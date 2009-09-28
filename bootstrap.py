@@ -312,6 +312,9 @@ def filter_ez_setup(line):
     return Logger.INFO
 
 def main():
+    if "--no-site-packages" not in sys.argv:
+        sys.argv.insert(1, "--no-site-packages")
+        
     parser = optparse.OptionParser(
         version="1.3.4dev",
         usage="%prog [OPTIONS] DEST_DIR")
