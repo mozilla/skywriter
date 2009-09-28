@@ -38,7 +38,19 @@ options(
     ),
     virtualenv=Bunch(
         paver_command_line="initial"
-    )
+    ),
+    server=Bunch(
+        # set to true to allow connections from other machines
+        address="",
+        port=8080,
+        try_build=False,
+        dburl=None,
+        async=False,
+        config_file=path("devconfig.py"),
+        directory=path("../bespinserver/").abspath(),
+        clientdir=path.getcwd()
+    ),
+    server_pavement=lambda: options.server.directory / "pavement.py"
 )
 
 @task
@@ -103,3 +115,30 @@ To get the Python server installed, run these two commands:
 paver install_server
 """ % (mac_note, linux_note, win_note, venv_command)
 
+@task
+def install_server(options):
+    """Install or update the development server."""
+    call_pavement(options.server_pavement, "develop")
+    print """
+Look for error messages in the output above. If everything looks
+good, you can start the server by running:
+
+paver start
+"""
+
+@task
+def start(options):
+    """Starts the BespinServer on localhost port 8080 for development.
+    
+    You can change the port and allow remote connections by setting
+    server.port or server.address on the command line.
+    
+    paver server.address=your.ip.address server.port=8000 start
+    
+    will allow remote connections (assuming you don't have a firewall
+    blocking the connection) and start the server on port 8000.
+    """
+    args = " ".join("%s=%s" % (key, value) 
+        for key, value in options.server.items())
+    call_pavement(options.server_pavement, args + " start")
+    

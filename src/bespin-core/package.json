@@ -1,0 +1,7 @@
+{
+    "name": "bespin-core",
+    "dependencies": ["narwhal"],
+    "author": "Mozilla",
+    "description": "Bespin core editor functionality",
+    "lib": ["lib"]
+}
