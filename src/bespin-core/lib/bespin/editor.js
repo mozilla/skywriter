@@ -26,7 +26,7 @@
 
 var bespin = require("bespin");
 var clipboard = require("bespin/editor/clipboard");
-
+var cursor = require("bespin/editor/cursor");
 var util = require("bespin/util");
 var key = require("bespin/util/keys");
 var events = require("bespin/events");
@@ -36,18 +36,31 @@ exports.Scrollbar = SC.Object.extend({
     VERTICAL: "vertical",
     MINIMUM_HANDLE_SIZE: 20,
 
-    init: function(ui, orientation, rect, value, min, max, extent) {
-        this.ui = ui;
-        this.orientation = orientation; // "horizontal" or "vertical"
-        this.rect = rect;       // position/size of the scrollbar track
-        this.value = value;     // current offset value
-        this.min = min;         // minimum offset value
-        this.max = max;         // maximum offset value
-        this.extent = extent;   // size of the current visible subset
+    ui: null,
 
-        this.mousedownScreenPoint;    // used for scroll bar dragging tracking; point at which the mousedown first occurred
-        this.mousedownValue;          // value at time of scroll drag start
-    },
+    // "horizontal" or "vertical"
+    orientation = null,
+
+    // position/size of the scrollbar track
+    rect = null,
+
+    // current offset value
+    value = null,
+
+    // minimum offset value
+    min = null,
+
+    // maximum offset value
+    max = null,
+
+    // size of the current visible subset
+    extent = null,
+
+    // used for scroll bar dragging tracking; point at which the mousedown first occurred
+    mousedownScreenPoint = null,
+
+    // value at time of scroll drag start    
+    mousedownValue = null,
 
     // return a Rect for the scrollbar handle
     getHandleBounds: function() {
@@ -137,13 +150,15 @@ exports.Scrollbar = SC.Object.extend({
  * treat as immutable (pretty please)
  */
 exports.Rect = SC.Object.extend({
-    init: function(x, y, w, h) {
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
+    x: null,
+    y: null,
+    w: null,
+    h: null,
+
+    init: function() {
         this.x2 = x + w;
         this.y2 = y + h;
+        sc_super();
     },
 
     // inclusive of bounding lines
@@ -157,9 +172,7 @@ exports.Rect = SC.Object.extend({
  *
  */
 exports.SelectionHelper = SC.Object.extend({
-    init: function(editor) {
-        this.editor = editor;
-    },
+    editor: null,
 
     // returns an object with the startCol and endCol of the selection.
     // If the col is -1 on the endPos, the selection goes for the entire line
@@ -232,17 +245,13 @@ dojo.mixin(exports, {
  * Core key listener to decide which actions to run
  */
 exports.DefaultEditorKeyListener = SC.Object.extend({
-    init: function(editor) {
-        this.editor = editor;
-        this.actions = editor.ui.actions;
-        this.skipKeypress = false;
+    editor: null,
+    skipKeypress: false,
+    defaultKeyMap: {},
 
-        this.defaultKeyMap = {};
-
-        // Allow for multiple key maps to be defined
-        this.keyMap = this.defaultKeyMap;
-        this.keyMapDescriptions = {};
-    },
+    // Allow for multiple key maps to be defined
+    keyMap: this.defaultKeyMap,
+    keyMapDescriptions: { },
 
     bindKey: function(keyCode, metaKey, ctrlKey, altKey, shiftKey, action, name) {
         this.defaultKeyMap[[keyCode, metaKey, ctrlKey, altKey, shiftKey]] =
@@ -250,9 +259,11 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
                 function() {
                     var toFire = events.toFire(action);
                     bespin.publish(toFire.name, toFire.args);
-                } : dojo.hitch(this.actions, action);
+                } : dojo.hitch(this.editor.ui.actions, action);
 
-        if (name) this.keyMapDescriptions[[keyCode, metaKey, ctrlKey, altKey, shiftKey]] = name;
+        if (name) {
+            this.keyMapDescriptions[[keyCode, metaKey, ctrlKey, altKey, shiftKey]] = name;
+        }
     },
 
     bindKeyForPlatform: function(keysForPlatforms, action, name, isSelectable) {
@@ -293,8 +304,8 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
     },
 
     /*
-      this is taken from th.KeyHelpers
-    */
+     * This is taken from th.KeyHelpers
+     */
     getPrintableChar: function(e) {
         if (e.charCode > 255) return false;
         if (e.charCode < 32) return false;
@@ -381,15 +392,15 @@ var Actions = require("bespin/editor/actions");
  * Holds the UI, the editor itself, the syntax highlighter, the actions, and more
  */
 exports.UI = SC.Object.extend({
-    init: function(editor) {
-        this.editor = editor;
+    editor: null,
+    init: function() {
         this.model = this.editor.model;
 
         var settings = bespin.get("settings");
         this.syntaxModel = syntax.Resolver.setEngine("simple").getModel();
 
-        this.selectionHelper = new exports.SelectionHelper(editor);
-        this.actions = new Actions(editor);
+        this.selectionHelper = new exports.SelectionHelper({ editor:editor });
+        this.actions = new Actions({ editor:editor });
 
         this.rowLengthCache = [];
         this.searchString = null;
@@ -468,7 +479,7 @@ exports.UI = SC.Object.extend({
         //if we act as component, onmousewheel should only be listened to inside of the editor canvas.
         var scope = editor.opts.actsAsComponent ? editor.canvas : window;
 
-        this.xscrollbar = new exports.Scrollbar(this, "horizontal");
+        this.xscrollbar = new exports.{ ui: this, orientation: "horizontal" });
         this.xscrollbar.valueChanged = dojo.hitch(this, function() {
             this.xoffset = -this.xscrollbar.value;
             this.editor.paint();
@@ -480,7 +491,7 @@ exports.UI = SC.Object.extend({
             dojo.connect(scope, (!dojo.isMozilla ? "onmousewheel" : "DOMMouseScroll"), this.xscrollbar, "onmousewheel")
         );
 
-        this.yscrollbar = new exports.Scrollbar(this, "vertical");
+        this.yscrollbar = new exports.Scrollbar({ ui: this, orientation: "vertical" });
         this.yscrollbar.valueChanged = dojo.hitch(this, function() {
             this.yoffset = -this.yscrollbar.value;
             this.editor.paint();
@@ -492,7 +503,10 @@ exports.UI = SC.Object.extend({
             dojo.connect(scope, (!dojo.isMozilla ? "onmousewheel" : "DOMMouseScroll"), this.yscrollbar, "onmousewheel")
         );
 
-        setTimeout(dojo.hitch(this, function() { this.toggleCursor(this); }), this.toggleCursorFrequency);
+        setTimeout(dojo.hitch(this, function() {
+            this.toggleCursor(this);
+        }), this.toggleCursorFrequency);
+        sc_super();
     },
 
     /**
@@ -515,7 +529,7 @@ exports.UI = SC.Object.extend({
             x = -1;
         } else {
             var tx = pos.x - this.gutterWidth - this.LINE_INSETS.left;
-        // round vs floor so we can pick the left half vs right half of a character
+            // round vs floor so we can pick the left half vs right half of a character
             x = Math.round(tx / this.charWidth);
 
             // With strictlines turned on, don't select past the end of the line
@@ -1859,13 +1873,11 @@ exports.UI = SC.Object.extend({
  * bespin.editor.API is the root object, the API that others should be able to
  * use
  */
- 
-cursor = require("bespin/editor/cursor.js");
+exports.API = SC.Object.extend({
+    container: null,
+    opts = {},
 
-exports.API = SC.Object.extend({ 
     init: function(container, opts) {
-        this.opts = opts || {};
-
         // fixme: this stuff may not belong here
         this.debugMode = false;
 
@@ -1874,13 +1886,15 @@ exports.API = SC.Object.extend({
 
         this.container.innerHTML = '<canvas id="canvas" moz-opaque="true" tabindex="-1"></canvas>';
         this.canvas = this.container.firstChild;
-        while (this.canvas && this.canvas.nodeType != 1) this.canvas = this.canvas.nextSibling;
+        while (this.canvas && this.canvas.nodeType != 1) {
+            this.canvas = this.canvas.nextSibling;
+        }
 
         this.cursorManager = new cursor.CursorManager(this);
-        this.ui = new exports.UI(this);
+        this.ui = new exports.UI({ editor: this });
         this.theme = bespin.themes['default'];
 
-        this.editorKeyListener = new exports.DefaultEditorKeyListener(this);
+        this.editorKeyListener = new exports.DefaultEditorKeyListener({ editor: this });
         this.historyManager = new history.HistoryManager(this);
         this.customEvents = new events.Events(this);
 
@@ -1888,16 +1902,22 @@ exports.API = SC.Object.extend({
 
         this.model.insertCharacters({ row: 0, col: 0 }, " ");
 
-        dojo.connect(this.canvas, "blur",  dojo.hitch(this, function(e) { this.setFocus(false); }));
-        dojo.connect(this.canvas, "focus", dojo.hitch(this, function(e) { this.setFocus(true); }));
+        dojo.connect(this.canvas, "blur",  dojo.hitch(this, function(e) {
+            this.setFocus(false);
+        }));
+        dojo.connect(this.canvas, "focus", dojo.hitch(this, function(e) {
+            this.setFocus(true);
+        }));
 
-        //bespin.editor.clipboard.setup(this);
+        // bespin.editor.clipboard.setup(this);
 
         this.paint();
 
         if (!this.opts.dontfocus) {
             this.setFocus(true);
         }
+
+        sc_super();
     },
 
     /**
