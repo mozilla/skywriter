@@ -1,6 +1,6 @@
 .Python
 bin
-lib
+^lib
 include
 man
 
