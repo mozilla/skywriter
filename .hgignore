@@ -1,6 +1,7 @@
 .Python
-bin
+.DS_Store
+^bin
 ^lib
 include
 man
-
+tmp
