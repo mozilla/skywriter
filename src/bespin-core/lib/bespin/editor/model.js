@@ -30,8 +30,8 @@ var copyPos = require("bespin.editor.utils");
  * This representation is encapsulated in Bespin.Editor.DocumentModel
  */
 exports.DocumentModel = SC.Object.extend({
-    init: function(editor) {
-        this.editor = editor;
+    editor: null,
+    init: function() {
         this.clear();
     },
 

@@ -77,7 +77,7 @@ exports.clipboard = {
             this.install(editor, new bespin.editor.clipboard.HiddenWorld());
         }
     }
-});
+};
 
 /**
  * This adapter configures the DOMEvents that only WebKit seems to do well right
@@ -85,7 +85,7 @@ exports.clipboard = {
  * hidden copynpaster text input, and then the real event does its thing and we
  * focus back
  */
-exports.DOMEvents = SC.Object.extends({
+exports.DOMEvents = SC.Object.extend({
     install: function(editor) {
         // * Defensively stop doing copy/cut/paste magic if you are in the command line
         var stopAction = function(e) {

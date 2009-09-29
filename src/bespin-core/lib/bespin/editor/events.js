@@ -28,7 +28,8 @@ var bespin = require("bespin");
  * Handle custom events aimed at, and for the editor
  */
 exports.Events = SC.Object.extend({
-    init: function(editor) {
+    extend: null,
+    init: function() {
         /**
          * When a file is opened successfully change the project and file status
          * area, then change the window title, and change the URL hash area

@@ -29,8 +29,9 @@ var copyPos = require("bespin.editor.utils");
  * Handles the position of the cursor, hiding the complexity of translating
  * between screen and model positions and so forth
  */
-exports.CursorManager = SC.Object.export({
-    init: function(editor) {
+exports.CursorManager = SC.Object.extend({
+    editor: null,
+    init: function() {
         this.editor = editor;
         this.position = { row: 0, col: 0 };
         this.virtualCol = 0;
