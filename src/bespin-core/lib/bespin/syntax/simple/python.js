@@ -27,15 +27,13 @@
 //
 // Module for syntax highlighting Python.
 
-dojo.provide("bespin.syntax.simple.python");
+// module: bespin/syntax/simple/python
 
-// ** {{{ bespin.syntax.simple.Python }}} **
-//
 // Tracks syntax highlighting data on a per-line basis. This is a quick-and-dirty implementation that
 // supports five basic highlights: keywords, punctuation, strings, comments, and "everything else", all
 // lumped into one last bucket.
 
-bespin.syntax.PythonConstants = {
+exports.PythonConstants = {
    LINE_COMMENT: "comment",
    STRING: "string",
    KEYWORD: "keyword",
@@ -43,7 +41,8 @@ bespin.syntax.PythonConstants = {
    OTHER: "plain"
 };
 
-dojo.declare("bespin.syntax.simple.Python", null, {
+exports.Python = SC.Object.extend({
+
    keywords: 'and as assert break class continue def del elif else except exec finally for from global ' +
        'if import in is lambda not or pass print raise return try while with yield'.split(" "),
 

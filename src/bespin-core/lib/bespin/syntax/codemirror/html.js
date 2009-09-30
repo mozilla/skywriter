@@ -51,13 +51,15 @@
 //
 // You can guess what this does. ;-)
 
-dojo.provide("bespin.syntax.codemirror.html");
+// module: bespin/syntax/codemirror/html
 
 // ** {{{ bespin.syntax.codemirror.HTML }}} **
 
-dojo.declare("bespin.syntax.codemirror.HTML", bespin.syntax.codemirror.XMLBase, {
+var xmlBase = require("bespin/syntax/codemirror/xml");
 
-    constructor: function(){
+exports.HTML = xmlBase.extend({
+
+    init: function(){
         this.Kludges = this.HTMLKludges;
     },
 
@@ -306,5 +308,6 @@ dojo.declare("bespin.syntax.codemirror.HTML", bespin.syntax.codemirror.XMLBase, 
     electricChars: "{}/:"
 });
 
-// Register
-bespin.syntax.codemirror.Resolver.register(new bespin.syntax.codemirror.HTML(), ['html', 'htm', 'shtml']);
+// Register this puppy
+var resolver = module("bespin/syntax/codemirror").resolver;
+resolver.register(exports.HTML.create(), ['html', 'htm', 'shtml']);

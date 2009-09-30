@@ -27,12 +27,16 @@
  * Not prepared for running in a worker thread.
  * Woul be more overhead than benefit for auch a simple highlighter
  */
-dojo.provide("bespin.syntax.simple._base");
+ 
+// module: bespin/syntax/simple/base
+
+var syntax = require("bespin/syntax");
 
 /**
  * Tracks syntax highlighting data on a per-line basis.
  */
-dojo.declare("bespin.syntax.simple.Model", bespin.syntax.Model, {
+
+exports.Model = syntax.Model.extend({
     lineMetaInfo: [],
 
     /**
@@ -99,8 +103,9 @@ dojo.declare("bespin.syntax.simple.Model", bespin.syntax.Model, {
 /**
  * The resolver holds the engines per language that are available to do the
  * actual syntax highlighting
- */
-bespin.syntax.simple.Resolver = new function() {
+ */ 
+
+exports.Resolver = new function() {
   var engines = {};
   var extension2type = {};
 
@@ -185,12 +190,12 @@ bespin.syntax.simple.Resolver = new function() {
 /**
  * Register
  */
-bespin.syntax.simple.Resolver.register("JavaScript", ['js', 'javascript', 'ecmascript', 'jsm', 'java']);
-bespin.syntax.simple.Resolver.register("Arduino",    ['pde']);
-bespin.syntax.simple.Resolver.register("C",          ['c', 'h']);
-bespin.syntax.simple.Resolver.register("CSharp",     ['cs']);
-bespin.syntax.simple.Resolver.register("CSS",        ['css']);
-bespin.syntax.simple.Resolver.register("HTML",       ['html', 'htm', 'xml', 'xhtml', 'shtml']);
-bespin.syntax.simple.Resolver.register("PHP",        ['php', 'php3', 'php4', 'php5']);
-bespin.syntax.simple.Resolver.register("Python",     ['py', 'python']);
-bespin.syntax.simple.Resolver.register("Ruby",       ['rb', 'ruby']);
+// bespin.syntax.simple.Resolver.register("JavaScript", ['js', 'javascript', 'ecmascript', 'jsm', 'java']);
+// bespin.syntax.simple.Resolver.register("Arduino",    ['pde']);
+// bespin.syntax.simple.Resolver.register("C",          ['c', 'h']);
+// bespin.syntax.simple.Resolver.register("CSharp",     ['cs']);
+// bespin.syntax.simple.Resolver.register("CSS",        ['css']);
+// bespin.syntax.simple.Resolver.register("HTML",       ['html', 'htm', 'xml', 'xhtml', 'shtml']);
+// bespin.syntax.simple.Resolver.register("PHP",        ['php', 'php3', 'php4', 'php5']);
+// bespin.syntax.simple.Resolver.register("Python",     ['py', 'python']);
+// bespin.syntax.simple.Resolver.register("Ruby",       ['rb', 'ruby']);

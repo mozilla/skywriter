@@ -49,15 +49,18 @@
 
 // = Tokenizer and parser utilities =
 
-dojo.provide("bespin.syntax.codemirror._base");
+// module: bespin/syntax/codemirror/base
 
 // ** {{{ bespin.syntax.codemirror.Model }}} **
 //
 // Tracks syntax highlighting data on a per-visible-lines basis.
-dojo.declare("bespin.syntax.codemirror.Model", bespin.syntax.Model, {
+
+var syntaxModel = require("bespin/syntax/model");
+
+exports.Model = syntaxModel.extend({
     worker: true,
 
-    constructor: function() {
+    init: function() {
         // required for worker facade
         this.resolver = bespin.syntax.codemirror.Resolver;
     },
@@ -107,7 +110,8 @@ dojo.declare("bespin.syntax.codemirror.Model", bespin.syntax.Model, {
 // ** {{{ bespin.syntax.codemirror.Resolver }}} **
 //
 // The resolver holds the engines per language that are available to do the actual syntax highlighting
-bespin.syntax.codemirror.Resolver = new function() {
+
+exports.Resolver = new function() {
   return {
       engines: {},
 
@@ -160,7 +164,7 @@ bespin.syntax.codemirror.Resolver = new function() {
 
 
 // ** {{{ bespin.syntax.codemirror.Base }}} **
-dojo.declare("bespin.syntax.codemirror.Base", null, {
+exports.Base = SC.Object.extend({
 
     indentUnit: 4,
 
@@ -545,10 +549,10 @@ dojo.declare("bespin.syntax.codemirror.Base", null, {
 });
 
 // -- Add core syntax files here, can load others later
-dojo.require("bespin.syntax.codemirror.javascript");
-dojo.require("bespin.syntax.codemirror.css");
-dojo.require("bespin.syntax.codemirror.xml");
-dojo.require("bespin.syntax.codemirror.html");
-dojo.require("bespin.syntax.codemirror.php_base");
-dojo.require("bespin.syntax.codemirror.php");
-dojo.require("bespin.syntax.codemirror.python");
+// dojo.require("bespin.syntax.codemirror.javascript");
+// dojo.require("bespin.syntax.codemirror.css");
+// dojo.require("bespin.syntax.codemirror.xml");
+// dojo.require("bespin.syntax.codemirror.html");
+// dojo.require("bespin.syntax.codemirror.php_base");
+// dojo.require("bespin.syntax.codemirror.php");
+// dojo.require("bespin.syntax.codemirror.python");

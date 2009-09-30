@@ -26,14 +26,12 @@
 //
 // Module for syntax highlighting HTML.
 
-dojo.provide("bespin.syntax.simple.html");
+// module: bespin/syntax/simple/html
 
-// ** {{{ bespin.syntax.simple.HTML }}} **
-//
 // Tracks syntax highlighting data on a per-line basis. This is a quick-and-dirty implementation that
 // supports keywords and the like, but doesn't actually understand HTML as it should.
 
-bespin.syntax.HTMLConstants = {
+exports.HTMLConstants = {
     HTML_STYLE_COMMENT: "comment",
     STRING: "string",
     KEYWORD: "keyword",
@@ -42,8 +40,7 @@ bespin.syntax.HTMLConstants = {
     ATTR_NAME: "attname"
 };
 
-
-dojo.declare("bespin.syntax.simple.HTML", null, {
+exports.HTML = SC.Object.extend({
     punctuation: '< > = " \'',
 
     highlight: function(line, meta) {

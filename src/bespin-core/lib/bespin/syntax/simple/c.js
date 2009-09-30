@@ -22,7 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-dojo.provide("bespin.syntax.simple.c");
+// module: bespin/syntax/simple/c
 
 /**
  * Tracks syntax highlighting data on a per-line basis.
@@ -30,7 +30,7 @@ dojo.provide("bespin.syntax.simple.c");
  * keywords, punctuation, strings, comments, and "everything else", all
  * lumped into one last bucket.
  */
-bespin.syntax.CConstants = {
+exports.CConstants = {
     C_STYLE_COMMENT: "c-comment",
     LINE_COMMENT: "comment",
     STRING: "string",
@@ -43,7 +43,8 @@ bespin.syntax.CConstants = {
  * C Syntax Highlighting Implementation
  * Module for syntax highlighting C based off of the Geshi Sytax Highlighter.
  */
-dojo.declare("bespin.syntax.simple.C", null, {
+ 
+exports.C = SC.Object.extend({
     keywords: 'if return while case continue default do else for switch goto ' +
         'null false break true function enum extern inline printf cout auto ' +
         'char const double float int long register short signed sizeof static ' +

@@ -28,12 +28,14 @@
  * The core model talks to specific engines to do the work and then packages it
  * up to send to the editor.
  */
-dojo.provide("bespin.syntax.base");
+
+// module: bespin/syntax
 
 /**
  * Base model for tracking syntax highlighting data.
  */
-dojo.declare("bespin.syntax.Model", null, {
+
+exports.Model = SC.Object.extend({
     language: "",
 
     lineCache: [],
@@ -96,8 +98,9 @@ dojo.declare("bespin.syntax.Model", null, {
 
 /**
  * The resolver hunts down the syntax engine
- */
-bespin.syntax.Resolver = (function() {
+ */ 
+ 
+exports.Resolver = (function() {
     var current, model;
 
     return {
@@ -112,8 +115,8 @@ bespin.syntax.Resolver = (function() {
                     delete model;
                 }
                 if (engine.worker) {
-                    model = new bespin.worker.WorkerFacade(bespin.syntax[name].Model());
-                    model.workerEnabled = true;
+                    // model = new bespin.worker.WorkerFacade(bespin.syntax[name].Model());
+                    // model.workerEnabled = true;
                 } else {
                     model = new bespin.syntax[name].Model();
                     model.workerEnabled = false;

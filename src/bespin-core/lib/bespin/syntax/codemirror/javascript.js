@@ -47,11 +47,11 @@
 // marijnh at gmail
  * ***** END LICENSE BLOCK ***** */
 
-dojo.provide("bespin.syntax.codemirror.javascript");
+// module bespin/syntax/codemirror/javascript
 
-// ** {{{ bespin.syntax.codemirror.JavaScript }}} **
+var base = module("bespin/syntax/codemirror/base");
 
-dojo.declare("bespin.syntax.codemirror.JavaScript", bespin.syntax.codemirror.Base, {
+exports.JavaScript = base.extend({
 
     // = Tokenizer for JavaScript code =
 
@@ -788,5 +788,7 @@ dojo.declare("bespin.syntax.codemirror.JavaScript", bespin.syntax.codemirror.Bas
     electricChars: "{}:"
 });
 
+var resolver = require("bespin/syntax/codemirror").resolver;
+
 // Register this puppy
-bespin.syntax.codemirror.Resolver.register(new bespin.syntax.codemirror.JavaScript(), ['js', 'javascript', 'ecmascript', 'jsm']);
+resolver.register(exports.JavaScript.create(), ['js', 'javascript', 'ecmascript', 'jsm']);

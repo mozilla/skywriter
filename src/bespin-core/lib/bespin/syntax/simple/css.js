@@ -26,7 +26,7 @@
 //
 // You can guess what this does. ;-)
 
-dojo.provide("bespin.syntax.simple.css");
+// module: bespin/syntax/simple/css
 
 
 // ** {{{ bespin.syntax.simple.CSS }}} **
@@ -35,7 +35,7 @@ dojo.provide("bespin.syntax.simple.css");
 // does the right thing for key/value pairs, #000000, and the like.
 // Doesn't actually grok the zones of "propertykey: propertyvalue" as it should.
 
-bespin.syntax.Constants = {
+exports.Constants = {
     C_STYLE_COMMENT: "c-comment",
     STRING: "string",
     KEYWORD: "keyword",
@@ -50,7 +50,8 @@ bespin.syntax.Constants = {
     COLOR_OR_ID: "color_or_id"
 };
 
-dojo.declare("bespin.syntax.simple.CSS", null, {
+
+exports.CSS = SC.Object.extend({
     keywords: ['ascent', 'azimuth', 'background-attachment', 'background-color', 'background-image', 'background-position',
         'background-repeat', 'background', 'baseline', 'bbox', 'border-collapse', 'border-color', 'border-spacing', 'border-style',
         'border-top', 'border-right', 'border-bottom', 'border-left', 'border-top-color', 'border-right-color', 'border-bottom-color',

@@ -51,11 +51,14 @@
 //
 // You can guess what this does. ;-)
 
-dojo.provide("bespin.syntax.codemirror.css");
+// module: bespin/syntax/codemirror/css
 
-// ** {{{ bespin.syntax.codemirror.CSSS }}} **
+var base = require("bespin/syntax/codemirror/base");
 
-dojo.declare("bespin.syntax.codemirror.CSS", bespin.syntax.codemirror.Base, {
+
+
+
+exports.CSS = base.extend({
 
     /// = Tokenizer for CSS documents =
 
@@ -275,4 +278,5 @@ dojo.declare("bespin.syntax.codemirror.CSS", bespin.syntax.codemirror.Base, {
 });
 
 // Register this puppy
-bespin.syntax.codemirror.Resolver.register(new bespin.syntax.codemirror.CSS(), ['css']);
+var resolver = module("bespin/syntax/codemirror").resolver;
+resolver.register(exports.CSS.create(), ['css']);
