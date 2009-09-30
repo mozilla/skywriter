@@ -25,7 +25,7 @@
 // module: bespin/events
 
 var bespin = require("bespin");
-var util = require("bespin/util/util");
+var util = require("bespin/util");
 
 /**
  * Given an <code>eventString</code> parse out the arguments and configure an

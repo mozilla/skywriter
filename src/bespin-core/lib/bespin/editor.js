@@ -26,7 +26,7 @@
 
 var bespin = require("bespin");
 var clipboard = require("bespin/editor/clipboard");
-var util = require("bespin/util/util");
+var util = require("bespin/util");
 var key = require("bespin/util/keys");
 var events = require("bespin/events");
 var syntax = require("bespin/syntax");
