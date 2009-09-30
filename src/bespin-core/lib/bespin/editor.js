@@ -27,9 +27,12 @@
 var bespin = require("bespin");
 var clipboard = require("bespin/editor/clipboard");
 var cursor = require("bespin/editor/cursor");
-var util = require("bespin/util");
+var util = require("bespin/util/util");
 var key = require("bespin/util/keys");
 var events = require("bespin/events");
+//var syntax  = requ-ire("bespin/syntax");
+var utils   = require("bespin/editor").utils.copyPos;
+var Actions = require("bespin/editor/actions");
 
 exports.Scrollbar = SC.Object.extend({
     HORIZONTAL: "horizontal",
@@ -383,10 +386,6 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
         dojo.stopEvent(e);
     }
 });
-
-var syntax  = require("bespin/syntax");
-var utils   = require("bespin/editor/utils");
-var Actions = require("bespin/editor/actions");
 
 /**
  * Holds the UI, the editor itself, the syntax highlighter, the actions, and more

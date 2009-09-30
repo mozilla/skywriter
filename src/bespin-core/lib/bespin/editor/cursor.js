@@ -23,7 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var copyPos = require("bespin.editor.utils");
+var utils = require("bespin/editor").utils.copyPos;
 
 /**
  * Handles the position of the cursor, hiding the complexity of translating
