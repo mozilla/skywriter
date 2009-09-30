@@ -39,28 +39,28 @@ exports.Scrollbar = SC.Object.extend({
     ui: null,
 
     // "horizontal" or "vertical"
-    orientation = null,
+    orientation: null,
 
     // position/size of the scrollbar track
-    rect = null,
+    rect: null,
 
     // current offset value
-    value = null,
+    value: null,
 
     // minimum offset value
-    min = null,
+    min: null,
 
     // maximum offset value
-    max = null,
+    max: null,
 
     // size of the current visible subset
-    extent = null,
+    extent: null,
 
     // used for scroll bar dragging tracking; point at which the mousedown first occurred
-    mousedownScreenPoint = null,
+    mousedownScreenPoint: null,
 
     // value at time of scroll drag start    
-    mousedownValue = null,
+    mousedownValue: null,
 
     // return a Rect for the scrollbar handle
     getHandleBounds: function() {
@@ -479,7 +479,7 @@ exports.UI = SC.Object.extend({
         //if we act as component, onmousewheel should only be listened to inside of the editor canvas.
         var scope = editor.opts.actsAsComponent ? editor.canvas : window;
 
-        this.xscrollbar = new exports.{ ui: this, orientation: "horizontal" });
+        this.xscrollbar = new exports.Scrollbar({ ui: this, orientation: "horizontal" });
         this.xscrollbar.valueChanged = dojo.hitch(this, function() {
             this.xoffset = -this.xscrollbar.value;
             this.editor.paint();
@@ -1875,7 +1875,7 @@ exports.UI = SC.Object.extend({
  */
 exports.API = SC.Object.extend({
     container: null,
-    opts = {},
+    opts: {},
 
     init: function(container, opts) {
         // fixme: this stuff may not belong here
