@@ -30,10 +30,13 @@ var cursor = require("bespin/editor/cursor");
 var util = require("bespin/util/util");
 var key = require("bespin/util/keys");
 var events = require("bespin/events");
-var syntax  = require("bespin/syntax");
-var utils   = require("bespin/editor").utils.copyPos;
-var Actions = require("bespin/editor/actions").Actions;
+var syntax = require("bespin/syntax");
+var utils = require("bespin/editor").utils;
+var actions = require("bespin/editor/actions");
 
+/**
+ *
+ */
 exports.Scrollbar = SC.Object.extend({
     HORIZONTAL: "horizontal",
     VERTICAL: "vertical",
@@ -67,25 +70,33 @@ exports.Scrollbar = SC.Object.extend({
 
     // return a Rect for the scrollbar handle
     getHandleBounds: function() {
-        var sx = (this.isH()) ? this.rect.x : this.rect.y;
-        var sw = (this.isH()) ? this.rect.w : this.rect.h;
+        var sx = this.isH() ? this.rect.x : this.rect.y;
+        var sw = this.isH() ? this.rect.w : this.rect.h;
 
         var smultiple = this.extent / (this.max + this.extent);
         var asw = smultiple * sw;
-        if (asw < this.MINIMUM_HANDLE_SIZE){asw = this.MINIMUM_HANDLE_SIZE;}
+        if (asw < this.MINIMUM_HANDLE_SIZE) {
+            asw = this.MINIMUM_HANDLE_SIZE;
+        }
 
         sx += (sw - asw) * (this.value / (this.max - this.min));
 
-        return (this.isH()) ? new exports.Rect(Math.floor(sx), this.rect.y, asw, this.rect.h) : new exports.Rect(this.rect.x, sx, this.rect.w, asw);
+        return this.isH() ?
+            new exports.Rect(Math.floor(sx), this.rect.y, asw, this.rect.h) :
+            new exports.Rect(this.rect.x, sx, this.rect.w, asw);
     },
 
     isH: function() {
-        return (!(this.orientation == this.VERTICAL));
+        return !(this.orientation == this.VERTICAL);
     },
 
     fixValue: function(value) {
-        if (value < this.min){value = this.min;}
-        if (value > this.max){value = this.max;}
+        if (value < this.min) {
+            value = this.min;
+        }
+        if (value > this.max) {
+            value = this.max;
+        }
         return value;
     },
 
@@ -209,57 +220,54 @@ exports.SelectionHelper = SC.Object.extend({
 /**
  * Mess with positions mainly
  */
-dojo.mixin(exports, {
-    utils: {
-        buildArgs: function(oldPos) {
-            return { pos: utils.copyPos(oldPos || bespin.get('editor').getCursorPos()) };
-        },
+exports.utils = {
+    buildArgs: function(oldPos) {
+        return { pos: utils.copyPos(oldPos || bespin.get('editor').getCursorPos()) };
+    },
 
-        changePos: function(args, pos) {
-            return { pos: utils.copyPos(oldPos || bespin.get('editor').getCursorPos()) };
-        },
+    changePos: function(args, pos) {
+        return { pos: utils.copyPos(oldPos || bespin.get('editor').getCursorPos()) };
+    },
 
-        copyPos: function(oldPos) {
-            return { row: oldPos.row, col: oldPos.col };
-        },
+    copyPos: function(oldPos) {
+        return { row: oldPos.row, col: oldPos.col };
+    },
 
-        posEquals: function(pos1, pos2) {
-            if (pos1 == pos2) {
-                return true;
-            }
-            if (!pos1 || !pos2) {
-                return false;
-            }
-            return (pos1.col == pos2.col) && (pos1.row == pos2.row);
-        },
-
-        diffObjects: function(o1, o2) {
-            var diffs = {};
-
-            if (!o1 || !o2) {
-                return undefined;
-            }
-
-            for (var key in o1) {
-                if (o2[key]) {
-                    if (o1[key] != o2[key]) {
-                        diffs[key] = o1[key] + " => " + o2[key];
-                    }
-                } else {
-                    diffs[key] = "o1: " + key + " = " + o1[key];
-                }
-            }
-
-            for (var key2 in o2) {
-                if (!o1[key2]) {
-                    diffs[key2] = "o2: " + key2 + " = " + o2[key2];
-                }
-            }
-            return diffs;
+    posEquals: function(pos1, pos2) {
+        if (pos1 == pos2) {
+            return true;
         }
-    } // utils
-});
+        if (!pos1 || !pos2) {
+            return false;
+        }
+        return (pos1.col == pos2.col) && (pos1.row == pos2.row);
+    },
 
+    diffObjects: function(o1, o2) {
+        var diffs = {};
+
+        if (!o1 || !o2) {
+            return undefined;
+        }
+
+        for (var key in o1) {
+            if (o2[key]) {
+                if (o1[key] != o2[key]) {
+                    diffs[key] = o1[key] + " => " + o2[key];
+                }
+            } else {
+                diffs[key] = "o1: " + key + " = " + o1[key];
+            }
+        }
+
+        for (var key2 in o2) {
+            if (!o1[key2]) {
+                diffs[key2] = "o2: " + key2 + " = " + o2[key2];
+            }
+        }
+        return diffs;
+    }
+};
 
 /**
  * Core key listener to decide which actions to run
@@ -428,7 +436,7 @@ exports.UI = SC.Object.extend({
         this.syntaxModel = syntax.Resolver.setEngine("simple").getModel();
 
         this.selectionHelper = new exports.SelectionHelper({ editor:editor });
-        this.actions = new Actions({ editor:editor });
+        this.actions = new actions.Actions({ editor:editor });
 
         this.rowLengthCache = [];
         this.searchString = null;
@@ -828,7 +836,7 @@ exports.UI = SC.Object.extend({
             return;    // can't do much without these
         }
 
-        if(bespin.get('settings')) {
+        if (bespin.get('settings')) {
             var pageScroll = parseFloat(bespin.get('settings').get('pagescroll')) || 0;
         } else {
             var pageScroll = 0;
@@ -933,16 +941,21 @@ exports.UI = SC.Object.extend({
             }
         }
 
-        //mousing over the scroll bars requires a full refresh
-        if ((oldX != this.overXScrollBar) || (oldY != this.overYScrollBar) || scrolled){this.editor.paint(true);}
+        // Mousing over the scroll bars requires a full refresh
+        if ((oldX != this.overXScrollBar) || (oldY != this.overYScrollBar) || scrolled) {
+            this.editor.paint(true);
+        }
     },
 
     installKeyListener: function(listener) {
+        if (this.oldkeydown) {
+            dojo.disconnect(this.oldkeydown);
+        }
+        if (this.oldkeypress) {
+            dojo.disconnect(this.oldkeypress);
+        }
 
-        if (this.oldkeydown){dojo.disconnect(this.oldkeydown);}
-        if (this.oldkeypress){dojo.disconnect(this.oldkeypress);}
-
-        this.oldkeydown  = dojo.hitch(listener, "onkeydown");
+        this.oldkeydown = dojo.hitch(listener, "onkeydown");
         this.oldkeypress = dojo.hitch(listener, "onkeypress");
 
         var scope = this.editor.opts.actsAsComponent ? this.editor.canvas : window;
@@ -1067,9 +1080,13 @@ exports.UI = SC.Object.extend({
         var lh = -1;
         if (ctx.measureText) {
             var t = ctx.measureText("M");
-            if (t.ascent){lh = Math.floor(t.ascent * 2.8);}
+            if (t.ascent) {
+                lh = Math.floor(t.ascent * 2.8);
+            }
         }
-        if (lh == -1){lh = this.LINE_HEIGHT;}
+        if (lh == -1) {
+            lh = this.LINE_HEIGHT;
+        }
         return lh;
     },
 
@@ -1116,50 +1133,74 @@ exports.UI = SC.Object.extend({
         var Rect = exports.Rect;
 
         // SETUP STATE
+        // if the user explicitly requests a full refresh, give it to 'em
+        var refreshCanvas = fullRefresh;
 
-        var refreshCanvas = fullRefresh;        // if the user explicitly requests a full refresh, give it to 'em
+        if (!refreshCanvas) {
+            refreshCanvas = (this.selectMouseDownPos);
+        }
 
-        if (!refreshCanvas){refreshCanvas = (this.selectMouseDownPos);}
+        if (!refreshCanvas) {
+            // if the line count has changed, full refresh
+            refreshCanvas = (this.lastLineCount != ed.model.getRowCount());
+        }
 
-        if (!refreshCanvas){refreshCanvas = (this.lastLineCount != ed.model.getRowCount());  // if the line count has changed, full refresh
-}
+        // save the number of lines for the next time paint
+        this.lastLineCount = ed.model.getRowCount();
 
-        this.lastLineCount = ed.model.getRowCount();        // save the number of lines for the next time paint
-
-        // get the line and character metrics; calculated for each paint because this value can change at run-time
+        // get the line and character metrics; calculated for each paint because
+        // this value can change at run-time
         ctx.font = theme.editorTextFont;
         this.charWidth = this.getCharWidth(ctx);
         this.lineHeight = this.getLineHeight(ctx);
 
-        // cwidth and cheight are set to the dimensions of the parent node of the canvas element; we'll resize the canvas element
+        // cwidth and cheight are set to the dimensions of the parent node of
+        // the canvas element; we'll resize the canvas element
         // itself a little bit later in this function
         var cwidth = this.getWidth();
         var cheight = this.getHeight();
 
-        // adjust the scrolling offsets if necessary; negative values are good, indicate scrolling down or to the right (we look for overflows on these later on)
-        // positive values are bad; they indicate scrolling up past the first line or to the left past the first column
-        if (this.xoffset > 0){this.xoffset = 0;}
-        if (this.yoffset > 0){this.yoffset = 0;}
+        // adjust the scrolling offsets if necessary; negative values are good,
+        // indicate scrolling down or to the right (we look for overflows on
+        // these later on)
+        // positive values are bad; they indicate scrolling up past the first
+        // line or to the left past the first column
+        if (this.xoffset > 0) {
+            this.xoffset = 0;
+        }
+        if (this.yoffset > 0) {
+            this.yoffset = 0;
+        }
 
         // only paint those lines that can be visible
         this.visibleRows = Math.ceil(cheight / this.lineHeight);
         this.firstVisibleRow = Math.floor(Math.abs(this.yoffset / this.lineHeight));
         lastLineToRender = this.firstVisibleRow + this.visibleRows;
-        if (lastLineToRender > (ed.model.getRowCount() - 1)){lastLineToRender = ed.model.getRowCount() - 1;}
+        if (lastLineToRender > (ed.model.getRowCount() - 1)) {
+            lastLineToRender = ed.model.getRowCount() - 1;
+        }
 
-        var virtualheight = this.lineHeight * ed.model.getRowCount();    // full height based on content
+        // full height based on content
+        var virtualheight = this.lineHeight * ed.model.getRowCount();
 
-        // virtual width *should* be based on every line in the model; however, with the introduction of tab support, calculating
-        // the width of a line is now expensive, so for the moment we will only calculate the width of the visible rows
-        //var virtualwidth = this.charWidth * (Math.max(this.getMaxCols(), ed.cursorManager.getCursorPosition().col) + 2);       // full width based on content plus a little padding
+        // virtual width *should* be based on every line in the model; however,
+        // with the introduction of tab support, calculating
+        // the width of a line is now expensive, so for the moment we will only
+        // calculate the width of the visible rows
+        // full width based on content plus a little padding
+        // var virtualwidth = this.charWidth * (Math.max(this.getMaxCols(), ed.cursorManager.getCursorPosition().col) + 2);
         var virtualwidth = this.charWidth * (Math.max(this.getMaxCols(this.firstVisibleRow, lastLineToRender), ed.cursorManager.getCursorPosition().col) + 2);
 
-        // calculate the gutter width; for now, we'll make it fun and dynamic based on the lines visible in the editor.
-        this.gutterWidth = this.GUTTER_INSETS.left + this.GUTTER_INSETS.right;  // first, add the padding space
-        this.gutterWidth += ("" + lastLineToRender).length * this.charWidth;    // make it wide enough to display biggest line number visible
+        // calculate the gutter width; for now, we'll make it fun and dynamic
+        // based on the lines visible in the editor.
+        // first, add the padding space
+        this.gutterWidth = this.GUTTER_INSETS.left + this.GUTTER_INSETS.right;
+        // make it wide enough to display biggest line number visible
+        this.gutterWidth += ("" + lastLineToRender).length * this.charWidth;
         if (this.editor.debugMode){this.gutterWidth += this.DEBUG_GUTTER_WIDTH;}
 
-        // these next two blocks make sure we don't scroll too far in either the x or y axis
+        // these next two blocks make sure we don't scroll too far in either the
+        // x or y axis
         if (this.xoffset < 0) {
             if ((Math.abs(this.xoffset)) > (virtualwidth - (cwidth - this.gutterWidth))){this.xoffset = (cwidth - this.gutterWidth) - virtualwidth;}
         }
@@ -1167,37 +1208,46 @@ exports.UI = SC.Object.extend({
             if ((Math.abs(this.yoffset)) > (virtualheight - (cheight - this.BOTTOM_SCROLL_AFFORDANCE))){this.yoffset = cheight - (virtualheight - this.BOTTOM_SCROLL_AFFORDANCE);}
         }
 
-        // if the current scrolled positions are different than the scroll positions we used for the last paint, refresh the entire canvas
+        // if the current scrolled positions are different than the scroll
+        // positions we used for the last paint, refresh the entire canvas
         if ((this.xoffset != this.lastxoffset) || (this.yoffset != this.lastyoffset)) {
             refreshCanvas = true;
             this.lastxoffset = this.xoffset;
             this.lastyoffset = this.yoffset;
         }
 
-        // these are boolean values indicating whether the x and y (i.e., horizontal or vertical) scroll bars are visible
+        // these are boolean values indicating whether the x and y
+        // (i.e., horizontal or vertical) scroll bars are visible
         var xscroll = ((cwidth - this.gutterWidth) < virtualwidth);
         var yscroll = (cheight < virtualheight);
 
-        // the scroll bars are rendered off-screen into their own canvas instances; these values are used in two ways as part of
+        // the scroll bars are rendered off-screen into their own canvas
+        // instances; these values are used in two ways as part of
         // this process:
-        //   1. the x position of the vertical scroll bar image when painted onto the canvas and the y position of the horizontal
-        //      scroll bar image (both images span 100% of the width/height in the other dimension)
-        //   2. the amount * -1 to translate the off-screen canvases used by the scrollbars; this lets us flip back to rendering
-        //      the scroll bars directly on the canvas with relative ease (by omitted the translations and passing in the main context
-        //      reference instead of the off-screen canvas context)
+        //   1. the x pos of the vertical scroll bar image when painted onto the
+        //      canvas and the y pos of the horizontal scroll bar image (both
+        //      images span 100% of the width/height in the other dimension)
+        //   2. the amount * -1 to translate the off-screen canvases used by the
+        //      scrollbars; this lets us flip back to rendering the scroll bars
+        //      directly on the canvas with relative ease (by omitted the
+        //      translations and passing in the main context reference instead
+        //      of the off-screen canvas context)
         var verticalx = cwidth - this.NIB_WIDTH - this.NIB_INSETS.right - 2;
         var horizontaly = cheight - this.NIB_WIDTH - this.NIB_INSETS.bottom - 2;
 
-        // these are boolean values that indicate whether special little "nibs" should be displayed indicating more content to the
-        // left, right, top, or bottom
+        // these are boolean values that indicate whether special little "nibs"
+        // should be displayed indicating more content to the left, right, top,
+        // or bottom
         var showLeftScrollNib = (xscroll && (this.xoffset != 0));
         var showRightScrollNib = (xscroll && (this.xoffset > ((cwidth - this.gutterWidth) - virtualwidth)));
         var showUpScrollNib = (yscroll && (this.yoffset != 0));
         var showDownScrollNib = (yscroll && (this.yoffset > (cheight - virtualheight)));
 
-        // check and see if the canvas is the same size as its immediate parent in the DOM; if not, resize the canvas
+        // check and see if the canvas is the same size as its immediate parent
+        // in the DOM; if not, resize the canvas
         if (((dojo.attr(c, "width")) != cwidth) || (dojo.attr(c, "height") != cheight)) {
-            refreshCanvas = true;   // if the canvas changes size, we'll need a full repaint
+            // if the canvas changes size, we'll need a full repaint
+            refreshCanvas = true;
             dojo.attr(c, { width: cwidth, height: cheight });
         }
 
@@ -1215,12 +1265,14 @@ exports.UI = SC.Object.extend({
             });
         }
 
-        // IF YOU WANT TO FORCE A COMPLETE REPAINT OF THE CANVAS ON EVERY PAINT, UNCOMMENT THE FOLLOWING LINE:
+        // IF YOU WANT TO FORCE A COMPLETE REPAINT OF THE CANVAS ON EVERY PAINT,
+        // UNCOMMENT THE FOLLOWING LINE:
         //refreshCanvas = true;
 
         // START RENDERING
 
-        // if we're not doing a full repaint, work out which rows are "dirty" and need to be repainted
+        // if we're not doing a full repaint, work out which rows are "dirty"
+        // and need to be repainted
         if (!refreshCanvas) {
             var dirty = ed.model.getDirtyRows();
 
@@ -1245,8 +1297,10 @@ exports.UI = SC.Object.extend({
             ctx.fillRect(0, 0, this.gutterWidth, c.height);
         }
 
-        // translate the canvas based on the scrollbar position; for now, just translate the vertical axis
-        ctx.save(); // take snapshot of current context state so we can roll back later on
+        // translate the canvas based on the scrollbar position; for now, just
+        // translate the vertical axis
+        // take snapshot of current context state so we can roll back later on
+        ctx.save();
 
         // the Math.round(this.yoffset) makes the painting nice and not to go over 2 pixels
         // see for more informations:
@@ -1268,6 +1322,7 @@ exports.UI = SC.Object.extend({
                  }
             }
             y = (this.lineHeight * this.firstVisibleRow);
+
             for (currentLine = this.firstVisibleRow; currentLine <= lastLineToRender; currentLine++) {
                 x = 0;
 
@@ -1292,7 +1347,8 @@ exports.UI = SC.Object.extend({
                         ctx.stroke();
                     }
 
-                    // ...and push the line number to the right, leaving a space for breakpoint stuff
+                    // ...and push the line number to the right, leaving a space
+                    // for breakpoint stuff
                     x += this.DEBUG_GUTTER_WIDTH;
                 }
 
@@ -1309,8 +1365,10 @@ exports.UI = SC.Object.extend({
             }
          }
 
-        // and now we're ready to translate the horizontal axis; while we're at it, we'll setup a clip to prevent any drawing outside
-        // of code editor region itself (protecting the gutter). this clip is important to prevent text from bleeding into the gutter.
+        // and now we're ready to translate the horizontal axis; while we're at
+        // it, we'll setup a clip to prevent any drawing outside
+        // of code editor region itself (protecting the gutter). this clip is
+        // important to prevent text from bleeding into the gutter.
         ctx.save();
         ctx.beginPath();
         ctx.rect(this.gutterWidth, -this.yoffset, cwidth - this.gutterWidth, cheight);
@@ -1318,17 +1376,22 @@ exports.UI = SC.Object.extend({
         ctx.translate(this.xoffset, 0);
         ctx.clip();
 
-        // calculate the first and last visible columns on the screen; these values will be used to try and avoid painting text
-        // that the user can't actually see
+        // calculate the first and last visible columns on the screen; these
+        // values will be used to try and avoid painting text that the user
+        // can't actually see
         var firstColumn = Math.floor(Math.abs(this.xoffset / this.charWidth));
         var lastColumn = firstColumn + (Math.ceil((cwidth - this.gutterWidth) / this.charWidth));
 
         // create the state necessary to render each line of text
         y = (this.lineHeight * this.firstVisibleRow);
-        var cc; // the starting column of the current region in the region render loop below
-        var ce; // the ending column in the same loop
-        var ri; // counter variable used for the same loop
-        var regionlen;  // length of the text in the region; used in the same loop
+        // the starting column of the current region in the region render loop below
+        var cc;
+        // the ending column in the same loop
+        var ce;
+        // counter variable used for the same loop
+        var ri;
+        // length of the text in the region; used in the same loop
+        var regionlen;
         var tx, tw, tsel;
         var settings = bespin.get("settings");
         var searchStringLength = (this.searchString ? this.searchString.length : -1);
@@ -1339,20 +1402,26 @@ exports.UI = SC.Object.extend({
 
             // if we aren't repainting the entire canvas...
             if (!refreshCanvas) {
-                // ...don't bother painting the line unless it is "dirty" (see above for dirty checking)
+                // ...don't bother painting the line unless it is "dirty"
+                // (see above for dirty checking)
                 if (!dirty[currentLine]) {
                     y += this.lineHeight;
                     continue;
                 }
 
-                // setup a clip for the current line only; this makes drawing just that piece of the scrollbar easy
-                ctx.save(); // this is restore()'d in another if (!refreshCanvas) block at the end of the loop
+                // setup a clip for the current line only; this makes drawing
+                // just that piece of the scrollbar easy
+                // this is restore()'d in another if (!refreshCanvas) block at
+                // the end of the loop
+                ctx.save();
                 ctx.beginPath();
                 ctx.rect(x + (Math.abs(this.xoffset)), y, cwidth, this.lineHeight);
                 ctx.closePath();
                 ctx.clip();
 
-                if ((currentLine % 2) == 1) { // only repaint the line background if the zebra stripe won't be painted into it
+                // only repaint the line background if the zebra stripe won't be
+                // painted into it
+                if ((currentLine % 2) == 1) {
                     ctx.fillStyle = theme.backgroundStyle;
                     ctx.fillRect(x + (Math.abs(this.xoffset)), y, cwidth, this.lineHeight);
                 }
@@ -1385,7 +1454,8 @@ exports.UI = SC.Object.extend({
             var lineText = lineMetadata.lineText;
             var searchIndices = lineMetadata.searchIndices;
 
-            // the following two chunks of code do the same thing; only one should be uncommented at a time
+            // the following two chunks of code do the same thing; only one
+            // should be uncommented at a time
 
             // CHUNK 1: this code just renders the line with white text and is for testing
             // ctx.fillStyle = "white";
@@ -1510,7 +1580,6 @@ exports.UI = SC.Object.extend({
                 }
             }
 
-
             if (!refreshCanvas) {
                 ctx.drawImage(this.verticalScrollCanvas, verticalx + Math.abs(this.xoffset), Math.abs(this.yoffset));
                 ctx.restore();
@@ -1518,7 +1587,6 @@ exports.UI = SC.Object.extend({
 
             y += this.lineHeight;
         }
-
 
         // paint the cursor
         if (this.editor.focus) {

@@ -22,7 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var editor = require("bespin.page.editor");
+var editor = require("bespin/page/editor");
 
 /**
  * The editor has the notion of a toolbar which are components that can drive
