@@ -30,7 +30,7 @@ var cursor = require("bespin/editor/cursor");
 var util = require("bespin/util/util");
 var key = require("bespin/util/keys");
 var events = require("bespin/events");
-//var syntax  = requ-ire("bespin/syntax");
+//var syntax  = re-quire("bespin/syntax");
 var utils   = require("bespin/editor").utils.copyPos;
 var Actions = require("bespin/editor/actions");
 

@@ -102,7 +102,7 @@
 
     // return the require object for chaining
     return require;
-}).call(this,"/.js/").preload(["json", "sandbox", "narwhal/client", "promise", "array", "object", "string", "function", "regexp", "reactor", "date", "global", "system", "system", "binary"])</script>
+}).call(this,"/.js/").preload(["json", "sandbox", "narwhal/client", "promise", "array", "object", "string", "function", "regexp", "reactor", "date", "global", "system", "system", "binary", "bespin/boot"])</script>
 
 <script type="text/javascript" src="dojo/dojo.js.uncompressed.js"></script>
 <script type='text/javascript' src='dojo/regexp.js'></script>
@@ -112,31 +112,25 @@
 <script type='text/javascript' src='dijit/_base/place.js'></script>
 <script type='text/javascript' src='th.compressed.js'></script>
 
-<script>
-        var _editorComponent;
-        var Component = require.when("bespin/editor", function() {
-            // Loads and configures the objects that the editor needs
-            // You can use dojo.addOnLoad(...); but for that you will need to load up dojo.js first
-            window.onload = function() {
-                _editorComponent = new Component('editor', {
-                    language: "js",
-                    loadfromdiv: true,
-                    set: {
-                        strictlines: 'off'
-                    }
-                });
-            };
-        }).Component;
-        function copyToTextarea() {
-            dojo.byId('inandout').value = _editorComponent.getContent();
-        }
-        function copyToEditor() {
-            _editorComponent.setContent(dojo.byId('inandout').value);
-        }
-        function setSyntax(value) {
-            bespin.publish("settings:language", { language: value });
-        }
-</script>
-
 </head>
-<body><p>Hi</p><script></script></body></html>
+<body>
+
+<p>Hi</p>
+    <h3>Sample Editor as a Component</h3>
+    <div id="editor" style="margin: 0; padding: 0; border: 0; height: 300px; border: 10px solid #ddd; -moz-border-radius: 10px; -webkit-border-radius: 10px;">var foo = "whee";
+
+function flubber() {
+    return "tweeble";
+}</div>
+
+    <div style="padding: 20px">
+    <b style="display: block; border-bottom: 1px solid #ddd;">Play with the editor</b><br>
+    Enter language and blur out: <input type="text" id="syntax" value="" onblur="setSyntax(this.value)"><br>
+    Push a new setting: <input type="text" id="key" value="strictlines"> <input type="text" id="value" value="on"> <input type="button" value="set" onclick="_editorComponent.set(dojo.byId('key').value, dojo.byId('value').value)"><br>
+
+    <textarea id="inandout" cols="100" rows="10"></textarea><br>
+    <input type="button" value="Copy to Textarea" onclick="copyToTextarea()">
+    <input type="button" value="Copy to Editor" onclick="copyToEditor()">
+    </div>
+
+</body></html>

@@ -1,9 +1,9 @@
 
 var bespin = require("bespin");
 
-var EditorApi = require("bespin/editor/editor").API;
-var Core = require("bespin.client.settings").Core;
-var InMemory = require("bespin.client.settings").InMemory;
+var EditorApi = require("bespin/editor").API;
+//var Core = re-quire("bespin/client/settings").Core;
+//var InMemory = re-quire("bespin/client/settings").InMemory;
 
 /**
  * This is a component that you can use to embed the Bespin Editor component
@@ -44,7 +44,7 @@ exports.Component = SC.Object.extend({
         /* 
         Command line wouldn't work anyway right now, so I am removing it entirely.
         if (opts.commandline) {
-            dojo.require("bespin.cmd.commandline");
+            dojo.re-quire("bespin.cmd.commandline");
       
             var commandlineElement;
       
