@@ -23,8 +23,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var worker = require("bespin.worker");
-var codecompletion = require("bespin.editor.codecompletion");
+var worker = require("bespin/worker");
+var codecompletion = require("bespin/editor/codecompletion");
 
 /**
  * Utilizes the bespin.parser infrastructure to suggest possible source

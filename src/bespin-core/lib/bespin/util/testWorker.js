@@ -1,0 +1,1 @@
+// This only exists as part of testing for Workers on Chrome

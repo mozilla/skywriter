@@ -23,7 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var keys = require("bespin.util.keys");
+var keys = require("bespin/util/keys");
 
 /**
  * <p>Pie Menu Handling
