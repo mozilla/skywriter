@@ -29,35 +29,38 @@ var bespin = require("bespin");
  * Given a string, make a token object that holds positions and has name access.
  * <p>Examples:
  * <pre>
- * var args = new bespin.util.TokenObject(userString, {
+ * var args = new TokenObject({ input:userString, options: {
  *     params: command.takes.order.join(' ')
+ * }});
+ *
+ * var test = new TokenObject({
+ *     input: document.getElementById("input").value,
+ *     options: {
+ *         splitBy: document.getElementById("regex").value,
+ *         params: document.getElementById("params").value
+ *     }
  * });
  *
- * var test = new bespin.util.TokenObject(document.getElementById("input").value, {
- *     splitBy: document.getElementById("regex").value,
- *     params: document.getElementById("params").value
- * });
- *
- * var test = new bespin.util.TokenObject("male 'Dion Almaer'", {
+ * var test = new TokenObject({ input:"male 'Dion Almaer'", options: {
  *     params: 'gender name'
- * })
+ * }});
  * </pre>
  */
- 
 exports.TokenObject = SC.Object.extend({
-    init: function(input, options) {
-        this._input = input;
-        this._options = options || {};
-        this._splitterRegex = new RegExp(this._options.splitBy || '\\s+');
-        this.pieces = this.tokenize(input.split(this._splitterRegex));
+    input: null,
+    options: { },
 
-        if (this._options.params) { // -- create a hash for name based access
+    init: function() {
+        this._splitterRegex = new RegExp(this.options.splitBy || '\\s+');
+        this.pieces = this.tokenize(this.input.split(this._splitterRegex));
+
+        if (this.options.params) { // -- create a hash for name based access
             this._nametoindex = {};
-            var namedparams = this._options.params.split(' ');
+            var namedparams = this.options.params.split(' ');
             for (var x = 0; x < namedparams.length; x++) {
                 this._nametoindex[namedparams[x]] = x;
 
-                if (!this._options['noshortcutvalues']) { // side step if you really don't want this
+                if (!this.options['noshortcutvalues']) { // side step if you really don't want this
                     this[namedparams[x]] = this.pieces[x];
                 }
             }

@@ -35,8 +35,7 @@ var bespin = require("bespin");
  * </ul>
  * <p>TODO: Having the keys in the same scope as the method is really bad :)
  */
- 
- 
+
 /**
  * Alpha keys, and special keys (ENTER, BACKSPACE) have key codes that our code
  * needs to check. This gives you a way to say Key.ENTER when matching a key

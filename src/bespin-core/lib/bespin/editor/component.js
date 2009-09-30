@@ -38,7 +38,7 @@ exports.Component = SC.Object.extend({
             initialcontent = opts.content;
         }
     
-        this.editor = bespin.register('editor', opts.editor || new EditorApi(container, opts));
+        this.editor = bespin.register('editor', opts.editor || new EditorApi({ container: container, opts: opts }));
     
         // Fancy a command line anyone?
         /* 

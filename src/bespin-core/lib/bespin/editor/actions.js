@@ -25,35 +25,30 @@
 // module: bespin/editor/actions
 var bespin = require("bespin");
 
-// = Actions =
-//
-// The editor can run various actions. They are defined here and you can add or change them dynamically. Cool huh?
-//
-// An action mutates the model or editor state in some way. The only way the editor state or model should be manipulated is via
-// the execution of actions.
-//
-// Actions integrate with the history manager by including instructions for how to undo (and redo) the action. These instructions
-// take the form of a hash containing the necessary state for undo/redo. A key "action" corresponds to the function name of the
-// action that should be executed to undo or redo the operation and the remaining keys correspond to state necessary to perform
-// the action. See below for various examples.
-//
-// The undo/redo action object is defined at the bottom of this file.
-
+/**
+ * The editor can run various actions. They are defined here and you can add or
+ * change them dynamically. Cool huh?
+ * An action mutates the model or editor state in some way. The only way the
+ * editor state or model should be manipulated is via the execution of actions.
+ * 
+ * Actions integrate with the history manager by including instructions for how
+ * to undo (and redo) the action. These instructions take the form of a hash
+ * containing the necessary state for undo/redo. A key "action" corresponds to
+ * the function name of the action that should be executed to undo or redo the
+ * operation and the remaining keys correspond to state necessary to perform the
+ * action. See below for various examples.
+ * The undo/redo action object is defined at the bottom of this file.
+ */
 exports.Actions = SC.Object.extend({
-    init: function(editor) {
-        this.editor = editor;
-        this.model = this.editor.model;
-        this.cursorManager = this.editor.cursorManager;
-        this.ignoreRepaints = false;
+    editor: null,
+    ignoreRepaints: false,
+    currentEditItem: undefined,
+    editDepth: 0,
 
-        this.currentEditItem = undefined;
-        this.editDepth = 0;
-
-        sc_super();
-    },
-
-    // history: begin an edit item. Call before making an edit. If any edit is already in progress,
-    // this will just be part of that edit.
+    /**
+     * history: begin an edit item. Call before making an edit.
+     * If any edit is already in progress, this will just be part of that edit.
+     */
     beginEdit: function(name) {
         if (this.editDepth == 0) {
             this.currentEditItem = new bespin.editor.ActionHistoryItem(name, this.editor);
@@ -75,18 +70,27 @@ exports.Actions = SC.Object.extend({
         }
     },
 
-    // this is a generic helper method used by various cursor-moving methods
+    /**
+     * this is a generic helper method used by various cursor-moving methods
+     */
     handleCursorSelection: function(args) {
         if (args.event.shiftKey) {
-            if (!this.editor.selection) this.editor.setSelection({ startPos: bespin.editor.utils.copyPos(args.pos) });
-            this.editor.setSelection({ startPos: this.editor.selection.startPos, endPos: bespin.editor.utils.copyPos(this.cursorManager.getCursorPosition()) });
+            if (!this.editor.selection) {
+                this.editor.setSelection({
+                    startPos: bespin.editor.utils.copyPos(args.pos)
+                });
+            }
+            this.editor.setSelection({
+                startPos: this.editor.selection.startPos,
+                endPos: bespin.editor.utils.copyPos(this.editor.cursorManager.getCursorPosition())
+            });
         } else {
             this.editor.setSelection(undefined);
         }
     },
 
     moveCursor: function(moveType, args) {
-        var posData = this.cursorManager[moveType](args);
+        var posData = this.editor.cursorManager[moveType](args);
         this.handleCursorSelection(args);
         this.repaint();
         args.pos = posData.newPos;
@@ -162,8 +166,7 @@ exports.Actions = SC.Object.extend({
         return args;
     },
 
-    applyState: function(state)
-    {
+    applyState: function(state) {
         if (this.testHistory.length == 0) {
             return;
         } else if (state < 0) {
@@ -177,13 +180,12 @@ exports.Actions = SC.Object.extend({
 
         var modelState = item.after;
         var editorState = item.uiAfter;
-        if (state < 0)
-        {
+        if (state < 0) {
             modelState = item.before;
             editorState = item.uiBefore;
         }
 
-        this.model.applyState(modelState);
+        this.editor.model.applyState(modelState);
         this.editor.setState(editorState);
     },
 
@@ -197,10 +199,13 @@ exports.Actions = SC.Object.extend({
 
     selectAll: function(args) {
         // do nothing with an empty doc
-        if (this.model.isEmpty()) return;
+        if (this.editor.model.isEmpty()) return;
 
         args.startPos = { row: 0, col: 0 };
-        args.endPos = { row: this.model.getRowCount() - 1, col: this.editor.ui.getRowScreenLength(this.model.getRowCount() - 1) };
+        args.endPos = {
+            row: this.editor.model.getRowCount() - 1,
+            col: this.editor.ui.getRowScreenLength(this.editor.model.getRowCount() - 1)
+        };
 
         this.select(args);
     },
@@ -208,7 +213,7 @@ exports.Actions = SC.Object.extend({
     select: function(args) {
         if (args.startPos) {
             this.editor.setSelection({ startPos: args.startPos, endPos: args.endPos });
-            this.cursorManager.moveCursor(args.endPos);
+            this.editor.cursorManager.moveCursor(args.endPos);
         } else {
             this.editor.setSelection(undefined);
         }
@@ -225,7 +230,7 @@ exports.Actions = SC.Object.extend({
         }
 
         var tab = args.tab;
-        var tablength = this.cursorManager.getCharacterLength("\t");
+        var tablength = this.editor.cursorManager.getCharacterLength("\t");
 
         if (!tab || !tablength) {
             if (settings && settings.isSettingOn('tabmode')) {
@@ -244,8 +249,11 @@ exports.Actions = SC.Object.extend({
         this.beginEdit("insertTab");
 
         delete this.editor.selection;
-        this.model.insertCharacters(this.cursorManager.getModelPosition({ row: args.pos.row, col: args.pos.col }), tab);
-        this.cursorManager.moveCursor({ row: args.pos.row, col: args.pos.col + tablength });
+        this.editor.model.insertCharacters(this.editor.cursorManager.getModelPosition({ row: args.pos.row, col: args.pos.col }), tab);
+        this.editor.cursorManager.moveCursor({
+            row: args.pos.row,
+            col: args.pos.col + tablength
+        });
         this.repaint();
 
         this.endEdit();
@@ -265,9 +273,15 @@ exports.Actions = SC.Object.extend({
 
             selection = {
                 startPos: { row: cursorPos.row, col: 0 },
-                endPos: { row: cursorPos.row, col: this.model.getRowMetadata(cursorPos.row).lineLength },
+                endPos: {
+                    row: cursorPos.row,
+                    col: this.editor.model.getRowMetadata(cursorPos.row).lineLength
+                },
                 startModelPos: { row: modelPos.row, col: 0 },
-                endModelPos: { row: modelPos.row, col: this.model.getRowMetadata(modelPos.row).lineLengthWithoutTabExpansion }
+                endModelPos: {
+                    row: modelPos.row,
+                    col: this.editor.model.getRowMetadata(modelPos.row).lineLengthWithoutTabExpansion
+                }
             };
 
             this.editor.setSelection(selection);
@@ -275,8 +289,8 @@ exports.Actions = SC.Object.extend({
 
         var startRow = selection.startPos.row;
         var endRow = selection.endPos.row;
-        var endRowLength = this.cursorManager.getStringLength(this.model.getRowArray(endRow).join(""));
-        var cursorRowLength = this.cursorManager.getStringLength(this.model.getRowArray(args.pos.row).join(""));
+        var endRowLength = this.editor.cursorManager.getStringLength(this.editor.model.getRowArray(endRow).join(""));
+        var cursorRowLength = this.editor.cursorManager.getStringLength(this.editor.model.getRowArray(args.pos.row).join(""));
         var charsToInsert;
         var tab = '';
         if (settings && settings.isSettingOn('tabmode')) {
@@ -290,20 +304,20 @@ exports.Actions = SC.Object.extend({
 
         for (var y = startRow; y <= endRow; y++) {
             if (tab != '\t') {
-                charsToInsert = this.cursorManager.getLeadingWhitespace(y);
-                charsToInsert = this.cursorManager.getNextTablevelRight(charsToInsert) - charsToInsert;
+                charsToInsert = this.editor.cursorManager.getLeadingWhitespace(y);
+                charsToInsert = this.editor.cursorManager.getNextTablevelRight(charsToInsert) - charsToInsert;
                 charsToInsert = tab.substring(0, charsToInsert);
             } else {
                 // in the case of "real" tabs we just insert the tabs
                 charsToInsert = '\t';
             }
-            this.model.insertCharacters(this.cursorManager.getModelPosition({ row: y, col: 0 }), charsToInsert);
+            this.editor.model.insertCharacters(this.editor.cursorManager.getModelPosition({ row: y, col: 0 }), charsToInsert);
         }
 
-        var delta = this.cursorManager.getStringLength(this.model.getRowArray(args.pos.row).join("")) - cursorRowLength;
-        selection.endPos.col += this.cursorManager.getStringLength(this.model.getRowArray(endRow).join("")) - endRowLength;
+        var delta = this.editor.cursorManager.getStringLength(this.editor.model.getRowArray(args.pos.row).join("")) - cursorRowLength;
+        selection.endPos.col += this.editor.cursorManager.getStringLength(this.editor.model.getRowArray(endRow).join("")) - endRowLength;
         this.editor.setSelection(selection);
-        this.cursorManager.moveCursor({ col: args.pos.col + delta });
+        this.editor.cursorManager.moveCursor({ col: args.pos.col + delta });
 
         if(unsetSelection) {
             this.editor.setSelection(undefined);
@@ -327,9 +341,15 @@ exports.Actions = SC.Object.extend({
 
             selection = {
                 startPos: { row: cursorPos.row, col: 0 },
-                endPos: { row: cursorPos.row, col: this.model.getRowMetadata(cursorPos.row).lineLength },
+                endPos: {
+                    row: cursorPos.row,
+                    col: this.editor.model.getRowMetadata(cursorPos.row).lineLength
+                },
                 startModelPos: { row: modelPos.row, col: 0 },
-                endModelPos: { row: modelPos.row, col: this.model.getRowMetadata(modelPos.row).lineLengthWithoutTabExpansion }
+                endModelPos: {
+                    row: modelPos.row,
+                    col: this.editor.model.getRowMetadata(modelPos.row).lineLengthWithoutTabExpansion
+                }
             };
 
             this.editor.setSelection(selection);
@@ -337,37 +357,37 @@ exports.Actions = SC.Object.extend({
 
         var startRow = selection.startPos.row;
         var endRow = selection.endPos.row;
-        var endRowLength = this.cursorManager.getStringLength(this.model.getRowArray(endRow).join(""));
+        var endRowLength = this.editor.cursorManager.getStringLength(this.editor.model.getRowArray(endRow).join(""));
         var row = false;
         var charsToDelete;
         var charsWidth;
 
         for (var y = startRow; y <= endRow; y++) {
-            row = this.model.getRowArray(y);
+            row = this.editor.model.getRowArray(y);
             if (row.length > 0 && row[0] == '\t') {
                 charsToDelete = 1;
                 charsWidth = this.editor.getTabSize();
             } else {
-                var leadingWhitespaceLength = this.cursorManager.getLeadingWhitespace(y);
-                charsToDelete = this.cursorManager.getContinuousSpaceCount(0, this.editor.getTabSize(), y);
+                var leadingWhitespaceLength = this.editor.cursorManager.getLeadingWhitespace(y);
+                charsToDelete = this.editor.cursorManager.getContinuousSpaceCount(0, this.editor.getTabSize(), y);
                 charsWidth = charsToDelete;
             }
 
             if (charsToDelete) {
-                this.model.deleteCharacters(this.cursorManager.getModelPosition({ row: y, col: 0 }), charsToDelete);
+                this.editor.model.deleteCharacters(this.editor.cursorManager.getModelPosition({ row: y, col: 0 }), charsToDelete);
             }
             if (y == startRow) {
                 selection.startPos.col = Math.max(0, selection.startPos.col - charsWidth);
             }
             if (y == endRow) {
-                if (!row) row = this.model.getRowArray(y);
-                var delta = endRowLength - this.cursorManager.getStringLength(row.join(""));
+                if (!row) row = this.editor.model.getRowArray(y);
+                var delta = endRowLength - this.editor.cursorManager.getStringLength(row.join(""));
                 selection.endPos.col = Math.max(0, selection.endPos.col - delta);
                 args.pos.col = Math.max(0, args.pos.col - delta);
             }
         }
         this.editor.setSelection(selection);
-        this.cursorManager.moveCursor({ col: args.pos.col });
+        this.editor.cursorManager.moveCursor({ col: args.pos.col });
 
         if(unsetSelection) {
             this.editor.setSelection(undefined);
@@ -378,7 +398,10 @@ exports.Actions = SC.Object.extend({
         this.endEdit();
     },
 
-    // NOTE: Actually, clipboard.js is taking care of this unless EditorOnly mode is set
+    /**
+     * NOTE: Actually, clipboard.js is taking care of this unless EditorOnly
+     * mode is set
+     */
     cutSelection: function(args) {
         if (this.editor.readonly) return;
 
@@ -388,18 +411,24 @@ exports.Actions = SC.Object.extend({
         this.endEdit();
     },
 
-    // NOTE: Actually, clipboard.js is taking care of this unless EditorOnly mode is set
+    /**
+     * NOTE: Actually, clipboard.js is taking care of this unless EditorOnly
+     * mode is set
+     */
     copySelection: function(args) {
         var selectionObject = this.editor.getSelection();
         if (selectionObject) {
-            var selectionText = this.model.getChunk(selectionObject);
+            var selectionText = this.editor.model.getChunk(selectionObject);
             if (selectionText) {
                 bespin.editor.clipboard.Manual.copy(selectionText);
             }
         }
     },
 
-    // NOTE: Actually, clipboard.js is taking care of this unless EditorOnly mode is set
+    /**
+     * NOTE: Actually, clipboard.js is taking care of this unless EditorOnly
+     * mode is set
+     */
     pasteFromClipboard: function(args) {
         if (this.editor.readonly) return;
 
@@ -420,10 +449,10 @@ exports.Actions = SC.Object.extend({
             this.deleteSelection();
         }
 
-        var pos = bespin.editor.utils.copyPos(this.cursorManager.getCursorPosition());
-        pos = this.model.insertChunk(this.cursorManager.getModelPosition(pos), args.chunk);
-        pos = this.cursorManager.getCursorPosition(pos);
-        this.cursorManager.moveCursor(pos);
+        var pos = bespin.editor.utils.copyPos(this.editor.cursorManager.getCursorPosition());
+        pos = this.editor.model.insertChunk(this.editor.cursorManager.getModelPosition(pos), args.chunk);
+        pos = this.editor.cursorManager.getCursorPosition(pos);
+        this.editor.cursorManager.moveCursor(pos);
         this.repaint();
 
         //undo/redo
@@ -440,9 +469,12 @@ exports.Actions = SC.Object.extend({
         // Sometimes we're passed a selection, and sometimes we're not.
         var startPos = (args.startPos != undefined) ? args.startPos : bespin.editor.utils.copyPos(args.pos);
 
-        var selection = this.editor.getSelection({ startPos: startPos, endPos: args.endPos });
-        var chunk = this.model.deleteChunk(selection);
-        this.cursorManager.moveCursor(selection.startPos);
+        var selection = this.editor.getSelection({
+            startPos: startPos,
+            endPos: args.endPos
+        });
+        var chunk = this.editor.model.deleteChunk(selection);
+        this.editor.cursorManager.moveCursor(selection.startPos);
         this.editor.setSelection(undefined);
         this.repaint();
 
@@ -461,12 +493,12 @@ exports.Actions = SC.Object.extend({
             if (args.pos.row == 0) return;
 
             var newcol = this.editor.ui.getRowScreenLength(args.pos.row - 1);
-            this.model.joinRow(args.pos.row - 1);
-            this.cursorManager.moveCursor({ row: args.pos.row - 1, col: newcol });
+            this.editor.model.joinRow(args.pos.row - 1);
+            this.editor.cursorManager.moveCursor({ row: args.pos.row - 1, col: newcol });
         } else {
-            if (args.pos.row >= this.model.getRowCount() - 1) return;
+            if (args.pos.row >= this.editor.model.getRowCount() - 1) return;
 
-            this.model.joinRow(args.pos.row);
+            this.editor.model.joinRow(args.pos.row);
         }
 
         this.endEdit();
@@ -480,7 +512,10 @@ exports.Actions = SC.Object.extend({
         this.beginEdit("killLine");
 
         // select the current row
-        this.editor.setSelection({ startPos: { row: args.pos.row, col: 0 }, endPos: { row: args.pos.row + 1, col: 0 } });
+        this.editor.setSelection({
+            startPos: { row: args.pos.row, col: 0 },
+            endPos: { row: args.pos.row + 1, col: 0 }
+        });
         this.cutSelection(args); // cut (will save and redo will work)
 
         this.endEdit();
@@ -491,7 +526,11 @@ exports.Actions = SC.Object.extend({
             return;
 
         var selection = this.editor.getSelection();
-        return this.deleteChunk({startPos: selection.startPos, endPos: selection.endPos, clearSelection:true});
+        return this.deleteChunk({
+            startPos: selection.startPos,
+            endPos: selection.endPos,
+            clearSelection: true
+        });
     },
 
     backspace: function(args) {
@@ -506,17 +545,20 @@ exports.Actions = SC.Object.extend({
                 var settings = bespin.get('settings');
                 if (settings && settings.isSettingOn('smartmove')) {
                     var tabsize = this.editor.getTabSize();
-                    var freeSpaces = this.cursorManager.getContinuousSpaceCount(args.pos.col, this.cursorManager.getNextTablevelLeft(args.pos.col));
+                    var freeSpaces = this.editor.cursorManager.getContinuousSpaceCount(args.pos.col, this.editor.cursorManager.getNextTablevelLeft(args.pos.col));
                     if (freeSpaces == tabsize) {
                         var pos = args.pos;
-                        this.editor.selection = { startPos: { row: pos.row, col: pos.col - tabsize}, endPos: {row: pos.row, col: pos.col}};
+                        this.editor.selection = {
+                            startPos: { row: pos.row, col: pos.col - tabsize},
+                            endPos: { row: pos.row, col: pos.col }
+                        };
                         this.deleteSelection(args);
                         this.endEdit();
                         return;
                     }
                 }
 
-                this.cursorManager.moveCursor({ col:  Math.max(0, args.pos.col - 1) });
+                this.editor.cursorManager.moveCursor({ col:  Math.max(0, args.pos.col - 1) });
                 args.pos.col -= 1;
                 this.deleteCharacter(args);
             } else {
@@ -540,10 +582,13 @@ exports.Actions = SC.Object.extend({
                 var settings = bespin.get('settings');
                 if (settings && settings.isSettingOn('smartmove')) {
                     var tabsize = this.editor.getTabSize();
-                    var freeSpaces = this.cursorManager.getContinuousSpaceCount(args.pos.col, this.cursorManager.getNextTablevelRight(args.pos.col));
+                    var freeSpaces = this.editor.cursorManager.getContinuousSpaceCount(args.pos.col, this.editor.cursorManager.getNextTablevelRight(args.pos.col));
                     if (freeSpaces == tabsize) {
                         var pos = args.pos;
-                        this.editor.selection = { startPos: { row: pos.row, col: pos.col }, endPos: { row: pos.row, col: pos.col + tabsize } };
+                        this.editor.selection = {
+                            startPos: { row: pos.row, col: pos.col },
+                            endPos: { row: pos.row, col: pos.col + tabsize }
+                        };
                         this.deleteSelection(args);
                         this.endEdit();
                         return;
@@ -565,10 +610,10 @@ exports.Actions = SC.Object.extend({
         if (args.pos.col < this.editor.ui.getRowScreenLength(args.pos.row)) {
             this.beginEdit("deleteCharacter");
 
-            var modelPos = this.cursorManager.getModelPosition(args.pos);
+            var modelPos = this.editor.cursorManager.getModelPosition(args.pos);
 
             var length = 1;
-            var deleted = this.model.deleteCharacters(modelPos, length);
+            var deleted = this.editor.model.deleteCharacters(modelPos, length);
             this.repaint();
 
             // undo/redo        
@@ -581,7 +626,7 @@ exports.Actions = SC.Object.extend({
 
         var settings = bespin.get("settings");
         if (settings && settings.isSettingOn('autoindent')) {
-            var autoindent = bespin.util.leadingWhitespace(this.model.getRowArray(args.pos.row));
+            var autoindent = bespin.util.leadingWhitespace(this.editor.model.getRowArray(args.pos.row));
         } else {
             var autoindent = [];
         }
@@ -605,38 +650,38 @@ exports.Actions = SC.Object.extend({
             pos = this.deleteSelection(args);
         }
 
-        this.model.insertCharacters(this.cursorManager.getModelPosition(pos), args.newchar);
-        this.cursorManager.moveRight(true);
+        this.editor.model.insertCharacters(this.editor.cursorManager.getModelPosition(pos), args.newchar);
+        this.editor.cursorManager.moveRight(true);
 
         var settings = bespin.get('settings');
         if (settings && settings.isSettingOn('closepairs')) {
             // Automatically close pairs
             switch(args.newchar) {
                 case '(':
-                    this.model.insertCharacters(this.cursorManager.getModelPosition(), ')');
+                    this.editor.model.insertCharacters(this.editor.cursorManager.getModelPosition(), ')');
                 break;
 
                 case '[':
-                    this.model.insertCharacters(this.cursorManager.getModelPosition(), ']');
+                    this.editor.model.insertCharacters(this.editor.cursorManager.getModelPosition(), ']');
                 break;
 
                 case '{':
-                    this.model.insertCharacters(this.cursorManager.getModelPosition(), '}');
+                    this.editor.model.insertCharacters(this.editor.cursorManager.getModelPosition(), '}');
                 break;
 
                 case '<':
                     // TODO: Check for HTML/XML syntax highlighting first, so you don't interfere with value comparisons
-    //                      this.model.insertCharacters(this.cursorManager.getModelPosition(), '>');
+                    // this.editor.model.insertCharacters(this.editor.cursorManager.getModelPosition(), '>');
                 break;
 
                 case '"':
                     // TODO: Check for proper context, to avoid ' \"" ' situation
-    //                        this.model.insertCharacters(this.cursorManager.getModelPosition(), '"');
+                    // this.editor.model.insertCharacters(this.editor.cursorManager.getModelPosition(), '"');
                 break;
 
                 case "'":
                     // TODO: Check to make sure this is a single-quotation mark, not an apostrophe
-    //                      this.model.insertCharacters(this.cursorManager.getModelPosition(), "'");
+                    // this.editor.model.insertCharacters(this.editor.cursorManager.getModelPosition(), "'");
                 break;
             }
         }
@@ -650,12 +695,12 @@ exports.Actions = SC.Object.extend({
         var saveCursorRow = this.editor.getCursorPos().row;
         var halfRows = Math.floor(this.editor.ui.visibleRows / 2);
         if (saveCursorRow > (this.editor.ui.firstVisibleRow + halfRows)) { // bottom half, so move down
-            this.cursorManager.moveCursor({ row: this.editor.getCursorPos().row + halfRows });
+          this.editor.cursorManager.moveCursor({ row: this.editor.getCursorPos().row + halfRows });
         } else { // top half, so move up
-            this.cursorManager.moveCursor({ row: this.editor.getCursorPos().row - halfRows });
+          this.editor.cursorManager.moveCursor({ row: this.editor.getCursorPos().row - halfRows });
         }
         this.editor.ui.ensureCursorVisible();
-        this.cursorManager.moveCursor({ row: saveCursorRow });
+        this.editor.cursorManager.moveCursor({ row: saveCursorRow });
     },
 
     getOppositeCase: function(stringCase) {
@@ -683,7 +728,7 @@ exports.Actions = SC.Object.extend({
                 args.selectionObject = this.editor.getSelection();
             }
 
-            var selection = this.model.getChunk(args.selectionObject);
+            var selection = this.editor.model.getChunk(args.selectionObject);
             var stringArray = selection.split("\n");
             for (i in stringArray) {
                 switch (args.stringCase) {
@@ -698,8 +743,8 @@ exports.Actions = SC.Object.extend({
             }
             var outText = stringArray.join("\n");
 
-            this.model.deleteChunk(args.selectionObject);
-            this.model.insertChunk(args.selectionObject.startModelPos, outText);
+            this.editor.model.deleteChunk(args.selectionObject);
+            this.editor.model.insertChunk(args.selectionObject.startModelPos, outText);
             this.select(args.selectionObject);
 
             this.endEdit();
@@ -770,19 +815,24 @@ exports.Actions = SC.Object.extend({
         this.editor.paint(true);
     },
 
-    // find the next match in the file
+    /**
+     * Find the next match in the file
+     */
     findNext: function(event, canBeSamePosition) {
         if (!this.editor.ui.searchString) return;
-        var pos = bespin.editor.utils.copyPos(this.cursorManager.getModelPosition());
+        var pos = bespin.editor.utils.copyPos(this.editor.cursorManager.getModelPosition());
         var sel = this.editor.getSelection();
         if (canBeSamePosition && sel !== undefined) {
             pos.col -= sel.endModelPos.col - sel.startModelPos.col + 1;
         }
-        var found = this.model.findNext(pos.row, pos.col, this.editor.ui.searchString);
-        if (!found) found = this.model.findNext(0, 0, this.editor.ui.searchString);
+        var found = this.editor.model.findNext(pos.row, pos.col, this.editor.ui.searchString);
+        if (!found) found = this.editor.model.findNext(0, 0, this.editor.ui.searchString);
         if (found) {
-            this.editor.setSelection({startPos: this.cursorManager.getCursorPosition(found.startPos), endPos: this.cursorManager.getCursorPosition(found.endPos)});
-            this.cursorManager.moveCursor(this.cursorManager.getCursorPosition(found.endPos));
+            this.editor.setSelection({
+                startPos: this.editor.cursorManager.getCursorPosition(found.startPos),
+                endPos: this.editor.cursorManager.getCursorPosition(found.endPos)
+            });
+            this.editor.cursorManager.moveCursor(this.editor.cursorManager.getCursorPosition(found.endPos));
             this.editor.ui.ensureCursorVisible(true);
             this.repaint();
 
@@ -792,19 +842,24 @@ exports.Actions = SC.Object.extend({
         }
     },
 
-    // find the previous match in the file
+    /**
+     * Find the previous match in the file
+     */
     findPrev: function() {
         if (!this.editor.ui.searchString) return;
 
-        var pos = this.cursorManager.getModelPosition();
-        var found = this.model.findPrev(pos.row, pos.col, this.editor.ui.searchString);
+        var pos = this.editor.cursorManager.getModelPosition();
+        var found = this.editor.model.findPrev(pos.row, pos.col, this.editor.ui.searchString);
         if (!found) {
-            var lastRow = this.model.getRowCount() - 1;
-            found = this.model.findPrev(lastRow, this.model.getRowArray(lastRow).length - 1, this.editor.ui.searchString);
+            var lastRow = this.editor.model.getRowCount() - 1;
+            found = this.editor.model.findPrev(lastRow, this.editor.model.getRowArray(lastRow).length - 1, this.editor.ui.searchString);
         }
         if (found) {
-            this.editor.setSelection({startPos: this.cursorManager.getCursorPosition(found.startPos), endPos: this.cursorManager.getCursorPosition(found.endPos)});
-            this.cursorManager.moveCursor(this.cursorManager.getCursorPosition(found.endPos));
+            this.editor.setSelection({
+                startPos: this.editor.cursorManager.getCursorPosition(found.startPos),
+                endPos: this.editor.cursorManager.getCursorPosition(found.endPos)
+            });
+            this.editor.cursorManager.moveCursor(this.editor.cursorManager.getCursorPosition(found.endPos));
             this.editor.ui.ensureCursorVisible(true);
             this.repaint();
 
@@ -814,7 +869,9 @@ exports.Actions = SC.Object.extend({
         }
     },
 
-    // Fire an escape message so various parts of the UI can choose to clear
+    /**
+     * Fire an escape message so various parts of the UI can choose to clear
+     */
     escape: function() {
         bespin.publish("ui:escape");
         if (this.editor.ui.searchString) {
@@ -900,20 +957,23 @@ exports.Actions = SC.Object.extend({
     nextFile: function() {
         bespin.get('editSession').goToNextFile();
     }
+});
 
-    });
+/**
+ * Pretty simple: just create a history edit item, call begin before doing
+ * anything, and end after everything is done.
+ * Or manually supply the current states.
+ */
 
-    //pretty simple: just create a history edit item, call begin before doing anything, and end after everything is done.
-    //or manually supply the current states.
-
-// Pretend it inherits from bespin.editor.HistoryItem.  
+/**
+ * Pretend it inherits from bespin.editor.HistoryItem.
+ */
 exports.ActionHistoryItem = SC.Object.extend({
     init: function(name, editor) {
         this.editor = editor;
     },
 
-    begin: function(editor, model)
-    {
+    begin: function(editor, model) {
         this.startIndex = this.editor.historyManager.getCurrent();
 
         if (editor)
@@ -927,11 +987,11 @@ exports.ActionHistoryItem = SC.Object.extend({
             this.modelBefore = this.editor.model.getState();
     },
 
-    end: function(editor, model)
-    {
-        // cheap hack for now. This can stay, but we should _add_ explicit bundling. This will allow multiple
-        // levels of detail for undo: you can group all of the "insertCharacter," and then give the user the choice:
-        // go character by character, or remove the whole set.
+    end: function(editor, model) {
+        // cheap hack for now. This can stay, but we should _add_ explicit
+        // bundling. This will allow multiple levels of detail for undo: you can
+        // group all of the "insertCharacter," and then give the user the
+        // choice: go character by character, or remove the whole set.
         this.editor.historyManager.truncate(this.startIndex);
 
         if (editor)
@@ -945,16 +1005,14 @@ exports.ActionHistoryItem = SC.Object.extend({
             this.modelAfter = this.editor.model.getState();
     },
 
-    undo: function()
-    {
+    undo: function() {
         this.editor.model.applyState(this.modelBefore);
         this.editor.setState(this.editorBefore);
         this.editor.ui.ensureCursorVisible();
         this.editor.paint();
     },
 
-    redo: function()
-    {
+    redo: function() {
         this.editor.model.applyState(this.modelAfter);
         this.editor.setState(this.editorAfter);
         this.editor.ui.ensureCursorVisible();
@@ -967,8 +1025,7 @@ dojo.declare("bespin.editor.ActionHistoryItem", null /* pretend it inherits besp
         this.editor = editor;
     },
 
-    begin: function(editor, model)
-    {
+    begin: function(editor, model) {
         this.startIndex = this.editor.historyManager.getCurrent();
 
         if (editor)
@@ -982,11 +1039,11 @@ dojo.declare("bespin.editor.ActionHistoryItem", null /* pretend it inherits besp
             this.modelBefore = this.editor.model.getState();
     },
 
-    end: function(editor, model)
-    {
-        // cheap hack for now. This can stay, but we should _add_ explicit bundling. This will allow multiple
-        // levels of detail for undo: you can group all of the "insertCharacter," and then give the user the choice:
-        // go character by character, or remove the whole set.
+    end: function(editor, model) {
+        // cheap hack for now. This can stay, but we should _add_ explicit
+        // bundling. This will allow multiple levels of detail for undo: you can
+        // group all of the "insertCharacter," and then give the user the
+        // choice: go character by character, or remove the whole set.
         this.editor.historyManager.truncate(this.startIndex);
 
         if (editor)
@@ -1000,19 +1057,17 @@ dojo.declare("bespin.editor.ActionHistoryItem", null /* pretend it inherits besp
             this.modelAfter = this.editor.model.getState();
     },
 
-    undo: function()
-    {
+    undo: function() {
         this.editor.model.applyState(this.modelBefore);
         this.editor.setState(this.editorBefore);
         this.editor.ui.ensureCursorVisible();
         this.editor.paint();
     },
 
-    redo: function()
-    {
+    redo: function() {
         this.editor.model.applyState(this.modelAfter);
         this.editor.setState(this.editorAfter);
         this.editor.ui.ensureCursorVisible();
         this.editor.paint();
     }
-})
+});

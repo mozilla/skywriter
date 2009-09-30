@@ -25,96 +25,88 @@
 var bespin = require("bespin");
 
 /**
- * Handle custom events aimed at, and for the editor
+ * When a file is opened successfully change the project and file status
+ * area, then change the window title, and change the URL hash area
  */
-exports.Events = SC.Object.extend({
-    extend: null,
-    init: function() {
-        /**
-         * When a file is opened successfully change the project and file status
-         * area, then change the window title, and change the URL hash area
-         */
-        bespin.subscribe("editor:openfile:opensuccess", function(event) {
-            var project = event.project || bespin.get('editSession').project;
-            var filename = event.file.name;
+bespin.subscribe("editor:openfile:opensuccess", function(event) {
+    var project = event.project || bespin.get('editSession').project;
+    var filename = event.file.name;
 
-            try {
-                // reset the state of the editor based on saved cookie
-                var data = dojo.cookie('viewData_' + project + '_' + filename.split('/').join('_'));
-                if (data) {
-                    bespin.get('editor').resetView(dojo.fromJson(data));
-                } else {
-                    bespin.get('editor').basicView();
-                }
-            } catch (e) {
-                console.log("Error setting in the view: ", e);
-            }
-
-            document.title = filename + ' - editing with Bespin';
-
-            bespin.publish("url:change", { project: project, path: filename });
-        });
-
-        /**
-         * Observe a urlchange event and then... change the location hash
-         */
-        bespin.subscribe("url:change", function(event) {
-            var hashArguments = dojo.queryToObject(location.hash.substring(1));
-            hashArguments.project = event.project;
-            hashArguments.path    = event.path;
-
-            // window.location.hash = dojo.objectToQuery() is not doing the right thing...
-            var pairs = [];
-            for (var name in hashArguments) {
-                var value = hashArguments[name];
-                pairs.push(name + '=' + value);
-            }
-            window.location.hash = pairs.join("&");
-        });
-
-        /**
-         * Observe a request for session status
-         * This should kick in when the user uses the back button, otherwise
-         * editor.openFile will check and see that the current file is the same
-         * as the file from the urlbar
-         */
-        bespin.subscribe("url:changed", function(event) {
-            editor.openFile(null, event.now.get('path'));
-        });
-
-        /**
-         * If the command line is in focus, unset focus from the editor
-         */
-        bespin.subscribe("cmdline:focus", function(event) {
-            editor.setFocus(false);
-        });
-
-        /**
-         * If the command line is blurred, take control in the editor
-         */
-        bespin.subscribe("cmdline:blur", function(event) {
-            editor.setFocus(true);
-        });
-
-        /**
-         * Track whether a file is dirty (hasn't been saved)
-         */
-        bespin.subscribe("editor:document:changed", function(event) {
-            bespin.publish("editor:dirty");
-        });
-
-        /**
-         *
-         */
-        bespin.subscribe("editor:dirty", function(event) {
-            editor.dirty = true;
-        });
-
-        /**
-         *
-         */
-        bespin.subscribe("editor:clean", function(event) {
-            editor.dirty = false;
-        });
+    try {
+        // reset the state of the editor based on saved cookie
+        var data = dojo.cookie('viewData_' + project + '_' + filename.split('/').join('_'));
+        if (data) {
+            bespin.get('editor').resetView(dojo.fromJson(data));
+        } else {
+            bespin.get('editor').basicView();
+        }
+    } catch (e) {
+        console.log("Error setting in the view: ", e);
     }
+
+    document.title = filename + ' - editing with Bespin';
+
+    bespin.publish("url:change", { project: project, path: filename });
+});
+
+/**
+ * Observe a urlchange event and then... change the location hash
+ */
+bespin.subscribe("url:change", function(event) {
+    var hashArguments = dojo.queryToObject(location.hash.substring(1));
+    hashArguments.project = event.project;
+    hashArguments.path    = event.path;
+
+    // window.location.hash = dojo.objectToQuery() is not doing the right thing...
+    var pairs = [];
+    for (var name in hashArguments) {
+        var value = hashArguments[name];
+        pairs.push(name + '=' + value);
+    }
+    window.location.hash = pairs.join("&");
+});
+
+/**
+ * Observe a request for session status
+ * This should kick in when the user uses the back button, otherwise
+ * editor.openFile will check and see that the current file is the same
+ * as the file from the urlbar
+ */
+bespin.subscribe("url:changed", function(event) {
+    editor.openFile(null, event.now.get('path'));
+});
+
+/**
+ * If the command line is in focus, unset focus from the editor
+ */
+bespin.subscribe("cmdline:focus", function(event) {
+    editor.setFocus(false);
+});
+
+/**
+ * If the command line is blurred, take control in the editor
+ */
+bespin.subscribe("cmdline:blur", function(event) {
+    editor.setFocus(true);
+});
+
+/**
+ * Track whether a file is dirty (hasn't been saved)
+ */
+bespin.subscribe("editor:document:changed", function(event) {
+    bespin.publish("editor:dirty");
+});
+
+/**
+ *
+ */
+bespin.subscribe("editor:dirty", function(event) {
+    editor.dirty = true;
+});
+
+/**
+ *
+ */
+bespin.subscribe("editor:clean", function(event) {
+    editor.dirty = false;
 });
