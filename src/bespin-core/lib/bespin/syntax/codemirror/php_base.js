@@ -36,12 +36,11 @@
 
 // = PHP Syntax Engine Implementation =
 
-dojo.provide("bespin.syntax.codemirror.php_base");
+// module: bespin/syntax/codemirror/php_base
 
-// ** {{{ bespin.syntax.codemirror.PHPBase }}} **
+var base = module("bespin/syntax/codemirror/base");
 
-dojo.declare("bespin.syntax.codemirror.PHPBase", bespin.syntax.codemirror.Base, {
-
+exports.PHPBase = base.extend({
     // = Tokenizer for PHP code =
 
     // References:
@@ -1445,5 +1444,7 @@ dojo.declare("bespin.syntax.codemirror.PHPBase", bespin.syntax.codemirror.Base, 
     }
 });
 
+var resolver = require("bespin/syntax/codemirror").resolver;
+
 // Register
-bespin.syntax.codemirror.Resolver.register(new bespin.syntax.codemirror.PHPBase(), ['php_base']);
+resolver.register(exports.PHPBase.create(), ['php_base']);

@@ -23,8 +23,8 @@
  *   Peter Neubauer (peter@neubauer.se)
  *
  * ***** END LICENSE BLOCK ***** */
-
-dojo.provide("bespin.syntax.simple.arduino");
+ 
+// module: bespin/syntax/simple/arduino
 
 /**
  * Tracks syntax highlighting data on a per-line basis.
@@ -32,7 +32,7 @@ dojo.provide("bespin.syntax.simple.arduino");
  * keywords, punctuation, strings, comments, and "everything else", all lumped
  * into one last bucket.
  */
-bespin.syntax.simple.ArduinoConstants = {
+exports.ArduinoConstants = {
     C_STYLE_COMMENT: "c-comment",
     LINE_COMMENT: "comment",
     STRING: "string",
@@ -44,7 +44,8 @@ bespin.syntax.simple.ArduinoConstants = {
 /**
  * Module for syntax highlighting Arduino PDE files.
  */
-dojo.declare("bespin.syntax.simple.Arduino", null, {
+
+exports.ARDUINO = SC.Object.extend({
     keywords: 'HIGH LOW INPUT OUTPUT SERIAL DISPLAY DEC BIN HEX OCT BYTE PI ' +
     'HALF_PI TWO_PI LSBFIRST MSBFIRST CHANGE FALLING RISING DEFAULT EXTERNAL INTERAL ' +
     'boolean  byte case char class default  do double else false float for if ' +

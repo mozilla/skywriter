@@ -60,11 +60,11 @@
 //
 // You can guess what this does. ;-)
 
-dojo.provide("bespin.syntax.codemirror.python");
+// module bespin/syntax/codemirror/python
 
-// ** {{{ bespin.syntax.codemirror.Python }}} **
+var base = require("bespin/syntax/codemirror/base");
 
-dojo.declare("bespin.syntax.codemirror.Python", bespin.syntax.codemirror.Base, {
+exports.Python = base.extend({
 
     singleOperators: "+-*/%&|^~<>",
 
@@ -684,5 +684,7 @@ dojo.declare("bespin.syntax.codemirror.Python", bespin.syntax.codemirror.Base, {
     electricChars: "}"
 });
 
+var resolver = require("bespin/syntax/codemirror").resolver;
+
 // Register this puppy
-bespin.syntax.codemirror.Resolver.register(new bespin.syntax.codemirror.Python(), ['py', 'python']);
+resolver.register(exports.Python.create(), ['py', 'python']);

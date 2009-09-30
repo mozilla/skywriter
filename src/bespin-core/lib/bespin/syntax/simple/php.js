@@ -26,15 +26,13 @@
 //
 // Module for syntax highlighting PHP.
 
-dojo.provide("bespin.syntax.simple.php");
+// module: bespin/syntax/simple/php
 
-// ** {{{ bespin.syntax.simple.PHP }}} **
-//
 // Tracks syntax highlighting data on a per-line basis. This is a quick-and-dirty implementation that
 // supports five basic highlights: keywords, punctuation, strings, comments, and "everything else", all
 // lumped into one last bucket.
 
-bespin.syntax.PHPConstants = {
+exports.PHPConstants = {
     C_STYLE_COMMENT: "c-comment",
     LINE_COMMENT: "comment",
     STRING: "string",
@@ -43,7 +41,7 @@ bespin.syntax.PHPConstants = {
     OTHER: "plain"
 };
 
-dojo.declare("bespin.syntax.simple.PHP", null, {
+exports.PHP = SC.Object.extend({
     keywords: 'include require include_once require_once for foreach as if elseif else while do endwhile ' +
         'endif switch case endswitch endfor endforeach ' +
         'return break continue ' +

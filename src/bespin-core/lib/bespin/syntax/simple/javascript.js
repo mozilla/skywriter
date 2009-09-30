@@ -26,15 +26,13 @@
 //
 // Module for syntax highlighting JavaScript.
 
-dojo.provide("bespin.syntax.simple.javascript");
+// module: bespin/syntax/simple/javascript
 
-// ** {{{ bespin.syntax.simple.JavaScript }}} **
-//
 // Tracks syntax highlighting data on a per-line basis. This is a quick-and-dirty implementation that
 // supports five basic highlights: keywords, punctuation, strings, comments, and "everything else", all
 // lumped into one last bucket.
 
-bespin.syntax.JavaScriptConstants = {
+exports.JavaScriptConstants = {
     C_STYLE_COMMENT: "c-comment",
     LINE_COMMENT: "comment",
     STRING: "string",
@@ -43,8 +41,8 @@ bespin.syntax.JavaScriptConstants = {
     OTHER: "plain"
 };
 
-dojo.declare("bespin.syntax.simple.JavaScript", null, {
-    keywords: ' abstract boolean break byte case catch char class const continue debugger ' +
+exports.JavaScript = SC.Object.extend({
+     keywords: ' abstract boolean break byte case catch char class const continue debugger ' +
                     'default delete do double else enum export extends false final finally float ' +
                     'for function goto if implements import in instanceof int interface let long native ' +
                     'new null package private protected public return short static super switch ' +

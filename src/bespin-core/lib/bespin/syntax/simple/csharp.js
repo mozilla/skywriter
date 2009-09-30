@@ -26,15 +26,13 @@
 //
 // Module for syntax highlighting C Sharp based off of the Geshi Sytax Highlighter.
 
-dojo.provide("bespin.syntax.simple.csharp");
+// module: bespin/syntax/simple/csharp
 
-// ** {{{ bespin.syntax.simple.CSharp }}} **
-//
 // Tracks syntax highlighting data on a per-line basis. This is a quick-and-dirty implementation that
 // supports five basic highlights: keywords, punctuation, strings, comments, and "everything else", all
 // lumped into one last bucket.
 
-bespin.syntax.CSharpConstants = {
+exports.CSharpConstants = {
     C_STYLE_COMMENT: "c-comment",
     LINE_COMMENT: "comment",
     STRING: "string",
@@ -43,7 +41,7 @@ bespin.syntax.CSharpConstants = {
     OTHER: "plain"
 };
 
-dojo.declare("bespin.syntax.simple.CSharp", null, {
+exports.CSharp = SC.Object.extend({
     keywords: 'break case continue default do else for goto if return' +
 'switch throw while' +
 'NULL false true enum errno EDOM' +

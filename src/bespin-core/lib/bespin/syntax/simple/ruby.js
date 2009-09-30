@@ -28,13 +28,11 @@
 //
 // Module for syntax highlighting Ruby.
 
-dojo.provide("bespin.syntax.simple.ruby");
+// module: bespin/syntax/simple/ruby
 
-// ** {{{ bespin.syntax.simple.Ruby }}} **
-//
 // Tracks syntax highlighting data on a per-line basis. This is a quick-and-dirty implementation.
 
-bespin.syntax.RubyConstants = {
+exports.RubyConstants = {
    REGULAR_EXPRESSION: "literal",
    LINE_COMMENT: "comment",
    STRING: "string",
@@ -46,7 +44,8 @@ bespin.syntax.RubyConstants = {
    OTHER: "plain"
 };
 
-dojo.declare("bespin.syntax.simple.Ruby", null, {
+exports.Ruby = SC.Object.extend({
+
    keywords: 'alias and begin break case class def defined do else elsif end ensure false for if in module next nil not or redo rescue retry return then true undef unless until when while yield'.split(' '),
 
    punctuation: '. # ( ) { } ^ ~ < << <= <=> = =~ == === > >= >> | || ||= - - -= :: ! !~ != / .. ... [] * ** & && &&= % + + += and not or " \''.split(' '),

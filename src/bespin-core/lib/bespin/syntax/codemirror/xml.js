@@ -51,11 +51,11 @@
 //
 // You can guess what this does. ;-)
 
-dojo.provide("bespin.syntax.codemirror.xml");
+// module bespin/syntax/codemirror/xml
 
-// ** {{{ bespin.syntax.codemirror.XMLBase }}} **
+var base = require("bespin/syntax/codemirror/base");
 
-dojo.declare("bespin.syntax.codemirror.XMLBase", bespin.syntax.codemirror.Base, {
+exports.XMLBase = base.extend({
 
     XMLKludges: {
         autoSelfClosers: {},
@@ -469,5 +469,7 @@ dojo.declare("bespin.syntax.codemirror.XML", bespin.syntax.codemirror.XMLBase, {
     electricChars: "/"
 });
 
+var resolver = require("bespin/syntax/codemirror").resolver;
+
 // Register
-bespin.syntax.codemirror.Resolver.register(new bespin.syntax.codemirror.XML(), ['xml', 'xhtml']);
+resolver.register(exports.XML.create(), ['xml', 'xhtml']);

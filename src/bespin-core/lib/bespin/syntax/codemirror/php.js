@@ -34,13 +34,13 @@
 //
 // You can guess what this does. ;-)
 
-dojo.provide("bespin.syntax.codemirror.php");
+// module: bespin/syntax/codemirror/php
 
-// ** {{{ bespin.syntax.codemirror.PHP }}} **
+var xmlBase = require("bespin/syntax/codemirror/xml");
 
-dojo.declare("bespin.syntax.codemirror.PHP", bespin.syntax.codemirror.BaseXML, {
+exports.PHP = xmlBase.extend({
 
-     constructor: function(){
+     init: function(){
          this.Kludges = this.HTMLKludges;
      },
 
@@ -394,5 +394,6 @@ dojo.declare("bespin.syntax.codemirror.PHP", bespin.syntax.codemirror.BaseXML, {
     electricChars: "{}/:"
 });
 
-// Register
-bespin.syntax.codemirror.Resolver.register(new bespin.syntax.codemirror.PHP(), ['php', 'php3', 'php4', 'php5']);
+var resolver = require("bespin/syntax/codemirror").resolver;
+
+resolver.register(exports.PHP.create(), ['php', 'php3', 'php4', 'php5']);
