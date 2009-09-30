@@ -103,5 +103,38 @@
     // return the require object for chaining
     return require;
 }).call(this,"/.js/").preload(["json", "sandbox", "narwhal/client", "promise", "array", "object", "string", "function", "regexp", "reactor", "date", "global", "hello", "system", "system", "binary"])</script>
+
+<script type="text/javascript" src="dojo/dojo.js.uncompressed.js"></script>
+<script type='text/javascript' src='dojo/regexp.js'></script>
+<script type='text/javascript' src='dojo/cookie.js'></script>
+<script type='text/javascript' src='dojo/AdapterRegistry.js'></script>
+<script type='text/javascript' src='dojo/fx/easing.js'></script>
+<script type='text/javascript' src='dijit/_base/place.js'></script>
+<script type='text/javascript' src='th.compressed.js'></script>
+
+<script>
+        var _editorComponent;
+        // Loads and configures the objects that the editor needs
+        // You can use dojo.addOnLoad(...); but for that you will need to load up dojo.js first
+        window.onload = function() {
+            _editorComponent = new bespin.editor.Component('editor', {
+                language: "js",
+                loadfromdiv: true,
+                set: {
+                    strictlines: 'off'
+                }
+            });
+        };
+        function copyToTextarea() {
+            dojo.byId('inandout').value = _editorComponent.getContent();
+        }
+        function copyToEditor() {
+            _editorComponent.setContent(dojo.byId('inandout').value);
+        }
+        function setSyntax(value) {
+            bespin.publish("settings:language", { language: value });
+        }
+</script>
+
 </head>
 <body><p>Hi</p><script></script></body></html>
