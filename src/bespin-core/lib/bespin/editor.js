@@ -26,7 +26,6 @@
 
 var bespin = require("bespin");
 var clipboard = require("bespin/editor/clipboard");
-var cursor = require("bespin/editor/cursor");
 var util = require("bespin/util/util");
 var key = require("bespin/util/keys");
 var events = require("bespin/events");
@@ -2006,6 +2005,9 @@ exports.API = SC.Object.extend({
         while (this.canvas && this.canvas.nodeType != 1) {
             this.canvas = this.canvas.nextSibling;
         }
+        
+        var r = require;
+        var cursor = r("bespin/editor/cursor");
 
         this.cursorManager = new cursor.CursorManager(this);
         this.ui = new exports.UI({ editor: this });

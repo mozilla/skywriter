@@ -39,6 +39,8 @@
     // this function gets called by injected scripts with a portion of the
     // module catalog, which includes factories and dependency lists.
     require.register = function (entries) {
+        console.log("registering:");
+        console.dir(entries);
         for (var id in entries) {
             if (Object.prototype.hasOwnProperty.call(entries, id)) {
                 require.catalog[id] = entries[id];
