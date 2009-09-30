@@ -23,7 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var utils = require("bespin/editor").utils.copyPos;
+var utils = require("bespin/editor").utils;
 
 /**
  * Handles the position of the cursor, hiding the complexity of translating
@@ -47,7 +47,7 @@ exports.CursorManager = SC.Object.extend({
             return this.position;
         }
 
-        var pos = copyPos(modelPos);
+        var pos = utils.copyPos(modelPos);
 
         // Avoid modifying model by just using an empty array if row is out of
         // range this is because getRowArray adds rows if the row is out of
@@ -87,13 +87,12 @@ exports.CursorManager = SC.Object.extend({
      */
     getModelPosition: function(pos) {
         pos = (pos != undefined) ? pos : this.position;
-        var modelPos = copyPos(pos);
+        var modelPos = utils.copyPos(pos);
 
         //avoid modifying model by just using an empty array if row is out of range
         //this is because getRowArray adds rows if the row is out of range.
         var line = [];
-        if (this.editor.model.hasRow(pos.row))
-            line = this.editor.model.getRowArray(pos.row);
+        if (this.editor.model.hasRow(pos.row)){line = this.editor.model.getRowArray(pos.row);}
 
         var tabsize = this.editor.getTabSize();
 
@@ -104,7 +103,7 @@ exports.CursorManager = SC.Object.extend({
             var current_pos = 0;
             for (var i = 0; i < modelPos.col; i++) {
                 var new_pos = current_pos;
-                
+
                 // if there is a tab, find what the editor position would be if we added it.
                 if (line[i] == '\t') {
                     new_pos = Math.floor((current_pos + tabsize) / tabsize) * tabsize;
@@ -128,11 +127,13 @@ exports.CursorManager = SC.Object.extend({
     },
 
     /**
-     * 
+     *
      */
     getCharacterLength: function(character, column) {
-        if (character.length > 1) return;
-        if (column == undefined) column = this.position.col;
+        if (character.length > 1) {
+            return;
+        }
+        if (column == undefined){column = this.position.col;}
         if (character == "\t") {
             var tabsize = this.editor.getTabSize();
             return (tabsize - (column % tabsize));
@@ -145,7 +146,9 @@ exports.CursorManager = SC.Object.extend({
      * Returns the length of a given string. This takes '\t' in account!
      */
     getStringLength: function(str) {
-        if (!str || str.length == 0) return 0;
+        if (!str || str.length == 0) {
+            return 0;
+        }
         var count = 0;
         str = str.split("");
         for (var x = 0; x < str.length; x++) {
@@ -206,7 +209,7 @@ exports.CursorManager = SC.Object.extend({
     },
 
     moveToLineStart: function() {
-        var oldPos = copyPos(this.position);
+        var oldPos = utils.copyPos(this.position);
         var leadingWhitespaceLength = this.getLeadingWhitespace(oldPos.row);
 
         if (this.position.col == 0) {
@@ -219,38 +222,38 @@ exports.CursorManager = SC.Object.extend({
             this.moveCursor({ col: 0 });
         }
 
-        return { oldPos: oldPos, newPos: copyPos(this.position) };
+        return { oldPos: oldPos, newPos: utils.copyPos(this.position) };
     },
 
     moveToLineEnd: function() {
-        var oldPos = copyPos(this.position);
+        var oldPos = utils.copyPos(this.position);
 
         this.moveCursor({ col: this.editor.ui.getRowScreenLength(oldPos.row) });
 
-        return { oldPos: oldPos, newPos: copyPos(this.position) };
+        return { oldPos: oldPos, newPos: utils.copyPos(this.position) };
     },
 
     moveToTop: function() {
-        var oldPos = copyPos(this.position);
+        var oldPos = utils.copyPos(this.position);
 
         this.editor.cursorManager.moveCursor({ row: 0, col: 0 });
 
-        return { oldPos: oldPos, newPos: copyPos(this.position) };
+        return { oldPos: oldPos, newPos: utils.copyPos(this.position) };
     },
 
     moveToBottom: function() {
-        var oldPos = copyPos(this.position);
+        var oldPos = utils.copyPos(this.position);
 
         var row = this.editor.model.getRowCount() - 1;
         this.editor.cursorManager.moveCursor({ row: row, col: this.editor.ui.getRowScreenLength(row) });
 
-        return { oldPos: oldPos, newPos: copyPos(this.position) };
+        return { oldPos: oldPos, newPos: utils.copyPos(this.position) };
     },
 
     moveUp: function() {
         var settings = bespin.get("settings");
         var selection = this.editor.getSelection();
-        var oldPos = copyPos(this.position);
+        var oldPos = utils.copyPos(this.position);
         var oldVirualCol = this.virtualCol;
 
         this.moveCursor({ row: oldPos.row - 1, col: Math.max(oldPos.col, this.virtualCol) });
@@ -260,14 +263,14 @@ exports.CursorManager = SC.Object.extend({
             this.virtualCol = Math.max(oldPos.col, oldVirualCol);
         }
 
-        return { oldPos: oldPos, newPos: copyPos(this.position) };
+        return { oldPos: oldPos, newPos: utils.copyPos(this.position) };
     },
 
     moveDown: function() {
         var settings = bespin.get("settings");
         var selection = this.editor.getSelection();
 
-        var oldPos = copyPos(this.position);
+        var oldPos = utils.copyPos(this.position);
         var oldVirualCol = this.virtualCol;
 
         this.moveCursor({ row: Math.max(0, oldPos.row + 1), col: Math.max(oldPos.col, this.virtualCol) });
@@ -277,12 +280,12 @@ exports.CursorManager = SC.Object.extend({
             this.virtualCol = Math.max(oldPos.col, oldVirualCol);
         }
 
-        return { oldPos: oldPos, newPos: copyPos(this.position) };
+        return { oldPos: oldPos, newPos: utils.copyPos(this.position) };
     },
 
     moveLeft: function(args) {
         var settings = bespin.get("settings");
-        var oldPos = copyPos(this.position);
+        var oldPos = utils.copyPos(this.position);
         var shiftKey = (args.event ? args.event.shiftKey : false);
 
         if (!this.editor.getSelection() || shiftKey) {
@@ -290,7 +293,7 @@ exports.CursorManager = SC.Object.extend({
                 var freeSpaces = this.getContinuousSpaceCount(oldPos.col, this.getNextTablevelLeft());
                 if (freeSpaces == this.editor.getTabSize()) {
                     this.moveCursor({ col: oldPos.col - freeSpaces });
-                    return { oldPos: oldPos, newPos: copyPos(this.position) };
+                    return { oldPos: oldPos, newPos: utils.copyPos(this.position) };
                 } // else {
                 //  this case is handled by the code following
                 //}
@@ -299,7 +302,7 @@ exports.CursorManager = SC.Object.extend({
             // start of the line so move up
             if ((settings && settings.isSettingOn('strictlines')) && (this.position.col == 0)) {
                 this.moveUp();
-                if (oldPos.row > 0) this.moveToLineEnd();
+                if (oldPos.row > 0){this.moveToLineEnd();}
             } else {
                 this.moveCursor({ row: oldPos.row, col: Math.max(0, oldPos.col - 1) });
             }
@@ -307,12 +310,12 @@ exports.CursorManager = SC.Object.extend({
             this.moveCursor(this.editor.getSelection().startPos);
         }
 
-        return { oldPos: oldPos, newPos: copyPos(this.position) };
+        return { oldPos: oldPos, newPos: utils.copyPos(this.position) };
     },
 
     moveRight: function(args) {
         var settings = bespin.get("settings");
-        var oldPos = copyPos(this.position);
+        var oldPos = utils.copyPos(this.position);
         var shiftKey = (args.event ? args.event.shiftKey : false);
 
         if (!this.editor.getSelection() || shiftKey) {
@@ -320,7 +323,7 @@ exports.CursorManager = SC.Object.extend({
                 var freeSpaces = this.getContinuousSpaceCount(oldPos.col, this.getNextTablevelRight());
                 if (freeSpaces == this.editor.getTabSize()) {
                     this.moveCursor({ col: oldPos.col + freeSpaces });
-                    return { oldPos: oldPos, newPos: copyPos(this.position) };
+                    return { oldPos: oldPos, newPos: utils.copyPos(this.position) };
                 }// else {
                 //  this case is handled by the code following
                 //}
@@ -329,7 +332,7 @@ exports.CursorManager = SC.Object.extend({
             // end of the line, so go to the start of the next line
             if ((settings && settings.isSettingOn('strictlines')) && (this.position.col >= this.editor.ui.getRowScreenLength(this.position.row))) {
                 this.moveDown();
-                if (oldPos.row < this.editor.model.getRowCount() - 1) this.moveCursor({ col: 0 });
+                if (oldPos.row < this.editor.model.getRowCount() - 1){this.moveCursor({ col: 0 });}
             } else {
                 this.moveCursor({ col: this.position.col + 1 });
             }
@@ -337,14 +340,14 @@ exports.CursorManager = SC.Object.extend({
             this.moveCursor(this.editor.getSelection().endPos);
         }
 
-        return { oldPos: oldPos, newPos: copyPos(this.position) };
+        return { oldPos: oldPos, newPos: utils.copyPos(this.position) };
     },
 
     movePageUp: function() {
         var settings = bespin.get("settings");
         var selection = this.editor.getSelection();
 
-        var oldPos = copyPos(this.position);
+        var oldPos = utils.copyPos(this.position);
         var oldVirualCol = this.virtualCol;
 
         this.moveCursor({ row: Math.max(this.editor.ui.firstVisibleRow - this.editor.ui.visibleRows, 0) });
@@ -354,14 +357,14 @@ exports.CursorManager = SC.Object.extend({
             this.virtualCol = Math.max(oldPos.col, oldVirualCol);
         }
 
-        return { oldPos: oldPos, newPos: copyPos(this.position) };
+        return { oldPos: oldPos, newPos: utils.copyPos(this.position) };
     },
 
     movePageDown: function() {
         var settings = bespin.get("settings");
         var selection = this.editor.getSelection();
 
-        var oldPos = copyPos(this.position);
+        var oldPos = utils.copyPos(this.position);
         var oldVirualCol = this.virtualCol;
 
         this.moveCursor({ row: Math.min(this.position.row + this.editor.ui.visibleRows, this.editor.model.getRowCount() - 1) });
@@ -371,11 +374,11 @@ exports.CursorManager = SC.Object.extend({
             this.virtualCol = Math.max(oldPos.col, oldVirualCol);
         }
 
-        return { oldPos: oldPos, newPos: copyPos(this.position) };
+        return { oldPos: oldPos, newPos: utils.copyPos(this.position) };
     },
 
     smartMoveLeft: function() {
-        var oldPos = copyPos(this.position);
+        var oldPos = utils.copyPos(this.position);
 
         var row = this.editor.ui.getRowString(oldPos.row);
 
@@ -386,7 +389,7 @@ exports.CursorManager = SC.Object.extend({
             this.moveToLineEnd();
         } else {
             // Short circuit if cursor is ahead of actual spaces in model
-            if (row.length < this.position.col) this.moveToLineEnd();
+            if (row.length < this.position.col){this.moveToLineEnd();}
 
             var newcol = this.position.col;
 
@@ -412,7 +415,8 @@ exports.CursorManager = SC.Object.extend({
                     c = row.charAt(newcol);
                     charCode = c.charCodeAt(0);
                     if ( (charCode < 65) || (charCode > 122) ) { // if you get to an alpha you are done
-                        if (newcol != this.position.col - 1) newcol++; // right next to a stop char, move back one
+                        if (newcol != this.position.col - 1){newcol++; // right next to a stop char, move back one
+}
                         break;
                     }
                 }
@@ -421,11 +425,11 @@ exports.CursorManager = SC.Object.extend({
             this.moveCursor({ col: newcol });
         }
 
-        return { oldPos: oldPos, newPos: copyPos(this.position) };
+        return { oldPos: oldPos, newPos: utils.copyPos(this.position) };
     },
 
     smartMoveRight: function() {
-        var oldPos = copyPos(this.position);
+        var oldPos = utils.copyPos(this.position);
 
         var row = this.editor.ui.getRowString(oldPos.row);
 
@@ -470,22 +474,25 @@ exports.CursorManager = SC.Object.extend({
                 }
             }
 
-            if (newcol != -1) this.moveCursor({ col: newcol });
+            if (newcol != -1){this.moveCursor({ col: newcol });}
         }
 
-        return { oldPos: oldPos, newPos: copyPos(this.position) };
+        return { oldPos: oldPos, newPos: utils.copyPos(this.position) };
     },
 
     moveCursor: function(newpos) {
-        if (!newpos) return; // guard against a bad position (certain redo did this)
-        if (newpos.col === undefined) newpos.col = this.position.col;
-        if (newpos.row === undefined) newpos.row = this.position.row;
+        if (!newpos) {
+            return; // guard against a bad position (certain redo did this)
+        }
+        if (newpos.col === undefined){newpos.col = this.position.col;}
+        if (newpos.row === undefined){newpos.row = this.position.row;}
 
         this.virtualCol = 0;
         var oldpos = this.position;
 
         var row = Math.min(newpos.row, this.editor.model.getRowCount() - 1); // last row if you go over
-        if (row < 0) row = 0; // can't move negative off screen
+        if (row < 0){row = 0; // can't move negative off screen
+}
 
         var invalid = this.isInvalidCursorPosition(row, newpos.col);
         if (invalid) {

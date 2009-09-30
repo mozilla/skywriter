@@ -30,9 +30,9 @@ var cursor = require("bespin/editor/cursor");
 var util = require("bespin/util/util");
 var key = require("bespin/util/keys");
 var events = require("bespin/events");
-//var syntax  = re-quire("bespin/syntax");
+var syntax  = require("bespin/syntax");
 var utils   = require("bespin/editor").utils.copyPos;
-var Actions = require("bespin/editor/actions");
+var Actions = require("bespin/editor/actions").Actions;
 
 exports.Scrollbar = SC.Object.extend({
     HORIZONTAL: "horizontal",
@@ -62,7 +62,7 @@ exports.Scrollbar = SC.Object.extend({
     // used for scroll bar dragging tracking; point at which the mousedown first occurred
     mousedownScreenPoint: null,
 
-    // value at time of scroll drag start    
+    // value at time of scroll drag start
     mousedownValue: null,
 
     // return a Rect for the scrollbar handle
@@ -72,7 +72,7 @@ exports.Scrollbar = SC.Object.extend({
 
         var smultiple = this.extent / (this.max + this.extent);
         var asw = smultiple * sw;
-        if (asw < this.MINIMUM_HANDLE_SIZE) asw = this.MINIMUM_HANDLE_SIZE;
+        if (asw < this.MINIMUM_HANDLE_SIZE){asw = this.MINIMUM_HANDLE_SIZE;}
 
         sx += (sw - asw) * (this.value / (this.max - this.min));
 
@@ -84,8 +84,8 @@ exports.Scrollbar = SC.Object.extend({
     },
 
     fixValue: function(value) {
-        if (value < this.min) value = this.min;
-        if (value > this.max) value = this.max;
+        if (value < this.min){value = this.min;}
+        if (value > this.max){value = this.max;}
         return value;
     },
 
@@ -94,8 +94,12 @@ exports.Scrollbar = SC.Object.extend({
         // We need a clean way to define that behaviour, but for now we hack and put in other elements that can scroll
         var command_output = dojo.byId("command_output");
         var target = e.target || e.originalTarget;
-        if (command_output && (target.id == "command_output" || util.contains(command_output, target))) return;
-        if (!this.ui.editor.focus) return;
+        if (command_output && (target.id == "command_output" || util.contains(command_output, target))) {
+            return;
+        }
+        if (!this.ui.editor.focus) {
+            return;
+        }
 
         var wheel = util.mousewheelevent.wheel(e);
         //console.log("Wheel speed: ", wheel);
@@ -132,7 +136,8 @@ exports.Scrollbar = SC.Object.extend({
     onmouseup: function(e) {
         this.mousedownScreenPoint = null;
         this.mousedownValue = null;
-        if (this.valueChanged) this.valueChanged(); // make the UI responsive when the user releases the mouse button (in case arrow no longer hovers over scrollbar)
+        if (this.valueChanged){this.valueChanged(); // make the UI responsive when the user releases the mouse button (in case arrow no longer hovers over scrollbar)
+}
     },
 
     onmousemove: function(e) {
@@ -145,7 +150,7 @@ exports.Scrollbar = SC.Object.extend({
 
     setValue: function(value) {
         this.value = this.fixValue(value);
-        if (this.valueChanged) this.valueChanged();
+        if (this.valueChanged){this.valueChanged();}
     }
 });
 
@@ -166,7 +171,9 @@ exports.Rect = SC.Object.extend({
 
     // inclusive of bounding lines
     contains: function(point) {
-        if (!this.x) return false;
+        if (!this.x) {
+            return false;
+        }
         return ((this.x <= point.x) && ((this.x + this.w) >= point.x) && (this.y <= point.y) && ((this.y + this.h) >= point.y));
     }
 });
@@ -185,8 +192,12 @@ exports.SelectionHelper = SC.Object.extend({
         var endCol;
 
         var selection = this.editor.getSelection();
-        if (!selection) return undefined;
-        if ((selection.endPos.row < rowIndex) || (selection.startPos.row > rowIndex)) return undefined;
+        if (!selection) {
+            return undefined;
+        }
+        if ((selection.endPos.row < rowIndex) || (selection.startPos.row > rowIndex)) {
+            return undefined;
+        }
 
         startCol = (selection.startPos.row < rowIndex) ? 0 : selection.startPos.col;
         endCol = (selection.endPos.row > rowIndex) ? -1 : selection.endPos.col;
@@ -213,15 +224,21 @@ dojo.mixin(exports, {
         },
 
         posEquals: function(pos1, pos2) {
-            if (pos1 == pos2) return true;
-            if (!pos1 || !pos2) return false;
+            if (pos1 == pos2) {
+                return true;
+            }
+            if (!pos1 || !pos2) {
+                return false;
+            }
             return (pos1.col == pos2.col) && (pos1.row == pos2.row);
         },
 
         diffObjects: function(o1, o2) {
             var diffs = {};
 
-            if (!o1 || !o2) return undefined;
+            if (!o1 || !o2) {
+                return undefined;
+            }
 
             for (var key in o1) {
                 if (o2[key]) {
@@ -274,7 +291,9 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
 
         // default to Windows (e.g. Linux often the same)
         var platformKeys = keysForPlatforms[platform] || keysForPlatforms['WINDOWS'];
-        if (!platformKeys) return;
+        if (!platformKeys) {
+            return;
+        }
 
         var args = keys.fillArguments(platformKeys);
         var bindFunction = (isSelectable) ? "bindKeyStringSelectable" : "bindKeyString";
@@ -310,15 +329,23 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
      * This is taken from th.KeyHelpers
      */
     getPrintableChar: function(e) {
-        if (e.charCode > 255) return false;
-        if (e.charCode < 32) return false;
-        if ((e.altKey || e.metaKey || e.ctrlKey) && (e.charCode > 65 && e.charCode < 123)) return false;
+        if (e.charCode > 255) {
+            return false;
+        }
+        if (e.charCode < 32) {
+            return false;
+        }
+        if ((e.altKey || e.metaKey || e.ctrlKey) && (e.charCode > 65 && e.charCode < 123)) {
+            return false;
+        }
         return String.fromCharCode(e.charCode);
     },
 
     onkeydown: function(e) {
         // handle keys only if editor has the focus!
-        if (!this.editor.focus) return;
+        if (!this.editor.focus) {
+            return;
+        }
 
         var args = { event: e,
                      pos: utils.copyPos(this.editor.cursorManager.getCursorPosition()) };
@@ -346,12 +373,14 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
         }
 
         // stop going, but allow special strokes to get to the browser
-        if (hasAction || !keys.passThroughToBrowser(e)) dojo.stopEvent(e);
+        if (hasAction || !keys.passThroughToBrowser(e)){dojo.stopEvent(e);}
     },
 
     onkeypress: function(e) {
         // handle keys only if editor has the focus!
-        if (!this.editor.focus) return;
+        if (!this.editor.focus) {
+            return;
+        }
 
         if ( (e.metaKey || e.ctrlKey) && e.charCode >= 48 /*0*/ && e.charCode <= 57 /*9*/) {
             return; // let APPLE || CTRL 0 through 9 get through to the browser
@@ -362,7 +391,7 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
         if (charToPrint) {
             this.skipKeypress = false;
         } else if (this.skipKeypress) {
-            if (!keys.passThroughToBrowser(e)) dojo.stopEvent(e);
+            if (!keys.passThroughToBrowser(e)){dojo.stopEvent(e);}
             return this.returnValue;
         }
 
@@ -545,7 +574,9 @@ exports.UI = SC.Object.extend({
 
     mouseDownSelect: function(e) {
         // only select if the editor has the focus!
-        if (!this.editor.focus) return;
+        if (!this.editor.focus) {
+            return;
+        }
 
         if (e.button == 2) {
             dojo.stopEvent(e);
@@ -555,7 +586,9 @@ exports.UI = SC.Object.extend({
         var clientY = e.clientY - this.getTopOffset();
         var clientX = e.clientX - this.getLeftOffset();
 
-        if (this.overXScrollBar || this.overYScrollBar) return;
+        if (this.overXScrollBar || this.overYScrollBar) {
+            return;
+        }
 
         if (this.editor.debugMode) {
             if (clientX < this.DEBUG_GUTTER_WIDTH) {
@@ -583,26 +616,32 @@ exports.UI = SC.Object.extend({
             var point = { x: clientX, y: clientY };
 
             // happens first, because scroll bars are not relative to scroll position
-            if ((this.xscrollbar.rect.contains(point)) || (this.yscrollbar.rect.contains(point))) return;
-            
+            if ((this.xscrollbar.rect.contains(point)) || (this.yscrollbar.rect.contains(point))) {
+                return;
+            }
+
             // now, compensate for scroll position.
             point.x += Math.abs(this.xoffset);
             point.y += Math.abs(this.yoffset);
-            
+
             this.selectMouseDownPos = this.convertClientPointToCursorPoint(point);
         }
     },
 
     mouseMoveSelect: function(e) {
         // only select if the editor has the focus!
-        if (!this.editor.focus) return;
+        if (!this.editor.focus) {
+            return;
+        }
 
         this.setSelection(e);
     },
 
     mouseUpSelect: function(e) {
         // only select if the editor has the focus!
-        if (!this.editor.focus) return;
+        if (!this.editor.focus) {
+            return;
+        }
 
         this.setSelection(e);
         this.selectMouseDownPos = undefined;
@@ -613,7 +652,9 @@ exports.UI = SC.Object.extend({
         var clientY = e.clientY - this.getTopOffset();
         var clientX = e.clientX - this.getLeftOffset();
 
-        if (!this.selectMouseDownPos) return;
+        if (!this.selectMouseDownPos) {
+            return;
+        }
 
         var down = utils.copyPos(this.selectMouseDownPos);
 
@@ -630,7 +671,7 @@ exports.UI = SC.Object.extend({
                 bespin.get("commandLine").showHint(lineMarker.msg);
             }
         }
-        if (up.col == -1) up.col = 0;
+        if (up.col == -1){up.col = 0;}
 
         //we'll be dealing with the model directly, so we need model positions.
         var modelstart = this.editor.getModelPos(down);
@@ -681,8 +722,9 @@ exports.UI = SC.Object.extend({
             // and have left model alone.
             var isDelimiter = function(item) {
                 var delimiters = ["=", " ", "\t", ">", "<", ".", "(", ")", "{", "}", ":", '"', "'", ";"];
-                if (delimiters.indexOf(item) > -1)
+                if (delimiters.indexOf(item) > -1) {
                     return true;
+                }
                 return false;
             };
 
@@ -695,8 +737,9 @@ exports.UI = SC.Object.extend({
                 });
             } else if (isDelimiter(cursorAt.charAt(0))) { // see above. Means empty space or =, >, <, etc. that we want to be clever with
                 var comparator = function(letter) {
-                    if (isDelimiter(letter))
+                    if (isDelimiter(letter)) {
                         return false;
+                    }
                     return true;
                 };
 
@@ -712,8 +755,9 @@ exports.UI = SC.Object.extend({
                 this.editor.moveCursor(this.editor.getCursorPos(backwards ? startPos : endPos));
             } else {
                 var comparator = function(letter) {
-                    if (isDelimiter(letter))
+                    if (isDelimiter(letter)) {
                         return true;
+                    }
                     return false;
                 };
 
@@ -780,7 +824,9 @@ exports.UI = SC.Object.extend({
     },
 
     ensureCursorVisible: function(softEnsure) {
-        if ((!this.lineHeight) || (!this.charWidth)) return;    // can't do much without these
+        if ((!this.lineHeight) || (!this.charWidth)) {
+            return;    // can't do much without these
+        }
 
         if(bespin.get('settings')) {
             var pageScroll = parseFloat(bespin.get('settings').get('pagescroll')) || 0;
@@ -888,14 +934,13 @@ exports.UI = SC.Object.extend({
         }
 
         //mousing over the scroll bars requires a full refresh
-        if ((oldX != this.overXScrollBar) || (oldY != this.overYScrollBar) || scrolled)
-            this.editor.paint(true);
+        if ((oldX != this.overXScrollBar) || (oldY != this.overYScrollBar) || scrolled){this.editor.paint(true);}
     },
 
     installKeyListener: function(listener) {
 
-        if (this.oldkeydown) dojo.disconnect(this.oldkeydown);
-        if (this.oldkeypress) dojo.disconnect(this.oldkeypress);
+        if (this.oldkeydown){dojo.disconnect(this.oldkeydown);}
+        if (this.oldkeypress){dojo.disconnect(this.oldkeypress);}
 
         this.oldkeydown  = dojo.hitch(listener, "onkeydown");
         this.oldkeypress = dojo.hitch(listener, "onkeypress");
@@ -1022,9 +1067,9 @@ exports.UI = SC.Object.extend({
         var lh = -1;
         if (ctx.measureText) {
             var t = ctx.measureText("M");
-            if (t.ascent) lh = Math.floor(t.ascent * 2.8);
+            if (t.ascent){lh = Math.floor(t.ascent * 2.8);}
         }
-        if (lh == -1) lh = this.LINE_HEIGHT;
+        if (lh == -1){lh = this.LINE_HEIGHT;}
         return lh;
     },
 
@@ -1074,9 +1119,10 @@ exports.UI = SC.Object.extend({
 
         var refreshCanvas = fullRefresh;        // if the user explicitly requests a full refresh, give it to 'em
 
-        if (!refreshCanvas) refreshCanvas = (this.selectMouseDownPos);
+        if (!refreshCanvas){refreshCanvas = (this.selectMouseDownPos);}
 
-        if (!refreshCanvas) refreshCanvas = (this.lastLineCount != ed.model.getRowCount());  // if the line count has changed, full refresh
+        if (!refreshCanvas){refreshCanvas = (this.lastLineCount != ed.model.getRowCount());  // if the line count has changed, full refresh
+}
 
         this.lastLineCount = ed.model.getRowCount();        // save the number of lines for the next time paint
 
@@ -1092,14 +1138,14 @@ exports.UI = SC.Object.extend({
 
         // adjust the scrolling offsets if necessary; negative values are good, indicate scrolling down or to the right (we look for overflows on these later on)
         // positive values are bad; they indicate scrolling up past the first line or to the left past the first column
-        if (this.xoffset > 0) this.xoffset = 0;
-        if (this.yoffset > 0) this.yoffset = 0;
+        if (this.xoffset > 0){this.xoffset = 0;}
+        if (this.yoffset > 0){this.yoffset = 0;}
 
         // only paint those lines that can be visible
         this.visibleRows = Math.ceil(cheight / this.lineHeight);
         this.firstVisibleRow = Math.floor(Math.abs(this.yoffset / this.lineHeight));
         lastLineToRender = this.firstVisibleRow + this.visibleRows;
-        if (lastLineToRender > (ed.model.getRowCount() - 1)) lastLineToRender = ed.model.getRowCount() - 1;
+        if (lastLineToRender > (ed.model.getRowCount() - 1)){lastLineToRender = ed.model.getRowCount() - 1;}
 
         var virtualheight = this.lineHeight * ed.model.getRowCount();    // full height based on content
 
@@ -1111,14 +1157,14 @@ exports.UI = SC.Object.extend({
         // calculate the gutter width; for now, we'll make it fun and dynamic based on the lines visible in the editor.
         this.gutterWidth = this.GUTTER_INSETS.left + this.GUTTER_INSETS.right;  // first, add the padding space
         this.gutterWidth += ("" + lastLineToRender).length * this.charWidth;    // make it wide enough to display biggest line number visible
-        if (this.editor.debugMode) this.gutterWidth += this.DEBUG_GUTTER_WIDTH;
+        if (this.editor.debugMode){this.gutterWidth += this.DEBUG_GUTTER_WIDTH;}
 
         // these next two blocks make sure we don't scroll too far in either the x or y axis
         if (this.xoffset < 0) {
-            if ((Math.abs(this.xoffset)) > (virtualwidth - (cwidth - this.gutterWidth))) this.xoffset = (cwidth - this.gutterWidth) - virtualwidth;
+            if ((Math.abs(this.xoffset)) > (virtualwidth - (cwidth - this.gutterWidth))){this.xoffset = (cwidth - this.gutterWidth) - virtualwidth;}
         }
         if (this.yoffset < 0) {
-            if ((Math.abs(this.yoffset)) > (virtualheight - (cheight - this.BOTTOM_SCROLL_AFFORDANCE))) this.yoffset = cheight - (virtualheight - this.BOTTOM_SCROLL_AFFORDANCE);
+            if ((Math.abs(this.yoffset)) > (virtualheight - (cheight - this.BOTTOM_SCROLL_AFFORDANCE))){this.yoffset = cheight - (virtualheight - this.BOTTOM_SCROLL_AFFORDANCE);}
         }
 
         // if the current scrolled positions are different than the scroll positions we used for the last paint, refresh the entire canvas
@@ -1179,7 +1225,7 @@ exports.UI = SC.Object.extend({
             var dirty = ed.model.getDirtyRows();
 
             // if the cursor has changed rows since the last paint, consider the previous row dirty
-            if ((this.lastCursorPos) && (this.lastCursorPos.row != ed.cursorManager.getCursorPosition().row)) dirty[this.lastCursorPos.row] = true;
+            if ((this.lastCursorPos) && (this.lastCursorPos.row != ed.cursorManager.getCursorPosition().row)){dirty[this.lastCursorPos.row] = true;}
 
             // we always repaint the current line
             dirty[ed.cursorManager.getCursorPosition().row] = true;
@@ -1356,7 +1402,9 @@ exports.UI = SC.Object.extend({
                 var styleInfo = lineInfo.regions[ri];
 
                 for (var style in styleInfo) {
-                    if (!styleInfo.hasOwnProperty(style)) continue;
+                    if (!styleInfo.hasOwnProperty(style)) {
+                        continue;
+                    }
 
                     var thisLine = "";
 
@@ -1365,7 +1413,7 @@ exports.UI = SC.Object.extend({
                     for (var si = 0; si < styleArray.length; si++) {
                         var range = styleArray[si];
 
-                        for ( ; currentColumn < range.start; currentColumn++) thisLine += " ";
+                        for ( ; currentColumn < range.start; currentColumn++) {thisLine += " ";}
                         thisLine += lineInfo.text.substring(range.start, range.stop);
                         currentColumn = range.stop;
                     }
@@ -1381,8 +1429,8 @@ exports.UI = SC.Object.extend({
                 // in some cases the selections are -1 => set them to a more "realistic" number
                 if (selections) {
                     tsel = { startCol: 0, endCol: lineText.length };
-                    if (selections.startCol != -1) tsel.startCol = selections.startCol;
-                    if (selections.endCol   != -1) tsel.endCol = selections.endCol;
+                    if (selections.startCol != -1){tsel.startCol = selections.startCol;}
+                    if (selections.endCol   != -1){tsel.endCol = selections.endCol;}
                 } else {
                     tsel = false;
                 }
@@ -1566,16 +1614,18 @@ exports.UI = SC.Object.extend({
         ctx.restore();
 
         // paint scroll bars unless we don't need to :-)
-        if (!refreshCanvas) return;
+        if (!refreshCanvas) {
+            return;
+        }
 
         // temporary disable of scrollbars
         //if (this.xscrollbar.rect) return;
 
-        if (this.horizontalScrollCanvas.width != cwidth) this.horizontalScrollCanvas.width = cwidth;
-        if (this.horizontalScrollCanvas.height != this.NIB_WIDTH + 4) this.horizontalScrollCanvas.height = this.NIB_WIDTH + 4;
+        if (this.horizontalScrollCanvas.width != cwidth){this.horizontalScrollCanvas.width = cwidth;}
+        if (this.horizontalScrollCanvas.height != this.NIB_WIDTH + 4){this.horizontalScrollCanvas.height = this.NIB_WIDTH + 4;}
 
-        if (this.verticalScrollCanvas.height != cheight) this.verticalScrollCanvas.height = cheight;
-        if (this.verticalScrollCanvas.width != this.NIB_WIDTH + 4) this.verticalScrollCanvas.width = this.NIB_WIDTH + 4;
+        if (this.verticalScrollCanvas.height != cheight){this.verticalScrollCanvas.height = cheight;}
+        if (this.verticalScrollCanvas.width != this.NIB_WIDTH + 4){this.verticalScrollCanvas.width = this.NIB_WIDTH + 4;}
 
         var hctx = this.horizontalScrollCanvas.getContext("2d");
         hctx.clearRect(0, 0, this.horizontalScrollCanvas.width, this.horizontalScrollCanvas.height);
@@ -1696,7 +1746,7 @@ exports.UI = SC.Object.extend({
 
         if (xscroll) {
             var fullonxbar = (((this.overXScrollBar) && (virtualwidth > cwidth)) || ((this.xscrollbar) && (this.xscrollbar.mousedownValue != null)));
-            if (!fullonxbar) hctx.globalAlpha = 0.3;
+            if (!fullonxbar){hctx.globalAlpha = 0.3;}
             this.paintScrollbar(hctx, this.xscrollbar);
             hctx.globalAlpha = 1.0;
         }
@@ -1711,7 +1761,7 @@ exports.UI = SC.Object.extend({
 
         if (yscroll) {
             var fullonybar = ((this.overYScrollBar) && (virtualheight > cheight)) || ((this.yscrollbar) && (this.yscrollbar.mousedownValue != null));
-            if (!fullonybar) vctx.globalAlpha = 0.3;
+            if (!fullonybar){vctx.globalAlpha = 0.3;}
             this.paintScrollbar(vctx, this.yscrollbar);
             vctx.globalAlpha = 1;
         }
@@ -1723,10 +1773,10 @@ exports.UI = SC.Object.extend({
         vctx.restore();
 
         // clear the unusued nibs
-        if (!showUpScrollNib) this.nibup = new Rect();
-        if (!showDownScrollNib) this.nibdown = new Rect();
-        if (!showLeftScrollNib) this.nibleft = new Rect();
-        if (!showRightScrollNib) this.nibright = new Rect();
+        if (!showUpScrollNib){this.nibup = new Rect();}
+        if (!showDownScrollNib){this.nibdown = new Rect();}
+        if (!showLeftScrollNib){this.nibleft = new Rect();}
+        if (!showRightScrollNib){this.nibright = new Rect();}
 
         //set whether scrollbars are visible, so mouseover and such can pass through if not.
         this.xscrollbarVisible = xscroll;
@@ -1925,7 +1975,9 @@ exports.API = SC.Object.extend({
      */
     getSelection: function(selection) {
         selection = (selection != undefined) ? selection : this.selection;
-        if (!selection) return undefined;
+        if (!selection) {
+            return undefined;
+        }
 
         var startPos = selection.startPos;
         var endPos = selection.endPos;
@@ -2013,7 +2065,7 @@ exports.API = SC.Object.extend({
         var size = bespin.defaultTabSize; // default
         if (settings) {
             var tabsize = parseInt(settings.get("tabsize"));
-            if (tabsize > 0) size = tabsize;
+            if (tabsize > 0){size = tabsize;}
         }
         return size;
     },
@@ -2128,7 +2180,9 @@ exports.API = SC.Object.extend({
      * TODO: There is probably a better location for this. Move it.
      */
     moveAndCenter: function(row) {
-        if (!row) return; // short circuit
+        if (!row) {
+            return; // short circuit
+        }
 
         var linenum = row - 1; // move it up a smidge
 
@@ -2202,7 +2256,7 @@ exports.API = SC.Object.extend({
             document.title = filename + ' - editing with Bespin';
 
             var commandLine = bespin.get("commandLine");
-            if (commandLine) commandLine.showHint('Saved file: ' + file.name);
+            if (commandLine){commandLine.showHint('Saved file: ' + file.name);}
 
             bespin.publish("editor:clean");
 
@@ -2213,7 +2267,7 @@ exports.API = SC.Object.extend({
 
         var newOnFailure = function(xhr) {
             var commandLine = bespin.get("commandLine");
-            if (commandLine) commandLine.showHint('Save failed: ' + xhr.responseText);
+            if (commandLine){commandLine.showHint('Save failed: ' + xhr.responseText);}
 
             if (dojo.isFunction(onFailure)) {
                 onFailure();

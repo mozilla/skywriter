@@ -23,7 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var copyPos = require("bespin.editor.utils");
+var copyPos = require("bespin/editor/utils");
 
 /**
  * The editor has a model of the data that it works with.
@@ -44,7 +44,7 @@ exports.DocumentModel = SC.Object.extend({
         this.history.push({ func: func, data: data });
         this.historyIndex++;
     },
-    
+
     performHistoryItem: function(item) {
         var func = item.func;
         var data = item.data;
@@ -69,7 +69,7 @@ exports.DocumentModel = SC.Object.extend({
                 break;
         }
     },
-    
+
     unperformHistoryItem: function(item) {
         var func = item.func;
         var data = item.data;
@@ -99,7 +99,7 @@ exports.DocumentModel = SC.Object.extend({
         } else if (state == this.historyIndex) {
             return; // nothing to do.
         }
-        
+
         if (state > this.historyIndex) {
             for (var i = this.historyIndex + 1; i <= state; i++) {
                 var historyItem = this.history[i];
@@ -111,17 +111,21 @@ exports.DocumentModel = SC.Object.extend({
                 this.unperformHistoryItem(historyItem);
             }
         }
-        
+
         this.historyIndex = state;
     },
 
     getState: function() {
         return this.historyIndex;
     },
-    
+
     isEmpty: function() {
-        if (this.rows.length > 1) return false;
-        if (this.rows.length == 1 && this.rows[0].length > 0) return false;
+        if (this.rows.length > 1) {
+            return false;
+        }
+        if (this.rows.length == 1 && this.rows[0].length > 0) {
+            return false;
+        }
         return true;
     },
 
@@ -132,12 +136,14 @@ exports.DocumentModel = SC.Object.extend({
     },
 
     setRowDirty: function(row) {
-        if (!this.dirtyRows) this.dirtyRows = new Array(this.rows.length);
+        if (!this.dirtyRows){this.dirtyRows = new Array(this.rows.length);}
         this.dirtyRows[row] = true;
     },
 
     isRowDirty: function(row) {
-        if (!this.dirtyRows) return true;
+        if (!this.dirtyRows) {
+            return true;
+        }
         return this.dirtyRows[row];
     },
 
@@ -153,7 +159,7 @@ exports.DocumentModel = SC.Object.extend({
      * intermediate rows as necessary
      */
     getRowArray: function(rowIndex) {
-        while (this.rows.length <= rowIndex) this.rows.push([]);
+        while (this.rows.length <= rowIndex){this.rows.push([]);}
         return this.rows[rowIndex];
     },
 
@@ -170,7 +176,7 @@ exports.DocumentModel = SC.Object.extend({
      */
     insertCharacters: function(modelPos, string, noHistory) {
         var row = this.getRowArray(modelPos.row);
-        while (row.length < modelPos.col) row.push(" ");
+        while (row.length < modelPos.col){row.push(" ");}
 
         var newrow = (modelPos.col > 0) ? row.splice(0, modelPos.col) : [];
         newrow = newrow.concat(string.split(""));
@@ -178,7 +184,7 @@ exports.DocumentModel = SC.Object.extend({
 
         this.setRowDirty(modelPos.row);
         this.editor.ui.syntaxModel.invalidateCache(modelPos.row);
-        
+
         if (!noHistory) {
             this.addHistoryItem('insertCharacters', { pos: copyPos(modelPos), characters: string});
         }
@@ -218,7 +224,7 @@ exports.DocumentModel = SC.Object.extend({
             }
         }
     },
-    
+
     replaceRow: function(row, newline, noHistory) {
         var oldline = this.getRowArray(row).join('');
         this.rows[row] = newline.split('');
@@ -233,7 +239,7 @@ exports.DocumentModel = SC.Object.extend({
     deleteCharacters: function(modelPos, length, noHistory) {
         var row = this.getRowArray(modelPos.row);
         var diff = (modelPos.col + length - 1) - row.length;
-        if (diff > 0) length -= diff;
+        if (diff > 0){length -= diff;}
         if (length > 0) {
             this.setRowDirty(modelPos.row);
             this.editor.ui.syntaxModel.invalidateCache(modelPos.row);
@@ -259,7 +265,7 @@ exports.DocumentModel = SC.Object.extend({
 
     deleteRows: function(row, count) {
         var diff = (row + count - 1) - this.rows.length;
-        if (diff > 0) count -= diff;
+        if (diff > 0){count -= diff;}
         if (count > 0) {
             this.rows.splice(row, count);
             this.cacheRowMetadata.splice(row, count);
@@ -304,7 +310,9 @@ exports.DocumentModel = SC.Object.extend({
         this.editor.ui.syntaxModel.invalidateCache(rowIndex);
         this.setRowDirty(rowIndex);
 
-        if (rowIndex >= this.rows.length - 1) return;
+        if (rowIndex >= this.rows.length - 1) {
+            return;
+        }
         var row = this.getRowArray(rowIndex);
         var nextrow = this.rows[rowIndex + 1];
         var rowLength = row.length;
@@ -314,7 +322,7 @@ exports.DocumentModel = SC.Object.extend({
         this.rows.splice(rowIndex + 1, 1);
 
         this.cacheRowMetadata.splice(rowIndex + 1, 1);
-        
+
         if (!noHistory) {
             var pos = { row: rowIndex, col: rowLength };
             this.addHistoryItem('joinRow', { selection: {startModelPos: pos, endModelPos: pos}, chunk: '\n' });
@@ -343,7 +351,7 @@ exports.DocumentModel = SC.Object.extend({
         startModelCol = startModelPos.col;
         var row = this.getRowArray(startModelPos.row);
         endModelCol = (endModelPos.row == startModelPos.row) ? endModelPos.col : row.length;
-        if (endModelCol > row.length) endModelCol = row.length;
+        if (endModelCol > row.length){endModelCol = row.length;}
         chunk += row.join("").substring(startModelCol, endModelCol);
 
         // get middle lines, if any
@@ -357,7 +365,7 @@ exports.DocumentModel = SC.Object.extend({
             startModelCol = 0;
             endModelCol = endModelPos.col;
             row = this.getRowArray(endModelPos.row);
-            if (endModelCol > row.length) endModelCol = row.length;
+            if (endModelCol > row.length){endModelCol = row.length;}
             chunk += "\n" + row.join("").substring(startModelCol, endModelCol);
         }
 
@@ -382,7 +390,7 @@ exports.DocumentModel = SC.Object.extend({
         startModelCol = startModelPos.col;
         var row = this.getRowArray(startModelPos.row);
         endModelCol = (endModelPos.row == startModelPos.row) ? endModelPos.col : row.length;
-        if (endModelCol > row.length) endModelCol = row.length;
+        if (endModelCol > row.length){endModelCol = row.length;}
         this.deleteCharacters({ row: startModelPos.row, col: startModelCol }, endModelCol - startModelCol, true /* nohistory */ );
 
         // get the end line
@@ -390,18 +398,17 @@ exports.DocumentModel = SC.Object.extend({
             startModelCol = 0;
             endModelCol = endModelPos.col;
             row = this.getRowArray(endModelPos.row);
-            if (endModelCol > row.length) endModelCol = row.length;
+            if (endModelCol > row.length){endModelCol = row.length;}
             this.deleteCharacters({ row: endModelPos.row, col: startModelCol }, endModelCol - startModelCol, true /* no history */ );
         }
 
         // remove any lines in-between
-        if ((endModelPos.row - startModelPos.row) > 1) this.deleteRows(startModelPos.row + 1, endModelPos.row - startModelPos.row - 1);
+        if ((endModelPos.row - startModelPos.row) > 1){this.deleteRows(startModelPos.row + 1, endModelPos.row - startModelPos.row - 1);}
 
         // join the rows
-        if (endModelPos.row != startModelPos.row) this.joinRow(startModelPos.row, true /* no history */);
+        if (endModelPos.row != startModelPos.row){this.joinRow(startModelPos.row, true /* no history */);}
 
-        if (!noHistory)
-            this.addHistoryItem('deleteChunk', { selection: { startModelPos: copyPos(selection.startModelPos), endModelPos: copyPos(selection.endModelPos)}, chunk: chunk});
+        if (!noHistory){this.addHistoryItem('deleteChunk', { selection: { startModelPos: copyPos(selection.startModelPos), endModelPos: copyPos(selection.endModelPos)}, chunk: chunk});}
         return chunk;
     },
 
@@ -444,7 +451,9 @@ exports.DocumentModel = SC.Object.extend({
         str = str.toLowerCase();
         var row = this.getRowArray(row).join('').toLowerCase();
 
-        if (row.indexOf(str) == -1) return false;
+        if (row.indexOf(str) == -1) {
+            return false;
+        }
 
         var result = new Array();
         var start = 0;
@@ -498,7 +507,9 @@ exports.DocumentModel = SC.Object.extend({
 
         for (var x = row; x > -1; x--) {
             indices = this.getStringIndicesInRow(x, str);
-            if (!indices) continue;
+            if (!indices) {
+                continue;
+            }
 
             for (var y = indices.length - 1; y > -1; y--) {
                 if (indices[y] < (col - strLen) || row != x) {
@@ -518,7 +529,9 @@ exports.DocumentModel = SC.Object.extend({
 
         for (var x = row; x < this.getRowCount(); x++) {
             indices = this.getStringIndicesInRow(x, str);
-            if (!indices) continue;
+            if (!indices) {
+                continue;
+            }
             for (var y = 0; y < indices.length; y++) {
                 if (indices[y] > col || row != x) {
                     return { startPos: { col: indices[y], row: x}, endPos: {col: indices[y] + str.length, row: x} };
@@ -530,19 +543,23 @@ exports.DocumentModel = SC.Object.extend({
 
     findBefore: function(row, col, comparator) {
         var line = this.getRowArray(row);
-        if (!dojo.isFunction(comparator)) comparator = function(letter) { // default to non alpha
-            if (letter.charAt(0) == ' ') return true;
+        if (!dojo.isFunction(comparator)){comparator = function(letter) { // default to non alpha
+            if (letter.charAt(0) == ' ') {
+                return true;
+            }
             var letterCode = letter.charCodeAt(0);
             return (letterCode < 48) || (letterCode > 122); // alpha only
-        };
+        };}
 
         //validate col to prevent endless loop
-        if (col >= line.length)
-            col = Math.max(line.length - 1, 0); // what about 0 length lines?
+        if (col >= line.length){col = Math.max(line.length - 1, 0); // what about 0 length lines?
+}
 
         while (col > 0) {
             var letter = line[col];
-            if (!letter) continue;
+            if (!letter) {
+                continue;
+            }
 
             if (comparator(letter)) {
                 col++; // move it back
@@ -557,19 +574,25 @@ exports.DocumentModel = SC.Object.extend({
 
     findAfter: function(row, col, comparator) {
         var line = this.getRowArray(row);
-        if (!dojo.isFunction(comparator)) comparator = function(letter) { // default to non alpha
-            if (letter.charAt(0) == ' ') return true;
+        if (!dojo.isFunction(comparator)){comparator = function(letter) { // default to non alpha
+            if (letter.charAt(0) == ' ') {
+                return true;
+            }
             var letterCode = letter.charCodeAt(0);
             return (letterCode < 48) || (letterCode > 122); // alpha only
-        };
+        };}
 
         while (col < line.length) {
             col++;
 
             var letter = line[col];
-            if (!letter) continue;
+            if (!letter) {
+                continue;
+            }
 
-            if (comparator(letter)) break;
+            if (comparator(letter)) {
+                break;
+            }
         }
 
         return { row: row, col: col };
@@ -607,7 +630,7 @@ exports.DocumentModel = SC.Object.extend({
 
                 // create a spacer string representing the space between the tab and the tabstop
                 var spacer = "";
-                for (var si = 1; si < toInsert; si++) spacer += " ";
+                for (var si = 1; si < toInsert; si++) {spacer += " ";}
 
                 // split the row string into the left half and the right half (eliminating the tab character) in preparation for
                 // creating a new row string

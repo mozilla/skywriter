@@ -1,0 +1,49 @@
+{
+    "popup" : {
+        "provides": [
+            ["popup", {
+                "pointer": "bespin/editor/popup"
+            }]
+        ],
+        "location": "/getscript/js"
+    },
+    "command" : {
+        "provides": [
+            ["commandLine", {
+                "pointer": "bespin/cmd/commandline"
+            }]
+        ],
+        "location": "/getscript/js"
+    },
+    "piemenu" : {
+        "provides": [
+            ["piemenu", {
+                "pointer": "bespin/editor/piemenu"
+            }]
+        ],
+        "location": "/getscript/js"
+    },
+    "debug": {
+        "provides": [
+            ["bespin.subscribe", {
+                "topic": "debugger:running",
+                "pointer": "bespin/debug:debuggerRunning"
+            }],
+            ["bespin.subscribe", {
+                "topic": "debugger:stopped",
+                "pointer": "bespin/debug:debuggerStopped"
+            }],
+            ["bespin.subscribe", {
+                "topic": "debugger:halted",
+                "pointer": "bespin/debug:debuggerHalted"
+            }],
+            ["debugbar", {
+                "pointer": "bespin/debug"
+            }],
+            ["breakpoints", {
+                "pointer": "bespin/debug:BreakpointManager"
+            }]
+        ],
+        "location": "/getscript/js"
+    }
+}

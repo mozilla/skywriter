@@ -42,7 +42,7 @@ exports.fix = function(ctx) {
     // Setup measureText
     if (!ctx.measureText && ctx.mozMeasureText) {
         ctx.measureText = function(text) {
-            if (ctx.font) ctx.mozTextStyle = ctx.font;
+            if (ctx.font){ctx.mozTextStyle = ctx.font;}
             var width = ctx.mozMeasureText(text);
             return { width: width };
         };
@@ -71,4 +71,4 @@ exports.fix = function(ctx) {
     }
 
     return ctx;
-});
+};

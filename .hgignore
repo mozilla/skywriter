@@ -1,5 +1,7 @@
 .Python
 .DS_Store
+.project
+.settings
 ^bin
 ^lib
 include
@@ -9,5 +11,4 @@ src/html/dojo
 src/html/dojox
 src/html/dijit
 src/html/th.compressed.js
-.project
 

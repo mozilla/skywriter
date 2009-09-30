@@ -1,9 +1,31 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License
+ * Version 1.1 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.
+ * See the License for the specific language governing rights and
+ * limitations under the License.
+ *
+ * The Original Code is Bespin.
+ *
+ * The Initial Developer of the Original Code is Mozilla.
+ * Portions created by the Initial Developer are Copyright (C) 2009
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Bespin Team (bespin@mozilla.com)
+ *
+ * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
 
 var EditorApi = require("bespin/editor").API;
-//var Core = re-quire("bespin/client/settings").Core;
-//var InMemory = re-quire("bespin/client/settings").InMemory;
+var settings = require("bespin/client/settings");
 
 /**
  * This is a component that you can use to embed the Bespin Editor component
@@ -25,7 +47,7 @@ exports.Component = SC.Object.extend({
      */
     init: function(container, opts) {
         opts.actsAsComponent = true;
-    
+
         var initialcontent;
         if (opts.loadfromdiv) {
             if (dojo.byId('BESPIN_EDITOR_CODE')) {
@@ -37,17 +59,15 @@ exports.Component = SC.Object.extend({
         } else if (opts.content) {
             initialcontent = opts.content;
         }
-    
+
         this.editor = bespin.register('editor', opts.editor || new EditorApi({ container: container, opts: opts }));
-    
+
         // Fancy a command line anyone?
-        /* 
+        /*
         Command line wouldn't work anyway right now, so I am removing it entirely.
         if (opts.commandline) {
-            dojo.re-quire("bespin.cmd.commandline");
-      
             var commandlineElement;
-      
+
             if (typeof opts.commandline == "boolean") { // literally, true
                 commandlineElement = dojo.create("div", {
                    id: "commandlinewrapper",
@@ -57,19 +77,19 @@ exports.Component = SC.Object.extend({
             } else {
                 commandlineElement = dojo.byId(opts.commandline);
             }
-      
+
             this.commandLine = bespin.register('commandLine', new bespin.cmd.commandline.Interface(commandlineElement, bespin.command.Store));
         } */
-    
+
         // Use in memory settings here instead of saving to the server which is default. Potentially use Cookie settings
-        bespin.register('settings', opts.settings || new Core(InMemory));
-    
+        bespin.register('settings', opts.settings || new settings.Core(settings.InMemory));
+
         // How about a Jetpack?
         if (opts.jetpack) {
             var jetpacktoolbar = dojo.create("div", {
                 id: "jetpacktoolbar"
             }, dojo.byId(container));
-    
+
             jetpacktoolbar.innerHTML = '<div class="button"><button id="install" onclick="_editorComponent.executeCommand(\'jetpack install yourfirstjetpack\')">&uarr; Install This JetPack Feature</button></div>\
             <div>Hey, <a href="https://jetpack.mozillalabs.com/">install JetPack first</a>.</div>\
             <style type="text/css">\
@@ -100,23 +120,23 @@ exports.Component = SC.Object.extend({
                 }\
             </style>';
         }
-    
+
         dojo.connect(window, 'resize', opts.resize || dojo.hitch(this, function() {
             this.editor.paint();
         }));
-    
+
         if (initialcontent) {
             this.setContent(initialcontent);
         }
-    
+
         if (opts.language) { // -- turn on syntax highlighting
             bespin.publish("settings:language", { language: opts.language });
         }
-    
+
         if (!opts.dontstealfocus) {
             this.editor.canvas.focus();
         }
-    
+
         if (opts.set) { // we have generic settings
             for (var key in opts.set) {
                 if (opts.set.hasOwnProperty(key)) {
