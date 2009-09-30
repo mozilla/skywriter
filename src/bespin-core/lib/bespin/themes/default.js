@@ -122,4 +122,4 @@ dojo.mixin(exports.coffeezebra, exports.coffee);
 exports.coffeezebra.zebraStripeColor = '#FFFFFF';
 
 /** Setup the default */
-bespin.themes['default'] = bespin.themes.coffee;
+// themes['default'] = exports.coffee;
