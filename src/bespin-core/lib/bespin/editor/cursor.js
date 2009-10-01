@@ -23,7 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var utils = require("bespin/editor").utils;
+var utils = require("bespin/editor/utils");
 var SC = require("sproutcore");
 
 /**

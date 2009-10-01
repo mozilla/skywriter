@@ -31,6 +31,7 @@ var keys = require("bespin/util/keys");
 var events = require("bespin/events");
 var syntax = require("bespin/syntax");
 var utils = require("bespin/editor/utils");
+var cursor = require("bespin/editor/cursor");
 var actions = require("bespin/editor/actions");
 var model = require("bespin/editor/model");
 var history = require("bespin/editor/history");
@@ -2042,10 +2043,6 @@ exports.API = SC.Object.extend({
         
         this.set('canvas', canvas);        
         
-        // avoid dependency circle
-        var r = require;
-        var cursor = r("bespin/editor/cursor");
-
         this.cursorManager = cursor.CursorManager.create({ editor: this });
         this.ui = exports.UI.create({ editor: this });
         this.theme = require("bespin/themes/default")['default'];
