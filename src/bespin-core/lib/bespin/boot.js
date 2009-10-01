@@ -1,21 +1,9 @@
-var _editorComponent;
+// This module is set up to be dependency-less so that Narwhal
+// will be able to run it right away.
 
-var SC = require("sproutcore");
-var component = require("bespin/editor/component");
-var bespin = require("bespin");
-
-_editorComponent = new component.Component('editor', {
-    language: "js",
-    loadfromdiv: true,
-    set: { strictlines: 'off' }
+// TODO "prequire" is a hack and should be replaced when
+// require.when/require.async become available for real.
+require.prequire.when("bespin/boot2", function(boot2) {
+    console.log("boot2 loaded");
 });
 
-function copyToTextarea() {
-    dojo.byId('inandout').value = _editorComponent.getContent();
-}
-function copyToEditor() {
-    _editorComponent.setContent(dojo.byId('inandout').value);
-}
-function setSyntax(value) {
-    bespin.publish("settings:language", { language: value });
-}

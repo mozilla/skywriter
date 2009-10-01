@@ -40,27 +40,53 @@ var settings = require("bespin/client/settings");
  * @param dontstealfocus by default the component will steal focus when it
  * loads, but you can change that by setting this to true
  */
-exports.Component = SC.Object.extend({
+exports.Component = SC.Object.extend({    
+
+    actsAsComponent: true,
+    
+    container: null,
+    
+    loadFromDiv: false,
+    
+    content: null,
+    
+    canStealFocus: true,
+    
+    model: function() {
+        return this.get('editor').get('model');
+    }.property('editor'),
+    
     /**
      * Takes a container element, and the set of options for the component which
      * include those noted above.
      */
-    init: function(container, opts) {
-        opts.actsAsComponent = true;
-
-        var initialcontent;
-        if (opts.loadfromdiv) {
-            if (dojo.byId('BESPIN_EDITOR_CODE')) {
-                var code = dojo.byId('BESPIN_EDITOR_CODE');
-                initialcontent = code.value;
-            } else {
-                initialcontent = dojo.byId(container).innerHTML;
-            }
-        } else if (opts.content) {
-            initialcontent = opts.content;
+    init: function() {
+        var container = dojo.byId(this.get('container'));
+        console.log("container is:", container);
+        if (container) {
+            this.set('container', container);
+        } else {
+            throw new Error("Container does not exist!");
         }
-
-        this.editor = bespin.register('editor', opts.editor || new EditorApi({ container: container, opts: opts }));
+        
+        var initialContent = "";
+        
+        if (this.get('loadFromDiv')) {
+            var code = dojo.byId('BESPIN_EDITOR_CODE');
+            if (code) {
+                initialContent = code.value;
+            } else {
+                initialContent = dojo.byId(container).innerHTML;
+            }
+        } else if (this.get('content')) {
+            initialContent = this.get('content');
+        }
+        
+        var editor = bespin.register('editor', this.get('editor') ||
+         EditorApi.create({ container: container })
+        );
+        
+        this.set('editor', editor);
 
         // Fancy a command line anyone?
         /*
@@ -82,7 +108,8 @@ exports.Component = SC.Object.extend({
         } */
 
         // Use in memory settings here instead of saving to the server which is default. Potentially use Cookie settings
-        bespin.register('settings', opts.settings || new settings.Core(settings.InMemory));
+        bespin.register('settings', this.get('settings') ||
+         settings.Core.create({ store: settings.InMemory }));
 
         // How about a Jetpack?
         if (opts.jetpack) {
@@ -125,22 +152,23 @@ exports.Component = SC.Object.extend({
             this.editor.paint();
         }));
 
-        if (initialcontent) {
-            this.setContent(initialcontent);
+        if (initialContent) {
+            this.setContent(initialContent);
         }
 
         if (opts.language) { // -- turn on syntax highlighting
             bespin.publish("settings:language", { language: opts.language });
         }
 
-        if (!opts.dontstealfocus) {
+        if (this.get('canStealFocus')) {
             this.editor.canvas.focus();
         }
 
-        if (opts.set) { // we have generic settings
-            for (var key in opts.set) {
-                if (opts.set.hasOwnProperty(key)) {
-                    this.set(key, opts.set[key]);
+        var opts = this.get('setOptions');
+        if (opts) { // we have generic settings
+            for (var key in opts) {
+                if (opts.hasOwnProperty(key)) {
+                    this.set(key, opts[key]);
                 }
             }
         }
@@ -150,14 +178,14 @@ exports.Component = SC.Object.extend({
      * Returns the contents of the editor
      */
     getContent: function() {
-        return this.editor.model.getDocument();
+        return this.get('model').getDocument();
     },
 
     /**
      * Takes the content and inserts it fresh into the document
      */
     setContent: function(content) {
-        return this.editor.model.insertDocument(content);
+        return this.get('model').insertDocument(content);
     },
 
     /**
@@ -165,7 +193,7 @@ exports.Component = SC.Object.extend({
      * not.
      */
     setFocus: function(bool) {
-        return this.editor.setFocus(bool);
+        return this.get('editor').setFocus(bool);
     },
 
     /**
@@ -210,7 +238,7 @@ exports.Component = SC.Object.extend({
      */
     executeCommand: function(command) {
         try {
-            this.commandLine.executeCommand(command);
+            this.get('commandLine').executeCommand(command);
         } catch (e) {
             // catch the command prompt errors
         }
@@ -221,6 +249,6 @@ exports.Component = SC.Object.extend({
      * helpers, and the like.
      */
     dispose: function() {
-        this.editor.dispose();
+        this.get('editor').dispose();
     }
 });

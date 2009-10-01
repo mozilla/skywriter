@@ -33,6 +33,9 @@ var syntax = require("bespin/syntax");
 var utils = require("bespin/editor").utils;
 var actions = require("bespin/editor/actions");
 var model = require("bespin/editor/model");
+var history = require("bespin/editor/history");
+var settings = require("bespin/client/settings");
+var canvas = require("bespin/util/canvas");
 
 /**
  *
@@ -217,57 +220,6 @@ exports.SelectionHelper = SC.Object.extend({
     }
 });
 
-/**
- * Mess with positions mainly
- */
-exports.utils = {
-    buildArgs: function(oldPos) {
-        return { pos: utils.copyPos(oldPos || bespin.get('editor').getCursorPos()) };
-    },
-
-    changePos: function(args, oldPos) {
-        return { pos: utils.copyPos(oldPos || bespin.get('editor').getCursorPos()) };
-    },
-
-    copyPos: function(oldPos) {
-        return { row: oldPos.row, col: oldPos.col };
-    },
-
-    posEquals: function(pos1, pos2) {
-        if (pos1 == pos2) {
-            return true;
-        }
-        if (!pos1 || !pos2) {
-            return false;
-        }
-        return (pos1.col == pos2.col) && (pos1.row == pos2.row);
-    },
-
-    diffObjects: function(o1, o2) {
-        var diffs = {};
-
-        if (!o1 || !o2) {
-            return undefined;
-        }
-
-        for (var key in o1) {
-            if (o2[key]) {
-                if (o1[key] != o2[key]) {
-                    diffs[key] = o1[key] + " => " + o2[key];
-                }
-            } else {
-                diffs[key] = "o1: " + key + " = " + o1[key];
-            }
-        }
-
-        for (var key2 in o2) {
-            if (!o1[key2]) {
-                diffs[key2] = "o2: " + key2 + " = " + o2[key2];
-            }
-        }
-        return diffs;
-    }
-};
 
 /**
  * Core key listener to decide which actions to run
@@ -429,47 +381,97 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
  */
 exports.UI = SC.Object.extend({
     editor: null,
+    
+    model: function() {
+        var editor = this.get('editor');
+        return editor ? editor.get('model') : null;
+    }.property('editor'),
+    
+    rowLengthCache: [],
+    
+    searchString: null,
+    
+    // tracks how many cursor toggles since the last full repaint
+    toggleCursorFullRepaintCounter: 0,
+    
+    // number of milliseconds between cursor blink
+    toggleCursorFrequency: 250,
+    
+    // is the cursor allowed to toggle? (used by cursorManager.moveCursor)
+    toggleCursorAllowed: true,
+    
+    horizontalScrollCanvas: null,
+    verticalScrollCanvas: null,    
+    
+    // gutterWidth used to be a constant, but is now dynamically calculated in each paint() invocation. I set it to a silly
+    // default value here in case some of the code expects it to be populated before the first paint loop kicks in. the
+    // default value ought to eventually become 0
+    gutterWidth: 54,
+    
+    LINE_HEIGHT: 23,
+    
+    BOTTOM_SCROLL_AFFORDANCE: 30,
+    
+    GUTTER_INSETS: { top: 0, left: 6, right: 10, bottom: 6 },
+    
+    LINE_INSETS: { top: 0, left: 5, right: 0, bottom: 6 },
+    
+    FALLBACK_CHARACTER_WIDTH: 10,
+    
+    NIB_WIDTH: 15,
+    
+    NIB_INSETS: {
+        top:    Math.floor(this.NIB_WIDTH / 2),
+        left:   Math.floor(this.NIB_WIDTH / 2),
+        right:  Math.floor(this.NIB_WIDTH / 2),
+        bottom: Math.floor(this.NIB_WIDTH / 2) 
+    },
+    
+    NIB_ARROW_INSETS: { top: 3, left: 3, right: 3, bottom: 5 },
+
+    DEBUG_GUTTER_WIDTH: 18,
+    
+    DEBUG_GUTTER_INSETS: { top: 2, left: 2, right: 2, bottom: 2 },    
+    
+    // number of pixels to translate the canvas for scrolling
+    xOffset: 0,
+    yOffset: 0,
+    
+    showCursor: true,
+    
+    xScrollBar: null,
+    yScrollBar: null,
+
+    overXScrollBar: false,
+    overYScrollBar: false,
+    
+    hasFocus: false,
+    
+    // a collection of global handles to event listeners that will need to be disposed.
+    globalHandles: [], 
+    
+    // painting optimization state
+    lastLineCount: 0,
+    lastCursorPos: null,
+    lastxoffset: 0,
+    lastyoffset: 0,    
+        
     init: function() {
-        this.model = this.editor.model;
-
         var settings = bespin.get("settings");
-        this.syntaxModel = syntax.Resolver.setEngine("simple").getModel();
+        
+        this.set('syntaxModel', syntax.Resolver.setEngine("simple").getModel());
+        
+        this.set('selectionHelper', exports.SelectionHelper.create({ editor: editor }));
+        
+        this.set('actions', actions.Actions.create({ editor: editor }));
 
-        this.selectionHelper = new exports.SelectionHelper({ editor: this.editor });
-        this.actions = new actions.Actions({ editor: this.editor });
-
-        this.rowLengthCache = [];
-        this.searchString = null;
-
-        this.toggleCursorFullRepaintCounter = 0; // tracks how many cursor toggles since the last full repaint
-        this.toggleCursorFrequency = 250;        // number of milliseconds between cursor blink
-        this.toggleCursorAllowed = true;         // is the cursor allowed to toggle? (used by cursorManager.moveCursor)
 
         // these two canvases are used as buffers for the scrollbar images, which are then composited onto the
         // main code view. we could have saved ourselves some misery by just prerendering slices of the scrollbars and
         // combining them like sane people, but... meh
-        this.horizontalScrollCanvas = dojo.create("canvas");
-        this.verticalScrollCanvas   = dojo.create("canvas");
+        this.set('horizontalScrollCanvas', dojo.create("canvas"));
+        this.set('verticalScrollCanvas', dojo.create('canvas'));
 
-        // gutterWidth used to be a constant, but is now dynamically calculated in each paint() invocation. I set it to a silly
-        // default value here in case some of the code expects it to be populated before the first paint loop kicks in. the
-        // default value ought to eventually become 0
-        this.gutterWidth = 54;
-
-        this.LINE_HEIGHT = 23;
-        this.BOTTOM_SCROLL_AFFORDANCE = 30; // if the bottom scrollbar is in the way, allow for a bit of scroll
-        this.GUTTER_INSETS = { top: 0, left: 6, right: 10, bottom: 6 };
-        this.LINE_INSETS = { top: 0, left: 5, right: 0, bottom: 6 };
-        this.FALLBACK_CHARACTER_WIDTH = 10;
-        this.NIB_WIDTH = 15;
-        this.NIB_INSETS = { top: Math.floor(this.NIB_WIDTH / 2),
-                            left: Math.floor(this.NIB_WIDTH / 2),
-                            right: Math.floor(this.NIB_WIDTH / 2),
-                            bottom: Math.floor(this.NIB_WIDTH / 2) };
-        this.NIB_ARROW_INSETS = { top: 3, left: 3, right: 3, bottom: 5 };
-
-        this.DEBUG_GUTTER_WIDTH = 18;
-        this.DEBUG_GUTTER_INSETS = { top: 2, left: 2, right: 2, bottom: 2 };
 
         //this.lineHeight;        // reserved for when line height is calculated dynamically instead of with a constant; set first time a paint occurs
         //this.charWidth;         // set first time a paint occurs
@@ -483,66 +485,75 @@ exports.UI = SC.Object.extend({
 
         //this.selectMouseDownPos;        // position when the user moused down
         //this.selectMouseDetail;         // the detail (number of clicks) for the mouse down.
+        
+        var source = this.get('editor').get('container');
+        
+        console.log(source);
+        window._source = source;
+        
+        source.addEventListener('mousemove', dojo.hitch(this, 
+          this.handleMouse));
+        source.addEventListener('mouseout', dojo.hitch(this,
+          this.handleMouse));
+        source.addEventListener('click', dojo.hitch(this, this.handleMouse));
+        source.addEventListener('mousedown', dojo.hitch(this,
+          this.handleMouse));
+        source.addEventListener('oncontextmenu', dojo.stopEvent);
+        source.addEventListener('mousedown', dojo.hitch(this, 
+          this.mouseDownSelect));
 
-        this.xoffset = 0;       // number of pixels to translate the canvas for scrolling
-        this.yoffset = 0;
+        
+        var gh = this.get('globalHandles');
+        
+        gh.push(dojo.connect(window, "mousemove", this, "mouseMoveSelect"));
+        gh.push(dojo.connect(window, "mouseup", this, "mouseUpSelect"));
+        
+        var editor = this.get('editor');
 
-        this.showCursor = true;
 
-        this.overXScrollBar = false;
-        this.overYScrollBar = false;
-        this.hasFocus = false;
+        // if we act as component, onmousewheel should only be listened to inside of the editor canvas.
+        var scope = editor.get('actsAsComponent') ?
+          editor.get('canvas') : window;
 
-        var source = this.editor.container;
-        this.globalHandles = []; //a collection of global handles to event listeners that will need to be disposed.
-
-        dojo.connect(source, "mousemove", this, "handleMouse");
-        dojo.connect(source, "mouseout", this, "handleMouse");
-        dojo.connect(source, "click", this, "handleMouse");
-        dojo.connect(source, "mousedown", this, "handleMouse");
-        dojo.connect(source, "oncontextmenu", dojo.stopEvent);
-
-        dojo.connect(source, "mousedown", this, "mouseDownSelect");
-        this.globalHandles.push(dojo.connect(window, "mousemove", this, "mouseMoveSelect"));
-        this.globalHandles.push(dojo.connect(window, "mouseup", this, "mouseUpSelect"));
-
-        // painting optimization state
-        this.lastLineCount = 0;
-        this.lastCursorPos = null;
-        this.lastxoffset = 0;
-        this.lastyoffset = 0;
-
-        //if we act as component, onmousewheel should only be listened to inside of the editor canvas.
-        var scope = this.editor.opts.actsAsComponent ? this.editor.canvas : window;
-
-        this.xscrollbar = new exports.Scrollbar({ ui: this, orientation: "horizontal" });
-        this.xscrollbar.valueChanged = dojo.hitch(this, function() {
-            this.xoffset = -this.xscrollbar.value;
-            this.editor.paint();
-        });
-
-        this.globalHandles.push(dojo.connect(window, "mousemove", this.xscrollbar, "onmousemove"));
-        this.globalHandles.push(dojo.connect(window, "mouseup", this.xscrollbar, "onmouseup"));
-        this.globalHandles.push(
-            dojo.connect(scope, (!dojo.isMozilla ? "onmousewheel" : "DOMMouseScroll"), this.xscrollbar, "onmousewheel")
+        var xScrollBar = exports.Scrollbar.create({
+            ui: this,
+            orientation: "horizontal",
+            valueChanged: function() {
+                var ui = this.get('ui');
+                ui.set('xOffset', -ui.get('xScrollBar').get('value'));
+                ui.get('editor').paint();
+            }
+        });       
+        this.set('xScrollBar', xScrollBar);
+        
+        gh.push(dojo.connect(window, "mousemove", xScrollBar, "onmousemove"));
+        gh.push(dojo.connect(window, "mouseup", xScrollBar, "onmouseup"));
+        
+        gh.push(
+            dojo.connect(scope, (!dojo.isMozilla ? "onmousewheel" : "DOMMouseScroll"), xScrollBar, "onmousewheel")
         );
-
-        this.yscrollbar = new exports.Scrollbar({ ui: this, orientation: "vertical" });
-        this.yscrollbar.valueChanged = dojo.hitch(this, function() {
-            this.yoffset = -this.yscrollbar.value;
-            this.editor.paint();
+        
+        var yScrollBar = exports.Scrollbar.create({
+            ui: this,
+            orientation: "vertical",
+            valueChanged: function() {
+                var ui = this.get('ui');
+                ui.get('yOffset') = -ui.get('yScrollBar').get('value');
+                ui.get('editor').paint();
+            }
         });
 
-        this.globalHandles.push(dojo.connect(window, "mousemove", this.yscrollbar, "onmousemove"));
-        this.globalHandles.push(dojo.connect(window, "mouseup", this.yscrollbar, "onmouseup"));
-        this.globalHandles.push(
-            dojo.connect(scope, (!dojo.isMozilla ? "onmousewheel" : "DOMMouseScroll"), this.yscrollbar, "onmousewheel")
+        gh.push(dojo.connect(window, "mousemove", yScrollBar, "onmousemove"));
+        gh.push(dojo.connect(window, "mouseup", yScrollBar, "onmouseup"));
+        gh.push(
+            dojo.connect(scope, (!dojo.isMozilla ? "onmousewheel" : "DOMMouseScroll"), yScrollBar, "onmousewheel")
         );
 
         setTimeout(dojo.hitch(this, function() {
             this.toggleCursor(this);
         }), this.toggleCursorFrequency);
-        this.sc_super();
+                
+        arguments.callee.base.apply(this, arguments);
     },
 
     /**
@@ -965,6 +976,8 @@ exports.UI = SC.Object.extend({
         var scope = this.editor.opts.actsAsComponent ? this.editor.canvas : window;
         dojo.connect(scope, "keydown", this, "oldkeydown");
         dojo.connect(scope, "keypress", this, "oldkeypress");
+        
+        var Key = keys.Key;
 
         // Modifiers, Key, Action
         listener.bindKeyStringSelectable("", keys.Key.LEFT_ARROW, this.actions.moveCursorLeft, "Move Cursor Left");
@@ -1993,37 +2006,42 @@ exports.UI = SC.Object.extend({
  * bespin.editor.API is the root object, the API that others should be able to
  * use
  */
+
+var model = require("bespin/editor/model");
+
 exports.API = SC.Object.extend({
     container: null,
     opts: {},
 
-    init: function(container, opts) {
+    init: function() {
         // fixme: this stuff may not belong here
         this.debugMode = false;
 
-        this.container = dojo.byId(container);
-        this.model = new model.DocumentModel(this);
+        this.set('model', new model.DocumentModel(this));
 
-        this.container.innerHTML = '<canvas id="canvas" moz-opaque="true" tabindex="-1"></canvas>';
-        this.canvas = this.container.firstChild;
-        while (this.canvas && this.canvas.nodeType != 1) {
-            this.canvas = this.canvas.nextSibling;
+        this.get('container').innerHTML = '<canvas id="canvas" moz-opaque="true" tabindex="-1"></canvas>';
+        
+        var canvas = this.get('container').firstChild;        
+        while (canvas && canvas.nodeType != 1) {
+            canvas = canvas.nextSibling;
         }
-
+        
+        this.set('canvas', canvas);        
+        
         var r = require;
-        var cursor = r("bespin/editor/cursor");
+        var cursor = require("bespin/editor/cursor");
 
-        this.cursorManager = new cursor.CursorManager(this);
-        this.ui = new exports.UI({ editor: this });
-        this.theme = bespin.themes['default'];
+        this.cursorManager = cursor.CursorManager.create({ editor: this });
+        this.ui = exports.UI.create({ editor: this });
+        this.theme = require("bespin/themes/default")['default'];
 
-        this.editorKeyListener = new exports.DefaultEditorKeyListener({ editor: this });
-        this.historyManager = new history.HistoryManager(this);
-        this.customEvents = new events.Events(this);
+        this.editorKeyListener = exports.DefaultEditorKeyListener.create({ editor: this });
+        this.historyManager = history.HistoryManager.create();
+        this.customEvents = new settings.Events();
 
-        this.ui.installKeyListener(this.editorKeyListener);
+        this.get('ui').installKeyListener(this.get('editorKeyListener'));
 
-        this.model.insertCharacters({ row: 0, col: 0 }, " ");
+        this.get('model').insertCharacters({ row: 0, col: 0 }, " ");
 
         dojo.connect(this.canvas, "blur",  dojo.hitch(this, function(e) {
             this.setFocus(false);
@@ -2040,7 +2058,8 @@ exports.API = SC.Object.extend({
             this.setFocus(true);
         }
 
-        this.sc_super();
+        arguments.callee.base.apply(this,arguments);
+        //sc_super();
     },
 
     /**
@@ -2161,7 +2180,7 @@ exports.API = SC.Object.extend({
     },
 
     paint: function(fullRefresh) {
-        var ctx = util.canvas.fix(this.canvas.getContext("2d"));
+        var ctx = canvas.fix(this.canvas.getContext("2d"));
         this.ui.paint(ctx, fullRefresh);
     },
 

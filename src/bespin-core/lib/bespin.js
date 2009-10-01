@@ -1,9 +1,5 @@
 // module: bespin
 
-// TODO: this must be circular
-var plugins = require("bespin/plugins");
-var command = require("bespin/command");
-
 dojo.mixin(exports, {
     // BEGIN VERSION BLOCK
     /** The core version of the Bespin system */
@@ -178,15 +174,15 @@ dojo.mixin(exports, {
 
     factories: {
         popup: function(callback, context) {
-            plugins.loadOne("popup", function(popupmod) {
+            exports.plugins.loadOne("popup", function(popupmod) {
                 var popup = exports.register("popup", new popupmod.Window());
                 callback.call(context, popup);
             });
         },
         piemenu: function(callback, context) {
-            plugins.loadOne("piemenu", function(piemenumod) {
+            exports.plugins.loadOne("piemenu", function(piemenumod) {
                 exports.register("piemenu", new piemenumod.Window());
-
+                
                 // the pie menu doesn't animate properly
                 // without restoring control to the UI temporarily
                 setTimeout(function() {
@@ -196,16 +192,16 @@ dojo.mixin(exports, {
             });
         },
         commandLine: function(callback, context) {
-            plugins.loadOne("commandLine", function(commandline) {
-                var commandLine = exports.register("commandLine",
-                    new commandline.Interface('command', command.store)
+            exports.plugins.loadOne("commandLine", function(commandline) {
+                var commandLine = exports.register("commandLine", 
+                    new commandline.Interface('command', exports.command.store)
                 );
                 callback.call(context, commandLine);
             });
         },
         debugbar: function(callback, context) {
-            plugins.loadOne("debugbar", function(debug) {
-                var commandLine = exports.register("debugbar",
+            exports.plugins.loadOne("debugbar", function(debug) {
+                var commandLine = exports.register("debugbar", 
                     new debug.EvalCommandLineInterface('debugbar_command', null, {
                         idPrefix: "debugbar_",
                         parentElement: dojo.byId("debugbar")
@@ -215,8 +211,8 @@ dojo.mixin(exports, {
             });
         },
         breakpoints: function(callback, context) {
-            plugins.loadOne("breakpoints", function(BreakpointManager) {
-                var breakpoints = exports.register("breakpoints",
+            exports.plugins.loadOne("breakpoints", function(BreakpointManager) {
+                var breakpoints = exports.register("breakpoints", 
                     new BreakpointManager()
                 );
                 callback.call(context, breakpoints);
