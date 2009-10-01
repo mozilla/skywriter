@@ -30,12 +30,13 @@ var util = require("bespin/util");
 var keys = require("bespin/util/keys");
 var events = require("bespin/events");
 var syntax = require("bespin/syntax");
-var utils = require("bespin/editor").utils;
+var utils = require("bespin/editor/utils");
 var actions = require("bespin/editor/actions");
 var model = require("bespin/editor/model");
 var history = require("bespin/editor/history");
 var settings = require("bespin/client/settings");
 var canvas = require("bespin/util/canvas");
+var SC = require("sproutcore");
 
 /**
  *
@@ -538,10 +539,11 @@ exports.UI = SC.Object.extend({
             orientation: "vertical",
             valueChanged: function() {
                 var ui = this.get('ui');
-                ui.get('yOffset') = -ui.get('yScrollBar').get('value');
+                ui.set('yOffset', -ui.get('yScrollBar').get('value'));
                 ui.get('editor').paint();
             }
         });
+        this.set('yScrollBar', yScrollBar);
 
         gh.push(dojo.connect(window, "mousemove", yScrollBar, "onmousemove"));
         gh.push(dojo.connect(window, "mouseup", yScrollBar, "onmouseup"));
@@ -926,17 +928,22 @@ exports.UI = SC.Object.extend({
             this.overYScrollBar = (p.x > sx) && this.yscrollbarVisible;
             this.overXScrollBar = (p.y > sy) && this.xscrollbarVisible;
         }
+        
+        var nibup = this.get('nibup'),
+            nibdown = this.get('nibdown'),
+            nibleft = this.get('nibleft'),
+            nibright = this.get('nibright');
 
         if (e.type == "click") {
             if ((typeof e.button != "undefined") && (e.button == 0)) {
                 var button;
-                if (this.nibup.contains(p)) {
+                if (nibup.contains(p)) {
                     button = "up";
-                } else if (this.nibdown.contains(p)) {
+                } else if (nibdown.contains(p)) {
                     button = "down";
-                } else if (this.nibleft.contains(p)) {
+                } else if (nibleft.contains(p)) {
                     button = "left";
-                } else if (this.nibright.contains(p)) {
+                } else if (nibright.contains(p)) {
                     button = "right";
                 }
 
@@ -1269,8 +1276,8 @@ exports.UI = SC.Object.extend({
         }
 
         // get debug metadata
-        var breakpoints = {};
-        var lineMarkers = bespin.get("parser").getLineMarkers();
+        // var breakpoints = {};
+        // var lineMarkers = bespin.get("parser").getLineMarkers();
 
         if (this.editor.debugMode && bespin.get("editSession")) {
             bespin.getComponent("breakpoints", function(bpmanager) {
@@ -1727,21 +1734,28 @@ exports.UI = SC.Object.extend({
                       { n: ed.theme.partialNibStyle, a: ed.theme.partialNibArrowStyle, s: ed.theme.partialNibStrokeStyle };
 
         var midpoint = Math.floor(this.NIB_WIDTH / 2);
+        
 
-        this.nibup = new Rect(cwidth - this.NIB_INSETS.right - this.NIB_WIDTH,
+        var nibup = new Rect(cwidth - this.NIB_INSETS.right - this.NIB_WIDTH,
                 this.NIB_INSETS.top, this.NIB_WIDTH, this.NIB_WIDTH);
+        this.set('nibup', nibup);
 
-        this.nibdown = new Rect(cwidth - this.NIB_INSETS.right - this.NIB_WIDTH,
+        var nibdown = new Rect(cwidth - this.NIB_INSETS.right - this.NIB_WIDTH,
                 cheight - (this.NIB_WIDTH * 2) - (this.NIB_INSETS.bottom * 2),
                 this.NIB_INSETS.top,
                 this.NIB_WIDTH, this.NIB_WIDTH);
 
-        this.nibleft = new Rect(this.gutterWidth + this.NIB_INSETS.left, cheight - this.NIB_INSETS.bottom - this.NIB_WIDTH,
-                this.NIB_WIDTH, this.NIB_WIDTH);
+        this.set('nibdown', nibdown);
 
-        this.nibright = new Rect(cwidth - (this.NIB_INSETS.right * 2) - (this.NIB_WIDTH * 2),
+        var nibleft = new Rect(this.gutterWidth + this.NIB_INSETS.left, cheight - this.NIB_INSETS.bottom - this.NIB_WIDTH,
+                this.NIB_WIDTH, this.NIB_WIDTH);
+        this.set('nibleft', nibleft);
+
+        var nibright = new Rect(cwidth - (this.NIB_INSETS.right * 2) - (this.NIB_WIDTH * 2),
                 cheight - this.NIB_INSETS.bottom - this.NIB_WIDTH,
                 this.NIB_WIDTH, this.NIB_WIDTH);
+        this.set('nibright', nibright);
+        
 
         vctx.translate(-verticalx, 0);
         hctx.translate(0, -horizontaly);

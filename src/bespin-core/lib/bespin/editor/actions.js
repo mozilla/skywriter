@@ -24,6 +24,7 @@
 
 // module: bespin/editor/actions
 var bespin = require("bespin");
+var SC = require("sproutcore");
 
 /**
  * The editor can run various actions. They are defined here and you can add or

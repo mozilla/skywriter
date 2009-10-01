@@ -24,6 +24,7 @@
 
 var bespin = require("bespin");
 var util = require("bespin/util");
+var SC = require("sproutcore");
 
 /**
  * The Server object implements the Bespin Server API (See

@@ -25,6 +25,7 @@
 var bespin = require("bespin");
 var util = require("bespin/util");
 var themes = require("bespin/themes/default");
+var SC = require("sproutcore");
 
 /**
  * This settings module provides a base implementation to store settings.

@@ -25,6 +25,7 @@
 
 var bespin = require("bespin");
 var command = require("bespin/command");
+var SC = require("sproutcore");
 
 /**
  * Basic code indentation utility.

@@ -13,13 +13,15 @@ ext.load(function(myfunc) {
     myfunc("yo");
 });
 
-/*
-var component = re_quire("bespin/editor/component");
+
+var component = require("bespin/editor/component");
 var _editorComponent;
-_editorComponent = new component.Component('editor', {
+
+_editorComponent = component.Component.create({
+    container: 'editor',
     language: "js",
-    loadfromdiv: true,
-    set: { strictlines: 'off' }
+    loadFromDiv: true,
+    setOptions: { strictlines: 'off' }
 });
 
 function copyToTextarea() {
@@ -31,4 +33,3 @@ function copyToEditor() {
 function setSyntax(value) {
     bespin.publish("settings:language", { language: value });
 }
-*/

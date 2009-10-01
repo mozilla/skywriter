@@ -23,31 +23,36 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
+var SC = require("sproutcore");
 
 /**
  * A store of commands
  */
 exports.Store = SC.Object.extend({
+    
+    commands: {},
+    aliases: {},
+    
+    command: null,
+    parent: null,
+    
     /**
      * To create a root command store, call with no parameters.
      * To create a sub-command store, pass the parent store in first, and a
      * single command into the second parameter
      */
-    constructor: function(parent, command) {
-        this.commands = {};
-        this.aliases = {};
-
+    init: function() {
         // If there is a parent, then this is a store for a command with subcommands
+        var parent = this.get('parent'), command = this.get('command');
         if (parent) {
             // save the fact that we are a subcommand for this chap
-            this.containerCommand = command;
-            this.parent = parent;
+            this.set('containerCommand', command) = command;
 
             // implicit that it takes something
-            command.takes = ['*'];
+            command.set('takes', ['*']);
 
             // link back to this store
-            command.subcommands = this;
+            command.set('subcommands', this);
 
             // add the sub command to the parent store
             parent.addCommand(command);
@@ -436,19 +441,19 @@ exports.executeExtensionCommand = function() {
     });
 };
 
-/**
- * Add a command to the root store on pub/sub.
- * TODO: We're trying to remove pub/sub for actions, so we should explain this
- */
-bespin.subscribe("extension:loaded:bespin.command", function(ext) {
-    ext.execute = exports.executeExtensionCommand;
-    exports.store.addCommand(ext);
-});
-
-/**
- * Remove a command from the root store on pub/sub.
- * TODO: We're trying to remove pub/sub for actions, so we should explain this
- */
-bespin.subscribe("extension:removed:bespin.command", function(ext) {
-    exports.store.removeCommand(ext);
-});
+// /**
+//  * Add a command to the root store on pub/sub.
+//  * TODO: We're trying to remove pub/sub for actions, so we should explain this
+//  */
+// bespin.subscribe("extension:loaded:bespin.command", function(ext) {
+//     ext.execute = exports.executeExtensionCommand;
+//     exports.store.addCommand(ext);
+// });
+// 
+// /**
+//  * Remove a command from the root store on pub/sub.
+//  * TODO: We're trying to remove pub/sub for actions, so we should explain this
+//  */
+// bespin.subscribe("extension:removed:bespin.command", function(ext) {
+//     exports.store.removeCommand(ext);
+// });

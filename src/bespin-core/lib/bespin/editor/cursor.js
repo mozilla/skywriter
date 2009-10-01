@@ -24,6 +24,7 @@
 
 var bespin = require("bespin");
 var utils = require("bespin/editor").utils;
+var SC = require("sproutcore");
 
 /**
  * Handles the position of the cursor, hiding the complexity of translating

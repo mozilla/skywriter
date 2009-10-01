@@ -24,6 +24,7 @@
 
 var bespin = require("bespin");
 var keys = require("bespin/util/keys");
+var SC = require("sproutcore");
 
 /**
  * <p>Pie Menu Handling
