@@ -24,8 +24,9 @@
 
 
 exports.Extension = SC.Object.extend({
-    load: function(callback) {
-        var parts = this.pointer.split(":");
+    load: function(callback, property) {
+        property = property || "pointer";
+        var parts = this.get(property).split(":");
         var modname = parts[0];
         require.prequire.when(modname, function() {
             var r = require;
@@ -44,20 +45,38 @@ exports.Extension = SC.Object.extend({
 exports.ExtensionPoint = SC.Object.extend({
     init: function() {
         this.extensions = [];
+        this.handlers = [];
     },
     
     addExtension: function(extension) {
         this.extensions.push(extension);
+    },
+    
+    active: function(extension) {
+        this.handlers.forEach(function(handler) {
+            if (handler.activate) {
+                handler.load(function(activate) {
+                    activate(extension);
+                }, "activate");
+            }
+        });
     }
 });
 
 exports.Plugin = SC.Object.extend({
+    activate: function() {
+        var provides = this.provides;
+        self = this;
+        this.provides.forEach(function(extension) {
+            var ep = self.get("catalog").getExtensionPoint(extension.ep);
+            ep.active(extension);
+        });
+    }
 });
 
 exports.Catalog = SC.Object.extend({
     init: function() {
         this.points = {};
-        this.getExtensionPoint("extensionpoint");
         this.plugins = {};
     },
     
@@ -71,22 +90,39 @@ exports.Catalog = SC.Object.extend({
         return this.points[name];
     },
     
-    activate: function(metadata) {
+    registerExtensionPoint: function(extension) {
+        var ep = this.getExtensionPoint(extension.name);
+        ep.handlers.push(extension);
+    },
+    
+    load: function(metadata) {
         for (var name in metadata) {
             var md = metadata[name];
+            if (md.active === undefined) {
+                md.active = true;
+            }
             md.catalog = this;
             if (md.provides) {
                 var provides = md.provides;
                 for (var i = 0; i < provides.length; i++) {
                     var extension = exports.Extension.create(provides[i]);
                     provides[i] = extension;
-                    var ep = this.getExtensionPoint(extension.ep);
-                    ep.addExtension(extension);
+                    var epname = extension.ep;
+                    if (epname == "extensionpoint") {
+                        this.registerExtensionPoint(extension);
+                    } else {
+                        var ep = this.getExtensionPoint(extension.ep);
+                        ep.addExtension(extension);
+                    }
                 }
             } else {
                 md.provides = [];
             }
-            this.plugins[name] = exports.Plugin.create(md);
+            var plugin = exports.Plugin.create(md);
+            if (plugin.active) {
+                plugin.activate();
+            }
+            this.plugins[name] = plugin;
         }
     }
 });

@@ -4,7 +4,7 @@ var builtins = require("bespin/builtins");
 var bespin = require("bespin");
 
 var catalog = plugins.Catalog.create();
-catalog.activate(builtins.metadata);
+catalog.load(builtins.metadata);
 bespin.register("plugins", catalog);
 
 var ep = catalog.getExtensionPoint("mypoint");
