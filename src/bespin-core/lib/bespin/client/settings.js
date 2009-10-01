@@ -46,12 +46,14 @@ var SC = require("sproutcore");
  */
 exports.Core = SC.Object.extend({
     store: null,
+
     init: function() {
         this.browserOverrides = {};
-        this.fromURL = new exports.URL();
-        this.customEvents = new exports.Events(this);
+        this.fromURL = exports.URL.create();
+        this.customEvents = exports.Events.create({ settings: this });
 
-        this.loadStore(store); // Load up the correct settings store
+        // Load up the correct settings store
+        this.loadStore(this.store);
     },
 
     loadSession: function() {
@@ -188,7 +190,7 @@ exports.InMemory = SC.Object.extend({
         this.parent = parent;
         this.settings = this.parent.defaultSettings();
         bespin.publish("settings:loaded");
-    },
+    }/*,
 
     set: function(key, value) {
         this.settings[key] = value;
@@ -200,7 +202,7 @@ exports.InMemory = SC.Object.extend({
 
     unset: function(key) {
         delete this.settings[key];
-    }
+    }*/
 });
 
 /**
@@ -438,6 +440,7 @@ exports.URL = SC.Object.extend({
         this.results = dojo.queryToObject(this.stripHash(queryString || window.location.hash));
     },
 
+    /*
     get: function(key) {
         return this.results[key];
     },
@@ -445,6 +448,7 @@ exports.URL = SC.Object.extend({
     set: function(key, value) {
         this.results[key] = value;
     },
+    */
 
     stripHash: function(url) {
         var tobe = url.split('');
@@ -459,9 +463,12 @@ exports.URL = SC.Object.extend({
  * settings need to watch and look for
  */
 exports.Events = SC.Object.extend({
-    constructor: function(settings) {
+    settings: null,
+
+    init: function() {
         var editSession = bespin.get('editSession');
         var editor = bespin.get('editor');
+        var self = this;
 
         /**
          * Watch for someone wanting to do a set operation
@@ -470,7 +477,7 @@ exports.Events = SC.Object.extend({
             var key = event.key;
             var value = event.value;
 
-            settings.set(key, value);
+            self.settings.set(key, value);
         });
 
         /**
@@ -530,7 +537,7 @@ exports.Events = SC.Object.extend({
         bespin.subscribe("settings:language", function(event) {
             var language = event.language;
             var fromCommand = event.fromCommand;
-            var languageSetting = settings.get('language') || "auto";
+            var languageSetting = self.settings.get('language') || "auto";
 
             if (language == editor.language) {
                 return; // already set to be that language
@@ -545,7 +552,7 @@ exports.Events = SC.Object.extend({
                 // the path from the URL anyway. So I'm reverting to this ...
                 // If that code did make sense then we should re-revert and
                 // explain in comments
-                var path = settings.fromURL.get('path');
+                var path = self.settings.fromURL.get('path');
                 if (path) {
                     var fileType = util.path.fileType(path);
                     if (fileType) {
@@ -579,7 +586,9 @@ exports.Events = SC.Object.extend({
                 if (themeSettings) {
                     if (themeSettings != editor.theme) {
                         editor.theme = themeSettings;
-                        bespin.publish("settings:set:fontsize", { value: settings.get('fontsize') });
+                        bespin.publish("settings:set:fontsize", {
+                            value: self.settings.get('fontsize')
+                        });
                     }
                     return true;
                 }
@@ -636,7 +645,7 @@ exports.Events = SC.Object.extend({
         });
 
         bespin.subscribe("settings:set:debugmode", function(event) {
-            editor.debugMode = settings.isOn(event.value);
+            editor.debugMode = this.settings.isOn(event.value);
 
             if (editor.debugMode) {
                 bespin.plugins.loadOne("bespin.debugger",
@@ -667,7 +676,7 @@ exports.Events = SC.Object.extend({
         var _trimOnSave; // store the subscribe handler away
 
         bespin.subscribe("settings:set:trimonsave", function(event) {
-            if (settings.isOn(event.value)) {
+            if (this.settings.isOn(event.value)) {
                 _trimOnSave = bespin.subscribe("editor:savefile:before", function(event) {
                     bespin.get("commandLine").executeCommand('trim', true);
                 });
@@ -680,7 +689,7 @@ exports.Events = SC.Object.extend({
          * Turn the syntax parser on or off
          */
         bespin.subscribe("settings:set:syntaxcheck", function (data) {
-            if (settings.isOff(data.value)) {
+            if (this.settings.isOff(data.value)) {
                 bespin.publish("parser:stop");
             } else {
                 bespin.publish("parser:start");
@@ -695,7 +704,7 @@ exports.Events = SC.Object.extend({
             if (event.path) {
                 editor.openFile(event.project, event.path);
             } else {
-                var lastUsed = settings.getObject("_lastused");
+                var lastUsed = this.settings.getObject("_lastused");
                 if (!lastUsed) {
                     editor.openFile("SampleProject", "readme.txt");
                 }
@@ -709,7 +718,7 @@ exports.Events = SC.Object.extend({
          * Check for auto load
          */
         bespin.subscribe("settings:init", function() {
-            if (settings.isOff(settings.get('autoconfig'))) {
+            if (this.settings.isOff(this.settings.get('autoconfig'))) {
                 return;
             }
 

@@ -48,11 +48,11 @@ exports.ExtensionPoint = SC.Object.extend({
         this.extensions = [];
         this.handlers = [];
     },
-    
+
     addExtension: function(extension) {
         this.extensions.push(extension);
     },
-    
+
     active: function(extension) {
         this.handlers.forEach(function(handler) {
             if (handler.activate) {
@@ -80,7 +80,7 @@ exports.Catalog = SC.Object.extend({
         this.points = {};
         this.plugins = {};
     },
-    
+
     getExtensionPoint: function(name) {
         if (this.points[name] === undefined) {
             this.points[name] = exports.ExtensionPoint.create({
@@ -90,12 +90,12 @@ exports.Catalog = SC.Object.extend({
         }
         return this.points[name];
     },
-    
+
     registerExtensionPoint: function(extension) {
         var ep = this.getExtensionPoint(extension.name);
         ep.handlers.push(extension);
     },
-    
+
     load: function(metadata) {
         for (var name in metadata) {
             var md = metadata[name];
@@ -130,12 +130,12 @@ exports.Catalog = SC.Object.extend({
 
 exports.thing1 = function(extension) {
     print("Thing1");
-}
+};
 
 exports.thing2 = function(extension) {
     print("Thing2");
-}
+};
 
 exports.thing3 = function(msg) {
     print("Thing3: " + msg);
-}
+};

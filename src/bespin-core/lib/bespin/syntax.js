@@ -34,12 +34,9 @@
 var bespin = require("bespin");
 var SC = require("sproutcore");
 
-if (!bespin.syntax) bespin.syntax = {};
-
 /**
  * Base model for tracking syntax highlighting data.
  */
-
 exports.Model = SC.Object.extend({
     language: "",
 
@@ -103,37 +100,38 @@ exports.Model = SC.Object.extend({
 
 /**
  * The resolver hunts down the syntax engine
- */ 
- 
-exports.Resolver = (function() {
-    var current, model;
+ */
+var current, model;
+var engines = {};
 
-    return {
-        setEngine: function(name) {
-            var engine = bespin.syntax[name];
-            if (name == current) {
-                return this;
-            }
-            if (engine) {
-                current = name;
-                if (model) {
-                    delete model;
-                }
-                if (engine.worker) {
-                    // model = new bespin.worker.WorkerFacade(bespin.syntax[name].Model());
-                    // model.workerEnabled = true;
-                } else {
-                    model = new bespin.syntax[name].Model();
-                    model.workerEnabled = false;
-                }
-            } else {
-                console.log("no such engine: ", name);
-            }
+exports.Resolver = {
+    setEngine: function(name) {
+        var engine = engines[name];
+        if (name == current) {
             return this;
-        },
-
-        getModel: function() {
-            return model;
         }
-    };
-})();
+
+        if (engine) {
+            current = name;
+            if (model) {
+                delete model;
+            }
+
+            if (engine.worker) {
+                // model = new bespin.worker.WorkerFacade(engines[name].Model());
+                // model.workerEnabled = true;
+            } else {
+                model = new engines[name].Model();
+                model.workerEnabled = false;
+            }
+        } else {
+            console.log("no such engine: ", name);
+        }
+
+        return this;
+    },
+
+    getModel: function() {
+        return model;
+    }
+};

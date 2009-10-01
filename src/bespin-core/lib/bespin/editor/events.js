@@ -110,4 +110,3 @@ bespin.subscribe("editor:dirty", function(event) {
 bespin.subscribe("editor:clean", function(event) {
     bespin.get('editor').dirty = false;
 });
-

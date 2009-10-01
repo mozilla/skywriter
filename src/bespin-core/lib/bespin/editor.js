@@ -38,6 +38,7 @@ var history = require("bespin/editor/history");
 var settings = require("bespin/client/settings");
 var canvas = require("bespin/util/canvas");
 var SC = require("sproutcore");
+var model = require("bespin/editor/model");
 
 /**
  *
@@ -134,12 +135,12 @@ exports.Scrollbar = SC.Object.extend({
 
         var bar = this.getHandleBounds();
         if (bar.contains({ x: clientX, y: clientY })) {
-            this.mousedownScreenPoint = (this.isH()) ? e.screenX : e.screenY;
+            this.mousedownScreenPoint = this.isH() ? e.screenX : e.screenY;
             this.mousedownValue = this.value;
         } else {
-            var p = (this.isH()) ? clientX : clientY;
-            var b1 = (this.isH()) ? bar.x : bar.y;
-            var b2 = (this.isH()) ? bar.x2 : bar.y2;
+            var p = this.isH() ? clientX : clientY;
+            var b1 = this.isH() ? bar.x : bar.y;
+            var b2 = this.isH() ? bar.x2 : bar.y2;
 
             if (p < b1) {
                 this.setValue(this.value -= this.extent);
@@ -152,8 +153,9 @@ exports.Scrollbar = SC.Object.extend({
     onmouseup: function(e) {
         this.mousedownScreenPoint = null;
         this.mousedownValue = null;
-        if (this.valueChanged){this.valueChanged(); // make the UI responsive when the user releases the mouse button (in case arrow no longer hovers over scrollbar)
-}
+        if (this.valueChanged) {
+            this.valueChanged(); // make the UI responsive when the user releases the mouse button (in case arrow no longer hovers over scrollbar)
+        }
     },
 
     onmousemove: function(e) {
@@ -388,11 +390,6 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
 exports.UI = SC.Object.extend({
     editor: null,
 
-    model: function() {
-        var editor = this.get('editor');
-        return editor ? editor.get('model') : null;
-    }.property('editor'),
-
     rowLengthCache: [],
 
     searchString: null,
@@ -427,9 +424,9 @@ exports.UI = SC.Object.extend({
     NIB_WIDTH: 15,
 
     NIB_INSETS: {
-        top:    Math.floor(this.NIB_WIDTH / 2),
-        left:   Math.floor(this.NIB_WIDTH / 2),
-        right:  Math.floor(this.NIB_WIDTH / 2),
+        top: Math.floor(this.NIB_WIDTH / 2),
+        left: Math.floor(this.NIB_WIDTH / 2),
+        right: Math.floor(this.NIB_WIDTH / 2),
         bottom: Math.floor(this.NIB_WIDTH / 2)
     },
 
@@ -445,8 +442,8 @@ exports.UI = SC.Object.extend({
 
     showCursor: true,
 
-    xScrollBar: null,
-    yScrollBar: null,
+    xscrollbar: null,
+    yscrollbar: null,
 
     overXScrollBar: false,
     overYScrollBar: false,
@@ -465,95 +462,83 @@ exports.UI = SC.Object.extend({
     init: function() {
         var settings = bespin.get("settings");
 
-        this.set('syntaxModel', syntax.Resolver.setEngine("simple").getModel());
-
-        this.set('selectionHelper', exports.SelectionHelper.create({ editor: this.editor }));
-
-        this.set('actions', actions.Actions.create({ editor: this.editor }));
-
+        this.model = this.editor.model;
+        this.syntaxModel = syntax.Resolver.setEngine("simple").getModel();
+        this.selectionHelper = exports.SelectionHelper.create({ editor: this.editor });
+        this.actions = actions.Actions.create({ editor: this.editor });
 
         // these two canvases are used as buffers for the scrollbar images, which are then composited onto the
         // main code view. we could have saved ourselves some misery by just prerendering slices of the scrollbars and
         // combining them like sane people, but... meh
-        this.set('horizontalScrollCanvas', dojo.create("canvas"));
-        this.set('verticalScrollCanvas', dojo.create('canvas'));
+        this.horizontalScrollCanvas = dojo.create("canvas");
+        this.verticalScrollCanvas = dojo.create('canvas');
 
+        // this.lineHeight;        // reserved for when line height is calculated dynamically instead of with a constant; set first time a paint occurs
+        // this.charWidth;         // set first time a paint occurs
+        // this.visibleRows;       // the number of rows visible in the editor; set each time a paint occurs
+        // this.firstVisibleRow;   // first row that is visible in the editor; set each time a paint occurs
 
-        //this.lineHeight;        // reserved for when line height is calculated dynamically instead of with a constant; set first time a paint occurs
-        //this.charWidth;         // set first time a paint occurs
-        //this.visibleRows;       // the number of rows visible in the editor; set each time a paint occurs
-        //this.firstVisibleRow;   // first row that is visible in the editor; set each time a paint occurs
+        // this.nibup;             // rect
+        // this.nibdown;           // rect
+        // this.nibleft;           // rect
+        // this.nibright;          // rect
 
-        //this.nibup;             // rect
-        //this.nibdown;           // rect
-        //this.nibleft;           // rect
-        //this.nibright;          // rect
+        // this.selectMouseDownPos;        // position when the user moused down
+        // this.selectMouseDetail;         // the detail (number of clicks) for the mouse down.
 
-        //this.selectMouseDownPos;        // position when the user moused down
-        //this.selectMouseDetail;         // the detail (number of clicks) for the mouse down.
+        var source = this.editor.container;
 
-        var source = this.get('editor').get('container');
-
-        console.log(source);
         window._source = source;
 
-        source.addEventListener('mousemove', dojo.hitch(this,
-          this.handleMouse));
-        source.addEventListener('mouseout', dojo.hitch(this,
-          this.handleMouse));
+        source.addEventListener('mousemove', dojo.hitch(this, this.handleMouse));
+        source.addEventListener('mouseout', dojo.hitch(this, this.handleMouse));
         source.addEventListener('click', dojo.hitch(this, this.handleMouse));
-        source.addEventListener('mousedown', dojo.hitch(this,
-          this.handleMouse));
+        source.addEventListener('mousedown', dojo.hitch(this, this.handleMouse));
         source.addEventListener('oncontextmenu', dojo.stopEvent);
-        source.addEventListener('mousedown', dojo.hitch(this,
-          this.mouseDownSelect));
+        source.addEventListener('mousedown', dojo.hitch(this, this.mouseDownSelect));
 
-
-        var gh = this.get('globalHandles');
-
+        var gh = this.globalHandles;
         gh.push(dojo.connect(window, "mousemove", this, "mouseMoveSelect"));
         gh.push(dojo.connect(window, "mouseup", this, "mouseUpSelect"));
 
-        var editor = this.get('editor');
-
+        var editor = this.editor;
 
         // if we act as component, onmousewheel should only be listened to inside of the editor canvas.
-        var scope = editor.get('actsAsComponent') ?
-          editor.get('canvas') : window;
+        var scope = editor.actsAsComponent ? editor.canvas : window;
 
-        var xScrollBar = exports.Scrollbar.create({
+        var xscrollbar = exports.Scrollbar.create({
             ui: this,
             orientation: "horizontal",
             valueChanged: function() {
-                var ui = this.get('ui');
-                ui.set('xOffset', -ui.get('xScrollBar').get('value'));
-                ui.get('editor').paint();
+                var ui = this.ui;
+                ui.xOffset = - ui.xscrollbar.value;
+                ui.editor.paint();
             }
         });
-        this.set('xScrollBar', xScrollBar);
+        this.xscrollbar = xscrollbar;
 
-        gh.push(dojo.connect(window, "mousemove", xScrollBar, "onmousemove"));
-        gh.push(dojo.connect(window, "mouseup", xScrollBar, "onmouseup"));
+        gh.push(dojo.connect(window, "mousemove", xscrollbar, "onmousemove"));
+        gh.push(dojo.connect(window, "mouseup", xscrollbar, "onmouseup"));
 
         gh.push(
-            dojo.connect(scope, (!dojo.isMozilla ? "onmousewheel" : "DOMMouseScroll"), xScrollBar, "onmousewheel")
+            dojo.connect(scope, (!dojo.isMozilla ? "onmousewheel" : "DOMMouseScroll"), xscrollbar, "onmousewheel")
         );
 
-        var yScrollBar = exports.Scrollbar.create({
+        var yscrollbar = exports.Scrollbar.create({
             ui: this,
             orientation: "vertical",
             valueChanged: function() {
-                var ui = this.get('ui');
-                ui.set('yOffset', -ui.get('yScrollBar').get('value'));
-                ui.get('editor').paint();
+                var ui = this.ui;
+                ui.yOffset = -ui.yscrollbar.value;
+                ui.editor.paint();
             }
         });
-        this.set('yScrollBar', yScrollBar);
+        this.yscrollbar = yscrollbar;
 
-        gh.push(dojo.connect(window, "mousemove", yScrollBar, "onmousemove"));
-        gh.push(dojo.connect(window, "mouseup", yScrollBar, "onmouseup"));
+        gh.push(dojo.connect(window, "mousemove", yscrollbar, "onmousemove"));
+        gh.push(dojo.connect(window, "mouseup", yscrollbar, "onmouseup"));
         gh.push(
-            dojo.connect(scope, (!dojo.isMozilla ? "onmousewheel" : "DOMMouseScroll"), yScrollBar, "onmousewheel")
+            dojo.connect(scope, (!dojo.isMozilla ? "onmousewheel" : "DOMMouseScroll"), yscrollbar, "onmousewheel")
         );
 
         setTimeout(dojo.hitch(this, function() {
@@ -859,7 +844,7 @@ exports.UI = SC.Object.extend({
 
         var pageScroll;
         if (bespin.get('settings')) {
-            pageScroll = parseFloat(bespin.get('settings').get('pagescroll')) || 0;
+            pageScroll = parseFloat(bespin.get('settings').pagescroll) || 0;
         } else {
             pageScroll = 0;
         }
@@ -934,10 +919,10 @@ exports.UI = SC.Object.extend({
             this.overXScrollBar = (p.y > sy) && this.xscrollbarVisible;
         }
 
-        var nibup = this.get('nibup'),
-            nibdown = this.get('nibdown'),
-            nibleft = this.get('nibleft'),
-            nibright = this.get('nibright');
+        var nibup = this.nibup;
+        var nibdown = this.nibdown;
+        var nibleft = this.nibleft;
+        var nibright = this.nibright;
 
         if (e.type == "click") {
             if ((typeof e.button != "undefined") && (e.button == 0)) {
@@ -1718,13 +1703,25 @@ exports.UI = SC.Object.extend({
         }
 
         // temporary disable of scrollbars
-        //if (this.xscrollbar.rect) return;
+        // if (this.xscrollbar.rect) {
+        //     return;
+        // }
 
-        if (this.horizontalScrollCanvas.width != cwidth){this.horizontalScrollCanvas.width = cwidth;}
-        if (this.horizontalScrollCanvas.height != this.NIB_WIDTH + 4){this.horizontalScrollCanvas.height = this.NIB_WIDTH + 4;}
+        if (this.horizontalScrollCanvas.width != cwidth) {
+            this.horizontalScrollCanvas.width = cwidth;
+        }
 
-        if (this.verticalScrollCanvas.height != cheight){this.verticalScrollCanvas.height = cheight;}
-        if (this.verticalScrollCanvas.width != this.NIB_WIDTH + 4){this.verticalScrollCanvas.width = this.NIB_WIDTH + 4;}
+        if (this.horizontalScrollCanvas.height != this.NIB_WIDTH + 4) {
+            this.horizontalScrollCanvas.height = this.NIB_WIDTH + 4;
+        }
+
+        if (this.verticalScrollCanvas.height != cheight) {
+            this.verticalScrollCanvas.height = cheight;
+        }
+
+        if (this.verticalScrollCanvas.width != this.NIB_WIDTH + 4) {
+            this.verticalScrollCanvas.width = this.NIB_WIDTH + 4;
+        }
 
         var hctx = this.horizontalScrollCanvas.getContext("2d");
         hctx.clearRect(0, 0, this.horizontalScrollCanvas.width, this.horizontalScrollCanvas.height);
@@ -1746,24 +1743,26 @@ exports.UI = SC.Object.extend({
 
         var nibup = new Rect(cwidth - this.NIB_INSETS.right - this.NIB_WIDTH,
                 this.NIB_INSETS.top, this.NIB_WIDTH, this.NIB_WIDTH);
-        this.set('nibup', nibup);
+        this.nibup = nibup;
 
         var nibdown = new Rect(cwidth - this.NIB_INSETS.right - this.NIB_WIDTH,
                 cheight - (this.NIB_WIDTH * 2) - (this.NIB_INSETS.bottom * 2),
                 this.NIB_INSETS.top,
                 this.NIB_WIDTH, this.NIB_WIDTH);
 
-        this.set('nibdown', nibdown);
+        this.nibdown = nibdown;
 
-        var nibleft = new Rect(this.gutterWidth + this.NIB_INSETS.left, cheight - this.NIB_INSETS.bottom - this.NIB_WIDTH,
-                this.NIB_WIDTH, this.NIB_WIDTH);
-        this.set('nibleft', nibleft);
+        var nibleft = new Rect(this.gutterWidth + this.NIB_INSETS.left,
+                cheight - this.NIB_INSETS.bottom - this.NIB_WIDTH,
+                this.NIB_WIDTH,
+                this.NIB_WIDTH);
+        this.nibleft = nibleft;
 
         var nibright = new Rect(cwidth - (this.NIB_INSETS.right * 2) - (this.NIB_WIDTH * 2),
                 cheight - this.NIB_INSETS.bottom - this.NIB_WIDTH,
-                this.NIB_WIDTH, this.NIB_WIDTH);
-        this.set('nibright', nibright);
-
+                this.NIB_WIDTH,
+                this.NIB_WIDTH);
+        this.nibright = nibright;
 
         vctx.translate(-verticalx, 0);
         hctx.translate(0, -horizontaly);
@@ -1851,8 +1850,12 @@ exports.UI = SC.Object.extend({
         this.xscrollbar.extent = cwidth - this.gutterWidth;
 
         if (xscroll) {
-            var fullonxbar = (((this.overXScrollBar) && (virtualwidth > cwidth)) || ((this.xscrollbar) && (this.xscrollbar.mousedownValue != null)));
-            if (!fullonxbar){hctx.globalAlpha = 0.3;}
+            var fullonxbar = ((this.overXScrollBar && virtualwidth > cwidth) ||
+                    (this.xscrollbar && this.xscrollbar.mousedownValue != null));
+
+            if (!fullonxbar) {
+                hctx.globalAlpha = 0.3;
+            }
             this.paintScrollbar(hctx, this.xscrollbar);
             hctx.globalAlpha = 1.0;
         }
@@ -1866,8 +1869,12 @@ exports.UI = SC.Object.extend({
         this.yscrollbar.extent = cheight;
 
         if (yscroll) {
-            var fullonybar = ((this.overYScrollBar) && (virtualheight > cheight)) || ((this.yscrollbar) && (this.yscrollbar.mousedownValue != null));
-            if (!fullonybar){vctx.globalAlpha = 0.3;}
+            var fullonybar = (this.overYScrollBar && virtualheight > cheight) ||
+                (this.yscrollbar && this.yscrollbar.mousedownValue != null);
+
+            if (!fullonybar) {
+                vctx.globalAlpha = 0.3;
+            }
             this.paintScrollbar(vctx, this.yscrollbar);
             vctx.globalAlpha = 1;
         }
@@ -1879,10 +1886,10 @@ exports.UI = SC.Object.extend({
         vctx.restore();
 
         // clear the unusued nibs
-        if (!showUpScrollNib){this.nibup = new Rect();}
-        if (!showDownScrollNib){this.nibdown = new Rect();}
-        if (!showLeftScrollNib){this.nibleft = new Rect();}
-        if (!showRightScrollNib){this.nibright = new Rect();}
+        if (!showUpScrollNib) { this.nibup = new Rect(); }
+        if (!showDownScrollNib) { this.nibdown = new Rect(); }
+        if (!showLeftScrollNib) { this.nibleft = new Rect(); }
+        if (!showRightScrollNib) { this.nibright = new Rect(); }
 
         //set whether scrollbars are visible, so mouseover and such can pass through if not.
         this.xscrollbarVisible = xscroll;
@@ -2028,9 +2035,6 @@ exports.UI = SC.Object.extend({
  * bespin.editor.API is the root object, the API that others should be able to
  * use
  */
-
-var model = require("bespin/editor/model");
-
 exports.API = SC.Object.extend({
     container: null,
     opts: {},
@@ -2039,16 +2043,16 @@ exports.API = SC.Object.extend({
         // fixme: this stuff may not belong here
         this.debugMode = false;
 
-        this.set('model', new model.DocumentModel(this));
+        this.model = model.DocumentModel.create({ editor: this });
 
-        this.get('container').innerHTML = '<canvas id="canvas" moz-opaque="true" tabindex="-1"></canvas>';
+        this.container.innerHTML = '<canvas id="canvas" moz-opaque="true" tabindex="-1"></canvas>';
 
-        var canvas = this.get('container').firstChild;
+        var canvas = this.container.firstChild;
         while (canvas && canvas.nodeType != 1) {
             canvas = canvas.nextSibling;
         }
 
-        this.set('canvas', canvas);
+        this.canvas = canvas;
 
         var r = require;
         var cursor = require("bespin/editor/cursor");
@@ -2058,12 +2062,12 @@ exports.API = SC.Object.extend({
         this.theme = require("bespin/themes/default")['default'];
 
         this.editorKeyListener = exports.DefaultEditorKeyListener.create({ editor: this });
-        this.historyManager = history.HistoryManager.create();
-        this.customEvents = new settings.Events();
+        this.historyManager = history.HistoryManager.create({ editor: this });
+        //this.customEvents = events.Events.create({ editor: this });
 
-        this.get('ui').installKeyListener(this.get('editorKeyListener'));
+        this.ui.installKeyListener(this.editorKeyListener);
 
-        this.get('model').insertCharacters({ row: 0, col: 0 }, " ");
+        this.model.insertCharacters({ row: 0, col: 0 }, " ");
 
         dojo.connect(this.canvas, "blur",  dojo.hitch(this, function(e) {
             this.setFocus(false);
@@ -2080,8 +2084,7 @@ exports.API = SC.Object.extend({
             this.setFocus(true);
         }
 
-        arguments.callee.base.apply(this,arguments);
-        //sc_super();
+        this.sc_super();
     },
 
     /**
@@ -2261,7 +2264,7 @@ exports.API = SC.Object.extend({
         // -- try an editor action first, else fire off a command
         var actionDescription = "Execute command: '" + action + "'";
         action = this.ui.actions[action] || function() {
-            bespin.get('commandLine').executeCommand(command, true);
+            bespin.commandLine.executeCommand(command, true);
         };
 
         if (keyCode && action) {
@@ -2469,7 +2472,10 @@ exports.API = SC.Object.extend({
         }
 
         onFailure = function() {
-            bespin.publish("editor:openfile:openfail", { project: project, filename: filename });
+            bespin.publish("editor:openfile:openfail", {
+                project: project,
+                filename: filename
+            });
         };
 
         onSuccess = function(file) {

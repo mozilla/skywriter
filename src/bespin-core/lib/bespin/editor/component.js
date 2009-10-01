@@ -53,16 +53,12 @@ exports.Component = SC.Object.extend({
 
     canStealFocus: true,
 
-    model: function() {
-        return this.get('editor').get('model');
-    }.property('editor'),
-
     /**
      * Takes a container element, and the set of options for the component which
      * include those noted above.
      */
     init: function() {
-        var container = dojo.byId(this.get('container'));
+        var container = dojo.byId(this.container);
         console.log("container is:", container);
         if (container) {
             this.set('container', container);
@@ -72,22 +68,21 @@ exports.Component = SC.Object.extend({
 
         var initialContent = "";
 
-        if (this.get('loadFromDiv')) {
+        if (this.loadFromDiv) {
             var code = dojo.byId('BESPIN_EDITOR_CODE');
             if (code) {
                 initialContent = code.value;
             } else {
                 initialContent = dojo.byId(container).innerHTML;
             }
-        } else if (this.get('content')) {
-            initialContent = this.get('content');
+        } else if (this.content) {
+            initialContent = this.content;
         }
 
-        var editor = bespin.register('editor', this.get('editor') ||
+        this.editor = bespin.register('editor', this.editor ||
             editorMod.API.create({ container: container })
         );
-
-        this.set('editor', editor);
+        this.model = this.editor.model;
 
         // Fancy a command line anyone?
         /*
@@ -109,8 +104,7 @@ exports.Component = SC.Object.extend({
         } */
 
         // Use in memory settings here instead of saving to the server which is default. Potentially use Cookie settings
-        bespin.register('settings', this.get('settings') ||
-        settings.Core.create({ store: settings.InMemory }));
+        bespin.register('settings', this.settings || settings.Core.create({ store: settings.InMemory }));
 
         // How about a Jetpack?
         if (this.opts.jetpack) {
@@ -164,11 +158,11 @@ exports.Component = SC.Object.extend({
             bespin.publish("settings:language", { language: this.opts.language });
         }
 
-        if (this.get('canStealFocus')) {
+        if (this.canStealFocus) {
             this.editor.canvas.focus();
         }
 
-        var opts = this.get('setOptions');
+        var opts = this.setOptions;
         if (opts) { // we have generic settings
             for (var key in opts) {
                 if (opts.hasOwnProperty(key)) {
@@ -182,14 +176,14 @@ exports.Component = SC.Object.extend({
      * Returns the contents of the editor
      */
     getContent: function() {
-        return this.get('model').getDocument();
+        return this.model.getDocument();
     },
 
     /**
      * Takes the content and inserts it fresh into the document
      */
     setContent: function(content) {
-        return this.get('model').insertDocument(content);
+        return this.model.insertDocument(content);
     },
 
     /**
@@ -197,7 +191,7 @@ exports.Component = SC.Object.extend({
      * not.
      */
     setFocus: function(bool) {
-        return this.get('editor').setFocus(bool);
+        return this.editor.setFocus(bool);
     },
 
     /**
@@ -242,7 +236,7 @@ exports.Component = SC.Object.extend({
      */
     executeCommand: function(command) {
         try {
-            this.get('commandLine').executeCommand(command);
+            this.commandLine.executeCommand(command);
         } catch (e) {
             // catch the command prompt errors
         }
@@ -253,7 +247,6 @@ exports.Component = SC.Object.extend({
      * helpers, and the like.
      */
     dispose: function() {
-        this.get('editor').dispose();
+        this.editor.dispose();
     }
 });
-

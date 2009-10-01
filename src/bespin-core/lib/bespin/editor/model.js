@@ -22,9 +22,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
-var copyPos = require("bespin/editor/utils").utils;
 var SC = require("sproutcore");
+var bespin = require("bespin");
+var utils = require("bespin/editor/utils");
 
 /**
  * The editor has a model of the data that it works with.
@@ -32,6 +32,7 @@ var SC = require("sproutcore");
  */
 exports.DocumentModel = SC.Object.extend({
     editor: null,
+
     init: function() {
         this.clear();
     },
@@ -41,7 +42,8 @@ exports.DocumentModel = SC.Object.extend({
      * Erases anything after the current position in the history stack
      */
     addHistoryItem: function(func, data) {
-        this.history.length = this.historyIndex + 1; // if current index == -1 (no history), length = 0. ==0, length = 1.
+        // if current index == -1 (no history), length = 0. ==0, length = 1.
+        this.history.length = this.historyIndex + 1;
         this.history.push({ func: func, data: data });
         this.historyIndex++;
     },
@@ -163,7 +165,9 @@ exports.DocumentModel = SC.Object.extend({
      * intermediate rows as necessary
      */
     getRowArray: function(rowIndex) {
-        while (this.rows.length <= rowIndex){this.rows.push([]);}
+        while (this.rows.length <= rowIndex) {
+            this.rows.push([]);
+        }
         return this.rows[rowIndex];
     },
 
@@ -180,7 +184,9 @@ exports.DocumentModel = SC.Object.extend({
      */
     insertCharacters: function(modelPos, string, noHistory) {
         var row = this.getRowArray(modelPos.row);
-        while (row.length < modelPos.col){row.push(" ");}
+        while (row.length < modelPos.col) {
+            row.push(" ");
+        }
 
         var newrow = (modelPos.col > 0) ? row.splice(0, modelPos.col) : [];
         newrow = newrow.concat(string.split(""));
@@ -188,12 +194,13 @@ exports.DocumentModel = SC.Object.extend({
 
         this.setRowDirty(modelPos.row);
 
-        var ui = this.get('editor').get('ui');
-        ui.get('syntaxModel').invalidateCache(modelPos.row);
+        var ui = this.editor.ui;
+        // TODO: fix the syntax model and uncomment
+        // ui.syntaxModel.invalidateCache(modelPos.row);
 
         if (!noHistory) {
             this.addHistoryItem('insertCharacters', {
-                pos: copyPos(modelPos),
+                pos: utils.copyPos(modelPos),
                 characters: string
             });
         }
@@ -238,7 +245,11 @@ exports.DocumentModel = SC.Object.extend({
         var oldline = this.getRowArray(row).join('');
         this.rows[row] = newline.split('');
         if (!noHistory) {
-            this.addHistoryItem('replaceRow', { row: row, oldline: oldline, newline: newline});
+            this.addHistoryItem('replaceRow', {
+                row: row,
+                oldline: oldline,
+                newline: newline
+            });
         }
     },
 
@@ -248,7 +259,7 @@ exports.DocumentModel = SC.Object.extend({
     deleteCharacters: function(modelPos, length, noHistory) {
         var row = this.getRowArray(modelPos.row);
         var diff = (modelPos.col + length - 1) - row.length;
-        if (diff > 0){length -= diff;}
+        if (diff > 0) { length -= diff; }
         if (length > 0) {
             this.setRowDirty(modelPos.row);
             this.editor.ui.syntaxModel.invalidateCache(modelPos.row);
@@ -256,7 +267,7 @@ exports.DocumentModel = SC.Object.extend({
             var deleted = row.splice(modelPos.col, length).join("");
             if (!noHistory) {
                 this.addHistoryItem('deleteCharacters', {
-                    pos: copyPos(modelPos),
+                    pos: utils.copyPos(modelPos),
                     characters: deleted
                 });
             }
@@ -399,25 +410,43 @@ exports.DocumentModel = SC.Object.extend({
         startModelCol = startModelPos.col;
         var row = this.getRowArray(startModelPos.row);
         endModelCol = (endModelPos.row == startModelPos.row) ? endModelPos.col : row.length;
-        if (endModelCol > row.length){endModelCol = row.length;}
-        this.deleteCharacters({ row: startModelPos.row, col: startModelCol }, endModelCol - startModelCol, true /* nohistory */ );
+        if (endModelCol > row.length) {
+            endModelCol = row.length;
+        }
+        var pos = { row: startModelPos.row, col: startModelCol };
+        this.deleteCharacters(pos, endModelCol - startModelCol, true /* nohistory */ );
 
         // get the end line
         if (startModelPos.row != endModelPos.row) {
             startModelCol = 0;
             endModelCol = endModelPos.col;
             row = this.getRowArray(endModelPos.row);
-            if (endModelCol > row.length){endModelCol = row.length;}
-            this.deleteCharacters({ row: endModelPos.row, col: startModelCol }, endModelCol - startModelCol, true /* no history */ );
+            if (endModelCol > row.length) {
+                endModelCol = row.length;
+            }
+            pos = { row: endModelPos.row, col: startModelCol };
+            this.deleteCharacters(pos, endModelCol - startModelCol, true /*no history*/ );
         }
 
         // remove any lines in-between
-        if ((endModelPos.row - startModelPos.row) > 1){this.deleteRows(startModelPos.row + 1, endModelPos.row - startModelPos.row - 1);}
+        if ((endModelPos.row - startModelPos.row) > 1) {
+            this.deleteRows(startModelPos.row + 1, endModelPos.row - startModelPos.row - 1);
+        }
 
         // join the rows
-        if (endModelPos.row != startModelPos.row){this.joinRow(startModelPos.row, true /* no history */);}
+        if (endModelPos.row != startModelPos.row) {
+            this.joinRow(startModelPos.row, true /* no history */);
+        }
 
-        if (!noHistory){this.addHistoryItem('deleteChunk', { selection: { startModelPos: copyPos(selection.startModelPos), endModelPos: copyPos(selection.endModelPos)}, chunk: chunk});}
+        if (!noHistory) {
+            this.addHistoryItem('deleteChunk', {
+                selection: {
+                    startModelPos: utils.copyPos(selection.startModelPos),
+                    endModelPos: utils.copyPos(selection.endModelPos)
+                },
+                chunk: chunk
+            });
+        }
         return chunk;
     },
 
@@ -428,7 +457,7 @@ exports.DocumentModel = SC.Object.extend({
         this.editor.ui.syntaxModel.invalidateCache(modelPos.row);
 
         var lines = chunk.split("\n");
-        var cModelPos = copyPos(modelPos);
+        var cModelPos = utils.copyPos(modelPos);
         for (var i = 0; i < lines.length; i++) {
             this.insertCharacters(cModelPos, lines[i], true /* No history */);
             cModelPos.col = cModelPos.col + lines[i].length;
@@ -443,8 +472,8 @@ exports.DocumentModel = SC.Object.extend({
         if (!noHistory) {
             this.addHistoryItem('insertChunk', {
                 selection: {
-                    startModelPos: copyPos(modelPos),
-                    endModelPos: copyPos(cModelPos)
+                    startModelPos: utils.copyPos(modelPos),
+                    endModelPos: utils.copyPos(cModelPos)
                 },
                 chunk: chunk
             });
