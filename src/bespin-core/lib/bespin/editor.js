@@ -2042,8 +2042,9 @@ exports.API = SC.Object.extend({
         
         this.set('canvas', canvas);        
         
+        // avoid dependency circle
         var r = require;
-        var cursor = require("bespin/editor/cursor");
+        var cursor = r("bespin/editor/cursor");
 
         this.cursorManager = cursor.CursorManager.create({ editor: this });
         this.ui = exports.UI.create({ editor: this });
