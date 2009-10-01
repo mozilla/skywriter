@@ -577,7 +577,7 @@ exports.Events = SC.Object.extend({
                 if (themeSettings) {
                     if (themeSettings != editor.theme) {
                         editor.theme = themeSettings;
-                        bespin.publish("settings:set:fontsize", {value: settings.get('fontsize')});
+                        bespin.publish("settings:set:fontsize", { value: settings.get('fontsize') });
                     }
                     return true;
                 }

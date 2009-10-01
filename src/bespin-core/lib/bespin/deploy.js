@@ -258,7 +258,7 @@ exports._deployCommand = function(instruction, project, opts) {
             }
         });
     }, { getKeychain: true });
-}
+};
 
 exports.commands.addCommand({
     name: 'test',

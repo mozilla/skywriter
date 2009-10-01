@@ -54,16 +54,16 @@ exports.Catalog = SC.Object.extend({
         this.points.push(exports.ExtensionPoint.create({
             name: "extensionpoint"
         }));
-        
+
         this.plugins = {};
     },
-    
+
     activate: function(metadata) {
         for (var name in metadata) {
             var md = metadata[name];
             md.catalog = this;
             if (md.provides) {
-                for (var i = 0; i < ) {
+                for (var i = 0; i < provides.length; i++) {
                     md.provides[i] = exports.Extension.create(md.provides[i]);
                 }
             } else {

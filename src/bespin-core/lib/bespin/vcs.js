@@ -741,11 +741,11 @@ bespin.vcs.svnCommands.genericExecute = function(instruction, args) {
         if (instruction.command.prompting) {
             prompts = instruction.command.prompting(command);
         } else {
-            prompts = {getKeychain: true}
+            prompts = { getKeychain: true };
         }
 
         bespin.vcs.getInfoFromUser(instruction, function(values) {
-            var commandMsg = {command: command};
+            var commandMsg = { command: command };
 
             if (values.message) {
                 command.splice(2, 0, "-m", values.message);
