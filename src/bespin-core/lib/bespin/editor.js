@@ -27,11 +27,12 @@
 var bespin = require("bespin");
 var clipboard = require("bespin/editor/clipboard");
 var util = require("bespin/util");
-var key = require("bespin/util/keys");
+var keys = require("bespin/util/keys");
 var events = require("bespin/events");
 var syntax = require("bespin/syntax");
 var utils = require("bespin/editor").utils;
 var actions = require("bespin/editor/actions");
+var model = require("bespin/editor/model");
 
 /**
  *
@@ -174,9 +175,9 @@ exports.Rect = SC.Object.extend({
     h: null,
 
     init: function() {
-        this.x2 = x + w;
-        this.y2 = y + h;
-        sc_super();
+        this.x2 = this.x + this.w;
+        this.y2 = this.y + this.h;
+        this.sc_super();
     },
 
     // inclusive of bounding lines
@@ -224,7 +225,7 @@ exports.utils = {
         return { pos: utils.copyPos(oldPos || bespin.get('editor').getCursorPos()) };
     },
 
-    changePos: function(args, pos) {
+    changePos: function(args, oldPos) {
         return { pos: utils.copyPos(oldPos || bespin.get('editor').getCursorPos()) };
     },
 
@@ -297,7 +298,7 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
         var platform = util.getOS();
 
         // default to Windows (e.g. Linux often the same)
-        var platformKeys = keysForPlatforms[platform] || keysForPlatforms['WINDOWS'];
+        var platformKeys = keysForPlatforms[platform] || keysForPlatforms.WINDOWS;
         if (!platformKeys) {
             return;
         }
@@ -367,8 +368,8 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
             hasAction = true;
             try {
                 action(args);
-            } catch (e) {
-                console.log("Action caused an error! ", e);
+            } catch (ex) {
+                console.log("Action caused an error! ", ex);
             }
             this.lastAction = action;
         }
@@ -434,8 +435,8 @@ exports.UI = SC.Object.extend({
         var settings = bespin.get("settings");
         this.syntaxModel = syntax.Resolver.setEngine("simple").getModel();
 
-        this.selectionHelper = new exports.SelectionHelper({ editor:editor });
-        this.actions = new actions.Actions({ editor:editor });
+        this.selectionHelper = new exports.SelectionHelper({ editor: this.editor });
+        this.actions = new actions.Actions({ editor: this.editor });
 
         this.rowLengthCache = [];
         this.searchString = null;
@@ -512,7 +513,7 @@ exports.UI = SC.Object.extend({
         this.lastyoffset = 0;
 
         //if we act as component, onmousewheel should only be listened to inside of the editor canvas.
-        var scope = editor.opts.actsAsComponent ? editor.canvas : window;
+        var scope = this.editor.opts.actsAsComponent ? this.editor.canvas : window;
 
         this.xscrollbar = new exports.Scrollbar({ ui: this, orientation: "horizontal" });
         this.xscrollbar.valueChanged = dojo.hitch(this, function() {
@@ -541,7 +542,7 @@ exports.UI = SC.Object.extend({
         setTimeout(dojo.hitch(this, function() {
             this.toggleCursor(this);
         }), this.toggleCursorFrequency);
-        sc_super();
+        this.sc_super();
     },
 
     /**
@@ -597,10 +598,11 @@ exports.UI = SC.Object.extend({
             return;
         }
 
+        var point;
         if (this.editor.debugMode) {
             if (clientX < this.DEBUG_GUTTER_WIDTH) {
                 console.log("Clicked in debug gutter");
-                var point = { x: clientX, y: clientY };
+                point = { x: clientX, y: clientY };
                 point.y += Math.abs(this.yoffset);
                 var p = this.convertClientPointToCursorPoint(point);
 
@@ -620,7 +622,7 @@ exports.UI = SC.Object.extend({
             this.selectMouseDownPos = (this.editor.selection) ? this.editor.selection.startPos : this.editor.getCursorPos();
             this.setSelection(e);
         } else {
-            var point = { x: clientX, y: clientY };
+            point = { x: clientX, y: clientY };
 
             // happens first, because scroll bars are not relative to scroll position
             if ((this.xscrollbar.rect.contains(point)) || (this.yscrollbar.rect.contains(point))) {
@@ -705,6 +707,7 @@ exports.UI = SC.Object.extend({
 
         //get detail
         var detail = this.selectMouseDetail;
+        var startPos, endPos;
 
         //single click
         if (detail == 1) {
@@ -735,6 +738,7 @@ exports.UI = SC.Object.extend({
                 return false;
             };
 
+            var comparator;
             if (!cursorAt) {
                 // nothing to see here. We must be past the end of the line.
                 // Per Gordon's suggestion, let's have double-click EOL select the line, excluding newline
@@ -743,15 +747,15 @@ exports.UI = SC.Object.extend({
                     endPos: this.editor.getCursorPos({row: modelstart.row, col: row.length})
                 });
             } else if (isDelimiter(cursorAt.charAt(0))) { // see above. Means empty space or =, >, <, etc. that we want to be clever with
-                var comparator = function(letter) {
+                comparator = function(letter) {
                     if (isDelimiter(letter)) {
                         return false;
                     }
                     return true;
                 };
 
-                var startPos = this.editor.model.findBefore(modelstart.row, modelstart.col, comparator);
-                var endPos = this.editor.model.findAfter(modelend.row, modelend.col, comparator);
+                startPos = this.editor.model.findBefore(modelstart.row, modelstart.col, comparator);
+                endPos = this.editor.model.findAfter(modelend.row, modelend.col, comparator);
 
                 this.editor.setSelection({
                     startPos: this.editor.getCursorPos(backwards ? endPos : startPos),
@@ -761,15 +765,15 @@ exports.UI = SC.Object.extend({
                 //set cursor so that it is at selection end (even if mouse wasn't there)
                 this.editor.moveCursor(this.editor.getCursorPos(backwards ? startPos : endPos));
             } else {
-                var comparator = function(letter) {
+                comparator = function(letter) {
                     if (isDelimiter(letter)) {
                         return true;
                     }
                     return false;
                 };
 
-                var startPos = this.editor.model.findBefore(modelstart.row, modelstart.col, comparator);
-                var endPos = this.editor.model.findAfter(modelend.row, modelend.col, comparator);
+                startPos = this.editor.model.findBefore(modelstart.row, modelstart.col, comparator);
+                endPos = this.editor.model.findAfter(modelend.row, modelend.col, comparator);
 
                 this.editor.setSelection({
                     startPos: this.editor.getCursorPos(backwards ? endPos : startPos),
@@ -781,8 +785,8 @@ exports.UI = SC.Object.extend({
             }
         } else if (detail > 2) { //triple plus duluxe
             // select the line
-            var startPos = {row: modelstart.row, col: 0};
-            var endPos = {row: modelend.row, col: 0};
+            startPos = {row: modelstart.row, col: 0};
+            endPos = {row: modelend.row, col: 0};
             if (this.editor.model.hasRow(endPos.row + 1)) {
                 endPos.row = endPos.row + 1;
             } else {
@@ -835,10 +839,11 @@ exports.UI = SC.Object.extend({
             return;    // can't do much without these
         }
 
+        var pageScroll;
         if (bespin.get('settings')) {
-            var pageScroll = parseFloat(bespin.get('settings').get('pagescroll')) || 0;
+            pageScroll = parseFloat(bespin.get('settings').get('pagescroll')) || 0;
         } else {
-            var pageScroll = 0;
+            pageScroll = 0;
         }
         pageScroll = (!softEnsure ? Math.max(0, Math.min(1, pageScroll)) : 0.25);
 
@@ -962,10 +967,10 @@ exports.UI = SC.Object.extend({
         dojo.connect(scope, "keypress", this, "oldkeypress");
 
         // Modifiers, Key, Action
-        listener.bindKeyStringSelectable("", Key.LEFT_ARROW, this.actions.moveCursorLeft, "Move Cursor Left");
-        listener.bindKeyStringSelectable("", Key.RIGHT_ARROW, this.actions.moveCursorRight, "Move Cursor Right");
-        listener.bindKeyStringSelectable("", Key.UP_ARROW, this.actions.moveCursorUp, "Move Cursor Up");
-        listener.bindKeyStringSelectable("", Key.DOWN_ARROW, this.actions.moveCursorDown, "Move Cursor Down");
+        listener.bindKeyStringSelectable("", keys.Key.LEFT_ARROW, this.actions.moveCursorLeft, "Move Cursor Left");
+        listener.bindKeyStringSelectable("", keys.Key.RIGHT_ARROW, this.actions.moveCursorRight, "Move Cursor Right");
+        listener.bindKeyStringSelectable("", keys.Key.UP_ARROW, this.actions.moveCursorUp, "Move Cursor Up");
+        listener.bindKeyStringSelectable("", keys.Key.DOWN_ARROW, this.actions.moveCursorDown, "Move Cursor Down");
 
         // Move Left: Mac = Alt+Left, Win/Lin = Ctrl+Left
         listener.bindKeyForPlatform({
@@ -980,83 +985,83 @@ exports.UI = SC.Object.extend({
         }, this.actions.moveWordRight, "Move Word Right", true /* selectable */);
 
         // Start of line: All platforms support HOME. Mac = Apple+Left, Win/Lin = Alt+Left
-        listener.bindKeyStringSelectable("", Key.HOME, this.actions.moveToLineStart, "Move to start of line");
+        listener.bindKeyStringSelectable("", keys.Key.HOME, this.actions.moveToLineStart, "Move to start of line");
         listener.bindKeyForPlatform({
             MAC: "APPLE LEFT_ARROW",
             WINDOWS: "ALT LEFT_ARROW"
         }, this.actions.moveToLineStart, "Move to start of line", true /* selectable */);
 
         // End of line: All platforms support END. Mac = Apple+Right, Win/Lin = Alt+Right
-        listener.bindKeyStringSelectable("", Key.END, this.actions.moveToLineEnd, "Move to end of line");
+        listener.bindKeyStringSelectable("", keys.Key.END, this.actions.moveToLineEnd, "Move to end of line");
         listener.bindKeyForPlatform({
             MAC: "APPLE RIGHT_ARROW",
             WINDOWS: "ALT RIGHT_ARROW"
         }, this.actions.moveToLineEnd, "Move to end of line", true /* selectable */);
 
-        listener.bindKeyString("CTRL", Key.K, this.actions.killLine, "Kill entire line");
-        listener.bindKeyString("CMD", Key.L, this.actions.gotoLine, "Goto Line");
-        listener.bindKeyString("CTRL", Key.L, this.actions.moveCursorRowToCenter, "Move cursor to center of page");
+        listener.bindKeyString("CTRL", keys.Key.K, this.actions.killLine, "Kill entire line");
+        listener.bindKeyString("CMD", keys.Key.L, this.actions.gotoLine, "Goto Line");
+        listener.bindKeyString("CTRL", keys.Key.L, this.actions.moveCursorRowToCenter, "Move cursor to center of page");
 
-        listener.bindKeyStringSelectable("", Key.BACKSPACE, this.actions.backspace, "Backspace");
-        listener.bindKeyStringSelectable("CTRL", Key.BACKSPACE, this.actions.deleteWordLeft, "Delete a word to the left");
+        listener.bindKeyStringSelectable("", keys.Key.BACKSPACE, this.actions.backspace, "Backspace");
+        listener.bindKeyStringSelectable("CTRL", keys.Key.BACKSPACE, this.actions.deleteWordLeft, "Delete a word to the left");
 
-        listener.bindKeyString("", Key.DELETE, this.actions.deleteKey, "Delete");
-        listener.bindKeyString("CTRL", Key.DELETE, this.actions.deleteWordRight, "Delete a word to the right");
+        listener.bindKeyString("", keys.Key.DELETE, this.actions.deleteKey, "Delete");
+        listener.bindKeyString("CTRL", keys.Key.DELETE, this.actions.deleteWordRight, "Delete a word to the right");
 
-        listener.bindKeyString("", Key.ENTER, this.actions.newline, "Insert newline");
-        listener.bindKeyString("CMD", Key.ENTER, this.actions.newlineBelow, "Insert newline at end of current line");
-        listener.bindKeyString("", Key.TAB, this.actions.insertTab, "Indent / insert tab");
-        listener.bindKeyString("SHIFT", Key.TAB, this.actions.unindent, "Unindent");
-        listener.bindKeyString("CMD", Key.SQUARE_BRACKET_CLOSE, this.actions.indent, "Indent");
-        listener.bindKeyString("CMD", Key.SQUARE_BRACKET_OPEN, this.actions.unindent, "Unindent");
+        listener.bindKeyString("", keys.Key.ENTER, this.actions.newline, "Insert newline");
+        listener.bindKeyString("CMD", keys.Key.ENTER, this.actions.newlineBelow, "Insert newline at end of current line");
+        listener.bindKeyString("", keys.Key.TAB, this.actions.insertTab, "Indent / insert tab");
+        listener.bindKeyString("SHIFT", keys.Key.TAB, this.actions.unindent, "Unindent");
+        listener.bindKeyString("CMD", keys.Key.SQUARE_BRACKET_CLOSE, this.actions.indent, "Indent");
+        listener.bindKeyString("CMD", keys.Key.SQUARE_BRACKET_OPEN, this.actions.unindent, "Unindent");
 
-        listener.bindKeyString("", Key.ESCAPE, this.actions.escape, "Clear fields and dialogs");
+        listener.bindKeyString("", keys.Key.ESCAPE, this.actions.escape, "Clear fields and dialogs");
 
-        listener.bindKeyString("CMD", Key.A, this.actions.selectAll, "Select All");
+        listener.bindKeyString("CMD", keys.Key.A, this.actions.selectAll, "Select All");
 
         // handle key to jump between editor and other windows / commandline
-        listener.bindKeyString("CMD", Key.I, this.actions.toggleQuickopen, "Toggle Quickopen");
-        listener.bindKeyString("CMD", Key.J, this.actions.focusCommandline, "Open Command line");
-        listener.bindKeyString("CMD", Key.O, this.actions.focusFileBrowser, "Open File Browser");
-        listener.bindKeyString("CMD", Key.F, this.actions.cmdFilesearch, "Search in this file");
-        listener.bindKeyString("CMD", Key.G, this.actions.findNext, "Find Next");
-        listener.bindKeyString("SHIFT CMD", Key.G, this.actions.findPrev, "Find Previous");
-        listener.bindKeyString("CTRL", Key.M, this.actions.togglePieMenu, "Open Pie Menu");
+        listener.bindKeyString("CMD", keys.Key.I, this.actions.toggleQuickopen, "Toggle Quickopen");
+        listener.bindKeyString("CMD", keys.Key.J, this.actions.focusCommandline, "Open Command line");
+        listener.bindKeyString("CMD", keys.Key.O, this.actions.focusFileBrowser, "Open File Browser");
+        listener.bindKeyString("CMD", keys.Key.F, this.actions.cmdFilesearch, "Search in this file");
+        listener.bindKeyString("CMD", keys.Key.G, this.actions.findNext, "Find Next");
+        listener.bindKeyString("SHIFT CMD", keys.Key.G, this.actions.findPrev, "Find Previous");
+        listener.bindKeyString("CTRL", keys.Key.M, this.actions.togglePieMenu, "Open Pie Menu");
 
-        listener.bindKeyString("CMD", Key.Z, this.actions.undo, "Undo");
-        listener.bindKeyString("SHIFT CMD", Key.Z, this.actions.redo, "Redo");
-        listener.bindKeyString("CMD", Key.Y, this.actions.redo, "Redo");
+        listener.bindKeyString("CMD", keys.Key.Z, this.actions.undo, "Undo");
+        listener.bindKeyString("SHIFT CMD", keys.Key.Z, this.actions.redo, "Redo");
+        listener.bindKeyString("CMD", keys.Key.Y, this.actions.redo, "Redo");
 
-        listener.bindKeyStringSelectable("CMD", Key.UP_ARROW, this.actions.moveToFileTop, "Move to top of file");
-        listener.bindKeyStringSelectable("CMD", Key.DOWN_ARROW, this.actions.moveToFileBottom, "Move to bottom of file");
-        listener.bindKeyStringSelectable("CMD", Key.HOME, this.actions.moveToFileTop, "Move to top of file");
-        listener.bindKeyStringSelectable("CMD", Key.END, this.actions.moveToFileBottom, "Move to bottom of file");
+        listener.bindKeyStringSelectable("CMD", keys.Key.UP_ARROW, this.actions.moveToFileTop, "Move to top of file");
+        listener.bindKeyStringSelectable("CMD", keys.Key.DOWN_ARROW, this.actions.moveToFileBottom, "Move to bottom of file");
+        listener.bindKeyStringSelectable("CMD", keys.Key.HOME, this.actions.moveToFileTop, "Move to top of file");
+        listener.bindKeyStringSelectable("CMD", keys.Key.END, this.actions.moveToFileBottom, "Move to bottom of file");
 
-        listener.bindKeyStringSelectable("", Key.PAGE_UP, this.actions.movePageUp, "Move a page up");
-        listener.bindKeyStringSelectable("", Key.PAGE_DOWN, this.actions.movePageDown, "Move a page down");
+        listener.bindKeyStringSelectable("", keys.Key.PAGE_UP, this.actions.movePageUp, "Move a page up");
+        listener.bindKeyStringSelectable("", keys.Key.PAGE_DOWN, this.actions.movePageDown, "Move a page down");
 
         // For now we are punting and doing a page down, but in the future we will tie to outline mode and move in block chunks
-        listener.bindKeyStringSelectable("ALT", Key.UP_ARROW, this.actions.movePageUp, "Move up a block");
-        listener.bindKeyStringSelectable("ALT", Key.DOWN_ARROW, this.actions.movePageDown, "Move down a block");
+        listener.bindKeyStringSelectable("ALT", keys.Key.UP_ARROW, this.actions.movePageUp, "Move up a block");
+        listener.bindKeyStringSelectable("ALT", keys.Key.DOWN_ARROW, this.actions.movePageDown, "Move down a block");
 
-        listener.bindKeyString("CMD ALT", Key.LEFT_ARROW, this.actions.previousFile);
-        listener.bindKeyString("CMD ALT", Key.RIGHT_ARROW, this.actions.nextFile);
+        listener.bindKeyString("CMD ALT", keys.Key.LEFT_ARROW, this.actions.previousFile);
+        listener.bindKeyString("CMD ALT", keys.Key.RIGHT_ARROW, this.actions.nextFile);
 
         // Other key bindings can be found in commands themselves.
         // For example, this:
         // Refactor warning: Below used to have an action - publish to "editor:newfile",
         // cahnged to this.editor.newfile but might not work as assumed.
-        // listener.bindKeyString("CTRL SHIFT", Key.N, this.editor.newfile, "Create a new file");
+        // listener.bindKeyString("CTRL SHIFT", keys.Key.N, this.editor.newfile, "Create a new file");
         // has been moved to the 'newfile' command withKey
         // Also, the clipboard.js handles C, V, and X
     },
 
     getWidth: function() {
-        return parseInt(dojo.style(this.editor.canvas.parentNode, "width"));
+        return parseInt(dojo.style(this.editor.canvas.parentNode, "width"), 10);
     },
 
     getHeight: function() {
-        return parseInt(dojo.style(this.editor.canvas.parentNode, "height"));
+        return parseInt(dojo.style(this.editor.canvas.parentNode, "height"), 10);
     },
 
     getTopOffset: function() {
@@ -1260,7 +1265,6 @@ exports.UI = SC.Object.extend({
                 dojo.forEach(points, function(point) {
                     breakpoints[point.lineNumber] = point;
                 });
-                delete points;
             });
         }
 
@@ -1334,8 +1338,8 @@ exports.UI = SC.Object.extend({
                         var bpw = this.DEBUG_GUTTER_WIDTH - this.DEBUG_GUTTER_INSETS.left - this.DEBUG_GUTTER_INSETS.right;
                         var bph = this.lineHeight - this.DEBUG_GUTTER_INSETS.top - this.DEBUG_GUTTER_INSETS.bottom;
 
-                        var bpmidpointx = bpx + parseInt(bpw / 2);
-                        var bpmidpointy = bpy + parseInt(bph / 2);
+                        var bpmidpointx = bpx + parseInt(bpw / 2, 10);
+                        var bpmidpointy = bpy + parseInt(bph / 2, 10);
 
                         ctx.strokeStyle = "rgb(128, 0, 0)";
                         ctx.fillStyle = "rgb(255, 102, 102)";
@@ -1536,7 +1540,7 @@ exports.UI = SC.Object.extend({
             // paint tab information, if applicable and the information should be displayed
             if (settings && (settings.isSettingOn("tabarrow") || settings.isSettingOn("tabshowspace"))) {
                 if (lineMetadata.tabExpansions.length > 0) {
-                    for (var i = 0; i < lineMetadata.tabExpansions.length; i++) {
+                    for (i = 0; i < lineMetadata.tabExpansions.length; i++) {
                         var expansion = lineMetadata.tabExpansions[i];
 
                         // the starting x position of the tab character; the existing value of y is fine
@@ -1546,31 +1550,31 @@ exports.UI = SC.Object.extend({
                         var showTabSpace = settings && settings.isSettingOn("tabshowspace");
                         if (showTabSpace) {
                             var sw = (expansion.end - expansion.start) * this.charWidth;
-                            ctx.fillStyle = this.editor.theme["tabSpace"] || "white";
+                            ctx.fillStyle = this.editor.theme.tabSpace || "white";
                             ctx.fillRect(lx, y, sw, this.lineHeight);
                         }
 
                         var showTabNib = settings && settings.isSettingOn("tabarrow");
                         if (showTabNib) {
                             // the center of the current character position's bounding rectangle
-                            var cy = y + (this.lineHeight / 2);
+                            cy = y + (this.lineHeight / 2);
                             var cx = lx + (this.charWidth / 2);
 
                             // the width and height of the triangle to draw representing the tab
-                            var tw = 4;
+                            tw = 4;
                             var th = 6;
 
                             // the origin of the triangle
-                            var tx = parseInt(cx - (tw / 2));
-                            var ty = parseInt(cy - (th / 2));
+                            tx = parseInt(cx - (tw / 2), 10);
+                            var ty = parseInt(cy - (th / 2), 10);
 
                             // draw the rectangle
                             ctx.globalAlpha = 0.3; // make the tab arrow subtle
                             ctx.beginPath();
-                            ctx.fillStyle = this.editor.theme["plain"] || "white";
+                            ctx.fillStyle = this.editor.theme.plain || "white";
                             ctx.moveTo(tx, ty);
                             ctx.lineTo(tx, ty + th);
-                            ctx.lineTo(tx + tw, ty + parseInt(th / 2));
+                            ctx.lineTo(tx + tw, ty + parseInt(th / 2, 10));
                             ctx.closePath();
                             ctx.fill();
                             ctx.globalAlpha = 1.0;
@@ -1629,7 +1633,7 @@ exports.UI = SC.Object.extend({
                         ctx.font = prevFont;
                     }
                 });
-            };
+            }
         }
 
         // Paint the 'change' overlays. This is the polygon that we draw for
@@ -1804,7 +1808,7 @@ exports.UI = SC.Object.extend({
 
         // the bar
         var sx = this.nibleft.x2 + 4;
-        var sw = this.nibright.x - this.nibleft.x2 - 9;
+        sw = this.nibright.x - this.nibleft.x2 - 9;
         this.xscrollbar.rect = new Rect(sx, this.nibleft.y - 1, sw, this.nibleft.h + 1);
         this.xscrollbar.value = -this.xoffset;
         this.xscrollbar.min = 0;
@@ -2005,7 +2009,7 @@ exports.API = SC.Object.extend({
         while (this.canvas && this.canvas.nodeType != 1) {
             this.canvas = this.canvas.nextSibling;
         }
-        
+
         var r = require;
         var cursor = r("bespin/editor/cursor");
 
@@ -2036,7 +2040,7 @@ exports.API = SC.Object.extend({
             this.setFocus(true);
         }
 
-        sc_super();
+        this.sc_super();
     },
 
     /**
@@ -2134,7 +2138,7 @@ exports.API = SC.Object.extend({
         var settings = bespin.get("settings");
         var size = bespin.defaultTabSize; // default
         if (settings) {
-            var tabsize = parseInt(settings.get("tabsize"));
+            var tabsize = parseInt(settings.get("tabsize"), 10);
             if (tabsize > 0){size = tabsize;}
         }
         return size;
@@ -2215,7 +2219,7 @@ exports.API = SC.Object.extend({
 
         // -- try an editor action first, else fire off a command
         var actionDescription = "Execute command: '" + action + "'";
-        var action = this.ui.actions[action] || function() {
+        action = this.ui.actions[action] || function() {
             bespin.get('commandLine').executeCommand(command, true);
         };
 
@@ -2377,13 +2381,14 @@ exports.API = SC.Object.extend({
      * TODO: Should we have onSuccess and onFailure callbacks?
      */
     openFile: function(project, filename, options) {
+        var onFailure, onSuccess;
         var session = bespin.get('editSession');
         var commandLine = bespin.get('commandLine');
         var self = this;
 
-        var project = project || session.project;
-        var filename = filename || session.path;
-        var options = options || {};
+        project = project || session.project;
+        filename = filename || session.path;
+        options = options || {};
         var fromFileHistory = options.fromFileHistory || false;
 
         // Short circuit if we are already open at the requested file
@@ -2396,11 +2401,11 @@ exports.API = SC.Object.extend({
 
         // If the current buffer is dirty, for now, save it
         if (this.dirty && !session.shouldCollaborate()) {
-            var onFailure = function(xhr) {
+            onFailure = function(xhr) {
                 commandLine.showHint("Trying to save current file. Failed: " + xhr.responseText);
             };
 
-            var onSuccess = function() {
+            onSuccess = function() {
                 self.openFile(project, filename, options);
             };
 
@@ -2422,11 +2427,11 @@ exports.API = SC.Object.extend({
             return;
         }
 
-        var onFailure = function() {
+        onFailure = function() {
             bespin.publish("editor:openfile:openfail", { project: project, filename: filename });
         };
 
-        var onSuccess = function(file) {
+        onSuccess = function(file) {
             // TODO: We shouldn't need to to this but originally there was
             // no onFailure, and this is how failure was communicated
             if (!file) {

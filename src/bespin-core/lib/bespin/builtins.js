@@ -23,4 +23,4 @@
  * ***** END LICENSE BLOCK ***** */
 
 exports.metadata = {
-}
+};

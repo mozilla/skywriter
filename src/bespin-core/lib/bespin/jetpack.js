@@ -120,7 +120,10 @@ exports.commands.addCommand({
         // Use the given name, or default to the current jetpack
         feature = feature || (function() {
             var editSession = bespin.get('editSession');
-            if (editSession.project != exports.projectName) return; // jump out if not in the jetpack project
+            if (editSession.project != exports.projectName) {
+                // jump out if not in the jetpack project
+                return;
+            }
             var bits = editSession.path.split('.');
             return bits[bits.length - 2];
         })();
@@ -197,8 +200,11 @@ bespin.subscribe("settings:set:jetpack", function(event) {
     var newset = bespin.get("settings").isOff(event.value);
     var jptb = dojo.byId('toolbar_jetpack');
 
-    if (newset) { // turn it off
-        if (jptb) jptb.style.display = 'none';
+    // turn it off
+    if (newset) {
+        if (jptb) {
+            jptb.style.display = 'none';
+        }
     } else { // turn it on
         if (jptb) {
             jptb.style.display = 'inline';
@@ -236,7 +242,9 @@ bespin.subscribe("toolbar:init", function(event) {
         dojo.connect(jetpack, 'mouseover', highlightOn);
         dojo.connect(jetpack, 'mouseout',  function() {
             var dropdown = dojo.byId('jetpack_dropdown');
-            if (!dropdown || dropdown.style.display == 'none') highlightOff();
+            if (!dropdown || dropdown.style.display == 'none') {
+                highlightOff();
+            }
         });
 
         // Change the font size between the small, medium, and large settings

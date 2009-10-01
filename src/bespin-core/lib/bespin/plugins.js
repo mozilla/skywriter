@@ -63,7 +63,7 @@ exports.Catalog = SC.Object.extend({
             var md = metadata[name];
             md.catalog = this;
             if (md.provides) {
-                for (var i = 0; i < provides.length; i++) {
+                for (var i = 0; i < md.provides.length; i++) {
                     md.provides[i] = exports.Extension.create(md.provides[i]);
                 }
             } else {

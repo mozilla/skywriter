@@ -56,12 +56,12 @@ exports.Server = SC.Object.extend({
                 console.groupEnd();
 
                 // If got an exception on success it's really a failure
-                if (functionName == "onSuccess" && dojo.isFunction(options['onFailure'])) {
+                if (functionName == "onSuccess" && dojo.isFunction(options.onFailure)) {
                     try {
                         options.onFailure({ responseText: ex.toString() });
-                    } catch (ex) {
+                    } catch (ex2) {
                         console.group("Error calling options.onFailure from server.request");
-                        console.error(ex);
+                        console.error(ex2);
                         console.trace();
                         console.groupEnd();
                     }
@@ -94,11 +94,11 @@ exports.Server = SC.Object.extend({
         }
 
         var onreadystatechange = function() {
-            if (xhr.readyState == 4) {
+            if (xhr.readyState === 4) {
                 if (xhr.status && xhr.status != 0 && (xhr.status >= 200 && xhr.status < 300)) {
                     var response = xhr.responseText;
 
-                    if (options['evalJSON'] && response) {
+                    if (options.evalJSON && response) {
                         try {
                             response = dojo.fromJson(response);
                         } catch (syntaxException) {
@@ -108,7 +108,7 @@ exports.Server = SC.Object.extend({
 
                     var handled = server._callCallback(options, "onSuccess", [ response, xhr ]);
 
-                    if (!handled && options['log']) {
+                    if (!handled && options.log) {
                         console.log(options.log);
                     }
                 } else {
@@ -202,7 +202,7 @@ exports.Server = SC.Object.extend({
      * Do we need to set off another poll?
      */
     _checkPolling: function() {
-        if (this._jobsCount == 0) {
+        if (this._jobsCount === 0) {
             return;
         }
         if (this._timeout != null) {
@@ -309,7 +309,7 @@ exports.Server = SC.Object.extend({
      */
     login: function(user, pass, onSuccess, onFailure) {
         var url = "/register/login/" + user;
-        this.request('POST', url, "password=" + escape(pass), {
+        this.request('POST', url, "password=" + encodeURI(pass), {
             onSuccess: onSuccess,
             on401: onFailure,
             log: 'Login complete.'
@@ -328,7 +328,7 @@ exports.Server = SC.Object.extend({
     signup: function(user, pass, email, opts) {
         opts = opts || {};
         var url = "/register/new/" + user;
-        var data = "password=" + escape(pass) + "&email=" + escape(email);
+        var data = "password=" + encodeURI(pass) + "&email=" + encodeURI(email);
         this.request('POST', url, data, opts);
     },
 
@@ -490,7 +490,7 @@ exports.Server = SC.Object.extend({
         if (dojo.isFunction(onSuccess)) {
             opts.onSuccess = onSuccess;
         } else {
-            opts['log'] = "Made a directory: [project=" + project + ", path=" + path + "]";
+            opts.log = "Made a directory: [project=" + project + ", path=" + path + "]";
         }
         if (dojo.isFunction(onFailure)) {
             opts.onFailure = onFailure;
@@ -519,7 +519,7 @@ exports.Server = SC.Object.extend({
         if (dojo.isFunction(onSuccess)) {
             opts.onSuccess = onSuccess;
         } else {
-            opts['log'] = "Removed directory: [project=" + project + ", path=" + path + "]";
+            opts.log = "Removed directory: [project=" + project + ", path=" + path + "]";
         }
         if (dojo.isFunction(onFailure)) {
             opts.onFailure = onFailure;
@@ -561,9 +561,9 @@ exports.Server = SC.Object.extend({
      * @param onSuccess fires after the file is closed
      */
     searchFiles: function(project, searchkey, includeFolders, onSuccess) {
-        var url = util.path.combine('/file/search', project + '?q=' + escape(searchkey));
+        var url = util.path.combine('/file/search', project + '?q=' + encodeURI(searchkey));
         if (includeFolders.length > 0) {
-            url += '&i=' + escape(includeFolders.join(';'));
+            url += '&i=' + encodeURI(includeFolders.join(';'));
         }
         var opts = {
             onSuccess: onSuccess,
@@ -748,7 +748,7 @@ exports.Server = SC.Object.extend({
     },
 
     rescan: function(project, instruction, opts) {
-        var url = '/project/rescan/' + escape(project);
+        var url = '/project/rescan/' + encodeURI(project);
         this.requestDisconnected('POST', url, {}, instruction, opts);
     }
 });

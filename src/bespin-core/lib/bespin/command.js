@@ -249,7 +249,7 @@ exports.Store = SC.Object.extend({
         if (matches.length == 1) {
             // Single match: go for autofill and hint
             var newValue = matches[0];
-            var command = this.commands[newValue] || this.commands[this.aliases[newValue]];
+            command = this.commands[newValue] || this.commands[this.aliases[newValue]];
             if (this.commandTakesArgs(command)) {
                 newValue = newValue + " ";
             }
@@ -335,7 +335,7 @@ exports.Store = SC.Object.extend({
 
         if (this.commands[prefix]) { // caught a real command
             command = this.commands[prefix];
-            commands.push(command['description'] ? command.description : command.preview);
+            commands.push(command.description ? command.description : command.preview);
         } else {
             var showHidden = false;
 

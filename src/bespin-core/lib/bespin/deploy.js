@@ -142,11 +142,14 @@ exports.commands.addCommand({
                         }, td);
                     }
 
+                    // TODO: This is used in dojo.style below before it is defined by dojo.create?!
+                    var pwrow;
+
                     // Auth type
                     tr = dojo.create("tr", {}, table);
                     td = dojo.create("td", {innerHTML: "Authentication type:"}, tr);
                     td = dojo.create("td", {}, tr);
-                    select = dojo.create("select", {name: "authType",
+                    var select = dojo.create("select", {name: "authType",
                         onchange: function(e) {
                             if (this.value == "ssh") {
                                 dojo.style(pwrow, "display", "none");
@@ -286,25 +289,25 @@ exports.commands.addCommand({
 
 dojo.extend(client.Server, {
     saveDeploySetup: function(project, data, opts) {
-        var opts = opts || {};
+        opts = opts || {};
         opts.evalJSON = true;
-        var url = "/project/deploy/" + escape(project) + "/setup";
+        var url = "/project/deploy/" + encodeURI(project) + "/setup";
         data = dojo.toJson(data);
         this.request('PUT', url, data, opts);
     },
 
     getDeploySetup: function(project, data, opts) {
-        var opts = opts || {};
+        opts = opts || {};
         opts.evalJSON = true;
-        var url = "/project/deploy/" + escape(project) + "/setup";
+        var url = "/project/deploy/" + encodeURI(project) + "/setup";
         data = dojo.toJson(data);
         this.request('POST', url, data, opts);
     },
 
     runDeploy: function(instruction, project, data, opts) {
-        var opts = opts || {};
+        opts = opts || {};
         opts.evalJSON = true;
-        var url = "/project/deploy/" + escape(project) + "/";
+        var url = "/project/deploy/" + encodeURI(project) + "/";
         data = dojo.toJson(data);
         this.requestDisconnected('POST', url, data, instruction, opts);
     }

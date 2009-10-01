@@ -92,7 +92,7 @@ exports.Key = {
 
 (function() {
     dojo.mixin(exports.Key, dojo.keys);
-    
+
     // -- Reverse the map for lookups
     var keys = exports.Key;
     exports.KeyCodeToName = {};

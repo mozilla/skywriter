@@ -1,7 +1,9 @@
 var _editorComponent;
 
-SC = require("sproutcore");
+var SC = require("sproutcore");
 var component = require("bespin/editor/component");
+var bespin = require("bespin");
+
 _editorComponent = new component.Component('editor', {
     language: "js",
     loadfromdiv: true,

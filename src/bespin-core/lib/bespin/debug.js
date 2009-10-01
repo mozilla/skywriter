@@ -27,6 +27,7 @@
  * <p>This holds the data for the Bespin debugger.
  */
 
+var bespin = require("bespin");
 var commandline = require("bespin/cmd/commandline");
 
 /**
@@ -195,7 +196,7 @@ members: {
 
         var frame = null;
         if (dojo.byId("debugbar_position").innerHTML != "") {
-            var frame = 0;
+            frame = 0;
         }
         this.evalFunction(value, frame, function(output) {
             console.log("EvalCL got output: " + output);
@@ -276,7 +277,9 @@ members: {
     addBreakpoint: function(newBreakpoint) {
         for (var i = 0; i < this.breakpoints.length; i++) {
             var breakpoint = this.breakpoints[i];
-            if (this.breakpointsEqual(breakpoint, newBreakpoint)) return false;
+            if (this.breakpointsEqual(breakpoint, newBreakpoint)) {
+                return false;
+            }
         }
         newBreakpoint.id = this.sequence++;
         this.breakpoints.push(newBreakpoint);
@@ -312,7 +315,9 @@ members: {
      *
      */
     toggleBreakpoint: function(breakpoint) {
-        if (!this.addBreakpoint(breakpoint)) this.removeBreakpoint(breakpoint);
+        if (!this.addBreakpoint(breakpoint)) {
+            this.removeBreakpoint(breakpoint);
+        }
     },
 
     /**
@@ -322,7 +327,9 @@ members: {
         var bps = [];   // breakpoints to return
 
         dojo.forEach(this.breakpoints, function(breakpoint) {
-            if (breakpoint.project == project && breakpoint.path == path) bps.push(breakpoint);
+            if (breakpoint.project == project && breakpoint.path == path) {
+                bps.push(breakpoint);
+            }
         });
 
         return bps;
@@ -343,7 +350,9 @@ members: {
                 self.breakpoints[i].id = this.sequence++;
             }
 
-            if (dojo.isFunction(callback)) callback();
+            if (dojo.isFunction(callback)) {
+                callback();
+            }
         });
     },
 
@@ -385,10 +394,11 @@ exports.debuggerHalted = function(location) {
     }
 
     var linenum = location.sourceLine + 1;
+    var scriptloc;
     if (exports.project) {
-        var scriptloc = '<a onclick="bespin.get(\'commandLine\').executeCommand(\'open  /' + exports.project + "/" + location.scriptName + ' ' + linenum + '\', true)">' + location.scriptName + ':' + linenum + '</a>';
+        scriptloc = '<a onclick="bespin.get(\'commandLine\').executeCommand(\'open  /' + exports.project + "/" + location.scriptName + ' ' + linenum + '\', true)">' + location.scriptName + ':' + linenum + '</a>';
     } else {
-        var scriptloc = location.scriptName + ':' + linenum;
+        scriptloc = location.scriptName + ':' + linenum;
     }
     newtext += '<span class="code">' + location.sourceLineText + '</span><br>' +
                 scriptloc;

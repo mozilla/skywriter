@@ -22,8 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-var tester = require("bespin.test");
+var tester = require("bespin/test");
+var bespin = require("bespin");
 
 tester.addTests("key", {
     testPie: function(test) {
@@ -37,3 +37,4 @@ tester.addTests("key", {
         // TODO: Find a way to test the results of the key-press!
     }
 });
+

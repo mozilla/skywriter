@@ -229,7 +229,7 @@ exports.Store = SC.Object.extend({
         var typed = query.action[0];
 
         // No hints for a blank command line
-        if (typed.length == 0 && this.parent == null) {
+        if (typed.length === 0 && this.parent === null) {
             callback(query);
             return;
         }
@@ -237,12 +237,12 @@ exports.Store = SC.Object.extend({
         // Get a list of all commands and aliases. TODO: cache?
         var matches = [];
         for (var command in this.commands) {
-            if (command.indexOf(typed) == 0) {
+            if (command.indexOf(typed) === 0) {
                 matches.push(command);
             }
         }
         for (var alias in this.aliases) {
-            if (alias.indexOf(typed) == 0) {
+            if (alias.indexOf(typed) === 0) {
                 matches.push(alias);
             }
         }
@@ -250,13 +250,13 @@ exports.Store = SC.Object.extend({
         if (matches.length == 1) {
             // Single match: go for autofill and hint
             var newValue = matches[0];
-            var command = this.commands[newValue] || this.commands[this.aliases[newValue]];
+            command = this.commands[newValue] || this.commands[this.aliases[newValue]];
             if (this.commandTakesArgs(command)) {
                 newValue = newValue + " ";
             }
             query.autofill = query.prefix + newValue;
             query.hint = command.preview;
-        } else if (matches.length == 0) {
+        } else if (matches.length === 0) {
             // No matches, cause an error
             query.error = "No matches";
         } else {
@@ -275,7 +275,7 @@ exports.Store = SC.Object.extend({
      * Does this command take arguments?
      */
     commandTakesArgs: function(command) {
-        return command.takes != undefined;
+        return command.takes !== undefined;
     },
 
     /**
@@ -284,7 +284,9 @@ exports.Store = SC.Object.extend({
      * more, split it all up for the command and send in an object.
      */
     getArgs: function(fromUser, command) {
-        if (!command.takes) return undefined;
+        if (!command.takes) {
+            return undefined;
+        }
 
         var args;
         var userString = fromUser.join(' ');
@@ -338,7 +340,7 @@ exports.Store = SC.Object.extend({
 
         if (this.commands[prefix]) { // caught a real command
             command = this.commands[prefix];
-            commands.push(command['description'] ? command.description : command.preview);
+            commands.push(command.description ? command.description : command.preview);
         } else {
             var showHidden = false;
 
@@ -369,8 +371,12 @@ exports.Store = SC.Object.extend({
                 name = sorted[i];
                 command = this.commands[name];
 
-                if (!showHidden && command.hidden) continue;
-                if (prefix && name.indexOf(prefix) != 0) continue;
+                if (!showHidden && command.hidden) {
+                    continue;
+                }
+                if (prefix && name.indexOf(prefix) !== 0) {
+                    continue;
+                }
 
                 var args = (command.takes) ? ' [' + command.takes.order.join('] [') + ']' : '';
 

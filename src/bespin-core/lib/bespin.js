@@ -1,5 +1,9 @@
 // module: bespin
 
+// TODO: this must be circular
+var plugins = require("bespin/plugins");
+var command = require("bespin/command");
+
 dojo.mixin(exports, {
     // BEGIN VERSION BLOCK
     /** The core version of the Bespin system */
@@ -9,7 +13,7 @@ dojo.mixin(exports, {
     /** The version number of the API (to ensure that the client and server are talking the same language) */
     apiVersion: 'dev',
     // END VERSION BLOCK
-  
+
     /** Basic setting. TODO: Explain why this is here or move it */
     defaultTabSize: 4,
 
@@ -24,7 +28,7 @@ dojo.mixin(exports, {
 
     /** Holds the timeouts so they can be cleared later */
     _lazySubscriptionTimeout: {},
-  
+
     /**
      * Given a topic and a set of parameters, publish onto the bus.
      * maps onto dojo.publish but lets us abstract away for the future
@@ -34,7 +38,7 @@ dojo.mixin(exports, {
             console.log("Publish", topic, args);
         }
 
-        bespin._eventLog[topic] = true;
+        exports._eventLog[topic] = true;
         dojo.publish("bespin:" + topic, dojo.isArray(args) ? args : [ args || {} ]);
     },
 
@@ -49,17 +53,17 @@ dojo.mixin(exports, {
 
         var count = topics.length;
         var done  = function () {
-            if (count == 0) {
+            if (count === 0) {
                 callback();
             }
         };
 
         for (var i = 0; i < topics.length; ++i) {
             var topic = topics[i];
-            if (bespin._eventLog[topic]) {
+            if (exports._eventLog[topic]) {
                 --count;
             } else {
-                bespin.subscribe(topic, function () {
+                exports.subscribe(topic, function () {
                     --count;
                     done();
                 });
@@ -116,7 +120,7 @@ dojo.mixin(exports, {
     register: function(id, object) {
         this.registeredComponents[id] = object;
 
-        bespin.publish("component:register:" + id, { id: id, object: object });
+        exports.publish("component:register:" + id, { id: id, object: object });
 
         return object;
     },
@@ -127,11 +131,11 @@ dojo.mixin(exports, {
     get: function(id) {
         return this.registeredComponents[id];
     },
-    
+
     unregister: function(id) {
         delete this.registeredComponents[id];
     },
-    
+
     /**
      * Given an id, and function to run, execute it if the component is available
      */
@@ -141,14 +145,14 @@ dojo.mixin(exports, {
             return func(component);
         }
     },
-    
+
     /**
      * Asynchronous component management.
-     * 
+     *
      * Retrieve the component with the given ID. If the component is
      * not yet loaded, load the component and pass it along. The
      * callback is called with the component as the single parameter.
-     * 
+     *
      * This function returns:
      * * true if the component was already available and the callback
      *   has been called
@@ -158,9 +162,9 @@ dojo.mixin(exports, {
      */
     getComponent: function(id, callback, context) {
         context = context || window;
-        var component = bespin.get(id);
+        var component = exports.get(id);
         if (!component) {
-            var factory = bespin.factories[id];
+            var factory = exports.factories[id];
             if (!factory) {
                 return undefined;
             }
@@ -171,37 +175,37 @@ dojo.mixin(exports, {
         }
         return true;
     },
-    
+
     factories: {
         popup: function(callback, context) {
-            bespin.plugins.loadOne("popup", function(popupmod) {
-                var popup = bespin.register("popup", new popupmod.Window());
+            plugins.loadOne("popup", function(popupmod) {
+                var popup = exports.register("popup", new popupmod.Window());
                 callback.call(context, popup);
             });
         },
         piemenu: function(callback, context) {
-            bespin.plugins.loadOne("piemenu", function(piemenumod) {
-                bespin.register("piemenu", new piemenumod.Window());
-                
+            plugins.loadOne("piemenu", function(piemenumod) {
+                exports.register("piemenu", new piemenumod.Window());
+
                 // the pie menu doesn't animate properly
                 // without restoring control to the UI temporarily
                 setTimeout(function() {
-                    var piemenu = bespin.get("piemenu");
+                    var piemenu = exports.get("piemenu");
                     callback.call(context, piemenu);
                 }, 25);
             });
         },
         commandLine: function(callback, context) {
-            bespin.plugins.loadOne("commandLine", function(commandline) {
-                var commandLine = bespin.register("commandLine", 
-                    new commandline.Interface('command', bespin.command.store)
+            plugins.loadOne("commandLine", function(commandline) {
+                var commandLine = exports.register("commandLine",
+                    new commandline.Interface('command', command.store)
                 );
                 callback.call(context, commandLine);
             });
         },
         debugbar: function(callback, context) {
-            bespin.plugins.loadOne("debugbar", function(debug) {
-                var commandLine = bespin.register("debugbar", 
+            plugins.loadOne("debugbar", function(debug) {
+                var commandLine = exports.register("debugbar",
                     new debug.EvalCommandLineInterface('debugbar_command', null, {
                         idPrefix: "debugbar_",
                         parentElement: dojo.byId("debugbar")
@@ -211,8 +215,8 @@ dojo.mixin(exports, {
             });
         },
         breakpoints: function(callback, context) {
-            bespin.plugins.loadOne("breakpoints", function(BreakpointManager) {
-                var breakpoints = bespin.register("breakpoints", 
+            plugins.loadOne("breakpoints", function(BreakpointManager) {
+                var breakpoints = exports.register("breakpoints",
                     new BreakpointManager()
                 );
                 callback.call(context, breakpoints);
@@ -225,40 +229,43 @@ dojo.mixin(exports, {
      */
     displayVersion: function(el) {
         el = dojo.byId(el) || dojo.byId("version");
-        if (!el) return;
+        if (!el) {
+            return;
+        }
         el.innerHTML = '<a href="https://wiki.mozilla.org/Labs/Bespin/ReleaseNotes" title="Read the release notes">Version <span class="versionnumber">' + this.versionNumber + '</span> "' + this.versionCodename + '"</a>';
     },
-    
+
     _subscribeToExtension: function(key) {
-        bespin.subscribe("extension:removed:" + key, function() {
-            var item = bespin.get(key);
+        exports.subscribe("extension:removed:" + key, function() {
+            var item = exports.get(key);
             if (item && item.destroy) {
                 item.destroy();
             }
-            bespin.unregister(key);
+            exports.unregister(key);
         });
     },
-    
+
     _initializeReloaders: function() {
-        for (var key in bespin.factories) {
-            bespin._subscribeToExtension(key);
+        for (var key in exports.factories) {
+            exports._subscribeToExtension(key);
         }
     }
 });
 
-// bespin.subscribe("extension:loaded:bespin.subscribe", function(ext) {
-//     var subscription = bespin.subscribe(ext.topic, function(e) {
+// exports.subscribe("extension:loaded:bespin.subscribe", function(ext) {
+//     var subscription = exports.subscribe(ext.topic, function(e) {
 //         ext.load(function(func) {
 //             func(e);
 //         });
 //     });
 //     ext.subscription = subscription;
 // });
-// 
-// bespin.subscribe("extension:removed:bespin.subscribe", function(ext) {
+//
+// exports.subscribe("extension:removed:bespin.subscribe", function(ext) {
 //     if (ext.subscription) {
-//         bespin.unsubscribe(ext.subscription);
+//         exports.unsubscribe(ext.subscription);
 //     }
 // });
-// 
-// bespin._initializeReloaders();
+//
+// exports._initializeReloaders();
+

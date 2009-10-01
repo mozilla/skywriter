@@ -50,7 +50,9 @@ exports.toFire = function(eventString) {
  * Return a default scope to be used for evaluation files
  */
 exports.defaultScope = function() {
-    if (this._defaultScope) return this._defaultScope;
+    if (this._defaultScope) {
+        return this._defaultScope;
+    }
 
     var scope = {
         bespin: bespin,
