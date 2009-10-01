@@ -27,8 +27,9 @@ exports.Extension = SC.Object.extend({
     load: function(callback) {
         var parts = this.pointer.split(":");
         var modname = parts[0];
-        var Q = require.async(modname);
-        Q.when(function(module) {
+        require.prequire.when(modname, function() {
+            var r = require;
+            var module = r(modname);
             if (callback) {
                 if (parts[1]) {
                     callback(module[parts[1]]);

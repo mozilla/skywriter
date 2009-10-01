@@ -7,7 +7,13 @@ var catalog = plugins.Catalog.create();
 catalog.activate(builtins.metadata);
 bespin.register("plugins", catalog);
 
+var ep = catalog.getExtensionPoint("mypoint");
+var ext = ep.extensions[0];
+ext.load(function(myfunc) {
+    myfunc("yo");
+});
 
+/*
 var component = re_quire("bespin/editor/component");
 var _editorComponent;
 _editorComponent = new component.Component('editor', {
@@ -25,3 +31,4 @@ function copyToEditor() {
 function setSyntax(value) {
     bespin.publish("settings:language", { language: value });
 }
+*/
