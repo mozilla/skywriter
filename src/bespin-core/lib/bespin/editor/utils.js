@@ -27,51 +27,56 @@ var bespin = require("bespin");
 /**
  * Mess with positions mainly
  */
-exports.utils = {
-    buildArgs: function(oldPos) {
-        return { pos: exports.copyPos(oldPos || bespin.get('editor').getCursorPos()) };
-    },
+exports.buildArgs = function(oldPos) {
+    return {
+        pos: exports.copyPos(oldPos || bespin.get('editor').getCursorPos())
+    };
+};
 
-    changePos: function(args, pos) {
-        return { pos: exports.copyPos(pos || bespin.get('editor').getCursorPos()) };
-    },
+exports.changePos = function(args, pos) {
+    return {
+        pos: exports.copyPos(pos || bespin.get('editor').getCursorPos())
+    };
+};
 
-    copyPos: function(oldPos) {
-        return { row: oldPos.row, col: oldPos.col };
-    },
+exports.copyPos = function(oldPos) {
+    return {
+        row: oldPos.row,
+        col: oldPos.col
+    };
+};
 
-    posEquals: function(pos1, pos2) {
-        if (pos1 == pos2) {
-            return true;
-        }
-        if (!pos1 || !pos2) {
-            return false;
-        }
-        return (pos1.col == pos2.col) && (pos1.row == pos2.row);
-    },
-
-    diffObjects: function(o1, o2) {
-        var diffs = {};
-
-        if (!o1 || !o2) {
-            return undefined;
-        }
-
-        for (var key in o1) {
-            if (o2[key]) {
-                if (o1[key] != o2[key]) {
-                    diffs[key] = o1[key] + " => " + o2[key];
-                }
-            } else {
-                diffs[key] = "o1: " + key + " = " + o1[key];
-            }
-        }
-
-        for (var key2 in o2) {
-            if (!o1[key2]) {
-                diffs[key2] = "o2: " + key2 + " = " + o2[key2];
-            }
-        }
-        return diffs;
+exports.posEquals = function(pos1, pos2) {
+    if (pos1 == pos2) {
+        return true;
     }
+    if (!pos1 || !pos2) {
+        return false;
+    }
+    return (pos1.col == pos2.col) && (pos1.row == pos2.row);
+};
+
+exports.diffObjects = function(o1, o2) {
+    var diffs = {};
+
+    if (!o1 || !o2) {
+        return undefined;
+    }
+
+    for (var key in o1) {
+        if (o2[key]) {
+            if (o1[key] != o2[key]) {
+                diffs[key] = o1[key] + " => " + o2[key];
+            }
+        } else {
+            diffs[key] = "o1: " + key + " = " + o1[key];
+        }
+    }
+
+    for (var key2 in o2) {
+        if (!o1[key2]) {
+            diffs[key2] = "o2: " + key2 + " = " + o2[key2];
+        }
+    }
+    return diffs;
 };

@@ -187,12 +187,15 @@ exports.DocumentModel = SC.Object.extend({
         this.rows[modelPos.row] = newrow.concat(row);
 
         this.setRowDirty(modelPos.row);
-        
-        var ui = this.get('editor').get('ui');        
+
+        var ui = this.get('editor').get('ui');
         ui.get('syntaxModel').invalidateCache(modelPos.row);
 
         if (!noHistory) {
-            this.addHistoryItem('insertCharacters', { pos: copyPos(modelPos), characters: string});
+            this.addHistoryItem('insertCharacters', {
+                pos: copyPos(modelPos),
+                characters: string
+            });
         }
     },
 

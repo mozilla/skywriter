@@ -309,8 +309,10 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
             return;
         }
 
-        var args = { event: e,
-                     pos: utils.copyPos(this.editor.cursorManager.getCursorPosition()) };
+        var args = {
+            event: e,
+            pos: utils.copyPos(this.editor.cursorManager.getCursorPosition())
+        };
         this.skipKeypress = false;
         this.returnValue = false;
 
@@ -357,8 +359,10 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
             return this.returnValue;
         }
 
-        var args = { event: e,
-                     pos: utils.copyPos(this.editor.cursorManager.getCursorPosition()) };
+        var args = {
+            event: e,
+            pos: utils.copyPos(this.editor.cursorManager.getCursorPosition())
+        };
         var actions = this.editor.ui.actions;
 
         if (charToPrint) {
@@ -929,7 +933,7 @@ exports.UI = SC.Object.extend({
             this.overYScrollBar = (p.x > sx) && this.yscrollbarVisible;
             this.overXScrollBar = (p.y > sy) && this.xscrollbarVisible;
         }
-        
+
         var nibup = this.get('nibup'),
             nibdown = this.get('nibdown'),
             nibleft = this.get('nibleft'),
@@ -1301,7 +1305,10 @@ exports.UI = SC.Object.extend({
             var dirty = ed.model.getDirtyRows();
 
             // if the cursor has changed rows since the last paint, consider the previous row dirty
-            if ((this.lastCursorPos) && (this.lastCursorPos.row != ed.cursorManager.getCursorPosition().row)){dirty[this.lastCursorPos.row] = true;}
+            if ((this.lastCursorPos) &&
+                (this.lastCursorPos.row != ed.cursorManager.getCursorPosition().row)) {
+                dirty[this.lastCursorPos.row] = true;
+            }
 
             // we always repaint the current line
             dirty[ed.cursorManager.getCursorPosition().row] = true;
@@ -1735,7 +1742,7 @@ exports.UI = SC.Object.extend({
                       { n: ed.theme.partialNibStyle, a: ed.theme.partialNibArrowStyle, s: ed.theme.partialNibStrokeStyle };
 
         var midpoint = Math.floor(this.NIB_WIDTH / 2);
-        
+
 
         var nibup = new Rect(cwidth - this.NIB_INSETS.right - this.NIB_WIDTH,
                 this.NIB_INSETS.top, this.NIB_WIDTH, this.NIB_WIDTH);
@@ -1756,7 +1763,7 @@ exports.UI = SC.Object.extend({
                 cheight - this.NIB_INSETS.bottom - this.NIB_WIDTH,
                 this.NIB_WIDTH, this.NIB_WIDTH);
         this.set('nibright', nibright);
-        
+
 
         vctx.translate(-verticalx, 0);
         hctx.translate(0, -horizontaly);
