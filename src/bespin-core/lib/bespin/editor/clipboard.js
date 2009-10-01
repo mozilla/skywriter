@@ -45,7 +45,9 @@ exports.clipboard = {
      * Uninstalls the clipboard handler installed by install()
      */
     uninstall: function() {
-        if (this.uses && typeof this.uses['uninstall'] == "function") this.uses.uninstall();
+        if (this.uses && typeof this.uses.uninstall == "function") {
+            this.uses.uninstall();
+        }
 
         //clear uses, because we are no longer using anything.
         this.uses = undefined;
@@ -91,58 +93,70 @@ exports.DOMEvents = SC.Object.extend({
         var stopAction = function(e) {
             return e.target.id == "command";
         };
-        var editorHasFocus = function() { 
+        var editorHasFocus = function() {
             return editor.focus;
         };
-        
-        var focuser = this.focuser = bespin.editor.clipboard.createHiddenTextarea();
+
+        this.focuser = bespin.editor.clipboard.createHiddenTextarea();
         var onfocuser = false;
-        
+
         // Copy
         this.beforecopyHandle = dojo.connect(document.body, "onbeforecopy", function(e) {
-            if ((!editorHasFocus() && !onfocuser) || stopAction(e)) return;
+            if ((!editorHasFocus() && !onfocuser) || stopAction(e)) {
+                return;
+            }
             dojo.stopEvent(e); // a full stop, because we _are_ handling the event
-            
+
             // have to show that there is something to copy
-            focuser.value = "Hello";
-            focuser.focus();
-            focuser.select();
-            
+            this.focuser.value = "Hello";
+            this.focuser.focus();
+            this.focuser.select();
+
             // and we are now on focuser
             onfocuser = true;
         });
 
         this.copyHandle = dojo.connect(document.body, "oncopy", function(e) {
-            if (!editorHasFocus() && !onfocuser) return;
-            if (stopAction(e)) return;
-            
+            if (!editorHasFocus() && !onfocuser) {
+                return;
+            }
+            if (stopAction(e)) {
+                return;
+            }
+
             var selectionText = editor.getSelectionAsText();
             if (selectionText && selectionText != '') {
                 e.clipboardData.setData('text/plain', selectionText);
                 dojo.stopEvent(e); // need a full stop, otherwise someone else will try to set copy data.
             }
 
-            editor.canvas.focus();            
+            editor.canvas.focus();
             onfocuser = false;
         });
-        
+
         // Cut
         this.beforecutHandle = dojo.connect(document, "beforecut", function(e) {
-            if ((!editorHasFocus() && !onfocuser) || stopAction(e)) return;
+            if ((!editorHasFocus() && !onfocuser) || stopAction(e)) {
+                return;
+            }
             dojo.stopEvent(e); // a full stop, because we _are_ handling the event
-            
+
             // have to show that there is something to copy
-            focuser.value = "Hello";
-            focuser.focus();
-            focuser.select();
-            
+            this.focuser.value = "Hello";
+            this.focuser.focus();
+            this.focuser.select();
+
             // and we are now on focuser
             onfocuser = true;
         });
 
         this.cutHandle = dojo.connect(document, "cut", function(e) {
-            if (!editorHasFocus() && !onfocuser) return;
-            if (stopAction(e)) return;
+            if (!editorHasFocus() && !onfocuser) {
+                return;
+            }
+            if (stopAction(e)) {
+                return;
+            }
 
             var selectionObject = editor.getSelection();
 
@@ -164,14 +178,20 @@ exports.DOMEvents = SC.Object.extend({
 
         // Paste
         this.beforepasteHandle = dojo.connect(document, "beforepaste", function(e) {
-            if (!editorHasFocus()) return;
-            if (stopAction(e)) return;
+            if (!editorHasFocus()) {
+                return;
+            }
+            if (stopAction(e)) {
+                return;
+            }
             dojo.stopEvent(e); // a full stop, because we _are_ handling the event
             e.preventDefault();
         });
 
         this.pasteHandle = dojo.connect(document, "paste", function(e) {
-            if (!editorHasFocus() || stopAction(e)) return;
+            if (!editorHasFocus() || stopAction(e)) {
+                return;
+            }
             dojo.stopEvent(e); // a full stop, because we _are_ handling the event
 
             e.preventDefault();
@@ -185,7 +205,7 @@ exports.DOMEvents = SC.Object.extend({
 
             dojo.byId('canvas').focus();
         });
-        
+
         // and this line makes it work immediately (otherwise you'd have to copy something from somewhere else on the page)
         // I'm not sure why this happens...
         document.body.focus();
@@ -198,7 +218,7 @@ exports.DOMEvents = SC.Object.extend({
         dojo.disconnect(this.cutHandle);
         dojo.disconnect(this.beforecopyHandle);
         dojo.disconnect(this.copyHandle);
-        
+
         document.body.removeChild(this.focuser);
     }
 });
@@ -215,7 +235,7 @@ exports.HiddenWorld = SC.Object.extend({
         var copynpaster;
         var copyToClipboard;
         var pasteFromClipboard;
-        
+
         copynpaster = bespin.editor.clipboard.createHiddenTextarea();
         copyToClipboard = function(text) {
             copynpaster.value = text;
@@ -223,7 +243,7 @@ exports.HiddenWorld = SC.Object.extend({
             copynpaster.focus();
             setTimeout(function() { editor.setFocus(true); }, 10);
         };
-        
+
         pasteFromClipboard = function() {
             copynpaster.select(); // select and hope that the paste goes in here
 
@@ -240,23 +260,26 @@ exports.HiddenWorld = SC.Object.extend({
         };
 
         this.keyDown = dojo.connect(document, "keydown", function(e) {
-            if (!bespin.get('editor').focus) return;
+            if (!bespin.get('editor').focus) {
+                return;
+            }
+            var selectionText;
+
             if ((bespin.util.isMac() && e.metaKey) || e.ctrlKey) {
                 // Copy
                 if (e.keyCode == 67 /*c*/) {
                     // place the selection into the input
-                    var selectionText = editor.getSelectionAsText();
+                    selectionText = editor.getSelectionAsText();
                     if (selectionText && selectionText != '') {
                         copyToClipboard(selectionText);
                     }
-
-                // Cut
                 } else if (e.keyCode == 88 /*x*/) {
+                    // Cut
                     // place the selection into the input
                     var selectionObject = editor.getSelection();
 
                     if (selectionObject) {
-                        var selectionText = editor.model.getChunk(selectionObject);
+                        selectionText = editor.model.getChunk(selectionObject);
 
                         if (selectionText && selectionText != '') {
                             copyToClipboard(selectionText);
@@ -265,10 +288,12 @@ exports.HiddenWorld = SC.Object.extend({
                             editor.ui.actions.endEdit();
                         }
                     }
-
-                // Paste
                 } else if (e.keyCode == 86 /*v*/) {
-                    if (e.target == dojo.byId("command")) return; // let the paste happen in the command
+                    // Paste
+                    if (e.target == dojo.byId("command")) {
+                        // let the paste happen in the command
+                        return;
+                    }
                     pasteFromClipboard();
                 }
             }
@@ -278,8 +303,9 @@ exports.HiddenWorld = SC.Object.extend({
     uninstall: function() {
         dojo.disconnect(this.keyDown);
 
-        if (this.copynpaster)
+        if (this.copynpaster) {
             document.body.removeChild(this.copynpaster);
+        }
 
         this.copynpaster = undefined;
     }
@@ -326,14 +352,18 @@ exports.Manual = function() {
 
             var trans = Components.classes["@mozilla.org/widget/transferable;1"].
                                    createInstance(Components.interfaces.nsITransferable);
-            if (!trans) return false;
+            if (!trans) {
+                return false;
+            }
 
             trans.addDataFlavor("text/unicode");
             trans.setTransferData("text/unicode", str, copytext.length * 2);
 
             var clipid = Components.interfaces.nsIClipboard;
-            var clip   = Components.classes["@mozilla.org/widget/clipboard;1"].getService(clipid);
-            if (!clip) return false;
+            var clip = Components.classes["@mozilla.org/widget/clipboard;1"].getService(clipid);
+            if (!clip) {
+                return false;
+            }
 
             clip.setData(trans, null, clipid.kGlobalClipboard);
 
@@ -370,21 +400,29 @@ exports.Manual = function() {
             }
 
             var clip = Components.classes["@mozilla.org/widget/clipboard;1"].getService(Components.interfaces.nsIClipboard);
-            if (!clip) return false;
+            if (!clip) {
+                return false;
+            }
 
             var trans = Components.classes["@mozilla.org/widget/transferable;1"].createInstance(Components.interfaces.nsITransferable);
-            if (!trans) return false;
+            if (!trans) {
+                return false;
+            }
             trans.addDataFlavor("text/unicode");
 
             clip.getData(trans, clip.kGlobalClipboard);
 
-            var str       = {};
+            var str = {};
             var strLength = {};
             var pastetext = "";
 
             trans.getTransferData("text/unicode", str, strLength);
-            if (str) str = str.value.QueryInterface(Components.interfaces.nsISupportsString);
-            if (str) pastetext = str.data.substring(0, strLength.value / 2);
+            if (str) {
+                str = str.value.QueryInterface(Components.interfaces.nsISupportsString);
+            }
+            if (str) {
+                pastetext = str.data.substring(0, strLength.value / 2);
+            }
             return pastetext;
         }
     };

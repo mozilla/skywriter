@@ -42,9 +42,9 @@ exports.Suggester = SC.Object.extend({
             self.currentMetaInfo = evt.info;
         });
 
-        // ** {{{ Event: codecomplete:suggest }}} **
-        //
-        // Fire to make the code completion engine provide suggestions
+        /**
+         * Fire to make the code completion engine provide suggestions
+         */
         bespin.subscribe("codecomplete:suggest", function (evt) {
             self.complete(evt.cursorPos, evt.row);
         });

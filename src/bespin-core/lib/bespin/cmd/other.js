@@ -34,14 +34,16 @@ command.store.addCommand({
     preview: 'evals given js code and show the result',
     completeText: 'evals given js code and show the result',
     execute: function(instruction, jscode) {
+        var result;
         try {
-            var result = eval(jscode);
+            result = eval(jscode);
         } catch (e) {
-            var result = '<b>Error: ' + e.message + '</b>';
+            result = '<b>Error: ' + e.message + '</b>';
         }
 
         var msg = '';
         var type = '';
+        var x;
 
         if (dojo.isFunction(result)) {
             // converts the function to a well formated string
@@ -73,7 +75,7 @@ command.store.addCommand({
                 return (a.name.toLowerCase() < b.name.toLowerCase()) ? -1 : 1;
             });
 
-            for (var x = 0; x < items.length; x++) {
+            for (x = 0; x < items.length; x++) {
                 msg += '<b>' + items[x].name + '</b>: ' + items[x].value + '<br>';
             }
 

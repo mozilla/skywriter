@@ -36,12 +36,15 @@ exports.API = SC.Object.extend({
             title: "Find Files"
         });
 
-        var focusManager = this.focusManager = new th.FocusManager(th.global_event_bus, th.byId('filesearch_input_first'), th.byId('filesearch_input_last'));
+        this.focusManager = new th.FocusManager(th.global_event_bus, th.byId('filesearch_input_first'), th.byId('filesearch_input_last'));
+        var focusManager = this.focusManager;
         this.scene.focusManager = this.focusManager;
         this.focusManager.relateTo(this.scene);
 
-        var inputSearch = this.inputSearch = this.scene.byId('filesearch_find');
-        var inputReplace = this.inputReplace = this.scene.byId('filesearch_replace');
+        this.inputSearch = this.scene.byId('filesearch_find');
+        var inputSearch = this.inputSearch;
+        this.inputReplace = this.scene.byId('filesearch_replace');
+        var inputReplace = this.inputReplace;
 
         focusManager.subscribe(inputSearch);
         focusManager.subscribe(inputReplace);

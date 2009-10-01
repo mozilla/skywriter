@@ -73,21 +73,21 @@ bespin.subscribe("url:change", function(event) {
  * as the file from the urlbar
  */
 bespin.subscribe("url:changed", function(event) {
-    editor.openFile(null, event.now.get('path'));
+    bespin.get('editor').openFile(null, event.now.get('path'));
 });
 
 /**
  * If the command line is in focus, unset focus from the editor
  */
 bespin.subscribe("cmdline:focus", function(event) {
-    editor.setFocus(false);
+    bespin.get('editor').setFocus(false);
 });
 
 /**
  * If the command line is blurred, take control in the editor
  */
 bespin.subscribe("cmdline:blur", function(event) {
-    editor.setFocus(true);
+    bespin.get('editor').setFocus(true);
 });
 
 /**
@@ -101,12 +101,13 @@ bespin.subscribe("editor:document:changed", function(event) {
  *
  */
 bespin.subscribe("editor:dirty", function(event) {
-    editor.dirty = true;
+    bespin.get('editor').dirty = true;
 });
 
 /**
  *
  */
 bespin.subscribe("editor:clean", function(event) {
-    editor.dirty = false;
+    bespin.get('editor').dirty = false;
 });
+

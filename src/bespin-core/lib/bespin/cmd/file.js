@@ -26,6 +26,12 @@ var bespin = require("bespin");
 var command = require("bespin/command");
 var util = require("bespin/util");
 var path = require("bespin/util/path");
+var diff_match_patch = require("bespin/mobwrite/diff");
+
+var DIFF_EQUAL = diff_match_patch.DIFF_EQUAL;
+var DIFF_DELETE = diff_match_patch.DIFF_DELETE;
+var DIFF_INSERT = diff_match_patch.DIFF_INSERT;
+
 
 /**
  * 'files' command
@@ -37,7 +43,7 @@ command.store.addCommand({
     preview: 'show files',
     completeText: 'list files relative to current file, or start with /projectname',
     execute: function(instruction, givenPath) {
-        var list = parseArguments(givenPath, {filter: true});
+        var list = exports._parseArguments(givenPath, {filter: true});
         bespin.get('server').list(list.project, list.path, function(filenames) {
             var files = "";
             for (var x = 0; x < filenames.length; x++) {
@@ -70,7 +76,7 @@ command.store.addCommand({
 
         var editSession = bespin.get('editSession');
 
-        var info = parseArguments(givenPath);
+        var info = exports._parseArguments(givenPath);
         var path = info.path;
         var project = info.project || editSession.project;
 
@@ -114,7 +120,7 @@ command.store.addCommand({
     preview: 'load up the contents of the file',
     completeText: 'add the filename to open',
     execute: function(instruction, opts) {
-        var info = parseArguments(opts.path);
+        var info = exports._parseArguments(opts.path);
         bespin.get("editor").openFile(info.project, info.path, { line: opts.line });
         bespin.publish("ui:escape", {});
     },
@@ -169,7 +175,7 @@ command.store.addCommand({
     completeText: 'optionally, you can specify a full path including project by starting the filename with "/"',
     withKey: "CTRL SHIFT N",
     execute: function(instruction, filename) {
-        var info = parseArguments(filename);
+        var info = exports._parseArguments(filename);
 
         bespin.get("editor").newFile(info.project, info.path);
         bespin.publish("ui:escape", {});
@@ -186,7 +192,7 @@ command.store.addCommand({
     preview: 'remove the file',
     completeText: 'add the filename to remove, give a full path starting with '/' to delete from a different project. To delete a directory end the path in a '/'',
     execute: function(instruction, filename) {
-        var info = parseArguments(filename);
+        var info = exports._parseArguments(filename);
         var path = info.path;
         var project = info.project;
 
@@ -298,8 +304,9 @@ command.store.addCommand({
         var editor = bespin.get('editor');
         var session = bespin.get("editSession");
 
+        var url;
         if (revision == "on") {
-            var url = path.combine('/history/at', session.project, session.path);
+            url = path.combine('/history/at', session.project, session.path);
             bespin.get("server").request('GET', url, null, {
                 evalJSON: true,
                 onSuccess: instruction.link(function(history) {
@@ -324,8 +331,7 @@ command.store.addCommand({
         } else {
             // This is where we need to do a diff and patch in to the editor
             // display
-            var session = bespin.get("editSession");
-            var url = path.combine('/file/at', session.project, session.path);
+            url = path.combine('/file/at', session.project, session.path);
             url += "?revision=" + revision;
             bespin.get("server").request('GET', url, null, {
                 onSuccess: instruction.link(function(older) {
@@ -423,7 +429,7 @@ command.store.addCommand({
  * <li>fol = { project:'', path:'', filter:'fol' }
  * </ul>
  */
-var parseArguments = function(givenPath, opts) {
+exports._parseArguments = function(givenPath, opts) {
     opts = opts || {};
 
     var session = bespin.get("editSession");
@@ -441,7 +447,7 @@ var parseArguments = function(givenPath, opts) {
         if (givenPath.charAt(0) === "/") {
             // Everything past the final / is used for filtering and isn't
             // passed to the server, and we ignore the initial /
-            var parts = givenPath.substr(1).split(/\//);
+            parts = givenPath.substr(1).split(/\//);
             filter = parts.pop();
             // Pull out the leading segment into the project
             project = parts.shift() || "";
@@ -462,7 +468,7 @@ var parseArguments = function(givenPath, opts) {
         } else {
             // Everything past the final / is used for filtering and isn't
             // passed to the server
-            var parts = givenPath.split(/\//);
+            parts = givenPath.split(/\//);
             filter = parts.pop();
             var trimmedPath = parts.join("/");
 
@@ -491,7 +497,7 @@ var parseArguments = function(givenPath, opts) {
  */
 exports._findCompletionsHelper = function(query, callback, options) {
     var givenPath = query.action.join(" ");
-    var list = parseArguments(givenPath, {filter: true});
+    var list = exports._parseArguments(givenPath, {filter: true});
     var self = this;
     bespin.get('server').list(list.project, list.path, function(files) {
         var matches = files.filter(function(file) {

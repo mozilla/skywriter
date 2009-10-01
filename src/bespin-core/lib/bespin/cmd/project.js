@@ -105,7 +105,7 @@ exports.commands.addCommand({
         });
 
         var onFailure = instruction.link(function(xhr) {
-            instruction.addErrorOutput('Unable to create project \'' + project + '\: ' + xhr.responseText);
+            instruction.addErrorOutput('Unable to create project \'' + project + ': ' + xhr.responseText);
         });
 
         bespin.get('files').makeDirectory(project, '', onSuccess, onFailure);
@@ -319,7 +319,7 @@ exports.commands.addCommand({
             args.url = project;
             // Make sure that a URL came along at some point, else call up an upload box
         } else if (!this.isURL(args.url)) {
-            var project = args.url; // only a project has been passed in
+            project = args.url; // only a project has been passed in
             this.upload(project);
         } else {
             // A project and URL are here and available to do a URL based import

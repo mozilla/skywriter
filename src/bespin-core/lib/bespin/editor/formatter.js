@@ -105,7 +105,7 @@ exports.API = SC.Object.extend({
 bespin.subscribe("component:register:actions", function(e) {
     var actions = bespin.get('actions');
 
-    actions['formatCode'] = dojo.hitch(actions, function(args) {
+    actions.formatCode = dojo.hitch(actions, function(args) {
         var sel = this.editor.getSelection();
         var formatted;
         var section = null;
@@ -135,7 +135,7 @@ bespin.subscribe("component:register:actions", function(e) {
 
         var padding = (function(tabSize) {
             var result = "";
-            for (x = 0; x < tabSize; x++) {
+            for (var x = 0; x < tabSize; x++) {
                 result += " ";
             }
             return result;
@@ -282,7 +282,7 @@ exports.C = Base.extend({
             if (inComment) {
                 pos = l[i].indexOf('*/');
                 if (pos >= 0) {
-                    l[i] = l[i].substr(pos1 + 2);
+                    l[i] = l[i].substr(pos + 2);
                     inComment = false;
                     i--;
                 }
@@ -290,9 +290,9 @@ exports.C = Base.extend({
                 pos = l[i].indexOf('/*');
                 if (pos >= 0) {
                     var s = l[i].substr(0, pos);
-                    var pos1 = l[i].indexOf('*/', pos+2);
+                    var pos1 = l[i].indexOf('*/', pos + 2);
                     if (pos1 >= 0) {
-                        s += l[i].substr(pos1+2);
+                        s += l[i].substr(pos + 2);
                         inComment = false;
                         l[i] = s;
                         i--;

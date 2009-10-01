@@ -152,7 +152,7 @@ exports.Core = SC.Object.extend({
     },
 
     list: function() {
-        if (typeof this.store['list'] == "function") {
+        if (typeof this.store.list == "function") {
             return this.store.list();
         } else {
             return this.toList();
@@ -255,7 +255,7 @@ exports.ServerAPI = SC.Object.extend({
         // TODO: seed the settings
         this.server.listSettings(dojo.hitch(this, function(settings) {
             this.settings = settings;
-            if (settings['tabsize'] === undefined) {
+            if (settings.tabsize === undefined) {
                 this.settings = this.parent.defaultSettings();
                 this.server.setSettings(this.settings);
             }
@@ -561,7 +561,7 @@ exports.Events = SC.Object.extend({
          * Change the font size for the editor
          */
         bespin.subscribe("settings:set:fontsize", function(event) {
-            var fontsize = parseInt(event.value);
+            var fontsize = parseInt(event.value, 10);
             editor.theme.editorTextFont = editor.theme.editorTextFont.replace(/[0-9]{1,}pt/, fontsize+'pt');
             editor.theme.lineNumberFont = editor.theme.lineNumberFont.replace(/[0-9]{1,}pt/, fontsize+'pt');
         });
@@ -652,8 +652,8 @@ exports.Events = SC.Object.extend({
          * The frequency of the cursor blink in milliseconds (defaults to 250)
          */
         bespin.subscribe("settings:set:cursorblink", function(event) {
-            var ms = parseInt(event.value); // get the number of milliseconds
-
+            // get the number of milliseconds
+            var ms = parseInt(event.value, 10);
             if (ms) {
                 editor.ui.toggleCursorFrequency = ms;
             }

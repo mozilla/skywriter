@@ -94,7 +94,7 @@ exports.Server = SC.Object.extend({
         }
 
         var onreadystatechange = function() {
-            if (xhr.readyState === 4) {
+            if (xhr.readyState == 4) {
                 if (xhr.status && xhr.status != 0 && (xhr.status >= 200 && xhr.status < 300)) {
                     var response = xhr.responseText;
 
@@ -202,7 +202,7 @@ exports.Server = SC.Object.extend({
      * Do we need to set off another poll?
      */
     _checkPolling: function() {
-        if (this._jobsCount === 0) {
+        if (this._jobsCount == 0) {
             return;
         }
         if (this._timeout != null) {

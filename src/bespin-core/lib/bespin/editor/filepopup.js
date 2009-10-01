@@ -22,6 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var bespin = require("bespin");
+
 var images = {
     open: "images/actions/open.png",
     paste: "images/actions/pasteToCommandLine.png",
@@ -69,7 +71,7 @@ exports.ActionTree = Class.define({
             };
             folderActions.push(action);
 
-            var action = {
+            action = {
                 name: "New Directory",
                 image: images.mkdir[0],
                 activeImage: images.mkdir[1],
@@ -80,7 +82,7 @@ exports.ActionTree = Class.define({
             };
             folderActions.push(action);
 
-            var action = {
+            action = {
                 name: "Delete",
                 image: images.del[0],
                 activeImage: images.del[1],
@@ -91,7 +93,7 @@ exports.ActionTree = Class.define({
             };
             folderActions.push(action);
 
-            var action = {
+            action = {
                 name: "Paste to Command Line",
                 image: images.paste[0],
                 activeImage: images.paste[1],
@@ -101,7 +103,8 @@ exports.ActionTree = Class.define({
             };
             folderActions.push(action);
 
-            var fae = this.folderActionElements = {};
+            this.folderActionElements = {};
+            var fae = this.folderActionElements;
 
             var toplabel = new th.Label({text: "", className: "folderDetailLabel"});
             toplabel.addCss("background-color", "rgb(37,34,33)");
@@ -389,16 +392,17 @@ members: {
             var key = bespin.util.keys.Key;
             var path = this.tree.getSelectedPath();
 
+            var list, listNext, listPre;
             if (path === undefined) {
-                var list = this.projects;
-                var listNext = this.tree.getList(0);
-                var listPre = null;
+                list = this.projects;
+                listNext = this.tree.getList(0);
+                listPre = null;
             } else {
                 // things to make life much more easy :)
                 var index = path.length - 1;
-                var list = this.tree.getList(index);
-                var listNext = (this.tree.getListCount() > index ? this.tree.getList(index + 1) : false);
-                var listPre = (index != 0 ? this.tree.getList(index - 1) : this.projects);
+                list = this.tree.getList(index);
+                listNext = (this.tree.getListCount() > index ? this.tree.getList(index + 1) : false);
+                listPre = (index != 0 ? this.tree.getList(index - 1) : this.projects);
             }
 
             switch (e.keyCode) {
@@ -486,7 +490,7 @@ members: {
         };
         fileActions.push(action);
 
-        var action = {
+        action = {
             name: "Paste to Command Line",
             image: images.paste[0],
             activeImage: images.paste[1],
@@ -507,7 +511,8 @@ members: {
         };
         fileActions.push(action);
 
-        var fileActionPanel = this.fileActionPanel = new th.Panel();
+        this.fileActionPanel = new th.Panel();
+        var fileActionPanel = this.fileActionPanel;
         fileActionPanel.addCss("background-color", "rgb(37,34,33)");
 
         var toplabel = new th.Label({text: "", className: "fileDetailLabel"});
@@ -701,14 +706,14 @@ members: {
         this.lastSelectedPath = newPath;
 
         if (newPath == oldPath && newPath != '') {
-            return;     // the path has not changed
+            // the path has not changed
+            return;
         }
 
         newPath = newPath.split('/');
         oldPath = oldPath.split('/');
 
         this.scene.renderAllowed = false;
-
 
         var sameLevel = 0;
         while (sameLevel < Math.min(newPath.length, oldPath.length) && newPath[sameLevel] == oldPath[sameLevel] && newPath[sameLevel] != '') {
@@ -717,7 +722,7 @@ members: {
 
         var fakePath = new Array(newPath.length);
         for (var x = 0; x < newPath.length; x++) {
-            var fakeItem = new Object();
+            var fakeItem = {};
             fakeItem.name = newPath[x];
             if (x != newPath.length - 1) {
                 fakeItem.contents = 'fake';
@@ -739,12 +744,12 @@ members: {
         var countSetupPaths = sameLevel;
 
         // deselect lists if needed
-        for (var x = newPath.length; x < this.tree.scrollPanes.length; x++) {
+        for (x = newPath.length; x < this.tree.scrollPanes.length; x++) {
             delete this.tree.getList(x).selected;
         }
 
         // get the data for the lists
-        for (var x = sameLevel; x < newPath.length; x++) {
+        for (x = sameLevel; x < newPath.length; x++) {
             var selected = this.tree.scrollPanes[x].view.selected;
             if (selected && selected.contents && dojo.isArray(selected.contents)) {
                 // restore filelist from local memory (the filelists was ones fetched)
@@ -777,11 +782,11 @@ members: {
                                 // when the path is not restored from the root,
                                 // then there are contents without contents!
                                 if (contentsPath[x]) {
-                                    var list = self.tree.getList(x-1);
+                                    var list2 = self.tree.getList(x-1);
                                     // todo: I added the if () to fix an error,
                                     // not sure if it was a symptom of something larger
-                                    if (list.selected) {
-                                        list.selected.contents = contentsPath[x];
+                                    if (list2.selected) {
+                                        list2.selected.contents = contentsPath[x];
                                     }
                                 }
                             }

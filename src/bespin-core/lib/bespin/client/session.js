@@ -29,6 +29,432 @@
 
 var bespin = require("bespin");
 var util = require("bespin/util");
+var mobwrite = require("bespin/mobwrite/core");
+var diff_match_patch = require("bespin/mobwrite/diff");
+
+var DIFF_EQUAL = diff_match_patch.DIFF_EQUAL;
+var DIFF_DELETE = diff_match_patch.DIFF_DELETE;
+var DIFF_INSERT = diff_match_patch.DIFF_INSERT;
+
+/**
+ * Mobwrite has a set of shareObjs which are designed to wrap DOM nodes.
+ * This creates a fake DOM node to be wrapped in a Mobwrite ShareObj.
+ * @param onFirstSync a function to call when the first sync has happened
+ * This allows us to support onSuccess. onFirstSync should NOT be null or
+ * some of the logic below might break.
+ */
+var ShareNode = SC.Object.extend({
+    session: null,
+
+    onFirstSync: function() { },
+    errorRaised: false,
+    pausedText: "",
+
+    init: function() {
+        this.editor = this.session.editor;
+        this.username = this.session.username || "[none]";
+
+        // Create an ID
+        var project = this.session.project;
+        var path = this.session.path;
+        if (path.indexOf("/") != 0) {
+            path = "/" + path;
+        }
+
+        var parts = project.split("+");
+        if (parts.length == 1) {
+            // This is our project
+            this.id = this.username + "/" + project + path;
+        }
+        else {
+            // This is someone else's projects
+            this.id = parts[0] + "/" + parts[1] + path;
+        }
+    },
+
+    /**
+     * When mobwrite/integrate.js/shareObj is assigned to us it lets us know
+     * so that we can share the dmp object.
+     */
+    setShareObj: function(shareObj) {
+        this.shareObj = shareObj;
+    },
+
+    /**
+     * A way for integrate.js to recognize us
+     */
+    isShareNode: true,
+
+    /**
+     * What is the contents of the editor?
+     */
+    getClientText: function(allowUnsynced) {
+        if (!allowUnsynced && this.onFirstSync) {
+            console.trace();
+            throw new Error("Attempt to getClientText() before onFirstSync() called.");
+        }
+        return this.session._getDocument();
+    },
+
+    /**
+     * Called by mobwrite when it (correctly) assumes that we start blank and
+     * that there are therefore no changes to make, however we need call
+     * things like onSuccess.
+     */
+    syncWithoutChange: function() {
+        this.syncDone();
+    },
+
+    /**
+     * Nasty hack to allow the editor to know that something has changed.
+     * In the first instance the use is restricted to calling the loaded
+     * callback
+     */
+    syncDone: function() {
+        if (this.onFirstSync) {
+            this.onFirstSync();
+            delete this.onFirstSync;
+        }
+
+        if (this.errorRaised) {
+            if (this.readOnlyStateBeforeError == false) {
+                this.editor.setReadOnly(false);
+            }
+            this.errorRaised = false;
+
+            bespin.get("commandLine").showHint("Connection to server re-established.");
+        }
+    },
+
+    /**
+     * Notification used by mobwrite to announce an update.
+     * Used by startSession to detect when it is safe to fire onSuccess
+     */
+    setClientText: function(text) {
+        var cursor = this.captureCursor();
+        this.session._setDocument(text);
+        this.restoreCursor(cursor);
+
+        this.syncDone();
+    },
+
+    /**
+     * Set the read-only flag on the editor
+     */
+    setReadOnly: function(readonly) {
+        this.editor.setReadOnly(readonly);
+    },
+
+    /**
+     * The session handles the collaborators side-bar
+     */
+    reportCollaborators: function(userEntries) {
+        this.session.reportCollaborators(userEntries);
+    },
+
+    /**
+     * Something in mobwrite has died. Attempt to tell the user and go into
+     * read-only mode if it's fatally broken
+     */
+    raiseError: function(text, recoverable) {
+        text = text || "";
+        var prefix = "<strong>" + (recoverable ? "" : "Fatal ") + "Collaboration Error</strong>: ";
+        var suffix = "<br/><strong>Warning</strong>: Changes since the last sync could be lost";
+
+        var commandLine = bespin.get("commandLine");
+        if (commandLine) {
+            commandLine.showHint(prefix + text + suffix, -1);
+        } else {
+            console.error("Missing commandLine to report: " + text);
+        }
+
+        if (!this.errorRaised) {
+            this.readOnlyStateBeforeError = this.editor.readonly;
+            this.editor.setReadOnly(true);
+            this.errorRaised = true;
+        }
+    },
+
+    /**
+     * Called by mobwrite to apply patches
+     */
+    patchClientText: function(patches) {
+        // Set some constants which tweak the matching behavior.
+        // Maximum distance to search from expected location.
+        this.shareObj.dmp.Match_Distance = 1000;
+        // At what point is no match declared (0.0 = perfection, 1.0 = very loose)
+        this.shareObj.dmp.Match_Threshold = 0.6;
+
+        var oldClientText = this.getClientText(true);
+        var cursor = this.captureCursor();
+        // Pack the cursor offsets into an array to be adjusted.
+        // See http://neil.fraser.name/writing/cursor/
+        var offsets = [];
+        if (cursor) {
+            offsets[0] = cursor.startOffset;
+            if ('endOffset' in cursor) {
+                offsets[1] = cursor.endOffset;
+            }
+        }
+
+        var newClientText = this._patchApply(patches, oldClientText, offsets);
+        // Set the new text only if there is a change to be made.
+        if (oldClientText != newClientText) {
+            this.session._setDocument(newClientText);
+            if (cursor) {
+                // Unpack the offset array.
+                cursor.startOffset = offsets[0];
+                if (offsets.length > 1) {
+                    cursor.endOffset = offsets[1];
+                    if (cursor.startOffset >= cursor.endOffset) {
+                        cursor.collapsed = true;
+                    }
+                }
+                this.restoreCursor(cursor);
+            }
+        }
+
+        this.syncDone();
+    },
+
+    /**
+     * Merge a set of patches onto the text. Return a patched text.
+     * This is taken from mobwrite.shareTextareaObj.prototype.patch_apply_
+     * and we should find a better way to share. Maybe shareBespinObj should
+     * inherit from shareTextareaObj? In the mean time we need to take extra
+     * care when doing merges
+     * @param {Array.<patch_obj>} patches Array of patch objects.
+     * @param {string} text Old text.
+     * @param {Array.<number>} offsets Offset indices to adjust.
+     * @return {string} New text.
+     * @private
+     */
+    _patchApply: function(patches, text, offsets) {
+        if (patches.length == 0) {
+            return text;
+        }
+
+        // Deep copy the patches so that no changes are made to originals.
+        patches = this.shareObj.dmp.patch_deepCopy(patches);
+        var nullPadding = this.shareObj.dmp.patch_addPadding(patches);
+        text = nullPadding + text + nullPadding;
+
+        this.shareObj.dmp.patch_splitMax(patches);
+
+        // delta keeps track of the offset between the expected and actual
+        // location of the previous patch.  If there are patches expected at
+        // positions 10 and 20, but the first patch was found at 12, delta is 2
+        // and the second patch has an effective expected position of 22.
+        var delta = 0;
+        for (var x = 0; x < patches.length; x++) {
+            var expected_loc = patches[x].start2 + delta;
+            var text1 = this.shareObj.dmp.diff_text1(patches[x].diffs);
+            var start_loc = this.shareObj.dmp.match_main(text, text1, expected_loc);
+            if (start_loc == -1) {
+                // No match found.  :(
+                if (mobwrite.debug) {
+                    window.console.warn('Patch failed: ' + patches[x]);
+                }
+            } else {
+                // Found a match.  :)
+                delta = start_loc - expected_loc;
+                var text2 = text.substring(start_loc, start_loc + text1.length);
+
+                // Run a diff to get a framework of equivalent indices.
+                var diffs = this.shareObj.dmp.diff_main(text1, text2, false);
+                var index1 = 0;
+                var index2;
+                var i;
+                for (var y = 0; y < patches[x].diffs.length; y++) {
+                    var mod = patches[x].diffs[y];
+                    if (mod[0] !== DIFF_EQUAL) {
+                        index2 = this.shareObj.dmp.diff_xIndex(diffs, index1);
+                    }
+                    if (mod[0] === DIFF_INSERT) {
+                        text = text.substring(0, start_loc + index2) + mod[1] +
+                                     text.substring(start_loc + index2);
+                        for (i = 0; i < offsets.length; i++) {
+                            if (offsets[i] + nullPadding.length > start_loc + index2) {
+                                offsets[i] += mod[1].length;
+                            }
+                        }
+                    } else if (mod[0] === DIFF_DELETE) {
+                        var del_start = start_loc + index2;
+                        var del_end = start_loc + this.shareObj.dmp.diff_xIndex(diffs,
+                                index1 + mod[1].length);
+                        text = text.substring(0, del_start) + text.substring(del_end);
+                        for (i = 0; i < offsets.length; i++) {
+                            if (offsets[i] + nullPadding.length > del_start) {
+                                if (offsets[i] + nullPadding.length < del_end) {
+                                    offsets[i] = del_start - nullPadding.length;
+                                } else {
+                                    offsets[i] -= del_end - del_start;
+                                }
+                            }
+                        }
+                    }
+                    if (mod[0] !== DIFF_DELETE) {
+                        index1 += mod[1].length;
+                    }
+                }
+            }
+        }
+
+        // Strip the padding off.
+        text = text.substring(nullPadding.length, text.length - nullPadding.length);
+        return text;
+    },
+
+    /**
+     * Return cursor information in the meta-data
+     */
+    getMetaData: function() {
+        var cursor = this.captureSimpleCursor();
+        var data = { c: { s: cursor.startOffset, e: cursor.endOffset } };
+        return dojo.toJson(data);
+    },
+
+    /**
+     * Record basic information regarding the current cursor.
+     * @return {Object?} Context information on the cursor in the format
+     * { startOffset:..., endOffset:... }
+     * @private
+     */
+    captureSimpleCursor: function() {
+        var selection = this.editor.getSelection();
+        var cursor = this.editor.getCursorPos();
+        var start = selection ? selection.startPos : cursor;
+        var end = selection ? selection.endPos : cursor;
+
+        return {
+            startOffset: this.session.convertRowColToOffset(start),
+            endOffset: this.session.convertRowColToOffset(end)
+        };
+    },
+
+    /**
+     * Record full information regarding the current cursor.
+     * @return {Object?} Context information on the cursor that extends the
+     * information from captureSimpleCursor with:
+     * { start[Prefix|Suffix]:"...", collapsed:boolean, end[Prefix|Suffix]:"..." }
+     * @private
+     */
+    captureCursor: function() {
+        var padLength = this.shareObj.dmp.Match_MaxBits / 2;  // Normally 16.
+        var text = this.session._getDocument();
+
+        var cursor = this.captureSimpleCursor();
+
+        cursor.startPrefix = text.substring(cursor.startOffset - padLength, cursor.startOffset);
+        cursor.startSuffix = text.substring(cursor.startOffset, cursor.startOffset + padLength);
+        cursor.collapsed = (cursor.startOffset == cursor.endOffset);
+        if (!cursor.collapsed) {
+            cursor.endPrefix = text.substring(cursor.endOffset - padLength, cursor.endOffset);
+            cursor.endSuffix = text.substring(cursor.endOffset, cursor.endOffset + padLength);
+        }
+
+        var ui = this.editor.ui;
+        // HTMLElement.scrollTop = editor.ui.yoffset
+        // HTMLElement.scrollHeight = editor.ui.yscrollbar.extent
+        // cursor.scroll[Top|Left] are decimals from 0 - 1
+        cursor.scrollTop = ui.yoffset / ui.yscrollbar.extent;
+        // HTMLElement.scrollLeft = editor.ui.xoffset
+        // HTMLElement.scrollWidth = editor.ui.xscrollbar.extent
+        cursor.scrollLeft = ui.xoffset / ui.xscrollbar.extent;
+
+        return cursor;
+    },
+
+    /**
+     * Attempt to restore the cursor's location.
+     * @param {Object} cursor Context information of the cursor.
+     * @private
+     */
+    restoreCursor: function(cursor) {
+        // TODO: There are 2 ways to optimize this if we need to.
+        // The first is to do simple checks like checking the current line is
+        // the same before and after insert, and then skipping the whole thing
+        // (We perhaps need to do something to avoid duplicate matches like
+        // ignoring blank lines or matching 3 lines or similar)
+        // OR we could make the restore use row/col positioning rather than
+        // offset from start. The latter could be lots of work
+
+        var dmp = this.shareObj.dmp;
+        // Set some constants which tweak the matching behavior.
+        // Maximum distance to search from expected location.
+        dmp.Match_Distance = 1000;
+        // At what point is no match declared (0.0 = perfection, 1.0 = very loose)
+        dmp.Match_Threshold = 0.9;
+
+        var padLength = dmp.Match_MaxBits / 2; // Normally 16.
+        var newText = this.session._getDocument();
+
+        // Find the start of the selection in the new text.
+        var pattern1 = cursor.startPrefix + cursor.startSuffix;
+        var pattern2, diff;
+        var cursorStartPoint = dmp.match_main(newText, pattern1,
+                cursor.startOffset - padLength);
+
+        if (cursorStartPoint !== null) {
+            pattern2 = newText.substring(cursorStartPoint, cursorStartPoint + pattern1.length);
+            //alert(pattern1 + '\nvs\n' + pattern2);
+            // Run a diff to get a framework of equivalent indices.
+            diff = dmp.diff_main(pattern1, pattern2, false);
+            cursorStartPoint += dmp.diff_xIndex(diff, cursor.startPrefix.length);
+        }
+
+        var cursorEndPoint = null;
+        if (!cursor.collapsed) {
+            // Find the end of the selection in the new text.
+            pattern1 = cursor.endPrefix + cursor.endSuffix;
+
+            cursorEndPoint = dmp.match_main(newText, pattern1,
+                    cursor.endOffset - padLength);
+
+            if (cursorEndPoint !== null) {
+                pattern2 = newText.substring(cursorEndPoint, cursorEndPoint + pattern1.length);
+                //alert(pattern1 + '\nvs\n' + pattern2);
+                // Run a diff to get a framework of equivalent indices.
+                diff = dmp.diff_main(pattern1, pattern2, false);
+                cursorEndPoint += dmp.diff_xIndex(diff, cursor.endPrefix.length);
+            }
+        }
+
+        // Deal with loose ends
+        if (cursorStartPoint === null && cursorEndPoint !== null) {
+            // Lost the start point of the selection, but we have the end point.
+            // Collapse to end point.
+            cursorStartPoint = cursorEndPoint;
+        } else if (cursorStartPoint === null && cursorEndPoint === null) {
+            // Lost both start and end points.
+            // Jump to the offset of start.
+            cursorStartPoint = cursor.startOffset;
+        }
+        if (cursorEndPoint === null) {
+            // End not known, collapse to start.
+            cursorEndPoint = cursorStartPoint;
+        }
+
+        // Cursor position
+        var startPos = this.session.convertOffsetToRowCol(cursorStartPoint);
+        this.editor.moveCursor(startPos);
+
+        // Selection: null means no selection
+        var selectionPos = null;
+        if (cursorEndPoint != cursorStartPoint) {
+            selectionPos = {
+                startPos: startPos,
+                endPos: this.session.convertOffsetToRowCol(cursorEndPoint)
+            };
+        }
+        this.editor.setSelection(selectionPos);
+
+        // Scroll bars
+        var ui = this.editor.ui;
+        ui.yscrollbar.setValue(-(cursor.scrollTop * ui.yscrollbar.extent));
+        ui.xscrollbar.setValue(-(cursor.scrollLeft * ui.xscrollbar.extent));
+    }
+});
 
 /**
  * EditSession represents a file edit session with the Bespin back-end server.
@@ -61,7 +487,7 @@ exports.EditSession = SC.Object.extend({
                     if (self.bailingOutOfCollaboration) {
                         return;
                     }
-                    if (editor.dirty) {
+                    if (this.editor.dirty) {
                         var msg = "Collaboration enabled on edited file.\n" +
                                 "To avoid losing changes, save before collaborating.\n" +
                                 "Save now?";
@@ -71,7 +497,7 @@ exports.EditSession = SC.Object.extend({
                             var onSuccess = function() {
                                 self.startSession(self.project, self.path);
                             };
-                            editor.saveFile(self.project, self.path, onSuccess);
+                            this.editor.saveFile(self.project, self.path, onSuccess);
                         } else {
                             // Not OK to save, bail out of collaboration
                             self.bailingOutOfCollaboration = true;
@@ -596,421 +1022,3 @@ exports.EditSession = SC.Object.extend({
     }
 });
 
-/**
- * Mobwrite has a set of shareObjs which are designed to wrap DOM nodes.
- * This creates a fake DOM node to be wrapped in a Mobwrite ShareObj.
- * @param onFirstSync a function to call when the first sync has happened
- * This allows us to support onSuccess. onFirstSync should NOT be null or
- * some of the logic below might break.
- */
-var ShareNode = SC.Object.extend({
-    session: session,
-
-    onFirstSync: function() { },
-    errorRaised: false,
-    pausedText: "",
-
-    init: function() {
-        this.editor = session.editor;
-        this.username = session.username || "[none]";
-
-        // Create an ID
-        var project = session.project;
-        var path = session.path;
-        if (path.indexOf("/") != 0) {
-            path = "/" + path;
-        }
-
-        parts = project.split("+");
-        if (parts.length == 1) {
-            // This is our project
-            this.id = this.username + "/" + project + path;
-        }
-        else {
-            // This is someone else's projects
-            this.id = parts[0] + "/" + parts[1] + path;
-        }
-    },
-
-    /**
-     * When mobwrite/integrate.js/shareObj is assigned to us it lets us know
-     * so that we can share the dmp object.
-     */
-    setShareObj: function(shareObj) {
-        this.shareObj = shareObj;
-    },
-
-    /**
-     * A way for integrate.js to recognize us
-     */
-    isShareNode: true,
-
-    /**
-     * What is the contents of the editor?
-     */
-    getClientText: function(allowUnsynced) {
-        if (!allowUnsynced && this.onFirstSync) {
-            console.trace();
-            throw new Error("Attempt to getClientText() before onFirstSync() called.");
-        }
-        return this.session._getDocument();
-    },
-
-    /**
-     * Called by mobwrite when it (correctly) assumes that we start blank and
-     * that there are therefore no changes to make, however we need call
-     * things like onSuccess.
-     */
-    syncWithoutChange: function() {
-        this.syncDone();
-    },
-
-    /**
-     * Nasty hack to allow the editor to know that something has changed.
-     * In the first instance the use is restricted to calling the loaded
-     * callback
-     */
-    syncDone: function() {
-        if (this.onFirstSync) {
-            this.onFirstSync();
-            delete this.onFirstSync;
-        }
-
-        if (this.errorRaised) {
-            if (this.readOnlyStateBeforeError == false) {
-                this.editor.setReadOnly(false);
-            }
-            this.errorRaised = false;
-
-            bespin.get("commandLine").showHint("Connection to server re-established.");
-        }
-    },
-
-    /**
-     * Notification used by mobwrite to announce an update.
-     * Used by startSession to detect when it is safe to fire onSuccess
-     */
-    setClientText: function(text) {
-        var cursor = this.captureCursor();
-        this.session._setDocument(text);
-        this.restoreCursor(cursor);
-
-        this.syncDone();
-    },
-
-    /**
-     * Set the read-only flag on the editor
-     */
-    setReadOnly: function(readonly) {
-        this.editor.setReadOnly(readonly);
-    },
-
-    /**
-     * The session handles the collaborators side-bar
-     */
-    reportCollaborators: function(userEntries) {
-        this.session.reportCollaborators(userEntries);
-    },
-
-    /**
-     * Something in mobwrite has died. Attempt to tell the user and go into
-     * read-only mode if it's fatally broken
-     */
-    raiseError: function(text, recoverable) {
-        text = text || "";
-        var prefix = "<strong>" + (recoverable ? "" : "Fatal ") + "Collaboration Error</strong>: ";
-        var suffix = "<br/><strong>Warning</strong>: Changes since the last sync could be lost";
-
-        var commandLine = bespin.get("commandLine");
-        if (commandLine) {
-            commandLine.showHint(prefix + text + suffix, -1);
-        } else {
-            console.error("Missing commandLine to report: " + text);
-        }
-
-        if (!this.errorRaised) {
-            this.readOnlyStateBeforeError = this.editor.readonly;
-            this.editor.setReadOnly(true);
-            this.errorRaised = true;
-        }
-    },
-
-    /**
-     * Called by mobwrite to apply patches
-     */
-    patchClientText: function(patches) {
-        // Set some constants which tweak the matching behavior.
-        // Maximum distance to search from expected location.
-        this.shareObj.dmp.Match_Distance = 1000;
-        // At what point is no match declared (0.0 = perfection, 1.0 = very loose)
-        this.shareObj.dmp.Match_Threshold = 0.6;
-
-        var oldClientText = this.getClientText(true);
-        var cursor = this.captureCursor();
-        // Pack the cursor offsets into an array to be adjusted.
-        // See http://neil.fraser.name/writing/cursor/
-        var offsets = [];
-        if (cursor) {
-            offsets[0] = cursor.startOffset;
-            if ('endOffset' in cursor) {
-                offsets[1] = cursor.endOffset;
-            }
-        }
-
-        var newClientText = this._patchApply(patches, oldClientText, offsets);
-        // Set the new text only if there is a change to be made.
-        if (oldClientText != newClientText) {
-            this.session._setDocument(newClientText);
-            if (cursor) {
-                // Unpack the offset array.
-                cursor.startOffset = offsets[0];
-                if (offsets.length > 1) {
-                    cursor.endOffset = offsets[1];
-                    if (cursor.startOffset >= cursor.endOffset) {
-                        cursor.collapsed = true;
-                    }
-                }
-                this.restoreCursor(cursor);
-            }
-        }
-
-        this.syncDone();
-    },
-
-    /**
-     * Merge a set of patches onto the text. Return a patched text.
-     * This is taken from mobwrite.shareTextareaObj.prototype.patch_apply_
-     * and we should find a better way to share. Maybe shareBespinObj should
-     * inherit from shareTextareaObj? In the mean time we need to take extra
-     * care when doing merges
-     * @param {Array.<patch_obj>} patches Array of patch objects.
-     * @param {string} text Old text.
-     * @param {Array.<number>} offsets Offset indices to adjust.
-     * @return {string} New text.
-     * @private
-     */
-    _patchApply: function(patches, text, offsets) {
-        if (patches.length == 0) {
-            return text;
-        }
-
-        // Deep copy the patches so that no changes are made to originals.
-        patches = this.shareObj.dmp.patch_deepCopy(patches);
-        var nullPadding = this.shareObj.dmp.patch_addPadding(patches);
-        text = nullPadding + text + nullPadding;
-
-        this.shareObj.dmp.patch_splitMax(patches);
-
-        // delta keeps track of the offset between the expected and actual
-        // location of the previous patch.  If there are patches expected at
-        // positions 10 and 20, but the first patch was found at 12, delta is 2
-        // and the second patch has an effective expected position of 22.
-        var delta = 0;
-        for (var x = 0; x < patches.length; x++) {
-            var expected_loc = patches[x].start2 + delta;
-            var text1 = this.shareObj.dmp.diff_text1(patches[x].diffs);
-            var start_loc = this.shareObj.dmp.match_main(text, text1, expected_loc);
-            if (start_loc == -1) {
-                // No match found.  :(
-                if (mobwrite.debug) {
-                    window.console.warn('Patch failed: ' + patches[x]);
-                }
-            } else {
-                // Found a match.  :)
-                delta = start_loc - expected_loc;
-                var text2 = text.substring(start_loc, start_loc + text1.length);
-
-                // Run a diff to get a framework of equivalent indices.
-                var diffs = this.shareObj.dmp.diff_main(text1, text2, false);
-                var index1 = 0;
-                var index2;
-                for (var y = 0; y < patches[x].diffs.length; y++) {
-                    var mod = patches[x].diffs[y];
-                    if (mod[0] !== DIFF_EQUAL) {
-                        index2 = this.shareObj.dmp.diff_xIndex(diffs, index1);
-                    }
-                    if (mod[0] === DIFF_INSERT) {
-                        text = text.substring(0, start_loc + index2) + mod[1] +
-                                     text.substring(start_loc + index2);
-                        for (var i = 0; i < offsets.length; i++) {
-                            if (offsets[i] + nullPadding.length > start_loc + index2) {
-                                offsets[i] += mod[1].length;
-                            }
-                        }
-                    } else if (mod[0] === DIFF_DELETE) {
-                        var del_start = start_loc + index2;
-                        var del_end = start_loc + this.shareObj.dmp.diff_xIndex(diffs,
-                                index1 + mod[1].length);
-                        text = text.substring(0, del_start) + text.substring(del_end);
-                        for (var i = 0; i < offsets.length; i++) {
-                            if (offsets[i] + nullPadding.length > del_start) {
-                                if (offsets[i] + nullPadding.length < del_end) {
-                                    offsets[i] = del_start - nullPadding.length;
-                                } else {
-                                    offsets[i] -= del_end - del_start;
-                                }
-                            }
-                        }
-                    }
-                    if (mod[0] !== DIFF_DELETE) {
-                        index1 += mod[1].length;
-                    }
-                }
-            }
-        }
-
-        // Strip the padding off.
-        text = text.substring(nullPadding.length, text.length - nullPadding.length);
-        return text;
-    },
-
-    /**
-     * Return cursor information in the meta-data
-     */
-    getMetaData: function() {
-        var cursor = this.captureSimpleCursor();
-        var data = { c: { s: cursor.startOffset, e: cursor.endOffset } };
-        return dojo.toJson(data);
-    },
-
-    /**
-     * Record basic information regarding the current cursor.
-     * @return {Object?} Context information on the cursor in the format
-     * { startOffset:..., endOffset:... }
-     * @private
-     */
-    captureSimpleCursor: function() {
-        var selection = this.editor.getSelection();
-        var cursor = this.editor.getCursorPos();
-        var start = selection ? selection.startPos : cursor;
-        var end = selection ? selection.endPos : cursor;
-
-        return {
-            startOffset: this.session.convertRowColToOffset(start),
-            endOffset: this.session.convertRowColToOffset(end)
-        };
-    },
-
-    /**
-     * Record full information regarding the current cursor.
-     * @return {Object?} Context information on the cursor that extends the
-     * information from captureSimpleCursor with:
-     * { start[Prefix|Suffix]:"...", collapsed:boolean, end[Prefix|Suffix]:"..." }
-     * @private
-     */
-    captureCursor: function() {
-        var padLength = this.shareObj.dmp.Match_MaxBits / 2;  // Normally 16.
-        var text = this.session._getDocument();
-
-        var cursor = this.captureSimpleCursor();
-
-        cursor.startPrefix = text.substring(cursor.startOffset - padLength, cursor.startOffset);
-        cursor.startSuffix = text.substring(cursor.startOffset, cursor.startOffset + padLength);
-        cursor.collapsed = (cursor.startOffset == cursor.endOffset);
-        if (!cursor.collapsed) {
-            cursor.endPrefix = text.substring(cursor.endOffset - padLength, cursor.endOffset);
-            cursor.endSuffix = text.substring(cursor.endOffset, cursor.endOffset + padLength);
-        }
-
-        var ui = this.editor.ui;
-        // HTMLElement.scrollTop = editor.ui.yoffset
-        // HTMLElement.scrollHeight = editor.ui.yscrollbar.extent
-        // cursor.scroll[Top|Left] are decimals from 0 - 1
-        cursor.scrollTop = ui.yoffset / ui.yscrollbar.extent;
-        // HTMLElement.scrollLeft = editor.ui.xoffset
-        // HTMLElement.scrollWidth = editor.ui.xscrollbar.extent
-        cursor.scrollLeft = ui.xoffset / ui.xscrollbar.extent;
-
-        return cursor;
-    },
-
-    /**
-     * Attempt to restore the cursor's location.
-     * @param {Object} cursor Context information of the cursor.
-     * @private
-     */
-    restoreCursor: function(cursor) {
-        // TODO: There are 2 ways to optimize this if we need to.
-        // The first is to do simple checks like checking the current line is
-        // the same before and after insert, and then skipping the whole thing
-        // (We perhaps need to do something to avoid duplicate matches like
-        // ignoring blank lines or matching 3 lines or similar)
-        // OR we could make the restore use row/col positioning rather than
-        // offset from start. The latter could be lots of work
-
-        var dmp = this.shareObj.dmp;
-        // Set some constants which tweak the matching behavior.
-        // Maximum distance to search from expected location.
-        dmp.Match_Distance = 1000;
-        // At what point is no match declared (0.0 = perfection, 1.0 = very loose)
-        dmp.Match_Threshold = 0.9;
-
-        var padLength = dmp.Match_MaxBits / 2; // Normally 16.
-        var newText = this.session._getDocument();
-
-        // Find the start of the selection in the new text.
-        var pattern1 = cursor.startPrefix + cursor.startSuffix;
-        var pattern2, diff;
-        var cursorStartPoint = dmp.match_main(newText, pattern1,
-                cursor.startOffset - padLength);
-
-        if (cursorStartPoint !== null) {
-            pattern2 = newText.substring(cursorStartPoint, cursorStartPoint + pattern1.length);
-            //alert(pattern1 + '\nvs\n' + pattern2);
-            // Run a diff to get a framework of equivalent indices.
-            diff = dmp.diff_main(pattern1, pattern2, false);
-            cursorStartPoint += dmp.diff_xIndex(diff, cursor.startPrefix.length);
-        }
-
-        var cursorEndPoint = null;
-        if (!cursor.collapsed) {
-            // Find the end of the selection in the new text.
-            pattern1 = cursor.endPrefix + cursor.endSuffix;
-
-            var cursorEndPoint = dmp.match_main(newText, pattern1,
-                    cursor.endOffset - padLength);
-
-            if (cursorEndPoint !== null) {
-                pattern2 = newText.substring(cursorEndPoint, cursorEndPoint + pattern1.length);
-                //alert(pattern1 + '\nvs\n' + pattern2);
-                // Run a diff to get a framework of equivalent indices.
-                diff = dmp.diff_main(pattern1, pattern2, false);
-                cursorEndPoint += dmp.diff_xIndex(diff, cursor.endPrefix.length);
-            }
-        }
-
-        // Deal with loose ends
-        if (cursorStartPoint === null && cursorEndPoint !== null) {
-            // Lost the start point of the selection, but we have the end point.
-            // Collapse to end point.
-            cursorStartPoint = cursorEndPoint;
-        } else if (cursorStartPoint === null && cursorEndPoint === null) {
-            // Lost both start and end points.
-            // Jump to the offset of start.
-            cursorStartPoint = cursor.startOffset;
-        }
-        if (cursorEndPoint === null) {
-            // End not known, collapse to start.
-            cursorEndPoint = cursorStartPoint;
-        }
-
-        // Cursor position
-        var startPos = this.session.convertOffsetToRowCol(cursorStartPoint);
-        this.editor.moveCursor(startPos);
-
-        // Selection: null means no selection
-        var selectionPos = null;
-        if (cursorEndPoint != cursorStartPoint) {
-            selectionPos = {
-                startPos: startPos,
-                endPos: this.session.convertOffsetToRowCol(cursorEndPoint)
-            };
-        }
-        this.editor.setSelection(selectionPos);
-
-        // Scroll bars
-        var ui = this.editor.ui;
-        ui.yscrollbar.setValue(-(cursor.scrollTop * ui.yscrollbar.extent));
-        ui.xscrollbar.setValue(-(cursor.scrollLeft * ui.xscrollbar.extent));
-    }
-});

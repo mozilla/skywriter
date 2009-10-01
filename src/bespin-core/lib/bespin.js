@@ -53,7 +53,7 @@ dojo.mixin(exports, {
 
         var count = topics.length;
         var done  = function () {
-            if (count === 0) {
+            if (count == 0) {
                 callback();
             }
         };

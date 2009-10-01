@@ -379,7 +379,7 @@ members: {
             return date.getHours() + ":" + mins + ":" + secs;
         };
 
-        var size = parseInt(this.settings.get("consolefontsize"));
+        var size = parseInt(this.settings.get("consolefontsize"), 10);
         var mode = this.settings.get("historytimemode");
 
         dojo.attr(this.output, "innerHTML", "");
@@ -513,7 +513,7 @@ members: {
             self.updateOutput();
         };
 
-        var size = parseInt(this.settings.get("consolefontsize"));
+        var size = parseInt(this.settings.get("consolefontsize"), 10);
         switch (size) {
             case 9: setSize(11); break;
             case 11: setSize(14); break;

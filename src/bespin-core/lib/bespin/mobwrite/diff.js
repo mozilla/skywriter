@@ -2114,3 +2114,10 @@ patch_obj.prototype.toString = function() {
   // Opera doesn't know how to encode char 0.
   return text.join('').replace(/\x00/g, '%00').replace(/%20/g, ' ');
 };
+
+// Mozilla: Common JS module loading
+exports.diff_match_patch = diff_match_patch;
+exports.DIFF_DELETE = DIFF_DELETE;
+exports.DIFF_INSERT = DIFF_INSERT;
+exports.DIFF_EQUAL = DIFF_EQUAL;
+

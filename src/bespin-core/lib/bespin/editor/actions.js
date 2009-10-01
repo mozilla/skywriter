@@ -58,8 +58,9 @@ exports.Actions = SC.Object.extend({
     },
 
     endEdit: function() {
-        if (this.editDepth <= 0)
+        if (this.editDepth <= 0) {
             return;
+        }
 
         this.editDepth--;
 
@@ -199,7 +200,9 @@ exports.Actions = SC.Object.extend({
 
     selectAll: function(args) {
         // do nothing with an empty doc
-        if (this.editor.model.isEmpty()) return;
+        if (this.editor.model.isEmpty()) {
+            return;
+        }
 
         args.startPos = { row: 0, col: 0 };
         args.endPos = {
@@ -220,7 +223,9 @@ exports.Actions = SC.Object.extend({
     },
 
     insertTab: function(args) {
-        if (this.editor.readonly) return;
+        if (this.editor.readonly) {
+            return;
+        }
 
         var settings = bespin.get("settings");
 
@@ -380,7 +385,9 @@ exports.Actions = SC.Object.extend({
                 selection.startPos.col = Math.max(0, selection.startPos.col - charsWidth);
             }
             if (y == endRow) {
-                if (!row) row = this.editor.model.getRowArray(y);
+                if (!row) {
+                    row = this.editor.model.getRowArray(y);
+                }
                 var delta = endRowLength - this.editor.cursorManager.getStringLength(row.join(""));
                 selection.endPos.col = Math.max(0, selection.endPos.col - delta);
                 args.pos.col = Math.max(0, args.pos.col - delta);
@@ -389,11 +396,11 @@ exports.Actions = SC.Object.extend({
         this.editor.setSelection(selection);
         this.editor.cursorManager.moveCursor({ col: args.pos.col });
 
-        if(unsetSelection) {
+        if (unsetSelection) {
             this.editor.setSelection(undefined);
         }
 
-        this.repaint();        
+        this.repaint();
 
         this.endEdit();
     },
@@ -403,7 +410,9 @@ exports.Actions = SC.Object.extend({
      * mode is set
      */
     cutSelection: function(args) {
-        if (this.editor.readonly) return;
+        if (this.editor.readonly) {
+            return;
+        }
 
         this.beginEdit('cut');
         this.copySelection(args);
@@ -430,10 +439,15 @@ exports.Actions = SC.Object.extend({
      * mode is set
      */
     pasteFromClipboard: function(args) {
-        if (this.editor.readonly) return;
+        if (this.editor.readonly) {
+            return;
+        }
 
         var clipboard = (args.clipboard) ? args.clipboard : bespin.editor.clipboard.Manual.data();
-        if (clipboard === undefined) return; // darn it clipboard!
+        if (clipboard === undefined) {
+            // darn it clipboard!
+            return;
+        }
         args.chunk = clipboard;
         this.beginEdit('paste');
         this.insertChunk(args);
@@ -441,7 +455,9 @@ exports.Actions = SC.Object.extend({
     },
 
     insertChunk: function(args) {
-        if (this.editor.readonly) return;
+        if (this.editor.readonly) {
+            return;
+        }
 
         this.beginEdit("insertChunk");
 
@@ -462,7 +478,9 @@ exports.Actions = SC.Object.extend({
     },
 
     deleteChunk: function(args) {
-        if (this.editor.readonly) return;
+        if (this.editor.readonly) {
+            return;
+        }
 
         this.beginEdit("deleteChunk");
 
@@ -485,18 +503,24 @@ exports.Actions = SC.Object.extend({
     },
 
     joinLine: function(args) {
-        if (this.editor.readonly) return;
+        if (this.editor.readonly) {
+            return;
+        }
 
         this.beginEdit("joinLine");
 
         if (args.joinDirection == "up") {
-            if (args.pos.row == 0) return;
+            if (args.pos.row == 0) {
+                return;
+            }
 
             var newcol = this.editor.ui.getRowScreenLength(args.pos.row - 1);
             this.editor.model.joinRow(args.pos.row - 1);
             this.editor.cursorManager.moveCursor({ row: args.pos.row - 1, col: newcol });
         } else {
-            if (args.pos.row >= this.editor.model.getRowCount() - 1) return;
+            if (args.pos.row >= this.editor.model.getRowCount() - 1) {
+                return;
+            }
 
             this.editor.model.joinRow(args.pos.row);
         }
@@ -507,7 +531,9 @@ exports.Actions = SC.Object.extend({
     },
 
     killLine: function(args) {
-        if (this.editor.readonly) return;
+        if (this.editor.readonly) {
+            return;
+        }
 
         this.beginEdit("killLine");
 
@@ -522,8 +548,9 @@ exports.Actions = SC.Object.extend({
     },
 
     deleteSelection: function(args) {
-        if (this.editor.readonly) 
+        if (this.editor.readonly) {
             return;
+        }
 
         var selection = this.editor.getSelection();
         return this.deleteChunk({
@@ -534,7 +561,9 @@ exports.Actions = SC.Object.extend({
     },
 
     backspace: function(args) {
-        if (this.editor.readonly) return;
+        if (this.editor.readonly) {
+            return;
+        }
 
         this.beginEdit("backspace"); // so we capture cursor movement.
 
@@ -571,7 +600,9 @@ exports.Actions = SC.Object.extend({
     },
 
     deleteKey: function(args) {
-        if (this.editor.readonly) return;
+        if (this.editor.readonly) {
+            return;
+        }
 
         this.beginEdit("deleteKey");
 
@@ -605,7 +636,9 @@ exports.Actions = SC.Object.extend({
     },
 
     deleteCharacter: function(args) {
-        if (this.editor.readonly) return;
+        if (this.editor.readonly) {
+            return;
+        }
 
         if (args.pos.col < this.editor.ui.getRowScreenLength(args.pos.row)) {
             this.beginEdit("deleteCharacter");
@@ -616,19 +649,22 @@ exports.Actions = SC.Object.extend({
             var deleted = this.editor.model.deleteCharacters(modelPos, length);
             this.repaint();
 
-            // undo/redo        
+            // undo/redo
             this.endEdit();
         }
     },
 
     newline: function(args) {
-        if (this.editor.readonly) return;
+        if (this.editor.readonly) {
+            return;
+        }
 
         var settings = bespin.get("settings");
+        var autoindent;
         if (settings && settings.isSettingOn('autoindent')) {
-            var autoindent = bespin.util.leadingWhitespace(this.editor.model.getRowArray(args.pos.row));
+            autoindent = bespin.util.leadingWhitespace(this.editor.model.getRowArray(args.pos.row));
         } else {
-            var autoindent = [];
+            autoindent = [];
         }
 
         args.chunk = "\n" + autoindent.join("");
@@ -640,7 +676,9 @@ exports.Actions = SC.Object.extend({
     },
 
     insertCharacter: function(args) {
-        if (this.editor.readonly) return;
+        if (this.editor.readonly) {
+            return;
+        }
 
         this.beginEdit("insertCharacter");
 
@@ -704,21 +742,23 @@ exports.Actions = SC.Object.extend({
     },
 
     getOppositeCase: function(stringCase) {
-        if (!stringCase) return undefined;
+        if (!stringCase) {
+            return undefined;
+        }
 
         switch (stringCase) {
-            case 'u':
-                return 'l';
-            break;
+        case 'u':
+            return 'l';
 
-            case 'l':
-                return 'u';
-            break;
+        case 'l':
+            return 'u';
         }
     },
 
     selectionChangeCase: function(args) {
-        if (this.editor.readonly) return;
+        if (this.editor.readonly) {
+            return;
+        }
 
         //console.log('selectionChangeCase Fired!');
         if (this.editor.selection) {
@@ -730,14 +770,14 @@ exports.Actions = SC.Object.extend({
 
             var selection = this.editor.model.getChunk(args.selectionObject);
             var stringArray = selection.split("\n");
-            for (i in stringArray) {
+            for (var i in stringArray) {
                 switch (args.stringCase) {
-                    case 'l':
-                        stringArray[i] = stringArray[i].toLowerCase();
+                case 'l':
+                    stringArray[i] = stringArray[i].toLowerCase();
                     break;
 
-                    case 'u':
-                        stringArray[i] = stringArray[i].toUpperCase();
+                case 'u':
+                    stringArray[i] = stringArray[i].toUpperCase();
                     break;
                 }
             }
@@ -787,9 +827,10 @@ exports.Actions = SC.Object.extend({
         }
 
         // display the count of matches in different ways
+        var msg;
         switch (displayType) {
             case 'commandLine':
-                var msg = "Found " + count + " match";
+                msg = "Found " + count + " match";
                 if (count > 1) { msg += 'es'; }
                 msg += " for your search for <em>" + str + "</em>";
 
@@ -804,7 +845,7 @@ exports.Actions = SC.Object.extend({
             break;
 
             case 'toolbar':
-                var msg = + count + " Match";
+                msg = + count + " Match";
                 if (count > 1) { msg += 'es'; }
                 dojo.byId('searchfeedback').innerHTML = msg;
                 dojo.byId('searchresult').style.display = 'block';
@@ -819,14 +860,18 @@ exports.Actions = SC.Object.extend({
      * Find the next match in the file
      */
     findNext: function(event, canBeSamePosition) {
-        if (!this.editor.ui.searchString) return;
+        if (!this.editor.ui.searchString) {
+            return;
+        }
         var pos = bespin.editor.utils.copyPos(this.editor.cursorManager.getModelPosition());
         var sel = this.editor.getSelection();
         if (canBeSamePosition && sel !== undefined) {
             pos.col -= sel.endModelPos.col - sel.startModelPos.col + 1;
         }
         var found = this.editor.model.findNext(pos.row, pos.col, this.editor.ui.searchString);
-        if (!found) found = this.editor.model.findNext(0, 0, this.editor.ui.searchString);
+        if (!found) {
+            found = this.editor.model.findNext(0, 0, this.editor.ui.searchString);
+        }
         if (found) {
             this.editor.setSelection({
                 startPos: this.editor.cursorManager.getCursorPosition(found.startPos),
@@ -846,7 +891,9 @@ exports.Actions = SC.Object.extend({
      * Find the previous match in the file
      */
     findPrev: function() {
-        if (!this.editor.ui.searchString) return;
+        if (!this.editor.ui.searchString) {
+            return;
+        }
 
         var pos = this.editor.cursorManager.getModelPosition();
         var found = this.editor.model.findPrev(pos.row, pos.col, this.editor.ui.searchString);
@@ -976,15 +1023,19 @@ exports.ActionHistoryItem = SC.Object.extend({
     begin: function(editor, model) {
         this.startIndex = this.editor.historyManager.getCurrent();
 
-        if (editor)
+        if (editor) {
             this.editorBefore = editor;
-        else
+        }
+        else {
             this.editorBefore = this.editor.getState();
+        }
 
-        if (model)
+        if (model) {
             this.modelBefore = model;
-        else
+        }
+        else {
             this.modelBefore = this.editor.model.getState();
+        }
     },
 
     end: function(editor, model) {
@@ -994,15 +1045,19 @@ exports.ActionHistoryItem = SC.Object.extend({
         // choice: go character by character, or remove the whole set.
         this.editor.historyManager.truncate(this.startIndex);
 
-        if (editor)
+        if (editor) {
             this.editorAfter = editor;
-        else
+        }
+        else {
             this.editorAfter = this.editor.getState();
+        }
 
-        if (model)
+        if (model) {
             this.modelAfter = model;
-        else
+        }
+        else {
             this.modelAfter = this.editor.model.getState();
+        }
     },
 
     undo: function() {
@@ -1017,7 +1072,7 @@ exports.ActionHistoryItem = SC.Object.extend({
         this.editor.setState(this.editorAfter);
         this.editor.ui.ensureCursorVisible();
         this.editor.paint();
-    }    
+    }
 });
 
 dojo.declare("bespin.editor.ActionHistoryItem", null /* pretend it inherits bespin.editor.HistoryItem */, {
@@ -1028,15 +1083,19 @@ dojo.declare("bespin.editor.ActionHistoryItem", null /* pretend it inherits besp
     begin: function(editor, model) {
         this.startIndex = this.editor.historyManager.getCurrent();
 
-        if (editor)
+        if (editor) {
             this.editorBefore = editor;
-        else
+        }
+        else {
             this.editorBefore = this.editor.getState();
+        }
 
-        if (model)
+        if (model) {
             this.modelBefore = model;
-        else
+        }
+        else {
             this.modelBefore = this.editor.model.getState();
+        }
     },
 
     end: function(editor, model) {
@@ -1046,15 +1105,19 @@ dojo.declare("bespin.editor.ActionHistoryItem", null /* pretend it inherits besp
         // choice: go character by character, or remove the whole set.
         this.editor.historyManager.truncate(this.startIndex);
 
-        if (editor)
+        if (editor) {
             this.editorAfter = editor;
-        else
+        }
+        else {
             this.editorAfter = this.editor.getState();
+        }
 
-        if (model)
+        if (model) {
             this.modelAfter = model;
-        else
+        }
+        else {
             this.modelAfter = this.editor.model.getState();
+        }
     },
 
     undo: function() {

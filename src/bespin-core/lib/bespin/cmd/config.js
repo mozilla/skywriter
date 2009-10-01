@@ -75,7 +75,7 @@ command.store.addCommand({
 
             for (var keys in descriptions) {
                 var keyData = keys.split(','); // metaKey, ctrlKey, altKey, shiftKey
-                var keyCode = parseInt(keyData[0]);
+                var keyCode = parseInt(keyData[0], 10);
 
                 var modifiers = [];
                 if (keyData[1] === "true") {
