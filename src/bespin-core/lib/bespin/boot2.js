@@ -1,4 +1,4 @@
-SC = require("sproutcore");
+window.SC = require("sproutcore");
 var plugins = require("bespin/plugins");
 var builtins = require("bespin/builtins");
 var bespin = require("bespin");
@@ -8,7 +8,8 @@ catalog.activate(builtins.metadata);
 bespin.register("plugins", catalog);
 
 
-var component = require("bespin/editor/component");
+var component = re_quire("bespin/editor/component");
+var _editorComponent;
 _editorComponent = new component.Component('editor', {
     language: "js",
     loadfromdiv: true,

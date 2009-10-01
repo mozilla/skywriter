@@ -1,9 +1,5 @@
 // module: bespin
 
-// TODO: this must be circular
-var plugins = require("bespin/plugins");
-var command = require("bespin/command");
-
 dojo.mixin(exports, {
     // BEGIN VERSION BLOCK
     /** The core version of the Bespin system */
