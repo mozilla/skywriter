@@ -24,6 +24,7 @@
 
 var bespin = require("bespin");
 var copyPos = require("bespin/editor/utils").utils;
+var SC = require("sproutcore");
 
 /**
  * The editor has a model of the data that it works with.

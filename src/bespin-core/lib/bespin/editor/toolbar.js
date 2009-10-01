@@ -23,6 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var editor = require("bespin/page/editor");
+var SC = require("sproutcore");
 
 /**
  * The editor has the notion of a toolbar which are components that can drive

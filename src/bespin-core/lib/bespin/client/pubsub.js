@@ -23,6 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
+var SC = require("sproutcore");
 
 /**
  * Proxies custom event to the server and receives them for re-publishing on the

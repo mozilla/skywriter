@@ -25,6 +25,7 @@
 var bespin = require("bespin");
 var worker = require("bespin/worker");
 var codecompletion = require("bespin/editor/codecompletion");
+var SC = require("sproutcore");
 
 /**
  * Utilizes the bespin.parser infrastructure to suggest possible source

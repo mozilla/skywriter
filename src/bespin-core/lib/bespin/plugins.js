@@ -22,6 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var SC = require("sproutcore");
 
 exports.Extension = SC.Object.extend({
     load: function(callback, property) {

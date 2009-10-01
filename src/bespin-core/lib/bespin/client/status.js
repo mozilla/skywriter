@@ -22,6 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var SC = require("sproutcore");
+
 /**
  * This is currently just a mock to randomly share status messages.
  * In the future the server will serve up interesting data.

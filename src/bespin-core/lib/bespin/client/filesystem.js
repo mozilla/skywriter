@@ -25,6 +25,7 @@
 var bespin = require("bespin");
 var defaultScope = require("bespin/events").defaultScope;
 var directory = require("bespin/util/path").directory;
+var SC = require("sproutcore");
 
 /**
  * This abstracts the remote Web Service file system, and in the future local

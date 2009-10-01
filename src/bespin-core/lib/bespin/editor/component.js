@@ -26,6 +26,7 @@ var bespin = require("bespin");
 
 var EditorApi = require("bespin/editor").API;
 var settings = require("bespin/client/settings");
+var SC = require("sproutcore");
 
 /**
  * This is a component that you can use to embed the Bespin Editor component

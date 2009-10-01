@@ -32,6 +32,7 @@
 // module: bespin/syntax
 
 var bespin = require("bespin");
+var SC = require("sproutcore");
 
 if (!bespin.syntax) bespin.syntax = {};
 

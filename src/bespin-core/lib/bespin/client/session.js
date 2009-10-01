@@ -31,6 +31,7 @@ var bespin = require("bespin");
 var util = require("bespin/util");
 var mobwrite = require("bespin/mobwrite/core");
 var diff_match_patch = require("bespin/mobwrite/diff");
+var SC = require("sproutcore");
 
 var DIFF_EQUAL = diff_match_patch.DIFF_EQUAL;
 var DIFF_DELETE = diff_match_patch.DIFF_DELETE;
