@@ -23,4 +23,18 @@
  * ***** END LICENSE BLOCK ***** */
 
 exports.metadata = {
-};
+    "EPTest" : {
+        provides: [
+            {
+                ep: "extensionpoint",
+                name: "mypoint",
+                activate: "bespin/plugins:thing1",
+                deactivate: "bespin/plugins:thing2"
+            },
+            {
+                ep: "mypoint",
+                pointer: "bespin/plugins:thing3"
+            }
+        ]
+    }
+}

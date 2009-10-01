@@ -1,4 +1,13 @@
 <html><head>
+<script type="text/javascript">
+function startEditor() {
+  require("bespin/boot");
+  var bespin = require("bespin");
+  var plugins = bespin.get("plugins");
+  plugins.loader = require.when;
+}
+</script>
+
 <script>// this is not a module.  it is a snippet of a script that will be sent by the
 // client/browser module server defined in the narwhal/server module, or some
 // similar mechanism.  this file is simply an anonymous function declaration.
@@ -25,6 +34,7 @@
     require.catalog = {};
     require.requests = [];
     require.preloads = {};
+    editor_started = false;
 
     // this is an event handler for factory arrivals that will be replaced when
     // narwhal/client arrives.
@@ -32,8 +42,9 @@
         // there's only one module we're particularly interested in at the
         // moment.  as soon as it comes down, load the client.  this will take
         // us to the next stage, getting the promise graph and sandbox set up.
-        if (id == "narwhal/client")
-            require.catalog[id].factory(require);
+        if (id == "narwhal/client") {
+          require.catalog[id].factory(require);
+        }
     };
 
     // this function gets called by injected scripts with a portion of the
@@ -102,7 +113,7 @@
 
     // return the require object for chaining
     return require;
-}).call(this,"/.js/").preload(["json", "sandbox", "narwhal/client", "promise", "array", "object", "string", "function", "regexp", "reactor", "date", "global", "system", "system", "binary", "bespin/boot"])</script>
+}).call(this,"/.js/").preload(["json", "sandbox", "narwhal/client", "promise", "array", "object", "string", "function", "regexp", "reactor", "date", "global", "system", "binary", "bespin/boot"]).async("bespin/boot")</script>
 
 <script type="text/javascript" src="dojo/dojo.js.uncompressed.js"></script>
 <script type='text/javascript' src='dojo/regexp.js'></script>
@@ -111,7 +122,6 @@
 <script type='text/javascript' src='dojo/fx/easing.js'></script>
 <script type='text/javascript' src='dijit/_base/place.js'></script>
 <script type='text/javascript' src='th.compressed.js'></script>
-
 </head>
 <body>
 
@@ -132,5 +142,9 @@ function flubber() {
     <input type="button" value="Copy to Textarea" onclick="copyToTextarea()">
     <input type="button" value="Copy to Editor" onclick="copyToEditor()">
     </div>
-
+<script type="text/javascript">
+require.when("bespin/boot", function(boot) {
+  console.log("got it");
+});
+</script>
 </body></html>

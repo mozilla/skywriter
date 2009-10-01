@@ -26,8 +26,9 @@
 exports.Extension = SC.Object.extend({
     load: function(callback) {
         var parts = this.pointer.split(":");
-        var modname = this._resolver(parts[0]);
-        require.when(modname, function(module) {
+        var modname = parts[0];
+        var Q = require.async(modname);
+        Q.when(function(module) {
             if (callback) {
                 if (parts[1]) {
                     callback(module[parts[1]]);
@@ -42,6 +43,10 @@ exports.Extension = SC.Object.extend({
 exports.ExtensionPoint = SC.Object.extend({
     init: function() {
         this.extensions = [];
+    },
+    
+    addExtension: function(extension) {
+        this.extensions.push(extension);
     }
 });
 
@@ -50,21 +55,32 @@ exports.Plugin = SC.Object.extend({
 
 exports.Catalog = SC.Object.extend({
     init: function() {
-        this.points = [];
-        this.points.push(exports.ExtensionPoint.create({
-            name: "extensionpoint"
-        }));
-
+        this.points = {};
+        this.getExtensionPoint("extensionpoint");
         this.plugins = {};
     },
-
+    
+    getExtensionPoint: function(name) {
+        if (this.points[name] === undefined) {
+            this.points[name] = exports.ExtensionPoint.create({
+                name: name,
+                catalog: this
+            });
+        }
+        return this.points[name];
+    },
+    
     activate: function(metadata) {
         for (var name in metadata) {
             var md = metadata[name];
             md.catalog = this;
             if (md.provides) {
-                for (var i = 0; i < md.provides.length; i++) {
-                    md.provides[i] = exports.Extension.create(md.provides[i]);
+                var provides = md.provides;
+                for (var i = 0; i < provides.length; i++) {
+                    var extension = exports.Extension.create(provides[i]);
+                    provides[i] = extension;
+                    var ep = this.getExtensionPoint(extension.ep);
+                    ep.addExtension(extension);
                 }
             } else {
                 md.provides = [];
@@ -73,3 +89,15 @@ exports.Catalog = SC.Object.extend({
         }
     }
 });
+
+exports.thing1 = function(extension) {
+    print("Thing1");
+}
+
+exports.thing2 = function(extension) {
+    print("Thing2");
+}
+
+exports.thing3 = function(msg) {
+    print("Thing3: " + msg);
+}
