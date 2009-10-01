@@ -29,14 +29,14 @@ var command = require("bespin/command");
  *
  */
 exports.API = SC.Object.extend({
-    init: function() {
-        this.requestFinished = true;
-        this.preformNewRequest = false;
-        this.projects;
-        this.currentProject;
-        this.currentProjectInclude;
+    requestFinished: true,
+    preformNewRequest: false,
+    projects: null,
+    currentProject: null,
+    currentProjectInclude: null,
 
-        var scene = this.scene = new th.WindowScene( {
+    init: function() {
+        this.scene = new th.WindowScene({
             canvasOrId: document.getElementById("quickopen"),
             createFocusManager: true,
             isVisible: false,
@@ -44,48 +44,48 @@ exports.API = SC.Object.extend({
             title: "Find Files"
         });
 
-        var bus = scene.bus;
+        this.focusManager = this.scene.focusManager;
+        this.input = this.scene.byId('input');
+        this.input.selectAll();
+        this.inputProject = this.scene.byId('project');
 
-        var focusManager = this.focusManager = scene.focusManager;
+        this.list = this.scene.byId('list');
+        this.list.items = [ 'Loading...'];
+        this.list.remove(this.list.renderer);
+        this.list.renderer = new th.HtmlLabel();
+        this.list.add(this.list.renderer);
+        this.list.renderer.addCss('padding', '2px 5px');
 
-        var input = this.input = scene.byId('input');
-        input.selectAll();
+        this.label = this.scene.byId('label');
 
-        var inputProject = this.inputProject = scene.byId('project');
+        this.focusManager.subscribe(this.inputProject);
+        this.focusManager.subscribe(this.input);
 
-        var list = this.list = scene.byId('list');
-        list.items = [ 'Loading...'];
-        list.remove(list.renderer);
-        list.renderer = new th.HtmlLabel();
-        list.add(list.renderer);
-        list.renderer.addCss('padding', '2px 5px');
-
-        this.label = scene.byId('label');
-
-        focusManager.subscribe(inputProject);
-        focusManager.subscribe(input);
-
-        scene.render();
-        scene.center();
+        this.scene.render();
+        this.scene.center();
 
         // add some key bindings
-        input.bindKey("", input.ARROW_UP, list.moveSelectionUp, list);
-        input.bindKey("", input.ARROW_DOWN, list.moveSelectionDown, list);
-        input.bindKey("", input.ESCAPE, function() { bespin.publish("ui:escape"); }, this);
-        input.bindKey("", input.ENTER, this.openFile, this);
+        this.input.bindKey("", this.input.ARROW_UP, this.list.moveSelectionUp, this.list);
+        this.input.bindKey("", this.input.ARROW_DOWN, this.list.moveSelectionDown, this.list);
+        this.input.bindKey("", this.input.ESCAPE, function() { bespin.publish("ui:escape"); }, this);
+        this.input.bindKey("", this.input.ENTER, this.openFile, this);
 
-        inputProject.bindKey("", inputProject.ENTER, function() { input.focusManager.focus(input);});
-        inputProject.bindKey("", input.ESCAPE, function() { bespin.publish("ui:escape"); }, this);
+        this.inputProject.bindKey("", this.inputProject.ENTER, function() {
+            this.input.focusManager.focus(this.input);
+        });
+        this.inputProject.bindKey("", this.input.ESCAPE, function() {
+            bespin.publish("ui:escape");
+        }, this);
 
         // bind to some events
-        bus.bind("dblclick", list, this.openFile, this);
+        this.scene.bus.bind("dblclick", this.list, this.openFile, this);
 
-        bus.bind("itemselected", list, function(e) {
+        this.scene.bus.bind("itemselected", this.list, function(e) {
             this.label.text = e.item.filename;
             this.label.repaint();
         }, this);
 
-        bus.bind("text:changed", input, function() {
+        this.scene.bus.bind("text:changed", this.input, function() {
             if (!this.currentProject) {
                 return;
             }
@@ -99,7 +99,7 @@ exports.API = SC.Object.extend({
             }
         }, this);
 
-        bus.bind("text:changed:newChar", inputProject, function() {
+        this.scene.bus.bind("text:changed:newChar", this.inputProject, function() {
             if (!this.inputProject.text == '') {
                 var newText = this.inputProject.text.toLowerCase();
                 // the text has changed!
@@ -112,7 +112,7 @@ exports.API = SC.Object.extend({
             }
         }, this);
 
-        bus.bind("focus:lost", inputProject, function() {
+        this.scene.bus.bind("focus:lost", this.inputProject, function() {
             var newText = this.inputProject.text.toLowerCase();
             for (var i=0; i < this.projects.length; i++) {
                 if (this.projects[i].toLowerCase() == newText) {
@@ -135,8 +135,8 @@ exports.API = SC.Object.extend({
             this.scene.render();
         }, this);
 
-        bus.bind("focus:received", inputProject, function() { this.selectAll(); }, inputProject);
-        bus.bind("focus:received", input       , function() { this.selectAll(); }, input);
+        this.scene.bus.bind("focus:received", this.inputProject, function() { this.selectAll(); }, this.inputProject);
+        this.scene.bus.bind("focus:received", this.input, function() { this.selectAll(); }, this.input);
 
         bespin.subscribe('ui:escape', dojo.hitch(this, function() {
             if (this.scene.isVisible) {
@@ -208,8 +208,8 @@ exports.API = SC.Object.extend({
 
     showFiles: function(files, sortFiles) {
         sortFiles = sortFiles || false;
-        var items = new Array();
-        var sortedItems = new Array();
+        var items = [];
+        var sortedItems = [];
         var quickopen = bespin.get('quickopen');
         var settings = bespin.get('settings');
         var lastFolder;
@@ -268,7 +268,8 @@ exports.API = SC.Object.extend({
         }
 
         for (var i=0; i < items.length; i++) {
-            items[i].text = quickopen.highlightText(items[i].name, quickopen.input.text) + (items[i].lastFolder == false ? '' :  ' - ' + items[i].lastFolder);
+            items[i].text = quickopen.highlightText(items[i].name, quickopen.input.text) +
+                    (items[i].lastFolder == false ? '' :  ' - ' + items[i].lastFolder);
         }
 
         quickopen.list.items = items;
@@ -326,7 +327,9 @@ exports.API = SC.Object.extend({
     }
 });
 
-// ** {{{Command: project}}} **
+/**
+ * The 'quickopen' command
+ */
 command.store.addCommand({
     name: 'quickopen',
     takes: ['task', 'project', 'path'],
@@ -334,17 +337,19 @@ command.store.addCommand({
     usage: '[add|remove] [project] [path to be added or removed]',
     execute: function(instruction, args) {
         var settings = bespin.get('settings');
+        var includes;
 
         if (!args.task) {
             instruction.addOutput(this.preview);
             instruction.addUsageOutput(this);
             instruction.error = false;
-            var includes = settings.getObject('quickopenInclude');
+
+            includes = settings.getObject('quickopenInclude');
             if (includes === undefined) {
                 return;
             }
-            output = '<br/>';
-            for (projects in includes) {
+            var output = '<br/>';
+            for (var projects in includes) {
                 if (includes[projects].length == 0) {
                     continue;
                 }
@@ -365,13 +370,13 @@ command.store.addCommand({
         }
 
         if (args.task == 'add') {
-            var includes = settings.getObject('quickopenInclude');
+            includes = settings.getObject('quickopenInclude');
             if (includes === undefined){includes = {};}
             if (includes[args.project] === undefined){includes[args.project] = [];}
             includes[args.project].push(args.path);
             settings.setObject('quickopenInclude', includes);
         } else if (args.task == 'remove') {
-            var includes = settings.getObject('quickopenInclude');
+            includes = settings.getObject('quickopenInclude');
             if (includes === undefined) {
                 return;
             }

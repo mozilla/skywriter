@@ -22,6 +22,12 @@
  * @author fraser@google.com (Neil Fraser)
  */
 
+var bespin = require("bespin");
+var diff_match_patch = require("diff");
+
+var DIFF_EQUAL = diff_match_patch.DIFF_EQUAL;
+var DIFF_DELETE = diff_match_patch.DIFF_DELETE;
+var DIFF_INSERT = diff_match_patch.DIFF_INSERT;
 
 /**
  * Singleton class containing all MobWrite code.
@@ -1183,3 +1189,8 @@ mobwrite.syncUnload_ = function(shareHandlers, onUnshare) {
   data = 'q=' + encodeURIComponent(data);
   mobwrite.syncLoadAjax_(mobwrite.syncGateway, data, onUnshare);
 };
+
+// Module exports
+exports.mobwrite = mobwrite;
+
+

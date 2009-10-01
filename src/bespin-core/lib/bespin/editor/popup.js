@@ -212,7 +212,7 @@ members: {
         // Height of the middle row. Assumes all top graphics are same height
         d.midHeight = d.btmTop - d.midTop;
         // Left hand edge of pie. Determined by width of pie
-        d.offLeft = parseInt(this.canvas.width / 2);
+        d.offLeft = parseInt(this.canvas.width / 2, 10);
 
         // calculate center panel coordinates
         d.centerPanel = {

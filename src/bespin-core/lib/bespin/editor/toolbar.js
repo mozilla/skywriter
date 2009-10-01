@@ -22,6 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var bespin = require("bespin");
 var editor = require("bespin/page/editor");
 
 /**
@@ -51,7 +52,7 @@ exports.Toolbar = SC.Object.extend({
     opts: {},
 
     init: function() {
-        if (opts.setupDefault) {
+        if (this.opts.setupDefault) {
             this.setupDefault();
         }
 

@@ -311,7 +311,7 @@ members:
         }
 
         var self = this;
-        var duration = parseInt(bespin.get('settings').get('menushowduration'));
+        var duration = parseInt(bespin.get('settings').get('menushowduration'), 10);
 
         // Set the duration for the fade in.
         if (typeof duration == "undefined" || isNaN(duration)) {
@@ -319,7 +319,7 @@ members:
         }
 
         // fade in the pie
-        new dojo._Animation({
+        var anim = new dojo._Animation({
             duration: duration,
             easing: dojo.fx.easing.backOut,
             curve: [0.0, 1.0],
@@ -334,7 +334,8 @@ members:
                 self.renderCompletePie(self.currentSlice, d);
                 self._showExecuting = false;
             }
-        }).play();
+        });
+        anim.play();
     },
 
     /**
@@ -346,7 +347,7 @@ members:
         }
 
         if (!this.hideAnimation) {
-            var duration = parseInt(bespin.get('settings').get('menuhideduration'));
+            var duration = parseInt(bespin.get('settings').get('menuhideduration'), 10);
 
             // Set the duration for the fade in.
             if (typeof duration == "undefined" || isNaN(duration)) {
@@ -427,8 +428,10 @@ members:
             return {x: this.launchedAt.x - width/2, y: this.launchedAt.y - height/2};
         }
 
-        return { x: parseInt((this.canvas.width / 2) - (width / 2)),
-                 y: parseInt((this.slices.off.img.height - height) / 2) + this.canvas.height - this.slices.off.img.height };
+        return {
+            x: parseInt((this.canvas.width / 2) - (width / 2), 10),
+            y: parseInt((this.slices.off.img.height - height) / 2, 10) + this.canvas.height - this.slices.off.img.height
+        };
     },
 
     /**
@@ -457,8 +460,8 @@ members:
         ctx.fillStyle = "rgba(0, 0, 0, " + alpha + ")";
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        var height = parseInt(off.height * progress);
-        var width = parseInt(off.width * progress);
+        var height = parseInt(off.height * progress, 10);
+        var width = parseInt(off.width * progress, 10);
 
         var p = this.getTopLeftXY(width, height);
 
@@ -507,7 +510,7 @@ members:
             d.offLeft = this.launchedAt.x - pieWidth/2;
             d.btmTop = this.launchedAt.y - pieHeight/2;
         } else {
-            d.offLeft = parseInt((this.canvas.width / 2) - (pieWidth / 2));
+            d.offLeft = parseInt((this.canvas.width / 2) - (pieWidth / 2), 10);
         }
 
         return d;
@@ -526,7 +529,7 @@ members:
         var sliceTop = d.btmTop;
 
         if (!slice) {
-            slice = this.slices['off'];
+            slice = this.slices.off;
         }
         this.ctx.drawImage(slice.img, d.offLeft, sliceTop);
     },

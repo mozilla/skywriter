@@ -22,16 +22,18 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var bespin = require("bespin");
+
 /**
  * Mess with positions mainly
  */
 exports.utils = {
     buildArgs: function(oldPos) {
-        return { pos: utils.copyPos(oldPos || bespin.get('editor').getCursorPos()) };
+        return { pos: exports.copyPos(oldPos || bespin.get('editor').getCursorPos()) };
     },
 
     changePos: function(args, pos) {
-        return { pos: utils.copyPos(oldPos || bespin.get('editor').getCursorPos()) };
+        return { pos: exports.copyPos(pos || bespin.get('editor').getCursorPos()) };
     },
 
     copyPos: function(oldPos) {

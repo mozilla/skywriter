@@ -23,8 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-
-var EditorApi = require("bespin/editor").API;
+var editorMod = require("bespin/editor");
 var settings = require("bespin/client/settings");
 
 /**
@@ -40,22 +39,23 @@ var settings = require("bespin/client/settings");
  * @param dontstealfocus by default the component will steal focus when it
  * loads, but you can change that by setting this to true
  */
-exports.Component = SC.Object.extend({    
+exports.Component = SC.Object.extend({
+    opts: {},
 
     actsAsComponent: true,
-    
+
     container: null,
-    
+
     loadFromDiv: false,
-    
+
     content: null,
-    
+
     canStealFocus: true,
-    
+
     model: function() {
         return this.get('editor').get('model');
     }.property('editor'),
-    
+
     /**
      * Takes a container element, and the set of options for the component which
      * include those noted above.
@@ -68,9 +68,9 @@ exports.Component = SC.Object.extend({
         } else {
             throw new Error("Container does not exist!");
         }
-        
+
         var initialContent = "";
-        
+
         if (this.get('loadFromDiv')) {
             var code = dojo.byId('BESPIN_EDITOR_CODE');
             if (code) {
@@ -81,11 +81,11 @@ exports.Component = SC.Object.extend({
         } else if (this.get('content')) {
             initialContent = this.get('content');
         }
-        
+
         var editor = bespin.register('editor', this.get('editor') ||
-         EditorApi.create({ container: container })
+            editorMod.API.create({ container: container })
         );
-        
+
         this.set('editor', editor);
 
         // Fancy a command line anyone?
@@ -109,46 +109,48 @@ exports.Component = SC.Object.extend({
 
         // Use in memory settings here instead of saving to the server which is default. Potentially use Cookie settings
         bespin.register('settings', this.get('settings') ||
-         settings.Core.create({ store: settings.InMemory }));
+        settings.Core.create({ store: settings.InMemory }));
 
         // How about a Jetpack?
-        if (opts.jetpack) {
+        if (this.opts.jetpack) {
             var jetpacktoolbar = dojo.create("div", {
                 id: "jetpacktoolbar"
             }, dojo.byId(container));
 
-            jetpacktoolbar.innerHTML = '<div class="button"><button id="install" onclick="_editorComponent.executeCommand(\'jetpack install yourfirstjetpack\')">&uarr; Install This JetPack Feature</button></div>\
-            <div>Hey, <a href="https://jetpack.mozillalabs.com/">install JetPack first</a>.</div>\
-            <style type="text/css">\
-                #jetpacktoolbar {\
-                    position: relative;\
-                    top: -15px;\
-                    left: 0;\
-                    height: 40px;\
-                    background-image: url(https://bespin.mozilla.com/images/footer_bg.png);\
-                    background-repeat: repeat-x;\
-                    color: white;\
-                    font-family: Helvetica, Arial, sans-serif;\
-                    font-size: 11px;\
-                }\
-                #jetpacktoolbar div {\
-                    padding: 17px 12px;\
-                    float: left;\
-                }\
-                #jetpacktoolbar div.button {\
-                    float: right;\
-                    padding: 13px 0;\
-                }\
-                #jetpacktoolbar button {\
-                    margin:0 7px 0 0;\
-                }\
-                #jetpacktoolbar a {\
-                    color: #eee;\
-                }\
-            </style>';
+            jetpacktoolbar.innerHTML = '<div class="button">' +
+                '<button id="install" onclick="_editorComponent.executeCommand(\'jetpack install yourfirstjetpack\')">&uarr; Install This JetPack Feature</button>' +
+                '</div>' +
+                '<div>Hey, <a href="https://jetpack.mozillalabs.com/">install JetPack first</a>.</div>' +
+                '<style type="text/css">' +
+                    '#jetpacktoolbar {' +
+                        'position: relative;' +
+                        'top: -15px;' +
+                        'left: 0;' +
+                        'height: 40px;' +
+                        'background-image: url(https://bespin.mozilla.com/images/footer_bg.png);' +
+                        'background-repeat: repeat-x;' +
+                        'color: white;' +
+                        'font-family: Helvetica, Arial, sans-serif;' +
+                        'font-size: 11px;' +
+                    '}' +
+                    '#jetpacktoolbar div {' +
+                        'padding: 17px 12px;' +
+                        'float: left;' +
+                    '}' +
+                    '#jetpacktoolbar div.button {' +
+                        'float: right;' +
+                        'padding: 13px 0;' +
+                    '}' +
+                    '#jetpacktoolbar button {' +
+                        'margin:0 7px 0 0;' +
+                    '}' +
+                    '#jetpacktoolbar a {' +
+                        'color: #eee;' +
+                    '}' +
+                '</style>';
         }
 
-        dojo.connect(window, 'resize', opts.resize || dojo.hitch(this, function() {
+        dojo.connect(window, 'resize', this.opts.resize || dojo.hitch(this, function() {
             this.editor.paint();
         }));
 
@@ -156,8 +158,9 @@ exports.Component = SC.Object.extend({
             this.setContent(initialContent);
         }
 
-        if (opts.language) { // -- turn on syntax highlighting
-            bespin.publish("settings:language", { language: opts.language });
+        if (this.opts.language) {
+            // -- turn on syntax highlighting
+            bespin.publish("settings:language", { language: this.opts.language });
         }
 
         if (this.get('canStealFocus')) {
@@ -252,3 +255,4 @@ exports.Component = SC.Object.extend({
         this.get('editor').dispose();
     }
 });
+

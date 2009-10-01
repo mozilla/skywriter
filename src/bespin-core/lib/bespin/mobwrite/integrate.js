@@ -22,6 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var mobwrite = require("bespin/mobwrite");
+
 /**
  * Constructor of shared object representing a text field.
  * @param {Node} shareNode A Bespin shared node
@@ -115,3 +117,4 @@ mobwrite.shareBespinObj.shareHandler = function(node) {
 
 // Register this shareHandler with MobWrite.
 mobwrite.shareHandlers.push(mobwrite.shareBespinObj.shareHandler);
+

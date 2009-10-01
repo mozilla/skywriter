@@ -109,7 +109,6 @@ exports.CodeInfo = SC.Object.define({
         if (!self._started) {
             self._started = true;
 
-            self.run_timeout;
             var delay = 400;
 
             // rerun parser every time the doc changes
@@ -367,7 +366,7 @@ exports.JavaScript = SC.Object.extend({
         var html = '<u>Outline</u><br/><br/>';
         html +='<div id="outlineInfo">';
         for (var i = 0; i < info.length; i++) {
-            var type = info[i].type;
+            type = info[i].type;
             var kind = type;
             var name = info[i].name;
             var pattern = codePatterns[type];
@@ -433,7 +432,7 @@ exports.JavaScript = SC.Object.extend({
         var self = this;
         //console.log("SubInit");
         bespin.subscribe("parser:js:codePatterns", function (patterns) {
-            for (pattern in patterns) {
+            for (var pattern in patterns) {
                 self.codePatterns[pattern] = patterns[pattern];
             }
             bespin.publish("parser:engine:updatedCodePatterns");

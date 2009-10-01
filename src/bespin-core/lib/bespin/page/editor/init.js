@@ -98,66 +98,6 @@ exports.doResize = function() {
 };
 
 /**
- * Loads and configures the objects that the editor needs
- */
-dojo.addOnLoad(function() {
-    var editor = bespin.register('editor', new editorMod.API('editor'));
-    var editSession = bespin.register('editSession', new sessionMod.EditSession({ editor: editor }));
-    var server = bespin.register('server', new client.Server());
-    var files = bespin.register('files', new client.FileSystem());
-
-    bespin.register('actions', editor.ui.actions);
-    //bespin.register('filesearch', new filesearch.API());
-    bespin.register('toolbar', new toolbar.Toolbar({ editor: editor, opts: { setupDefault: true } }));
-    bespin.register('quickopen', new quickopen.API());
-
-    // Get going when settings are loaded
-    bespin.subscribe("settings:loaded", function(event) {
-        bespin.get('settings').loadSession();  // load the last file or what is passed in
-        pageEditor.doResize();
-    });
-
-    var whenLoggedIn = function(userinfo) {
-        bespin.get('editSession').setUserinfo(userinfo);
-        bespin.register('settings', new settings.Core());
-
-        if (userinfo.serverCapabilities) {
-            var sc = userinfo.serverCapabilities;
-            bespin.register("serverCapabilities", sc.capabilities);
-
-            for (var packagename in sc.dojoModulePath) {
-                dojo.registerModulePath(packagename, sc.dojoModulePath[packagename]);
-            }
-
-            // this is done to trick the build system which would
-            // try to find a module called "plugin" below.
-            var re = dojo.require;
-            sc.javaScriptPlugins.forEach(function(plugin) {
-                re.call(dojo, plugin);
-            });
-        }
-
-        bespin.publish("authenticated");
-    };
-
-    var whenNotLoggedIn = function() {
-        navigate.home(); // go back
-    };
-
-    // Force a login just in case the user session isn't around
-    server.currentuser(whenLoggedIn, whenNotLoggedIn);
-
-    // Set the version info
-    bespin.displayVersion();
-
-    dojo.connect(window, 'resize', exports, "doResize");
-
-    // -- Deal with the project label (project, filename, dirty flag)
-    statusScene = new ProjectStatusScene();
-    bespin.publish("bespin:editor:initialized", {});
-});
-
-/**
  * The object that understands how to render the project label scene
  * It paints "project name [status of clean or dirty] file name"
  */
@@ -239,3 +179,64 @@ var ProjectStatusScene = function() {
         }
     };
 };
+
+/**
+ * Loads and configures the objects that the editor needs
+ */
+dojo.addOnLoad(function() {
+    var editor = bespin.register('editor', new editorMod.API('editor'));
+    var editSession = bespin.register('editSession', new sessionMod.EditSession({ editor: editor }));
+    var server = bespin.register('server', new client.Server());
+    var files = bespin.register('files', new client.FileSystem());
+
+    bespin.register('actions', editor.ui.actions);
+    //bespin.register('filesearch', new filesearch.API());
+    bespin.register('toolbar', new toolbar.Toolbar({ editor: editor, opts: { setupDefault: true } }));
+    bespin.register('quickopen', new quickopen.API());
+
+    // Get going when settings are loaded
+    bespin.subscribe("settings:loaded", function(event) {
+        bespin.get('settings').loadSession();  // load the last file or what is passed in
+        pageEditor.doResize();
+    });
+
+    var whenLoggedIn = function(userinfo) {
+        bespin.get('editSession').setUserinfo(userinfo);
+        bespin.register('settings', new settings.Core());
+
+        if (userinfo.serverCapabilities) {
+            var sc = userinfo.serverCapabilities;
+            bespin.register("serverCapabilities", sc.capabilities);
+
+            for (var packagename in sc.dojoModulePath) {
+                dojo.registerModulePath(packagename, sc.dojoModulePath[packagename]);
+            }
+
+            // this is done to trick the build system which would
+            // try to find a module called "plugin" below.
+            var re = dojo.require;
+            sc.javaScriptPlugins.forEach(function(plugin) {
+                re.call(dojo, plugin);
+            });
+        }
+
+        bespin.publish("authenticated");
+    };
+
+    var whenNotLoggedIn = function() {
+        navigate.home(); // go back
+    };
+
+    // Force a login just in case the user session isn't around
+    server.currentuser(whenLoggedIn, whenNotLoggedIn);
+
+    // Set the version info
+    bespin.displayVersion();
+
+    dojo.connect(window, 'resize', exports, "doResize");
+
+    // -- Deal with the project label (project, filename, dirty flag)
+    statusScene = new ProjectStatusScene();
+    bespin.publish("bespin:editor:initialized", {});
+});
+

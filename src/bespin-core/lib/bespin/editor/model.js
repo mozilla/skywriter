@@ -100,14 +100,15 @@ exports.DocumentModel = SC.Object.extend({
             return; // nothing to do.
         }
 
+        var i, historyItem;
         if (state > this.historyIndex) {
-            for (var i = this.historyIndex + 1; i <= state; i++) {
-                var historyItem = this.history[i];
+            for (i = this.historyIndex + 1; i <= state; i++) {
+                historyItem = this.history[i];
                 this.performHistoryItem(historyItem);
             }
         } else {
-            for (var i = this.historyIndex; i > state; i--) {
-                var historyItem = this.history[i];
+            for (i = this.historyIndex; i > state; i--) {
+                historyItem = this.history[i];
                 this.unperformHistoryItem(historyItem);
             }
         }
@@ -136,7 +137,9 @@ exports.DocumentModel = SC.Object.extend({
     },
 
     setRowDirty: function(row) {
-        if (!this.dirtyRows){this.dirtyRows = new Array(this.rows.length);}
+        if (!this.dirtyRows) {
+            this.dirtyRows = new Array(this.rows.length);
+        }
         this.dirtyRows[row] = true;
     },
 
@@ -451,13 +454,13 @@ exports.DocumentModel = SC.Object.extend({
      */
     getStringIndicesInRow: function(row, str) {
         str = str.toLowerCase();
-        var row = this.getRowArray(row).join('').toLowerCase();
+        row = this.getRowArray(row).join('').toLowerCase();
 
         if (row.indexOf(str) == -1) {
             return false;
         }
 
-        var result = new Array();
+        var result = [];
         var start = 0;
         var index = row.indexOf(str);
 
