@@ -13,6 +13,9 @@ ext.load(function(myfunc) {
     myfunc("yo");
 });
 
+SC.Object.prototype.sc_super = function super_name() {
+    super_name.caller.base.apply(this, super_name.caller.arguments);
+}
 
 var component = require("bespin/editor/component");
 var _editorComponent;
@@ -33,3 +36,4 @@ function copyToEditor() {
 function setSyntax(value) {
     bespin.publish("settings:language", { language: value });
 }
+
