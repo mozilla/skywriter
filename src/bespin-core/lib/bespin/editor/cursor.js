@@ -32,11 +32,10 @@ var utils = require("bespin/editor").utils;
 exports.CursorManager = SC.Object.extend({
     editor: null,
     init: function() {
-        this.editor = editor;
         this.position = { row: 0, col: 0 };
         this.virtualCol = 0;
 
-        sc_super();
+        arguments.callee.base.apply(this, arguments);
     },
 
     /**

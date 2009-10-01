@@ -2,10 +2,12 @@ var _editorComponent;
 
 SC = require("sproutcore");
 var component = require("bespin/editor/component");
-_editorComponent = new component.Component('editor', {
-    language: "js",
-    loadfromdiv: true,
-    set: { strictlines: 'off' }
+
+_editorComponent = component.Component.create({
+    container: 'editor',
+    language: 'js',
+    loadFromDiv: true,
+    setOptions: { strictlines: 'off' }
 });
 
 function copyToTextarea() {

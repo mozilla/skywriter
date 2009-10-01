@@ -34,7 +34,7 @@ dojo.mixin(exports, {
             console.log("Publish", topic, args);
         }
 
-        bespin._eventLog[topic] = true;
+        exports._eventLog[topic] = true;
         dojo.publish("bespin:" + topic, dojo.isArray(args) ? args : [ args || {} ]);
     },
 
@@ -56,10 +56,10 @@ dojo.mixin(exports, {
 
         for (var i = 0; i < topics.length; ++i) {
             var topic = topics[i];
-            if (bespin._eventLog[topic]) {
+            if (exports._eventLog[topic]) {
                 --count;
             } else {
-                bespin.subscribe(topic, function () {
+                exports.subscribe(topic, function () {
                     --count;
                     done();
                 });
@@ -116,7 +116,7 @@ dojo.mixin(exports, {
     register: function(id, object) {
         this.registeredComponents[id] = object;
 
-        bespin.publish("component:register:" + id, { id: id, object: object });
+        exports.publish("component:register:" + id, { id: id, object: object });
 
         return object;
     },
@@ -158,9 +158,9 @@ dojo.mixin(exports, {
      */
     getComponent: function(id, callback, context) {
         context = context || window;
-        var component = bespin.get(id);
+        var component = exports.get(id);
         if (!component) {
-            var factory = bespin.factories[id];
+            var factory = exports.factories[id];
             if (!factory) {
                 return undefined;
             }
@@ -174,34 +174,34 @@ dojo.mixin(exports, {
     
     factories: {
         popup: function(callback, context) {
-            bespin.plugins.loadOne("popup", function(popupmod) {
-                var popup = bespin.register("popup", new popupmod.Window());
+            exports.plugins.loadOne("popup", function(popupmod) {
+                var popup = exports.register("popup", new popupmod.Window());
                 callback.call(context, popup);
             });
         },
         piemenu: function(callback, context) {
-            bespin.plugins.loadOne("piemenu", function(piemenumod) {
-                bespin.register("piemenu", new piemenumod.Window());
+            exports.plugins.loadOne("piemenu", function(piemenumod) {
+                exports.register("piemenu", new piemenumod.Window());
                 
                 // the pie menu doesn't animate properly
                 // without restoring control to the UI temporarily
                 setTimeout(function() {
-                    var piemenu = bespin.get("piemenu");
+                    var piemenu = exports.get("piemenu");
                     callback.call(context, piemenu);
                 }, 25);
             });
         },
         commandLine: function(callback, context) {
-            bespin.plugins.loadOne("commandLine", function(commandline) {
-                var commandLine = bespin.register("commandLine", 
-                    new commandline.Interface('command', bespin.command.store)
+            exports.plugins.loadOne("commandLine", function(commandline) {
+                var commandLine = exports.register("commandLine", 
+                    new commandline.Interface('command', exports.command.store)
                 );
                 callback.call(context, commandLine);
             });
         },
         debugbar: function(callback, context) {
-            bespin.plugins.loadOne("debugbar", function(debug) {
-                var commandLine = bespin.register("debugbar", 
+            exports.plugins.loadOne("debugbar", function(debug) {
+                var commandLine = exports.register("debugbar", 
                     new debug.EvalCommandLineInterface('debugbar_command', null, {
                         idPrefix: "debugbar_",
                         parentElement: dojo.byId("debugbar")
@@ -211,8 +211,8 @@ dojo.mixin(exports, {
             });
         },
         breakpoints: function(callback, context) {
-            bespin.plugins.loadOne("breakpoints", function(BreakpointManager) {
-                var breakpoints = bespin.register("breakpoints", 
+            exports.plugins.loadOne("breakpoints", function(BreakpointManager) {
+                var breakpoints = exports.register("breakpoints", 
                     new BreakpointManager()
                 );
                 callback.call(context, breakpoints);
@@ -230,18 +230,18 @@ dojo.mixin(exports, {
     },
     
     _subscribeToExtension: function(key) {
-        bespin.subscribe("extension:removed:" + key, function() {
-            var item = bespin.get(key);
+        exports.subscribe("extension:removed:" + key, function() {
+            var item = exports.get(key);
             if (item && item.destroy) {
                 item.destroy();
             }
-            bespin.unregister(key);
+            exports.unregister(key);
         });
     },
     
     _initializeReloaders: function() {
-        for (var key in bespin.factories) {
-            bespin._subscribeToExtension(key);
+        for (var key in exports.factories) {
+            exports._subscribeToExtension(key);
         }
     }
 });

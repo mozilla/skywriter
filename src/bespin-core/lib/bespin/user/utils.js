@@ -22,10 +22,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
+var bespin    = require("bespin");
 var webpieces = require("bespin/util/webpieces");
-var navigate = require("bespin/util/navigate");
-var register = require("bespin/user/register");
+var navigate  = require("bespin/util/navigate");
+var register  = require("bespin/user/register");
 
 /**
  * Utility functions for the Bespin front page
@@ -82,9 +82,8 @@ dojo.mixin(exports, {
 
     showingBrowserCompatScreen: function() {
        if (!this.checkBrowserAbility()) {
-           // if you don't have the ability
-           webpieces.showCenterPopup(dojo.byId('browser_not_compat'), true);
-
+            // if you don't have the ability
+            webpieces.showCenterPopup(dojo.byId('browser_not_compat'), true);
             return true;
         } else {
             return false;
