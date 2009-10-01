@@ -22,14 +22,18 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-dojo.provide("bespin.social");
+// module: bespin/social
+
+var bespin  = require("bespin");
+var command = require("bespin/command");
+var server  = require("bespin/client/server");
 
 
 /**
  * Utility to take an string array of strings, and publish a ul list to the
  * instruction
  */
-bespin.social.displayArray = function(instruction, titleNone, titleSome, array) {
+exports.displayArray = function(instruction, titleNone, titleSome, array) {
     if (!array || array.length === 0) {
         instruction.addOutput(titleNone);
         return;
@@ -45,7 +49,7 @@ bespin.social.displayArray = function(instruction, titleNone, titleSome, array) 
  * TODO: I'm fairly sure there is a better way to do this knowing how command
  * line parsing works
  */
-bespin.social.toArgArray = function(args) {
+exports.toArgArray = function(args) {
     if (args == null) {
         return [];
     }
@@ -65,14 +69,15 @@ bespin.social.toArgArray = function(args) {
 /**
  * Add a 'follow' command that gets and adds to out list of our followers
  */
-bespin.command.store.addCommand({
+  
+command.store.addCommand({
     name: 'follow',
     takes: ['username ...'],
     preview: 'add to the list of users we are following, or (with no args) list the current set',
     completeText: 'username(s) of person(s) to follow',
     usage: "[username] ...<br><br><em>(username optional. Will list current followed users if not provided)</em>",
     execute: function(instruction, args) {
-        var usernames = bespin.social.toArgArray(args);
+        var usernames = exports.toArgArray(args);
         if (usernames.length === 0) {
             bespin.get('server').follow([], {
                 evalJSON: true,
@@ -82,7 +87,7 @@ bespin.command.store.addCommand({
                         return;
                     }
 
-                    var parent = bespin.social.displayFollowers(followers);
+                    var parent = exports.displayFollowers(followers);
                     instruction.setElement(parent);
                 },
                 onFailure: function(xhr) {
@@ -102,7 +107,7 @@ bespin.command.store.addCommand({
                     // TODO: Rename this event
                     bespin.publish("project:created");
 
-                    var parent = bespin.social.displayFollowers(followers);
+                    var parent = exports.displayFollowers(followers);
                     instruction.setElement(parent);
                 },
                 onFailure: function(xhr) {
@@ -116,7 +121,7 @@ bespin.command.store.addCommand({
 /**
  * Extend bespin.client.Server with follow / followers methods
  */
-dojo.extend(bespin.client.Server, {
+dojo.extend(server, {
     follow: function(usernames, opts) {
         this.request('POST', '/network/follow/', dojo.toJson(usernames), opts);
     },
@@ -130,7 +135,7 @@ dojo.extend(bespin.client.Server, {
  * Utility to take an string array of follower names, and publish a
  * "Following: ..." message as a command line response.
  */
-bespin.social.displayFollowers = function(followers) {
+exports.displayFollowers = function(followers) {
     var parent = dojo.create("div", {});
     dojo.create("div", { innerHTML: "You are following these users:" }, parent);
     var table = dojo.create("table", { }, parent);
@@ -160,7 +165,7 @@ bespin.social.displayFollowers = function(followers) {
 /**
  * Add an 'unfollow' command that removes from our list of our followers
  */
-bespin.command.store.addCommand({
+command.store.addCommand({
     name: 'unfollow',
     takes: ['username ...'],
     preview: 'remove from the list of users we are following',
@@ -183,7 +188,7 @@ bespin.command.store.addCommand({
                     // TODO: Rename this event
                     bespin.publish("project:created");
 
-                    var parent = bespin.social.displayFollowers(followers);
+                    var parent = exports.displayFollowers(followers);
                     instruction.setElement(parent);
                 },
                 onFailure: function(xhr) {
@@ -197,7 +202,7 @@ bespin.command.store.addCommand({
 /**
  * Extend bespin.client.Server with an unfollow method
  */
-dojo.extend(bespin.client.Server, {
+dojo.extend(server, {
     unfollow: function(users, opts) {
         this.request('POST', '/network/unfollow/', dojo.toJson(users), opts);
     }
@@ -208,25 +213,33 @@ dojo.extend(bespin.client.Server, {
 /**
  * Container for the group command
  */
-if (!bespin.social.group) {
-    bespin.social.group = {};
+if (!exports.group) {
+    exports.group = {};
 }
 
 /**
  * Command store for the group commands
  * (which are subcommands of the main 'group' command)
  */
-bespin.social.group.commands = new bespin.command.Store(bespin.command.store, {
+ 
+exports.group.commands = command.Store.create({
     name: 'group',
     preview: 'Collect the people you follow into groups, and display the existing groups',
     completeText: 'subcommands: add, remove, list, help',
     subcommanddefault: 'help'
 });
+ 
+// exports.group.commands = new bespin.command.Store(bespin.command.store, {
+//     name: 'group',
+//     preview: 'Collect the people you follow into groups, and display the existing groups',
+//     completeText: 'subcommands: add, remove, list, help',
+//     subcommanddefault: 'help'
+// });
 
 /**
  * Display sub-command help
  */
-bespin.social.group.commands.addCommand({
+exports.group.commands.addCommand({
     name: 'help',
     takes: ['search'],
     preview: 'show subcommands for group command',
@@ -241,7 +254,7 @@ bespin.social.group.commands.addCommand({
 /**
  * 'group list' subcommand.
  */
-bespin.social.group.commands.addCommand({
+exports.group.commands.addCommand({
     name: 'list',
     preview: 'List the current group and group members',
     takes: ['group'],
@@ -338,7 +351,7 @@ bespin.social.group.commands.addCommand({
 /**
  * 'group add' subcommand.
  */
-bespin.social.group.commands.addCommand({
+exports.group.commands.addCommand({
     name: 'add',
     preview: 'Add members to a new or existing group',
     takes: [ 'group', 'member ...' ],
@@ -361,7 +374,7 @@ bespin.social.group.commands.addCommand({
 /**
  * 'group remove' subcommand.
  */
-bespin.social.group.commands.addCommand({
+exports.group.commands.addCommand({
     name: 'remove',
     preview: 'Remove members from an existing group (and remove group if empty)',
     takes: [ 'group', 'member ...' ],
@@ -396,7 +409,7 @@ bespin.social.group.commands.addCommand({
 /**
  * Extend bespin.client.Server with group* methods
  */
-dojo.extend(bespin.client.Server, {
+dojo.extend(server, {
     /**
      * Get a list of the users the current user is following
      */
@@ -438,12 +451,12 @@ dojo.extend(bespin.client.Server, {
 /**
  * Container for the share commands and functions
  */
-bespin.social.share = {
+exports.share = {
     /**
      * Command store for the share commands
      * (which are subcommands of the main 'share' command)
      */
-    commands: new bespin.command.Store(bespin.command.store, {
+    commands: new command.Store(bespin.command.store, {
         name: 'share',
         preview: 'Manage the projects that you share to other users',
         completeText: 'subcommands: add, remove, list, help',
@@ -454,7 +467,7 @@ bespin.social.share = {
 /**
  * Display sub-command help
  */
-bespin.social.share.commands.addCommand({
+exports.share.commands.addCommand({
     name: 'help',
     takes: ['search'],
     preview: 'show subcommands for share command',
@@ -469,7 +482,7 @@ bespin.social.share.commands.addCommand({
 /**
  * 'share list' sub-command.
  */
-bespin.social.share.commands.addCommand({
+exports.share.commands.addCommand({
     name: 'list',
     preview: 'List the current shared projects',
     description: 'List the current shared projects.',
@@ -560,7 +573,7 @@ bespin.social.share.commands.addCommand({
 /**
  * 'share remove' sub-command.
  */
-bespin.social.share.commands.addCommand({
+exports.share.commands.addCommand({
     name: 'remove',
     preview: 'Remove a share from the current shared projects',
     description: 'Remove a share from the current shared projects.',
@@ -596,7 +609,7 @@ bespin.social.share.commands.addCommand({
 /**
  * 'share add' sub-command.
  */
-bespin.social.share.commands.addCommand({
+exports.share.commands.addCommand({
     name: 'add',
     preview: 'Add a share to the current shared projects',
     description: 'Add a share to the current shared projects.',
@@ -625,7 +638,7 @@ bespin.social.share.commands.addCommand({
 /**
  * Extensions to bespin.client.Server to add share* methods
  */
-dojo.extend(bespin.client.Server, {
+dojo.extend(server, {
     /**
      * List all project shares
      */

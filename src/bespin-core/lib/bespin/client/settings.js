@@ -44,7 +44,8 @@ var themes = require("bespin/themes/default");
  * TODO: tie into the sessions servlet; eliminate Gears dependency
  */
 exports.Core = SC.Object.extend({
-    constructor: function(store) {
+    store: null,
+    init: function() {
         this.browserOverrides = {};
         this.fromURL = new exports.URL();
         this.customEvents = new exports.Events(this);

@@ -23,7 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var copyPos = require("bespin/editor/utils");
+var copyPos = require("bespin/editor/utils").utils;
 
 /**
  * The editor has a model of the data that it works with.
@@ -183,7 +183,9 @@ exports.DocumentModel = SC.Object.extend({
         this.rows[modelPos.row] = newrow.concat(row);
 
         this.setRowDirty(modelPos.row);
-        this.editor.ui.syntaxModel.invalidateCache(modelPos.row);
+        
+        var ui = this.get('editor').get('ui');        
+        ui.get('syntaxModel').invalidateCache(modelPos.row);
 
         if (!noHistory) {
             this.addHistoryItem('insertCharacters', { pos: copyPos(modelPos), characters: string});

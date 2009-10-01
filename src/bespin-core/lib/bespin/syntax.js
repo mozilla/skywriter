@@ -31,6 +31,10 @@
 
 // module: bespin/syntax
 
+var bespin = require("bespin");
+
+if (!bespin.syntax) bespin.syntax = {};
+
 /**
  * Base model for tracking syntax highlighting data.
  */
