@@ -466,7 +466,17 @@ exports.UI = SC.Object.extend({
         var settings = bespin.get("settings");
 
         this.model = this.editor.model;
-        this.syntaxModel = syntax.Resolver.setEngine("simple").getModel();
+        
+        var pluginCatalog = bespin.get("plugins");
+        var ep = pluginCatalog.getExtensionPoint("bespin.syntax.engine");
+        // set model to a default that will work until the real thing is loaded
+        this.syntaxModel = syntax.Model.create();
+        
+        var self = this;
+        ep.extensions[0].load(function(model) {
+            self.syntaxModel = model.create();
+        });
+        
         this.selectionHelper = exports.SelectionHelper.create({ editor: this.editor });
         this.actions = actions.Actions.create({ editor: this.editor });
 

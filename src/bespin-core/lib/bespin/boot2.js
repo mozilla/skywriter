@@ -7,12 +7,6 @@ var catalog = plugins.Catalog.create();
 catalog.load(builtins.metadata);
 bespin.register("plugins", catalog);
 
-var ep = catalog.getExtensionPoint("mypoint");
-var ext = ep.extensions[0];
-ext.load(function(myfunc) {
-    myfunc("yo");
-});
-
 SC.Object.prototype.sc_super = function super_name() {
     super_name.caller.base.apply(this, super_name.caller.arguments);
 }

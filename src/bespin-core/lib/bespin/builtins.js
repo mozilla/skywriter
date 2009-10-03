@@ -23,17 +23,17 @@
  * ***** END LICENSE BLOCK ***** */
 
 exports.metadata = {
-    "EPTest" : {
+    "Base Syntax": {
         provides: [
             {
-                ep: "extensionpoint",
-                name: "mypoint",
-                activate: "bespin/plugins:thing1",
-                deactivate: "bespin/plugins:thing2"
+                ep: "entrypoint",
+                name: "bespin.syntax.engine",
+                description: "Syntax highlighting engines"
             },
             {
-                ep: "mypoint",
-                pointer: "bespin/plugins:thing3"
+                ep: "bespin.syntax.engine",
+                name: "simple",
+                pointer: "bespin/syntax/simple:Model"
             }
         ]
     }
