@@ -1495,9 +1495,7 @@ exports.UI = SC.Object.extend({
             // CHUNK 2: this code uses the SyntaxModel API to render the line
             // syntax highlighting
             
-            // TODO: re-enable highlighting
-            // var lineInfo = this.syntaxModel.getSyntaxStylesPerLine(lineText, currentLine, this.editor.language);
-            var lineInfo = { regions: [] };
+            var lineInfo = this.syntaxModel.getSyntaxStylesPerLine(lineText, currentLine, this.editor.language);
 
             // Define a fill that is aware of the readonly attribute and fades out if applied
             var readOnlyAwareFill = ed.readonly ? this.fillTextWithTransparency : this.fillText;
