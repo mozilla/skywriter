@@ -53,7 +53,7 @@ exports.JavaScript = SC.Object.extend({
     highlight: function(line, meta) {
         if (!meta) meta = {};
 
-        var K = bespin.syntax.JavaScriptConstants;    // aliasing the constants for shorter reference ;-)
+        var K = exports.JavaScriptConstants;    // aliasing the constants for shorter reference ;-)
 
         var regions = {};                               // contains the individual style types as keys, with array of start/stop positions as value
 

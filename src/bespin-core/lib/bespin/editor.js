@@ -468,7 +468,7 @@ exports.UI = SC.Object.extend({
         this.model = this.editor.model;
         
         var pluginCatalog = bespin.get("plugins");
-        var ep = pluginCatalog.getExtensionPoint("bespin.syntax.engine");
+        var ep = pluginCatalog.getExtensionPoint("syntax.engine");
         // set model to a default that will work until the real thing is loaded
         this.syntaxModel = syntax.Model.create();
         
