@@ -234,8 +234,11 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
     defaultKeyMap: {},
 
     // Allow for multiple key maps to be defined
-    keyMap: this.defaultKeyMap,
     keyMapDescriptions: { },
+    
+    init: function() {
+        this.keyMap = this.defaultKeyMap;
+    },
 
     bindKey: function(keyCode, metaKey, ctrlKey, altKey, shiftKey, action, name) {
         this.defaultKeyMap[[keyCode, metaKey, ctrlKey, altKey, shiftKey]] =
@@ -1481,7 +1484,10 @@ exports.UI = SC.Object.extend({
 
             // CHUNK 2: this code uses the SyntaxModel API to render the line
             // syntax highlighting
-            var lineInfo = this.syntaxModel.getSyntaxStylesPerLine(lineText, currentLine, this.editor.language);
+            
+            // TODO: re-enable highlighting
+            // var lineInfo = this.syntaxModel.getSyntaxStylesPerLine(lineText, currentLine, this.editor.language);
+            var lineInfo = { regions: [] };
 
             // Define a fill that is aware of the readonly attribute and fades out if applied
             var readOnlyAwareFill = ed.readonly ? this.fillTextWithTransparency : this.fillText;

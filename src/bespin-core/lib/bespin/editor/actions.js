@@ -52,7 +52,8 @@ exports.Actions = SC.Object.extend({
      */
     beginEdit: function(name) {
         if (this.editDepth == 0) {
-            this.currentEditItem = new bespin.editor.ActionHistoryItem(name, this.editor);
+            this.currentEditItem = exports.ActionHistoryItem.create({name: name, 
+                    editor: this.editor});
             this.currentEditItem.begin();
         }
         this.editDepth++;
@@ -1017,10 +1018,6 @@ exports.Actions = SC.Object.extend({
  * Pretend it inherits from bespin.editor.HistoryItem.
  */
 exports.ActionHistoryItem = SC.Object.extend({
-    init: function(name, editor) {
-        this.editor = editor;
-    },
-
     begin: function(editor, model) {
         this.startIndex = this.editor.historyManager.getCurrent();
 
