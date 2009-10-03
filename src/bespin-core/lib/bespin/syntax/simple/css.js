@@ -97,7 +97,7 @@ exports.CSS = SC.Object.extend({
     punctuation: '{ } / + * . , ; ( ) ? : = " \''.split(" "),
 
     highlight: function(line, meta) {
-        var K = bespin.syntax.Constants;    // aliasing the constants for shorter reference ;-)
+        var K = exports.Constants;    // aliasing the constants for shorter reference ;-)
 
         var regions = {};  // contains the individual style types as keys, with array of start/stop positions as value
 
