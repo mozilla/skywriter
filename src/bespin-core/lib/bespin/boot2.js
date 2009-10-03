@@ -1,7 +1,12 @@
+console.log("loading boot2");
+
 window.SC = require("sproutcore");
 var plugins = require("bespin/plugins");
 var builtins = require("bespin/builtins");
 var bespin = require("bespin");
+
+// SC.LOG_BINDINGS = true;
+// SC.LOG_OBSERVERS = true;
 
 var catalog = plugins.Catalog.create();
 catalog.load(builtins.metadata);
@@ -85,9 +90,12 @@ QuickOpen.controller = SC.Object.create({
    searchKey: "",
    
    matchingFiles: function() {
-       var project = this.get('project');       
+       var project = this.get('project');
+       if (!project) return [];
+       
        var rootDir = project.get('rootDirectory');       
-       var results = [], searchKey = this.get('searchKey').toLowerCase();
+       var results = [], searchKey = 
+        (this.get('searchKey') || "").toLowerCase();
        
        function traverse(directory, results, searchKey) {
            var contents = directory.get('contents');
@@ -100,8 +108,6 @@ QuickOpen.controller = SC.Object.create({
                     name = file.get('name');
                     if (name.toLowerCase().indexOf(searchKey) > -1) {
                         results.pushObject(file);
-                    } else {
-                      console.log(name + ' didn\'t match');
                     }
                }
            }
@@ -109,7 +115,7 @@ QuickOpen.controller = SC.Object.create({
        
        traverse(rootDir, results, searchKey);
        return results;
-   }.property('searchKey', 'project')   
+   }.property('searchKey', 'project').cacheable()
 });
 
 
@@ -137,3 +143,57 @@ QuickOpen.controller.set('project', project1);
 window.project1 = project1;
 window.dir1 = dir1;
 window.file1 = file1;
+
+
+console.log("about to call SC._didBecomeReady");
+SC._didBecomeReady();
+console.log("done!");
+
+var FileView = SC.ListItemView.extend({
+    init: function() {
+        console.log("init");
+        window._fv = this;
+    },
+    contentValueKey: function() {
+        console.log("retrieving contentValueKey");
+        return 'name';
+    }.property()
+});
+
+var mainPage = SC.Page.design({
+    mainPane: SC.MainPane.design({
+        childViews: 'modal'.w(),
+        
+        modal: SC.View.design({
+            classNames: ['bespin-modal'],
+            backgroundColor: 'white',
+            
+            childViews: 'searchField fileList'.w(),
+            
+            layout: { width: 400, height: 200, centerX: 0, centerY: 0 },
+            
+            searchField: SC.TextFieldView.design({
+                layout: { left: 10, right: 10, top: 10, height: 20 },
+                fieldValueBinding: 'QuickOpen.controller.searchKey'
+            }),
+            
+            fileList: SC.ListView.design({
+                layout: { top: 40, left: 10, right: 10, bottom: 10 },
+                contentValueKey: 'name',
+
+                contentBinding: 'QuickOpen.controller.matchingFiles',
+                exampleView: FileView
+            })
+        })
+    })
+});
+
+
+mainPage.get('mainPane').append();
+
+
+// var list = SC.ListView.create({
+//    layout: { } 
+// });
+
+
