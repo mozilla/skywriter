@@ -122,24 +122,57 @@ function startEditor() {
 <script type='text/javascript' src='dojo/fx/easing.js'></script>
 <script type='text/javascript' src='dijit/_base/place.js'></script>
 <script type='text/javascript' src='th.compressed.js'></script>
+<style>
+  body { padding: 20px; font-family: Calibri, Helvetica, Arial; }
+  h1 { border-bottom: 1px solid #ddd; font-size:120%; }
+</style>
 </head>
 <body>
 
-<p>Hi</p>
-    <h3>Sample Editor as a Component</h3>
-    <div id="editor" style="margin: 0; padding: 0; border: 0; height: 300px; border: 10px solid #ddd; -moz-border-radius: 10px; -webkit-border-radius: 10px;">var foo = "whee";
+<h1>Sample Editor as a Component</h1>
+<div id="editor" style="margin: 0; padding: 0; border: 0; height: 300px; border: 10px solid #ddd; -moz-border-radius: 10px; -webkit-border-radius: 10px;">var foo = "whee";
 
 function flubber() {
     return "tweeble";
 }</div>
 
-    <div style="padding: 20px">
-    <b style="display: block; border-bottom: 1px solid #ddd;">Play with the editor</b><br>
-    Enter language and blur out: <input type="text" id="syntax" value="" onblur="setSyntax(this.value)"><br>
-    Push a new setting: <input type="text" id="key" value="strictlines"> <input type="text" id="value" value="on"> <input type="button" value="set" onclick="_editorComponent.set(dojo.byId('key').value, dojo.byId('value').value)"><br>
+<h1>Play with the editor</h1>
 
-    <textarea id="inandout" cols="100" rows="10"></textarea><br>
-    <input type="button" value="Copy to Textarea" onclick="copyToTextarea()">
-    <input type="button" value="Copy to Editor" onclick="copyToEditor()">
-    </div>
-</body></html>
+<div>
+  <script>
+    function setSyntax(value) {
+        bespin.publish("settings:language", { language: value });
+    }
+  </script>
+  Enter language and blur out: <input type="text" id="syntax" value="" onblur="setSyntax(this.value)">
+</div>
+
+<div>
+  <script>
+    function setSetting() {
+        var key = dojo.byId('key').value;
+        var value = dojo.byId('value').value;
+        _editorComponent.set(key, value);
+    }
+  </script>
+  Push a new setting: <input type="text" id="key" value="strictlines">
+  <input type="text" id="value" value="on">
+  <input type="button" value="set" onclick="setSetting();">
+</div>
+
+<div>
+  <script>
+    function copyToTextarea() {
+        dojo.byId('inandout').value = _editorComponent.getContent();
+    }
+    function copyToEditor() {
+        _editorComponent.setContent(dojo.byId('inandout').value);
+    }
+  </script>
+  <textarea id="inandout" cols="100" rows="10"></textarea><br>
+  <input type="button" value="Copy to Textarea" onclick="copyToTextarea()">
+  <input type="button" value="Copy to Editor" onclick="copyToEditor()">
+</div>
+
+</body>
+</html>

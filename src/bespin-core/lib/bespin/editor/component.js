@@ -58,10 +58,10 @@ exports.Component = SC.Object.extend({
      * include those noted above.
      */
     init: function() {
-        var container = dojo.byId(this.container);
-        console.log("container is:", container);
-        if (container) {
-            this.set('container', container);
+        if (this.container) {
+            console.log("container is", this.container);
+            // TODO eh!
+            this.set('container', this.container);
         } else {
             throw new Error("Container does not exist!");
         }
@@ -73,14 +73,14 @@ exports.Component = SC.Object.extend({
             if (code) {
                 initialContent = code.value;
             } else {
-                initialContent = dojo.byId(container).innerHTML;
+                initialContent = this.container.innerHTML;
             }
         } else if (this.content) {
             initialContent = this.content;
         }
 
         this.editor = bespin.register('editor', this.editor ||
-            editorMod.API.create({ container: container })
+            editorMod.API.create({ container: this.container })
         );
         this.model = this.editor.model;
 
@@ -110,7 +110,7 @@ exports.Component = SC.Object.extend({
         if (this.opts.jetpack) {
             var jetpacktoolbar = dojo.create("div", {
                 id: "jetpacktoolbar"
-            }, dojo.byId(container));
+            }, this.container);
 
             jetpacktoolbar.innerHTML = '<div class="button">' +
                 '<button id="install" onclick="_editorComponent.executeCommand(\'jetpack install yourfirstjetpack\')">&uarr; Install This JetPack Feature</button>' +

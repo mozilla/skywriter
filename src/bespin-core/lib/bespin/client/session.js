@@ -33,10 +33,6 @@ var mobwrite = require("bespin/mobwrite/core");
 var diff_match_patch = require("bespin/mobwrite/diff");
 var SC = require("sproutcore");
 
-var DIFF_EQUAL = diff_match_patch.DIFF_EQUAL;
-var DIFF_DELETE = diff_match_patch.DIFF_DELETE;
-var DIFF_INSERT = diff_match_patch.DIFF_INSERT;
-
 /**
  * Mobwrite has a set of shareObjs which are designed to wrap DOM nodes.
  * This creates a fake DOM node to be wrapped in a Mobwrite ShareObj.
@@ -268,10 +264,10 @@ var ShareNode = SC.Object.extend({
                 var i;
                 for (var y = 0; y < patches[x].diffs.length; y++) {
                     var mod = patches[x].diffs[y];
-                    if (mod[0] !== DIFF_EQUAL) {
+                    if (mod[0] !== diff_match_patch.DIFF_EQUAL) {
                         index2 = this.shareObj.dmp.diff_xIndex(diffs, index1);
                     }
-                    if (mod[0] === DIFF_INSERT) {
+                    if (mod[0] === diff_match_patch.DIFF_INSERT) {
                         text = text.substring(0, start_loc + index2) + mod[1] +
                                      text.substring(start_loc + index2);
                         for (i = 0; i < offsets.length; i++) {
@@ -279,7 +275,7 @@ var ShareNode = SC.Object.extend({
                                 offsets[i] += mod[1].length;
                             }
                         }
-                    } else if (mod[0] === DIFF_DELETE) {
+                    } else if (mod[0] === diff_match_patch.DIFF_DELETE) {
                         var del_start = start_loc + index2;
                         var del_end = start_loc + this.shareObj.dmp.diff_xIndex(diffs,
                                 index1 + mod[1].length);
@@ -294,7 +290,7 @@ var ShareNode = SC.Object.extend({
                             }
                         }
                     }
-                    if (mod[0] !== DIFF_DELETE) {
+                    if (mod[0] !== diff_match_patch.DIFF_DELETE) {
                         index1 += mod[1].length;
                     }
                 }
