@@ -235,7 +235,7 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
 
     // Allow for multiple key maps to be defined
     keyMapDescriptions: { },
-    
+
     init: function() {
         this.keyMap = this.defaultKeyMap;
     },
@@ -466,17 +466,17 @@ exports.UI = SC.Object.extend({
         var settings = bespin.get("settings");
 
         this.model = this.editor.model;
-        
+
         var pluginCatalog = bespin.get("plugins");
         var ep = pluginCatalog.getExtensionPoint("syntax.engine");
         // set model to a default that will work until the real thing is loaded
         this.syntaxModel = syntax.Model.create();
-        
+
         var self = this;
         ep.extensions[0].load(function(model) {
             self.syntaxModel = model.create();
         });
-        
+
         this.selectionHelper = exports.SelectionHelper.create({ editor: this.editor });
         this.actions = actions.Actions.create({ editor: this.editor });
 
@@ -502,15 +502,13 @@ exports.UI = SC.Object.extend({
         var source = this.editor.container;
 
         window._source = source;
-        
-        var self = this;
-        
+
         source.addEventListener('mousemove', function(e) { return self.handleMouse(e); }, false);
         source.addEventListener('mouseout', function(e) { return self.handleMouse(e); }, false);
         source.addEventListener('click', function(e) { return self.handleMouse(e); }, false);
         source.addEventListener('mousedown', function(e) { return self.handleMouse(e); }, false);
         source.addEventListener('oncontextmenu', dojo.stopEvent, true);
-        source.addEventListener('mousedown', function(e) { return self.mouseDownSelect }, false);
+        source.addEventListener('mousedown', function(e) { return self.mouseDownSelect(e); }, false);
 
         var gh = this.globalHandles;
         gh.push(dojo.connect(window, "mousemove", this, "mouseMoveSelect"));
@@ -532,12 +530,11 @@ exports.UI = SC.Object.extend({
         });
         this.xscrollbar = xscrollbar;
 
+        var wheelEventName = (!dojo.isMozilla ? "onmousewheel" : "DOMMouseScroll");
+
         gh.push(dojo.connect(window, "mousemove", xscrollbar, "onmousemove"));
         gh.push(dojo.connect(window, "mouseup", xscrollbar, "onmouseup"));
-
-        gh.push(
-            dojo.connect(scope, (!dojo.isMozilla ? "onmousewheel" : "DOMMouseScroll"), xscrollbar, "onmousewheel")
-        );
+        gh.push(dojo.connect(scope, wheelEventName, xscrollbar, "onmousewheel"));
 
         var yscrollbar = exports.Scrollbar.create({
             ui: this,
@@ -552,9 +549,7 @@ exports.UI = SC.Object.extend({
 
         gh.push(dojo.connect(window, "mousemove", yscrollbar, "onmousemove"));
         gh.push(dojo.connect(window, "mouseup", yscrollbar, "onmouseup"));
-        gh.push(
-            dojo.connect(scope, (!dojo.isMozilla ? "onmousewheel" : "DOMMouseScroll"), yscrollbar, "onmousewheel")
-        );
+        gh.push(dojo.connect(scope, wheelEventName, yscrollbar, "onmousewheel"));
 
         setTimeout(dojo.hitch(this, function() {
             this.toggleCursor(this);
@@ -698,7 +693,9 @@ exports.UI = SC.Object.extend({
                 bespin.get("commandLine").showHint(lineMarker.msg);
             }
         }
-        if (up.col == -1){up.col = 0;}
+        if (up.col == -1) {
+            up.col = 0;
+        }
 
         //we'll be dealing with the model directly, so we need model positions.
         var modelstart = this.editor.getModelPos(down);
@@ -1494,7 +1491,7 @@ exports.UI = SC.Object.extend({
 
             // CHUNK 2: this code uses the SyntaxModel API to render the line
             // syntax highlighting
-            
+
             var lineInfo = this.syntaxModel.getSyntaxStylesPerLine(lineText, currentLine, this.editor.language);
 
             // Define a fill that is aware of the readonly attribute and fades out if applied

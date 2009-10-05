@@ -1,6 +1,11 @@
-console.log("loading boot2");
 
 window.SC = require("sproutcore");
+
+// Hack to allow us to call this.sc_super() in place of the global sc_super();
+SC.Object.prototype.sc_super = function super_name() {
+    super_name.caller.base.apply(this, super_name.caller.arguments);
+};
+
 var plugins = require("bespin/plugins");
 var builtins = require("bespin/builtins");
 var bespin = require("bespin");
@@ -12,29 +17,6 @@ var catalog = plugins.Catalog.create();
 catalog.load(builtins.metadata);
 bespin.register("plugins", catalog);
 
-SC.Object.prototype.sc_super = function super_name() {
-    super_name.caller.base.apply(this, super_name.caller.arguments);
-}
-
-// var component = require("bespin/editor/component");
-// var _editorComponent;
-// 
-// _editorComponent = component.Component.create({
-//     container: 'editor',
-//     language: "js",
-//     loadFromDiv: true,
-//     setOptions: { strictlines: 'off' }
-// });
-// 
-// function copyToTextarea() {
-//     dojo.byId('inandout').value = _editorComponent.getContent();
-// }
-// function copyToEditor() {
-//     _editorComponent.setContent(dojo.byId('inandout').value);
-// }
-// function setSyntax(value) {
-//     bespin.publish("settings:language", { language: value });
-// }
 
 window.FS = SC.Object.create({
     store: SC.Store.create()
@@ -175,19 +157,14 @@ var mainPage = SC.Page.design({
                 layout: { top: 40, left: 10, right: 10, bottom: 10 },
                 contentValueKey: 'name',
 
-                contentBinding: 'QuickOpen.controller.matchingFiles',
-                exampleView: FileView
-            })
-        })
-    })
+exports.editorComponent = component.Component.create({
+    container: 'editor',
+    language: "js",
+    loadFromDiv: true,
+    setOptions: { strictlines: 'off' }
+exports.editorComponent = component.Component.create({
+    container: dojo.byId('editor'),
+    language: "js",
+    loadFromDiv: true,
+    setOptions: { strictlines: 'on' }
 });
-
-
-mainPage.get('mainPane').append();
-
-
-// var list = SC.ListView.create({
-//    layout: { } 
-// });
-
-
