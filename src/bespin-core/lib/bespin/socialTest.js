@@ -22,12 +22,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-dojo.provide("bespin.socialTest");
+var test = require("bespin/test");
+var social = require("bespin/social");
 
-dojo.require("bespin.social");
-dojo.require("bespin.test");
-
-bespin.test.addTests("social", {
+test.addTests("social", {
     setup: function() {
         this.server = bespin.get("server");
         this.originalServerFollowers = this.server.followers;

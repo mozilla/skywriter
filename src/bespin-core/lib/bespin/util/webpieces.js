@@ -21,12 +21,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * ***** END LICENSE BLOCK ***** */
- 
-// module: bespin/util/webpieces
 
 var bespin = require("bespin");
-dojo.require("dijit._base.place");
-
 
 dojo.mixin(exports, {
     /**

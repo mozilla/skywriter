@@ -214,7 +214,7 @@ dojo.addOnLoad(function() {
 
             // this is done to trick the build system which would
             // try to find a module called "plugin" below.
-            var re = dojo.require;
+            var re = require;
             sc.javaScriptPlugins.forEach(function(plugin) {
                 re.call(dojo, plugin);
             });
