@@ -160,7 +160,7 @@ exports.PassThroughKeyCodes = (function() {
  * @param e Event that came into an <code>onkeydown</code> handler
  */
 exports.passThroughToBrowser = function(e) {
-    var Key = bespin.util.keys.Key;
+    var Key = exports.Key;
 
     if (!e.ctrlKey) {
         // let normal characters through

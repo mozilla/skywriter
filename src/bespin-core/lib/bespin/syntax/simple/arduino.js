@@ -64,7 +64,7 @@ exports.ARDUINO = SC.Object.extend({
         if (!meta) meta = {};
 
         // aliasing the constants for shorter reference ;-)
-        var K = bespin.syntax.ArduinoConstants;
+        var K = exports.ArduinoConstants;
 
         // contains the individual style types as keys, with array of start/stop
         // positions as value

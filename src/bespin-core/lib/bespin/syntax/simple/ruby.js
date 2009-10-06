@@ -55,7 +55,7 @@ exports.Ruby = SC.Object.extend({
    highlight: function(line, meta) {
        if (!meta) meta = {};
 
-       var K = bespin.syntax.RubyConstants;    // aliasing the constants for shorter reference ;-)
+       var K = exports.RubyConstants;    // aliasing the constants for shorter reference ;-)
 
        // contains the individual style types as keys, with array of start/stop positions as value
        var regions = {};

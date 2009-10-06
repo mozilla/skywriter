@@ -30,6 +30,8 @@
  
 // module: bespin/syntax/simple/base
 
+var bespin = require("bespin");
+var util = require("bespin/util");
 var syntax = require("bespin/syntax");
 
 /**
@@ -53,10 +55,17 @@ exports.Model = syntax.Model.extend({
 
     getSyntaxStylesPerLine: function(lineText, lineNumber, language) {
         if (!this.language || (this.language != language)) {
-            this.engine = bespin.syntax.simple.Resolver.resolve(language);
+            var self = this;
+            // engines are loaded asynchronously. until the real thing
+            // is loaded, use the Noop engine.
+            this.engine = exports.NoopSyntaxEngine;
+            
+            exports.Resolver.resolve(language, function(engine) {
+                self.engine = engine;
+            });
             this.language = language;
         }
-
+        
         /**
          * Get the row contents as one string
          */
@@ -101,101 +110,62 @@ exports.Model = syntax.Model.extend({
 });
 
 /**
+ * Return a plain region that is the entire line
+ */
+exports.NoopSyntaxEngine = {
+    highlight: function(line, meta)
+    {
+        return { regions: {
+            plain: [{
+                start: 0,
+                stop: line.length
+                }]
+            }
+        };
+    }
+};
+
+/**
  * The resolver holds the engines per language that are available to do the
  * actual syntax highlighting
  */ 
-
 exports.Resolver = new function() {
-  var engines = {};
   var extension2type = {};
-
-  /**
-   * Return a plain region that is the entire line
-   */
-  var NoopSyntaxEngine = {
-      highlight: function(line, meta) {
-          return { regions: {
-              plain: [{
-                  start: 0,
-                  stop: line.length
-              }]
-          } };
-      }
-  };
 
   return {
       /**
-       * A high level highlight function that uses the {{{type}}} to get the
-       * engine, and asks it to highlight
+       * Hunt down the engine for the given {{{type}}} (e.g. css, js, html)
+       * and callback when it's found. If it's not found, the callback is
+       * never called (so the caller should use a sane default such as the
+       * NoopSyntaxEngine).
        */
-      highlight: function(type, line, meta, lineNumber) {
-          this.resolve(type).highlight(line, meta, lineNumber);
-      },
-
-      /**
-       * Engines register themselves,
-       * e.g. {{{bespin.syntax.EngineResolver.register("CSS", ['css'], new bespin.syntax.simple.CSS());}}}
-       */
-      register: function(type, extensions, syntaxEngine) {
-          if (syntaxEngine) {
-              // map the type (e.g. CSS to the syntax engine object if one is passed)
-              engines[type] = syntaxEngine;
+      resolve: function(extension, callback) {
+          if (!extension) {
+              return;
           }
-
-          for (var i = 0; i < extensions.length; i++) {
-              // link the extension to the type (js -> JavaScript)
-              extension2type[extensions[i]] = type;
+          
+          var candidate = extension2type[extension];
+          
+          if (candidate) {
+              return candidate;
           }
-      },
-
-      /**
-       * Hunt down the engine for the given {{{type}}} (e.g. css, js, html) or
-       * return the {{{NoopSyntaxEngine}}}
-       */
-      resolve: function(extension) {
-          /**
-           * make sure there is a valid extension that actually has a
-           * high-lighter
-           */
-          if (!extension || extension == "off" || !extension2type[extension]) {
-              return NoopSyntaxEngine;
-          }
-
-          // convert the extension (e.g. js) to a type (JavaScript)
-          var type = extension2type[extension];
-
-          // does an object already exist?
-          if (!engines[type] || (typeof engines[type] === "string" && engines[type] != "LOADING")) {
-              // cheat and have this show that the engine is loading so don't do it twice
-              engines[type] = "LOADING";
-
-              var dr = dojo.require;
-              dr.call(dojo, "bespin.syntax.simple." + type.toLowerCase());
-
-              if (bespin.syntax.simple[type]) {
-                  engines[type] = new bespin.syntax.simple[type]();
-                  /**
-                   * This is an ugly work around for a weirdness in Firefox 3.5b99
-                   * For some reason the lines aren't painted correctly, but if we force a reset of the canvas all repaints well
-                   * Seems to be fixed in Firefox 3.5RC2
-                   *setTimeout(function() { bespin.get('editor').ui.resetCanvas(); }, 0);
-                   */
+          
+          var pluginCatalog = bespin.get("plugins");
+          var ep = pluginCatalog.getExtensionPoint("syntax.simple.highlighter");
+          var ext = ep.extensions;
+          for (var i = 0; i < ext.length; i++) {
+              var engineMeta = ext[i];
+              if (util.include(engineMeta.extensions, extension)) {
+                  engineMeta.load(function(engine) {
+                      engine = engine.create();
+                      for (var j = 0; j < engineMeta.extensions; j++) {
+                          extension2type[engineMeta.extensions[j]] = engine;
+                      }
+                      callback(engine);
+                  });
+                  return;
               }
           }
-          return engines[type] || NoopSyntaxEngine;
       }
   };
 }();
-
-/**
- * Register
- */
-// bespin.syntax.simple.Resolver.register("JavaScript", ['js', 'javascript', 'ecmascript', 'jsm', 'java']);
-// bespin.syntax.simple.Resolver.register("Arduino",    ['pde']);
-// bespin.syntax.simple.Resolver.register("C",          ['c', 'h']);
-// bespin.syntax.simple.Resolver.register("CSharp",     ['cs']);
-// bespin.syntax.simple.Resolver.register("CSS",        ['css']);
-// bespin.syntax.simple.Resolver.register("HTML",       ['html', 'htm', 'xml', 'xhtml', 'shtml']);
-// bespin.syntax.simple.Resolver.register("PHP",        ['php', 'php3', 'php4', 'php5']);
-// bespin.syntax.simple.Resolver.register("Python",     ['py', 'python']);
-// bespin.syntax.simple.Resolver.register("Ruby",       ['rb', 'ruby']);

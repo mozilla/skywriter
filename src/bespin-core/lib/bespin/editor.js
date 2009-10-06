@@ -234,8 +234,11 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
     defaultKeyMap: {},
 
     // Allow for multiple key maps to be defined
-    keyMap: this.defaultKeyMap,
     keyMapDescriptions: { },
+    
+    init: function() {
+        this.keyMap = this.defaultKeyMap;
+    },
 
     bindKey: function(keyCode, metaKey, ctrlKey, altKey, shiftKey, action, name) {
         this.defaultKeyMap[[keyCode, metaKey, ctrlKey, altKey, shiftKey]] =
@@ -424,10 +427,10 @@ exports.UI = SC.Object.extend({
     NIB_WIDTH: 15,
 
     NIB_INSETS: {
-        top: Math.floor(this.NIB_WIDTH / 2),
-        left: Math.floor(this.NIB_WIDTH / 2),
-        right: Math.floor(this.NIB_WIDTH / 2),
-        bottom: Math.floor(this.NIB_WIDTH / 2)
+        top: Math.floor(15 / 2),
+        left: Math.floor(15 / 2),
+        right: Math.floor(15 / 2),
+        bottom: Math.floor(15 / 2)
     },
 
     NIB_ARROW_INSETS: { top: 3, left: 3, right: 3, bottom: 5 },
@@ -437,8 +440,8 @@ exports.UI = SC.Object.extend({
     DEBUG_GUTTER_INSETS: { top: 2, left: 2, right: 2, bottom: 2 },
 
     // number of pixels to translate the canvas for scrolling
-    xOffset: 0,
-    yOffset: 0,
+    xoffset: 0,
+    yoffset: 0,
 
     showCursor: true,
 
@@ -463,7 +466,17 @@ exports.UI = SC.Object.extend({
         var settings = bespin.get("settings");
 
         this.model = this.editor.model;
-        this.syntaxModel = syntax.Resolver.setEngine("simple").getModel();
+        
+        var pluginCatalog = bespin.get("plugins");
+        var ep = pluginCatalog.getExtensionPoint("syntax.engine");
+        // set model to a default that will work until the real thing is loaded
+        this.syntaxModel = syntax.Model.create();
+        
+        var self = this;
+        ep.extensions[0].load(function(model) {
+            self.syntaxModel = model.create();
+        });
+        
         this.selectionHelper = exports.SelectionHelper.create({ editor: this.editor });
         this.actions = actions.Actions.create({ editor: this.editor });
 
@@ -489,13 +502,15 @@ exports.UI = SC.Object.extend({
         var source = this.editor.container;
 
         window._source = source;
-
-        source.addEventListener('mousemove', dojo.hitch(this, this.handleMouse));
-        source.addEventListener('mouseout', dojo.hitch(this, this.handleMouse));
-        source.addEventListener('click', dojo.hitch(this, this.handleMouse));
-        source.addEventListener('mousedown', dojo.hitch(this, this.handleMouse));
-        source.addEventListener('oncontextmenu', dojo.stopEvent);
-        source.addEventListener('mousedown', dojo.hitch(this, this.mouseDownSelect));
+        
+        var self = this;
+        
+        source.addEventListener('mousemove', function(e) { return self.handleMouse(e); }, false);
+        source.addEventListener('mouseout', function(e) { return self.handleMouse(e); }, false);
+        source.addEventListener('click', function(e) { return self.handleMouse(e); }, false);
+        source.addEventListener('mousedown', function(e) { return self.handleMouse(e); }, false);
+        source.addEventListener('oncontextmenu', dojo.stopEvent, true);
+        source.addEventListener('mousedown', function(e) { return self.mouseDownSelect }, false);
 
         var gh = this.globalHandles;
         gh.push(dojo.connect(window, "mousemove", this, "mouseMoveSelect"));
@@ -511,7 +526,7 @@ exports.UI = SC.Object.extend({
             orientation: "horizontal",
             valueChanged: function() {
                 var ui = this.ui;
-                ui.xOffset = - ui.xscrollbar.value;
+                ui.xoffset = - ui.xscrollbar.value;
                 ui.editor.paint();
             }
         });
@@ -529,7 +544,7 @@ exports.UI = SC.Object.extend({
             orientation: "vertical",
             valueChanged: function() {
                 var ui = this.ui;
-                ui.yOffset = -ui.yscrollbar.value;
+                ui.yoffset = -ui.yscrollbar.value;
                 ui.editor.paint();
             }
         });
@@ -1479,6 +1494,7 @@ exports.UI = SC.Object.extend({
 
             // CHUNK 2: this code uses the SyntaxModel API to render the line
             // syntax highlighting
+            
             var lineInfo = this.syntaxModel.getSyntaxStylesPerLine(lineText, currentLine, this.editor.language);
 
             // Define a fill that is aware of the readonly attribute and fades out if applied

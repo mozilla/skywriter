@@ -25,6 +25,7 @@
 // module: bespin/editor/actions
 var bespin = require("bespin");
 var SC = require("sproutcore");
+var utils = require("bespin/editor/utils");
 
 /**
  * The editor can run various actions. They are defined here and you can add or
@@ -52,7 +53,8 @@ exports.Actions = SC.Object.extend({
      */
     beginEdit: function(name) {
         if (this.editDepth == 0) {
-            this.currentEditItem = new bespin.editor.ActionHistoryItem(name, this.editor);
+            this.currentEditItem = exports.ActionHistoryItem.create({name: name, 
+                    editor: this.editor});
             this.currentEditItem.begin();
         }
         this.editDepth++;
@@ -79,12 +81,12 @@ exports.Actions = SC.Object.extend({
         if (args.event.shiftKey) {
             if (!this.editor.selection) {
                 this.editor.setSelection({
-                    startPos: bespin.editor.utils.copyPos(args.pos)
+                    startPos: utils.copyPos(args.pos)
                 });
             }
             this.editor.setSelection({
                 startPos: this.editor.selection.startPos,
-                endPos: bespin.editor.utils.copyPos(this.editor.cursorManager.getCursorPosition())
+                endPos: utils.copyPos(this.editor.cursorManager.getCursorPosition())
             });
         } else {
             this.editor.setSelection(undefined);
@@ -466,7 +468,7 @@ exports.Actions = SC.Object.extend({
             this.deleteSelection();
         }
 
-        var pos = bespin.editor.utils.copyPos(this.editor.cursorManager.getCursorPosition());
+        var pos = utils.copyPos(this.editor.cursorManager.getCursorPosition());
         pos = this.editor.model.insertChunk(this.editor.cursorManager.getModelPosition(pos), args.chunk);
         pos = this.editor.cursorManager.getCursorPosition(pos);
         this.editor.cursorManager.moveCursor(pos);
@@ -486,7 +488,7 @@ exports.Actions = SC.Object.extend({
         this.beginEdit("deleteChunk");
 
         // Sometimes we're passed a selection, and sometimes we're not.
-        var startPos = (args.startPos != undefined) ? args.startPos : bespin.editor.utils.copyPos(args.pos);
+        var startPos = (args.startPos != undefined) ? args.startPos : utils.copyPos(args.pos);
 
         var selection = this.editor.getSelection({
             startPos: startPos,
@@ -817,7 +819,7 @@ exports.Actions = SC.Object.extend({
         var count = this.editor.model.getCountOfString(str);
         if (count != 0) {
             // okay, there are matches, so go on...
-            var pos = bespin.editor.utils.copyPos(this.editor.cursorManager.getCursorPosition());
+            var pos = utils.copyPos(this.editor.cursorManager.getCursorPosition());
 
             // first try to find the searchSting from the current position
             if (!this.editor.ui.actions.findNext(null, true)) {
@@ -864,7 +866,7 @@ exports.Actions = SC.Object.extend({
         if (!this.editor.ui.searchString) {
             return;
         }
-        var pos = bespin.editor.utils.copyPos(this.editor.cursorManager.getModelPosition());
+        var pos = utils.copyPos(this.editor.cursorManager.getModelPosition());
         var sel = this.editor.getSelection();
         if (canBeSamePosition && sel !== undefined) {
             pos.col -= sel.endModelPos.col - sel.startModelPos.col + 1;
@@ -1017,10 +1019,6 @@ exports.Actions = SC.Object.extend({
  * Pretend it inherits from bespin.editor.HistoryItem.
  */
 exports.ActionHistoryItem = SC.Object.extend({
-    init: function(name, editor) {
-        this.editor = editor;
-    },
-
     begin: function(editor, model) {
         this.startIndex = this.editor.historyManager.getCurrent();
 
