@@ -24,6 +24,7 @@
 
 var bespin = require("bespin");
 var SC = require("sproutcore");
+var util = require("bespin/util");
 
 /**
  *
@@ -72,7 +73,7 @@ members: {
                 zIndex: 210,
                 cursor: "pointer"
             },
-            onclick: dojo.hitch(this, this.hide)
+            onclick: util.bind(this, this.hide)
         }, dojo.body());
 
         this.nodes.push("closer");

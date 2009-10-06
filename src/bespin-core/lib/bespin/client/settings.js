@@ -252,19 +252,20 @@ exports.Cookie = SC.Object.extend({
  */
 exports.ServerAPI = SC.Object.extend({
     constructor: function(parent) {
+        this.self = this;
         this.parent = parent;
         this.server = bespin.get('server');
         this.settings = this.parent.defaultSettings(); // seed defaults just for now!
 
         // TODO: seed the settings
-        this.server.listSettings(dojo.hitch(this, function(settings) {
-            this.settings = settings;
+        this.server.listSettings(function(settings) {
+            self.settings = settings;
             if (settings.tabsize === undefined) {
-                this.settings = this.parent.defaultSettings();
-                this.server.setSettings(this.settings);
+                self.settings = self.parent.defaultSettings();
+                self.server.setSettings(self.settings);
             }
             bespin.publish("settings:loaded");
-        }));
+        });
     },
 
     set: function(key, value) {
@@ -614,7 +615,8 @@ exports.Events = SC.Object.extend({
                 }
 
                 // Not in themes, load from users directory
-                bespin.get('files').loadContents(bespin.userSettingsProject, "/themes/" + theme + ".js", dojo.hitch(this, function(file) {
+                var self = this;
+                var onSuccess = function(file) {
                     try {
                         eval(file.content);
                     } catch (e) {
@@ -624,9 +626,13 @@ exports.Events = SC.Object.extend({
                     if (!checkSetAndExit()) {
                         bespin.get("commandLine").addErrorOutput("Sorry old chap. No theme called '" + theme + "'. Fancy making it?");
                     }
-                }), function() {
+                };
+
+                var onFailure = function() {
                     bespin.get("commandLine").addErrorOutput("Sorry old chap. No theme called '" + theme + "'. Fancy making it?");
-                });
+                };
+
+                bespin.get('files').loadContents(bespin.userSettingsProject, "/themes/" + theme + ".js", onSuccess, onFailure);
             }
         });
 

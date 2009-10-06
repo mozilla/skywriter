@@ -67,6 +67,7 @@ exports.Component = SC.Object.extend({
         }
 
         var initialContent = "";
+        var self = this;
 
         if (this.loadFromDiv) {
             var code = dojo.byId('BESPIN_EDITOR_CODE');
@@ -145,9 +146,9 @@ exports.Component = SC.Object.extend({
                 '</style>';
         }
 
-        dojo.connect(window, 'resize', this.opts.resize || dojo.hitch(this, function() {
-            this.editor.paint();
-        }));
+        dojo.connect(window, 'resize', this.opts.resize || function() {
+            self.editor.paint();
+        });
 
         if (initialContent) {
             this.setContent(initialContent);

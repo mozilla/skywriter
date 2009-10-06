@@ -106,14 +106,14 @@ exports.API = SC.Object.extend({
 bespin.subscribe("component:register:actions", function(e) {
     var actions = bespin.get('actions');
 
-    actions.formatCode = dojo.hitch(actions, function(args) {
-        var sel = this.editor.getSelection();
+    actions.formatCode = function(args) {
+        var sel = actions.editor.getSelection();
         var formatted;
         var section = null;
-        var cursorPos = this.editor.cursorManager.getCursorPosition();
+        var cursorPos = actions.editor.cursorManager.getCursorPosition();
 
         // todo reposition cursor
-        var code = this.editor.model.getDocument();
+        var code = actions.editor.model.getDocument();
         if (sel) {
             // make these full lines
             sel.startPos.col = 0;
@@ -121,7 +121,7 @@ bespin.subscribe("component:register:actions", function(e) {
                 sel.endPos.row += 1;
                 sel.endPos.col = 0;
             }
-            this.editor.setSelection(sel);
+            actions.editor.setSelection(sel);
             section = {
                 start: sel.startPos.row,
                 end: sel.endPos.row
@@ -132,7 +132,7 @@ bespin.subscribe("component:register:actions", function(e) {
             return bespin.register('formatter', new exports.API());
         })();
 
-        formatter.setLanguage(this.editor.language);
+        formatter.setLanguage(actions.editor.language);
 
         var padding = (function(tabSize) {
             var result = "";
@@ -140,24 +140,24 @@ bespin.subscribe("component:register:actions", function(e) {
                 result += " ";
             }
             return result;
-        })(this.editor.getTabSize());
+        })(actions.editor.getTabSize());
 
         formatted = formatter.indent(code, padding, section);
 
         if (!sel) {
-            this.selectAll({});
+            actions.selectAll({});
         }
 
-        this.insertChunk({
+        actions.insertChunk({
             chunk: formatted
         });
 
         if (!sel) {
-            this.editor.setSelection(undefined);
-            this.editor.cursorManager.moveCursor(cursorPos);
-            this.repaint();
+            actions.editor.setSelection(undefined);
+            actions.editor.cursorManager.moveCursor(cursorPos);
+            actions.repaint();
         }
-    });
+    };
 });
 
 /**

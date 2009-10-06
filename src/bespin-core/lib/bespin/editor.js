@@ -246,7 +246,7 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
                 function() {
                     var toFire = events.toFire(action);
                     bespin.publish(toFire.name, toFire.args);
-                } : dojo.hitch(this.editor.ui.actions, action);
+                } : util.bind(this.editor.ui.actions, action);
 
         if (name) {
             this.keyMapDescriptions[[keyCode, metaKey, ctrlKey, altKey, shiftKey]] = name;
@@ -551,11 +551,11 @@ exports.UI = SC.Object.extend({
         gh.push(dojo.connect(window, "mouseup", yscrollbar, "onmouseup"));
         gh.push(dojo.connect(scope, wheelEventName, yscrollbar, "onmousewheel"));
 
-        setTimeout(dojo.hitch(this, function() {
-            this.toggleCursor(this);
-        }), this.toggleCursorFrequency);
+        setTimeout(function() {
+            self.toggleCursor(self);
+        }, self.toggleCursorFrequency);
 
-        arguments.callee.base.apply(this, arguments);
+        this.sc_super();
     },
 
     /**
@@ -979,8 +979,8 @@ exports.UI = SC.Object.extend({
             dojo.disconnect(this.oldkeypress);
         }
 
-        this.oldkeydown = dojo.hitch(listener, "onkeydown");
-        this.oldkeypress = dojo.hitch(listener, "onkeypress");
+        this.oldkeydown = function(ev) { listener.onkeydown(ev); };
+        this.oldkeypress = function(ev) { listener.onkeypress(ev); };
 
         var scope = this.editor.opts.actsAsComponent ? this.editor.canvas : window;
         dojo.connect(scope, "keydown", this, "oldkeydown");
@@ -2082,12 +2082,13 @@ exports.API = SC.Object.extend({
 
         this.model.insertCharacters({ row: 0, col: 0 }, " ");
 
-        dojo.connect(this.canvas, "blur",  dojo.hitch(this, function(e) {
-            this.setFocus(false);
-        }));
-        dojo.connect(this.canvas, "focus", dojo.hitch(this, function(e) {
-            this.setFocus(true);
-        }));
+        var self = this;
+        dojo.connect(this.canvas, "blur",  function(e) {
+            self.setFocus(false);
+        });
+        dojo.connect(this.canvas, "focus", function(e) {
+            self.setFocus(true);
+        });
 
         // bespin.editor.clipboard.setup(this);
 

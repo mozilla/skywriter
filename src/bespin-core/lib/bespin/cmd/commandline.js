@@ -162,10 +162,11 @@ members: {
         }
 
         timeout = timeout || 4600;
+        var self = this;
         if (timeout != -1) {
-            this.hintTimeout = setTimeout(dojo.hitch(this, function() {
-                this.hideHint();
-            }), timeout);
+            this.hintTimeout = setTimeout(function() {
+                self.hideHint();
+            }, timeout);
         }
     },
 
@@ -700,7 +701,7 @@ members: {
             if (context == null) {
                 return action;
             }
-            return dojo.hitch(context, action);
+            return function() { action.apply(context, arguments); };
         }
 
         return this.executing.link(action, context);
@@ -1177,7 +1178,7 @@ members: {
 
         bespin.fireAfter([ "authenticated" ], function() {
             // load last 50 instructions from history
-            bespin.get("files").loadContents(bespin.userSettingsProject, "command.history", dojo.hitch(this, function(file) {
+            bespin.get("files").loadContents(bespin.userSettingsProject, "command.history", function(file) {
                 var typings = file.content.split(/\n/);
                 var instructions = [];
 
@@ -1189,7 +1190,7 @@ members: {
                 });
 
                 self.history.setInstructions(instructions);
-            }));
+            });
         });
     },
 
