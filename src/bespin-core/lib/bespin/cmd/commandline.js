@@ -105,15 +105,15 @@ members: {
     },
 
     destroy: function() {
-        dojo.forEach(this.subscriptions, function(sub) {
+        this.subscriptions.forEach(function(sub) {
             bespin.unsubscribe(sub);
         });
 
-        dojo.forEach(this.connections, function(conn) {
+        this.connections.forEach(function(conn) {
             dojo.disconnect(conn);
         });
 
-        dojo.forEach(this.nodes, function(nodeId) {
+        this.nodes.forEach(function(nodeId) {
             dojo.query("#" + nodeId).orphan();
         });
     },
@@ -392,7 +392,7 @@ members: {
         var self = this;
 
         var count = 1;
-        dojo.forEach(this.history.instructions, function(instruction) {
+        this.history.instructions.forEach(function(instruction) {
             if (!instruction.historical) {
                 // The row for the input (i.e. what was typed)
                 var rowin = dojo.create("tr", {
@@ -1181,7 +1181,7 @@ members: {
                 var typings = file.content.split(/\n/);
                 var instructions = [];
 
-                dojo.forEach(typings, function(typing) {
+                typings.forEach(function(typing) {
                     if (typing && typing != "") {
                         var instruction = new exports.Instruction(null, typing);
                         instructions.push(instruction);
@@ -1195,7 +1195,7 @@ members: {
 
     save: function(instructions) {
         var content = "";
-        dojo.forEach(instructions, function(instruction) {
+        instructions.forEach(function(instruction) {
             if (instruction.typed && instruction.typed != "") {
                 content += instruction.typed + "\n";
             }

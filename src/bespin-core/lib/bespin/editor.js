@@ -1284,7 +1284,7 @@ exports.UI = SC.Object.extend({
         if (this.editor.debugMode && bespin.get("editSession")) {
             bespin.getComponent("breakpoints", function(bpmanager) {
                 var points = bpmanager.getBreakpoints(bespin.get('editSession').project, bespin.get('editSession').path);
-                dojo.forEach(points, function(point) {
+                points.forEach(function(point) {
                     breakpoints[point.lineNumber] = point;
                 });
             });
@@ -2545,7 +2545,7 @@ exports.API = SC.Object.extend({
 
         // Remove newItem from down in the list and place at top
         var cleanLastUsed = [];
-        dojo.forEach(lastUsed, function(item) {
+        lastUsed.forEach(function(item) {
             if (item.project != newItem.project || item.filename != newItem.filename) {
                 cleanLastUsed.unshift(item);
             }

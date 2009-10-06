@@ -464,15 +464,15 @@ members: {
     },
 
     destroy: function() {
-        dojo.forEach(this.subscriptions, function(sub) {
+        this.subscriptions.forEach(function(sub) {
             bespin.unsubscribe(sub);
         });
 
-        dojo.forEach(this.connections, function(conn) {
+        this.connections.forEach(function(conn) {
             dojo.disconnect(conn);
         });
 
-        dojo.forEach(this.nodes, function(nodeId) {
+        this.nodes.forEach(function(nodeId) {
             dojo.query("#" + nodeId).orphan();
         });
     },

@@ -90,4 +90,4 @@ exports.metadata = {
             }
         ]
     }
-}
+};

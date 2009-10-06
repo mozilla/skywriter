@@ -162,7 +162,7 @@ exports.CodeInfo = SC.Object.define({
 
     getLineMarkers: function() {
         var lineMarkers = {};
-        dojo.forEach(this.messages, function(message) {
+        this.messages.forEach(function(message) {
             if (!lineMarkers[message.line]) {
                 lineMarkers[message.line] = {type: message.type, msg: ""};
             }

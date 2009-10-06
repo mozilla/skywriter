@@ -346,7 +346,7 @@ exports.ServerFile = SC.Object.extend({
 
         var onLoad = function(file) {
             // Strip \n\n from the end of the file and insert into this.settings
-            dojo.forEach(file.content.split(/\n/), function(setting) {
+            file.content.split(/\n/).forEach(function(setting) {
                 if (setting.match(/^\s*#/)) {
                     return; // if comments are added ignore
                 }

@@ -80,7 +80,7 @@ members: {
         // Load the menu border images
         this.border = [];
         var borderIds = [ "top_lft", "top_mid", "top_rt", "lft", "mid", "rt", "btm_lft", "btm_lftb", "btm_rt", "btm_rtb" ];
-        dojo.forEach(borderIds, function(id) {
+        borderIds.forEach(function(id) {
             this.border[id] = dojo.create("img", {
                 id: "border_" + id,
                 src: "/images/menu/" + id + ".png",

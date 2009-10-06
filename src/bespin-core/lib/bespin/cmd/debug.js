@@ -171,7 +171,8 @@ command.store.addCommand({
         var start = Date.now();
 
         for (var i = 0; i < 3; i++) {
-            dojo.forEach(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'], function(c) {
+            var letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+            letters.forEach(function(c) {
                 var args = { pos: utils.copyPos(bespin.get('editor').getCursorPos()) };
                 args.newchar = c;
                 bespin.get('editor').ui.actions.insertCharacter(args);

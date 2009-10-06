@@ -163,7 +163,7 @@ command.store.addCommand({
         var output = [];
         output.push("<table>");
         var count = 1;
-        dojo.forEach(instructions, function(instruction) {
+        instructions.forEach(function(instruction) {
             output.push("<tr>");
             output.push('<th>' + count + '</th>');
             output.push('<td>' + instruction.typed + "</td>");
@@ -189,7 +189,8 @@ command.store.addCommand({
         if (!setting.key) { // -- show all
             var settings = bespin.get("settings").list();
             output = "";
-            dojo.forEach(settings.sort(function (a, b) { // first sort the settings based on the key
+            // first sort the settings based on the key
+            settings.sort(function(a, b) {
                 if (a.key < b.key) {
                     return -1;
                 } else if (a.key == b.key) {
@@ -197,7 +198,9 @@ command.store.addCommand({
                 } else {
                     return 1;
                 }
-            }), function(setting) { // now add to output unless hidden settings (start with a _)
+            });
+            // now add to output unless hidden settings (start with a _)
+            settings.forEach(function(setting) {
                 if (setting.key[0] != '_') {
                     output += "<a class='setting' href='https://wiki.mozilla.org/Labs/Bespin/Settings#" + setting.key + "' title='View external documentation on setting: " + setting.key + "' target='_blank'>" + setting.key + "</a> = " + setting.value + "<br/>";
                 }

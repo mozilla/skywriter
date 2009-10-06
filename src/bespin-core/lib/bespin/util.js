@@ -84,7 +84,9 @@ exports.indexOfProperty = function(array, propertyName, item) {
  * A la Prototype last().
  */
 exports.last = function(array) {
-    if (dojo.isArray(array)) return array[array.length - 1];
+    if (dojo.isArray(array)) {
+        return array[array.length - 1];
+    }
 };
 
 /**
@@ -94,7 +96,7 @@ exports.shrinkArray = function(array) {
     var newArray = [];
 
     var stillAtBeginning = true;
-    dojo.forEach(array.reverse(), function(item) {
+    array.reverse().forEach(function(item) {
         if (stillAtBeginning && item === undefined) {
             return;
         }
@@ -113,8 +115,10 @@ exports.shrinkArray = function(array) {
  * @param character The item to put in the array, defaults to ' '
  */
 exports.makeArray = function(number, character) {
-    if (number < 1) return []; // give us a normal number please!
-    if (!character) character = ' ';
+    if (number < 1) {
+        return []; // give us a normal number please!
+    }
+    if (!character){character = ' ';}
 
     var newArray = [];
     for (var i = 0; i < number; i++) {
@@ -275,7 +279,9 @@ exports.randomPassword = function(length) {
  */
 exports.isEmpty = function(object) {
     for (var x in object) {
-        if (object.hasOwnProperty(x)) return false;
+        if (object.hasOwnProperty(x)) {
+            return false;
+        }
     }
     return true;
 };
