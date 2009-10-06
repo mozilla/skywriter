@@ -157,7 +157,7 @@ exports.commands.addCommand({
                     return util.endsWith(file.name, '\\.js');
                 });
 
-                output += dojo.map(jsCommands, function(jsCommand) {
+                output += jsCommands.map(function(jsCommand) {
                     return jsCommand.name.replace(/\.js$/, '');
                 }).join("<br>");
             }
