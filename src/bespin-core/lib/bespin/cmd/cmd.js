@@ -153,7 +153,7 @@ exports.commands.addCommand({
             } else {
                 output = "<u>Your Custom Commands</u><br/><br/>";
 
-                var jsCommands = dojo.filter(commands, function(file) {
+                var jsCommands = commands.filter(function(file) {
                     return util.endsWith(file.name, '\\.js');
                 });
 

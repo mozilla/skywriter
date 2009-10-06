@@ -152,7 +152,7 @@ exports.commands.addCommand({
             } else {
                 output = "<u>Your Jetpack Features</u><br/><br/>";
 
-                output += dojo.map(dojo.filter(jetpacks, function(file) {
+                output += dojo.map(jetpacks(function(file) {
                     return util.endsWith(file.name, '\\.js');
                 }), function(c) {
                     return "<a href=\"javascript:bespin.get('commandLine').executeCommand('open /" + exports.projectName + "/" + c.name + "');\">" + c.name.replace(/\.js$/, '') + "</a>";
@@ -374,7 +374,7 @@ exports.loadInstallScripts = function() {
         var output;
 
         if (jetpacks && jetpacks.length > 0) {
-            output += dojo.map(dojo.filter(jetpacks, function(file) {
+            output += dojo.map(jetpacks.filter(function(file) {
                 return util.endsWith(file.name, '\\.js');
             }), function(c) {
                 return "<option>" + c.name.replace(/\.js$/, '') + "</option>";
