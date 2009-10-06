@@ -1,4 +1,7 @@
 <html><head>
+<link rel="stylesheet" href="sproutcore.css" type="text/css" />
+<link rel="stylesheet" href="bespin.css" type="text/css" />
+
 <script type="text/javascript">
 function startEditor() {
   require("bespin/boot");
@@ -138,41 +141,9 @@ function flubber() {
 
 <h1>Play with the editor</h1>
 
-<div>
-  <script>
-    function setSyntax(value) {
-        bespin.publish("settings:language", { language: value });
-    }
-  </script>
-  Enter language and blur out: <input type="text" id="syntax" value="" onblur="setSyntax(this.value)">
-</div>
-
-<div>
-  <script>
-    function setSetting() {
-        var key = dojo.byId('key').value;
-        var value = dojo.byId('value').value;
-        _editorComponent.set(key, value);
-    }
-  </script>
-  Push a new setting: <input type="text" id="key" value="strictlines">
-  <input type="text" id="value" value="on">
-  <input type="button" value="set" onclick="setSetting();">
-</div>
-
-<div>
-  <script>
-    function copyToTextarea() {
-        dojo.byId('inandout').value = _editorComponent.getContent();
-    }
-    function copyToEditor() {
-        _editorComponent.setContent(dojo.byId('inandout').value);
-    }
-  </script>
-  <textarea id="inandout" cols="100" rows="10"></textarea><br>
-  <input type="button" value="Copy to Textarea" onclick="copyToTextarea()">
-  <input type="button" value="Copy to Editor" onclick="copyToEditor()">
-</div>
-
-</body>
-</html>
+    <textarea id="inandout" cols="100" rows="10"></textarea><br>
+    <input type="button" value="Copy to Textarea" onclick="copyToTextarea()">
+    <input type="button" value="Copy to Editor" onclick="copyToEditor()">
+    </div>
+    
+</body></html>
