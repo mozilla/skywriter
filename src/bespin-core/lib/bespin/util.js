@@ -61,7 +61,7 @@ exports.endsWith = function(str, end) {
  * A la Prototype include().
  */
 exports.include = function(array, item) {
-    return dojo.indexOf(array, item) > -1;
+    return array.indexOf(item) > -1;
 };
 
 /**
