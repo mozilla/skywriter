@@ -897,7 +897,7 @@ members: {
         var self = this;
         return function() {
             try {
-                action.apply(context || dojo.global, arguments);
+                action.apply(context || window, arguments);
             } finally {
                 self._outstanding--;
 
