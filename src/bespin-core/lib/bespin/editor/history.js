@@ -143,14 +143,3 @@ exports.HistoryManager = SC.Object.extend({
 bespin.subscribe("editor:openfile:opensuccess", function() {
     bespin.get('editor').historyManager.clear();
 });
-
-/**
- * This is a reference implementation of a history item.
- */
-dojo.declare("bespin.editor.HistoryItem", null, {
-    undo: function() {
-    },
-
-    redo: function() {
-    }
-});

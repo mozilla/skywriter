@@ -248,10 +248,11 @@ exports.XMLBase = base.extend({
                 while (context && !context.startOfLine) {
                     context = context.prev;
                 }
-                if (context)
+                if (context) {
                     return context.indent + self.indentUnit;
-                else
+                } else {
                     return 0;
+                }
             };
         }
 
@@ -270,7 +271,7 @@ exports.XMLBase = base.extend({
                 if (!context || context.name != "!cdata") {
                     pushContext("!cdata");
                 }
-                if (/\]\]>$/.test(content)) popContext(); {
+                if (/\]\]>$/.test(content)){popContext();} {
                     cont();
                 }
             } else if (harmlessTokens.hasOwnProperty(style)) {
@@ -387,9 +388,7 @@ exports.XMLBase = base.extend({
     }
 });
 
-
-dojo.declare("bespin.syntax.codemirror.XML", bespin.syntax.codemirror.XMLBase, {
-
+exports.XML = exports.XMLBase.extend({
     // The parser-iterator-producing function.
     makeParser: function(input, basecolumn) {
         return this.makeXmlParser.call(this, input, basecolumn);

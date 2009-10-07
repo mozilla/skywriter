@@ -32,7 +32,7 @@ var utils = require("bespin/editor/utils");
  * change them dynamically. Cool huh?
  * An action mutates the model or editor state in some way. The only way the
  * editor state or model should be manipulated is via the execution of actions.
- * 
+ *
  * Actions integrate with the history manager by including instructions for how
  * to undo (and redo) the action. These instructions take the form of a hash
  * containing the necessary state for undo/redo. A key "action" corresponds to
@@ -53,7 +53,7 @@ exports.Actions = SC.Object.extend({
      */
     beginEdit: function(name) {
         if (this.editDepth == 0) {
-            this.currentEditItem = exports.ActionHistoryItem.create({name: name, 
+            this.currentEditItem = exports.ActionHistoryItem.create({name: name,
                     editor: this.editor});
             this.currentEditItem.begin();
         }
@@ -945,7 +945,7 @@ exports.Actions = SC.Object.extend({
 
     // toggleFilesearch: function() {
     //     var settings = bespin.get("settings");
-    // 
+    //
     //     var filesearch = bespin.get('filesearch');
     //     if (filesearch) {
     //         filesearch.toggle();
@@ -1014,71 +1014,7 @@ exports.Actions = SC.Object.extend({
  * anything, and end after everything is done.
  * Or manually supply the current states.
  */
-
-/**
- * Pretend it inherits from bespin.editor.HistoryItem.
- */
 exports.ActionHistoryItem = SC.Object.extend({
-    begin: function(editor, model) {
-        this.startIndex = this.editor.historyManager.getCurrent();
-
-        if (editor) {
-            this.editorBefore = editor;
-        }
-        else {
-            this.editorBefore = this.editor.getState();
-        }
-
-        if (model) {
-            this.modelBefore = model;
-        }
-        else {
-            this.modelBefore = this.editor.model.getState();
-        }
-    },
-
-    end: function(editor, model) {
-        // cheap hack for now. This can stay, but we should _add_ explicit
-        // bundling. This will allow multiple levels of detail for undo: you can
-        // group all of the "insertCharacter," and then give the user the
-        // choice: go character by character, or remove the whole set.
-        this.editor.historyManager.truncate(this.startIndex);
-
-        if (editor) {
-            this.editorAfter = editor;
-        }
-        else {
-            this.editorAfter = this.editor.getState();
-        }
-
-        if (model) {
-            this.modelAfter = model;
-        }
-        else {
-            this.modelAfter = this.editor.model.getState();
-        }
-    },
-
-    undo: function() {
-        this.editor.model.applyState(this.modelBefore);
-        this.editor.setState(this.editorBefore);
-        this.editor.ui.ensureCursorVisible();
-        this.editor.paint();
-    },
-
-    redo: function() {
-        this.editor.model.applyState(this.modelAfter);
-        this.editor.setState(this.editorAfter);
-        this.editor.ui.ensureCursorVisible();
-        this.editor.paint();
-    }
-});
-
-dojo.declare("bespin.editor.ActionHistoryItem", null /* pretend it inherits bespin.editor.HistoryItem */, {
-    constructor: function(name, editor) {
-        this.editor = editor;
-    },
-
     begin: function(editor, model) {
         this.startIndex = this.editor.historyManager.getCurrent();
 
