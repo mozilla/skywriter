@@ -22,8 +22,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-dojo.provide("bespin.themes.pastels");
-
 /**
  * Pastels Theme by Irakli Gozalishvili
  */

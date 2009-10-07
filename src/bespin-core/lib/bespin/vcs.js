@@ -22,13 +22,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-dojo.provide("bespin.vcs");
-
 /**
  * Command store for the VCS commands
  * (which are subcommands of the main 'vcs' command)
  */
-bespin.vcs.commands = new bespin.command.Store(bespin.command.store, {
+exports.commands = new bespin.command.Store(bespin.command.store, {
     name: 'vcs',
     preview: 'run a version control command',
     completeText: 'subcommands: add, clone, commit, diff, getkey, help, push, remove, resolved, update',
@@ -38,7 +36,7 @@ bespin.vcs.commands = new bespin.command.Store(bespin.command.store, {
 /**
  * Display sub-command help
  */
-bespin.vcs.commands.addCommand({
+exports.commands.addCommand({
     name: 'help',
     takes: ['search'],
     preview: 'show commands for vcs subcommand',
@@ -57,13 +55,13 @@ bespin.vcs.commands.addCommand({
  * If they click the submit button, the password is sent to the callback.
  * If they do not, the callback is not called.
  */
-bespin.vcs.getInfoFromUser = function(instruction, callback, opts) {
+exports.getInfoFromUser = function(instruction, callback, opts) {
     opts = opts || {};
 
     // If the password is cached and the caller doesn't
     // need a message entered, then we can return right away.
-    if (bespin.vcs._keychainpw && !opts.getMessage) {
-        callback({kcpass: bespin.vcs._keychainpw});
+    if (exports._keychainpw && !opts.getMessage) {
+        callback({kcpass: exports._keychainpw});
         return;
     }
 
@@ -71,8 +69,8 @@ bespin.vcs.getInfoFromUser = function(instruction, callback, opts) {
         var values = {};
         if (opts.getKeychain) {
             values.kcpass = kcpass.value;
-            bespin.vcs._justSetKeychainpw = true;
-            bespin.vcs._keychainpw = kcpass.value;
+            exports._justSetKeychainpw = true;
+            exports._keychainpw = kcpass.value;
         }
 
         if (opts.getMessage) {
@@ -95,8 +93,8 @@ bespin.vcs.getInfoFromUser = function(instruction, callback, opts) {
     if (opts.getKeychain) {
         // if we already have the password, we don't need to prompt
         // for it!
-        if (bespin.vcs._keychainpw) {
-            var kcpass = {value: bespin.vcs._keychainpw};
+        if (exports._keychainpw) {
+            var kcpass = {value: exports._keychainpw};
         } else {
             tr = dojo.create("tr", { }, table);
             dojo.create("td", { innerHTML: "Keychain password: " }, tr);
@@ -136,7 +134,7 @@ bespin.vcs.getInfoFromUser = function(instruction, callback, opts) {
     dojo.create("input", {
         type: "button",
         value: "Cancel",
-        onclick: bespin.vcs._createCancelHandler(instruction)
+        onclick: exports._createCancelHandler(instruction)
     }, td);
 
     instruction.setElement(vcsauth);
@@ -150,14 +148,14 @@ bespin.vcs.getInfoFromUser = function(instruction, callback, opts) {
  * Add command.
  * Add the specified files on the next commit
  */
-bespin.vcs.commands.addCommand({
+exports.commands.addCommand({
     name: 'add',
     preview: 'Adds missing files to the project',
     takes: ['*'],
     completeText: 'Use the current file, add -a for all files or add filenames',
     description: 'Without any options, the vcs add command will add the currently selected file. If you pass in -a, the command will add <em>all</em> files. Finally, you can list files individually.',
     execute: function(instruction, args) {
-        bespin.vcs._performVCSCommandWithFiles("add", instruction, args);
+        exports._performVCSCommandWithFiles("add", instruction, args);
     }
 });
 
@@ -165,7 +163,7 @@ bespin.vcs.commands.addCommand({
  * Clone command.
  * Create a copy of an existing repository in a new directory
  */
-bespin.vcs.commands.addCommand({
+exports.commands.addCommand({
     name: 'clone',
     takes: ['url'],
     aliases: ['checkout'],
@@ -213,7 +211,7 @@ bespin.vcs.commands.addCommand({
                 var status = dojo.create("span", {innerHTML: "Working..."},
                             outer);
                 instruction.setElement(outer);
-                bespin.get('server').clone(data, instruction, bespin.vcs._createStandardHandler(instruction, {
+                bespin.get('server').clone(data, instruction, exports._createStandardHandler(instruction, {
                     onSuccess: function() {
                         bespin.publish("project:created", {project: newProjectName});
                     },
@@ -351,8 +349,10 @@ bespin.vcs.commands.addCommand({
         var usernameField = dojo.create("input", {type: "text", name: "username"}, cell);
 
         // password_row
-        row = dojo.create("tr", {style: "display:none",
-            className: "authfields userfields"}, tbody);
+        row = dojo.create("tr", {
+            style: "display:none",
+            className: "authfields userfields"
+        }, tbody);
         dojo.create("td", {innerHTML: "Password"}, row);
         cell = dojo.create("td", {}, row);
         dojo.create("input", {type: "password", name: "password"}, cell);
@@ -363,8 +363,11 @@ bespin.vcs.commands.addCommand({
         dojo.create("input", {type: "submit", value: "Ok"}, cell);
 
         // vcsauthcancel
-        dojo.create("input", {type: "button", value: "Cancel",
-            onclick: bespin.vcs._createCancelHandler(instruction)}, cell);
+        dojo.create("input", {
+            type: "button",
+            value: "Cancel",
+            onclick: exports._createCancelHandler(instruction)
+        }, cell);
 
         instruction.setElement(form);
 
@@ -376,7 +379,7 @@ bespin.vcs.commands.addCommand({
  * Commit command.
  * Commit all outstanding changes
  */
-bespin.vcs.commands.addCommand({
+exports.commands.addCommand({
     name: 'commit',
     takes: ['message'],
     aliases: [ 'ci' ],
@@ -396,7 +399,7 @@ bespin.vcs.commands.addCommand({
             bespin.get('server').vcs(project,
                                     { command: [ 'commit', '-m', values.message ] },
                                     instruction,
-                                    bespin.vcs._createStandardHandler(instruction));
+                                    exports._createStandardHandler(instruction));
         };
 
         // for now, be a nagger and ask to save first using an ugly confirm()
@@ -405,7 +408,7 @@ bespin.vcs.commands.addCommand({
                 bespin.get("editor").saveFile();
             }
         } else if (!message) {
-            bespin.vcs.getInfoFromUser(instruction, doCommit, {getMessage: true});
+            exports.getInfoFromUser(instruction, doCommit, {getMessage: true});
         } else {
             doCommit(message);
         }
@@ -416,14 +419,14 @@ bespin.vcs.commands.addCommand({
  * Diff command.
  * Report on the changes between the working files and the repository
  */
-bespin.vcs.commands.addCommand({
+exports.commands.addCommand({
     name: 'diff',
     preview: 'Display the differences in the checkout out files',
     takes: ['*'],
     completeText: 'Use the current file, add -a for all files or add filenames',
     description: 'Without any options, the vcs diff command will diff the currently selected file against the repository copy. If you pass in -a, the command will diff <em>all</em> files. Finally, you can list files to diff individually.',
     execute: function(instruction, args) {
-        bespin.vcs._performVCSCommandWithFiles("diff", instruction, args);
+        exports._performVCSCommandWithFiles("diff", instruction, args);
     }
 });
 
@@ -431,14 +434,14 @@ bespin.vcs.commands.addCommand({
  * Revert command.
  * Report on the changes between the working files and the repository
  */
-bespin.vcs.commands.addCommand({
+exports.commands.addCommand({
     name: 'revert',
     preview: 'Revert files back to their checked-in state',
     takes: ['*'],
     completeText: 'Use the current file, add -a for all files or add filenames',
     description: 'Without any options, the vcs revert command will revert the currently selected file against the repository copy. If you pass in -a, the command will revert <em>all</em> files. Finally, you can list files to revert individually. No backups are kept!',
     execute: function(instruction, args) {
-        bespin.vcs._performVCSCommandWithFiles("revert", instruction, args,
+        exports._performVCSCommandWithFiles("revert", instruction, args,
             {
                 acceptAll: true,
                 onSuccess: function() {
@@ -452,7 +455,7 @@ bespin.vcs.commands.addCommand({
 /**
  * Retrieve an SSH public key for authentication use
  */
-bespin.vcs.getkey = {
+exports.getkey = {
     name: 'getkey',
     takes: [ 'password' ],
     completeText: 'Recommended: Don\'t pass in a password, put it in the following dialog',
@@ -481,8 +484,8 @@ bespin.vcs.getkey = {
             on401: function(xhr) {
                 // If kcpass is non-empty then this is due to a rejected password
                 var errmsg = (!kcpass || kcpass === "") ? "" : "Wrong password";
-                bespin.vcs.getInfoFromUser(instruction, function(values) {
-                    bespin.vcs.getkey.execute(instruction, values.kcpass);
+                exports.getInfoFromUser(instruction, function(values) {
+                    exports.getkey.execute(instruction, values.kcpass);
                 }, {errmsg: errmsg, getKeychain: true});
             },
 
@@ -493,13 +496,13 @@ bespin.vcs.getkey = {
     }
 };
 
-bespin.vcs.commands.addCommand(bespin.vcs.getkey);
+exports.commands.addCommand(exports.getkey);
 
 /**
  * Push command.
  * Push changes to the specified destination
  */
-bespin.vcs.commands.addCommand({
+exports.commands.addCommand({
     name: 'push',
     preview: 'push to the remote repository',
     execute: function(instruction, args) {
@@ -514,11 +517,11 @@ bespin.vcs.commands.addCommand({
             return;
         }
 
-        bespin.vcs.getInfoFromUser(instruction, function(values) {
+        exports.getInfoFromUser(instruction, function(values) {
             bespin.get('server').vcs(project,
                                     { command: ['push', '_BESPIN_PUSH'], kcpass: values.kcpass },
                                     instruction,
-                                    bespin.vcs._createStandardHandler(instruction));
+                                    exports._createStandardHandler(instruction));
         }, {getKeychain: true});
     }
 });
@@ -527,14 +530,14 @@ bespin.vcs.commands.addCommand({
  * Remove command.
  * Remove the specified files on the next commit
  */
-bespin.vcs.commands.addCommand({
+exports.commands.addCommand({
     name: 'remove',
     aliases: [ 'rm' ],
     preview: 'Remove a file from version control (also deletes it)',
     takes: ['*'],
     description: 'The files presented will be deleted and removed from version control.',
     execute: function(instruction, args) {
-        bespin.vcs._performVCSCommandWithFiles("remove", instruction, args,
+    exports._performVCSCommandWithFiles("remove", instruction, args,
             { acceptAll: false });
     }
 });
@@ -543,7 +546,7 @@ bespin.vcs.commands.addCommand({
  * Resolved command.
  * Retry file merges from a merge or update
  */
-bespin.vcs.commands.addCommand({
+exports.commands.addCommand({
     name: 'resolved',
     takes: ['*'],
     aliases: [ 'resolve' ],
@@ -551,7 +554,7 @@ bespin.vcs.commands.addCommand({
     completeText: 'Use the current file, add -a for all files or add filenames',
     description: 'Without any options, the vcs resolved command will mark the currently selected file as resolved. If you pass in -a, the command will resolve <em>all</em> files. Finally, you can list files individually.',
     execute: function(instruction, args) {
-        bespin.vcs._performVCSCommandWithFiles("resolved", instruction, args);
+        exports._performVCSCommandWithFiles("resolved", instruction, args);
     }
 });
 
@@ -559,7 +562,7 @@ bespin.vcs.commands.addCommand({
  * Status command.
  * Show changed files under the working directory
  */
-bespin.vcs.commands.addCommand({
+exports.commands.addCommand({
     name: 'status',
     aliases: [ 'st' ],
     preview: 'Display the status of the repository files.',
@@ -579,7 +582,7 @@ bespin.vcs.commands.addCommand({
         bespin.get('server').vcs(project,
                                 { command: ['status'] },
                                 instruction,
-                                bespin.vcs._createStandardHandler(instruction));
+                                exports._createStandardHandler(instruction));
     }
 });
 
@@ -587,7 +590,7 @@ bespin.vcs.commands.addCommand({
  * Log command.
  * Show changed files under the working directory
  */
-bespin.vcs.commands.addCommand({
+exports.commands.addCommand({
     name: 'log',
     preview: 'Display the changes to the current file.',
     description: '',
@@ -596,7 +599,7 @@ bespin.vcs.commands.addCommand({
         bespin.get('server').vcs(session.project,
             { command: [ 'log', session.path ] },
             instruction,
-            bespin.vcs._createStandardHandler(instruction, { acceptAll: true }));
+            exports._createStandardHandler(instruction, { acceptAll: true }));
     }
 });
 
@@ -604,7 +607,7 @@ bespin.vcs.commands.addCommand({
  * Update command.
  * Pull updates from the repository into the current working directory
  */
-bespin.vcs.commands.addCommand({
+exports.commands.addCommand({
     name: 'update',
     aliases: [ 'up', 'co' ],
     preview: 'Update your working copy from the remote repository',
@@ -632,13 +635,13 @@ bespin.vcs.commands.addCommand({
             bespin.get('server').vcs(project,
                                     command,
                                     instruction,
-                                    bespin.vcs._createStandardHandler(instruction));
+                                    exports._createStandardHandler(instruction));
         };
 
-        bespin.vcs._getRemoteauth(project, function(remoteauth) {
+        exports._getRemoteauth(project, function(remoteauth) {
             console.log("remote auth is: " + remoteauth);
             if (remoteauth == "both") {
-                bespin.vcs.getInfoFromUser(instruction, sendRequest,
+                exports.getInfoFromUser(instruction, sendRequest,
                         {getKeychain: true});
             } else {
                 sendRequest(undefined);
@@ -652,7 +655,7 @@ bespin.vcs.commands.addCommand({
  * Command store for the Mercurial commands
  * (which are subcommands of the main 'hg' command)
  */
-bespin.vcs.hgCommands = new bespin.command.Store(bespin.command.store, {
+exports.hgCommands = new bespin.command.Store(bespin.command.store, {
     name: 'hg',
     preview: 'run a Mercurial command',
     subcommanddefault: 'help'
@@ -661,7 +664,7 @@ bespin.vcs.hgCommands = new bespin.command.Store(bespin.command.store, {
 /**
  * Display sub-command help
  */
-bespin.vcs.hgCommands.addCommand({
+exports.hgCommands.addCommand({
     name: 'help',
     takes: ['search'],
     preview: 'show commands for hg subcommand',
@@ -676,7 +679,7 @@ bespin.vcs.hgCommands.addCommand({
 /**
  * Initialize an HG repository
  */
-bespin.vcs.hgCommands.addCommand({
+exports.hgCommands.addCommand({
     name: 'init',
     preview: 'initialize a new hg repository',
     description: 'This will create a new repository in this project.',
@@ -694,7 +697,7 @@ bespin.vcs.hgCommands.addCommand({
         bespin.get('server').vcs(project,
                                 { command: ['hg', 'init'] },
                                 instruction,
-                                bespin.vcs._createStandardHandler(instruction));
+                                exports._createStandardHandler(instruction));
     }
 });
 
@@ -702,7 +705,7 @@ bespin.vcs.hgCommands.addCommand({
  * Command store for the Subversion commands
  * (which are subcommands of the main 'svn' command)
  */
-bespin.vcs.svnCommands = new bespin.command.Store(bespin.command.store, {
+exports.svnCommands = new bespin.command.Store(bespin.command.store, {
     name: 'svn',
     preview: 'run a Subversion command',
     subcommanddefault: 'help'
@@ -711,7 +714,7 @@ bespin.vcs.svnCommands = new bespin.command.Store(bespin.command.store, {
 /**
  * Display sub-command help
  */
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'help',
     takes: ['search'],
     preview: 'show commands for svn subcommand',
@@ -723,7 +726,7 @@ bespin.vcs.svnCommands.addCommand({
     }
 });
 
-bespin.vcs.svnCommands.genericExecute = function(instruction, args) {
+exports.svnCommands.genericExecute = function(instruction, args) {
     var project;
 
     bespin.withComponent('editSession', function(editSession) {
@@ -744,7 +747,7 @@ bespin.vcs.svnCommands.genericExecute = function(instruction, args) {
             prompts = { getKeychain: true };
         }
 
-        bespin.vcs.getInfoFromUser(instruction, function(values) {
+        exports.getInfoFromUser(instruction, function(values) {
             var commandMsg = { command: command };
 
             if (values.message) {
@@ -756,25 +759,25 @@ bespin.vcs.svnCommands.genericExecute = function(instruction, args) {
             }
 
             bespin.get('server').vcs(project,
-                                    commandMsg,
-                                    instruction,
-                                    bespin.vcs._createStandardHandler(instruction,
-                                        {escape: true}));
+                commandMsg,
+                instruction,
+                exports._createStandardHandler(instruction,
+                    { escape: true }));
 
         }, prompts);
     } else {
         bespin.get('server').vcs(project,
-                                { command: command },
-                                instruction,
-                                bespin.vcs._createStandardHandler(instruction,
-                                    {escape: true}));
+                { command: command },
+                instruction,
+                exports._createStandardHandler(instruction,
+                    { escape: true }));
     }
 };
 
 /**
  * Generic vcs remote command handler
  */
-bespin.vcs._performVCSCommandWithFiles = function(vcsCommand, instruction, args, options) {
+exports._performVCSCommandWithFiles = function(vcsCommand, instruction, args, options) {
     options = options || { acceptAll: true };
     var project;
     var path;
@@ -813,22 +816,22 @@ bespin.vcs._performVCSCommandWithFiles = function(vcsCommand, instruction, args,
     bespin.get('server').vcs(project,
                             { command: command },
                             instruction,
-                            bespin.vcs._createStandardHandler(instruction, handlerOptions));
+                            exports._createStandardHandler(instruction, handlerOptions));
 };
 
 /**
- * The cache for <pre>bespin.vcs._getRemoteauth</pre>
- * @see bespin.vcs._getRemoteauth
+ * The cache for <pre>exports._getRemoteauth</pre>
+ * @see exports._getRemoteauth
  */
-bespin.vcs._remoteauthCache = {};
+exports._remoteauthCache = {};
 
 /**
  * Looks in the cache or calls to the server to find out if the given project
  * requires remote authentication.
  * The result is published at vcs:remoteauth:project
  */
-bespin.vcs._getRemoteauth = function(project, callback) {
-    var cached = bespin.vcs._remoteauthCache[project];
+exports._getRemoteauth = function(project, callback) {
+    var cached = exports._remoteauthCache[project];
     if (cached === undefined) {
         bespin.get('server').remoteauth(project, callback);
         return;
@@ -841,13 +844,13 @@ bespin.vcs._getRemoteauth = function(project, callback) {
  * Catch publishes primarily from bespin.client.Server.remoteauth (below)
  */
 bespin.subscribe("vcs:remoteauthUpdate", function(event) {
-    bespin.vcs._remoteauthCache[event.project] = event.remoteauth;
+    exports._remoteauthCache[event.project] = event.remoteauth;
 });
 
 /**
  * Most of the VCS commands just want to output to the CLI
  */
-bespin.vcs._createStandardHandler = function(instruction, options) {
+exports._createStandardHandler = function(instruction, options) {
     options = options || {};
     return {
         onPartial: options.onPartial,
@@ -856,9 +859,9 @@ bespin.vcs._createStandardHandler = function(instruction, options) {
                 // if the keychain password was just set,
                 // it's possible there was an error with that,
                 // so remove the cached one.
-                if (bespin.vcs._justSetKeychainpw) {
-                    delete bespin.vcs._keychainpw;
-                    delete bespin.vcs._justSetKeychainpw;
+                if (exports._justSetKeychainpw) {
+                    delete exports._keychainpw;
+                    delete exports._justSetKeychainpw;
                 }
 
                 // If the server gets an exception, response is
@@ -874,8 +877,8 @@ bespin.vcs._createStandardHandler = function(instruction, options) {
                     options.onFailure(response);
                 }
             } else {
-                if (bespin.vcs._justSetKeychainpw) {
-                    delete bespin.vcs._justSetKeychainpw;
+                if (exports._justSetKeychainpw) {
+                    delete exports._justSetKeychainpw;
                 }
 
                 var output = response.output;
@@ -901,7 +904,7 @@ bespin.vcs._createStandardHandler = function(instruction, options) {
  * Create an event handler to sort out the output if the user clicks cancel
  * in one of the popup dialogs
  */
-bespin.vcs._createCancelHandler = function(instruction) {
+exports._createCancelHandler = function(instruction) {
     return instruction.link(function() {
         instruction.addErrorOutput("Cancelled");
         instruction.unlink();
@@ -971,9 +974,8 @@ dojo.extend(bespin.client.Server, {
     }
 });
 
-
 /* PASTEHERE: VCS commands that are generated by paver generate_vcs */
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'add',
     takes: ['*'],
     preview: 'add: Put files and directories under version control, schedulingthem for addition to repository',
@@ -1002,12 +1004,10 @@ bespin.vcs.svnCommands.addCommand({
         "  --no-auto-props       disable automatic properties\n" +
         "  --parents             add intermediate parents\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'merge',
     takes: ['*'],
     keychain: true,
@@ -1085,12 +1085,10 @@ bespin.vcs.svnCommands.addCommand({
         "                        ignore ancestry when calculating merges\n" +
         "  --reintegrate         lump-merge all of source URL's unmerged changes\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'blame',
     takes: ['*'],
     aliases: ['praise', 'annotate', 'ann'],
@@ -1129,12 +1127,10 @@ bespin.vcs.svnCommands.addCommand({
         "  --use-merge-history, -g\n" +
         "                        use/display additional information from merge history\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'copy',
     takes: ['*'],
     aliases: ['cp'],
@@ -1198,12 +1194,10 @@ bespin.vcs.svnCommands.addCommand({
         "                        set revision property WITH_REVPROP in new revision\n" +
         "                        using the name[=value] format\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'delete',
     takes: ['*'],
     aliases: ['del', 'remove', 'rm'],
@@ -1239,12 +1233,10 @@ bespin.vcs.svnCommands.addCommand({
         "  --force               force operation to run\n" +
         "  --keep-local          keep path in working copy\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'switch',
     takes: ['*'],
     aliases: ['sw'],
@@ -1311,12 +1303,10 @@ bespin.vcs.svnCommands.addCommand({
         "  --relocate FROM       relocate via URL-rewriting\n" +
         "  --ignore-externals    ignore externals definitions\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'move',
     takes: ['*'],
     aliases: ['mv', 'rename', 'ren'],
@@ -1354,12 +1344,10 @@ bespin.vcs.svnCommands.addCommand({
         "                        set revision property WITH_REVPROP in new revision\n" +
         "                        using the name[=value] format\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'commit',
     takes: ['*'],
     aliases: ['ci'],
@@ -1397,12 +1385,10 @@ bespin.vcs.svnCommands.addCommand({
         "                        name[=value] format\n" +
         "  --keep-changelists    don't delete changelists after commit\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'cleanup',
     takes: ['*'],
     preview: 'cleanup: Recursively clean up the working copy, removing locks, resuming unfinished operations, etc',
@@ -1416,12 +1402,10 @@ bespin.vcs.svnCommands.addCommand({
         "optional arguments:\n" +
         "  --help, -h  show this message and exit\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'propset',
     takes: ['*'],
     aliases: ['pset', 'ps'],
@@ -1496,12 +1480,10 @@ bespin.vcs.svnCommands.addCommand({
         "                        'immediates', or 'infinity')\n" +
         "  --force               force operation to run\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'update',
     takes: ['*'],
     aliases: ['up'],
@@ -1576,12 +1558,10 @@ bespin.vcs.svnCommands.addCommand({
         "  --accept {postpone,base,mine-full,theirs-full}\n" +
         "                        specify automatic conflict resolution action\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'revert',
     takes: ['*'],
     preview: 'revert: Restore pristine working copy file (undo most local edits)',
@@ -1604,12 +1584,10 @@ bespin.vcs.svnCommands.addCommand({
         "                        'immediates', or 'infinity')\n" +
         "  --recursive, -R       descend recursively, same as --depth=infinity\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'log',
     takes: ['*'],
     keychain: true,
@@ -1678,12 +1656,10 @@ bespin.vcs.svnCommands.addCommand({
         "  --with-revprop WITH_REVPROP\n" +
         "                        retrieve revision property WITH_REVPROP\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'cat',
     takes: ['*'],
     keychain: true,
@@ -1710,12 +1686,10 @@ bespin.vcs.svnCommands.addCommand({
         "                        working copy 'COMMITTED' last commit at or before BASE\n" +
         "                        'PREV' revision just before COMMITTED\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'info',
     takes: ['*'],
     preview: 'info: Display information about a local or remote item',
@@ -1749,12 +1723,10 @@ bespin.vcs.svnCommands.addCommand({
         "  --xml                 output in XML\n" +
         "  --incremental         give output suitable for concatenation\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'propget',
     takes: ['*'],
     aliases: ['pg', 'pget'],
@@ -1794,12 +1766,10 @@ bespin.vcs.svnCommands.addCommand({
         "  --strict              use strict semantics\n" +
         "  --xml                 output in XML\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'proplist',
     takes: ['*'],
     aliases: ['plist', 'pl'],
@@ -1824,12 +1794,10 @@ bespin.vcs.svnCommands.addCommand({
         "                        'immediates', or 'infinity')\n" +
         "  --xml                 output in XML\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'status',
     takes: ['*'],
     aliases: ['st', 'stat'],
@@ -1928,12 +1896,10 @@ bespin.vcs.svnCommands.addCommand({
         "  --show-updates, -u    display update information\n" +
         "  --ignore-externals    ignore externals definitions\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'mkdir',
     takes: ['*'],
     keychain: true,
@@ -1967,12 +1933,10 @@ bespin.vcs.svnCommands.addCommand({
         "                        operate only on members of changelist ARG\n" +
         "  --parents             make intermediate directories\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'propdel',
     takes: ['*'],
     aliases: ['pdel', 'pd'],
@@ -1996,12 +1960,10 @@ bespin.vcs.svnCommands.addCommand({
         "                        limit operation by depth ARG ('empty', 'files',\n" +
         "                        'immediates', or 'infinity')\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
 
-
-
-bespin.vcs.svnCommands.addCommand({
+exports.svnCommands.addCommand({
     name: 'resolve',
     takes: ['*'],
     preview: 'Resolve conflicts on working copy files or directories',
@@ -2026,7 +1988,5 @@ bespin.vcs.svnCommands.addCommand({
         "  --accept {base,working,mine-full,theirs-full}\n" +
         "                        specify automatic conflict resolution source\n" +
         "\n",
-    execute: bespin.vcs.svnCommands.genericExecute
+    execute: exports.svnCommands.genericExecute
 });
-
-

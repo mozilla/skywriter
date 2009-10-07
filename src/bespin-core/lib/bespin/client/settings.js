@@ -144,7 +144,7 @@ exports.Core = SC.Object.extend({
 
     getObject: function(key) {
         try {
-            return dojo.fromJson(this.get(key));
+            return JSON.parse(this.get(key));
         } catch(e) {
             console.log("Error in getObject: " + e);
             return {};
@@ -216,7 +216,7 @@ exports.Cookie = SC.Object.extend({
             path: '/'
         };
 
-        var settings = dojo.fromJson(dojo.cookie("settings"));
+        var settings = JSON.parse(dojo.cookie("settings"));
 
         if (settings) {
             this.settings = settings;

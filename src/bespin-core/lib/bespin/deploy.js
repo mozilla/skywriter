@@ -243,7 +243,7 @@ exports._deployCommand = function(instruction, project, opts) {
                 var contentType = xhr.getResponseHeader("Content-Type");
                 var response = xhr.responseText;
                 if (/^application\/json/.exec(contentType)) {
-                    var data = dojo.fromJson(response);
+                    var data = JSON.parse(response);
                     if (data.notConfigured) {
                         instruction.addErrorOutput("<p>Deployment is not configured for this project. Please use the 'deploy setup' command to configure it.");
                         var cl = bespin.get("commandLine");

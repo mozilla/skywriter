@@ -36,7 +36,7 @@ bespin.subscribe("editor:openfile:opensuccess", function(event) {
         // reset the state of the editor based on saved cookie
         var data = dojo.cookie('viewData_' + project + '_' + filename.split('/').join('_'));
         if (data) {
-            bespin.get('editor').resetView(dojo.fromJson(data));
+            bespin.get('editor').resetView(JSON.parse(data));
         } else {
             bespin.get('editor').basicView();
         }

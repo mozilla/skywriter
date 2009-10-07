@@ -22,8 +22,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-dojo.provide("bespin.themes.white");
-
 /**
  * White Theme
  */

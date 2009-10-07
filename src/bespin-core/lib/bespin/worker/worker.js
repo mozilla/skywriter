@@ -191,7 +191,7 @@ exports.WorkerFacade = SC.Object.extend({
         var cb = function(event) {
             var data  = event.data;
             if (typeof data == "string") {
-                data = dojo.fromJson(data);
+                data = JSON.parse(data);
             }
             var index = data.callIndex;
 
@@ -227,12 +227,12 @@ exports.WorkerFacade = SC.Object.extend({
                     else
                     if (message.indexOf("__IMPORT_SCRIPT__") == 0) {
                         var json = message.substr("__IMPORT_SCRIPT__".length);
-                        var paras = dojo.fromJson(json);
+                        var paras = JSON.parse(json);
                         loadScript.apply(this, paras);
                         return;
                     }
                     else {
-                        message = dojo.fromJson(message);
+                        message = JSON.parse(message);
                     }
                 }
 

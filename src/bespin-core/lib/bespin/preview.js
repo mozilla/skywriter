@@ -22,7 +22,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-dojo.provide("bespin.preview");
+var bespin  = require("bespin");
+var command = require("bespin/command");
+var path = require("bespin/util/path");
+var keys = require("bespin/util/keys");
+var webpieces = require("bespin/util/webpieces");
 
 /**
  * TODO: We need to find a way to add in a key-sequence for this. Currently
@@ -32,21 +36,21 @@ dojo.provide("bespin.preview");
 /**
  * Add in the preview command
  */
-bespin.command.store.addCommand({
+command.store.addCommand({
     name: 'preview',
     takes: ['filename'],
     preview: 'view the file in a new browser window',
     completeText: 'add the filename to view or use the current file',
     withKey: "CMD B",
     execute: function(instruction, filename) {
-        bespin.preview.show(filename);
+        exports.show(filename);
     }
 });
 
 /**
  * Preview the given file in a browser context
  */
-bespin.preview.show = function(filename, project, type) {
+exports.show = function(filename, project, type) {
     var editSession = bespin.get('editSession');
     var settings = bespin.get("settings");
 
@@ -55,7 +59,7 @@ bespin.preview.show = function(filename, project, type) {
     var project = project || editSession.project;
     var type = type || settings.get("preview");
 
-    var url = bespin.util.path.combine("preview/at", project, filename);
+    var url = path.combine("preview/at", project, filename);
 
     if (!settings || !filename) {
         // TODO: Warn in some way?
@@ -83,7 +87,7 @@ bespin.preview.show = function(filename, project, type) {
 
             var esc = dojo.connect(document, "onkeypress", function(e) {
                 var key = e.keyCode || e.charCode;
-                if (key == bespin.util.keys.Key.ESCAPE) {
+                if (key == keys.Key.ESCAPE) {
                     preview.removeChild(inlineIframe);
                     dojo.style(preview, "display", "none");
                     dojo.style(subheader, "display", "block");
@@ -104,12 +108,12 @@ bespin.preview.show = function(filename, project, type) {
                 src: url,
                 style: "border:0; width:320px; height:460px; background-color: white; display:block"
             }, centerpopup);
-            bespin.util.webpieces.showCenterPopup(centerpopup);
+            webpieces.showCenterPopup(centerpopup);
             var esc = dojo.connect(document, "onkeypress", function(e) {
                 var key = e.keyCode || e.charCode;
-                if (key == bespin.util.keys.Key.ESCAPE) {
+                if (key == keys.Key.ESCAPE) {
                     centerpopup.removeChild(iphoneIframe);
-                    bespin.util.webpieces.hideCenterPopup(centerpopup);
+                    webpieces.hideCenterPopup(centerpopup);
                     dojo.disconnect(esc);
                 }
             });

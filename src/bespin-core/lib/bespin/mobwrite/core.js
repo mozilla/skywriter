@@ -819,7 +819,7 @@ mobwrite.syncRun2_ = function(text) {
           handle: value.substring(0, div)
       };
       try {
-          userEntry.clientData = dojo.fromJson(value.substring(div + 1));
+          userEntry.clientData = JSON.parse(value.substring(div + 1));
       } catch (ex) {
           window.console.error('Malformed collaborator line - bad json: ', line, ex);
       }

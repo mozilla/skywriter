@@ -101,7 +101,7 @@ exports.Server = SC.Object.extend({
 
                     if (options.evalJSON && response) {
                         try {
-                            response = dojo.fromJson(response);
+                            response = JSON.parse(response);
                         } catch (syntaxException) {
                             console.log("Couldn't eval the JSON: " + response + " (SyntaxError: " + syntaxException + ")");
                         }

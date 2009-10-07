@@ -28,7 +28,6 @@ var bespin  = require("bespin");
 var command = require("bespin/command");
 var server  = require("bespin/client/server");
 
-
 /**
  * Utility to take an string array of strings, and publish a ul list to the
  * instruction

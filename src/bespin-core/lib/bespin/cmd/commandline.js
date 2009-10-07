@@ -1223,7 +1223,7 @@ members: {
         bespin.fireAfter([ "authenticated" ], function() {
             if (window.globalStorage) {
                 var data = globalStorage[location.hostname].history;
-                var instructions = dojo.fromJson(data);
+                var instructions = JSON.parse(data);
                 self.history.setInstructions(instructions);
             }
         });

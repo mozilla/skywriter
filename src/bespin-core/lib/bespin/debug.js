@@ -341,7 +341,7 @@ members: {
     loadBreakpoints: function(callback) {
         var self = this;
         bespin.get('files').loadContents(bespin.userSettingsProject, "breakpoints", function(file) {
-            self.breakpoints = dojo.fromJson(file.content);
+            self.breakpoints = JSON.parse(file.content);
 
             // reset IDs, because they are not consistent between
             // loads of Bespin.
