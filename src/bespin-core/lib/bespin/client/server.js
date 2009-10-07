@@ -89,10 +89,7 @@ exports.Server = SC.Object.extend({
     request: function(method, url, payload, options) {
         var server = this;
         var xhr = new XMLHttpRequest();
-
-        if (!options) {
-            throw new Error("Synchronous XHR is no longer supported");
-        }
+        options = options || {};
 
         var onreadystatechange = function() {
             if (xhr.readyState == 4) {

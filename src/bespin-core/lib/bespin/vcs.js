@@ -211,7 +211,7 @@ exports.commands.addCommand({
                 var status = dojo.create("span", {innerHTML: "Working..."},
                             outer);
                 instruction.setElement(outer);
-                bespin.get('server').clone(data, instruction, exports._createStandardHandler(instruction, {
+                clone(data, instruction, exports._createStandardHandler(instruction, {
                     onSuccess: function() {
                         bespin.publish("project:created", {project: newProjectName});
                     },
@@ -396,10 +396,10 @@ exports.commands.addCommand({
                 instruction.addErrorOutput("You need to pass in a project");
                 return;
             }
-            bespin.get('server').vcs(project,
-                                    { command: [ 'commit', '-m', values.message ] },
-                                    instruction,
-                                    exports._createStandardHandler(instruction));
+            vcs(project,
+                { command: [ 'commit', '-m', values.message ] },
+                instruction,
+                exports._createStandardHandler(instruction));
         };
 
         // for now, be a nagger and ask to save first using an ugly confirm()
@@ -441,14 +441,13 @@ exports.commands.addCommand({
     completeText: 'Use the current file, add -a for all files or add filenames',
     description: 'Without any options, the vcs revert command will revert the currently selected file against the repository copy. If you pass in -a, the command will revert <em>all</em> files. Finally, you can list files to revert individually. No backups are kept!',
     execute: function(instruction, args) {
-        exports._performVCSCommandWithFiles("revert", instruction, args,
-            {
-                acceptAll: true,
-                onSuccess: function() {
-                    // null means leave the same
-                    editor.openFile(null, null, { reload:true });
-                }
-            });
+        exports._performVCSCommandWithFiles("revert", instruction, args, {
+            acceptAll: true,
+            onSuccess: function() {
+                // null means leave the same
+                editor.openFile(null, null, { reload:true });
+            }
+        });
     }
 });
 
@@ -461,9 +460,10 @@ exports.getkey = {
     completeText: 'Recommended: Don\'t pass in a password, put it in the following dialog',
     preview: 'Get your SSH public key that Bespin can use for remote repository authentication. (May prompt for your keychain password)',
     execute: function(instruction, kcpass) {
-        if (kcpass == ''){kcpass = undefined;}
-        var server = bespin.get('server');
-        server.getkey(kcpass, {
+        if (kcpass == '') {
+            kcpass = undefined;
+        }
+        getkey(kcpass, {
             onSuccess: function(key) {
                 var parent = dojo.create("div", {
                     innerHTML: "SSH public key that Bespin can use for remote repository authentication:<br/>"
@@ -486,7 +486,7 @@ exports.getkey = {
                 var errmsg = (!kcpass || kcpass === "") ? "" : "Wrong password";
                 exports.getInfoFromUser(instruction, function(values) {
                     exports.getkey.execute(instruction, values.kcpass);
-                }, {errmsg: errmsg, getKeychain: true});
+                }, { errmsg: errmsg, getKeychain: true });
             },
 
             onFailure: function(xhr) {
@@ -518,10 +518,10 @@ exports.commands.addCommand({
         }
 
         exports.getInfoFromUser(instruction, function(values) {
-            bespin.get('server').vcs(project,
-                                    { command: ['push', '_BESPIN_PUSH'], kcpass: values.kcpass },
-                                    instruction,
-                                    exports._createStandardHandler(instruction));
+            vcs(project,
+                { command: ['push', '_BESPIN_PUSH'], kcpass: values.kcpass },
+                instruction,
+                exports._createStandardHandler(instruction));
         }, {getKeychain: true});
     }
 });
@@ -579,10 +579,10 @@ exports.commands.addCommand({
             return;
         }
 
-        bespin.get('server').vcs(project,
-                                { command: ['status'] },
-                                instruction,
-                                exports._createStandardHandler(instruction));
+        vcs(project,
+            { command: ['status'] },
+            instruction,
+            exports._createStandardHandler(instruction));
     }
 });
 
@@ -596,7 +596,7 @@ exports.commands.addCommand({
     description: '',
     execute: function(instruction, args) {
         var session = bespin.get("editSession");
-        bespin.get('server').vcs(session.project,
+        vcs(session.project,
             { command: [ 'log', session.path ] },
             instruction,
             exports._createStandardHandler(instruction, { acceptAll: true }));
@@ -632,10 +632,10 @@ exports.commands.addCommand({
                 command.kcpass = values.kcpass;
             }
 
-            bespin.get('server').vcs(project,
-                                    command,
-                                    instruction,
-                                    exports._createStandardHandler(instruction));
+            vcs(project,
+                command,
+                instruction,
+                exports._createStandardHandler(instruction));
         };
 
         exports._getRemoteauth(project, function(remoteauth) {
@@ -694,10 +694,11 @@ exports.hgCommands.addCommand({
             instruction.addErrorOutput("You need to pass in a project");
             return;
         }
-        bespin.get('server').vcs(project,
-                                { command: ['hg', 'init'] },
-                                instruction,
-                                exports._createStandardHandler(instruction));
+
+        vcs(project,
+            { command: ['hg', 'init'] },
+            instruction,
+            exports._createStandardHandler(instruction));
     }
 });
 
@@ -758,19 +759,16 @@ exports.svnCommands.genericExecute = function(instruction, args) {
                 commandMsg.kcpass = values.kcpass;
             }
 
-            bespin.get('server').vcs(project,
+            vcs(project,
                 commandMsg,
                 instruction,
-                exports._createStandardHandler(instruction,
-                    { escape: true }));
-
+                exports._createStandardHandler(instruction, { escape: true }));
         }, prompts);
     } else {
-        bespin.get('server').vcs(project,
-                { command: command },
-                instruction,
-                exports._createStandardHandler(instruction,
-                    { escape: true }));
+        vcs(project,
+            { command: command },
+            instruction,
+            exports._createStandardHandler(instruction, { escape: true }));
     }
 };
 
@@ -813,10 +811,10 @@ exports._performVCSCommandWithFiles = function(vcsCommand, instruction, args, op
         handlerOptions.onSuccess = options.onSuccess;
     }
 
-    bespin.get('server').vcs(project,
-                            { command: command },
-                            instruction,
-                            exports._createStandardHandler(instruction, handlerOptions));
+    vcs(project,
+        { command: command },
+        instruction,
+        exports._createStandardHandler(instruction, handlerOptions));
 };
 
 /**
@@ -833,7 +831,7 @@ exports._remoteauthCache = {};
 exports._getRemoteauth = function(project, callback) {
     var cached = exports._remoteauthCache[project];
     if (cached === undefined) {
-        bespin.get('server').remoteauth(project, callback);
+        remoteauth(project, callback);
         return;
     }
     // work from cache
@@ -914,65 +912,66 @@ exports._createCancelHandler = function(instruction) {
 /**
  * Extension to bespin.client.Server
  */
-dojo.extend(bespin.client.Server, {
-    /**
-     * Finds out if the given project requires remote authentication the values
-     * returned are "", "both" (for read and write), "write" when only writes
-     * require authentication the result is published as an object with project,
-     * remoteauth values to vcs:remoteauthUpdate and sent to the callback.
-     */
-    remoteauth: function(project, callback) {
-        var url = '/vcs/remoteauth/' + escape(project) + '/';
-        this.request('GET', url, null, {
-            onSuccess: function(result) {
-                var event = {
-                    project: project,
-                    remoteauth: result
-                };
-                bespin.publish("vcs:remoteauthUpdate", event);
-                callback(result);
-            }
-        });
-    },
 
-    /**
-     * Run a Version Control System (VCS) command.
-     * The command object should have a command attribute on it that is a list
-     * of the arguments.
-     * Commands that require authentication should also have kcpass, which is a
-     * string containing the user's keychain password.
-     */
-    vcs: function(project, command, instruction, opts) {
-        var url = '/vcs/command/' + project + '/';
-        this.requestDisconnected('POST', url, JSON.stringify(command), instruction, opts);
-    },
-
-    /**
-     * Sets authentication for a project
-     */
-    setauth: function(project, form, opts) {
-        this.request('POST', '/vcs/setauth/' + project + '/',
-                    dojo.formToQuery(form), opts || {});
-    },
-
-    /**
-     * Retrieves the user's SSH public key that can be used for VCS functions
-     */
-    getkey: function(kcpass, opts) {
-        if (kcpass == null) {
-            this.request('POST', '/vcs/getkey/', null, opts || {});
-        } else {
-            this.request('POST', '/vcs/getkey/', "kcpass=" + escape(kcpass), opts || {});
+/**
+ * Finds out if the given project requires remote authentication the values
+ * returned are "", "both" (for read and write), "write" when only writes
+ * require authentication the result is published as an object with project,
+ * remoteauth values to vcs:remoteauthUpdate and sent to the callback.
+ */
+var remoteauth = function(project, callback) {
+    var url = '/vcs/remoteauth/' + escape(project) + '/';
+    bespin.get('server').request('GET', url, null, {
+        onSuccess: function(result) {
+            var event = {
+                project: project,
+                remoteauth: result
+            };
+            bespin.publish("vcs:remoteauthUpdate", event);
+            callback(result);
         }
-    },
+    });
+};
 
-    /**
-     * Clone a remote repository
-     */
-    clone: function(data, instruction, opts) {
-        this.requestDisconnected('POST', '/vcs/clone/', data, instruction, opts);
+/**
+ * Run a Version Control System (VCS) command.
+ * The command object should have a command attribute on it that is a list
+ * of the arguments.
+ * Commands that require authentication should also have kcpass, which is a
+ * string containing the user's keychain password.
+ */
+var vcs = function(project, command, instruction, opts) {
+    var url = '/vcs/command/' + project + '/';
+    bespin.get('server').requestDisconnected('POST', url, JSON.stringify(command), instruction, opts);
+};
+
+/**
+ * Sets authentication for a project
+ */
+var setauth = function(project, form, opts) {
+    var url = '/vcs/setauth/' + project + '/';
+    bespin.get('server').request('POST', url, dojo.formToQuery(form), opts);
+};
+
+/**
+ * Retrieves the user's SSH public key that can be used for VCS functions
+ */
+var getkey = function(kcpass, opts) {
+    var url = '/vcs/getkey/';
+    if (kcpass == null) {
+        bespin.get('server').request('POST', url, null, opts);
+    } else {
+        var params = "kcpass=" + escape(kcpass);
+        bespin.get('server').request('POST', url, params, opts);
     }
-});
+};
+
+/**
+ * Clone a remote repository
+ */
+var clone = function(data, instruction, opts) {
+    bespin.get('server').requestDisconnected('POST', '/vcs/clone/', data, instruction, opts);
+};
 
 /* PASTEHERE: VCS commands that are generated by paver generate_vcs */
 exports.svnCommands.addCommand({

@@ -24,8 +24,8 @@
 
 var bespin = require("bespin");
 var command = require("bespin/command");
-var vcs = require("bespin.vcs");
-var client = require("bespin.client");
+var vcs = require("bespin/vcs");
+var server = require("bespin/client/server");
 
 exports.commands = new command.Store(command.store, {
     name: 'deploy',
@@ -76,10 +76,9 @@ exports.commands.addCommand({
 
         vcs.getInfoFromUser(instruction, function(values) {
             instruction.addOutput("");
-            var server = bespin.get("server");
             var kcpass = values.kcpass;
 
-            server.getDeploySetup(project, {kcpass:kcpass}, {
+            getDeploySetup(project, { kcpass:kcpass }, {
                 onSuccess: function(currentSetup) {
                     console.log(currentSetup);
 
@@ -91,9 +90,8 @@ exports.commands.addCommand({
                         onsubmit: function(e) {
                             dojo.stopEvent(e);
                             instruction.addOutput("");
-                            var server = bespin.get("server");
                             var data = dojo.formToObject(form);
-                            server.saveDeploySetup(project, data, {
+                            saveDeploySetup(project, data, {
                                 onSuccess: function() {
                                     instruction.addOutput("Deployment settings applied for " + project);
                                 }
@@ -215,8 +213,7 @@ exports._deployCommand = function(instruction, project, opts) {
     }
 
     var outer = dojo.create("div", {});
-    var throbber = dojo.create("img",
-        {src: "/images/throbber.gif"}, outer);
+    var throbber = dojo.create("img", { src: "/images/throbber.gif" }, outer);
     var status = dojo.create("span", {innerHTML: "Working..."},
                 outer);
 
@@ -224,19 +221,17 @@ exports._deployCommand = function(instruction, project, opts) {
         instruction.setElement(outer);
 
         var kcpass = values.kcpass;
-        var server = bespin.get("server");
         var data = {
             kcpass: kcpass,
             dryRun: opts.dryRun
         };
-        server.runDeploy(instruction, project, data, {
+        runDeploy(instruction, project, data, {
             onSuccess: function(response) {
                 if (response.error) {
                     instruction.addErrorOutput("<pre>" +
                         response.output + "</pre>");
                 } else {
-                    instruction.addOutput("<pre>" + response.output
-                        + "</pre>");
+                    instruction.addOutput("<pre>" + response.output + "</pre>");
                 }
             },
             onFailure: function(xhr) {
@@ -287,29 +282,26 @@ exports.commands.addCommand({
     }
 });
 
-dojo.extend(client.Server, {
-    saveDeploySetup: function(project, data, opts) {
-        opts = opts || {};
-        opts.evalJSON = true;
-        var url = "/project/deploy/" + encodeURI(project) + "/setup";
-        data = JSON.stringify(data);
-        this.request('PUT', url, data, opts);
-    },
+var saveDeploySetup = function(project, data, opts) {
+    opts = opts || {};
+    opts.evalJSON = true;
+    var url = "/project/deploy/" + encodeURI(project) + "/setup";
+    data = JSON.stringify(data);
+    bespin.get("server").request('PUT', url, data, opts);
+};
 
-    getDeploySetup: function(project, data, opts) {
-        opts = opts || {};
-        opts.evalJSON = true;
-        var url = "/project/deploy/" + encodeURI(project) + "/setup";
-        data = JSON.stringify(data);
-        this.request('POST', url, data, opts);
-    },
+var getDeploySetup = function(project, data, opts) {
+    opts = opts || {};
+    opts.evalJSON = true;
+    var url = "/project/deploy/" + encodeURI(project) + "/setup";
+    data = JSON.stringify(data);
+    bespin.get("server").request('POST', url, data, opts);
+};
 
-    runDeploy: function(instruction, project, data, opts) {
-        opts = opts || {};
-        opts.evalJSON = true;
-        var url = "/project/deploy/" + encodeURI(project) + "/";
-        data = JSON.stringify(data);
-        this.requestDisconnected('POST', url, data, instruction, opts);
-    }
-});
-
+var runDeploy = function(instruction, project, data, opts) {
+    opts = opts || {};
+    opts.evalJSON = true;
+    var url = "/project/deploy/" + encodeURI(project) + "/";
+    data = JSON.stringify(data);
+    bespin.get("server").requestDisconnected('POST', url, data, instruction, opts);
+};
