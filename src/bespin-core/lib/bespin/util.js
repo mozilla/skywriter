@@ -54,10 +54,12 @@ exports.queryToObject = function(str, seperator) {
  * AKA prototype.bind / dojo.hitch / etc
  */
 exports.bind = function(context, func) {
-    if (typeof func == "string") {
-        return context[func].apply(context, arguments);
-    }
-    return func.apply(context, arguments);
+    return function() {
+        if (typeof func == "string") {
+            return context[func].apply(context, arguments);
+        }
+        return func.apply(context, arguments);
+    };
 };
 
 /**
