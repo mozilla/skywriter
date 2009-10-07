@@ -105,7 +105,7 @@ exports.Store = SC.Object.extend({
             if (this.parent) {
                 name = this.parent.getFullCommandName() + " " + name;
             }
-            return dojo.trim(name);
+            return name.trim();
         };
 
         if (!command.findCompletions) {
@@ -159,7 +159,7 @@ exports.Store = SC.Object.extend({
         if (this.parent) {
             name = this.parent.getFullCommandName() + " " + name;
         }
-        return dojo.trim(name);
+        return name.trim();
     },
 
     /**
@@ -197,7 +197,7 @@ exports.Store = SC.Object.extend({
      * store.
      */
     findCommand: function(value) {
-        var parts = dojo.trim(value).split(/\s+/);
+        var parts = value.trim().split(/\s+/);
         var first = parts.shift();
         var command = this.commands[first] || this.commands[this.aliases[first]];
         if (!command) {

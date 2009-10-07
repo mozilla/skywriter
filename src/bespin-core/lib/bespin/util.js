@@ -198,9 +198,9 @@ exports.leadingWhitespace = function(row) {
  * Given a camelCaseWord convert to "Camel Case Word"
  */
 exports.englishFromCamel = function(camel) {
-    dojo.trim(camel.replace(/([A-Z])/g, function(str) {
+    camel.replace(/([A-Z])/g, function(str) {
         return " " + str.toLowerCase();
-    }));
+    }).trim();
 };
 
 /**

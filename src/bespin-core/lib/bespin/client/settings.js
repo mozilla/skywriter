@@ -353,7 +353,7 @@ exports.ServerFile = SC.Object.extend({
                 }
                 if (setting.match(/\S+\s+\S+/)) {
                     var pieces = setting.split(/\s+/);
-                    self.settings[dojo.trim(pieces[0])] = dojo.trim(pieces[1]);
+                    self.settings[pieces[0].trim()] = pieces[1].trim();
                 }
             });
 

@@ -596,7 +596,7 @@ members: {
 
         var query = {
             value: value,  // "vcs clone repo"
-            parts: dojo.trim(value).split(/\s+/), // ["vcs", "clone", "repo"]
+            parts: value.trim().split(/\s+/), // ["vcs", "clone", "repo"]
             cursorPos: cursorPos, // 13
             preCursor: preCursor, // "vcs clone rep"
             command: command, // clone command
@@ -833,7 +833,7 @@ members: {
 exports.Instruction = Class.define({
 members: {
     init: function(commandLine, typed) {
-        this.typed = dojo.trim(typed);
+        this.typed = typed.trim();
         this.output = "";
         this.commandLine = commandLine;
 
