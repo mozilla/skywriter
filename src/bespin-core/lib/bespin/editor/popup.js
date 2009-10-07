@@ -73,7 +73,7 @@ members: {
                 zIndex: 210,
                 cursor: "pointer"
             },
-            onclick: util.bind(this, this.hide)
+            onclick: this.hide.bind(this)
         }, dojo.body());
 
         this.nodes.push("closer");

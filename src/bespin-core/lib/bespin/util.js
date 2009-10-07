@@ -51,18 +51,6 @@ exports.queryToObject = function(str, seperator) {
 };
 
 /**
- * AKA prototype.bind / dojo.hitch / etc
- */
-exports.bind = function(context, func) {
-    return function() {
-        if (typeof func == "string") {
-            return context[func].apply(context, arguments);
-        }
-        return func.apply(context, arguments);
-    };
-};
-
-/**
  * A la Prototype endsWith(). Takes a regex exclusing the '$' end marker
  */
 exports.endsWith = function(str, end) {

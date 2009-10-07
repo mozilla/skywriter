@@ -246,8 +246,7 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
                 function() {
                     var toFire = events.toFire(action);
                     bespin.publish(toFire.name, toFire.args);
-                } : util.bind(this.editor.ui.actions, action);
-
+                } : action.bind(this.editor.ui.actions);
         if (name) {
             this.keyMapDescriptions[[keyCode, metaKey, ctrlKey, altKey, shiftKey]] = name;
         }

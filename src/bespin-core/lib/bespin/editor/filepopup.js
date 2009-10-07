@@ -597,7 +597,7 @@ members: {
             if (/\/$/.test(name)) {
                 fdata.push({
                     name: name.substring(0, name.length - 1),
-                    contents: util.bind(this, this.fetchFiles)
+                    contents: this.fetchFiles.bind(this)
                 });
             } else {
                 fdata.push({ name: name });
@@ -809,7 +809,7 @@ members: {
         for (var i = 0; i < projectItems.length; i++) {
             projectItems[i] = {
                 name: projectItems[i].name.substring(0, projectItems[i].name.length - 1),
-                contents: util.bind(this, this.fetchFiles)
+                contents: this.fetchFiles.bind(this)
             };
         }
 
@@ -823,7 +823,7 @@ members: {
     refreshProjects: function() {
         console.log("refreshProjects");
 
-        bespin.get("server").list(null, null, util.bind(this, this.displayProjects));
+        bespin.get("server").list(null, null, this.displayProjects.bind(this));
     },
 
     getFileDetailPanel: function(item) {
