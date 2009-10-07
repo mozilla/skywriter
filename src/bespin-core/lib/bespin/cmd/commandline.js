@@ -105,15 +105,15 @@ members: {
     },
 
     destroy: function() {
-        dojo.forEach(this.subscriptions, function(sub) {
+        this.subscriptions.forEach(function(sub) {
             bespin.unsubscribe(sub);
         });
 
-        dojo.forEach(this.connections, function(conn) {
+        this.connections.forEach(function(conn) {
             dojo.disconnect(conn);
         });
 
-        dojo.forEach(this.nodes, function(nodeId) {
+        this.nodes.forEach(function(nodeId) {
             dojo.query("#" + nodeId).orphan();
         });
     },
@@ -162,10 +162,11 @@ members: {
         }
 
         timeout = timeout || 4600;
+        var self = this;
         if (timeout != -1) {
-            this.hintTimeout = setTimeout(dojo.hitch(this, function() {
-                this.hideHint();
-            }), timeout);
+            this.hintTimeout = setTimeout(function() {
+                self.hideHint();
+            }, timeout);
         }
     },
 
@@ -392,7 +393,7 @@ members: {
         var self = this;
 
         var count = 1;
-        dojo.forEach(this.history.instructions, function(instruction) {
+        this.history.instructions.forEach(function(instruction) {
             if (!instruction.historical) {
                 // The row for the input (i.e. what was typed)
                 var rowin = dojo.create("tr", {
@@ -700,7 +701,7 @@ members: {
             if (context == null) {
                 return action;
             }
-            return dojo.hitch(context, action);
+            return function() { action.apply(context, arguments); };
         }
 
         return this.executing.link(action, context);
@@ -896,7 +897,7 @@ members: {
         var self = this;
         return function() {
             try {
-                action.apply(context || dojo.global, arguments);
+                action.apply(context || window, arguments);
             } finally {
                 self._outstanding--;
 
@@ -1177,11 +1178,11 @@ members: {
 
         bespin.fireAfter([ "authenticated" ], function() {
             // load last 50 instructions from history
-            bespin.get("files").loadContents(bespin.userSettingsProject, "command.history", dojo.hitch(this, function(file) {
+            bespin.get("files").loadContents(bespin.userSettingsProject, "command.history", function(file) {
                 var typings = file.content.split(/\n/);
                 var instructions = [];
 
-                dojo.forEach(typings, function(typing) {
+                typings.forEach(function(typing) {
                     if (typing && typing != "") {
                         var instruction = new exports.Instruction(null, typing);
                         instructions.push(instruction);
@@ -1189,13 +1190,13 @@ members: {
                 });
 
                 self.history.setInstructions(instructions);
-            }));
+            });
         });
     },
 
     save: function(instructions) {
         var content = "";
-        dojo.forEach(instructions, function(instruction) {
+        instructions.forEach(function(instruction) {
             if (instruction.typed && instruction.typed != "") {
                 content += instruction.typed + "\n";
             }

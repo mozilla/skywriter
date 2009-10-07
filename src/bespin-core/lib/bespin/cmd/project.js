@@ -24,6 +24,7 @@
 
 var bespin = require("bespin");
 var command = require("bespin/command");
+var webpieces = require("bespin/util/webpieces");
 
 // TODO: For this and for other sub-command sets. I think that the resources
 // exposed here are exposed through the Store ctor keeping a reference to them
@@ -247,11 +248,6 @@ exports.commands.addCommand({
 
         el.innerHTML = "<div id='upload-container'><form method='POST' name='upload' id='upload' enctype='multipart/form-data'><div id='upload-header'>Import project via upload <img id='upload-close' src='images/icn_close_x.png' align='right'></div><div id='upload-content'><div id='upload-status'></div><p>Browse to find the project archive that you wish to archive<br>and then click on the <code>Upload</code> button.</p><center><input type='file' id='filedata' name='filedata' accept='application/zip,application/x-gzip'> <input type='submit' value='Upload'></center></div></form></div>";
 
-        dojo.require("dijit._base.place");
-        dojo.require("bespin.util.webpieces");
-
-        dojo.require("dojo.io.iframe");
-
         dojo.connect(dojo.byId('upload'), "submit", function() {
             dojo.byId('upload-status').innerHTML = 'Importing file into new project ' + project;
             dojo.io.iframe.send({
@@ -279,14 +275,14 @@ exports.commands.addCommand({
             });
         });
 
-        bespin.util.webpieces.showCenterPopup(el, true);
+        webpieces.showCenterPopup(el, true);
 
         // TODO: refactor this block into webpieces if popup is modal
         // pass the uploadClose DOM element as parameter to showCenterPopup
         var uploadClose, overlay;
         var hideCenterPopup = function(){
             el.removeChild(el.firstChild);
-            bespin.util.webpieces.hideCenterPopup(el);
+            webpieces.hideCenterPopup(el);
             dojo.disconnect(uploadClose);
             dojo.disconnect(overlay);
         };

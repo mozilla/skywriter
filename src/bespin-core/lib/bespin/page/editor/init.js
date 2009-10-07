@@ -65,15 +65,15 @@ exports.recalcLayout = function() {
     // note also that this interferes with collab below.
     var debugbar = dojo.byId("debugbar");
     if (debugbar.style.display == "block") {
-        dojo.forEach(move, function(item) { item.style.right = "201px"; });
+        move.forEach(function(item) { item.style.right = "201px"; });
     }
 
     if (bespin.get('toolbar').showCollab) {
         collab.style.display = "block";
-        dojo.forEach(move, function(item) { item.style.right = "201px"; });
+        move.forEach(function(item) { item.style.right = "201px"; });
     } else {
         collab.style.display = "none";
-        dojo.forEach(move, function(item) { item.style.right = "0"; });
+        move.forEach(function(item) { item.style.right = "0"; });
     }
 
     if (bespin.get('toolbar').showTarget) {
@@ -214,7 +214,7 @@ dojo.addOnLoad(function() {
 
             // this is done to trick the build system which would
             // try to find a module called "plugin" below.
-            var re = dojo.require;
+            var re = require;
             sc.javaScriptPlugins.forEach(function(plugin) {
                 re.call(dojo, plugin);
             });

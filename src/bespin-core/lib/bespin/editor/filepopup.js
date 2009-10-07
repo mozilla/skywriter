@@ -23,6 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
+var util = require("bespin/util");
 
 var images = {
     open: "images/actions/open.png",
@@ -375,34 +376,33 @@ members: {
 
         this.refreshProjects();
 
-        var hitchedRefresh = dojo.hitch(this, this.refreshProjects);
+        var self = this;
+        var hitchedRefresh = function() { return self.refreshProjects(); };
         this.subscriptions.push(bespin.subscribe("project:created", hitchedRefresh));
         this.subscriptions.push(bespin.subscribe("project:deleted", hitchedRefresh));
         this.subscriptions.push(bespin.subscribe("project:renamed", hitchedRefresh));
 
-        var fileUpdates = dojo.hitch(this, function(e) {
-            this.updatePath(e.project, e.path);
-        });
+        var fileUpdates = function(e) { self.updatePath(e.project, e.path); };
         this.subscriptions.push(bespin.subscribe("file:saved", fileUpdates));
         this.subscriptions.push(bespin.subscribe("file:removed", fileUpdates));
         this.subscriptions.push(bespin.subscribe("directory:created", fileUpdates));
         this.subscriptions.push(bespin.subscribe("directory:removed", fileUpdates));
 
-        this.connections.push(dojo.connect(this.canvas, "keydown", dojo.hitch(this, function(e) {
+        this.connections.push(dojo.connect(this.canvas, "keydown", function(e) {
             var key = bespin.util.keys.Key;
-            var path = this.tree.getSelectedPath();
+            var path = self.tree.getSelectedPath();
 
             var list, listNext, listPre;
             if (path === undefined) {
-                list = this.projects;
-                listNext = this.tree.getList(0);
+                list = self.projects;
+                listNext = self.tree.getList(0);
                 listPre = null;
             } else {
                 // things to make life much more easy :)
                 var index = path.length - 1;
-                list = this.tree.getList(index);
-                listNext = (this.tree.getListCount() > index ? this.tree.getList(index + 1) : false);
-                listPre = (index != 0 ? this.tree.getList(index - 1) : this.projects);
+                list = self.tree.getList(index);
+                listNext = (self.tree.getListCount() > index ? self.tree.getList(index + 1) : false);
+                listPre = (index != 0 ? self.tree.getList(index - 1) : self.projects);
             }
 
             switch (e.keyCode) {
@@ -412,7 +412,7 @@ members: {
                     }
                     listPre.selected.lastSelected = list.selected.name;  // save the selection, if the user comes back to this list
                     list.selected = null;
-                    this.tree.repaint();
+                    self.tree.repaint();
                     break;
                 case key.RIGHT_ARROW:
                     if (!listNext) {
@@ -433,7 +433,7 @@ members: {
                     list.moveSelectionDown();
                     break;
                 case key.ENTER:
-                    this.scene.bus.fire("dblclick", e, this.tree);
+                    self.scene.bus.fire("dblclick", e, self.tree);
                     break;
                 case key.ESCAPE:
                     bespin.getComponent("popup", function(popup) {
@@ -460,19 +460,19 @@ members: {
                     dojo.stopEvent(e);
                     break;
            }
-       })));
+       }));
     },
 
     destroy: function() {
-        dojo.forEach(this.subscriptions, function(sub) {
+        this.subscriptions.forEach(function(sub) {
             bespin.unsubscribe(sub);
         });
 
-        dojo.forEach(this.connections, function(conn) {
+        this.connections.forEach(function(conn) {
             dojo.disconnect(conn);
         });
 
-        dojo.forEach(this.nodes, function(nodeId) {
+        this.nodes.forEach(function(nodeId) {
             dojo.query("#" + nodeId).orphan();
         });
     },
@@ -538,8 +538,10 @@ members: {
             }
         });
 
-
-        this.tree.getDetailPanel = dojo.hitch(this, this.getFileDetailPanel);
+        var self = this;
+        this.tree.getDetailPanel = function(item) {
+            self.getFileDetailPanel(item);
+        };
     },
 
     show: function(coords) {
@@ -595,7 +597,7 @@ members: {
             if (/\/$/.test(name)) {
                 fdata.push({
                     name: name.substring(0, name.length - 1),
-                    contents: dojo.hitch(this, this.fetchFiles)
+                    contents: util.bind(this, this.fetchFiles)
                 });
             } else {
                 fdata.push({ name: name });
@@ -807,7 +809,7 @@ members: {
         for (var i = 0; i < projectItems.length; i++) {
             projectItems[i] = {
                 name: projectItems[i].name.substring(0, projectItems[i].name.length - 1),
-                contents: dojo.hitch(this, this.fetchFiles)
+                contents: util.bind(this, this.fetchFiles)
             };
         }
 
@@ -821,7 +823,7 @@ members: {
     refreshProjects: function() {
         console.log("refreshProjects");
 
-        bespin.get("server").list(null, null, dojo.hitch(this, this.displayProjects));
+        bespin.get("server").list(null, null, util.bind(this, this.displayProjects));
     },
 
     getFileDetailPanel: function(item) {

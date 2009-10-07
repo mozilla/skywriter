@@ -74,12 +74,13 @@ exports.Toolbar = SC.Object.extend({
      * Go through the default list and try to hitch onto the DOM element
      */
     setupDefault: function() {
-        dojo.forEach(this.DEFAULT_TOOLBAR, dojo.hitch(this, function(item) {
+        var self = this;
+        this.DEFAULT_TOOLBAR.forEach(function(item) {
             var item_el = dojo.byId("toolbar_" + item);
             if (item_el) {
-                this.setup(item, item_el);
+                self.setup(item, item_el);
             }
-        }));
+        });
     },
 
     addComponent: function(type, callback) {

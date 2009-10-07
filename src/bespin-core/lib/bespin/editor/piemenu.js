@@ -172,15 +172,15 @@ members:
     },
 
     destroy: function() {
-        dojo.forEach(this.subscriptions, function(sub) {
+        this.subscriptions.forEach(function(sub) {
             bespin.unsubscribe(sub);
         });
 
-        dojo.forEach(this.connections, function(conn) {
+        this.connections.forEach(function(conn) {
             dojo.disconnect(conn);
         });
 
-        dojo.forEach(this.nodes, function(nodeId) {
+        this.nodes.forEach(function(nodeId) {
             dojo.query("#" + nodeId).orphan();
         });
     },
@@ -556,7 +556,7 @@ members:
         // 27 is an evil number. Again.
         var toolbarOffsetTop = (this.settings.topMargin + this.settings.canvasTop + 27) + "px";
 
-        dojo.forEach(this.currentSlice.toolbar, function(button) {
+        this.currentSlice.toolbar.forEach(function(button) {
             dojo.style(button.img, {
                 display: "block",
                 // This is DOM so top is relative to top of window not canvas
@@ -582,7 +582,7 @@ members:
      */
     unrenderToolbar: function() {
         if (this.currentSlice.toolbar) {
-            dojo.forEach(this.currentSlice.toolbar, function(button) {
+            this.currentSlice.toolbar.forEach(function(button) {
                 dojo.style(button.img, "display", "none");
             });
         }

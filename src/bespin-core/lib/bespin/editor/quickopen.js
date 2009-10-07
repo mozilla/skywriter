@@ -136,15 +136,21 @@ exports.API = SC.Object.extend({
             this.scene.render();
         }, this);
 
-        this.scene.bus.bind("focus:received", this.inputProject, function() { this.selectAll(); }, this.inputProject);
-        this.scene.bus.bind("focus:received", this.input, function() { this.selectAll(); }, this.input);
+        this.scene.bus.bind("focus:received", this.inputProject, function() {
+            this.selectAll();
+        }, this.inputProject);
 
-        bespin.subscribe('ui:escape', dojo.hitch(this, function() {
-            if (this.scene.isVisible) {
-                this.toggle();
+        this.scene.bus.bind("focus:received", this.input, function() {
+            this.selectAll();
+        }, this.input);
+
+        var self = this;
+        bespin.subscribe('ui:escape', function() {
+            if (self.scene.isVisible) {
+                self.toggle();
                 bespin.get('editor').setFocus(true);
             }
-        }));
+        });
     },
 
     toggle: function() {
@@ -297,18 +303,19 @@ exports.API = SC.Object.extend({
     },
 
     loadProjects: function() {
-        bespin.get("server").list(null, null, dojo.hitch(this, function(projectItems) {
-            this.projects = [];
+        var self = this;
+        bespin.get("server").list(null, null, function(projectItems) {
+            self.projects = [];
             for (var i=0; i < projectItems.length; i++) {
-                this.projects.push(projectItems[i].name.substring(0,projectItems[i].name.length - 1));
+                var name = projectItems[i].name;
+                self.projects.push(name.substring(0, name.length - 1));
             }
-            this.projects.sort(function(a, b) {
+            self.projects.sort(function(a, b) {
                  var x = a.toLowerCase();
                  var y = b.toLowerCase();
                  return ((x < y) ? -1 : ((x > y) ? 1 : 0));
              });
-
-        }));
+        });
     },
 
     setProject: function(name) {

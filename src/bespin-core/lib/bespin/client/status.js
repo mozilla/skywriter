@@ -28,7 +28,7 @@ var SC = require("sproutcore");
  * This is currently just a mock to randomly share status messages.
  * In the future the server will serve up interesting data.
  * For now, it is turned off.
-*/
+ */
 exports.StatusChecker = SC.Object.extend({
     interval: 0,
     statusMessages: [
@@ -42,7 +42,10 @@ exports.StatusChecker = SC.Object.extend({
     ],
 
     start: function() {
-        this.interval = setInterval(dojo.hitch(this, "updateStatus"), 12000);
+        var self = this;
+        this.interval = setInterval(function() {
+            self.updateStatus();
+        }, 12000);
     },
 
     stop: function() {

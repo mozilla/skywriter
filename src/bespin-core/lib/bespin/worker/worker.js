@@ -415,7 +415,7 @@ exports.WorkerFacade = SC.Object.extend({
 
         if (libs) {
             var quoted = [];
-            dojo.forEach(libs, function(lib) {
+            libs.forEach(function(lib) {
                 quoted.push("'"+lib+"'");
             });
             source += "importScripts("+quoted.join(", ")+");\n";

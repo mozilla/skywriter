@@ -67,15 +67,15 @@ members: {
     },
 
     destroy: function() {
-        dojo.forEach(this.subscriptions, function(sub) {
+        this.subscriptions.forEach(function(sub) {
             bespin.unsubscribe(sub);
         });
 
-        dojo.forEach(this.connections, function(conn) {
+        this.connections.forEach(function(conn) {
             dojo.disconnect(conn);
         });
 
-        dojo.forEach(this.nodes, function(nodeId) {
+        this.nodes.forEach(function(nodeId) {
             dojo.query("#" + nodeId).orphan();
         });
     },
@@ -215,7 +215,7 @@ members: {
         var outputNode = this.output;
         var self = this;
         outputNode.innerHTML = "";
-        dojo.forEach(this.history.instructions, function(instruction) {
+        this.history.instructions.forEach(function(instruction) {
             var rowin = dojo.create("div", {
                 className: "command_rowin",
                 onclick: function(ev) {
@@ -326,7 +326,7 @@ members: {
     getBreakpoints: function(project, path) {
         var bps = [];   // breakpoints to return
 
-        dojo.forEach(this.breakpoints, function(breakpoint) {
+        this.breakpoints.forEach(function(breakpoint) {
             if (breakpoint.project == project && breakpoint.path == path) {
                 bps.push(breakpoint);
             }

@@ -151,11 +151,10 @@ exports.commands.addCommand({
                 output = "You haven't installed any Jetpacks. Run '> jetpack create' to get going.";
             } else {
                 output = "<u>Your Jetpack Features</u><br/><br/>";
-
-                output += dojo.map(dojo.filter(jetpacks, function(file) {
-                    return util.endsWith(file.name, '\\.js');
-                }), function(c) {
-                    return "<a href=\"javascript:bespin.get('commandLine').executeCommand('open /" + exports.projectName + "/" + c.name + "');\">" + c.name.replace(/\.js$/, '') + "</a>";
+                output += jetpacks.filter(endsJs).map(function(c) {
+                    return "<a href=\"javascript:bespin.get('commandLine')" +
+                        ".executeCommand('open /" + exports.projectName + "/" + c.name + "');\">" +
+                        c.name.replace(/\.js$/, '') + "</a>";
                 }).join("<br>");
             }
 
@@ -374,9 +373,7 @@ exports.loadInstallScripts = function() {
         var output;
 
         if (jetpacks && jetpacks.length > 0) {
-            output += dojo.map(dojo.filter(jetpacks, function(file) {
-                return util.endsWith(file.name, '\\.js');
-            }), function(c) {
+            output += jetpacks.filter(endsJs).map(function(c) {
                 return "<option>" + c.name.replace(/\.js$/, '') + "</option>";
             }).join("");
         }
@@ -386,3 +383,9 @@ exports.loadInstallScripts = function() {
     });
 };
 
+/**
+ * Private utility to check if the file.name ends with '.js'
+ */
+var endsJs = function(file) {
+    return util.endsWith(file.name, '\\.js');
+};

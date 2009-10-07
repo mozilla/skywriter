@@ -22,11 +22,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-dojo.provide("bespin.testTest");
+var test = require("bespin/test");
 
-dojo.require("bespin.test");
-
-bespin.test.addTests("test", {
+test.addTests("test", {
     setup: function() {
         this.setupRun = true;
     },

@@ -140,8 +140,13 @@ exports.fillArguments = function(string, args) {
  * Cache the character codes that we want to pass through to the browser
  * Should map to list below
  */
-exports.PassThroughCharCodes = dojo.map(["k", "l", "n", "o", "t", "w", "+", "-", "~",
-    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], function(item) { return item.charCodeAt(0); });
+var codes = [
+    "k", "l", "n", "o", "t", "w", "+", "-", "~", "0", "1", "2", "3", "4", "5",
+    "6", "7", "8", "9"
+];
+exports.PassThroughCharCodes = codes.map(function(item) {
+    return item.charCodeAt(0);
+});
 
 /**
  * Cache the key codes that we want to pass through to the browser
@@ -149,14 +154,19 @@ exports.PassThroughCharCodes = dojo.map(["k", "l", "n", "o", "t", "w", "+", "-",
  */
 exports.PassThroughKeyCodes = (function() {
     var Key = exports.Key;
-    return [Key.C, Key.X, Key.V, Key.K, Key.L, Key.N, Key.O, Key.T, Key.W, Key.NUMPAD_PLUS, Key.NUMPAD_MINUS, Key.TILDE,
-            Key.ZERO, Key.ONE, Key.TWO, Key.THREE, Key.FOUR, Key.FIVE, Key.SIX, Key.SEVEN, Key.EIGHT, Key.NINE];
+    return [
+        Key.C, Key.X, Key.V, Key.K, Key.L, Key.N, Key.O, Key.T, Key.W,
+        Key.NUMPAD_PLUS, Key.NUMPAD_MINUS, Key.TILDE, Key.ZERO, Key.ONE,
+        Key.TWO, Key.THREE, Key.FOUR, Key.FIVE, Key.SIX, Key.SEVEN, Key.EIGHT,
+        Key.NINE
+    ];
 })();
 
 /**
  * Given the event, return true if you want to allow the event to pass through
  * to the browser.
- * For example, allow Apple-L to go to location, Apple-K for search. Apple-# for a tab.
+ * For example, allow Apple-L to go to location, Apple-K for search. Apple-# for
+ * a tab.
  * @param e Event that came into an <code>onkeydown</code> handler
  */
 exports.passThroughToBrowser = function(e) {

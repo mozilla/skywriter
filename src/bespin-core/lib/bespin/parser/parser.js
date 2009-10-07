@@ -61,7 +61,7 @@ exports.CodeInfo = SC.Object.define({
                 bespin.get("commandLine").addErrorOutput("Please pass me a valid function name.");
                 return;
             }
-            var matches = dojo.filter(self.foldPoints, function(func) {
+            var matches = self.foldPoints.filter(function(func) {
                 return func['(name)'] == functionName;
             });
             if (matches.length === 0) {
@@ -76,7 +76,7 @@ exports.CodeInfo = SC.Object.define({
             var data = event.info;
             self.foldPoints = data.foldPoints;
             var syntaxmarkers = bespin.get("settings") && bespin.get("settings").get("syntaxmarkers");
-            self.messages = dojo.filter(data.messages, function(message) {
+            self.messages = data.messages.filter(function(message) {
                 if (syntaxmarkers === "all") {
                     return true;
                 }
@@ -162,7 +162,7 @@ exports.CodeInfo = SC.Object.define({
 
     getLineMarkers: function() {
         var lineMarkers = {};
-        dojo.forEach(this.messages, function(message) {
+        this.messages.forEach(function(message) {
             if (!lineMarkers[message.line]) {
                 lineMarkers[message.line] = {type: message.type, msg: ""};
             }

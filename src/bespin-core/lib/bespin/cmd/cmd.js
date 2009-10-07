@@ -153,11 +153,11 @@ exports.commands.addCommand({
             } else {
                 output = "<u>Your Custom Commands</u><br/><br/>";
 
-                var jsCommands = dojo.filter(commands, function(file) {
+                var jsCommands = commands.filter(function(file) {
                     return util.endsWith(file.name, '\\.js');
                 });
 
-                output += dojo.map(jsCommands, function(jsCommand) {
+                output += jsCommands.map(function(jsCommand) {
                     return jsCommand.name.replace(/\.js$/, '');
                 }).join("<br>");
             }

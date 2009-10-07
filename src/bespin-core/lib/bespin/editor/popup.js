@@ -24,6 +24,7 @@
 
 var bespin = require("bespin");
 var SC = require("sproutcore");
+var util = require("bespin/util");
 
 /**
  *
@@ -72,7 +73,7 @@ members: {
                 zIndex: 210,
                 cursor: "pointer"
             },
-            onclick: dojo.hitch(this, this.hide)
+            onclick: util.bind(this, this.hide)
         }, dojo.body());
 
         this.nodes.push("closer");
@@ -80,7 +81,7 @@ members: {
         // Load the menu border images
         this.border = [];
         var borderIds = [ "top_lft", "top_mid", "top_rt", "lft", "mid", "rt", "btm_lft", "btm_lftb", "btm_rt", "btm_rtb" ];
-        dojo.forEach(borderIds, function(id) {
+        borderIds.forEach(function(id) {
             this.border[id] = dojo.create("img", {
                 id: "border_" + id,
                 src: "/images/menu/" + id + ".png",

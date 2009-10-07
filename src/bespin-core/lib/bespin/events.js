@@ -21,7 +21,7 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * ***** END LICENSE BLOCK ***** */
- 
+
 // module: bespin/events
 
 var bespin = require("bespin");
@@ -54,15 +54,16 @@ exports.defaultScope = function() {
         return this._defaultScope;
     }
 
+    var self = this;
     var scope = {
         bespin: bespin,
         include: function(file) {
             bespin.get('files').evalFile(bespin.userSettingsProject, file);
         },
         tryTocopyComponent: function(id) {
-            bespin.withComponent(id, dojo.hitch(this, function(component) {
-                this.id = component;
-            }));
+            bespin.withComponent(id, function(component) {
+                self.id = component;
+            });
         },
         require: require,
         publish: bespin.publish,

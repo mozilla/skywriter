@@ -24,6 +24,7 @@
 
 var bespin = require("bespin");
 var SC = require("sproutcore");
+var TokenObject = require("bespin/util/tokenobject").TokenObject;
 
 /**
  * A store of commands
@@ -43,18 +44,15 @@ exports.Store = SC.Object.extend({
      */
     init: function() {
         // If there is a parent, then this is a store for a command with subcommands
-        var parent = this.get('parent');
-        var command = this.get('command');
-
         if (parent) {
             // save the fact that we are a subcommand for this chap
-            this.set('containerCommand', command);
+            this.containerCommand = this.command;
 
             // implicit that it takes something
-            command.set('takes', ['*']);
+            command.takes = ['*'];
 
             // link back to this store
-            command.set('subcommands', this);
+            command.subcommands = this;
 
             // add the sub command to the parent store
             parent.addCommand(command);
@@ -90,7 +88,7 @@ exports.Store = SC.Object.extend({
 
         // Cache all the aliases in a store wide list
         if (command.aliases) {
-            dojo.forEach(command.aliases, function(alias) {
+            command.aliases.forEach(function(alias) {
                 this.aliases[alias] = command.name;
             }, this);
         }
@@ -298,14 +296,18 @@ exports.Store = SC.Object.extend({
         var userString = fromUser.join(' ');
 
         if (command.takes['*']) {
-            args = new bespin.util.TokenObject(userString);
+            args = new TokenObject({ input:userString });
             args.rawinput = userString;
 
             args.varargs = args.pieces; // directly grab the token pieces as an array
-        } else if (command.takes && command.takes.order.length < 2) { // One argument, so just return that
+        } else if (command.takes && command.takes.order.length < 2) {
+            // One argument, so just return that
             args = userString;
         } else {
-            args = new bespin.util.TokenObject(userString, { params: command.takes.order.join(' ') });
+            args = new TokenObject({
+                input: userString,
+                options: { params: command.takes.order.join(' ') }
+            });
             args.rawinput = userString;
         }
         return args;
@@ -322,7 +324,7 @@ exports.Store = SC.Object.extend({
             order: takes
         };
 
-        dojo.forEach(takes, function(item) {
+        takes.forEach(function(item) {
             command.takes[item] = {
                 "short": item[0]
             };
@@ -405,12 +407,39 @@ exports.Store = SC.Object.extend({
 /**
  * Add a root command store to the main bespin namespace
  */
-exports.store = new exports.Store();
+exports.command = {
+    store: new bespin.command.Store(),
+
+    executeExtensionCommand: function() {
+        var args = arguments;
+        var self = this;
+        this.load(function(execute) {
+            execute.apply(self, args);
+        });
+    }
+};
+
+/**
+ * Add a command to the root store on pub/sub.
+ * TODO: We're trying to remove pub/sub for actions, so we should explain this
+ */
+bespin.subscribe("extension:loaded:bespin.command", function(ext) {
+    ext.execute = exports.command.executeExtensionCommand;
+    exports.command.store.addCommand(ext);
+});
+
+/**
+ * Remove a command from the root store on pub/sub.
+ * TODO: We're trying to remove pub/sub for actions, so we should explain this
+ */
+bespin.subscribe("extension:removed:bespin.command", function(ext) {
+    exports.command.store.removeCommand(ext);
+});
 
 /**
  * 'help' command for the root store
  */
-exports.store.addCommand({
+exports.command.store.addCommand({
     name: 'help',
     takes: ['search'],
     preview: 'show commands',
@@ -431,32 +460,4 @@ exports.store.addCommand({
         instruction.addOutput(output);
     }
 });
-
-/**
- *
- */
-exports.executeExtensionCommand = function() {
-    var args = arguments;
-    var self = this;
-    this.load(function(execute) {
-        execute.apply(self, args);
-    });
-};
-
-// /**
-//  * Add a command to the root store on pub/sub.
-//  * TODO: We're trying to remove pub/sub for actions, so we should explain this
-//  */
-// bespin.subscribe("extension:loaded:bespin.command", function(ext) {
-//     ext.execute = exports.executeExtensionCommand;
-//     exports.store.addCommand(ext);
-// });
-//
-// /**
-//  * Remove a command from the root store on pub/sub.
-//  * TODO: We're trying to remove pub/sub for actions, so we should explain this
-//  */
-// bespin.subscribe("extension:removed:bespin.command", function(ext) {
-//     exports.store.removeCommand(ext);
-// });
 

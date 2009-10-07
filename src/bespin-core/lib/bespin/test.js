@@ -22,9 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-dojo.provide("bespin.test");
-
-dojo.require("bespin.util.util");
+var util = require("bespin/util/util");
 
 /**
  * Add a 'test' command'
@@ -36,7 +34,7 @@ bespin.command.store.addCommand({
     completeText: 'suite name, or \'all\' to run all tests, or press return to list tests.',
     execute: function(instruction, suite) {
         if (!suite) {
-            if (bespin.util.isEmpty(bespin.test._knownTests)) {
+            if (util.isEmpty(bespin.test._knownTests)) {
                 instruction.addOutput("No test suites registered. See bespin.test.addTests() to add them.");
             } else {
                 var msg = "Available test targets: all";
@@ -72,7 +70,9 @@ dojo.mixin(bespin.test, {
      * @param container Object containing setup|teardown|test* methods
      */
     addTests: function(name, container) {
-        if (name == "all") throw new Error("Test suites can't be called 'all'");
+        if (name == "all") {
+            throw new Error("Test suites can't be called 'all'");
+        }
         this._knownTests[name] = container;
     },
 
@@ -215,34 +215,54 @@ dojo.declare("bespin.test.Assert", null, {
     },
 
     isTrue: function(value, message) {
-        if (!value) this._fail("isTrue", arguments);
+        if (!value) {
+            this._fail("isTrue", arguments);
+        }
     },
     isFalse: function(value, message) {
-        if (value) this._fail("isFalse", arguments);
+        if (value) {
+            this._fail("isFalse", arguments);
+        }
     },
     isNull: function(value, message) {
-        if (value !== null) this._fail("isNull", arguments);
+        if (value !== null) {
+            this._fail("isNull", arguments);
+        }
     },
     isNotNull: function(value, message) {
-        if (value === null) this._fail("isNotNull", arguments);
+        if (value === null) {
+            this._fail("isNotNull", arguments);
+        }
     },
     isUndefined: function(value, message) {
-        if (value !== undefined) this._fail("isUndefined", arguments);
+        if (value !== undefined) {
+            this._fail("isUndefined", arguments);
+        }
     },
     isNotUndefined: function(value, message) {
-        if (value === undefined) this._fail("isNotUndefined", arguments);
+        if (value === undefined) {
+            this._fail("isNotUndefined", arguments);
+        }
     },
     isNaN: function(value, message) {
-        if (!isNaN(value)) this._fail("isNaN", arguments);
+        if (!isNaN(value)) {
+            this._fail("isNaN", arguments);
+        }
     },
     isNotNaN: function(value, message) {
-        if (isNaN(value)) this. _fail("isNotNaN", arguments);
+        if (isNaN(value)) {
+            this. _fail("isNotNaN", arguments);
+        }
     },
     isEqual: function(expected, actual, message) {
-        if (!this._isEqual(expected, actual)) this._fail("isEqual", arguments);
+        if (!this._isEqual(expected, actual)) {
+            this._fail("isEqual", arguments);
+        }
     },
     isNotEqual: function(expected, actual, message) {
-        if (this._isEqual(expected, actual)) this._fail("isNotEqual", arguments);
+        if (this._isEqual(expected, actual)) {
+            this._fail("isNotEqual", arguments);
+        }
     },
     fail: function(message) {
         this._fail("fail", arguments);
@@ -428,7 +448,9 @@ dojo.declare("bespin.test.Assert", null, {
         var reply = "(";
         if (args != null) {
             for (var i = 0; i < args.length; i++) {
-                if (i != 0) reply += ", ";
+                if (i != 0) {
+                    reply += ", ";
+                }
                 reply += dojo.toJson(args[i]);
             }
         }
@@ -436,9 +458,13 @@ dojo.declare("bespin.test.Assert", null, {
         return reply;
     },
     _isEqual: function(expected, actual, depth) {
-        if (!depth) depth = 0;
+        if (!depth) {
+            depth = 0;
+        }
         // Rather than failing we assume that it works!
-        if (depth > 10) return true;
+        if (depth > 10) {
+            return true;
+        }
 
         if (expected == null) {
             if (actual != null) {
