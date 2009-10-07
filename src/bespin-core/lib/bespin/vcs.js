@@ -941,7 +941,7 @@ dojo.extend(bespin.client.Server, {
      */
     vcs: function(project, command, instruction, opts) {
         var url = '/vcs/command/' + project + '/';
-        this.requestDisconnected('POST', url, dojo.toJson(command), instruction, opts);
+        this.requestDisconnected('POST', url, JSON.stringify(command), instruction, opts);
     },
 
     /**

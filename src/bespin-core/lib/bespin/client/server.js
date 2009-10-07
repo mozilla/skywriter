@@ -722,7 +722,7 @@ exports.Server = SC.Object.extend({
      */
     fileTemplate: function(project, path, templateOptions, opts) {
         var url = util.path.combine('/file/template', project, path);
-        this.request('PUT', url, dojo.toJson(templateOptions), opts || {});
+        this.request('PUT', url, JSON.stringify(templateOptions), opts || {});
     },
 
     /**
@@ -733,7 +733,7 @@ exports.Server = SC.Object.extend({
      */
     projectTemplate: function(project, templateOptions, opts) {
         var url = util.path.combine('/project/template/', project, "");
-        this.request('POST', url, dojo.toJson(templateOptions), opts || {});
+        this.request('POST', url, JSON.stringify(templateOptions), opts || {});
     },
 
     lost: function(values, opts) {

@@ -308,7 +308,7 @@ var ShareNode = SC.Object.extend({
     getMetaData: function() {
         var cursor = this.captureSimpleCursor();
         var data = { c: { s: cursor.startOffset, e: cursor.endOffset } };
-        return dojo.toJson(data);
+        return JSON.stringify(data);
     },
 
     /**

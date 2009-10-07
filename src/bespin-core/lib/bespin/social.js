@@ -69,7 +69,7 @@ exports.toArgArray = function(args) {
 /**
  * Add a 'follow' command that gets and adds to out list of our followers
  */
-  
+
 command.store.addCommand({
     name: 'follow',
     takes: ['username ...'],
@@ -123,7 +123,7 @@ command.store.addCommand({
  */
 dojo.extend(server, {
     follow: function(usernames, opts) {
-        this.request('POST', '/network/follow/', dojo.toJson(usernames), opts);
+        this.request('POST', '/network/follow/', JSON.stringify(usernames), opts);
     },
 
     followers: function(opts) {
@@ -204,7 +204,7 @@ command.store.addCommand({
  */
 dojo.extend(server, {
     unfollow: function(users, opts) {
-        this.request('POST', '/network/unfollow/', dojo.toJson(users), opts);
+        this.request('POST', '/network/unfollow/', JSON.stringify(users), opts);
     }
 });
 
@@ -221,14 +221,14 @@ if (!exports.group) {
  * Command store for the group commands
  * (which are subcommands of the main 'group' command)
  */
- 
+
 exports.group.commands = command.Store.create({
     name: 'group',
     preview: 'Collect the people you follow into groups, and display the existing groups',
     completeText: 'subcommands: add, remove, list, help',
     subcommanddefault: 'help'
 });
- 
+
 // exports.group.commands = new bespin.command.Store(bespin.command.store, {
 //     name: 'group',
 //     preview: 'Collect the people you follow into groups, and display the existing groups',
@@ -428,7 +428,7 @@ dojo.extend(server, {
      * Get a list of the users the current user is following
      */
     groupRemove: function(group, users, opts) {
-        this.request('POST', '/group/remove/' + group + '/', dojo.toJson(users), opts);
+        this.request('POST', '/group/remove/' + group + '/', JSON.stringify(users), opts);
     },
 
     /**
@@ -442,7 +442,7 @@ dojo.extend(server, {
      * Get a list of the users the current user is following
      */
     groupAdd: function(group, users, opts) {
-        this.request('POST', '/group/add/' + group + '/', dojo.toJson(users), opts);
+        this.request('POST', '/group/add/' + group + '/', JSON.stringify(users), opts);
     }
 });
 
@@ -678,7 +678,7 @@ dojo.extend(server, {
      * Add a member to the sharing list for a project
      */
     shareAdd: function(project, member, options, opts) {
-        this.request('POST', '/share/add/' + project + '/' + member + '/', dojo.toJson(options), opts);
+        this.request('POST', '/share/add/' + project + '/' + member + '/', JSON.stringify(options), opts);
     }
 });
 

@@ -48,7 +48,10 @@ exports.Proxy = SC.Object.extend({
 
     forward: function(topic, event) {
         var self = this;
-        var url = "/event/forward/?queue=" + self.queue + "&topic=" + encodeURIComponent(topic) + "&event=" + encodeURIComponent(dojo.toJson(event));
+        var eventJson = JSON.stringify(event);
+        var url = "/event/forward/?queue=" + self.queue +
+            "&topic=" + encodeURIComponent(topic) +
+            "&event=" + encodeURIComponent(eventJson);
         this.server.request('GET', url, null, {
             log: 'Event ' + topic + " forwarded."
         });
@@ -56,8 +59,7 @@ exports.Proxy = SC.Object.extend({
 
     bind: function() {
         var self = this;
-        var url = "/event/bind/";
-        this.server.request('GET', url, null, {
+        this.server.request('GET', "/event/bind/", null, {
             evalJSON: true,
             onSuccess: function(info) {
                 self.queue = info.queue;

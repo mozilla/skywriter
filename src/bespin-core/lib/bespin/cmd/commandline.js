@@ -927,7 +927,7 @@ members: {
      * A string version of this Instruction suitable for serialization
      */
     toString: function() {
-        return dojo.toJson({
+        return JSON.stringify({
             typed: this.typed,
             output: this.output,
             start: this.start ? this.start.getTime() : -1,
@@ -1230,7 +1230,7 @@ members: {
     },
 
     save: function(instructions) {
-        var data = dojo.toJson(instructions);
+        var data = JSON.stringify(instructions);
         if (window.globalStorage) {
             globalStorage[location.hostname].history = data;
         }

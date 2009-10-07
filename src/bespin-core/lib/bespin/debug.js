@@ -364,7 +364,7 @@ members: {
         // save breakpoints back to server asynchronously
         bespin.get('files').saveFile(bespin.userSettingsProject, {
             name: "breakpoints",
-            content: dojo.toJson(self.breakpoints),
+            content: JSON.stringify(self.breakpoints),
             timestamp: new Date().getTime()
         });
     }

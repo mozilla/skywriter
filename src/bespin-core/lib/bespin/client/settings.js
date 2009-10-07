@@ -130,7 +130,7 @@ exports.Core = SC.Object.extend({
     },
 
     setObject: function(key, value) {
-        this.set(key, dojo.toJson(value));
+        this.set(key, JSON.stringify(value));
     },
 
     get: function(key) {
@@ -227,14 +227,14 @@ exports.Cookie = SC.Object.extend({
                 'autocomplete': 'off',
                 'collaborate': 'off'
             };
-            dojo.cookie("settings", dojo.toJson(this.settings), this.cookieSettings);
+            dojo.cookie("settings", JSON.stringify(this.settings), this.cookieSettings);
         }
         bespin.publish("settings:loaded");
     },
 
     set: function(key, value) {
         this.settings[key] = value;
-        dojo.cookie("settings", dojo.toJson(this.settings), this.cookieSettings);
+        dojo.cookie("settings", JSON.stringify(this.settings), this.cookieSettings);
     },
 
     get: function(key) {
@@ -243,7 +243,7 @@ exports.Cookie = SC.Object.extend({
 
     unset: function(key) {
         delete this.settings[key];
-        dojo.cookie("settings", dojo.toJson(this.settings), this.cookieSettings);
+        dojo.cookie("settings", JSON.stringify(this.settings), this.cookieSettings);
     }
 });
 

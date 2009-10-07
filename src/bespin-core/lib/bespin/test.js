@@ -426,7 +426,7 @@ dojo.declare("bespin.test.Assert", null, {
     _addFunctionMessage: function(type, args, reply) {
         var message = type + this._argsToString(args);
         if (reply) {
-            message += " = " + dojo.toJson(reply);
+            message += " = " + JSON.stringify(reply);
         }
         this._addMessage(message);
     },
@@ -451,7 +451,7 @@ dojo.declare("bespin.test.Assert", null, {
                 if (i != 0) {
                     reply += ", ";
                 }
-                reply += dojo.toJson(args[i]);
+                reply += JSON.stringify(args[i]);
             }
         }
         reply += ")";
@@ -468,7 +468,7 @@ dojo.declare("bespin.test.Assert", null, {
 
         if (expected == null) {
             if (actual != null) {
-                console.log("expected: null, actual non-null: " + dojo.toJson(actual));
+                console.log("expected: null, actual non-null: " + JSON.stringify(actual));
                 return false;
             }
             return true;
@@ -476,7 +476,7 @@ dojo.declare("bespin.test.Assert", null, {
 
         if (typeof(expected) == "number" && isNaN(expected)) {
             if (!(typeof(actual) == "number" && isNaN(actual))) {
-                console.log("expected: NaN, actual non-NaN: " + dojo.toJson(actual));
+                console.log("expected: NaN, actual non-NaN: " + JSON.stringify(actual));
                 return false;
             }
             return true;
@@ -484,7 +484,7 @@ dojo.declare("bespin.test.Assert", null, {
 
         if (actual == null) {
             if (expected != null) {
-                console.log("actual: null, expected non-null: " + dojo.toJson(expected));
+                console.log("actual: null, expected non-null: " + JSON.stringify(expected));
                 return false;
             }
             return true; // we wont get here of course ...

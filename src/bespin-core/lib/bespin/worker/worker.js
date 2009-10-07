@@ -248,7 +248,7 @@ exports.WorkerFacade = SC.Object.extend({
                                 event: event
                             };
                             //console.log("To-Worker-Event: " + name + index)
-                            worker.postMessage(USE_GEARS ? ret : dojo.toJson(ret));
+                            worker.postMessage(USE_GEARS ? ret : JSON.stringify(ret));
                         });
                     })();
                 }
@@ -299,7 +299,7 @@ exports.WorkerFacade = SC.Object.extend({
                                  };
                                  if (!USE_GEARS) {
                                       // here we should really test whether our postMessage supports structured data. Safari 4 does not
-                                     data = dojo.toJson(data);
+                                     data = JSON.stringify(data);
                                  }
                                  // send the method to a worker
                                  // console.log("Contacting worker "+data)
@@ -390,7 +390,7 @@ exports.WorkerFacade = SC.Object.extend({
                 }
                 // everything else is turned into JSON
                 else {
-                    src = dojo.toJson(val);
+                    src = JSON.stringify(val);
                 }
 
                 // Make sure to encode the property so nobody can insert arbitrary string into our JS

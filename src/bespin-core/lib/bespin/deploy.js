@@ -292,7 +292,7 @@ dojo.extend(client.Server, {
         opts = opts || {};
         opts.evalJSON = true;
         var url = "/project/deploy/" + encodeURI(project) + "/setup";
-        data = dojo.toJson(data);
+        data = JSON.stringify(data);
         this.request('PUT', url, data, opts);
     },
 
@@ -300,7 +300,7 @@ dojo.extend(client.Server, {
         opts = opts || {};
         opts.evalJSON = true;
         var url = "/project/deploy/" + encodeURI(project) + "/setup";
-        data = dojo.toJson(data);
+        data = JSON.stringify(data);
         this.request('POST', url, data, opts);
     },
 
@@ -308,7 +308,7 @@ dojo.extend(client.Server, {
         opts = opts || {};
         opts.evalJSON = true;
         var url = "/project/deploy/" + encodeURI(project) + "/";
-        data = dojo.toJson(data);
+        data = JSON.stringify(data);
         this.requestDisconnected('POST', url, data, instruction, opts);
     }
 });

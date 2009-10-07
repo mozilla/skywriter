@@ -2375,7 +2375,7 @@ exports.API = SC.Object.extend({
         filename = filename || bespin.get('editSession').path; // default to what you have
 
         // saves the current state of the editor to a cookie
-        dojo.cookie('viewData_' + project + '_' + filename.split('/').join('_'), dojo.toJson(bespin.get('editor').getCurrentView()), { expires: 7 });
+        dojo.cookie('viewData_' + project + '_' + filename.split('/').join('_'), JSON.stringify(bespin.get('editor').getCurrentView()), { expires: 7 });
 
         var file = {
             name: filename,
