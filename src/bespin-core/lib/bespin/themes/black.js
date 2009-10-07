@@ -89,5 +89,5 @@ exports.black = {
  * Black Zebra Theme
  */
 exports.blackzebra = {};
-dojo.mixin(exports.blackzebra, exports.black);
+SC.mixin(exports.blackzebra, exports.black);
 exports.blackzebra.zebraStripeColor = '#111111';

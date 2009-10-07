@@ -109,5 +109,5 @@ exports.pastels = {
  * Pastels Zebra Theme
  */
 exports.pastelszebra = {};
-dojo.mixin(exports.pastelszebra, exports.pastels);
+SC.mixin(exports.pastelszebra, exports.pastels);
 exports.pastelszebra.zebraStripeColor = '#242020';

@@ -24,7 +24,7 @@
 
 var bespin = require("bespin");
 
-dojo.mixin(exports, {
+SC.mixin(exports, {
     /**
      * Center Popup
      */

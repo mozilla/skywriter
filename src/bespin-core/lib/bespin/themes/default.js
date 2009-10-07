@@ -118,7 +118,7 @@ exports.coffee = {
 exports.coffeezebra = {
 };
 
-dojo.mixin(exports.coffeezebra, exports.coffee);
+SC.mixin(exports.coffeezebra, exports.coffee);
 exports.coffeezebra.zebraStripeColor = '#FFFFFF';
 
 /** Setup the default */

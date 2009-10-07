@@ -1,6 +1,6 @@
 // module: bespin
 
-dojo.mixin(exports, {
+SC.mixin(exports, {
     // BEGIN VERSION BLOCK
     /** The core version of the Bespin system */
     versionNumber: 'tip',
@@ -182,7 +182,7 @@ dojo.mixin(exports, {
         piemenu: function(callback, context) {
             exports.plugins.loadOne("piemenu", function(piemenumod) {
                 exports.register("piemenu", new piemenumod.Window());
-                
+
                 // the pie menu doesn't animate properly
                 // without restoring control to the UI temporarily
                 setTimeout(function() {
@@ -193,7 +193,7 @@ dojo.mixin(exports, {
         },
         commandLine: function(callback, context) {
             exports.plugins.loadOne("commandLine", function(commandline) {
-                var commandLine = exports.register("commandLine", 
+                var commandLine = exports.register("commandLine",
                     new commandline.Interface('command', exports.command.store)
                 );
                 callback.call(context, commandLine);
@@ -201,7 +201,7 @@ dojo.mixin(exports, {
         },
         debugbar: function(callback, context) {
             exports.plugins.loadOne("debugbar", function(debug) {
-                var commandLine = exports.register("debugbar", 
+                var commandLine = exports.register("debugbar",
                     new debug.EvalCommandLineInterface('debugbar_command', null, {
                         idPrefix: "debugbar_",
                         parentElement: dojo.byId("debugbar")
@@ -212,7 +212,7 @@ dojo.mixin(exports, {
         },
         breakpoints: function(callback, context) {
             exports.plugins.loadOne("breakpoints", function(BreakpointManager) {
-                var breakpoints = exports.register("breakpoints", 
+                var breakpoints = exports.register("breakpoints",
                     new BreakpointManager()
                 );
                 callback.call(context, breakpoints);

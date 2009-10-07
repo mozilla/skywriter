@@ -8,7 +8,7 @@
 
 var bespin = require("bespin");
 
-dojo.mixin(exports, {
+SC.mixin(exports, {
     wheel: function(event) {
         var delta = 0;
         if (!event) {
