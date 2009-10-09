@@ -23,6 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
+var util = require("bespin/util");
 var command = require("bespin/command");
 var utils = require("bespin/editor/utils");
 
@@ -230,7 +231,7 @@ command.store.addCommand({
         }
     },
     execute: function(instruction, type) {
-        if (dojo.isFunction(this.uses[type])) {
+        if (util.isFunction(this.uses[type])) {
             this.uses[type]();
             instruction.addOutput("Added code for " + type + ".<br>Please check the results carefully.");
         } else {

@@ -793,7 +793,7 @@ exports.EditSession = SC.Object.extend({
                     // clash with other bits of client side read-only management
                     self.editor.setReadOnly(false);
 
-                    if (dojo.isFunction(onSuccess)) {
+                    if (util.isFunction(onSuccess)) {
                         onSuccess({
                             name: self.path,
                             timestamp: new Date().getTime()

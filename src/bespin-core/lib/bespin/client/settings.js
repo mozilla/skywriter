@@ -170,8 +170,8 @@ exports.Core = SC.Object.extend({
     publishValues: function() {
         // Goes deep into internals which is naughty!
         // In this case, going into the Dojo saved "topics" that you subscribe/publish too
+        var settingsTopicBase = "bespin:settings:set:";
         for (var topic in dojo._topics) {
-            var settingsTopicBase = "bespin:settings:set:";
             if (topic.indexOf(settingsTopicBase) == 0) {
                 var settingKey = topic.substring(settingsTopicBase.length);
                 bespin.publish("settings:set:" + settingKey, {

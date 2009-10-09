@@ -24,6 +24,7 @@
 
 var SC = require("sproutcore");
 var bespin = require("bespin");
+var util = require("bespin/util");
 var utils = require("bespin/editor/utils");
 
 /**
@@ -154,7 +155,7 @@ exports.DocumentModel = SC.Object.extend({
     },
 
     setRowArray: function(rowIndex, row) {  // invalidate
-        if (!dojo.isArray(row)) {
+        if (!Array.isArray(row)) {
             row = row.split('');
         }
         this.rows[rowIndex] = row;
@@ -581,13 +582,15 @@ exports.DocumentModel = SC.Object.extend({
 
     findBefore: function(row, col, comparator) {
         var line = this.getRowArray(row);
-        if (!dojo.isFunction(comparator)){comparator = function(letter) { // default to non alpha
-            if (letter.charAt(0) == ' ') {
-                return true;
-            }
-            var letterCode = letter.charCodeAt(0);
-            return (letterCode < 48) || (letterCode > 122); // alpha only
-        };}
+        if (!util.isFunction(comparator)) {
+            comparator = function(letter) { // default to non alpha
+                if (letter.charAt(0) == ' ') {
+                    return true;
+                }
+                var letterCode = letter.charCodeAt(0);
+                return (letterCode < 48) || (letterCode > 122); // alpha only
+            };
+        }
 
         //validate col to prevent endless loop
         if (col >= line.length){col = Math.max(line.length - 1, 0); // what about 0 length lines?
@@ -612,13 +615,15 @@ exports.DocumentModel = SC.Object.extend({
 
     findAfter: function(row, col, comparator) {
         var line = this.getRowArray(row);
-        if (!dojo.isFunction(comparator)){comparator = function(letter) { // default to non alpha
-            if (letter.charAt(0) == ' ') {
-                return true;
-            }
-            var letterCode = letter.charCodeAt(0);
-            return (letterCode < 48) || (letterCode > 122); // alpha only
-        };}
+        if (!util.isFunction(comparator)) {
+            comparator = function(letter) { // default to non alpha
+                if (letter.charAt(0) == ' ') {
+                    return true;
+                }
+                var letterCode = letter.charCodeAt(0);
+                return (letterCode < 48) || (letterCode > 122); // alpha only
+            };
+        }
 
         while (col < line.length) {
             col++;

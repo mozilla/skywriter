@@ -753,7 +753,7 @@ members: {
         // get the data for the lists
         for (x = sameLevel; x < newPath.length; x++) {
             var selected = this.tree.scrollPanes[x].view.selected;
-            if (selected && selected.contents && dojo.isArray(selected.contents)) {
+            if (selected && selected.contents && Array.isArray(selected.contents)) {
                 // restore filelist from local memory (the filelists was ones fetched)
                 if (x > this.tree.scrollPanes.length - 1) {
                     this.tree.showChildren(null, selected.contents);

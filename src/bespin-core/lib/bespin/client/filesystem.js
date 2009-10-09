@@ -23,6 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
+var util = require("bespin/util");
 var defaultScope = require("bespin/events").defaultScope;
 var directory = require("bespin/util/path").directory;
 var SC = require("sproutcore");
@@ -65,7 +66,7 @@ exports.FileSystem = SC.Object.extend({
                 }
             },
             elseFailed: function() {
-                if (dojo.isFunction(onFailure)) {
+                if (util.isFunction(onFailure)) {
                     onFailure({ responseText:'The file ' + path + ' already exists my friend.' });
                 }
                 bespin.get("commandLine").addErrorOutput('The file ' + path + ' already exists my friend.');
@@ -169,7 +170,7 @@ exports.FileSystem = SC.Object.extend({
             onSuccess: function() {
                 console.log("File saved: " + project + " " + file.name);
                 bespin.publish("file:saved", { project: project, path: file.name });
-                if (dojo.isFunction(onSuccess)) {
+                if (util.isFunction(onSuccess)) {
                     onSuccess();
                 }
             },

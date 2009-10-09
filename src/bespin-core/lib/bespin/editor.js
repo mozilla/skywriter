@@ -24,10 +24,12 @@
 
 // module: bespin/editor
 
+var SC = require("sproutcore");
 var bespin = require("bespin");
 var clipboard = require("bespin/editor/clipboard");
 var util = require("bespin/util");
 var keys = require("bespin/util/keys");
+var mousewheelevent = require("bespin/util/mousewheelevent");
 var events = require("bespin/events");
 var syntax = require("bespin/syntax");
 var utils = require("bespin/editor/utils");
@@ -37,7 +39,6 @@ var model = require("bespin/editor/model");
 var history = require("bespin/editor/history");
 var settings = require("bespin/client/settings");
 var canvas = require("bespin/util/canvas");
-var SC = require("sproutcore");
 var model = require("bespin/editor/model");
 
 /**
@@ -118,9 +119,9 @@ exports.Scrollbar = SC.Object.extend({
             return;
         }
 
-        var wheel = util.mousewheelevent.wheel(e);
+        var wheel = mousewheelevent.wheel(e);
         //console.log("Wheel speed: ", wheel);
-        var axis = util.mousewheelevent.axis(e);
+        var axis = mousewheelevent.axis(e);
 
         if (this.orientation == this.VERTICAL && axis == this.VERTICAL) {
             this.setValue(this.value + (wheel * this.ui.lineHeight));
@@ -324,7 +325,7 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
 
         var hasAction = false;
 
-        if (dojo.isFunction(action)) {
+        if (util.isFunction(action)) {
             hasAction = true;
             try {
                 action(args);
@@ -2391,7 +2392,7 @@ exports.API = SC.Object.extend({
 
             bespin.publish("editor:clean");
 
-            if (dojo.isFunction(onSuccess)) {
+            if (util.isFunction(onSuccess)) {
                 onSuccess();
             }
         };
@@ -2400,7 +2401,7 @@ exports.API = SC.Object.extend({
             var commandLine = bespin.get("commandLine");
             if (commandLine){commandLine.showHint('Save failed: ' + xhr.responseText);}
 
-            if (dojo.isFunction(onFailure)) {
+            if (util.isFunction(onFailure)) {
                 onFailure();
             }
         };

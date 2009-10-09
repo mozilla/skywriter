@@ -23,6 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
+var util = require("bespin/util");
 var keys = require("bespin/util/keys");
 var SC = require("sproutcore");
 
@@ -307,7 +308,7 @@ members:
         }
         this.currentSlice = slice;
 
-        if (dojo.isFunction(this.currentSlice.preAnimate)) {
+        if (util.isFunction(this.currentSlice.preAnimate)) {
             this.currentSlice.preAnimate();
         }
 

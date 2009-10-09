@@ -44,7 +44,7 @@ exports.Server = SC.Object.extend({
      * syntax problem to do something other than swallow the error
      */
     _callCallback: function(options, functionName, args) {
-        if (dojo.isFunction(options[functionName])) {
+        if (util.isFunction(options[functionName])) {
             try {
                 options[functionName].apply(null, args);
                 return true;
@@ -57,7 +57,7 @@ exports.Server = SC.Object.extend({
                 console.groupEnd();
 
                 // If got an exception on success it's really a failure
-                if (functionName == "onSuccess" && dojo.isFunction(options.onFailure)) {
+                if (functionName == "onSuccess" && util.isFunction(options.onFailure)) {
                     try {
                         options.onFailure({ responseText: ex.toString() });
                     } catch (ex2) {
@@ -227,7 +227,7 @@ exports.Server = SC.Object.extend({
         // need for a partial error system, and the question about how we
         // treat messages that errored half way through
         if (message.asyncDone) {
-            if (dojo.isArray(job.partials)) {
+            if (Array.isArray(job.partials)) {
                 // We're done, and we've got outstanding messages
                 // that we need to pass on. We aggregate the
                 // messages and call originalOnSuccess
@@ -240,7 +240,7 @@ exports.Server = SC.Object.extend({
             }
         }
         else {
-            if (dojo.isFunction(job.options.onPartial)) {
+            if (util.isFunction(job.options.onPartial)) {
                 // In progress, and we have somewhere to send the
                 // messages that we've just been sent
                 job.options.onPartial(message.output);
@@ -372,7 +372,7 @@ exports.Server = SC.Object.extend({
             evalJSON: true,
             log: "Listing files in: " + url
         };
-        if (dojo.isFunction(onFailure)) {
+        if (util.isFunction(onFailure)) {
             opts.onFailure = onFailure;
         }
 
@@ -394,7 +394,7 @@ exports.Server = SC.Object.extend({
             evalJSON: true,
             log: "Listing all files in: " + url
         };
-        if (dojo.isFunction(onFailure)) {
+        if (util.isFunction(onFailure)) {
             opts.onFailure = onFailure;
         }
 
@@ -445,7 +445,7 @@ exports.Server = SC.Object.extend({
         path = path || '';
         var url = util.path.combine('/file/at', project, path);
         var opts = { onSuccess: onSuccess };
-        if (dojo.isFunction(onFailure)) {
+        if (util.isFunction(onFailure)) {
             opts.onFailure = onFailure;
         }
 
@@ -464,7 +464,7 @@ exports.Server = SC.Object.extend({
         path = path || '';
         var url = util.path.combine('/file/at', project, path);
         var opts = { onSuccess: onSuccess };
-        if (dojo.isFunction(onFailure)) {
+        if (util.isFunction(onFailure)) {
             opts.onFailure = onFailure;
         }
 
@@ -485,12 +485,12 @@ exports.Server = SC.Object.extend({
 
         var url = util.path.combineAsDirectory('/file/at', project, (path || ''));
         var opts = {};
-        if (dojo.isFunction(onSuccess)) {
+        if (util.isFunction(onSuccess)) {
             opts.onSuccess = onSuccess;
         } else {
             opts.log = "Made a directory: [project=" + project + ", path=" + path + "]";
         }
-        if (dojo.isFunction(onFailure)) {
+        if (util.isFunction(onFailure)) {
             opts.onFailure = onFailure;
         }
 
@@ -514,12 +514,12 @@ exports.Server = SC.Object.extend({
 
         var url = util.path.combineAsDirectory('/file/at', project, path);
         var opts = {};
-        if (dojo.isFunction(onSuccess)) {
+        if (util.isFunction(onSuccess)) {
             opts.onSuccess = onSuccess;
         } else {
             opts.log = "Removed directory: [project=" + project + ", path=" + path + "]";
         }
-        if (dojo.isFunction(onFailure)) {
+        if (util.isFunction(onFailure)) {
             opts.onFailure = onFailure;
         }
 

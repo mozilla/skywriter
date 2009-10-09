@@ -288,7 +288,7 @@ exports.Assert.prototype.command = function(type, expect) {
 
     var self = this;
     var check = function(output) {
-        if (dojo.isArray(expect)) {
+        if (Array.isArray(expect)) {
             expect.forEach(function(expected) {
                 if (output.indexOf(expected) == -1) {
                     self._fail("command", [ type, expected ], output);

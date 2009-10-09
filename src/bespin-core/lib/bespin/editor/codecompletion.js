@@ -23,6 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
+var util = require("bespin/util");
 var worker = require("bespin/worker");
 var codecompletion = require("bespin/editor/codecompletion");
 var SC = require("sproutcore");
@@ -129,22 +130,27 @@ exports.Suggester = SC.Object.extend({
     }
 });
 
-// put facade into a worker
+/**
+ * Put facade into a worker
+ */
 var facade = new worker.WorkerFacade(new codecompletion.Suggester());
 if (!facade.__hasWorkers__) {
     facade.initialize();
 }
-var subscription;
 
 bespin.subscribe("codecomplete:showsuggestion", function(e) {
     bespin.get("commandLine").showHint("Code Completions<br><br>" + e.candidates.join("<br>"));
 });
 
-// for now we do suggestions upon every doc change
-// could change this to be more unobtrusive
+var changeSub;
+
+/**
+ * For now we do suggestions upon every doc change
+ * TODO: Change this to be more unobtrusive
+ */
 bespin.subscribe("settings:set:codecomplete", function(data) {
     if (bespin.get("settings").isOn(data.value)) {
-        subscription = bespin.subscribe("editor:document:changed", function() {
+        var onChange = util.rateLimit(400, null, function() {
             var editor = bespin.get("editor");
             var pos = editor.getCursorPos();
             var row = editor.model.getRowArray(pos.row);
@@ -153,8 +159,9 @@ bespin.subscribe("settings:set:codecomplete", function(data) {
                 cursorPos: pos,
                 row: row
             });
-        }, 400);
+        });
+        changeSub = bespin.subscribe("editor:document:changed", onChange);
     } else {
-        bespin.unsubscribe(subscription);
+        bespin.unsubscribe(changeSub);
     }
 });

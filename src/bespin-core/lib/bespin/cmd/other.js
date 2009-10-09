@@ -23,6 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
+var util = require("bespin/util");
 var command = require("bespin/command");
 
 /**
@@ -45,12 +46,12 @@ command.store.addCommand({
         var type = '';
         var x;
 
-        if (dojo.isFunction(result)) {
+        if (util.isFunction(result)) {
             // converts the function to a well formated string
             msg = (result + '').replace(/\n/g, '<br>').replace(/ /g, '&#160');
             type = 'function';
         } else if (dojo.isObject(result)) {
-            if (dojo.isArray(result)) {
+            if (Array.isArray(result)) {
                 type = 'array';
             } else {
                 type = 'object';
@@ -60,7 +61,7 @@ command.store.addCommand({
             var value;
 
             for (x in result) {
-                if (dojo.isFunction(result[x])) {
+                if (util.isFunction(result[x])) {
                     value = "[function]";
                 } else if (dojo.isObject(result[x])) {
                     value = "[object]";

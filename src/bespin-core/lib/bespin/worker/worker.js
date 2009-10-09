@@ -186,8 +186,8 @@ exports.WorkerFacade = SC.Object.extend({
         var self = this;
         var workers = [];
 
-        // The standard callback choose a callback for the particular method using
-        // the callIndex that is set upon sending the method
+        // The standard callback choose a callback for the particular method
+        // using the callIndex that is set upon sending the method
         var cb = function(event) {
             var data  = event.data;
             if (typeof data == "string") {
@@ -221,11 +221,10 @@ exports.WorkerFacade = SC.Object.extend({
                 var message = event.data;
                 if (typeof message == "string") {
                     if (message.indexOf("log=") == 0) {
-                        console.log("From Worker: " + message.substr(4)); // dont comment this out :)
+                        // don't comment this out :)
+                        console.log("From Worker: " + message.substr(4));
                         return
-                    }
-                    else
-                    if (message.indexOf("__IMPORT_SCRIPT__") == 0) {
+                    } else if (message.indexOf("__IMPORT_SCRIPT__") == 0) {
                         var json = message.substr("__IMPORT_SCRIPT__".length);
                         var paras = JSON.parse(json);
                         loadScript.apply(this, paras);
@@ -278,7 +277,7 @@ exports.WorkerFacade = SC.Object.extend({
         var facade = this;
 
         for (var prop in obj) {
-            // supposedly we dont need "private" methods. Delete if assumption is wrong
+            // supposedly we don't need "private" methods. Delete if assumption is wrong
             if (prop.charAt(0) != "_") {
                 // make a lexical scope
                 (function() {
@@ -298,15 +297,17 @@ exports.WorkerFacade = SC.Object.extend({
                                      paras:  paras
                                  };
                                  if (!USE_GEARS) {
-                                      // here we should really test whether our postMessage supports structured data. Safari 4 does not
+                                     // here we should really test whether our
+                                     // postMessage supports structured data.
+                                     // Safari 4 does not
                                      data = JSON.stringify(data);
                                  }
                                  // send the method to a worker
                                  // console.log("Contacting worker "+data)
                                  this.__getWorker__().postMessage(data);
                              } else {
-                                 // No worker implementation available. Use an async call using
-                                 // setTimeout instead
+                                 // No worker implementation available. Use an
+                                 // async call using setTimeout instead
                                  var self = this;
                                  window.setTimeout(function() {
                                      var retVal = self.__obj__[method].apply(self.__obj__, paras);
@@ -323,7 +324,8 @@ exports.WorkerFacade = SC.Object.extend({
                              // paras is an array of extra paras for the callback
                              return {
                                  and: function(context, mutex, paras, callback) {
-                                     var func = arguments[arguments.length - 1]; // always the last para
+                                     // always the last para
+                                     var func = arguments[arguments.length - 1];
                                      if (mutex instanceof bespin.worker.Mutex) {
                                          mutex.start();
                                          func = function() {
@@ -368,21 +370,26 @@ exports.WorkerFacade = SC.Object.extend({
     serializeToPortableSource: function(obj) {
         var self   = this;
 
-        var isArray = dojo.isArray(obj);
+        var isArray = Array.isArray(obj);
 
         var source = isArray ? "[\n" : "{\n";
 
         for (var prop in obj) {
             // console.log("Serializing "+prop);
-            (function() { // lexical scope
-                if (prop == "_constructor") { // workaround for unserializable method in dojo
-                    return;                  // maybe replace with test for [native code] in string
+            // lexical scope
+            (function() {
+                // workaround for unserializable method in dojo
+                if (prop == "_constructor") {
+                    // maybe replace with test for [native code] in string
+                    return;
                 }
                 var val    = obj[prop];
                 var method = prop;
                 var src = "";
-                if (typeof val == "function") { // serialize function to their string representation
-                    src = val.toString();      // toSource() might be better but toString insert nice line breaks
+                // serialize function to their string representation
+                if (typeof val == "function") {
+                    // toSource() might be better but toString insert nice line breaks
+                    src = val.toString();
                 }
                 // if val is an object that included functions we need to call ourselves recursively
                 else if (val && typeof val == "object" && self.hasFunctions(val)) {

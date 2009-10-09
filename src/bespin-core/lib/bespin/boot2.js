@@ -6,6 +6,8 @@ SC.Object.prototype.sc_super = function super_name() {
     super_name.caller.base.apply(this, super_name.caller.arguments);
 };
 
+require("bespin/globals");
+
 var plugins = require("bespin/plugins");
 var builtins = require("bespin/builtins");
 var bespin = require("bespin");

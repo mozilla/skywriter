@@ -26,7 +26,7 @@ var bespin = require("bespin");
 
 /**
  * While dojo.queryToObject() is mainly for URL query strings,
- * this version allows to specify a seperator character
+ * this version allows to specify a separator character
  */
 exports.queryToObject = function(str, seperator) {
     var ret = {};
@@ -40,7 +40,7 @@ exports.queryToObject = function(str, seperator) {
             if (dojo.isString(ret[name])){
                 ret[name] = [ret[name]];
             }
-            if (dojo.isArray(ret[name])){
+            if (Array.isArray(ret[name])){
                 ret[name].push(val);
             } else {
                 ret[name] = val;
@@ -51,7 +51,62 @@ exports.queryToObject = function(str, seperator) {
 };
 
 /**
- * A la Prototype endsWith(). Takes a regex exclusing the '$' end marker
+ * Holds the count to keep a unique value for setTimeout
+ * @private See rateLimit()
+ */
+var nextRateLimitId = 0;
+
+/**
+ * Holds the timeouts so they can be cleared later
+ * @private See rateLimit()
+ */
+var rateLimitTimeouts = {};
+
+/**
+ * Delay calling some function to check that it's not called again inside a
+ * maxRate. The real function is called after maxRate ms unless the return
+ * value of this function is called before, in which case the clock is restarted
+ */
+exports.rateLimit = function(maxRate, scope, func) {
+    if (maxRate) {
+        var rateLimitId = nextRateLimitId++;
+
+        return function() {
+            if (rateLimitTimeouts[rateLimitId]) {
+                clearTimeout(rateLimitTimeouts[rateLimitId]);
+            }
+
+            rateLimitTimeouts[rateLimitId] = setTimeout(function() {
+                func.apply(scope, arguments);
+                delete rateLimitTimeouts[rateLimitId];
+            }, maxRate);
+        };
+    }
+};
+
+/**
+ * Is the passed object a function?
+ * From dojo.isFunction()
+ */
+exports.isFunction = (function() {
+    var _isFunction = function(it) {
+        var t = typeof it; // must evaluate separately due to bizarre Opera bug. See #8937
+        //Firefox thinks object HTML element is a function, so test for nodeType.
+        return it && (t == "function" || it instanceof Function) && !it.nodeType; // Boolean
+    };
+
+    return dojo.isSafari ?
+        // only slow this down w/ gratuitious casting in Safari (not WebKit)
+        function(/*anything*/ it) {
+            if (typeof it == "function" && it == "[object NodeList]") {
+                return false;
+            }
+            return _isFunction(it); // Boolean
+        } : _isFunction;
+})();
+
+/**
+ * A la Prototype endsWith(). Takes a regex excluding the '$' end marker
  */
 exports.endsWith = function(str, end) {
     return str.match(new RegExp(end + "$"));
@@ -84,7 +139,7 @@ exports.indexOfProperty = function(array, propertyName, item) {
  * A la Prototype last().
  */
 exports.last = function(array) {
-    if (dojo.isArray(array)) {
+    if (Array.isArray(array)) {
         return array[array.length - 1];
     }
 };

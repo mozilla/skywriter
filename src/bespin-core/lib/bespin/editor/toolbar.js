@@ -23,6 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
+var util = require("bespin/util");
 var editor = require("bespin/page/editor");
 var SC = require("sproutcore");
 
@@ -61,11 +62,11 @@ exports.Toolbar = SC.Object.extend({
     },
 
     setup: function(type, el, callback) {
-        if (dojo.isFunction(callback)) {
+        if (util.isFunction(callback)) {
             // add the component first
             this.addComponent(type, callback);
         }
-        if (dojo.isFunction(this.components[type])) {
+        if (util.isFunction(this.components[type])) {
             this.components[type](this, el);
         }
     },

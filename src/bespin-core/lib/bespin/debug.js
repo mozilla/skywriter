@@ -28,6 +28,7 @@
  */
 
 var bespin = require("bespin");
+var util = require("bespin/util");
 var commandline = require("bespin/cmd/commandline");
 
 /**
@@ -350,7 +351,7 @@ members: {
                 self.breakpoints[i].id = this.sequence++;
             }
 
-            if (dojo.isFunction(callback)) {
+            if (util.isFunction(callback)) {
                 callback();
             }
         });

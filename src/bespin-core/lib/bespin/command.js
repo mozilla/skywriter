@@ -73,7 +73,7 @@ exports.Store = SC.Object.extend({
         this.commands[command.name] = command;
 
         // Allow for the default [ ] takes style by expanding it to something bigger
-        if (command.takes && dojo.isArray(command.takes)) {
+        if (command.takes && Array.isArray(command.takes)) {
             command = this.normalizeTakes(command);
         }
 
