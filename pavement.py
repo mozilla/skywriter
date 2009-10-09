@@ -142,3 +142,10 @@ def start(options):
         for key, value in options.server.items())
     call_pavement(options.server_pavement, args + " start")
     
+@task
+def docs(options):
+    """Builds the documentation."""
+    if not path("src/growl").exists():
+        sh("pip install -r requirements.txt")
+    sh("growl.py . _site", cwd="docs")
+    

@@ -12,5 +12,6 @@
 ^src/html/dijit
 ^src/html/th.compressed.js
 ^src/bespin/tmp
+^src/growl
 ^docs/_site
 
