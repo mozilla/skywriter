@@ -50,6 +50,9 @@ exports.Core = SC.Object.extend({
     init: function() {
         this.browserOverrides = {};
         this.fromURL = exports.URL.create();
+
+        // TODO: There is no reason for this even to be a class - all we want
+        // to do is register some subscriptions
         this.customEvents = exports.Events.create({ settings: this });
 
         // Load up the correct settings store

@@ -34,6 +34,7 @@ var cookie = require("bespin/util/cookie");
 var mousewheelevent = require("bespin/util/mousewheelevent");
 
 var clipboard = require("bespin/editor/clipboard");
+var editorEvents = require("bespin/editor/events");
 var events = require("bespin/events");
 var syntax = require("bespin/syntax");
 var utils = require("bespin/editor/utils");
@@ -483,9 +484,10 @@ exports.UI = SC.Object.extend({
         this.selectionHelper = exports.SelectionHelper.create({ editor: this.editor });
         this.actions = actions.Actions.create({ editor: this.editor });
 
-        // these two canvases are used as buffers for the scrollbar images, which are then composited onto the
-        // main code view. we could have saved ourselves some misery by just prerendering slices of the scrollbars and
-        // combining them like sane people, but... meh
+        // these two canvases are used as buffers for the scrollbar images,
+        // which are then composited onto the main code view. we could have
+        // saved ourselves some misery by just prerendering slices of the
+        // scrollbars and combining them like sane people, but... meh
         this.horizontalScrollCanvas = dojo.create("canvas");
         this.verticalScrollCanvas = dojo.create('canvas');
 
@@ -533,7 +535,7 @@ exports.UI = SC.Object.extend({
         });
         this.xscrollbar = xscrollbar;
 
-        var wheelEventName = (!dojo.isMozilla ? "onmousewheel" : "DOMMouseScroll");
+        var wheelEventName = (window.onmousewheel ? "onmousewheel" : "DOMMouseScroll");
 
         gh.push(dojo.connect(window, "mousemove", xscrollbar, "onmousemove"));
         gh.push(dojo.connect(window, "mouseup", xscrollbar, "onmouseup"));
@@ -2079,7 +2081,7 @@ exports.API = SC.Object.extend({
 
         this.editorKeyListener = exports.DefaultEditorKeyListener.create({ editor: this });
         this.historyManager = history.HistoryManager.create({ editor: this });
-        //this.customEvents = events.Events.create({ editor: this });
+        editorEvents.subscribe();
 
         this.ui.installKeyListener(this.editorKeyListener);
 
@@ -2093,7 +2095,7 @@ exports.API = SC.Object.extend({
             self.setFocus(true);
         });
 
-        // bespin.editor.clipboard.setup(this);
+        clipboard.setup(this);
 
         this.paint();
 
@@ -2257,7 +2259,7 @@ exports.API = SC.Object.extend({
      */
     dispose: function() {
         // TODO: Isn't bespin.editor == this?
-        //bespin.editor.clipboard.uninstall();
+        // clipboard.uninstall();
         this.ui.dispose();
     },
 

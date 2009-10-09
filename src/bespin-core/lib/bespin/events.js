@@ -22,17 +22,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// module: bespin/events
-
 var bespin = require("bespin");
 var util = require("bespin/util");
 
 /**
  * Given an <code>eventString</code> parse out the arguments and configure an
  * event object.
- * <p>For example:
+ * <p>For example:<ul>
  * <li><code>command:execute;name=ls,args=bespin</code>
  * <li><code>command:execute</code>
+ * </ul>
  */
 exports.toFire = function(eventString) {
     var event = {};

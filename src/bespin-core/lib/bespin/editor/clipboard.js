@@ -22,64 +22,78 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
-var SC = require("sproutcore");
-
 /**
  * Handle clipboard operations.
- * If using WebKit (I know, feature detection would be nicer,
- * but e.clipboardData is deep) use DOMEvents. Else try the bad tricks.
+ */
+
+var SC = require("sproutcore");
+var bespin = require("bespin");
+var util = require("bespin/util");
+var utils = require("bespin/editor/utils");
+
+/**
+ * The clipboard implementation currently in use
+ */
+var uses = null;
+
+/**
+ * Given a clipboard adapter implementation, save it, an call install() on it
+ */
+var install = function(editor, newImpl) {
+    uninstall();
+    uses = newImpl;
+    uses.install(editor);
+};
+
+/**
+ * Uninstalls the clipboard handler installed by install()
+ */
+var uninstall = function() {
+    if (uses && typeof uses.uninstall == "function") {
+        uses.uninstall();
+    }
+
+    // Clear uses, because we are no longer using anything.
+    uses = undefined;
+};
+
+var isWebKit = parseFloat(navigator.userAgent.split("WebKit/")[1]) || undefined;
+
+/**
+ * Do the first setup. Right now checks for WebKit and inits a DOMEvents
+ * solution if that is true else install the default.
+ * <p>If using WebKit (I know, feature detection would be nicer, but
+ * e.clipboardData is deep) use DOMEvents. Else try the bad tricks.
  * The factory that is used to install, and setup the adapter that does the work
  */
-exports.clipboard = {
-    /**
-     * Given a clipboard adapter implementation, save it, an call install() on
-     * it
-     */
-    install: function(editor, newImpl) {
-        this.uninstall();
-        this.uses = newImpl;
-        this.uses.install(editor);
-    },
+exports.setup = function(editor) {
+    install(editor, new HiddenWorld());
 
-    /**
-     * Uninstalls the clipboard handler installed by install()
-     */
-    uninstall: function() {
-        if (this.uses && typeof this.uses.uninstall == "function") {
-            this.uses.uninstall();
-        }
-
-        //clear uses, because we are no longer using anything.
-        this.uses = undefined;
-    },
-
-    createHiddenTextarea: function() {
-        return dojo.create("textarea", {
-            id: 'copynpaster',
-            tabIndex: '-1',
-            style: "position:absolute; z-index:999; top:-10000px; width:0px; height:0px; border:none;"
-        }, dojo.body());
-    },
-
-    createHiddenIframe: function() {
-        return dojo.create("iframe", {id: 'icopynpaster', style: "position:absolute; z-index:999; top:-10000px; width:0px; height:0px; border:none;"}, dojo.body());
-    },
-
-    /**
-     * Do the first setup. Right now checks for WebKit and inits a DOMEvents
-     * solution if that is true else install the default.
-     */
-    setup: function(editor) {
-        this.install(editor, new bespin.editor.clipboard.HiddenWorld());
-
-        // setData appears to be working again, if you go through certain steps (you have to stop the event properly...)
-        if (dojo.isWebKit) {
-            this.install(editor, new bespin.editor.clipboard.DOMEvents());
-        } else {
-            this.install(editor, new bespin.editor.clipboard.HiddenWorld());
-        }
+    // setData appears to be working again, if you go through certain steps
+    // (you have to stop the event properly...)
+    if (isWebKit) {
+        install(editor, new DOMEvents());
+    } else {
+        install(editor, new HiddenWorld());
     }
+};
+
+/**
+ * Create a hidden text area so we can adjust the destination of the copy event
+ * just before it happens.
+ */
+var createHiddenTextarea = function() {
+    return dojo.create("textarea", {
+        tabIndex: '-1',
+        style: {
+            position: "absolute",
+            zIndex: 999,
+            top: "-10000px",
+            width: 0,
+            height: 0,
+            border: "none"
+        }
+    }, dojo.body());
 };
 
 /**
@@ -88,9 +102,9 @@ exports.clipboard = {
  * hidden copynpaster text input, and then the real event does its thing and we
  * focus back
  */
-exports.DOMEvents = SC.Object.extend({
+var DOMEvents = SC.Object.extend({
     install: function(editor) {
-        // * Defensively stop doing copy/cut/paste magic if you are in the command line
+        // Defensively stop doing copy/cut/paste magic if you are in the command line
         var stopAction = function(e) {
             return e.target.id == "command";
         };
@@ -98,7 +112,7 @@ exports.DOMEvents = SC.Object.extend({
             return editor.focus;
         };
 
-        this.focuser = bespin.editor.clipboard.createHiddenTextarea();
+        this.focuser = createHiddenTextarea();
         var onfocuser = false;
 
         // Copy
@@ -196,7 +210,7 @@ exports.DOMEvents = SC.Object.extend({
             dojo.stopEvent(e); // a full stop, because we _are_ handling the event
 
             e.preventDefault();
-            var args = bespin.editor.utils.buildArgs();
+            var args = utils.buildArgs();
             args.chunk = e.clipboardData.getData('text/plain');
             if (args.chunk) {
                 editor.ui.actions.beginEdit('paste');
@@ -207,7 +221,8 @@ exports.DOMEvents = SC.Object.extend({
             dojo.byId('canvas').focus();
         });
 
-        // and this line makes it work immediately (otherwise you'd have to copy something from somewhere else on the page)
+        // and this line makes it work immediately (otherwise you'd have to copy
+        // something from somewhere else on the page)
         // I'm not sure why this happens...
         document.body.focus();
     },
@@ -228,28 +243,25 @@ exports.DOMEvents = SC.Object.extend({
  * Exclusively grab the C, X, and V key combos and use a hidden input to move
  * data around
  */
-exports.HiddenWorld = SC.Object.extend({
+var HiddenWorld = SC.Object.extend({
     install: function(editor) {
 
         // Configure the hidden copynpaster element, if it doesn't already exist
         // save in a var for later use
-        var copynpaster;
-        var copyToClipboard;
-        var pasteFromClipboard;
+        var copynpaster = createHiddenTextarea();
 
-        copynpaster = bespin.editor.clipboard.createHiddenTextarea();
-        copyToClipboard = function(text) {
+        var copyToClipboard = function(text) {
             copynpaster.value = text;
             copynpaster.select();
             copynpaster.focus();
             setTimeout(function() { editor.setFocus(true); }, 10);
         };
 
-        pasteFromClipboard = function() {
+        var pasteFromClipboard = function() {
             copynpaster.select(); // select and hope that the paste goes in here
 
             setTimeout(function() {
-                var args = bespin.editor.utils.buildArgs();
+                var args = utils.buildArgs();
                 args.chunk = copynpaster.value;
                 if (args.chunk) {
                     editor.ui.actions.beginEdit('paste');
@@ -266,7 +278,7 @@ exports.HiddenWorld = SC.Object.extend({
             }
             var selectionText;
 
-            if ((bespin.util.isMac() && e.metaKey) || e.ctrlKey) {
+            if ((util.isMac() && e.metaKey) || e.ctrlKey) {
                 // Copy
                 if (e.keyCode == 67 /*c*/) {
                     // place the selection into the input
@@ -313,7 +325,7 @@ exports.HiddenWorld = SC.Object.extend({
 });
 
 /**
- * Turn on the key combinations to access the Bespin.Clipboard.Manual class
+ * Turn on the key combinations to access the clipboard.manual class
  * which basically only works with the editor only. Not in favour.
  */
 exports.EditorOnly = SC.Object.extend({
@@ -330,14 +342,15 @@ exports.EditorOnly = SC.Object.extend({
  * The ugly hack that tries to use XUL to get work done, but will probably fall
  * through to in-app copy/paste only
  */
-exports.Manual = function() {
+exports.manual = function() {
     var clipdata;
+    var privilegeManager = netscape.security.PrivilegeManager;
 
     return {
         copy: function(copytext) {
             try {
-                if (netscape.security.PrivilegeManager.enablePrivilege) {
-                    netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+                if (privilegeManager.enablePrivilege) {
+                    privilegeManager.enablePrivilege("UniversalXPConnect");
                 } else {
                     clipdata = copytext;
                     return;
@@ -347,12 +360,12 @@ exports.Manual = function() {
                 return;
             }
 
-            var str = Components.classes["@mozilla.org/supports-string;1"].
-                                      createInstance(Components.interfaces.nsISupportsString);
+            var str = Components.classes["@mozilla.org/supports-string;1"]
+                    .createInstance(Components.interfaces.nsISupportsString);
             str.data = copytext;
 
-            var trans = Components.classes["@mozilla.org/widget/transferable;1"].
-                                   createInstance(Components.interfaces.nsITransferable);
+            var trans = Components.classes["@mozilla.org/widget/transferable;1"]
+                    .createInstance(Components.interfaces.nsITransferable);
             if (!trans) {
                 return false;
             }
@@ -391,8 +404,8 @@ exports.Manual = function() {
 
         data: function() {
             try {
-                if (netscape.security.PrivilegeManager.enablePrivilege) {
-                    netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+                if (privilegeManager.enablePrivilege) {
+                    privilegeManager.enablePrivilege("UniversalXPConnect");
                 } else {
                     return clipdata;
                 }
@@ -400,12 +413,14 @@ exports.Manual = function() {
                 return clipdata;
             }
 
-            var clip = Components.classes["@mozilla.org/widget/clipboard;1"].getService(Components.interfaces.nsIClipboard);
+            var clip = Components.classes["@mozilla.org/widget/clipboard;1"]
+                    .getService(Components.interfaces.nsIClipboard);
             if (!clip) {
                 return false;
             }
 
-            var trans = Components.classes["@mozilla.org/widget/transferable;1"].createInstance(Components.interfaces.nsITransferable);
+            var trans = Components.classes["@mozilla.org/widget/transferable;1"]
+                    .createInstance(Components.interfaces.nsITransferable);
             if (!trans) {
                 return false;
             }

@@ -26,6 +26,7 @@
 var bespin = require("bespin");
 var SC = require("sproutcore");
 var utils = require("bespin/editor/utils");
+var clipboard = require("bespin/editor/clipboard");
 
 /**
  * The editor can run various actions. They are defined here and you can add or
@@ -432,7 +433,7 @@ exports.Actions = SC.Object.extend({
         if (selectionObject) {
             var selectionText = this.editor.model.getChunk(selectionObject);
             if (selectionText) {
-                bespin.editor.clipboard.Manual.copy(selectionText);
+                clipboard.manual.copy(selectionText);
             }
         }
     },
@@ -446,12 +447,12 @@ exports.Actions = SC.Object.extend({
             return;
         }
 
-        var clipboard = (args.clipboard) ? args.clipboard : bespin.editor.clipboard.Manual.data();
-        if (clipboard === undefined) {
+        var data = (args.clipboard) ? args.clipboard : clipboard.manual.data();
+        if (data === undefined) {
             // darn it clipboard!
             return;
         }
-        args.chunk = clipboard;
+        args.chunk = data;
         this.beginEdit('paste');
         this.insertChunk(args);
         this.endEdit();
