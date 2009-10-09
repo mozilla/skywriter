@@ -22,19 +22,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// module: bespin/util/keys
-var bespin = require("bespin");
-
 /**
  * Helpful code to deal with key handling and processing.
- * Consists of two core pieces:
- * <ul>
- * <li>bespin.util.keys.Key: is a map of keys to key codes
- * <li>bespin.util.keys.fillArguments: convert string, e.g. "CTRL A" to key and
- * modifier
- * </ul>
- * <p>TODO: Having the keys in the same scope as the method is really bad :)
  */
+
+var bespin = require("bespin");
 
 /**
  * Alpha keys, and special keys (ENTER, BACKSPACE) have key codes that our code
@@ -42,7 +34,77 @@ var bespin = require("bespin");
  * code instead of "13"
  */
 exports.Key = {
-    // -- Numbers
+    // Common Key values, copied from dojo.keys (_base/event.js)
+    BACKSPACE: 8,
+    TAB: 9,
+    CLEAR: 12,
+    ENTER: 13,
+    SHIFT: 16,
+    CTRL: 17,
+    ALT: 18,
+    META: dojo.isSafari ? 91 : 224,     // the apple key on macs
+    PAUSE: 19,
+    CAPS_LOCK: 20,
+    ESCAPE: 27,
+    SPACE: 32,
+    PAGE_UP: 33,
+    PAGE_DOWN: 34,
+    END: 35,
+    HOME: 36,
+    LEFT_ARROW: 37,
+    UP_ARROW: 38,
+    RIGHT_ARROW: 39,
+    DOWN_ARROW: 40,
+    INSERT: 45,
+    DELETE: 46,
+    HELP: 47,
+    LEFT_WINDOW: 91,
+    RIGHT_WINDOW: 92,
+    SELECT: 93,
+    NUMPAD_0: 96,
+    NUMPAD_1: 97,
+    NUMPAD_2: 98,
+    NUMPAD_3: 99,
+    NUMPAD_4: 100,
+    NUMPAD_5: 101,
+    NUMPAD_6: 102,
+    NUMPAD_7: 103,
+    NUMPAD_8: 104,
+    NUMPAD_9: 105,
+    NUMPAD_MULTIPLY: 106,
+    NUMPAD_PLUS: 107,
+    NUMPAD_ENTER: 108,
+    NUMPAD_MINUS: 109,
+    NUMPAD_PERIOD: 110,
+    NUMPAD_DIVIDE: 111,
+    F1: 112,
+    F2: 113,
+    F3: 114,
+    F4: 115,
+    F5: 116,
+    F6: 117,
+    F7: 118,
+    F8: 119,
+    F9: 120,
+    F10: 121,
+    F11: 122,
+    F12: 123,
+    F13: 124,
+    F14: 125,
+    F15: 126,
+    NUM_LOCK: 144,
+    SCROLL_LOCK: 145,
+    // virtual key mapping
+    copyKey: dojo.isMac && !dojo.isAIR ? (dojo.isSafari ? 91 : 224 ) : 17,
+
+    // Special keys that dojo.keys doesn't have
+    FORWARD_SLASH: 191,
+    TILDE: 192,
+    SQUARE_BRACKET_OPEN: 219,
+    BACK_SLASH: 220,
+    SQUARE_BRACKET_CLOSE: 221,
+
+    // Numbers
     ZERO: 48,
     ONE: 49,
     TWO: 50,
@@ -54,7 +116,7 @@ exports.Key = {
     EIGHT: 56,
     NINE: 57,
 
-    // -- Alphabet
+    // Alphabet
     A: 65,
     B: 66,
     C: 67,
@@ -80,31 +142,21 @@ exports.Key = {
     W: 87,
     X: 88,
     Y: 89,
-    Z: 90,
-
-    // Special keys that dojo.keys doesn't have
-    FORWARD_SLASH: 191,
-    TILDE: 192,
-    SQUARE_BRACKET_OPEN: 219,
-    BACK_SLASH: 220,
-    SQUARE_BRACKET_CLOSE: 221
+    Z: 90
 };
 
-(function() {
-    SC.mixin(exports.Key, dojo.keys);
+/**
+ * Reverse the map for lookups
+ */
+exports.KeyCodeToName = {};
 
-    // -- Reverse the map for lookups
-    var keys = exports.Key;
-    exports.KeyCodeToName = {};
+for (var key in exports.Key) {
+    var keyCode = exports.Key[key];
 
-    for (var key in keys) {
-        var keyCode = keys[key];
-
-        if (typeof keyCode == "number") {
-            exports.KeyCodeToName[keyCode] = key;
-        }
+    if (typeof keyCode == "number") {
+        exports.KeyCodeToName[keyCode] = key;
     }
-})();
+}
 
 /**
  * Given a key as a string, return the key code representation.
@@ -153,12 +205,29 @@ exports.PassThroughCharCodes = codes.map(function(item) {
  * Should map to list above
  */
 exports.PassThroughKeyCodes = (function() {
-    var Key = exports.Key;
     return [
-        Key.C, Key.X, Key.V, Key.K, Key.L, Key.N, Key.O, Key.T, Key.W,
-        Key.NUMPAD_PLUS, Key.NUMPAD_MINUS, Key.TILDE, Key.ZERO, Key.ONE,
-        Key.TWO, Key.THREE, Key.FOUR, Key.FIVE, Key.SIX, Key.SEVEN, Key.EIGHT,
-        Key.NINE
+        exports.Key.C,
+        exports.Key.X,
+        exports.Key.V,
+        exports.Key.K,
+        exports.Key.L,
+        exports.Key.N,
+        exports.Key.O,
+        exports.Key.T,
+        exports.Key.W,
+        exports.Key.NUMPAD_PLUS,
+        exports.Key.NUMPAD_MINUS,
+        exports.Key.TILDE,
+        exports.Key.ZERO,
+        exports.Key.ONE,
+        exports.Key.TWO,
+        exports.Key.THREE,
+        exports.Key.FOUR,
+        exports.Key.FIVE,
+        exports.Key.SIX,
+        exports.Key.SEVEN,
+        exports.Key.EIGHT,
+        exports.Key.NINE
     ];
 })();
 
@@ -170,8 +239,6 @@ exports.PassThroughKeyCodes = (function() {
  * @param e Event that came into an <code>onkeydown</code> handler
  */
 exports.passThroughToBrowser = function(e) {
-    var Key = exports.Key;
-
     if (!e.ctrlKey) {
         // let normal characters through
         return true;

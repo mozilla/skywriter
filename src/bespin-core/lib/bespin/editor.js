@@ -26,10 +26,14 @@
 
 var SC = require("sproutcore");
 var bespin = require("bespin");
-var clipboard = require("bespin/editor/clipboard");
+
 var util = require("bespin/util");
 var keys = require("bespin/util/keys");
+var canvas = require("bespin/util/canvas");
+var cookie = require("bespin/util/cookie");
 var mousewheelevent = require("bespin/util/mousewheelevent");
+
+var clipboard = require("bespin/editor/clipboard");
 var events = require("bespin/events");
 var syntax = require("bespin/syntax");
 var utils = require("bespin/editor/utils");
@@ -38,7 +42,6 @@ var actions = require("bespin/editor/actions");
 var model = require("bespin/editor/model");
 var history = require("bespin/editor/history");
 var settings = require("bespin/client/settings");
-var canvas = require("bespin/util/canvas");
 var model = require("bespin/editor/model");
 
 /**
@@ -2376,7 +2379,9 @@ exports.API = SC.Object.extend({
         filename = filename || bespin.get('editSession').path; // default to what you have
 
         // saves the current state of the editor to a cookie
-        dojo.cookie('viewData_' + project + '_' + filename.split('/').join('_'), JSON.stringify(bespin.get('editor').getCurrentView()), { expires: 7 });
+        var name = 'viewData_' + project + '_' + filename.split('/').join('_');
+        var value = JSON.stringify(bespin.get('editor').getCurrentView());
+        cookie.set(name, value, { expires: 7 });
 
         var file = {
             name: filename,

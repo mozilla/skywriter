@@ -216,7 +216,7 @@ exports.Cookie = SC.Object.extend({
             path: '/'
         };
 
-        var settings = JSON.parse(dojo.cookie("settings"));
+        var settings = JSON.parse(cookie.get("settings"));
 
         if (settings) {
             this.settings = settings;
@@ -227,14 +227,14 @@ exports.Cookie = SC.Object.extend({
                 'autocomplete': 'off',
                 'collaborate': 'off'
             };
-            dojo.cookie("settings", JSON.stringify(this.settings), this.cookieSettings);
+            cookie.set("settings", JSON.stringify(this.settings), this.cookieSettings);
         }
         bespin.publish("settings:loaded");
     },
 
     set: function(key, value) {
         this.settings[key] = value;
-        dojo.cookie("settings", JSON.stringify(this.settings), this.cookieSettings);
+        cookie.set("settings", JSON.stringify(this.settings), this.cookieSettings);
     },
 
     get: function(key) {
@@ -243,7 +243,7 @@ exports.Cookie = SC.Object.extend({
 
     unset: function(key) {
         delete this.settings[key];
-        dojo.cookie("settings", JSON.stringify(this.settings), this.cookieSettings);
+        cookie.set("settings", JSON.stringify(this.settings), this.cookieSettings);
     }
 });
 

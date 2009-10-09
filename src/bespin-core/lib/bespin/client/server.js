@@ -24,6 +24,7 @@
 
 var bespin = require("bespin");
 var util = require("bespin/util");
+var cookie = require("bespin/util/cookie");
 var SC = require("sproutcore");
 
 /**
@@ -155,10 +156,10 @@ exports.Server = SC.Object.extend({
      * @see protectXhrAgainstCsrf()
      */
     getAntiCsrfToken: function() {
-        var token = dojo.cookie("Domain-Token");
+        var token = cookie.get("Domain-Token");
         if (!token) {
             token = util.randomPassword();
-            dojo.cookie("Domain-Token", token);
+            cookie.set("Domain-Token", token);
         }
         return token;
     },
