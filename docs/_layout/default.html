@@ -17,9 +17,9 @@
 <!-- MENU -->
 <ul id="menu">
 	<li><a href="{{page.root}}index.html" title="Home">Home</a></li>
-	<li><a href="{{page.root}}pluginguide/index.html" title="Plugin Guide">Creating Plugins</a></li>
-	<li><a href="{{page.root}}embedding/index.html" title="Embedding Bespin in your app">Embedding</a></li>
-	<li><a href="{{page.root}}devguide/index.html" title="Developer's Guide">Developing Bespin</a></li>
+	<li{% if page.urlparts|first == "pluginguide" %} class="current"{% endif %}><a href="{{page.root}}pluginguide/index.html" title="Plugin Guide">Creating Plugins</a></li>
+	<li{% if page.urlparts|first == "embedding" %} class="current"{% endif %}><a href="{{page.root}}embedding/index.html" title="Embedding Bespin in your app">Embedding</a></li>
+	<li{% if page.urlparts|first == "devguide" %} class="current"{% endif %}><a href="{{page.root}}devguide/index.html" title="Developer's Guide">Developing Bespin</a></li>
 </ul>
 <!-- / MENU -->
 
@@ -35,6 +35,17 @@
 <!-- / MAIN COLUMN -->
 
 <!-- SIDEBAR -->
+<div id="sidebar">
+{% if page.urlparts|first == "pluginguide" %}
+<h2 class="compact">Contents</h2>
+
+<ul class="compact">
+<li><a href="index.html">Introduction</a></li>
+<li><a href="extpoints.html">Built-in Extension Points</a></li>
+<li><a href="distributing.html">Distributing Plugins</a></li>
+</ul>
+{% endif %}
+</div>
 <!-- / SIDEBAR -->
 
 <!-- / MAIN CONTAINER -->
