@@ -34,6 +34,11 @@ exports.Store = SC.Object.extend({
     commands: {},
     aliases: {},
 
+    /**
+     * TODO: this is perhaps misnamed - it's really here just for the benefit
+     * of the SproutCore init function. Perhaps init should remove it from this
+     * once it has been added to the parent store
+     */
     command: null,
     parent: null,
 
@@ -44,18 +49,18 @@ exports.Store = SC.Object.extend({
      */
     init: function() {
         // If there is a parent, then this is a store for a command with subcommands
-        if (parent) {
+        if (this.parent) {
             // save the fact that we are a subcommand for this chap
             this.containerCommand = this.command;
 
             // implicit that it takes something
-            command.takes = ['*'];
+            this.command.takes = ['*'];
 
             // link back to this store
-            command.subcommands = this;
+            this.command.subcommands = this;
 
             // add the sub command to the parent store
-            parent.addCommand(command);
+            this.parent.addCommand(this.command);
         }
     },
 
@@ -407,16 +412,14 @@ exports.Store = SC.Object.extend({
 /**
  * Add a root command store to the main bespin namespace
  */
-exports.command = {
-    store: new bespin.command.Store(),
+exports.store = new exports.Store();
 
-    executeExtensionCommand: function() {
-        var args = arguments;
-        var self = this;
-        this.load(function(execute) {
-            execute.apply(self, args);
-        });
-    }
+exports.executeExtensionCommand = function() {
+    var args = arguments;
+    var self = this;
+    this.load(function(execute) {
+        execute.apply(self, args);
+    });
 };
 
 /**
@@ -425,7 +428,7 @@ exports.command = {
  */
 bespin.subscribe("extension:loaded:bespin.command", function(ext) {
     ext.execute = exports.command.executeExtensionCommand;
-    exports.command.store.addCommand(ext);
+    exports.store.addCommand(ext);
 });
 
 /**
@@ -433,13 +436,13 @@ bespin.subscribe("extension:loaded:bespin.command", function(ext) {
  * TODO: We're trying to remove pub/sub for actions, so we should explain this
  */
 bespin.subscribe("extension:removed:bespin.command", function(ext) {
-    exports.command.store.removeCommand(ext);
+    exports.store.removeCommand(ext);
 });
 
 /**
  * 'help' command for the root store
  */
-exports.command.store.addCommand({
+exports.store.addCommand({
     name: 'help',
     takes: ['search'],
     preview: 'show commands',

@@ -23,16 +23,20 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var client = require("bespin/client");
+
+var navigate = require("bespin/util/navigate");
+var path = require("bespin/util/path");
+var urlbar = require("bespin/util/urlbar");
+
+var filesystem = require("bespin/client/filesystem");
+var server = require("bespin/client/server");
+
 var editorMod = require("bespin/editor");
 var toolbar = require("bespin/editor/toolbar");
 var sessionMod = require("bespin/client/session");
 var filesearch = require("bespin/editor/filesearch");
 var quickopen = require("bespin/editor/quickopen");
 var settings = require("bespin/client/settings");
-var pageEditor = require("bespin/page/editor");
-var navigate = require("bespin/util/navigate");
-var path = require("bespin/util/path");
 
 /**
  * This file is the editor bootstrap code that is loaded via script src from
@@ -82,7 +86,7 @@ exports.recalcLayout = function() {
         target.style.display = "none";
     }
 
-    this.doResize();
+    exports.doResize();
 };
 
 /**
@@ -183,11 +187,11 @@ var ProjectStatusScene = function() {
 /**
  * Loads and configures the objects that the editor needs
  */
-dojo.addOnLoad(function() {
+exports.onLoad = function() {
     var editor = bespin.register('editor', new editorMod.API('editor'));
     var editSession = bespin.register('editSession', new sessionMod.EditSession({ editor: editor }));
-    var server = bespin.register('server', new client.Server());
-    var files = bespin.register('files', new client.FileSystem());
+    var server = bespin.register('server', new server.Server());
+    var files = bespin.register('files', new filesystem.FileSystem());
 
     bespin.register('actions', editor.ui.actions);
     //bespin.register('filesearch', new filesearch.API());
@@ -197,7 +201,7 @@ dojo.addOnLoad(function() {
     // Get going when settings are loaded
     bespin.subscribe("settings:loaded", function(event) {
         bespin.get('settings').loadSession();  // load the last file or what is passed in
-        pageEditor.doResize();
+        exports.doResize();
     });
 
     var whenLoggedIn = function(userinfo) {
@@ -237,6 +241,9 @@ dojo.addOnLoad(function() {
 
     // -- Deal with the project label (project, filename, dirty flag)
     statusScene = new ProjectStatusScene();
-    bespin.publish("bespin:editor:initialized", {});
-});
 
+    // publish changes to the URL bar to allow us to change the edited file
+    urlbar.monitor();
+
+    bespin.publish("bespin:editor:initialized", {});
+};

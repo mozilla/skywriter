@@ -1,28 +1,45 @@
-console.log("loading boot2");
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License
+ * Version 1.1 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.
+ * See the License for the specific language governing rights and
+ * limitations under the License.
+ *
+ * The Original Code is Bespin.
+ *
+ * The Initial Developer of the Original Code is Mozilla.
+ * Portions created by the Initial Developer are Copyright (C) 2009
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Bespin Team (bespin@mozilla.com)
+ *
+ * ***** END LICENSE BLOCK ***** */
 
-window.SC = require("sproutcore");
-// Hack to allow us to call this.sc_super() in place of the global sc_super();
-SC.Object.prototype.sc_super = function super_name() {
-    super_name.caller.base.apply(this, super_name.caller.arguments);
-};
+var embed = require("bespin/embed");
 
-require("bespin/globals");
+/**
+ * We need an HTML element to turn into a Bespin component. This can be either
+ * a string that references an HTML element id, or an HTMLElement itself (e.g.
+ * from a call to document.getElementById)
+ */
+var id = "editor";
 
-var plugins = require("bespin/plugins");
-var builtins = require("bespin/builtins");
-var bespin = require("bespin");
-
-// SC.LOG_BINDINGS = true;
-// SC.LOG_OBSERVERS = true;
-
-var catalog = plugins.Catalog.create();
-catalog.load(builtins.metadata);
-bespin.register("plugins", catalog);
-
-var component = require("bespin/editor/component");
-exports.editorComponent = component.Component.create({
-    container: dojo.byId('editor'),
+/**
+ * Bespin initialization can be customized in a number of ways. For a complete
+ * list of options, see TODO
+ */
+var options = {
     language: "js",
     loadFromDiv: true,
     setOptions: { strictlines: 'on' }
-});
+};
+
+// Fire up Bespin on the given element ID
+window.editorComponent = embed.useBespin(id, options);

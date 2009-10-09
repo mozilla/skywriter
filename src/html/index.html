@@ -155,7 +155,7 @@ function flubber() {
     function setSetting() {
         var key = dojo.byId('key').value;
         var value = dojo.byId('value').value;
-        _editorComponent.set(key, value);
+        window.editorComponent.set(key, value);
     }
   </script>
   Push a new setting: <input type="text" id="key" value="strictlines">
@@ -166,10 +166,10 @@ function flubber() {
 <div>
   <script>
     function copyToTextarea() {
-        dojo.byId('inandout').value = _editorComponent.getContent();
+        dojo.byId('inandout').value = window.editorComponent.getContent();
     }
     function copyToEditor() {
-        _editorComponent.setContent(dojo.byId('inandout').value);
+        window.editorComponent.setContent(dojo.byId('inandout').value);
     }
   </script>
   <textarea id="inandout" cols="100" rows="10"></textarea><br>

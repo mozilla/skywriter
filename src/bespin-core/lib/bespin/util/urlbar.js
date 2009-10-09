@@ -29,25 +29,20 @@ var settings = require("bespin/client/settings");
  * If it sees a change it tries to open the file
  * The common case is using the back/forward buttons
  */
-exports.last = document.location.hash;
-
-/**
- *
- */
-exports.check = function() {
-    var hash = document.location.hash;
-    if (this.last != hash) {
-        var urlchange = new settings.URL(hash);
-        bespin.publish("url:changed", { was: this.last, now: urlchange });
-        this.last = hash;
-    }
-};
+var last = document.location.hash;
 
 /**
  * Once everything is going, scan the URL bar periodically
  */
-dojo.addOnLoad(function() {
-    setInterval(function() {
-        exports.check();
+exports.monitor = function() {
+    window.setInterval(function() {
+        var hash = document.location.hash;
+        if (last != hash) {
+            bespin.publish("url:changed", {
+                was: last,
+                now: new settings.URL(hash)
+            });
+            last = hash;
+        }
     }, 200);
-});
+};

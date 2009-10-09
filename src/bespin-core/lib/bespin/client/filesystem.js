@@ -252,7 +252,7 @@ exports.FileSystem = SC.Object.extend({
      */
     whenFileExists: function(project, path, callbacks) {
         var onSuccess = function(files) {
-            var hasSome = dojo.some(files, function(file) {
+            var hasSome = files.some(function(file) {
                 return file.name == path;
             });
 
@@ -284,7 +284,7 @@ exports.FileSystem = SC.Object.extend({
      */
     whenFileDoesNotExist: function(project, path, callbacks) {
         var onSuccess = function(files) {
-            var hasSome = dojo.some(files, function(file) {
+            var hasSome = files.some(function(file) {
                 return (file.name == path);
             });
 

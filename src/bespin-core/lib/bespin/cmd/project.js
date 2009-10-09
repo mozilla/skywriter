@@ -263,8 +263,11 @@ exports.commands.addCommand({
                 error: function(error, ioArg) {
                     setTimeout(function() {
                         bespin.get('files').projects(function(projectNames) {
-                            if (dojo.some(projectNames, function(testProject) { return project + '/' == testProject.name; })) {
-                                bespin.publish("project:created", {project: project});
+                            var isProject = function(test) {
+                                return project + '/' == test.name;
+                            };
+                            if (projectNames.some(isProject)) {
+                                bespin.publish("project:created", { project: project });
                                 dojo.byId('upload-status').innerHTML = 'Archive imported and project ' + project + ' has been created!';
                             } else {
                                 dojo.byId('upload-status').innerHTML = 'Error uploading the file. Sorry, try again!';

@@ -85,6 +85,13 @@ exports.rateLimit = function(maxRate, scope, func) {
 };
 
 /**
+ * Return true if it is a String
+ */
+exports.isString = function(it) {
+    return (typeof it == "string" || it instanceof String);
+};
+
+/**
  * Is the passed object a function?
  * From dojo.isFunction()
  */

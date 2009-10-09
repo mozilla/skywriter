@@ -22,14 +22,23 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+window.SC = require("sproutcore");
+
 /**
  * Array detector.
  * Firefox 3.5 and Safari 4 have this already. Chrome 4 however ...
  * Note to Dojo - your isArray is still broken: instanceof doesn't work with
- * multiple frames.
+ * Arrays taken from a different frame/window.
  */
 if (!Array.isArray) {
     Array.isArray = function(data) {
         return (data && Object.prototype.toString.call(data) == "[object Array]");
     };
 }
+
+/**
+ * Hack to allow us to call this.sc_super() in place of the global sc_super();
+ */
+SC.Object.prototype.sc_super = function super_name() {
+    super_name.caller.base.apply(this, super_name.caller.arguments);
+};

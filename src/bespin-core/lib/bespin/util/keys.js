@@ -178,14 +178,14 @@ exports.passThroughToBrowser = function(e) {
     } else if (e.metaKey || e.altKey || e.ctrlKey) {
         // Apple or Alt key
         if (e.type == "keypress") {
-            var match = dojo.some(exports.PassThroughCharCodes, function(item) {
+            var match = exports.PassThroughCharCodes.some(function(item) {
                 return (item == e.charCode);
             });
             if (match) {
                 return true;
             }
         } else {
-            var match = dojo.some(exports.PassThroughKeyCodes, function(item) {
+            var match = exports.PassThroughKeyCodes.some(function(item) {
                 return (item == e.keyCode);
             });
             if (match) {

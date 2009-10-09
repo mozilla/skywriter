@@ -23,9 +23,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
-var command = require("bespin/command");
 var SC = require("sproutcore");
+var bespin = require("bespin");
+var util = require("bespin/util");
+var command = require("bespin/command");
 
 /**
  * Basic code indentation utility.
@@ -61,7 +62,7 @@ command.store.addCommand({
  */
 exports.API = SC.Object.extend({
     setLanguage: function(language) {
-        if (dojo.isString(language)) {
+        if (util.isString(language)) {
             language = language.toLowerCase();
         }
         switch (language) {

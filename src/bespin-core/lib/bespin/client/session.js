@@ -461,7 +461,7 @@ var ShareNode = SC.Object.extend({
  */
 exports.EditSession = SC.Object.extend({
     editor: null,
-    currentState: this.mobwriteState.stopped,
+    currentState: null,
     bailingOutOfCollaboration: false,
 
     // TODO: Should this really be here?
@@ -471,6 +471,7 @@ exports.EditSession = SC.Object.extend({
     init: function() {
         var self = this;
 
+        this.currentState = this.mobwriteState.stopped;
         this.reportCollaborators([]);
 
         // Take note of in-flight collaboration status changes
@@ -952,7 +953,8 @@ exports.EditSession = SC.Object.extend({
 
         var maxInLargeMode = 10;
 
-        dojo.empty(collabList);
+        // Clear it out before we refill
+        collabList.innerHTML = "";
         for (var username in this.users) {
             if (this.users.hasOwnProperty(username)) {
                 var user = this.users[username];

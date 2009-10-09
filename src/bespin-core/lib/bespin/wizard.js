@@ -63,7 +63,7 @@ exports.wizard = {
             self.element = dojo.byId('centerpopup');
             self.element.innerHTML = data;
             dojo.query("#centerpopup script").forEach(function(node) {
-                dojo.eval(node.innerHTML);
+                eval(node.innerHTML);
             });
 
             webpieces.showCenterPopup(self.element, true);

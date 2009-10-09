@@ -23,7 +23,7 @@
  */
 
 var bespin = require("bespin");
-var diff_match_patch = require("diff");
+var diff_match_patch = require("bespin/mobwrite/diff");
 
 var DIFF_EQUAL = diff_match_patch.DIFF_EQUAL;
 var DIFF_DELETE = diff_match_patch.DIFF_DELETE;

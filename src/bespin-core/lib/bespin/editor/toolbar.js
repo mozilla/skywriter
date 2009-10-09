@@ -22,10 +22,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var SC = require("sproutcore");
 var bespin = require("bespin");
 var util = require("bespin/util");
-var editor = require("bespin/page/editor");
-var SC = require("sproutcore");
 
 /**
  * The editor has the notion of a toolbar which are components that can drive
