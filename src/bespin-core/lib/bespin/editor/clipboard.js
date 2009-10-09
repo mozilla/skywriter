@@ -112,7 +112,8 @@ var DOMEvents = SC.Object.extend({
             return editor.focus;
         };
 
-        this.focuser = createHiddenTextarea();
+        var focuser = createHiddenTextarea();
+        this.focuser = focuser;
         var onfocuser = false;
 
         // Copy
@@ -123,9 +124,9 @@ var DOMEvents = SC.Object.extend({
             dojo.stopEvent(e); // a full stop, because we _are_ handling the event
 
             // have to show that there is something to copy
-            this.focuser.value = "Hello";
-            this.focuser.focus();
-            this.focuser.select();
+            focuser.value = "Hello";
+            focuser.focus();
+            focuser.select();
 
             // and we are now on focuser
             onfocuser = true;
@@ -157,9 +158,9 @@ var DOMEvents = SC.Object.extend({
             dojo.stopEvent(e); // a full stop, because we _are_ handling the event
 
             // have to show that there is something to copy
-            this.focuser.value = "Hello";
-            this.focuser.focus();
-            this.focuser.select();
+            focuser.value = "Hello";
+            focuser.focus();
+            focuser.select();
 
             // and we are now on focuser
             onfocuser = true;
@@ -344,7 +345,7 @@ exports.EditorOnly = SC.Object.extend({
  */
 exports.manual = function() {
     var clipdata;
-    var privilegeManager = netscape.security.PrivilegeManager;
+    var privilegeManager = window.netscape ? netscape.security.PrivilegeManager : null;
 
     return {
         copy: function(copytext) {
