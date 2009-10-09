@@ -36,15 +36,34 @@
 
 <!-- SIDEBAR -->
 <div id="sidebar">
+
 {% if page.urlparts|first == "pluginguide" %}
 <h2 class="compact">Contents</h2>
-
 <ul class="compact">
 <li><a href="index.html">Introduction</a></li>
 <li><a href="extpoints.html">Built-in Extension Points</a></li>
 <li><a href="distributing.html">Distributing Plugins</a></li>
 </ul>
 {% endif %}
+
+{% if page.urlparts|first == "embedding" %}
+<h2 class="compact">Contents</h2>
+<ul class="compact">
+<li><a href="index.html">Introduction</a></li>
+<li><a href="building.html">Creating a custom, embedded Bespin</a></li>
+<li><a href="using.html">Using Bespin on your pages</a></li>
+</ul>
+{% endif %}
+
+{% if page.urlparts|first == "devguide" %}
+<h2 class="compact">Contents</h2>
+<ul class="compact">
+<li><a href="index.html">Getting Started</a></li>
+<li><a href="tour.html">A Tour of the Code</a></li>
+</ul>
+{% endif %}
+
+
 </div>
 <!-- / SIDEBAR -->
 

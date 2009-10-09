@@ -33,6 +33,11 @@ h1 a, h1 a:hover {
 	font: inherit;
 	color: inherit;
 }
+
+h2 {
+    margin-top: 1em;
+}
+
 h2.compact {
 	font: 1.5em/1.8em Georgia, 'Times New Roman', Times, serif;
 }
