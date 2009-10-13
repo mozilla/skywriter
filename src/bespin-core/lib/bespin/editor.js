@@ -38,7 +38,6 @@ var clipboard = require("bespin/editor/clipboard");
 var editorEvents = require("bespin/editor/events");
 var events = require("bespin/events");
 var syntax = require("bespin/syntax");
-var utils = require("bespin/editor/utils");
 var cursor = require("bespin/editor/cursor");
 var actions = require("bespin/editor/actions");
 var model = require("bespin/editor/model");
@@ -320,7 +319,7 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
 
         var args = {
             event: e,
-            pos: utils.copyPos(this.editor.cursorManager.getCursorPosition())
+            pos: cursor.copyPos(this.editor.cursorManager.getCursorPosition())
         };
         this.skipKeypress = false;
         this.returnValue = false;
@@ -370,7 +369,7 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
 
         var args = {
             event: e,
-            pos: utils.copyPos(this.editor.cursorManager.getCursorPosition())
+            pos: cursor.copyPos(this.editor.cursorManager.getCursorPosition())
         };
         var actions = this.editor.ui.actions;
 
@@ -683,7 +682,7 @@ exports.UI = SC.Object.extend({
             return;
         }
 
-        var down = utils.copyPos(this.selectMouseDownPos);
+        var down = cursor.copyPos(this.selectMouseDownPos);
 
         var point = { x: clientX, y: clientY };
         point.x += Math.abs(this.xoffset);
@@ -731,7 +730,7 @@ exports.UI = SC.Object.extend({
 
         //single click
         if (detail == 1) {
-            if (utils.posEquals(modelstart, modelend)) {
+            if (cursor.posEquals(modelstart, modelend)) {
                 this.editor.setSelection(undefined);
             } else {
                 //we could use raw "down" and "up", but that would skip validation.
@@ -1317,7 +1316,7 @@ exports.UI = SC.Object.extend({
         }
 
         // save this state for the next paint attempt (see above for usage)
-        this.lastCursorPos = utils.copyPos(ed.cursorManager.getCursorPosition());
+        this.lastCursorPos = cursor.copyPos(ed.cursorManager.getCursorPosition());
 
         // if we're doing a full repaint...
         if (refreshCanvas) {
@@ -2127,8 +2126,8 @@ exports.API = SC.Object.extend({
         }
 
         return {
-            startPos: utils.copyPos(startPos),
-            endPos: utils.copyPos(endPos),
+            startPos: cursor.copyPos(startPos),
+            endPos: cursor.copyPos(endPos),
             startModelPos: this.getModelPos(startPos),
             endModelPos: this.getModelPos(endPos)
         };

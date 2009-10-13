@@ -37,7 +37,6 @@ var settings = require("bespin/settings");
 var plugins = require("bespin/plugins");
 var builtins = require("bespin/builtins");
 var editorMod = require("bespin/editor");
-var component = require("bespin/editor/component");
 
 // When we come to integrate the non embedded parts ...
 // var init = re quire("bespin/page/editor/init");

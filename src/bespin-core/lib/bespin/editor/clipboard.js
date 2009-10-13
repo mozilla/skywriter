@@ -29,7 +29,7 @@
 var SC = require("sproutcore");
 var bespin = require("bespin");
 var util = require("bespin/util");
-var utils = require("bespin/editor/utils");
+var cursor = require("bespin/editor/cursor");
 
 /**
  * The clipboard implementation currently in use
@@ -211,7 +211,7 @@ var DOMEvents = SC.Object.extend({
             dojo.stopEvent(e); // a full stop, because we _are_ handling the event
 
             e.preventDefault();
-            var args = utils.buildArgs();
+            var args = cursor.buildArgs();
             args.chunk = e.clipboardData.getData('text/plain');
             if (args.chunk) {
                 editor.ui.actions.beginEdit('paste');
@@ -262,7 +262,7 @@ var HiddenWorld = SC.Object.extend({
             copynpaster.select(); // select and hope that the paste goes in here
 
             setTimeout(function() {
-                var args = utils.buildArgs();
+                var args = cursor.buildArgs();
                 args.chunk = copynpaster.value;
                 if (args.chunk) {
                     editor.ui.actions.beginEdit('paste');

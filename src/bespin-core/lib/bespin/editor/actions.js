@@ -25,7 +25,7 @@
 // module: bespin/editor/actions
 var bespin = require("bespin");
 var SC = require("sproutcore");
-var utils = require("bespin/editor/utils");
+var cursor = require("bespin/editor/cursor");
 var clipboard = require("bespin/editor/clipboard");
 
 /**
@@ -82,12 +82,12 @@ exports.Actions = SC.Object.extend({
         if (args.event.shiftKey) {
             if (!this.editor.selection) {
                 this.editor.setSelection({
-                    startPos: utils.copyPos(args.pos)
+                    startPos: cursor.copyPos(args.pos)
                 });
             }
             this.editor.setSelection({
                 startPos: this.editor.selection.startPos,
-                endPos: utils.copyPos(this.editor.cursorManager.getCursorPosition())
+                endPos: cursor.copyPos(this.editor.cursorManager.getCursorPosition())
             });
         } else {
             this.editor.setSelection(undefined);
@@ -469,7 +469,7 @@ exports.Actions = SC.Object.extend({
             this.deleteSelection();
         }
 
-        var pos = utils.copyPos(this.editor.cursorManager.getCursorPosition());
+        var pos = cursor.copyPos(this.editor.cursorManager.getCursorPosition());
         pos = this.editor.model.insertChunk(this.editor.cursorManager.getModelPosition(pos), args.chunk);
         pos = this.editor.cursorManager.getCursorPosition(pos);
         this.editor.cursorManager.moveCursor(pos);
@@ -489,7 +489,7 @@ exports.Actions = SC.Object.extend({
         this.beginEdit("deleteChunk");
 
         // Sometimes we're passed a selection, and sometimes we're not.
-        var startPos = (args.startPos != undefined) ? args.startPos : utils.copyPos(args.pos);
+        var startPos = (args.startPos != undefined) ? args.startPos : cursor.copyPos(args.pos);
 
         var selection = this.editor.getSelection({
             startPos: startPos,
@@ -820,7 +820,7 @@ exports.Actions = SC.Object.extend({
         var count = this.editor.model.getCountOfString(str);
         if (count != 0) {
             // okay, there are matches, so go on...
-            var pos = utils.copyPos(this.editor.cursorManager.getCursorPosition());
+            var pos = cursor.copyPos(this.editor.cursorManager.getCursorPosition());
 
             // first try to find the searchSting from the current position
             if (!this.editor.ui.actions.findNext(null, true)) {
@@ -867,7 +867,7 @@ exports.Actions = SC.Object.extend({
         if (!this.editor.ui.searchString) {
             return;
         }
-        var pos = utils.copyPos(this.editor.cursorManager.getModelPosition());
+        var pos = cursor.copyPos(this.editor.cursorManager.getModelPosition());
         var sel = this.editor.getSelection();
         if (canBeSamePosition && sel !== undefined) {
             pos.col -= sel.endModelPos.col - sel.startModelPos.col + 1;

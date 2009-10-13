@@ -25,7 +25,7 @@
 var SC = require("sproutcore");
 var bespin = require("bespin");
 var util = require("bespin/util");
-var utils = require("bespin/editor/utils");
+var cursor = require("bespin/editor/cursor");
 
 /**
  * The editor has a model of the data that it works with.
@@ -201,7 +201,7 @@ exports.DocumentModel = SC.Object.extend({
 
         if (!noHistory) {
             this.addHistoryItem('insertCharacters', {
-                pos: utils.copyPos(modelPos),
+                pos: cursor.copyPos(modelPos),
                 characters: string
             });
         }
@@ -268,7 +268,7 @@ exports.DocumentModel = SC.Object.extend({
             var deleted = row.splice(modelPos.col, length).join("");
             if (!noHistory) {
                 this.addHistoryItem('deleteCharacters', {
-                    pos: utils.copyPos(modelPos),
+                    pos: cursor.copyPos(modelPos),
                     characters: deleted
                 });
             }
@@ -442,8 +442,8 @@ exports.DocumentModel = SC.Object.extend({
         if (!noHistory) {
             this.addHistoryItem('deleteChunk', {
                 selection: {
-                    startModelPos: utils.copyPos(selection.startModelPos),
-                    endModelPos: utils.copyPos(selection.endModelPos)
+                    startModelPos: cursor.copyPos(selection.startModelPos),
+                    endModelPos: cursor.copyPos(selection.endModelPos)
                 },
                 chunk: chunk
             });
@@ -458,7 +458,7 @@ exports.DocumentModel = SC.Object.extend({
         this.editor.ui.syntaxModel.invalidateCache(modelPos.row);
 
         var lines = chunk.split("\n");
-        var cModelPos = utils.copyPos(modelPos);
+        var cModelPos = cursor.copyPos(modelPos);
         for (var i = 0; i < lines.length; i++) {
             this.insertCharacters(cModelPos, lines[i], true /* No history */);
             cModelPos.col = cModelPos.col + lines[i].length;
@@ -473,8 +473,8 @@ exports.DocumentModel = SC.Object.extend({
         if (!noHistory) {
             this.addHistoryItem('insertChunk', {
                 selection: {
-                    startModelPos: utils.copyPos(modelPos),
-                    endModelPos: utils.copyPos(cModelPos)
+                    startModelPos: cursor.copyPos(modelPos),
+                    endModelPos: cursor.copyPos(cModelPos)
                 },
                 chunk: chunk
             });
