@@ -29,8 +29,6 @@
  * up to send to the editor.
  */
 
-// module: bespin/syntax
-
 var bespin = require("bespin");
 var SC = require("sproutcore");
 
@@ -78,12 +76,15 @@ exports.Model = SC.Object.extend({
     },
 
     getSyntaxStylesPerLine: function(lineText, lineNumber, language) {
-        return { regions: {
-            plain: [{
-                start: 0,
-                stop: lineText.length
+        return {
+            text: lineText,
+            regions: [{
+                plain: [{
+                    start: 0,
+                    stop: lineText.length
+                }]
             }]
-        }};
+        };
     },
 
     /**

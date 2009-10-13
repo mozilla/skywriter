@@ -28,8 +28,6 @@
  * Would be more overhead than benefit for auch a simple highlighter
  */
 
-// module: bespin/syntax/simple/base
-
 var bespin = require("bespin");
 var util = require("bespin/util");
 var syntax = require("bespin/syntax");
@@ -66,9 +64,7 @@ exports.Model = syntax.Model.extend({
             this.language = language;
         }
 
-        /**
-         * Get the row contents as one string
-         */
+        // Get the row contents as one string
         var syntaxResult = {
             text: lineText,
             regions: []
@@ -76,10 +72,8 @@ exports.Model = syntax.Model.extend({
 
         var meta;
 
-        /**
-         * We have the ability to have subtypes within the main parser
-         * E.g. HTML can have JavaScript or CSS within
-         */
+        // We have the ability to have subtypes within the main parser
+        // E.g. HTML can have JavaScript or CSS within
         if (typeof this.engine['innertypes'] == "function") {
             var languages = this.engine.innertypes(lineText);
 
@@ -114,10 +108,11 @@ exports.Model = syntax.Model.extend({
  */
 exports.NoopSyntaxEngine = {
     highlight: function(line, meta) {
-        return { regions: {
-            plain: [{
-                start: 0,
-                stop: line.length
+        return {
+            regions: {
+                plain: [{
+                    start: 0,
+                    stop: line.length
                 }]
             }
         };

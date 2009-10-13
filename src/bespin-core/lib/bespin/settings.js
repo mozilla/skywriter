@@ -24,7 +24,7 @@
 
 var bespin = require("bespin");
 var util = require("bespin/util");
-var themes = require("bespin/themes/default");
+var themes = require("bespin/theme");
 var SC = require("sproutcore");
 
 /**

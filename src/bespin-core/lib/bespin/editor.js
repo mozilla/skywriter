@@ -493,9 +493,11 @@ exports.UI = SC.Object.extend({
         this.syntaxModel = syntax.Model.create();
 
         var self = this;
-        ep.extensions[0].load(function(model) {
-            self.syntaxModel = model.create();
-        });
+        if (ep.extensions.length > 0) {
+            ep.extensions[0].load(function(model) {
+                self.syntaxModel = model.create();
+            });
+        }
 
         this.selectionHelper = exports.SelectionHelper.create({ editor: this.editor });
         this.actions = actions.Actions.create({ editor: this.editor });
