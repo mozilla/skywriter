@@ -272,6 +272,7 @@ command.store.addCommand({
     }
 });
 var cursor = require("bespin/editor/cursor");
+var cursor = require("bespin/cursor");
 
 /**
  * A set of debug commands, that is, commands that could be useful in debugging

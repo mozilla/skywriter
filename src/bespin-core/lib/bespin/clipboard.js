@@ -29,7 +29,7 @@
 var SC = require("sproutcore");
 var bespin = require("bespin");
 var util = require("bespin/util");
-var cursor = require("bespin/editor/cursor");
+var cursor = require("bespin/cursor");
 
 /**
  * The clipboard implementation currently in use

@@ -26,6 +26,7 @@
 
 var bespin = require("bespin");
 var filepopup = require("bespin/editor/filepopup");
+var filepopup = require("bespin/filepopup");
 
 /**
  * When we are completing against some type, we need a place to cache the

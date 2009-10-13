@@ -25,7 +25,7 @@
 var SC = require("sproutcore");
 var bespin = require("bespin");
 var util = require("bespin/util");
-var cursor = require("bespin/editor/cursor");
+var cursor = require("bespin/cursor");
 
 /**
  * The editor has a model of the data that it works with.

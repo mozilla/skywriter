@@ -23,66 +23,93 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var util = require("bespin/util");
 
-/**
- * Given an <code>eventString</code> parse out the arguments and configure an
- * event object.
- * <p>For example:<ul>
- * <li><code>command:execute;name=ls,args=bespin</code>
- * <li><code>command:execute</code>
- * </ul>
- */
-exports.toFire = function(eventString) {
-    var event = {};
-    if (eventString.indexOf(';') < 0) { // just a plain command with no args
-        event.name = eventString;
-    } else { // split up the args
-        var pieces = eventString.split(';');
-        event.name = pieces[0];
-        event.args = util.queryToObject(pieces[1], ',');
-    }
-    return event;
-};
+exports.subscribe = function() {
+    /**
+     * When a file is opened successfully change the project and file status
+     * area, then change the window title, and change the URL hash area
+     */
+    bespin.subscribe("editor:openfile:opensuccess", function(event) {
+        var project = event.project || bespin.get('editSession').project;
+        var filename = event.file.name;
 
-/**
- * Return a default scope to be used for evaluation files
- */
-exports.defaultScope = function() {
-    if (this._defaultScope) {
-        return this._defaultScope;
-    }
+        try {
+            // reset the state of the editor based on saved cookie
+            var name = 'viewData_' + project + '_' + filename.split('/').join('_');
+            var data = cookie.get(name);
+            if (data) {
+                bespin.get('editor').resetView(JSON.parse(data));
+            } else {
+                bespin.get('editor').basicView();
+            }
+        } catch (e) {
+            console.log("Error setting in the view: ", e);
+        }
 
-    var self = this;
-    var scope = {
-        bespin: bespin,
-        include: function(file) {
-            bespin.get('files').evalFile(bespin.userSettingsProject, file);
-        },
-        tryTocopyComponent: function(id) {
-            bespin.withComponent(id, function(component) {
-                self.id = component;
-            });
-        },
-        require: require,
-        publish: bespin.publish,
-        subscribe: bespin.subscribe
-    };
+        document.title = filename + ' - editing with Bespin';
 
-    bespin.withComponent('commandLine', function(commandLine) {
-        scope.commandLine = commandLine;
-        scope.execute = function(cmd) {
-            commandLine.executeCommand(cmd);
-        };
+        bespin.publish("url:change", { project: project, path: filename });
     });
 
-    scope.tryTocopyComponent('editor');
-    scope.tryTocopyComponent('editSession');
-    scope.tryTocopyComponent('files');
-    scope.tryTocopyComponent('server');
-    scope.tryTocopyComponent('toolbar');
+    /**
+     * Observe a urlchange event and then... change the location hash
+     */
+    bespin.subscribe("url:change", function(event) {
+        var hashArguments = dojo.queryToObject(location.hash.substring(1));
+        hashArguments.project = event.project;
+        hashArguments.path    = event.path;
 
-    this._defaultScope = scope; // setup the short circuit
+        // window.location.hash = dojo.objectToQuery() is not doing the right thing...
+        var pairs = [];
+        for (var name in hashArguments) {
+            var value = hashArguments[name];
+            pairs.push(name + '=' + value);
+        }
+        window.location.hash = pairs.join("&");
+    });
 
-    return this._defaultScope;
+    /**
+     * Observe a request for session status
+     * This should kick in when the user uses the back button, otherwise
+     * editor.openFile will check and see that the current file is the same
+     * as the file from the urlbar
+     */
+    bespin.subscribe("url:changed", function(event) {
+        bespin.get('editor').openFile(null, event.now.get('path'));
+    });
+
+    /**
+     * If the command line is in focus, unset focus from the editor
+     */
+    bespin.subscribe("cmdline:focus", function(event) {
+        bespin.get('editor').setFocus(false);
+    });
+
+    /**
+     * If the command line is blurred, take control in the editor
+     */
+    bespin.subscribe("cmdline:blur", function(event) {
+        bespin.get('editor').setFocus(true);
+    });
+
+    /**
+     * Track whether a file is dirty (hasn't been saved)
+     */
+    bespin.subscribe("editor:document:changed", function(event) {
+        bespin.publish("editor:dirty");
+    });
+
+    /**
+     *
+     */
+    bespin.subscribe("editor:dirty", function(event) {
+        bespin.get('editor').dirty = true;
+    });
+
+    /**
+     *
+     */
+    bespin.subscribe("editor:clean", function(event) {
+        bespin.get('editor').dirty = false;
+    });
 };

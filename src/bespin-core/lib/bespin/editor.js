@@ -22,8 +22,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// module: bespin/editor
-
 var SC = require("sproutcore");
 var bespin = require("bespin");
 
@@ -34,15 +32,14 @@ var cookie = require("bespin/util/cookie");
 var mousewheelevent = require("bespin/util/mousewheelevent");
 
 var settings = require("bespin/settings");
-var clipboard = require("bespin/editor/clipboard");
-var editorEvents = require("bespin/editor/events");
-var events = require("bespin/events");
+var clipboard = require("bespin/clipboard");
+var editorEvents = require("bespin/events");
 var syntax = require("bespin/syntax");
-var cursor = require("bespin/editor/cursor");
-var actions = require("bespin/editor/actions");
-var model = require("bespin/editor/model");
-var history = require("bespin/editor/history");
-var model = require("bespin/editor/model");
+var cursor = require("bespin/cursor");
+var actions = require("bespin/actions");
+var model = require("bespin/model");
+var history = require("bespin/history");
+var model = require("bespin/model");
 
 /**
  *
@@ -230,6 +227,26 @@ exports.SelectionHelper = SC.Object.extend({
 
 
 /**
+ * Given an <code>eventString</code> parse out the arguments and configure an
+ * event object.
+ * <p>For example:<ul>
+ * <li><code>command:execute;name=ls,args=bespin</code>
+ * <li><code>command:execute</code>
+ * </ul>
+ */
+var toFire = function(eventString) {
+    var event = {};
+    if (eventString.indexOf(';') < 0) { // just a plain command with no args
+        event.name = eventString;
+    } else { // split up the args
+        var pieces = eventString.split(';');
+        event.name = pieces[0];
+        event.args = util.queryToObject(pieces[1], ',');
+    }
+    return event;
+};
+
+/**
  * Core key listener to decide which actions to run
  */
 exports.DefaultEditorKeyListener = SC.Object.extend({
@@ -248,7 +265,7 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
         this.defaultKeyMap[[keyCode, metaKey, ctrlKey, altKey, shiftKey]] =
             (typeof action == "string") ?
                 function() {
-                    var toFire = events.toFire(action);
+                    var toFire = toFire(action);
                     bespin.publish(toFire.name, toFire.args);
                 } : action.bind(this.editor.ui.actions);
         if (name) {
@@ -2072,7 +2089,7 @@ exports.API = SC.Object.extend({
         this.canvas = canvas;
 
         var r = require;
-        var cursor = require("bespin/editor/cursor");
+        var cursor = require("bespin/cursor");
 
         this.cursorManager = cursor.CursorManager.create({ editor: this });
         this.ui = exports.UI.create({ editor: this });
