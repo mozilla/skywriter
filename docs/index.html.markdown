@@ -8,6 +8,8 @@ This documentation is intended for Bespin developers, plugin authors and users o
 
 Bespin end users will likely find more useful documentation on the [Bespin Wiki][1].
 
+[The Glossary](glossary.html) will clear up any questions you have about terminology used on the project.
+
 Plugin Author Guide
 -------------------
 
