@@ -33,7 +33,7 @@ exports.metadata = {
             {
                 "ep": "syntax.engine",
                 "name": "simple",
-                "pointer": "bespin/syntax/simple:Model"
+                "pointer": "bespin/plugins/syntax/simple:Model"
             },
             {
                 "ep": "entrypoint",
@@ -44,49 +44,49 @@ exports.metadata = {
                 "ep": "syntax.simple.highlighter",
                 "name": "JavaScript",
                 "extensions": ["js", "javascript", "ecmascript", "jsm", "java"],
-                "pointer": "bespin/syntax/simple/javascript:JavaScript"
+                "pointer": "bespin/plugins/syntax/simple/javascript:JavaScript"
             },
             {
                 "ep": "syntax.simple.highlighter",
                 "name": "C",
                 "extensions": ['c', 'h'],
-                "pointer": "bespin/syntax/simple/c:C"
+                "pointer": "bespin/plugins/syntax/simple/c:C"
             },
             {
                 "ep": "syntax.simple.highlighter",
                 "name": "CSharp",
                 "extensions": ['cs'],
-                "pointer": "bespin/syntax/simple/csharp:CSharp"
+                "pointer": "bespin/plugins/syntax/simple/csharp:CSharp"
             },
             {
                 "ep": "syntax.simple.highlighter",
                 "name": "CSS",
                 "extensions": ['css'],
-                "pointer": "bespin/syntax/simple/css:CSS"
+                "pointer": "bespin/plugins/syntax/simple/css:CSS"
             },
             {
                 "ep": "syntax.simple.highlighter",
                 "name": "HTML",
                 "extensions": ['html', 'htm', 'xml', 'xhtml', 'shtml'],
-                "pointer": "bespin/syntax/simple/html:HTML"
+                "pointer": "bespin/plugins/syntax/simple/html:HTML"
             },
             {
                 "ep": "syntax.simple.highlighter",
                 "name": "PHP",
                 "extensions": ['php', 'php3', 'php4', 'php5'],
-                "pointer": "bespin/syntax/simple/php:PHP"
+                "pointer": "bespin/plugins/syntax/simple/php:PHP"
             },
             {
                 "ep": "syntax.simple.highlighter",
                 "name": "Python",
                 "extensions": ['py', 'python'],
-                "pointer": "bespin/syntax/simple/python:Python"
+                "pointer": "bespin/plugins/syntax/simple/python:Python"
             },
             {
                 "ep": "syntax.simple.highlighter",
                 "name": "Ruby",
                 "extensions": ['rb', 'ruby'],
-                "pointer": "bespin/syntax/simple/ruby:Ruby"
+                "pointer": "bespin/plugins/syntax/simple/ruby:Ruby"
             }
         ]
     }

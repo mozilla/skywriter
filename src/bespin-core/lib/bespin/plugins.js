@@ -22,6 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var Q = require("ref-send");
 var SC = require("sproutcore");
 
 exports.Extension = SC.Object.extend({
@@ -29,9 +30,7 @@ exports.Extension = SC.Object.extend({
         property = property || "pointer";
         var parts = this.get(property).split(":");
         var modname = parts[0];
-        require.prequire.when(modname, function() {
-            var r = require;
-            var module = r(modname);
+        Q.when(require.async(modname), function(module) {
             if (callback) {
                 if (parts[1]) {
                     callback(module[parts[1]]);
