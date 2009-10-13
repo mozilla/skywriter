@@ -37,7 +37,6 @@ function startEditor() {
     require.catalog = {};
     require.requests = [];
     require.preloads = {};
-    editor_started = false;
 
     // this is an event handler for factory arrivals that will be replaced when
     // narwhal/client arrives.
@@ -45,9 +44,8 @@ function startEditor() {
         // there's only one module we're particularly interested in at the
         // moment.  as soon as it comes down, load the client.  this will take
         // us to the next stage, getting the promise graph and sandbox set up.
-        if (id == "narwhal/client") {
-          require.catalog[id].factory(require);
-        }
+        if (id == "narwhal/client")
+            require.catalog[id].factory(require);
     };
 
     // this function gets called by injected scripts with a portion of the
@@ -74,24 +72,26 @@ function startEditor() {
     // for transport either by a build system or by a server-side component
     // like the narwhal/server module.
     require.preload = function (ids) {
-        var length = ids.length;
-        for (var i = 0; i < length; i++) {
-            // don't double preload; this check makes preload idempotent
-            if (require.preloads[ids[i]])
-                continue;
-            // make a note not to preload this module ever again.
-            require.preloads[ids[i]] = true;
+        setTimeout(function () {
+            var length = ids.length;
+            for (var i = 0; i < length; i++) {
+                // don't double preload; this check makes preload idempotent
+                if (require.preloads[ids[i]])
+                    continue;
+                // make a note not to preload this module ever again.
+                require.preloads[ids[i]] = true;
 
-            // prepend instead of append to avoid KB917927
-            // - Kean Tan <http://www.karmagination.com/>
-            var script = document.createElement('script');
-            script.src = path + ids[i] + '.js';
-            document.documentElement.insertBefore(
-                script,
-                document.documentElement.firstChild
-            );
+                // prepend instead of append to avoid KB917927
+                // - Kean Tan <http://www.karmagination.com/>
+                var script = document.createElement('script');
+                script.src = path + ids[i] + '.js';
+                document.documentElement.insertBefore(
+                    script,
+                    document.documentElement.firstChild
+                );
 
-        };
+            };
+        }, 0);
         return require;
     };
 
