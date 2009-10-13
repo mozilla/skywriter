@@ -33,6 +33,7 @@ var canvas = require("bespin/util/canvas");
 var cookie = require("bespin/util/cookie");
 var mousewheelevent = require("bespin/util/mousewheelevent");
 
+var settings = require("bespin/settings");
 var clipboard = require("bespin/editor/clipboard");
 var editorEvents = require("bespin/editor/events");
 var events = require("bespin/events");
@@ -42,7 +43,6 @@ var cursor = require("bespin/editor/cursor");
 var actions = require("bespin/editor/actions");
 var model = require("bespin/editor/model");
 var history = require("bespin/editor/history");
-var settings = require("bespin/client/settings");
 var model = require("bespin/editor/model");
 
 /**

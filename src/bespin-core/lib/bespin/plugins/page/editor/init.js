@@ -32,11 +32,11 @@ var filesystem = require("bespin/client/filesystem");
 var server = require("bespin/client/server");
 
 var editorMod = require("bespin/editor");
+var settings = require("bespin/settings");
 var toolbar = require("bespin/editor/toolbar");
 var sessionMod = require("bespin/client/session");
 var filesearch = require("bespin/editor/filesearch");
 var quickopen = require("bespin/editor/quickopen");
-var settings = require("bespin/client/settings");
 
 /**
  * This file is the editor bootstrap code that is loaded via script src from

@@ -22,7 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var settings = require("bespin/client/settings");
+var settings = require("bespin/settings");
 
 /**
  * URLBar watches the browser URL navigation bar for changes.

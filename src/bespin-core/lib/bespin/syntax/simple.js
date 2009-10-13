@@ -25,9 +25,9 @@
 /**
  * Simple Syntax Highlighting
  * Not prepared for running in a worker thread.
- * Woul be more overhead than benefit for auch a simple highlighter
+ * Would be more overhead than benefit for auch a simple highlighter
  */
- 
+
 // module: bespin/syntax/simple/base
 
 var bespin = require("bespin");
@@ -59,13 +59,13 @@ exports.Model = syntax.Model.extend({
             // engines are loaded asynchronously. until the real thing
             // is loaded, use the Noop engine.
             this.engine = exports.NoopSyntaxEngine;
-            
+
             exports.Resolver.resolve(language, function(engine) {
                 self.engine = engine;
             });
             this.language = language;
         }
-        
+
         /**
          * Get the row contents as one string
          */
@@ -113,8 +113,7 @@ exports.Model = syntax.Model.extend({
  * Return a plain region that is the entire line
  */
 exports.NoopSyntaxEngine = {
-    highlight: function(line, meta)
-    {
+    highlight: function(line, meta) {
         return { regions: {
             plain: [{
                 start: 0,
@@ -128,7 +127,7 @@ exports.NoopSyntaxEngine = {
 /**
  * The resolver holds the engines per language that are available to do the
  * actual syntax highlighting
- */ 
+ */
 exports.Resolver = new function() {
   var extension2type = {};
 
@@ -143,13 +142,13 @@ exports.Resolver = new function() {
           if (!extension) {
               return;
           }
-          
+
           var candidate = extension2type[extension];
-          
+
           if (candidate) {
               return candidate;
           }
-          
+
           var pluginCatalog = bespin.get("plugins");
           var ep = pluginCatalog.getExtensionPoint("syntax.simple.highlighter");
           var ext = ep.extensions;
