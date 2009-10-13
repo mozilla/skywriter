@@ -24,7 +24,7 @@
 
 var bespin = require("bespin");
 var command = require("bespin/command");
-var util = require("bespin/util");
+var util = require("bespin/util/util");
 var path = require("bespin/util/path");
 var diff_match_patch = require("bespin/mobwrite/diff");
 

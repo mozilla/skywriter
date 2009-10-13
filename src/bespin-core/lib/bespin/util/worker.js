@@ -36,7 +36,7 @@ var USE_GEARS = false;
  * hash (#) url part that is extracted and evaled inside the worker.
  * Sounds like a security hole, but maybe it is not.
  */
-var JS_WORKER_SOURCE = dojo.moduleUrl("bespin", "bootstrap_worker.js");
+var JS_WORKER_SOURCE = dojo.moduleUrl("bespin.util", "bootstrap_worker.js");
 var uriEncodeSource = function(source) {
     return JS_WORKER_SOURCE+"#"+escape(source);
 };

@@ -23,9 +23,9 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var util = require("bespin/util");
-var worker = require("bespin/worker");
-var codecompletion = require("bespin/editor/codecompletion");
+var util = require("bespin/util/util");
+var worker = require("bespin/util/worker");
+var codecompletion = require("bespin/edior/codecompletion");
 var SC = require("sproutcore");
 
 /**

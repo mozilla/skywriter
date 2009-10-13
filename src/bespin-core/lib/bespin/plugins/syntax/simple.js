@@ -29,7 +29,7 @@
  */
 
 var bespin = require("bespin");
-var util = require("bespin/util");
+var util = require("bespin/util/util");
 var syntax = require("bespin/syntax");
 
 /**

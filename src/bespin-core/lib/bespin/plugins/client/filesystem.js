@@ -305,6 +305,7 @@ exports.FileSystem = SC.Object.extend({
         this.server.list(project, directory(path), onSuccess, onFailure);
     }
 });
+var util = require("bespin/util/util");
 var directory = require("bespin/util/path").directory;
 var SC = require("sproutcore");
 

@@ -25,7 +25,7 @@
 var SC = require("sproutcore");
 var bespin = require("bespin");
 
-var util = require("bespin/util");
+var util = require("bespin/util/util");
 var keys = require("bespin/util/keys");
 var canvas = require("bespin/util/canvas");
 var cookie = require("bespin/util/cookie");
@@ -2095,7 +2095,7 @@ exports.API = SC.Object.extend({
 
         this.cursorManager = cursor.CursorManager.create({ editor: this });
         this.ui = exports.UI.create({ editor: this });
-        this.theme = require("bespin/themes/default")['default'];
+        this.theme = require("bespin/theme")['default'];
 
         this.editorKeyListener = exports.DefaultEditorKeyListener.create({ editor: this });
         this.historyManager = history.HistoryManager.create({ editor: this });

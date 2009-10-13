@@ -24,7 +24,7 @@
 
 var bespin = require("bespin");
 var SC = require("sproutcore");
-var util = require("bespin/util");
+var util = require("bespin/util/util");
 
 /**
  *

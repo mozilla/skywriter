@@ -28,11 +28,11 @@
  * and easy to learn to the embedding user.
  */
 
-require("bespin/globals");
+require("bespin/util/globals");
 
 var SC = require("sproutcore");
 var bespin = require("bespin");
-var util = require("bespin/util");
+var util = require("bespin/util/util");
 var settings = require("bespin/settings");
 var plugins = require("bespin/plugins");
 var builtins = require("bespin/builtins");

@@ -23,7 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var worker = require("bespin/worker");
+var worker = require("bespin/util/worker");
 
 /**
  * Module for dealing parsing and getting meta info about source.
