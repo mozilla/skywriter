@@ -2,15 +2,6 @@
 <link rel="stylesheet" href="sproutcore.css" type="text/css" />
 <link rel="stylesheet" href="bespin.css" type="text/css" />
 
-<script type="text/javascript">
-function startEditor() {
-  require("bespin/boot");
-  var bespin = require("bespin");
-  var plugins = bespin.get("plugins");
-  plugins.loader = require.when;
-}
-</script>
-
 <script>// this is not a module.  it is a snippet of a script that will be sent by the
 // client/browser module server defined in the narwhal/server module, or some
 // similar mechanism.  this file is simply an anonymous function declaration.

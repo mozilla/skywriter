@@ -26,6 +26,7 @@
 # ***** END LICENSE BLOCK *****
 # 
 import sys
+import subprocess
 
 from paver.easy import *
 import paver.virtual
@@ -54,6 +55,18 @@ options(
 )
 
 @task
+def install_narwhal():
+    narwhal = path("narwhal")
+    if not narwhal.exists():
+        sh("git clone git://github.com/dangoor/narwhal.git")
+        sh("narwhal/bin/sea tusk install jack")
+        sh("narwhal/bin/sea tusk install qunit")
+    client_package = path("src/bespin-core")
+    # yikes! this won't work on Windows
+    sh("ln -sf %s narwhal/packages/" % (client_package.abspath()))
+
+@task
+@needs(["install_narwhal"])
 def initial():
     """Initial setup help."""
     venv_command = "Scripts/activate.bat" if sys.platform == 'win32' \
@@ -138,6 +151,7 @@ def start(options):
     will allow remote connections (assuming you don't have a firewall
     blocking the connection) and start the server on port 8000.
     """
+    subprocess.Popen("narwhal/bin/sea jackup -p 8081".split(), stdout=sys.stdout)
     args = " ".join("%s=%s" % (key, value) 
         for key, value in options.server.items())
     call_pavement(options.server_pavement, args + " start")

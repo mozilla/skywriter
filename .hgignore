@@ -14,4 +14,4 @@
 ^src/bespin/tmp
 ^src/growl
 ^docs/_site
-
+^narwhal/
