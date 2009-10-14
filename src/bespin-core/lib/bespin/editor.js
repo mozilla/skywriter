@@ -169,7 +169,9 @@ exports.Scrollbar = SC.Object.extend({
 
     setValue: function(value) {
         this.value = this.fixValue(value);
-        if (this.valueChanged){this.valueChanged();}
+        if (this.valueChanged) {
+            this.valueChanged();
+        }
     }
 });
 
@@ -362,7 +364,9 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
         }
 
         // stop going, but allow special strokes to get to the browser
-        if (hasAction || !keys.passThroughToBrowser(e)){dojo.stopEvent(e);}
+        if (hasAction || !keys.passThroughToBrowser(e)) {
+            util.stopEvent(e);
+        }
     },
 
     onkeypress: function(e) {
@@ -380,7 +384,9 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
         if (charToPrint) {
             this.skipKeypress = false;
         } else if (this.skipKeypress) {
-            if (!keys.passThroughToBrowser(e)){dojo.stopEvent(e);}
+            if (!keys.passThroughToBrowser(e)) {
+                util.stopEvent(e);
+            }
             return this.returnValue;
         }
 
@@ -403,7 +409,7 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
             }
         }
 
-        dojo.stopEvent(e);
+        util.stopEvent(e);
     }
 });
 
@@ -623,7 +629,7 @@ exports.UI = SC.Object.extend({
         }
 
         if (e.button == 2) {
-            dojo.stopEvent(e);
+            util.stopEvent(e);
             return false;
         }
 
@@ -916,7 +922,7 @@ exports.UI = SC.Object.extend({
             bespin.getComponent("piemenu", function(piemenu) {
                 piemenu.show(null, false, e.clientX, e.clientY);
             });
-            dojo.stopEvent(e);
+            util.stopEvent(e);
             return false;
         }
 
@@ -1252,15 +1258,21 @@ exports.UI = SC.Object.extend({
         this.gutterWidth = this.GUTTER_INSETS.left + this.GUTTER_INSETS.right;
         // make it wide enough to display biggest line number visible
         this.gutterWidth += ("" + lastLineToRender).length * this.charWidth;
-        if (this.editor.debugMode){this.gutterWidth += this.DEBUG_GUTTER_WIDTH;}
+        if (this.editor.debugMode) {
+            this.gutterWidth += this.DEBUG_GUTTER_WIDTH;
+        }
 
         // these next two blocks make sure we don't scroll too far in either the
         // x or y axis
         if (this.xoffset < 0) {
-            if ((Math.abs(this.xoffset)) > (virtualwidth - (cwidth - this.gutterWidth))){this.xoffset = (cwidth - this.gutterWidth) - virtualwidth;}
+            if ((Math.abs(this.xoffset)) > (virtualwidth - (cwidth - this.gutterWidth))) {
+                this.xoffset = (cwidth - this.gutterWidth) - virtualwidth;
+            }
         }
         if (this.yoffset < 0) {
-            if ((Math.abs(this.yoffset)) > (virtualheight - (cheight - this.BOTTOM_SCROLL_AFFORDANCE))){this.yoffset = cheight - (virtualheight - this.BOTTOM_SCROLL_AFFORDANCE);}
+            if ((Math.abs(this.yoffset)) > (virtualheight - (cheight - this.BOTTOM_SCROLL_AFFORDANCE))) {
+                this.yoffset = cheight - (virtualheight - this.BOTTOM_SCROLL_AFFORDANCE);
+            }
         }
 
         // if the current scrolled positions are different than the scroll
@@ -1557,8 +1569,12 @@ exports.UI = SC.Object.extend({
                 // in some cases the selections are -1 => set them to a more "realistic" number
                 if (selections) {
                     tsel = { startCol: 0, endCol: lineText.length };
-                    if (selections.startCol != -1){tsel.startCol = selections.startCol;}
-                    if (selections.endCol   != -1){tsel.endCol = selections.endCol;}
+                    if (selections.startCol != -1) {
+                        tsel.startCol = selections.startCol;
+                    }
+                    if (selections.endCol != -1) {
+                        tsel.endCol = selections.endCol;
+                    }
                 } else {
                     tsel = false;
                 }
@@ -2223,14 +2239,21 @@ exports.API = SC.Object.extend({
     },
 
     /**
+     * Basic setting
+     */
+    defaultTabSize: 4,
+
+    /**
      * be gentle trying to get the tabstop from settings
      */
     getTabSize: function() {
         var settings = bespin.get("settings");
-        var size = bespin.defaultTabSize; // default
+        var size = this.defaultTabSize;
         if (settings) {
             var tabsize = parseInt(settings.get("tabsize"), 10);
-            if (tabsize > 0){size = tabsize;}
+            if (tabsize > 0) {
+                size = tabsize;
+            }
         }
         return size;
     },
@@ -2423,7 +2446,9 @@ exports.API = SC.Object.extend({
             document.title = filename + ' - editing with Bespin';
 
             var commandLine = bespin.get("commandLine");
-            if (commandLine){commandLine.showHint('Saved file: ' + file.name);}
+            if (commandLine) {
+                commandLine.showHint('Saved file: ' + file.name);
+            }
 
             bespin.publish("editor:clean");
 
@@ -2434,7 +2459,9 @@ exports.API = SC.Object.extend({
 
         var newOnFailure = function(xhr) {
             var commandLine = bespin.get("commandLine");
-            if (commandLine){commandLine.showHint('Save failed: ' + xhr.responseText);}
+            if (commandLine) {
+                commandLine.showHint('Save failed: ' + xhr.responseText);
+            }
 
             if (util.isFunction(onFailure)) {
                 onFailure();

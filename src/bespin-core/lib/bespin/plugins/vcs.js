@@ -22,11 +22,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var bespin = require("bespin");
+var util = require("bespin/util/util");
+var command = require("bespin/command");
+
 /**
  * Command store for the VCS commands
  * (which are subcommands of the main 'vcs' command)
  */
-exports.commands = new bespin.command.Store(bespin.command.store, {
+exports.commands = new command.Store(command.store, {
     name: 'vcs',
     preview: 'run a version control command',
     completeText: 'subcommands: add, clone, commit, diff, getkey, help, push, remove, resolved, update',
@@ -79,7 +83,7 @@ exports.getInfoFromUser = function(instruction, callback, opts) {
 
         callback(values);
         instruction.unlink();
-        dojo.stopEvent(e);
+        util.stopEvent(e);
         return false;
     };
 
@@ -177,7 +181,7 @@ exports.commands.addCommand({
 
         var form = dojo.create('form', {
             onsubmit: function(e) {
-                dojo.stopEvent(e);
+                util.stopEvent(e);
                 var data = dojo.formToObject(form);
 
                 instruction.addOutput("");
@@ -213,7 +217,7 @@ exports.commands.addCommand({
                 instruction.setElement(outer);
                 clone(data, instruction, exports._createStandardHandler(instruction, {
                     onSuccess: function() {
-                        bespin.publish("project:created", {project: newProjectName});
+                        bespin.publish("project:created", { project: newProjectName });
                     },
                     onPartial: function(output) {
                         status.innerHTML = output;
@@ -655,7 +659,7 @@ exports.commands.addCommand({
  * Command store for the Mercurial commands
  * (which are subcommands of the main 'hg' command)
  */
-exports.hgCommands = new bespin.command.Store(bespin.command.store, {
+exports.hgCommands = new command.Store(command.store, {
     name: 'hg',
     preview: 'run a Mercurial command',
     subcommanddefault: 'help'
@@ -706,7 +710,7 @@ exports.hgCommands.addCommand({
  * Command store for the Subversion commands
  * (which are subcommands of the main 'svn' command)
  */
-exports.svnCommands = new bespin.command.Store(bespin.command.store, {
+exports.svnCommands = new command.Store(command.store, {
     name: 'svn',
     preview: 'run a Subversion command',
     subcommanddefault: 'help'
@@ -1351,10 +1355,10 @@ exports.svnCommands.addCommand({
     takes: ['*'],
     aliases: ['ci'],
     prompting: function(command) {
-        if (bespin.util.include(command, "-m")) {
-            return {getKeychain: true};
+        if (util.include(command, "-m")) {
+            return { getKeychain: true };
         }
-        return {getKeychain: true, getMessage: true};
+        return { getKeychain: true, getMessage: true };
     },
     preview: 'commit (ci): Send changes from your working copy to the repository',
     description:         "usage: svn commit [--help] [--quiet] [--message MESSAGE] [--changelist\n" +

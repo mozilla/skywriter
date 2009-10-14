@@ -24,7 +24,6 @@
 
 var bespin    = require("bespin");
 var webpieces = require("bespin/util/webpieces");
-var navigate  = require("bespin/util/navigate");
 var register  = require("bespin/user/register");
 
 /**
@@ -33,7 +32,8 @@ var register  = require("bespin/user/register");
  */
 SC.mixin(exports, {
     whenLoginSucceeded: function() {
-        navigate.editor();
+        // TODO: something else
+        // navigate.editor();
     },
 
     whenLoginFailed: function(xhr) {

@@ -116,7 +116,7 @@ function startEditor() {
 
     // return the require object for chaining
     return require;
-}).call(this,"/.js/").preload(["json", "sandbox", "narwhal/client", "promise", "array", "object", "string", "function", "regexp", "reactor", "date", "global", "system", "binary", "bespin/boot"]).async("bespin/boot")</script>
+}).call(this,"/.js/").preload(["sandbox", "narwhal/client", "promise", "array", "object", "string", "function", "regexp", "reactor", "date", "global", "system", "binary", "bespin/boot"]).async("bespin/boot")</script>
 
 <script type="text/javascript" src="dojo/dojo.js.uncompressed.js"></script>
 <script type='text/javascript' src='dojo/regexp.js'></script>
@@ -137,7 +137,7 @@ function startEditor() {
 <body>
 
 <h1>Sample Editor as a Component</h1>
-<div id="editor" class="bespin" data-bespin-options="{ 'stealFocus': true }">var foo = "whee";
+<div id="editor" class="bespin" data-bespin-options='{ "stealFocus": true }'>var foo = "whee";
 
 function flubber() {
     return "tweeble";
@@ -146,6 +146,7 @@ function flubber() {
 <script>
 window.onBespinLoad = function() {
     console.log("window.onBespinLoad called");
+    bespin = document.getElementById("editor").bespin;
 };
 </script>
 
@@ -165,7 +166,8 @@ window.onBespinLoad = function() {
     function setSetting() {
         var key = dojo.byId('key').value;
         var value = dojo.byId('value').value;
-        window.editorComponent.set(key, value);
+        console.debug(bespin);
+        bespin.set(key, value);
     }
   </script>
   Push a new setting: <input type="text" id="key" value="strictlines">
@@ -176,10 +178,10 @@ window.onBespinLoad = function() {
 <div>
   <script>
     function copyToTextarea() {
-        dojo.byId('inandout').value = window.editorComponent.getContent();
+        dojo.byId('inandout').value = bespin.getContent();
     }
     function copyToEditor() {
-        window.editorComponent.setContent(dojo.byId('inandout').value);
+        bespin.setContent(dojo.byId('inandout').value);
     }
   </script>
   <textarea id="inandout" cols="100" rows="10"></textarea><br>

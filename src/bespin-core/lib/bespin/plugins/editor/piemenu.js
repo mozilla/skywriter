@@ -100,11 +100,11 @@ members:
 
             if (self.keyRunsMe(e)) {
                 self.show();
-                dojo.stopEvent(e);
+                util.stopEvent(e);
                 return;
             } else if (e.keyCode == keys.Key.ESCAPE) {
                 self.hide();
-                dojo.stopEvent(e);
+                util.stopEvent(e);
                 return;
             }
 
@@ -116,7 +116,7 @@ members:
                     self.renderCompletePie(slice, d);
                     setTimeout(function() {
                         self.showSlice(slice);
-                        dojo.stopEvent(e);
+                        util.stopEvent(e);
                     }, 10);
                     return;
                 }
@@ -154,7 +154,7 @@ members:
                 console.log("Hiding from context menu.");
                 this.hide();
             }
-            dojo.stopEvent(e);
+            util.stopEvent(e);
         }));
     },
 

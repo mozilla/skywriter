@@ -457,7 +457,7 @@ members: {
                     // bespin.get('editor').container.dispatchEvent(_event);
 
                     // stop the event so it doesn't bubble (e.g. Cmd-O doubling up)
-                    dojo.stopEvent(e);
+                    util.stopEvent(e);
                     break;
            }
        }));

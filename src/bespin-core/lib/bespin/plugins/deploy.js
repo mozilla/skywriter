@@ -23,6 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
+var util = require("bespin/util/util");
 var command = require("bespin/command");
 var vcs = require("bespin/vcs");
 var server = require("bespin/client/server");
@@ -88,7 +89,7 @@ exports.commands.addCommand({
 
                     var form = dojo.create("form", {
                         onsubmit: function(e) {
-                            dojo.stopEvent(e);
+                            util.stopEvent(e);
                             instruction.addOutput("");
                             var data = dojo.formToObject(form);
                             saveDeploySetup(project, data, {

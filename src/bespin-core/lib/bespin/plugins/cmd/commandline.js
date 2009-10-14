@@ -25,8 +25,8 @@
 // This is a plugin
 
 var bespin = require("bespin");
+var util = require("bespin/util/util");
 var filepopup = require("bespin/editor/filepopup");
-var filepopup = require("bespin/filepopup");
 
 // This code came from embed.init() although commented out. When we re-enable
 // this plug-in, we might need to use this code
@@ -471,7 +471,7 @@ members: {
                     onclick: function(ev) {
                         instruction.hideOutput = !instruction.hideOutput;
                         self.updateOutput();
-                        dojo.stopEvent(ev);
+                        util.stopEvent(ev);
                     }
                 }, hover);
 
@@ -484,7 +484,7 @@ members: {
                     onclick: function(ev) {
                         self.history.remove(instruction);
                         self.updateOutput();
-                        dojo.stopEvent(ev);
+                        util.stopEvent(ev);
                     }
                 }, hover);
 
@@ -761,13 +761,13 @@ members: {
                 if (this.currentPanel != "output") {
                     this.showPanel("output");
                 }
-                dojo.stopEvent(e);
+                util.stopEvent(e);
                 return false;
             } else if (e.keyChar == 'o' && (e.ctrlKey || e.metaKey)) { // send back
                 if (this.currentPanel != "files") {
                     this.showPanel("files");
                 }
-                dojo.stopEvent(e);
+                util.stopEvent(e);
                 return false;
             } else if ((e.keyChar == 'n' && e.ctrlKey) || e.keyCode == key.DOWN_ARROW) {
                 var next = this.history.next();
@@ -778,7 +778,7 @@ members: {
                     this.commandLine.value = '';
                 }
 
-                dojo.stopEvent(e);
+                util.stopEvent(e);
                 return false;
             } else if ((e.keyChar == 'p' && e.ctrlKey) || e.keyCode == key.UP_ARROW) {
                 var prev = this.history.previous();
@@ -786,24 +786,24 @@ members: {
                     this.commandLine.value = prev.typed;
                 }
 
-                dojo.stopEvent(e);
+                util.stopEvent(e);
                 return false;
             } else if (e.keyChar == 'u' && e.ctrlKey) {
                 this.commandLine.value = '';
 
-                dojo.stopEvent(e);
+                util.stopEvent(e);
                 return false;
             } else if (e.keyCode == key.ENTER) {
                 var typed = this.commandLine.value;
                 this.commandLine.value = '';
                 this.executeCommand(typed);
 
-                dojo.stopEvent(e);
+                util.stopEvent(e);
                 return false;
             } else if (e.keyCode == key.TAB) {
                 this._complete(e);
 
-                dojo.stopEvent(e);
+                util.stopEvent(e);
                 return false;
             } else { // pie menu use cases here
                 if (e.keyCode == key.ESCAPE) {
@@ -812,7 +812,7 @@ members: {
                     bespin.getComponent("popup", function(popup) {
                         popup.hide();
                     });
-                    dojo.stopEvent(e);
+                    util.stopEvent(e);
                     return false;
                 }
             }

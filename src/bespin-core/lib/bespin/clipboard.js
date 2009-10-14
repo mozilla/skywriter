@@ -39,7 +39,7 @@ var uses = null;
 /**
  * Given a clipboard adapter implementation, save it, an call install() on it
  */
-var install = function(editor, newImpl) {
+function install(editor, newImpl) {
     uninstall();
     uses = newImpl;
     uses.install(editor);
@@ -48,7 +48,7 @@ var install = function(editor, newImpl) {
 /**
  * Uninstalls the clipboard handler installed by install()
  */
-var uninstall = function() {
+function uninstall() {
     if (uses && typeof uses.uninstall == "function") {
         uses.uninstall();
     }
@@ -80,18 +80,25 @@ exports.setup = function(editor) {
  * Create a hidden text area so we can adjust the destination of the copy event
  * just before it happens.
  */
-var createHiddenTextarea = function() {
-    return dojo.create("textarea", {
-        tabIndex: '-1',
-        style: {
-            position: "absolute",
-            zIndex: 999,
-            top: "-10000px",
-            width: 0,
-            height: 0,
-            border: "none"
-        }
-    }, dojo.body());
+function createHiddenTextarea() {
+    var textarea = document.createElement("textarea");
+    textarea.tabIndex = -1;
+    textarea.style.position = "absolute";
+    textarea.style.zIndex = "999";
+    textarea.style.top = "-10000px";
+    textarea.style.width = 0;
+    textarea.style.height = 0;
+    document.body.appendChild(textarea);
+    return textarea;
+};
+
+// Defensively stop doing copy/cut/paste magic if you are in the command line
+var isCommandLine = function(e) {
+    return e.target.id == "command";
+};
+
+var editorHasFocus = function() {
+    return editor.focus;
 };
 
 /**
@@ -102,24 +109,17 @@ var createHiddenTextarea = function() {
  */
 var DOMEvents = SC.Object.extend({
     install: function(editor) {
-        // Defensively stop doing copy/cut/paste magic if you are in the command line
-        var stopAction = function(e) {
-            return e.target.id == "command";
-        };
-        var editorHasFocus = function() {
-            return editor.focus;
-        };
-
         var focuser = createHiddenTextarea();
         this.focuser = focuser;
         var onfocuser = false;
 
         // Copy
         this.beforecopyHandle = dojo.connect(document.body, "onbeforecopy", function(e) {
-            if ((!editorHasFocus() && !onfocuser) || stopAction(e)) {
+            if ((!editorHasFocus() && !onfocuser) || isCommandLine(e)) {
                 return;
             }
-            dojo.stopEvent(e); // a full stop, because we _are_ handling the event
+            // a full stop, because we _are_ handling the event
+            util.stopEvent(e);
 
             // have to show that there is something to copy
             focuser.value = "Hello";
@@ -134,14 +134,15 @@ var DOMEvents = SC.Object.extend({
             if (!editorHasFocus() && !onfocuser) {
                 return;
             }
-            if (stopAction(e)) {
+            if (isCommandLine(e)) {
                 return;
             }
 
             var selectionText = editor.getSelectionAsText();
             if (selectionText && selectionText != '') {
                 e.clipboardData.setData('text/plain', selectionText);
-                dojo.stopEvent(e); // need a full stop, otherwise someone else will try to set copy data.
+                // stop event, otherwise someone else will try to set copy data.
+                util.stopEvent(e);
             }
 
             editor.canvas.focus();
@@ -150,10 +151,11 @@ var DOMEvents = SC.Object.extend({
 
         // Cut
         this.beforecutHandle = dojo.connect(document, "beforecut", function(e) {
-            if ((!editorHasFocus() && !onfocuser) || stopAction(e)) {
+            if ((!editorHasFocus() && !onfocuser) || isCommandLine(e)) {
                 return;
             }
-            dojo.stopEvent(e); // a full stop, because we _are_ handling the event
+            // a full stop, because we _are_ handling the event
+            util.stopEvent(e);
 
             // have to show that there is something to copy
             focuser.value = "Hello";
@@ -168,7 +170,7 @@ var DOMEvents = SC.Object.extend({
             if (!editorHasFocus() && !onfocuser) {
                 return;
             }
-            if (stopAction(e)) {
+            if (isCommandLine(e)) {
                 return;
             }
 
@@ -195,20 +197,20 @@ var DOMEvents = SC.Object.extend({
             if (!editorHasFocus()) {
                 return;
             }
-            if (stopAction(e)) {
+            if (isCommandLine(e)) {
                 return;
             }
-            dojo.stopEvent(e); // a full stop, because we _are_ handling the event
-            e.preventDefault();
+            // a full stop, because we _are_ handling the event
+            util.stopEvent(e);
         });
 
         this.pasteHandle = dojo.connect(document, "paste", function(e) {
-            if (!editorHasFocus() || stopAction(e)) {
+            if (!editorHasFocus() || isCommandLine(e)) {
                 return;
             }
-            dojo.stopEvent(e); // a full stop, because we _are_ handling the event
+            // a full stop, because we _are_ handling the event
+            util.stopEvent(e);
 
-            e.preventDefault();
             var args = cursor.buildArgs();
             args.chunk = e.clipboardData.getData('text/plain');
             if (args.chunk) {
@@ -343,13 +345,13 @@ exports.EditorOnly = SC.Object.extend({
  */
 exports.manual = function() {
     var clipdata;
-    var privilegeManager = window.netscape ? netscape.security.PrivilegeManager : null;
+    var privMan = window.netscape ? netscape.security.PrivilegeManager : null;
 
     return {
         copy: function(copytext) {
             try {
-                if (privilegeManager.enablePrivilege) {
-                    privilegeManager.enablePrivilege("UniversalXPConnect");
+                if (privMan.enablePrivilege) {
+                    privMan.enablePrivilege("UniversalXPConnect");
                 } else {
                     clipdata = copytext;
                     return;
@@ -373,7 +375,8 @@ exports.manual = function() {
             trans.setTransferData("text/unicode", str, copytext.length * 2);
 
             var clipid = Components.interfaces.nsIClipboard;
-            var clip = Components.classes["@mozilla.org/widget/clipboard;1"].getService(clipid);
+            var clip = Components.classes["@mozilla.org/widget/clipboard;1"]
+                    .getService(clipid);
             if (!clip) {
                 return false;
             }

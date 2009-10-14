@@ -354,6 +354,14 @@ exports.contains = document.compareDocumentPosition ? function(a, b) {
 };
 
 /**
+ * Prevents propagation and clobbers the default action of the passed event
+ */
+exports.stopEvent = function(ev) {
+    ev.preventDefault();
+    ev.stopPropagation();
+};
+
+/**
  * Create a random password of the given length (default 16 chars)
  */
 exports.randomPassword = function(length) {

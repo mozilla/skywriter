@@ -24,7 +24,6 @@
 
 var bespin = require("bespin");
 
-var navigate = require("bespin/util/navigate");
 var path = require("bespin/util/path");
 var urlbar = require("bespin/util/urlbar");
 
@@ -228,7 +227,8 @@ exports.onLoad = function() {
     };
 
     var whenNotLoggedIn = function() {
-        navigate.home(); // go back
+        // TODO: Something else
+        // navigate.home(); // go back
     };
 
     // Force a login just in case the user session isn't around
@@ -442,7 +442,8 @@ exports.onLoad = function() {
     };
 
     var whenNotLoggedIn = function() {
-        navigate.home(); // go back
+        // TODO: Something else
+        // navigate.home(); // go back
     };
 
     // Force a login just in case the user session isn't around

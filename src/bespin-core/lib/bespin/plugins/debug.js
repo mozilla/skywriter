@@ -159,7 +159,7 @@ members: {
                     this.commandLine.value = next.typed;
                 }
 
-                dojo.stopEvent(e);
+                util.stopEvent(e);
                 return false;
             } else if ((e.keyChar == 'p' && e.ctrlKey) || e.keyCode == key.UP_ARROW) {
                 var prev = this.history.previous();
@@ -167,12 +167,12 @@ members: {
                     this.commandLine.value = prev.typed;
                 }
 
-                dojo.stopEvent(e);
+                util.stopEvent(e);
                 return false;
             } else if (e.keyChar == 'u' && e.ctrlKey) {
                 this.commandLine.value = '';
 
-                dojo.stopEvent(e);
+                util.stopEvent(e);
                 return false;
             }
         }));

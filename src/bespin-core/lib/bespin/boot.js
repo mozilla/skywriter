@@ -31,8 +31,8 @@ require.prequire.when("bespin/embed", function() {
     for (var i = 0; i < nodes.length; i++) {
         var node = nodes[i];
         var options = node.getAttribute('data-bespin-options');
-        var bespin = embed.useBespin(node, JSONparse(options));
-        node.setAttribute('bespin', bespin);
+        var bespin = embed.useBespin(node, JSON.parse(options));
+        node.bespin = bespin;
     }
 
     // If users want a custom startup
@@ -40,8 +40,3 @@ require.prequire.when("bespin/embed", function() {
         window.onBespinLoad();
     }
 });
-
-// For some reason that I can't work out JSON.parse was barfing here?!
-function JSONparse(text) {
-    return eval("[" + text + "]")[0];
-}
