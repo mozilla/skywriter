@@ -27,17 +27,16 @@
 
 console.log("Made it into boot!");
 
-// TODO "prequire" is a hack and should be replaced when
-// require.when/require.async become available for real.
-require.prequire.when("bespin/embed", function() {
-    var embed = require("bespin/embed");
+var r = require;
+var Q = r("ref-send");
 
+Q.when(require.async("bespin/embed"), function(embed) {
     var nodes = document.querySelectorAll(".bespin");
     for (var i = 0; i < nodes.length; i++) {
         var node = nodes[i];
         var options = node.getAttribute('data-bespin-options');
-        var bespin = embed.useBespin(node, JSON.parse(options));
-        node.bespin = bespin;
+        var bespin = embed.useBespin(node, eval("(" + options + ")"));
+        node.setAttribute('bespin', bespin);
     }
 
     // If users want a custom startup
