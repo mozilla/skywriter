@@ -23,13 +23,26 @@
  * ***** END LICENSE BLOCK ***** */
 
 /**
+ * Adds escape sequences for special characters in regular expressions
+ * @param {String} str a String with special characters to be left unescaped
+ */
+var escapeString = function(str, except){
+    return str.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, function(ch){
+        if(except && except.indexOf(ch) != -1){
+            return ch;
+        }
+        return "\\" + ch;
+    });
+};
+
+/**
  * Get a cookie value by name
  * @param {String} name The cookie value to retrieve
  * @return The value, or undefined if the cookie was not found
  */
 exports.get = function(name) {
-    var matches = document.cookie.match(new RegExp("(?:^|; )" +
-        dojo.regexp.escapeString(name) + "=([^;]*)"));
+    var matcher = new RegExp("(?:^|; )" + escapeString(name) + "=([^;]*)");
+    var matches = document.cookie.match(matcher);
     return matches ? decodeURIComponent(matches[1]) : undefined;
 };
 

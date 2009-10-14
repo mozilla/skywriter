@@ -23,7 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var util = require("bespin/util");
+var util = require("bespin/util/util");
 var command = require("bespin/command");
 var utils = require("bespin/editor/utils");
 

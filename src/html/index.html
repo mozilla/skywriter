@@ -124,20 +124,30 @@ function startEditor() {
 <script type='text/javascript' src='dojo/AdapterRegistry.js'></script>
 <script type='text/javascript' src='dojo/fx/easing.js'></script>
 <script type='text/javascript' src='dijit/_base/place.js'></script>
+<!--
 <script type='text/javascript' src='th.compressed.js'></script>
+-->
+
 <style>
   body { padding: 20px; font-family: Calibri, Helvetica, Arial; }
   h1 { border-bottom: 1px solid #ddd; font-size:120%; }
+  .bespin { margin: 0; padding: 0; border: 0; height: 300px; border: 10px solid #ddd; -moz-border-radius: 10px; -webkit-border-radius: 10px; }
 </style>
 </head>
 <body>
 
 <h1>Sample Editor as a Component</h1>
-<div id="editor" style="margin: 0; padding: 0; border: 0; height: 300px; border: 10px solid #ddd; -moz-border-radius: 10px; -webkit-border-radius: 10px;">var foo = "whee";
+<div id="editor" class="bespin" data-bespin-options="{ 'stealFocus': true }">var foo = "whee";
 
 function flubber() {
     return "tweeble";
 }</div>
+
+<script>
+window.onBespinLoad = function() {
+    console.log("window.onBespinLoad called");
+};
+</script>
 
 <h1>Play with the editor</h1>
 

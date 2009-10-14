@@ -1,12 +1,8 @@
 /*
  * Orginal: http://adomas.org/javascript-mouse-wheel/
  *
- * Tweaked to map everyting to Mozilla's event.detail result
+ * Tweaked to map everything to Mozilla's event.detail result
  */
-
-// module: bespin/util/mousewheelevent
-
-var bespin = require("bespin");
 
 SC.mixin(exports, {
     wheel: function(event) {

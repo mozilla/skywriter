@@ -110,7 +110,7 @@ exports.Scrollbar = SC.Object.extend({
     onmousewheel: function(e) {
         // We need to move the editor unless something else needs to scroll.
         // We need a clean way to define that behaviour, but for now we hack and put in other elements that can scroll
-        var command_output = dojo.byId("command_output");
+        var command_output = document.getElementById("command_output");
         var target = e.target || e.originalTarget;
         if (command_output && (target.id == "command_output" || util.contains(command_output, target))) {
             return;
@@ -298,7 +298,7 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
         // The magic "CMD" means metaKey for Mac (the APPLE or COMMAND key)
         // and ctrlKey for Windows (CONTROL)
         if (modifiers.toUpperCase().indexOf("CMD") != -1) {
-            if (util.isMac()) {
+            if (util.isMac) {
                 metaKey = true;
             } else {
                 ctrlKey = true;
@@ -1139,18 +1139,24 @@ exports.UI = SC.Object.extend({
         return lh;
     },
 
-    resetCanvas: function() { // forces a resize of the canvas
-        dojo.attr(dojo.byId(this.editor.canvas), { width: this.getWidth(), height: this.getHeight() });
+    /**
+     * Forces a resize of the canvas
+     */
+    resetCanvas: function() {
+        dojo.attr(this.editor.canvas, {
+            width: this.getWidth(),
+            height: this.getHeight()
+        });
     },
 
-    /*
+    /**
      * Wrap the normal fillText for the normal case
      */
     fillText: function(ctx, text, x, y) {
         ctx.fillText(text, x, y);
     },
 
-    /*
+    /**
      * Set the transparency to 30% for the fillText (e.g. readonly mode uses this)
      */
     fillTextWithTransparency: function(ctx, text, x, y) {
@@ -1170,7 +1176,7 @@ exports.UI = SC.Object.extend({
         // these are convenience references so we don't have to type so much
         var self = this;
         var ed = this.editor;
-        var c = dojo.byId(ed.canvas);
+        var c = this.editor.canvas;
         var theme = ed.theme;
 
         // these are commonly used throughout the rendering process so are defined up here to make it clear they are shared
@@ -2111,6 +2117,10 @@ exports.API = SC.Object.extend({
         });
         dojo.connect(this.canvas, "focus", function(e) {
             self.setFocus(true);
+        });
+        // TODO: We're repainting fairly often do we need to add this?
+        dojo.connect(window, 'resize', function() {
+            self.paint();
         });
 
         clipboard.setup(this);

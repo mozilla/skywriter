@@ -22,22 +22,32 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
-
 /**
- * While dojo.queryToObject() is mainly for URL query strings,
- * this version allows to specify a separator character
+ * Create an object representing a de-serialized query section of a URL.
+ * Query keys with multiple values are returned in an array.
+ * <p>Example: The input "foo=bar&foo=baz&thinger=%20spaces%20=blah&zonk=blarg&"
+ * Produces the output object:
+ * <pre>{
+ *   foo: [ "bar", "baz" ],
+ *   thinger: " spaces =blah",
+ *   zonk: "blarg"
+ * }
+ * </pre>
+ * <p>Note that spaces and other urlencoded entities are correctly handled
+ * @see dojo.queryToObject()
+ * While dojo.queryToObject() is mainly for URL query strings, this version
+ * allows to specify a separator character
  */
 exports.queryToObject = function(str, seperator) {
     var ret = {};
-    var qp = str.split(seperator);
+    var qp = str.split(seperator || "&");
     var dec = decodeURIComponent;
     qp.forEach(function(item) {
-        if (item.length){
+        if (item.length) {
             var parts = item.split("=");
             var name = dec(parts.shift());
             var val = dec(parts.join("="));
-            if (dojo.isString(ret[name])){
+            if (exports.isString(ret[name])){
                 ret[name] = [ret[name]];
             }
             if (Array.isArray(ret[name])){
@@ -102,7 +112,7 @@ exports.isFunction = (function() {
         return it && (t == "function" || it instanceof Function) && !it.nodeType; // Boolean
     };
 
-    return dojo.isSafari ?
+    return exports.isSafari ?
         // only slow this down w/ gratuitious casting in Safari (not WebKit)
         function(/*anything*/ it) {
             if (typeof it == "function" && it == "[object NodeList]") {
@@ -278,32 +288,54 @@ exports.OS = {
     WINDOWS: 'WINDOWS'
 };
 
-/**
- * Is the user using a browser that identifies itself as Mac OS
- */
-exports.isMac = function() {
-    return navigator.appVersion.indexOf("Mac") >= 0;
-};
+var ua = navigator.userAgent;
+var av = navigator.appVersion;
+
+/** Is the user using a browser that identifies itself as Linux */
+exports.isLinux = av.indexOf("Linux") >= 0;
+
+/** Is the user using a browser that identifies itself as Windows */
+exports.isWindows = av.indexOf("Win") >= 0;
+
+/** Is the user using a browser that identifies itself as WebKit */
+exports.isWebKit = parseFloat(ua.split("WebKit/")[1]) || undefined;
+
+/** Is the user using a browser that identifies itself as Chrome */
+exports.isChrome = parseFloat(ua.split("Chrome/")[1]) || undefined;
+
+/** Is the user using a browser that identifies itself as Mac OS */
+exports.isMac = av.indexOf("Macintosh") >= 0;
+
+if (ua.indexOf("AdobeAIR") >= 0) {
+    exports.isAIR = 1;
+}
 
 /**
- * Is the user using a browser that identifies itself as Linux
+ * Is the user using a browser that identifies itself as Safari
+ * See also:
+ * - http://developer.apple.com/internet/safari/faq.html#anchor2
+ * - http://developer.apple.com/internet/safari/uamatrix.html
  */
-exports.isLinux = function() {
-    return navigator.appVersion.indexOf("Linux") >= 0;
-};
+var index = Math.max(av.indexOf("WebKit"), av.indexOf("Safari"), 0);
+if (index && !exports.isChrome) {
+    // try to grab the explicit Safari version first. If we don't get
+    // one, look for less than 419.3 as the indication that we're on something
+    // "Safari 2-ish".
+    exports.isSafari = parseFloat(av.split("Version/")[1]);
+    if (!exports.isSafari || parseFloat(av.substr(index + 7)) <= 419.3) {
+        exports.isSafari = 2;
+    }
+}
 
-/**
- * Is the user using a browser that identifies itself as Windows
- */
-exports.isWindows = function() {
-    return navigator.appVersion.indexOf("Win") >= 0;
-};
+if (ua.indexOf("Gecko") >= 0 && !exports.isWebKit) {
+    exports.isMozilla = parseFloat(av);
+}
 
 /**
  * Return a exports.OS constant
  */
 exports.getOS = function() {
-    if (exports.isMac()) {
+    if (exports.isMac) {
         return exports.OS['MAC'];
     } else if (exports.isLinux()) {
         return exports.OS['LINUX'];

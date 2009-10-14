@@ -22,13 +22,26 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// This module is set up to be dependency-less so that Narwhal
-// will be able to run it right away.
-
 // TODO "prequire" is a hack and should be replaced when
 // require.when/require.async become available for real.
-require.prequire.when("bespin/boot2", function() {
-    var r = require;
-    var boot2 = r("bespin/boot2");
+require.prequire.when("bespin/embed", function() {
+    var embed = require("bespin/embed");
+
+    var nodes = document.querySelectorAll(".bespin");
+    for (var i = 0; i < nodes.length; i++) {
+        var node = nodes[i];
+        var options = node.getAttribute('data-bespin-options');
+        var bespin = embed.useBespin(node, JSONparse(options));
+        node.setAttribute('bespin', bespin);
+    }
+
+    // If users want a custom startup
+    if (window.onBespinLoad) {
+        window.onBespinLoad();
+    }
 });
 
+// For some reason that I can't work out JSON.parse was barfing here?!
+function JSONparse(text) {
+    return eval("[" + text + "]")[0];
+}

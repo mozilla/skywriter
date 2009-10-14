@@ -22,8 +22,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
-
 /**
  * Simple wrapper to force navigation to a project URL without all using
  * location.href
@@ -37,33 +35,33 @@ exports.go = function(url, newTab) {
 };
 
 /**
- * 
+ *
  */
 exports.home = function(newTab) {
     go("index.html", newTab);
 };
 
 /**
- * 
+ *
  */
 exports.quickEdit = function(newTab) {
     go("editor.html#new=true", newTab);
 };
 
 /**
- * 
+ *
  */
 exports.editor = function(project, path, opts) {
     var url = "editor.html#";
     var args = [];
-  
-    if (project) args.push("project=" + project);
-    if (path) args.push("path=" + path);
-    if (!opts) opts = {};
-    if (opts.newFile) args.push("new=true");
-    if (opts.content) args.push("content=" + escape(opts.content));
-  
-    if (args.length > 0) url += args.join("&");
-  
+
+    if (project){args.push("project=" + project);}
+    if (path){args.push("path=" + path);}
+    if (!opts){opts = {};}
+    if (opts.newFile){args.push("new=true");}
+    if (opts.content){args.push("content=" + escape(opts.content));}
+
+    if (args.length > 0){url += args.join("&");}
+
     go(url, opts.newTab);
 };

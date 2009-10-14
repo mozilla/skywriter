@@ -311,7 +311,7 @@ SC.mixin(exports, {
                 var commandLine = exports.register("debugbar",
                     new debug.EvalCommandLineInterface('debugbar_command', null, {
                         idPrefix: "debugbar_",
-                        parentElement: dojo.byId("debugbar")
+                        parentElement: document.getElementById("debugbar")
                     })
                 );
                 callback.call(context, commandLine);
@@ -331,7 +331,7 @@ SC.mixin(exports, {
      * Set innerHTML on the element given, with the Bespin version info
      */
     displayVersion: function(el) {
-        el = dojo.byId(el) || dojo.byId("version");
+        el = document.getElementById(el) || document.getElementById("version");
         if (!el) {
             return;
         }

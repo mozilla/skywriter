@@ -22,8 +22,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
-
 /**
  * Take the given arguments and combine them with one path separator:
  * <pre>
@@ -69,7 +67,7 @@ exports.directory = function(path) {
  * </pre>
  */
 exports.makeDirectory = function(path) {
-    if (!/\/$/.test(path)) path += '/';
+    if (!/\/$/.test(path)){path += '/';}
     return path;
 };
 
@@ -94,7 +92,7 @@ exports.escape = function() {
 };
 
 /**
- * 
+ *
  */
 exports.trimLeadingSlash = function(path) {
     if (path.indexOf('/') == 0) {

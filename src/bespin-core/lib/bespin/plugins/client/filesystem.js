@@ -22,11 +22,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
-var util = require("bespin/util");
-var defaultScope = require("bespin/events").defaultScope;
-var directory = require("bespin/util/path").directory;
 var SC = require("sproutcore");
+var bespin = require("bespin");
+var util = require("bespin/util/util");
+var directory = require("bespin/util/path").directory;
 
 /**
  * This abstracts the remote Web Service file system, and in the future local

@@ -23,6 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
+var util = require("bespin/util/util");
 
 exports.subscribe = function() {
     /**
@@ -55,7 +56,7 @@ exports.subscribe = function() {
      * Observe a urlchange event and then... change the location hash
      */
     bespin.subscribe("url:change", function(event) {
-        var hashArguments = dojo.queryToObject(location.hash.substring(1));
+        var hashArguments = util.queryToObject(location.hash.substring(1));
         hashArguments.project = event.project;
         hashArguments.path    = event.path;
 

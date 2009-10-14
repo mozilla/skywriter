@@ -26,7 +26,7 @@
  * Helpful code to deal with key handling and processing.
  */
 
-var bespin = require("bespin");
+var util = require("bespin/util/util");
 
 /**
  * Alpha keys, and special keys (ENTER, BACKSPACE) have key codes that our code
@@ -42,7 +42,7 @@ exports.Key = {
     SHIFT: 16,
     CTRL: 17,
     ALT: 18,
-    META: dojo.isSafari ? 91 : 224,     // the apple key on macs
+    META: util.isSafari ? 91 : 224,     // the apple key on macs
     PAUSE: 19,
     CAPS_LOCK: 20,
     ESCAPE: 27,
@@ -95,7 +95,7 @@ exports.Key = {
     NUM_LOCK: 144,
     SCROLL_LOCK: 145,
     // virtual key mapping
-    copyKey: dojo.isMac && !dojo.isAIR ? (dojo.isSafari ? 91 : 224 ) : 17,
+    copyKey: util.isMac && !util.isAIR ? (util.isSafari ? 91 : 224 ) : 17,
 
     // Special keys that dojo.keys doesn't have
     FORWARD_SLASH: 191,

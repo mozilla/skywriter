@@ -800,7 +800,7 @@ exports.Actions = SC.Object.extend({
             // nothing to search for? Reset the searchString
             this.editor.ui.setSearchString(false);
             this.editor.paint(true);
-            dojo.byId('searchresult').style.display = 'none';
+            document.getElementById('searchresult').style.display = 'none';
             return false;
         }
 
@@ -810,7 +810,7 @@ exports.Actions = SC.Object.extend({
             } else {
                 this.findPrev();
             }
-            dojo.byId('searchresult').style.display = 'block';
+            document.getElementById('searchresult').style.display = 'block';
             return;
         }
 
@@ -850,8 +850,8 @@ exports.Actions = SC.Object.extend({
             case 'toolbar':
                 msg = + count + " Match";
                 if (count > 1) { msg += 'es'; }
-                dojo.byId('searchfeedback').innerHTML = msg;
-                dojo.byId('searchresult').style.display = 'block';
+                document.getElementById('searchfeedback').innerHTML = msg;
+                document.getElementById('searchresult').style.display = 'block';
             break;
         }
 

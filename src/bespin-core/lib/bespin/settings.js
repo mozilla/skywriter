@@ -171,8 +171,11 @@ exports.Core = SC.Object.extend({
      * init it.
      */
     publishValues: function() {
-        // Goes deep into internals which is naughty!
-        // In this case, going into the Dojo saved "topics" that you subscribe/publish too
+        // TODO: This code was only called in one place and there was a better
+        // (read less hacky) way of doing it (and it worked too - bonus)
+        // We should delete this code when we're sure that this strategy works
+        // In this case, going into the Dojo saved "topics" that you
+        // subscribe/publish too
         var settingsTopicBase = "bespin:settings:set:";
         for (var topic in dojo._topics) {
             if (topic.indexOf(settingsTopicBase) == 0) {
@@ -360,7 +363,14 @@ exports.ServerFile = SC.Object.extend({
                 }
             });
 
-            self.parent.publishValues();
+            // This loop is supposed to replace self.parent.publishValues();
+            // If this works, then we should remove the above code
+            for (var key in self.settings) {
+                bespin.publish("settings:set:" + key, {
+                    value: self.settings[key]
+                });
+            }
+
             postLoad();
         };
 
@@ -441,7 +451,7 @@ exports.DB = SC.Object.extend({
  */
 exports.URL = SC.Object.extend({
     constructor: function(queryString) {
-        this.results = dojo.queryToObject(this.stripHash(queryString || window.location.hash));
+        this.results = util.queryToObject(this.stripHash(queryString || window.location.hash));
     },
 
     /*

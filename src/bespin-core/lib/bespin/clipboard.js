@@ -57,8 +57,6 @@ var uninstall = function() {
     uses = undefined;
 };
 
-var isWebKit = parseFloat(navigator.userAgent.split("WebKit/")[1]) || undefined;
-
 /**
  * Do the first setup. Right now checks for WebKit and inits a DOMEvents
  * solution if that is true else install the default.
@@ -71,7 +69,7 @@ exports.setup = function(editor) {
 
     // setData appears to be working again, if you go through certain steps
     // (you have to stop the event properly...)
-    if (isWebKit) {
+    if (util.isWebKit) {
         install(editor, new DOMEvents());
     } else {
         install(editor, new HiddenWorld());
@@ -219,7 +217,7 @@ var DOMEvents = SC.Object.extend({
                 editor.ui.actions.endEdit();
             }
 
-            dojo.byId('canvas').focus();
+            document.getElementById('canvas').focus();
         });
 
         // and this line makes it work immediately (otherwise you'd have to copy
@@ -279,7 +277,7 @@ var HiddenWorld = SC.Object.extend({
             }
             var selectionText;
 
-            if ((util.isMac() && e.metaKey) || e.ctrlKey) {
+            if ((util.isMac && e.metaKey) || e.ctrlKey) {
                 // Copy
                 if (e.keyCode == 67 /*c*/) {
                     // place the selection into the input
@@ -304,7 +302,7 @@ var HiddenWorld = SC.Object.extend({
                     }
                 } else if (e.keyCode == 86 /*v*/) {
                     // Paste
-                    if (e.target == dojo.byId("command")) {
+                    if (e.target == document.getElementById("command")) {
                         // let the paste happen in the command
                         return;
                     }
@@ -389,16 +387,16 @@ exports.manual = function() {
                 if (range && BodyLoaded==1)
                     range.execCommand('Copy');
             } else {
-                var flashcopier = 'flashcopier';
-                if (!document.getElementById(flashcopier)) {
-                    var divholder = document.createElement('div');
-                    divholder.id = flashcopier;
-                    document.body.appendChild(divholder);
+                var flashcopier = document.getElementById('flashcopier');
+                if (!flashcopier) {
+                    flashcopier = document.createElement('div');
+                    flashcopier.id = 'flashcopier';
+                    document.body.appendChild(flashcopier);
                 }
-                document.getElementById(flashcopier).innerHTML = '';
+                flashcopier.innerHTML = '';
 
                 var divinfo = '<embed src="_clipboard.swf" FlashVars="clipboard='+escape(inElement.value)+'" width="0" height="0" type="application/x-shockwave-flash"></embed>';
-                document.getElementById(flashcopier).innerHTML = divinfo;
+                flashcopier.innerHTML = divinfo;
             }
             */
         },

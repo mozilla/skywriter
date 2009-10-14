@@ -35,6 +35,50 @@ var path = require("bespin/util/path");
  */
 exports.projectName = "jetpacks";
 
+/*
+// This code came from embed.init(), but it didn't really fit there at all.
+// When we want to re-enable it we should take this code and push it off
+// into a plugin somewhere
+// How about a Jetpack?
+if (this.opts.jetpack) {
+    var jetpacktoolbar = dojo.create("div", {
+        id: "jetpacktoolbar"
+    }, this.container);
+
+    jetpacktoolbar.innerHTML = '<div class="button">' +
+        '<button id="install" onclick="_editorComponent.executeCommand(\'jetpack install yourfirstjetpack\')">&uarr; Install This JetPack Feature</button>' +
+        '</div>' +
+        '<div>Hey, <a href="https://jetpack.mozillalabs.com/">install JetPack first</a>.</div>' +
+        '<style type="text/css">' +
+            '#jetpacktoolbar {' +
+                'position: relative;' +
+                'top: -15px;' +
+                'left: 0;' +
+                'height: 40px;' +
+                'background-image: url(https://bespin.mozilla.com/images/footer_bg.png);' +
+                'background-repeat: repeat-x;' +
+                'color: white;' +
+                'font-family: Helvetica, Arial, sans-serif;' +
+                'font-size: 11px;' +
+            '}' +
+            '#jetpacktoolbar div {' +
+                'padding: 17px 12px;' +
+                'float: left;' +
+            '}' +
+            '#jetpacktoolbar div.button {' +
+                'float: right;' +
+                'padding: 13px 0;' +
+            '}' +
+            '#jetpacktoolbar button {' +
+                'margin:0 7px 0 0;' +
+            '}' +
+            '#jetpacktoolbar a {' +
+                'color: #eee;' +
+            '}' +
+        '</style>';
+}
+*/
+
 /**
  * Command store for the Jetpack commands
  * (which are subcommands of the main 'jetpack' command)

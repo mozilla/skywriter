@@ -22,8 +22,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
-
 /**
  * Canvas Shim
  * <p>Make canvas work the same on the different browsers and their quirks.

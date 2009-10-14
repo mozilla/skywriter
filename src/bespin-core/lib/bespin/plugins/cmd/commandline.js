@@ -28,6 +28,28 @@ var bespin = require("bespin");
 var filepopup = require("bespin/editor/filepopup");
 var filepopup = require("bespin/filepopup");
 
+// This code came from embed.init() although commented out. When we re-enable
+// this plug-in, we might need to use this code
+// Fancy a command line anyone?
+/*
+Command line wouldn't work anyway right now, so I am removing it entirely.
+if (opts.commandline) {
+    var commandlineElement;
+
+    if (typeof opts.commandline == "boolean") { // literally, true
+        commandlineElement = dojo.create("div", {
+           id: "commandlinewrapper",
+           hidden: true
+        }, dojo.body());
+        commandlineElement.innerHTML = '<table style="display: none;" cellpadding="0"><tr><td id="prompt"><img id="promptimg" src="https://bespin.mozilla.com/images/icn_command.png" alt=">" ></td><td id="commandline"><input id="command" spellcheck="false"></td></tr></table>';
+    } else {
+        commandlineElement = document.getElementById(opts.commandline);
+    }
+
+    this.commandLine = bespin.register('commandLine', new bespin.cmd.commandline.Interface(commandlineElement, bespin.command.Store));
+} */
+
+
 /**
  * When we are completing against some type, we need a place to cache the
  * retrieved values
