@@ -1,0 +1,7 @@
+{
+    "name": "bespin-build",
+    "dependencies": ["narwhal"],
+    "author": "Mozilla",
+    "description": "Bespin custom build tool",
+    "lib": ["lib"]
+}

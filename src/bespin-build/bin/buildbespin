@@ -1,0 +1,2 @@
+#!/usr/bin/env narwhal
+require('bespin/builder').main(system.args);

@@ -62,7 +62,8 @@ def install_narwhal():
         sh("narwhal/bin/sea tusk install jack")
         sh("narwhal/bin/sea tusk install qunit")
     
-    packages = ["bespin-core", "bespin-supported", "bespin-labs"]
+    packages = ["bespin-core", "bespin-supported", "bespin-labs", 
+                "bespin-build"]
     for package in packages:
         client_package = path("src/%s" % package)
         # yikes! this won't work on Windows

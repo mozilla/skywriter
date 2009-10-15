@@ -1,0 +1,7 @@
+{
+    "name": "bespin-labs",
+    "dependencies": ["narwhal"],
+    "author": "Mozilla",
+    "description": "Bespin experimental, unsupported editor functionality",
+    "lib": ["lib"]
+}

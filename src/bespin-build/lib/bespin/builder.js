@@ -22,23 +22,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// This module is set up to be dependency-less so that Narwhal
-// will be able to run it right away.
+// Bespin build system
 
-var r = require;
-var Q = r("ref-send");
-
-Q.when(require.async("bespin/embed"), function(embed) {
-    var nodes = document.querySelectorAll(".bespin");
-    for (var i = 0; i < nodes.length; i++) {
-        var node = nodes[i];
-        var options = node.getAttribute('data-bespin-options');
-        var bespin = embed.useBespin(node, eval("(" + options + ")"));
-        node.setAttribute('bespin', bespin);
-    }
-
-    // If users want a custom startup
-    if (window.onBespinLoad) {
-        window.onBespinLoad();
-    }
-});
+exports.main = function(args) {
+    print("Bespin Build System");
+    
+}
