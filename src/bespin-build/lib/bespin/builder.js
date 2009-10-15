@@ -24,7 +24,12 @@
 
 // Bespin build system
 
+DEFAULT_PROFILE = "bespinProfile.json";
+
 exports.main = function(args) {
-    print("Bespin Build System");
+    print("Bespin Build System\n");
+    
+    var profileFilename = args[0] ? args[0] : DEFAULT_PROFILE;
+    print("Using build profile: ", profileFilename);
     
 }
