@@ -61,9 +61,12 @@ def install_narwhal():
         sh("git clone git://github.com/dangoor/narwhal.git")
         sh("narwhal/bin/sea tusk install jack")
         sh("narwhal/bin/sea tusk install qunit")
-    client_package = path("src/bespin-core")
-    # yikes! this won't work on Windows
-    sh("ln -sf %s narwhal/packages/" % (client_package.abspath()))
+    
+    packages = ["bespin-core", "bespin-supported", "bespin-labs"]
+    for package in packages:
+        client_package = path("src/%s" % package)
+        # yikes! this won't work on Windows
+        sh("ln -sf %s narwhal/packages/" % (client_package.abspath()))
 
 @task
 @needs(["install_narwhal"])
