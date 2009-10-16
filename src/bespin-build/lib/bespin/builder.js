@@ -60,7 +60,8 @@ var STANDARD_INCLUDES = [
     "function", 
     "regexp", 
     "reactor", 
-    "date", 
+    "date",
+    "json", // TODO remove this one. We don't need to include this module.
     "global", 
     "system", 
     "binary",
@@ -139,8 +140,8 @@ exports.expandIncludes = function(loader, includes) {
             var items = file.listTree(path);
             for (var j = 0; j < items.length; j++) {
                 var fullname = items[j];
-                // we don't care about directories
-                if (fullname == "" || (/\/$/.exec(fullname))) {
+                // we don't care about directories or non-js files
+                if (fullname == "" || (/\/$/.exec(fullname)) || !(/\.js$/.exec(fullname))) {
                     continue;
                 }
                 fullname = packageName + "/" + fullname;
@@ -214,7 +215,12 @@ exports.getFileContents = function(loader, filespec) {
 * Creates a new sandbox.Loader with the current path.
 */
 exports._getLoader = function() {
-    return new sandbox.Loader({paths: require.paths});
+    var paths = require.paths.map(function (path) {
+        return String(path);
+    });
+    paths.unshift(file.join(system.prefix, "engines", "browser", "lib"));
+    
+    return new sandbox.Loader({paths: paths});
 };
 
 /*
@@ -232,6 +238,10 @@ exports.generateScript = function(description) {
     }
     
     var loader = exports._getLoader();
+    
+    // TODO this is temporary because narwhal-jsc doesn't automatically
+    // clear the file first.
+    outputPath.remove();
     
     var outputFile = file.open(outputPath.toString(), "w");
     
