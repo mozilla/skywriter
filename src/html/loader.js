@@ -7,6 +7,7 @@
 // "require" that can then be chained with .preload(ids), .when(id),
 // .async(id), or other calls, depending on what services are needed to load
 // this particular page.
+
 (function (path) {
 
     // ultimately, we're exporting a "require" API to global scope, and
@@ -103,4 +104,4 @@
 
     // return the require object for chaining
     return require;
-}).call(this,"/.js/").preload(["ref-send", "sandbox", "narwhal/client", "array", "object", "string", "function", "regexp", "reactor", "date", "global", "system", "binary"])
+}).call(this,"/.js/");

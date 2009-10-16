@@ -41,22 +41,53 @@ var throwsBuilderError = function(func, args, message) {
         if (e instanceof builder.BuilderError) {
             qunit.ok(true, "Got a BuilderError");
         } else {
-            throw e;
+            qunit.ok(false, "Got an unexpected exception: " + e);
         }
     }
-}
+};
 
 qunit.test("Profile loading", function() {
-    qunit.ok(FAKEPROFILE.exists(), "Expected the testing profile file to exist (fakeprofile.json)");
-    qunit.ok(FAKEPROFILE.isFile(), "Expected to find a file at " + FAKEPROFILE);
+    qunit.ok(FAKEPROFILE.exists(), 
+        "Expected the testing profile file to exist (fakeprofile.json)");
+    qunit.ok(FAKEPROFILE.isFile(), 
+        "Expected to find a file at " + FAKEPROFILE);
     throwsBuilderError(builder.loadProfile, ["BADFILENAME!!!"], 
         "Expected an exception for a bad filename");
     var profile = builder.loadProfile(FAKEPROFILE);
-    qunit.equals(1, profile.length);
-    qunit.equals("foo", profile[0].output);
+    qunit.equals(profile.length, 1);
+    qunit.equals(profile[0].output, "foo");
 });
 
 qunit.test("Profile validation", function() {
-    throwsBuilderError(builder.validateProfile, [{}], "validate profile expects a list");
-    throwsBuilderError(builder.validateProfile, [[{}]], "profiles must have an output defined");
+    throwsBuilderError(builder.validateProfile, [{}], 
+        "validate profile expects a list");
+    throwsBuilderError(builder.validateProfile, [[{}]], 
+        "profiles must have an output defined");
+    
+    var myProfile = [{output: "foo.js"}];
+    builder.validateProfile(myProfile);
+    qunit.ok(true, "Should not have encountered an error in the previous validation.");
+    qunit.ok(Array.isArray(myProfile[0].includes), 
+        "Expected profile to be augmented with includes");
+});
+
+qunit.test("Setting up for build", function() {
+    var temppath = new file.Path("testtmp");
+    if (temppath.exists()) {
+        temppath.rmtree();
+    }
+    builder.generateScript({output: temppath + "/foo.js"});
+    qunit.ok(temppath.exists(), "expected output directory to be created");
+    if (temppath.exists()) {
+        temppath.rmtree();
+    }
+});
+
+qunit.test("Get file contents", function() {
+    throwsBuilderError(builder.getFileContents, [{file: "BADFILENAME"}],
+        "file contents can only be retrieved for good files");
+    file.write("GOODFILENAME", "Just some test data.\n");
+    var contents = builder.getFileContents({file: "GOODFILENAME"});
+    qunit.equals(contents, "Just some test data.\n", "File contents not retrieved properly");
+    file.remove("GOODFILENAME");
 });

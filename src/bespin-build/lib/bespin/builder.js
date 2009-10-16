@@ -27,36 +27,98 @@
 var file = require("file");
 var os = require("os");
 
-DEFAULT_PROFILE = "bespinProfile.json";
+var DEFAULT_PROFILE = "bespinProfile.json";
 
-PROFILE_FORMAT = '\nA profile is a JSON file containing an array of objects.\n' +
+var PROFILE_FORMAT = '\nA profile is a JSON file containing an array of objects.\n' +
     'Each object must minimally have an "output" defined on it. For example:\n\n' +
     '[{"output": "BespinEmbed.js"}]\n\n' +
     'is a minimally acceptable profile.\n';
+    
+var STANDARD_INCLUDES = [
+    {file: "src/html/loader.js"},
+    {file: "src/bespin-build/preloads.js"},
+    "narwhal/client"
+];
 
 var BuilderError = exports.BuilderError = function(message) {
     this.message = message;
-}
+};
 
+/*
+* Loads a JSON-format profile from disk.
+* @param {String} filename The profile file to load.
+* @type Object
+*/
 exports.loadProfile = function(filename) {
     if (!file.exists(filename)) {
         throw new BuilderError("Profile file " + filename + " does not exist.");
     }
     var data = file.read(filename);
     return JSON.parse(data);
-}
+};
 
+/*
+* Validates the information in a loaded profile object.
+* @param {Object} profile The profile object.
+*/
 exports.validateProfile = function(profile) {
     if (!Array.isArray(profile)) {
         throw new BuilderError(PROFILE_FORMAT);
     }
     for (var i = 0; i < profile.length; i++) {
-        if (!profile.output) {
+        var desc = profile[i];
+        if (!desc.output) {
             throw new BuilderError(PROFILE_FORMAT);
         }
+        if (!desc.includes) {
+            desc.includes = STANDARD_INCLUDES;
+        }
     }
-}
+};
 
+/*
+* Retrieves/augments the file contents for the filespec provided.
+* The filespec can be a string, in which case it's assumed to be
+* a module. Modules are looked up on the module path, and the
+* contents are wrapped to be properly registered with the client-side
+* module sandbox.
+* 
+* If filespec is an object with a "file" property, then that
+* file's contents will be returned directly.
+* @param {String|Object} filespec File to return contents of.
+* @type String
+*/
+exports.getFileContents = function(filespec) {
+    if (filespec instanceof String) {
+        // handle modules
+        return "";
+    } else if (filespec.file) {
+        // handle files
+        var path = new file.Path(filespec.file);
+        if (!path.exists()) {
+            throw new BuilderError("Could not find included file: " 
+                + filespec.file);
+        }
+        return path.read();
+    }
+};
+
+/*
+* Generates an output script based on one item
+* description from the profile.
+* @param {Object} description One item from the list of items in a profile.
+*/
+exports.generateScript = function(description) {
+    var outputPath = new file.Path(description.output);
+    if (!outputPath.dirname().exists()) {
+        outputPath.dirname().mkdirs();
+    }
+};
+
+/*
+* Entry point for the command line interface.
+* @param (Array) args The command line arguments.
+*/
 exports.main = function(args) {
     print("Bespin Build System\n");
     
@@ -69,6 +131,10 @@ exports.main = function(args) {
 
         print("Using build profile: ", profileFilename);
         
+        for (var i = 0; i < profile.length; i++) {
+            exports.generateScript(profile[i]);
+        }
+        
     } catch (e) {
         if (e instanceof exports.BuilderError) {
             print("Build failed!");
@@ -77,4 +143,4 @@ exports.main = function(args) {
         }
     }
     
-}
+};
