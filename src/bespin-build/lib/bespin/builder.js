@@ -67,6 +67,7 @@ var STANDARD_INCLUDES = [
     "binary",
     {file: "src/html/dojo/dojo.js.uncompressed.js"},
     "sproutcore",
+    "bespin",
     {moduleDir: "bespin/boot"},
     {file: "src/bespin-build/launchbespin.js"}
 ];
