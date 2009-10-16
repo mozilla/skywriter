@@ -242,7 +242,9 @@ exports.generateScript = function(description) {
     
     // TODO this is temporary because narwhal-jsc doesn't automatically
     // clear the file first.
-    outputPath.remove();
+    if (outputPath.exists()) {
+        outputPath.remove();
+    }
     
     var outputFile = file.open(outputPath.toString(), "w");
     
