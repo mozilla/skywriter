@@ -10,19 +10,19 @@ Bespin
 :   The project code name for an in-browser code editor/IDE for open web
     developers.
 
-Boot
-:   the part of Bespin required to make it run. The notion is that ultimately
-    anything that is not required to boot will be a plugin. We also want to
-    minimize what is in the Boot part of Bespin.
-
 CommonJS
 :   An effort to create a standard library that runs across platforms and
     interpreters for JavaScript. Bespin's code is organized into CommonJS
     modules.
 
 Core
-:   any officially supported parts of Bespin. This consists of the Boot part
-    of Bespin plus any plugins that beyond the experimental stage.
+:   the part of Bespin required to make it run. The notion is that ultimately
+    anything that is not required to boot will be a plugin. We also want to
+    minimize what is in the Boot part of Bespin.
+
+Labs
+:   parts of Bespin that are in the official repository but have not yet
+    settled to the point where they are "supported".
 
 Reboot
 :   a major refactoring of Bespin's code, especially pertaining to the
@@ -30,3 +30,8 @@ Reboot
 
 SC
 :   SproutCore, web GUI toolkit used by Bespin after the Reboot.
+
+Supported
+:   parts of Bespin that are actively maintained by Mozilla and the rest of
+    the Bespin community.
+    

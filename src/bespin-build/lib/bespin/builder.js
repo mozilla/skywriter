@@ -29,6 +29,11 @@ var os = require("os");
 
 DEFAULT_PROFILE = "bespinProfile.json";
 
+PROFILE_FORMAT = '\nA profile is a JSON file containing an array of objects.\n' +
+    'Each object must minimally have an "output" defined on it. For example:\n\n' +
+    '[{"output": "BespinEmbed.js"}]\n\n' +
+    'is a minimally acceptable profile.\n';
+
 var BuilderError = exports.BuilderError = function(message) {
     this.message = message;
 }
@@ -42,7 +47,14 @@ exports.loadProfile = function(filename) {
 }
 
 exports.validateProfile = function(profile) {
-    
+    if (!Array.isArray(profile)) {
+        throw new BuilderError(PROFILE_FORMAT);
+    }
+    for (var i = 0; i < profile.length; i++) {
+        if (!profile.output) {
+            throw new BuilderError(PROFILE_FORMAT);
+        }
+    }
 }
 
 exports.main = function(args) {

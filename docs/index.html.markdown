@@ -31,5 +31,6 @@ Developer's Guide
 
 * [Getting Started](devguide/index.html)
 * [A Tour of the Code](devguide/tour.html)
+* [Testing](devguide/testing.html)
 
 [1]: https://wiki.mozilla.org/Bespin "The Bespin Wiki"

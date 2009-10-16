@@ -1,6 +1,6 @@
 /**
  * Stylesheet for the Typo E-mag HTML template.
- * (c) 2009, Matìj Grabovský
+ * (c) 2009, MatÃ¬j GrabovskÃ½
  * 
  * Oi.
  **/
@@ -198,4 +198,21 @@ img.right {
 	vertical-align: .15em;
 	font-size: .75em;
 	color: #666;
+}
+
+dt {
+    font-weight: bold;
+}
+
+dd {
+    margin-left: 1em;
+}
+
+pre {
+    -moz-background-clip:border;
+    -moz-background-inline-policy:continuous;
+    -moz-background-origin:padding;
+    background:#F3F3F3 none repeat scroll 0 0;
+    border:1px solid #DADADA;
+    margin-bottom: 1.8em;
 }

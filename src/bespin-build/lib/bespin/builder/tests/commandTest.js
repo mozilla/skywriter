@@ -29,17 +29,34 @@ var qunit = require("qunit");
 
 var builder = require("bespin/builder");
 
+qunit.module("bespin/builder/tests/commandTest");
+
 var FAKEPROFILE = new file.Path(module.path).dirname().join("fakeprofile.json");
+
+var throwsBuilderError = function(func, args, message) {
+    try {
+        func.apply(this, args);
+        qunit.ok(false, message);
+    } catch (e) {
+        if (e instanceof builder.BuilderError) {
+            qunit.ok(true, "Got a BuilderError");
+        } else {
+            throw e;
+        }
+    }
+}
 
 qunit.test("Profile loading", function() {
     qunit.ok(FAKEPROFILE.exists(), "Expected the testing profile file to exist (fakeprofile.json)");
     qunit.ok(FAKEPROFILE.isFile(), "Expected to find a file at " + FAKEPROFILE);
-    try {
-        builder.loadProfile("BADFILENAME!!!");
-        qunit.ok(false, "Expected an exception for a bad filename");
-    } catch (e) {
-    }
+    throwsBuilderError(builder.loadProfile, ["BADFILENAME!!!"], 
+        "Expected an exception for a bad filename");
     var profile = builder.loadProfile(FAKEPROFILE);
     qunit.equals(1, profile.length);
     qunit.equals("foo", profile[0].output);
+});
+
+qunit.test("Profile validation", function() {
+    throwsBuilderError(builder.validateProfile, [{}], "validate profile expects a list");
+    throwsBuilderError(builder.validateProfile, [[{}]], "profiles must have an output defined");
 });
