@@ -27,6 +27,20 @@
 var file = require("file");
 var os = require("os");
 var sandbox = require("sandbox");
+var logger = require("logger");
+var term = require("term");
+
+var log = new logger.Logger(new term.Stream(system));
+
+log.format = function(severity, args) {
+    var message = Array.prototype.join.apply(args, [""]);
+    if (severity < 2) {
+        message = "\0red(" + message + "\0)";
+    } else if (severity == 4) {
+        message = "debug: " + message;
+    }
+    return message + "\n";
+};
 
 var DEFAULT_PROFILE = "bespinProfile.json";
 
@@ -37,8 +51,19 @@ var PROFILE_FORMAT = '\nA profile is a JSON file containing an array of objects.
     
 var STANDARD_INCLUDES = [
     {file: "src/html/loader.js"},
-    {file: "src/bespin-build/preloads.js"},
-    "narwhal/client"
+    "ref-send", 
+    "sandbox", 
+    "narwhal/client", 
+    "array", 
+    "object", 
+    "string", 
+    "function", 
+    "regexp", 
+    "reactor", 
+    "date", 
+    "global", 
+    "system", 
+    "binary"
 ];
 
 var BuilderError = exports.BuilderError = function(message) {
@@ -129,9 +154,28 @@ exports._getLoader = function() {
 */
 exports.generateScript = function(description) {
     var outputPath = new file.Path(description.output);
+    
+    log.info("Generating " + outputPath);
+    
     if (!outputPath.dirname().exists()) {
         outputPath.dirname().mkdirs();
     }
+    
+    var loader = exports._getLoader();
+    
+    var outputFile = file.open(outputPath.toString(), "w");
+    for (var i = 0; i < description.includes.length; i++) {
+        var filespec = description.includes[i];
+        
+        if (log.level == log.DEBUG) {
+            log.debug("Generating output for " + JSON.stringify(filespec));
+        }
+        
+        var contents = exports.getFileContents(loader, filespec);
+        outputFile.write(contents);
+        outputFile.write("\n");
+    }
+    outputFile.close();
 };
 
 /*
@@ -139,7 +183,10 @@ exports.generateScript = function(description) {
 * @param (Array) args The command line arguments.
 */
 exports.main = function(args) {
-    print("Bespin Build System\n");
+    startTime = new Date().getTime();
+    log.level = log.DEBUG;
+    
+    log.info("Bespin Build System\n");
     
     var profileFilename = args[1] ? args[1] : DEFAULT_PROFILE;
     
@@ -148,7 +195,7 @@ exports.main = function(args) {
 
         exports.validateProfile(profile);
 
-        print("Using build profile: ", profileFilename);
+        log.info("Using build profile: ", profileFilename);
         
         for (var i = 0; i < profile.length; i++) {
             exports.generateScript(profile[i]);
@@ -156,10 +203,12 @@ exports.main = function(args) {
         
     } catch (e) {
         if (e instanceof exports.BuilderError) {
-            print("Build failed!");
-            print (e.message);
+            log.fatal("Build failed!");
+            log.fatal(e.message);
             os.exit(1);
         }
     }
     
+    var runTime = (new Date().getTime() - startTime) / 1000;
+    log.info("Build complete! (" + runTime + " seconds)");
 };

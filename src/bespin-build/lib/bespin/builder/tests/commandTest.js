@@ -78,7 +78,7 @@ qunit.test("Setting up for build", function() {
     if (temppath.exists()) {
         temppath.rmtree();
     }
-    builder.generateScript({output: temppath + "/foo.js"});
+    builder.generateScript({output: temppath + "/foo.js", includes: []});
     qunit.ok(temppath.exists(), "expected output directory to be created");
     if (temppath.exists()) {
         temppath.rmtree();

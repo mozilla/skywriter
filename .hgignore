@@ -15,3 +15,4 @@
 ^src/growl
 ^docs/_site
 ^narwhal/
+^build/
