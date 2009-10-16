@@ -63,7 +63,11 @@ var STANDARD_INCLUDES = [
     "date", 
     "global", 
     "system", 
-    "binary"
+    "binary",
+    {file: "src/html/dojo/dojo.js.uncompressed.js"},
+    "sproutcore",
+    {moduleDir: "bespin/boot"},
+    {file: "src/bespin-build/launchbespin.js"}
 ];
 
 var BuilderError = exports.BuilderError = function(message) {
@@ -97,9 +101,62 @@ exports.validateProfile = function(profile) {
             throw new BuilderError(PROFILE_FORMAT);
         }
         if (!desc.includes) {
-            desc.includes = STANDARD_INCLUDES;
+            desc.includes = STANDARD_INCLUDES.slice(0);
         }
     }
+};
+
+/*
+* Takes references to directories and expands them out to individual
+* files that need to be copied. For example, a filespec with a
+* moduleDir will look up the module referenced and then recursively
+* add all of the files in the directory containing that module.
+* Returns a new array with the include filespecs.
+* 
+* @param {sandbox.Loader} loader to find the files 
+* @type Array new array
+*/
+exports.expandIncludes = function(loader, includes) {
+    var out = [];
+    for (var i = 0; i < includes.length; i++) {
+        var filespec = includes[i];
+        if (typeof(filespec) == "string" || filespec.file) {
+            out.push(filespec);
+            continue;
+        }
+        
+        if (filespec.moduleDir) {
+            var parts = filespec.moduleDir.split(/\//);
+            parts.pop();
+            var packageName = parts.join("/");
+            try {
+                var path = loader.find(filespec.moduleDir);
+            } catch (e) {
+                throw new BuilderError("Unable to find module " + filespec.moduleDir 
+                    + " for a moduleDir include");
+            }
+            path = new file.Path(path).dirname();
+            var items = file.listTree(path);
+            for (var j = 0; j < items.length; j++) {
+                var fullname = items[j];
+                // we don't care about directories
+                if (fullname == "" || (/\/$/.exec(fullname))) {
+                    continue;
+                }
+                fullname = packageName + "/" + fullname;
+                
+                fullname = fullname.replace(/\.js$/, "");
+                
+                // at some point, we'll likely have a more flexible way to 
+                // exclude certain files.
+                if (fullname.indexOf("/tests/") > -1) {
+                    continue;
+                }
+                out.push(fullname);
+            }
+        }
+    }
+    return out;
 };
 
 /*
@@ -116,7 +173,8 @@ exports.validateProfile = function(profile) {
 * @type String
 */
 exports.getFileContents = function(loader, filespec) {
-    var path;
+    var path, wrap, contents;
+    
     if (typeof(filespec) === "string") {
         // handle modules
         try {
@@ -124,11 +182,8 @@ exports.getFileContents = function(loader, filespec) {
         } catch (e) {
             throw new BuilderError("Could not find included module: " + filespec);
         }
-        var contents = 'require.register({"' + filespec +
-            '":{"factory":function(require,exports,module,system,print){';
-        contents += file.read(path);
-        contents += '},"depends":[]}});';
-        return contents;
+        wrap = true;
+        path = new file.Path(path);
     } else if (filespec.file) {
         // handle files
         path = new file.Path(filespec.file);
@@ -136,8 +191,23 @@ exports.getFileContents = function(loader, filespec) {
             throw new BuilderError("Could not find included file: " 
                 + filespec.file);
         }
-        return path.read();
+        wrap = false;
     }
+    
+    if (wrap) {
+        contents = 'require.register({"' + filespec +
+        '":{"factory":function(require,exports,module,system,print){';
+    } else {
+        contents = "";
+    }
+    
+    contents += file.read(path);
+    
+    if (wrap) {
+        contents += '},"depends":[]}});';
+    }
+    
+    return contents;
 };
 
 /*
@@ -164,8 +234,11 @@ exports.generateScript = function(description) {
     var loader = exports._getLoader();
     
     var outputFile = file.open(outputPath.toString(), "w");
-    for (var i = 0; i < description.includes.length; i++) {
-        var filespec = description.includes[i];
+    
+    var includes = exports.expandIncludes(loader, description.includes);
+    
+    for (var i = 0; i < includes.length; i++) {
+        var filespec = includes[i];
         
         if (log.level == log.DEBUG) {
             log.debug("Generating output for " + JSON.stringify(filespec));

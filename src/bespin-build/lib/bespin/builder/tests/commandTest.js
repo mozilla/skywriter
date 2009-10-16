@@ -104,3 +104,28 @@ qunit.test("Get file contents", function() {
     qunit.ok(contents.indexOf("MAGICAL STRING") > -1, 
         "Could not find MAGICAL STRING in the output");
 });
+
+qunit.test("Expand includes", function() {
+    var loader = builder._getLoader();
+    throwsBuilderError(builder.expandIncludes, [loader, [{moduleDir: "bogus/module"}]],
+        "bad module name should result in an error");
+    var includes = builder.expandIncludes(loader, [{moduleDir: "bespin/boot"}, "bespin/debug"]);
+    qunit.ok(includes.length > 1, "expected many includes");
+    var hubFound = false;
+    var testsFound = false;
+    var debugFound = false;
+    
+    for (var i = 0; i < includes.length; i++) {
+        var filespec = includes[i];
+        if (filespec == "bespin/util/hub") {
+            hubFound = true;
+        } else if (filespec == "bespin/tests/allTests") {
+            testsFound = true;
+        } else if (filespec == "bespin/debug") {
+            debugFound = true;
+        }
+    }
+    qunit.ok(hubFound, "Should have found bespin/util/hub module in the include list");
+    qunit.ok(debugFound, "Should have found the debug module, which was included separately");
+    qunit.ok(!testsFound, "Tests should not have been included");
+});
