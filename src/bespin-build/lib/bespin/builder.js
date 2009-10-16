@@ -26,6 +26,7 @@
 
 var file = require("file");
 var os = require("os");
+var sandbox = require("sandbox");
 
 var DEFAULT_PROFILE = "bespinProfile.json";
 
@@ -85,22 +86,40 @@ exports.validateProfile = function(profile) {
 * 
 * If filespec is an object with a "file" property, then that
 * file's contents will be returned directly.
+* @param {Object} loader: Narwhal sandbox.Loader to find files.
 * @param {String|Object} filespec File to return contents of.
 * @type String
 */
-exports.getFileContents = function(filespec) {
-    if (filespec instanceof String) {
+exports.getFileContents = function(loader, filespec) {
+    var path;
+    if (typeof(filespec) === "string") {
         // handle modules
-        return "";
+        try {
+            path = loader.find(filespec);
+        } catch (e) {
+            throw new BuilderError("Could not find included module: " + filespec);
+        }
+        var contents = 'require.register({"' + filespec +
+            '":{"factory":function(require,exports,module,system,print){';
+        contents += file.read(path);
+        contents += '},"depends":[]}});';
+        return contents;
     } else if (filespec.file) {
         // handle files
-        var path = new file.Path(filespec.file);
+        path = new file.Path(filespec.file);
         if (!path.exists()) {
             throw new BuilderError("Could not find included file: " 
                 + filespec.file);
         }
         return path.read();
     }
+};
+
+/*
+* Creates a new sandbox.Loader with the current path.
+*/
+exports._getLoader = function() {
+    return new sandbox.Loader({paths: require.paths});
 };
 
 /*

@@ -22,6 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// THIS IS A MAGICAL STRING USED FOR TESTING.
+
 // Tests for the command line interface parts
 
 var file = require("file");
@@ -84,10 +86,21 @@ qunit.test("Setting up for build", function() {
 });
 
 qunit.test("Get file contents", function() {
-    throwsBuilderError(builder.getFileContents, [{file: "BADFILENAME"}],
+    var loader = builder._getLoader();
+    
+    throwsBuilderError(builder.getFileContents, [loader, {file: "BADFILENAME"}],
         "file contents can only be retrieved for good files");
     file.write("GOODFILENAME", "Just some test data.\n");
-    var contents = builder.getFileContents({file: "GOODFILENAME"});
+    var contents = builder.getFileContents(loader, {file: "GOODFILENAME"});
     qunit.equals(contents, "Just some test data.\n", "File contents not retrieved properly");
     file.remove("GOODFILENAME");
+    
+    throwsBuilderError(builder.getFileContents, [loader, "non/existent/module"]);
+    contents = builder.getFileContents(loader, "bespin/builder/tests/commandTest");
+    var fileStart = 'require.register({"bespin/builder/tests/commandTest":{"factory":function(require,exports,module,system,print){';
+    qunit.equals(contents.indexOf(fileStart), 0, 
+        "File header is missing or incorrect: "
+        + contents.substring(0, fileStart.length));
+    qunit.ok(contents.indexOf("MAGICAL STRING") > -1, 
+        "Could not find MAGICAL STRING in the output");
 });
