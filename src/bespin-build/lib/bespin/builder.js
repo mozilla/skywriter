@@ -24,12 +24,45 @@
 
 // Bespin build system
 
+var file = require("file");
+var os = require("os");
+
 DEFAULT_PROFILE = "bespinProfile.json";
+
+var BuilderError = exports.BuilderError = function(message) {
+    this.message = message;
+}
+
+exports.loadProfile = function(filename) {
+    if (!file.exists(filename)) {
+        throw new BuilderError("Profile file " + filename + " does not exist.");
+    }
+    var data = file.read(filename);
+    return JSON.parse(data);
+}
+
+exports.validateProfile = function(profile) {
+    
+}
 
 exports.main = function(args) {
     print("Bespin Build System\n");
     
-    var profileFilename = args[0] ? args[0] : DEFAULT_PROFILE;
-    print("Using build profile: ", profileFilename);
+    var profileFilename = args[1] ? args[1] : DEFAULT_PROFILE;
+    
+    try {
+        var profile = exports.loadProfile(profileFilename);
+
+        exports.validateProfile(profile);
+
+        print("Using build profile: ", profileFilename);
+        
+    } catch (e) {
+        if (e instanceof exports.BuilderError) {
+            print("Build failed!");
+            print (e.message);
+            os.exit(1);
+        }
+    }
     
 }

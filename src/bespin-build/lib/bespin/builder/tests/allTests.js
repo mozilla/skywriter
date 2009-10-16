@@ -22,23 +22,4 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var qunit = require("qunit");
-
-qunit.init();
-
-console.log("Starting the test suite");
-
-qunit.test("Sanity", function() {
-    qunit.ok(true, "Sanity is not looking good.")
-});
-
-// command-line only tests
-if (typeof document == "undefined") {
-    // trick the static dependency resolver. This
-    // keeps the module from being sent to the browser,
-    // but still works on the command line.
-    var r = require;
-    r("bespin/builder/tests/allTests");
-}
-
-qunit.start();
+require("bespin/builder/tests/commandTest");

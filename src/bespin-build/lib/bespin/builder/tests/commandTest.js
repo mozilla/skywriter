@@ -22,23 +22,24 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// Tests for the command line interface parts
+
+var file = require("file");
 var qunit = require("qunit");
 
-qunit.init();
+var builder = require("bespin/builder");
 
-console.log("Starting the test suite");
+var FAKEPROFILE = new file.Path(module.path).dirname().join("fakeprofile.json");
 
-qunit.test("Sanity", function() {
-    qunit.ok(true, "Sanity is not looking good.")
+qunit.test("Profile loading", function() {
+    qunit.ok(FAKEPROFILE.exists(), "Expected the testing profile file to exist (fakeprofile.json)");
+    qunit.ok(FAKEPROFILE.isFile(), "Expected to find a file at " + FAKEPROFILE);
+    try {
+        builder.loadProfile("BADFILENAME!!!");
+        qunit.ok(false, "Expected an exception for a bad filename");
+    } catch (e) {
+    }
+    var profile = builder.loadProfile(FAKEPROFILE);
+    qunit.equals(1, profile.length);
+    qunit.equals("foo", profile[0].output);
 });
-
-// command-line only tests
-if (typeof document == "undefined") {
-    // trick the static dependency resolver. This
-    // keeps the module from being sent to the browser,
-    // but still works on the command line.
-    var r = require;
-    r("bespin/builder/tests/allTests");
-}
-
-qunit.start();
