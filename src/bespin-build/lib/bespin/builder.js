@@ -225,6 +225,30 @@ exports._getLoader = function() {
 };
 
 /*
+* Runs the YUI Compressor in a separate process to compress the output file.
+* The file is compressed in place.
+*/
+exports.compressOutput = function(outputfile) {
+    log.info("Compressing output");
+    outputfile = new file.Path(outputfile);
+    var loaderpath = exports._getLoader().find("bespin/builder");
+    var pathToMe = new file.Path(loaderpath);
+    var pathToCompressor = pathToMe.dirname().dirname().dirname();
+    var compressorFilename = pathToCompressor.join("yuicompressor-2.4.2.jar");
+    log.debug("Using compressor at " + compressorFilename);
+    if (!compressorFilename.exists()) {
+        throw new BuilderError("Cannot find the compressor! Should be at " + compressorFilename);
+    }
+    var uncompressedName = new file.Path(outputfile.toString() + ".uncompressed.js");
+    log.debug("Original output at " + uncompressedName);
+    outputfile.rename(uncompressedName.basename());
+    os.system("java -jar " + compressorFilename + " -o " + outputfile.toString()
+        + " " + uncompressedName.toString());
+    log.debug("Removing original file");
+    file.remove(uncompressedName);
+};
+
+/*
 * Generates an output script based on one item
 * description from the profile.
 * @param {Object} description One item from the list of items in a profile.
@@ -262,6 +286,7 @@ exports.generateScript = function(description) {
         outputFile.write("\n");
     }
     outputFile.close();
+    exports.compressOutput(outputPath);
 };
 
 /*
@@ -292,6 +317,8 @@ exports.main = function(args) {
             log.fatal("Build failed!");
             log.fatal(e.message);
             os.exit(1);
+        } else {
+            throw e;
         }
     }
     
