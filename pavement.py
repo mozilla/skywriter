@@ -165,5 +165,25 @@ def docs(options):
     """Builds the documentation."""
     if not path("src/growl").exists():
         sh("pip install -r requirements.txt")
-    sh("growl.py . _site", cwd="docs")
+    builddir = path("build")
+    builddir.mkdir()
+    docsdir = builddir / "docs"
+    sh("growl.py . ../%s" % docsdir, cwd="docs")
+    
+@task
+@needs(['docs'])
+def release_embed(options):
+    sh("narwhal/bin/sea buildbespin")
+    builddir = path("build")
+    version = options.version.number
+    outputdir = path("build") / ("BespinEmbedded-%s" 
+        % (version))
+    if outputdir.exists():
+        outputdir.rmtree()
+    outputdir.mkdir()
+    path("LICENSE.txt").copy(outputdir)
+    (builddir / "docs").copytree(outputdir / "docs")
+    (builddir / "BespinEmbed.js").copy(outputdir / "BespinEmbed.js")
+    sh("tar czf BespinEmbedded-%s.tar.gz BespinEmbedded-%s" % \
+        (version, version), cwd="build")
     
