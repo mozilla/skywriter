@@ -31,7 +31,6 @@ var keys = require("bespin/util/keys");
 var cursor = require("bespin/cursor");
 
 exports.EditorView = SC.View.extend({
-    layout: { centerY: 0, height: 300, width: 300, centerX: 0 },
     render: function(context, firstTime) {
         this.sc_super();
         if (firstTime) {
