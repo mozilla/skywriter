@@ -45,20 +45,22 @@ exports.useBespin = function(element, options) {
     var originalInnerHtml = element.innerHTML;
     
     var controller = EditorController.create({});
-    bespin.register("editor", controller);
-    
-    var editorPane = SC.Pane.create({
-        layout: {centerX: 0, centerY: 0, width: 300, height: 300}
-    });
-    editorPane.appendChild(controller.ui, null);
-    SC.$(element).css('position', 'relative');
-    element.innerHTML = "";
-    editorPane.appendTo(element);
-    if (options.initialContent) {
-        controller.model.insertDocument(options.initialContent);
-    } else {
-        controller.model.insertDocument(originalInnerHtml);
-    }
+    SC.run(function() {
+        bespin.register("editor", controller);
+
+        var editorPane = SC.Pane.create({
+            layout: {centerX: 0, centerY: 0, width: 300, height: 300}
+        });
+        editorPane.appendChild(controller.ui, null);
+        SC.$(element).css('position', 'relative');
+        element.innerHTML = "";
+        editorPane.appendTo(element);
+        if (options.initialContent) {
+            controller.model.insertDocument(options.initialContent);
+        } else {
+            controller.model.insertDocument(originalInnerHtml);
+        }
+    })
     return controller;
 };
 
