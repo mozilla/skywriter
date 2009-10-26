@@ -48,10 +48,9 @@ exports.useBespin = function(element, options) {
     bespin.register("editor", controller);
     
     var editorPane = SC.Pane.create({
-        layout: {centerX: 0, centerY: 0, width: 300, height: 300},
-        childViews: ['editorView'],
-        editorView: controller.ui
+        layout: {centerX: 0, centerY: 0, width: 300, height: 300}
     });
+    editorPane.appendChild(controller.ui, null);
     SC.$(element).css('position', 'relative');
     element.innerHTML = "";
     editorPane.appendTo(element);
