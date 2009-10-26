@@ -29,14 +29,16 @@ var r = require;
 var Q = r("ref-send");
 
 Q.when(require.async("bespin/embed"), function(embed) {
+    SC._didBecomeReady();
+
     var nodes = document.querySelectorAll(".bespin");
     for (var i = 0; i < nodes.length; i++) {
         var node = nodes[i];
         var options = node.getAttribute('data-bespin-options');
         var bespin = embed.useBespin(node, eval("(" + options + ")"));
-        node.setAttribute('bespin', bespin);
+        node.bespin = bespin;
     }
-
+    
     // If users want a custom startup
     if (window.onBespinLoad) {
         window.onBespinLoad();

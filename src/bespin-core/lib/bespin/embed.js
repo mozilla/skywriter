@@ -38,6 +38,33 @@ var plugins = require("bespin/plugins");
 var builtins = require("bespin/builtins");
 var editorMod = require("bespin/editor");
 
+var EditorController = require('bespin/editor/controller').EditorController;
+
+exports.useBespin = function(element, options) {
+    // Creating the editor alters the components innerHTML
+    var originalInnerHtml = element.innerHTML;
+    
+    var controller = EditorController.create({});
+    SC.run(function() {
+        bespin.register("editor", controller);
+
+        var editorPane = SC.Pane.create({
+        });
+        editorPane.appendChild(controller.ui, null);
+        SC.$(element).css('position', 'relative');
+        element.innerHTML = "";
+        editorPane.appendTo(element);
+        if (options.initialContent) {
+            controller.model.insertDocument(options.initialContent);
+        } else {
+            controller.model.insertDocument(originalInnerHtml);
+        }
+    })
+    return controller;
+};
+
+
+
 // When we come to integrate the non embedded parts ...
 // var init = re quire("bespin/page/editor/init");
 // And then call init.onLoad();
@@ -52,7 +79,7 @@ bespin.register("plugins", catalog);
 /**
  * Initialize a Bespin component on a given element.
  */
-exports.useBespin = function(element, options) {
+exports.useBespin2 = function(element, options) {
     options = options || {};
 
     if (util.isString(element)) {
