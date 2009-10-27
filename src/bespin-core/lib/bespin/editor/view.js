@@ -552,7 +552,26 @@ exports.EditorView = SC.View.extend({
         content.clear();
         content.insertCharacters({ row: 0, col: 0 }, e.type);
     },
-
+    
+    mouseDown: function(e) {
+        console.log("Mousedown: ");
+        console.log(e);
+        this.handleMouse(e);
+    },
+    
+    mouseUp: function(e) {
+        console.log("mouse up:");
+        console.log(e);
+        return false;
+    },
+    
+    click: function(e) {
+        console.log("mouse clicked:");
+        console.log(e);
+        e.type = "click";
+        this.handleMouse(e);
+    },
+    
     handleMouse: function(e) {
         // Right click for pie menu
         if (e.button == 2) {
