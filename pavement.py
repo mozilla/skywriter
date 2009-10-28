@@ -58,7 +58,7 @@ options(
 def install_narwhal():
     narwhal = path("narwhal")
     if not narwhal.exists():
-        sh("git clone git://github.com/dangoor/narwhal.git")
+        sh("git clone -q git://github.com/dangoor/narwhal.git")
         sh("narwhal/bin/sea tusk install jack")
         sh("narwhal/bin/sea tusk install qunit")
     
