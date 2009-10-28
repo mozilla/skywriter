@@ -88,6 +88,11 @@ img.right {
 	text-transform: uppercase;
 	font: 1.1em/1em Georgia, 'Times New Roman', Times, serif;
 }
+
+#menu ul {
+    list-style-type: none;
+}
+
 #menu li {
 	display: inline;
 	margin: 0 10px;
@@ -100,6 +105,20 @@ img.right {
 #menu li.current a {
 	background-color: #c40000;
 	color: white;
+}
+
+ul.compact {
+    list-style-type: none;
+}
+
+ul {
+    list-style-type: square;
+    list-style-position: inside;
+}
+
+ol {
+    list-style-type: decimal;
+    list-style-position: inside;
 }
 
 #web-title {

@@ -57,4 +57,8 @@ There are three categories of code in bespin-core:
 
 TODO: #3 above is not wholly accurate as of this writing (10/27/09). There are currently some modules at the bespin/ level that belong in bespin/editor.
 
-`bespin/boot`
+`bespin/boot` is the module that kicks off the loading of Bespin's code. `bespin/embed` notably provides the useBespin function, which is how the embedded editor gets dropped into pages.
+
+`bespin/editor/controller` is the controller in the "model/view/controller" sense. It provides the main API for managing the text editor control and for connecting the data with the view.
+
+`bespin/editor/view` is provides the visible editor component. It is responsible for drawing on the canvas and for managing events that come in.
