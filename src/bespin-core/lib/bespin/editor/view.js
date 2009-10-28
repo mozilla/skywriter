@@ -157,22 +157,6 @@ exports.EditorView = SC.View.extend({
         // this.selectMouseDetail;         // the detail (number of clicks) for the mouse down.
 
         
-        // Event handlers
-        // var source = this.editor.container;
-        // 
-        // window._source = source;
-        // 
-        // source.addEventListener('mousemove', function(e) { return self.handleMouse(e); }, false);
-        // source.addEventListener('mouseout', function(e) { return self.handleMouse(e); }, false);
-        // source.addEventListener('click', function(e) { return self.handleMouse(e); }, false);
-        // source.addEventListener('mousedown', function(e) { return self.handleMouse(e); }, false);
-        // source.addEventListener('oncontextmenu', dojo.stopEvent, true);
-        // source.addEventListener('mousedown', function(e) { return self.mouseDownSelect(e); }, false);
-        // 
-        // var gh = this.globalHandles;
-        // gh.push(dojo.connect(window, "mousemove", this, "mouseMoveSelect"));
-        // gh.push(dojo.connect(window, "mouseup", this, "mouseUpSelect"));
-
         var editor = this.editor;
 
         // if we act as component, onmousewheel should only be listened to inside of the editor canvas.
@@ -254,83 +238,6 @@ exports.EditorView = SC.View.extend({
             }
         }
         return { row: y, col: x };
-    },
-
-    mouseDownSelect: function(e) {
-        // only select if the editor has the focus!
-        if (!this.editor.focus) {
-            return;
-        }
-
-        if (e.button == 2) {
-            util.stopEvent(e);
-            return false;
-        }
-
-        var clientY = e.clientY - this.getTopOffset();
-        var clientX = e.clientX - this.getLeftOffset();
-
-        if (this.overXScrollBar || this.overYScrollBar) {
-            return;
-        }
-
-        var point;
-        if (this.editor.debugMode) {
-            if (clientX < this.DEBUG_GUTTER_WIDTH) {
-                console.log("Clicked in debug gutter");
-                point = { x: clientX, y: clientY };
-                point.y += Math.abs(this.yoffset);
-                var p = this.convertClientPointToCursorPoint(point);
-
-                var editSession = bespin.get("editSession");
-                if (p && editSession) {
-                    bespin.getComponent("breakpoints", function(breakpoints) {
-                        breakpoints.toggleBreakpoint({ project: editSession.project, path: editSession.path, lineNumber: p.row });
-                        this.editor.paint(true);
-                    }, this);
-                }
-                return;
-            }
-        }
-
-        this.selectMouseDetail = e.detail;
-        if (e.shiftKey) {
-            this.selectMouseDownPos = (this.editor.selection) ? this.editor.selection.startPos : this.editor.getCursorPos();
-            this.setSelection(e);
-        } else {
-            point = { x: clientX, y: clientY };
-
-            // happens first, because scroll bars are not relative to scroll position
-            if ((this.xscrollbar.rect.contains(point)) || (this.yscrollbar.rect.contains(point))) {
-                return;
-            }
-
-            // now, compensate for scroll position.
-            point.x += Math.abs(this.xoffset);
-            point.y += Math.abs(this.yoffset);
-
-            this.selectMouseDownPos = this.convertClientPointToCursorPoint(point);
-        }
-    },
-
-    mouseMoveSelect: function(e) {
-        // only select if the editor has the focus!
-        if (!this.editor.focus) {
-            return;
-        }
-
-        this.setSelection(e);
-    },
-
-    mouseUpSelect: function(e) {
-        // only select if the editor has the focus!
-        if (!this.editor.focus) {
-            return;
-        }
-
-        this.setSelection(e);
-        this.selectMouseDownPos = undefined;
-        this.selectMouseDetail = undefined;
     },
 
     setSelection: function(e) {
@@ -553,21 +460,73 @@ exports.EditorView = SC.View.extend({
         content.insertCharacters({ row: 0, col: 0 }, e.type);
     },
     
+    mouseDragged: function(e) {
+        if (this.selectMouseDownPos) {
+            this.setSelection(e);
+        }
+        return true;
+    },
+    
     mouseDown: function(e) {
-        console.log("Mousedown: ");
-        console.log(e);
+        var clientY = e.clientY - this.getTopOffset();
+        var clientX = e.clientX - this.getLeftOffset();
+
+        if (this.overXScrollBar || this.overYScrollBar) {
+            return;
+        }
+
+        var point;
+        if (this.editor.debugMode) {
+            if (clientX < this.DEBUG_GUTTER_WIDTH) {
+                console.log("Clicked in debug gutter");
+                point = { x: clientX, y: clientY };
+                point.y += Math.abs(this.yoffset);
+                var p = this.convertClientPointToCursorPoint(point);
+
+                var editSession = bespin.get("editSession");
+                if (p && editSession) {
+                    bespin.getComponent("breakpoints", function(breakpoints) {
+                        breakpoints.toggleBreakpoint({ project: editSession.project, path: editSession.path, lineNumber: p.row });
+                        this.editor.paint(true);
+                    }, this);
+                }
+                return;
+            }
+        }
+
+        this.selectMouseDetail = e.detail;
+        if (e.shiftKey) {
+            this.selectMouseDownPos = (this.editor.selection) ? this.editor.selection.startPos : this.editor.getCursorPos();
+            this.setSelection(e);
+        } else {
+            point = { x: clientX, y: clientY };
+
+            // happens first, because scroll bars are not relative to scroll position
+            if ((this.xscrollbar.rect.contains(point)) || (this.yscrollbar.rect.contains(point))) {
+                return;
+            }
+
+            // now, compensate for scroll position.
+            point.x += Math.abs(this.xoffset);
+            point.y += Math.abs(this.yoffset);
+
+            this.selectMouseDownPos = this.convertClientPointToCursorPoint(point);
+        }
         this.handleMouse(e);
+        return true;
     },
     
     mouseUp: function(e) {
-        console.log("mouse up:");
-        console.log(e);
-        return false;
+        if (this.selectMouseDownPos) {
+            this.setSelection(e);
+            this.selectMouseDownPos = undefined;
+            this.selectMouseDetail = undefined;
+            return false;
+        }
+        return true;
     },
     
     click: function(e) {
-        console.log("mouse clicked:");
-        console.log(e);
         e.type = "click";
         this.handleMouse(e);
     },
