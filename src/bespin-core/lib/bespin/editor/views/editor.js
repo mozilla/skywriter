@@ -22,14 +22,41 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore");
+var SC = require('sproutcore');
 
-var bespin = require("bespin");
-var syntax = require("bespin/syntax");
-var actions = require("bespin/actions");
-var keys = require("bespin/util/keys");
-var cursor = require("bespin/cursor");
+var bespin = require('bespin');
+var syntax = require('bespin/syntax');
+var actions = require('bespin/actions');
+var keys = require('bespin/util/keys');
+var cursor = require('bespin/cursor');
+var scroller = require('bespin/editor/views/scroller');
 
+var SelectionHelper = SC.Object.extend({
+    editor: null,
+
+    // returns an object with the startCol and endCol of the selection.
+    // If the col is -1 on the endPos, the selection goes for the entire line
+    // returns undefined if the row has no selection
+    getRowSelectionPositions: function(rowIndex) {
+        var startCol;
+        var endCol;
+
+        var selection = this.editor.getSelection();
+        if (!selection) {
+            return undefined;
+        }
+        if ((selection.endPos.row < rowIndex) || (selection.startPos.row > rowIndex)) {
+            return undefined;
+        }
+
+        startCol = (selection.startPos.row < rowIndex) ? 0 : selection.startPos.col;
+        endCol = (selection.endPos.row > rowIndex) ? -1 : selection.endPos.col;
+
+        return { startCol: startCol, endCol: endCol };
+    }
+});
+
+// The main editor view.
 exports.EditorView = SC.View.extend({
     render: function(context, firstTime) {
         this.sc_super();
@@ -133,7 +160,7 @@ exports.EditorView = SC.View.extend({
             });
         }
 
-        this.selectionHelper = exports.SelectionHelper.create({ editor: this.editor });
+        this.selectionHelper = SelectionHelper.create({ editor: this.editor });
         this.actions = actions.Actions.create({ editor: this.editor });
 
         // these two canvases are used as buffers for the scrollbar images,
@@ -162,7 +189,7 @@ exports.EditorView = SC.View.extend({
         // if we act as component, onmousewheel should only be listened to inside of the editor canvas.
         var scope = editor.actsAsComponent ? editor.canvas : window;
 
-        var xscrollbar = exports.Scrollbar.create({
+        var xscrollbar = scroller.Scrollbar.create({
             ui: this,
             orientation: "horizontal",
             valueChanged: function() {
@@ -180,7 +207,7 @@ exports.EditorView = SC.View.extend({
         // gh.push(dojo.connect(window, "mouseup", xscrollbar, "onmouseup"));
         // gh.push(dojo.connect(scope, wheelEventName, xscrollbar, "onmousewheel"));
 
-        var yscrollbar = exports.Scrollbar.create({
+        var yscrollbar = scroller.Scrollbar.create({
             ui: this,
             orientation: "vertical",
             valueChanged: function() {
@@ -807,7 +834,7 @@ exports.EditorView = SC.View.extend({
         var currentLine;
         var lastLineToRender;
 
-        var Rect = exports.Rect;
+        var Rect = scroller.Rect;
 
         // SETUP STATE
         // if the user explicitly requests a full refresh, give it to 'em
@@ -1581,7 +1608,7 @@ exports.EditorView = SC.View.extend({
             ctx.translate(-(bar.x + Math.floor(bar.w / 2)), -(bar.y + Math.floor(bar.h / 2)));
 
             // if we're vertical, the bar needs to be re-worked a bit
-            bar = new exports.Rect(bar.x - Math.floor(bar.h / 2) + Math.floor(bar.w / 2),
+            bar = new scroller.Rect(bar.x - Math.floor(bar.h / 2) + Math.floor(bar.w / 2),
                     bar.y + Math.floor(bar.h / 2) - Math.floor(bar.w / 2), bar.h, bar.w);
         }
 
@@ -1706,191 +1733,4 @@ exports.EditorView = SC.View.extend({
         }
     }
 });
-
-/**
- *
- */
-exports.SelectionHelper = SC.Object.extend({
-    editor: null,
-
-    // returns an object with the startCol and endCol of the selection.
-    // If the col is -1 on the endPos, the selection goes for the entire line
-    // returns undefined if the row has no selection
-    getRowSelectionPositions: function(rowIndex) {
-        var startCol;
-        var endCol;
-
-        var selection = this.editor.getSelection();
-        if (!selection) {
-            return undefined;
-        }
-        if ((selection.endPos.row < rowIndex) || (selection.startPos.row > rowIndex)) {
-            return undefined;
-        }
-
-        startCol = (selection.startPos.row < rowIndex) ? 0 : selection.startPos.col;
-        endCol = (selection.endPos.row > rowIndex) ? -1 : selection.endPos.col;
-
-        return { startCol: startCol, endCol: endCol };
-    }
-});
-
-/**
- *
- */
-exports.Scrollbar = SC.Object.extend({
-    HORIZONTAL: "horizontal",
-    VERTICAL: "vertical",
-    MINIMUM_HANDLE_SIZE: 20,
-
-    ui: null,
-
-    // "horizontal" or "vertical"
-    orientation: null,
-
-    // position/size of the scrollbar track
-    rect: null,
-
-    // current offset value
-    value: null,
-
-    // minimum offset value
-    min: null,
-
-    // maximum offset value
-    max: null,
-
-    // size of the current visible subset
-    extent: null,
-
-    // used for scroll bar dragging tracking; point at which the mousedown first occurred
-    mousedownScreenPoint: null,
-
-    // value at time of scroll drag start
-    mousedownValue: null,
-
-    // return a Rect for the scrollbar handle
-    getHandleBounds: function() {
-        var sx = this.isH() ? this.rect.x : this.rect.y;
-        var sw = this.isH() ? this.rect.w : this.rect.h;
-
-        var smultiple = this.extent / (this.max + this.extent);
-        var asw = smultiple * sw;
-        if (asw < this.MINIMUM_HANDLE_SIZE) {
-            asw = this.MINIMUM_HANDLE_SIZE;
-        }
-
-        sx += (sw - asw) * (this.value / (this.max - this.min));
-
-        return this.isH() ?
-            new exports.Rect(Math.floor(sx), this.rect.y, asw, this.rect.h) :
-            new exports.Rect(this.rect.x, sx, this.rect.w, asw);
-    },
-
-    isH: function() {
-        return !(this.orientation == this.VERTICAL);
-    },
-
-    fixValue: function(value) {
-        if (value < this.min) {
-            value = this.min;
-        }
-        if (value > this.max) {
-            value = this.max;
-        }
-        return value;
-    },
-
-    onmousewheel: function(e) {
-        // We need to move the editor unless something else needs to scroll.
-        // We need a clean way to define that behaviour, but for now we hack and put in other elements that can scroll
-        var command_output = document.getElementById("command_output");
-        var target = e.target || e.originalTarget;
-        if (command_output && (target.id == "command_output" || util.contains(command_output, target))) {
-            return;
-        }
-        if (!this.ui.editor.focus) {
-            return;
-        }
-
-        var wheel = mousewheelevent.wheel(e);
-        //console.log("Wheel speed: ", wheel);
-        var axis = mousewheelevent.axis(e);
-
-        if (this.orientation == this.VERTICAL && axis == this.VERTICAL) {
-            this.setValue(this.value + (wheel * this.ui.lineHeight));
-        } else if (this.orientation == this.HORIZONTAL && axis == this.HORIZONTAL) {
-            this.setValue(this.value + (wheel * this.ui.charWidth));
-        }
-    },
-
-    onmousedown: function(e) {
-        var clientY = e.clientY - this.ui.getTopOffset();
-        var clientX = e.clientX - this.ui.getLeftOffset();
-
-        var bar = this.getHandleBounds();
-        if (bar.contains({ x: clientX, y: clientY })) {
-            this.mousedownScreenPoint = this.isH() ? e.screenX : e.screenY;
-            this.mousedownValue = this.value;
-        } else {
-            var p = this.isH() ? clientX : clientY;
-            var b1 = this.isH() ? bar.x : bar.y;
-            var b2 = this.isH() ? bar.x2 : bar.y2;
-
-            if (p < b1) {
-                this.setValue(this.value -= this.extent);
-            } else if (p > b2) {
-                this.setValue(this.value += this.extent);
-            }
-        }
-    },
-
-    onmouseup: function(e) {
-        this.mousedownScreenPoint = null;
-        this.mousedownValue = null;
-        if (this.valueChanged) {
-            this.valueChanged(); // make the UI responsive when the user releases the mouse button (in case arrow no longer hovers over scrollbar)
-        }
-    },
-
-    onmousemove: function(e) {
-        if (this.mousedownScreenPoint) {
-            var diff = ((this.isH()) ? e.screenX : e.screenY) - this.mousedownScreenPoint;
-            var multiplier = diff / (this.isH() ? this.rect.w : this.rect.h);
-            this.setValue(this.mousedownValue + Math.floor(((this.max + this.extent) - this.min) * multiplier));
-        }
-    },
-
-    setValue: function(value) {
-        this.value = this.fixValue(value);
-        if (this.valueChanged) {
-            this.valueChanged();
-        }
-    }
-});
-
-/**
- * treat as immutable (pretty please)
- */
-exports.Rect = SC.Object.extend({
-    x: null,
-    y: null,
-    w: null,
-    h: null,
-
-    init: function() {
-        this.x2 = this.x + this.w;
-        this.y2 = this.y + this.h;
-        this.sc_super();
-    },
-
-    // inclusive of bounding lines
-    contains: function(point) {
-        if (!this.x) {
-            return false;
-        }
-        return ((this.x <= point.x) && ((this.x + this.w) >= point.x) && (this.y <= point.y) && ((this.y + this.h) >= point.y));
-    }
-});
-
 

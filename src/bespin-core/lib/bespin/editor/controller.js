@@ -36,7 +36,7 @@ var editorEvents = require("bespin/events");
 var cursor = require("bespin/cursor");
 var model = require("bespin/model");
 var history = require("bespin/history");
-var view = require("bespin/editor/view");
+var view = require("bespin/editor/views/editor");
 
 
 /**
