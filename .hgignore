@@ -16,3 +16,4 @@
 ^docs/_site
 ^narwhal/
 ^build/
+^sproutcore/
