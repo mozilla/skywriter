@@ -182,8 +182,9 @@ def release_embed(options):
         outputdir.rmtree()
     outputdir.mkdir()
     path("LICENSE.txt").copy(outputdir)
+    (path("src") / "bespin-build" / "sample.html").copy(outputdir)
     (builddir / "docs").copytree(outputdir / "docs")
-    (builddir / "BespinEmbed.js").copy(outputdir / "BespinEmbed.js")
+    (builddir / "BespinEmbedded.js").copy(outputdir / "BespinEmbedded.js")
     sh("tar czf BespinEmbedded-%s.tar.gz BespinEmbedded-%s" % \
         (version, version), cwd="build")
     
