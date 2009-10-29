@@ -40,31 +40,6 @@ var editorMod = require("bespin/editor");
 
 var EditorController = require('bespin/editor/controller').EditorController;
 
-exports.useBespin = function(element, options) {
-    // Creating the editor alters the components innerHTML
-    var originalInnerHtml = element.innerHTML;
-    
-    var controller = EditorController.create({});
-    SC.run(function() {
-        bespin.register("editor", controller);
-
-        var editorPane = SC.Pane.create({
-        });
-        editorPane.appendChild(controller.ui, null);
-        SC.$(element).css('position', 'relative');
-        element.innerHTML = "";
-        editorPane.appendTo(element);
-        if (options.initialContent) {
-            controller.model.insertDocument(options.initialContent);
-        } else {
-            controller.model.insertDocument(originalInnerHtml);
-        }
-    })
-    return controller;
-};
-
-
-
 // When we come to integrate the non embedded parts ...
 // var init = re quire("bespin/page/editor/init");
 // And then call init.onLoad();
@@ -79,7 +54,7 @@ bespin.register("plugins", catalog);
 /**
  * Initialize a Bespin component on a given element.
  */
-exports.useBespin2 = function(element, options) {
+exports.useBespin = function(element, options) {
     options = options || {};
 
     if (util.isString(element)) {
@@ -93,124 +68,40 @@ exports.useBespin2 = function(element, options) {
     // Creating the editor alters the components innerHTML
     var originalInnerHtml = element.innerHTML;
 
-    var editorComponent = exports.Component.create({ element: element });
+    var controller = EditorController.create({ container: element });
+    SC.run(function() {
+        bespin.register("editor", controller);
 
-    // The initial content defaults to the contents of the div, but you can
-    // override with the 'initialContent' option
-    if (options.initialContent) {
-        editorComponent.setContent(options.initialContent);
-    } else {
-        editorComponent.setContent(originalInnerHtml);
-    }
+        var editorPane = SC.Pane.create({});
+        editorPane.appendChild(controller.ui, null);
+        SC.$(element).css('position', 'relative');
+        element.innerHTML = "";
+        editorPane.appendTo(element);
+        if (options.initialContent) {
+            controller.model.insertDocument(options.initialContent);
+        } else {
+            controller.model.insertDocument(originalInnerHtml);
+        }
 
-    // Call editorComponent.set on any settings
-    if (options.settings) {
-        for (var key in options.settings) {
-            if (options.settings.hasOwnProperty(key)) {
-                editorComponent.set(key, options.settings[key]);
+        // Call controller.set on any settings
+        if (options.settings) {
+            for (var key in options.settings) {
+                if (options.settings.hasOwnProperty(key)) {
+                    controller.set(key, options.settings[key]);
+                }
             }
         }
-    }
 
-    // stealFocus makes us take focus on startup
-    if (options.stealFocus) {
-        editorComponent.setFocus(true);
-    }
-
-    // Move to a given line if requested
-    if (options.lineNumber) {
-        editorComponent.setLineNumber(options.lineNumber);
-    }
-
-    return editorComponent;
-};
-
-/**
- * This is a component that you can use to embed the Bespin Editor component
- * anywhere you wish.
- * There are a set of options that you pass in, as well as the container element
- * @param loadfromdiv Take the innerHTML from the given div and load it into
- * the editor
- * @param content Feed the editor the string as the initial content (loadfromdiv
- * trumps this)
- * @param language The given syntax highlighter language to turn on (not people
- * language!)
- * @param dontstealfocus by default the component will steal focus when it
- * loads, but you can change that by setting this to true
- */
-exports.Component = SC.Object.extend({
-    element: null,
-
-    /**
-     * Takes a container element, and the set of options for the component which
-     * include those noted above.
-     */
-    init: function() {
-        this.editor = bespin.register('editor', editorMod.API.create({ container: this.element }));
-
-        // Use in memory settings here instead of saving to the server which is default. Potentially use Cookie settings
-        bespin.register('settings', settings.Core.create({ store: settings.InMemory }));
-    },
-
-    /**
-     * Returns the contents of the editor
-     */
-    getContent: function() {
-        return bespin.get("editor").model.getDocument();
-    },
-
-    /**
-     * Takes the content and inserts it fresh into the document
-     */
-    setContent: function(content) {
-        return bespin.get("editor").model.insertDocument(content);
-    },
-
-    /**
-     * If you pass in true, focus will be set on the editor, if false, it will
-     * not.
-     */
-    setFocus: function(bool) {
-        return bespin.get("editor").setFocus(bool);
-    },
-
-    /**
-     * Pass in the line number to jump to (and refresh)
-     */
-    setLineNumber: function(linenum) {
-        bespin.get("editor").moveAndCenter(linenum);
-    },
-
-    /**
-     * Talk to the Bespin settings structure and pass in the key/value
-     */
-    set: function(key, value) {
-        bespin.get("settings").set(key, value);
-    },
-
-    /**
-     * Track changes in the document
-     */
-    onchange: function(callback) {
-        bespin.subscribe("editor:document:changed", callback);
-    },
-
-    /**
-     * Execute a given command
-     */
-    executeCommand: function(command) {
-        try {
-            bespin.get("commandLine").executeCommand(command);
-        } catch (e) {
-            // catch the command prompt errors
+        // stealFocus makes us take focus on startup
+        if (options.stealFocus) {
+            controller.setFocus(true);
         }
-    },
 
-    /**
-     * Disposes the editor as best as possible, clearing resources, clipboard
-     * helpers, and the like.
-     */
-    dispose: function() {
-        bespin.get("editor").dispose();
-    }
-});
+        // Move to a given line if requested
+        if (options.lineNumber) {
+            controller.setLineNumber(options.lineNumber);
+        }
+    });
+
+    return controller;
+};

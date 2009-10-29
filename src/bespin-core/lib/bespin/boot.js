@@ -34,11 +34,11 @@ Q.when(require.async("bespin/embed"), function(embed) {
     var nodes = document.querySelectorAll(".bespin");
     for (var i = 0; i < nodes.length; i++) {
         var node = nodes[i];
-        var options = node.getAttribute('data-bespin-options');
-        var bespin = embed.useBespin(node, eval("(" + options + ")"));
+        var options = node.getAttribute('data-bespinoptions');
+        var bespin = embed.useBespin(node, JSON.parse(options));
         node.bespin = bespin;
     }
-    
+
     // If users want a custom startup
     if (window.onBespinLoad) {
         window.onBespinLoad();

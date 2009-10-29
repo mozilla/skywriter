@@ -45,7 +45,7 @@ var view = require("bespin/editor/views/editor");
  */
 exports.EditorController = SC.Object.extend({
     opts: {},
-    
+
     containerBinding: '.ui.layer',
 
     init: function() {
@@ -76,9 +76,9 @@ exports.EditorController = SC.Object.extend({
         //     self.setFocus(true);
         // });
         // TODO: We're repainting fairly often do we need to add this?
-        dojo.connect(window, 'resize', function() {
-            self.paint();
-        });
+        // dojo.connect(window, 'resize', function() {
+        //     self.paint();
+        // });
 
         clipboard.setup(this);
 
@@ -88,11 +88,70 @@ exports.EditorController = SC.Object.extend({
             this.setFocus(true);
         }
 
+        // TODO: This is probably the wrong place to do this, but it needs to be
+        // done somewhere.
+        // Use in memory settings here instead of saving to the server which is default. Potentially use Cookie settings
+        bespin.register('settings', settings.Core.create({ store: settings.InMemory }));
+
         this.sc_super();
     },
 
     /**
-     * ensures that the start position is before the end position; reading
+     * Returns the contents of the editor
+     */
+    getContent: function() {
+        return this.model.getDocument();
+    },
+
+    /**
+     * Takes the content and inserts it fresh into the document
+     */
+    setContent: function(content) {
+        return this.model.insertDocument(content);
+    },
+
+    /**
+     * If you pass in true, focus will be set on the editor, if false, it will
+     * not.
+     */
+    setFocus: function(bool) {
+        return this.setFocus(bool);
+    },
+
+    /**
+     * Pass in the line number to jump to (and refresh)
+     */
+    setLineNumber: function(linenum) {
+        this.moveAndCenter(linenum);
+    },
+
+    /**
+     * Talk to the Bespin settings structure and pass in the key/value
+     */
+    set: function(key, value) {
+        bespin.get("settings").set(key, value);
+    },
+
+    /**
+     * Track changes in the document
+     */
+    onchange: function(callback) {
+        bespin.subscribe("editor:document:changed", callback);
+    },
+
+    /**
+     * Execute a given command
+     */
+    executeCommand: function(command) {
+        try {
+            bespin.get("commandLine").executeCommand(command);
+        } catch (e) {
+            // catch the command prompt errors
+        }
+    },
+
+    /**
+     * Ensures that the start position is before the end position; reading
      * directly from the selection property makes no such guarantee
      */
     getSelection: function(selection) {
