@@ -2,6 +2,7 @@
 ^.Python
 ^.project
 ^.settings
+^.pydevproject
 ^bin
 ^lib
 ^include
