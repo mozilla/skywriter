@@ -183,6 +183,7 @@ def release_embed(options):
     outputdir.mkdir()
     path("LICENSE.txt").copy(outputdir)
     (path("src") / "bespin-build" / "sample.html").copy(outputdir)
+    (path("src") / "html" / "sproutcore.css").copy(outputdir / "BespinEmbedded.css")
     (builddir / "docs").copytree(outputdir / "docs")
     (builddir / "BespinEmbedded.js").copy(outputdir / "BespinEmbedded.js")
     sh("tar czf BespinEmbedded-%s.tar.gz BespinEmbedded-%s" % \
