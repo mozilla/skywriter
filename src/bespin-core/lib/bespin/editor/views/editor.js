@@ -65,17 +65,19 @@ exports.EditorView = SC.View.extend({
             context = context.begin('canvas').attr('moz-opaque', 'true').attr("tabindex", "-1").end();
         }
     },
-    
+
     didCreateLayer: function() {
         console.log("DCL");
         var canvas = this.get("canvas");
-        if (canvas) return;
+        if (canvas) {
+            return;
+        }
         var layer = this.get("layer");
         if (layer) {
             this.set("canvas", layer.childNodes[0]);
         }
     },
-    
+
     rowLengthCache: [],
 
     searchString: null,
@@ -167,8 +169,8 @@ exports.EditorView = SC.View.extend({
         // which are then composited onto the main code view. we could have
         // saved ourselves some misery by just prerendering slices of the
         // scrollbars and combining them like sane people, but... meh
-        this.horizontalScrollCanvas = dojo.create("canvas");
-        this.verticalScrollCanvas = dojo.create('canvas');
+        this.horizontalScrollCanvas = document.createElement("canvas");
+        this.verticalScrollCanvas = document.createElement('canvas');
 
         // this.lineHeight;        // reserved for when line height is calculated dynamically instead of with a constant; set first time a paint occurs
         // this.charWidth;         // set first time a paint occurs
@@ -183,11 +185,15 @@ exports.EditorView = SC.View.extend({
         // this.selectMouseDownPos;        // position when the user moused down
         // this.selectMouseDetail;         // the detail (number of clicks) for the mouse down.
 
-        
         var editor = this.editor;
 
-        // if we act as component, onmousewheel should only be listened to inside of the editor canvas.
-        var scope = editor.actsAsComponent ? editor.canvas : window;
+
+        // In the old Bespin, if we acted as a component, the onmousewheel
+        // should only be listened to inside of the editor canvas. In the new
+        // world where everything builds off the embedded bespin, we should work
+        // out what to do with a failed scroll when we find it.
+        // var scope = editor.actsAsComponent ? editor.canvas : window;
+        var scope = this.editor.canvas;
 
         var xscrollbar = scroller.Scrollbar.create({
             ui: this,
@@ -217,7 +223,7 @@ exports.EditorView = SC.View.extend({
             }
         });
         this.yscrollbar = yscrollbar;
-        
+
         // Still more event handlers
         // gh.push(dojo.connect(window, "mousemove", yscrollbar, "onmousemove"));
         // gh.push(dojo.connect(window, "mouseup", yscrollbar, "onmouseup"));
@@ -236,7 +242,7 @@ exports.EditorView = SC.View.extend({
     convertClientPointToCursorPoint: function(pos) {
         var settings = bespin.get("settings");
         var x, y;
-        
+
         var content = this.get("content");
 
         if (pos.y < 0) { //ensure line >= first
@@ -486,14 +492,14 @@ exports.EditorView = SC.View.extend({
         content.clear();
         content.insertCharacters({ row: 0, col: 0 }, e.type);
     },
-    
+
     mouseDragged: function(e) {
         if (this.selectMouseDownPos) {
             this.setSelection(e);
         }
         return true;
     },
-    
+
     mouseDown: function(e) {
         var clientY = e.clientY - this.getTopOffset();
         var clientX = e.clientX - this.getLeftOffset();
@@ -542,7 +548,7 @@ exports.EditorView = SC.View.extend({
         this.handleMouse(e);
         return true;
     },
-    
+
     mouseUp: function(e) {
         if (this.selectMouseDownPos) {
             this.setSelection(e);
@@ -552,12 +558,12 @@ exports.EditorView = SC.View.extend({
         }
         return true;
     },
-    
+
     click: function(e) {
         e.type = "click";
         this.handleMouse(e);
     },
-    
+
     handleMouse: function(e) {
         // Right click for pie menu
         if (e.button == 2) {
@@ -653,7 +659,11 @@ exports.EditorView = SC.View.extend({
         this.oldkeydown = function(ev) { listener.onkeydown(ev); };
         this.oldkeypress = function(ev) { listener.onkeypress(ev); };
 
-        var scope = this.editor.opts.actsAsComponent ? this.editor.canvas : window;
+        // TODO: Why would we ever want to take over keypresses for the whole
+        // window????
+        // var scope = this.editor.opts.actsAsComponent ? this.editor.canvas : window;
+        var scope = this.editor.canvas;
+
         dojo.connect(scope, "keydown", this, "oldkeydown");
         dojo.connect(scope, "keypress", this, "oldkeypress");
 
@@ -750,11 +760,13 @@ exports.EditorView = SC.View.extend({
     },
 
     getWidth: function() {
-        return parseInt(dojo.style(this.editor.container, "width"), 10);
+        var styles = window.getComputedStyle(this.editor.container, null);
+        return parseInt(styles.width, 10);
     },
 
     getHeight: function() {
-        return parseInt(dojo.style(this.editor.container, "height"), 10);
+        var styles = window.getComputedStyle(this.editor.container, null);
+        return parseInt(styles.height, 10);
     },
 
     getTopOffset: function() {
