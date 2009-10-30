@@ -66,9 +66,13 @@ exports.EditorController = SC.Object.extend({
 
         this.ui.installKeyListener(this.editorKeyListener);
 
-        this.model.insertCharacters({ row: 0, col: 0 }, " ");
+        // TODO: We can't do this without explanation. In the past we Ben/Dion
+        // were doing this because in a few places they were using !contents
+        // to detect if something had been loaded. and "" == false, so they
+        // 'primed' it like this. We should use contents !== undefined.
+        //this.model.insertCharacters({ row: 0, col: 0 }, " ");
 
-        var self = this;
+        // var self = this;
         // dojo.connect(this.canvas, "blur",  function(e) {
         //     self.setFocus(false);
         // });
@@ -812,5 +816,3 @@ var toFire = function(eventString) {
     }
     return event;
 };
-
-

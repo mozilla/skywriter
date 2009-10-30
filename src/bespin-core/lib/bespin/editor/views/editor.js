@@ -61,8 +61,10 @@ exports.EditorView = SC.View.extend({
     render: function(context, firstTime) {
         this.sc_super();
         if (firstTime) {
-            console.log("Creating canvas");
-            context = context.begin('canvas').attr('moz-opaque', 'true').attr("tabindex", "-1").end();
+            context.begin('canvas')
+                .attr('moz-opaque', 'true')
+                .attr("tabindex", "-1")
+                .end();
         }
     },
 
@@ -75,6 +77,12 @@ exports.EditorView = SC.View.extend({
         var layer = this.get("layer");
         if (layer) {
             this.set("canvas", layer.childNodes[0]);
+
+            // TODO: There has to be a better way for the controller to know
+            // when it's safe to call installKeyListener() than this...
+            if (this.delayedInstallKeyListener) {
+                this.delayedInstallKeyListener();
+            }
         }
     },
 
@@ -187,13 +195,13 @@ exports.EditorView = SC.View.extend({
 
         var editor = this.editor;
 
-
         // In the old Bespin, if we acted as a component, the onmousewheel
         // should only be listened to inside of the editor canvas. In the new
         // world where everything builds off the embedded bespin, we should work
         // out what to do with a failed scroll when we find it.
         // var scope = editor.actsAsComponent ? editor.canvas : window;
-        var scope = this.editor.canvas;
+        // And we don't need it here. And it wouldn't work anyway
+        // var scope = this.editor.canvas;
 
         var xscrollbar = scroller.Scrollbar.create({
             ui: this,
@@ -648,7 +656,28 @@ exports.EditorView = SC.View.extend({
         }
     },
 
+    /**
+     *
+     */
     installKeyListener: function(listener) {
+        // TODO: Why would we ever want to take over keypresses for the whole
+        // window????
+        // var scope = this.editor.opts.actsAsComponent ? this.editor.canvas : window;
+        var scope = this.editor.container;//this.get('canvas');
+
+        // Maybe the canvas hasn't been setup yet. Delay this until it has. YUK
+        if (!scope) {
+            this.delayedInstallKeyListener = function() {
+                this.installKeyListener(listener);
+            };
+
+            console.log("delaying keyli");
+            return;
+        }
+
+        console.log("real keyli");
+        console.trace();
+
         if (this.oldkeydown) {
             dojo.disconnect(this.oldkeydown);
         }
@@ -659,10 +688,11 @@ exports.EditorView = SC.View.extend({
         this.oldkeydown = function(ev) { listener.onkeydown(ev); };
         this.oldkeypress = function(ev) { listener.onkeypress(ev); };
 
-        // TODO: Why would we ever want to take over keypresses for the whole
-        // window????
-        // var scope = this.editor.opts.actsAsComponent ? this.editor.canvas : window;
-        var scope = this.editor.canvas;
+        var echo = function() {
+            console.log(arguments);
+        };
+
+        dojo.connect(scope, "keypress", this, echo);
 
         dojo.connect(scope, "keydown", this, "oldkeydown");
         dojo.connect(scope, "keypress", this, "oldkeypress");
