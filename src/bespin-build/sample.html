@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html><head>
+
+<link href="BespinEmbedded.css" type="text/css" rel="stylesheet">
+
+<script type="text/javascript" src="BespinEmbedded.js"></script>
+
+<style>
+  body { padding: 20px; font-family: Calibri, Helvetica, Arial; }
+  h1 { border-bottom: 1px solid #ddd; font-size:120%; }
+  .bespin { margin: 0; padding: 0; border: 0; height: 300px; border: 10px solid #ddd; -moz-border-radius: 10px; -webkit-border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<h1>Sample Editor as a Component</h1>
+<div id="editor" class="bespin" data-bespin-options='{ "stealFocus": true }'>var foo = "whee";
+
+function flubber() {
+    return "tweeble";
+}</div>
+
+<script>
+window.onBespinLoad = function() {
+    console.log("window.onBespinLoad called");
+    bespin = document.getElementById("editor").bespin;
+};
+</script>
+</body>
+</html>
