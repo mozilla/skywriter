@@ -692,8 +692,11 @@ exports.EditorView = SC.View.extend({
             console.log("setFocus should be", focus, " currently", this.focus);
             if (this.focus != focus) {
                 var canvas = this.get('canvas');
-                // Call focus() or blur() depending on the passed focus param
-                (focus ? canvas.focus : canvas.blur)();
+                if (focus) {
+                    canvas.focus();
+                } else {
+                    canvas.blur();
+                }
                 this.focus = focus;
             }
         }.bind(this));

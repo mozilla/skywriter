@@ -35,6 +35,16 @@ exports.CursorManager = SC.Object.extend({
         this.position = { row: 0, col: 0 };
         this.virtualCol = 0;
 
+        // If someone does 'set strictlines on' then we need to check to see
+        // if the cursor is in a valid place, and correct if not.
+        bespin.subscribe("settings:set:strictlines", function(setting) {
+            var settings = bespin.get('settings');
+            if (settings.isOn(setting.value)) {
+                var oldPos = exports.copyPos(this.position);
+                this.checkPastEndOfLine(oldPos);
+            }
+        }.bind(this));
+
         this.sc_super();
     },
 
@@ -253,47 +263,27 @@ exports.CursorManager = SC.Object.extend({
     },
 
     moveUp: function() {
-        var selection = this.editor.getSelection();
         var oldPos = exports.copyPos(this.position);
-        var oldVirualCol = this.virtualCol;
 
         this.moveCursor({
             row: oldPos.row - 1,
             col: Math.max(oldPos.col, this.virtualCol)
         });
 
-        // TODO: This pattern crops up a lot - factor it out
-        var settings = bespin.get("settings");
-        var isStrictLines = settings ? settings.isSettingOn('strictlines') : false;
-        var thisScreenLength = this.editor.ui.getRowScreenLength(this.position.row);
-        if (isStrictLines && this.position.col > thisScreenLength) {
-            // this sets this.virtulaCol = 0!
-            this.moveToLineEnd();
-            this.virtualCol = Math.max(oldPos.col, oldVirualCol);
-        }
+        this.checkPastEndOfLine(oldPos);
 
         return { oldPos: oldPos, newPos: exports.copyPos(this.position) };
     },
 
     moveDown: function() {
-        var selection = this.editor.getSelection();
-
         var oldPos = exports.copyPos(this.position);
-        var oldVirualCol = this.virtualCol;
 
         this.moveCursor({
             row: Math.max(0, oldPos.row + 1),
             col: Math.max(oldPos.col, this.virtualCol)
         });
 
-        var settings = bespin.get("settings");
-        var isStrictLines = settings ? settings.isSettingOn('strictlines') : false;
-        var thisScreenLength = this.editor.ui.getRowScreenLength(this.position.row);
-        if (isStrictLines && this.position.col > thisScreenLength) {
-            // this sets this.virtulaCol = 0!
-            this.moveToLineEnd();
-            this.virtualCol = Math.max(oldPos.col, oldVirualCol);
-        }
+        this.checkPastEndOfLine(oldPos);
 
         return { oldPos: oldPos, newPos: exports.copyPos(this.position) };
     },
@@ -363,45 +353,42 @@ exports.CursorManager = SC.Object.extend({
     },
 
     movePageUp: function() {
-        var settings = bespin.get("settings");
-        var selection = this.editor.getSelection();
-
         var oldPos = exports.copyPos(this.position);
-        var oldVirualCol = this.virtualCol;
 
         this.moveCursor({
             row: Math.max(this.editor.ui.firstVisibleRow - this.editor.ui.visibleRows, 0)
         });
 
-        var settings = bespin.get("settings");
-        var isStrictLines = settings ? settings.isSettingOn('strictlines') : false;
-        var thisScreenLength = this.editor.ui.getRowScreenLength(this.position.row);
-        if (isStrictLines && this.position.col > thisScreenLength) {
-            // this sets this.virtulaCol = 0!
-            this.moveToLineEnd();
-            this.virtualCol = Math.max(oldPos.col, oldVirualCol);
-        }
+        this.checkPastEndOfLine(oldPos);
 
         return { oldPos: oldPos, newPos: exports.copyPos(this.position) };
     },
 
     movePageDown: function() {
-        var settings = bespin.get("settings");
-        var selection = this.editor.getSelection();
-
         var oldPos = exports.copyPos(this.position);
-        var oldVirualCol = this.virtualCol;
 
         this.moveCursor({
             row: Math.min(this.position.row + this.editor.ui.visibleRows, this.editor.model.getRowCount() - 1)
         });
 
-        if ((settings && settings.isSettingOn('strictlines')) && this.position.col > this.editor.ui.getRowScreenLength(this.position.row)) {
-            this.moveToLineEnd();   // this sets this.virtulaCol = 0!
-            this.virtualCol = Math.max(oldPos.col, oldVirualCol);
-        }
+        this.checkPastEndOfLine(oldPos);
 
         return { oldPos: oldPos, newPos: exports.copyPos(this.position) };
+    },
+
+    /**
+     * If strictlines is off, then we need to ensure that the cursor isn't off
+     * the end of the line.
+     */
+    checkPastEndOfLine: function(oldPos) {
+        var settings = bespin.get("settings");
+        var isStrictLines = settings ? settings.isSettingOn('strictlines') : false;
+        var maxCol = this.editor.ui.getRowScreenLength(this.position.row);
+        if (isStrictLines && this.position.col > maxCol) {
+            // this sets this.virtulaCol = 0!
+            this.moveToLineEnd();
+            this.virtualCol = Math.max(oldPos.col, this.virtualCol);
+        }
     },
 
     smartMoveLeft: function() {
