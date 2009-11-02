@@ -44,7 +44,8 @@ var view = require("bespin/editor/views/editor");
  * use
  */
 exports.EditorController = SC.Object.extend({
-    opts: {},
+    // TODO: was only used for opts.dontfocus which in turn (see below)
+    // opts: {},
 
     containerBinding: '.ui.layer',
 
@@ -72,25 +73,20 @@ exports.EditorController = SC.Object.extend({
         // 'primed' it like this. We should use contents !== undefined.
         //this.model.insertCharacters({ row: 0, col: 0 }, " ");
 
-        // var self = this;
-        // dojo.connect(this.canvas, "blur",  function(e) {
-        //     self.setFocus(false);
-        // });
-        // dojo.connect(this.canvas, "focus", function(e) {
-        //     self.setFocus(true);
-        // });
         // TODO: We're repainting fairly often do we need to add this?
+        // var self = this;
         // dojo.connect(window, 'resize', function() {
         //     self.paint();
         // });
 
         clipboard.setup(this);
 
-        //this.paint();
+        // this.paint();
 
-        if (!this.opts.dontfocus) {
-            this.setFocus(true);
-        }
+        // TODO: I think this is left over from some startup funkiness
+        // if (!this.opts.dontfocus) {
+        //     this.setFocus(true);
+        // }
 
         // TODO: This is probably the wrong place to do this, but it needs to be
         // done somewhere.
@@ -112,14 +108,6 @@ exports.EditorController = SC.Object.extend({
      */
     setContent: function(content) {
         return this.model.insertDocument(content);
-    },
-
-    /**
-     * If you pass in true, focus will be set on the editor, if false, it will
-     * not.
-     */
-    setFocus: function(bool) {
-        return this.setFocus(bool);
     },
 
     /**
@@ -297,12 +285,7 @@ exports.EditorController = SC.Object.extend({
      * set to the underlying canvas
      */
     setFocus: function(focus) {
-        this.focus = focus;
-
-        // force it if you have too
-        if (focus) {
-            //this.canvas.focus();
-        }
+        this.ui.setFocus(focus);
     },
 
     /**
@@ -717,7 +700,8 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
 
     onkeydown: function(e) {
         // handle keys only if editor has the focus!
-        if (!this.editor.focus) {
+        if (!this.editor.ui.hasFocus()) {
+            console.log("ignoring keyboard event, we don't have focus", e);
             return;
         }
 
@@ -756,7 +740,8 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
 
     onkeypress: function(e) {
         // handle keys only if editor has the focus!
-        if (!this.editor.focus) {
+        if (!this.editor.ui.hasFocus()) {
+            console.log("ignoring keyboard event, we don't have focus", e);
             return;
         }
 

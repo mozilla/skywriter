@@ -58,12 +58,16 @@ var SelectionHelper = SC.Object.extend({
 
 // The main editor view.
 exports.EditorView = SC.View.extend({
+    onInitActions: [],
+    inited: false,
+
     render: function(context, firstTime) {
         this.sc_super();
         if (firstTime) {
             context.begin('canvas')
                 .attr('moz-opaque', 'true')
-                .attr("tabindex", "-1")
+                .attr("tabindex", "1")
+                .id("woot")
                 .end();
         }
     },
@@ -80,10 +84,19 @@ exports.EditorView = SC.View.extend({
 
             // TODO: There has to be a better way for the controller to know
             // when it's safe to call installKeyListener() than this...
-            if (this.delayedInstallKeyListener) {
-                this.delayedInstallKeyListener();
-            }
+            this.onInitActions.forEach(function(action) {
+                action();
+            });
+            this.inited = true;
         }
+    },
+
+    onInit: function(action) {
+        if (this.inited) {
+            action();
+            return;
+        }
+        this.onInitActions.push(action);
     },
 
     rowLengthCache: [],
@@ -163,11 +176,10 @@ exports.EditorView = SC.View.extend({
         // set model to a default that will work until the real thing is loaded
         this.syntaxModel = syntax.Model.create();
 
-        var self = this;
         if (ep.extensions.length > 0) {
             ep.extensions[0].load(function(model) {
-                self.syntaxModel = model.create();
-            });
+                this.syntaxModel = model.create();
+            }.bind(this));
         }
 
         this.selectionHelper = SelectionHelper.create({ editor: this.editor });
@@ -238,8 +250,22 @@ exports.EditorView = SC.View.extend({
         // gh.push(dojo.connect(scope, wheelEventName, yscrollbar, "onmousewheel"));
 
         setTimeout(function() {
-            self.toggleCursor(self);
-        }, self.toggleCursorFrequency);
+            this.toggleCursor(this);
+        }.bind(this), this.toggleCursorFrequency);
+
+        this.onInit(function() {
+            console.log("this init", this);
+            var canvas = this.get('canvas');
+            console.log("adding listeners", canvas.id);
+            canvas.addEventListener("blur", function(ev) {
+                console.log("blur event for", this, "this.focus was", this.focus);
+                this.focus = true;
+            }.bind(this), true);
+            canvas.addEventListener("focus", function(ev) {
+                console.log("focus event for", this, "this.focus was", this.focus);
+                this.focus = true;
+            }.bind(this), true);
+        }.bind(this));
 
         this.sc_super();
     },
@@ -499,6 +525,7 @@ exports.EditorView = SC.View.extend({
         var content = this.get("content");
         content.clear();
         content.insertCharacters({ row: 0, col: 0 }, e.type);
+        console.log("handleFocus");
     },
 
     mouseDragged: function(e) {
@@ -553,8 +580,7 @@ exports.EditorView = SC.View.extend({
 
             this.selectMouseDownPos = this.convertClientPointToCursorPoint(point);
         }
-        this.handleMouse(e);
-        return true;
+        return this.handleMouse(e);
     },
 
     mouseUp: function(e) {
@@ -654,29 +680,47 @@ exports.EditorView = SC.View.extend({
         if ((oldX != this.overXScrollBar) || (oldY != this.overYScrollBar) || scrolled) {
             this.editor.paint(true);
         }
+
+        return true;
+    },
+
+    /**
+     *
+     */
+    setFocus: function(focus) {
+        this.onInit(function() {
+            console.log("setFocus should be", focus, " currently", this.focus);
+            if (this.focus != focus) {
+                var canvas = this.get('canvas');
+                // Call focus() or blur() depending on the passed focus param
+                (focus ? canvas.focus : canvas.blur)();
+                this.focus = focus;
+            }
+        }.bind(this));
+    },
+
+    /**
+     *
+     */
+    hasFocus: function(focus) {
+        return this.focus;
     },
 
     /**
      *
      */
     installKeyListener: function(listener) {
+        this.onInit(function() {
+            this.realInstallKeyListener(listener);
+        }.bind(this));
+    },
+
+    realInstallKeyListener: function(listener) {
+        console.log(this);
         // TODO: Why would we ever want to take over keypresses for the whole
         // window????
         // var scope = this.editor.opts.actsAsComponent ? this.editor.canvas : window;
-        var scope = this.editor.container;//this.get('canvas');
-
-        // Maybe the canvas hasn't been setup yet. Delay this until it has. YUK
-        if (!scope) {
-            this.delayedInstallKeyListener = function() {
-                this.installKeyListener(listener);
-            };
-
-            console.log("delaying keyli");
-            return;
-        }
-
-        console.log("real keyli");
-        console.trace();
+        var scope = this.get('canvas');
 
         if (this.oldkeydown) {
             dojo.disconnect(this.oldkeydown);
@@ -692,7 +736,7 @@ exports.EditorView = SC.View.extend({
             console.log(arguments);
         };
 
-        dojo.connect(scope, "keypress", this, echo);
+        scope.addEventListener("keypress", echo, false);
 
         dojo.connect(scope, "keydown", this, "oldkeydown");
         dojo.connect(scope, "keypress", this, "oldkeypress");
@@ -865,7 +909,6 @@ exports.EditorView = SC.View.extend({
         // DECLARE VARIABLES
 
         // these are convenience references so we don't have to type so much
-        var self = this;
         var ed = this.editor;
         var c = this.get('canvas');
         var theme = ed.theme;
@@ -1348,7 +1391,7 @@ exports.EditorView = SC.View.extend({
         }
 
         // paint the cursor
-        if (this.editor.focus) {
+        if (this.focus) {
             if (this.showCursor) {
                 if (ed.theme.cursorType == "underline") {
                     x = this.gutterWidth + this.LINE_INSETS.left + ed.cursorManager.getCursorPosition().col * this.charWidth;
@@ -1379,16 +1422,16 @@ exports.EditorView = SC.View.extend({
             if (userEntries) {
                 userEntries.forEach(function(userEntry) {
                     if (!userEntry.clientData.isMe) {
-                        x = self.gutterWidth + self.LINE_INSETS.left + userEntry.clientData.cursor.start.col * self.charWidth;
-                        y = userEntry.clientData.cursor.start.row * self.lineHeight;
+                        x = this.gutterWidth + this.LINE_INSETS.left + userEntry.clientData.cursor.start.col * this.charWidth;
+                        y = userEntry.clientData.cursor.start.row * this.lineHeight;
                         ctx.fillStyle = "#ee8c00";
-                        ctx.fillRect(x, y, 1, self.lineHeight);
+                        ctx.fillRect(x, y, 1, this.lineHeight);
                         var prevFont = ctx.font;
                         ctx.font = "6pt Monaco, Lucida Console, monospace";
-                        ctx.fillText(userEntry.handle, x + 3, y + self.lineHeight + 4);
+                        ctx.fillText(userEntry.handle, x + 3, y + this.lineHeight + 4);
                         ctx.font = prevFont;
                     }
-                });
+                }.bind(this));
             }
         }
 
@@ -1404,34 +1447,34 @@ exports.EditorView = SC.View.extend({
                 ctx.strokeStyle = "#211A16";
                 ctx.beginPath();
                 // Line 1 (starting at column 180 - should do better)
-                x = self.gutterWidth + self.LINE_INSETS.left + 180 * self.charWidth;
-                y = change.start.row * self.lineHeight;
+                x = this.gutterWidth + this.LINE_INSETS.left + 180 * this.charWidth;
+                y = change.start.row * this.lineHeight;
                 ctx.moveTo(x, y);
-                x = self.gutterWidth + self.LINE_INSETS.left + change.start.col * self.charWidth;
+                x = this.gutterWidth + this.LINE_INSETS.left + change.start.col * this.charWidth;
                 ctx.lineTo(x, y);
                 // Line 2
-                y += self.lineHeight;
+                y += this.lineHeight;
                 ctx.lineTo(x, y);
                 // Line 3
-                x = self.gutterWidth + self.LINE_INSETS.left;
+                x = this.gutterWidth + this.LINE_INSETS.left;
                 ctx.lineTo(x, y);
                 // Line 4
-                y = (change.end.row + 1) * self.lineHeight;
+                y = (change.end.row + 1) * this.lineHeight;
                 ctx.lineTo(x, y);
                 // Line 5
-                x = self.gutterWidth + self.LINE_INSETS.left + change.end.col * self.charWidth;
+                x = this.gutterWidth + this.LINE_INSETS.left + change.end.col * this.charWidth;
                 ctx.lineTo(x, y);
                 // Line 6
-                y = change.end.row * self.lineHeight;
+                y = change.end.row * this.lineHeight;
                 ctx.lineTo(x, y);
                 // Line 7
-                x = self.gutterWidth + self.LINE_INSETS.left + 180 * self.charWidth;
+                x = this.gutterWidth + this.LINE_INSETS.left + 180 * this.charWidth;
                 ctx.lineTo(x, y);
                 // Line 8
-                y = change.start.row * self.lineHeight;
+                y = change.start.row * this.lineHeight;
                 ctx.lineTo(x, y);
                 ctx.stroke();
-            });
+            }.bind(this));
         }
 
         // scroll bars - x axis

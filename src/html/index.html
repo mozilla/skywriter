@@ -46,7 +46,7 @@ window.onBespinLoad = function() {
 <div>
   <script>
     function setSyntax(value) {
-        bespin.publish("settings:language", { language: value });
+        bespin.set("language", { language: value });
     }
   </script>
   Enter language and blur out: <input type="text" id="syntax" value="" onblur="setSyntax(this.value)">
