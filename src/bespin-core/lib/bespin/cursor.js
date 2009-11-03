@@ -142,10 +142,12 @@ exports.CursorManager = SC.Object.extend({
         if (character.length > 1) {
             return;
         }
-        if (column == undefined){column = this.position.col;}
+        if (column == undefined) {
+            column = this.position.col;
+        }
         if (character == "\t") {
             var tabsize = this.editor.getTabSize();
-            return (tabsize - (column % tabsize));
+            return tabsize - (column % tabsize);
         } else {
             return 1;
         }

@@ -553,6 +553,10 @@ exports.Events = SC.Object.extend({
             var fromCommand = event.fromCommand;
             var languageSetting = self.settings.get('language') || "auto";
 
+            if (!editor) {
+                console.log("Ignoring language change - no editor");
+            }
+
             if (language == editor.language) {
                 return; // already set to be that language
             }
