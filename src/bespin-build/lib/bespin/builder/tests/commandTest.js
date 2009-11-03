@@ -30,23 +30,12 @@ var file = require("file");
 var qunit = require("qunit");
 
 var builder = require("bespin/builder");
+var common = require("bespin/builder/common");
+var throwsBuilderError = require("bespin/builder/tests/common").throwsBuilderError;
 
 qunit.module("bespin/builder/tests/commandTest");
 
 var FAKEPROFILE = new file.Path(module.path).dirname().join("fakeprofile.json");
-
-var throwsBuilderError = function(func, args, message) {
-    try {
-        func.apply(this, args);
-        qunit.ok(false, message);
-    } catch (e) {
-        if (e instanceof builder.BuilderError) {
-            qunit.ok(true, "Got a BuilderError");
-        } else {
-            qunit.ok(false, "Got an unexpected exception: " + e);
-        }
-    }
-};
 
 qunit.test("Profile loading", function() {
     qunit.ok(FAKEPROFILE.exists(), 
@@ -83,49 +72,4 @@ qunit.test("Setting up for build", function() {
     if (temppath.exists()) {
         temppath.rmtree();
     }
-});
-
-qunit.test("Get file contents", function() {
-    var loader = builder._getLoader();
-    
-    throwsBuilderError(builder.getFileContents, [loader, {file: "BADFILENAME"}],
-        "file contents can only be retrieved for good files");
-    file.write("GOODFILENAME", "Just some test data.\n");
-    var contents = builder.getFileContents(loader, {file: "GOODFILENAME"});
-    qunit.equals(contents, "Just some test data.\n", "File contents not retrieved properly");
-    file.remove("GOODFILENAME");
-    
-    throwsBuilderError(builder.getFileContents, [loader, "non/existent/module"]);
-    contents = builder.getFileContents(loader, "bespin/builder/tests/commandTest");
-    var fileStart = 'require.register({"bespin/builder/tests/commandTest":{"factory":function(require,exports,module,system,print){';
-    qunit.equals(contents.indexOf(fileStart), 0, 
-        "File header is missing or incorrect: "
-        + contents.substring(0, fileStart.length));
-    qunit.ok(contents.indexOf("MAGICAL STRING") > -1, 
-        "Could not find MAGICAL STRING in the output");
-});
-
-qunit.test("Expand includes", function() {
-    var loader = builder._getLoader();
-    throwsBuilderError(builder.expandIncludes, [loader, [{moduleDir: "bogus/module"}]],
-        "bad module name should result in an error");
-    var includes = builder.expandIncludes(loader, [{moduleDir: "bespin/boot"}, "bespin/debug"]);
-    qunit.ok(includes.length > 1, "expected many includes");
-    var hubFound = false;
-    var testsFound = false;
-    var debugFound = false;
-    
-    for (var i = 0; i < includes.length; i++) {
-        var filespec = includes[i];
-        if (filespec == "bespin/util/hub") {
-            hubFound = true;
-        } else if (filespec == "bespin/tests/allTests") {
-            testsFound = true;
-        } else if (filespec == "bespin/debug") {
-            debugFound = true;
-        }
-    }
-    qunit.ok(hubFound, "Should have found bespin/util/hub module in the include list");
-    qunit.ok(debugFound, "Should have found the debug module, which was included separately");
-    qunit.ok(!testsFound, "Tests should not have been included");
 });

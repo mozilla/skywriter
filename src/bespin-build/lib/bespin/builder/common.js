@@ -22,5 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-require("bespin/builder/tests/commandTest");
-require("bespin/builder/tests/workingSetTest");
+
+var BuilderError = exports.BuilderError = function(message) {
+    this.message = message;
+};

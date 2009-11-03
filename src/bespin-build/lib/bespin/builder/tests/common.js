@@ -22,5 +22,20 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-require("bespin/builder/tests/commandTest");
-require("bespin/builder/tests/workingSetTest");
+var qunit = require("qunit");
+
+var BuilderError = require("bespin/builder/common").BuilderError;
+
+exports.throwsBuilderError = function(func, args, message) {
+    try {
+        func.apply(this, args);
+        qunit.ok(false, message);
+    } catch (e) {
+        if (e instanceof BuilderError) {
+            qunit.ok(true, "Got a BuilderError");
+        } else {
+            qunit.ok(false, "Got an unexpected exception: " + e);
+        }
+    }
+};
+

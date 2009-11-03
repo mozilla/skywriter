@@ -30,6 +30,9 @@ var sandbox = require("sandbox");
 var logger = require("logger");
 var term = require("term");
 
+var BuilderError = require("bespin/builder/common").BuilderError;
+var workingset = require("./builder/workingset");
+
 var log = new logger.Logger(new term.Stream(system));
 
 log.format = function(severity, args) {
@@ -72,10 +75,6 @@ var STANDARD_INCLUDES = [
     {file: "src/bespin-build/launchbespin.js"}
 ];
 
-var BuilderError = exports.BuilderError = function(message) {
-    this.message = message;
-};
-
 /*
 * Loads a JSON-format profile from disk.
 * @param {String} filename The profile file to load.
@@ -108,109 +107,6 @@ exports.validateProfile = function(profile) {
     }
 };
 
-/*
-* Takes references to directories and expands them out to individual
-* files that need to be copied. For example, a filespec with a
-* moduleDir will look up the module referenced and then recursively
-* add all of the files in the directory containing that module.
-* Returns a new array with the include filespecs.
-* 
-* @param {sandbox.Loader} loader to find the files 
-* @type Array new array
-*/
-exports.expandIncludes = function(loader, includes) {
-    var out = [];
-    for (var i = 0; i < includes.length; i++) {
-        var filespec = includes[i];
-        if (typeof(filespec) == "string" || filespec.file) {
-            out.push(filespec);
-            continue;
-        }
-        
-        if (filespec.moduleDir) {
-            var parts = filespec.moduleDir.split(/\//);
-            parts.pop();
-            var packageName = parts.join("/");
-            try {
-                var path = loader.find(filespec.moduleDir);
-            } catch (e) {
-                throw new BuilderError("Unable to find module " + filespec.moduleDir 
-                    + " for a moduleDir include");
-            }
-            path = new file.Path(path).dirname();
-            var items = file.listTree(path);
-            for (var j = 0; j < items.length; j++) {
-                var fullname = items[j];
-                // we don't care about directories or non-js files
-                if (fullname == "" || (/\/$/.exec(fullname)) || !(/\.js$/.exec(fullname))) {
-                    continue;
-                }
-                fullname = packageName + "/" + fullname;
-                
-                fullname = fullname.replace(/\.js$/, "");
-                
-                // at some point, we'll likely have a more flexible way to 
-                // exclude certain files.
-                if (fullname.indexOf("/tests/") > -1) {
-                    continue;
-                }
-                out.push(fullname);
-            }
-        }
-    }
-    return out;
-};
-
-/*
-* Retrieves/augments the file contents for the filespec provided.
-* The filespec can be a string, in which case it's assumed to be
-* a module. Modules are looked up on the module path, and the
-* contents are wrapped to be properly registered with the client-side
-* module sandbox.
-* 
-* If filespec is an object with a "file" property, then that
-* file's contents will be returned directly.
-* @param {Object} loader: Narwhal sandbox.Loader to find files.
-* @param {String|Object} filespec File to return contents of.
-* @type String
-*/
-exports.getFileContents = function(loader, filespec) {
-    var path, wrap, contents;
-    
-    if (typeof(filespec) === "string") {
-        // handle modules
-        try {
-            path = loader.find(filespec);
-        } catch (e) {
-            throw new BuilderError("Could not find included module: " + filespec);
-        }
-        wrap = true;
-        path = new file.Path(path);
-    } else if (filespec.file) {
-        // handle files
-        path = new file.Path(filespec.file);
-        if (!path.exists()) {
-            throw new BuilderError("Could not find included file: " 
-                + filespec.file);
-        }
-        wrap = false;
-    }
-    
-    if (wrap) {
-        contents = 'require.register({"' + filespec +
-        '":{"factory":function(require,exports,module,system,print){';
-    } else {
-        contents = "";
-    }
-    
-    contents += file.read(path);
-    
-    if (wrap) {
-        contents += '},"depends":[]}});';
-    }
-    
-    return contents;
-};
 
 /*
 * Creates a new sandbox.Loader with the current path.
@@ -262,30 +158,16 @@ exports.generateScript = function(description) {
         outputPath.dirname().mkdirs();
     }
     
-    var loader = exports._getLoader();
-    
     // TODO this is temporary because narwhal-jsc doesn't automatically
     // clear the file first.
     if (outputPath.exists()) {
         outputPath.remove();
     }
     
-    var outputFile = file.open(outputPath.toString(), "w");
+    var set = new workingset.WorkingSet(exports._getLoader(), description.includes);
     
-    var includes = exports.expandIncludes(loader, description.includes);
+    set.dump(outputPath);
     
-    for (var i = 0; i < includes.length; i++) {
-        var filespec = includes[i];
-        
-        if (log.level == log.DEBUG) {
-            log.debug("Generating output for " + JSON.stringify(filespec));
-        }
-        
-        var contents = exports.getFileContents(loader, filespec);
-        outputFile.write(contents);
-        outputFile.write("\n");
-    }
-    outputFile.close();
     exports.compressOutput(outputPath);
 };
 
@@ -313,9 +195,13 @@ exports.main = function(args) {
         }
         
     } catch (e) {
-        if (e instanceof exports.BuilderError) {
+        if (e instanceof BuilderError) {
             log.fatal("Build failed!");
-            log.fatal(e.message);
+            var message = e.message;
+            if (e.rhinoException) {
+                message += "\n" + e.rhinoException.getScriptStackTrace();
+            }
+            log.fatal(message);
             os.exit(1);
         } else {
             throw e;
