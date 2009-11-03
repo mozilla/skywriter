@@ -27,23 +27,12 @@
 var file = require("file");
 var os = require("os");
 var sandbox = require("sandbox");
-var logger = require("logger");
-var term = require("term");
 
-var BuilderError = require("bespin/builder/common").BuilderError;
+var common = require("bespin/builder/common");
+var BuilderError = common.BuilderError;
+var log = common.log;
 var workingset = require("./builder/workingset");
 
-var log = new logger.Logger(new term.Stream(system));
-
-log.format = function(severity, args) {
-    var message = Array.prototype.join.apply(args, [""]);
-    if (severity < 2) {
-        message = "\0red(" + message + "\0)";
-    } else if (severity == 4) {
-        message = "debug: " + message;
-    }
-    return message + "\n";
-};
 
 var DEFAULT_PROFILE = "bespinProfile.json";
 

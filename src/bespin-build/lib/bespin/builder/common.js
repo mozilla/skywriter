@@ -22,6 +22,20 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var logger = require("logger");
+var term = require('term');
+
+var log = exports.log = new logger.Logger(new term.Stream(system));
+
+log.format = function(severity, args) {
+    var message = Array.prototype.join.apply(args, [""]);
+    if (severity < 2) {
+        message = "\0red(" + message + "\0)";
+    } else if (severity == 4) {
+        message = "debug: " + message;
+    }
+    return message + "\n";
+};
 
 var BuilderError = exports.BuilderError = function(message) {
     this.message = message;

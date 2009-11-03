@@ -24,7 +24,9 @@
 
 var file = require("file");
 
-var BuilderError = require("./common").BuilderError;
+var common = require("./common");
+var BuilderError = common.BuilderError;
+var log = common.log;
 
 var WorkingSet = exports.WorkingSet = function(loader, includes) {
     this.loader = loader;
