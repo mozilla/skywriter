@@ -261,10 +261,12 @@ command.store.addCommand({
     preview: 'update the project catalog of files used by quick open',
     execute: function(instruction, project) {
         if (!project) {
-            bespin.withComponent('editSession', function(editSession) {
+            var session = bespin.get('editSession');
+            if (session) {
                 project = editSession.project;
-            });
+            }
         }
+
         bespin.get("server").rescan(project, instruction, {
             onSuccess: instruction.link(function(response) {
                 instruction.addOutput(response);

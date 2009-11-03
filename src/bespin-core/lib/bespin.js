@@ -60,5 +60,4 @@ var container = require("bespin/util/container");
 exports.register = container.register;
 exports.unregister = container.unregister;
 exports.get = container.get;
-exports.withComponent = container.withComponent;
 exports.getComponent = container.getComponent;

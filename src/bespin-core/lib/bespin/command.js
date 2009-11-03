@@ -84,10 +84,8 @@ exports.Store = SC.Object.extend({
 
         // Add bindings
         if (command.withKey) {
-            // TODO - ensure that keyboard support is loaded earlier so we
-            // don't have to muck about like this
-            bespin.fireAfter([ "component:register:editor" ], function() {
-                bespin.get('editor').bindCommand(command.name, command.withKey);
+            bespin.getComponent('editor', function(editor) {
+                editor.bindCommand(command.name, command.withKey);
             });
         }
 

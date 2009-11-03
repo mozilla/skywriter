@@ -392,9 +392,10 @@ exports.commands.addCommand({
         var doCommit = function(values) {
             var project;
 
-            bespin.withComponent('editSession', function(editSession) {
-                project = editSession.project;
-            });
+            var session = bespin.get('editSession');
+            if (session) {
+                project = session.project;
+            }
 
             if (!project) {
                 instruction.addErrorOutput("You need to pass in a project");
@@ -512,9 +513,10 @@ exports.commands.addCommand({
     execute: function(instruction, args) {
         var project;
 
-        bespin.withComponent('editSession', function(editSession) {
-            project = editSession.project;
-        });
+        var session = bespin.get('editSession');
+        if (session) {
+            project = session.project;
+        }
 
         if (!project) {
             instruction.addErrorOutput("You need to pass in a project");
@@ -574,9 +576,10 @@ exports.commands.addCommand({
     execute: function(instruction, args) {
         var project;
 
-        bespin.withComponent('editSession', function(editSession) {
-            project = editSession.project;
-        });
+        var session = bespin.get('editSession');
+        if (session) {
+            project = session.project;
+        }
 
         if (!project) {
             instruction.addErrorOutput("You need to pass in a project");
@@ -618,9 +621,10 @@ exports.commands.addCommand({
     execute: function(instruction) {
         var project;
 
-        bespin.withComponent('editSession', function(editSession) {
-            project = editSession.project;
-        });
+        var session = bespin.get('editSession');
+        if (session) {
+            project = session.project;
+        }
 
         if (!project) {
             instruction.addErrorOutput("You need to pass in a project");
@@ -690,9 +694,10 @@ exports.hgCommands.addCommand({
     execute: function(instruction) {
         var project;
 
-        bespin.withComponent('editSession', function(editSession) {
-            project = editSession.project;
-        });
+        var session = bespin.get('editSession');
+        if (session) {
+            project = session.project;
+        }
 
         if (!project) {
             instruction.addErrorOutput("You need to pass in a project");
@@ -734,9 +739,10 @@ exports.svnCommands.addCommand({
 exports.svnCommands.genericExecute = function(instruction, args) {
     var project;
 
-    bespin.withComponent('editSession', function(editSession) {
-        project = editSession.project;
-    });
+    var session = bespin.get('editSession');
+    if (session) {
+        project = session.project;
+    }
 
     if (!project) {
         instruction.addErrorOutput("You need to be editing in a project");
@@ -784,10 +790,11 @@ exports._performVCSCommandWithFiles = function(vcsCommand, instruction, args, op
     var project;
     var path;
 
-    bespin.withComponent('editSession', function(editSession) {
-        project = editSession.project;
-        path = editSession.path;
-    });
+    var session = bespin.get('editSession');
+    if (session) {
+        project = session.project;
+        path = session.path;
+    }
 
     if (!project) {
         instruction.addErrorOutput("You need to pass in a project");

@@ -104,9 +104,7 @@ exports.API = SC.Object.extend({
 /**
  *
  */
-bespin.subscribe("component:register:actions", function(e) {
-    var actions = bespin.get('actions');
-
+bespin.getComponent('actions', function(actions) {
     actions.formatCode = function(args) {
         var sel = actions.editor.getSelection();
         var formatted;

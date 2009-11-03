@@ -35,7 +35,6 @@ var registeredComponents = {};
  */
 exports.register = function(id, object) {
     registeredComponents[id] = object;
-    hub.publish("component:register:" + id, { id: id, object: object });
     return object;
 };
 
@@ -51,16 +50,6 @@ exports.unregister = function(id) {
  */
 exports.get = function(id) {
     return registeredComponents[id];
-};
-
-/**
- * Given an id, and function to run, execute it if the component is available
- */
-exports.withComponent = function(id, func) {
-    var component = this.get(id);
-    if (component) {
-        return func(component);
-    }
 };
 
 /**

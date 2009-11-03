@@ -65,9 +65,10 @@ exports.commands.addCommand({
     completeText: "Optionally provide the project to deploy",
     execute: function(instruction, project) {
         if (!project) {
-            bespin.withComponent('editSession', function(editSession) {
-                project = editSession.project;
-            });
+            var session = bespin.get('editSession');
+            if (session) {
+                project = session.project;
+            }
         }
 
         if (!project) {
@@ -203,9 +204,10 @@ exports.commands.addCommand({
 
 exports._deployCommand = function(instruction, project, opts) {
     if (!project) {
-        bespin.withComponent('editSession', function(editSession) {
-            project = editSession.project;
-        });
+        var session = bespin.get('editSession');
+        if (session) {
+            project = session.project;
+        }
     }
 
     if (!project) {

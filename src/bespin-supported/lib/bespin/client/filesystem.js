@@ -319,36 +319,27 @@ var defaultScope = function() {
         return _defaultScope;
     }
 
-    var self = this;
-    var scope = {
+    var _defaultScope = {
         bespin: bespin,
         include: function(file) {
             bespin.get('files').evalFile(bespin.userSettingsProject, file);
         },
-        tryTocopyComponent: function(id) {
-            bespin.withComponent(id, function(component) {
-                self.id = component;
-            });
-        },
         require: require,
         publish: bespin.publish,
-        subscribe: bespin.subscribe
+        subscribe: bespin.subscribe,
+        commandLine: commandLine,
+        execute: function(cmd) {
+            commandLine.executeCommand(cmd);
+        }
     };
 
-    bespin.withComponent('commandLine', function(commandLine) {
-        scope.commandLine = commandLine;
-        scope.execute = function(cmd) {
-            commandLine.executeCommand(cmd);
-        };
+    var components = [ 'editor', 'editSession', 'files', 'server', 'toolbar', 'commandLine' ];
+    components.forEach(function(id) {
+        var component = bespin.get(id);
+        if (component) {
+            _defaultScope.id = component;
+        }
     });
-
-    scope.tryTocopyComponent('editor');
-    scope.tryTocopyComponent('editSession');
-    scope.tryTocopyComponent('files');
-    scope.tryTocopyComponent('server');
-    scope.tryTocopyComponent('toolbar');
-
-    _defaultScope = scope; // setup the short circuit
 
     return _defaultScope;
 };
