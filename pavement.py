@@ -130,6 +130,9 @@ To get the Python server installed, run these two commands:
 
 %s
 paver install_server
+
+* NOTE: "paver" always needs to be run in the directory with the
+pavement.py file (eg, the "bespinclient" directory).
 """ % (mac_note, linux_note, win_note, venv_command)
 
 @task
@@ -155,7 +158,13 @@ def start(options):
     will allow remote connections (assuming you don't have a firewall
     blocking the connection) and start the server on port 8000.
     """
-    subprocess.Popen("narwhal/bin/sea jackup -p 8081".split(), stdout=sys.stdout)
+    if sys.platform.startswith("win"):
+        commnad = "narwhal/bin/sea.cmd"
+    else:
+        command = "narwhal/bin/sea"
+    
+    command += " jackup -p 8081"
+    subprocess.Popen(command.split(), stdout=sys.stdout)
     args = " ".join("%s=%s" % (key, value) 
         for key, value in options.server.items())
     call_pavement(options.server_pavement, args + " start")
