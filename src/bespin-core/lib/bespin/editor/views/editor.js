@@ -58,46 +58,9 @@ var SelectionHelper = SC.Object.extend({
 
 // The main editor view.
 exports.EditorView = SC.View.extend({
-    onInitActions: [],
-    inited: false,
-
-    render: function(context, firstTime) {
-        this.sc_super();
-        if (firstTime) {
-            context.begin('canvas')
-                .attr('moz-opaque', 'true')
-                .attr("tabindex", "1")
-                .id("woot")
-                .end();
-        }
-    },
-
-    didCreateLayer: function() {
-        console.log("DCL");
-        var canvas = this.get("canvas");
-        if (canvas) {
-            return;
-        }
-        var layer = this.get("layer");
-        if (layer) {
-            this.set("canvas", layer.childNodes[0]);
-
-            // TODO: There has to be a better way for the controller to know
-            // when it's safe to call installKeyListener() than this...
-            this.onInitActions.forEach(function(action) {
-                action();
-            });
-            this.inited = true;
-        }
-    },
-
-    onInit: function(action) {
-        if (this.inited) {
-            action();
-            return;
-        }
-        this.onInitActions.push(action);
-    },
+    classNames: 'sc-canvas-view',
+    displayProperties: ['value', 'shouldAutoResize'],
+    tagName: 'canvas',
 
     rowLengthCache: [],
 
@@ -162,6 +125,10 @@ exports.EditorView = SC.View.extend({
     // a collection of global handles to event listeners that will need to be disposed.
     globalHandles: [],
 
+    // Some things need to happen only when we're rendered. This is how we delay
+    onInitActions: [],
+    inited: false,
+
     // painting optimization state
     lastLineCount: 0,
     lastCursorPos: null,
@@ -205,13 +172,11 @@ exports.EditorView = SC.View.extend({
         // this.selectMouseDownPos;        // position when the user moused down
         // this.selectMouseDetail;         // the detail (number of clicks) for the mouse down.
 
-        var editor = this.editor;
-
         // In the old Bespin, if we acted as a component, the onmousewheel
         // should only be listened to inside of the editor canvas. In the new
         // world where everything builds off the embedded bespin, we should work
         // out what to do with a failed scroll when we find it.
-        // var scope = editor.actsAsComponent ? editor.canvas : window;
+        // var scope = this.editor.actsAsComponent ? this.editor.canvas : window;
         // And we don't need it here. And it wouldn't work anyway
         // var scope = this.editor.canvas;
 
@@ -250,24 +215,55 @@ exports.EditorView = SC.View.extend({
         // gh.push(dojo.connect(scope, wheelEventName, yscrollbar, "onmousewheel"));
 
         setTimeout(function() {
-            this.toggleCursor(this);
+            this.toggleCursor();
         }.bind(this), this.toggleCursorFrequency);
 
         this.onInit(function() {
-            console.log("this init", this);
             var canvas = this.get('canvas');
             console.log("adding listeners", canvas.id);
-            canvas.addEventListener("blur", function(ev) {
-                console.log("blur event for", this, "this.focus was", this.focus);
-                this.focus = true;
-            }.bind(this), true);
-            canvas.addEventListener("focus", function(ev) {
-                console.log("focus event for", this, "this.focus was", this.focus);
-                this.focus = true;
-            }.bind(this), true);
         }.bind(this));
 
         this.sc_super();
+    },
+
+    render: function(context, firstTime) {
+        // TODO: Shouldn't we only do this if !firstTime
+        context.attr('moz-opaque', 'true');
+        context.attr("tabindex", "1");
+        context.push('canvas tag not supported by your browser');
+    },
+
+    didCreateLayer: function() {
+        console.log("DCL");
+        var canvas = this.$()[0];
+        this.set("canvas", canvas);
+
+        SC.Event.add(canvas, "blur", this, function(ev) {
+            console.log("blur event for", this, "this.focus was", this.focus);
+            this.focus = true;
+            return true;
+        });
+
+        SC.Event.add(canvas, "focus", this, function(ev) {
+            console.log("focus event for", this, "this.focus was", this.focus);
+            this.focus = true;
+            return true;
+        });
+
+        // TODO: There has to be a better way for the controller to know
+        // when it's safe to call installKeyListener() than this...
+        this.onInitActions.forEach(function(action) {
+            action();
+        });
+        this.inited = true;
+    },
+
+    onInit: function(action) {
+        if (this.inited) {
+            action();
+            return;
+        }
+        this.onInitActions.push(action);
     },
 
     /**
@@ -470,21 +466,24 @@ exports.EditorView = SC.View.extend({
         this.editor.paint();
     },
 
-    toggleCursor: function(ui) {
-        if (ui.toggleCursorAllowed) {
-            ui.showCursor = !ui.showCursor;
+    toggleCursor: function() {
+        if (this.toggleCursorAllowed) {
+            this.showCursor = !this.showCursor;
         } else {
-            ui.toggleCursorAllowed = true;
+            this.toggleCursorAllowed = true;
         }
 
         if (++this.toggleCursorFullRepaintCounter > 0) {
             this.toggleCursorFullRepaintCounter = 0;
-            ui.editor.paint(true);
+            this.editor.paint(true);
         } else {
-            ui.editor.paint();
+            this.editor.paint();
         }
 
-        setTimeout(function() { ui.toggleCursor(ui); }, ui.toggleCursorFrequency);
+        // Trigger this to kick off again soon
+        setTimeout(function() {
+            this.toggleCursor();
+        }.bind(this), this.toggleCursorFrequency);
     },
 
     ensureCursorVisible: function(softEnsure) {
@@ -521,11 +520,14 @@ exports.EditorView = SC.View.extend({
         }
     },
 
+    /**
+     * TODO: Is this ever called?
+     */
     handleFocus: function(e) {
         var content = this.get("content");
         content.clear();
         content.insertCharacters({ row: 0, col: 0 }, e.type);
-        console.log("handleFocus");
+        return true;
     },
 
     mouseDragged: function(e) {
@@ -540,7 +542,7 @@ exports.EditorView = SC.View.extend({
         var clientX = e.clientX - this.getLeftOffset();
 
         if (this.overXScrollBar || this.overYScrollBar) {
-            return;
+            return true;
         }
 
         var point;
@@ -558,7 +560,7 @@ exports.EditorView = SC.View.extend({
                         this.editor.paint(true);
                     }, this);
                 }
-                return;
+                return true;
             }
         }
 
@@ -571,7 +573,7 @@ exports.EditorView = SC.View.extend({
 
             // happens first, because scroll bars are not relative to scroll position
             if ((this.xscrollbar.rect.contains(point)) || (this.yscrollbar.rect.contains(point))) {
-                return;
+                return true;
             }
 
             // now, compensate for scroll position.
@@ -580,6 +582,11 @@ exports.EditorView = SC.View.extend({
 
             this.selectMouseDownPos = this.convertClientPointToCursorPoint(point);
         }
+
+        // I'm not sure why we should need to manually set focus to the canvas;
+        // it happens automatically when there is no mouseDown event handler
+        this.get('canvas').focus();
+
         return this.handleMouse(e);
     },
 
@@ -590,23 +597,25 @@ exports.EditorView = SC.View.extend({
             this.selectMouseDetail = undefined;
             return false;
         }
+
         return true;
     },
 
     click: function(e) {
         e.type = "click";
-        this.handleMouse(e);
+        return this.handleMouse(e);
     },
 
     handleMouse: function(e) {
+        /*
         // Right click for pie menu
         if (e.button == 2) {
             bespin.getComponent("piemenu", function(piemenu) {
                 piemenu.show(null, false, e.clientX, e.clientY);
             });
-            util.stopEvent(e);
             return false;
         }
+        */
 
         var clientY = e.clientY - this.getTopOffset();
         var clientX = e.clientX - this.getLeftOffset();
@@ -719,30 +728,29 @@ exports.EditorView = SC.View.extend({
     },
 
     realInstallKeyListener: function(listener) {
-        console.log(this);
         // TODO: Why would we ever want to take over keypresses for the whole
         // window????
         // var scope = this.editor.opts.actsAsComponent ? this.editor.canvas : window;
         var scope = this.get('canvas');
 
         if (this.oldkeydown) {
-            dojo.disconnect(this.oldkeydown);
+            SC.Event.remove(scope, "keydown", this, this.oldkeydown);
         }
         if (this.oldkeypress) {
-            dojo.disconnect(this.oldkeypress);
+            SC.Event.remove(scope, "keypress", this, this.oldkeypress);
         }
 
-        this.oldkeydown = function(ev) { listener.onkeydown(ev); };
-        this.oldkeypress = function(ev) { listener.onkeypress(ev); };
-
-        var echo = function() {
-            console.log(arguments);
+        this.oldkeydown = function(ev) {
+            listener.onkeydown(ev);
+            return true;
+        };
+        this.oldkeypress = function(ev) {
+            listener.onkeypress(ev);
+            return true;
         };
 
-        scope.addEventListener("keypress", echo, false);
-
-        dojo.connect(scope, "keydown", this, "oldkeydown");
-        dojo.connect(scope, "keypress", this, "oldkeypress");
+        SC.Event.add(scope, "keydown", this, this.oldkeydown);
+        SC.Event.add(scope, "keypress", this, this.oldkeypress);
 
         var Key = keys.Key;
 
