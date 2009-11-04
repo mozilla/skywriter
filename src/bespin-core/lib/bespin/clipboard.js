@@ -27,52 +27,31 @@
  */
 
 var SC = require("sproutcore");
-var bespin = require("bespin");
 var util = require("bespin/util/util");
-var cursor = require("bespin/cursor");
+var keys = require("bespin/util/keys");
 
 /**
  * The clipboard implementation currently in use
  */
-var uses = null;
+var implementation = null;
 
 /**
- * Given a clipboard adapter implementation, save it, an call install() on it
+ * Do the first setup.
+ * <p>If using WebKit use DOMEvents, else try the bad tricks (HiddenWorld).
  */
-function install(editor, newImpl) {
-    uninstall();
-    uses = newImpl;
-    uses.install(editor);
-};
-
-/**
- * Uninstalls the clipboard handler installed by install()
- */
-function uninstall() {
-    if (uses && typeof uses.uninstall == "function") {
-        uses.uninstall();
+exports.setup = function(editorWrapper) {
+    if (implementation) {
+        implementation.uninstall();
     }
 
-    // Clear uses, because we are no longer using anything.
-    uses = undefined;
-};
-
-/**
- * Do the first setup. Right now checks for WebKit and inits a DOMEvents
- * solution if that is true else install the default.
- * <p>If using WebKit (I know, feature detection would be nicer, but
- * e.clipboardData is deep) use DOMEvents. Else try the bad tricks.
- * The factory that is used to install, and setup the adapter that does the work
- */
-exports.setup = function(editor) {
-    install(editor, new HiddenWorld());
-
-    // setData appears to be working again, if you go through certain steps
-    // (you have to stop the event properly...)
+    // Feature detection would be nicer, but ev.clipboardData only exists on
+    // clipboard events
     if (util.isWebKit) {
-        install(editor, new DOMEvents());
+        implementation = DOMEvents.create({ editorWrapper:editorWrapper });
+        implementation.install();
     } else {
-        install(editor, new HiddenWorld());
+        implementation = HiddenWorld.create({ editorWrapper:editorWrapper });
+        implementation.install();
     }
 };
 
@@ -80,163 +59,171 @@ exports.setup = function(editor) {
  * Create a hidden text area so we can adjust the destination of the copy event
  * just before it happens.
  */
-function createHiddenTextarea() {
-    var textarea = document.createElement("textarea");
-    textarea.tabIndex = -1;
-    textarea.style.position = "absolute";
-    textarea.style.zIndex = "999";
-    textarea.style.top = "-10000px";
-    textarea.style.width = 0;
-    textarea.style.height = 0;
-    document.body.appendChild(textarea);
-    return textarea;
-};
+var ClipboardProxy = SC.Object.extend({
+    _hasFocus: false,
 
-// Defensively stop doing copy/cut/paste magic if you are in the command line
-var isCommandLine = function(e) {
-    return e.target.id == "command";
-};
+    /**
+     * Create a textarea under the document body to handle our text
+     */
+    init: function() {
+        this.textarea = document.createElement("textarea");
+        this.textarea.className = "bespin-clipboardproxy";
+        this.textarea.tabIndex = -1;
+        this.textarea.style.position = "absolute";
+        this.textarea.style.zIndex = "999";
+        this.textarea.style.top = "-10000px";
+        this.textarea.style.width = 0;
+        this.textarea.style.height = 0;
+        document.body.appendChild(this.textarea);
+    },
 
-var editorHasFocus = function() {
-    return editor.focus;
-};
+    /**
+     * Take focus and put the (optional) passed text into the internal textarea
+     * and make sure that it is selected.
+     */
+    takeFocus: function(text) {
+        // have to show that there is something to copy
+        text = text || "Hello";
+
+        this.textarea.value = text;
+        this.textarea.focus();
+        this.textarea.select();
+
+        this._hasFocus = true;
+    },
+
+    /**
+     * Focus tracking - do we have it?
+     */
+    hasFocus: function(text) {
+        return this._hasFocus;
+    },
+
+    /**
+     * Focus tracking - it's gone
+     */
+    loseFocus: function() {
+        this._hasFocus = false;
+    },
+
+    /**
+     * What are the contents of the textarea?
+     */
+    getValue: function() {
+        return this.textarea.value;
+    },
+
+    /**
+     * Clean up
+     */
+    dispose: function() {
+        document.body.removeChild(this.textarea);
+    }
+});
 
 /**
  * This adapter configures the DOMEvents that only WebKit seems to do well right
  * now. There is trickery involved here. The before event changes focus to the
- * hidden copynpaster text input, and then the real event does its thing and we
- * focus back
+ * hidden textarea, and then the real event does its thing and we focus back
  */
 var DOMEvents = SC.Object.extend({
-    install: function(editor) {
-        var focuser = createHiddenTextarea();
-        this.focuser = focuser;
-        var onfocuser = false;
+    editorWrapper: null,
 
-        // Copy
-        this.beforecopyHandle = dojo.connect(document.body, "onbeforecopy", function(e) {
-            if ((!editorHasFocus() && !onfocuser) || isCommandLine(e)) {
+    install: function() {
+        var proxy = ClipboardProxy.create();
+        // Would like to attach events to this.editorWrapper.getFocusElement()
+        // (i.e. the canvas element) except that this doesn't work, so we have
+        // to attach to document.body and then check to see if we're it
+        var element = document;
+
+        // Safari calls this to see if there is anything to cut/copy, to detect
+        // if we it grey out the copy menu item. Chrome calls this just before
+        // calling cut/copy
+        var primeMenu = function(ev) {
+            if (!this.editorWrapper.hasFocus()) {
                 return;
             }
-            // a full stop, because we _are_ handling the event
-            util.stopEvent(e);
+            // Tell the system that we are going to handle the event
+            ev.preventDefault();
+            // Line up the fake element so Safari's checks work OK
+            proxy.takeFocus();
+        };
 
-            // have to show that there is something to copy
-            focuser.value = "Hello";
-            focuser.focus();
-            focuser.select();
+        SC.Event.add(element, "beforecopy", this, primeMenu, false);
+        SC.Event.add(element, "beforecut", this, primeMenu, false);
+        SC.Event.add(element, "beforepaste", this, primeMenu, false);
 
-            // and we are now on focuser
-            onfocuser = true;
-        });
-
-        this.copyHandle = dojo.connect(document.body, "oncopy", function(e) {
-            if (!editorHasFocus() && !onfocuser) {
+        // Called to actually do the copy
+        var onCopy = function(ev) {
+            if (!proxy.hasFocus()) {
                 return;
             }
-            if (isCommandLine(e)) {
-                return;
-            }
-
-            var selectionText = editor.getSelectionAsText();
-            if (selectionText && selectionText != '') {
-                e.clipboardData.setData('text/plain', selectionText);
+            var text = this.editorWrapper.getSelection();
+            console.log("onCopy", ev, text);
+            if (text && text != '') {
+                ev.clipboardData.setData('text/plain', text);
                 // stop event, otherwise someone else will try to set copy data.
-                util.stopEvent(e);
+                util.stopEvent(ev);
             }
 
-            editor.canvas.focus();
-            onfocuser = false;
-        });
+            proxy.loseFocus();
+            this.editorWrapper.focus();
+        };
+        SC.Event.add(element, "copy", this, onCopy, false);
 
-        // Cut
-        this.beforecutHandle = dojo.connect(document, "beforecut", function(e) {
-            if ((!editorHasFocus() && !onfocuser) || isCommandLine(e)) {
+        var onCut = function(ev) {
+            if (!proxy.hasFocus()) {
                 return;
             }
-            // a full stop, because we _are_ handling the event
-            util.stopEvent(e);
+            var text = this.editorWrapper.removeSelection();
+            console.log("onCut", ev, text);
+            if (text) {
+                ev.clipboardData.setData('text/plain', text);
+                // TODO: do we mean this or util.stopEvent(ev);
+                ev.preventDefault();
+            }
 
-            // have to show that there is something to copy
-            focuser.value = "Hello";
-            focuser.focus();
-            focuser.select();
+            proxy.loseFocus();
+            this.editorWrapper.focus();
+        };
+        SC.Event.add(element, "cut", this, onCut, false);
 
-            // and we are now on focuser
-            onfocuser = true;
-        });
-
-        this.cutHandle = dojo.connect(document, "cut", function(e) {
-            if (!editorHasFocus() && !onfocuser) {
+        var onPaste = function(ev) {
+            if (!proxy.hasFocus()) {
                 return;
             }
-            if (isCommandLine(e)) {
-                return;
-            }
+            var text = ev.clipboardData.getData('text/plain');
+            console.log("onPaste", ev, text);
+            this.editorWrapper.replaceSelection(text);
+            util.stopEvent(ev);
 
-            var selectionObject = editor.getSelection();
+            proxy.loseFocus();
+            this.editorWrapper.focus();
+        };
+        SC.Event.add(element, "paste", this, onPaste);
 
-            if (selectionObject) {
-                var selectionText = editor.model.getChunk(selectionObject);
+        this.uninstall = function() {
+            SC.Event.remove(element, "beforecopy", this, primeMenu, false);
+            SC.Event.remove(element, "beforecut", this, primeMenu, false);
+            SC.Event.remove(element, "beforepaste", this, primeMenu, false);
 
-                if (selectionText && selectionText != '') {
-                    e.preventDefault();
-                    e.clipboardData.setData('text/plain', selectionText);
-                    editor.ui.actions.beginEdit('cut');
-                    editor.ui.actions.deleteSelection(selectionObject);
-                    editor.ui.actions.endEdit();
-                }
-            }
+            SC.Event.remove(element, "copy", this, onCopy, false);
+            SC.Event.remove(element, "cut", this, onCut, false);
+            SC.Event.remove(element, "paste", this, onPaste, false);
 
-            editor.canvas.focus();
-            onfocuser = false;
-        });
-
-        // Paste
-        this.beforepasteHandle = dojo.connect(document, "beforepaste", function(e) {
-            if (!editorHasFocus()) {
-                return;
-            }
-            if (isCommandLine(e)) {
-                return;
-            }
-            // a full stop, because we _are_ handling the event
-            util.stopEvent(e);
-        });
-
-        this.pasteHandle = dojo.connect(document, "paste", function(e) {
-            if (!editorHasFocus() || isCommandLine(e)) {
-                return;
-            }
-            // a full stop, because we _are_ handling the event
-            util.stopEvent(e);
-
-            var args = cursor.buildArgs();
-            args.chunk = e.clipboardData.getData('text/plain');
-            if (args.chunk) {
-                editor.ui.actions.beginEdit('paste');
-                editor.ui.actions.insertChunk(args);
-                editor.ui.actions.endEdit();
-            }
-
-            document.getElementById('canvas').focus();
-        });
+            proxy.dispose();
+        };
 
         // and this line makes it work immediately (otherwise you'd have to copy
         // something from somewhere else on the page)
         // I'm not sure why this happens...
-        document.body.focus();
+        //document.body.focus();
     },
 
+    /**
+     * This is dynamically re-written by the install function
+     */
     uninstall: function() {
-        dojo.disconnect(this.beforepasteHandle);
-        dojo.disconnect(this.pasteHandle);
-        dojo.disconnect(this.beforecutHandle);
-        dojo.disconnect(this.cutHandle);
-        dojo.disconnect(this.beforecopyHandle);
-        dojo.disconnect(this.copyHandle);
-
-        document.body.removeChild(this.focuser);
     }
 });
 
@@ -245,97 +232,59 @@ var DOMEvents = SC.Object.extend({
  * data around
  */
 var HiddenWorld = SC.Object.extend({
-    install: function(editor) {
+    editorWrapper: null,
 
-        // Configure the hidden copynpaster element, if it doesn't already exist
-        // save in a var for later use
-        var copynpaster = createHiddenTextarea();
+    install: function() {
+        this.proxy = ClipboardProxy.create();
 
-        var copyToClipboard = function(text) {
-            copynpaster.value = text;
-            copynpaster.select();
-            copynpaster.focus();
-            setTimeout(function() { editor.setFocus(true); }, 10);
-        };
-
-        var pasteFromClipboard = function() {
-            copynpaster.select(); // select and hope that the paste goes in here
-
-            setTimeout(function() {
-                var args = cursor.buildArgs();
-                args.chunk = copynpaster.value;
-                if (args.chunk) {
-                    editor.ui.actions.beginEdit('paste');
-                    editor.ui.actions.insertChunk(args);
-                    editor.ui.actions.endEdit();
-                }
-                editor.setFocus(true);
-            }, 0);
-        };
-
-        this.keyDown = dojo.connect(document, "keydown", function(e) {
-            if (!bespin.get('editor').focus) {
-                return;
-            }
-            var selectionText;
-
-            if ((util.isMac && e.metaKey) || e.ctrlKey) {
+        var onKeyDown = function(ev) {
+            var text;
+            if ((util.isMac && ev.metaKey) || ev.ctrlKey) {
                 // Copy
-                if (e.keyCode == 67 /*c*/) {
+                if (ev.keyCode == keys.Key.C) {
                     // place the selection into the input
-                    selectionText = editor.getSelectionAsText();
-                    if (selectionText && selectionText != '') {
-                        copyToClipboard(selectionText);
+                    text = this.editorWrapper.getSelection();
+                    if (text && text != '') {
+                        this._copyToClipboard(text);
                     }
-                } else if (e.keyCode == 88 /*x*/) {
+                } else if (ev.keyCode == keys.Key.X) {
                     // Cut
-                    // place the selection into the input
-                    var selectionObject = editor.getSelection();
-
-                    if (selectionObject) {
-                        selectionText = editor.model.getChunk(selectionObject);
-
-                        if (selectionText && selectionText != '') {
-                            copyToClipboard(selectionText);
-                            editor.ui.actions.beginEdit('cut');
-                            editor.ui.actions.deleteSelection(selectionObject);
-                            editor.ui.actions.endEdit();
-                        }
-                    }
-                } else if (e.keyCode == 86 /*v*/) {
-                    // Paste
-                    if (e.target == document.getElementById("command")) {
-                        // let the paste happen in the command
-                        return;
-                    }
-                    pasteFromClipboard();
+                    text = this.editorWrapper.removeSelection();
+                    this._copyToClipboard(text);
+                } else if (ev.keyCode == keys.Key.V) {
+                    this._pasteFromClipboard();
                 }
             }
-        });
+        }.bind(this);
+
+        var element = this.editorWrapper.getFocusElement();
+        element.addEventListener("keydown", onKeyDown, false);
+
+        this.eventRemover = function() {
+            element.removeEventListener("keydown", onKeyDown, false);
+        };
+    },
+
+    _copyToClipboard: function(text) {
+        this.proxy.takeFocus(text);
+        setTimeout(function() {
+            this.editorWrapper.focus();
+        }.bind(this), 10);
+    },
+
+    _pasteFromClipboard: function() {
+        // Hope that the paste goes in here
+        this.proxy.takeFocus();
+        setTimeout(function() {
+            var text = this.proxy.getValue();
+            this.editorWrapper.replaceSelection(text);
+            this.editorWrapper.focus();
+        }.bind(this), 0);
     },
 
     uninstall: function() {
-        dojo.disconnect(this.keyDown);
-
-        if (this.copynpaster) {
-            document.body.removeChild(this.copynpaster);
-        }
-
-        this.copynpaster = undefined;
-    }
-});
-
-/**
- * Turn on the key combinations to access the clipboard.manual class
- * which basically only works with the editor only. Not in favour.
- */
-exports.EditorOnly = SC.Object.extend({
-    install: function() {
-        var editor = bespin.get('editor');
-
-        editor.bindKey("copySelection", "CMD C");
-        editor.bindKey("pasteFromClipboard", "CMD V");
-        editor.bindKey("cutSelection", "CMD X");
+        this.eventRemover();
+        this.proxy.dispose();
     }
 });
 

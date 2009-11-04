@@ -31,7 +31,6 @@ var cookie = require("bespin/util/cookie");
 var keys = require("bespin/util/keys");
 
 var settings = require("bespin/settings");
-var clipboard = require("bespin/clipboard");
 var editorEvents = require("bespin/events");
 var cursor = require("bespin/cursor");
 var model = require("bespin/model");
@@ -78,8 +77,6 @@ exports.EditorController = SC.Object.extend({
         // dojo.connect(window, 'resize', function() {
         //     self.paint();
         // });
-
-        clipboard.setup(this);
 
         // this.paint();
 

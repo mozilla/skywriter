@@ -30,6 +30,7 @@ var actions = require('bespin/actions');
 var keys = require('bespin/util/keys');
 var cursor = require('bespin/cursor');
 var scroller = require('bespin/editor/views/scroller');
+var clipboard = require("bespin/clipboard");
 
 var SelectionHelper = SC.Object.extend({
     editor: null,
@@ -218,11 +219,6 @@ exports.EditorView = SC.View.extend({
             this.toggleCursor();
         }.bind(this), this.toggleCursorFrequency);
 
-        this.onInit(function() {
-            var canvas = this.get('canvas');
-            console.log("adding listeners", canvas.id);
-        }.bind(this));
-
         this.sc_super();
     },
 
@@ -234,21 +230,25 @@ exports.EditorView = SC.View.extend({
     },
 
     didCreateLayer: function() {
-        console.log("DCL");
         var canvas = this.$()[0];
         this.set("canvas", canvas);
 
         SC.Event.add(canvas, "blur", this, function(ev) {
-            console.log("blur event for", this, "this.focus was", this.focus);
             this.focus = true;
             return true;
         });
 
         SC.Event.add(canvas, "focus", this, function(ev) {
-            console.log("focus event for", this, "this.focus was", this.focus);
             this.focus = true;
             return true;
         });
+
+        // Nail the clipboard
+        var editorWrapper = EditorWrapper.create({
+            editor: this.editor,
+            ui: this
+        });
+        clipboard.setup(editorWrapper);
 
         // TODO: There has to be a better way for the controller to know
         // when it's safe to call installKeyListener() than this...
@@ -698,7 +698,6 @@ exports.EditorView = SC.View.extend({
      */
     setFocus: function(focus) {
         this.onInit(function() {
-            console.log("setFocus should be", focus, " currently", this.focus);
             if (this.focus != focus) {
                 var canvas = this.get('canvas');
                 if (focus) {
@@ -716,6 +715,16 @@ exports.EditorView = SC.View.extend({
      */
     hasFocus: function(focus) {
         return this.focus;
+    },
+
+    /**
+     * Accessor for the DOM element to which we attach keyboard event handlers.
+     * This could be seen as leakage of implementation details, so please
+     * document usage of this function here.
+     * <p>Used by clipboard.js to adding cut and paste hacks
+     */
+    _getFocusElement: function() {
+        return this.get('canvas');
     },
 
     /**
@@ -1830,3 +1839,90 @@ exports.EditorView = SC.View.extend({
     }
 });
 
+/**
+ * A wrapper for the functionality that we are exposing to the clipboard
+ * editor.
+ */
+var EditorWrapper = SC.Object.extend({
+    /**
+     * The things we are proxying to
+     */
+    editor: null,
+    ui: null,
+
+    /**
+     * Proxy to the UI's setFocus()
+     */
+    focus: function() {
+        this.ui.setFocus();
+    },
+
+    /**
+     * Proxy to the UI's definition of if it has focus
+     */
+    hasFocus: function() {
+        return this.ui.hasFocus();
+    },
+
+    /**
+     * We need to add cut and paste handlers to something this provides an
+     * element.
+     */
+    getFocusElement: function() {
+        return this.ui._getFocusElement();
+    },
+
+    /**
+     * i.e. cut, except that we don't affect the clipboard
+     */
+    removeSelection: function() {
+        var selectionObject = this.editor.getSelection();
+        var text = null;
+
+        if (selectionObject) {
+            var text = this.editor.model.getChunk(selectionObject);
+
+            if (text && text != '') {
+                this.ui.actions.beginEdit('cut');
+                this.ui.actions.deleteSelection(selectionObject);
+                this.ui.actions.endEdit();
+            }
+        }
+
+        return text;
+    },
+
+    /**
+     * Return the current selection
+     * i.e. copy, except that we don't affect the clipboard
+     */
+    getSelection: function() {
+        return this.editor.getSelectionAsText();
+    },
+
+    /**
+     * Replace the current selection, or insert at the cursor
+     * i.e. paste, except that the contents does not come from the clipboard
+     */
+    replaceSelection: function(text) {
+        var args = cursor.buildArgs();
+        args.chunk = text;
+        if (args.chunk) {
+            this.ui.actions.beginEdit('paste');
+            this.ui.actions.insertChunk(args);
+            this.ui.actions.endEdit();
+        }
+    },
+
+    /**
+     * Turn on the key combinations to access the clipboard.manual class
+     * which basically only works with the editor only. Not in favour.
+     * TODO: Really this should be an implementation like DOMEvents and
+     * HiddenWorld.
+     */
+    installEditorOnly: function() {
+        this.editor.bindKey("copySelection", "CMD C");
+        this.editor.bindKey("pasteFromClipboard", "CMD V");
+        this.editor.bindKey("cutSelection", "CMD X");
+    }
+});
