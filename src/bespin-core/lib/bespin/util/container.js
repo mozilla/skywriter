@@ -74,7 +74,11 @@ exports.getComponent = function(id, callback, context) {
         if (!factory) {
             return undefined;
         }
-        factory(callback, context);
+        var onCreate = function(component) {
+            exports.register(id, component);
+            callback.call(context, component);
+        };
+        factory(onCreate);
         return false;
     } else {
         callback.call(context, component);
@@ -83,49 +87,35 @@ exports.getComponent = function(id, callback, context) {
 };
 
 exports.factories = {
-    popup: function(callback, context) {
+    popup: function(onCreate) {
         exports.plugins.loadOne("popup", function(popupmod) {
-            var popup = exports.register("popup", new popupmod.Window());
-            callback.call(context, popup);
+            onCreate(new popupmod.Window());
         });
     },
-    piemenu: function(callback, context) {
+    piemenu: function(onCreate) {
         exports.plugins.loadOne("piemenu", function(piemenumod) {
-            exports.register("piemenu", new piemenumod.Window());
-
+            var piemenu = new piemenumod.Window();
             // the pie menu doesn't animate properly
             // without restoring control to the UI temporarily
-            setTimeout(function() {
-                var piemenu = exports.get("piemenu");
-                callback.call(context, piemenu);
-            }, 25);
+            setTimeout(function() { onCreate(piemenu); }, 25);
         });
     },
-    commandLine: function(callback, context) {
+    commandLine: function(onCreate) {
         exports.plugins.loadOne("commandLine", function(commandline) {
-            var commandLine = exports.register("commandLine",
-                new commandline.Interface('command', exports.command.store)
-            );
-            callback.call(context, commandLine);
+            onCreate(new commandline.Interface('command', exports.command.store));
         });
     },
-    debugbar: function(callback, context) {
+    debugbar: function(onCreate) {
         exports.plugins.loadOne("debugbar", function(debug) {
-            var commandLine = exports.register("debugbar",
-                new debug.EvalCommandLineInterface('debugbar_command', null, {
-                    idPrefix: "debugbar_",
-                    parentElement: document.getElementById("debugbar")
-                })
-            );
-            callback.call(context, commandLine);
+            onCreate(new debug.EvalCommandLineInterface('debugbar_command', null, {
+                idPrefix: "debugbar_",
+                parentElement: document.getElementById("debugbar")
+            }));
         });
     },
-    breakpoints: function(callback, context) {
+    breakpoints: function(onCreate) {
         exports.plugins.loadOne("breakpoints", function(BreakpointManager) {
-            var breakpoints = exports.register("breakpoints",
-                new BreakpointManager()
-            );
-            callback.call(context, breakpoints);
+            onCreate(new BreakpointManager());
         });
     }
 };
