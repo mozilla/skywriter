@@ -197,6 +197,30 @@ exports.EditorController = SC.Object.extend({
     },
 
     /**
+     * Queries the DOM to determine the absolute position and size of the
+     * container element and returns it as a SproutCore layout object.
+     */
+    computeLayout: function() {
+        var layout = {
+            left:      0,
+            top:      0,
+            width:  this.container.clientWidth,
+            height: this.container.clientHeight
+        };
+        
+        var container = this.container;
+        while (container !== null) {
+            if (!isNaN(container.offsetLeft))
+                layout.left += container.offsetLeft;
+            if (!isNaN(container.offsetTop))
+                layout.top += container.offsetTop;
+            container = container.parentNode;
+        }
+
+        return layout;
+    },
+
+    /**
      *
      */
     moveCursor: function(pos) {

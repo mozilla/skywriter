@@ -228,10 +228,19 @@ exports.EditorView = SC.View.extend({
         return { row: y, col: x };
     },
 
+    /**
+     * @private
+     * Translates the coordinates for a mouse event into absolute coordinates,
+     * taking the scrolled position of the canvas into account.
+     */
+    absoluteCoordinatesForEvent: function(ev) {
+        return this.convertFrameFromView({ x: ev.clientX, y: ev.clientY });
+    },
+
     setSelection: function(e) {
         var content = this.get("content");
-        var clientY = e.clientY - this.getTopOffset();
-        var clientX = e.clientX - this.getLeftOffset();
+        var absolutePoint = this.absoluteCoordinatesForEvent(e);
+        var clientY = absolutePoint.y, clientX = absolutePoint.x;
 
         if (!this.selectMouseDownPos) {
             return;
@@ -431,8 +440,8 @@ exports.EditorView = SC.View.extend({
     },
 
     mouseDown: function(e) {
-        var clientY = e.clientY - this.getTopOffset();
-        var clientX = e.clientX - this.getLeftOffset();
+        var absolutePoint = this.absoluteCoordinatesForEvent(e);
+        var clientY = absolutePoint.y, clientX = absolutePoint.x;
 
         var point;
         if (this.editor.debugMode) {
@@ -496,8 +505,8 @@ exports.EditorView = SC.View.extend({
         }
         */
 
-        var clientY = e.clientY - this.getTopOffset();
-        var clientX = e.clientX - this.getLeftOffset();
+        var absolutePoint = this.absoluteCoordinatesForEvent(e);
+        var clientY = absolutePoint.y, clientX = absolutePoint.x;
 
         var scrolled = false;
 
@@ -681,24 +690,6 @@ exports.EditorView = SC.View.extend({
      */
     getHeight: function() {
         return this.lineHeight * this.get('content').getRowCount();
-    },
-
-    /**
-     * How far are we from the top of the screen?
-     */
-    getTopOffset: function() {
-        // If getBoundingClientRect() fails then we might need to use a library
-        // function or this.editor.container.offsetTop
-        return this.editor.container.getBoundingClientRect().top;
-    },
-
-    /**
-     * How far are we from the left of the screen?
-     */
-    getLeftOffset: function() {
-        // If getBoundingClientRect() fails then we might need to use a library
-        // function or this.editor.container.offsetLeft
-        return this.editor.container.getBoundingClientRect().left;
     },
 
     // TODO: convert to property
