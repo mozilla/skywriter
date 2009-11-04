@@ -153,7 +153,95 @@ exports.Scrollbar = SC.Object.extend({
         if (this.valueChanged) {
             this.valueChanged();
         }
-    }
+    },
+
+    // FIXME --pcw
+    paintScrollbar: function(ctx, scrollbar) {
+        var bar = scrollbar.getHandleBounds();
+        var alpha = (ctx.globalAlpha) ? ctx.globalAlpha : 1;
+
+        if (!scrollbar.isH()) {
+            ctx.save();     // restored in another if (!scrollbar.isH()) block at end of function
+            ctx.translate(bar.x + Math.floor(bar.w / 2), bar.y + Math.floor(bar.h / 2));
+            ctx.rotate(Math.PI * 1.5);
+            ctx.translate(-(bar.x + Math.floor(bar.w / 2)), -(bar.y + Math.floor(bar.h / 2)));
+
+            // if we're vertical, the bar needs to be re-worked a bit
+            bar = new scroller.Rect(bar.x - Math.floor(bar.h / 2) + Math.floor(bar.w / 2),
+                    bar.y + Math.floor(bar.h / 2) - Math.floor(bar.w / 2), bar.h, bar.w);
+        }
+
+        var halfheight = bar.h / 2;
+
+        ctx.beginPath();
+        ctx.arc(bar.x + halfheight, bar.y + halfheight, halfheight, Math.PI / 2, 3 * (Math.PI / 2), false);
+        ctx.arc(bar.x2 - halfheight, bar.y + halfheight, halfheight, 3 * (Math.PI / 2), Math.PI / 2, false);
+        ctx.lineTo(bar.x + halfheight, bar.y + bar.h);
+        ctx.closePath();
+
+        var gradient = ctx.createLinearGradient(bar.x, bar.y, bar.x, bar.y + bar.h);
+        gradient.addColorStop(0, this.editor.theme.scrollBarFillGradientTopStart.replace(/%a/, alpha));
+        gradient.addColorStop(0.4, this.editor.theme.scrollBarFillGradientTopStop.replace(/%a/, alpha));
+        gradient.addColorStop(0.41, this.editor.theme.scrollBarFillStyle.replace(/%a/, alpha));
+        gradient.addColorStop(0.8, this.editor.theme.scrollBarFillGradientBottomStart.replace(/%a/, alpha));
+        gradient.addColorStop(1, this.editor.theme.scrollBarFillGradientBottomStop.replace(/%a/, alpha));
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        ctx.save();
+        ctx.clip();
+
+        ctx.fillStyle = this.editor.theme.scrollBarFillStyle.replace(/%a/, alpha);
+        ctx.beginPath();
+        ctx.moveTo(bar.x + (halfheight * 0.4), bar.y + (halfheight * 0.6));
+        ctx.lineTo(bar.x + (halfheight * 0.9), bar.y + (bar.h * 0.4));
+        ctx.lineTo(bar.x, bar.y + (bar.h * 0.4));
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(bar.x + bar.w - (halfheight * 0.4), bar.y + (halfheight * 0.6));
+        ctx.lineTo(bar.x + bar.w - (halfheight * 0.9), bar.y + (bar.h * 0.4));
+        ctx.lineTo(bar.x + bar.w, bar.y + (bar.h * 0.4));
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
+
+        ctx.beginPath();
+        ctx.arc(bar.x + halfheight, bar.y + halfheight, halfheight, Math.PI / 2, 3 * (Math.PI / 2), false);
+        ctx.arc(bar.x2 - halfheight, bar.y + halfheight, halfheight, 3 * (Math.PI / 2), Math.PI / 2, false);
+        ctx.lineTo(bar.x + halfheight, bar.y + bar.h);
+        ctx.closePath();
+
+        ctx.strokeStyle = this.editor.theme.scrollTrackStrokeStyle;
+        ctx.stroke();
+
+        if (!scrollbar.isH()) {
+            ctx.restore();
+        }
+    },
+
+    // FIXME --pcw
+    paintNib: function(ctx, nibStyle, arrowStyle, strokeStyle) {
+        var midpoint = Math.floor(this.NIB_WIDTH / 2);
+
+        ctx.fillStyle = nibStyle;
+        ctx.beginPath();
+        ctx.arc(0, 0, Math.floor(this.NIB_WIDTH / 2), 0, Math.PI * 2, true);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = strokeStyle;
+        ctx.stroke();
+
+        ctx.fillStyle = arrowStyle;
+        ctx.beginPath();
+        ctx.moveTo(0, -midpoint + this.NIB_ARROW_INSETS.top);
+        ctx.lineTo(-midpoint + this.NIB_ARROW_INSETS.left, midpoint - this.NIB_ARROW_INSETS.bottom);
+        ctx.lineTo(midpoint - this.NIB_ARROW_INSETS.right, midpoint - this.NIB_ARROW_INSETS.bottom);
+        ctx.closePath();
+        ctx.fill();
+    },
+
 });
 
 /**
