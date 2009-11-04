@@ -28,9 +28,9 @@ var bespin = require('bespin');
 var syntax = require('bespin/syntax');
 var actions = require('bespin/actions');
 var keys = require('bespin/util/keys');
+var clipboard = require("bespin/util/clipboard");
 var cursor = require('bespin/cursor');
 var scroller = require('bespin/editor/views/scroller');
-var clipboard = require("bespin/clipboard");
 
 var SelectionHelper = SC.Object.extend({
     editor: null,

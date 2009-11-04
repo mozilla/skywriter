@@ -30,9 +30,9 @@ var keys = require("bespin/util/keys");
 var canvas = require("bespin/util/canvas");
 var cookie = require("bespin/util/cookie");
 var mousewheelevent = require("bespin/util/mousewheelevent");
+var clipboard = require("bespin/util/clipboard");
 
 var settings = require("bespin/settings");
-var clipboard = require("bespin/clipboard");
 var editorEvents = require("bespin/events");
 var syntax = require("bespin/syntax");
 var cursor = require("bespin/cursor");
