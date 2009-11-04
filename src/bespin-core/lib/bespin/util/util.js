@@ -337,7 +337,7 @@ if (ua.indexOf("Gecko") >= 0 && !exports.isWebKit) {
 exports.getOS = function() {
     if (exports.isMac) {
         return exports.OS['MAC'];
-    } else if (exports.isLinux()) {
+    } else if (exports.isLinux) {
         return exports.OS['LINUX'];
     } else {
         return exports.OS['WINDOWS'];
