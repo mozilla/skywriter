@@ -61,12 +61,18 @@ exports.EditorController = SC.Object.extend({
 
         // TODO: Should we change this name from 'ui'? Seems confusing... --pcw
         this.ui = SC.ScrollView.create({
-            contentView: view.EditorView.design({
+            contentView: view.EditorView.extend({
                 editor: this,
                 content: this.model
-            })
+            }),
+            hasHorizontalScroller: true,
+            autohidesHorizontalScroller: false,
+            hasVerticalScroller: true,
+            autohidesVerticalScroller: false
         });
         this.editorView = this.ui.contentView;
+
+        console.log(this.ui); //contentViewFrameDidChange = function() { console.log("contentViewFrameDidChange"); };
 
         this.theme = require("bespin/theme")['default'];
 

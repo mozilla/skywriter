@@ -716,7 +716,7 @@ exports.EditorView = SC.View.extend({
         if (this.editor.debugMode)
             width += this.DEBUG_GUTTER_WIDTH;
         return width;
-    }.property('content').cacheable(),
+    }.property('content'),
 
     // Returns the width in pixels of the longest line.
     textWidth: function() {
@@ -724,25 +724,39 @@ exports.EditorView = SC.View.extend({
         // time. This is expensive. Cache instead. --pcw
         return this.charWidth
             * this.getMaxCols(0, this.get('content').getRowCount() - 1);
-    }.property('content').cacheable(),
+    }.property('content'),
 
-    // Returns the dimensions of the entire content area of the editor.
-    // This can only be safely called in the paint() function after charWidth
-    // and lineHeight have been calculated and stored in this object.
-    //
-    // TODO: Allow this to be called from anywhere - the way paint() stores
-    // vital state is confusing. --pcw
-    computeLayout: function() {
-        // Cache the layout for performance
-        if (this._editor_layout === undefined)
-            this._editor_layout = {};
-
-        var layout = this._editor_layout;
-        layout.top = layout.left = 0;
-        layout.width = this.getWidth();
-        layout.height = this.getHeight();
-        return layout;
+    /**
+     * Returns the dimensions of the entire content area of the editor.
+     * This can only be safely called in the paint() function after charWidth
+     * and lineHeight have been calculated and stored in this object.
+     *
+     * TODO: Allow this to be called from anywhere - the way paint() stores
+     * vital state is confusing. --pcw
+     */
+    computeLayout: function(minimumSize) {
+        var frame = this.get('frame');
+        return {
+            left:   frame.x,
+            top:    frame.y,
+            width:  minimumSize != null
+                    ? Math.max(this.getWidth(), minimumSize.width)
+                    : this.getWidth(),
+            height: minimumSize != null
+                    ? Math.max(this.getHeight(), minimumSize.height)
+                    : this.getHeight()
+        };
     },
+
+    /**
+     * Override for the View class's layoutStyle property that doesn't
+     * reflect the layout position in the DOM. This prevents flicker resulting
+     * from the base class's implementation of this function moving the canvas
+     * around as the user scrolls.
+     */
+    layoutStyle: function(key, value) { 
+        return {};
+    }.property().cacheable(),
 
     /**
      * Forces a resize of the canvas
@@ -767,19 +781,31 @@ exports.EditorView = SC.View.extend({
         ctx.globalAlpha = 1.0;
     },
 
-    // Adjusts the width and height values of the canvas to fill the parent
-    // view.
-    resizeCanvasIfNeeded: function() {
-        var canvas = this.get('canvas');
+    /**
+     * @private
+     * Returns the width and height of the containing view (typically a
+     * ScrollView). This is used as the minimum size of the drawing area.
+     */
+    computeContainerSize: function() {
         var parentLayer = this.get('parentView').get('layer');
+        var size = {
+            width:  parentLayer.clientWidth,
+            height: parentLayer.clientHeight
+        };
+        return size.width == 0 && size.height == 0 ? null : size;
+    },
 
-        // At first these are zero, so we can't use them.
-        if (parentLayer.clientWidth !== 0 && parentLayer.clientHeight !== 0) {
-            if (parentLayer.clientWidth !== canvas.width)
-                canvas.width = parentLayer.clientWidth;
-            if (parentLayer.clientHeight !== canvas.height)
-                canvas.height = parentLayer.clientHeight;
-        }
+    /**
+     * @private
+     * Adjusts the width and height of the canvas to match the given size, if
+     * needed.
+     */
+    resizeCanvasToFit: function(size) {
+        var canvas = this.get('canvas');
+        if (size.width !== canvas.width)
+            canvas.width = size.width;
+        if (size.height !== canvas.height)
+            canvas.height = size.height;
     },
 
     /**
@@ -806,8 +832,6 @@ exports.EditorView = SC.View.extend({
 
         var Rect = scroller.Rect;
 
-        this.resizeCanvasIfNeeded();
-
         // SETUP STATE
         // if the user explicitly requests a full refresh, give it to 'em
         var refreshCanvas = fullRefresh;
@@ -833,7 +857,11 @@ exports.EditorView = SC.View.extend({
         // TODO: This really shouldn't be done in paint(), instead do it
         // lazily whenever the layout changes.
         // This depends on charWidth and lineHeight being set properly above.
-        var layout = this.computeLayout();
+        var containerSize = this.computeContainerSize();
+        if (containerSize != null)
+            this.resizeCanvasToFit(containerSize);
+        var layout = this.computeLayout(containerSize);
+        this.adjust(layout);
 
         // cwidth and cheight are set to the dimensions of the parent node of
         // the canvas element; we'll resize the canvas element
@@ -894,21 +922,22 @@ exports.EditorView = SC.View.extend({
         // save this state for the next paint attempt (see above for usage)
         this.lastCursorPos = cursor.copyPos(ed.cursorManager.getCursorPosition());
 
+        // take snapshot of current context state so we can roll back later on
+        ctx.save();
+
+        // Translate the canvas based on the layout position.
+        ctx.translate(layout.left, layout.top);
+
         // if we're doing a full repaint...
         if (refreshCanvas) {
             // ...paint the background color over the whole canvas and...
             ctx.fillStyle = theme.backgroundStyle;
-            ctx.fillRect(0, 0, c.width, c.height);
+            ctx.fillRect(0, 0, layout.width, layout.height);
 
             // ...paint the gutter
             ctx.fillStyle = theme.gutterStyle;
-            ctx.fillRect(0, 0, this.get('gutterWidth'), c.height);
+            ctx.fillRect(0, 0, this.get('gutterWidth'), layout.height);
         }
-
-        // translate the canvas based on the scrollbar position; for now, just
-        // translate the vertical axis
-        // take snapshot of current context state so we can roll back later on
-        ctx.save();
 
         // the Math.round(this.yoffset) makes the painting nice and not to go over 2 pixels
         // see for more informations:
