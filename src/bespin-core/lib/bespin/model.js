@@ -195,9 +195,8 @@ exports.DocumentModel = SC.Object.extend({
 
         this.setRowDirty(modelPos.row);
 
-        var ui = this.editor.ui;
         // TODO: fix the syntax model and uncomment
-        // ui.syntaxModel.invalidateCache(modelPos.row);
+        // editor.editorView.syntaxModel.invalidateCache(modelPos.row);
 
         if (!noHistory) {
             this.addHistoryItem('insertCharacters', {
@@ -263,7 +262,7 @@ exports.DocumentModel = SC.Object.extend({
         if (diff > 0) { length -= diff; }
         if (length > 0) {
             this.setRowDirty(modelPos.row);
-            this.editor.ui.syntaxModel.invalidateCache(modelPos.row);
+            this.editor.editorView.syntaxModel.invalidateCache(modelPos.row);
 
             var deleted = row.splice(modelPos.col, length).join("");
             if (!noHistory) {
@@ -298,7 +297,7 @@ exports.DocumentModel = SC.Object.extend({
      * new line beneath the passed row
      */
     splitRow: function(modelPos) {
-        this.editor.ui.syntaxModel.invalidateCache(modelPos.row);
+        this.editor.editorView.syntaxModel.invalidateCache(modelPos.row);
         this.setRowDirty(modelPos.row);
 
         var row = this.getRowArray(modelPos.row);
@@ -328,7 +327,7 @@ exports.DocumentModel = SC.Object.extend({
      * whitespace as well.
      */
     joinRow: function(rowIndex, noHistory) {
-        this.editor.ui.syntaxModel.invalidateCache(rowIndex);
+        this.editor.editorView.syntaxModel.invalidateCache(rowIndex);
         this.setRowDirty(rowIndex);
 
         if (rowIndex >= this.rows.length - 1) {
@@ -403,7 +402,7 @@ exports.DocumentModel = SC.Object.extend({
         var startModelPos = selection.startModelPos;
         var endModelPos = selection.endModelPos;
 
-        this.editor.ui.syntaxModel.invalidateCache(startModelPos.row);
+        this.editor.editorView.syntaxModel.invalidateCache(startModelPos.row);
 
         var startModelCol, endModelCol;
 
@@ -455,7 +454,7 @@ exports.DocumentModel = SC.Object.extend({
      * inserts the chunk and returns the ending position
      */
     insertChunk: function(modelPos, chunk, noHistory) {
-        this.editor.ui.syntaxModel.invalidateCache(modelPos.row);
+        this.editor.editorView.syntaxModel.invalidateCache(modelPos.row);
 
         var lines = chunk.split("\n");
         var cModelPos = cursor.copyPos(modelPos);
@@ -692,8 +691,8 @@ exports.DocumentModel = SC.Object.extend({
         meta.lineText = lineText;
         meta.lineLength = meta.lineText.length;
 
-        if (this.editor.ui.searchString) {
-            meta.searchIndices = this.getStringIndicesInRow(row, this.editor.ui.searchString);
+        if (this.editor.editorView.searchString) {
+            meta.searchIndices = this.getStringIndicesInRow(row, this.editor.editorView.searchString);
         } else {
             meta.searchIndices = false;
         }

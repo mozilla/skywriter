@@ -227,7 +227,7 @@ exports.CursorManager = SC.Object.extend({
             this.moveCursor({ col:  leadingWhitespaceLength });
         } else if (this.position.col == leadingWhitespaceLength) {
             this.moveCursor({ col: 0 });
-        } else if (leadingWhitespaceLength != this.editor.ui.getRowScreenLength(this.editor.cursorManager.getCursorPosition().row)) {
+        } else if (leadingWhitespaceLength != this.editor.editorView.getRowScreenLength(this.editor.cursorManager.getCursorPosition().row)) {
             this.moveCursor({ col: leadingWhitespaceLength });
         } else {
             this.moveCursor({ col: 0 });
@@ -239,7 +239,7 @@ exports.CursorManager = SC.Object.extend({
     moveToLineEnd: function() {
         var oldPos = exports.copyPos(this.position);
 
-        this.moveCursor({ col: this.editor.ui.getRowScreenLength(oldPos.row) });
+        this.moveCursor({ col: this.editor.editorView.getRowScreenLength(oldPos.row) });
 
         return { oldPos: oldPos, newPos: exports.copyPos(this.position) };
     },
@@ -258,7 +258,7 @@ exports.CursorManager = SC.Object.extend({
         var row = this.editor.model.getRowCount() - 1;
         this.editor.cursorManager.moveCursor({
             row: row,
-            col: this.editor.ui.getRowScreenLength(row)
+            col: this.editor.editorView.getRowScreenLength(row)
         });
 
         return { oldPos: oldPos, newPos: exports.copyPos(this.position) };
@@ -339,7 +339,7 @@ exports.CursorManager = SC.Object.extend({
             }
 
             // end of the line, so go to the start of the next line
-            if ((settings && settings.isSettingOn('strictlines')) && (this.position.col >= this.editor.ui.getRowScreenLength(this.position.row))) {
+            if ((settings && settings.isSettingOn('strictlines')) && (this.position.col >= this.editor.editorView.getRowScreenLength(this.position.row))) {
                 this.moveDown();
                 if (oldPos.row < this.editor.model.getRowCount() - 1) {
                     this.moveCursor({ col: 0 });
@@ -358,7 +358,8 @@ exports.CursorManager = SC.Object.extend({
         var oldPos = exports.copyPos(this.position);
 
         this.moveCursor({
-            row: Math.max(this.editor.ui.firstVisibleRow - this.editor.ui.visibleRows, 0)
+            row: Math.max(this.editor.editorView.firstVisibleRow
+                - this.editor.editorView.visibleRows, 0)
         });
 
         this.checkPastEndOfLine(oldPos);
@@ -370,7 +371,9 @@ exports.CursorManager = SC.Object.extend({
         var oldPos = exports.copyPos(this.position);
 
         this.moveCursor({
-            row: Math.min(this.position.row + this.editor.ui.visibleRows, this.editor.model.getRowCount() - 1)
+            row: Math.min(this.position.row
+                + this.editor.editorView.visibleRows,
+                this.editor.model.getRowCount() - 1)
         });
 
         this.checkPastEndOfLine(oldPos);
@@ -385,7 +388,8 @@ exports.CursorManager = SC.Object.extend({
     checkPastEndOfLine: function(oldPos) {
         var settings = bespin.get("settings");
         var isStrictLines = settings ? settings.isSettingOn('strictlines') : false;
-        var maxCol = this.editor.ui.getRowScreenLength(this.position.row);
+        var maxCol
+            = this.editor.editorView.getRowScreenLength(this.position.row);
         if (isStrictLines && this.position.col > maxCol) {
             // this sets this.virtulaCol = 0!
             this.moveToLineEnd();
@@ -396,7 +400,7 @@ exports.CursorManager = SC.Object.extend({
     smartMoveLeft: function() {
         var oldPos = exports.copyPos(this.position);
 
-        var row = this.editor.ui.getRowString(oldPos.row);
+        var row = this.editor.editorView.getRowString(oldPos.row);
 
         var c, charCode;
 
@@ -447,7 +451,7 @@ exports.CursorManager = SC.Object.extend({
     smartMoveRight: function() {
         var oldPos = exports.copyPos(this.position);
 
-        var row = this.editor.ui.getRowString(oldPos.row);
+        var row = this.editor.editorView.getRowString(oldPos.row);
 
         if (row.length <= this.position.col) { // -- at the edge so go to the next line
             this.moveDown();
@@ -536,9 +540,9 @@ exports.CursorManager = SC.Object.extend({
         // console.log('Position: (' + this.position.row + ', ' + this.position.col + ')', '[' + this.getModelPosition().col + ']');
 
         // keeps the editor's cursor from blinking while moving it
-        var editorUI = bespin.get('editor').ui;
-        editorUI.showCursor = true;
-        editorUI.toggleCursorAllowed = false;
+        var editorView = bespin.get('editor').editorView;
+        editorView.showCursor = true;
+        editorView.toggleCursorAllowed = false;
     },
 
     // Pass in a screen position; returns undefined if the postion is valid,

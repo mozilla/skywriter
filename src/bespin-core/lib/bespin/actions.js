@@ -210,7 +210,7 @@ exports.Actions = SC.Object.extend({
         args.startPos = { row: 0, col: 0 };
         args.endPos = {
             row: this.editor.model.getRowCount() - 1,
-            col: this.editor.ui.getRowScreenLength(this.editor.model.getRowCount() - 1)
+            col: this.editor.editorView.getRowScreenLength(this.editor.model.getRowCount() - 1)
         };
 
         this.select(args);
@@ -517,7 +517,7 @@ exports.Actions = SC.Object.extend({
                 return;
             }
 
-            var newcol = this.editor.ui.getRowScreenLength(args.pos.row - 1);
+            var newcol = this.editor.editorView.getRowScreenLength(args.pos.row - 1);
             this.editor.model.joinRow(args.pos.row - 1);
             this.editor.cursorManager.moveCursor({ row: args.pos.row - 1, col: newcol });
         } else {
@@ -612,7 +612,7 @@ exports.Actions = SC.Object.extend({
         if (this.editor.selection) {
             this.deleteSelection(args);
         } else {
-            if (args.pos.col < this.editor.ui.getRowScreenLength(args.pos.row)) {
+            if (args.pos.col < this.editor.editorView.getRowScreenLength(args.pos.row)) {
                 var settings = bespin.get('settings');
                 if (settings && settings.isSettingOn('smartmove')) {
                     var tabsize = this.editor.getTabSize();
@@ -643,7 +643,7 @@ exports.Actions = SC.Object.extend({
             return;
         }
 
-        if (args.pos.col < this.editor.ui.getRowScreenLength(args.pos.row)) {
+        if (args.pos.col < this.editor.editorView.getRowScreenLength(args.pos.row)) {
             this.beginEdit("deleteCharacter");
 
             var modelPos = this.editor.cursorManager.getModelPosition(args.pos);
@@ -740,7 +740,7 @@ exports.Actions = SC.Object.extend({
         } else { // top half, so move up
           this.editor.cursorManager.moveCursor({ row: this.editor.getCursorPos().row - halfRows });
         }
-        this.editor.ui.ensureCursorVisible();
+        this.editor.editorView.ensureCursorVisible();
         this.editor.cursorManager.moveCursor({ row: saveCursorRow });
     },
 
@@ -881,7 +881,7 @@ exports.Actions = SC.Object.extend({
                 endPos: this.editor.cursorManager.getCursorPosition(found.endPos)
             });
             this.editor.cursorManager.moveCursor(this.editor.cursorManager.getCursorPosition(found.endPos));
-            this.editor.ui.ensureCursorVisible(true);
+            this.editor.editorView.ensureCursorVisible(true);
             this.repaint();
 
             return true;
@@ -910,7 +910,7 @@ exports.Actions = SC.Object.extend({
                 endPos: this.editor.cursorManager.getCursorPosition(found.endPos)
             });
             this.editor.cursorManager.moveCursor(this.editor.cursorManager.getCursorPosition(found.endPos));
-            this.editor.ui.ensureCursorVisible(true);
+            this.editor.editorView.ensureCursorVisible(true);
             this.repaint();
 
             return true;
@@ -966,7 +966,7 @@ exports.Actions = SC.Object.extend({
 
     repaint: function() {
         if (!this.ignoreRepaints) {
-            this.editor.ui.ensureCursorVisible();
+            this.editor.editorView.ensureCursorVisible();
             this.editor.paint();
         }
     },
@@ -1058,14 +1058,14 @@ exports.ActionHistoryItem = SC.Object.extend({
     undo: function() {
         this.editor.model.applyState(this.modelBefore);
         this.editor.setState(this.editorBefore);
-        this.editor.ui.ensureCursorVisible();
+        this.editor.editorView.ensureCursorVisible();
         this.editor.paint();
     },
 
     redo: function() {
         this.editor.model.applyState(this.modelAfter);
         this.editor.setState(this.editorAfter);
-        this.editor.ui.ensureCursorVisible();
+        this.editor.editorView.ensureCursorVisible();
         this.editor.paint();
     }
 });

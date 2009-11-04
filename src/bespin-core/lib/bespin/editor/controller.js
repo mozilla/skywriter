@@ -46,7 +46,7 @@ exports.EditorController = SC.Object.extend({
     // TODO: was only used for opts.dontfocus which in turn (see below)
     // opts: {},
 
-    containerBinding: '.ui.layer',
+    containerBinding: '.editorView.layer',
 
     init: function() {
         // fixme: this stuff may not belong here
@@ -57,14 +57,23 @@ exports.EditorController = SC.Object.extend({
         var cursor = require("bespin/cursor");
 
         this.cursorManager = cursor.CursorManager.create({ editor: this });
-        this.ui = view.EditorView.create({ editor: this, content: this.model });
+
+        // TODO: Should we change this name from 'ui'? Seems confusing... --pcw
+        this.ui = SC.ScrollView.create({
+            contentView: view.EditorView.design({
+                editor: this,
+                content: this.model
+            })
+        });
+        this.editorView = this.ui.contentView;
+
         this.theme = require("bespin/theme")['default'];
 
         this.editorKeyListener = exports.DefaultEditorKeyListener.create({ editor: this });
         this.historyManager = history.HistoryManager.create({ editor: this });
         editorEvents.subscribe();
 
-        this.ui.installKeyListener(this.editorKeyListener);
+        this.editorView.installKeyListener(this.editorKeyListener);
 
         // TODO: We can't do this without explanation. In the past we Ben/Dion
         // were doing this because in a few places they were using !contents
@@ -194,23 +203,23 @@ exports.EditorController = SC.Object.extend({
     resetView: function(data) {
         this.cursorManager.moveCursor(data.cursor);
         this.setSelection(data.selection);
-        this.ui.yoffset = data.offset.y;
-        this.ui.xoffset = data.offset.x;
+        this.ui.horizontalScrollOffset = 0;
+        this.ui.verticalScrollOffset = 0;
     },
 
     basicView: function() {
         this.cursorManager.moveCursor({row: 0, col: 0});
         this.setSelection(undefined);
-        this.ui.yoffset = 0;
-        this.ui.xoffset = 0;
+        this.ui.horizontalScrollOffset = 0;
+        this.ui.verticalScrollOffset = 0;
     },
 
     getCurrentView: function() {
         return {
             cursor: this.getCursorPos(),
             offset: {
-                x: this.ui.xoffset,
-                y: this.ui.yoffset
+                x: this.horizontalScrollOffset,
+                y: this.verticalScrollOffset
             },
             selection: this.selection
         };
@@ -223,7 +232,7 @@ exports.EditorController = SC.Object.extend({
     setState: function(data) {
         this.cursorManager.moveCursor(data.cursor);
         this.setSelection(data.selection);
-        this.ui.ensureCursorVisible();
+        this.editorView.ensureCursorVisible();
         this.paint(false);
     },
 
@@ -264,16 +273,16 @@ exports.EditorController = SC.Object.extend({
     },
 
     paint: function(fullRefresh) {
-        var canvasElem = this.ui.get("canvas");
+        var canvasElem = this.editorView.get("canvas");
         if (!canvasElem) {
             return;
         }
         var ctx = canvas.fix(canvasElem.getContext("2d"));
-        this.ui.paint(ctx, fullRefresh);
+        this.editorView.paint(ctx, fullRefresh);
     },
 
     changeKeyListener: function(newKeyListener) {
-        this.ui.installKeyListener(newKeyListener);
+        this.editorView.installKeyListener(newKeyListener);
         this.editorKeyListener = newKeyListener;
     },
 
@@ -282,7 +291,7 @@ exports.EditorController = SC.Object.extend({
      * set to the underlying canvas
      */
     setFocus: function(focus) {
-        this.ui.setFocus(focus);
+        this.editorView.setFocus(focus);
     },
 
     /**
@@ -321,7 +330,7 @@ exports.EditorController = SC.Object.extend({
 
         // -- try an editor action first, else fire off a command
         var actionDescription = "Execute command: '" + action + "'";
-        action = this.ui.actions[action] || function() {
+        action = this.editorView.actions[action] || function() {
             bespin.commandLine.executeCommand(command, true);
         };
 
@@ -365,9 +374,10 @@ exports.EditorController = SC.Object.extend({
         this.cursorManager.moveCursor({ row: linenum, col: 0 });
 
         // If the line that we are moving to is off screen, center it, else just move in place
-        if ((linenum < this.ui.firstVisibleRow) ||
-            (linenum >= this.ui.firstVisibleRow + this.ui.visibleRows)) {
-            this.ui.actions.moveCursorRowToCenter();
+        if ((linenum < this.editorView.firstVisibleRow) ||
+            (linenum >= this.editorView.firstVisibleRow
+                + this.editorView.visibleRows)) {
+            this.editorView.actions.moveCursorRowToCenter();
         }
     },
 
@@ -634,7 +644,7 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
                 function() {
                     var toFire = toFire(action);
                     bespin.publish(toFire.name, toFire.args);
-                } : action.bind(this.editor.ui.actions);
+                } : action.bind(this.editor.editorView.actions);
         if (name) {
             this.keyMapDescriptions[[keyCode, metaKey, ctrlKey, altKey, shiftKey]] = name;
         }
@@ -697,7 +707,7 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
 
     onkeydown: function(e) {
         // handle keys only if editor has the focus!
-        if (!this.editor.ui.hasFocus()) {
+        if (!this.editor.editorView.hasFocus()) {
             console.log("ignoring keyboard event, we don't have focus", e);
             return;
         }
@@ -737,7 +747,7 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
 
     onkeypress: function(e) {
         // handle keys only if editor has the focus!
-        if (!this.editor.ui.hasFocus()) {
+        if (!this.editor.editorView.hasFocus()) {
             console.log("ignoring keyboard event, we don't have focus", e);
             return;
         }
@@ -761,7 +771,7 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
             event: e,
             pos: cursor.copyPos(this.editor.cursorManager.getCursorPosition())
         };
-        var actions = this.editor.ui.actions;
+        var actions = this.editor.editorView.actions;
 
         if (charToPrint) {
             args.newchar = String.fromCharCode(e.charCode);
