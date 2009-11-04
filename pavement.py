@@ -159,7 +159,7 @@ def start(options):
     blocking the connection) and start the server on port 8000.
     """
     if sys.platform.startswith("win"):
-        commnad = "narwhal/bin/sea.cmd"
+        command = "narwhal/bin/sea.cmd"
     else:
         command = "narwhal/bin/sea"
     
