@@ -861,7 +861,7 @@ exports.EditorView = SC.View.extend({
     },
 
     /**
-     *
+     * How far are we from the top of the screen?
      */
     getTopOffset: function() {
         // If getBoundingClientRect() fails then we might need to use a library
@@ -869,6 +869,9 @@ exports.EditorView = SC.View.extend({
         return this.editor.container.getBoundingClientRect().top;
     },
 
+    /**
+     * How far are we from the left of the screen?
+     */
     getLeftOffset: function() {
         // If getBoundingClientRect() fails then we might need to use a library
         // function or this.editor.container.offsetLeft
