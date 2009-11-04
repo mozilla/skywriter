@@ -72,7 +72,36 @@ exports.useBespin = function(element, options) {
     SC.run(function() {
         bespin.register("editor", controller);
 
-        var editorPane = SC.Pane.create({});
+        var editorPane = SC.Pane.create({
+            //
+            // Contrary to SproutCore's ordinary model, the embedded control's
+            // layout is pulled *from* the browser's rendering model and pushed
+            // *to* SproutCore. Here we tell SproutCore to grab the browser's
+            // computed dimensions for the control.
+            //
+            // Note that if we use StaticLayout for this then the scrolling
+            // will get all screwed up, because SproutCore will give up trying
+            // to determine position and size for any child controls of the
+            // editor - but this information is needed for ScrollViews to work
+            // properly.
+            //
+            layout: function(key, value) {
+                var layout = {
+                    top:    0,
+                    left:   0,
+                    width:  element.clientWidth,
+                    height: element.clientHeight
+                };
+                console.log("pane layout: " + layout.toSource());
+                return layout;
+            }.property(),
+
+            // And here we tell SproutCore to keep its paws off the element's
+            // CSS (and also make the editor pane fill the enclosing element).
+            layoutStyle: function(key, value) {
+                return { width: '100%', height: '100%' };
+            }.property().cacheable()
+        });
         editorPane.appendChild(controller.ui, null);
         SC.$(element).css('position', 'relative');
         element.innerHTML = "";

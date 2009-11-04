@@ -898,10 +898,6 @@ exports.EditorView = SC.View.extend({
             });
         }
 
-        // IF YOU WANT TO FORCE A COMPLETE REPAINT OF THE CANVAS ON EVERY PAINT,
-        // UNCOMMENT THE FOLLOWING LINE:
-        //refreshCanvas = true;
-
         // START RENDERING
 
         // if we're not doing a full repaint, work out which rows are "dirty"
@@ -943,7 +939,6 @@ exports.EditorView = SC.View.extend({
         // see for more informations:
         //  - https://developer.mozilla.org/en/Canvas_tutorial/Applying_styles_and_colors, section "Line styles"
         //  - https://developer.mozilla.org/@api/deki/files/601/=Canvas-grid.png
-        // TODO: translate here using y axis of clippingFrame? --pcw
 
         // paint the line numbers
         if (refreshCanvas) {
