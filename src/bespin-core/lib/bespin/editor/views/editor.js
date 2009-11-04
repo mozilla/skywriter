@@ -123,9 +123,6 @@ exports.EditorView = SC.View.extend({
 
     hasFocus: false,
 
-    // a collection of global handles to event listeners that will need to be disposed.
-    globalHandles: [],
-
     // Some things need to happen only when we're rendered. This is how we delay
     onInitActions: [],
     inited: false,
@@ -863,12 +860,19 @@ exports.EditorView = SC.View.extend({
         return parseInt(styles.height, 10);
     },
 
+    /**
+     *
+     */
     getTopOffset: function() {
-        return dojo.coords(this.editor.container).y || this.editor.container.offsetTop;
+        // If getBoundingClientRect() fails then we might need to use a library
+        // function or this.editor.container.offsetTop
+        return this.editor.container.getBoundingClientRect().top;
     },
 
     getLeftOffset: function() {
-        return dojo.coords(this.editor.container).x || this.editor.container.offsetLeft;
+        // If getBoundingClientRect() fails then we might need to use a library
+        // function or this.editor.container.offsetLeft
+        return this.editor.container.getBoundingClientRect().left;
     },
 
     getCharWidth: function(ctx) {
@@ -897,10 +901,8 @@ exports.EditorView = SC.View.extend({
      * Forces a resize of the canvas
      */
     resetCanvas: function() {
-        dojo.attr(this.editor.canvas, {
-            width: this.getWidth(),
-            height: this.getHeight()
-        });
+        this.editor.canvas.width = this.getWidth();
+        this.editor.canvas.height = this.getHeight();
     },
 
     /**
@@ -926,7 +928,6 @@ exports.EditorView = SC.View.extend({
      */
     paint: function(ctx, fullRefresh) {
         var content = this.get("content");
-        // DECLARE VARIABLES
 
         // these are convenience references so we don't have to type so much
         var ed = this.editor;
@@ -1060,10 +1061,11 @@ exports.EditorView = SC.View.extend({
 
         // check and see if the canvas is the same size as its immediate parent
         // in the DOM; if not, resize the canvas
-        if (((dojo.attr(c, "width")) != cwidth) || (dojo.attr(c, "height") != cheight)) {
+        if (c.width != cwidth || c.height != cheight) {
             // if the canvas changes size, we'll need a full repaint
             refreshCanvas = true;
-            dojo.attr(c, { width: cwidth, height: cheight });
+            c.width = cwidth;
+            c.height = cheight;
         }
 
         // get debug metadata
@@ -1833,9 +1835,6 @@ exports.EditorView = SC.View.extend({
     },
 
     dispose: function() {
-        for (var i = 0; i < this.globalHandles.length; i++) {
-            dojo.disconnect(this.globalHandles[i]);
-        }
     }
 });
 

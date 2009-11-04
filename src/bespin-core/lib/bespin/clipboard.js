@@ -347,7 +347,9 @@ exports.manual = function() {
                 }
                 flashcopier.innerHTML = '';
 
-                var divinfo = '<embed src="_clipboard.swf" FlashVars="clipboard='+escape(inElement.value)+'" width="0" height="0" type="application/x-shockwave-flash"></embed>';
+                var divinfo = '<embed src="_clipboard.swf" FlashVars="clipboard=' +
+                    escape(inElement.value) +
+                    '" width="0" height="0" type="application/x-shockwave-flash"></embed>';
                 flashcopier.innerHTML = divinfo;
             }
             */
