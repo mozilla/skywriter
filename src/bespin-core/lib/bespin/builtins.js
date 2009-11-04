@@ -43,7 +43,7 @@ exports.metadata = {
             {
                 "ep": "syntax.simple.highlighter",
                 "name": "JavaScript",
-                "extensions": ["js", "javascript", "ecmascript", "jsm", "java"],
+                "extensions": ["js", "json", "javascript", "ecmascript", "jsm", "java"],
                 "pointer": "bespin/syntax/simple/javascript:JavaScript"
             },
             {

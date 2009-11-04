@@ -58,25 +58,26 @@ exports.JavaScript = SC.Object.extend({
         var regions = {};                               // contains the individual style types as keys, with array of start/stop positions as value
 
         // current state, maintained as we parse through each character in the line; values at any time should be consistent
-        var currentStyle = (meta.inMultilineComment) ? K.C_STYLE_COMMENT : undefined;
+        var currentStyle = (meta.inMultilineComment) ? K.C_STYLE_COMMENT : meta.inMultilineString ? K.STRING : undefined;
         var currentRegion = {}; // should always have a start property for a non-blank buffer
         var buffer = "";
 
         // these properties are related to the parser state above but are special cases
-        var stringChar = "";    // the character used to start the current string
-        var multiline = meta.inMultilineComment;
+        var multilineComment = meta.inMultilineComment;
+        var multilineString = meta.inMultilineString;
+        var stringChar = meta.stringChar || "";    // the character used to start the current string
 
         for (var i = 0; i < line.length; i++) {
             var c = line.charAt(i);
 
             // check if we're in a comment and whether this character ends the comment
             if (currentStyle == K.C_STYLE_COMMENT) {
-                if (c == "/" && /\*$/.test(buffer)) { // has the c-style comment just ended?
+                if (c == "/" && (/\*$/.test(buffer))) { // has the c-style comment just ended?
                     currentRegion.stop = i + 1;
                     this.addRegion(regions, currentStyle, currentRegion);
                     currentRegion = {};
                     currentStyle = undefined;
-                    multiline = false;
+                    multilineComment = false;
                     buffer = "";
                 } else {
                     if (buffer == "") currentRegion = { start: i };
@@ -90,7 +91,7 @@ exports.JavaScript = SC.Object.extend({
                 // check if we're in a string
                 if (currentStyle == K.STRING) {
                     // if this is not an unescaped end quote (either a single quote or double quote to match how the string started) then keep going
-                    if ( ! (c == stringChar && !/\\$/.test(buffer))) {
+                    if ( ! (c == stringChar && !(/\\$/.test(buffer)))) {
                         if (buffer == "") currentRegion = { start: i };
                         buffer += c;
                         continue;
@@ -122,7 +123,7 @@ exports.JavaScript = SC.Object.extend({
                         regions[K.PUNCTUATION].pop();
 
                         // we are in a c-style comment
-                        multiline = true;
+                        multilineComment = true;
                         currentStyle = K.C_STYLE_COMMENT;
                         currentRegion = { start: i - 1 };
                         buffer = "/*";
@@ -149,6 +150,7 @@ exports.JavaScript = SC.Object.extend({
                     currentStyle = K.STRING;
                     stringChar = c;
                 } else {
+                    multilineString = false;
                     currentStyle = undefined;
                 }
 
@@ -157,6 +159,14 @@ exports.JavaScript = SC.Object.extend({
 
             if (buffer == "") currentRegion = { start: i };
             buffer += c;
+        // check for a multiline string
+        if (currentStyle == K.STRING) {
+            if (c == "\\") {
+                multilineString = true;
+            } else {
+                multilineString = false;   
+            }
+        }
         }
 
         // check for a trailing character inside of a string or a comment
@@ -166,7 +176,11 @@ exports.JavaScript = SC.Object.extend({
             this.addRegion(regions, currentStyle, currentRegion);
         }
 
-        var newMeta = { inMultilineComment: multiline };
+        var newMeta = {
+            inMultilineComment: multilineComment,
+            inMultilineString: multilineString
+        };
+        if (multilineString) newMeta.stringChar = stringChar;
         if (meta.inJavaScript) newMeta.inJavaScript = meta.inJavaScript;
 
         return { regions: regions, meta: newMeta };
