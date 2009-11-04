@@ -79,11 +79,6 @@ exports.EditorView = SC.View.extend({
     horizontalScrollCanvas: null,
     verticalScrollCanvas: null,
 
-    // gutterWidth used to be a constant, but is now dynamically calculated in each paint() invocation. I set it to a silly
-    // default value here in case some of the code expects it to be populated before the first paint loop kicks in. the
-    // default value ought to eventually become 0
-    gutterWidth: 54,
-
     LINE_HEIGHT: 23,
 
     BOTTOM_SCROLL_AFFORDANCE: 30,
@@ -214,10 +209,10 @@ exports.EditorView = SC.View.extend({
             y = Math.floor(ty / this.lineHeight);
         }
 
-        if (pos.x <= (this.gutterWidth + this.LINE_INSETS.left)) {
+        if (pos.x <= (this.get('gutterWidth') + this.LINE_INSETS.left)) {
             x = -1;
         } else {
-            var tx = pos.x - this.gutterWidth - this.LINE_INSETS.left;
+            var tx = pos.x - this.get('gutterWidth') - this.LINE_INSETS.left;
             // round vs floor so we can pick the left half vs right half of a character
             x = Math.round(tx / this.charWidth);
 
@@ -674,14 +669,18 @@ exports.EditorView = SC.View.extend({
         // Also, the clipboard.js handles C, V, and X
     },
 
+    /**
+     * Returns the width in pixels of the entire content area.
+     */
     getWidth: function() {
-        var styles = window.getComputedStyle(this.editor.container, null);
-        return parseInt(styles.width, 10);
+        return this.get('gutterWidth') + this.get('textWidth');
     },
 
+    /**
+     * Returns the height in pixels of the content area.
+     */
     getHeight: function() {
-        var styles = window.getComputedStyle(this.editor.container, null);
-        return parseInt(styles.height, 10);
+        return this.lineHeight * this.get('content').getRowCount();
     },
 
     /**
@@ -702,6 +701,7 @@ exports.EditorView = SC.View.extend({
         return this.editor.container.getBoundingClientRect().left;
     },
 
+    // TODO: convert to property
     getCharWidth: function(ctx) {
         if (ctx.measureText) {
             return ctx.measureText("M").width;
@@ -710,6 +710,7 @@ exports.EditorView = SC.View.extend({
         }
     },
 
+    // TODO: convert to property
     getLineHeight: function(ctx) {
         var lh = -1;
         if (ctx.measureText) {
@@ -724,12 +725,46 @@ exports.EditorView = SC.View.extend({
         return lh;
     },
 
+    gutterWidth: function() {
+        var width = this.GUTTER_INSETS.left + this.GUTTER_INSETS.right
+            + this.get('content').getRowCount().toString().length
+            * this.charWidth;
+        if (this.editor.debugMode)
+            width += this.DEBUG_GUTTER_WIDTH;
+        return width;
+    }.property('content').cacheable(),
+
+    // Returns the width in pixels of the longest line.
+    textWidth: function() {
+        // TODO: Don't look through every row to determine the width every
+        // time. This is expensive. Cache instead. --pcw
+        return this.charWidth
+            * this.getMaxCols(0, this.get('content').getRowCount() - 1);
+    }.property('content').cacheable(),
+
+    // Returns the dimensions of the entire content area of the editor.
+    // This can only be safely called in the paint() function after charWidth
+    // and lineHeight have been calculated and stored in this object.
+    //
+    // TODO: Allow this to be called from anywhere - the way paint() stores
+    // vital state is confusing. --pcw
+    computeLayout: function() {
+        // Cache the layout for performance
+        if (this._editor_layout === undefined)
+            this._editor_layout = {};
+
+        var layout = this._editor_layout;
+        layout.top = layout.left = 0;
+        layout.width = this.getWidth();
+        layout.height = this.getHeight();
+        return layout;
+    },
+
     /**
      * Forces a resize of the canvas
      */
     resetCanvas: function() {
-        this.editor.canvas.width = this.getWidth();
-        this.editor.canvas.height = this.getHeight();
+        // FIXME: No-op for now --pcw
     },
 
     /**
@@ -748,6 +783,21 @@ exports.EditorView = SC.View.extend({
         ctx.globalAlpha = 1.0;
     },
 
+    // Adjusts the width and height values of the canvas to fill the parent
+    // view.
+    resizeCanvasIfNeeded: function() {
+        var canvas = this.get('canvas');
+        var parentLayer = this.get('parentView').get('layer');
+
+        // At first these are zero, so we can't use them.
+        if (parentLayer.clientWidth !== 0 && parentLayer.clientHeight !== 0) {
+            if (parentLayer.clientWidth !== canvas.width)
+                canvas.width = parentLayer.clientWidth;
+            if (parentLayer.clientHeight !== canvas.height)
+                canvas.height = parentLayer.clientHeight;
+        }
+    },
+
     /**
      * This is where the editor is painted from head to toe.
      * The optional "fullRefresh" argument triggers a complete repaint of the
@@ -755,6 +805,8 @@ exports.EditorView = SC.View.extend({
      */
     paint: function(ctx, fullRefresh) {
         var content = this.get("content");
+
+        fullRefresh = true; // FIXME --pcw
 
         fullRefresh = true; // FIXME --pcw
 
@@ -770,6 +822,8 @@ exports.EditorView = SC.View.extend({
         var lastLineToRender;
 
         var Rect = scroller.Rect;
+
+        this.resizeCanvasIfNeeded();
 
         // SETUP STATE
         // if the user explicitly requests a full refresh, give it to 'em
@@ -793,6 +847,11 @@ exports.EditorView = SC.View.extend({
         this.charWidth = this.getCharWidth(ctx);
         this.lineHeight = this.getLineHeight(ctx);
 
+        // TODO: This really shouldn't be done in paint(), instead do it
+        // lazily whenever the layout changes.
+        // This depends on charWidth and lineHeight being set properly above.
+        var layout = this.computeLayout();
+
         // cwidth and cheight are set to the dimensions of the parent node of
         // the canvas element; we'll resize the canvas element
         // itself a little bit later in this function
@@ -808,39 +867,12 @@ exports.EditorView = SC.View.extend({
             lastLineToRender = content.getRowCount() - 1;
         }
 
-        // full height based on content
-        var virtualheight = this.lineHeight * content.getRowCount();
-
-        // virtual width *should* be based on every line in the model; however,
-        // with the introduction of tab support, calculating
-        // the width of a line is now expensive, so for the moment we will only
-        // calculate the width of the visible rows
-        // full width based on content plus a little padding
-        // var virtualwidth = this.charWidth * (Math.max(this.getMaxCols(), ed.cursorManager.getCursorPosition().col) + 2);
-        var virtualwidth = this.charWidth * (Math.max(this.getMaxCols(this.firstVisibleRow, lastLineToRender), ed.cursorManager.getCursorPosition().col) + 2);
-
-        // calculate the gutter width; for now, we'll make it fun and dynamic
-        // based on the lines visible in the editor.
-        // first, add the padding space
-        this.gutterWidth = this.GUTTER_INSETS.left + this.GUTTER_INSETS.right;
-        // make it wide enough to display biggest line number visible
-        this.gutterWidth += ("" + lastLineToRender).length * this.charWidth;
-        if (this.editor.debugMode) {
-            this.gutterWidth += this.DEBUG_GUTTER_WIDTH;
-        }
+        var virtualheight = this.getHeight();
+        var virtualwidth = this.get('textWidth');
 
         // if the current scrolled positions are different than the scroll
         // positions we used for the last paint, refresh the entire canvas
         // TODO --pcw
-
-        // check and see if the canvas is the same size as its immediate parent
-        // in the DOM; if not, resize the canvas
-        if (c.width != cwidth || c.height != cheight) {
-            // if the canvas changes size, we'll need a full repaint
-            refreshCanvas = true;
-            c.width = cwidth;
-            c.height = cheight;
-        }
 
         // get debug metadata
         // var breakpoints = {};
@@ -887,7 +919,7 @@ exports.EditorView = SC.View.extend({
 
             // ...paint the gutter
             ctx.fillStyle = theme.gutterStyle;
-            ctx.fillRect(0, 0, this.gutterWidth, c.height);
+            ctx.fillRect(0, 0, this.get('gutterWidth'), c.height);
         }
 
         // translate the canvas based on the scrollbar position; for now, just
@@ -910,7 +942,8 @@ exports.EditorView = SC.View.extend({
                         y = this.lineHeight * (currentLine - 1);
                         cy = y + (this.lineHeight - this.LINE_INSETS.bottom);
                         ctx.fillStyle = this.editor.theme["lineMarker" + lineMarkers[currentLine].type + "Color"];
-                        ctx.fillRect(0, y, this.gutterWidth, this.lineHeight);
+                        ctx.fillRect(0, y, this.get('gutterWidth'),
+                            this.lineHeight);
                     }
                  }
             }
@@ -964,7 +997,8 @@ exports.EditorView = SC.View.extend({
         // important to prevent text from bleeding into the gutter.
         ctx.save();
         ctx.beginPath();
-        ctx.rect(this.gutterWidth, 0.0, cwidth - this.gutterWidth, cheight);
+        ctx.rect(this.get('gutterWidth'), 0.0,
+            cwidth - this.get('gutterWidth'), cheight);
         ctx.closePath();
         ctx.clip();
 
@@ -973,7 +1007,8 @@ exports.EditorView = SC.View.extend({
         // can't actually see
         // TODO: use clippingFrame to calculate these --pcw
         var firstColumn = 0;
-        var lastColumn = firstColumn + (Math.ceil((cwidth - this.gutterWidth) / this.charWidth));
+        var lastColumn = firstColumn + (Math.ceil((cwidth
+            - this.get('gutterWidth')) / this.charWidth));
 
         // create the state necessary to render each line of text
         y = (this.lineHeight * this.firstVisibleRow);
@@ -991,7 +1026,7 @@ exports.EditorView = SC.View.extend({
 
         // paint each line
         for (currentLine = this.firstVisibleRow; currentLine <= lastLineToRender; currentLine++) {
-            x = this.gutterWidth;
+            x = this.get('gutterWidth');
 
             // if we aren't repainting the entire canvas...
             if (!refreshCanvas) {
@@ -1189,19 +1224,24 @@ exports.EditorView = SC.View.extend({
         if (this.focus) {
             if (this.showCursor) {
                 if (ed.theme.cursorType == "underline") {
-                    x = this.gutterWidth + this.LINE_INSETS.left + ed.cursorManager.getCursorPosition().col * this.charWidth;
+                    x = this.get('gutterWidth') + this.LINE_INSETS.left
+                        + ed.cursorManager.getCursorPosition().col
+                        * this.charWidth;
                     y = (ed.getCursorPos().row * this.lineHeight) + (this.lineHeight - 5);
                     ctx.fillStyle = ed.theme.cursorStyle;
                     ctx.fillRect(x, y, this.charWidth, 3);
                 } else {
-                    x = this.gutterWidth + this.LINE_INSETS.left + ed.cursorManager.getCursorPosition().col * this.charWidth;
+                    x = this.get('gutterWidth') + this.LINE_INSETS.left
+                        + ed.cursorManager.getCursorPosition().col
+                        * this.charWidth;
                     y = (ed.cursorManager.getCursorPosition().row * this.lineHeight);
                     ctx.fillStyle = ed.theme.cursorStyle;
                     ctx.fillRect(x, y, 1, this.lineHeight);
                 }
             }
         } else {
-            x = this.gutterWidth + this.LINE_INSETS.left + ed.cursorManager.getCursorPosition().col * this.charWidth;
+            x = this.get('gutterWidth') + this.LINE_INSETS.left
+                + ed.cursorManager.getCursorPosition().col * this.charWidth;
             y = (ed.cursorManager.getCursorPosition().row * this.lineHeight);
 
             ctx.fillStyle = ed.theme.unfocusedCursorFillStyle;
