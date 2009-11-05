@@ -831,45 +831,12 @@ exports.EditorView = SC.View.extend({
     },
 
     /**
-     * @private
-     * Returns the width and height of the containing view (typically a
-     * ScrollView). This is used as the minimum size of the drawing area.
-     */
-    computeContainerSize: function() {
-        var parentLayer = this.get('parentView').get('layer');
-        var size = {
-            width:  parentLayer.clientWidth,
-            height: parentLayer.clientHeight
-        };
-        return size.width == 0 && size.height == 0 ? null : size;
-    },
-
-    /**
-     * @private
-     * Adjusts the width and height of the canvas to match the given size, if
-     * needed.
-     */
-    resizeCanvasToFit: function(size) {
-        var canvas = this.get('canvas');
-        if (size.width !== canvas.width)
-            canvas.width = size.width;
-        if (size.height !== canvas.height)
-            canvas.height = size.height;
-    },
-
-    /**
      * This is where the editor is painted from head to toe.
      * The optional "fullRefresh" argument triggers a complete repaint of the
      * editor canvas; otherwise, pitiful tricks are used to draw as little as possible.
      */
     paint: function(ctx, fullRefresh) {
         var content = this.get("content");
-
-        fullRefresh = true; // FIXME --pcw
-
-        fullRefresh = true; // FIXME --pcw
-
-        fullRefresh = true; // FIXME --pcw
 
         fullRefresh = true; // FIXME --pcw
 
