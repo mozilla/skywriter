@@ -82,6 +82,14 @@ exports.BespinScrollerView = SC.View.extend({
     layoutDirection: SC.LAYOUT_VERTICAL,
 
     /**
+     * @property
+     * Specifies whether the scroll bar is enabled. Even if this property is
+     * set to YES, the scroll bar will still be disabled if the scroll bar is
+     * too large for the maximum value.
+     */
+    isEnabled: true,
+
+    /**
      * @property{String}
      * The property of the owning view that the scroll bar should modify
      * whenever its value changes. By default the scroll bar updates
@@ -112,11 +120,30 @@ exports.BespinScrollerView = SC.View.extend({
 
     /**
      * @property
-     * The dimensions of the handle or knob.
+     * Returns the dimensions of the handle or knob. Read-only.
      */
     handleFrame: function() {
-        // TODO
-    }.property('value', 'maximum').cacheable(),
+        var value = this.get('value');
+        var maximum = this.get('maximum');
+        var frame = this.get('frame');
+        var scrollerThickness = this.get('scrollerThickness');
+        switch (this.get('layoutDirection')) {
+        case SC.LAYOUT_VERTICAL:
+            return {
+                x:      0,
+                y:      value * frame.height / maximum,
+                width:  scrollerThickness,
+                height: frame.height * frame.height / maximum
+            };
+        case SC.LAYOUT_HORIZONTAL:
+            return {
+                x:      value * frame.width / maximum,
+                y:      0,
+                width:  frame.width * frame.width / maximum,
+                height: scrollerThickness
+            };
+        }
+    }.property('value', 'maximum', 'frame'),
  
     /**
      * @property{Number}
@@ -168,42 +195,79 @@ exports.BespinScrollerView = SC.View.extend({
 
     _paint: function() {
         var ctx = this.$('canvas')[0].getContext('2d');
+        
+        var frame = this.get('frame');
         var bar = this.get('handleFrame');
         var alpha = (ctx.globalAlpha) ? ctx.globalAlpha : 1;
 
-        // The rest of the painting code assumes the scroll bar is horizontal;
-        // if not, we create that fiction by installing a 90 degree rotation.
+        console.log("_paint: layoutDirection " + this.get('layoutDirection'));
+        console.log("_paint: frame " + frame.toSource());
+        console.log("_paint: bar " + bar.toSource());
+        console.log("_paint: maximum " + this.get('maximum') + " value "
+            + this.get('value'));
+
+        var handleFrame = this.get('handleFrame');
         var layoutDirection = this.get('layoutDirection');
-        if (layoutDirection === SC.LAYOUT_VERTICAL) {
+        var handleDistance, handleLength, frameLength;
+        switch (layoutDirection) {
+        case SC.LAYOUT_VERTICAL:
+            handleDistance = handleFrame.y;
+            handleLength = handleFrame.height;
+            frameLength = frame.height;     
+
+            // The rest of the painting code assumes the scroll bar is
+            // horizontal. Create that fiction by installing a 90 degree
+            // rotation.
             ctx.save();
-            ctx.rotate(Math.PI * 1.5);
+            //var deltaX = handleFrame.y + Math.floor(handleFrame.width / 2);
+            //var deltaY = 0 + Math.floor(handleFrame.height / 2);
+            //ctx.translate(deltaX, deltaY);
+            ctx.translate(frame.width, 0);
+            ctx.rotate(Math.PI * 0.5);
+            //ctx.translate(-deltaX, -deltaY);
+            break;
+
+        case SC.LAYOUT_HORIZONTAL:
+            handleDistance = handleFrame.x;
+            handleLength = handleFrame.width;
+            frameLength = frame.width;
+            break;
+
+        default:
+            console.log("BUG");
         }
+
+        console.log("_paint: handleDistance %@ handleLength %@ frameLength %@"
+            .fmt(handleDistance, handleLength, frameLength));
+
+        if (this.get('isEnabled') === false || frameLength <= handleLength)
+            return;     // The scroll bar is disabled...
 
         /* if (!scrollbar.isH()) {
             ctx.save();     // restored in another if (!scrollbar.isH()) block at end of function
-            ctx.translate(bar.x + Math.floor(bar.w / 2), bar.y + Math.floor(bar.h / 2));
+            ctx.translate(handleDistance + Math.floor(bar.w / 2), 0 + Math.floor(bar.h / 2));
             ctx.rotate(Math.PI * 1.5);
-            ctx.translate(-(bar.x + Math.floor(bar.w / 2)), -(bar.y + Math.floor(bar.h / 2)));
+            ctx.translate(-(handleDistance + Math.floor(bar.w / 2)), -(0 + Math.floor(bar.h / 2)));
 
             // if we're vertical, the bar needs to be re-worked a bit
-            bar = new scroller.Rect(bar.x - Math.floor(bar.h / 2) + Math.floor(bar.w / 2),
-                    bar.y + Math.floor(bar.h / 2) - Math.floor(bar.w / 2), bar.h, bar.w);
+            bar = new scroller.Rect(handleDistance - Math.floor(bar.h / 2) + Math.floor(bar.w / 2),
+                    0 + Math.floor(bar.h / 2) - Math.floor(bar.w / 2), bar.h, bar.w);
         } */
 
         var theme = this.get('theme');
-
-        var halfheight = bar.height / 2;
+        var scrollerThickness = this.get('scrollerThickness');
+        var halfThickness = scrollerThickness / 2;
 
         ctx.beginPath();
-        ctx.arc(bar.x + halfheight, bar.y + halfheight, halfheight,
+        ctx.arc(handleDistance + halfThickness, 0 + halfThickness, halfThickness,
             Math.PI / 2, 3 * (Math.PI / 2), false);
-        ctx.arc(bar.x + bar.width - halfheight, bar.y + halfheight, halfheight,
+        ctx.arc(handleDistance + handleLength - halfThickness, 0 + halfThickness, halfThickness,
             3 * (Math.PI / 2), Math.PI / 2, false);
-        ctx.lineTo(bar.x + halfheight, bar.y + bar.height);
+        ctx.lineTo(handleDistance + halfThickness, 0 + scrollerThickness);
         ctx.closePath();
 
-        var gradient = ctx.createLinearGradient(bar.x, bar.y, bar.x,
-            bar.y + bar.height);
+        var gradient = ctx.createLinearGradient(handleDistance, 0, handleDistance,
+            0 + scrollerThickness);
         gradient.addColorStop(0,
             theme.scrollBarFillGradientTopStart.replace(/%a/, alpha));
         gradient.addColorStop(0.4,
@@ -222,28 +286,28 @@ exports.BespinScrollerView = SC.View.extend({
 
         ctx.fillStyle = theme.scrollBarFillStyle.replace(/%a/, alpha);
         ctx.beginPath();
-        ctx.moveTo(bar.x + (halfheight * 0.4), bar.y + (halfheight * 0.6));
-        ctx.lineTo(bar.x + (halfheight * 0.9), bar.y + (bar.height * 0.4));
-        ctx.lineTo(bar.x, bar.y + (bar.height * 0.4));
+        ctx.moveTo(handleDistance + (halfThickness * 0.4), 0 + (halfThickness * 0.6));
+        ctx.lineTo(handleDistance + (halfThickness * 0.9), 0 + (scrollerThickness * 0.4));
+        ctx.lineTo(handleDistance, 0 + (scrollerThickness * 0.4));
         ctx.closePath();
         ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(bar.x + bar.w - (halfheight * 0.4),
-            bar.y + (halfheight * 0.6));
-        ctx.lineTo(bar.x + bar.w - (halfheight * 0.9),
-            bar.y + (bar.height * 0.4));
-        ctx.lineTo(bar.x + bar.w, bar.y + (bar.height * 0.4));
+        ctx.moveTo(handleDistance + handleLength - (halfThickness * 0.4),
+            0 + (halfThickness * 0.6));
+        ctx.lineTo(handleDistance + handleLength - (halfThickness * 0.9),
+            0 + (scrollerThickness * 0.4));
+        ctx.lineTo(handleDistance + handleLength, 0 + (scrollerThickness * 0.4));
         ctx.closePath();
         ctx.fill();
 
         ctx.restore();
 
         ctx.beginPath();
-        ctx.arc(bar.x + halfheight, bar.y + halfheight, halfheight,
+        ctx.arc(handleDistance + halfThickness, 0 + halfThickness, halfThickness,
             Math.PI / 2, 3 * (Math.PI / 2), false);
-        ctx.arc(bar.x + bar.width - halfheight, bar.y + halfheight, halfheight,
+        ctx.arc(handleDistance + handleLength - halfThickness, 0 + halfThickness, halfThickness,
             3 * (Math.PI / 2), Math.PI / 2, false);
-        ctx.lineTo(bar.x + halfheight, bar.y + bar.height);
+        ctx.lineTo(handleDistance + halfThickness, 0 + scrollerThickness);
         ctx.closePath();
 
         ctx.strokeStyle = theme.scrollTrackStrokeStyle;
