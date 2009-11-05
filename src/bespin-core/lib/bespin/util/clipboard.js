@@ -45,8 +45,10 @@ exports.setup = function(editorWrapper) {
     }
 
     // Feature detection would be nicer, but ev.clipboardData only exists on
-    // clipboard events
-    if (util.isWebKit) {
+    // clipboard events, so we can't use that.
+    // Also there is breakage in the WebKit impl right now, everything is
+    // using HiddenWorld
+    if (false && util.isWebKit) {
         implementation = DOMEvents.create({ editorWrapper:editorWrapper });
         implementation.install();
     } else {
@@ -102,7 +104,7 @@ var ClipboardProxy = SC.Object.extend({
     /**
      * Focus tracking - it's gone
      */
-    loseFocus: function() {
+    focusLost: function() {
         this._hasFocus = false;
     },
 
@@ -147,69 +149,86 @@ var DOMEvents = SC.Object.extend({
             ev.preventDefault();
             // Line up the fake element so Safari's checks work OK
             proxy.takeFocus();
-        };
+        }.bind(this);
 
-        SC.Event.add(element, "beforecopy", this, primeMenu, false);
-        SC.Event.add(element, "beforecut", this, primeMenu, false);
-        SC.Event.add(element, "beforepaste", this, primeMenu, false);
+        element.addEventListener("beforecopy", primeMenu, false);
+        element.addEventListener("beforecut", primeMenu, false);
+        // SC.Event.add(element, "beforecopy", this, primeMenu, false);
+        // SC.Event.add(element, "beforecut", this, primeMenu, false);
 
         // Called to actually do the copy
         var onCopy = function(ev) {
             if (!proxy.hasFocus()) {
                 return;
             }
+
             var text = this.editorWrapper.getSelection();
-            console.log("onCopy", ev, text);
             if (text && text != '') {
                 ev.clipboardData.setData('text/plain', text);
-                // stop event, otherwise someone else will try to set copy data.
-                util.stopEvent(ev);
             }
+            console.log("onCopy", ev, text);
 
-            proxy.loseFocus();
             this.editorWrapper.focus();
-        };
-        SC.Event.add(element, "copy", this, onCopy, false);
+            proxy.focusLost();
+            util.stopEvent(ev);
+        }.bind(this);
+        element.addEventListener("copy", onCopy);
+        // SC.Event.add(element, "copy", this, onCopy, false);
 
         var onCut = function(ev) {
             if (!proxy.hasFocus()) {
                 return;
             }
+
             var text = this.editorWrapper.removeSelection();
-            console.log("onCut", ev, text);
             if (text) {
                 ev.clipboardData.setData('text/plain', text);
-                // TODO: do we mean this or util.stopEvent(ev);
-                ev.preventDefault();
             }
+            console.log("onCut", ev, text);
 
-            proxy.loseFocus();
             this.editorWrapper.focus();
-        };
-        SC.Event.add(element, "cut", this, onCut, false);
+            proxy.focusLost();
+            util.stopEvent(ev);
+        }.bind(this);
+        element.addEventListener("cut", onCut);
+        // SC.Event.add(element, "cut", this, onCut, false);
 
         var onPaste = function(ev) {
-            if (!proxy.hasFocus()) {
+            if (!this.editorWrapper.hasFocus()) {
                 return;
             }
+
             var text = ev.clipboardData.getData('text/plain');
-            console.log("onPaste", ev, text);
             this.editorWrapper.replaceSelection(text);
-            util.stopEvent(ev);
+            console.log("onPaste", ev, text);
 
-            proxy.loseFocus();
             this.editorWrapper.focus();
-        };
-        SC.Event.add(element, "paste", this, onPaste);
+            proxy.focusLost();
+            util.stopEvent(ev);
+        }.bind(this);
+        element.addEventListener("paste", onPaste);
+        // SC.Event.add(element, "paste", this, onPaste);
 
+        /**
+         * re-write the uninstall function to clear up the resources that we
+         * have created
+         */
         this.uninstall = function() {
-            SC.Event.remove(element, "beforecopy", this, primeMenu, false);
-            SC.Event.remove(element, "beforecut", this, primeMenu, false);
-            SC.Event.remove(element, "beforepaste", this, primeMenu, false);
+            element.removeEventListener("beforecopy", primeMenu, false);
+            element.removeEventListener("beforecut", primeMenu, false);
+            element.removeEventListener("beforepaste", primeMenu, false);
 
-            SC.Event.remove(element, "copy", this, onCopy, false);
-            SC.Event.remove(element, "cut", this, onCut, false);
-            SC.Event.remove(element, "paste", this, onPaste, false);
+            element.removeEventListener("copy", onCopy, false);
+            element.removeEventListener("cut", onCut, false);
+            element.removeEventListener("paste", onPaste, false);
+
+            // SC.Event.remove(element, "beforecopy", this, primeMenu, false);
+            // SC.Event.remove(element, "beforecut", this, primeMenu, false);
+            // SC.Event.remove(element, "beforepaste", this, primeMenu, false);
+
+            // SC.Event.remove(element, "copy", this, onCopy, false);
+            // SC.Event.remove(element, "cut", this, onCut, false);
+            // SC.Event.remove(element, "paste", this, onPaste, false);
 
             proxy.dispose();
         };
@@ -237,6 +256,10 @@ var HiddenWorld = SC.Object.extend({
     install: function() {
         this.proxy = ClipboardProxy.create();
 
+        /**
+         * Add a keydown handler to grab everything.
+         * TODO: Hook into the editors keyboard handling
+         */
         var onKeyDown = function(ev) {
             var text;
             if ((util.isMac && ev.metaKey) || ev.ctrlKey) {
@@ -245,14 +268,14 @@ var HiddenWorld = SC.Object.extend({
                     // place the selection into the input
                     text = this.editorWrapper.getSelection();
                     if (text && text != '') {
-                        this._copyToClipboard(text);
+                        this.copyToClipboard(text);
                     }
                 } else if (ev.keyCode == keys.Key.X) {
                     // Cut
                     text = this.editorWrapper.removeSelection();
-                    this._copyToClipboard(text);
+                    this.copyToClipboard(text);
                 } else if (ev.keyCode == keys.Key.V) {
-                    this._pasteFromClipboard();
+                    this.pasteFromClipboard();
                 }
             }
         }.bind(this);
@@ -260,19 +283,20 @@ var HiddenWorld = SC.Object.extend({
         var element = this.editorWrapper.getFocusElement();
         element.addEventListener("keydown", onKeyDown, false);
 
-        this.eventRemover = function() {
+        this.uninstall = function() {
             element.removeEventListener("keydown", onKeyDown, false);
+            this.proxy.dispose();
         };
     },
 
-    _copyToClipboard: function(text) {
+    copyToClipboard: function(text) {
         this.proxy.takeFocus(text);
         setTimeout(function() {
             this.editorWrapper.focus();
         }.bind(this), 10);
     },
 
-    _pasteFromClipboard: function() {
+    pasteFromClipboard: function() {
         // Hope that the paste goes in here
         this.proxy.takeFocus();
         setTimeout(function() {
@@ -282,9 +306,10 @@ var HiddenWorld = SC.Object.extend({
         }.bind(this), 0);
     },
 
+    /**
+     * This is dynamically re-written by the install function
+     */
     uninstall: function() {
-        this.eventRemover();
-        this.proxy.dispose();
     }
 });
 

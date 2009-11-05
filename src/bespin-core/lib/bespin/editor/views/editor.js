@@ -1413,7 +1413,7 @@ var EditorWrapper = SC.Object.extend({
      * Proxy to the UI's setFocus()
      */
     focus: function() {
-        this.ui.setFocus();
+        this.ui.setFocus(true);
     },
 
     /**
