@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bespin scroller test</title>
+    <link rel="stylesheet" href="sproutcore.css" type="text/css" />
+    <script type="text/javascript" src="loader.js"></script>
+    <script type="text/javascript">
+        require.preload(["ref-send", "sandbox", "narwhal/client", "array", "object", "string", "function", "regexp", "reactor", "date", "global", "system", "binary"]);
+        require.async('bespin/boot');
+
+        window.onBespinLoad = function() {
+            var SC = require('sproutcore');
+
+            var controller = SC.Object.create({
+                content: function(key, value) {
+                    var items = [];
+                    for (var i = 0; i < 1000; i++)
+                        items.push({ title: "" + i });
+                    return items;
+                }.property().cacheable()
+            });
+
+            var view = SC.MainPane.create({
+                layout: {
+                    top:    0,
+                    left:   0,
+                    width:  640,
+                    height: 480
+                },
+                childViews: 'scrollView'.w(),
+                scrollView: SC.ScrollView.design({
+                    layout: { top: 0, left: 0, width: 640, height: 480 },
+                    hasHorizontalScroller: true,
+                    hasVerticalScroller: true,
+                    contentView: SC.ListView.design({
+                        layout: {
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            right: 0
+                        },
+                        contentValueKey:    'title',
+                        //content:            [ { title: "1" }, "2", "3", "4", "5" ],
+                        canEditContent:     false,
+                        canReorderContent:  false
+                        // exampleView:        SC.LabelView
+                    })
+                }) 
+            });
+            view.scrollView.contentView.bind('content', controller, 'content');
+            view.appendTo(document.getElementById('root'));
+        }
+    </script>
+</head>
+<body>
+    <p>
+        This is a test of the Bespin scroll bars. They're first class
+        SproutCore widgets, so they can be used in any SproutCore ScrollView!
+    </p>
+    <div id="root" style="position: relative;"></div>
+</body>
+</html>
+
