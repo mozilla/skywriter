@@ -28,6 +28,37 @@ var SC = require('sproutcore');
 exports.BespinScrollerView = SC.View.extend({
     classNames: ['bespin-scroller-view'],
 
+    _mouseDownScreenPoint: null,
+    _mouseDownValue: null,
+
+    _value: 0,
+
+    _bespinScrollerView_valueDidChange: function() {
+        console.log("valueDidChange");
+        SC.RunLoop.begin();
+        this.set('layerNeedsUpdate', true);
+        SC.RunLoop.end();
+    }.observes('value'),
+
+    _bespinScrollerView_maximumDidChange: function() {
+        console.log("maximumDidChange");
+        SC.RunLoop.begin();
+        this.set('layerNeedsUpdate', true);
+        SC.RunLoop.end();
+    }.observes('maximum'),
+
+    // TODO: Make this a real SproutCore theme (i.e. an identifier that gets
+    // prepended to CSS properties), perhaps?
+    theme: {
+        scrollTrackFillStyle: "rgba(50, 50, 50, 0.8)",
+        scrollTrackStrokeStyle: "rgb(150, 150, 150)",
+        scrollBarFillStyle: "rgba(0, 0, 0, %a)",
+        scrollBarFillGradientTopStart: "rgba(90, 90, 90, %a)",
+        scrollBarFillGradientTopStop: "rgba(40, 40, 40, %a)",
+        scrollBarFillGradientBottomStart: "rgba(22, 22, 22, %a)",
+        scrollBarFillGradientBottomStop: "rgba(44, 44, 44, %a)"
+    },
+
     /**
      * @property
      * The thickness of this scroll bar. The default is
@@ -70,6 +101,7 @@ exports.BespinScrollerView = SC.View.extend({
      * The current position that the scroll bar is scrolled to.
      */
     value: function(key, value) {
+        console.log("value called, " + this._value + " -> " + value);
         if (value !== undefined) {
             if (value >= 0)
                 this._value = value;
@@ -77,6 +109,14 @@ exports.BespinScrollerView = SC.View.extend({
             return Math.min(this._value || 0, this.get('maximum'));
         }
     }.property('maximum').cacheable(),
+
+    /**
+     * @property
+     * The dimensions of the handle or knob.
+     */
+    handleFrame: function() {
+        // TODO
+    }.property('value', 'maximum').cacheable(),
  
     /**
      * @property{Number}
@@ -88,113 +128,58 @@ exports.BespinScrollerView = SC.View.extend({
      */
     maximum: 0,
 
-    // position/size of the scrollbar track
-    rect: null,
-
-    // size of the current visible subset
-    extent: null,
-
-    // return a Rect for the scrollbar handle
-    getHandleBounds: function() {
-        var sx = this.isH() ? this.rect.x : this.rect.y;
-        var sw = this.isH() ? this.rect.w : this.rect.h;
-
-        var smultiple = this.extent / (this.max + this.extent);
-        var asw = smultiple * sw;
-        if (asw < this.MINIMUM_HANDLE_SIZE) {
-            asw = this.MINIMUM_HANDLE_SIZE;
-        }
-
-        sx += (sw - asw) * (this.value / (this.max - this.min));
-
-        return this.isH() ?
-            new exports.Rect(Math.floor(sx), this.rect.y, asw, this.rect.h) :
-            new exports.Rect(this.rect.x, sx, this.rect.w, asw);
-    },
-
-    isH: function() {
-        return !(this.orientation == this.VERTICAL);
-    },
-
-    fixValue: function(value) {
-        if (value < this.min) {
-            value = this.min;
-        }
-        if (value > this.max) {
-            value = this.max;
-        }
-        return value;
-    },
-
     mouseWheel: function(evt) {
         // TODO
     },
 
     mouseDown: function(evt) {
-        if (withinHandle(evt)) {
+        var value = this.get('value');
+        var pos = this.positionRelativeToHandle(evt);
+        switch (pos) {
+        case 'before':
+            this.set('value', value - this.get('frame').height);
+            break;
+        case 'after':
+            this.set('value', value + this.get('frame').height);
+            break;
+        case 'inside':
             this._mouseDownScreenPoint
-                = this.get('layoutDirection') == SC.LAYOUT_HORIZONTAL
+                = this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL
                 ? evt.x : evt.y;
-            this._mouseDownValue = this.get('value');
-        }
-        var bar = this.getHandleBounds();
-        // TODO
-    },
-
-    onmousedown: function(e) {
-        
-        var clientY = e.clientY - this.ui.getTopOffset();
-        var clientX = e.clientX - this.ui.getLeftOffset();
-
-        var bar = this.getHandleBounds();
-        if (bar.contains({ x: clientX, y: clientY })) {
-            this.mousedownScreenPoint = this.isH() ? e.screenX : e.screenY;
-            this.mousedownValue = this.value;
-        } else {
-            var p = this.isH() ? clientX : clientY;
-            var b1 = this.isH() ? bar.x : bar.y;
-            var b2 = this.isH() ? bar.x2 : bar.y2;
-
-            if (p < b1) {
-                this.setValue(this.value -= this.extent);
-            } else if (p > b2) {
-                this.setValue(this.value += this.extent);
-            }
+            this._mouseDownValue = value;
+            break;
         }
     },
 
-    onmouseup: function(e) {
-        this.mousedownScreenPoint = null;
-        this.mousedownValue = null;
-        if (this.valueChanged) {
-            this.valueChanged(); // make the UI responsive when the user releases the mouse button (in case arrow no longer hovers over scrollbar)
+    mouseUp: function(evt) {
+        this._mouseDownScreenPoint = null;
+        this._mouseDownValue = null;
+    },
+
+    mouseMove: function(evt) {
+        if (this._mouseDownScreenPoint !== null) {
+            var dist = this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL
+                ? evt.x : evt.y;
+            var delta = dist - this._mouseDownScreenPoint;
+            this.set('value', this._mouseDownValue
+                + screenLengthToContentLength(delta));
         }
     },
 
-    onmousemove: function(e) {
-        if (this.mousedownScreenPoint) {
-            var diff = ((this.isH()) ? e.screenX : e.screenY) - this.mousedownScreenPoint;
-            var multiplier = diff / (this.isH() ? this.rect.w : this.rect.h);
-            this.setValue(this.mousedownValue + Math.floor(((this.max + this.extent) - this.min) * multiplier));
-        }
-    },
-
-    setValue: function(value) {
-        this.value = this.fixValue(value);
-        if (this.valueChanged) {
-            this.valueChanged();
-        }
-    },
-
-    // FIXME --pcw
-    render: function(context, firstTime) {
-        if (firstTime) {
-            context.push('<canvas width="" height="">');
-
-        var bar = scrollbar.getHandleBounds();
+    _paint: function() {
+        var ctx = this.$('canvas')[0].getContext('2d');
+        var bar = this.get('handleFrame');
         var alpha = (ctx.globalAlpha) ? ctx.globalAlpha : 1;
 
-        if (!scrollbar.isH()) {
+        // The rest of the painting code assumes the scroll bar is horizontal;
+        // if not, we create that fiction by installing a 90 degree rotation.
+        var layoutDirection = this.get('layoutDirection');
+        if (layoutDirection === SC.LAYOUT_VERTICAL) {
+            ctx.save();
+            ctx.rotate(Math.PI * 1.5);
+        }
+
+        /* if (!scrollbar.isH()) {
             ctx.save();     // restored in another if (!scrollbar.isH()) block at end of function
             ctx.translate(bar.x + Math.floor(bar.w / 2), bar.y + Math.floor(bar.h / 2));
             ctx.rotate(Math.PI * 1.5);
@@ -203,56 +188,88 @@ exports.BespinScrollerView = SC.View.extend({
             // if we're vertical, the bar needs to be re-worked a bit
             bar = new scroller.Rect(bar.x - Math.floor(bar.h / 2) + Math.floor(bar.w / 2),
                     bar.y + Math.floor(bar.h / 2) - Math.floor(bar.w / 2), bar.h, bar.w);
-        }
+        } */
 
-        var halfheight = bar.h / 2;
+        var theme = this.get('theme');
+
+        var halfheight = bar.height / 2;
 
         ctx.beginPath();
-        ctx.arc(bar.x + halfheight, bar.y + halfheight, halfheight, Math.PI / 2, 3 * (Math.PI / 2), false);
-        ctx.arc(bar.x2 - halfheight, bar.y + halfheight, halfheight, 3 * (Math.PI / 2), Math.PI / 2, false);
-        ctx.lineTo(bar.x + halfheight, bar.y + bar.h);
+        ctx.arc(bar.x + halfheight, bar.y + halfheight, halfheight,
+            Math.PI / 2, 3 * (Math.PI / 2), false);
+        ctx.arc(bar.x + bar.width - halfheight, bar.y + halfheight, halfheight,
+            3 * (Math.PI / 2), Math.PI / 2, false);
+        ctx.lineTo(bar.x + halfheight, bar.y + bar.height);
         ctx.closePath();
 
-        var gradient = ctx.createLinearGradient(bar.x, bar.y, bar.x, bar.y + bar.h);
-        gradient.addColorStop(0, this.editor.theme.scrollBarFillGradientTopStart.replace(/%a/, alpha));
-        gradient.addColorStop(0.4, this.editor.theme.scrollBarFillGradientTopStop.replace(/%a/, alpha));
-        gradient.addColorStop(0.41, this.editor.theme.scrollBarFillStyle.replace(/%a/, alpha));
-        gradient.addColorStop(0.8, this.editor.theme.scrollBarFillGradientBottomStart.replace(/%a/, alpha));
-        gradient.addColorStop(1, this.editor.theme.scrollBarFillGradientBottomStop.replace(/%a/, alpha));
+        var gradient = ctx.createLinearGradient(bar.x, bar.y, bar.x,
+            bar.y + bar.height);
+        gradient.addColorStop(0,
+            theme.scrollBarFillGradientTopStart.replace(/%a/, alpha));
+        gradient.addColorStop(0.4,
+            theme.scrollBarFillGradientTopStop.replace(/%a/, alpha));
+        gradient.addColorStop(0.41,
+            theme.scrollBarFillStyle.replace(/%a/, alpha));
+        gradient.addColorStop(0.8,
+            theme.scrollBarFillGradientBottomStart.replace(/%a/, alpha));
+        gradient.addColorStop(1,
+            theme.scrollBarFillGradientBottomStop.replace(/%a/, alpha));
         ctx.fillStyle = gradient;
         ctx.fill();
 
         ctx.save();
         ctx.clip();
 
-        ctx.fillStyle = this.editor.theme.scrollBarFillStyle.replace(/%a/, alpha);
+        ctx.fillStyle = theme.scrollBarFillStyle.replace(/%a/, alpha);
         ctx.beginPath();
         ctx.moveTo(bar.x + (halfheight * 0.4), bar.y + (halfheight * 0.6));
-        ctx.lineTo(bar.x + (halfheight * 0.9), bar.y + (bar.h * 0.4));
-        ctx.lineTo(bar.x, bar.y + (bar.h * 0.4));
+        ctx.lineTo(bar.x + (halfheight * 0.9), bar.y + (bar.height * 0.4));
+        ctx.lineTo(bar.x, bar.y + (bar.height * 0.4));
         ctx.closePath();
         ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(bar.x + bar.w - (halfheight * 0.4), bar.y + (halfheight * 0.6));
-        ctx.lineTo(bar.x + bar.w - (halfheight * 0.9), bar.y + (bar.h * 0.4));
-        ctx.lineTo(bar.x + bar.w, bar.y + (bar.h * 0.4));
+        ctx.moveTo(bar.x + bar.w - (halfheight * 0.4),
+            bar.y + (halfheight * 0.6));
+        ctx.lineTo(bar.x + bar.w - (halfheight * 0.9),
+            bar.y + (bar.height * 0.4));
+        ctx.lineTo(bar.x + bar.w, bar.y + (bar.height * 0.4));
         ctx.closePath();
         ctx.fill();
 
         ctx.restore();
 
         ctx.beginPath();
-        ctx.arc(bar.x + halfheight, bar.y + halfheight, halfheight, Math.PI / 2, 3 * (Math.PI / 2), false);
-        ctx.arc(bar.x2 - halfheight, bar.y + halfheight, halfheight, 3 * (Math.PI / 2), Math.PI / 2, false);
-        ctx.lineTo(bar.x + halfheight, bar.y + bar.h);
+        ctx.arc(bar.x + halfheight, bar.y + halfheight, halfheight,
+            Math.PI / 2, 3 * (Math.PI / 2), false);
+        ctx.arc(bar.x + bar.width - halfheight, bar.y + halfheight, halfheight,
+            3 * (Math.PI / 2), Math.PI / 2, false);
+        ctx.lineTo(bar.x + halfheight, bar.y + bar.height);
         ctx.closePath();
 
-        ctx.strokeStyle = this.editor.theme.scrollTrackStrokeStyle;
+        ctx.strokeStyle = theme.scrollTrackStrokeStyle;
         ctx.stroke();
 
-        if (!scrollbar.isH()) {
+        if (layoutDirection === SC.LAYOUT_VERTICAL)
             ctx.restore();
+    },
+
+    didCreateLayer: function() {
+        console.log('didCreateLayer ' + this.get('layoutDirection'));
+        this._paint();
+    },
+
+    render: function(context, firstTime) {
+        console.log('render ' + this.get('layoutDirection'));
+
+        if (!firstTime) {
+            this._paint();
+            return;
         }
+
+        // FIXME: doesn't work properly if not visible --pcw
+        var frame = this.get('frame');
+        context.push('<canvas width="%@" height="%@">'.fmt(frame.width,
+            frame.height));
     },
 
     // FIXME --pcw

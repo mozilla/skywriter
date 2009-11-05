@@ -10,6 +10,7 @@
 
         window.onBespinLoad = function() {
             var SC = require('sproutcore');
+            var scroller = require('bespin/editor/views/scroller');
 
             var controller = SC.Object.create({
                 content: function(key, value) {
@@ -30,8 +31,15 @@
                 childViews: 'scrollView'.w(),
                 scrollView: SC.ScrollView.design({
                     layout: { top: 0, left: 0, width: 640, height: 480 },
+
                     hasHorizontalScroller: true,
+                    autohidesHorizontalScroller: false,
+                    horizontalScrollerView: scroller.BespinScrollerView,
+
                     hasVerticalScroller: true,
+                    autohidesVerticalScroller: false,
+                    verticalScrollerView: scroller.BespinScrollerView,
+
                     contentView: SC.ListView.design({
                         layout: {
                             left: 0,
@@ -40,10 +48,8 @@
                             right: 0
                         },
                         contentValueKey:    'title',
-                        //content:            [ { title: "1" }, "2", "3", "4", "5" ],
                         canEditContent:     false,
                         canReorderContent:  false
-                        // exampleView:        SC.LabelView
                     })
                 }) 
             });
