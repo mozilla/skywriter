@@ -24,37 +24,75 @@
 
 var SC = require('sproutcore');
 
-// The fancy custom Bespin scrollbars.
-exports.Scrollbar = SC.Object.extend({
-    HORIZONTAL: "horizontal",
-    VERTICAL: "vertical",
-    MINIMUM_HANDLE_SIZE: 20,
+// The fancy custom Bespin scroll bars.
+exports.BespinScrollerView = SC.View.extend({
+    classNames: ['bespin-scroller-view'],
 
-    ui: null,
+    /**
+     * @property
+     * The thickness of this scroll bar. The default is
+     * SC.NATURAL_SCROLLER_THICKNESS (16 as of this writing on the desktop).
+     */
+    scrollerThickness: SC.NATURAL_SCROLLER_THICKNESS,
 
-    // "horizontal" or "vertical"
-    orientation: null,
+    /**
+     * @property
+     * The minimum size of the scroll bar handle/knob.
+     */
+    minimumHandleSize: 20,
+
+    /**
+     * @property
+     * Specifies the direction of the scroll bar: one of SC.LAYOUT_HORIZONTAL
+     * or SC.LAYOUT_VERTICAL.
+     *
+     * Changes to this value after the view has been created have no effect.
+     */
+    layoutDirection: SC.LAYOUT_VERTICAL,
+
+    /**
+     * @property{String}
+     * The property of the owning view that the scroll bar should modify
+     * whenever its value changes. By default the scroll bar updates
+     * verticalScrollOffset if its layoutDirection is SC.LAYOUT_VERTICAL or
+     * horizontalScrollOffset if its layoutDirection is SC.LAYOUT_HORIZONTAL.
+     */
+    ownerScrollValueKey: function() {
+        switch (this.get('layoutDirection')) {
+        case SC.LAYOUT_VERTICAL:    return 'verticalScrollOffset';
+        case SC.LAYOUT_HORIZONTAL:  return 'horizontalScrollOffset';
+        }
+        return null;
+    }.property('layoutDirection').cacheable(),
+
+    /**
+     * @property
+     * The current position that the scroll bar is scrolled to.
+     */
+    value: function(key, value) {
+        if (value !== undefined) {
+            if (value >= 0)
+                this._value = value;
+        } else {
+            return Math.min(this._value || 0, this.get('maximum'));
+        }
+    }.property('maximum').cacheable(),
+ 
+    /**
+     * @property{Number}
+     * The maximum value for the scroll bar.
+     *
+     * TODO: When set to a value less than the width or height of the knob, the
+     * scroll bar is disabled.
+     *
+     */
+    maximum: 0,
 
     // position/size of the scrollbar track
     rect: null,
 
-    // current offset value
-    value: null,
-
-    // minimum offset value
-    min: null,
-
-    // maximum offset value
-    max: null,
-
     // size of the current visible subset
     extent: null,
-
-    // used for scroll bar dragging tracking; point at which the mousedown first occurred
-    mousedownScreenPoint: null,
-
-    // value at time of scroll drag start
-    mousedownValue: null,
 
     // return a Rect for the scrollbar handle
     getHandleBounds: function() {
@@ -88,30 +126,23 @@ exports.Scrollbar = SC.Object.extend({
         return value;
     },
 
-    onmousewheel: function(e) {
-        // We need to move the editor unless something else needs to scroll.
-        // We need a clean way to define that behaviour, but for now we hack and put in other elements that can scroll
-        var command_output = document.getElementById("command_output");
-        var target = e.target || e.originalTarget;
-        if (command_output && (target.id == "command_output" || util.contains(command_output, target))) {
-            return;
-        }
-        if (!this.ui.editor.focus) {
-            return;
-        }
+    mouseWheel: function(evt) {
+        // TODO
+    },
 
-        var wheel = mousewheelevent.wheel(e);
-        //console.log("Wheel speed: ", wheel);
-        var axis = mousewheelevent.axis(e);
-
-        if (this.orientation == this.VERTICAL && axis == this.VERTICAL) {
-            this.setValue(this.value + (wheel * this.ui.lineHeight));
-        } else if (this.orientation == this.HORIZONTAL && axis == this.HORIZONTAL) {
-            this.setValue(this.value + (wheel * this.ui.charWidth));
+    mouseDown: function(evt) {
+        if (withinHandle(evt)) {
+            this._mouseDownScreenPoint
+                = this.get('layoutDirection') == SC.LAYOUT_HORIZONTAL
+                ? evt.x : evt.y;
+            this._mouseDownValue = this.get('value');
         }
+        var bar = this.getHandleBounds();
+        // TODO
     },
 
     onmousedown: function(e) {
+        
         var clientY = e.clientY - this.ui.getTopOffset();
         var clientX = e.clientX - this.ui.getLeftOffset();
 
@@ -156,7 +187,10 @@ exports.Scrollbar = SC.Object.extend({
     },
 
     // FIXME --pcw
-    paintScrollbar: function(ctx, scrollbar) {
+    render: function(context, firstTime) {
+        if (firstTime) {
+            context.push('<canvas width="" height="">');
+
         var bar = scrollbar.getHandleBounds();
         var alpha = (ctx.globalAlpha) ? ctx.globalAlpha : 1;
 
@@ -242,32 +276,5 @@ exports.Scrollbar = SC.Object.extend({
         ctx.fill();
     },
 
-});
-
-/**
- * treat as immutable (pretty please)
- *
- * TODO: Delete me as part of the scrollbar revamp - SproutCore has its own
- * rect structure --pcw
- */
-exports.Rect = SC.Object.extend({
-    x: null,
-    y: null,
-    w: null,
-    h: null,
-
-    init: function() {
-        this.x2 = this.x + this.w;
-        this.y2 = this.y + this.h;
-        this.sc_super();
-    },
-
-    // inclusive of bounding lines
-    contains: function(point) {
-        if (!this.x) {
-            return false;
-        }
-        return ((this.x <= point.x) && ((this.x + this.w) >= point.x) && (this.y <= point.y) && ((this.y + this.h) >= point.y));
-    }
 });
 
