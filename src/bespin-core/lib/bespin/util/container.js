@@ -22,6 +22,32 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+/**
+ * The Bespin container provides a way for various parts of the system to
+ * discover each other.
+ *
+ * <p>Currently 'bespin' is a singleton that is referenced everywhere. This code
+ * reduces the need for it to be a singleton, makes dependencies more explicit,
+ * allows for dynamic re-loading and makes component access simpler.
+ *
+ * <p>When any component is registered with the container it is introspected for
+ * a 'requires' member. This map links desired member names to system titles.
+ * For example:
+ * <pre>requires: { fred:'jane', shiela:'bill' }</pre>
+ * <p>The container assumes from this that it should inject the 'jane' component
+ * into the fred member of this object, and the 'bill' component into the shiela
+ * member, so the component can access a 'jane' using <code>this.fred</code>.
+ *
+ * <p>It will be more common for the requires line to have the same name in
+ * both slots, for example: <code>requires: { editor:'editor' }</code>.
+ *
+ * <p>There will be a mapping from the component names ('jane'/'dave' above) to
+ * creator functions that will be provided by the plug-in system. Currently,
+ * however this is hard coded. This will allow people to provide alternative
+ * implementations of any core component, and since the container can track who
+ * uses what, it can re-inject newer versions of those components at runtime.
+ */
+
 var hub = require("bespin/util/hub");
 
 /**
@@ -35,6 +61,72 @@ var registeredComponents = {};
  */
 exports.register = function(id, object) {
     registeredComponents[id] = object;
+
+    console.log("container.register", id, object);
+    if (object.requires) {
+        // Clone the requires structure so we can remove fulfilled requirements
+        // and not trip over anything in the prototype chain.
+        var requirements = {};
+        for (var property in object.requires) {
+            if (object.requires.hasOwnProperty(property)) {
+                var name = object.requires[property];
+                requirements[property] = name;
+            }
+        }
+
+        /**
+         * Call afterContainerSetup if we've injected all that we need to
+         */
+        var checkCompleted = function() {
+            var remaining = 0;
+            for (var i in requirements) {
+                if (object.requires.hasOwnProperty(property)) {
+                    remaining++;
+                }
+            }
+            if (remaining == 0) {
+                if (object.afterContainerSetup) {
+                    object.afterContainerSetup();
+                }
+            }
+        };
+
+        /**
+         * We've found a component to match name, so this needs injecting into
+         * the object[property] and recalling for next time.
+         */
+        var inject = function(object, property, name, component) {
+            object[property] = component;
+            exports.register(name, component);
+            delete requirements[property];
+            checkCompleted();
+        };
+
+        checkCompleted();
+
+        for (var property in requirements) {
+            if (object.requires.hasOwnProperty(property)) {
+                var name = requirements[property];
+
+                var source = object.requires[name];
+                var component = exports.get(source);
+                if (component) {
+                    inject(object, property, name, component);
+                } else {
+                    var factory = exports.factories[name];
+                    if (factory) {
+                        var onCreate = function(component) {
+                            inject(object, property, name, component);
+                        };
+                        factory(onCreate);
+                    } else {
+                        console.error("No component ", name, " while injecting ", id);
+                    }
+                }
+            }
+        }
+    }
+
     return object;
 };
 
@@ -86,7 +178,19 @@ exports.getComponent = function(id, callback, context) {
     return true;
 };
 
+var re = require;
+
 exports.factories = {
+    settings: function(onCreate) {
+        var settings = re("bespin/settings");
+        onCreate(settings.Core.create({ store: settings.InMemory }));
+    },
+    session: function(onCreate) {
+        onCreate({});
+    },
+    file: function(onCreate) {
+        onCreate({});
+    },
     popup: function(onCreate) {
         exports.plugins.loadOne("popup", function(popupmod) {
             onCreate(new popupmod.Window());
@@ -101,9 +205,12 @@ exports.factories = {
         });
     },
     commandLine: function(onCreate) {
+        onCreate({});
+        /*
         exports.plugins.loadOne("commandLine", function(commandline) {
             onCreate(new commandline.Interface('command', exports.command.store));
         });
+        */
     },
     debugbar: function(onCreate) {
         exports.plugins.loadOne("debugbar", function(debug) {
