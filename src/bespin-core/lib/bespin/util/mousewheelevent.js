@@ -4,6 +4,8 @@
  * Tweaked to map everything to Mozilla's event.detail result
  */
 
+var SC = require("sproutcore");
+
 SC.mixin(exports, {
     wheel: function(event) {
         var delta = 0;

@@ -22,6 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var SC = require("sproutcore");
+
 // Version numbers
 SC.mixin(exports, {
     // BEGIN VERSION BLOCK

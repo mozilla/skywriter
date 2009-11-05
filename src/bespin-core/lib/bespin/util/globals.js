@@ -22,7 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-window.SC = require("sproutcore");
+var SC = require("sproutcore");
 
 /**
  * Array detector.
