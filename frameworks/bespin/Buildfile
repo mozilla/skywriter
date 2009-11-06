@@ -1,0 +1,3 @@
+config :bespin,
+  :required => [:tiki, 'tiki/system'],
+  :use_modules => true
