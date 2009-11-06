@@ -682,8 +682,7 @@ exports.EditorView = SC.View.extend({
      * Returns the width in pixels of the entire content area.
      */
     getWidth: function() {
-        return this.get('gutterWidth') + this.get('textWidth')
-            + this.charWidth;
+        return this.get('gutterWidth') + this.get('textWidth');
     },
 
     /**
@@ -903,7 +902,7 @@ exports.EditorView = SC.View.extend({
         }
 
         var virtualheight = this.getHeight();
-        var virtualwidth = this.getWidth();
+        var virtualwidth = this.get('textWidth');
 
         // if the current scrolled positions are different than the scroll
         // positions we used for the last paint, refresh the entire canvas

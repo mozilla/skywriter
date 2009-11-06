@@ -36,7 +36,6 @@ var cursor = require("bespin/cursor");
 var model = require("bespin/model");
 var history = require("bespin/history");
 var view = require("bespin/editor/views/editor");
-var scroller = require("bespin/editor/views/scroller");
 
 /**
  * bespin.editor.API is the root object, the API that others should be able to
@@ -71,10 +70,8 @@ exports.EditorController = SC.Object.extend({
             }),
             hasHorizontalScroller: true,
             autohidesHorizontalScroller: false,
-            horizontalScrollerView: scroller.BespinScrollerView,
             hasVerticalScroller: true,
-            autohidesVerticalScroller: false,
-            verticalScrollerView: scroller.BespinScrollerView
+            autohidesVerticalScroller: false
         });
         this.editorView = this.ui.contentView;
 
@@ -225,20 +222,20 @@ exports.EditorController = SC.Object.extend({
      */
     computeLayout: function() {
         var layout = {
-            left:   0,
-            top:    0,
+            left:      0,
+            top:      0,
             width:  this.container.clientWidth,
             height: this.container.clientHeight
         };
 
         var container = this.container;
         while (container !== null) {
-            layout.left += container.offsetLeft + container.clientLeft;
-            layout.top += container.offsetTop + container.clientTop;
-            container = container.offsetParent;
+            if (!isNaN(container.offsetLeft))
+                layout.left += container.offsetLeft;
+            if (!isNaN(container.offsetTop))
+                layout.top += container.offsetTop;
+            container = container.parentNode;
         }
-
-        console.log("computeLayout", layout);
 
         return layout;
     },
