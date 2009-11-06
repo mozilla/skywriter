@@ -24,12 +24,18 @@
 
 var SC = require('sproutcore');
 
+var NIB_ARROW_PADDING_BEFORE    = 3;
+var NIB_ARROW_PADDING_AFTER     = 5;
+var NIB_LENGTH                  = 15;
+var NIB_PADDING                 = 8;    // 15/2
+
 // The fancy custom Bespin scroll bars.
 exports.BespinScrollerView = SC.View.extend({
     classNames: ['bespin-scroller-view'],
 
     _mouseDownScreenPoint: null,
     _mouseDownValue: null,
+    _isMouseOver: false,
 
     _value: 0,
 
@@ -50,6 +56,13 @@ exports.BespinScrollerView = SC.View.extend({
     // TODO: Make this a real SproutCore theme (i.e. an identifier that gets
     // prepended to CSS properties), perhaps?
     theme: {
+        backgroundStyle: "#2A211C",
+        partialNibStyle: "rgba(100, 100, 100, 0.3)",
+        partialNibArrowStyle: "rgba(255, 255, 255, 0.3)",
+        partialNibStrokeStyle: "rgba(150, 150, 150, 0.3)",
+        fullNibStyle: "rgb(100, 100, 100)",
+        fullNibArrowStyle: "rgb(255, 255, 255)",
+        fullNibStrokeStyle: "rgb(150, 150, 150)",
         scrollTrackFillStyle: "rgba(50, 50, 50, 0.8)",
         scrollTrackStrokeStyle: "rgb(150, 150, 150)",
         scrollBarFillStyle: "rgba(0, 0, 0, %a)",
@@ -120,30 +133,57 @@ exports.BespinScrollerView = SC.View.extend({
 
     /**
      * @property
-     * Returns the dimensions of the handle or knob. Read-only.
+     * The dimensions of the gutter (the middle area between the buttons, which
+     * contains the handle or knob). Read-only.
      */
-    handleFrame: function() {
-        var value = this.get('value');
-        var maximum = this.get('maximum');
+    gutterFrame: function() {
         var frame = this.get('frame');
         var scrollerThickness = this.get('scrollerThickness');
         switch (this.get('layoutDirection')) {
         case SC.LAYOUT_VERTICAL:
             return {
                 x:      0,
-                y:      value * frame.height / maximum,
+                y:      NIB_LENGTH,
                 width:  scrollerThickness,
-                height: frame.height * frame.height / maximum
+                height: Math.max(0, frame.height - NIB_LENGTH * 2)
             };
         case SC.LAYOUT_HORIZONTAL:
             return {
-                x:      value * frame.width / maximum,
+                x:      NIB_LENGTH,
                 y:      0,
-                width:  frame.width * frame.width / maximum,
+                width:  Math.max(0, frame.width - NIB_LENGTH * 2),
                 height: scrollerThickness
             };
         }
-    }.property('value', 'maximum', 'frame'),
+    }.property('frame', 'scrollerThickness', 'layoutDirection').cacheable(),
+
+    /**
+     * @property
+     * The dimensions of the handle or knob. Read-only.
+     */
+    handleFrame: function() {
+        var value = this.get('value');
+        var maximum = this.get('maximum');
+        var gutterFrame = this.get('gutterFrame');
+        var scrollerThickness = this.get('scrollerThickness');
+        switch (this.get('layoutDirection')) {
+        case SC.LAYOUT_VERTICAL:
+            return {
+                x:      0,
+                y:      value * gutterFrame.height / maximum,
+                width:  scrollerThickness,
+                height: gutterFrame.height * gutterFrame.height / maximum
+            };
+        case SC.LAYOUT_HORIZONTAL:
+            return {
+                x:      value * gutterFrame.width / maximum,
+                y:      0,
+                width:  gutterFrame.width * gutterFrame.width / maximum,
+                height: scrollerThickness
+            };
+        }
+    }.property('value', 'maximum', 'gutterFrame', 'scrollerThickness',
+        'layoutDirection').cacheable(),
  
     /**
      * @property{Number}
@@ -154,6 +194,20 @@ exports.BespinScrollerView = SC.View.extend({
      *
      */
     maximum: 0,
+
+    mouseEntered: function(evt) {
+        SC.RunLoop.begin();
+        this._isMouseOver = true;
+        this.set('layerNeedsUpdate', true);
+        SC.RunLoop.end();
+    },
+
+    mouseExited: function(evt) {
+        SC.RunLoop.begin();
+        this._isMouseOver = false;
+        this.set('layerNeedsUpdate', true);
+        SC.RunLoop.end();
+    },
 
     mouseWheel: function(evt) {
         // TODO
@@ -193,68 +247,113 @@ exports.BespinScrollerView = SC.View.extend({
         }
     },
 
+    _paintNib: function(ctx) {
+        var theme = this.get('theme');
+        var fillStyle, arrowStyle, strokeStyle;
+        if (this._isMouseOver) {
+            fillStyle   = theme.fullNibStyle;
+            arrowStyle  = theme.fullNibArrowStyle;
+            strokeStyle = theme.fullNibStrokeStyle;
+        } else {
+            fillStyle   = theme.partialNibStyle;
+            arrowStyle  = theme.partialNibArrowStyle;
+            strokeStyle = theme.partialNibStrokeStyle;
+        }
+
+        var midpoint = Math.floor(NIB_LENGTH / 2);
+
+        ctx.fillStyle = fillStyle;
+        ctx.beginPath();
+        ctx.arc(0, 0, Math.floor(NIB_LENGTH / 2), 0, Math.PI * 2, true);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = strokeStyle;
+        ctx.stroke();
+
+        ctx.fillStyle = arrowStyle;
+        ctx.beginPath();
+        ctx.moveTo(0, -midpoint + NIB_ARROW_PADDING_BEFORE);
+        ctx.lineTo(-midpoint + NIB_ARROW_PADDING_BEFORE,
+            midpoint - NIB_ARROW_PADDING_AFTER);
+        ctx.lineTo(midpoint - NIB_ARROW_PADDING_BEFORE,
+            midpoint - NIB_ARROW_PADDING_AFTER);
+        ctx.closePath();
+        ctx.fill();
+    },
+
+    _paintNibs: function(ctx) {
+        var scrollerThickness = this.get('scrollerThickness');
+
+        var frame = this.get('frame');
+        var frameLength;
+        switch (this.get('layoutDirection')) {
+        case SC.LAYOUT_VERTICAL:    frameLength = frame.height; break;
+        case SC.LAYOUT_HORIZONTAL:  frameLength = frame.width;  break;
+        }
+
+        // Starting nib
+        ctx.save();
+        ctx.translate(NIB_PADDING, scrollerThickness / 2);
+        ctx.rotate(Math.PI * 1.5);
+        ctx.moveTo(0, 0);
+        this._paintNib(ctx);
+        ctx.restore();
+
+        // Ending nib
+        ctx.save();
+        ctx.translate(frameLength - NIB_PADDING, scrollerThickness / 2);
+        ctx.rotate(Math.PI * 0.5);
+        ctx.moveTo(0, 0);
+        this._paintNib(ctx);
+        ctx.restore();
+    },
+
     _paint: function() {
         var ctx = this.$('canvas')[0].getContext('2d');
         
-        var frame = this.get('frame');
+        var gutterFrame = this.get('gutterFrame');
         var bar = this.get('handleFrame');
         var alpha = (ctx.globalAlpha) ? ctx.globalAlpha : 1;
 
-        console.log("_paint: layoutDirection " + this.get('layoutDirection'));
-        console.log("_paint: frame " + frame.toSource());
-        console.log("_paint: bar " + bar.toSource());
-        console.log("_paint: maximum " + this.get('maximum') + " value "
-            + this.get('value'));
+        // Clear out the canvas.
+        var frame = this.get('frame'), theme = this.get('theme');
+        ctx.fillStyle = theme.backgroundStyle;
+        ctx.fillRect(0, 0, frame.width, frame.height);
+
+        ctx.save();
 
         var handleFrame = this.get('handleFrame');
         var layoutDirection = this.get('layoutDirection');
-        var handleDistance, handleLength, frameLength;
+        var handleDistance, handleLength, gutterLength;
         switch (layoutDirection) {
         case SC.LAYOUT_VERTICAL:
             handleDistance = handleFrame.y;
             handleLength = handleFrame.height;
-            frameLength = frame.height;     
+            gutterLength = gutterFrame.height;     
 
             // The rest of the painting code assumes the scroll bar is
             // horizontal. Create that fiction by installing a 90 degree
             // rotation.
-            ctx.save();
-            //var deltaX = handleFrame.y + Math.floor(handleFrame.width / 2);
-            //var deltaY = 0 + Math.floor(handleFrame.height / 2);
-            //ctx.translate(deltaX, deltaY);
-            ctx.translate(frame.width, 0);
+            ctx.translate(gutterFrame.width, 0);
             ctx.rotate(Math.PI * 0.5);
-            //ctx.translate(-deltaX, -deltaY);
             break;
 
         case SC.LAYOUT_HORIZONTAL:
             handleDistance = handleFrame.x;
             handleLength = handleFrame.width;
-            frameLength = frame.width;
+            gutterLength = gutterFrame.width;
             break;
-
-        default:
-            console.log("BUG");
         }
 
-        console.log("_paint: handleDistance %@ handleLength %@ frameLength %@"
-            .fmt(handleDistance, handleLength, frameLength));
+        ctx.save();
+        ctx.translate(NIB_LENGTH, 0);
 
-        if (this.get('isEnabled') === false || frameLength <= handleLength)
+        console.log("_paint: handleDistance %@ handleLength %@ gutterLength %@"
+            .fmt(handleDistance, handleLength, gutterLength));
+
+        if (this.get('isEnabled') === false || gutterLength <= handleLength)
             return;     // The scroll bar is disabled...
 
-        /* if (!scrollbar.isH()) {
-            ctx.save();     // restored in another if (!scrollbar.isH()) block at end of function
-            ctx.translate(handleDistance + Math.floor(bar.w / 2), 0 + Math.floor(bar.h / 2));
-            ctx.rotate(Math.PI * 1.5);
-            ctx.translate(-(handleDistance + Math.floor(bar.w / 2)), -(0 + Math.floor(bar.h / 2)));
-
-            // if we're vertical, the bar needs to be re-worked a bit
-            bar = new scroller.Rect(handleDistance - Math.floor(bar.h / 2) + Math.floor(bar.w / 2),
-                    0 + Math.floor(bar.h / 2) - Math.floor(bar.w / 2), bar.h, bar.w);
-        } */
-
-        var theme = this.get('theme');
         var scrollerThickness = this.get('scrollerThickness');
         var halfThickness = scrollerThickness / 2;
 
@@ -313,8 +412,11 @@ exports.BespinScrollerView = SC.View.extend({
         ctx.strokeStyle = theme.scrollTrackStrokeStyle;
         ctx.stroke();
 
-        if (layoutDirection === SC.LAYOUT_VERTICAL)
-            ctx.restore();
+        ctx.restore();
+
+        this._paintNibs(ctx);
+
+        ctx.restore();
     },
 
     didCreateLayer: function() {
@@ -334,28 +436,6 @@ exports.BespinScrollerView = SC.View.extend({
         var frame = this.get('frame');
         context.push('<canvas width="%@" height="%@">'.fmt(frame.width,
             frame.height));
-    },
-
-    // FIXME --pcw
-    paintNib: function(ctx, nibStyle, arrowStyle, strokeStyle) {
-        var midpoint = Math.floor(this.NIB_WIDTH / 2);
-
-        ctx.fillStyle = nibStyle;
-        ctx.beginPath();
-        ctx.arc(0, 0, Math.floor(this.NIB_WIDTH / 2), 0, Math.PI * 2, true);
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = strokeStyle;
-        ctx.stroke();
-
-        ctx.fillStyle = arrowStyle;
-        ctx.beginPath();
-        ctx.moveTo(0, -midpoint + this.NIB_ARROW_INSETS.top);
-        ctx.lineTo(-midpoint + this.NIB_ARROW_INSETS.left, midpoint - this.NIB_ARROW_INSETS.bottom);
-        ctx.lineTo(midpoint - this.NIB_ARROW_INSETS.right, midpoint - this.NIB_ARROW_INSETS.bottom);
-        ctx.closePath();
-        ctx.fill();
-    },
-
+    }
 });
 
