@@ -197,9 +197,19 @@ exports.onLoad = function() {
     bespin.register('toolbar', new toolbar.Toolbar({ editor: editor, opts: { setupDefault: true } }));
     bespin.register('quickopen', new quickopen.API());
 
-    // Get going when settings are loaded
+    // Load the last file or what is passed in
     bespin.subscribe("settings:loaded", function(event) {
-        bespin.get('settings').loadSession();  // load the last file or what is passed in
+        var editSession = bespin.get('editSession');
+        var fromURL = settings.URL.create();
+        var path = fromURL.getValue('path') || editSession.path;
+        var project = fromURL.getValue('project') || editSession.project;
+
+        // TODO: This is no way to load a file!
+        bespin.publish("settings:init", {
+            path: path,
+            project: project
+        });
+
         exports.doResize();
     });
 

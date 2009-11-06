@@ -110,18 +110,6 @@ exports.Core = SC.Object.extend({
         this.store.unsetValue(key);
     },
 
-    loadSession: function() {
-        var editSession = bespin.get('editSession');
-
-        var path = this.fromURL.getValue('path') || editSession.path;
-        var project = this.fromURL.getValue('project') || editSession.project;
-
-        bespin.publish("settings:init", { // -- time to init my friends
-            path: path,
-            project: project
-        });
-    },
-
     /**
      * Checks to see if the passed value is "on" or "true" (case sensitive).
      * NOTE: This DOES NOT use settings it just does a string comparison. To
