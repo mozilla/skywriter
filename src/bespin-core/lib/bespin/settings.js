@@ -196,11 +196,11 @@ exports.Core = SC.Object.extend({
  * Debugging in memory settings (die when browser is closed)
  */
 exports.InMemory = SC.Object.extend({
-    constructor: function(parent) {
+    init: function(parent) {
         this.parent = parent;
         this.settings = defaultSettings();
         bespin.publish("settings:loaded");
-    }/*,
+    },
 
     setValue: function(key, value) {
         this.settings[key] = value;
@@ -212,14 +212,14 @@ exports.InMemory = SC.Object.extend({
 
     unsetValue: function(key) {
         delete this.settings[key];
-    }*/
+    }
 });
 
 /**
  * Save the settings in a cookie
  */
 exports.Cookie = SC.Object.extend({
-    constructor: function(parent) {
+    init: function(parent) {
         var expirationInHours = 1;
         this.cookieSettings = {
             expires: expirationInHours / 24,
@@ -261,7 +261,7 @@ exports.Cookie = SC.Object.extend({
  * The real grand-daddy that implements uses Server to access the backend
  */
 exports.ServerAPI = SC.Object.extend({
-    constructor: function(parent) {
+    init: function(parent) {
         this.self = this;
         this.parent = parent;
         this.server = bespin.get('server');
@@ -298,7 +298,7 @@ exports.ServerAPI = SC.Object.extend({
  * Store the settings in the file system
  */
 exports.ServerFile = SC.Object.extend({
-    constructor: function(parent) {
+    init: function(parent) {
         this.parent = parent;
         this.server = bespin.get('server');
         this.settings = defaultSettings();
@@ -454,11 +454,10 @@ exports.DB = SC.Object.extend({
  * Grab the setting from the URL, either via # or ?
  */
 exports.URL = SC.Object.extend({
-    constructor: function(queryString) {
+    init: function(queryString) {
         this.results = util.queryToObject(this.stripHash(queryString || window.location.hash));
     },
 
-    /*
     getValue: function(key) {
         return this.results[key];
     },
@@ -466,7 +465,6 @@ exports.URL = SC.Object.extend({
     setValue: function(key, value) {
         this.results[key] = value;
     },
-    */
 
     stripHash: function(url) {
         var tobe = url.split('');
