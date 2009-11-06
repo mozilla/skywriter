@@ -30,7 +30,7 @@ exports.main = function(args) {
     var console = {
         log: function() {},
         debug: function() {}
-    }
+    };
 
     global.console = console;
 
@@ -47,11 +47,11 @@ exports.main = function(args) {
 
         print(total + " tests, " + failures + " failed.");
         errors = [];
-    }
+    };
 
     QUnit.testStart = function(name) {
         currentTest = name;
-    }
+    };
 
     QUnit.log = function(result, message) {
         if (result) {
@@ -61,7 +61,7 @@ exports.main = function(args) {
             errors.push({name: currentTest, message:message});
         }
         system.stdout.flush();
-    }
+    };
 
     require("bespin/tests/allTests");
-}
+};

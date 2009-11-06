@@ -240,8 +240,7 @@ exports.Scrollbar = SC.Object.extend({
         ctx.lineTo(midpoint - this.NIB_ARROW_INSETS.right, midpoint - this.NIB_ARROW_INSETS.bottom);
         ctx.closePath();
         ctx.fill();
-    },
-
+    }
 });
 
 /**
