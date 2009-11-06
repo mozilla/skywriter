@@ -149,7 +149,7 @@ var changeSub;
  * TODO: Change this to be more unobtrusive
  */
 bespin.subscribe("settings:set:codecomplete", function(data) {
-    if (bespin.get("settings").isOn(data.value)) {
+    if (bespin.get("settings").isValueOn(data.value)) {
         var onChange = util.rateLimit(400, null, function() {
             var editor = bespin.get("editor");
             var pos = editor.getCursorPos();

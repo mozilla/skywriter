@@ -41,6 +41,37 @@ var SC = require("sproutcore");
  */
 
 /**
+ * To allow container to create settings, configured dynamically
+ */
+exports.factory = function(onCreate) {
+    onCreate(exports.Core.create({ store: exports.InMemory }));
+};
+
+/**
+ * The default initial settings
+ */
+function defaultSettings() {
+    return {
+        'tabsize': '4',
+        'tabmode': 'off',
+        'tabarrow': 'on',
+        'fontsize': '10',
+        'consolefontsize': '11',
+        'autocomplete': 'off',
+        'closepairs': 'off',
+        'collaborate': 'off',
+        'language': 'auto',
+        'strictlines': 'on',
+        'syntaxcheck': 'off',
+        'syntaxengine': 'simple',
+        'syntaxmarkers': 'all',
+        'preview': 'window',
+        'smartmove': 'on',
+        'jslint': ''
+    };
+}
+
+/**
  * Handles load/save of user settings.
  * TODO: tie into the sessions servlet; eliminate Gears dependency
  */
@@ -55,8 +86,28 @@ exports.Core = SC.Object.extend({
         // to do is register some subscriptions
         this.customEvents = exports.Events.create({ settings: this });
 
-        // Load up the correct settings store
-        this.loadStore(this.store);
+        // This is where we choose which store to load
+        // TODO: Seriously. How is this code even vaguely acceptable?
+        this.store = new (this.store || exports.ServerFile)(this);
+    },
+
+    set: function(key, value) {
+        this.store.set(key, value);
+
+        bespin.publish("settings:set:" + key, { value: value });
+    },
+
+    get: function(key) {
+        var fromURL = this.fromURL.get(key); // short circuit
+        if (fromURL) {
+            return fromURL;
+        }
+
+        return this.store.get(key);
+    },
+
+    unset: function(key) {
+        this.store.unset(key);
     },
 
     loadSession: function() {
@@ -71,80 +122,51 @@ exports.Core = SC.Object.extend({
         });
     },
 
-    defaultSettings: function() {
-        return {
-            'tabsize': '4',
-            'tabmode': 'off',
-            'tabarrow': 'on',
-            'fontsize': '10',
-            'consolefontsize': '11',
-            'autocomplete': 'off',
-            'closepairs': 'off',
-            'collaborate': 'off',
-            'language': 'auto',
-            'strictlines': 'on',
-            'syntaxcheck': 'off',
-            'syntaxengine': 'simple',
-            'syntaxmarkers': 'all',
-            'preview': 'window',
-            'smartmove': 'on',
-            'jslint': ''
-        };
-    },
-
-    isOn: function(value) {
+    /**
+     * Checks to see if the passed value is "on" or "true" (case sensitive).
+     * NOTE: This DOES NOT use settings it just does a string comparison. To
+     * test a setting you probably need #isSettingOn() and #isSettingOff().
+     */
+    isValueOn: function(value) {
         return value == 'on' || value == 'true';
     },
 
-    isOff: function(value) {
+    /**
+     * Checks to see if the passed value is "off" or "false" (case sensitive) or
+     * <code>undefined</code>.
+     * NOTE: This DOES NOT use settings it just does a string comparison. To
+     * test a setting you probably need #isSettingOn() and #isSettingOff().
+     */
+    isValueOff: function(value) {
         return value == 'off' || value == 'false' || value === undefined;
     },
 
+    /**
+     * Check to see if the given setting is on (using #isValueOn())
+     */
     isSettingOn: function(key) {
-        return this.isOn(this.get(key));
-    },
-
-    isSettingOff: function(key) {
-        return this.isOff(this.get(key));
+        return this.isValueOn(this.get(key));
     },
 
     /**
-     * This is where we choose which store to load
+     * Check to see if the given setting is off (using #isValueOff())
      */
-    loadStore: function(store) {
-        this.store = new (store || exports.ServerFile)(this);
+    isSettingOff: function(key) {
+        return this.isValueOff(this.get(key));
     },
 
-    toList: function() {
-        var settings = [];
-        var storeSettings = this.store.settings;
-        for (var prop in storeSettings) {
-            if (storeSettings.hasOwnProperty(prop)) {
-                settings.push({ 'key': prop, 'value': storeSettings[prop] });
-            }
-        }
-        return settings;
-    },
-
-    set: function(key, value) {
-        this.store.set(key, value);
-
-        bespin.publish("settings:set:" + key, { value: value });
-    },
-
+    /**
+     * Like #set() except that the value is assumed to be an object that should
+     * be converted to JSON.
+     */
     setObject: function(key, value) {
         this.set(key, JSON.stringify(value));
     },
 
-    get: function(key) {
-        var fromURL = this.fromURL.get(key); // short circuit
-        if (fromURL) {
-            return fromURL;
-        }
-
-        return this.store.get(key);
-    },
-
+    /**
+     * Like #get() except that the value is assumed to be an object that should
+     * be converted from JSON before being returned.
+     */
     getObject: function(key) {
         try {
             return JSON.parse(this.get(key));
@@ -154,36 +176,18 @@ exports.Core = SC.Object.extend({
         }
     },
 
-    unset: function(key) {
-        this.store.unset(key);
-    },
-
     list: function() {
         if (typeof this.store.list == "function") {
             return this.store.list();
         } else {
-            return this.toList();
-        }
-    },
-
-    /**
-     * For every setting that has a bespin:settings:set:nameofsetting callback,
-     * init it.
-     */
-    publishValues: function() {
-        // TODO: This code was only called in one place and there was a better
-        // (read less hacky) way of doing it (and it worked too - bonus)
-        // We should delete this code when we're sure that this strategy works
-        // In this case, going into the Dojo saved "topics" that you
-        // subscribe/publish too
-        var settingsTopicBase = "bespin:settings:set:";
-        for (var topic in dojo._topics) {
-            if (topic.indexOf(settingsTopicBase) == 0) {
-                var settingKey = topic.substring(settingsTopicBase.length);
-                bespin.publish("settings:set:" + settingKey, {
-                    value: this.get(settingKey)
-                });
+            var settings = [];
+            var storeSettings = this.store.settings;
+            for (var prop in storeSettings) {
+                if (storeSettings.hasOwnProperty(prop)) {
+                    settings.push({ 'key': prop, 'value': storeSettings[prop] });
+                }
             }
+            return settings;
         }
     }
 });
@@ -668,7 +672,7 @@ exports.Events = SC.Object.extend({
         });
 
         bespin.subscribe("settings:set:debugmode", function(event) {
-            editor.debugMode = this.settings.isOn(event.value);
+            editor.debugMode = this.settings.isValueOn(event.value);
 
             if (editor.debugMode) {
                 bespin.plugins.loadOne("bespin.debugger",
@@ -699,7 +703,7 @@ exports.Events = SC.Object.extend({
         var _trimOnSave; // store the subscribe handler away
 
         bespin.subscribe("settings:set:trimonsave", function(event) {
-            if (this.settings.isOn(event.value)) {
+            if (this.settings.isValueOn(event.value)) {
                 _trimOnSave = bespin.subscribe("editor:savefile:before", function(event) {
                     bespin.get("commandLine").executeCommand('trim', true);
                 });
@@ -712,7 +716,7 @@ exports.Events = SC.Object.extend({
          * Turn the syntax parser on or off
          */
         bespin.subscribe("settings:set:syntaxcheck", function (data) {
-            if (this.settings.isOff(data.value)) {
+            if (this.settings.isValueOff(data.value)) {
                 bespin.publish("parser:stop");
             } else {
                 bespin.publish("parser:start");
@@ -741,7 +745,7 @@ exports.Events = SC.Object.extend({
          * Check for auto load
          */
         bespin.subscribe("settings:init", function() {
-            if (this.settings.isOff(this.settings.get('autoconfig'))) {
+            if (this.settings.isValueOff(this.settings.get('autoconfig'))) {
                 return;
             }
 

@@ -481,7 +481,7 @@ exports.EditSession = SC.Object.extend({
                     // Ignore if there is no mobwrite
                     return;
                 }
-                if (bespin.get("settings").isOn(ev.value)) {
+                if (bespin.get("settings").isValueOn(ev.value)) {
                     if (self.bailingOutOfCollaboration) {
                         return;
                     }
