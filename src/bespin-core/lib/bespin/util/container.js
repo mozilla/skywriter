@@ -48,7 +48,7 @@
  * uses what, it can re-inject newer versions of those components at runtime.
  */
 
-var hub = require("bespin/util/hub");
+var util = require("bespin/util/util");
 
 /**
  * Methods for registering components with the main system
@@ -91,37 +91,28 @@ exports.register = function(id, object) {
             }
         };
 
-        /**
-         * We've found a component to match name, so this needs injecting into
-         * the object[property] and recalling for next time.
-         */
-        var inject = function(object, property, name, component) {
-            object[property] = component;
-            exports.register(name, component);
-            delete requirements[property];
-            checkCompleted();
-        };
-
         checkCompleted();
 
         for (var property in requirements) {
             if (object.requires.hasOwnProperty(property)) {
                 var name = requirements[property];
+                /**
+                 * We've found a component to match name, so this needs to be
+                 * injected into object[property] and recalling for next time.
+                 */
+                var onCreate = function(component) {
+                    object[property] = component;
+                    exports.register(name, component);
+                    delete requirements[property];
+                    checkCompleted();
+                };
 
                 var source = object.requires[name];
                 var component = exports.get(source);
                 if (component) {
-                    inject(object, property, name, component);
+                    onCreate(component);
                 } else {
-                    var factory = exports.factories[name];
-                    if (factory) {
-                        var onCreate = function(component) {
-                            inject(object, property, name, component);
-                        };
-                        factory(onCreate);
-                    } else {
-                        console.error("No component ", name, " while injecting ", id);
-                    }
+                    createFromFactory(name, onCreate);
                 }
             }
         }
@@ -146,51 +137,79 @@ exports.get = function(id) {
 
 /**
  * Asynchronous component management.
- *
- * Retrieve the component with the given ID. If the component is
- * not yet loaded, load the component and pass it along. The
- * callback is called with the component as the single parameter.
- *
- * This function returns:
- * * true if the component was already available and the callback
- *   has been called
- * * false if the component was not loaded and is being loaded
- *   asynchronously
- * * undefined if the component is unknown.
+ * <p>Retrieve the component with the given ID. If the component is not yet
+ * loaded, load the component and pass it along. The callback is called with the
+ * component as the single parameter.
  */
 exports.getComponent = function(id, callback, context) {
     context = context || window;
     var component = exports.get(id);
-    if (!component) {
-        var factory = exports.factories[id];
-        if (!factory) {
-            return undefined;
-        }
+    if (component) {
+        callback.call(context, component);
+    } else {
         var onCreate = function(component) {
             exports.register(id, component);
             callback.call(context, component);
         };
-        factory(onCreate);
-        return false;
-    } else {
-        callback.call(context, component);
+        createFromFactory(id, onCreate);
     }
-    return true;
 };
 
+/**
+ * When we don't want to provide an object that actually does anything
+ */
+exports.dummyFactory = function(onCreate) {
+    onCreate({});
+};
+
+/**
+ * We can't handle dynamic requirements yet
+ */
 var re = require;
 
+/**
+ * Internal function to create an object using a lookup into the factories
+ * registry.
+ * <p>We lookup <code>id</code> in <code>factories</code>. If the value is a
+ * function we call it, passing <code>onCreate</code>. If the value is a string
+ * then we split on ":", and <code>require</code> the section before, and call
+ * the function exported under the string after the ":".
+ * <p>For example if the module "bespin/foo" exported a function using
+ * <code>exports.bar = function(onCreate) { ... }</code> then we could use that
+ * as a factory using "bespin/foo:bar".
+ */
+function createFromFactory(id, onCreate) {
+    var factory = exports.factories[id];
+    if (!factory) {
+        console.error("No component ", id);
+    } else if (util.isFunction(factory)) {
+        factory(onCreate);
+    } else {
+        // Assume string and split on ":"
+        var parts = factory.split(":");
+        if (parts.length != 2) {
+            console.error("Can't split ", factory, "into 2 parts on ':'");
+        } else {
+            var module = re(parts[0]);
+            var exported = module[parts[1]];
+            if (util.isFunction(exported)) {
+                exported(onCreate);
+            } else {
+                onCreate(exported);
+            }
+        }
+    }
+}
+
+/**
+ * How to create the various components that make up core bespin.
+ * Ideally these would all be strings like 'settings', then we could easily load
+ * the entire initial configuration from the plugin system.
+ */
 exports.factories = {
-    settings: function(onCreate) {
-        var settings = re("bespin/settings");
-        onCreate(settings.Core.create({ store: settings.InMemory }));
-    },
-    session: function(onCreate) {
-        onCreate({});
-    },
-    file: function(onCreate) {
-        onCreate({});
-    },
+    settings: "bespin/settings:factory",
+    session: "bespin/util/container:dummyFactory",
+    file: "bespin/util/container:dummyFactory",
     popup: function(onCreate) {
         exports.plugins.loadOne("popup", function(popupmod) {
             onCreate(new popupmod.Window());
@@ -227,6 +246,9 @@ exports.factories = {
     }
 };
 
+/*
+var hub = re quire("bespin/util/hub");
+
 var subscribeToExtension = function(key) {
     hub.subscribe("extension:removed:" + key, function() {
         var item = exports.get(key);
@@ -259,3 +281,4 @@ var initializeReloaders = function() {
 // });
 //
 // initializeReloaders();
+*/
