@@ -73,8 +73,8 @@ exports.EditorController = SC.Object.extend({
             autohidesHorizontalScroller: false,
             horizontalScrollerView: scroller.BespinScrollerView,
             hasVerticalScroller: true,
-            autohidesVerticalScroller: false
-            verticalScrollerView: scroller.BespinScrollerView,
+            autohidesVerticalScroller: false,
+            verticalScrollerView: scroller.BespinScrollerView
         });
         this.editorView = this.ui.contentView;
 

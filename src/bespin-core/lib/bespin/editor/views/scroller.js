@@ -87,6 +87,12 @@ exports.BespinScrollerView = SC.View.extend({
 
     /**
      * @property
+     * The amount to scroll when the nibs/arrows are clicked.
+     */
+    lineHeight: 15,
+
+    /**
+     * @property
      * Specifies the direction of the scroll bar: one of SC.LAYOUT_HORIZONTAL
      * or SC.LAYOUT_VERTICAL.
      *
@@ -117,6 +123,20 @@ exports.BespinScrollerView = SC.View.extend({
         return null;
     }.property('layoutDirection').cacheable(),
 
+    _computeGutterLength: function() {
+        var gutterFrame = this.get('gutterFrame');
+        var gutterLength;
+        switch (this.get('layoutDirection')) {
+        case SC.LAYOUT_HORIZONTAL:  gutterLength = gutterFrame.width;   break;
+        case SC.LAYOUT_VERTICAL:    gutterLength = gutterFrame.height;  break;
+        }
+        return gutterLength;
+    },
+
+    _computeMaximumValue: function() {
+        return this.get('maximum') - this._computeGutterLength();
+    },
+
     /**
      * @property
      * The current position that the scroll bar is scrolled to.
@@ -124,8 +144,13 @@ exports.BespinScrollerView = SC.View.extend({
     value: function(key, value) {
         console.log("value called, " + this._value + " -> " + value);
         if (value !== undefined) {
-            if (value >= 0)
-                this._value = value;
+            var maximum = this._computeMaximumValue();
+            if (value < 0)
+                value = 0;
+            else if (value > maximum)
+                value = maximum;
+
+            this._value = value;
         } else {
             return Math.min(this._value || 0, this.get('maximum'));
         }
@@ -196,9 +221,54 @@ exports.BespinScrollerView = SC.View.extend({
     maximum: 0,
 
     _segmentForMouseEvent: function(evt) {
-        // TODO: return 'nib-start', 'gutter-before', 'handle', 'gutter-after',
-        // or 'nib-end' as appropriate
-    }
+        var point = this.convertFrameFromView({
+            x: evt.clientX,
+            y: evt.clientY
+        });
+        var frame = this.get('frame');
+
+        console.log("_segmentForMouseEvent point " + point.toSource()
+            + " cx " + evt.clientX + " cy " + evt.clientY);
+
+        var layoutDirection = this.get('layoutDirection');
+        switch (layoutDirection) {
+        case SC.LAYOUT_HORIZONTAL:
+            if (point.x < NIB_LENGTH)
+                return 'nib-start';
+            if (point.x >= frame.width - NIB_LENGTH)
+                return 'nib-end';
+            break;
+        case SC.LAYOUT_VERTICAL:
+            if (point.y < NIB_LENGTH)
+                return 'nib-start';
+            if (point.y >= frame.height - NIB_LENGTH)
+                return 'nib-end';
+            break;
+        }
+
+        var handleFrame = this.get('handleFrame');
+        if (point.x >= handleFrame.x && point.y >= handleFrame.y
+                && point.x < handleFrame.x + handleFrame.width
+                && point.y < handleFrame.y + handleFrame.height)
+            return 'handle';
+
+        switch (layoutDirection) {
+        case SC.LAYOUT_HORIZONTAL:
+            if (point.x < handleFrame.x)
+                return 'gutter-before';
+            else if (point.x >= handleFrame.x + handleFrame.width)
+                return 'gutter-after';
+            break;
+        case SC.LAYOUT_VERTICAL:
+            if (point.y < handleFrame.y)
+                return 'gutter-before';
+            else if (point.y >= handleFrame.y + handleFrame.height)
+                return 'gutter-after';
+            break;
+        }
+
+        console.assert(false, "_segmentForMouseEvent: point outside view");
+    },
 
     mouseEntered: function(evt) {
         SC.RunLoop.begin();
@@ -219,23 +289,44 @@ exports.BespinScrollerView = SC.View.extend({
     },
 
     mouseDown: function(evt) {
+        SC.RunLoop.begin();
         var value = this.get('value');
-        var pos = this.positionRelativeToHandle(evt);
+        
+        var layoutDirection = this.get('layoutDirection');
+        var gutterFrame = this.get('gutterFrame');
+        var gutterLength;
+        switch (layoutDirection) {
+        case SC.LAYOUT_HORIZONTAL:  gutterLength = gutterFrame.width;   break;
+        case SC.LAYOUT_VERTICAL:    gutterLength = gutterFrame.height;  break;
+        }
+
+        console.log("handleFrame " + this.get('handleFrame').toSource());
+        
         switch (this._segmentForMouseEvent(evt)) {
-        // FIXME
-        case 'before':
-            this.set('value', value - this.get('frame').height);
+        case 'nib-start':
+            this.set('value', value - this.get('lineHeight'));
             break;
-        case 'after':
-            this.set('value', value + this.get('frame').height);
+        case 'nib-end':
+            this.set('value', value + this.get('lineHeight'));
             break;
-        case 'inside':
-            this._mouseDownScreenPoint
-                = this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL
-                ? evt.x : evt.y;
-            this._mouseDownValue = value;
+        case 'gutter-before':
+            this.set('value', value - gutterLength);
+            break;
+        case 'gutter-after':
+            this.set('value', value + gutterLength);
+            break;
+        case 'handle':
+            switch (this.get('layoutDirection')) {
+            case SC.LAYOUT_HORIZONTAL:
+                this._mouseDownScreenPoint = evt.x;
+                break;
+            case SC.LAYOUT_VERTICAL:
+                this._mouseDownScreenPoint = evt.y;
+                break;
+            }
             break;
         }
+        SC.RunLoop.end();
     },
 
     mouseUp: function(evt) {
