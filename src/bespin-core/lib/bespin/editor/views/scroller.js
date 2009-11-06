@@ -40,14 +40,12 @@ exports.BespinScrollerView = SC.View.extend({
     _value: 0,
 
     _bespinScrollerView_valueDidChange: function() {
-        console.log("valueDidChange");
         SC.RunLoop.begin();
         this.set('layerNeedsUpdate', true);
         SC.RunLoop.end();
     }.observes('value'),
 
     _bespinScrollerView_maximumDidChange: function() {
-        console.log("maximumDidChange");
         SC.RunLoop.begin();
         this.set('layerNeedsUpdate', true);
         SC.RunLoop.end();
@@ -123,7 +121,12 @@ exports.BespinScrollerView = SC.View.extend({
         return null;
     }.property('layoutDirection').cacheable(),
 
-    _computeGutterLength: function() {
+    /**
+     * @property{Number}
+     * The length of the gutter, equal to gutterFrame.width or
+     * gutterFrame.height depending on the scroll bar's layout direction.
+     */
+    gutterLength: function() {
         var gutterFrame = this.get('gutterFrame');
         var gutterLength;
         switch (this.get('layoutDirection')) {
@@ -131,30 +134,47 @@ exports.BespinScrollerView = SC.View.extend({
         case SC.LAYOUT_VERTICAL:    gutterLength = gutterFrame.height;  break;
         }
         return gutterLength;
-    },
+    }.property('gutterFrame', 'layoutDirection').cacheable(),
 
-    _computeMaximumValue: function() {
-        return this.get('maximum') - this._computeGutterLength();
-    },
+    /**
+     * @property{Number}
+     * The length of the entire scroll bar, equal to frame.width or
+     * frame.height depending on the scroll bar's layout direction.
+     */
+    frameLength: function() {
+        var frame = this.get('frame');
+        switch (this.get('layoutDirection')) {
+        case SC.LAYOUT_HORIZONTAL:  return frame.width;
+        case SC.LAYOUT_VERTICAL:    return frame.height;
+        }
+    }.property('frame', 'layoutDirection').cacheable(),
+
+    /**
+     * @property{Number}
+     * The actual maximum value, which will be less than the maximum due to
+     * accounting for the frame length.
+     */
+    maximumValue: function() {
+        return Math.max(this.get('maximum') - this.get('frameLength'), 0);
+    }.property('maximum', 'frameLength').cacheable(),
 
     /**
      * @property
      * The current position that the scroll bar is scrolled to.
      */
     value: function(key, value) {
-        console.log("value called, " + this._value + " -> " + value);
+        var maximumValue = this.get('maximumValue');
         if (value !== undefined) {
-            var maximum = this._computeMaximumValue();
             if (value < 0)
                 value = 0;
-            else if (value > maximum)
-                value = maximum;
+            else if (value > maximumValue)
+                value = maximumValue;
 
             this._value = value;
         } else {
-            return Math.min(this._value || 0, this.get('maximum'));
+            return Math.min(this._value || 0, maximumValue);
         }
-    }.property('maximum').cacheable(),
+    }.property('maximumValue').cacheable(),
 
     /**
      * @property
@@ -189,21 +209,23 @@ exports.BespinScrollerView = SC.View.extend({
     handleFrame: function() {
         var value = this.get('value');
         var maximum = this.get('maximum');
+        var frame = this.get('frame');
         var gutterFrame = this.get('gutterFrame');
         var scrollerThickness = this.get('scrollerThickness');
+
         switch (this.get('layoutDirection')) {
         case SC.LAYOUT_VERTICAL:
             return {
                 x:      0,
-                y:      value * gutterFrame.height / maximum,
+                y:      NIB_LENGTH + value * gutterFrame.height / maximum,
                 width:  scrollerThickness,
-                height: gutterFrame.height * gutterFrame.height / maximum
+                height: frame.height * gutterFrame.height / maximum
             };
         case SC.LAYOUT_HORIZONTAL:
             return {
-                x:      value * gutterFrame.width / maximum,
+                x:      NIB_LENGTH + value * gutterFrame.width / maximum,
                 y:      0,
-                width:  gutterFrame.width * gutterFrame.width / maximum,
+                width:  frame.width * gutterFrame.width / maximum,
                 height: scrollerThickness
             };
         }
@@ -226,9 +248,6 @@ exports.BespinScrollerView = SC.View.extend({
             y: evt.clientY
         });
         var frame = this.get('frame');
-
-        console.log("_segmentForMouseEvent point " + point.toSource()
-            + " cx " + evt.clientX + " cy " + evt.clientY);
 
         var layoutDirection = this.get('layoutDirection');
         switch (layoutDirection) {
@@ -291,16 +310,7 @@ exports.BespinScrollerView = SC.View.extend({
     mouseDown: function(evt) {
         SC.RunLoop.begin();
         var value = this.get('value');
-        
-        var layoutDirection = this.get('layoutDirection');
-        var gutterFrame = this.get('gutterFrame');
-        var gutterLength;
-        switch (layoutDirection) {
-        case SC.LAYOUT_HORIZONTAL:  gutterLength = gutterFrame.width;   break;
-        case SC.LAYOUT_VERTICAL:    gutterLength = gutterFrame.height;  break;
-        }
-
-        console.log("handleFrame " + this.get('handleFrame').toSource());
+        var gutterLength = this.get('gutterLength');
         
         switch (this._segmentForMouseEvent(evt)) {
         case 'nib-start':
@@ -381,13 +391,6 @@ exports.BespinScrollerView = SC.View.extend({
     _paintNibs: function(ctx) {
         var scrollerThickness = this.get('scrollerThickness');
 
-        var frame = this.get('frame');
-        var frameLength;
-        switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_VERTICAL:    frameLength = frame.height; break;
-        case SC.LAYOUT_HORIZONTAL:  frameLength = frame.width;  break;
-        }
-
         // Starting nib
         ctx.save();
         ctx.translate(NIB_PADDING, scrollerThickness / 2);
@@ -398,7 +401,8 @@ exports.BespinScrollerView = SC.View.extend({
 
         // Ending nib
         ctx.save();
-        ctx.translate(frameLength - NIB_PADDING, scrollerThickness / 2);
+        ctx.translate(this.get('frameLength') - NIB_PADDING,
+            scrollerThickness / 2);
         ctx.rotate(Math.PI * 0.5);
         ctx.moveTo(0, 0);
         this._paintNib(ctx);
@@ -408,8 +412,6 @@ exports.BespinScrollerView = SC.View.extend({
     _paint: function() {
         var ctx = this.$('canvas')[0].getContext('2d');
         
-        var gutterFrame = this.get('gutterFrame');
-        var bar = this.get('handleFrame');
         var alpha = (ctx.globalAlpha) ? ctx.globalAlpha : 1;
 
         // Clear out the canvas.
@@ -421,12 +423,13 @@ exports.BespinScrollerView = SC.View.extend({
 
         var handleFrame = this.get('handleFrame');
         var layoutDirection = this.get('layoutDirection');
-        var handleDistance, handleLength, gutterLength;
+        var gutterFrame = this.get('gutterFrame');
+        var gutterLength = this.get('gutterLength');
+        var handleDistance, handleLength;
         switch (layoutDirection) {
         case SC.LAYOUT_VERTICAL:
             handleDistance = handleFrame.y;
             handleLength = handleFrame.height;
-            gutterLength = gutterFrame.height;     
 
             // The rest of the painting code assumes the scroll bar is
             // horizontal. Create that fiction by installing a 90 degree
@@ -438,15 +441,10 @@ exports.BespinScrollerView = SC.View.extend({
         case SC.LAYOUT_HORIZONTAL:
             handleDistance = handleFrame.x;
             handleLength = handleFrame.width;
-            gutterLength = gutterFrame.width;
             break;
         }
 
         ctx.save();
-        ctx.translate(NIB_LENGTH, 0);
-
-        console.log("_paint: handleDistance %@ handleLength %@ gutterLength %@"
-            .fmt(handleDistance, handleLength, gutterLength));
 
         if (this.get('isEnabled') === false || gutterLength <= handleLength)
             return;     // The scroll bar is disabled...
@@ -517,13 +515,10 @@ exports.BespinScrollerView = SC.View.extend({
     },
 
     didCreateLayer: function() {
-        console.log('didCreateLayer ' + this.get('layoutDirection'));
         this._paint();
     },
 
     render: function(context, firstTime) {
-        console.log('render ' + this.get('layoutDirection'));
-
         if (!firstTime) {
             this._paint();
             return;
