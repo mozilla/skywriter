@@ -198,20 +198,36 @@ exports.onLoad = function() {
     bespin.register('quickopen', new quickopen.API());
 
     // Load the last file or what is passed in
-    bespin.subscribe("settings:loaded", function(event) {
-        var editSession = bespin.get('editSession');
-        var fromURL = settings.URL.create();
-        var path = fromURL.getValue('path') || editSession.path;
-        var project = fromURL.getValue('project') || editSession.project;
+    // TODO: This was waiting until settings:loaded was published, but there
+    // doesn't seem to be any sense in that.
+    var fromURL = settings.URL.create();
+    var path = fromURL.getValue('path') || editSession.path;
+    var project = fromURL.getValue('project') || editSession.project;
 
-        // TODO: This is no way to load a file!
-        bespin.publish("settings:init", {
-            path: path,
-            project: project
-        });
+    var settings = bespin.get('settings');
 
-        exports.doResize();
-    });
+    // Open whatever file we should be looking at
+    if (path) {
+        editor.openFile(project, path);
+    } else {
+        var lastUsed = settings.getObject("_lastused");
+        if (!lastUsed) {
+            editor.openFile("SampleProject", "readme.txt");
+        } else {
+            editor.openFile(lastUsed[0].project, lastUsed[0].filename, lastUsed[0]);
+        }
+    }
+
+    // Load user settings config file
+    if (!settings.isSettingOff('autoconfig')) {
+        try {
+            files.evalFile(bespin.userSettingsProject, "config");
+        } catch (e) {
+            console.log("Error in user config: ", e);
+        }
+    }
+
+    exports.doResize();
 
     var whenLoggedIn = function(userinfo) {
         bespin.get('editSession').setUserinfo(userinfo);

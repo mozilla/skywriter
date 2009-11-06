@@ -822,6 +822,7 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
         util.stopEvent(e);
     }
 });
+
 /**
  * Given an <code>eventString</code> parse out the arguments and configure an
  * event object.
@@ -841,3 +842,94 @@ var toFire = function(eventString) {
     }
     return event;
 };
+
+/**
+ * Run the trim command before saving the file
+ */
+bespin.subscribe("settings:set:trimonsave", function(event) {
+    var settings = bespin.get('settings');
+    if (settings.isValueOn(event.value)) {
+        _trimOnSave = bespin.subscribe("editor:savefile:before", function(event) {
+            bespin.get("commandLine").executeCommand('trim', true);
+        });
+    } else {
+        bespin.unsubscribe(_trimOnSave);
+    }
+});
+// Store the subscribe handler away
+var _trimOnSave;
+
+/**
+ * When a file is opened successfully change the project and file status
+ * area, then change the window title, and change the URL hash area
+ */
+bespin.subscribe("editor:openfile:opensuccess", function(event) {
+    var session = bespin.get('editSession');
+    var project = event.project || session.project;
+    var filename = event.file.name;
+
+    try {
+        // reset the state of the editor based on saved cookie
+        var name = 'viewData_' + project + '_' + filename.split('/').join('_');
+        var data = cookie.get(name);
+        if (data) {
+            bespin.get('editor').resetView(JSON.parse(data));
+        } else {
+            bespin.get('editor').basicView();
+        }
+    } catch (e) {
+        console.log("Error setting in the view: ", e);
+    }
+
+    document.title = filename + ' - editing with Bespin';
+
+    bespin.publish("url:change", { project: project, path: filename });
+
+    // Set the session path and change the syntax highlighter
+    // when a new file is opened
+    if (event.file.name == null) {
+        console.error("event.file.name falsy");
+    }
+
+    if (event.project) {
+        session.project = event.project;
+    }
+    session.path = event.file.name;
+
+    var fileType = util.path.fileType(event.file.name);
+    if (fileType) {
+        bespin.publish("settings:language", { language: fileType });
+    }
+
+    // If a file (such as BespinSettings/config) is loaded that you want to auto
+    // syntax highlight, here is where you do it
+    // FUTURE: allow people to add in their own special things
+    var mapName = project + "/" + filename;
+    if (specialFileMap[mapName]) {
+        bespin.publish("settings:language", {
+            language: specialFileMap[mapName]
+        });
+    }
+});
+
+/**
+ *
+ */
+var specialFileMap = {
+    'BespinSettings/config': 'js'
+};
+
+/**
+ * Add in emacs key bindings
+ */
+bespin.subscribe("settings:set:keybindings", function(event) {
+    var editor = bespin.get('editor');
+    if (event.value == "emacs") {
+        editor.bindKey("moveCursorLeft", "ctrl b");
+        editor.bindKey("moveCursorRight", "ctrl f");
+        editor.bindKey("moveCursorUp", "ctrl p");
+        editor.bindKey("moveCursorDown", "ctrl n");
+        editor.bindKey("moveToLineStart", "ctrl a");
+        editor.bindKey("moveToLineEnd", "ctrl e");
+    }
+});

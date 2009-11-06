@@ -390,7 +390,7 @@ exports.EditorView = SC.View.extend({
 
         //up and down. optimally, we should have a timeout or something to keep checking...
         if (clientY < 0) {
-            // TODO: tell enclosing ScrollView --pcw 
+            // TODO: tell enclosing ScrollView --pcw
         } else if (clientY >= this.getHeight()) {
             // TODO: tell enclosing ScrollView --pcw
         }
@@ -761,7 +761,7 @@ exports.EditorView = SC.View.extend({
      * from the base class's implementation of this function moving the canvas
      * around as the user scrolls.
      */
-    layoutStyle: function(key, value) { 
+    layoutStyle: function(key, value) {
         return {};
     }.property().cacheable(),
 
@@ -1246,7 +1246,7 @@ exports.EditorView = SC.View.extend({
                     }
                 }
             }
-            
+
             y += this.lineHeight;
         }
 
@@ -1395,6 +1395,89 @@ exports.EditorView = SC.View.extend({
     },
 
     dispose: function() {
+    }
+});
+
+/**
+ * The frequency of the cursor blink in milliseconds (defaults to 250)
+ */
+bespin.subscribe("settings:set:cursorblink", function(event) {
+    // get the number of milliseconds
+    var ms = parseInt(event.value, 10);
+    if (ms) {
+        var editor = bespin.get('editor');
+        editor.ui.toggleCursorFrequency = ms;
+    }
+});
+
+/**
+ * Change the font size for the editor
+ */
+bespin.subscribe("settings:set:fontsize", function(event) {
+    var editor = bespin.get('editor');
+    var fontsize = parseInt(event.value, 10);
+    editor.theme.editorTextFont = editor.theme.editorTextFont.replace(/[0-9]{1,}pt/, fontsize+'pt');
+    editor.theme.lineNumberFont = editor.theme.lineNumberFont.replace(/[0-9]{1,}pt/, fontsize+'pt');
+});
+
+/**
+ * Change the Theme object used by the editor
+ */
+bespin.subscribe("settings:set:theme", function(event) {
+    var editor = bespin.get('editor');
+    var settings = bespin.get('settings');
+    var theme = event.value;
+
+    var checkSetAndExit = function() {
+        var themeSettings = themes[theme];
+        if (themeSettings) {
+            if (themeSettings != editor.theme) {
+                editor.theme = themeSettings;
+                bespin.publish("settings:set:fontsize", {
+                    value: settings.getValue('fontsize')
+                });
+            }
+            return true;
+        }
+        return false;
+    };
+
+    if (theme) {
+        // Try to load the theme from the themes hash
+        if (checkSetAndExit()) {
+            return true;
+        }
+
+        // Not in the default themes, load from themes.ThemeName file
+        try {
+            var req = require;
+            // the build system doesn't like dynamic names.
+            req.call(window, "themes." + theme);
+            if (checkSetAndExit()) {
+                return true;
+            }
+        } catch (e) {
+            console.log("Unable to load theme: " + theme, e);
+        }
+
+        // Not in themes, load from users directory
+        var onSuccess = function(file) {
+            try {
+                eval(file.content);
+            } catch (e) {
+                console.log("Error with theme loading: ", e);
+            }
+
+            if (!checkSetAndExit()) {
+                bespin.get("commandLine").addErrorOutput("Sorry old chap. No theme called '" + theme + "'. Fancy making it?");
+            }
+        };
+
+        var onFailure = function() {
+            bespin.get("commandLine").addErrorOutput("Sorry old chap. No theme called '" + theme + "'. Fancy making it?");
+        };
+
+        bespin.get('files').loadContents(bespin.userSettingsProject, "/themes/" + theme + ".js", onSuccess, onFailure);
     }
 });
 

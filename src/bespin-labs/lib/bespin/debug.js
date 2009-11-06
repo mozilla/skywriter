@@ -264,6 +264,21 @@ members: {
     }
 }});
 
+bespin.subscribe("settings:set:debugmode", function(event) {
+    var editor = bespin.get('editor');
+    var settings = bespin.get('settings');
+    editor.debugMode = settings.isValueOn(event.value);
+
+    if (editor.debugMode) {
+        bespin.plugins.loadOne("bespin.debugger", function(debug) {
+            debug.loadBreakpoints(function() {
+                editor.paint(true);
+            });
+        });
+    } else {
+        editor.paint(true);
+    }
+});
 
 exports.BreakpointManager = Class.define({
 members: {

@@ -475,52 +475,50 @@ exports.EditSession = SC.Object.extend({
         this.reportCollaborators([]);
 
         // Take note of in-flight collaboration status changes
-        bespin.fireAfter([ "settings:loaded" ], function() {
-            bespin.subscribe("settings:set:collaborate", function(ev) {
-                if (!window.mobwrite) {
-                    // Ignore if there is no mobwrite
+        bespin.subscribe("settings:set:collaborate", function(ev) {
+            if (!window.mobwrite) {
+                // Ignore if there is no mobwrite
+                return;
+            }
+            if (bespin.get("settings").isValueOn(ev.value)) {
+                if (self.bailingOutOfCollaboration) {
                     return;
                 }
-                if (bespin.get("settings").isValueOn(ev.value)) {
-                    if (self.bailingOutOfCollaboration) {
-                        return;
-                    }
-                    if (this.editor.dirty) {
-                        var msg = "Collaboration enabled on edited file.\n" +
-                                "To avoid losing changes, save before collaborating.\n" +
-                                "Save now?";
-                        var reply = confirm(msg);
-                        if (reply) {
-                            // User OKed the save
-                            var onSuccess = function() {
-                                self.startSession(self.project, self.path);
-                            };
-                            this.editor.saveFile(self.project, self.path, onSuccess);
-                        } else {
-                            // Not OK to save, bail out of collaboration
-                            self.bailingOutOfCollaboration = true;
-                            bespin.get("settings").setValue("collaborate", "off");
-                            self.bailingOutOfCollaboration = false;
-
-                            // We have reset the collaborate setting, but the
-                            // output has not yet hit the screen, so we hack the
-                            // message somewhat, and show a hint later when the
-                            // display has happened. Yuck.
-                            var commandLine = bespin.get("commandLine");
-                            commandLine.addOutput("Reverting the following collaboration setting:");
-
-                            setTimeout(function() {
-                                commandLine.showHint("Collaborate is off");
-                            }, 10);
-                        }
+                if (this.editor.dirty) {
+                    var msg = "Collaboration enabled on edited file.\n" +
+                            "To avoid losing changes, save before collaborating.\n" +
+                            "Save now?";
+                    var reply = confirm(msg);
+                    if (reply) {
+                        // User OKed the save
+                        var onSuccess = function() {
+                            self.startSession(self.project, self.path);
+                        };
+                        this.editor.saveFile(self.project, self.path, onSuccess);
                     } else {
-                        self.startSession(self.project, self.path);
+                        // Not OK to save, bail out of collaboration
+                        self.bailingOutOfCollaboration = true;
+                        bespin.get("settings").setValue("collaborate", "off");
+                        self.bailingOutOfCollaboration = false;
+
+                        // We have reset the collaborate setting, but the
+                        // output has not yet hit the screen, so we hack the
+                        // message somewhat, and show a hint later when the
+                        // display has happened. Yuck.
+                        var commandLine = bespin.get("commandLine");
+                        commandLine.addOutput("Reverting the following collaboration setting:");
+
+                        setTimeout(function() {
+                            commandLine.showHint("Collaborate is off");
+                        }, 10);
                     }
                 } else {
-                    self.stopSession();
-                    self.setReadOnlyIfNotMyProject(self.project);
+                    self.startSession(self.project, self.path);
                 }
-            });
+            } else {
+                self.stopSession();
+                self.setReadOnlyIfNotMyProject(self.project);
+            }
         });
     },
 
