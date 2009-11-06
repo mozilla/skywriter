@@ -320,7 +320,7 @@ exports.BespinScrollerView = SC.View.extend({
         SC.RunLoop.begin();
         var value = this.get('value');
         var gutterLength = this.get('gutterLength');
-        
+
         switch (this._segmentForMouseEvent(evt)) {
         case 'nib-start':
             this.set('value', value - this.get('lineHeight'));
@@ -430,12 +430,19 @@ exports.BespinScrollerView = SC.View.extend({
     },
 
     _paint: function() {
-        var ctx = this.$('canvas')[0].getContext('2d');
+        var canvas = this.$('canvas')[0];
+        var frame = this.get('frame');
+        if (canvas.width !== frame.width)
+            canvas.width = frame.width;
+        if (canvas.height !== frame.height)
+            canvas.height = frame.height;
+
+        var ctx = canvas.getContext('2d');
         
         var alpha = (ctx.globalAlpha) ? ctx.globalAlpha : 1;
 
         // Clear out the canvas.
-        var frame = this.get('frame'), theme = this.get('theme');
+        var theme = this.get('theme');
         ctx.fillStyle = theme.backgroundStyle;
         ctx.fillRect(0, 0, frame.width, frame.height);
 
