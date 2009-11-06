@@ -195,6 +195,11 @@ exports.BespinScrollerView = SC.View.extend({
      */
     maximum: 0,
 
+    _segmentForMouseEvent: function(evt) {
+        // TODO: return 'nib-start', 'gutter-before', 'handle', 'gutter-after',
+        // or 'nib-end' as appropriate
+    }
+
     mouseEntered: function(evt) {
         SC.RunLoop.begin();
         this._isMouseOver = true;
@@ -216,7 +221,8 @@ exports.BespinScrollerView = SC.View.extend({
     mouseDown: function(evt) {
         var value = this.get('value');
         var pos = this.positionRelativeToHandle(evt);
-        switch (pos) {
+        switch (this._segmentForMouseEvent(evt)) {
+        // FIXME
         case 'before':
             this.set('value', value - this.get('frame').height);
             break;
