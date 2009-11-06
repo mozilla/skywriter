@@ -1,2 +1,0 @@
-#!/usr/bin/env narwhal
-require('bespin/tests/cmdline').main(system.args);

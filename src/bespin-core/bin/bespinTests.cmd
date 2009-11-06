@@ -1,1 +1,0 @@
-narwhal.cmd %~dpn0 %*
