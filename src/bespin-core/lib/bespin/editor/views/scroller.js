@@ -306,8 +306,14 @@ exports.BespinScrollerView = SC.View.extend({
     },
 
     mouseWheel: function(evt) {
-        console.log("mouseWheel");
-        // TODO
+        SC.RunLoop.begin();
+        var delta;
+        switch (this.get('layoutDirection')) {
+        case SC.LAYOUT_HORIZONTAL:  delta = evt.wheelDeltaX;    break;
+        case SC.LAYOUT_VERTICAL:    delta = evt.wheelDeltaY;    break;
+        }
+        this.set('value', this.get('value') + 2*delta);
+        SC.RunLoop.end();
     },
 
     mouseDown: function(evt) {
@@ -359,9 +365,6 @@ exports.BespinScrollerView = SC.View.extend({
 
             var maximum = this.get('maximum');
             var gutterLength = this.get('gutterLength');
-
-            console.log("mouseMoved eventDelta", eventDelta, "maximum",
-                maximum, "gutterLength", gutterLength, "evt", evt);
 
             this.set('value', this.get('value')
                 + eventDelta * maximum / gutterLength);
