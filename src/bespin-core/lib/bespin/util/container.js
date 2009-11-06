@@ -190,6 +190,13 @@ function createFromFactory(id, onCreate) {
         if (parts.length != 2) {
             console.error("Can't split ", factory, "into 2 parts on ':'");
         } else {
+            // Maybe rather than being synchronous with "module = re(parts[0]);"
+            // we should be doing this
+            // re.when(re.async(parts[0]), function(module) {
+            //     var exported = module[parts[1]];
+            //     ...
+            // });
+            // This works for now, and I'm not trying to solve every problem
             var module = re(parts[0]);
             var exported = module[parts[1]];
             if (util.isFunction(exported)) {
