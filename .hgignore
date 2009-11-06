@@ -17,4 +17,6 @@
 ^docs/_site
 ^narwhal/
 ^build/
-^sproutcore/
+^frameworks/sproutcore
+^frameworks/tiki
+
