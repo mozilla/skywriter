@@ -112,6 +112,7 @@ exports.BespinScrollerView = SC.View.extend({
      * whenever its value changes. By default the scroll bar updates
      * verticalScrollOffset if its layoutDirection is SC.LAYOUT_VERTICAL or
      * horizontalScrollOffset if its layoutDirection is SC.LAYOUT_HORIZONTAL.
+     * Read-only.
      */
     ownerScrollValueKey: function() {
         switch (this.get('layoutDirection')) {
@@ -125,6 +126,7 @@ exports.BespinScrollerView = SC.View.extend({
      * @property{Number}
      * The length of the gutter, equal to gutterFrame.width or
      * gutterFrame.height depending on the scroll bar's layout direction.
+     * Read-only.
      */
     gutterLength: function() {
         var gutterFrame = this.get('gutterFrame');
@@ -139,7 +141,7 @@ exports.BespinScrollerView = SC.View.extend({
     /**
      * @property{Number}
      * The length of the entire scroll bar, equal to frame.width or
-     * frame.height depending on the scroll bar's layout direction.
+     * frame.height depending on the scroll bar's layout direction. Read-only.
      */
     frameLength: function() {
         var frame = this.get('frame');
@@ -152,7 +154,7 @@ exports.BespinScrollerView = SC.View.extend({
     /**
      * @property{Number}
      * The actual maximum value, which will be less than the maximum due to
-     * accounting for the frame length.
+     * accounting for the frame length. Read-only.
      */
     maximumValue: function() {
         return Math.max(this.get('maximum') - this.get('frameLength'), 0);
@@ -304,6 +306,7 @@ exports.BespinScrollerView = SC.View.extend({
     },
 
     mouseWheel: function(evt) {
+        console.log("mouseWheel");
         // TODO
     },
 
@@ -328,10 +331,10 @@ exports.BespinScrollerView = SC.View.extend({
         case 'handle':
             switch (this.get('layoutDirection')) {
             case SC.LAYOUT_HORIZONTAL:
-                this._mouseDownScreenPoint = evt.x;
+                this._mouseDownScreenPoint = evt.clientX;
                 break;
             case SC.LAYOUT_VERTICAL:
-                this._mouseDownScreenPoint = evt.y;
+                this._mouseDownScreenPoint = evt.clientY;
                 break;
             }
             break;
@@ -344,14 +347,28 @@ exports.BespinScrollerView = SC.View.extend({
         this._mouseDownValue = null;
     },
 
-    mouseMove: function(evt) {
+    mouseMoved: function(evt) {
+        SC.RunLoop.begin();
         if (this._mouseDownScreenPoint !== null) {
-            var dist = this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL
-                ? evt.x : evt.y;
-            var delta = dist - this._mouseDownScreenPoint;
-            this.set('value', this._mouseDownValue
-                + screenLengthToContentLength(delta));
+            var eventDistance;
+            switch (this.get('layoutDirection')) {
+            case SC.LAYOUT_HORIZONTAL:  eventDistance = evt.clientX;    break;
+            case SC.LAYOUT_VERTICAL:    eventDistance = evt.clientY;    break;
+            }
+            var eventDelta = eventDistance - this._mouseDownScreenPoint;
+
+            var maximum = this.get('maximum');
+            var gutterLength = this.get('gutterLength');
+
+            console.log("mouseMoved eventDelta", eventDelta, "maximum",
+                maximum, "gutterLength", gutterLength, "evt", evt);
+
+            this.set('value', this.get('value')
+                + eventDelta * maximum / gutterLength);
+
+            this._mouseDownScreenPoint = eventDistance;
         }
+        SC.RunLoop.end();
     },
 
     _paintNib: function(ctx) {
