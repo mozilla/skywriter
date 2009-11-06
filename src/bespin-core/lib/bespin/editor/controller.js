@@ -48,13 +48,18 @@ exports.EditorController = SC.Object.extend({
 
     containerBinding: '.editorView.layer',
 
+    requires: {
+        settings: 'settings',
+        commandLine: 'commandLine',
+        session: 'session',
+        file: 'file'
+    },
+
     init: function() {
         // fixme: this stuff may not belong here
         this.debugMode = false;
 
         this.model = model.DocumentModel.create({ editor: this });
-
-        var cursor = require("bespin/cursor");
 
         this.cursorManager = cursor.CursorManager.create({ editor: this });
 
@@ -97,15 +102,31 @@ exports.EditorController = SC.Object.extend({
 
         // this.paint();
 
-        // TODO: I think this is left over from some startup funkiness
-        // if (!this.opts.dontfocus) {
-        //     this.setFocus(true);
-        // }
+        var test1 = {
+            value: 1
+        };
 
-        // TODO: This is probably the wrong place to do this, but it needs to be
-        // done somewhere.
-        // Use in memory settings here instead of saving to the server which is default. Potentially use Cookie settings
-        bespin.register('settings', settings.Core.create({ store: settings.InMemory }));
+        console.log(test1.value == 1);
+        test1.value = 2;
+        console.log(test1.value == 2);
+        test1.value++;
+        console.log(test1.value == 3);
+
+        var test2 = {
+            _value:1
+        };
+        test2.__defineGetter__("value", function() {
+            return this._value;
+        });
+        test2.__defineSetter__("value", function(value) {
+            this._value = value;
+        });
+
+        console.log(test2.value == 1);
+        test2.value = 2;
+        console.log(test2.value == 2);
+        test2.value++;
+        console.log(test2.value == 3);
 
         this.sc_super();
     },
@@ -134,8 +155,8 @@ exports.EditorController = SC.Object.extend({
     /**
      * Talk to the Bespin settings structure and pass in the key/value
      */
-    set: function(key, value) {
-        bespin.get("settings").set(key, value);
+    setSetting: function(key, value) {
+        this.settings.setValue(key, value);
     },
 
     /**
@@ -150,7 +171,7 @@ exports.EditorController = SC.Object.extend({
      */
     executeCommand: function(command) {
         try {
-            bespin.get("commandLine").executeCommand(command);
+            this.commandLine.executeCommand(command);
         } catch (e) {
             // catch the command prompt errors
         }
@@ -209,7 +230,7 @@ exports.EditorController = SC.Object.extend({
             width:  this.container.clientWidth,
             height: this.container.clientHeight
         };
-        
+
         var container = this.container;
         while (container !== null) {
             if (!isNaN(container.offsetLeft))
@@ -277,13 +298,10 @@ exports.EditorController = SC.Object.extend({
      * be gentle trying to get the tabstop from settings
      */
     getTabSize: function() {
-        var settings = bespin.get("settings");
         var size = this.defaultTabSize;
-        if (settings) {
-            var tabsize = parseInt(settings.get("tabsize"), 10);
-            if (tabsize > 0) {
-                size = tabsize;
-            }
+        var tabsize = parseInt(this.settings.getValue("tabsize"), 10);
+        if (tabsize > 0) {
+            size = tabsize;
         }
         return size;
     },
@@ -383,9 +401,7 @@ exports.EditorController = SC.Object.extend({
         var keyObj = keys.fillArguments(keySpec);
         var keyCode = keys.toKeyCode(keyObj.key);
         var action = function() {
-            bespin.getComponent("commandLine", function(cli) {
-                cli.executeCommand(command, true);
-            });
+            this.commandLine.executeCommand(command, true);
         };
         var actionDescription = "Execute command: '" + command + "'";
 
@@ -417,7 +433,7 @@ exports.EditorController = SC.Object.extend({
      * Observe a request for a new file to be created
      */
     newFile: function(project, path, content) {
-        project = project || bespin.get('editSession').project;
+        project = project || this.session.project;
         path = path || "new.txt";
         var self = this;
 
@@ -426,7 +442,7 @@ exports.EditorController = SC.Object.extend({
             // updating the editor with contents, setting it here might break
             // the synchronization process.
             // See the note at the top of session.js:EditSession.startSession()
-            if (bespin.get("settings").isSettingOff("collaborate")) {
+            if (this.settings.isSettingOff("collaborate")) {
                 self.model.insertDocument(content || "");
                 self.cursorManager.moveCursor({ row: 0, col: 0 });
                 self.setFocus(true);
@@ -444,7 +460,7 @@ exports.EditorController = SC.Object.extend({
             bespin.publish("editor:dirty");
         };
 
-        bespin.get('files').newFile(project, path, onSuccess);
+        this.file.newFile(project, path, onSuccess);
     },
 
     /**
@@ -458,12 +474,12 @@ exports.EditorController = SC.Object.extend({
      * </ul>
      */
     saveFile: function(project, filename, onSuccess, onFailure) {
-        project = project || bespin.get('editSession').project;
-        filename = filename || bespin.get('editSession').path; // default to what you have
+        project = project || this.session.project;
+        filename = filename || this.session.path; // default to what you have
 
         // saves the current state of the editor to a cookie
         var name = 'viewData_' + project + '_' + filename.split('/').join('_');
-        var value = JSON.stringify(bespin.get('editor').getCurrentView());
+        var value = JSON.stringify(this.getCurrentView());
         cookie.set(name, value, { expires: 7 });
 
         var file = {
@@ -474,11 +490,7 @@ exports.EditorController = SC.Object.extend({
 
         var newOnSuccess = function() {
             document.title = filename + ' - editing with Bespin';
-
-            var commandLine = bespin.get("commandLine");
-            if (commandLine) {
-                commandLine.showHint('Saved file: ' + file.name);
-            }
+            this.commandLine.showHint('Saved file: ' + file.name);
 
             bespin.publish("editor:clean");
 
@@ -488,11 +500,7 @@ exports.EditorController = SC.Object.extend({
         };
 
         var newOnFailure = function(xhr) {
-            var commandLine = bespin.get("commandLine");
-            if (commandLine) {
-                commandLine.showHint('Save failed: ' + xhr.responseText);
-            }
-
+            this.commandLine.showHint('Save failed: ' + xhr.responseText);
             if (util.isFunction(onFailure)) {
                 onFailure();
             }
@@ -500,7 +508,7 @@ exports.EditorController = SC.Object.extend({
 
         bespin.publish("editor:savefile:before", { filename: filename });
 
-        bespin.get('files').saveFile(project, file, newOnSuccess, newOnFailure);
+        this.file.saveFile(project, file, newOnSuccess, newOnFailure);
     },
 
     /**
@@ -532,27 +540,25 @@ exports.EditorController = SC.Object.extend({
      */
     openFile: function(project, filename, options) {
         var onFailure, onSuccess;
-        var session = bespin.get('editSession');
-        var commandLine = bespin.get('commandLine');
         var self = this;
 
-        project = project || session.project;
-        filename = filename || session.path;
+        project = project || this.session.project;
+        filename = filename || this.session.path;
         options = options || {};
         var fromFileHistory = options.fromFileHistory || false;
 
         // Short circuit if we are already open at the requested file
-        if (session.checkSameFile(project, filename) && !options.reload) {
+        if (this.session.checkSameFile(project, filename) && !options.reload) {
             if (options.line) {
-                commandLine.executeCommand('goto ' + options.line, true);
+                this.commandLine.executeCommand('goto ' + options.line, true);
             }
             return;
         }
 
         // If the current buffer is dirty, for now, save it
-        if (this.dirty && !session.shouldCollaborate()) {
+        if (this.dirty && !this.session.shouldCollaborate()) {
             onFailure = function(xhr) {
-                commandLine.showHint("Trying to save current file. Failed: " + xhr.responseText);
+                this.commandLine.showHint("Trying to save current file. Failed: " + xhr.responseText);
             };
 
             onSuccess = function() {
@@ -564,7 +570,7 @@ exports.EditorController = SC.Object.extend({
         }
 
         if (options.force) {
-            bespin.get('files').whenFileDoesNotExist(project, filename, {
+            this.file.whenFileDoesNotExist(project, filename, {
                 execute: function() {
                     self.newFile(project, filename, options.content || "");
                 },
@@ -599,10 +605,10 @@ exports.EditorController = SC.Object.extend({
                 self.setFocus(true);
             }
 
-            session.setProjectPath(project, filename);
+            this.session.setProjectPath(project, filename);
 
             if (options.line) {
-                commandLine.executeCommand('goto ' + options.line, true);
+                this.commandLine.executeCommand('goto ' + options.line, true);
             }
 
             self._addHistoryItem(project, filename, fromFileHistory);
@@ -612,7 +618,7 @@ exports.EditorController = SC.Object.extend({
 
         bespin.publish("editor:openfile:openbefore", { project: project, filename: filename });
 
-        bespin.get('files').editFile(project, filename, onSuccess, onFailure);
+        this.file.editFile(project, filename, onSuccess, onFailure);
     },
 
     /**
@@ -621,10 +627,8 @@ exports.EditorController = SC.Object.extend({
      * session. It's not totally clear where it should live. Refactor.
      */
     _addHistoryItem: function(project, filename, fromFileHistory) {
-        var settings = bespin.get("settings");
-
         // Get the array of lastused files
-        var lastUsed = settings.getObject("_lastused");
+        var lastUsed = this.settings.getObject("_lastused");
         if (!lastUsed) {
             lastUsed = [];
         }
@@ -633,7 +637,7 @@ exports.EditorController = SC.Object.extend({
         var newItem = { project: project, filename: filename };
 
         if (!fromFileHistory) {
-            bespin.get('editSession').addFileToHistory(newItem);
+            this.session.addFileToHistory(newItem);
         }
 
         // Remove newItem from down in the list and place at top
@@ -652,7 +656,7 @@ exports.EditorController = SC.Object.extend({
         }
 
         // Maybe this should have a _ prefix: but then it does not persist??
-        settings.setObject("_lastused", lastUsed);
+        this.settings.setObject("_lastused", lastUsed);
     }
 });
 /**
@@ -821,6 +825,7 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
         util.stopEvent(e);
     }
 });
+
 /**
  * Given an <code>eventString</code> parse out the arguments and configure an
  * event object.
@@ -840,3 +845,94 @@ var toFire = function(eventString) {
     }
     return event;
 };
+
+/**
+ * Run the trim command before saving the file
+ */
+bespin.subscribe("settings:set:trimonsave", function(event) {
+    var settings = bespin.get('settings');
+    if (settings.isValueOn(event.value)) {
+        _trimOnSave = bespin.subscribe("editor:savefile:before", function(event) {
+            bespin.get("commandLine").executeCommand('trim', true);
+        });
+    } else {
+        bespin.unsubscribe(_trimOnSave);
+    }
+});
+// Store the subscribe handler away
+var _trimOnSave;
+
+/**
+ * When a file is opened successfully change the project and file status
+ * area, then change the window title, and change the URL hash area
+ */
+bespin.subscribe("editor:openfile:opensuccess", function(event) {
+    var session = bespin.get('editSession');
+    var project = event.project || session.project;
+    var filename = event.file.name;
+
+    try {
+        // reset the state of the editor based on saved cookie
+        var name = 'viewData_' + project + '_' + filename.split('/').join('_');
+        var data = cookie.get(name);
+        if (data) {
+            bespin.get('editor').resetView(JSON.parse(data));
+        } else {
+            bespin.get('editor').basicView();
+        }
+    } catch (e) {
+        console.log("Error setting in the view: ", e);
+    }
+
+    document.title = filename + ' - editing with Bespin';
+
+    bespin.publish("url:change", { project: project, path: filename });
+
+    // Set the session path and change the syntax highlighter
+    // when a new file is opened
+    if (event.file.name == null) {
+        console.error("event.file.name falsy");
+    }
+
+    if (event.project) {
+        session.project = event.project;
+    }
+    session.path = event.file.name;
+
+    var fileType = util.path.fileType(event.file.name);
+    if (fileType) {
+        bespin.publish("settings:language", { language: fileType });
+    }
+
+    // If a file (such as BespinSettings/config) is loaded that you want to auto
+    // syntax highlight, here is where you do it
+    // FUTURE: allow people to add in their own special things
+    var mapName = project + "/" + filename;
+    if (specialFileMap[mapName]) {
+        bespin.publish("settings:language", {
+            language: specialFileMap[mapName]
+        });
+    }
+});
+
+/**
+ *
+ */
+var specialFileMap = {
+    'BespinSettings/config': 'js'
+};
+
+/**
+ * Add in emacs key bindings
+ */
+bespin.subscribe("settings:set:keybindings", function(event) {
+    var editor = bespin.get('editor');
+    if (event.value == "emacs") {
+        editor.bindKey("moveCursorLeft", "ctrl b");
+        editor.bindKey("moveCursorRight", "ctrl f");
+        editor.bindKey("moveCursorUp", "ctrl p");
+        editor.bindKey("moveCursorDown", "ctrl n");
+        editor.bindKey("moveToLineStart", "ctrl a");
+        editor.bindKey("moveToLineEnd", "ctrl e");
+    }
+});

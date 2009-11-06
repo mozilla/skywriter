@@ -27,32 +27,6 @@ var util = require("bespin/util/util");
 
 exports.subscribe = function() {
     /**
-     * When a file is opened successfully change the project and file status
-     * area, then change the window title, and change the URL hash area
-     */
-    bespin.subscribe("editor:openfile:opensuccess", function(event) {
-        var project = event.project || bespin.get('editSession').project;
-        var filename = event.file.name;
-
-        try {
-            // reset the state of the editor based on saved cookie
-            var name = 'viewData_' + project + '_' + filename.split('/').join('_');
-            var data = cookie.get(name);
-            if (data) {
-                bespin.get('editor').resetView(JSON.parse(data));
-            } else {
-                bespin.get('editor').basicView();
-            }
-        } catch (e) {
-            console.log("Error setting in the view: ", e);
-        }
-
-        document.title = filename + ' - editing with Bespin';
-
-        bespin.publish("url:change", { project: project, path: filename });
-    });
-
-    /**
      * Observe a urlchange event and then... change the location hash
      */
     bespin.subscribe("url:change", function(event) {

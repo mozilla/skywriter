@@ -27,6 +27,7 @@
 
 var r = require;
 var Q = r("ref-send");
+var SC = require("sproutcore");
 
 Q.when(require.async("bespin/embed"), function(embed) {
     SC._didBecomeReady();

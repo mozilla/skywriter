@@ -57,7 +57,7 @@ exports.show = function(filename, project, type) {
     // Provide defaults
     var filename = filename || editSession.path;
     var project = project || editSession.project;
-    var type = type || settings.get("preview");
+    var type = type || settings.getValue("preview");
 
     var url = path.combine("preview/at", project, filename);
 

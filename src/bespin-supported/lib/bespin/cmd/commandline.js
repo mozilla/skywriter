@@ -403,8 +403,8 @@ members: {
             return date.getHours() + ":" + mins + ":" + secs;
         };
 
-        var size = parseInt(this.settings.get("consolefontsize"), 10);
-        var mode = this.settings.get("historytimemode");
+        var size = parseInt(this.settings.getValue("consolefontsize"), 10);
+        var mode = this.settings.getValue("historytimemode");
 
         dojo.attr(this.output, "innerHTML", "");
 
@@ -533,11 +533,11 @@ members: {
     toggleFontSize: function() {
         var self = this;
         var setSize = function(size) {
-            self.settings.set("consolefontsize", size);
+            self.settings.setValue("consolefontsize", size);
             self.updateOutput();
         };
 
-        var size = parseInt(this.settings.get("consolefontsize"), 10);
+        var size = parseInt(this.settings.getValue("consolefontsize"), 10);
         switch (size) {
             case 9: setSize(11); break;
             case 11: setSize(14); break;
@@ -552,11 +552,11 @@ members: {
     toggleHistoryTimeMode: function() {
         var self = this;
         var setMode = function(mode) {
-            self.settings.set("historytimemode", mode);
+            self.settings.setValue("historytimemode", mode);
             self.updateOutput();
         };
 
-        var size = this.settings.get("historytimemode");
+        var size = this.settings.getValue("historytimemode");
         switch (size) {
             case "history": setMode("time"); break;
             case "time": setMode("blank"); break;

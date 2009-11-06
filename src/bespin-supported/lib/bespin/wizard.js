@@ -36,6 +36,13 @@ var wizards = {
     overview: { url: "/overlays/overview.html" }
 };
 
+// TODO: Find some way to only do this if we're sure that this is a new user
+// Now we know what are settings are we can decide if we need to
+// open the new user wizard
+// if (!settings.isSettingOn("hidewelcomescreen") && bespin.wizard) {
+//     bespin.wizard.show(null, "newuser", false);
+// }
+
 /**
  * A collection of functions for displaying Wizards
  */
@@ -127,24 +134,5 @@ command.store.addCommand({
         }
 
         exports.show(instruction, type, true);
-    }
-});
-
-command.store.addCommand({
-    name: 'welcome',
-    preview: 'display welcome + help',
-    execute: function() {
-        bespin.get('commandLine').executeCommand("wizard newuser");
-    }
-});
-
-/**
- * If we are opening up a new file
- */
-bespin.subscribe("settings:init", function(event) {
-    // Now we know what are settings are we can decide if we need to
-    // open the new user wizard
-    if (!settings.isSettingOn("hidewelcomescreen") && bespin.wizard) {
-        bespin.wizard.show(null, "newuser", false);
     }
 });

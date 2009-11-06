@@ -75,7 +75,7 @@ exports.CodeInfo = SC.Object.define({
         bespin.subscribe("parser:engine:parseDone", function(event) {
             var data = event.info;
             self.foldPoints = data.foldPoints;
-            var syntaxmarkers = bespin.get("settings") && bespin.get("settings").get("syntaxmarkers");
+            var syntaxmarkers = bespin.get("settings") && bespin.get("settings").getValue("syntaxmarkers");
             self.messages = data.messages.filter(function(message) {
                 if (syntaxmarkers === "all") {
                     return true;
@@ -615,7 +615,7 @@ bespin.register("parser", new exports.CodeInfo());
 
 bespin.fireAfter(["settings:language", "settings:set:syntaxcheck", "parser:engine:initialized"], function () {
     var settings = bespin.get("settings");
-    if (settings && settings.isOn(settings.get("syntaxcheck"))) {
+    if (settings && settings.isValueOn(settings.getValue("syntaxcheck"))) {
         var editor = bespin.get("editor");
         if (editor.language) {
             bespin.publish("parser:start");
@@ -633,7 +633,70 @@ bespin.fireAfter(["settings:language", "settings:set:syntaxcheck", "parser:engin
  */
 bespin.subscribe("settings:language", function () {
     var settings = bespin.get("settings");
-    if (settings && settings.isOn(settings.get("syntaxcheck"))) {
+    if (settings && settings.isValueOn(settings.getValue("syntaxcheck"))) {
         bespin.publish("parser:start");
+    }
+});
+
+/**
+ * Turn the syntax parser on or off
+ */
+bespin.subscribe("settings:set:syntaxcheck", function (data) {
+    var settings = bespin.get('settings');
+    if (settings.isValueOff(data.value)) {
+        bespin.publish("parser:stop");
+    } else {
+        bespin.publish("parser:start");
+    }
+});
+
+/**
+ * When the syntax setting is changed, tell the syntax system to change
+ */
+bespin.subscribe("settings:set:language", function(event) {
+    bespin.publish("settings:language", {
+        language: event.value,
+        fromCommand: true
+    });
+});
+
+/**
+ * Given a new language command, change the editor.language
+ */
+bespin.subscribe("settings:language", function(event) {
+    var language = event.language;
+    var fromCommand = event.fromCommand;
+    var settings = bespin.get('settings');
+    var languageSetting = settings.getValue('language') || "auto";
+    var editor = bespin.get('editor');
+
+    if (!editor) {
+        console.log("Ignoring language change - no editor");
+    }
+
+    if (language == editor.language) {
+        return; // already set to be that language
+    }
+
+    if (util.include(['auto', 'on'], language)) {
+        // TODO: There was some code added in rev 565cac09ddc1 which
+        // prefixed this code with:
+        //   var path = bespin.get('editSession').path;
+        //   if (path) {
+        // I'm not sure that this makes sense (when we're then reading
+        // the path from the URL anyway. So I'm reverting to this ...
+        // If that code did make sense then we should re-revert and
+        // explain in comments
+        var path = settings.fromURL.getValue('path');
+        if (path) {
+            var fileType = util.path.fileType(path);
+            if (fileType) {
+                editor.language = fileType;
+            }
+        }
+    } else if (util.include(['auto', 'on'], languageSetting) || fromCommand) {
+        editor.language = language;
+    } else if (languageSetting == 'off') {
+        editor.language = 'off';
     }
 });

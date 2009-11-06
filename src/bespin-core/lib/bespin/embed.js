@@ -66,7 +66,7 @@ exports.useBespin = function(element, options) {
     }
 
     // Creating the editor alters the components innerHTML
-    var originalInnerHtml = element.innerHTML;
+    var content = element.innerHTML;
 
     var controller = EditorController.create({ container: element });
     SC.run(function() {
@@ -85,17 +85,17 @@ exports.useBespin = function(element, options) {
         SC.$(element).css('position', 'relative');
         element.innerHTML = "";
         editorPane.appendTo(element);
+
         if (options.initialContent) {
-            controller.model.insertDocument(options.initialContent);
-        } else {
-            controller.model.insertDocument(originalInnerHtml);
+            content = options.initialContent;
         }
+        controller.model.insertDocument(content);
 
         // Call controller.set on any settings
         if (options.settings) {
             for (var key in options.settings) {
                 if (options.settings.hasOwnProperty(key)) {
-                    controller.set(key, options.settings[key]);
+                    controller.setSetting(key, options.settings[key]);
                 }
             }
         }

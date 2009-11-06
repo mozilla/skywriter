@@ -39,7 +39,7 @@ exports.CursorManager = SC.Object.extend({
         // if the cursor is in a valid place, and correct if not.
         bespin.subscribe("settings:set:strictlines", function(setting) {
             var settings = bespin.get('settings');
-            if (settings.isOn(setting.value)) {
+            if (settings.isValueOn(setting.value)) {
                 var oldPos = exports.copyPos(this.position);
                 this.checkPastEndOfLine(oldPos);
             }

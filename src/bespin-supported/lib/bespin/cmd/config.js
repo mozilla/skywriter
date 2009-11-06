@@ -216,7 +216,7 @@ command.store.addCommand({
                 }
             } else {
                 output = "Saving setting: <strong>" + key + "</strong> = " + setting.value;
-                bespin.get("settings").set(key, setting.value);
+                bespin.get("settings").setValue(key, setting.value);
             }
         }
         instruction.addOutput(output);
@@ -224,7 +224,7 @@ command.store.addCommand({
     findCompletions: function(query, callback) {
         var settings = bespin.get("settings");
         var key = query.action[0];
-        var val = settings.get(key);
+        var val = settings.getValue(key);
 
         if (query.action.length == 1) {
             // Check if this is an exact match
@@ -243,7 +243,7 @@ command.store.addCommand({
             if (matches.length == 1) {
                 // Single match: go for autofill and hint
                 query.autofill = "set " + matches[0];
-                val = settings.get(matches[0]);
+                val = settings.getValue(matches[0]);
                 query.hint = "Current value of " + matches[0] + " is '" + val + "'. Enter a new value, or press enter to display in the console.";
             } else if (matches.length == 0) {
                 // No matches, cause an error
@@ -282,17 +282,17 @@ command.store.addCommand({
     completeText: 'add a key for the setting to delete entirely',
     execute: function(instruction, key) {
         var settings = bespin.get("settings");
-        if (!settings.get(key)) {
+        if (!settings.getValue(key)) {
             instruction.addErrorOutput("No setting for " + key + ".");
         } else {
-            settings.unset(key);
+            settings.unsetValue(key);
             instruction.addOutput("Unset the setting for " + key + ".");
         }
     },
     findCompletions: function(query, callback) {
         var settings = bespin.get("settings");
         var key = query.action[0];
-        var val = settings.get(key);
+        var val = settings.getValue(key);
 
         // Multiple params are an error
         if (query.action.length > 1) {
@@ -317,7 +317,7 @@ command.store.addCommand({
         if (matches.length == 1) {
             // Single match: go for autofill and hint
             query.autofill = "set " + matches[0];
-            val = settings.get(matches[0]);
+            val = settings.getValue(matches[0]);
             query.hint = "Current value of " + matches[0] + " is '" + val + "'. Press enter to remove the setting.";
         } else if (matches.length == 0) {
             // No matches, cause an error

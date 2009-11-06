@@ -313,7 +313,7 @@ members:
         }
 
         var self = this;
-        var duration = parseInt(bespin.get('settings').get('menushowduration'), 10);
+        var duration = parseInt(bespin.get('settings').getValue('menushowduration'), 10);
 
         // Set the duration for the fade in.
         if (typeof duration == "undefined" || isNaN(duration)) {
@@ -349,7 +349,7 @@ members:
         }
 
         if (!this.hideAnimation) {
-            var duration = parseInt(bespin.get('settings').get('menuhideduration'), 10);
+            var duration = parseInt(bespin.get('settings').getValue('menuhideduration'), 10);
 
             // Set the duration for the fade in.
             if (typeof duration == "undefined" || isNaN(duration)) {
