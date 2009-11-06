@@ -499,7 +499,7 @@ exports.EditSession = SC.Object.extend({
                         } else {
                             // Not OK to save, bail out of collaboration
                             self.bailingOutOfCollaboration = true;
-                            bespin.get("settings").set("collaborate", "off");
+                            bespin.get("settings").setValue("collaborate", "off");
                             self.bailingOutOfCollaboration = false;
 
                             // We have reset the collaborate setting, but the
@@ -534,8 +534,9 @@ exports.EditSession = SC.Object.extend({
             // This could be run early in the startup process.
             // TODO: bespin.getComponent doesn't work with commandLine for some reason?
             setTimeout(function() {
-                var msg = "To edit files in others projects you must have 'collaborate' set to on." +
-                          " <a href=\"javascript:bespin.get('settings').set('collaborate', 'on');\">Turn it on now</a>";
+                var msg = "To edit files in others projects you must have " +
+                          "'collaborate' set to on." +
+                          " <a href=\"javascript:bespin.get('settings').setValue('collaborate', 'on');\">Turn it on now</a>";
                 bespin.get("commandLine").showHint(msg, 10000);
             }, 100);
         }

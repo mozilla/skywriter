@@ -75,7 +75,7 @@ exports.CodeInfo = SC.Object.define({
         bespin.subscribe("parser:engine:parseDone", function(event) {
             var data = event.info;
             self.foldPoints = data.foldPoints;
-            var syntaxmarkers = bespin.get("settings") && bespin.get("settings").get("syntaxmarkers");
+            var syntaxmarkers = bespin.get("settings") && bespin.get("settings").getValue("syntaxmarkers");
             self.messages = data.messages.filter(function(message) {
                 if (syntaxmarkers === "all") {
                     return true;
@@ -615,7 +615,7 @@ bespin.register("parser", new exports.CodeInfo());
 
 bespin.fireAfter(["settings:language", "settings:set:syntaxcheck", "parser:engine:initialized"], function () {
     var settings = bespin.get("settings");
-    if (settings && settings.isValueOn(settings.get("syntaxcheck"))) {
+    if (settings && settings.isValueOn(settings.getValue("syntaxcheck"))) {
         var editor = bespin.get("editor");
         if (editor.language) {
             bespin.publish("parser:start");
@@ -633,7 +633,7 @@ bespin.fireAfter(["settings:language", "settings:set:syntaxcheck", "parser:engin
  */
 bespin.subscribe("settings:language", function () {
     var settings = bespin.get("settings");
-    if (settings && settings.isValueOn(settings.get("syntaxcheck"))) {
+    if (settings && settings.isValueOn(settings.getValue("syntaxcheck"))) {
         bespin.publish("parser:start");
     }
 });

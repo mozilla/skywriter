@@ -91,30 +91,30 @@ exports.Core = SC.Object.extend({
         this.store = new (this.store || exports.ServerFile)(this);
     },
 
-    set: function(key, value) {
-        this.store.set(key, value);
+    setValue: function(key, value) {
+        this.store.setValue(key, value);
 
         bespin.publish("settings:set:" + key, { value: value });
     },
 
-    get: function(key) {
-        var fromURL = this.fromURL.get(key); // short circuit
+    getValue: function(key) {
+        var fromURL = this.fromURL.getValue(key); // short circuit
         if (fromURL) {
             return fromURL;
         }
 
-        return this.store.get(key);
+        return this.store.getValue(key);
     },
 
-    unset: function(key) {
-        this.store.unset(key);
+    unsetValue: function(key) {
+        this.store.unsetValue(key);
     },
 
     loadSession: function() {
         var editSession = bespin.get('editSession');
 
-        var path = this.fromURL.get('path') || editSession.path;
-        var project = this.fromURL.get('project') || editSession.project;
+        var path = this.fromURL.getValue('path') || editSession.path;
+        var project = this.fromURL.getValue('project') || editSession.project;
 
         bespin.publish("settings:init", { // -- time to init my friends
             path: path,
@@ -145,31 +145,31 @@ exports.Core = SC.Object.extend({
      * Check to see if the given setting is on (using #isValueOn())
      */
     isSettingOn: function(key) {
-        return this.isValueOn(this.get(key));
+        return this.isValueOn(this.getValue(key));
     },
 
     /**
      * Check to see if the given setting is off (using #isValueOff())
      */
     isSettingOff: function(key) {
-        return this.isValueOff(this.get(key));
+        return this.isValueOff(this.getValue(key));
     },
 
     /**
-     * Like #set() except that the value is assumed to be an object that should
-     * be converted to JSON.
+     * Like #setValue() except that the value is assumed to be an object that
+     * should be converted to JSON.
      */
     setObject: function(key, value) {
-        this.set(key, JSON.stringify(value));
+        this.setValue(key, JSON.stringify(value));
     },
 
     /**
-     * Like #get() except that the value is assumed to be an object that should
-     * be converted from JSON before being returned.
+     * Like #getValue() except that the value is assumed to be an object that
+     * should be converted from JSON before being returned.
      */
     getObject: function(key) {
         try {
-            return JSON.parse(this.get(key));
+            return JSON.parse(this.getValue(key));
         } catch(e) {
             console.log("Error in getObject: " + e);
             return {};
@@ -198,19 +198,19 @@ exports.Core = SC.Object.extend({
 exports.InMemory = SC.Object.extend({
     constructor: function(parent) {
         this.parent = parent;
-        this.settings = this.parent.defaultSettings();
+        this.settings = defaultSettings();
         bespin.publish("settings:loaded");
     }/*,
 
-    set: function(key, value) {
+    setValue: function(key, value) {
         this.settings[key] = value;
     },
 
-    get: function(key) {
+    getValue: function(key) {
         return this.settings[key];
     },
 
-    unset: function(key) {
+    unsetValue: function(key) {
         delete this.settings[key];
     }*/
 });
@@ -242,16 +242,16 @@ exports.Cookie = SC.Object.extend({
         bespin.publish("settings:loaded");
     },
 
-    set: function(key, value) {
+    setValue: function(key, value) {
         this.settings[key] = value;
         cookie.set("settings", JSON.stringify(this.settings), this.cookieSettings);
     },
 
-    get: function(key) {
+    getValue: function(key) {
         return this.settings[key];
     },
 
-    unset: function(key) {
+    unsetValue: function(key) {
         delete this.settings[key];
         cookie.set("settings", JSON.stringify(this.settings), this.cookieSettings);
     }
@@ -265,29 +265,29 @@ exports.ServerAPI = SC.Object.extend({
         this.self = this;
         this.parent = parent;
         this.server = bespin.get('server');
-        this.settings = this.parent.defaultSettings(); // seed defaults just for now!
+        this.settings = defaultSettings();
 
         // TODO: seed the settings
         this.server.listSettings(function(settings) {
             self.settings = settings;
             if (settings.tabsize === undefined) {
-                self.settings = self.parent.defaultSettings();
+                self.settings = defaultSettings();
                 self.server.setSettings(self.settings);
             }
             bespin.publish("settings:loaded");
         });
     },
 
-    set: function(key, value) {
+    setValue: function(key, value) {
         this.settings[key] = value;
         this.server.setSetting(key, value);
     },
 
-    get: function(key) {
+    getValue: function(key) {
         return this.settings[key];
     },
 
-    unset: function(key) {
+    unsetValue: function(key) {
         delete this.settings[key];
         this.server.unsetSetting(key);
     }
@@ -301,14 +301,14 @@ exports.ServerFile = SC.Object.extend({
     constructor: function(parent) {
         this.parent = parent;
         this.server = bespin.get('server');
-        this.settings = this.parent.defaultSettings(); // seed defaults just for now!
+        this.settings = defaultSettings();
         this.loaded = false;
 
         // Load up settings from the file system
         this._load();
     },
 
-    set: function(key, value) {
+    setValue: function(key, value) {
         this.settings[key] = value;
 
         if (key[0] != '_') {
@@ -316,11 +316,11 @@ exports.ServerFile = SC.Object.extend({
         }
     },
 
-    get: function(key) {
+    getValue: function(key) {
         return this.settings[key];
     },
 
-    unset: function(key) {
+    unsetValue: function(key) {
         delete this.settings[key];
 
         this._save(); // Save back to the file system
@@ -411,11 +411,11 @@ exports.DB = SC.Object.extend({
         bespin.publish("settings:loaded");
     },
 
-    set: function(key, value) {
+    setValue: function(key, value) {
         this.db.forceRow('settings', { 'key': key, 'value': value, timestamp: new Date().getTime() }, 'key');
     },
 
-    get: function(key) {
+    getValue: function(key) {
         var rs = this.db.run('select distinct value from settings where key = ?', [ key ]);
         try {
             if (rs && rs.isValidRow()) {
@@ -428,7 +428,7 @@ exports.DB = SC.Object.extend({
         }
     },
 
-    unset: function(key) {
+    unsetValue: function(key) {
         this.db.run('delete from settings where key = ?', [ key ]);
     },
 
@@ -459,11 +459,11 @@ exports.URL = SC.Object.extend({
     },
 
     /*
-    get: function(key) {
+    getValue: function(key) {
         return this.results[key];
     },
 
-    set: function(key, value) {
+    setValue: function(key, value) {
         this.results[key] = value;
     },
     */
@@ -495,7 +495,7 @@ exports.Events = SC.Object.extend({
             var key = event.key;
             var value = event.value;
 
-            self.settings.set(key, value);
+            self.settings.setValue(key, value);
         });
 
         /**
@@ -555,7 +555,7 @@ exports.Events = SC.Object.extend({
         bespin.subscribe("settings:language", function(event) {
             var language = event.language;
             var fromCommand = event.fromCommand;
-            var languageSetting = self.settings.get('language') || "auto";
+            var languageSetting = self.settings.getValue('language') || "auto";
 
             if (!editor) {
                 console.log("Ignoring language change - no editor");
@@ -574,7 +574,7 @@ exports.Events = SC.Object.extend({
                 // the path from the URL anyway. So I'm reverting to this ...
                 // If that code did make sense then we should re-revert and
                 // explain in comments
-                var path = self.settings.fromURL.get('path');
+                var path = self.settings.fromURL.getValue('path');
                 if (path) {
                     var fileType = util.path.fileType(path);
                     if (fileType) {
@@ -609,7 +609,7 @@ exports.Events = SC.Object.extend({
                     if (themeSettings != editor.theme) {
                         editor.theme = themeSettings;
                         bespin.publish("settings:set:fontsize", {
-                            value: self.settings.get('fontsize')
+                            value: self.settings.getValue('fontsize')
                         });
                     }
                     return true;
@@ -745,7 +745,7 @@ exports.Events = SC.Object.extend({
          * Check for auto load
          */
         bespin.subscribe("settings:init", function() {
-            if (this.settings.isValueOff(this.settings.get('autoconfig'))) {
+            if (this.settings.isValueOff(this.settings.getValue('autoconfig'))) {
                 return;
             }
 

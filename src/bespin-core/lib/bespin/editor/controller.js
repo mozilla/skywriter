@@ -152,8 +152,8 @@ exports.EditorController = SC.Object.extend({
     /**
      * Talk to the Bespin settings structure and pass in the key/value
      */
-    set: function(key, value) {
-        this.settings.set(key, value);
+    setSetting: function(key, value) {
+        this.settings.setValue(key, value);
     },
 
     /**
@@ -227,7 +227,7 @@ exports.EditorController = SC.Object.extend({
             width:  this.container.clientWidth,
             height: this.container.clientHeight
         };
-        
+
         var container = this.container;
         while (container !== null) {
             if (!isNaN(container.offsetLeft))
@@ -296,7 +296,7 @@ exports.EditorController = SC.Object.extend({
      */
     getTabSize: function() {
         var size = this.defaultTabSize;
-        var tabsize = parseInt(this.settings.get("tabsize"), 10);
+        var tabsize = parseInt(this.settings.getValue("tabsize"), 10);
         if (tabsize > 0) {
             size = tabsize;
         }

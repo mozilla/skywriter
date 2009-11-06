@@ -95,7 +95,7 @@ exports.useBespin = function(element, options) {
         if (options.settings) {
             for (var key in options.settings) {
                 if (options.settings.hasOwnProperty(key)) {
-                    controller.set(key, options.settings[key]);
+                    controller.setSetting(key, options.settings[key]);
                 }
             }
         }

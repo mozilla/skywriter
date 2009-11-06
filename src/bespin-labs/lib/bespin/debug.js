@@ -94,7 +94,7 @@ members: {
 
         var settings = bespin.get("settings");
         if (settings && settings.isSettingOff("debugmode")) {
-            settings.set("debugmode", "on");
+            settings.setValue("debugmode", "on");
         }
 
         exports.project = bespin.get("editSession").project;
