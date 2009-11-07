@@ -245,10 +245,7 @@ exports.BespinScrollerView = SC.View.extend({
     maximum: 0,
 
     _segmentForMouseEvent: function(evt) {
-        var point = this.convertFrameFromView({
-            x: evt.clientX,
-            y: evt.clientY
-        });
+        var point = this.convertFrameFromView({ x: evt.pageX, y: evt.pageY });
         var frame = this.get('frame');
 
         var layoutDirection = this.get('layoutDirection');
@@ -288,7 +285,9 @@ exports.BespinScrollerView = SC.View.extend({
             break;
         }
 
-        console.assert(false, "_segmentForMouseEvent: point outside view");
+        console.assert(false, "_segmentForMouseEvent: point ", point,
+            " outside view with handle frame ", handleFrame, " and frame ",
+            frame);
     },
 
     mouseEntered: function(evt) {
@@ -446,12 +445,16 @@ exports.BespinScrollerView = SC.View.extend({
         ctx.fillStyle = theme.backgroundStyle;
         ctx.fillRect(0, 0, frame.width, frame.height);
 
+        if (this.get('isEnabled') === false || gutterLength <= handleLength)
+            return; // Don't display the scroll bar.        
+    
         ctx.save();
 
         var handleFrame = this.get('handleFrame');
         var layoutDirection = this.get('layoutDirection');
         var gutterFrame = this.get('gutterFrame');
         var gutterLength = this.get('gutterLength');
+
         var handleDistance, handleLength;
         switch (layoutDirection) {
         case SC.LAYOUT_VERTICAL:
@@ -473,9 +476,6 @@ exports.BespinScrollerView = SC.View.extend({
 
         ctx.save();
 
-        if (this.get('isEnabled') === false || gutterLength <= handleLength)
-            return;     // The scroll bar is disabled...
-
         var scrollerThickness = this.get('scrollerThickness');
         var halfThickness = scrollerThickness / 2;
 
@@ -487,8 +487,8 @@ exports.BespinScrollerView = SC.View.extend({
         ctx.lineTo(handleDistance + halfThickness, 0 + scrollerThickness);
         ctx.closePath();
 
-        var gradient = ctx.createLinearGradient(handleDistance, 0, handleDistance,
-            0 + scrollerThickness);
+        var gradient = ctx.createLinearGradient(handleDistance, 0,
+            handleDistance, 0 + scrollerThickness);
         gradient.addColorStop(0,
             theme.scrollBarFillGradientTopStart.replace(/%a/, alpha));
         gradient.addColorStop(0.4,

@@ -233,11 +233,9 @@ exports.EditorController = SC.Object.extend({
 
         var container = this.container;
         while (container !== null) {
-            if (!isNaN(container.offsetLeft))
-                layout.left += container.offsetLeft;
-            if (!isNaN(container.offsetTop))
-                layout.top += container.offsetTop;
-            container = container.parentNode;
+            layout.left += container.offsetLeft + container.clientLeft;
+            layout.top += container.offsetTop + container.clientTop;
+            container = container.offsetParent;
         }
 
         console.log("computeLayout", layout);
