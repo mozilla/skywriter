@@ -1,3 +1,4 @@
 config :bespin,
-  :required => [:tiki, 'tiki/system'],
-  :use_modules => true
+  :required => [:tiki, 'tiki/system', :browserup],
+  :use_modules => true,
+  :factory_format => :function

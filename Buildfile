@@ -3,4 +3,5 @@ config :editor,
   :dynamc_required => [],
   :test_required => [],
   :test_debug => [],
-  :use_modules => true
+  :use_modules => true,
+  :factory_format => :function

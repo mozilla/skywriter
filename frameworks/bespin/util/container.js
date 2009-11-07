@@ -48,7 +48,7 @@
  * uses what, it can re-inject newer versions of those components at runtime.
  */
 
-var util = require("bespin/util/util");
+var util = require("bespin:util/util");
 
 /**
  * Methods for registering components with the main system

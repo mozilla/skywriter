@@ -23,7 +23,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore");
+var SC = require('sproutcore/runtime:package').SC;
+require('browserup:package');
 
 // Version numbers
 SC.mixin(exports, {
@@ -52,14 +53,14 @@ exports.displayVersion = function(el) {
 };
 
 // Clone the hub
-var hub = require("bespin/util/hub");
+var hub = require("bespin:util/hub");
 exports.publish = hub.publish;
 exports.subscribe = hub.subscribe;
 exports.unsubscribe = hub.unsubscribe;
 exports.fireAfter = hub.fireAfter;
 
 // Clone the container
-var container = require("bespin/util/container");
+var container = require("bespin:util/container");
 exports.register = container.register;
 exports.unregister = container.unregister;
 exports.get = container.get;
