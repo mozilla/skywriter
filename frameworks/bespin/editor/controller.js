@@ -36,6 +36,7 @@ var cursor = require("cursor");
 var model = require("model");
 var history = require("history");
 var view = require("editor/views/editor");
+var scroller = require("editor/views/scroller");
 
 /**
  * bespin.editor.API is the root object, the API that others should be able to
@@ -70,8 +71,10 @@ exports.EditorController = SC.Object.extend({
             }),
             hasHorizontalScroller: true,
             autohidesHorizontalScroller: false,
+            horizontalScrollerView: scroller.BespinScrollerView,
             hasVerticalScroller: true,
-            autohidesVerticalScroller: false
+            autohidesVerticalScroller: false,
+            verticalScrollerView: scroller.BespinScrollerView
         });
         this.editorView = this.ui.contentView;
 
