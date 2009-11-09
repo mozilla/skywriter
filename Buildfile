@@ -5,7 +5,3 @@ config :editor,
   :test_debug => [],
   :use_modules => true,
   :factory_format => :function
-
-config :sproutcore,
-  :factory_format => :function
-
