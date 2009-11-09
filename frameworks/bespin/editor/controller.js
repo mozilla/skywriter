@@ -77,7 +77,7 @@ exports.EditorController = SC.Object.extend({
 
         console.log(this.ui); //contentViewFrameDidChange = function() { console.log("contentViewFrameDidChange"); };
 
-        this.theme = require("bespin/theme")['default'];
+        this.theme = require("theme")['default'];
 
         this.editorKeyListener = exports.DefaultEditorKeyListener.create({ editor: this });
         this.historyManager = history.HistoryManager.create({ editor: this });
@@ -125,7 +125,7 @@ exports.EditorController = SC.Object.extend({
         test2.value++;
         console.log(test2.value == 3);
 
-        this.sc_super();
+        sc_super();
     },
 
     /**

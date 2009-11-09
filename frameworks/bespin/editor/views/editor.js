@@ -144,7 +144,7 @@ exports.EditorView = SC.View.extend({
             this.toggleCursor();
         }.bind(this), this.toggleCursorFrequency);
 
-        this.sc_super();
+        sc_super();
     },
 
     render: function(context, firstTime) {

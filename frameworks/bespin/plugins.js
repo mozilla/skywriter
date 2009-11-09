@@ -22,7 +22,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Q = require("ref-send");
 var SC = require("sproutcore/runtime:package").SC;
 
 exports.Extension = SC.Object.extend({
@@ -30,7 +29,7 @@ exports.Extension = SC.Object.extend({
         property = property || "pointer";
         var parts = this.get(property).split(":");
         var modname = parts[0];
-        Q.when(require.async(modname), function(module) {
+        tiki.async(modname).then(function(module) {
             if (callback) {
                 if (parts[1]) {
                     callback(module[parts[1]]);

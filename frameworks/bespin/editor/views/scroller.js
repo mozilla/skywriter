@@ -258,7 +258,7 @@ exports.Rect = SC.Object.extend({
     init: function() {
         this.x2 = this.x + this.w;
         this.y2 = this.y + this.h;
-        this.sc_super();
+        sc_super();
     },
 
     // inclusive of bounding lines

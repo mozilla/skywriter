@@ -45,7 +45,7 @@ exports.CursorManager = SC.Object.extend({
             }
         }.bind(this));
 
-        this.sc_super();
+        sc_super();
     },
 
     /**
