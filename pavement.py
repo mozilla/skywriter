@@ -59,13 +59,13 @@ options(
 def install_sproutcore():
     abbot = path("abbot")
     if not abbot.exists():
-        sh("git clone git://github.com/sproutit/sproutcore-abbot.git abbot")
+        sh("git clone -q git://github.com/sproutit/sproutcore-abbot.git abbot")
         sh("git checkout -b origin/tiki", cwd=abbot)
         sh("git pull origin tiki", cwd=abbot)
-        sh("git clone git://github.com/sproutit/sproutcore.git", cwd="frameworks")
+        sh("git clone -q git://github.com/sproutit/sproutcore.git", cwd="frameworks")
         sh("git checkout -b origin/tiki", cwd="frameworks/sproutcore")
         sh("git pull origin tiki", cwd="frameworks/sproutcore")
-        sh("git clone git://github.com/sproutit/tiki.git", cwd="frameworks")
+        sh("git clone -q git://github.com/sproutit/tiki.git", cwd="frameworks")
 
 @task
 @needs(["install_sproutcore"])
