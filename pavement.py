@@ -55,22 +55,21 @@ options(
 )
 
 @task
-def install_narwhal():
-    narwhal = path("narwhal")
-    if not narwhal.exists():
-        sh("git clone -q git://github.com/dangoor/narwhal.git")
-        sh("narwhal/bin/sea tusk install jack")
-        sh("narwhal/bin/sea tusk install qunit")
-    
-    packages = ["bespin-core", "bespin-supported", "bespin-labs", 
-                "bespin-build"]
-    for package in packages:
-        client_package = path("src/%s" % package)
-        # yikes! this won't work on Windows
-        sh("ln -sf %s narwhal/packages/" % (client_package.abspath()))
+def install_sproutcore():
+    abbot = path("abbot")
+    if not abbot.exists():
+        sh("git clone git://github.com/sproutit/sproutcore-abbot.git abbot")
+        sh("git checkout -b origin/tiki", cwd=abbot)
+        sh("git pull origin tiki", cwd=abbot)
+        sh("git clone git://github.com/sproutit/sproutcore.git", cwd="frameworks")
+        sh("git checkout -b origin/tiki", cwd="frameworks/sproutcore")
+        sh("git pull origin tiki", cwd="frameworks/sproutcore")
+        sh("git clone git://github.com/sproutit/tiki.git", cwd="frameworks")
+        sh("git remote add dangoor git://github.com/dangoor/tiki.git", cwd="frameworks/tiki")
+        sh("git pull dangoor master", cwd="frameworks/tiki")
 
 @task
-@needs(["install_narwhal"])
+@needs(["install_sproutcore"])
 def initial():
     """Initial setup help."""
     venv_command = "Scripts/activate.bat" if sys.platform == 'win32' \
@@ -148,26 +147,10 @@ paver start
 
 @task
 def start(options):
-    """Starts the BespinServer on localhost port 8080 for development.
-    
-    You can change the port and allow remote connections by setting
-    server.port or server.address on the command line.
-    
-    paver server.address=your.ip.address server.port=8000 start
-    
-    will allow remote connections (assuming you don't have a firewall
-    blocking the connection) and start the server on port 8000.
+    """Starts the BespinServer on localhost port 4020 for development.
     """
-    if sys.platform.startswith("win"):
-        command = "narwhal/bin/sea.cmd"
-    else:
-        command = "narwhal/bin/sea"
-    
-    command += " jackup -p 8081"
+    command = "abbot/bin/sc-server"
     subprocess.Popen(command.split(), stdout=sys.stdout)
-    args = " ".join("%s=%s" % (key, value) 
-        for key, value in options.server.items())
-    call_pavement(options.server_pavement, args + " start")
     
 @task
 def docs(options):

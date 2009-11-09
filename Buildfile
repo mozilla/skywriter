@@ -1,5 +1,5 @@
 config :editor,
-  :required => %w(tiki tiki/platform/classic tiki/system sproutcore/runtime bespin),
+  :required => %w(tiki tiki/platform/classic tiki/system sproutcore bespin),
   :dynamic_required => [],
   :test_required => [],
   :test_debug => [],
