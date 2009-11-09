@@ -66,8 +66,6 @@ def install_sproutcore():
         sh("git checkout -b origin/tiki", cwd="frameworks/sproutcore")
         sh("git pull origin tiki", cwd="frameworks/sproutcore")
         sh("git clone git://github.com/sproutit/tiki.git", cwd="frameworks")
-        sh("git remote add dangoor git://github.com/dangoor/tiki.git", cwd="frameworks/tiki")
-        sh("git pull dangoor master", cwd="frameworks/tiki")
 
 @task
 @needs(["install_sproutcore"])
