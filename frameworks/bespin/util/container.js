@@ -214,9 +214,9 @@ function createFromFactory(id, onCreate) {
  * the entire initial configuration from the plugin system.
  */
 exports.factories = {
-    settings: "bespin/settings:factory",
-    session: "bespin/util/container:dummyFactory",
-    file: "bespin/util/container:dummyFactory",
+    settings: "settings:factory",
+    session: "util/container:dummyFactory",
+    file: "util/container:dummyFactory",
     popup: function(onCreate) {
         exports.plugins.loadOne("popup", function(popupmod) {
             onCreate(new popupmod.Window());

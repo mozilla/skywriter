@@ -27,11 +27,15 @@ main = function() {
     var catalog = plugins.Catalog.create();
     catalog.load(builtins.metadata);
     bespin.register("plugins", catalog);
-
+    
     view.app.getPath("mainPage.mainPane").append();
-    console.log("Layer:");
-    console.log(view.app.getPath("mainPage.mainPane.layer"));
+    
+    // TODO: the stuff that follows is messy. in SC terms, an EditorView should actually
+    // be created in the mainPane directly via a "design" call, not created by 
+    // the controller.
+    
     var controller = EditorController.create({ container: view.app.getPath("mainPage.mainPane.layer") });
     bespin.register("editor", controller);
+    controller.model.insertDocument("Welcome to Bespin.");
     view.app.getPath("mainPage.mainPane").appendChild(controller.ui);
 };
