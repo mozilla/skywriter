@@ -26,6 +26,7 @@
 # ***** END LICENSE BLOCK *****
 # 
 import sys
+import os
 import subprocess
 
 from paver.easy import *
@@ -150,7 +151,8 @@ def start(options):
     """Starts the BespinServer on localhost port 4020 for development.
     """
     command = "abbot/bin/sc-server"
-    subprocess.Popen(command.split(), stdout=sys.stdout)
+    popen = subprocess.Popen(command, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
+    popen.wait()
     
 @task
 def docs(options):
