@@ -36,7 +36,7 @@ var cursor = require("cursor");
 var model = require("model");
 var history = require("history");
 var view = require("editor/views/editor");
-var scroller = require("editor/views/scroller");
+var scroll = require("editor/views/scroll");
 
 /**
  * bespin.editor.API is the root object, the API that others should be able to
@@ -64,17 +64,11 @@ exports.EditorController = SC.Object.extend({
         this.cursorManager = cursor.CursorManager.create({ editor: this });
 
         // TODO: Should we change this name from 'ui'? Seems confusing... --pcw
-        this.ui = SC.ScrollView.create({
+        this.ui = scroll.BespinScrollView.create({
             contentView: view.EditorView.extend({
                 editor: this,
                 content: this.model
-            }),
-            hasHorizontalScroller: true,
-            autohidesHorizontalScroller: false,
-            horizontalScrollerView: scroller.BespinScrollerView,
-            hasVerticalScroller: true,
-            autohidesVerticalScroller: false,
-            verticalScrollerView: scroller.BespinScrollerView
+            })
         });
         this.editorView = this.ui.contentView;
 
