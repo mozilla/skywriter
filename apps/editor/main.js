@@ -2,6 +2,7 @@
 
 var didRun = false;
 var bespin = require("bespin:package");
+var view = require("view");
 
 main = function() {
     if (didRun) {
@@ -15,4 +16,5 @@ main = function() {
     });
     
     bespin.publish("foo:bar", {});
+    view.app.getPath("mainPage.mainPane").append();
 };

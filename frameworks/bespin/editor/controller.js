@@ -22,20 +22,20 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore");
-var bespin = require("bespin");
+var SC = require('sproutcore/runtime:package').SC;
+var bespin = require("package");
 
-var util = require("bespin/util/util");
-var canvas = require("bespin/util/canvas");
-var cookie = require("bespin/util/cookie");
-var keys = require("bespin/util/keys");
+var util = require("util/util");
+var canvas = require("util/canvas");
+var cookie = require("util/cookie");
+var keys = require("util/keys");
 
-var settings = require("bespin/settings");
-var editorEvents = require("bespin/events");
-var cursor = require("bespin/cursor");
-var model = require("bespin/model");
-var history = require("bespin/history");
-var view = require("bespin/editor/views/editor");
+var settings = require("settings");
+var editorEvents = require("events");
+var cursor = require("cursor");
+var model = require("model");
+var history = require("history");
+var view = require("editor/views/editor");
 
 /**
  * bespin.editor.API is the root object, the API that others should be able to

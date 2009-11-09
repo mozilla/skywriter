@@ -22,10 +22,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
-var util = require("bespin/util/util");
-var themes = require("bespin/theme");
-var SC = require("sproutcore");
+var bespin = require("package");
+var util = require("util/util");
+var themes = require("theme");
+var SC = require("sproutcore/runtime:package").SC;
 
 /**
  * This settings module provides a base implementation to store settings.

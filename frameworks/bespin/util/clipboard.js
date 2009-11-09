@@ -26,9 +26,9 @@
  * Handle clipboard operations.
  */
 
-var SC = require("sproutcore");
-var util = require("bespin/util/util");
-var keys = require("bespin/util/keys");
+var SC = require("sproutcore/runtime:package").SC;
+var util = require("util/util");
+var keys = require("util/keys");
 
 /**
  * The clipboard implementation currently in use

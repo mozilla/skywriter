@@ -22,15 +22,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore');
+var SC = require('sproutcore/runtime:package').SC;
 
-var bespin = require('bespin');
-var syntax = require('bespin/syntax');
-var actions = require('bespin/actions');
-var keys = require('bespin/util/keys');
-var clipboard = require("bespin/util/clipboard");
-var cursor = require('bespin/cursor');
-var scroller = require('bespin/editor/views/scroller');
+var bespin = require('package');
+var syntax = require('syntax');
+var actions = require('actions');
+var keys = require('util/keys');
+var clipboard = require("util/clipboard");
+var cursor = require('cursor');
+var scroller = require('editor/views/scroller');
 
 var SelectionHelper = SC.Object.extend({
     editor: null,

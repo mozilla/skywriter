@@ -28,17 +28,17 @@
  * and easy to learn to the embedding user.
  */
 
-require("bespin/util/globals");
+require("util/globals");
 
-var SC = require("sproutcore");
-var bespin = require("bespin");
-var util = require("bespin/util/util");
-var settings = require("bespin/settings");
-var plugins = require("bespin/plugins");
-var builtins = require("bespin/builtins");
-var editorMod = require("bespin/editor");
+var SC = require("sproutcore/runtime:package").SC;
+var bespin = require("package");
+var util = require("util/util");
+var settings = require("settings");
+var plugins = require("plugins");
+var builtins = require("builtins");
+var editorMod = require("editor");
 
-var EditorController = require('bespin/editor/controller').EditorController;
+var EditorController = require('editor/controller').EditorController;
 
 // When we come to integrate the non embedded parts ...
 // var init = re quire("bespin/page/editor/init");

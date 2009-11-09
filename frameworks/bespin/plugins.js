@@ -23,7 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var Q = require("ref-send");
-var SC = require("sproutcore");
+var SC = require("sproutcore/runtime:package").SC;
 
 exports.Extension = SC.Object.extend({
     load: function(callback, property) {

@@ -22,8 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
-var SC = require("sproutcore");
+var bespin = require("package");
+var SC = require("sproutcore/runtime:package").SC;
 
 /**
  * Handle the undo/redo queues for the editor

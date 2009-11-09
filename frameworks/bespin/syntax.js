@@ -29,8 +29,8 @@
  * up to send to the editor.
  */
 
-var bespin = require("bespin");
-var SC = require("sproutcore");
+var bespin = require("package");
+var SC = require("sproutcore/runtime:package").SC;
 
 /**
  * Base model for tracking syntax highlighting data.

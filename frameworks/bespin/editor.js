@@ -22,23 +22,23 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore");
-var bespin = require("bespin");
+var SC = require('sproutcore/runtime:package').SC;
+var bespin = require("bespin:package");
 
-var util = require("bespin/util/util");
-var keys = require("bespin/util/keys");
-var canvas = require("bespin/util/canvas");
-var cookie = require("bespin/util/cookie");
-var mousewheelevent = require("bespin/util/mousewheelevent");
-var clipboard = require("bespin/util/clipboard");
+var util = require("util/util");
+var keys = require("util/keys");
+var canvas = require("util/canvas");
+var cookie = require("util/cookie");
+var mousewheelevent = require("util/mousewheelevent");
+var clipboard = require("util/clipboard");
 
-var settings = require("bespin/settings");
-var editorEvents = require("bespin/events");
-var syntax = require("bespin/syntax");
-var cursor = require("bespin/cursor");
-var actions = require("bespin/actions");
-var model = require("bespin/model");
-var history = require("bespin/history");
+var settings = require("settings");
+var editorEvents = require("events");
+var syntax = require("syntax");
+var cursor = require("cursor");
+var actions = require("actions");
+var model = require("model");
+var history = require("history");
 
 // /**
 //  * If the debugger is reloaded, we need to make sure the module is in memory

@@ -22,10 +22,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore");
-var bespin = require("bespin");
-var util = require("bespin/util/util");
-var cursor = require("bespin/cursor");
+var SC = require("sproutcore/runtime:package").SC;
+var bespin = require("package");
+var util = require("util/util");
+var cursor = require("cursor");
 
 /**
  * The editor has a model of the data that it works with.

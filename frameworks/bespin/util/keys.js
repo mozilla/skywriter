@@ -26,7 +26,7 @@
  * Helpful code to deal with key handling and processing.
  */
 
-var util = require("bespin/util/util");
+var util = require("util/util");
 
 /**
  * Alpha keys, and special keys (ENTER, BACKSPACE) have key codes that our code

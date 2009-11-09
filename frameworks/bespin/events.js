@@ -22,8 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
-var util = require("bespin/util/util");
+var bespin = require("package");
+var util = require("util/util");
 
 exports.subscribe = function() {
     /**

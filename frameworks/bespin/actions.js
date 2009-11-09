@@ -22,10 +22,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
-var SC = require("sproutcore");
-var cursor = require("bespin/cursor");
-var clipboard = require("bespin/util/clipboard");
+var bespin = require("package");
+var SC = require("sproutcore/runtime:package").SC;
+var cursor = require("cursor");
+var clipboard = require("util/clipboard");
 
 /**
  * The editor can run various actions. They are defined here and you can add or

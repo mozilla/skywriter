@@ -22,7 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore');
+var SC = require('sproutcore/runtime:package').SC;
 
 // The fancy custom Bespin scrollbars.
 exports.Scrollbar = SC.Object.extend({
