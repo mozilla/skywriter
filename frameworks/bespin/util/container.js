@@ -56,14 +56,34 @@ var util = require("util/util");
 var registeredComponents = {};
 
 /**
+ * To prevent a loop where a requires b, requires a we track things we are
+ * creating, and if asked to create something thats already there, we die
+ */
+var beingCreated = {};
+
+/**
  * Given an id and an object, register it inside of Bespin.
  * <p>The way to attach components into bespin for others to get them out
  */
 exports.register = function(id, object) {
     registeredComponents[id] = object;
-
+    exports.inject(object);
     console.log("container.register", id, object);
-    if (object.requires) {
+    return object;
+};
+
+/**
+ * Undoes the effects of #register()
+ */
+exports.unregister = function(id) {
+    delete registeredComponents[id];
+};
+
+/**
+ * Inject the requirements into an object
+ */
+exports.inject = function(object) {
+    if (object && object.requires) {
         // Clone the requires structure so we can remove fulfilled requirements
         // and not trip over anything in the prototype chain.
         var requirements = {};
@@ -107,9 +127,9 @@ exports.register = function(id, object) {
                     checkCompleted();
                 };
 
-                var source = object.requires[name];
+                var source = object.requires[property];
                 var component = exports.get(source);
-                if (component) {
+                if (component !== undefined) {
                     onCreate(component);
                 } else {
                     createFromFactory(name, onCreate);
@@ -117,22 +137,21 @@ exports.register = function(id, object) {
             }
         }
     }
-
-    return object;
-};
-
-/**
- * Undoes the effects of #register()
- */
-exports.unregister = function(id) {
-    delete registeredComponents[id];
 };
 
 /**
  * Given an id, return the component.
  */
 exports.get = function(id) {
-    return registeredComponents[id];
+    var object = registeredComponents[id];
+    if (object === undefined) {
+        var onCreate = function(component) {
+            exports.register(id, component);
+            object = component;
+        };
+        createFromFactory(id, onCreate);
+    }
+    return object;
 };
 
 /**
@@ -144,7 +163,7 @@ exports.get = function(id) {
 exports.getComponent = function(id, callback, context) {
     context = context || window;
     var component = exports.get(id);
-    if (component) {
+    if (component === undefined) {
         callback.call(context, component);
     } else {
         var onCreate = function(component) {
@@ -159,7 +178,7 @@ exports.getComponent = function(id, callback, context) {
  * When we don't want to provide an object that actually does anything
  */
 exports.dummyFactory = function(onCreate) {
-    onCreate({});
+    onCreate(null);
 };
 
 /**
@@ -179,17 +198,35 @@ var re = require;
  * as a factory using "bespin/foo:bar".
  */
 function createFromFactory(id, onCreate) {
-    var factory = exports.factories[id];
-    if (!factory) {
-        console.error("No component ", id);
-    } else if (util.isFunction(factory)) {
-        factory(onCreate);
-    } else {
-        // Assume string and split on ":"
-        var parts = factory.split(":");
-        if (parts.length != 2) {
-            console.error("Can't split ", factory, "into 2 parts on ':'");
+    if (beingCreated[id] !== undefined) {
+        console.trace();
+        throw "Already creating " + id;
+    }
+
+    beingCreated[id] = onCreate;
+    try {
+        var factory = exports.factories[id];
+        if (factory === undefined) {
+            console.trace();
+            throw "No component factory '" + id + "'";
+        } else if (util.isFunction(factory)) {
+            factory(onCreate);
         } else {
+            // Extract the method
+            var parts = factory.split(" ");
+            if (parts.length != 2) {
+                throw "Can't split " + factory + " into 2 parts on ' '";
+            }
+            var action = parts.shift();
+            if (action != "call" && action != "create" && action != "new" && action != "value") {
+                throw "Create action must be call|create|new|value. Found" + action;
+            }
+            // Split on ":" for module and export
+            var factory = parts.join(" ");
+            var parts = factory.split(":");
+            if (parts.length != 2) {
+                throw "Can't split " + factory + " into 2 parts on ':'";
+            }
             // Maybe rather than being synchronous with "module = re(parts[0]);"
             // we should be doing this
             // re.when(re.async(parts[0]), function(module) {
@@ -199,12 +236,19 @@ function createFromFactory(id, onCreate) {
             // This works for now, and I'm not trying to solve every problem
             var module = re(parts[0]);
             var exported = module[parts[1]];
-            if (util.isFunction(exported)) {
+            if (action == "call") {
                 exported(onCreate);
-            } else {
+            } else if (action == "create") {
+                onCreate(exported.create());
+            } else if (action == "new") {
+                onCreate(new exported());
+            } else if (action == "value") {
                 onCreate(exported);
             }
         }
+    }
+    finally {
+        delete beingCreated[id];
     }
 }
 
@@ -214,9 +258,11 @@ function createFromFactory(id, onCreate) {
  * the entire initial configuration from the plugin system.
  */
 exports.factories = {
-    settings: "settings:factory",
-    session: "util/container:dummyFactory",
-    file: "util/container:dummyFactory",
+    editor: "create editor/controller:EditorController",
+    settings: "create settings:InMemorySettings",
+    editSession: "call util/container:dummyFactory",
+    file: "call util/container:dummyFactory",
+    parser: "call util/container:dummyFactory",
     popup: function(onCreate) {
         exports.plugins.loadOne("popup", function(popupmod) {
             onCreate(new popupmod.Window());

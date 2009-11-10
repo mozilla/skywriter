@@ -67,13 +67,14 @@ exports.useBespin = function(element, options) {
 
     // Creating the editor alters the components innerHTML
     var content = element.innerHTML;
+    var editor;
 
-    var controller = EditorController.create({ container: element });
     SC.run(function() {
-        bespin.register("editor", controller);
+        bespin.register("container", element);
+        editor = bespin.get("editor");
 
         var editorPane = SC.Pane.create({
-            layout: controller.computeLayout(),
+            layout: editor.computeLayout(),
 
             // And here we tell SproutCore to keep its paws off the element's
             // CSS (and also make the editor pane fill the enclosing element).
@@ -81,7 +82,7 @@ exports.useBespin = function(element, options) {
                 return { width: '100%', height: '100%' };
             }.property().cacheable()
         });
-        editorPane.appendChild(controller.ui, null);
+        editorPane.appendChild(editor.ui, null);
         SC.$(element).css('position', 'relative');
         element.innerHTML = "";
         editorPane.appendTo(element);
@@ -89,27 +90,27 @@ exports.useBespin = function(element, options) {
         if (options.initialContent) {
             content = options.initialContent;
         }
-        controller.model.insertDocument(content);
+        editor.model.insertDocument(content);
 
-        // Call controller.set on any settings
+        // Call editor.setSetting on any settings passed in options.settings
         if (options.settings) {
             for (var key in options.settings) {
                 if (options.settings.hasOwnProperty(key)) {
-                    controller.setSetting(key, options.settings[key]);
+                    editor.setSetting(key, options.settings[key]);
                 }
             }
         }
 
         // stealFocus makes us take focus on startup
         if (options.stealFocus) {
-            controller.setFocus(true);
+            editor.setFocus(true);
         }
 
         // Move to a given line if requested
         if (options.lineNumber) {
-            controller.setLineNumber(options.lineNumber);
+            editor.setLineNumber(options.lineNumber);
         }
     });
 
-    return controller;
+    return editor;
 };
