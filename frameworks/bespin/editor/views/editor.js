@@ -31,6 +31,7 @@ var keys = require('util/keys');
 var clipboard = require("util/clipboard");
 var cursor = require('cursor');
 var scroller = require('editor/views/scroller');
+var settings = require("settings");
 
 var SelectionHelper = SC.Object.extend({
     editor: null,
@@ -55,6 +56,15 @@ var SelectionHelper = SC.Object.extend({
 
         return { startCol: startCol, endCol: endCol };
     }
+});
+
+/**
+ * Add a setting to control is TAB characters are displayed as an arrow
+ */
+settings.addSetting({
+    name: "tabarrow",
+    type: "boolean",
+    defaultValue: true
 });
 
 // The main editor view.
@@ -1529,6 +1539,15 @@ bespin.subscribe("settings:set:fontsize", function(event) {
 });
 
 /**
+ * Add a setting to affect the editor font size
+ */
+settings.addSetting({
+    name: "fontsize",
+    type: "number",
+    defaultValue: 10
+});
+
+/**
  * Change the Theme object used by the editor
  */
 bespin.subscribe("settings:set:theme", function(event) {
@@ -1541,9 +1560,6 @@ bespin.subscribe("settings:set:theme", function(event) {
         if (themeSettings) {
             if (themeSettings != editor.theme) {
                 editor.theme = themeSettings;
-                bespin.publish("settings:set:fontsize", {
-                    value: settings.getValue('fontsize')
-                });
             }
             return true;
         }

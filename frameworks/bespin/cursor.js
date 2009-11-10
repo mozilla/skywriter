@@ -22,8 +22,27 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("package");
+var bespin = require(package);
 var SC = require("sproutcore/runtime:package").SC;
+var settings = require("settings");
+
+/**
+ * Add a setting to restrict the cursor to valid cursor positions
+ */
+settings.addSetting({
+    name: "strictlines",
+    type: "boolean",
+    defaultValue: false
+});
+
+/**
+ * Add a setting to alter cursor positioning on new lines?
+ */
+settings.addSetting({
+    name: "smartmove",
+    type: "boolean",
+    defaultValue: true
+});
 
 /**
  * Handles the position of the cursor, hiding the complexity of translating

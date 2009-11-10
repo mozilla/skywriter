@@ -39,6 +39,15 @@ var view = require("editor/views/editor");
 var scroll = require("editor/views/scroll");
 
 /**
+ * Add a tabsize setting to alter the displayed width of the TAB character
+ */
+settings.addSetting({
+    name: "tabsize",
+    type: "number",
+    defaultValue: 4
+});
+
+/**
  * bespin.editor.API is the root object, the API that others should be able to
  * use
  */
@@ -49,9 +58,10 @@ exports.EditorController = SC.Object.extend({
     containerBinding: '.editorView.layer',
 
     requires: {
+        container: 'container',
         settings: 'settings',
         commandLine: 'commandLine',
-        session: 'session',
+        session: 'editSession',
         file: 'file'
     },
 
@@ -219,8 +229,8 @@ exports.EditorController = SC.Object.extend({
      */
     computeLayout: function() {
         var layout = {
-            left:   0,
-            top:    0,
+            left:      0,
+            top:      0,
             width:  this.container.clientWidth,
             height: this.container.clientHeight
         };
@@ -855,6 +865,15 @@ bespin.subscribe("settings:set:trimonsave", function(event) {
 });
 // Store the subscribe handler away
 var _trimOnSave;
+
+/**
+ * Add a setting to alter the (programming) language of the current file
+ */
+settings.addSetting({
+    name: "language",
+    type: "text",
+    defaultValue: "auto"
+});
 
 /**
  * When a file is opened successfully change the project and file status

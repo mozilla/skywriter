@@ -24,6 +24,7 @@
 
 var bespin = require("bespin");
 var worker = require("bespin/util/worker");
+var settings = require("bespin/settings");
 
 /**
  * Module for dealing parsing and getting meta info about source.
@@ -31,6 +32,24 @@ var worker = require("bespin/util/worker");
  * up to send to the editor.
  * Works similar to syntax highlighting engine
  */
+
+/**
+ * TODO: What's this?
+ */
+settings.addSetting({
+    name: "syntaxmarkers",
+    type: "text",
+    defaultValue: "all"
+});
+
+/**
+ * Add a setting to turn jslint parsing on or off
+ */
+settings.addSetting({
+    name: "jslint",
+    type: "text",
+    defaultValue: ''
+});
 
 /**
  * Saves Info about current source code
@@ -651,6 +670,15 @@ bespin.subscribe("settings:set:syntaxcheck", function (data) {
 });
 
 /**
+ * Add a setting to turn syntax checking of a file on/off
+ */
+settings.addSetting({
+    name: "syntaxcheck",
+    type: "boolean",
+    defaultValue: false
+});
+
+/**
  * When the syntax setting is changed, tell the syntax system to change
  */
 bespin.subscribe("settings:set:language", function(event) {
@@ -669,6 +697,7 @@ bespin.subscribe("settings:language", function(event) {
     var settings = bespin.get('settings');
     var languageSetting = settings.getValue('language') || "auto";
     var editor = bespin.get('editor');
+    var fromURL = urlbar.URL.create();
 
     if (!editor) {
         console.log("Ignoring language change - no editor");
@@ -687,7 +716,7 @@ bespin.subscribe("settings:language", function(event) {
         // the path from the URL anyway. So I'm reverting to this ...
         // If that code did make sense then we should re-revert and
         // explain in comments
-        var path = settings.fromURL.getValue('path');
+        var path = fromURL.getValue('path');
         if (path) {
             var fileType = util.path.fileType(path);
             if (fileType) {

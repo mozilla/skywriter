@@ -23,9 +23,28 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("package");
-var SC = require("sproutcore/runtime:package").SC;
+var SC = require("sproutcore/runtime:package");
 var cursor = require("cursor");
 var clipboard = require("util/clipboard");
+var settings = require("settings");
+
+/**
+ * Add a setting to affect what happens when we press TAB
+ */
+settings.addSetting({
+    name: "tabmode",
+    type: "boolean",
+    defaultValue: false
+});
+
+/**
+ * Add a setting to control auto-closing of character pairs like {, }
+ */
+settings.addSetting({
+    name: "closepairs",
+    type: "boolean",
+    defaultValue: false
+});
 
 /**
  * The editor can run various actions. They are defined here and you can add or

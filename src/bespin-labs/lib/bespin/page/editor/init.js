@@ -200,7 +200,7 @@ exports.onLoad = function() {
     // Load the last file or what is passed in
     // TODO: This was waiting until settings:loaded was published, but there
     // doesn't seem to be any sense in that.
-    var fromURL = settings.URL.create();
+    var fromURL = urlbar.URL.create();
     var path = fromURL.getValue('path') || editSession.path;
     var project = fromURL.getValue('project') || editSession.project;
 
@@ -231,7 +231,7 @@ exports.onLoad = function() {
 
     var whenLoggedIn = function(userinfo) {
         bespin.get('editSession').setUserinfo(userinfo);
-        bespin.register('settings', new settings.Core());
+        bespin.register('settings', new settings.ServerSettings());
 
         if (userinfo.serverCapabilities) {
             var sc = userinfo.serverCapabilities;

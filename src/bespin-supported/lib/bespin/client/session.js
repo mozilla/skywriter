@@ -32,6 +32,16 @@ var util = require("bespin/util/util");
 var mobwrite = require("bespin/mobwrite/core");
 var diff_match_patch = require("bespin/mobwrite/diff");
 var SC = require("sproutcore");
+var settings = require("bespin/settings");
+
+/**
+ * Add a setting to turn collaboration mode on/off
+ */
+settings.addSetting({
+    name: "collaborate",
+    type: "boolean",
+    defaultValue: false
+});
 
 /**
  * Mobwrite has a set of shareObjs which are designed to wrap DOM nodes.

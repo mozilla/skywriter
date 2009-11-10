@@ -27,6 +27,7 @@
 var bespin = require("bespin");
 var util = require("bespin/util/util");
 var filepopup = require("bespin/editor/filepopup");
+var settings = require("bespin/settings");
 
 // This code came from embed.init() although commented out. When we re-enable
 // this plug-in, we might need to use this code
@@ -49,6 +50,14 @@ if (opts.commandline) {
     this.commandLine = bespin.register('commandLine', new bespin.cmd.commandline.Interface(commandlineElement, bespin.command.Store));
 } */
 
+/**
+ * Add a setting to control the console font size
+ */
+settings.addSetting({
+    name: "consolefontsize",
+    type: "number",
+    defaultValue: 11
+});
 
 /**
  * When we are completing against some type, we need a place to cache the

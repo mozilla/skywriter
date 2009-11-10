@@ -22,96 +22,157 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+/**
+ * This module manages settings.
+ * <p>It provides an API for controlling the known settings. This allows us to
+ * provide better GUI/CLI support
+ * <p>It provides 3 implementations of a setting store:<ul>
+ * <li>InMemorySettings: i.e. temporary, non-persistent. Useful in textarea
+ * replacement type scenarios.
+ * <li>CookieSettings: Stores the data in a cookie. Generally not practical as
+ * it slows client server communication (if any)
+ * <li>ServerSettings: Stores data on a server using the <tt>server</tt> API.
+ * </ul>
+ * <p>It is expected that an HTML5 storage option will be developed soon. This
+ * module did contain a prototype Gears implementation, however this was never
+ * maintained, and has been deleted due to bit-rot.
+ *
+ * <p>TODO:<ul>
+ * <li>Check what happens when we alter settings from the UI
+ * <li>Remove the typed access methods like isSettingOn and allow typed data to
+ * be stored, converting to string on save.
+ * <li>Ensure that values can be bound in a SC sense
+ * <li>Convert all subscriptions to bindings.
+ * <li>Implement HTML5 storage option
+ * <li>Make all settings have a 'description' member and use that in set|unset
+ * commands.
+ * <li>When the command system is re-worked to include more GUI interaction,
+ * expose data in settings to that system.
+ * </ul>
+ */
+
 var bespin = require("package");
 var util = require("util/util");
 var themes = require("theme");
 var SC = require("sproutcore/runtime:package").SC;
 
 /**
- * This settings module provides a base implementation to store settings.
- * It also contains various "stores" to save that data, including:
- *
- * <li>Core: Core interface to settings. User code always goes through here.
- * <li>Server: The main store. Saves back to the Bespin Server API
- * <li>InMemory: In memory settings that are used primarily for debugging
- * <li>Cookie: Store in a cookie using cookie-jar
- * <li>URL: Intercept settings in the URL. Often used to override
- * <li>DB: Commented out for now, but a way to store settings locally
- * <li>Events: Custom events that the settings store can intercept and send
+ * Our store of the settings that we accept.
  */
+var settings = [];
 
 /**
- * To allow container to create settings, configured dynamically
+ * These are the types that we accept. They are vaguely based on the Jetpack
+ * settings system (https://wiki.mozilla.org/Labs/Jetpack/JEP/24) although
+ * clearly more restricted.
+ * <p>If you alter this list, remember to alter the error message in
+ * #addSetting() to reflect the altered list of types.
+ * In addition to these types, Jetpack also accepts range, member, password
+ * that we are thinking of adding in the short term.
  */
-exports.factory = function(onCreate) {
-    onCreate(exports.Core.create({ store: exports.InMemory }));
+var validators = {
+    number: function(value) {
+        return typeof value == "number";
+    },
+    boolean: function(value) {
+        return typeof value == "boolean";
+    },
+    text: function(value) {
+        return typeof value == "string";
+    }
+};
+
+/**
+ * Function to add to the list of available settings.
+ * <p>Example usage:
+ * <pre>
+ * settings.addSetting({
+ *     name: "tabsize", // For use in 'set|unset' commands
+ *     type: "number",  // The type to allow value checking. See #validators()
+ *     defaultValue: 4  // The default value for use when none is directly set
+ * });
+ * </pre>
+ */
+exports.addSetting = function(setting) {
+    if (!setting.name) {
+        throw "Settings need 'name' members";
+    }
+    if (!validators[setting.type]) {
+        throw "setting.type should be one of [number|boolean|string]";
+    }
+    if (!setting.defaultValue === undefined) {
+        throw "Settings need 'defaultValue' members";
+    }
+    if (!validators[setting.type](setting.defaultValue)) {
+        throw "Default value " + setting.defaultValue + " is not a valid " + setting.type;
+    }
+    settings.push(setting);
 };
 
 /**
  * The default initial settings
  */
 function defaultSettings() {
-    return {
-        'tabsize': '4',
-        'tabmode': 'off',
-        'tabarrow': 'on',
-        'fontsize': '10',
-        'consolefontsize': '11',
-        'autocomplete': 'off',
-        'closepairs': 'off',
-        'collaborate': 'off',
-        'language': 'auto',
-        'strictlines': 'on',
-        'syntaxcheck': 'off',
-        'syntaxengine': 'simple',
-        'syntaxmarkers': 'all',
-        'preview': 'window',
-        'smartmove': 'on',
-        'jslint': ''
-    };
+    var defaultSettings = {};
+    settings.forEach(function(setting) {
+        defaultSettings[setting.name] = setting.defaultValue;
+    });
+    return defaultSettings;
 }
 
 /**
- * Watch for someone wanting to do a set operation.
- * TODO: Determine if we can kill this
+ * A base class for all the various methods of storing settings.
  */
-bespin.subscribe("settings:set", function(event) {
-    var settings = bespin.get('settings');
-    settings.setValue(event.key, event.value);
-});
+exports.InMemorySettings = SC.Object.extend({
+    /**
+     * We cache the current settings. We are likely to expose this to bindings
+     */
+    values: {},
 
-/**
- * Handles load/save of user settings.
- */
-exports.Core = SC.Object.extend({
-    store: null,
-
+    /**
+     * Setup the default settings
+     */
     init: function() {
-        // This is where we choose which store to load
-        // TODO: Seriously....
-        this.store = new (this.store || exports.ServerFile)(this);
+        // We delay this because publishing to a bunch of things can cause lots
+        // of objects to be created, and it's a bad idea to do that while a core
+        // component (i.e. settings) is being created.
+        setTimeout(function() {
+            this._loadInitialValues();
+        }.bind(this), 10);
     },
 
+    /**
+     * Change the value of the <code>key</code> setting to <code>value</code>.
+     */
     setValue: function(key, value) {
-        this.store.setValue(key, value);
-
+        this.values[key] = value;
+        this._changeValue(key, value);
         bespin.publish("settings:set:" + key, { value: value });
     },
 
+    /**
+     * Retrieve the value of the <code>key</code> setting.
+     */
     getValue: function(key) {
-        return this.store.getValue(key);
+        return this.values[key];
     },
 
-    unsetValue: function(key) {
-        this.store.unsetValue(key);
+    /**
+     * Reset the value of the <code>key</code> setting to it's default
+     */
+    resetValue: function(key) {
+        // TODO: implement this properly
+        delete this.values[key];
     },
 
+    /**
+     * Retrieve a list of the known settings and their values
+     */
     list: function() {
         var settings = [];
-        var storeSettings = this.store.settings;
-        for (var prop in storeSettings) {
-            if (storeSettings.hasOwnProperty(prop)) {
-                settings.push({ 'key': prop, 'value': storeSettings[prop] });
+        for (var prop in this.values) {
+            if (this.values.hasOwnProperty(prop)) {
+                settings.push({ 'key': prop, 'value': this.values[prop] });
             }
         }
         return settings;
@@ -169,167 +230,83 @@ exports.Core = SC.Object.extend({
             console.log("Error in getObject: " + e);
             return {};
         }
-    }
-});
-
-/**
- * Debugging in memory settings (die when browser is closed)
- */
-exports.InMemory = SC.Object.extend({
-    init: function(parent) {
-        this.parent = parent;
-        this.settings = defaultSettings();
     },
 
-    setValue: function(key, value) {
-        this.settings[key] = value;
+    /**
+     * Subclasses should overload this.
+     * Called whenever a value changes, which allows persistent subclasses to
+     * take action to persist the new value
+     */
+    _changeValue: function(key, value) {
     },
 
-    getValue: function(key) {
-        return this.settings[key];
+    /**
+     * Subclasses should overload this, probably calling _loadDefaultValues()
+     * as part of the process before user values are included.
+     */
+    _loadInitialValues: function() {
+        this._loadDefaultValues();
     },
 
-    unsetValue: function(key) {
-        delete this.settings[key];
+    /**
+     * Prime the local cache with the defaults.
+     */
+    _loadDefaultValues: function() {
+        this._loadFromObject(defaultSettings());
+    },
+
+    /**
+     * Utility to load settings from an object
+     */
+    _loadFromObject: function(data) {
+        for (var key in data) {
+            if (data.hasOwnProperty(key)) {
+                this.setValue(key, data[key]);
+            }
+        }
+    },
+
+    /**
+     * Utility to grab all the settings and export them into an object
+     */
+    _saveToObject: function() {
+        var reply = {};
+        for (var key in this.values) {
+            if (this.values.hasOwnProperty(key)) {
+                reply[key] = this.values[key];
+            }
+        }
+        return reply;
     }
 });
 
 /**
  * Save the settings in a cookie
+ * This code has not been tested since reboot
  */
-exports.Cookie = SC.Object.extend({
-    init: function(parent) {
-        var expirationInHours = 1;
-        this.cookieSettings = {
-            expires: expirationInHours / 24,
-            path: '/'
-        };
-
-        var settings = JSON.parse(cookie.get("settings"));
-
-        if (settings) {
-            this.settings = settings;
-        } else {
-            this.settings = {
-                'tabsize': '2',
-                'fontsize': '10',
-                'autocomplete': 'off',
-                'collaborate': 'off'
-            };
-            cookie.set("settings", JSON.stringify(this.settings), this.cookieSettings);
-        }
+exports.CookieSettings = exports.InMemorySettings.extend({
+    _loadInitialValues: function() {
+        this.sc_super();
+        var data = cookie.get("settings");
+        this._loadFromObject(JSON.parse(data));
     },
 
-    setValue: function(key, value) {
-        this.settings[key] = value;
-        cookie.set("settings", JSON.stringify(this.settings), this.cookieSettings);
-    },
-
-    getValue: function(key) {
-        return this.settings[key];
-    },
-
-    unsetValue: function(key) {
-        delete this.settings[key];
-        cookie.set("settings", JSON.stringify(this.settings), this.cookieSettings);
+    _changeValue: function(key, value) {
+        var data = JSON.stringify(this._saveToObject());
+        cookie.set("settings", data);
     }
 });
 
 /**
- * The real grand-daddy that implements uses Server to access the backend
+ * Save the settings using the server.
+ * This code has not been tested since reboot
  */
-exports.ServerAPI = SC.Object.extend({
-    init: function(parent) {
-        this.self = this;
-        this.parent = parent;
-        this.server = bespin.get('server');
-        this.settings = defaultSettings();
-
-        // TODO: seed the settings
-        this.server.listSettings(function(settings) {
-            self.settings = settings;
-            if (settings.tabsize === undefined) {
-                self.settings = defaultSettings();
-                self.server.setSettings(self.settings);
-            }
-        });
-    },
-
-    setValue: function(key, value) {
-        this.settings[key] = value;
-        this.server.setSetting(key, value);
-    },
-
-    getValue: function(key) {
-        return this.settings[key];
-    },
-
-    unsetValue: function(key) {
-        delete this.settings[key];
-        this.server.unsetSetting(key);
-    }
-});
-
-
-/**
- * Store the settings in the file system
- */
-exports.ServerFile = SC.Object.extend({
-    init: function(parent) {
-        this.parent = parent;
-        this.server = bespin.get('server');
-        this.settings = defaultSettings();
-        this.loaded = false;
-
-        // Load up settings from the file system
-        this._load();
-    },
-
-    setValue: function(key, value) {
-        this.settings[key] = value;
-
-        if (key[0] != '_') {
-            this._save(); // Save back to the file system unless this is a hidden setting
-        }
-    },
-
-    getValue: function(key) {
-        return this.settings[key];
-    },
-
-    unsetValue: function(key) {
-        delete this.settings[key];
-
-        this._save(); // Save back to the file system
-    },
-
-    _save: function() {
-        if (!this.loaded) {
-            return; // short circuit to make sure that we don't save the defaults over your settings
-        }
-
-        var settings = "";
-        for (var key in this.settings) {
-            if (this.settings.hasOwnProperty(key)) {
-                settings += key + " " + this.settings[key] + "\n";
-            }
-        }
-
-        bespin.get('files').saveFile(bespin.userSettingsProject, {
-            name: "settings",
-            content: settings,
-            timestamp: new Date().getTime()
-        });
-    },
-
-    _load: function() {
-        var self = this;
-
-        var postLoad = function() {
-            if (!self.loaded) { // first time load
-                self.loaded = true;
-            }
-        };
+exports.ServerSettings = exports.InMemorySettings.extend({
+    _loadInitialValues: function() {
+        this.sc_super();
+        bespin.get('server').listSettings(function(settings) {
+            this._loadFromObject(settings);
+        }.bind(this));
 
         var onLoad = function(file) {
             // Strip \n\n from the end of the file and insert into this.settings
@@ -339,111 +316,27 @@ exports.ServerFile = SC.Object.extend({
                 }
                 if (setting.match(/\S+\s+\S+/)) {
                     var pieces = setting.split(/\s+/);
-                    self.settings[pieces[0].trim()] = pieces[1].trim();
+                    this.setValue(pieces[0].trim(), pieces[1].trim());
                 }
             });
-
-            // This loop is supposed to replace self.parent.publishValues();
-            // If this works, then we should remove the above code
-            for (var key in self.settings) {
-                bespin.publish("settings:set:" + key, {
-                    value: self.settings[key]
-                });
-            }
-
-            postLoad();
         };
 
-        bespin.fireAfter([ "authenticated" ], function() {
-            // postLoad even if we can't read the settings file
-            bespin.get('files').loadContents(bespin.userSettingsProject, "settings", onLoad, postLoad);
-        });
-    }
-});
-
-
-/**
- * Taken out for now to allow us to not require gears_db.js (and Gears itself).
- * Experimental ability to save locally in the SQLite database.
- * The plan is to migrate to ActiveRecord.js or something like it to abstract on top
- * of various stores (HTML5, Gears, globalStorage, etc.)
- */
-
-/*
-// turn off for now so we can take gears_db.js out
-exports.DB = SC.Object.extend({
-    parent: null,
-    init: function() {
-        this.db = new GearsDB('wideboy');
-
-        //this.db.run('drop table settings');
-        this.db.run('create table if not exists settings (' +
-               'id integer primary key,' +
-               'key varchar(255) unique not null,' +
-               'value varchar(255) not null,' +
-               'timestamp int not null)');
-
-        this.db.run('CREATE INDEX IF NOT EXISTS settings_id_index ON settings (id)');
+        bespin.get('files').loadContents(bespin.userSettingsProject, "settings", onLoad);
     },
 
-    setValue: function(key, value) {
-        this.db.forceRow('settings', { 'key': key, 'value': value, timestamp: new Date().getTime() }, 'key');
-    },
-
-    getValue: function(key) {
-        var rs = this.db.run('select distinct value from settings where key = ?', [ key ]);
-        try {
-            if (rs && rs.isValidRow()) {
-              return rs.field(0);
+    _changeValue: function(key, value) {
+        // Aggregate the settings into a file
+        var settings = "";
+        for (var key in this.values) {
+            if (this.values.hasOwnProperty(key)) {
+                settings += key + " " + this.values[key] + "\n";
             }
-        } catch (e) {
-            console.log(e.message);
-        } finally {
-            rs.close();
         }
-    },
-
-    unsetValue: function(key) {
-        this.db.run('delete from settings where key = ?', [ key ]);
-    },
-
-    list: function() {
-        // TODO: Need to override with browser settings
-        return this.db.selectRows('settings', '1=1');
-    },
-
-    // -- Private-y
-    seed: function() {
-        this.db.run('delete from settings');
-
-        // TODO: loop through the settings
-        this.db.run('insert into settings (key, value, timestamp) values (?, ?, ?)', ['keybindings', 'emacs', 1183878000000]);
-        this.db.run('insert into settings (key, value, timestamp) values (?, ?, ?)', ['tabsize', '2', 1183878000000]);
-        this.db.run('insert into settings (key, value, timestamp) values (?, ?, ?)', ['fontsize', '10', 1183878000000]);
-        this.db.run('insert into settings (key, value, timestamp) values (?, ?, ?)', ['autocomplete', 'off', 1183878000000]);
-    }
-});
-*/
-
-/**
- * Grab the setting from the URL, either via # or ?
- */
-exports.URL = SC.Object.extend({
-    init: function(queryString) {
-        this.results = util.queryToObject(this.stripHash(queryString || window.location.hash));
-    },
-
-    getValue: function(key) {
-        return this.results[key];
-    },
-
-    setValue: function(key, value) {
-        this.results[key] = value;
-    },
-
-    stripHash: function(url) {
-        var tobe = url.split('');
-        tobe.shift();
-        return tobe.join('');
+        // Send it to the server
+        bespin.get('files').saveFile(bespin.userSettingsProject, {
+            name: "settings",
+            content: settings,
+            timestamp: new Date().getTime()
+        });
     }
 });

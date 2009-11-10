@@ -251,7 +251,7 @@ exports.Toolbar = SC.Object.extend({
 
                 dojo.connect(fontsize, 'click', function() {
                     currentFontSize = (currentFontSize > 2) ? 1 : currentFontSize + 1;
-                    bespin.publish("settings:set:fontsize", [{ value: fontSizes[currentFontSize] }]);
+                    bespin.get("settings").setValue("fontsize", fontSizes[currentFontSize]);
                 });
             })();
         }

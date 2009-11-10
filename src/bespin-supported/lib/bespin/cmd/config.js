@@ -285,7 +285,7 @@ command.store.addCommand({
         if (!settings.getValue(key)) {
             instruction.addErrorOutput("No setting for " + key + ".");
         } else {
-            settings.unsetValue(key);
+            settings.resetValue(key);
             instruction.addOutput("Unset the setting for " + key + ".");
         }
     },

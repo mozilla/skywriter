@@ -46,3 +46,26 @@ exports.monitor = function() {
         }
     }, 200);
 };
+
+/**
+ * Grab the setting from the URL, either via # or ?
+ */
+exports.URL = SC.Object.extend({
+    init: function(queryString) {
+        this.results = util.queryToObject(this.stripHash(queryString || window.location.hash));
+    },
+
+    getValue: function(key) {
+        return this.results[key];
+    },
+
+    setValue: function(key, value) {
+        this.results[key] = value;
+    },
+
+    stripHash: function(url) {
+        var tobe = url.split('');
+        tobe.shift();
+        return tobe.join('');
+    }
+});

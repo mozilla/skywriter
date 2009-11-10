@@ -27,11 +27,21 @@ var command = require("bespin/command");
 var path = require("bespin/util/path");
 var keys = require("bespin/util/keys");
 var webpieces = require("bespin/util/webpieces");
+var settings = require("bespin/settings");
 
 /**
  * TODO: We need to find a way to add in a key-sequence for this. Currently
  * it's in with all the other key sequences ...
  */
+
+/**
+ * Add a setting to alter how previews are displayed
+ */
+settings.addSetting({
+    name: "preview",
+    type: "text",
+    defaultValue: "window"
+});
 
 /**
  * Add in the preview command
