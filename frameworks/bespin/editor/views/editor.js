@@ -122,8 +122,6 @@ exports.EditorView = SC.View.extend({
         this.selectionHelper = SelectionHelper.create({ editor: this.editor });
         this.actions = actions.Actions.create({ editor: this.editor });
 
-        // this.lineHeight;        // reserved for when line height is calculated dynamically instead of with a constant; set first time a paint occurs
-        // this.charWidth;         // set first time a paint occurs
         // this.visibleRows;       // the number of rows visible in the editor; set each time a paint occurs
         // this.firstVisibleRow;   // first row that is visible in the editor; set each time a paint occurs
 
@@ -199,14 +197,16 @@ exports.EditorView = SC.View.extend({
         var x, y;
 
         var content = this.get("content");
+        var charWidth = this.get("charWidth");
+        var lineHeight = this.get("lineHeight");
 
         if (pos.y < 0) { //ensure line >= first
             y = 0;
-        } else if (pos.y >= (this.lineHeight * content.getRowCount())) { //ensure line <= last
+        } else if (pos.y >= (lineHeight * content.getRowCount())) { //ensure line <= last
             y = content.getRowCount() - 1;
         } else {
             var ty = pos.y;
-            y = Math.floor(ty / this.lineHeight);
+            y = Math.floor(ty / lineHeight);
         }
 
         if (pos.x <= (this.get('gutterWidth') + this.LINE_INSETS.left)) {
@@ -214,7 +214,7 @@ exports.EditorView = SC.View.extend({
         } else {
             var tx = pos.x - this.get('gutterWidth') - this.LINE_INSETS.left;
             // round vs floor so we can pick the left half vs right half of a character
-            x = Math.round(tx / this.charWidth);
+            x = Math.round(tx / charWidth);
 
             // With strictlines turned on, don't select past the end of the line
             if ((settings && settings.isSettingOn('strictlines'))) {
@@ -689,57 +689,59 @@ exports.EditorView = SC.View.extend({
      * Returns the height in pixels of the content area.
      */
     getHeight: function() {
-        return this.lineHeight * this.get('content').getRowCount();
+        return this.get('lineHeight') * this.get('content').getRowCount();
     },
 
-    // TODO: convert to property
-    getCharWidth: function(ctx) {
-        if (ctx.measureText) {
+    /**
+     * @property{Number}
+     * The width of one character in pixels.
+     *
+     * TODO: When the theme property moves to this view, these properties
+     * should become dependent on it.
+     */
+    charWidth: function(key, value) {
+        var ctx = this.get('canvas').getContext('2d');
+        if (ctx.measureText !== undefined)
             return ctx.measureText("M").width;
-        } else {
-            return this.FALLBACK_CHARACTER_WIDTH;
-        }
-    },
+        return this.FALLBACK_CHARACTER_WIDTH;
+    }.property().cacheable(),
 
-    // TODO: convert to property
-    getLineHeight: function(ctx) {
-        var lh = -1;
-        if (ctx.measureText) {
+    /**
+     * @property{Number}
+     * The height of one character in pixels.
+     *
+     * TODO: When the theme property moves to this view, these properties
+     * should become dependent on this.
+     */
+    lineHeight: function(key, value) {
+        var ctx = this.get('canvas').getContext('2d');
+        if (ctx.measureText !== undefined) {
             var t = ctx.measureText("M");
-            if (t.ascent) {
-                lh = Math.floor(t.ascent * 2.8);
-            }
+            if (!isNaN(t.ascent))
+                return Math.floor(t.ascent * 2.8);
         }
-        if (lh == -1) {
-            lh = this.LINE_HEIGHT;
-        }
-        return lh;
-    },
+        return this.LINE_HEIGHT;
+    }.property().cacheable(),
 
     gutterWidth: function() {
         var width = this.GUTTER_INSETS.left + this.GUTTER_INSETS.right
             + this.get('content').getRowCount().toString().length
-            * this.charWidth;
+            * this.get('charWidth');
         if (this.editor.debugMode)
             width += this.DEBUG_GUTTER_WIDTH;
         return width;
-    }.property('content'),
+    }.property('content', 'charWidth'),
 
     // Returns the width in pixels of the longest line.
     textWidth: function() {
         // TODO: Don't look through every row to determine the width every
         // time. This is expensive. Cache instead. --pcw
-        return this.charWidth
+        return this.get('charWidth')
             * this.getMaxCols(0, this.get('content').getRowCount() - 1);
-    }.property('content'),
+    }.property('content', 'charWidth'),
 
     /**
      * Returns the dimensions of the entire content area of the editor.
-     * This can only be safely called in the paint() function after charWidth
-     * and lineHeight have been calculated and stored in this object.
-     *
-     * TODO: Allow this to be called from anywhere - the way paint() stores
-     * vital state is confusing. --pcw
      */
     computeLayout: function(minimumSize) {
         var frame = this.get('frame');
@@ -871,21 +873,6 @@ exports.EditorView = SC.View.extend({
         // save the number of lines for the next time paint
         this.lastLineCount = content.getRowCount();
 
-        // get the line and character metrics; calculated for each paint because
-        // this value can change at run-time
-        ctx.font = theme.editorTextFont;
-        this.charWidth = this.getCharWidth(ctx);
-        this.lineHeight = this.getLineHeight(ctx);
-
-        // TODO: This really shouldn't be done in paint(), instead do it
-        // lazily whenever the layout changes.
-        // This depends on charWidth and lineHeight being set properly above.
-        var containerSize = this.computeContainerSize();
-        if (containerSize != null)
-            this.resizeCanvasToFit(containerSize);
-        var layout = this.computeLayout(containerSize);
-        this.adjust(layout);
-
         // cwidth and cheight are set to the dimensions of the parent node of
         // the canvas element; we'll resize the canvas element
         // itself a little bit later in this function
@@ -894,7 +881,8 @@ exports.EditorView = SC.View.extend({
 
         // only paint those lines that can be visible
         // TODO: calculate using clippingFrame --pcw
-        this.visibleRows = Math.ceil(cheight / this.lineHeight);
+        var lineHeight = this.get('lineHeight');
+        this.visibleRows = Math.ceil(cheight / lineHeight);
         this.firstVisibleRow = 0;
         lastLineToRender = this.firstVisibleRow + this.visibleRows;
         if (lastLineToRender > (content.getRowCount() - 1)) {
@@ -944,19 +932,21 @@ exports.EditorView = SC.View.extend({
         // take snapshot of current context state so we can roll back later on
         ctx.save();
 
-        // Translate the canvas based on the layout position.
-        ctx.translate(layout.left, layout.top);
-
         // if we're doing a full repaint...
+        var clippingFrame = this.get('clippingFrame');
         if (refreshCanvas) {
             // ...paint the background color over the whole canvas and...
             ctx.fillStyle = theme.backgroundStyle;
-            ctx.fillRect(0, 0, layout.width, layout.height);
+            ctx.fillRect(0, 0, clippingFrame.width, clippingFrame.height);
 
             // ...paint the gutter
             ctx.fillStyle = theme.gutterStyle;
-            ctx.fillRect(0, 0, this.get('gutterWidth'), layout.height);
+            ctx.fillRect(0, 0, this.get('gutterWidth'), clippingFrame.height);
         }
+
+        // Translate the canvas based on the layout position.
+        var layout = this.get('layout');
+        ctx.translate(layout.left, layout.top);
 
         // the Math.round(this.yoffset) makes the painting nice and not to go over 2 pixels
         // see for more informations:
@@ -969,15 +959,15 @@ exports.EditorView = SC.View.extend({
             if (bespin.get("parser")) {
                 for (currentLine = this.firstVisibleRow; currentLine <= lastLineToRender; currentLine++) {
                     if (lineMarkers[currentLine]) {
-                        y = this.lineHeight * (currentLine - 1);
-                        cy = y + (this.lineHeight - this.LINE_INSETS.bottom);
+                        y = lineHeight * (currentLine - 1);
+                        cy = y + (lineHeight - this.LINE_INSETS.bottom);
                         ctx.fillStyle = this.editor.theme["lineMarker" + lineMarkers[currentLine].type + "Color"];
                         ctx.fillRect(0, y, this.get('gutterWidth'),
-                            this.lineHeight);
+                            lineHeight);
                     }
                  }
             }
-            y = (this.lineHeight * this.firstVisibleRow);
+            y = (lineHeight * this.firstVisibleRow);
 
             for (currentLine = this.firstVisibleRow; currentLine <= lastLineToRender; currentLine++) {
                 x = 0;
@@ -989,7 +979,7 @@ exports.EditorView = SC.View.extend({
                         var bpx = x + this.DEBUG_GUTTER_INSETS.left;
                         var bpy = y + this.DEBUG_GUTTER_INSETS.top;
                         var bpw = this.DEBUG_GUTTER_WIDTH - this.DEBUG_GUTTER_INSETS.left - this.DEBUG_GUTTER_INSETS.right;
-                        var bph = this.lineHeight - this.DEBUG_GUTTER_INSETS.top - this.DEBUG_GUTTER_INSETS.bottom;
+                        var bph = lineHeight - this.DEBUG_GUTTER_INSETS.top - this.DEBUG_GUTTER_INSETS.bottom;
 
                         var bpmidpointx = bpx + parseInt(bpw / 2, 10);
                         var bpmidpointy = bpy + parseInt(bph / 2, 10);
@@ -1010,14 +1000,13 @@ exports.EditorView = SC.View.extend({
 
                 x += this.GUTTER_INSETS.left;
 
-                cy = y + (this.lineHeight - this.LINE_INSETS.bottom);
+                cy = y + (lineHeight - this.LINE_INSETS.bottom);
 
                 ctx.fillStyle = theme.lineNumberColor;
                 ctx.font = this.editor.theme.lineNumberFont;
-                //console.log(currentLine + " " + x + " " + cy);
                 ctx.fillText(currentLine + 1, x, cy);
 
-                y += this.lineHeight;
+                y += lineHeight;
             }
          }
 
@@ -1036,12 +1025,13 @@ exports.EditorView = SC.View.extend({
         // values will be used to try and avoid painting text that the user
         // can't actually see
         // TODO: use clippingFrame to calculate these --pcw
+        var charWidth = this.get('charWidth');
         var firstColumn = 0;
         var lastColumn = firstColumn + (Math.ceil((cwidth
-            - this.get('gutterWidth')) / this.charWidth));
+            - this.get('gutterWidth')) / charWidth));
 
         // create the state necessary to render each line of text
-        y = (this.lineHeight * this.firstVisibleRow);
+        y = (lineHeight * this.firstVisibleRow);
         // the starting column of the current region in the region render loop below
         var cc;
         // the ending column in the same loop
@@ -1063,7 +1053,7 @@ exports.EditorView = SC.View.extend({
                 // ...don't bother painting the line unless it is "dirty"
                 // (see above for dirty checking)
                 if (!dirty[currentLine]) {
-                    y += this.lineHeight;
+                    y += lineHeight;
                     continue;
                 }
 
@@ -1074,7 +1064,7 @@ exports.EditorView = SC.View.extend({
                 ctx.save();
                 ctx.beginPath();
                 // TODO: calculate with clippingFrame --pcw
-                ctx.rect(x, y, cwidth, this.lineHeight);
+                ctx.rect(x, y, cwidth, lineHeight);
                 ctx.closePath();
                 ctx.clip();
 
@@ -1083,7 +1073,7 @@ exports.EditorView = SC.View.extend({
                 if ((currentLine % 2) == 1) {
                     ctx.fillStyle = theme.backgroundStyle;
                     // TODO: calculate with clippingFrame --pcw
-                    ctx.fillRect(x, y, cwidth, this.lineHeight);
+                    ctx.fillRect(x, y, cwidth, lineHeight);
                 }
             }
 
@@ -1092,24 +1082,24 @@ exports.EditorView = SC.View.extend({
                     (currentLine == ed.cursorManager.getCursorPosition().row)) {
                 ctx.fillStyle = theme.highlightCurrentLineColor;
                 // TODO: calculate with clippingFrame --pcw
-                ctx.fillRect(x, y, cwidth, this.lineHeight);
+                ctx.fillRect(x, y, cwidth, lineHeight);
             // if not on highlight, see if we need to paint the zebra
             } else if ((currentLine % 2) == 0) {
                 ctx.fillStyle = theme.zebraStripeColor;
                 // TODO: calculate with clippingFrame --pcw
-                ctx.fillRect(x, y, cwidth, this.lineHeight);
+                ctx.fillRect(x, y, cwidth, lineHeight);
             }
 
             x += this.LINE_INSETS.left;
-            cy = y + (this.lineHeight - this.LINE_INSETS.bottom);
+            cy = y + (lineHeight - this.LINE_INSETS.bottom);
 
             // paint the selection bar if the line has selections
             var selections = this.selectionHelper.getRowSelectionPositions(currentLine);
             if (selections) {
-                tx = x + (selections.startCol * this.charWidth);
-                tw = (selections.endCol == -1) ? (lastColumn - firstColumn) * this.charWidth : (selections.endCol - selections.startCol) * this.charWidth;
+                tx = x + (selections.startCol * charWidth);
+                tw = (selections.endCol == -1) ? (lastColumn - firstColumn) * charWidth : (selections.endCol - selections.startCol) * charWidth;
                 ctx.fillStyle = theme.editorSelectedTextBackground;
-                ctx.fillRect(tx, y, tw, this.lineHeight);
+                ctx.fillRect(tx, y, tw, lineHeight);
             }
 
             var lineMetadata = content.getRowMetadata(currentLine);
@@ -1174,11 +1164,11 @@ exports.EditorView = SC.View.extend({
 
                 for (var i = 0; i < searchIndices.length; i++) {
                     var index = ed.cursorManager.getCursorPosition({col: searchIndices[i], row: currentLine}).col;
-                    tx = x + index * this.charWidth;
+                    tx = x + index * charWidth;
 
                     // highlight the area
                     ctx.fillStyle = this.editor.theme.searchHighlight;
-                    ctx.fillRect(tx, y, searchStringLength * this.charWidth, this.lineHeight);
+                    ctx.fillRect(tx, y, searchStringLength * charWidth, lineHeight);
 
                     // figure out, whether the selection is in this area. If so, colour it different
                     if (tsel) {
@@ -1190,7 +1180,7 @@ exports.EditorView = SC.View.extend({
                             indexEnd = Math.min(indexEnd, tsel.endCol);
 
                             ctx.fillStyle = this.editor.theme.searchHighlightSelected;
-                            ctx.fillRect(x + indexStart * this.charWidth, y, (indexEnd - indexStart) * this.charWidth, this.lineHeight);
+                            ctx.fillRect(x + indexStart * charWidth, y, (indexEnd - indexStart) * charWidth, lineHeight);
                         }
                     }
 
@@ -1208,21 +1198,21 @@ exports.EditorView = SC.View.extend({
                         var expansion = lineMetadata.tabExpansions[i];
 
                         // the starting x position of the tab character; the existing value of y is fine
-                        var lx = x + (expansion.start * this.charWidth);
+                        var lx = x + (expansion.start * charWidth);
 
                         // check if the user wants us to highlight tabs; useful if you need to mix tabs and spaces
                         var showTabSpace = settings && settings.isSettingOn("tabshowspace");
                         if (showTabSpace) {
-                            var sw = (expansion.end - expansion.start) * this.charWidth;
+                            var sw = (expansion.end - expansion.start) * charWidth;
                             ctx.fillStyle = this.editor.theme.tabSpace || "white";
-                            ctx.fillRect(lx, y, sw, this.lineHeight);
+                            ctx.fillRect(lx, y, sw, lineHeight);
                         }
 
                         var showTabNib = settings && settings.isSettingOn("tabarrow");
                         if (showTabNib) {
                             // the center of the current character position's bounding rectangle
-                            cy = y + (this.lineHeight / 2);
-                            var cx = lx + (this.charWidth / 2);
+                            cy = y + (lineHeight / 2);
+                            var cx = lx + (charWidth / 2);
 
                             // the width and height of the triangle to draw representing the tab
                             tw = 4;
@@ -1247,7 +1237,7 @@ exports.EditorView = SC.View.extend({
                 }
             }
 
-            y += this.lineHeight;
+            y += lineHeight;
         }
 
         // paint the cursor
@@ -1256,28 +1246,28 @@ exports.EditorView = SC.View.extend({
                 if (ed.theme.cursorType == "underline") {
                     x = this.get('gutterWidth') + this.LINE_INSETS.left
                         + ed.cursorManager.getCursorPosition().col
-                        * this.charWidth;
-                    y = (ed.getCursorPos().row * this.lineHeight) + (this.lineHeight - 5);
+                        * charWidth;
+                    y = (ed.getCursorPos().row * lineHeight) + (lineHeight - 5);
                     ctx.fillStyle = ed.theme.cursorStyle;
-                    ctx.fillRect(x, y, this.charWidth, 3);
+                    ctx.fillRect(x, y, charWidth, 3);
                 } else {
                     x = this.get('gutterWidth') + this.LINE_INSETS.left
                         + ed.cursorManager.getCursorPosition().col
-                        * this.charWidth;
-                    y = (ed.cursorManager.getCursorPosition().row * this.lineHeight);
+                        * charWidth;
+                    y = (ed.cursorManager.getCursorPosition().row * lineHeight);
                     ctx.fillStyle = ed.theme.cursorStyle;
-                    ctx.fillRect(x, y, 1, this.lineHeight);
+                    ctx.fillRect(x, y, 1, lineHeight);
                 }
             }
         } else {
             x = this.get('gutterWidth') + this.LINE_INSETS.left
-                + ed.cursorManager.getCursorPosition().col * this.charWidth;
-            y = (ed.cursorManager.getCursorPosition().row * this.lineHeight);
+                + ed.cursorManager.getCursorPosition().col * charWidth;
+            y = (ed.cursorManager.getCursorPosition().row * lineHeight);
 
             ctx.fillStyle = ed.theme.unfocusedCursorFillStyle;
             ctx.strokeStyle = ed.theme.unfocusedCursorStrokeStyle;
-            ctx.fillRect(x, y, this.charWidth, this.lineHeight);
-            ctx.strokeRect(x, y, this.charWidth, this.lineHeight);
+            ctx.fillRect(x, y, charWidth, lineHeight);
+            ctx.strokeRect(x, y, charWidth, lineHeight);
         }
 
         // Paint the cursors of other users
@@ -1287,13 +1277,13 @@ exports.EditorView = SC.View.extend({
             if (userEntries) {
                 userEntries.forEach(function(userEntry) {
                     if (!userEntry.clientData.isMe) {
-                        x = this.gutterWidth + this.LINE_INSETS.left + userEntry.clientData.cursor.start.col * this.charWidth;
-                        y = userEntry.clientData.cursor.start.row * this.lineHeight;
+                        x = this.gutterWidth + this.LINE_INSETS.left + userEntry.clientData.cursor.start.col * charWidth;
+                        y = userEntry.clientData.cursor.start.row * lineHeight;
                         ctx.fillStyle = "#ee8c00";
-                        ctx.fillRect(x, y, 1, this.lineHeight);
+                        ctx.fillRect(x, y, 1, lineHeight);
                         var prevFont = ctx.font;
                         ctx.font = "6pt Monaco, Lucida Console, monospace";
-                        ctx.fillText(userEntry.handle, x + 3, y + this.lineHeight + 4);
+                        ctx.fillText(userEntry.handle, x + 3, y + lineHeight + 4);
                         ctx.font = prevFont;
                     }
                 }.bind(this));
@@ -1312,31 +1302,31 @@ exports.EditorView = SC.View.extend({
                 ctx.strokeStyle = "#211A16";
                 ctx.beginPath();
                 // Line 1 (starting at column 180 - should do better)
-                x = this.gutterWidth + this.LINE_INSETS.left + 180 * this.charWidth;
-                y = change.start.row * this.lineHeight;
+                x = this.gutterWidth + this.LINE_INSETS.left + 180 * charWidth;
+                y = change.start.row * lineHeight;
                 ctx.moveTo(x, y);
-                x = this.gutterWidth + this.LINE_INSETS.left + change.start.col * this.charWidth;
+                x = this.gutterWidth + this.LINE_INSETS.left + change.start.col * charWidth;
                 ctx.lineTo(x, y);
                 // Line 2
-                y += this.lineHeight;
+                y += lineHeight;
                 ctx.lineTo(x, y);
                 // Line 3
                 x = this.gutterWidth + this.LINE_INSETS.left;
                 ctx.lineTo(x, y);
                 // Line 4
-                y = (change.end.row + 1) * this.lineHeight;
+                y = (change.end.row + 1) * lineHeight;
                 ctx.lineTo(x, y);
                 // Line 5
-                x = this.gutterWidth + this.LINE_INSETS.left + change.end.col * this.charWidth;
+                x = this.gutterWidth + this.LINE_INSETS.left + change.end.col * charWidth;
                 ctx.lineTo(x, y);
                 // Line 6
-                y = change.end.row * this.lineHeight;
+                y = change.end.row * lineHeight;
                 ctx.lineTo(x, y);
                 // Line 7
-                x = this.gutterWidth + this.LINE_INSETS.left + 180 * this.charWidth;
+                x = this.gutterWidth + this.LINE_INSETS.left + 180 * charWidth;
                 ctx.lineTo(x, y);
                 // Line 8
-                y = change.start.row * this.lineHeight;
+                y = change.start.row * lineHeight;
                 ctx.lineTo(x, y);
                 ctx.stroke();
             }.bind(this));
@@ -1449,6 +1439,22 @@ exports.EditorView = SC.View.extend({
     _scrollToCursorVisible: function() {
         var cursorPos = this.editor.cursorManager.getCursorPosition();
         return this._scrollToCharVisible(cursorPos);
+    },
+
+    _updateCanvasSize: function() {
+        var containerSize = this.computeContainerSize();
+        if (containerSize != null)
+            this.resizeCanvasToFit(containerSize);
+        var layout = this.computeLayout(containerSize);
+        this.adjust(layout);
+    },
+
+    /**
+     * Called by the cursor object whenever it moves.
+     */
+    cursorDidMove: function(sender, newPosition) {
+        this._updateCanvasSize();
+        this._scrollToCursorVisible();
     },
 
     dispose: function() {

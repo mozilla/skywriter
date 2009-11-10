@@ -543,6 +543,10 @@ exports.CursorManager = SC.Object.extend({
         var editorView = bespin.get('editor').editorView;
         editorView.showCursor = true;
         editorView.toggleCursorAllowed = false;
+
+        // Tell the editor view that the cursor moved; this is the main way
+        // the model informs the view of changes.
+        editorView.cursorDidMove(this, this.position);
     },
 
     // Pass in a screen position; returns undefined if the postion is valid,
