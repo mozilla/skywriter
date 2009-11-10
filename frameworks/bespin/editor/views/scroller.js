@@ -408,24 +408,30 @@ exports.BespinScrollerView = SC.View.extend({
     },
 
     _paintNibs: function(ctx) {
+        var isMouseOver = this._isMouseOver;
         var scrollerThickness = this.get('scrollerThickness');
+        var value = this.get('value');
 
         // Starting nib
-        ctx.save();
-        ctx.translate(NIB_PADDING, scrollerThickness / 2);
-        ctx.rotate(Math.PI * 1.5);
-        ctx.moveTo(0, 0);
-        this._paintNib(ctx);
-        ctx.restore();
+        if (isMouseOver || value !== 0) {
+            ctx.save();
+            ctx.translate(NIB_PADDING, scrollerThickness / 2);
+            ctx.rotate(Math.PI * 1.5);
+            ctx.moveTo(0, 0);
+            this._paintNib(ctx);
+            ctx.restore();
+        }
 
         // Ending nib
-        ctx.save();
-        ctx.translate(this.get('frameLength') - NIB_PADDING,
-            scrollerThickness / 2);
-        ctx.rotate(Math.PI * 0.5);
-        ctx.moveTo(0, 0);
-        this._paintNib(ctx);
-        ctx.restore();
+        if (isMouseOver || value !== this.get('maximumValue')) {
+            ctx.save();
+            ctx.translate(this.get('frameLength') - NIB_PADDING,
+                scrollerThickness / 2);
+            ctx.rotate(Math.PI * 0.5);
+            ctx.moveTo(0, 0);
+            this._paintNib(ctx);
+            ctx.restore();
+        }
     },
 
     _paint: function() {
@@ -440,14 +446,14 @@ exports.BespinScrollerView = SC.View.extend({
         
         var alpha = (ctx.globalAlpha) ? ctx.globalAlpha : 1;
 
-        // Clear out the canvas.
         var theme = this.get('theme');
-        ctx.fillStyle = theme.backgroundStyle;
-        ctx.fillRect(0, 0, frame.width, frame.height);
+
+        ctx.clearRect(0, 0, frame.width, frame.height);
 
         if (this.get('isEnabled') === false || gutterLength <= handleLength)
             return; // Don't display the scroll bar.        
     
+        // Begin master drawing context
         ctx.save();
 
         var handleFrame = this.get('handleFrame');
@@ -474,10 +480,20 @@ exports.BespinScrollerView = SC.View.extend({
             break;
         }
 
-        ctx.save();
-
         var scrollerThickness = this.get('scrollerThickness');
         var halfThickness = scrollerThickness / 2;
+
+        if (this._isMouseOver === false) {
+            ctx.globalAlpha = 0.3;
+        } else {
+            // Draw the scroll track rectangle.
+            var frameLength = this.get('frameLength');
+            ctx.fillStyle = theme.scrollTrackFillStyle;
+            ctx.fillRect(NIB_PADDING + 1, 1,
+                frameLength - 2*NIB_PADDING - 2, scrollerThickness - 2);
+            ctx.strokeStyle = theme.scrollTrackStrokeStyle;
+            ctx.strokeRect(NIB_PADDING, 0, frameLength, scrollerThickness);
+        }
 
         ctx.beginPath();
         ctx.arc(handleDistance + halfThickness, 0 + halfThickness, halfThickness,
@@ -502,6 +518,7 @@ exports.BespinScrollerView = SC.View.extend({
         ctx.fillStyle = gradient;
         ctx.fill();
 
+        // Begin handle border context
         ctx.save();
         ctx.clip();
 
@@ -522,6 +539,7 @@ exports.BespinScrollerView = SC.View.extend({
         ctx.fill();
 
         ctx.restore();
+        // End handle border context
 
         ctx.beginPath();
         ctx.arc(handleDistance + halfThickness, 0 + halfThickness, halfThickness,
@@ -534,11 +552,13 @@ exports.BespinScrollerView = SC.View.extend({
         ctx.strokeStyle = theme.scrollTrackStrokeStyle;
         ctx.stroke();
 
-        ctx.restore();
+        if (this._isMouseOver === false)
+            ctx.globalAlpha = 1.0;
 
         this._paintNibs(ctx);
 
         ctx.restore();
+        // End master drawing context
     },
 
     didCreateLayer: function() {
