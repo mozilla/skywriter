@@ -1394,6 +1394,63 @@ exports.EditorView = SC.View.extend({
         console.log("changes=", this.changes);
     },
 
+    // Scrolls the view so that the given frame (specified in coordinates
+    // relative to the top left of this view) is visible. Returns true if
+    // scrolling actually occurred and false otherwise.
+    _scrollToFrameVisible: function(frame) {
+        var clippingFrame = this.get('clippingFrame');
+
+        var targetX;
+        var frameRight = frame.x + frame.width;
+        if (frame.x < clippingFrame.x)
+            targetX = pos.x;                                // off left side
+        else if (frameRight > clippingFrame.x + clippingFrame.width)
+            targetX = frameRight - clippingFrame.width;     // off right side
+        else
+            targetX = clippingFrame.x;                      // already visible
+
+        var targetY;
+        var frameBottom = frame.y + frame.height;
+        if (frame.y < clippingFrame.y)
+            targetY = frame.y;                              // off left side
+        else if (frameBottom >= clippingFrame.y + clippingFrame.height)
+            targetY = frameBottom - clippingFrame.height;   // off right side
+        else
+            targetY = clippingFrame.y;                      // already visible
+
+        if (targetX === clippingFrame.x && targetY === clippingFrame.y)
+            return false;
+
+        // Grab the enclosing scrollable view.
+        var scrollable = this;
+        do {
+            scrollable = scrollable.get('parentView');
+            if (scrollable === null)
+                return false;
+        } while (scrollable.get('isScrollable') !== true);
+
+        scrollable.scrollToVisible();
+        return scrollable.scrollTo(targetX, targetY);
+    },
+
+    // Scrolls the view so that the character at the given row and column
+    // (specified as an object with 'row' and 'col' properties) is visible.
+    _scrollToCharVisible: function(pos) {
+        var charWidth = this.get('charWidth');
+        var lineHeight = this.get('lineHeight');
+        return this._scrollToFrameVisible({
+            x:      pos.col * charWidth,
+            y:      pos.row * lineHeight,
+            width:  charWidth,
+            height: lineHeight
+        });
+    },
+
+    _scrollToCursorVisible: function() {
+        var cursorPos = this.editor.cursorManager.getCursorPosition();
+        return this._scrollToCharVisible(cursorPos);
+    },
+
     dispose: function() {
     }
 });
