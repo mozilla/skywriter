@@ -932,21 +932,23 @@ exports.EditorView = SC.View.extend({
         // take snapshot of current context state so we can roll back later on
         ctx.save();
 
+        // Translate the canvas based on the layout position.
+        var layout = this.get('layout');
+        ctx.translate(layout.left, layout.top);
+
         // if we're doing a full repaint...
         var clippingFrame = this.get('clippingFrame');
         if (refreshCanvas) {
             // ...paint the background color over the whole canvas and...
             ctx.fillStyle = theme.backgroundStyle;
-            ctx.fillRect(0, 0, clippingFrame.width, clippingFrame.height);
+            ctx.fillRect(clippingFrame.x, clippingFrame.y,
+                clippingFrame.width, clippingFrame.height);
 
             // ...paint the gutter
             ctx.fillStyle = theme.gutterStyle;
-            ctx.fillRect(0, 0, this.get('gutterWidth'), clippingFrame.height);
+            ctx.fillRect(0, clippingFrame.y, this.get('gutterWidth'),
+                clippingFrame.height);
         }
-
-        // Translate the canvas based on the layout position.
-        var layout = this.get('layout');
-        ctx.translate(layout.left, layout.top);
 
         // the Math.round(this.yoffset) makes the painting nice and not to go over 2 pixels
         // see for more informations:
