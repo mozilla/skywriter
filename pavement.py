@@ -28,6 +28,9 @@
 import sys
 import os
 import subprocess
+import urllib2
+import tarfile
+from cStringIO import StringIO
 
 from paver.easy import *
 import paver.virtual
@@ -53,13 +56,49 @@ options(
         clientdir=path.getcwd()
     ),
     server_pavement=lambda: options.server.directory / "pavement.py",
-    builddir=path("tmp")
+    builddir=path("tmp"),
+    install_sproutcore=Bunch(
+        git=False
+    )
 )
 
 @task
-def install_sproutcore():
-    abbot = path("abbot")
-    if not abbot.exists():
+@cmdopts([('git', 'g', 'use git to download')])
+def install_sproutcore(options):
+    """Installs the versions of SproutCore that are required.
+    Can optionally download using git, so that you can keep
+    up to date easier."""
+    abbot_path = path("abbot")
+    if abbot_path.exists():
+        info("abbot directory exists, no action required.")
+        return
+    if not options.git:
+        print "download sproutcore-abbot/tiki"
+        abbot_tarball = urllib2.urlopen("http://github.com/sproutit/sproutcore-abbot/tarball/tiki")
+        abbot_dirname = abbot_tarball.url.split('/')[-1].split('.')[0]
+        abbot_tar = tarfile.open(fileobj = StringIO(abbot_tarball.read()))
+        abbot_tar.extractall()
+        abbot_tar.close()
+        os.rename(abbot_dirname, "abbot")
+        os.rmdir("abbot/frameworks/sproutcore")
+
+        print "download sproutcore/tiki"
+        sproutcore_tarball = urllib2.urlopen("http://github.com/sproutit/sproutcore/tarball/tiki")
+        sproutcore_dirname = sproutcore_tarball.url.split('/')[-1].split('.')[0]
+        sproutcore_tar = tarfile.open(fileobj = StringIO(sproutcore_tarball.read()))
+        sproutcore_tar.extractall(path = "abbot/frameworks")
+        sproutcore_tar.close()
+        os.rename("abbot/frameworks/%s" % sproutcore_dirname, "abbot/frameworks/sproutcore")
+
+        print "download tiki"
+        tiki_tarball = urllib2.urlopen("http://github.com/sproutit/sproutcore/tarball/master")
+        tiki_dirname = tiki_tarball.url.split('/')[-1].split('.')[0]
+        tiki_tar = tarfile.open(fileobj = StringIO(tiki_tarball.read()))
+        tiki_tar.extractall(path = "abbot/frameworks")
+        tiki_tar.close()
+        os.rename("abbot/frameworks/%s" % tiki_dirname, "abbot/frameworks/tiki")
+    else:
+        # use git
         sh("git clone -q git://github.com/sproutit/sproutcore-abbot.git abbot")
         sh("git checkout -b origin/tiki", cwd=abbot)
         sh("git pull origin tiki", cwd=abbot)
