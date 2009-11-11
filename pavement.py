@@ -87,17 +87,17 @@ def install_sproutcore(options):
         sproutcore_tarball = urllib2.urlopen("http://github.com/sproutit/sproutcore/tarball/tiki")
         sproutcore_dirname = sproutcore_tarball.url.split('/')[-1].split('.')[0]
         sproutcore_tar = tarfile.open(fileobj = StringIO(sproutcore_tarball.read()))
-        sproutcore_tar.extractall(path = "abbot/frameworks")
+        sproutcore_tar.extractall(path = "frameworks")
         sproutcore_tar.close()
-        os.rename("abbot/frameworks/%s" % sproutcore_dirname, "abbot/frameworks/sproutcore")
+        os.rename("frameworks/%s" % sproutcore_dirname, "frameworks/sproutcore")
 
         print "download tiki"
         tiki_tarball = urllib2.urlopen("http://github.com/sproutit/sproutcore/tarball/master")
         tiki_dirname = tiki_tarball.url.split('/')[-1].split('.')[0]
         tiki_tar = tarfile.open(fileobj = StringIO(tiki_tarball.read()))
-        tiki_tar.extractall(path = "abbot/frameworks")
+        tiki_tar.extractall(path = "frameworks")
         tiki_tar.close()
-        os.rename("abbot/frameworks/%s" % tiki_dirname, "abbot/frameworks/tiki")
+        os.rename("frameworks/%s" % tiki_dirname, "frameworks/tiki")
     else:
         # use git
         sh("git clone -q git://github.com/sproutit/sproutcore-abbot.git abbot")
