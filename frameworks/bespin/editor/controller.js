@@ -219,8 +219,8 @@ exports.EditorController = SC.Object.extend({
      */
     computeLayout: function() {
         var layout = {
-            left:      0,
-            top:      0,
+            left:   0,
+            top:    0,
             width:  this.container.clientWidth,
             height: this.container.clientHeight
         };

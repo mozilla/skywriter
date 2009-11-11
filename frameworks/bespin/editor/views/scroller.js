@@ -123,27 +123,79 @@ exports.BespinScrollerView = SC.View.extend({
     }.property('layoutDirection').cacheable(),
 
     /**
-     * @property{Number}
-     * The length of the gutter, equal to gutterFrame.width or
-     * gutterFrame.height depending on the scroll bar's layout direction.
-     * Read-only.
+     * @property
+     * The dimensions of transparent space inside the frame, given as an object
+     * with 'left', 'bottom', 'top', and 'right' properties.
+     *
+     * Note that the scrollerThickness property includes the padding on the
+     * sides of the bar.
      */
-    gutterLength: function() {
-        var gutterFrame = this.get('gutterFrame');
+    padding: { left: 0, bottom: 0, top: 0, right: 0 },
+
+    // The frame of the scroll bar, not counting any padding. Read-only.
+    _clientFrame: function() {
+        var frame = this.get('frame'), padding = this.get('padding');
+        return {
+            x:      padding.left,
+            y:      padding.top,
+            width:  frame.width - (padding.left + padding.right),
+            height: frame.height - (padding.top + padding.bottom)
+        };
+    }.property('frame', 'padding').cacheable(),
+
+    // The thickness of the scroll bar, not counting any padding. Read-only.
+    _clientThickness: function() {
+        var padding = this.get('padding');
+        var scrollerThickness = this.get('scrollerThickness');
+        switch (this.get('layoutDirection')) {
+        case SC.LAYOUT_VERTICAL:
+            return scrollerThickness - (padding.left + padding.right);
+        case SC.LAYOUT_HORIZONTAL:
+            return scrollerThickness - (padding.top + padding.bottom);
+        }
+    }.property('layoutDirection', 'padding', 'scrollerThickness').cacheable(),
+
+    // The dimensions of the gutter (the middle area between the buttons, which
+    // contains the handle or knob). Read-only.
+    _gutterFrame: function() {
+        var clientFrame = this.get('_clientFrame');
+        var thickness = this.get('_clientThickness');
+        switch (this.get('layoutDirection')) {
+        case SC.LAYOUT_VERTICAL:
+            return {
+                x:      clientFrame.x,
+                y:      clientFrame.y + NIB_LENGTH,
+                width:  thickness,
+                height: Math.max(0, clientFrame.height - 2*NIB_LENGTH)
+            };
+        case SC.LAYOUT_HORIZONTAL:
+            return {
+                x:      clientFrame.x + NIB_LENGTH,
+                y:      clientFrame.y,
+                width:  Math.max(0, clientFrame.width - 2*NIB_LENGTH),
+                height: thickness
+            };
+        }
+    }.property('_clientFrame', '_clientThickness',
+        'layoutDirection').cacheable(),
+
+    // The length of the gutter, equal to _gutterFrame.width or
+    // _gutterFrame.height depending on the scroll bar's layout direction.
+    // Read-only.
+    _gutterLength: function() {
+        var gutterFrame = this.get('_gutterFrame');
         var gutterLength;
         switch (this.get('layoutDirection')) {
         case SC.LAYOUT_HORIZONTAL:  gutterLength = gutterFrame.width;   break;
         case SC.LAYOUT_VERTICAL:    gutterLength = gutterFrame.height;  break;
         }
         return gutterLength;
-    }.property('gutterFrame', 'layoutDirection').cacheable(),
+    }.property('_gutterFrame', 'layoutDirection').cacheable(),
 
-    /**
-     * @property{Number}
-     * The length of the entire scroll bar, equal to frame.width or
-     * frame.height depending on the scroll bar's layout direction. Read-only.
-     */
-    frameLength: function() {
+    // The length of the scroll bar, counting the padding. Equal to frame.width
+    // or frame.height, depending on the layout direction of the bar.
+    // Read-only.
+    _frameLength: function() {
         var frame = this.get('frame');
         switch (this.get('layoutDirection')) {
         case SC.LAYOUT_HORIZONTAL:  return frame.width;
@@ -151,14 +203,55 @@ exports.BespinScrollerView = SC.View.extend({
         }
     }.property('frame', 'layoutDirection').cacheable(),
 
+    // The length of the scroll bar, not counting any padding. Equal to
+    // _clientFrame.width or _clientFrame.height, depending on the scroll bar's
+    // layout direction. Read-only. 
+    _clientLength: function() {
+        var clientFrame = this.get('_clientFrame');
+        switch (this.get('layoutDirection')) {
+        case SC.LAYOUT_HORIZONTAL:  return clientFrame.width;
+        case SC.LAYOUT_VERTICAL:    return clientFrame.height;
+        }
+    }.property('_clientFrame', 'layoutDirection').cacheable(),
+
+    // The dimensions of the handle or knob. Read-only.
+    _handleFrame: function() {
+        var value = this.get('value');
+        var maximum = this.get('maximum');
+        var frame = this.get('frame');
+        var clientFrame = this.get('_clientFrame');
+        var gutterFrame = this.get('_gutterFrame');
+        var clientThickness = this.get('_clientThickness');
+
+        switch (this.get('layoutDirection')) {
+        case SC.LAYOUT_VERTICAL:
+            return {
+                x:      clientFrame.x,
+                y:      clientFrame.y + NIB_LENGTH
+                            + value * gutterFrame.height / maximum,
+                width:  clientThickness,
+                height: frame.height * gutterFrame.height / maximum
+            };
+        case SC.LAYOUT_HORIZONTAL:
+            return {
+                x:      clientFrame.x + NIB_LENGTH
+                            + value * gutterFrame.width / maximum,
+                y:      clientFrame.y,
+                width:  frame.width * gutterFrame.width / maximum,
+                height: clientThickness
+            };
+        }
+    }.property('_clientFrame', '_clientThickness', '_gutterFrame', 'maximum',
+        'value').cacheable(),
+ 
     /**
      * @property{Number}
      * The actual maximum value, which will be less than the maximum due to
      * accounting for the frame length. Read-only.
      */
     maximumValue: function() {
-        return Math.max(this.get('maximum') - this.get('frameLength'), 0);
-    }.property('maximum', 'frameLength').cacheable(),
+        return Math.max(this.get('maximum') - this.get('_frameLength'), 0);
+    }.property('_frameLength', 'maximum').cacheable(),
 
     /**
      * @property
@@ -178,62 +271,6 @@ exports.BespinScrollerView = SC.View.extend({
         }
     }.property('maximumValue').cacheable(),
 
-    /**
-     * @property
-     * The dimensions of the gutter (the middle area between the buttons, which
-     * contains the handle or knob). Read-only.
-     */
-    gutterFrame: function() {
-        var frame = this.get('frame');
-        var scrollerThickness = this.get('scrollerThickness');
-        switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_VERTICAL:
-            return {
-                x:      0,
-                y:      NIB_LENGTH,
-                width:  scrollerThickness,
-                height: Math.max(0, frame.height - NIB_LENGTH * 2)
-            };
-        case SC.LAYOUT_HORIZONTAL:
-            return {
-                x:      NIB_LENGTH,
-                y:      0,
-                width:  Math.max(0, frame.width - NIB_LENGTH * 2),
-                height: scrollerThickness
-            };
-        }
-    }.property('frame', 'scrollerThickness', 'layoutDirection').cacheable(),
-
-    /**
-     * @property
-     * The dimensions of the handle or knob. Read-only.
-     */
-    handleFrame: function() {
-        var value = this.get('value');
-        var maximum = this.get('maximum');
-        var frame = this.get('frame');
-        var gutterFrame = this.get('gutterFrame');
-        var scrollerThickness = this.get('scrollerThickness');
-
-        switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_VERTICAL:
-            return {
-                x:      0,
-                y:      NIB_LENGTH + value * gutterFrame.height / maximum,
-                width:  scrollerThickness,
-                height: frame.height * gutterFrame.height / maximum
-            };
-        case SC.LAYOUT_HORIZONTAL:
-            return {
-                x:      NIB_LENGTH + value * gutterFrame.width / maximum,
-                y:      0,
-                width:  frame.width * gutterFrame.width / maximum,
-                height: scrollerThickness
-            };
-        }
-    }.property('value', 'maximum', 'gutterFrame', 'scrollerThickness',
-        'layoutDirection').cacheable(),
- 
     /**
      * @property{Number}
      * The maximum value for the scroll bar.
@@ -264,7 +301,7 @@ exports.BespinScrollerView = SC.View.extend({
             break;
         }
 
-        var handleFrame = this.get('handleFrame');
+        var handleFrame = this.get('_handleFrame');
         if (point.x >= handleFrame.x && point.y >= handleFrame.y
                 && point.x < handleFrame.x + handleFrame.width
                 && point.y < handleFrame.y + handleFrame.height)
@@ -318,7 +355,7 @@ exports.BespinScrollerView = SC.View.extend({
     mouseDown: function(evt) {
         SC.RunLoop.begin();
         var value = this.get('value');
-        var gutterLength = this.get('gutterLength');
+        var gutterLength = this.get('_gutterLength');
 
         switch (this._segmentForMouseEvent(evt)) {
         case 'nib-start':
@@ -363,7 +400,7 @@ exports.BespinScrollerView = SC.View.extend({
             var eventDelta = eventDistance - this._mouseDownScreenPoint;
 
             var maximum = this.get('maximum');
-            var gutterLength = this.get('gutterLength');
+            var gutterLength = this.get('_gutterLength');
 
             this.set('value', this.get('value')
                 + eventDelta * maximum / gutterLength);
@@ -409,13 +446,13 @@ exports.BespinScrollerView = SC.View.extend({
 
     _paintNibs: function(ctx) {
         var isMouseOver = this._isMouseOver;
-        var scrollerThickness = this.get('scrollerThickness');
+        var thickness = this.get('_clientThickness');
         var value = this.get('value');
 
         // Starting nib
         if (isMouseOver || value !== 0) {
             ctx.save();
-            ctx.translate(NIB_PADDING, scrollerThickness / 2);
+            ctx.translate(NIB_PADDING, thickness / 2);
             ctx.rotate(Math.PI * 1.5);
             ctx.moveTo(0, 0);
             this._paintNib(ctx);
@@ -425,8 +462,8 @@ exports.BespinScrollerView = SC.View.extend({
         // Ending nib
         if (isMouseOver || value !== this.get('maximumValue')) {
             ctx.save();
-            ctx.translate(this.get('frameLength') - NIB_PADDING,
-                scrollerThickness / 2);
+            ctx.translate(this.get('_clientLength') - NIB_PADDING,
+                thickness / 2);
             ctx.rotate(Math.PI * 0.5);
             ctx.moveTo(0, 0);
             this._paintNib(ctx);
@@ -456,55 +493,59 @@ exports.BespinScrollerView = SC.View.extend({
         // Begin master drawing context
         ctx.save();
 
-        var handleFrame = this.get('handleFrame');
+        // Translate so that we're only drawing in the padding.
+        var padding = this.get('padding');
+        ctx.translate(padding.left, padding.top);
+
+        var handleFrame = this.get('_handleFrame');
+        var gutterLength = this.get('_gutterLength');
         var layoutDirection = this.get('layoutDirection');
-        var gutterFrame = this.get('gutterFrame');
-        var gutterLength = this.get('gutterLength');
+
+        var thickness = this.get('_clientThickness');
+        var halfThickness = thickness / 2;
 
         var handleDistance, handleLength;
         switch (layoutDirection) {
         case SC.LAYOUT_VERTICAL:
-            handleDistance = handleFrame.y;
+            handleDistance = handleFrame.y - padding.top;
             handleLength = handleFrame.height;
 
             // The rest of the painting code assumes the scroll bar is
             // horizontal. Create that fiction by installing a 90 degree
             // rotation.
-            ctx.translate(gutterFrame.width, 0);
+            ctx.translate(thickness, 0);
             ctx.rotate(Math.PI * 0.5);
             break;
 
         case SC.LAYOUT_HORIZONTAL:
-            handleDistance = handleFrame.x;
+            handleDistance = handleFrame.x - padding.left;
             handleLength = handleFrame.width;
             break;
         }
-
-        var scrollerThickness = this.get('scrollerThickness');
-        var halfThickness = scrollerThickness / 2;
 
         if (this._isMouseOver === false) {
             ctx.globalAlpha = 0.3;
         } else {
             // Draw the scroll track rectangle.
-            var frameLength = this.get('frameLength');
+            var clientLength = this.get('_clientLength');
             ctx.fillStyle = theme.scrollTrackFillStyle;
             ctx.fillRect(NIB_PADDING + 1, 1,
-                frameLength - 2*NIB_PADDING - 2, scrollerThickness - 2);
+                clientLength - 2*NIB_PADDING - 2, thickness - 2);
             ctx.strokeStyle = theme.scrollTrackStrokeStyle;
-            ctx.strokeRect(NIB_PADDING, 0, frameLength, scrollerThickness);
+            ctx.strokeRect(NIB_PADDING, 0, clientLength - 2*NIB_PADDING,
+                thickness);
         }
 
         ctx.beginPath();
         ctx.arc(handleDistance + halfThickness, 0 + halfThickness, halfThickness,
             Math.PI / 2, 3 * (Math.PI / 2), false);
-        ctx.arc(handleDistance + handleLength - halfThickness, 0 + halfThickness, halfThickness,
-            3 * (Math.PI / 2), Math.PI / 2, false);
-        ctx.lineTo(handleDistance + halfThickness, 0 + scrollerThickness);
+        ctx.arc(handleDistance + handleLength - halfThickness, 0 + halfThickness,
+            halfThickness, 3 * (Math.PI / 2), Math.PI / 2, false);
+        ctx.lineTo(handleDistance + halfThickness, 0 + thickness);
         ctx.closePath();
 
         var gradient = ctx.createLinearGradient(handleDistance, 0,
-            handleDistance, 0 + scrollerThickness);
+            handleDistance, thickness);
         gradient.addColorStop(0,
             theme.scrollBarFillGradientTopStart.replace(/%a/, alpha));
         gradient.addColorStop(0.4,
@@ -525,16 +566,16 @@ exports.BespinScrollerView = SC.View.extend({
         ctx.fillStyle = theme.scrollBarFillStyle.replace(/%a/, alpha);
         ctx.beginPath();
         ctx.moveTo(handleDistance + (halfThickness * 0.4), 0 + (halfThickness * 0.6));
-        ctx.lineTo(handleDistance + (halfThickness * 0.9), 0 + (scrollerThickness * 0.4));
-        ctx.lineTo(handleDistance, 0 + (scrollerThickness * 0.4));
+        ctx.lineTo(handleDistance + (halfThickness * 0.9), 0 + (thickness * 0.4));
+        ctx.lineTo(handleDistance, 0 + (thickness * 0.4));
         ctx.closePath();
         ctx.fill();
         ctx.beginPath();
         ctx.moveTo(handleDistance + handleLength - (halfThickness * 0.4),
             0 + (halfThickness * 0.6));
         ctx.lineTo(handleDistance + handleLength - (halfThickness * 0.9),
-            0 + (scrollerThickness * 0.4));
-        ctx.lineTo(handleDistance + handleLength, 0 + (scrollerThickness * 0.4));
+            0 + (thickness * 0.4));
+        ctx.lineTo(handleDistance + handleLength, 0 + (thickness * 0.4));
         ctx.closePath();
         ctx.fill();
 
@@ -542,11 +583,11 @@ exports.BespinScrollerView = SC.View.extend({
         // End handle border context
 
         ctx.beginPath();
-        ctx.arc(handleDistance + halfThickness, 0 + halfThickness, halfThickness,
+        ctx.arc(handleDistance + halfThickness, halfThickness, halfThickness,
             Math.PI / 2, 3 * (Math.PI / 2), false);
-        ctx.arc(handleDistance + handleLength - halfThickness, 0 + halfThickness, halfThickness,
+        ctx.arc(handleDistance + handleLength - halfThickness, halfThickness, halfThickness,
             3 * (Math.PI / 2), Math.PI / 2, false);
-        ctx.lineTo(handleDistance + halfThickness, 0 + scrollerThickness);
+        ctx.lineTo(handleDistance + halfThickness, thickness);
         ctx.closePath();
 
         ctx.strokeStyle = theme.scrollTrackStrokeStyle;
