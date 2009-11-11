@@ -283,28 +283,29 @@ exports.BespinScrollerView = SC.View.extend({
 
     _segmentForMouseEvent: function(evt) {
         var point = this.convertFrameFromView({ x: evt.pageX, y: evt.pageY });
-        var frame = this.get('frame');
+        var clientFrame = this.get('_clientFrame');
+
+        if (!SC.pointInRect(point, clientFrame))
+            return null;
 
         var layoutDirection = this.get('layoutDirection');
         switch (layoutDirection) {
         case SC.LAYOUT_HORIZONTAL:
             if (point.x < NIB_LENGTH)
                 return 'nib-start';
-            if (point.x >= frame.width - NIB_LENGTH)
+            if (point.x >= clientFrame.width - NIB_LENGTH)
                 return 'nib-end';
             break;
         case SC.LAYOUT_VERTICAL:
             if (point.y < NIB_LENGTH)
                 return 'nib-start';
-            if (point.y >= frame.height - NIB_LENGTH)
+            if (point.y >= clientFrame.height - NIB_LENGTH)
                 return 'nib-end';
             break;
         }
 
         var handleFrame = this.get('_handleFrame');
-        if (point.x >= handleFrame.x && point.y >= handleFrame.y
-                && point.x < handleFrame.x + handleFrame.width
-                && point.y < handleFrame.y + handleFrame.height)
+        if (SC.pointInRect(point, handleFrame))
             return 'handle';
 
         switch (layoutDirection) {
@@ -323,8 +324,8 @@ exports.BespinScrollerView = SC.View.extend({
         }
 
         console.assert(false, "_segmentForMouseEvent: point ", point,
-            " outside view with handle frame ", handleFrame, " and frame ",
-            frame);
+            " outside view with handle frame ", handleFrame,
+            " and client frame ", clientFrame);
     },
 
     mouseEntered: function(evt) {
