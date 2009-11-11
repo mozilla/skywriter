@@ -92,7 +92,7 @@ def install_sproutcore(options):
         os.rename("frameworks/%s" % sproutcore_dirname, "frameworks/sproutcore")
 
         print "download tiki"
-        tiki_tarball = urllib2.urlopen("http://github.com/sproutit/sproutcore/tarball/master")
+        tiki_tarball = urllib2.urlopen("http://github.com/sproutit/tiki/tarball/master")
         tiki_dirname = tiki_tarball.url.split('/')[-1].split('.')[0]
         tiki_tar = tarfile.open(fileobj = StringIO(tiki_tarball.read()))
         tiki_tar.extractall(path = "frameworks")
