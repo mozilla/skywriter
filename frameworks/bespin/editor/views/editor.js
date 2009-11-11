@@ -1395,7 +1395,7 @@ exports.EditorView = SC.View.extend({
         var targetX;
         var frameRight = frame.x + frame.width;
         if (frame.x < clippingFrame.x)
-            targetX = pos.x;                                // off left side
+            targetX = frame.x;                              // off left side
         else if (frameRight > clippingFrame.x + clippingFrame.width)
             targetX = frameRight - clippingFrame.width;     // off right side
         else
