@@ -52,7 +52,8 @@ options(
         directory=path("../bespinserver/").abspath(),
         clientdir=path.getcwd()
     ),
-    server_pavement=lambda: options.server.directory / "pavement.py"
+    server_pavement=lambda: options.server.directory / "pavement.py",
+    builddir=path("tmp")
 )
 
 @task
@@ -157,27 +158,71 @@ def docs(options):
     """Builds the documentation."""
     if not path("src/growl").exists():
         sh("pip install -r requirements.txt")
-    builddir = path("build")
+    builddir = options.builddir
     builddir.mkdir()
     docsdir = builddir / "docs"
     sh("growl.py . ../%s" % docsdir, cwd="docs")
     
 @task
+def sc_build(options):
+    sh("abbot/bin/sc-build -rc editor")
+    
+SPROUTCORE_INLINE="""
+var ENV = {"platform":"classic","mode":"production"};
+var SC=SC||{BUNDLE_INFO:{},LAZY_INSTANTIATION:{}};SC.browser=(function(){var c=navigator.userAgent.toLowerCase();
+var a=(c.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/)||[])[1];var b={version:a,safari:(/webkit/).test(c)?a:0,opera:(/opera/).test(c)?a:0,msie:(/msie/).test(c)&&!(/opera/).test(c)?a:0,mozilla:(/mozilla/).test(c)&&!(/(compatible|webkit)/).test(c)?a:0,mobileSafari:(/apple.*mobile.*safari/).test(c)?a:0,windows:!!(/(windows)/).test(c),mac:!!((/(macintosh)/).test(c)||(/(mac os x)/).test(c)),language:(navigator.language||navigator.browserLanguage).split("-",1)[0]};
+b.current=b.msie?"msie":b.mozilla?"mozilla":b.safari?"safari":b.opera?"opera":"unknown";
+return b})();SC.bundleDidLoad=function(a){var b=this.BUNDLE_INFO[a];if(!b){b=this.BUNDLE_INFO[a]={}
+}b.loaded=true};SC.bundleIsLoaded=function(a){var b=this.BUNDLE_INFO[a];return b?!!b.loaded:false
+};SC.loadBundle=function(){throw"SC.loadBundle(): SproutCore is not loaded."};SC.setupBodyClassNames=function(){var e=document.body;
+if(!e){return}var c,a,f,b,g,d;c=SC.browser.current;a=SC.browser.windows?"windows":SC.browser.mac?"mac":"other-platform";
+d=document.documentElement.style;f=(d.MozBoxShadow!==undefined)||(d.webkitBoxShadow!==undefined)||(d.oBoxShadow!==undefined)||(d.boxShadow!==undefined);
+b=(d.MozBorderRadius!==undefined)||(d.webkitBorderRadius!==undefined)||(d.oBorderRadius!==undefined)||(d.borderRadius!==undefined);
+g=e.className?e.className.split(" "):[];if(f){g.push("box-shadow")}if(b){g.push("border-rad")
+}g.push(c);g.push(a);if(SC.browser.mobileSafari){g.push("mobile-safari")}e.className=g.join(" ")
+};
+"""
+
+def _find_build_output(toplevel, name):
+    en = toplevel / name / "en"
+    
+    # get sorted list of builds, in descending order
+    # of modification time
+    builds = sorted(en.glob("*"), 
+                key=lambda item: item.getmtime(), 
+                reverse=True)
+    if not builds:
+        raise BuildFailure("Could not find a Bespin build in " + en)
+    return builds[0]
+
+@task
 @needs(['docs'])
 def release_embed(options):
-    sh("narwhal/bin/sea buildbespin")
-    builddir = path("build")
+    builddir = options.builddir
+    if not builddir.exists():
+        builddir.mkdir()
+        
     version = options.version.number
-    outputdir = path("build") / ("BespinEmbedded-%s" 
+    outputdir = builddir / ("BespinEmbedded-%s" 
         % (version))
     if outputdir.exists():
         outputdir.rmtree()
     outputdir.mkdir()
+    
+    sproutcore_built = builddir / "build" / "static"
+    bespin_dir = _find_build_output(sproutcore_built, "bespin")
+    bespin_js = bespin_dir / "javascript-packed.js"
+    info("Generating BespinEmbedded.js based on %s", bespin_js)
+    jsinput = bespin_js.text()
+    jsoutput = (outputdir / "BespinEmbedded.js").open("w")
+    jsoutput.write(SPROUTCORE_INLINE)
+    jsoutput.write(jsinput)
+    jsoutput.close()
+    
     path("LICENSE.txt").copy(outputdir)
     (path("src") / "bespin-build" / "sample.html").copy(outputdir)
     (path("src") / "html" / "sproutcore.css").copy(outputdir / "BespinEmbedded.css")
     (builddir / "docs").copytree(outputdir / "docs")
-    (builddir / "BespinEmbedded.js").copy(outputdir / "BespinEmbedded.js")
     sh("tar czf BespinEmbedded-%s.tar.gz BespinEmbedded-%s" % \
-        (version, version), cwd="build")
+        (version, version), cwd="tmp")
     
