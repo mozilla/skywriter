@@ -92,6 +92,7 @@ var validators = {
  *     defaultValue: 4  // The default value for use when none is directly set
  * });
  * </pre>
+ * @param {object} setting An object containing name/type/defaultValue members.
  */
 exports.addSetting = function(setting) {
     if (!setting.name) {
@@ -122,8 +123,9 @@ function defaultSettings() {
 
 /**
  * A base class for all the various methods of storing settings.
+ * @class
  */
-exports.InMemorySettings = SC.Object.extend({
+exports.InMemorySettings = SC.Object.extend(/** @lends exports.InMemorySettings */ {
     /**
      * We cache the current settings. We are likely to expose this to bindings
      */
@@ -131,6 +133,7 @@ exports.InMemorySettings = SC.Object.extend({
 
     /**
      * Setup the default settings
+     * @constructs
      */
     init: function() {
         // We delay this because publishing to a bunch of things can cause lots
@@ -283,8 +286,10 @@ exports.InMemorySettings = SC.Object.extend({
 /**
  * Save the settings in a cookie
  * This code has not been tested since reboot
+ * @class
+ * @augments exports.InMemorySettings
  */
-exports.CookieSettings = exports.InMemorySettings.extend({
+exports.CookieSettings = exports.InMemorySettings.extend(/** @lends exports.CookieSettings */{
     _loadInitialValues: function() {
         this.sc_super();
         var data = cookie.get("settings");
@@ -300,8 +305,10 @@ exports.CookieSettings = exports.InMemorySettings.extend({
 /**
  * Save the settings using the server.
  * This code has not been tested since reboot
+ * @class
+ * @augments exports.InMemorySettings
  */
-exports.ServerSettings = exports.InMemorySettings.extend({
+exports.ServerSettings = exports.InMemorySettings.extend(/** @lends exports.ServerSettings */ {
     _loadInitialValues: function() {
         this.sc_super();
         bespin.get('server').listSettings(function(settings) {
