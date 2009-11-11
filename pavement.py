@@ -31,6 +31,7 @@ import subprocess
 import urllib2
 import tarfile
 from cStringIO import StringIO
+import webbrowser
 
 from paver.easy import *
 import paver.virtual
@@ -193,7 +194,7 @@ def start(options):
     popen.wait()
     
 @task
-def docs(options):
+def build_docs(options):
     """Builds the documentation."""
     if not path("src/growl").exists():
         sh("pip install -r requirements.txt")
@@ -235,7 +236,7 @@ def _find_build_output(toplevel, name):
     return builds[0]
 
 @task
-@needs(['docs'])
+@needs(['build_docs'])
 def release_embed(options):
     builddir = options.builddir
     if not builddir.exists():
@@ -264,4 +265,12 @@ def release_embed(options):
     (builddir / "docs").copytree(outputdir / "docs")
     sh("tar czf BespinEmbedded-%s.tar.gz BespinEmbedded-%s" % \
         (version, version), cwd="tmp")
+    
+@task
+def docs(options):
+    """Display the documentation in your web browser."""
+    docdir = options.builddir / "docs"
+    if not docdir.exists():
+        call_task("build_docs")
+    webbrowser.open("file:///%s/index.html" % docdir.abspath())
     
