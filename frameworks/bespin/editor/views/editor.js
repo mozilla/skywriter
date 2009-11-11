@@ -732,12 +732,15 @@ exports.EditorView = SC.View.extend({
         return width;
     }.property('content', 'charWidth'),
 
-    // Returns the width in pixels of the longest line.
-    textWidth: function() {
-        // TODO: Don't look through every row to determine the width every
-        // time. This is expensive. Cache instead. --pcw
+    /**
+     * @property{Number}
+     *
+     * Returns the width in pixels of the longest line, plus some padding.
+     * Read-only.
+     */
+    textWidth: function(key, value) {
         return this.get('charWidth')
-            * this.getMaxCols(0, this.get('content').getRowCount() - 1);
+            * (this.getMaxCols(0, this.get('content').getRowCount() - 1) + 1);
     }.property('content', 'charWidth'),
 
     /**
@@ -1396,7 +1399,7 @@ exports.EditorView = SC.View.extend({
         var frameRight = frame.x + frame.width;
         if (frame.x < clippingFrame.x)
             targetX = frame.x;                              // off left side
-        else if (frameRight > clippingFrame.x + clippingFrame.width)
+        else if (frameRight >= clippingFrame.x + clippingFrame.width)
             targetX = frameRight - clippingFrame.width;     // off right side
         else
             targetX = clippingFrame.x;                      // already visible
@@ -1431,7 +1434,7 @@ exports.EditorView = SC.View.extend({
         var charWidth = this.get('charWidth');
         var lineHeight = this.get('lineHeight');
         return this._scrollToFrameVisible({
-            x:      pos.col * charWidth,
+            x:      this.get('gutterWidth') + pos.col * charWidth,
             y:      pos.row * lineHeight,
             width:  charWidth,
             height: lineHeight
