@@ -11,10 +11,6 @@ main = function() {
     }
     didRun = true;
     
-    // TODO this is a temporary hack. Remove this once the bootstrap sequence 
-    // for Tiki is straightened out
-    SC._didBecomeReady();
-    
     console.log("In main now!");
     bespin.subscribe("foo:bar", function() {
         console.log("Got my foobar");

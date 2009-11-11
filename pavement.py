@@ -222,6 +222,7 @@ g=e.className?e.className.split(" "):[];if(f){g.push("box-shadow")}if(b){g.push(
 }g.push(c);g.push(a);if(SC.browser.mobileSafari){g.push("mobile-safari")}e.className=g.join(" ")
 };
 """
+BUILD_POSTAMBLE="""tiki.require("bespin:boot");"""
 
 def _find_build_output(toplevel, name):
     en = toplevel / name / "en"
@@ -236,7 +237,7 @@ def _find_build_output(toplevel, name):
     return builds[0]
 
 @task
-@needs(['build_docs'])
+@needs(['build_docs', 'sc_build'])
 def release_embed(options):
     builddir = options.builddir
     if not builddir.exists():
@@ -257,6 +258,7 @@ def release_embed(options):
     jsoutput = (outputdir / "BespinEmbedded.js").open("w")
     jsoutput.write(SPROUTCORE_INLINE)
     jsoutput.write(jsinput)
+    jsoutput.write(BUILD_POSTAMBLE)
     jsoutput.close()
     
     path("LICENSE.txt").copy(outputdir)
