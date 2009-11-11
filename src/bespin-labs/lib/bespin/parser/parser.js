@@ -24,7 +24,6 @@
 
 var bespin = require("bespin");
 var worker = require("bespin/util/worker");
-var settings = require("bespin/settings");
 
 /**
  * Module for dealing parsing and getting meta info about source.
@@ -36,7 +35,7 @@ var settings = require("bespin/settings");
 /**
  * TODO: What's this?
  */
-settings.addSetting({
+bespin.get("setting").addSetting({
     name: "syntaxmarkers",
     type: "text",
     defaultValue: "all"
@@ -45,7 +44,7 @@ settings.addSetting({
 /**
  * Add a setting to turn jslint parsing on or off
  */
-settings.addSetting({
+bespin.get("setting").addSetting({
     name: "jslint",
     type: "text",
     defaultValue: ''
@@ -94,7 +93,7 @@ exports.CodeInfo = SC.Object.define({
         bespin.subscribe("parser:engine:parseDone", function(event) {
             var data = event.info;
             self.foldPoints = data.foldPoints;
-            var syntaxmarkers = bespin.get("settings") && bespin.get("settings").getValue("syntaxmarkers");
+            var syntaxmarkers = bespin.get("settings") && bespin.get("settings").values.syntaxmarkers;
             self.messages = data.messages.filter(function(message) {
                 if (syntaxmarkers === "all") {
                     return true;
@@ -165,7 +164,7 @@ exports.CodeInfo = SC.Object.define({
         if (exports.AsyncEngineResolver.__hasWorkers__) {
             var editor = bespin.get("editor");
             var type = editor.language;
-            var parseOptions = bespin.get("settings") && bespin.get("settings").getObject("jslint");
+            var parseOptions = bespin.get("settings").values.jslint;
 
             if (type) {
                 var source = editor.model.getDocument();
@@ -633,8 +632,7 @@ bespin.subscribe("parser:start", function () {
 bespin.register("parser", new exports.CodeInfo());
 
 bespin.fireAfter(["settings:language", "settings:set:syntaxcheck", "parser:engine:initialized"], function () {
-    var settings = bespin.get("settings");
-    if (settings && settings.isValueOn(settings.getValue("syntaxcheck"))) {
+    if (settings.values.syntaxcheck) {
         var editor = bespin.get("editor");
         if (editor.language) {
             bespin.publish("parser:start");
@@ -651,8 +649,7 @@ bespin.fireAfter(["settings:language", "settings:set:syntaxcheck", "parser:engin
  * Parser doesn't automatically start without it
  */
 bespin.subscribe("settings:language", function () {
-    var settings = bespin.get("settings");
-    if (settings && settings.isValueOn(settings.getValue("syntaxcheck"))) {
+    if (settings.values.syntaxcheck) {
         bespin.publish("parser:start");
     }
 });
@@ -661,18 +658,17 @@ bespin.subscribe("settings:language", function () {
  * Turn the syntax parser on or off
  */
 bespin.subscribe("settings:set:syntaxcheck", function (data) {
-    var settings = bespin.get('settings');
-    if (settings.isValueOff(data.value)) {
-        bespin.publish("parser:stop");
-    } else {
+    if (data.value) {
         bespin.publish("parser:start");
+    } else {
+        bespin.publish("parser:stop");
     }
 });
 
 /**
  * Add a setting to turn syntax checking of a file on/off
  */
-settings.addSetting({
+bespin.get("setting").addSetting({
     name: "syntaxcheck",
     type: "boolean",
     defaultValue: false
@@ -695,7 +691,7 @@ bespin.subscribe("settings:language", function(event) {
     var language = event.language;
     var fromCommand = event.fromCommand;
     var settings = bespin.get('settings');
-    var languageSetting = settings.getValue('language') || "auto";
+    var languageSetting = settings.values.language || "auto";
     var editor = bespin.get('editor');
     var fromURL = urlbar.URL.create();
 

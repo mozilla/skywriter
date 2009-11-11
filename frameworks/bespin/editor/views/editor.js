@@ -244,9 +244,8 @@ exports.EditorView = SC.View.extend({
             x = Math.round(tx / charWidth);
 
             // With strictlines turned on, don't select past the end of the line
-            if ((settings && settings.isSettingOn('strictlines'))) {
+            if (settings.values.strictlines) {
                 var maxcol = this.getRowScreenLength(y);
-
                 if (x >= maxcol) {
                     x = this.getRowScreenLength(y);
                 }
@@ -1120,8 +1119,8 @@ exports.EditorView = SC.View.extend({
             }
 
             // if highlight line is on, paint the highlight color
-            if ((settings && settings.isSettingOn('highlightline')) &&
-                    (currentLine == ed.cursorManager.getCursorPosition().row)) {
+            if (settings.values.highlightline &&
+                    currentLine == ed.cursorManager.getCursorPosition().row) {
                 ctx.fillStyle = theme.highlightCurrentLineColor;
                 // TODO: calculate with clippingFrame --pcw
                 ctx.fillRect(x, y, cwidth, lineHeight);
@@ -1234,7 +1233,7 @@ exports.EditorView = SC.View.extend({
             }
 
             // paint tab information, if applicable and the information should be displayed
-            if (settings && (settings.isSettingOn("tabarrow") || settings.isSettingOn("tabshowspace"))) {
+            if (settings.values.tabarrow || settings.values.tabshowspace) {
                 if (lineMetadata.tabExpansions.length > 0) {
                     for (i = 0; i < lineMetadata.tabExpansions.length; i++) {
                         var expansion = lineMetadata.tabExpansions[i];
@@ -1243,14 +1242,14 @@ exports.EditorView = SC.View.extend({
                         var lx = x + (expansion.start * charWidth);
 
                         // check if the user wants us to highlight tabs; useful if you need to mix tabs and spaces
-                        var showTabSpace = settings && settings.isSettingOn("tabshowspace");
+                        var showTabSpace = settings.values.tabshowspace;
                         if (showTabSpace) {
                             var sw = (expansion.end - expansion.start) * charWidth;
                             ctx.fillStyle = this.editor.theme.tabSpace || "white";
                             ctx.fillRect(lx, y, sw, lineHeight);
                         }
 
-                        var showTabNib = settings && settings.isSettingOn("tabarrow");
+                        var showTabNib = settings.values.tabarrow;
                         if (showTabNib) {
                             // the center of the current character position's bounding rectangle
                             cy = y + (lineHeight / 2);

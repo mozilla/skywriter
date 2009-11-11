@@ -216,7 +216,7 @@ command.store.addCommand({
                 }
             } else {
                 output = "Saving setting: <strong>" + key + "</strong> = " + setting.value;
-                bespin.get("settings").setValue(key, setting.value);
+                bespin.get("settings").values[key] = setting.value;
             }
         }
         instruction.addOutput(output);

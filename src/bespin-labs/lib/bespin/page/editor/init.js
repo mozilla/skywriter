@@ -210,7 +210,7 @@ exports.onLoad = function() {
     if (path) {
         editor.openFile(project, path);
     } else {
-        var lastUsed = settings.getObject("_lastused");
+        var lastUsed = settings.values.lastused;
         if (!lastUsed) {
             editor.openFile("SampleProject", "readme.txt");
         } else {
@@ -219,7 +219,7 @@ exports.onLoad = function() {
     }
 
     // Load user settings config file
-    if (!settings.isSettingOff('autoconfig')) {
+    if (settings.values.autoconfig) {
         try {
             files.evalFile(bespin.userSettingsProject, "config");
         } catch (e) {

@@ -238,7 +238,7 @@ exports.API = SC.Object.extend({
             lastSlash = file.lastIndexOf("/");
             path = (lastSlash == -1) ? "" : file.substring(0, lastSlash);
             name = (lastSlash == -1) ? file : file.substring(lastSlash + 1);
-            if (settings && settings.isSettingOff('dotmode') && name[0] == '.') {
+            if (!settings.values.dotmode && name[0] == '.') {
                 continue;
             }
 
@@ -325,7 +325,7 @@ exports.API = SC.Object.extend({
 
         var settings = bespin.get('settings');
         if (settings) {
-            var includeFolders = settings.getObject('quickopenInclude');
+            var includeFolders = settings.values.quickopenInclude;
             if (includeFolders) {
                 if (includeFolders[name]) {
                     this.currentProjectInclude = includeFolders[name];
@@ -352,7 +352,7 @@ command.store.addCommand({
             instruction.addUsageOutput(this);
             instruction.error = false;
 
-            includes = settings.getObject('quickopenInclude');
+            includes = settings.values.quickopenInclude;
             if (includes === undefined) {
                 return;
             }
@@ -378,13 +378,13 @@ command.store.addCommand({
         }
 
         if (args.task == 'add') {
-            includes = settings.getObject('quickopenInclude');
+            includes = settings.values.quickopenInclude;
             if (includes === undefined){includes = {};}
             if (includes[args.project] === undefined){includes[args.project] = [];}
             includes[args.project].push(args.path);
-            settings.setObject('quickopenInclude', includes);
+            settings.values.quickopenInclude = includes;
         } else if (args.task == 'remove') {
-            includes = settings.getObject('quickopenInclude');
+            includes = settings.values.quickopenInclude;
             if (includes === undefined) {
                 return;
             }
@@ -395,7 +395,7 @@ command.store.addCommand({
                 return;
             }
             includes[args.project].splice(includes[args.project].indexOf(args.path), 1);
-            settings.setObject('quickopenInclude', includes);
+            settings.values.quickopenInclude = includes;
         }
     }
 });

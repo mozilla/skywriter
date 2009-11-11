@@ -27,7 +27,6 @@
 var bespin = require("bespin");
 var util = require("bespin/util/util");
 var filepopup = require("bespin/editor/filepopup");
-var settings = require("bespin/settings");
 
 // This code came from embed.init() although commented out. When we re-enable
 // this plug-in, we might need to use this code
@@ -53,7 +52,7 @@ if (opts.commandline) {
 /**
  * Add a setting to control the console font size
  */
-settings.addSetting({
+bespin.get("setting").addSetting({
     name: "consolefontsize",
     type: "number",
     defaultValue: 11
@@ -412,8 +411,8 @@ members: {
             return date.getHours() + ":" + mins + ":" + secs;
         };
 
-        var size = parseInt(this.settings.getValue("consolefontsize"), 10);
-        var mode = this.settings.getValue("historytimemode");
+        var size = parseInt(this.settings.values.consolefontsize, 10);
+        var mode = this.settings.values.historytimemode;
 
         dojo.attr(this.output, "innerHTML", "");
 
@@ -542,11 +541,11 @@ members: {
     toggleFontSize: function() {
         var self = this;
         var setSize = function(size) {
-            self.settings.setValue("consolefontsize", size);
+            self.settings.values.consolefontsize = size;
             self.updateOutput();
         };
 
-        var size = parseInt(this.settings.getValue("consolefontsize"), 10);
+        var size = parseInt(this.settings.values.consolefontsize, 10);
         switch (size) {
             case 9: setSize(11); break;
             case 11: setSize(14); break;
@@ -561,11 +560,11 @@ members: {
     toggleHistoryTimeMode: function() {
         var self = this;
         var setMode = function(mode) {
-            self.settings.setValue("historytimemode", mode);
+            self.settings.values.historytimemode = mode;
             self.updateOutput();
         };
 
-        var size = this.settings.getValue("historytimemode");
+        var size = this.settings.values.historytimemode;
         switch (size) {
             case "history": setMode("time"); break;
             case "time": setMode("blank"); break;

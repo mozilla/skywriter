@@ -26,12 +26,11 @@ var bespin = require("package");
 var SC = require("sproutcore/runtime:package").SC;
 var cursor = require("cursor");
 var clipboard = require("util/clipboard");
-var settings = require("settings");
 
 /**
  * Add a setting to affect what happens when we press TAB
  */
-settings.addSetting({
+bespin.get("setting").addSetting({
     name: "tabmode",
     type: "boolean",
     defaultValue: false
@@ -40,7 +39,7 @@ settings.addSetting({
 /**
  * Add a setting to control auto-closing of character pairs like {, }
  */
-settings.addSetting({
+bespin.get("setting").addSetting({
     name: "closepairs",
     type: "boolean",
     defaultValue: false
@@ -260,7 +259,7 @@ exports.Actions = SC.Object.extend({
         var tablength = this.editor.cursorManager.getCharacterLength("\t");
 
         if (!tab || !tablength) {
-            if (settings && settings.isSettingOn('tabmode')) {
+            if (settings.values.tabmode) {
                 // do something tabby
                 tab = "\t";
             } else {
@@ -320,7 +319,7 @@ exports.Actions = SC.Object.extend({
         var cursorRowLength = this.editor.cursorManager.getStringLength(this.editor.model.getRowArray(args.pos.row).join(""));
         var charsToInsert;
         var tab = '';
-        if (settings && settings.isSettingOn('tabmode')) {
+        if (settings.values.tabmode) {
             tab = "\t";
         } else {
             var tabsize = this.editor.getTabSize();
@@ -594,7 +593,7 @@ exports.Actions = SC.Object.extend({
         } else {
             if (args.pos.col > 0) {
                 var settings = bespin.get('settings');
-                if (settings && settings.isSettingOn('smartmove')) {
+                if (settings.values.smartmove) {
                     var tabsize = this.editor.getTabSize();
                     var freeSpaces = this.editor.cursorManager.getContinuousSpaceCount(args.pos.col, this.editor.cursorManager.getNextTablevelLeft(args.pos.col));
                     if (freeSpaces == tabsize) {
@@ -633,7 +632,7 @@ exports.Actions = SC.Object.extend({
         } else {
             if (args.pos.col < this.editor.editorView.getRowScreenLength(args.pos.row)) {
                 var settings = bespin.get('settings');
-                if (settings && settings.isSettingOn('smartmove')) {
+                if (settings.values.smartmove) {
                     var tabsize = this.editor.getTabSize();
                     var freeSpaces = this.editor.cursorManager.getContinuousSpaceCount(args.pos.col, this.editor.cursorManager.getNextTablevelRight(args.pos.col));
                     if (freeSpaces == tabsize) {
@@ -683,7 +682,7 @@ exports.Actions = SC.Object.extend({
 
         var settings = bespin.get("settings");
         var autoindent;
-        if (settings && settings.isSettingOn('autoindent')) {
+        if (settings.values.autoindent) {
             autoindent = bespin.util.leadingWhitespace(this.editor.model.getRowArray(args.pos.row));
         } else {
             autoindent = [];
@@ -714,7 +713,7 @@ exports.Actions = SC.Object.extend({
         this.editor.cursorManager.moveRight(true);
 
         var settings = bespin.get('settings');
-        if (settings && settings.isSettingOn('closepairs')) {
+        if (settings.values.closepairs) {
             // Automatically close pairs
             switch(args.newchar) {
                 case '(':

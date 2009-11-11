@@ -240,11 +240,10 @@ exports.commands.addCommand({
  * <p>If you "set jetpack on", wire up the toolbar to have the jetpack icon
  */
 bespin.subscribe("settings:set:jetpack", function(event) {
-    var newset = bespin.get("settings").isValueOff(event.value);
     var jptb = dojo.byId('toolbar_jetpack');
 
     // turn it off
-    if (newset) {
+    if (event.value) {
         if (jptb) {
             jptb.style.display = 'none';
         }

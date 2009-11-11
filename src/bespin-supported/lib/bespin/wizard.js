@@ -39,7 +39,7 @@ var wizards = {
 // TODO: Find some way to only do this if we're sure that this is a new user
 // Now we know what are settings are we can decide if we need to
 // open the new user wizard
-// if (!settings.isSettingOn("hidewelcomescreen") && bespin.wizard) {
+// if (!settings.values.hidewelcomescreen && bespin.wizard) {
 //     bespin.wizard.show(null, "newuser", false);
 // }
 

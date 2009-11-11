@@ -27,7 +27,6 @@ var command = require("bespin/command");
 var path = require("bespin/util/path");
 var keys = require("bespin/util/keys");
 var webpieces = require("bespin/util/webpieces");
-var settings = require("bespin/settings");
 
 /**
  * TODO: We need to find a way to add in a key-sequence for this. Currently
@@ -37,7 +36,7 @@ var settings = require("bespin/settings");
 /**
  * Add a setting to alter how previews are displayed
  */
-settings.addSetting({
+bespin.get("setting").addSetting({
     name: "preview",
     type: "text",
     defaultValue: "window"
@@ -67,7 +66,7 @@ exports.show = function(filename, project, type) {
     // Provide defaults
     var filename = filename || editSession.path;
     var project = project || editSession.project;
-    var type = type || settings.getValue("preview");
+    var type = type || settings.values.preview;
 
     var url = path.combine("preview/at", project, filename);
 

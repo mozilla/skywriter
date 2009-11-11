@@ -360,7 +360,7 @@ members: {
             }, this);
 
             var settings = bespin.get("settings");
-            if (settings && settings.isSettingOn('keepfilepopuponopen')) {
+            if (settings.values.keepfilepopuponopen) {
                 // keep the file popup up!
             } else {
                 bespin.publish("ui:escape");
@@ -591,7 +591,7 @@ members: {
         for (var i = 0; i < files.length; i++) {
             name = files[i].name;
             var settings = bespin.get("settings");
-            if (settings && settings.isSettingOff('dotmode') && name[0] == '.') {
+            if (!settings.values.dotmode && name[0] == '.') {
                 continue;
             }
             if (/\/$/.test(name)) {

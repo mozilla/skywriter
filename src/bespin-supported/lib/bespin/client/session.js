@@ -32,12 +32,11 @@ var util = require("bespin/util/util");
 var mobwrite = require("bespin/mobwrite/core");
 var diff_match_patch = require("bespin/mobwrite/diff");
 var SC = require("sproutcore");
-var settings = require("bespin/settings");
 
 /**
  * Add a setting to turn collaboration mode on/off
  */
-settings.addSetting({
+bespin.get("setting").addSetting({
     name: "collaborate",
     type: "boolean",
     defaultValue: false
@@ -490,7 +489,7 @@ exports.EditSession = SC.Object.extend({
                 // Ignore if there is no mobwrite
                 return;
             }
-            if (bespin.get("settings").isValueOn(ev.value)) {
+            if (ev.value) {
                 if (self.bailingOutOfCollaboration) {
                     return;
                 }
@@ -508,7 +507,7 @@ exports.EditSession = SC.Object.extend({
                     } else {
                         // Not OK to save, bail out of collaboration
                         self.bailingOutOfCollaboration = true;
-                        bespin.get("settings").setValue("collaborate", "off");
+                        bespin.get("settings").values.collaborate = false;
                         self.bailingOutOfCollaboration = false;
 
                         // We have reset the collaborate setting, but the
@@ -544,7 +543,7 @@ exports.EditSession = SC.Object.extend({
             setTimeout(function() {
                 var msg = "To edit files in others projects you must have " +
                           "'collaborate' set to on." +
-                          " <a href=\"javascript:bespin.get('settings').setValue('collaborate', 'on');\">Turn it on now</a>";
+                          " <a href=\"javascript:bespin.get('settings').values.collaborate = true;\">Turn it on now</a>";
                 bespin.get("commandLine").showHint(msg, 10000);
             }, 100);
         }
@@ -554,7 +553,7 @@ exports.EditSession = SC.Object.extend({
      * Should we attempt to use collaboration features?
      */
     shouldCollaborate: function() {
-        var collab = bespin.get('settings').isSettingOn('collaborate');
+        var collab = bespin.get('settings').values.collaborate;
 
         if (collab && !window.mobwrite) {
             console.log("Missing mobwrite: Forcing 'collaborate' to off in filesystem.js:isCollaborationOn");

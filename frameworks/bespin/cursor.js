@@ -24,12 +24,11 @@
 
 var bespin = require(package);
 var SC = require("sproutcore/runtime:package").SC;
-var settings = require("settings");
 
 /**
  * Add a setting to restrict the cursor to valid cursor positions
  */
-settings.addSetting({
+bespin.get("setting").addSetting({
     name: "strictlines",
     type: "boolean",
     defaultValue: false
@@ -38,7 +37,7 @@ settings.addSetting({
 /**
  * Add a setting to alter cursor positioning on new lines?
  */
-settings.addSetting({
+bespin.get("setting").addSetting({
     name: "smartmove",
     type: "boolean",
     defaultValue: true
@@ -57,8 +56,7 @@ exports.CursorManager = SC.Object.extend({
         // If someone does 'set strictlines on' then we need to check to see
         // if the cursor is in a valid place, and correct if not.
         bespin.subscribe("settings:set:strictlines", function(setting) {
-            var settings = bespin.get('settings');
-            if (settings.isValueOn(setting.value)) {
+            if (setting.value) {
                 var oldPos = exports.copyPos(this.position);
                 this.checkPastEndOfLine(oldPos);
             }
@@ -208,7 +206,7 @@ exports.CursorManager = SC.Object.extend({
         to = to + (delta == 1 ? 0 : -1);
         from = this.getModelPosition({col: from, row: rowIndex}).col;
         to = this.getModelPosition({col: to, row: rowIndex}).col;
-        if (settings && settings.isSettingOn('strictlines')) {
+        if (settings.values.strictlines) {
             from = Math.min(from, length);
             to = Math.min(to, length);
         }
@@ -315,7 +313,7 @@ exports.CursorManager = SC.Object.extend({
         var shiftKey = (args.event ? args.event.shiftKey : false);
 
         if (!this.editor.getSelection() || shiftKey) {
-            if (settings && settings.isSettingOn('smartmove')) {
+            if (settings.values.smartmove) {
                 var freeSpaces = this.getContinuousSpaceCount(oldPos.col, this.getNextTablevelLeft());
                 if (freeSpaces == this.editor.getTabSize()) {
                     this.moveCursor({ col: oldPos.col - freeSpaces });
@@ -326,7 +324,7 @@ exports.CursorManager = SC.Object.extend({
             }
 
             // start of the line so move up
-            if ((settings && settings.isSettingOn('strictlines')) && (this.position.col == 0)) {
+            if (settings.values.strictlines && this.position.col == 0) {
                 this.moveUp();
                 if (oldPos.row > 0) {
                     this.moveToLineEnd();
@@ -347,7 +345,7 @@ exports.CursorManager = SC.Object.extend({
         var shiftKey = (args.event ? args.event.shiftKey : false);
 
         if (!this.editor.getSelection() || shiftKey) {
-            if ((settings && settings.isSettingOn('smartmove')) && args != true) {
+            if (settings.values.smartmove && args != true) {
                 var freeSpaces = this.getContinuousSpaceCount(oldPos.col, this.getNextTablevelRight());
                 if (freeSpaces == this.editor.getTabSize()) {
                     this.moveCursor({ col: oldPos.col + freeSpaces });
@@ -358,7 +356,7 @@ exports.CursorManager = SC.Object.extend({
             }
 
             // end of the line, so go to the start of the next line
-            if ((settings && settings.isSettingOn('strictlines')) && (this.position.col >= this.editor.editorView.getRowScreenLength(this.position.row))) {
+            if (settings.values.strictlines && (this.position.col >= this.editor.editorView.getRowScreenLength(this.position.row))) {
                 this.moveDown();
                 if (oldPos.row < this.editor.model.getRowCount() - 1) {
                     this.moveCursor({ col: 0 });
@@ -406,7 +404,7 @@ exports.CursorManager = SC.Object.extend({
      */
     checkPastEndOfLine: function(oldPos) {
         var settings = bespin.get("settings");
-        var isStrictLines = settings ? settings.isSettingOn('strictlines') : false;
+        var isStrictLines = settings.values.strictlines;
         var maxCol
             = this.editor.editorView.getRowScreenLength(this.position.row);
         if (isStrictLines && this.position.col > maxCol) {
@@ -453,9 +451,12 @@ exports.CursorManager = SC.Object.extend({
                     newcol--;
                     c = row.charAt(newcol);
                     charCode = c.charCodeAt(0);
-                    if ( (charCode < 65) || (charCode > 122) ) { // if you get to an alpha you are done
-                        if (newcol != this.position.col - 1){newcol++; // right next to a stop char, move back one
-}
+                    // if you get to an alpha you are done
+                    if ((charCode < 65) || (charCode > 122)) {
+                        if (newcol != this.position.col - 1) {
+                            // right next to a stop char, move back one
+                            newcol++;
+                        }
                         break;
                     }
                 }

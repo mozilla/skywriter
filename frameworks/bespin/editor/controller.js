@@ -41,7 +41,7 @@ var scroll = require("editor/views/scroll");
 /**
  * Add a tabsize setting to alter the displayed width of the TAB character
  */
-settings.addSetting({
+bespin.get("setting").addSetting({
     name: "tabsize",
     type: "number",
     defaultValue: 4
@@ -160,7 +160,7 @@ exports.EditorController = SC.Object.extend({
      * Talk to the Bespin settings structure and pass in the key/value
      */
     setSetting: function(key, value) {
-        this.settings.setValue(key, value);
+        this.settings.values[key] = value;
     },
 
     /**
@@ -303,7 +303,7 @@ exports.EditorController = SC.Object.extend({
      */
     getTabSize: function() {
         var size = this.defaultTabSize;
-        var tabsize = parseInt(this.settings.getValue("tabsize"), 10);
+        var tabsize = parseInt(this.settings.values.tabsize, 10);
         if (tabsize > 0) {
             size = tabsize;
         }
@@ -446,7 +446,7 @@ exports.EditorController = SC.Object.extend({
             // updating the editor with contents, setting it here might break
             // the synchronization process.
             // See the note at the top of session.js:EditSession.startSession()
-            if (this.settings.isSettingOff("collaborate")) {
+            if (!this.settings.values.collaborate) {
                 self.model.insertDocument(content || "");
                 self.cursorManager.moveCursor({ row: 0, col: 0 });
                 self.setFocus(true);
@@ -632,7 +632,7 @@ exports.EditorController = SC.Object.extend({
      */
     _addHistoryItem: function(project, filename, fromFileHistory) {
         // Get the array of lastused files
-        var lastUsed = this.settings.getObject("_lastused");
+        var lastUsed = this.settings.values.lastused;
         if (!lastUsed) {
             lastUsed = [];
         }
@@ -659,10 +659,10 @@ exports.EditorController = SC.Object.extend({
             lastUsed = lastUsed.slice(0, 10);
         }
 
-        // Maybe this should have a _ prefix: but then it does not persist??
-        this.settings.setObject("_lastused", lastUsed);
+        this.settings.values.lastused = lastUsed;
     }
 });
+
 /**
  * Core key listener to decide which actions to run
  */
@@ -854,8 +854,7 @@ var toFire = function(eventString) {
  * Run the trim command before saving the file
  */
 bespin.subscribe("settings:set:trimonsave", function(event) {
-    var settings = bespin.get('settings');
-    if (settings.isValueOn(event.value)) {
+    if (event.value) {
         _trimOnSave = bespin.subscribe("editor:savefile:before", function(event) {
             bespin.get("commandLine").executeCommand('trim', true);
         });
@@ -869,7 +868,7 @@ var _trimOnSave;
 /**
  * Add a setting to alter the (programming) language of the current file
  */
-settings.addSetting({
+bespin.get("setting").addSetting({
     name: "language",
     type: "text",
     defaultValue: "auto"

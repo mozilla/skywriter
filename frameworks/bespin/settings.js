@@ -39,8 +39,6 @@
  *
  * <p>TODO:<ul>
  * <li>Check what happens when we alter settings from the UI
- * <li>Remove the typed access methods like isSettingOn and allow typed data to
- * be stored, converting to string on save.
  * <li>Ensure that values can be bound in a SC sense
  * <li>Convert all subscriptions to bindings.
  * <li>Implement HTML5 storage option
@@ -51,86 +49,38 @@
  * </ul>
  */
 
+var SC = require("sproutcore/runtime:package").SC;
 var bespin = require("package");
 var util = require("util/util");
 var themes = require("theme");
-var SC = require("sproutcore/runtime:package").SC;
-
-/**
- * Our store of the settings that we accept.
- */
-var settings = [];
-
-/**
- * These are the types that we accept. They are vaguely based on the Jetpack
- * settings system (https://wiki.mozilla.org/Labs/Jetpack/JEP/24) although
- * clearly more restricted.
- * <p>If you alter this list, remember to alter the error message in
- * #addSetting() to reflect the altered list of types.
- * In addition to these types, Jetpack also accepts range, member, password
- * that we are thinking of adding in the short term.
- */
-var validators = {
-    number: function(value) {
-        return typeof value == "number";
-    },
-    boolean: function(value) {
-        return typeof value == "boolean";
-    },
-    text: function(value) {
-        return typeof value == "string";
-    }
-};
-
-/**
- * Function to add to the list of available settings.
- * <p>Example usage:
- * <pre>
- * settings.addSetting({
- *     name: "tabsize", // For use in 'set|unset' commands
- *     type: "number",  // The type to allow value checking. See #validators()
- *     defaultValue: 4  // The default value for use when none is directly set
- * });
- * </pre>
- * @param {object} setting An object containing name/type/defaultValue members.
- */
-exports.addSetting = function(setting) {
-    if (!setting.name) {
-        throw "Settings need 'name' members";
-    }
-    if (!validators[setting.type]) {
-        throw "setting.type should be one of [number|boolean|string]";
-    }
-    if (!setting.defaultValue === undefined) {
-        throw "Settings need 'defaultValue' members";
-    }
-    if (!validators[setting.type](setting.defaultValue)) {
-        throw "Default value " + setting.defaultValue + " is not a valid " + setting.type;
-    }
-    settings.push(setting);
-};
-
-/**
- * The default initial settings
- */
-function defaultSettings() {
-    var defaultSettings = {};
-    settings.forEach(function(setting) {
-        defaultSettings[setting.name] = setting.defaultValue;
-    });
-    return defaultSettings;
-}
 
 /**
  * A base class for all the various methods of storing settings.
+ * <p>Usage:
+ * <pre>
+ * var settingsMod = require("settings");
+ * var settings = settingsMod.InMemorySettings.create();
+ * // Add a new setting
+ * settings.addSetting({ name:"foo", ... });
+ * // Display the default value
+ * alert(settings.values.foo);
+ * // Alter the value, which also publishes the change etc.
+ * settings.values.foo = "bar";
+ * // Reset the value to the default
+ * settings.resetValue("foo");
+ * </pre>
  * @class
  */
 exports.InMemorySettings = SC.Object.extend(/** @lends exports.InMemorySettings */ {
     /**
-     * We cache the current settings. We are likely to expose this to bindings
+     * The current settings.
      */
     values: {},
 
+    /**
+     * Our store of the settings that we accept.
+     */
+    _settings: {},
     /**
      * Setup the default settings
      * @constructs
@@ -145,93 +95,98 @@ exports.InMemorySettings = SC.Object.extend(/** @lends exports.InMemorySettings 
     },
 
     /**
-     * Change the value of the <code>key</code> setting to <code>value</code>.
-     */
-    setValue: function(key, value) {
-        this.values[key] = value;
-        this._changeValue(key, value);
-        bespin.publish("settings:set:" + key, { value: value });
-    },
-
-    /**
-     * Retrieve the value of the <code>key</code> setting.
-     */
-    getValue: function(key) {
-        return this.values[key];
-    },
-
-    /**
      * Reset the value of the <code>key</code> setting to it's default
      */
     resetValue: function(key) {
-        // TODO: implement this properly
-        delete this.values[key];
+        var setting = this._settings[key];
+        if (setting) {
+            this.values[key] = setting.defaultValue;
+        } else {
+            delete this.values[key];
+        }
     },
 
     /**
      * Retrieve a list of the known settings and their values
      */
     list: function() {
-        var settings = [];
+        var reply = [];
         for (var prop in this.values) {
             if (this.values.hasOwnProperty(prop)) {
-                settings.push({ 'key': prop, 'value': this.values[prop] });
+                reply.push({ 'key': prop, 'value': this.values[prop] });
             }
         }
-        return settings;
+        return reply;
     },
 
     /**
-     * Checks to see if the passed value is "on" or "true" (case sensitive).
-     * NOTE: This DOES NOT use settings it just does a string comparison. To
-     * test a setting you probably need #isSettingOn() and #isSettingOff().
+     * Function to add to the list of available settings.
+     * <p>Example usage:
+     * <pre>
+     * bepsin.get("settings").addSetting({
+     *     name: "tabsize", // For use in settings.values.X
+     *     type: "number",  // To allow value checking. See #_types
+     *     defaultValue: 4  // Default value for use when none is directly set
+     * });
+     * </pre>
+     * @param {object} setting Object containing name/type/defaultValue members.
      */
-    isValueOn: function(value) {
-        return value == 'on' || value == 'true';
+    addSetting: function(setting) {
+        if (!setting.name) {
+            throw "Settings need 'name' members";
+        }
+        if (!this._types[setting.type]) {
+            throw "setting.type should be one of [number|boolean|string]";
+        }
+        if (!setting.defaultValue === undefined) {
+            throw "Settings need 'defaultValue' members";
+        }
+        if (!this._types[setting.type].validator(setting.defaultValue)) {
+            throw "Default value " + setting.defaultValue + " is not a valid " + setting.type;
+        }
+        // Recall the setting
+        this._settings[setting.name] = setting;
+        // Set the default value up. We do this before __defineSetter__ because
+        // we don't want to publish the change to everyone. This might not be
+        // the correct behavior. Need experience to tell.
+        this.values[setting.name] = setting.defaultValue;
+        // Add a setter to values so we subclasses can save, and we can publish
+        this.values.__defineSetter__(setting.name, function(value) {
+            this.values[setting.name] = value;
+            this._changeValue(setting.name, value);
+            bespin.publish("settings:set:" + setting.name, { value: value });
+        }.bind(this));
     },
 
     /**
-     * Checks to see if the passed value is "off" or "false" (case sensitive) or
-     * <code>undefined</code>.
-     * NOTE: This DOES NOT use settings it just does a string comparison. To
-     * test a setting you probably need #isSettingOn() and #isSettingOff().
+     * These are the types that we accept. They are vaguely based on the Jetpack
+     * settings system (https://wiki.mozilla.org/Labs/Jetpack/JEP/24) although
+     * clearly more restricted.
+     * <p>If you alter this list, remember to alter the error message in
+     * #addSetting() to reflect the altered list of types.
+     * In addition to these types, Jetpack also accepts range, member, password
+     * that we are thinking of adding in the short term.
      */
-    isValueOff: function(value) {
-        return value == 'off' || value == 'false' || value === undefined;
-    },
-
-    /**
-     * Check to see if the given setting is on (using #isValueOn())
-     */
-    isSettingOn: function(key) {
-        return this.isValueOn(this.getValue(key));
-    },
-
-    /**
-     * Check to see if the given setting is off (using #isValueOff())
-     */
-    isSettingOff: function(key) {
-        return this.isValueOff(this.getValue(key));
-    },
-
-    /**
-     * Like #setValue() except that the value is assumed to be an object that
-     * should be converted to JSON.
-     */
-    setObject: function(key, value) {
-        this.setValue(key, JSON.stringify(value));
-    },
-
-    /**
-     * Like #getValue() except that the value is assumed to be an object that
-     * should be converted from JSON before being returned.
-     */
-    getObject: function(key) {
-        try {
-            return JSON.parse(this.getValue(key));
-        } catch(e) {
-            console.log("Error in getObject: " + e);
-            return {};
+    _types: {
+        number: {
+            validator: function(value) { return typeof value == "number"; },
+            toString: function(value) { return "" + value; },
+            fromString: function(value) { return 0 + value; }
+        },
+        boolean: {
+            validator: function(value) { return typeof value == "boolean"; },
+            toString: function(value) { return "" + value; },
+            fromString: function(value) { return !!value; }
+        },
+        text: {
+            validator: function(value) { return typeof value == "string"; },
+            toString: function(value) { return value; },
+            fromString: function(value) { return value; }
+        },
+        object: {
+            validator: function(value) { return typeof value == "object"; },
+            toString: function(value) { return JSON.stringify(value); },
+            fromString: function(value) { return JSON.parse(value); }
         }
     },
 
@@ -255,7 +210,7 @@ exports.InMemorySettings = SC.Object.extend(/** @lends exports.InMemorySettings 
      * Prime the local cache with the defaults.
      */
     _loadDefaultValues: function() {
-        this._loadFromObject(defaultSettings());
+        this._loadFromObject(this._defaultValues());
     },
 
     /**
@@ -264,7 +219,14 @@ exports.InMemorySettings = SC.Object.extend(/** @lends exports.InMemorySettings 
     _loadFromObject: function(data) {
         for (var key in data) {
             if (data.hasOwnProperty(key)) {
-                this.setValue(key, data[key]);
+                var value = data[key];
+                // We don't ignore values that are not associated with a setting
+                // so if there is no setting, just use the string value
+                var setting = this._settings[key];
+                if (setting) {
+                    value = this._types[setting.type].fromString(value);
+                }
+                this.values[key] = value;
             }
         }
     },
@@ -276,10 +238,30 @@ exports.InMemorySettings = SC.Object.extend(/** @lends exports.InMemorySettings 
         var reply = {};
         for (var key in this.values) {
             if (this.values.hasOwnProperty(key)) {
-                reply[key] = this.values[key];
+                var value = this.values[key];
+                // We don't delete values that are not associated with a setting
+                // so if there is no setting, just use value.toString()
+                var setting = this._settings[key];
+                if (setting) {
+                    reply[key] = this._types[setting.type].toString(value);
+                } else {
+                    reply[key] = "" + value;
+                }
             }
         }
         return reply;
+    /**
+     * The default initial settings
+     */
+    _defaultValues: function() {
+        var defaultValues = {};
+        for (var name in this._settings) {
+            if (this._settings.hasOwnProperty(name)) {
+                var setting = this._settings[name];
+                defaultValues[setting.name] = setting.defaultValue;
+            }
+        }
+        return defaultValues;
     }
 });
 
@@ -291,11 +273,9 @@ exports.InMemorySettings = SC.Object.extend(/** @lends exports.InMemorySettings 
  */
 exports.CookieSettings = exports.InMemorySettings.extend(/** @lends exports.CookieSettings */{
     _loadInitialValues: function() {
-        this.sc_super();
+        this._loadDefaultValues();
         var data = cookie.get("settings");
         this._loadFromObject(JSON.parse(data));
-    },
-
     _changeValue: function(key, value) {
         var data = JSON.stringify(this._saveToObject());
         cookie.set("settings", data);
@@ -310,10 +290,7 @@ exports.CookieSettings = exports.InMemorySettings.extend(/** @lends exports.Cook
  */
 exports.ServerSettings = exports.InMemorySettings.extend(/** @lends exports.ServerSettings */ {
     _loadInitialValues: function() {
-        this.sc_super();
-        bespin.get('server').listSettings(function(settings) {
-            this._loadFromObject(settings);
-        }.bind(this));
+        this._loadDefaultValues();
 
         var onLoad = function(file) {
             // Strip \n\n from the end of the file and insert into this.settings
@@ -323,7 +300,7 @@ exports.ServerSettings = exports.InMemorySettings.extend(/** @lends exports.Serv
                 }
                 if (setting.match(/\S+\s+\S+/)) {
                     var pieces = setting.split(/\s+/);
-                    this.setValue(pieces[0].trim(), pieces[1].trim());
+                    this.values[pieces[0].trim()] = pieces[1].trim();
                 }
             });
         };
@@ -333,16 +310,16 @@ exports.ServerSettings = exports.InMemorySettings.extend(/** @lends exports.Serv
 
     _changeValue: function(key, value) {
         // Aggregate the settings into a file
-        var settings = "";
+        var content = "";
         for (var key in this.values) {
             if (this.values.hasOwnProperty(key)) {
-                settings += key + " " + this.values[key] + "\n";
+                content += key + " " + this.values[key] + "\n";
             }
         }
         // Send it to the server
         bespin.get('files').saveFile(bespin.userSettingsProject, {
             name: "settings",
-            content: settings,
+            content: content,
             timestamp: new Date().getTime()
         });
     }

@@ -31,12 +31,11 @@
 
 var SC = require("sproutcore/runtime:package").SC;
 var bespin = require("package");
-var settings = require("settings");
 
 /**
  * Add a setting to alter the syntax coloring engine
  */
-settings.addSetting({
+bespin.get("setting").addSetting({
     name: "syntaxengine",
     type: "text",
     defaultValue: "simple"

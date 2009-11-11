@@ -93,8 +93,8 @@ members: {
         this.resize();
 
         var settings = bespin.get("settings");
-        if (settings && settings.isSettingOff("debugmode")) {
-            settings.setValue("debugmode", "on");
+        if (!settings.values.debugmode) {
+            settings.values.debugmode = true;
         }
 
         exports.project = bespin.get("editSession").project;
@@ -266,9 +266,7 @@ members: {
 
 bespin.subscribe("settings:set:debugmode", function(event) {
     var editor = bespin.get('editor');
-    var settings = bespin.get('settings');
-    editor.debugMode = settings.isValueOn(event.value);
-
+    editor.debugMode = event.value;
     if (editor.debugMode) {
         bespin.plugins.loadOne("bespin.debugger", function(debug) {
             debug.loadBreakpoints(function() {

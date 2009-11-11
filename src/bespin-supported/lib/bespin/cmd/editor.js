@@ -59,7 +59,7 @@ command.store.addCommand({
                 var linenum = parseInt(value, 10); // parse the line number as a decimal
 
                 if (isNaN(linenum)) { // it's not a number, so for now it is a function name
-                    if (settings.isValueOn(settings.getValue("syntaxcheck"))) {
+                    if (settings.values.syntaxcheck) {
                         bespin.publish("parser:gotofunction", {
                             functionName: value
                         });
@@ -76,7 +76,7 @@ command.store.addCommand({
     command.store.addCommand(gotoCmd);
     bespin.subscribe("settings:set:syntaxcheck", function () {
         var settings = bespin.get("settings");
-        if (settings.isValueOn(settings.getValue("syntaxcheck"))) {
+        if (settings.values.syntaxcheck) {
             gotoCmd.preview = previewFull;
             gotoCmd.completeText = completeTextFull;
         } else {
@@ -128,7 +128,7 @@ command.store.addCommand({
     execute: function(instruction, tabsize) {
         if (!tabsize) {
             var settings = bespin.get("settings");
-            tabsize = settings.getValue('tabsize');
+            tabsize = settings.values.tabsize;
         }
 
         var replaceArgs = {
@@ -151,7 +151,7 @@ command.store.addCommand({
     execute: function(instruction, tabsize) {
         if (!tabsize) {
             var settings = bespin.get("settings");
-            tabsize = settings.getValue('tabsize');
+            tabsize = settings.values.tabsize;
         }
 
         var replaceArgs = {
