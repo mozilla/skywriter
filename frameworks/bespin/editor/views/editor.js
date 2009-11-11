@@ -105,6 +105,23 @@ exports.EditorView = SC.View.extend({
     lastLineCount: 0,
     lastCursorPos: null,
 
+    /**
+     * @property
+     * The padding to leave inside the clipping frame, given as an object with
+     * 'bottom' and 'right' properties. Text content is displayed inside this
+     * padding as usual, but the cursor cannot enter it. In a BespinScrollView,
+     * this feature is used to prevent the cursor from ever going behind the
+     * scroll bars.
+     */
+    padding: { bottom: 0, right: 0 },
+
+    /**
+     * @property{Boolean}
+     * This property is always true for objects that expose a padding property.
+     * The BespinScrollView uses this.
+     */
+    hasPadding: true,
+
     init: function() {
         var settings = bespin.get("settings");
 
@@ -680,16 +697,20 @@ exports.EditorView = SC.View.extend({
 
     /**
      * Returns the width in pixels of the entire content area.
+     * TODO: convert to property for improved performance
      */
     getWidth: function() {
-        return this.get('gutterWidth') + this.get('textWidth');
+        return this.get('gutterWidth') + this.get('textWidth')
+            + this.get('padding').right;
     },
 
     /**
      * Returns the height in pixels of the content area.
+     * TODO: convert to property for improved performance
      */
     getHeight: function() {
-        return this.get('lineHeight') * this.get('content').getRowCount();
+        return this.get('lineHeight') * this.get('content').getRowCount()
+            + this.get('padding').bottom;
     },
 
     /**
@@ -1394,26 +1415,33 @@ exports.EditorView = SC.View.extend({
     // scrolling actually occurred and false otherwise.
     _scrollToFrameVisible: function(frame) {
         var clippingFrame = this.get('clippingFrame');
+        var padding = this.get('padding');
+        var preferredFrame = {
+            x:      clippingFrame.x,
+            y:      clippingFrame.y,
+            width:  clippingFrame.width - padding.right,
+            height: clippingFrame.height - padding.bottom
+        };
 
         var targetX;
         var frameRight = frame.x + frame.width;
-        if (frame.x < clippingFrame.x)
+        if (frame.x < preferredFrame.x)
             targetX = frame.x;                              // off left side
-        else if (frameRight >= clippingFrame.x + clippingFrame.width)
-            targetX = frameRight - clippingFrame.width;     // off right side
+        else if (frameRight >= preferredFrame.x + preferredFrame.width)
+            targetX = frameRight - preferredFrame.width;    // off right side
         else
-            targetX = clippingFrame.x;                      // already visible
+            targetX = preferredFrame.x;                     // already visible
 
         var targetY;
         var frameBottom = frame.y + frame.height;
-        if (frame.y < clippingFrame.y)
+        if (frame.y < preferredFrame.y)
             targetY = frame.y;                              // off left side
-        else if (frameBottom >= clippingFrame.y + clippingFrame.height)
-            targetY = frameBottom - clippingFrame.height;   // off right side
+        else if (frameBottom >= preferredFrame.y + preferredFrame.height)
+            targetY = frameBottom - preferredFrame.height;  // off right side
         else
-            targetY = clippingFrame.y;                      // already visible
+            targetY = preferredFrame.y;                     // already visible
 
-        if (targetX === clippingFrame.x && targetY === clippingFrame.y)
+        if (targetX === preferredFrame.x && targetY === preferredFrame.y)
             return false;
 
         // Grab the enclosing scrollable view.

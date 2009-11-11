@@ -34,13 +34,17 @@ exports.BespinScrollView = SC.ScrollView.extend({
     autohidesVerticalScroller: false,
     verticalScrollerView: scroller.BespinScrollerView,
 
+    horizontalScrollerThickness: 24,
+    verticalScrollerThickness: 24,
+
     tile: function() {
         var hScroller = this.get('horizontalScrollerView');
         var vScroller = this.get('verticalScrollerView');
         var hScrollerVisible = this.get('isHorizontalScrollerVisible');
         var vScrollerVisible = this.get('isVerticalScrollerVisible');
 
-        var hScrollerThickness = 24, vScrollerThickness = 24;
+        var hScrollerThickness = this.get('horizontalScrollerThickness');
+        var vScrollerThickness = this.get('verticalScrollerThickness');
         if (hScrollerVisible) {
             var hScroller = this.get('horizontalScrollerView');
             hScroller.set('scrollerThickness', hScrollerThickness);
@@ -76,6 +80,14 @@ exports.BespinScrollView = SC.ScrollView.extend({
 
         this.get('containerView').set('layout',
             { left: 0, bottom: 0, top: 0, right: 0 });
+
+        var contentView = this.get('contentView');
+        if (contentView.get('hasPadding') === true) {
+            this.get('contentView').set('padding', {
+                bottom: hScrollerThickness + 6,
+                right:  vScrollerThickness + 6
+            });
+        }
     }
 });
 
