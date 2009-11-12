@@ -210,7 +210,7 @@ def sc_build(options):
     
 SPROUTCORE_INLINE="""
 var ENV = {"platform":"classic","mode":"production"};
-var SC=SC||{BUNDLE_INFO:{},LAZY_INSTANTIATION:{}};SC.browser=(function(){var c=navigator.userAgent.toLowerCase();
+var SC=SC||{BUNDLE_INFO:{},LAZY_INSTANTIATION:{}};SC.json=JSON;SC.browser=(function(){var c=navigator.userAgent.toLowerCase();
 var a=(c.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/)||[])[1];var b={version:a,safari:(/webkit/).test(c)?a:0,opera:(/opera/).test(c)?a:0,msie:(/msie/).test(c)&&!(/opera/).test(c)?a:0,mozilla:(/mozilla/).test(c)&&!(/(compatible|webkit)/).test(c)?a:0,mobileSafari:(/apple.*mobile.*safari/).test(c)?a:0,windows:!!(/(windows)/).test(c),mac:!!((/(macintosh)/).test(c)||(/(mac os x)/).test(c)),language:(navigator.language||navigator.browserLanguage).split("-",1)[0]};
 b.current=b.msie?"msie":b.mozilla?"mozilla":b.safari?"safari":b.opera?"opera":"unknown";
 return b})();SC.bundleDidLoad=function(a){var b=this.BUNDLE_INFO[a];if(!b){b=this.BUNDLE_INFO[a]={}
@@ -327,12 +327,13 @@ BASE_RULES.add(Exclude("sproutcore/frameworks/foundation", [
     RE("debug/.*"),
     # RE("mixins/.*"),
     "mixins/button.js",
-    "mixins/control.js",
+    # "mixins/control.js",
     "mixins/inline_text_field.js",
     # "mixins/string.js",
-    "mixins/tree_item_content.js",
-    "private/tree_item_observer.js",
+    # "mixins/tree_item_content.js",
+    # "private/tree_item_observer.js",
     "system/datetime.js",
+    "system/json.js",
     RE("tests/.*"),
     RE("validators/.*"),
 ]))
