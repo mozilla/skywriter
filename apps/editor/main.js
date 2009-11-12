@@ -1,7 +1,33 @@
 "export package main";
 
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License
+ * Version 1.1 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.
+ * See the License for the specific language governing rights and
+ * limitations under the License.
+ *
+ * The Original Code is Bespin.
+ *
+ * The Initial Developer of the Original Code is Mozilla.
+ * Portions created by the Initial Developer are Copyright (C) 2009
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Bespin Team (bespin@mozilla.com)
+ *
+ * ***** END LICENSE BLOCK ***** */
+
 var didRun = false;
+
 var bespin = require("bespin:package");
+var containerMod = require("bespin:util/container");
 var EditorController = require("bespin:editor/controller").EditorController;
 var view = require("view");
 
@@ -10,28 +36,34 @@ main = function() {
         return;
     }
     didRun = true;
-    
-    console.log("In main now!");
-    bespin.subscribe("foo:bar", function() {
-        console.log("Got my foobar");
-    });
-    
-    bespin.publish("foo:bar", {});
-    var plugins = require("bespin:plugins");
-    var builtins = require("bespin:builtins");
-    
-    var catalog = plugins.Catalog.create();
-    catalog.load(builtins.metadata);
-    bespin.register("plugins", catalog);
-    
+
+    // TODO this is a temporary hack. Remove this once the bootstrap sequence
+    // for Tiki is straightened out
+    SC._didBecomeReady();
+
+    // The container allows us to keep multiple bespins separate, and constructs
+    // objects according to a user controlled recipe.
+    console.log("Bespin is starting up.");
+
+    // We would like to create a container here, something like this:
+    //   var container = containerMod.Container.create();
+    // However until we've got rid of the singleton 'bespin' we cant do that
+    var container = bespin._container;
+
     view.app.getPath("mainPage.mainPane").append();
-    
+
+    // Tell the container about the element that we run inside
+    var element = view.app.getPath("mainPage.mainPane.layer");
+    container.register("container", element);
+
     // TODO: the stuff that follows is messy. in SC terms, an EditorView should actually
-    // be created in the mainPane directly via a "design" call, not created by 
+    // be created in the mainPane directly via a "design" call, not created by
     // the controller.
-    
-    var controller = EditorController.create({ container: view.app.getPath("mainPage.mainPane.layer") });
-    bespin.register("editor", controller);
-    controller.model.insertDocument("Welcome to Bespin.");
-    view.app.getPath("mainPage.mainPane").appendChild(controller.ui);
+    // We could also say editor = container.get("editor"); which would allow
+    // users to customize how the editor is built, but see above
+    var editor = EditorController.create();
+    bespin.register("editor", editor);
+
+    editor.model.insertDocument("Welcome to Bespin.");
+    view.app.getPath("mainPage.mainPane").appendChild(editor.ui);
 };

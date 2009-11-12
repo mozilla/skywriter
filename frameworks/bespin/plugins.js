@@ -23,6 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime:package").SC;
+var builtins = require("builtins");
 
 exports.Extension = SC.Object.extend({
     load: function(callback, property) {
@@ -77,6 +78,7 @@ exports.Catalog = SC.Object.extend({
     init: function() {
         this.points = {};
         this.plugins = {};
+        this.load(builtins.metadata);
     },
 
     getExtensionPoint: function(name) {
