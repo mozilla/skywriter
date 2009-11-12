@@ -33,11 +33,8 @@ SC.mixin(exports, {
     /** The version number to display to users */
     versionCodename: 'DEVELOPMENT MODE',
     /** The version number of the API (to ensure that the client and server are talking the same language) */
-    apiVersion: 'dev',
+    apiVersion: 'dev'
     // END VERSION BLOCK
-
-    /** The name of the project that contains the users client side settings */
-    userSettingsProject: "BespinSettings"
 });
 
 /**
@@ -51,16 +48,21 @@ exports.displayVersion = function(el) {
     el.innerHTML = '<a href="https://wiki.mozilla.org/Labs/Bespin/ReleaseNotes" title="Read the release notes">Version <span class="versionnumber">' + this.versionNumber + '</span> "' + this.versionCodename + '"</a>';
 };
 
-// Clone the hub
-var hub = require("util/hub");
-exports.publish = hub.publish;
-exports.subscribe = hub.subscribe;
-exports.unsubscribe = hub.unsubscribe;
-exports.fireAfter = hub.fireAfter;
+// For now there is a global container, but we're planning on getting rid of it.
+var containerMod = require("util/container");
 
-// Clone the container
-var container = require("util/container");
-exports.register = container.register;
-exports.unregister = container.unregister;
-exports.get = container.get;
-exports.getComponent = container.getComponent;
+// This will be going away soon. Do not access bespin._container outside of main
+exports._container = containerMod.Container.create();
+
+exports.register = exports._container.register.bind(exports._container);
+exports.unregister = exports._container.unregister.bind(exports._container);
+exports.get = exports._container.get.bind(exports._container);
+exports.getComponent = exports._container.getComponent.bind(exports._container);
+
+// Clone the hub
+var hub = exports._container.get("hub");
+
+exports.publish = hub.publish.bind(hub);
+exports.subscribe = hub.subscribe.bind(hub);
+exports.unsubscribe = hub.unsubscribe.bind(hub);
+exports.fireAfter = hub.fireAfter.bind(hub);

@@ -31,25 +31,23 @@
 require("util/globals");
 
 var SC = require("sproutcore/runtime:package").SC;
+var bespin = require("bespin");
+var util = require("bespin/util/util");
+var settings = require("bespin/settings");
+var plugins = require("bespin/plugins");
+var builtins = require("bespin/builtins");
+var editorMod = require("bespin/editor");
 var bespin = require("package");
+var containerMod = require("util/container");
 var util = require("util/util");
+
+var EditorController = require('bespin/editor/controller').EditorController;
 var settings = require("settings");
 var plugins = require("plugins");
 var builtins = require("builtins");
 var editorMod = require("editor");
 
 var EditorController = require('editor/controller').EditorController;
-
-// When we come to integrate the non embedded parts ...
-// var init = re quire("bespin/page/editor/init");
-// And then call init.onLoad();
-
-var catalog = plugins.Catalog.create();
-catalog.load(builtins.metadata);
-bespin.register("plugins", catalog);
-
-// SC.LOG_BINDINGS = true;
-// SC.LOG_OBSERVERS = true;
 
 /**
  * Initialize a Bespin component on a given element.
@@ -69,9 +67,16 @@ exports.useBespin = function(element, options) {
     var content = element.innerHTML;
     var editor;
 
+    // The container allows us to keep multiple bespins separate, and constructs
+    // objects according to a user controlled recipe.
+    var container = containerMod.Container.create();
+
+    // We want to move away from the singleton bespin.foo, but until we have ...
+    bespin.container = container;
+
     SC.run(function() {
-        bespin.register("container", element);
-        editor = bespin.get("editor");
+        container.register("container", element);
+        editor = container.get("editor");
 
         var editorPane = SC.Pane.create({
             layout: editor.computeLayout(),

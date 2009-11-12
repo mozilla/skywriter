@@ -22,6 +22,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var util = require("util/util");
+var builtins = require("builtins");
+
 /**
  * The Bespin container provides a way for various parts of the system to
  * discover each other.
@@ -47,291 +50,213 @@
  * implementations of any core component, and since the container can track who
  * uses what, it can re-inject newer versions of those components at runtime.
  */
+exports.Container = SC.Object.extend(/** @lends exports.Container */ {
+    /**
+     * Methods for registering components with the main system
+     */
+    components: {},
 
-var util = require("util/util");
+    /**
+     * To prevent a loop where a requires b, requires a we track things we are
+     * creating, and if asked to create something thats already there, we die
+     */
+    beingCreated: {},
 
-/**
- * Methods for registering components with the main system
- */
-var registeredComponents = {};
+    /**
+     * Containers contain themselves so they can be got at easily
+     */
+    init: function() {
+        this.register("container", this);
+    },
 
-/**
- * To prevent a loop where a requires b, requires a we track things we are
- * creating, and if asked to create something thats already there, we die
- */
-var beingCreated = {};
+    /**
+     * Given an id and an object, register it inside of Bespin.
+     * <p>The way to attach components into bespin for others to get them out
+     */
+    register: function(id, object) {
+        this.components[id] = object;
+        this.inject(object);
+        console.log("container.register", id, object);
+        return object;
+    },
 
-/**
- * Given an id and an object, register it inside of Bespin.
- * <p>The way to attach components into bespin for others to get them out
- */
-exports.register = function(id, object) {
-    registeredComponents[id] = object;
-    exports.inject(object);
-    console.log("container.register", id, object);
-    return object;
-};
+    /**
+     * Undoes the effects of #register()
+     */
+    unregister: function(id) {
+        delete this.components[id];
+    },
 
-/**
- * Undoes the effects of #register()
- */
-exports.unregister = function(id) {
-    delete registeredComponents[id];
-};
-
-/**
- * Inject the requirements into an object
- */
-exports.inject = function(object) {
-    if (object && object.requires) {
-        // Clone the requires structure so we can remove fulfilled requirements
-        // and not trip over anything in the prototype chain.
-        var requirements = {};
-        for (var property in object.requires) {
-            if (object.requires.hasOwnProperty(property)) {
-                var name = object.requires[property];
-                requirements[property] = name;
-            }
-        }
-
-        /**
-         * Call afterContainerSetup if we've injected all that we need to
-         */
-        var checkCompleted = function() {
-            var remaining = 0;
-            for (var i in requirements) {
+    /**
+     * Inject the requirements into an object
+     */
+    inject: function(object) {
+        if (object && object.requires) {
+            // Clone the requires structure so we can remove fulfilled
+            // requirements and not trip over anything in the prototype chain.
+            var requirements = {};
+            for (var property in object.requires) {
                 if (object.requires.hasOwnProperty(property)) {
-                    remaining++;
+                    var name = object.requires[property];
+                    requirements[property] = name;
                 }
             }
-            if (remaining == 0) {
-                if (object.afterContainerSetup) {
-                    object.afterContainerSetup();
+
+            /**
+             * Call afterContainerSetup if we've injected all that we need to
+             */
+            var checkCompleted = function() {
+                var remaining = 0;
+                for (var i in requirements) {
+                    if (object.requires.hasOwnProperty(property)) {
+                        remaining++;
+                    }
                 }
-            }
-        };
+                if (remaining == 0) {
+                    if (object.afterContainerSetup) {
+                        object.afterContainerSetup();
+                    }
+                }
+            };
 
-        checkCompleted();
+            checkCompleted();
 
-        for (var property in requirements) {
-            if (object.requires.hasOwnProperty(property)) {
-                var name = requirements[property];
-                /**
-                 * We've found a component to match name, so this needs to be
-                 * injected into object[property] and recalling for next time.
-                 */
-                var onCreate = function(component) {
-                    object[property] = component;
-                    exports.register(name, component);
-                    delete requirements[property];
-                    checkCompleted();
-                };
+            for (var property in requirements) {
+                if (object.requires.hasOwnProperty(property)) {
+                    var name = requirements[property];
+                    /**
+                     * We've found a component to match , so this needs to be
+                     * injected into object[property] and recalled for next time
+                     */
+                    var onCreate = function(component) {
+                        object[property] = component;
+                        this.register(name, component);
+                        delete requirements[property];
+                        checkCompleted();
+                    }.bind(this);
 
-                var source = object.requires[property];
-                var component = exports.get(source);
-                if (component !== undefined) {
-                    onCreate(component);
-                } else {
-                    createFromFactory(name, onCreate);
+                    var source = object.requires[property];
+                    var component = this.get(source);
+                    if (component !== undefined) {
+                        onCreate(component);
+                    } else {
+                        this._createFromFactory(name, onCreate);
+                    }
                 }
             }
         }
-    }
-};
+    },
 
-/**
- * Given an id, return the component.
- */
-exports.get = function(id) {
-    var object = registeredComponents[id];
-    if (object === undefined) {
-        var onCreate = function(component) {
-            exports.register(id, component);
-            object = component;
-        };
-        createFromFactory(id, onCreate);
-    }
-    return object;
-};
+    /**
+     * Given an id, return the component.
+     */
+    get: function(id) {
+        var object = this.components[id];
+        if (object === undefined) {
+            var onCreate = function(component) {
+                this.register(id, component);
+                object = component;
+            }.bind(this);
+            this._createFromFactory(id, onCreate);
+        }
+        return object;
+    },
 
-/**
- * Asynchronous component management.
- * <p>Retrieve the component with the given ID. If the component is not yet
- * loaded, load the component and pass it along. The callback is called with the
- * component as the single parameter.
- */
-exports.getComponent = function(id, callback, context) {
-    context = context || window;
-    var component = exports.get(id);
-    if (component === undefined) {
-        callback.call(context, component);
-    } else {
-        var onCreate = function(component) {
-            exports.register(id, component);
+    /**
+     * Asynchronous component management.
+     * <p>Retrieve the component with the given ID. If the component is not yet
+     * loaded, load the component and pass it along. The callback is called with
+     * the component as the single parameter.
+     */
+    getComponent: function(id, callback, context) {
+        context = context || window;
+        var component = this.components[id];
+        if (component !== undefined) {
             callback.call(context, component);
-        };
-        createFromFactory(id, onCreate);
+        } else {
+            var onCreate = function(component) {
+                this.register(id, component);
+                callback.call(context, component);
+            }.bind(this);
+            this._createFromFactory(id, onCreate);
+        }
+    },
+
+    /**
+     * Internal function to create an object using a lookup into the factories
+     * registry.
+     * <p>We lookup <code>id</code> in <code>factories</code>. If the value is a
+     * function we call it, passing <code>onCreate</code>. If the value is a
+     *  stringthen we split on ":", and <code>require</code> the section before,
+     * and call the function exported under the string after the ":".
+     * <p>For example if the module "bespin/foo" exported a function using
+     * <code>exports.bar = function(onCreate) { ... }</code> then we could use
+     * that as a factory using "bespin/foo:bar".
+     * @private
+     */
+    _createFromFactory: function(id, onCreate) {
+        if (this.beingCreated[id] !== undefined) {
+            console.trace();
+            throw "Already creating " + id;
+        }
+
+        this.beingCreated[id] = onCreate;
+        try {
+            var factory = builtins.factories[id];
+            if (factory === undefined) {
+                console.trace();
+                throw "No component factory '" + id + "'";
+            } else if (util.isFunction(factory)) {
+                factory(onCreate);
+                // Extract the method
+                var parts = factory.split(" ");
+                if (parts.length != 2) {
+                    throw "Can't split " + factory + " into 2 parts on ' '";
+                }
+                var action = parts.shift();
+                // Split on ":" for module and export
+                var factory = parts.join(" ");
+                var parts = factory.split(":");
+                if (parts.length != 2) {
+                    throw "Can't split " + factory + " into 2 parts on ':'";
+                }
+                // Maybe rather than being synch with "module = re(parts[0]);"
+                // we should be doing this
+                // re.when(re.async(parts[0]), function(module) {
+                //     var exported = module[parts[1]];
+                //     ...
+                // });
+                // This works for now, and I'm not trying to solve every problem
+                // What we really want is a give it me now if you can, otherwise
+                // we go async ...
+                // We can't handle dynamic requirements yet
+                var re = require;
+                var module = re(parts[0]);
+                var exported = module[parts[1]];
+                if (action == "call") {
+                    exported(onCreate);
+                } else if (action == "create") {
+                    onCreate(exported.create());
+                } else if (action == "new") {
+                    onCreate(new exported());
+                } else if (action == "value") {
+                    onCreate(exported);
+                } else {
+                    throw "Create action must be call|create|new|value. " +
+                            "Found" + action;
+                }
+            }
+        }
+        finally {
+            delete this.beingCreated[id];
+        }
     }
-};
+});
 
 /**
- * When we don't want to provide an object that actually does anything
+ * When we don't want to provide an object that actually does anything.
+ * TODO: Delete this when we don't need to create fake components any more
  */
 exports.dummyFactory = function(onCreate) {
     onCreate(null);
 };
-
-/**
- * We can't handle dynamic requirements yet
- */
-var re = require;
-
-/**
- * Internal function to create an object using a lookup into the factories
- * registry.
- * <p>We lookup <code>id</code> in <code>factories</code>. If the value is a
- * function we call it, passing <code>onCreate</code>. If the value is a string
- * then we split on ":", and <code>require</code> the section before, and call
- * the function exported under the string after the ":".
- * <p>For example if the module "bespin/foo" exported a function using
- * <code>exports.bar = function(onCreate) { ... }</code> then we could use that
- * as a factory using "bespin/foo:bar".
- */
-function createFromFactory(id, onCreate) {
-    if (beingCreated[id] !== undefined) {
-        console.trace();
-        throw "Already creating " + id;
-    }
-
-    beingCreated[id] = onCreate;
-    try {
-        var factory = exports.factories[id];
-        if (factory === undefined) {
-            console.trace();
-            throw "No component factory '" + id + "'";
-        } else if (util.isFunction(factory)) {
-            factory(onCreate);
-        } else {
-            // Extract the method
-            var parts = factory.split(" ");
-            if (parts.length != 2) {
-                throw "Can't split " + factory + " into 2 parts on ' '";
-            }
-            var action = parts.shift();
-            if (action != "call" && action != "create" && action != "new" && action != "value") {
-                throw "Create action must be call|create|new|value. Found" + action;
-            }
-            // Split on ":" for module and export
-            var factory = parts.join(" ");
-            var parts = factory.split(":");
-            if (parts.length != 2) {
-                throw "Can't split " + factory + " into 2 parts on ':'";
-            }
-            // Maybe rather than being synchronous with "module = re(parts[0]);"
-            // we should be doing this
-            // re.when(re.async(parts[0]), function(module) {
-            //     var exported = module[parts[1]];
-            //     ...
-            // });
-            // This works for now, and I'm not trying to solve every problem
-            var module = re(parts[0]);
-            var exported = module[parts[1]];
-            if (action == "call") {
-                exported(onCreate);
-            } else if (action == "create") {
-                onCreate(exported.create());
-            } else if (action == "new") {
-                onCreate(new exported());
-            } else if (action == "value") {
-                onCreate(exported);
-            }
-        }
-    }
-    finally {
-        delete beingCreated[id];
-    }
-}
-
-/**
- * How to create the various components that make up core bespin.
- * Ideally these would all be strings like 'settings', then we could easily load
- * the entire initial configuration from the plugin system.
- */
-exports.factories = {
-    editor: "create editor/controller:EditorController",
-    settings: "create settings:InMemorySettings",
-    editSession: "call util/container:dummyFactory",
-    file: "call util/container:dummyFactory",
-    parser: "call util/container:dummyFactory",
-    popup: function(onCreate) {
-        exports.plugins.loadOne("popup", function(popupmod) {
-            onCreate(new popupmod.Window());
-        });
-    },
-    piemenu: function(onCreate) {
-        exports.plugins.loadOne("piemenu", function(piemenumod) {
-            var piemenu = new piemenumod.Window();
-            // the pie menu doesn't animate properly
-            // without restoring control to the UI temporarily
-            setTimeout(function() { onCreate(piemenu); }, 25);
-        });
-    },
-    commandLine: function(onCreate) {
-        onCreate({});
-        /*
-        exports.plugins.loadOne("commandLine", function(commandline) {
-            onCreate(new commandline.Interface('command', exports.command.store));
-        });
-        */
-    },
-    debugbar: function(onCreate) {
-        exports.plugins.loadOne("debugbar", function(debug) {
-            onCreate(new debug.EvalCommandLineInterface('debugbar_command', null, {
-                idPrefix: "debugbar_",
-                parentElement: document.getElementById("debugbar")
-            }));
-        });
-    },
-    breakpoints: function(onCreate) {
-        exports.plugins.loadOne("breakpoints", function(BreakpointManager) {
-            onCreate(new BreakpointManager());
-        });
-    }
-};
-
-/*
-var hub = re quire("bespin/util/hub");
-
-var subscribeToExtension = function(key) {
-    hub.subscribe("extension:removed:" + key, function() {
-        var item = exports.get(key);
-        if (item && item.destroy) {
-            item.destroy();
-        }
-        hub.unregister(key);
-    });
-};
-
-var initializeReloaders = function() {
-    for (var key in exports.factories) {
-        subscribeToExtension(key);
-    }
-};
-
-// hub.subscribe("extension:loaded:bespin.subscribe", function(ext) {
-//     var subscription = hub.subscribe(ext.topic, function(e) {
-//         ext.load(function(func) {
-//             func(e);
-//         });
-//     });
-//     ext.subscription = subscription;
-// });
-//
-// hub.subscribe("extension:removed:bespin.subscribe", function(ext) {
-//     if (ext.subscription) {
-//         hub.unsubscribe(ext.subscription);
-//     }
-// });
-//
-// initializeReloaders();
-*/
