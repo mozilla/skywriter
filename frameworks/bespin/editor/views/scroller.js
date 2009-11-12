@@ -514,7 +514,7 @@ exports.BespinScrollerView = SC.View.extend({
             // The rest of the painting code assumes the scroll bar is
             // horizontal. Create that fiction by installing a 90 degree
             // rotation.
-            ctx.translate(thickness, 0);
+            ctx.translate(thickness + 1, 0);
             ctx.rotate(Math.PI * 0.5);
             break;
 
@@ -530,21 +530,27 @@ exports.BespinScrollerView = SC.View.extend({
             // Draw the scroll track rectangle.
             var clientLength = this.get('_clientLength');
             ctx.fillStyle = theme.scrollTrackFillStyle;
-            ctx.fillRect(NIB_PADDING + 1, 1,
-                clientLength - 2*NIB_PADDING - 2, thickness - 2);
+            ctx.fillRect(NIB_PADDING + 0.5, 0.5,
+                clientLength - 2*NIB_PADDING, thickness - 1);
             ctx.strokeStyle = theme.scrollTrackStrokeStyle;
-            ctx.strokeRect(NIB_PADDING, 0, clientLength - 2*NIB_PADDING,
-                thickness);
+            ctx.strokeRect(NIB_PADDING + 0.5, 0.5,
+                clientLength - 2*NIB_PADDING, thickness - 1);
         }
 
-        ctx.beginPath();
-        ctx.arc(handleDistance + halfThickness, 0 + halfThickness, halfThickness,
-            Math.PI / 2, 3 * (Math.PI / 2), false);
-        ctx.arc(handleDistance + handleLength - halfThickness, 0 + halfThickness,
-            halfThickness, 3 * (Math.PI / 2), Math.PI / 2, false);
-        ctx.lineTo(handleDistance + halfThickness, 0 + thickness);
-        ctx.closePath();
+        var buildHandlePath = function() {
+            ctx.beginPath();
+            ctx.arc(handleDistance + halfThickness + 0.5,                // x
+                halfThickness,                                     // y
+                halfThickness - 0.5, Math.PI / 2, 3 * Math.PI / 2, false);
+            ctx.arc(handleDistance + handleLength - halfThickness - 0.5, // x
+                halfThickness,                                     // y
+                halfThickness - 0.5, 3 * Math.PI / 2, Math.PI / 2, false);
+            ctx.lineTo(handleDistance + halfThickness + 0.5, thickness - 0.5);
+            ctx.closePath();
+        };
+        buildHandlePath();
 
+        // Paint the interior of the handle path.
         var gradient = ctx.createLinearGradient(handleDistance, 0,
             handleDistance, thickness);
         gradient.addColorStop(0,
@@ -560,15 +566,16 @@ exports.BespinScrollerView = SC.View.extend({
         ctx.fillStyle = gradient;
         ctx.fill();
 
-        // Begin handle border context
+        // Begin handle shine edge context
         ctx.save();
         ctx.clip();
 
+        // Draw the little shines in the handle.
         ctx.fillStyle = theme.scrollBarFillStyle.replace(/%a/, alpha);
         ctx.beginPath();
-        ctx.moveTo(handleDistance + (halfThickness * 0.4), 0 + (halfThickness * 0.6));
-        ctx.lineTo(handleDistance + (halfThickness * 0.9), 0 + (thickness * 0.4));
-        ctx.lineTo(handleDistance, 0 + (thickness * 0.4));
+        ctx.moveTo(handleDistance + halfThickness * 0.4, halfThickness * 0.6);
+        ctx.lineTo(handleDistance + halfThickness * 0.9, thickness * 0.4);
+        ctx.lineTo(handleDistance, thickness * 0.4);
         ctx.closePath();
         ctx.fill();
         ctx.beginPath();
@@ -583,16 +590,13 @@ exports.BespinScrollerView = SC.View.extend({
         ctx.restore();
         // End handle border context
 
-        ctx.beginPath();
-        ctx.arc(handleDistance + halfThickness, halfThickness, halfThickness,
-            Math.PI / 2, 3 * (Math.PI / 2), false);
-        ctx.arc(handleDistance + handleLength - halfThickness, halfThickness, halfThickness,
-            3 * (Math.PI / 2), Math.PI / 2, false);
-        ctx.lineTo(handleDistance + halfThickness, thickness);
-        ctx.closePath();
-
+        // Begin handle outline context
+        ctx.save();
+        buildHandlePath();
         ctx.strokeStyle = theme.scrollTrackStrokeStyle;
         ctx.stroke();
+        ctx.restore();
+        // End handle outline context
 
         if (this._isMouseOver === false)
             ctx.globalAlpha = 1.0;
