@@ -326,13 +326,21 @@ BASE_RULES.add(Exclude("sproutcore/frameworks/foundation", [
     "controllers/tree.js",
     RE("debug/.*"),
     # RE("mixins/.*"),
+    "mixins/button.js",
+    "mixins/control.js",
+    "mixins/inline_text_field.js",
+    # "mixins/string.js",
+    "mixins/tree_item_content.js",
+    "private/tree_item_observer.js",
+    "system/datetime.js",
     RE("tests/.*"),
     RE("validators/.*"),
 ]))
 BASE_RULES.add(Exclude("sproutcore/frameworks/desktop", [
     RE("debug/.*"),
-    "mixins/collection_group",
-    "mixins/collection_row_delegate",
+    "mixins/collection_group.js",
+    "mixins/collection_row_delegate.js",
+    "mixins/collection_view_delegate.js",
     RE("panes/.*"),
     RE("tests/.*"),
     RE("views/.*")
