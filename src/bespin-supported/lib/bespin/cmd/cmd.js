@@ -71,7 +71,6 @@ exports.commands.addCommand({
         }
 
         var path = "commands/" + commandname + ".js";
-        var project = bespin.userSettingsProject;
         var onSuccess = function(file) {
             try {
                 var command = eval(file.content);
@@ -84,7 +83,8 @@ exports.commands.addCommand({
             }
         };
 
-        bespin.get('files').loadContents(project, path, onSuccess, true);
+        var files = bespin.get('files');
+        files.loadContents(files.userSettingsProject, path, onSuccess, true);
     }
 });
 
@@ -104,17 +104,11 @@ exports.commands.addCommand({
             return;
         }
 
-        if (!bespin.userSettingsProject) {
-            instruction.addErrorOutput("You don't seem to have a user project. Sorry.");
-            return;
-        }
-
         if (!commandname) {
             instruction.addErrorOutput("Please pass me a command name to edit.");
             return;
         }
 
-        var project = bespin.userSettingsProject;
         var filename = "commands/" + commandname + ".js";
         var content = "" +
             "{\n" +
@@ -126,7 +120,8 @@ exports.commands.addCommand({
             "    }\n" +
             "}";
 
-        bespin.get("editor").openFile(project, filename, {
+        var files = bespin.get('files');
+        bespin.get("editor").openFile(files.userSettingsProject, filename, {
             content: content,
             force: true
         });
@@ -140,12 +135,8 @@ exports.commands.addCommand({
     name: 'list',
     preview: 'list my custom commands',
     execute: function(instruction) {
-        if (!bespin.userSettingsProject) {
-            instruction.addOutput("You don't seem to have a user project. Sorry.");
-            return;
-        }
-
-        bespin.get('server').list(bespin.userSettingsProject, 'commands/', function(commands) {
+        var files = bespin.get('files');
+        bespin.get('server').list(files.userSettingsProject, 'commands/', function(commands) {
             var output;
 
             if (!commands || commands.length < 1) {
@@ -186,11 +177,6 @@ exports.commands.addCommand({
         var editSession = bespin.get('editSession');
         var files = bespin.get('files');
 
-        if (!bespin.userSettingsProject) {
-            instruction.addErrorOutput("You don't seem to have a user project. Sorry.");
-            return;
-        }
-
         if (!commandname) {
             instruction.addErrorOutput("Please pass me a command name to delete.");
             return;
@@ -199,7 +185,7 @@ exports.commands.addCommand({
         var commandpath = "commands/" + commandname + ".js";
 
         var onSuccess = instruction.link(function() {
-            if (editSession.checkSameFile(bespin.userSettingsProject, commandpath)) {
+            if (editSession.checkSameFile(files.userSettingsProject, commandpath)) {
                 // only clear if deleting the same file
                 bespin.get('editor').model.clear();
             }
@@ -210,6 +196,6 @@ exports.commands.addCommand({
             instruction.addOutput("Wasn't able to remove the command <b>" + commandname + "</b><br/><em>Error</em> (probably doesn't exist): " + xhr.responseText);
         });
 
-        files.removeFile(bespin.userSettingsProject, commandpath, onSuccess, onFailure);
+        files.removeFile(files.userSettingsProject, commandpath, onSuccess, onFailure);
     }
 });

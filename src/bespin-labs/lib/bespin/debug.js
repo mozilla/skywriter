@@ -354,7 +354,8 @@ members: {
      */
     loadBreakpoints: function(callback) {
         var self = this;
-        bespin.get('files').loadContents(bespin.userSettingsProject, "breakpoints", function(file) {
+        var files = bespin.get('files');
+        files.loadContents(files.userSettingsProject, "breakpoints", function(file) {
             self.breakpoints = JSON.parse(file.content);
 
             // reset IDs, because they are not consistent between
@@ -375,8 +376,9 @@ members: {
      */
     saveBreakpoints: function() {
         var self = this;
+        var files = bespin.get('files');
         // save breakpoints back to server asynchronously
-        bespin.get('files').saveFile(bespin.userSettingsProject, {
+        files.saveFile(files.userSettingsProject, {
             name: "breakpoints",
             content: JSON.stringify(self.breakpoints),
             timestamp: new Date().getTime()

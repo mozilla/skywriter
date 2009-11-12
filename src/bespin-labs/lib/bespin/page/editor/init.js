@@ -221,7 +221,7 @@ exports.onLoad = function() {
     // Load user settings config file
     if (settings.values.autoconfig) {
         try {
-            files.evalFile(bespin.userSettingsProject, "config");
+            files.evalFile(files.userSettingsProject, "config");
         } catch (e) {
             console.log("Error in user config: ", e);
         }

@@ -127,7 +127,8 @@ exports.commands.addCommand({
             return;
         }
 
-        if (!project || project == bespin.userSettingsProject) {
+        var files = bespin.get('files');
+        if (!project || project == files.userSettingsProject) {
             instruction.addErrorOutput('Sorry, you can\'t delete the settings project.');
             return;
         }
@@ -143,7 +144,7 @@ exports.commands.addCommand({
             instruction.unlink();
         });
 
-        bespin.get('files').removeDirectory(project, '', onSuccess, onFailure);
+        files.removeDirectory(project, '', onSuccess, onFailure);
     }
 });
 

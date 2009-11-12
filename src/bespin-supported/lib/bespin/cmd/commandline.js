@@ -52,7 +52,7 @@ if (opts.commandline) {
 /**
  * Add a setting to control the console font size
  */
-bespin.get("setting").addSetting({
+bespin.get("settings").addSetting({
     name: "consolefontsize",
     type: "number",
     defaultValue: 11
@@ -1209,7 +1209,8 @@ members: {
 
         bespin.fireAfter([ "authenticated" ], function() {
             // load last 50 instructions from history
-            bespin.get("files").loadContents(bespin.userSettingsProject, "command.history", function(file) {
+            var files = bespin.get('files');
+            files.loadContents(files.userSettingsProject, "command.history", function(file) {
                 var typings = file.content.split(/\n/);
                 var instructions = [];
 
@@ -1233,7 +1234,8 @@ members: {
             }
         });
         // save instructions back to server asynchronously
-        bespin.get("files").saveFile(bespin.userSettingsProject, {
+        var files = bespin.get('files');
+        files.saveFile(files.userSettingsProject, {
             name: "command.history",
             content: content,
             autosave: true,

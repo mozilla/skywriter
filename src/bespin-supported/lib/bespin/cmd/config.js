@@ -34,12 +34,8 @@ command.store.addCommand({
     aliases: ['config'],
     preview: 'load up the config file',
     execute: function(instruction) {
-        if (!bespin.userSettingsProject) {
-            instruction.addErrorOutput("You don't seem to have a user project. Sorry.");
-            return;
-        }
-
-        bespin.get("editor").openFile(bespin.userSettingsProject, "config");
+        var files = bespin.get('files');
+        bespin.get("editor").openFile(files.userSettingsProject, "config");
     }
 });
 
@@ -50,7 +46,7 @@ command.store.addCommand({
     name: 'runconfig',
     preview: 'run your config file',
     execute: function(instruction) {
-        bespin.get('files').evalFile(bespin.userSettingsProject, "config");
+        files.evalFile(files.userSettingsProject, "config");
     }
 });
 

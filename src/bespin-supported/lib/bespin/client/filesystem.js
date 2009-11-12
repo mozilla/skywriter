@@ -33,6 +33,9 @@ var directory = require("bespin/util/path").directory;
  * It ties into the bespin.client.Server object for remote access.
  */
 exports.FileSystem = SC.Object.extend({
+    /** The name of the project that contains the users client side settings */
+    userSettingsProject: "BespinSettings",
+
     server: bespin.get('server'),
 
     /**
@@ -322,7 +325,8 @@ var defaultScope = function() {
     var _defaultScope = {
         bespin: bespin,
         include: function(file) {
-            bespin.get('files').evalFile(bespin.userSettingsProject, file);
+            var files = bespin.get('files');
+            files.evalFile(files.userSettingsProject, file);
         },
         require: require,
         publish: bespin.publish,
