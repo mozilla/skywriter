@@ -375,8 +375,6 @@ def release_embed(options):
     if not builddir.exists():
         builddir.mkdir()
     
-    hidefiles()
-    
     version = options.version.number
     outputdir = builddir / ("BespinEmbedded-%s" 
         % (version))
