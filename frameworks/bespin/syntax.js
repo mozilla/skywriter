@@ -35,7 +35,7 @@ var bespin = require("package");
 /**
  * Add a setting to alter the syntax coloring engine
  */
-bespin.get("setting").addSetting({
+bespin.get("settings").addSetting({
     name: "syntaxengine",
     type: "text",
     defaultValue: "simple"

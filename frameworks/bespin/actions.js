@@ -30,7 +30,7 @@ var clipboard = require("util/clipboard");
 /**
  * Add a setting to affect what happens when we press TAB
  */
-bespin.get("setting").addSetting({
+bespin.get("settings").addSetting({
     name: "tabmode",
     type: "boolean",
     defaultValue: false
@@ -39,7 +39,7 @@ bespin.get("setting").addSetting({
 /**
  * Add a setting to control auto-closing of character pairs like {, }
  */
-bespin.get("setting").addSetting({
+bespin.get("settings").addSetting({
     name: "closepairs",
     type: "boolean",
     defaultValue: false

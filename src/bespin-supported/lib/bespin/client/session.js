@@ -36,7 +36,7 @@ var SC = require("sproutcore");
 /**
  * Add a setting to turn collaboration mode on/off
  */
-bespin.get("setting").addSetting({
+bespin.get("settings").addSetting({
     name: "collaborate",
     type: "boolean",
     defaultValue: false

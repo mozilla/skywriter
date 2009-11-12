@@ -35,7 +35,7 @@ var worker = require("bespin/util/worker");
 /**
  * TODO: What's this?
  */
-bespin.get("setting").addSetting({
+bespin.get("settings").addSetting({
     name: "syntaxmarkers",
     type: "text",
     defaultValue: "all"
@@ -44,7 +44,7 @@ bespin.get("setting").addSetting({
 /**
  * Add a setting to turn jslint parsing on or off
  */
-bespin.get("setting").addSetting({
+bespin.get("settings").addSetting({
     name: "jslint",
     type: "text",
     defaultValue: ''
@@ -668,7 +668,7 @@ bespin.subscribe("settings:set:syntaxcheck", function (data) {
 /**
  * Add a setting to turn syntax checking of a file on/off
  */
-bespin.get("setting").addSetting({
+bespin.get("settings").addSetting({
     name: "syntaxcheck",
     type: "boolean",
     defaultValue: false

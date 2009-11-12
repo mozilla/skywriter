@@ -36,7 +36,7 @@ var webpieces = require("bespin/util/webpieces");
 /**
  * Add a setting to alter how previews are displayed
  */
-bespin.get("setting").addSetting({
+bespin.get("settings").addSetting({
     name: "preview",
     type: "text",
     defaultValue: "window"

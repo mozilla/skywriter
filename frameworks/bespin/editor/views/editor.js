@@ -1552,6 +1552,7 @@ settings.addSetting({
 bespin.subscribe("settings:set:theme", function(event) {
     var editor = bespin.get('editor');
     var settings = bespin.get('settings');
+    var files = bespin.get('files');
     var theme = event.value;
 
     var checkSetAndExit = function() {
@@ -1600,7 +1601,7 @@ bespin.subscribe("settings:set:theme", function(event) {
             bespin.get("commandLine").addErrorOutput("Sorry old chap. No theme called '" + theme + "'. Fancy making it?");
         };
 
-        bespin.get('files').loadContents(bespin.userSettingsProject, "/themes/" + theme + ".js", onSuccess, onFailure);
+        files.loadContents(files.userSettingsProject, "/themes/" + theme + ".js", onSuccess, onFailure);
     }
 });
 
