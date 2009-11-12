@@ -62,10 +62,18 @@ exports.EditorController = SC.Object.extend({
         settings: 'settings',
         commandLine: 'commandLine',
         session: 'editSession',
-        file: 'file'
+        files: 'files',
+        hub: 'hub'
     },
 
     init: function() {
+        // Add a tabsize setting to alter the displayed width of the TAB character
+        settings.addSetting({
+            name: "tabsize",
+            type: "number",
+            defaultValue: 4
+        });
+
         // fixme: this stuff may not belong here
         this.debugMode = false;
 
@@ -82,7 +90,6 @@ exports.EditorController = SC.Object.extend({
         });
         this.editorView = this.ui.contentView;
 
-        console.log(this.ui); //contentViewFrameDidChange = function() { console.log("contentViewFrameDidChange"); };
 
         this.theme = require("theme")['default'];
 
@@ -91,46 +98,6 @@ exports.EditorController = SC.Object.extend({
         editorEvents.subscribe();
 
         this.editorView.installKeyListener(this.editorKeyListener);
-
-        // TODO: We can't do this without explanation. In the past we Ben/Dion
-        // were doing this because in a few places they were using !contents
-        // to detect if something had been loaded. and "" == false, so they
-        // 'primed' it like this. We should use contents !== undefined.
-        //this.model.insertCharacters({ row: 0, col: 0 }, " ");
-
-        // TODO: We're repainting fairly often do we need to add this?
-        // var self = this;
-        // dojo.connect(window, 'resize', function() {
-        //     self.paint();
-        // });
-
-        // this.paint();
-
-        var test1 = {
-            value: 1
-        };
-
-        console.log(test1.value == 1);
-        test1.value = 2;
-        console.log(test1.value == 2);
-        test1.value++;
-        console.log(test1.value == 3);
-
-        var test2 = {
-            _value:1
-        };
-        test2.__defineGetter__("value", function() {
-            return this._value;
-        });
-        test2.__defineSetter__("value", function(value) {
-            this._value = value;
-        });
-
-        console.log(test2.value == 1);
-        test2.value = 2;
-        console.log(test2.value == 2);
-        test2.value++;
-        console.log(test2.value == 3);
 
         sc_super();
     },
@@ -167,7 +134,7 @@ exports.EditorController = SC.Object.extend({
      * Track changes in the document
      */
     onchange: function(callback) {
-        bespin.subscribe("editor:document:changed", callback);
+        this.hub.subscribe("editor:document:changed", callback);
     },
 
     /**
@@ -385,7 +352,7 @@ exports.EditorController = SC.Object.extend({
         // -- try an editor action first, else fire off a command
         var actionDescription = "Execute command: '" + action + "'";
         action = this.editorView.actions[action] || function() {
-            bespin.commandLine.executeCommand(command, true);
+            this.commandLine.executeCommand(command, true);
         };
 
         if (keyCode && action) {
@@ -452,7 +419,7 @@ exports.EditorController = SC.Object.extend({
                 self.setFocus(true);
             }
 
-            bespin.publish("editor:openfile:opensuccess", {
+            this.hub.publish("editor:openfile:opensuccess", {
                 project: project,
                 file: {
                     name: path,
@@ -461,10 +428,10 @@ exports.EditorController = SC.Object.extend({
                 }
             });
 
-            bespin.publish("editor:dirty");
+            this.hub.publish("editor:dirty");
         };
 
-        this.file.newFile(project, path, onSuccess);
+        this.files.newFile(project, path, onSuccess);
     },
 
     /**
@@ -496,7 +463,7 @@ exports.EditorController = SC.Object.extend({
             document.title = filename + ' - editing with Bespin';
             this.commandLine.showHint('Saved file: ' + file.name);
 
-            bespin.publish("editor:clean");
+            this.hub.publish("editor:clean");
 
             if (util.isFunction(onSuccess)) {
                 onSuccess();
@@ -510,7 +477,7 @@ exports.EditorController = SC.Object.extend({
             }
         };
 
-        bespin.publish("editor:savefile:before", { filename: filename });
+        this.hub.publish("editor:savefile:before", { filename: filename });
 
         this.file.saveFile(project, file, newOnSuccess, newOnFailure);
     },
@@ -588,7 +555,7 @@ exports.EditorController = SC.Object.extend({
         }
 
         onFailure = function() {
-            bespin.publish("editor:openfile:openfail", {
+            this.hub.publish("editor:openfile:openfail", {
                 project: project,
                 filename: filename
             });
@@ -617,10 +584,10 @@ exports.EditorController = SC.Object.extend({
 
             self._addHistoryItem(project, filename, fromFileHistory);
 
-            bespin.publish("editor:openfile:opensuccess", { project: project, file: file });
+            this.hub.publish("editor:openfile:opensuccess", { project: project, file: file });
         };
 
-        bespin.publish("editor:openfile:openbefore", { project: project, filename: filename });
+        this.hub.publish("editor:openfile:openbefore", { project: project, filename: filename });
 
         this.file.editFile(project, filename, onSuccess, onFailure);
     },
@@ -868,7 +835,7 @@ var _trimOnSave;
 /**
  * Add a setting to alter the (programming) language of the current file
  */
-bespin.get("setting").addSetting({
+bespin.get("settings").addSetting({
     name: "language",
     type: "text",
     defaultValue: "auto"

@@ -81,6 +81,9 @@ exports.InMemorySettings = SC.Object.extend(/** @lends exports.InMemorySettings 
      * Our store of the settings that we accept.
      */
     _settings: {},
+    requires: {
+        hub: 'hub'
+    },
     /**
      * Setup the default settings
      * @constructs
@@ -142,7 +145,8 @@ exports.InMemorySettings = SC.Object.extend(/** @lends exports.InMemorySettings 
             throw "Settings need 'defaultValue' members";
         }
         if (!this._types[setting.type].validator(setting.defaultValue)) {
-            throw "Default value " + setting.defaultValue + " is not a valid " + setting.type;
+            throw "Default value " + setting.defaultValue +
+                    " is not a valid " + setting.type;
         }
         // Recall the setting
         this._settings[setting.name] = setting;
@@ -154,7 +158,8 @@ exports.InMemorySettings = SC.Object.extend(/** @lends exports.InMemorySettings 
         this.values.__defineSetter__(setting.name, function(value) {
             this.values[setting.name] = value;
             this._changeValue(setting.name, value);
-            bespin.publish("settings:set:" + setting.name, { value: value });
+            // TODO: remove this when we've done it all via bindings
+            hub.publish("settings:set:" + setting.name, { value: value });
         }.bind(this));
     },
 
@@ -289,6 +294,8 @@ exports.CookieSettings = exports.InMemorySettings.extend(/** @lends exports.Cook
  * @augments exports.InMemorySettings
  */
 exports.ServerSettings = exports.InMemorySettings.extend(/** @lends exports.ServerSettings */ {
+    requires: {
+        files: 'files'
     _loadInitialValues: function() {
         this._loadDefaultValues();
 
@@ -305,7 +312,7 @@ exports.ServerSettings = exports.InMemorySettings.extend(/** @lends exports.Serv
             });
         };
 
-        bespin.get('files').loadContents(bespin.userSettingsProject, "settings", onLoad);
+        this.files.loadContents(this.files.userSettingsProject, "settings", onLoad);
     },
 
     _changeValue: function(key, value) {
@@ -317,7 +324,7 @@ exports.ServerSettings = exports.InMemorySettings.extend(/** @lends exports.Serv
             }
         }
         // Send it to the server
-        bespin.get('files').saveFile(bespin.userSettingsProject, {
+        this.files.saveFile(this.files.userSettingsProject, {
             name: "settings",
             content: content,
             timestamp: new Date().getTime()
