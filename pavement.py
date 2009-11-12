@@ -32,6 +32,7 @@ import urllib2
 import tarfile
 from cStringIO import StringIO
 import webbrowser
+import re
 
 from paver.easy import *
 import paver.virtual
@@ -236,13 +237,146 @@ def _find_build_output(toplevel, name):
         raise BuildFailure("Could not find a Bespin build in " + en)
     return builds[0]
 
+class Match(object):
+    def __init__(self, include, score):
+        self.include = include
+        self.score = score
+
+class RE(object):
+    def __init__(self, expr):
+        # subtract one from the score, because regexes are often
+        # of the form foo/bar/.* and are less-specific than a complete 
+        # filename
+        self.score = len(expr.split("/")) - 1
+        self.expr = re.compile(expr)
+
+class Rule(object):
+    def __init__(self, include, prefix, specifics=None):
+        self.include = include
+        self.prefix = prefix + "/"
+        self.prefix_segments = len(prefix.split('/'))
+        self.specifics = specifics
+    
+    def test(self, filename):
+        if not filename.startswith(self.prefix):
+            return None
+        filename = filename[len(self.prefix):]
+        if not self.specifics:
+            return Match(self.include, self.prefix_segments)
+            
+        for specific in self.specifics:
+            if isinstance(specific, RE) and specific.expr.match(filename):
+                return Match(self.include, 
+                    self.prefix_segments + specific.score)
+                
+            if filename == specific:
+                return Match(self.include, 
+                    self.prefix_segments + len(filename.split('/')))
+        
+        return None
+        
+class Include(Rule):
+    def __init__(self, prefix, specifics=None):
+        super(Include, self).__init__(True, prefix, specifics)
+
+class Exclude(Rule):
+    def __init__(self, prefix, specifics=None):
+        super(Exclude, self).__init__(False, prefix, specifics)
+        
+DEFAULT_EXCLUDE = Match(False, -1)
+
+class FilterRules(object):
+    def __init__(self):
+        self.rules = []
+    
+    def add(self, rule):
+        self.rules.append(rule)
+    
+    def test(self, filename):
+        best_match = DEFAULT_EXCLUDE
+        
+        for rule in self.rules:
+            match = rule.test(filename)
+            if match:
+                if match.score > best_match.score:
+                    best_match = match
+        
+        return best_match.include
+
+BASE_RULES = FilterRules()
+BASE_RULES.add(Include("bespin"))
+BASE_RULES.add(Include("tiki"))
+BASE_RULES.add(Include("sproutcore"))
+BASE_RULES.add(Include("browserup"))
+BASE_RULES.add(Exclude("tiki/frameworks/system/experimental"))
+BASE_RULES.add(Exclude("sproutcore/frameworks", [
+    RE("datejs/.*"),
+    RE("mini/.*"),
+    RE("designer/.*"),
+    RE("datastore/.*"),
+    RE("testing/.*"),
+    RE("core_tools/.*")
+]))
+BASE_RULES.add(Exclude("sproutcore/frameworks/runtime", [
+    RE("debug/.*")
+]))
+BASE_RULES.add(Exclude("sproutcore/frameworks/foundation", [
+    "controllers/array.js",
+    "controllers/object.js",
+    "controllers/tree.js",
+    RE("debug/.*"),
+    # RE("mixins/.*"),
+    RE("tests/.*"),
+    RE("validators/.*"),
+]))
+BASE_RULES.add(Exclude("sproutcore/frameworks/desktop", [
+    RE("debug/.*"),
+    "mixins/collection_group",
+    "mixins/collection_row_delegate",
+    RE("panes/.*"),
+    RE("tests/.*"),
+    RE("views/.*")
+]))
+BASE_RULES.add(Include("sproutcore/frameworks/desktop", [
+    "views/scroll.js",
+    "views/scroller.js"
+]))
+
 @task
-@needs(['build_docs', 'sc_build'])
+def resetfiles():
+    info("Resetting hidden files")
+    frameworks = path("frameworks")
+    for f in frameworks.walkfiles("*.jsignore"):
+        f.rename(f.splitext()[0] + ".js")
+
+@task
+def hidefiles():
+    info("Hiding files from SproutCore build")
+    frameworks = path("frameworks")
+    for f in frameworks.walkfiles():
+        if not f.ext in [".js", ".jsignore"]:
+            continue
+        common, remainder = f.split("/", 1)
+        include = BASE_RULES.test(remainder)
+        if not include and f.ext != ".jsignore":
+            f.rename(f.splitext()[0] + ".jsignore")
+        if include and f.ext == ".jsignore":
+            f.rename(f.splitext()[0] + ".js")
+
+@task
+@needs(['hidefiles', 'build_docs'])
 def release_embed(options):
+    try:
+        sc_build(options)
+    finally:
+        resetfiles()
+        
     builddir = options.builddir
     if not builddir.exists():
         builddir.mkdir()
-        
+    
+    hidefiles()
+    
     version = options.version.number
     outputdir = builddir / ("BespinEmbedded-%s" 
         % (version))

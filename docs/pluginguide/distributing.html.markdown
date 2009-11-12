@@ -4,4 +4,4 @@ title: Bespin Plugin Guide
 subtitle: Distributing plugins
 ---
 
-How do you package them up and upload them?
+This section will talk about how to package up and distribute plugins.

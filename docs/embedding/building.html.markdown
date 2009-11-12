@@ -4,4 +4,6 @@ title: Bespin Embedded Guide
 subtitle: Building
 ---
 
-How you make a custom build of Bespin Embedded.
+After the plugin architecture has settled down, this document
+will describe how to generate your own, customized Bespin Embedded build
+with whatever set of plugins you need.

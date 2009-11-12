@@ -1,4 +1,8 @@
 config :bespin,
-  :required => [:tiki, 'tiki/system', :sproutcore, "sproutcore/empty_theme", "sproutcore/standard_theme", :browserup],
+  :required => [:tiki, 'tiki/system', 
+    "sproutcore",
+    "sproutcore/empty_theme", 
+    "sproutcore/standard_theme", 
+    :browserup],
   :use_modules => true,
   :factory_format => :function
