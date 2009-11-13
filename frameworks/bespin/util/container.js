@@ -208,6 +208,7 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
                 throw "No component factory '" + id + "'";
             } else if (util.isFunction(factory)) {
                 factory(onCreate);
+            } else {
                 // Extract the method
                 var parts = factory.split(" ");
                 if (parts.length != 2) {

@@ -1,5 +1,3 @@
-"export package main";
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -23,6 +21,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * ***** END LICENSE BLOCK ***** */
+
+"export package main";
 
 var didRun = false;
 

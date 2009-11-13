@@ -81,9 +81,11 @@ exports.InMemorySettings = SC.Object.extend(/** @lends exports.InMemorySettings 
      * Our store of the settings that we accept.
      */
     _settings: {},
+
     requires: {
         hub: 'hub'
     },
+
     /**
      * Setup the default settings
      * @constructs
@@ -255,6 +257,8 @@ exports.InMemorySettings = SC.Object.extend(/** @lends exports.InMemorySettings 
             }
         }
         return reply;
+    },
+
     /**
      * The default initial settings
      */
@@ -281,6 +285,8 @@ exports.CookieSettings = exports.InMemorySettings.extend(/** @lends exports.Cook
         this._loadDefaultValues();
         var data = cookie.get("settings");
         this._loadFromObject(JSON.parse(data));
+    },
+
     _changeValue: function(key, value) {
         var data = JSON.stringify(this._saveToObject());
         cookie.set("settings", data);
@@ -296,6 +302,8 @@ exports.CookieSettings = exports.InMemorySettings.extend(/** @lends exports.Cook
 exports.ServerSettings = exports.InMemorySettings.extend(/** @lends exports.ServerSettings */ {
     requires: {
         files: 'files'
+    },
+
     _loadInitialValues: function() {
         this._loadDefaultValues();
 
