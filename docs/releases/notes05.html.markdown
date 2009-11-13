@@ -9,8 +9,22 @@ Known Bugs
 This release is a *preview release*. We wanted to get this out to embedders 
 so that they could try it out and give us feedback on the new packaging.
 
+* The Manual Upgrade option for embedding, as listed in the 
+  [introduction to embedding][1], currently creates an editor component
+  that behaves very strangely.
 * The scrollbar behavior is not yet back to its old state, so you may witness
-  odd appearance or behavior.
+  odd appearance or behavior. A future release will break the editor gutter
+  area out into a separate component, which will make fixing the scrollbars
+  easier.
+* The BespinEmbedded.js file is larger than we'd like it to be, but optimizing
+  its size is not easy at this stage. We'll be looking at ways to shrink it
+  further from release to release.
+* Currently, Bespin is putting three objects into your page's global namespace:
+  SC, ENV and tiki.
+* In development, the SproutCore test runner is not yet working, likely due 
+  to the new "Tiki" module loader that Bespin is using.
+
+[1]: index.html "Introduction to Embedding"
 
 Features
 --------

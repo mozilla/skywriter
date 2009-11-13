@@ -25,7 +25,7 @@ Embedder's Guide
 
 * [Introduction](embedding/index.html)
 * [Creating a custom, embedded Bespin](embedding/building.html)
-* [Using Bespin on your pages](embedding/using.html)
+* [Bespin Startup Options](embedding/bespinoptions.html)
 
 
 Developer's Guide

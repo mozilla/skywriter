@@ -4,6 +4,13 @@ title: Bespin Embedded Guide
 subtitle: Introduction
 ---
 
+Important Note
+==============
+
+The current Bespin Embedded release is a *preview release*, and the API has
+not yet been finalized. Changes from release-to-release are still possible
+at this stage, and will be noted in the release notes for each release.
+
 How to embed Bespin in your site
 ================================
 
@@ -12,20 +19,30 @@ Level 1: Upgrade an element
 
 The easiest thing to do to get Bespin working on your website is to simply
 include the Bespin script in your page, and mark the elements that you wish to
-use with Bespin with the `class="bespin` attribute.
+use with Bespin with the `class="bespin` attribute. Download the
+Bespin Embedded release and put these two files on your web server:
 
-For example:
+* BespinEmbedded.js
+* BespinEmbedded.css
 
-    <script src="https://bespin.mozilla.com/embed/minimal-bespin.js"><script>
+To use Bespin on your page, you would then add lines like the following to
+the &lt;head&gt; element on your page:
+
+    :::html
+    <link href="/path/to/BespinEmbedded.css" rel="stylesheet" 
+      type="text/css">
+    <script src="/path/to/BespinEmbedded.js"></script>
     
+Then, elsewhere on your page, you can transform an element (such as a
+&lt;div&gt; or &lt;textarea&gt;) into a Bespin editor:
+
+    :::html
     <textarea class="bespin">Initial contents</textarea>
 
-**NOTE**: Currently we have not published and embedded builds to mozilla.com.
-Until they are finalized, you will need to [build your own](building.html)
-
 There are a number of options to customize how Bespin loads. You can request
-Bespin to use this as follows:
+Bespin to use these as follows:
 
+    :::html
     <textarea class="bespin" data-bespinoptions='{ "stealFocus":true }'>
     </textarea>
 
@@ -37,9 +54,8 @@ do.
 
 The [Bespin startup options][2] are documented.
 
-As of the time of writing Bespin does not allow multiple elements in a page to
-become Bespin editors - there can only be one. We expect this restriction to be
-removed soon.
+Bespin does not allow multiple elements in a page to become Bespin editors - 
+there can only be one.
 
 [1]: http://json.org/ "The JSON Spec"
 [2]: bespinoptions.html "Start-up option documentation"
@@ -51,11 +67,12 @@ Level 2: Manual Upgrade
 Sometimes the element to upgrade might be dynamically created, or you might want
 to have Bespin as an option that is only loaded when the user selects a 'Use
 Bespin' option. In this case just inserting `class="bespin` after page load
-won't work, you need to tell Bespin to use an element:
+won't work, and you'll need to tell Bespin to use an element:
 
-    <script src="https://bespin.mozilla.com/embed/minimal-bespin.js"><script>
+    :::html
+    <script src="/path/to/BespinEmbedded.js"><script>
     <script>
-    var embed = require("bespin/embed");
+    var embed = tiki.require("bespin:embed");
     var node = document.getElementById("edit");
     embed.useBespin(node);
     </script>
@@ -65,29 +82,18 @@ won't work, you need to tell Bespin to use an element:
 Rather than passing in a node, you can also simply pass in an string identifier
 as follows:
 
-    require("bespin/embed").useBespin("edit");
+    :::js
+    tiki.require("bespin:embed").useBespin("edit");
 
 And as with level 1 above, you can also use options to customize the display:
 
-    require("bespin/embed").useBespin("edit", {
+    :::js
+    tiki.require("bespin:embed").useBespin("edit", {
         stealFocus: true
     });
 
 Because this is JavaScript, the strict demands of JSON are not applicable here,
 where they are when using data-bespinoptions.
-
-
-Level 3: Adding Plug-ins
------------------------
-
-Many uses of Bespin will require a set of extra plug-ins for example, to allow
-server-side file storage, or adding collaboration. Bespin is designed to scale
-from a simple textarea replacement to larger shared project 'IDE replacement'
-environments.
-
-See the [plug-in guide][3] for details on
-
-[3]: ../pluginguide/index.html "Bespin Plug-in Documentation"
 
 
 The Embedded API
@@ -99,18 +105,16 @@ for example.
 When using manual upgrade of an element, the `useBespin()` function returns a
 bespin object which can be manipulated as follows:
 
+    :::js
     var bespin = embed.useBespin("edit");
     bespin.setContent("Initial Content\nWith 2 lines");
     bespin.setLineNumber(2);
 
-For full details of the available methods, see the [bespin/embed.Component][1]
-
-[1]: todo.com "We've not worked out what the URL for generated docs is yet"
-
-When using element upgrading (with the `class="bespin` attribute), you don't
-instantly have access to the Bespin Component. Fortunately you can get access
+When using element upgrading (with the `class="bespin"` attribute), you don't
+instantly have access to the Bespin Component. Fortunately, you can get access
 to it fairly easily:
 
+    :::html
     <textarea id="edit" class="bespin">Initial contents</textarea>
     <script>
     var bespin = document.getElementById("edit").bespin;
@@ -124,19 +128,21 @@ Component as a member of the parent DOM node, called 'bespin'.
 Development Mode and onBespinLoad
 ---------------------------------
 
-When using a simple <script> tag to include the Bespin components, we can be
-sure that Bespin is ready for action on page load. However what happens if we
-are in development mode where the components are loaded asynchronously. Then
-it's hard to know when Bespin is ready for action. For now there is an
-onBespinLoad event that is fired when bespin is ready for action. This event
-may well be replaced in the future, so don't rely on it.
+When you use a simple &lt;script&gt; tag to include the Bespin components, you can be
+sure that Bespin is ready for action on page load. However, what happens if you
+are in development mode where the components are loaded asynchronously? Then,
+it's hard to know when Bespin is ready for action. Bespin fires an
+onBespinLoad event when it is ready for action.
 
 For example:
+
+    :::html
     <script>
     window.onBespinLoad = function() {
         bespin = document.getElementById("editor").bespin;
     };
-    <input type="button" value="Clear Bespin" onclick="bespin.setContent('');">
+    <input type="button" value="Clear Bespin" 
+        onclick="bespin.setContent('');">
     </script>
 
 If you are using Bespin via a normal script tag, then you don't need to use the

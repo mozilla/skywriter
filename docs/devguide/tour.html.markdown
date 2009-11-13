@@ -15,50 +15,47 @@ Most people hacking on Bespin will never need to do anything inside of the bespi
 
 # Inside bespinclient #
 
-In a fresh bespinclient checkout, there are two top-level directories of note:
+In a fresh bespinclient checkout, there are four top-level directories of note:
 
 * docs - the documentation source files, of which this tour is a part.
-* src - the project source code.
+* frameworks - the project source code.
+* apps - the location of the applications (in SproutCore terminology) that
+  are built on the infrastructure in frameworks.
+* src - this directory is from the initial Reboot work and will go away
+  once everything has migrated to the frameworks directory.
 
 When things are fully set up, there are also some other directories of interest:
 
 * bin - this is the Python virtualenv bin directory, containing various scripts used to manage the project and start things up.
-* narwhal - a clone of the [Narwhal project](http://narwhaljs.org), which is used for JavaScript command line tools and module loading.
+* abbot - the SproutCore build system
 
 There are a couple of directories that are not interesting:
 
 * include - part of virtualenv, not important
 * lib - also part of the virtualenv
 
-# Packages #
+# Frameworks #
 
-Inside the src directory, you will find an `html` directory. These are static files served directly by the web server.
+* bespin - the minimal set of code required to create a functioning editor environment
 
-The directories starting with bespin-* are packages available to Narwhal:
+# Inside bespin #
 
-* bespin-build - the command line build tools for creating a new Bespin Embedded or Bespin Server package
-* bespin-core - the minimal set of code required to create a functioning editor environment
-* bespin-supported - plugins for bespin-core that add the other main functionality of the Bespin web site
-* bespin-labs - plugins for bespin-core that provide features that are not fully fleshed out
+If you look in the frameworks/bespin directory, you will see the JavaScript code for the
+editor, and a `Buildfile`. The `Buildfile` provides instructions to SproutCore's Abbot build 
+system.
 
-# Inside bespin-core #
+There are four categories of code in bespin:
 
-If you look in the src/bespin-core/lib directory, you will see:
+1. bespin:* - infrastructure code, such as `bespin/plugins`, which is required for the editor to work
+2. bespin:util - utility code that is not necessarily Bespin-specific but is also required for the editor
+3. bespin:editor - this is where all of the code that is specific to the Bespin text editor lives
+4. bespin:tests - unit test suites
 
-* bespin.js - some top level functions, many of which are deprecated, that are available as bespin.*
-* sproutcore.js - at this time, a pre-built SproutCore is actually part of the Bespin repository. This will likely change.
-* bespin/ - this is where the main code lies.
+`bespin:embed` notably provides the useBespin function, which is how the embedded editor gets dropped into pages.
 
-There are three categories of code in bespin-core:
+`bespin:editor/controller` is the controller in the ["model/view/controller"][mvc] sense. It provides the main API for managing the text editor control and for connecting the data with the view.
 
-1. bespin/ - infrastructure code, such as `bespin/plugins`, which is required for the editor to work
-2. bespin/util - utility code that is not necessarily Bespin-specific but is also required for the editor
-3. bespin/editor - this is where all of the code that is specific to the Bespin text editor lives
+`bespin:editor/views/editor.js` provides the visible editor component. It is responsible for drawing on the canvas and for managing events that come in.
 
-TODO: #3 above is not wholly accurate as of this writing (10/27/09). There are currently some modules at the bespin/ level that belong in bespin/editor.
+[mvc]: http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller
 
-`bespin/boot` is the module that kicks off the loading of Bespin's code. `bespin/embed` notably provides the useBespin function, which is how the embedded editor gets dropped into pages.
-
-`bespin/editor/controller` is the controller in the "model/view/controller" sense. It provides the main API for managing the text editor control and for connecting the data with the view.
-
-`bespin/editor/view` is provides the visible editor component. It is responsible for drawing on the canvas and for managing events that come in.

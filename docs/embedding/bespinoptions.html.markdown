@@ -18,6 +18,7 @@ initialContent
 This option allows you to replace the startup content of an element with some
 custom content. For example:
 
+    :::html
     <textarea id="edit"></textarea>
     <script>
     require("bespin/embed").useBespin("edit", {
@@ -27,6 +28,7 @@ custom content. For example:
 
 This is an alternative to the simpler:
 
+    :::html
     <textarea id="edit">Hello, World!</textarea>
     <script>
     require("bespin/embed").useBespin("edit");
@@ -43,10 +45,12 @@ settings
 It's possible to insert any settings (as in those defined by the 'set' command
 where the command line is available) using the settings option. For example:
 
+    :::html
     <div class="bespin" data-bespinoptions='{"settings":{"tabsize":2}}'/>
 
 Or using the manual API:
 
+    :::html
     <textarea id="edit"></textarea>
     <script>
     require("bespin/embed").useBespin("edit", {
@@ -58,8 +62,6 @@ Any of the standard settings are available.
 
 This is equivalent to calling `bespin.set("tabsize", 2);` on page load.
 
-TODO: Link to some settings documentation.
-
 
 stealFocus
 ----------
@@ -67,6 +69,7 @@ stealFocus
 On startup it's sometimes useful to instruct the browser to begin with some
 specific component having the focus. For example:
 
+    :::js
     require("bespin/embed").useBespin("edit", {
         stealFocus: true
     });
@@ -81,6 +84,7 @@ lineNumber
 It might be useful to start with the cursor set to a specific line on startup.
 You can do this with the `lineNumber` startup option. For example:
 
+    :::html
     <div class="bespin" data-bespinoptions='{ "lineNumber":1000 }'/>
 
 This is equivalent to calling `bespin.setLineNumber(1000);` on page load.

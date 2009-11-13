@@ -17,16 +17,8 @@ very good code coverage
 Running the Tests
 -----------------
 
-There are two ways to run the tests: from the browser and from the command 
-line. To run the tests from the browser, fire up the development server
+To run the tests from your browser, fire up the development server
 and then point your browser at 
-[http://localhost:8080/test.html](http://localhost:8080/test.html).
+[http://localhost:8080/test/](http://localhost:8080/test/).
 
-To run the command line tests, run the following command:
-  
-    bespinTests
-
-These commands will run the entire test suite, as appropriate for the type
-of runner. In other words, tests that can only run on the command line will
-only run there and tests that can only run in the browser will only run there.
-Some tests can run just fine in both places.
+You can select the portion of the test suite you wish to run.

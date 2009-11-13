@@ -4,4 +4,6 @@ subtitle: Getting Started
 layout: default
 ---
 
-Checking out the repositories, getting the software installed, firing up the server, etc.
+[Current installation instructions][1] are available on the wiki.
+
+[1]: https://wiki.mozilla.org/Labs/Bespin/DeveloperGuide/Setup
