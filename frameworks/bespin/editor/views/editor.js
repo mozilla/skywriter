@@ -817,17 +817,23 @@ exports.EditorView = SC.View.extend({
     // Adjusts the width and height values of the canvas to fill the parent
     // view.
     resizeCanvasIfNeeded: function() {
-        var canvas = this.get('canvas');
-        var parentLayer = this.get('parentView').get('layer');
+        if (this._editor_isResizeNeeded !== true)
+            return;
 
         // At first these are zero, so we can't use them.
-        if (parentLayer.clientWidth !== 0 && parentLayer.clientHeight !== 0) {
-            if (parentLayer.clientWidth !== canvas.width)
-                canvas.width = parentLayer.clientWidth;
-            if (parentLayer.clientHeight !== canvas.height)
-                canvas.height = parentLayer.clientHeight;
-        }
+        var parentLayer = this.get('parentView').get('layer');
+        if (parentLayer.clientWidth === 0 || parentLayer.clientHeight === 0)
+            return;
+        
+        var canvas = this.get('canvas');
+        if (parentLayer.clientWidth !== canvas.width)
+            canvas.width = parentLayer.clientWidth;
+        if (parentLayer.clientHeight !== canvas.height)
+            canvas.height = parentLayer.clientHeight;
+
+        this._editor_isResizeNeeded = false;
     },
+    _editor_isResizeNeeded: true,
 
     /**
      * @private
