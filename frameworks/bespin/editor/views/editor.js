@@ -1486,8 +1486,14 @@ exports.EditorView = SC.View.extend({
      * Called by the cursor object whenever it moves.
      */
     cursorDidMove: function(sender, newPosition) {
+        // Create a run loop so that the size adjustment and the position
+        // adjustment (which affect the scroll bars through key-value
+        // observing) fire at the end of this routine and at the same time.
+        // Fixes bug 528089.
+        SC.RunLoop.begin();
         this._updateCanvasSize();
         this._scrollToCursorVisible();
+        SC.RunLoop.end();
     },
 
     dispose: function() {

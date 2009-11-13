@@ -40,15 +40,11 @@ exports.BespinScrollerView = SC.View.extend({
     _value: 0,
 
     _bespinScrollerView_valueDidChange: function() {
-        SC.RunLoop.begin();
         this.set('layerNeedsUpdate', true);
-        SC.RunLoop.end();
     }.observes('value'),
 
     _bespinScrollerView_maximumDidChange: function() {
-        SC.RunLoop.begin();
         this.set('layerNeedsUpdate', true);
-        SC.RunLoop.end();
     }.observes('maximum'),
 
     // TODO: Make this a real SproutCore theme (i.e. an identifier that gets
