@@ -14,15 +14,16 @@
 <body>
 
 <h1>Sample Editor as a Component</h1>
-<div id="editor" class="bespin" data-bespin-options='{ "stealFocus": true }'>var foo = "whee";
-
-function flubber() {
-    return "tweeble";
-}</div>
+<div id="editor" class="bespin" data-bespin-options='{ "stealFocus": true }'>// The text of this div shows up in the editor.
+var thisCode = "what shows up in the editor";
+function editMe() {
+ alert("and have fun!");
+}
+</div>
 
 <script>
 window.onBespinLoad = function() {
-    console.log("window.onBespinLoad called");
+    console.log("this is called when Bespin is loaded");
     bespin = document.getElementById("editor").bespin;
 };
 </script>
