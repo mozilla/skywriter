@@ -33,6 +33,7 @@ import tarfile
 from cStringIO import StringIO
 import webbrowser
 import re
+import zipfile
 
 from paver.easy import *
 import paver.virtual
@@ -61,6 +62,11 @@ options(
     builddir=path("tmp"),
     install_sproutcore=Bunch(
         git=False
+    ),
+    jsdocs=Bunch(
+        download_url="http://jsdoc-toolkit.googlecode.com/files/jsdoc_toolkit-2.3.0.zip",
+        download_location=path("external") / "jsdoc_toolkit-2.3.0.zip",
+        dest_dir=path("external") / "jsdoc-toolkit"
     )
 )
 
@@ -408,6 +414,49 @@ def release_embed(options):
     (builddir / "docs").copytree(outputdir / "docs")
     sh("tar czf BespinEmbedded-%s.tar.gz BespinEmbedded-%s" % \
         (version, version), cwd="tmp")
+    
+@task
+def jsdocs(options):
+    """Generate API documentation using the jsdoc-toolkit."""
+    
+    external = path("external")
+    if not options.dest_dir.exists():
+        external.mkdir()
+        if not options.download_location.exists():
+            info("Downloading jsdoc-toolkit from %s", options.download_url)
+            jsdocs_zipinput = urllib2.urlopen(options.download_url)
+            jsdocs_zipoutput = open(options.download_location, "wb")
+            jsdocs_zipoutput.write(jsdocs_zipinput.read())
+            jsdocs_zipoutput.close()
+            jsdocs_zipinput.close()
+        
+        info("Uncompressing jsdoc-toolkit")    
+        zf = zipfile.ZipFile(options.download_location)
+        for name in zf.namelist():
+            outname = name.split('/', 1)[1]
+            if name.endswith('/'):
+                (external / outname).makedirs()
+            else:
+                info("Expanding %s", outname)
+                open(external / outname, "wb").write(zf.read(name))
+    
+    outputdir = options.builddir / "docs" / "api"
+    if outputdir.exists():
+        outputdir.rmtree()
+    outputdir.makedirs()
+    sourcedir = (path.getcwd() / "frameworks" / "bespin").abspath()
+    
+    command = ("java -jar jsrun.jar app/run.js -a "
+                    "--directory=%s "
+                    "--encoding=utf-8 "
+                    "--recurse=10 "
+                    "--securemodules "
+                    "--template=%s/templates/jsdoc "
+                    "--verbose "
+                    "%s") % (outputdir.abspath(), options.dest_dir.abspath(), sourcedir)
+                    
+    sh(command, cwd=options.dest_dir)
+        
     
 @task
 def docs(options):
