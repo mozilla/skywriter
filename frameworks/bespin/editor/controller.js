@@ -23,29 +23,18 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime:package').SC;
-var bespin = require("package");
 
 var util = require("util/util");
 var canvas = require("util/canvas");
 var cookie = require("util/cookie");
 var keys = require("util/keys");
 
-var settings = require("settings");
 var editorEvents = require("events");
 var cursor = require("cursor");
 var model = require("model");
 var history = require("history");
 var view = require("editor/views/editor");
 var scroll = require("editor/views/scroll");
-
-/**
- * Add a tabsize setting to alter the displayed width of the TAB character
- */
-bespin.get("setting").addSetting({
-    name: "tabsize",
-    type: "number",
-    defaultValue: 4
-});
 
 /**
  * bespin.editor.API is the root object, the API that others should be able to
@@ -57,8 +46,9 @@ exports.EditorController = SC.Object.extend({
 
     containerBinding: '.editorView.layer',
 
+    /** @see container.js */
     requires: {
-        container: 'container',
+        ioc: 'ioc',
         settings: 'settings',
         commandLine: 'commandLine',
         session: 'editSession',
@@ -67,12 +57,75 @@ exports.EditorController = SC.Object.extend({
     },
 
     init: function() {
-        // Add a tabsize setting to alter the displayed width of the TAB character
-        settings.addSetting({
+        // Add a tabsize setting to alter the displayed width of the TAB char
+        this.settings.addSetting({
             name: "tabsize",
             type: "number",
             defaultValue: 4
         });
+
+        // Do we trim trailing whitespace on save?
+        this.settings.addSetting({
+            name: "trimonsave",
+            type: "boolean",
+            defaultValue: false
+        });
+
+        // Language handling.
+        // This probably isn't the best place for this, but at least collected
+        // in the wrong place is better that distributed over lots of wrong
+        // places. We should move language handling to somewhere better.
+
+        // Add a setting to alter the (programming) language of the current file
+        settings.addSetting({
+            name: "language",
+            type: "text",
+            defaultValue: "auto"
+        });
+
+        // Update the language on file save
+        this.hub.subscribe("editor:openfile:opensuccess", function(event) {
+            var project = event.project || session.project;
+
+            var fileType = util.path.fileType(event.file.name);
+            if (fileType) {
+                this.hub.publish("settings:language", { language: fileType });
+            }
+
+            // If a file (such as BespinSettings/config) is loaded that you want to auto
+            // syntax highlight, here is where you do it
+            // FUTURE: allow people to add in their own special things
+            var mapName = project + "/" + event.file.name;
+            if (this.specialFileMap[mapName]) {
+                this.hub.publish("settings:language", {
+                    language: this.specialFileMap[mapName]
+                });
+            }
+        }.bind(this));
+
+        this.specialFileMap = {
+            'BespinSettings/config': 'js'
+        };
+
+        // Set the cursor position on reload
+        this.hub.subscribe("editor:openfile:opensuccess", function(event) {
+            var project = event.project || session.project;
+            var filename = event.file.name;
+
+            try {
+                // TODO: Cookies? Yuck
+                // reset the state of the editor based on saved cookie
+                var name = 'viewData_' + project + '_' + filename.split('/').join('_');
+                var data = cookie.get(name);
+                if (data) {
+                    this.resetView(JSON.parse(data));
+                } else {
+                    this.basicView();
+                }
+            } catch (ex) {
+                console.log("Error setting in the view: ", ex);
+            }
+        }.bind(this));
 
         // fixme: this stuff may not belong here
         this.debugMode = false;
@@ -90,10 +143,11 @@ exports.EditorController = SC.Object.extend({
         });
         this.editorView = this.ui.contentView;
 
-
         this.theme = require("theme")['default'];
 
-        this.editorKeyListener = exports.DefaultEditorKeyListener.create({ editor: this });
+        this.editorKeyListener = exports.DefaultEditorKeyListener.create();
+        this.ioc.inject(this.editorKeyListener);
+
         this.historyManager = history.HistoryManager.create({ editor: this });
         editorEvents.subscribe();
 
@@ -266,11 +320,11 @@ exports.EditorController = SC.Object.extend({
     defaultTabSize: 4,
 
     /**
-     * be gentle trying to get the tabstop from settings
+     * Get the tabstop from settings
      */
     getTabSize: function() {
         var size = this.defaultTabSize;
-        var tabsize = parseInt(this.settings.values.tabsize, 10);
+        var tabsize = this.settings.values.tabsize;
         if (tabsize > 0) {
             size = tabsize;
         }
@@ -477,7 +531,10 @@ exports.EditorController = SC.Object.extend({
             }
         };
 
-        this.hub.publish("editor:savefile:before", { filename: filename });
+        // If trimonsave is set then we should trim line endings before we save:
+        if (this.settings.values.trimonsave) {
+            this.commandLine.executeCommand('trim', true);
+        }
 
         this.file.saveFile(project, file, newOnSuccess, newOnFailure);
     },
@@ -585,6 +642,16 @@ exports.EditorController = SC.Object.extend({
             self._addHistoryItem(project, filename, fromFileHistory);
 
             this.hub.publish("editor:openfile:opensuccess", { project: project, file: file });
+
+            // TODO: This should probably go into a subscribe, or better a
+            // binding, but we need to work out where this belongs first
+
+            document.title = file + ' - editing with Bespin';
+
+            this.hub.publish("url:change", { project: project, path: file });
+
+            this.session.project = project;
+            this.session.path = file;
         };
 
         this.hub.publish("editor:openfile:openbefore", { project: project, filename: filename });
@@ -634,27 +701,56 @@ exports.EditorController = SC.Object.extend({
  * Core key listener to decide which actions to run
  */
 exports.DefaultEditorKeyListener = SC.Object.extend({
-    editor: null,
     skipKeypress: false,
     defaultKeyMap: {},
 
     // Allow for multiple key maps to be defined
     keyMapDescriptions: { },
 
+    /** @see container.js */
+    requires: {
+        editor: 'editor',
+        hub: 'hub'
+    },
+
     init: function() {
         this.keyMap = this.defaultKeyMap;
     },
 
     bindKey: function(keyCode, metaKey, ctrlKey, altKey, shiftKey, action, name) {
-        this.defaultKeyMap[[keyCode, metaKey, ctrlKey, altKey, shiftKey]] =
-            (typeof action == "string") ?
-                function() {
-                    var toFire = toFire(action);
-                    bespin.publish(toFire.name, toFire.args);
-                } : action.bind(this.editor.editorView.actions);
-        if (name) {
-            this.keyMapDescriptions[[keyCode, metaKey, ctrlKey, altKey, shiftKey]] = name;
+        var key = [keyCode, metaKey, ctrlKey, altKey, shiftKey].toString();
+        if (typeof action == "string") {
+            this.defaultKeyMap[key] = function() {
+                var toFire = this._toFire(action);
+                this.hub.publish(toFire.name, toFire.args);
+            }.bind(this);
+        } else {
+            this.defaultKeyMap[key] = action.bind(this.editor.editorView.actions);
         }
+
+        if (name) {
+            this.keyMapDescriptions[key] = name;
+        }
+    },
+
+    /**
+     * Given an <code>eventString</code> parse out the arguments and configure an
+     * event object.
+     * <p>For example:<ul>
+     * <li><code>command:execute;name=ls,args=bespin</code>
+     * <li><code>command:execute</code>
+     * </ul>
+     */
+    _toFire: function(eventString) {
+        var event = {};
+        if (eventString.indexOf(';') < 0) { // just a plain command with no args
+            event.name = eventString;
+        } else { // split up the args
+            var pieces = eventString.split(';');
+            event.name = pieces[0];
+            event.args = util.queryToObject(pieces[1], ',');
+        }
+        return event;
     },
 
     bindKeyForPlatform: function(keysForPlatforms, action, name, isSelectable) {
@@ -794,124 +890,5 @@ exports.DefaultEditorKeyListener = SC.Object.extend({
         }
 
         util.stopEvent(e);
-    }
-});
-
-/**
- * Given an <code>eventString</code> parse out the arguments and configure an
- * event object.
- * <p>For example:<ul>
- * <li><code>command:execute;name=ls,args=bespin</code>
- * <li><code>command:execute</code>
- * </ul>
- */
-var toFire = function(eventString) {
-    var event = {};
-    if (eventString.indexOf(';') < 0) { // just a plain command with no args
-        event.name = eventString;
-    } else { // split up the args
-        var pieces = eventString.split(';');
-        event.name = pieces[0];
-        event.args = util.queryToObject(pieces[1], ',');
-    }
-    return event;
-};
-
-/**
- * Run the trim command before saving the file
- */
-bespin.subscribe("settings:set:trimonsave", function(event) {
-    if (event.value) {
-        _trimOnSave = bespin.subscribe("editor:savefile:before", function(event) {
-            bespin.get("commandLine").executeCommand('trim', true);
-        });
-    } else {
-        bespin.unsubscribe(_trimOnSave);
-    }
-});
-// Store the subscribe handler away
-var _trimOnSave;
-
-/**
- * Add a setting to alter the (programming) language of the current file
- */
-bespin.get("settings").addSetting({
-    name: "language",
-    type: "text",
-    defaultValue: "auto"
-});
-
-/**
- * When a file is opened successfully change the project and file status
- * area, then change the window title, and change the URL hash area
- */
-bespin.subscribe("editor:openfile:opensuccess", function(event) {
-    var session = bespin.get('editSession');
-    var project = event.project || session.project;
-    var filename = event.file.name;
-
-    try {
-        // reset the state of the editor based on saved cookie
-        var name = 'viewData_' + project + '_' + filename.split('/').join('_');
-        var data = cookie.get(name);
-        if (data) {
-            bespin.get('editor').resetView(JSON.parse(data));
-        } else {
-            bespin.get('editor').basicView();
-        }
-    } catch (e) {
-        console.log("Error setting in the view: ", e);
-    }
-
-    document.title = filename + ' - editing with Bespin';
-
-    bespin.publish("url:change", { project: project, path: filename });
-
-    // Set the session path and change the syntax highlighter
-    // when a new file is opened
-    if (event.file.name == null) {
-        console.error("event.file.name falsy");
-    }
-
-    if (event.project) {
-        session.project = event.project;
-    }
-    session.path = event.file.name;
-
-    var fileType = util.path.fileType(event.file.name);
-    if (fileType) {
-        bespin.publish("settings:language", { language: fileType });
-    }
-
-    // If a file (such as BespinSettings/config) is loaded that you want to auto
-    // syntax highlight, here is where you do it
-    // FUTURE: allow people to add in their own special things
-    var mapName = project + "/" + filename;
-    if (specialFileMap[mapName]) {
-        bespin.publish("settings:language", {
-            language: specialFileMap[mapName]
-        });
-    }
-});
-
-/**
- *
- */
-var specialFileMap = {
-    'BespinSettings/config': 'js'
-};
-
-/**
- * Add in emacs key bindings
- */
-bespin.subscribe("settings:set:keybindings", function(event) {
-    var editor = bespin.get('editor');
-    if (event.value == "emacs") {
-        editor.bindKey("moveCursorLeft", "ctrl b");
-        editor.bindKey("moveCursorRight", "ctrl f");
-        editor.bindKey("moveCursorUp", "ctrl p");
-        editor.bindKey("moveCursorDown", "ctrl n");
-        editor.bindKey("moveToLineStart", "ctrl a");
-        editor.bindKey("moveToLineEnd", "ctrl e");
     }
 });

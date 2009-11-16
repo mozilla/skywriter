@@ -47,17 +47,40 @@
  * <li>When the command system is re-worked to include more GUI interaction,
  * expose data in settings to that system.
  * </ul>
+ *
+ * <p>For future versions of the API it might be better to decrease the
+ * dependency on settings, and increase it on the system with a setting.
+ * e.g. Now:
+ * <pre>
+ * settings.addSetting({ name:"foo", ... });
+ * settings.values.foo = "bar";
+ * </pre>
+ * <p>Vs the potentially better:
+ * <pre>
+ * var foo = settings.addSetting({ name:"foo", ... });
+ * foo.value = "bar";
+ * </pre>
+ * <p>Comparison:
+ * <ul>
+ * <li>The latter version gains by forcing access to the setting to be through
+ * the module providing it, so there wouldn't be any hidden dependencies.
+ * <li>It's also more compact.
+ * <li>It could provide access to to other methods e.g. <tt>foo.reset()</tt>
+ * and <tt>foo.onChange(function(val) {...});</tt> (but see SC binding)
+ * <li>On the other hand dependencies are so spread out right now that it's
+ * probably hard to do this easily. We should move to this in the future.
+ * </ul>
  */
 
 var SC = require("sproutcore/runtime:package").SC;
-var bespin = require("package");
 var util = require("util/util");
-var themes = require("theme");
 
 /**
  * A base class for all the various methods of storing settings.
  * <p>Usage:
  * <pre>
+ * // Create manually, or require 'settings' from the container.
+ * // This is the manual version:
  * var settingsMod = require("settings");
  * var settings = settingsMod.InMemorySettings.create();
  * // Add a new setting
@@ -82,6 +105,7 @@ exports.InMemorySettings = SC.Object.extend(/** @lends exports.InMemorySettings 
      */
     _settings: {},
 
+    /** @see container.js */
     requires: {
         hub: 'hub'
     },

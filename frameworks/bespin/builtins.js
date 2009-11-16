@@ -98,6 +98,7 @@ exports.metadata = {
  * the entire initial configuration from the plugin system.
  */
 exports.factories = {
+    // "ioc": "The container itself, placed into itself on creation",
     "hub": "create util/hub:Hub",
     "plugins": "create plugins:Catalog",
     "editor": "create editor/controller:EditorController",

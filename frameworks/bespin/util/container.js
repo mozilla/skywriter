@@ -66,7 +66,7 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
      * Containers contain themselves so they can be got at easily
      */
     init: function() {
-        this.register("container", this);
+        this.register("ioc", this);
     },
 
     /**
