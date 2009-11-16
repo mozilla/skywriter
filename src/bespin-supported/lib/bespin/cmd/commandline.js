@@ -259,8 +259,7 @@ members: {
         }
 
         if (panel == "output") {
-            bespin.getComponent('popup', function(popup)
-            {
+            bespin.getComponent('popup', function(popup) {
                 popup.setTitle("Command Line");
             });
             dojo.style(this.output, {
@@ -275,8 +274,7 @@ members: {
             //     this.focus();
             // }));
         } else if (panel == "reference") {
-            bespin.getComponent('popup', function(popup)
-            {
+            bespin.getComponent('popup', function(popup) {
                 popup.setTitle("Reference");
             });
             var url = "https://wiki.mozilla.org/Labs/Bespin";
@@ -405,13 +403,17 @@ members: {
     updateOutput: function() {
         var formatTime = function(date) {
             var mins = "0" + date.getMinutes();
-            if (mins.length > 2){mins = mins.slice(mins.length - 2);}
+            if (mins.length > 2) {
+                mins = mins.slice(mins.length - 2);
+            }
             var secs = "0" + date.getSeconds();
-            if (secs.length > 2){secs = secs.slice(secs.length - 2);}
+            if (secs.length > 2) {
+                secs = secs.slice(secs.length - 2);
+            }
             return date.getHours() + ":" + mins + ":" + secs;
         };
 
-        var size = parseInt(this.settings.values.consolefontsize, 10);
+        var size = this.settings.values.consolefontsize;
         var mode = this.settings.values.historytimemode;
 
         dojo.attr(this.output, "innerHTML", "");
@@ -545,7 +547,7 @@ members: {
             self.updateOutput();
         };
 
-        var size = parseInt(this.settings.values.consolefontsize, 10);
+        var size = this.settings.values.consolefontsize;
         switch (size) {
             case 9: setSize(11); break;
             case 11: setSize(14); break;
