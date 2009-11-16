@@ -84,7 +84,7 @@ def install_sproutcore(options):
         print "download sproutcore-abbot/tiki"
         abbot_tarball = urllib2.urlopen("http://github.com/sproutit/sproutcore-abbot/tarball/tiki")
         abbot_dirname = abbot_tarball.url.split('/')[-1].split('.')[0]
-        abbot_tar = tarfile.open(fileobj = StringIO(abbot_tarball.read()))
+        abbot_tar = tarfile.open(name="sproutcore-abbot.tgz", fileobj = StringIO(abbot_tarball.read()))
         abbot_tar.extractall()
         abbot_tar.close()
         os.rename(abbot_dirname, "abbot")
@@ -93,7 +93,7 @@ def install_sproutcore(options):
         print "download sproutcore/tiki"
         sproutcore_tarball = urllib2.urlopen("http://github.com/sproutit/sproutcore/tarball/tiki")
         sproutcore_dirname = sproutcore_tarball.url.split('/')[-1].split('.')[0]
-        sproutcore_tar = tarfile.open(fileobj = StringIO(sproutcore_tarball.read()))
+        sproutcore_tar = tarfile.open(name="sproutcore.tgz", fileobj = StringIO(sproutcore_tarball.read()))
         sproutcore_tar.extractall(path = "frameworks")
         sproutcore_tar.close()
         os.rename("frameworks/%s" % sproutcore_dirname, "frameworks/sproutcore")
@@ -101,7 +101,7 @@ def install_sproutcore(options):
         print "download tiki"
         tiki_tarball = urllib2.urlopen("http://github.com/sproutit/tiki/tarball/master")
         tiki_dirname = tiki_tarball.url.split('/')[-1].split('.')[0]
-        tiki_tar = tarfile.open(fileobj = StringIO(tiki_tarball.read()))
+        tiki_tar = tarfile.open(name="tiki.tgz", fileobj = StringIO(tiki_tarball.read()))
         tiki_tar.extractall(path = "frameworks")
         tiki_tar.close()
         os.rename("frameworks/%s" % tiki_dirname, "frameworks/tiki")
