@@ -22,40 +22,41 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("package");
 var SC = require("sproutcore/runtime:package").SC;
-
-/**
- * Add a setting to restrict the cursor to valid cursor positions
- */
-bespin.get("settings").addSetting({
-    name: "strictlines",
-    type: "boolean",
-    defaultValue: false
-});
-
-/**
- * Add a setting to alter cursor positioning on new lines?
- */
-bespin.get("settings").addSetting({
-    name: "smartmove",
-    type: "boolean",
-    defaultValue: true
-});
 
 /**
  * Handles the position of the cursor, hiding the complexity of translating
  * between screen and model positions and so forth
  */
 exports.CursorManager = SC.Object.extend({
-    editor: null,
+    /** @see container.js */
+    requires: {
+        editor: 'editor',
+        settings: 'settings',
+        hub: 'hub'
+    },
+
     init: function() {
         this.position = { row: 0, col: 0 };
         this.virtualCol = 0;
 
+        // Add a setting to restrict the cursor to valid cursor positions
+        this.settings.addSetting({
+            name: "strictlines",
+            type: "boolean",
+            defaultValue: false
+        });
+
+        // Add a setting to alter cursor positioning on new lines?
+        this.settings.addSetting({
+            name: "smartmove",
+            type: "boolean",
+            defaultValue: true
+        });
+
         // If someone does 'set strictlines on' then we need to check to see
         // if the cursor is in a valid place, and correct if not.
-        bespin.subscribe("settings:set:strictlines", function(setting) {
+        this.hub.subscribe("settings:set:strictlines", function(setting) {
             if (setting.value) {
                 var oldPos = exports.copyPos(this.position);
                 this.checkPastEndOfLine(oldPos);
@@ -118,7 +119,9 @@ exports.CursorManager = SC.Object.extend({
         //avoid modifying model by just using an empty array if row is out of range
         //this is because getRowArray adds rows if the row is out of range.
         var line = [];
-        if (this.editor.model.hasRow(pos.row)){line = this.editor.model.getRowArray(pos.row);}
+        if (this.editor.model.hasRow(pos.row)) {
+            line = this.editor.model.getRowArray(pos.row);
+        }
 
         var tabsize = this.editor.getTabSize();
 
@@ -198,7 +201,6 @@ exports.CursorManager = SC.Object.extend({
     // there are 2 white spaces together from the beginning
     getContinuousSpaceCount: function(from, to, rowIndex) {
         rowIndex = rowIndex || this.position.row;
-        var settings = bespin.get('settings');
         var row = this.editor.model.getRowArray(rowIndex);
         var delta = (from < to ? 1 : -1);
         var length = row.length;
@@ -206,7 +208,7 @@ exports.CursorManager = SC.Object.extend({
         to = to + (delta == 1 ? 0 : -1);
         from = this.getModelPosition({col: from, row: rowIndex}).col;
         to = this.getModelPosition({col: to, row: rowIndex}).col;
-        if (settings.values.strictlines) {
+        if (this.settings.values.strictlines) {
             from = Math.min(from, length);
             to = Math.min(to, length);
         }
@@ -308,12 +310,11 @@ exports.CursorManager = SC.Object.extend({
     },
 
     moveLeft: function(args) {
-        var settings = bespin.get("settings");
         var oldPos = exports.copyPos(this.position);
         var shiftKey = (args.event ? args.event.shiftKey : false);
 
         if (!this.editor.getSelection() || shiftKey) {
-            if (settings.values.smartmove) {
+            if (this.settings.values.smartmove) {
                 var freeSpaces = this.getContinuousSpaceCount(oldPos.col, this.getNextTablevelLeft());
                 if (freeSpaces == this.editor.getTabSize()) {
                     this.moveCursor({ col: oldPos.col - freeSpaces });
@@ -324,7 +325,7 @@ exports.CursorManager = SC.Object.extend({
             }
 
             // start of the line so move up
-            if (settings.values.strictlines && this.position.col == 0) {
+            if (this.settings.values.strictlines && this.position.col == 0) {
                 this.moveUp();
                 if (oldPos.row > 0) {
                     this.moveToLineEnd();
@@ -340,12 +341,11 @@ exports.CursorManager = SC.Object.extend({
     },
 
     moveRight: function(args) {
-        var settings = bespin.get("settings");
         var oldPos = exports.copyPos(this.position);
         var shiftKey = (args.event ? args.event.shiftKey : false);
 
         if (!this.editor.getSelection() || shiftKey) {
-            if (settings.values.smartmove && args != true) {
+            if (this.settings.values.smartmove && args != true) {
                 var freeSpaces = this.getContinuousSpaceCount(oldPos.col, this.getNextTablevelRight());
                 if (freeSpaces == this.editor.getTabSize()) {
                     this.moveCursor({ col: oldPos.col + freeSpaces });
@@ -356,7 +356,7 @@ exports.CursorManager = SC.Object.extend({
             }
 
             // end of the line, so go to the start of the next line
-            if (settings.values.strictlines && (this.position.col >= this.editor.editorView.getRowScreenLength(this.position.row))) {
+            if (this.settings.values.strictlines && (this.position.col >= this.editor.editorView.getRowScreenLength(this.position.row))) {
                 this.moveDown();
                 if (oldPos.row < this.editor.model.getRowCount() - 1) {
                     this.moveCursor({ col: 0 });
@@ -403,8 +403,7 @@ exports.CursorManager = SC.Object.extend({
      * the end of the line.
      */
     checkPastEndOfLine: function(oldPos) {
-        var settings = bespin.get("settings");
-        var isStrictLines = settings.values.strictlines;
+        var isStrictLines = this.settings.values.strictlines;
         var maxCol
             = this.editor.editorView.getRowScreenLength(this.position.row);
         if (isStrictLines && this.position.col > maxCol) {
@@ -560,7 +559,7 @@ exports.CursorManager = SC.Object.extend({
         // console.log('Position: (' + this.position.row + ', ' + this.position.col + ')', '[' + this.getModelPosition().col + ']');
 
         // keeps the editor's cursor from blinking while moving it
-        var editorView = bespin.get('editor').editorView;
+        var editorView = this.editor.editorView;
         editorView.showCursor = true;
         editorView.toggleCursorAllowed = false;
 
@@ -603,13 +602,13 @@ exports.CursorManager = SC.Object.extend({
  */
 exports.buildArgs = function(oldPos) {
     return {
-        pos: exports.copyPos(oldPos || bespin.get('editor').getCursorPos())
+        pos: exports.copyPos(oldPos || this.editor.getCursorPos())
     };
 };
 
 exports.changePos = function(args, pos) {
     return {
-        pos: exports.copyPos(pos || bespin.get('editor').getCursorPos())
+        pos: exports.copyPos(pos || this.editor.getCursorPos())
     };
 };
 

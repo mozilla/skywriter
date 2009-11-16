@@ -31,22 +31,9 @@
 require("util/globals");
 
 var SC = require("sproutcore/runtime:package").SC;
-var bespin = require("bespin");
-var util = require("bespin/util/util");
-var settings = require("bespin/settings");
-var plugins = require("bespin/plugins");
-var builtins = require("bespin/builtins");
-var editorMod = require("bespin/editor");
 var bespin = require("package");
 var containerMod = require("util/container");
 var util = require("util/util");
-
-var EditorController = require('bespin/editor/controller').EditorController;
-var plugins = require("plugins");
-var builtins = require("builtins");
-var editorMod = require("editor");
-
-var EditorController = require('editor/controller').EditorController;
 
 /**
  * Initialize a Bespin component on a given element.

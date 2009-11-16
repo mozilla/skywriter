@@ -106,7 +106,8 @@ exports.factories = {
     "editSession": "call util/container:dummyFactory",
     "files": "call util/container:dummyFactory", // "create client/filesystem:FileSystem",
     "parser": "call util/container:dummyFactory",
-    "commandLine": "call util/container:dummyFactory"
+    "commandLine": "call util/container:dummyFactory",
+    "cursorManager": "create cursor:CursorManager"
 };
 
 /*

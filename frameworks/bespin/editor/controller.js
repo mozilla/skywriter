@@ -52,6 +52,7 @@ exports.EditorController = SC.Object.extend({
         settings: 'settings',
         commandLine: 'commandLine',
         session: 'editSession',
+        cursorManager: 'cursorManager',
         files: 'files',
         hub: 'hub'
     },
@@ -131,8 +132,6 @@ exports.EditorController = SC.Object.extend({
         this.debugMode = false;
 
         this.model = model.DocumentModel.create({ editor: this });
-
-        this.cursorManager = cursor.CursorManager.create({ editor: this });
 
         // TODO: Should we change this name from 'ui'? Seems confusing... --pcw
         this.ui = scroll.BespinScrollView.create({
