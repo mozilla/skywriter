@@ -88,7 +88,6 @@ def install_sproutcore(options):
         abbot_tar.extractall()
         abbot_tar.close()
         os.rename(abbot_dirname, "abbot")
-        os.rmdir("abbot/frameworks/sproutcore")
 
         print "download sproutcore/tiki"
         sproutcore_tarball = urllib2.urlopen("http://github.com/sproutit/sproutcore/tarball/tiki")
