@@ -42,7 +42,6 @@ var containerMod = require("util/container");
 var util = require("util/util");
 
 var EditorController = require('bespin/editor/controller').EditorController;
-var settings = require("settings");
 var plugins = require("plugins");
 var builtins = require("builtins");
 var editorMod = require("editor");

@@ -31,7 +31,6 @@ var keys = require('util/keys');
 var clipboard = require("util/clipboard");
 var cursor = require('cursor');
 var scroller = require('editor/views/scroller');
-var settings = require("settings");
 
 var SelectionHelper = SC.Object.extend({
     editor: null,
@@ -61,7 +60,7 @@ var SelectionHelper = SC.Object.extend({
 /**
  * Add a setting to control is TAB characters are displayed as an arrow
  */
-settings.addSetting({
+bespin.get("settings").addSetting({
     name: "tabarrow",
     type: "boolean",
     defaultValue: true
@@ -833,7 +832,7 @@ exports.EditorView = SC.View.extend({
         var parentLayer = this.get('parentView').get('layer');
         if (parentLayer.clientWidth === 0 || parentLayer.clientHeight === 0)
             return;
-        
+
         var canvas = this.get('canvas');
         if (parentLayer.clientWidth !== canvas.width)
             canvas.width = parentLayer.clientWidth;
@@ -1540,7 +1539,7 @@ bespin.subscribe("settings:set:fontsize", function(event) {
 /**
  * Add a setting to affect the editor font size
  */
-settings.addSetting({
+bespin.get("settings").addSetting({
     name: "fontsize",
     type: "number",
     defaultValue: 10

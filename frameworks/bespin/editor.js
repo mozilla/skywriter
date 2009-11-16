@@ -32,7 +32,6 @@ var cookie = require("util/cookie");
 var mousewheelevent = require("util/mousewheelevent");
 var clipboard = require("util/clipboard");
 
-var settings = require("settings");
 var editorEvents = require("events");
 var syntax = require("syntax");
 var cursor = require("cursor");
