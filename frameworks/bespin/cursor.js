@@ -23,12 +23,19 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime:package").SC;
+var bespin = require("package");
 
 /**
  * Handles the position of the cursor, hiding the complexity of translating
  * between screen and model positions and so forth
  */
 exports.CursorManager = SC.Object.extend({
+    init: function() {
+        this.position = { row: 0, col: 0 };
+        this.virtualCol = 0;
+        sc_super();
+    },
+
     /** @see container.js */
     requires: {
         editor: 'editor',
@@ -36,10 +43,8 @@ exports.CursorManager = SC.Object.extend({
         hub: 'hub'
     },
 
-    init: function() {
-        this.position = { row: 0, col: 0 };
-        this.virtualCol = 0;
-
+    /** Called by container.js when requirements are fulfilled */
+    afterContainerInit: function() {
         // Add a setting to restrict the cursor to valid cursor positions
         this.settings.addSetting({
             name: "strictlines",
@@ -62,8 +67,6 @@ exports.CursorManager = SC.Object.extend({
                 this.checkPastEndOfLine(oldPos);
             }
         }.bind(this));
-
-        sc_super();
     },
 
     /**
@@ -602,17 +605,20 @@ exports.CursorManager = SC.Object.extend({
  */
 exports.buildArgs = function(oldPos) {
     return {
-        pos: exports.copyPos(oldPos || this.editor.getCursorPos())
+        pos: exports.copyPos(oldPos || bespin.get("editor").getCursorPos())
     };
 };
 
 exports.changePos = function(args, pos) {
     return {
-        pos: exports.copyPos(pos || this.editor.getCursorPos())
+        pos: exports.copyPos(pos || bespin.get("editor").getCursorPos())
     };
 };
 
 exports.copyPos = function(oldPos) {
+    if (!oldPos) {
+        return oldPos;
+    }
     return {
         row: oldPos.row,
         col: oldPos.col

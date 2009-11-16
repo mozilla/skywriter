@@ -41,9 +41,6 @@ var scroll = require("editor/views/scroll");
  * use
  */
 exports.EditorController = SC.Object.extend({
-    // TODO: was only used for opts.dontfocus which in turn (see below)
-    // opts: {},
-
     containerBinding: '.editorView.layer',
 
     /** @see container.js */
@@ -54,10 +51,12 @@ exports.EditorController = SC.Object.extend({
         session: 'editSession',
         cursorManager: 'cursorManager',
         files: 'files',
+        settings: 'settings',
         hub: 'hub'
     },
 
-    init: function() {
+    /** Called by container.js when requirements are fulfilled */
+    afterContainerSetup: function() {
         // Add a tabsize setting to alter the displayed width of the TAB char
         this.settings.addSetting({
             name: "tabsize",
@@ -78,7 +77,7 @@ exports.EditorController = SC.Object.extend({
         // places. We should move language handling to somewhere better.
 
         // Add a setting to alter the (programming) language of the current file
-        settings.addSetting({
+        this.settings.addSetting({
             name: "language",
             type: "text",
             defaultValue: "auto"
