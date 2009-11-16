@@ -1,0 +1,1 @@
+Note: this directory (bespinclient/src) is only temporary. This code will be moving into the frameworks directory, bit-by-bit as plugins are created.
