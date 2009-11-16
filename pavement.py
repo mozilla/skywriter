@@ -197,6 +197,7 @@ def start(options):
     """
     command = "abbot/bin/sc-server"
     popen = subprocess.Popen(command, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
+    call_pavement("../bespinserver/pavement.py", ["clientdir=../bespinclient", "start"])
     popen.wait()
     
 @task
