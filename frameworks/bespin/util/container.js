@@ -128,19 +128,21 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
                      * We've found a component to match , so this needs to be
                      * injected into object[property] and recalled for next time
                      */
-                    var onCreate = function(component) {
+                    var onFound = function(component) {
                         object[property] = component;
-                        this.register(name, component);
                         delete requirements[property];
                         checkCompleted();
                     }.bind(this);
 
                     var source = object.requires[property];
-                    var component = this.get(source);
+                    var component = this.components[source];
                     if (component !== undefined) {
-                        onCreate(component);
+                        onFound(component);
                     } else {
-                        this._createFromFactory(name, onCreate);
+                        this._createFromFactory(name, function(component) {
+                            this.register(name, component);
+                            onFound(component);
+                        }.bind(this));
                     }
                 }
             }
