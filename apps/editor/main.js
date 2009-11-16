@@ -1,3 +1,5 @@
+"export package main";
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -21,8 +23,6 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * ***** END LICENSE BLOCK ***** */
-
-"export package main";
 
 var didRun = false;
 
@@ -62,7 +62,7 @@ main = function() {
     // We could also say editor = container.get("editor"); which would allow
     // users to customize how the editor is built, but see above
     var editor = EditorController.create();
-    bespin.register("editor", editor);
+    container.register("editor", editor);
 
     editor.model.insertDocument("Welcome to Bespin.");
     view.app.getPath("mainPage.mainPane").appendChild(editor.ui);
