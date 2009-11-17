@@ -6,4 +6,4 @@ config :editor,
   :use_modules => true,
   :factory_format => :function
 
-proxy '/server', :to => 'localhost:8080'
+proxy '/server/', :to => 'localhost:8080', :url => "/"
