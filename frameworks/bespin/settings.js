@@ -204,7 +204,7 @@ exports.InMemorySettings = SC.Object.extend(/** @lends exports.InMemorySettings 
             toString: function(value) { return "" + value; },
             fromString: function(value) { return 0 + value; }
         },
-        boolean: {
+        "boolean": {
             validator: function(value) { return typeof value == "boolean"; },
             toString: function(value) { return "" + value; },
             fromString: function(value) { return !!value; }
