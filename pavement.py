@@ -397,7 +397,7 @@ def release_embed(options):
         outputdir.rmtree()
     outputdir.mkdir()
     
-    sproutcore_built = builddir / "build" / "static"
+    sproutcore_built = builddir / "production" / "build" / "static"
     bespin_dir = _find_build_output(sproutcore_built, "bespin")
     bespin_js = bespin_dir / "javascript-packed.js"
     info("Generating BespinEmbedded.js based on %s", bespin_js)
