@@ -37,10 +37,6 @@ main = function() {
     }
     didRun = true;
 
-    // TODO this is a temporary hack. Remove this once the bootstrap sequence
-    // for Tiki is straightened out
-    SC._didBecomeReady();
-
     // The container allows us to keep multiple bespins separate, and constructs
     // objects according to a user controlled recipe.
     console.log("Bespin is starting up.");
