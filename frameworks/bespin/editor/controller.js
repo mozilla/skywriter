@@ -248,13 +248,13 @@ exports.EditorController = SC.Object.extend({
      */
     computeLayout: function() {
         var layout = {
-            left:      0,
-            top:      0,
-            width:  this.container.clientWidth,
-            height: this.container.clientHeight
+            left:   0,
+            top:    0,
+            width:  this.ui.clientWidth,
+            height: this.ui.clientHeight
         };
 
-        var container = this.container;
+        var container = this.ui;
         while (container !== null) {
             if (!isNaN(container.offsetLeft))
                 layout.left += container.offsetLeft;

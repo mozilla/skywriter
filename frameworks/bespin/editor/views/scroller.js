@@ -226,14 +226,16 @@ exports.BespinScrollerView = SC.View.extend({
                 y:      clientFrame.y + NIB_LENGTH
                             + value * gutterFrame.height / maximum,
                 width:  clientThickness,
-                height: frame.height * gutterFrame.height / maximum
+                height: Math.min(frame.height, maximum) * gutterFrame.height
+                            / maximum
             };
         case SC.LAYOUT_HORIZONTAL:
             return {
                 x:      clientFrame.x + NIB_LENGTH
                             + value * gutterFrame.width / maximum,
                 y:      clientFrame.y,
-                width:  frame.width * gutterFrame.width / maximum,
+                width:  Math.min(frame.width, maximum) * gutterFrame.width
+                            / maximum,
                 height: clientThickness
             };
         }
