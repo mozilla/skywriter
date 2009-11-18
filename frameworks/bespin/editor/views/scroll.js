@@ -65,16 +65,16 @@ exports.BespinScrollView = SC.ScrollView.extend({
             var vScroller = this.get('verticalScrollerView');
             vScroller.set('scrollerThickness', vScrollerThickness);
             vScroller.set('padding', {
-                left: 0,
-                right: 6,
-                top: 6,
+                left:   0,
+                right:  6,
+                top:    6,
                 bottom: 6 + hScrollerThickness
             });
             vScroller.set('layout', {
-                top: 0,
-                right: 0,
+                top:    0,
+                right:  0,
                 bottom: 0,
-                width: vScrollerThickness
+                width:  vScrollerThickness
             });
         }
 
