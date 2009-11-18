@@ -31,6 +31,7 @@ var keys = require('util/keys');
 var clipboard = require("util/clipboard");
 var cursor = require('cursor');
 var scroller = require('editor/views/scroller');
+var canvas = require('editor/mixins/canvas');
 
 var SelectionHelper = SC.Object.extend({
     editor: null,
@@ -67,10 +68,9 @@ bespin.get("settings").addSetting({
 });
 
 // The main editor view.
-exports.EditorView = SC.View.extend({
+exports.EditorView = SC.View.extend(canvas.Canvas, {
     classNames: 'sc-canvas-view',
     displayProperties: ['value', 'shouldAutoResize'],
-    tagName: 'canvas',
 
     rowLengthCache: [],
 
@@ -84,9 +84,6 @@ exports.EditorView = SC.View.extend({
 
     // is the cursor allowed to toggle? (used by cursorManager.moveCursor)
     toggleCursorAllowed: true,
-
-    horizontalScrollCanvas: null,
-    verticalScrollCanvas: null,
 
     LINE_HEIGHT: 23,
 
@@ -131,6 +128,19 @@ exports.EditorView = SC.View.extend({
      */
     hasPadding: true,
 
+    // Not cacheable, unfortunately, because it depends on the parent view's
+    // frame...
+    layerFrame: function() {
+        var parentView = this.get('parentView');
+        var parentFrame = parentView.get('frame');
+        return {
+            x:      0,
+            y:      0,
+            width:  parentFrame.width,
+            height: parentFrame.height
+        };
+    }.property(),
+
     init: function() {
         var settings = bespin.get("settings");
 
@@ -169,15 +179,17 @@ exports.EditorView = SC.View.extend({
     },
 
     render: function(context, firstTime) {
-        // TODO: Shouldn't we only do this if !firstTime
-        context.attr('moz-opaque', 'true');
+        sc_super();
+
+        if (!firstTime)
+            return;
+
+        context.attr("moz-opaque", "true");
         context.attr("tabindex", "1");
-        context.push('canvas tag not supported by your browser');
     },
 
     didCreateLayer: function() {
         var canvas = this.$()[0];
-        this.set("canvas", canvas);
 
         SC.Event.add(canvas, "blur", this, function(ev) {
             this.focus = true;
@@ -495,7 +507,8 @@ exports.EditorView = SC.View.extend({
 
         // I'm not sure why we should need to manually set focus to the canvas;
         // it happens automatically when there is no mouseDown event handler
-        this.get('canvas').focus();
+        var canvas = this.$()[0];
+        canvas.focus();
 
         return this.handleMouse(e);
     },
@@ -546,7 +559,7 @@ exports.EditorView = SC.View.extend({
     setFocus: function(focus) {
         this.onInit(function() {
             if (this.focus != focus) {
-                var canvas = this.get('canvas');
+                var canvas = this.$()[0];
                 if (focus) {
                     canvas.focus();
                 } else {
@@ -571,7 +584,8 @@ exports.EditorView = SC.View.extend({
      * <p>Used by clipboard.js to adding cut and paste hacks
      */
     _getFocusElement: function() {
-        return this.get('canvas');
+        var canvas = this.$()[0];
+        return canvas;
     },
 
     /**
@@ -587,7 +601,8 @@ exports.EditorView = SC.View.extend({
         // TODO: Why would we ever want to take over keypresses for the whole
         // window????
         // var scope = this.editor.opts.actsAsComponent ? this.editor.canvas : window;
-        var scope = this.get('canvas');
+        var canvas = this.$()[0];
+        var scope = canvas;
 
         if (this.oldkeydown) {
             SC.Event.remove(scope, "keydown", this, this.oldkeydown);
@@ -717,9 +732,12 @@ exports.EditorView = SC.View.extend({
      * should become dependent on it.
      */
     charWidth: function(key, value) {
-        var ctx = this.get('canvas').getContext('2d');
-        if (ctx.measureText !== undefined)
-            return ctx.measureText("M").width;
+        var canvas = this.$()[0];
+        if (!SC.none(canvas)) {
+            var ctx = canvas.getContext('2d');
+            if (ctx.measureText !== undefined)
+                return ctx.measureText("M").width;
+        }
         return this.FALLBACK_CHARACTER_WIDTH;
     }.property().cacheable(),
 
@@ -731,11 +749,14 @@ exports.EditorView = SC.View.extend({
      * should become dependent on this.
      */
     lineHeight: function(key, value) {
-        var ctx = this.get('canvas').getContext('2d');
-        if (ctx.measureText !== undefined) {
-            var t = ctx.measureText("M");
-            if (!isNaN(t.ascent))
-                return Math.floor(t.ascent * 2.8);
+        var canvas = this.$()[0];
+        if (!SC.none(canvas)) {
+            var ctx = canvas.getContext('2d');
+            if (ctx.measureText !== undefined) {
+                var t = ctx.measureText("M");
+                if (!isNaN(t.ascent))
+                    return Math.floor(t.ascent * 2.8);
+            }
         }
         return this.LINE_HEIGHT;
     }.property().cacheable(),
@@ -776,7 +797,8 @@ exports.EditorView = SC.View.extend({
         // FIXME: Until the canvas is set up, we don't know how to measure
         // text, so lie - this should be fixed when the layer becomes a canvas
         // as part of the canvas mixin reworking. --pcw
-        if (SC.none(this.get('canvas'))) {
+        var canvas = this.$()[0];
+        if (SC.none(canvas)) {
             return {
                 left:   origin.left,
                 top:    origin.top,
@@ -797,29 +819,6 @@ exports.EditorView = SC.View.extend({
         'textWidth'),
 
     _origin: { top: 0, left: 0 },
-
-    /**
-     * Override for the View class's renderLayout method that doesn't
-     * adjust the DOM. This prevents flicker resulting from the base class's
-     * implementation of this function moving the canvas around as the user
-     * scrolls, as well as adjusting the size of the canvas appropriately.
-     */
-    renderLayout: function(context, firstTime) {
-        var canvas = this.get('canvas');
-        if (SC.none(canvas))
-            return; // the canvas hasn't been created yet
-
-        var layout = this.get('layout');
-        var parentViewFrame = this.get('parentView').get('frame');
-
-        var width = parentViewFrame.width;
-        if (canvas.width !== width)
-            canvas.width = width;
-
-        var height = parentViewFrame.height;
-        if (canvas.height !== height)
-            canvas.height = height;
-    },
 
     /**
      * Forces a resize of the canvas
@@ -852,7 +851,7 @@ exports.EditorView = SC.View.extend({
      * The optional "fullRefresh" argument triggers a complete repaint of the
      * editor canvas; otherwise, pitiful tricks are used to draw as little as possible.
      */
-    paint: function(ctx, fullRefresh) {
+    drawRect: function(ctx, visibleFrame) {
         var content = this.get("content");
 
         if (!this._firstPaint) {
@@ -866,7 +865,7 @@ exports.EditorView = SC.View.extend({
 
         // these are convenience references so we don't have to type so much
         var ed = this.editor;
-        var c = this.get('canvas');
+        var c = this.$()[0];
         var theme = ed.theme;
 
         // these are commonly used throughout the rendering process so are defined up here to make it clear they are shared
@@ -895,11 +894,6 @@ exports.EditorView = SC.View.extend({
         // cwidth and cheight are set to the dimensions of the canvas
         var cwidth = c.width;
         var cheight = c.height;
-
-        // only paint those lines that can be visible
-        var visibleFrame = SC.cloneRect(this.get('clippingFrame'));
-        visibleFrame.width  = cwidth;
-        visibleFrame.height = cheight;
 
         var lineHeight = this.get('lineHeight');
 
@@ -950,10 +944,6 @@ exports.EditorView = SC.View.extend({
 
         // take snapshot of current context state so we can roll back later on
         ctx.save();
-
-        // Translate the canvas based on the layout position.
-        var layout = this.get('layout');
-        ctx.translate(layout.left, layout.top);
 
         // if we're doing a full repaint...
         if (refreshCanvas) {
@@ -1495,7 +1485,8 @@ exports.EditorView = SC.View.extend({
     },
 
     _bespin_editorView_parentViewFrameDidChange: function() {
-        this.updateLayout();
+        this.propertyWillChange('layerFrame');
+        this.propertyDidChange('layerFrame', this.get('layerFrame'));
     }.observes('*parentView.frame')
 });
 

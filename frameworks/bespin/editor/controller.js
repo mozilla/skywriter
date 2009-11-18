@@ -346,12 +346,9 @@ exports.EditorController = SC.Object.extend({
     },
 
     paint: function(fullRefresh) {
-        var canvasElem = this.editorView.get("canvas");
-        if (!canvasElem) {
-            return;
-        }
-        var ctx = canvas.fix(canvasElem.getContext("2d"));
-        this.editorView.paint(ctx, fullRefresh);
+        SC.RunLoop.begin();
+        this.editorView.set('layerNeedsUpdate', true);
+        SC.RunLoop.end();
     },
 
     changeKeyListener: function(newKeyListener) {

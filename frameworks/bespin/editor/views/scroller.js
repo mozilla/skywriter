@@ -23,6 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime:package').SC;
+var canvas = require('editor/mixins/canvas');
 
 var NIB_ARROW_PADDING_BEFORE    = 3;
 var NIB_ARROW_PADDING_AFTER     = 5;
@@ -30,7 +31,7 @@ var NIB_LENGTH                  = 15;
 var NIB_PADDING                 = 8;    // 15/2
 
 // The fancy custom Bespin scroll bars.
-exports.BespinScrollerView = SC.View.extend({
+exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
     classNames: ['bespin-scroller-view'],
 
     _mouseDownScreenPoint: null,
@@ -409,7 +410,7 @@ exports.BespinScrollerView = SC.View.extend({
         SC.RunLoop.end();
     },
 
-    _paintNib: function(ctx) {
+    _drawNib: function(ctx) {
         var theme = this.get('theme');
         var fillStyle, arrowStyle, strokeStyle;
         if (this._isMouseOver) {
@@ -443,7 +444,7 @@ exports.BespinScrollerView = SC.View.extend({
         ctx.fill();
     },
 
-    _paintNibs: function(ctx) {
+    _drawNibs: function(ctx) {
         var isMouseOver = this._isMouseOver;
         var thickness = this.get('_clientThickness');
         var value = this.get('value');
@@ -454,7 +455,7 @@ exports.BespinScrollerView = SC.View.extend({
             ctx.translate(NIB_PADDING, thickness / 2);
             ctx.rotate(Math.PI * 1.5);
             ctx.moveTo(0, 0);
-            this._paintNib(ctx);
+            this._drawNib(ctx);
             ctx.restore();
         }
 
@@ -465,30 +466,18 @@ exports.BespinScrollerView = SC.View.extend({
                 thickness / 2);
             ctx.rotate(Math.PI * 0.5);
             ctx.moveTo(0, 0);
-            this._paintNib(ctx);
+            this._drawNib(ctx);
             ctx.restore();
         }
     },
 
-    _paint: function() {
-        var canvas = this.$('canvas')[0];
-        var frame = this.get('frame');
-        if (canvas.width !== frame.width)
-            canvas.width = frame.width;
-        if (canvas.height !== frame.height)
-            canvas.height = frame.height;
-
-        var ctx = canvas.getContext('2d');
-        
+    drawRect: function(ctx, visibleFrame) {
         var alpha = (ctx.globalAlpha) ? ctx.globalAlpha : 1;
-
         var theme = this.get('theme');
 
+        var frame = this.get('frame');
         ctx.clearRect(0, 0, frame.width, frame.height);
 
-        if (this.get('isEnabled') === false || gutterLength <= handleLength)
-            return; // Don't display the scroll bar.        
-    
         // Begin master drawing context
         ctx.save();
 
@@ -498,18 +487,17 @@ exports.BespinScrollerView = SC.View.extend({
 
         var handleFrame = this.get('_handleFrame');
         var gutterLength = this.get('_gutterLength');
-        var layoutDirection = this.get('layoutDirection');
-
         var thickness = this.get('_clientThickness');
         var halfThickness = thickness / 2;
 
+        var layoutDirection = this.get('layoutDirection');
         var handleDistance, handleLength;
         switch (layoutDirection) {
         case SC.LAYOUT_VERTICAL:
             handleDistance = handleFrame.y - padding.top;
             handleLength = handleFrame.height;
 
-            // The rest of the painting code assumes the scroll bar is
+            // The rest of the drawing code assumes the scroll bar is
             // horizontal. Create that fiction by installing a 90 degree
             // rotation.
             ctx.translate(thickness + 1, 0);
@@ -522,6 +510,9 @@ exports.BespinScrollerView = SC.View.extend({
             break;
         }
 
+        if (this.get('isEnabled') === false || gutterLength <= handleLength)
+            return; // Don't display the scroll bar.        
+   
         if (this._isMouseOver === false) {
             ctx.globalAlpha = 0.3;
         } else {
@@ -599,26 +590,10 @@ exports.BespinScrollerView = SC.View.extend({
         if (this._isMouseOver === false)
             ctx.globalAlpha = 1.0;
 
-        this._paintNibs(ctx);
+        this._drawNibs(ctx);
 
         ctx.restore();
         // End master drawing context
-    },
-
-    didCreateLayer: function() {
-        this._paint();
-    },
-
-    render: function(context, firstTime) {
-        if (!firstTime) {
-            this._paint();
-            return;
-        }
-
-        // FIXME: doesn't work properly if not visible --pcw
-        var frame = this.get('frame');
-        context.push('<canvas width="%@" height="%@">'.fmt(frame.width,
-            frame.height));
     }
 });
 
