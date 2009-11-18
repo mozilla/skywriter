@@ -8,9 +8,6 @@
 ^include
 ^man
 ^tmp
-^src/html/dojo
-^src/html/dojox
-^src/html/dijit
 ^src/html/th.compressed.js
 ^src/bespin/tmp
 ^src/growl
