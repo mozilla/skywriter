@@ -24,6 +24,7 @@
 
 var util = require("util/util");
 var builtins = require("builtins");
+var plugins = require("plugins");
 
 /**
  * The Bespin container provides a way for various parts of the system to
@@ -67,6 +68,7 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
      */
     init: function() {
         this.register("ioc", this);
+        this.register("plugins", plugins.Catalog.create());
     },
 
     /**
@@ -91,13 +93,15 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
      * Inject the requirements into an object
      */
     inject: function(object) {
+        var property, name;
+        
         if (object && object.requires) {
             // Clone the requires structure so we can remove fulfilled
             // requirements and not trip over anything in the prototype chain.
             var requirements = {};
-            for (var property in object.requires) {
+            for (property in object.requires) {
                 if (object.requires.hasOwnProperty(property)) {
-                    var name = object.requires[property];
+                    name = object.requires[property];
                     requirements[property] = name;
                 }
             }
@@ -121,9 +125,9 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
 
             checkCompleted();
 
-            for (var property in requirements) {
+            for (property in requirements) {
                 if (object.requires.hasOwnProperty(property)) {
-                    var name = requirements[property];
+                    name = requirements[property];
                     /**
                      * We've found a component to match , so this needs to be
                      * injected into object[property] and recalled for next time
@@ -187,13 +191,9 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
     /**
      * Internal function to create an object using a lookup into the factories
      * registry.
-     * <p>We lookup <code>id</code> in <code>factories</code>. If the value is a
-     * function we call it, passing <code>onCreate</code>. If the value is a
-     *  stringthen we split on ":", and <code>require</code> the section before,
-     * and call the function exported under the string after the ":".
-     * <p>For example if the module "bespin/foo" exported a function using
-     * <code>exports.bar = function(onCreate) { ... }</code> then we could use
-     * that as a factory using "bespin/foo:bar".
+     * <p>We lookup <code>id</code> in the <code>factory</code> extension point. 
+     * Look at the documentation for the factory extension point (in builtins.js).
+     * 
      * @private
      */
     _createFromFactory: function(id, onCreate) {
@@ -204,50 +204,28 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
 
         this.beingCreated[id] = onCreate;
         try {
-            var factory = builtins.factories[id];
-            if (factory === undefined) {
+            var catalog = this.get("plugins");
+            
+            var extension = catalog.getExtensionByKey("factory", id);
+            if (extension === undefined) {
                 console.trace();
                 throw "No component factory '" + id + "'";
-            } else if (util.isFunction(factory)) {
-                factory(onCreate);
             } else {
-                // Extract the method
-                var parts = factory.split(" ");
-                if (parts.length != 2) {
-                    throw "Can't split " + factory + " into 2 parts on ' '";
-                }
-                var action = parts.shift();
-                // Split on ":" for module and export
-                var factory = parts.join(" ");
-                var parts = factory.split(":");
-                if (parts.length != 2) {
-                    throw "Can't split " + factory + " into 2 parts on ':'";
-                }
-                // Maybe rather than being synch with "module = re(parts[0]);"
-                // we should be doing this
-                // re.when(re.async(parts[0]), function(module) {
-                //     var exported = module[parts[1]];
-                //     ...
-                // });
-                // This works for now, and I'm not trying to solve every problem
-                // What we really want is a give it me now if you can, otherwise
-                // we go async ...
-                // We can't handle dynamic requirements yet
-                var re = require;
-                var module = re(parts[0]);
-                var exported = module[parts[1]];
-                if (action == "call") {
-                    exported(onCreate);
-                } else if (action == "create") {
-                    onCreate(exported.create());
-                } else if (action == "new") {
-                    onCreate(new exported());
-                } else if (action == "value") {
-                    onCreate(exported);
-                } else {
-                    throw "Create action must be call|create|new|value. " +
-                            "Found" + action;
-                }
+                var action = extension.action;
+                extension.load(function(exported) {
+                    if (action == "call") {
+                        exported(onCreate);
+                    } else if (action == "create") {
+                        onCreate(exported.create());
+                    } else if (action == "new") {
+                        onCreate(new exported());
+                    } else if (action == "value") {
+                        onCreate(exported);
+                    } else {
+                        throw "Create action must be call|create|new|value. " +
+                                "Found" + action;
+                    }
+                });
             }
         }
         finally {
