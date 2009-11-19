@@ -26,6 +26,7 @@ var bespin = require("package");
 var SC = require("sproutcore/runtime:package").SC;
 var cursor = require("cursor");
 var clipboard = require("util/clipboard");
+var signup = require("signup");
 
 /**
  * Add a setting to affect what happens when we press TAB
@@ -1024,6 +1025,10 @@ exports.Actions = SC.Object.extend({
 
     nextFile: function() {
         bespin.get('editSession').goToNextFile();
+    },
+
+    showLogin: function() {
+        signup.showSignup();
     }
 });
 
