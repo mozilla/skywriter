@@ -62,4 +62,10 @@ main = function() {
 
     editor.model.insertDocument("Welcome to Bespin.");
     view.app.getPath("mainPage.mainPane").appendChild(editor.ui);
+    
+    // Load the plugin metadata for all of the system default plugins
+    var body = document.body;
+    var el = document.createElement('script');
+    el.setAttribute('src', "/server/plugin/register/defaults");
+    body.appendChild(el);
 };

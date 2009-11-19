@@ -24,13 +24,15 @@
 
 var SC = require("sproutcore/runtime:package").SC;
 var builtins = require("builtins");
+var r = require;
 
 exports.Extension = SC.Object.extend({
     load: function(callback, property) {
         property = property || "pointer";
         var parts = this.get(property).split(":");
-        var modname = parts[0];
-        tiki.async(modname).then(function(module) {
+        var self = this;
+        tiki.async(this._pluginName).then(function() {
+            var module = r(self._pluginName + ":" + parts[0]);
             if (callback) {
                 if (parts[1]) {
                     callback(module[parts[1]]);
@@ -107,6 +109,7 @@ exports.Catalog = SC.Object.extend({
                 var provides = md.provides;
                 for (var i = 0; i < provides.length; i++) {
                     var extension = exports.Extension.create(provides[i]);
+                    extension._pluginName = name;
                     provides[i] = extension;
                     var epname = extension.ep;
                     if (epname == "extensionpoint") {
@@ -127,15 +130,3 @@ exports.Catalog = SC.Object.extend({
         }
     }
 });
-
-exports.thing1 = function(extension) {
-    print("Thing1");
-};
-
-exports.thing2 = function(extension) {
-    print("Thing2");
-};
-
-exports.thing3 = function(msg) {
-    print("Thing3: " + msg);
-};
