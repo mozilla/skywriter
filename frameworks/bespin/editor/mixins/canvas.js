@@ -115,6 +115,24 @@ exports.Canvas = {
         context.restore();
     },
 
+    /**
+     * Returns the width of the character 'M' in the given font, or null if the
+     * canvas hasn't been created yet. (It's unfortunate that you actually need
+     * a canvas to measure text...)
+     */
+    getCharacterWidth: function(font) {
+        var canvas = this.$()[0];
+        if (SC.none(canvas))
+            return null;
+
+        var context = canvas.getContext('2d');
+        context.save();
+        context.font = font;
+        var width = context.measureText("M").width;
+        context.restore();
+        return width;
+    },
+
     _bespin_canvas_layerFrameDidChange: function() {
         this.updateLayout();
     }.observes('layerFrame')

@@ -731,15 +731,9 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
      * TODO: When the theme property moves to this view, these properties
      * should become dependent on it.
      */
-    charWidth: function(key, value) {
-        var canvas = this.$()[0];
-        if (!SC.none(canvas)) {
-            var ctx = canvas.getContext('2d');
-            if (ctx.measureText !== undefined)
-                return ctx.measureText("M").width;
-        }
-        return this.FALLBACK_CHARACTER_WIDTH;
-    }.property().cacheable(),
+    charWidth: function() {
+        return this.getCharacterWidth(this.editor.theme.editorTextFont);
+    }.property(),
 
     /**
      * @property{Number}
