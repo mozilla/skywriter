@@ -133,6 +133,23 @@ exports.Canvas = {
         return width;
     },
 
+    /**
+     * Attempts to determine a reasonable line height for the given font and
+     * returns it.
+     */
+    guessLineHeight: function(font) {
+        var canvas = this.$()[0];
+        if (SC.none(canvas))
+            return null;    // don't even try
+
+        var context = canvas.getContext('2d');
+        context.save();
+        context.font = font;
+        var height = Math.floor(context.measureText("m").width * 2.8);
+        context.restore();
+        return height;
+    },
+
     _bespin_canvas_layerFrameDidChange: function() {
         this.updateLayout();
     }.observes('layerFrame')
