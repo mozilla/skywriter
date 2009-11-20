@@ -1,3 +1,10 @@
 {
-    
+    "provides": [
+        {
+            "ep": "factory",
+            "name": "server",
+            "pointer": "server:Server",
+            "action": "create"
+        }
+    ]
 }
