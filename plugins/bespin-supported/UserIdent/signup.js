@@ -23,9 +23,9 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime:package").SC;
-var util = require("util/util");
+var util = require("bespin:util/util");
 var view = require("editor:view");
-var bespin = require("package");
+var bespin = require("bespin");
 
 exports.showSignup = function() {
     view.app.getPath("signupPage.mainPane").append();
@@ -35,10 +35,10 @@ exports.showSignup = function() {
 /**
  * Controller for the sign-in process
  */
-view.app.signupController = bespin.BaseController.create({
+exports.signupController = bespin.BaseController.extend({
     /** @see BaseController */
     requires: {
-        // server: 'server'
+        server: 'server'
     },
 
     username: "",
@@ -46,8 +46,8 @@ view.app.signupController = bespin.BaseController.create({
     password: "",
 
     signIn: function() {
-        // this.server.login(this.username, this.password, this.onSuccess,
-        //         this.onFailure);
+        this.server.login(this.username, this.password, this.onSuccess,
+                this.onFailure);
     },
 
     /**
@@ -68,10 +68,10 @@ view.app.signupController = bespin.BaseController.create({
 /**
  * Controller for the registration process
  */
-view.app.registerController = bespin.BaseController.create({
+exports.registerController = bespin.BaseController.create({
     /** @see BaseController */
     requires: {
-        // server: 'server'
+        server: 'server'
     },
 
     username: "",
@@ -170,8 +170,8 @@ view.app.signupPage = SC.Page.design({
                     layout: { left: 150, top: 60, width: 80 },
                     isDefault: true,
                     title: "Log in",
-                    target: "signupPage",
-                    action: "showRegisterView"
+                    target: "signupController",
+                    action: "signIn"
                 })
 
             }),

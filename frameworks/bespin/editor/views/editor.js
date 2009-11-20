@@ -694,8 +694,6 @@ exports.EditorView = SC.View.extend({
         listener.bindKeyString("CMD ALT", keys.Key.LEFT_ARROW, this.actions.previousFile);
         listener.bindKeyString("CMD ALT", keys.Key.RIGHT_ARROW, this.actions.nextFile);
 
-        listener.bindKeyString("SHIFT CMD", keys.Key.L, this.actions.showLogin, "Login");
-
         // Other key bindings can be found in commands themselves.
         // For example, this:
         // Refactor warning: Below used to have an action - publish to "editor:newfile",
