@@ -25,6 +25,8 @@
 var util = require("util/util");
 var builtins = require("builtins");
 var plugins = require("plugins");
+var SC = require("sproutcore/runtime").SC;
+var system = require("system");
 
 /**
  * The Bespin container provides a way for various parts of the system to
@@ -53,22 +55,17 @@ var plugins = require("plugins");
  */
 exports.Container = SC.Object.extend(/** @lends exports.Container */ {
     /**
-     * Methods for registering components with the main system
-     */
-    components: {},
-
-    /**
-     * To prevent a loop where a requires b, requires a we track things we are
-     * creating, and if asked to create something thats already there, we die
-     */
-    beingCreated: {},
-
-    /**
      * Containers contain themselves so they can be got at easily
      */
     init: function() {
         this.register("ioc", this);
         this.register("plugins", plugins.Catalog.create());
+        
+        /**
+         * To prevent a loop where a requires b, requires a we track things we are
+         * creating, and if asked to create something thats already there, we die
+         */
+        this._beingCreated = {};
     },
 
     /**
@@ -76,7 +73,7 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
      * <p>The way to attach components into bespin for others to get them out
      */
     register: function(id, object) {
-        this.components[id] = object;
+        SC.global(id, object);
         this.inject(object);
         console.log("container.register", id, object);
         return object;
@@ -86,7 +83,7 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
      * Undoes the effects of #register()
      */
     unregister: function(id) {
-        delete this.components[id];
+        SC.global.remove(id);
     },
 
     /**
@@ -139,7 +136,7 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
                     }.bind(this);
 
                     var source = object.requires[property];
-                    var component = this.components[source];
+                    var component = system.global[source];
                     if (component !== undefined) {
                         onFound(component);
                     } else {
@@ -157,7 +154,7 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
      * Given an id, return the component.
      */
     get: function(id) {
-        var object = this.components[id];
+        var object = system.global[id];
         if (object === undefined) {
             var onCreate = function(component) {
                 this.register(id, component);
@@ -176,7 +173,7 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
      */
     getComponent: function(id, callback, context) {
         context = context || window;
-        var component = this.components[id];
+        var component = system.global[id];
         if (component !== undefined) {
             callback.call(context, component);
         } else {
@@ -197,12 +194,12 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
      * @private
      */
     _createFromFactory: function(id, onCreate) {
-        if (this.beingCreated[id] !== undefined) {
+        if (this._beingCreated[id] !== undefined) {
             console.trace();
             throw "Already creating " + id;
         }
 
-        this.beingCreated[id] = onCreate;
+        this._beingCreated[id] = onCreate;
         try {
             var catalog = this.get("plugins");
             
@@ -229,7 +226,7 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
             }
         }
         finally {
-            delete this.beingCreated[id];
+            delete this._beingCreated[id];
         }
     }
 });
