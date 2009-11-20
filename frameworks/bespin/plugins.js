@@ -177,3 +177,10 @@ exports.Catalog = SC.Object.extend({
         }
     }
 });
+
+exports.startupHandler = function(ep) {
+    ep.load(function(func) {
+        console.log("Startup calling: " + ep.pointer);
+        func();
+    });
+}

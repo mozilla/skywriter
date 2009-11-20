@@ -28,8 +28,9 @@ var view = require("editor:view");
 var bespin = require("bespin");
 
 exports.showSignup = function() {
-    view.app.getPath("signupPage.mainPane").append();
-    // exports.app.signupPage.makeFirstResponder(pane.contentView.firstName);
+    bespin.getComponent("signupController", function() {
+        view.app.getPath("signupPage.mainPane").append();
+    });
 };
 
 /**
@@ -112,7 +113,7 @@ exports.registerController = bespin.BaseController.create({
         };
         // this.server.signup(this.username, this.password1, this.email, opts);
     }
-}),
+});
 
 /**
  *

@@ -94,6 +94,14 @@ exports.metadata = {
         "provides": [
             {
                 "ep": "extensionpoint",
+                "name": "startup",
+                "description": "A function that should be called at startup. This should be used \
+sparingly, as these plugins will be eagerly loaded at the beginning. All that's needed for this \
+extension point is a pointer to a function that takes no arguments.",
+                "activate": "plugins:startupHandler"
+            },
+            {
+                "ep": "extensionpoint",
                 "name": "factory",
                 "description": "Provides a factory for singleton components. Each extension needs to \
 provide a name, a pointer and an action. The action can be 'call' (if the pointer refers to \

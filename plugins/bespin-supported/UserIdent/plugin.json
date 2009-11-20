@@ -11,7 +11,10 @@
             "name": "registerController",
             "pointer": "signup:registerController",
             "action": "create"
+        },
+        {
+            "ep": "startup",
+            "pointer": "signup:showSignup"
         }
-        
     ]
 }
