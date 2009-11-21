@@ -56,7 +56,7 @@ exports.loginController = bespin.BaseController.extend({
      * The login worked.
      */
     onSuccess: function() {
-        exports.userIdentPage.get("mainPane").removeFromParent();
+        exports.userIdentPage.get("mainPane").remove();
         console.log("login succeeded");
     },
 
@@ -64,7 +64,7 @@ exports.loginController = bespin.BaseController.extend({
      * The login failed.
      */
     onFailure: function() {
-        var pane = SC.AlertPane.error("Login Failed", 'Your Username or Password was not recognised');
+        var pane = SC.AlertPane.error("Login Failed", 'Your Username or Password was not recognized');
         pane.append();
         console.log("login failed");
     }
@@ -80,39 +80,31 @@ exports.signupController = bespin.BaseController.extend({
     },
 
     username: "",
-    usernameError: "",
-    usernameCheck: function() {
-        this.usernameError = this.username.length > 4 ? "" :
+    usernameError: function() {
+        var usernameError = this.get('username').length > 4 ? "" :
                 "Must be 4 characters or more";
-        console.log(this.usernameError);
-    }.observes("username"),
+        console.log(usernameError);
+    }.property("username").cacheable(),
 
     password1: "",
-    password1Error: "",
-    password1Check: function() {
-        this.password1Error = this.password1.length >= 6 ? "" :
+    password1Error: function() {
+        var password1Error = this.get('password1').length >= 6 ? "" :
                 "Must be 6 characters or more";
-        console.log(this.password2Error);
-    }.observes("password1"),
+        console.log(password1Error);
+    }.property("password1").cacheable(),
 
     password2: "",
-    password2Error: "",
-    password2Check: function() {
-        this.password2Error = this.password1 == this.password2 ? "" :
+    password2Error: function() {
+        var password2Error = this.get('password1') == this.get('password2') ? "" :
                 "Passwords do not match";
-        console.log(this.password2Error);
-    }.observes("password2"),
+        console.log(password2Error);
+    }.property("password2", "password1").cacheable(),
 
     /**
      * Email is only used for
      */
     email: "",
     emailError: "",
-    emailCheck: function() {
-        this.emailError = this.password1 == this.email ? "" :
-                "Passwords do not match";
-        console.log(this.emailError);
-    }.observes("email"),
 
     /**
      * Attempt to register
@@ -129,7 +121,7 @@ exports.signupController = bespin.BaseController.extend({
      * The sign up worked.
      */
     onSuccess: function() {
-        exports.userIdentPage.get("mainPane").removeFromParent();
+        exports.userIdentPage.get("mainPane").remove();
         console.log("login succeeded");
     },
 
@@ -148,13 +140,13 @@ exports.signupController = bespin.BaseController.extend({
  */
 exports.dumbController = SC.Object.extend({
     action: "login",
-    actionChange: function() {
+    actionView: function() {
         var mainPane = exports.userIdentPage.get("mainPane");
-        var pane = mainPane.get("contentView").get("container")
-                .set("nowShowing", this.action + "View");
         mainPane.get("layout").height = 450;
         mainPane.set("layerNeedsUpdate", true);
-    }.observes("action")
+        
+        return this.get("action") + "View";
+    }.property("action").cacheable()
 });
 
 /**
@@ -181,7 +173,7 @@ exports.userIdentPage = SC.Page.design({
             }),
 
             container: SC.ContainerView.design({
-                nowShowing: "loginView",
+                nowShowingBinding: "dumbController.actionView",
                 layout: { left: 0, top: 100, right: 0, bottom: 0 }
             })
         })
