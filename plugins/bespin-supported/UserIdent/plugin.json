@@ -1,20 +1,7 @@
 {
-    "provides": [
-        {
-            "ep": "factory",
-            "name": "signupController",
-            "pointer": "signup:signupController",
-            "action": "create"
-        },
-        {
-            "ep": "factory",
-            "name": "registerController",
-            "pointer": "signup:registerController",
-            "action": "create"
-        },
-        {
+    "provides": [ {
             "ep": "startup",
-            "pointer": "signup:showSignup"
+            "pointer": "userident:showSignup"
         }
     ]
 }
