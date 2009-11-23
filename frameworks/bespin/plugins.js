@@ -41,14 +41,16 @@ exports.Extension = SC.Object.extend({
                 fullName = self._pluginName;
             }
             
-            var module = r(fullName);
-            if (callback) {
-                if (parts[1]) {
-                    callback(module[parts[1]]);
-                } else {
-                    callback(module);
+            SC.run(function() {
+                var module = r(fullName);
+                if (callback) {
+                    if (parts[1]) {
+                        callback(module[parts[1]]);
+                    } else {
+                        callback(module);
+                    }
                 }
-            }
+            });
         });
     }
 });

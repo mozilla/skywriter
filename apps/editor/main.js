@@ -45,27 +45,29 @@ main = function() {
     //   var container = containerMod.Container.create();
     // However until we've got rid of the singleton 'bespin' we cant do that
     var container = bespin._container;
-
-    view.app.getPath("mainPage.mainPane").append();
-
-    // Tell the container about the element that we run inside
-    var element = view.app.getPath("mainPage.mainPane.layer");
-    container.register("container", element);
-
-    // TODO: the stuff that follows is messy. in SC terms, an EditorView should actually
-    // be created in the mainPane directly via a "design" call, not created by
-    // the controller.
-    // We could also say editor = container.get("editor"); which would allow
-    // users to customize how the editor is built, but see above
-    var editor = EditorController.create();
-    container.register("editor", editor);
-
-    editor.model.insertDocument("Welcome to Bespin.");
-    view.app.getPath("mainPage.mainPane").appendChild(editor.ui);
     
-    // Load the plugin metadata for all of the system default plugins
-    var body = document.body;
-    var el = document.createElement('script');
-    el.setAttribute('src', "/server/plugin/register/defaults");
-    body.appendChild(el);
+    SC.run(function() {
+        view.app.getPath("mainPage.mainPane").append();
+
+        // Tell the container about the element that we run inside
+        var element = view.app.getPath("mainPage.mainPane.layer");
+        container.register("container", element);
+
+        // TODO: the stuff that follows is messy. in SC terms, an EditorView should actually
+        // be created in the mainPane directly via a "design" call, not created by
+        // the controller.
+        // We could also say editor = container.get("editor"); which would allow
+        // users to customize how the editor is built, but see above
+        var editor = EditorController.create();
+        container.register("editor", editor);
+
+        editor.model.insertDocument("Welcome to Bespin.");
+        view.app.getPath("mainPage.mainPane").appendChild(editor.ui);
+
+        // Load the plugin metadata for all of the system default plugins
+        var body = document.body;
+        var el = document.createElement('script');
+        el.setAttribute('src', "/server/plugin/register/defaults");
+        body.appendChild(el);
+    });
 };
