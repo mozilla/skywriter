@@ -74,7 +74,7 @@ exports.BespinScrollView = SC.ScrollView.extend({
         var hScrollerThickness = this.get('horizontalScrollerThickness');
         var vScrollerThickness = this.get('verticalScrollerThickness');
         if (hScrollerVisible) {
-            var hScroller = this.get('horizontalScrollerView');
+            hScroller = this.get('horizontalScrollerView');
             hScroller.set('scrollerThickness', hScrollerThickness);
             hScroller.set('padding', {
                 top:    0,
@@ -90,7 +90,7 @@ exports.BespinScrollView = SC.ScrollView.extend({
             });
         }
         if (vScrollerVisible) {
-            var vScroller = this.get('verticalScrollerView');
+            vScroller = this.get('verticalScrollerView');
             vScroller.set('scrollerThickness', vScrollerThickness);
             vScroller.set('padding', {
                 left:   0,
