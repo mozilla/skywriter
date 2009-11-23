@@ -175,8 +175,9 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
     render: function(context, firstTime) {
         sc_super();
 
-        if (!firstTime)
+        if (!firstTime) {
             return;
+        }
 
         context.attr("moz-opaque", "true");
         context.attr("tabindex", "1");
@@ -427,13 +428,6 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
         //finally, and the LAST thing we should do (otherwise we'd mess positioning up)
         //scroll down, up, right, or left a bit if needed.
 
-        //up and down. optimally, we should have a timeout or something to keep checking...
-        if (clientY < 0) {
-            // TODO: tell enclosing ScrollView --pcw
-        } else if (clientY >= this.getHeight()) {
-            // TODO: tell enclosing ScrollView --pcw
-        }
-
         this.editor.paint();
     },
 
@@ -444,7 +438,8 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
             this.toggleCursorAllowed = true;
         }
 
-        if (++this.toggleCursorFullRepaintCounter > 0) {
+        this.toggleCursorFullRepaintCounter++;
+        if (this.toggleCursorFullRepaintCounter > 0) {
             this.toggleCursorFullRepaintCounter = 0;
             this.editor.paint(true);
         } else {
@@ -707,8 +702,8 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
      * TODO: convert to property for improved performance
      */
     getHeight: function() {
-        return this.get('lineHeight') * this.get('content').getRowCount()
-            + this.get('padding').bottom;
+        return this.get('lineHeight') * this.get('content').getRowCount() +
+            this.get('padding').bottom;
     },
 
     /**
@@ -732,8 +727,8 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
     lineHeight: function(key, value) {
         var theme = this.editor.theme;
         var userLineHeight = theme.lineHeight;
-        return !SC.none(userLineHeight) ? userLineHeight
-            : this.guessLineHeight(theme.editorTextFont);
+        return !SC.none(userLineHeight) ? userLineHeight :
+            this.guessLineHeight(theme.editorTextFont);
     }.property().cacheable(),
 
     /**
@@ -743,8 +738,8 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
      * Read-only.
      */
     textWidth: function(key, value) {
-        return this.get('charWidth')
-            * (this.getMaxCols(0, this.get('content').getRowCount() - 1) + 1);
+        return this.get('charWidth') *
+            (this.getMaxCols(0, this.get('content').getRowCount() - 1) + 1);
     }.property('content', 'charWidth'),
 
     /**
@@ -776,10 +771,10 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
         return {
             left:   origin.left,
             top:    origin.top,
-            width:  this.LINE_INSETS.left + this.get('textWidth')
-                        + this.get('padding').right,
-            height: this.get('lineHeight') * this.get('content').getRowCount()
-                        + this.get('padding').bottom
+            width:  this.LINE_INSETS.left + this.get('textWidth') +
+                    this.get('padding').right,
+            height: this.get('lineHeight') * this.get('content').getRowCount() +
+                    this.get('padding').bottom
         };
     }.property('canvas', 'content', 'lineHeight', 'padding', 'textWidth'),
 
@@ -983,7 +978,7 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
                 // TODO: calculate with clippingFrame --pcw
                 ctx.fillRect(x, y, cwidth, lineHeight);
             // if not on highlight, see if we need to paint the zebra
-            } else if ((currentLine % 2) == 0) {
+            } else if ((currentLine % 2) === 0) {
                 ctx.fillStyle = theme.zebraStripeColor;
                 // TODO: calculate with clippingFrame --pcw
                 ctx.fillRect(x, y, cwidth, lineHeight);
@@ -1143,22 +1138,22 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
         if (this.focus) {
             if (this.showCursor) {
                 if (ed.theme.cursorType == "underline") {
-                    x = this.LINE_INSETS.left
-                        + ed.cursorManager.getCursorPosition().col * charWidth;
+                    x = this.LINE_INSETS.left +
+                        ed.cursorManager.getCursorPosition().col * charWidth;
                     y = (ed.getCursorPos().row * lineHeight) + (lineHeight - 5);
                     ctx.fillStyle = ed.theme.cursorStyle;
                     ctx.fillRect(x, y, charWidth, 3);
                 } else {
-                    x = this.LINE_INSETS.left
-                        + ed.cursorManager.getCursorPosition().col * charWidth;
+                    x = this.LINE_INSETS.left +
+                        ed.cursorManager.getCursorPosition().col * charWidth;
                     y = (ed.cursorManager.getCursorPosition().row * lineHeight);
                     ctx.fillStyle = ed.theme.cursorStyle;
                     ctx.fillRect(x, y, 1, lineHeight);
                 }
             }
         } else {
-            x = this.LINE_INSETS.left
-                + ed.cursorManager.getCursorPosition().col * charWidth;
+            x = this.LINE_INSETS.left +
+                ed.cursorManager.getCursorPosition().col * charWidth;
             y = (ed.cursorManager.getCursorPosition().row * lineHeight);
 
             ctx.fillStyle = ed.theme.unfocusedCursorFillStyle;
@@ -1174,9 +1169,8 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
             if (userEntries) {
                 userEntries.forEach(function(userEntry) {
                     if (!userEntry.clientData.isMe) {
-                        x = this.LINE_INSETS.left
-                            + userEntry.clientData.cursor.start.col
-                            * charWidth;
+                        x = this.LINE_INSETS.left +
+                            userEntry.clientData.cursor.start.col * charWidth;
                         y = userEntry.clientData.cursor.start.row * lineHeight;
                         ctx.fillStyle = "#ee8c00";
                         ctx.fillRect(x, y, 1, lineHeight);
@@ -1264,7 +1258,7 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
 
     setSearchString: function(str) {
         var content = this.get("content");
-        if (str && str != '') {
+        if (str && str !== '') {
             this.searchString = str;
         } else {
             delete this.searchString;
@@ -1307,31 +1301,35 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
 
         var targetX;
         var frameRight = frame.x + frame.width;
-        if (frame.x < preferredFrame.x)
+        if (frame.x < preferredFrame.x) {
             targetX = frame.x;                              // off left side
-        else if (frameRight >= preferredFrame.x + preferredFrame.width)
+        } else if (frameRight >= preferredFrame.x + preferredFrame.width) {
             targetX = frameRight - preferredFrame.width;    // off right side
-        else
+        } else {
             targetX = preferredFrame.x;                     // already visible
+        }
 
         var targetY;
         var frameBottom = frame.y + frame.height;
-        if (frame.y < preferredFrame.y)
+        if (frame.y < preferredFrame.y) {
             targetY = frame.y;                              // off left side
-        else if (frameBottom >= preferredFrame.y + preferredFrame.height)
+        } else if (frameBottom >= preferredFrame.y + preferredFrame.height) {
             targetY = frameBottom - preferredFrame.height;  // off right side
-        else
+        } else {
             targetY = preferredFrame.y;                     // already visible
+        }
 
-        if (targetX === preferredFrame.x && targetY === preferredFrame.y)
+        if (targetX === preferredFrame.x && targetY === preferredFrame.y) {
             return false;
+        }
 
         // Grab the enclosing scrollable view.
         var scrollable = this;
         do {
             scrollable = scrollable.get('parentView');
-            if (scrollable === null)
+            if (scrollable === null) {
                 return false;
+            }
         } while (scrollable.get('isScrollable') !== true);
 
         scrollable.scrollToVisible();
@@ -1345,8 +1343,8 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
         var charWidth = this.get('charWidth');
         var lineHeight = this.get('lineHeight');
         return this._scrollToFrameVisible({
-            x:      pos.col === 0 ? 0   // scroll far left for convenience
-                    : this.LINE_INSETS.left + pos.col * charWidth,
+            x:      pos.col === 0 ? 0 :     // scroll far left for convenience
+                    this.LINE_INSETS.left + pos.col * charWidth,
             y:      pos.row * lineHeight,
             width:  charWidth,
             height: lineHeight
@@ -1478,6 +1476,8 @@ bespin.subscribe("settings:set:theme", function(event) {
 
         files.loadContents(files.userSettingsProject, "/themes/" + theme + ".js", onSuccess, onFailure);
     }
+
+    return false;
 });
 
 /**
@@ -1521,9 +1521,9 @@ var EditorWrapper = SC.Object.extend({
         var text = null;
 
         if (selectionObject) {
-            var text = this.editor.model.getChunk(selectionObject);
+            text = this.editor.model.getChunk(selectionObject);
 
-            if (text && text != '') {
+            if (text && text !== '') {
                 this.ui.actions.beginEdit('cut');
                 this.ui.actions.deleteSelection(selectionObject);
                 this.ui.actions.endEdit();
