@@ -127,16 +127,17 @@ exports.useBespin = function(element, options) {
 
         // Hook the window.onresize event; this catches most of the common
         // scenarios that result in element resizing.
-        if (SC.none(options.dontHookWindowResizeEvent)
-                || !options.dontHookWindowResizeEvent) {
+        if (SC.none(options.dontHookWindowResizeEvent) ||
+                !options.dontHookWindowResizeEvent) {
             var handler = function() {
                 exports.elementDimensionsDidChange(editor);
-            }
+            };
 
-            if (!SC.none(window.addEventListener))
+            if (!SC.none(window.addEventListener)) {
                 window.addEventListener('resize', handler, false);
-            else if (!SC.none(window.attachEvent))
+            } else if (!SC.none(window.attachEvent)) {
                 window.addEventListener('onresize', handler);
+            }
         }
     });
 
