@@ -68,10 +68,12 @@ exports.Canvas = {
         }
 
         var canvas = this.$()[0];
-        if (canvas.width !== layerFrame.width)
+        if (canvas.width !== layerFrame.width) {
             canvas.width = layerFrame.width;
-        if (canvas.height !== layerFrame.height)
+        }
+        if (canvas.height !== layerFrame.height) {
             canvas.height = layerFrame.height;
+        }
     },
 
     /**
@@ -103,16 +105,17 @@ exports.Canvas = {
         visibleFrame.height = layerFrame.height;
 
         var canvas = this.$()[0];
-        var context = canvas.getContext('2d');
+        var drawingContext = canvas.getContext('2d');
 
-        context.save();
+        drawingContext.save();
 
         var frame = this.get('frame');
-        context.translate(frame.x - layerFrame.x, frame.y - layerFrame.y);
+        drawingContext.translate(frame.x - layerFrame.x,
+            frame.y - layerFrame.y);
 
-        this.drawRect(context, visibleFrame);
+        this.drawRect(drawingContext, visibleFrame);
 
-        context.restore();
+        drawingContext.restore();
     },
 
     /**
@@ -122,8 +125,9 @@ exports.Canvas = {
      */
     getCharacterWidth: function(font) {
         var canvas = this.$()[0];
-        if (SC.none(canvas))
+        if (SC.none(canvas)) {
             return null;
+        }
 
         var context = canvas.getContext('2d');
         context.save();
@@ -139,8 +143,9 @@ exports.Canvas = {
      */
     guessLineHeight: function(font) {
         var canvas = this.$()[0];
-        if (SC.none(canvas))
+        if (SC.none(canvas)) {
             return null;    // don't even try
+        }
 
         var context = canvas.getContext('2d');
         context.save();
