@@ -115,8 +115,8 @@ exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
         switch (this.get('layoutDirection')) {
         case SC.LAYOUT_VERTICAL:    return 'verticalScrollOffset';
         case SC.LAYOUT_HORIZONTAL:  return 'horizontalScrollOffset';
+        default:                    return null;
         }
-        return null;
     }.property('layoutDirection').cacheable(),
 
     /**
@@ -149,6 +149,9 @@ exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
             return scrollerThickness - (padding.left + padding.right);
         case SC.LAYOUT_HORIZONTAL:
             return scrollerThickness - (padding.top + padding.bottom);
+        default:
+            console.assert(false, "unknown layout direction");
+            return null;
         }
     }.property('layoutDirection', 'padding', 'scrollerThickness').cacheable(),
 
@@ -172,6 +175,9 @@ exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
                 width:  Math.max(0, clientFrame.width - 2*NIB_LENGTH),
                 height: thickness
             };
+        default:
+            console.assert(false, "unknown layout direction");
+            return null;
         }
     }.property('_clientFrame', '_clientThickness',
         'layoutDirection').cacheable(),
@@ -183,8 +189,15 @@ exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
         var gutterFrame = this.get('_gutterFrame');
         var gutterLength;
         switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_HORIZONTAL:  gutterLength = gutterFrame.width;   break;
-        case SC.LAYOUT_VERTICAL:    gutterLength = gutterFrame.height;  break;
+        case SC.LAYOUT_HORIZONTAL:
+            gutterLength = gutterFrame.width;
+            break;
+        case SC.LAYOUT_VERTICAL:
+            gutterLength = gutterFrame.height;
+            break;
+        default:
+            console.assert(false, "unknown layout direction");
+            break;
         }
         return gutterLength;
     }.property('_gutterFrame', 'layoutDirection').cacheable(),
@@ -195,8 +208,13 @@ exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
     _frameLength: function() {
         var frame = this.get('frame');
         switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_HORIZONTAL:  return frame.width;
-        case SC.LAYOUT_VERTICAL:    return frame.height;
+        case SC.LAYOUT_HORIZONTAL:
+            return frame.width;
+        case SC.LAYOUT_VERTICAL:
+            return frame.height;
+        default:
+            console.assert(false, "unknown layout direction");
+            return null;
         }
     }.property('frame', 'layoutDirection').cacheable(),
 
@@ -206,8 +224,13 @@ exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
     _clientLength: function() {
         var clientFrame = this.get('_clientFrame');
         switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_HORIZONTAL:  return clientFrame.width;
-        case SC.LAYOUT_VERTICAL:    return clientFrame.height;
+        case SC.LAYOUT_HORIZONTAL:
+            return clientFrame.width;
+        case SC.LAYOUT_VERTICAL:
+            return clientFrame.height;
+        default:
+            console.assert(false, "unknown layout direction");
+            return null;
         }
     }.property('_clientFrame', 'layoutDirection').cacheable(),
 
@@ -224,21 +247,24 @@ exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
         case SC.LAYOUT_VERTICAL:
             return {
                 x:      clientFrame.x,
-                y:      clientFrame.y + NIB_LENGTH
-                            + value * gutterFrame.height / maximum,
+                y:      clientFrame.y + NIB_LENGTH +
+                        value * gutterFrame.height / maximum,
                 width:  clientThickness,
-                height: Math.min(frame.height, maximum) * gutterFrame.height
-                            / maximum
+                height: Math.min(frame.height, maximum) * gutterFrame.height /
+                        maximum
             };
         case SC.LAYOUT_HORIZONTAL:
             return {
-                x:      clientFrame.x + NIB_LENGTH
-                            + value * gutterFrame.width / maximum,
+                x:      clientFrame.x + NIB_LENGTH +
+                        value * gutterFrame.width / maximum,
                 y:      clientFrame.y,
-                width:  Math.min(frame.width, maximum) * gutterFrame.width
-                            / maximum,
+                width:  Math.min(frame.width, maximum) * gutterFrame.width /
+                        maximum,
                 height: clientThickness
             };
+        default:
+            console.assert(false, "unknown layout direction");
+            return null;
         }
     }.property('_clientFrame', '_clientThickness', '_gutterFrame', 'maximum',
         'value').cacheable(),
@@ -259,15 +285,17 @@ exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
     value: function(key, value) {
         var maximumValue = this.get('maximumValue');
         if (value !== undefined) {
-            if (value < 0)
+            if (value < 0) {
                 value = 0;
-            else if (value > maximumValue)
+            } else if (value > maximumValue) {
                 value = maximumValue;
+            }
 
             this._value = value;
-        } else {
-            return Math.min(this._value || 0, maximumValue);
+            return value;
         }
+
+        return Math.min(this._value || 0, maximumValue);
     }.property('maximumValue').cacheable(),
 
     /**
@@ -284,47 +312,60 @@ exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
         var point = this.convertFrameFromView({ x: evt.pageX, y: evt.pageY });
         var clientFrame = this.get('_clientFrame');
 
-        if (!SC.pointInRect(point, clientFrame))
+        if (!SC.pointInRect(point, clientFrame)) {
             return null;
+        }
 
         var layoutDirection = this.get('layoutDirection');
         switch (layoutDirection) {
         case SC.LAYOUT_HORIZONTAL:
-            if (point.x < NIB_LENGTH)
+            if (point.x < NIB_LENGTH) {
                 return 'nib-start';
-            if (point.x >= clientFrame.width - NIB_LENGTH)
+            } else if (point.x >= clientFrame.width - NIB_LENGTH) {
                 return 'nib-end';
+            }
             break;
         case SC.LAYOUT_VERTICAL:
-            if (point.y < NIB_LENGTH)
+            if (point.y < NIB_LENGTH) {
                 return 'nib-start';
-            if (point.y >= clientFrame.height - NIB_LENGTH)
+            } else if (point.y >= clientFrame.height - NIB_LENGTH) {
                 return 'nib-end';
+            }
+            break;
+        default:
+            console.assert(false, "unknown layout direction");
             break;
         }
 
         var handleFrame = this.get('_handleFrame');
-        if (SC.pointInRect(point, handleFrame))
+        if (SC.pointInRect(point, handleFrame)) {
             return 'handle';
+        }
 
         switch (layoutDirection) {
         case SC.LAYOUT_HORIZONTAL:
-            if (point.x < handleFrame.x)
+            if (point.x < handleFrame.x) {
                 return 'gutter-before';
-            else if (point.x >= handleFrame.x + handleFrame.width)
+            } else if (point.x >= handleFrame.x + handleFrame.width) {
                 return 'gutter-after';
+            }
             break;
         case SC.LAYOUT_VERTICAL:
-            if (point.y < handleFrame.y)
+            if (point.y < handleFrame.y) {
                 return 'gutter-before';
-            else if (point.y >= handleFrame.y + handleFrame.height)
+            } else if (point.y >= handleFrame.y + handleFrame.height) {
                 return 'gutter-after';
+            }
+            break;
+        default:
+            console.assert(false, "unknown layout direction");
             break;
         }
 
         console.assert(false, "_segmentForMouseEvent: point ", point,
             " outside view with handle frame ", handleFrame,
             " and client frame ", clientFrame);
+        return null;
     },
 
     mouseEntered: function(evt) {
@@ -345,8 +386,15 @@ exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
         SC.RunLoop.begin();
         var delta;
         switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_HORIZONTAL:  delta = evt.wheelDeltaX;    break;
-        case SC.LAYOUT_VERTICAL:    delta = evt.wheelDeltaY;    break;
+        case SC.LAYOUT_HORIZONTAL:
+            delta = evt.wheelDeltaX;
+            break;
+        case SC.LAYOUT_VERTICAL:
+            delta = evt.wheelDeltaY;
+            break;
+        default:
+            console.assert(false, "unknown layout direction");
+            return;
         }
         this.set('value', this.get('value') + 2*delta);
         SC.RunLoop.end();
@@ -378,7 +426,12 @@ exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
             case SC.LAYOUT_VERTICAL:
                 this._mouseDownScreenPoint = evt.clientY;
                 break;
+            default:
+                console.assert(false, "unknown layout direction");
+                break;
             }
+        default:
+            console.assert("_segmentForMouseEvent returned an unknown value");
             break;
         }
         SC.RunLoop.end();
@@ -394,16 +447,23 @@ exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
         if (this._mouseDownScreenPoint !== null) {
             var eventDistance;
             switch (this.get('layoutDirection')) {
-            case SC.LAYOUT_HORIZONTAL:  eventDistance = evt.clientX;    break;
-            case SC.LAYOUT_VERTICAL:    eventDistance = evt.clientY;    break;
+            case SC.LAYOUT_HORIZONTAL:
+                eventDistance = evt.clientX;
+                break;
+            case SC.LAYOUT_VERTICAL:
+                eventDistance = evt.clientY;
+                break;
+            default:
+                console.assert(false, "unknown layout direction");
+                break;
             }
             var eventDelta = eventDistance - this._mouseDownScreenPoint;
 
             var maximum = this.get('maximum');
             var gutterLength = this.get('_gutterLength');
 
-            this.set('value', this.get('value')
-                + eventDelta * maximum / gutterLength);
+            this.set('value', this.get('value') +
+                eventDelta * maximum / gutterLength);
 
             this._mouseDownScreenPoint = eventDistance;
         }
@@ -508,10 +568,15 @@ exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
             handleDistance = handleFrame.x - padding.left;
             handleLength = handleFrame.width;
             break;
+
+        default:
+            console.assert(false, "unknown layout direction");
+            break;
         }
 
-        if (this.get('isEnabled') === false || gutterLength <= handleLength)
-            return; // Don't display the scroll bar.        
+        if (this.get('isEnabled') === false || gutterLength <= handleLength) {
+            return; // Don't display the scroll bar.
+        }
    
         if (this._isMouseOver === false) {
             ctx.globalAlpha = 0.3;
@@ -587,8 +652,9 @@ exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
         ctx.restore();
         // End handle outline context
 
-        if (this._isMouseOver === false)
+        if (this._isMouseOver === false) {
             ctx.globalAlpha = 1.0;
+        }
 
         this._drawNibs(ctx);
 
