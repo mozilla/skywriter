@@ -98,7 +98,7 @@ exports.metadata = {
                 "description": "A function that should be called at startup. This should be used \
 sparingly, as these plugins will be eagerly loaded at the beginning. All that's needed for this \
 extension point is a pointer to a function that takes no arguments.",
-                "activate": "plugins:startupHandler"
+                "activate": "plugins#startupHandler"
             },
             {
                 "ep": "extensionpoint",
@@ -112,49 +112,49 @@ component).",
             },
             {
                 "action": "call",
-                "pointer": "util/container:dummyFactory",
+                "pointer": "util/container#dummyFactory",
                 "name": "files",
                 "ep": "factory"
             },
             {
                 "action": "create",
-                "pointer": "util/hub:Hub",
+                "pointer": "util/hub#Hub",
                 "name": "hub",
                 "ep": "factory"
             },
             {
                 "action": "create",
-                "pointer": "settings:InMemorySettings",
+                "pointer": "settings#InMemorySettings",
                 "name": "settings",
                 "ep": "factory"
             },
             {
                 "action": "call",
-                "pointer": "util/container:dummyFactory",
+                "pointer": "util/container#dummyFactory",
                 "name": "commandLine",
                 "ep": "factory"
             },
             {
                 "action": "call",
-                "pointer": "util/container:dummyFactory",
+                "pointer": "util/container#dummyFactory",
                 "name": "parser",
                 "ep": "factory"
             },
             {
                 "action": "create",
-                "pointer": "editor/controller:EditorController",
+                "pointer": "editor/controller#EditorController",
                 "name": "editor",
                 "ep": "factory"
             },
             {
                 "action": "call",
-                "pointer": "util/container:dummyFactory",
+                "pointer": "util/container#dummyFactory",
                 "name": "editSession",
                 "ep": "factory"
             },
             {
                 "action": "create",
-                "pointer": "cursor:CursorManager",
+                "pointer": "cursor#CursorManager",
                 "name": "cursorManager",
                 "ep": "factory"
             }

@@ -24,6 +24,7 @@
 
 var SC = require('sproutcore/runtime:package').SC;
 require('browserup:package');
+require("util/globals");
 
 // Version numbers
 SC.mixin(exports, {

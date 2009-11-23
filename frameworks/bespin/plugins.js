@@ -29,10 +29,19 @@ var r = require;
 exports.Extension = SC.Object.extend({
     load: function(callback, property) {
         property = property || "pointer";
-        var parts = this.get(property).split(":");
+        var parts = this.get(property).split("#");
         var self = this;
         tiki.async(this._pluginName).then(function() {
-            var module = r(self._pluginName + ":" + parts[0]);
+            var fullName;
+            // this allows syntax like #foo
+            // which is equivalent to PluginName:package#foo
+            if (parts[0]) {
+                fullName = self._pluginName + ":" + parts[0];
+            } else {
+                fullName = self._pluginName;
+            }
+            
+            var module = r(fullName);
             if (callback) {
                 if (parts[1]) {
                     callback(module[parts[1]]);
@@ -183,4 +192,4 @@ exports.startupHandler = function(ep) {
         console.log("Startup calling: " + ep.pointer);
         func();
     });
-}
+};

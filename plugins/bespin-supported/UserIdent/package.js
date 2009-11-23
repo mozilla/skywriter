@@ -27,17 +27,13 @@ var util = require("bespin:util/util");
 var bespin = require("bespin");
 
 exports.showSignup = function() {
-    bespin.register("loginController", exports.loginController.create());
-    bespin.register("signupController", exports.signupController.create());
-    bespin.register("dumbController", exports.dumbController.create());
-
     exports.userIdentPage.get("mainPane").append();
 };
 
 /**
  * Controller for the sign-in process
  */
-exports.loginController = bespin.BaseController.extend({
+exports.loginController = bespin.BaseController.create({
     /** @see BaseController */
     requires: {
         server: 'server'
@@ -73,7 +69,7 @@ exports.loginController = bespin.BaseController.extend({
 /**
  * Controller for the registration process
  */
-exports.signupController = bespin.BaseController.extend({
+exports.signupController = bespin.BaseController.create({
     /** @see BaseController */
     requires: {
         server: 'server'
@@ -138,7 +134,7 @@ exports.signupController = bespin.BaseController.extend({
 /**
  * UI change controller
  */
-exports.dumbController = SC.Object.extend({
+exports.dumbController = SC.Object.create({
     action: "login",
     actionView: function() {
         var mainPane = exports.userIdentPage.get("mainPane");
@@ -163,7 +159,7 @@ exports.userIdentPage = SC.Page.design({
             childViews: [ "action", "container" ],
             action: SC.RadioView.design({
                 layout: { top: 45, left: 140 },
-                valueBinding: "dumbController.action",
+                valueBinding: "UserIdent#dumbController.action",
                 itemValueKey: 'value',
                 itemTitleKey: 'title',
                 items: [
@@ -173,7 +169,7 @@ exports.userIdentPage = SC.Page.design({
             }),
 
             container: SC.ContainerView.design({
-                nowShowingBinding: "dumbController.actionView",
+                nowShowingBinding: "UserIdent#dumbController.actionView",
                 layout: { left: 0, top: 100, right: 0, bottom: 0 }
             })
         })

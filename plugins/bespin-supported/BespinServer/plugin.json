@@ -3,7 +3,7 @@
         {
             "ep": "factory",
             "name": "server",
-            "pointer": "server:Server",
+            "pointer": "server#Server",
             "action": "create"
         }
     ]
