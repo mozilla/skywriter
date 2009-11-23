@@ -88,9 +88,9 @@ exports.GutterView = SC.View.extend(canvas.Canvas, {
         return {
             left:   origin.left,
             top:    origin.top,
-            width:  GUTTER_INSETS.left
-                    + rowCount.toString().length * this.get('_charWidth')
-                    + GUTTER_INSETS.right,
+            width:  GUTTER_INSETS.left +
+                    rowCount.toString().length * this.get('_charWidth') +
+                    GUTTER_INSETS.right,
             height: rowCount * this.get('_lineHeight')
         };
     }.property('_charWidth', '_lineHeight', 'rowCount').cacheable(),
@@ -115,8 +115,8 @@ exports.GutterView = SC.View.extend(canvas.Canvas, {
     _lineHeight: function() {
         var theme = this.get('theme');
         var userLineHeight = theme.lineHeight;
-        return !SC.none(userLineHeight) ? userLineHeight
-            : this.guessLineHeight(theme.editorTextFont);
+        return !SC.none(userLineHeight) ? userLineHeight :
+            this.guessLineHeight(theme.editorTextFont);
     }.property('theme').cacheable(),
 
     drawRect: function(ctx, visibleFrame) {
@@ -127,10 +127,9 @@ exports.GutterView = SC.View.extend(canvas.Canvas, {
 
         var lineHeight = this.get('_lineHeight');
         var firstVisibleRow = Math.floor(visibleFrame.y / lineHeight);
-        var lastLineToRender
-            = Math.min(this.get('rowCount') - 1,
-                Math.ceil((visibleFrame.y + visibleFrame.height)
-                / lineHeight));
+        var lastLineToRender = Math.min(this.get('rowCount') - 1,
+                Math.ceil((visibleFrame.y + visibleFrame.height) /
+                lineHeight));
 
         for (var currentLine = firstVisibleRow;
             currentLine <= lastLineToRender; currentLine++) {
