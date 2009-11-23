@@ -1,4 +1,5 @@
 {
+    "depends": ["BespinServer"],
     "provides": [ {
             "ep": "startup",
             "pointer": "#showSignup"

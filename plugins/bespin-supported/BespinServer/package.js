@@ -32,7 +32,7 @@ var SC = require("sproutcore/runtime:package").SC;
  * https://wiki.mozilla.org/BespinServerAPI) giving the client access to the
  * backend store. The FileSystem object uses this to talk back.
  */
-exports.Server = SC.Object.extend({
+exports.server = SC.Object.create({
     SERVER_BASE_URL: '/server',
 
     // Stores the outstanding asynchronous tasks that we've submitted

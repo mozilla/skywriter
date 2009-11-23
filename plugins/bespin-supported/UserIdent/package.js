@@ -25,6 +25,7 @@
 var SC = require("sproutcore/runtime:package").SC;
 var util = require("bespin:util/util");
 var bespin = require("bespin");
+var server = require("BespinServer").server;
 
 exports.showSignup = function() {
     exports.userIdentPage.get("mainPane").append();
@@ -33,18 +34,13 @@ exports.showSignup = function() {
 /**
  * Controller for the sign-in process
  */
-exports.loginController = bespin.BaseController.create({
-    /** @see BaseController */
-    requires: {
-        server: 'server'
-    },
-
+exports.loginController = SC.Object.create({
     username: "",
 
     password: "",
 
     login: function() {
-        this.server.login(this.username, this.password, this.onSuccess,
+        server.login(this.username, this.password, this.onSuccess,
                 this.onFailure);
     },
 
@@ -69,12 +65,7 @@ exports.loginController = bespin.BaseController.create({
 /**
  * Controller for the registration process
  */
-exports.signupController = bespin.BaseController.create({
-    /** @see BaseController */
-    requires: {
-        server: 'server'
-    },
-
+exports.signupController = SC.Object.create({
     username: "",
     usernameError: function() {
         var usernameError = this.get('username').length > 4 ? "" :
@@ -110,7 +101,7 @@ exports.signupController = bespin.BaseController.create({
             onSuccess: this.onSuccess.bind(this),
             onFailure: this.onFailure.bind(this)
         };
-        this.server.signup(this.username, this.password1, this.email, opts);
+        server.signup(this.username, this.password1, this.email, opts);
     },
 
     /**
