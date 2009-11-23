@@ -66,3 +66,14 @@ exports.publish = hub.publish.bind(hub);
 exports.subscribe = hub.subscribe.bind(hub);
 exports.unsubscribe = hub.unsubscribe.bind(hub);
 exports.fireAfter = hub.fireAfter.bind(hub);
+
+
+/**
+ *
+ */
+exports.BaseController = SC.Object.extend({
+    init: function() {
+        sc_super();
+        exports._container.inject(this);
+    }
+});

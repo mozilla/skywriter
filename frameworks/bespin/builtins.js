@@ -26,7 +26,7 @@ exports.metadata = {
     "Base Syntax": {
         "provides": [
             {
-                "ep": "entrypoint",
+                "ep": "extensionpoint",
                 "name": "syntax.engine",
                 "description": "Syntax highlighting engines"
             },
@@ -36,7 +36,7 @@ exports.metadata = {
                 "pointer": "bespin/syntax/simple:Model"
             },
             {
-                "ep": "entrypoint",
+                "ep": "extensionpoint",
                 "name": "syntax.simple.highlighter",
                 "description": "Highlighter code for the simple syntax highlighter."
             },
@@ -89,25 +89,77 @@ exports.metadata = {
                 "pointer": "bespin/syntax/simple/ruby:Ruby"
             }
         ]
+    },
+    "bespin": {
+        "provides": [
+            {
+                "ep": "extensionpoint",
+                "name": "startup",
+                "description": "A function that should be called at startup. This should be used \
+sparingly, as these plugins will be eagerly loaded at the beginning. All that's needed for this \
+extension point is a pointer to a function that takes no arguments.",
+                "activate": "plugins:startupHandler"
+            },
+            {
+                "ep": "extensionpoint",
+                "name": "factory",
+                "description": "Provides a factory for singleton components. Each extension needs to \
+provide a name, a pointer and an action. The action can be 'call' (if the pointer refers to \
+a function), 'create' (if the pointer refers to an SC.Object), 'new' (if the pointer refers to \
+a traditional JS object) or 'value' (if the pointer refers to the object itself that is the \
+component).",
+                "indexOn": "name"
+            },
+            {
+                "action": "call",
+                "pointer": "util/container:dummyFactory",
+                "name": "files",
+                "ep": "factory"
+            },
+            {
+                "action": "create",
+                "pointer": "util/hub:Hub",
+                "name": "hub",
+                "ep": "factory"
+            },
+            {
+                "action": "create",
+                "pointer": "settings:InMemorySettings",
+                "name": "settings",
+                "ep": "factory"
+            },
+            {
+                "action": "call",
+                "pointer": "util/container:dummyFactory",
+                "name": "commandLine",
+                "ep": "factory"
+            },
+            {
+                "action": "call",
+                "pointer": "util/container:dummyFactory",
+                "name": "parser",
+                "ep": "factory"
+            },
+            {
+                "action": "create",
+                "pointer": "editor/controller:EditorController",
+                "name": "editor",
+                "ep": "factory"
+            },
+            {
+                "action": "call",
+                "pointer": "util/container:dummyFactory",
+                "name": "editSession",
+                "ep": "factory"
+            },
+            {
+                "action": "create",
+                "pointer": "cursor:CursorManager",
+                "name": "cursorManager",
+                "ep": "factory"
+            }
+        ]
     }
-};
-
-/**
- * How to create the various components that make up core bespin.
- * Ideally these would all be strings like 'settings', then we could easily load
- * the entire initial configuration from the plugin system.
- */
-exports.factories = {
-    // "ioc": "The container itself, placed into itself on creation",
-    "hub": "create util/hub:Hub",
-    "plugins": "create plugins:Catalog",
-    "editor": "create editor/controller:EditorController",
-    "settings": "create settings:InMemorySettings",
-    "editSession": "call util/container:dummyFactory",
-    "files": "call util/container:dummyFactory", // "create client/filesystem:FileSystem",
-    "parser": "call util/container:dummyFactory",
-    "commandLine": "call util/container:dummyFactory",
-    "cursorManager": "create cursor:CursorManager"
 };
 
 /*

@@ -24,13 +24,15 @@
 
 var SC = require("sproutcore/runtime:package").SC;
 var builtins = require("builtins");
+var r = require;
 
 exports.Extension = SC.Object.extend({
     load: function(callback, property) {
         property = property || "pointer";
         var parts = this.get(property).split(":");
-        var modname = parts[0];
-        tiki.async(modname).then(function(module) {
+        var self = this;
+        tiki.async(this._pluginName).then(function() {
+            var module = r(self._pluginName + ":" + parts[0]);
             if (callback) {
                 if (parts[1]) {
                     callback(module[parts[1]]);
@@ -50,6 +52,25 @@ exports.ExtensionPoint = SC.Object.extend({
 
     addExtension: function(extension) {
         this.extensions.push(extension);
+    },
+    
+    /*
+    * If we are keeping an index (an indexOn property is set on the
+    * extension point), you can look up an extension by key.
+    */
+    getByKey: function(key) {
+        var indexOn = this.get("indexOn");
+        
+        if (!indexOn) {
+            return undefined;
+        }
+        
+        for (var i = 0; i < this.extensions.length; i++) {
+            if (this.extensions[i][indexOn] == key) {
+                return this.extensions[i];
+            }
+        }
+        return undefined;
     },
 
     active: function(extension) {
@@ -80,7 +101,8 @@ exports.Catalog = SC.Object.extend({
         this.plugins = {};
         this.load(builtins.metadata);
     },
-
+    
+    /* Retrieve an extension point object by name. */
     getExtensionPoint: function(name) {
         if (this.points[name] === undefined) {
             this.points[name] = exports.ExtensionPoint.create({
@@ -90,10 +112,37 @@ exports.Catalog = SC.Object.extend({
         }
         return this.points[name];
     },
+    
+    /* Retreive the list of extensions for the named extension point.
+    *  If none are defined, this will return an empty array.
+    */
+    getExtensions: function(name) {
+        var ep = this.points[name];
+        if (ep === undefined) {
+            return [];
+        }
+        return ep.extensions;
+    },
+    
+    /* Look up an extension in an indexed extension point by
+    * the given key. If the extension point or the key are
+    * unknown, undefined will be returned.
+    */
+    getExtensionByKey: function(name, key) {
+        var ep = this.points[name];
+        if (ep === undefined) {
+            return undefined;
+        }
+        
+        return ep.getByKey(key);
+    },
 
     registerExtensionPoint: function(extension) {
         var ep = this.getExtensionPoint(extension.name);
         ep.handlers.push(extension);
+        if (extension.indexOn) {
+            ep.set("indexOn", extension.indexOn);
+        }
     },
 
     load: function(metadata) {
@@ -107,6 +156,7 @@ exports.Catalog = SC.Object.extend({
                 var provides = md.provides;
                 for (var i = 0; i < provides.length; i++) {
                     var extension = exports.Extension.create(provides[i]);
+                    extension._pluginName = name;
                     provides[i] = extension;
                     var epname = extension.ep;
                     if (epname == "extensionpoint") {
@@ -128,14 +178,9 @@ exports.Catalog = SC.Object.extend({
     }
 });
 
-exports.thing1 = function(extension) {
-    print("Thing1");
-};
-
-exports.thing2 = function(extension) {
-    print("Thing2");
-};
-
-exports.thing3 = function(msg) {
-    print("Thing3: " + msg);
-};
+exports.startupHandler = function(ep) {
+    ep.load(function(func) {
+        console.log("Startup calling: " + ep.pointer);
+        func();
+    });
+}

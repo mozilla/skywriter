@@ -107,8 +107,8 @@ def install_sproutcore(options):
     else:
         # use git
         sh("git clone -q git://github.com/sproutit/sproutcore-abbot.git abbot")
-        sh("git checkout -b origin/tiki", cwd=abbot)
-        sh("git pull origin tiki", cwd=abbot)
+        sh("git checkout -b origin/tiki", cwd=abbot_path)
+        sh("git pull origin tiki", cwd=abbot_path)
         sh("git clone -q git://github.com/sproutit/sproutcore.git", cwd="frameworks")
         sh("git checkout -b origin/tiki", cwd="frameworks/sproutcore")
         sh("git pull origin tiki", cwd="frameworks/sproutcore")

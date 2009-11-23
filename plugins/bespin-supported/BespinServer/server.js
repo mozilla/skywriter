@@ -23,9 +23,9 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var util = require("bespin/util/util");
-var cookie = require("bespin/util/cookie");
-var SC = require("sproutcore");
+var util = require("bespin:util/util");
+var cookie = require("bespin:util/cookie");
+var SC = require("sproutcore/runtime:package").SC;
 
 /**
  * The Server object implements the Bespin Server API (See
@@ -33,7 +33,7 @@ var SC = require("sproutcore");
  * backend store. The FileSystem object uses this to talk back.
  */
 exports.Server = SC.Object.extend({
-    SERVER_BASE_URL: '.',
+    SERVER_BASE_URL: '/server',
 
     // Stores the outstanding asynchronous tasks that we've submitted
     _jobs: {},

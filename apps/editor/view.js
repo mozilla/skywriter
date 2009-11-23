@@ -23,7 +23,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime:package').SC;
-var EditorView = require("bespin:editor/views/editor").EditorView;
 
 exports.app = SC.Application.create({
     NAMESPACE: "bespin"
