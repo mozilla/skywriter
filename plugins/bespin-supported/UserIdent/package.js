@@ -190,7 +190,7 @@ exports.userIdentPage = SC.Page.design({
         }),
 
         userField: SC.TextFieldView.design({
-            valueBinding: "loginController.username",
+            valueBinding: "UserIdent#loginController.username",
             blur: function() { console.log("hai"); },
             layout: { left: 155, top: 0, height: 20, width: 100 }
         }),
@@ -202,7 +202,7 @@ exports.userIdentPage = SC.Page.design({
         }),
 
         passwordField: SC.TextFieldView.design({
-            valueBinding: "loginController.password",
+            valueBinding: "UserIdent#loginController.password",
             isPassword: true,
             layout: { left: 155, top: 30, height: 20, width: 100 }
         }),
@@ -211,7 +211,7 @@ exports.userIdentPage = SC.Page.design({
             layout: { left: 155, top: 60, width: 80 },
             isDefault: true,
             title: "Log in",
-            target: "loginController",
+            target: "UserIdent#loginController",
             action: "login"
         })
     }),
@@ -233,7 +233,7 @@ exports.userIdentPage = SC.Page.design({
         }),
 
         userField: SC.TextFieldView.design({
-            valueBinding: "signupController.username",
+            valueBinding: "UserIdent#signupController.username",
             layout: { left: 155, top: 0, height: 20, width: 100 }
         }),
 
@@ -244,7 +244,7 @@ exports.userIdentPage = SC.Page.design({
         }),
 
         password1Field: SC.TextFieldView.design({
-            valueBinding: "signupController.password1",
+            valueBinding: "UserIdent#signupController.password1",
             layout: { left: 155, top: 30, height: 20, width: 100 }
         }),
 
@@ -255,7 +255,7 @@ exports.userIdentPage = SC.Page.design({
         }),
 
         password2Field: SC.TextFieldView.design({
-            valueBinding: "signupController.password2",
+            valueBinding: "UserIdent#signupController.password2",
             layout: { left: 155, top: 60, height: 20, width: 100 }
         }),
 
@@ -266,7 +266,7 @@ exports.userIdentPage = SC.Page.design({
         }),
 
         emailField: SC.TextFieldView.design({
-            valueBinding: "signupController.email",
+            valueBinding: "UserIdent#signupController.email",
             layout: { left: 155, top: 90, height: 20, width: 100 }
         }),
 
@@ -274,7 +274,7 @@ exports.userIdentPage = SC.Page.design({
             layout: { left: 155, top: 120, width: 80 },
             isDefault: true,
             title: "Sign up",
-            target: "signupController",
+            target: "UserIdent#signupController",
             action: "signup"
         })
     })

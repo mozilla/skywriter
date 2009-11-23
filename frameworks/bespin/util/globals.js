@@ -49,15 +49,12 @@ SC.objectForPropertyPath = function(path, root, stopAt) {
     stopAt = (stopAt == undefined) ? path.length : stopAt;
     var hashed = path.split("#");
     if (hashed.length == 1) {
-        console.log("Falling through to the old objectForPropertyPath");
         return SC.objectForPropertyPathOriginal(path, root, stopAt);
     }
-    console.log("oFPP loading module: ", hashed[0]);
     var module = require(hashed[0]);
     if (module === undefined) {
         return undefined;
     }
     stopAt = stopAt - hashed[0].length;
-    console.log("Looking up ", hashed[1], " in module");
     return SC.objectForPropertyPathOriginal(hashed[1], module, stopAt);
 };
