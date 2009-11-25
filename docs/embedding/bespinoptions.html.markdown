@@ -12,6 +12,19 @@ options.
 [1]: index.html "Bespin embedding documentation"
 
 
+dontHookWindowResizeEvent
+-------------------------
+
+The embedded editor needs to be notified via a call to
+`elementDimensionsDidChange` whenever its position or size changes. By default,
+Bespin will hook the `window.onresize` event and call that function
+automatically, so you don't need to worry about it unless you're manipulating
+the DOM in a way that will cause the embedded Bespin component to move around.
+If you don't want `elementDimensionsDidChange` to be called whenever the window
+resizes, you can supply a value of `true` for this setting, and
+`window.onresize` will be left alone.
+
+
 initialContent
 --------------
 

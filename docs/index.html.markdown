@@ -10,7 +10,7 @@ Bespin end users will likely find more useful documentation on the [Bespin Wiki]
 
 [The Glossary](glossary.html) will clear up any questions you have about terminology used on the project.
 
-Find out what's new, in the [Bespin 0.5 Release Notes](releases/notes05.html).
+Find out what's new, in the [Bespin 0.5.1 Release Notes](releases/notes051.html).
 
 Plugin Author Guide
 -------------------
@@ -33,6 +33,7 @@ Developer's Guide
 
 * [Getting Started](devguide/index.html)
 * [A Tour of the Code](devguide/tour.html)
-* [Testing](devguide/testing.html)
+* [Automated Testing](devguide/testing.html)
+* [Manual Test Plan](devguide/testplan.html)
 
 [1]: https://wiki.mozilla.org/Bespin "The Bespin Wiki"

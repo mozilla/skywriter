@@ -60,11 +60,10 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
     init: function() {
         this.register("ioc", this);
         this.register("plugins", plugins.Catalog.create());
-        
-        /**
-         * To prevent a loop where a requires b, requires a we track things we are
-         * creating, and if asked to create something thats already there, we die
-         */
+
+        // To prevent a loop where a requires b, requires a we track things we
+        // are creating, and if asked to create something that's already there,
+        // we die
         this._beingCreated = {};
     },
 
@@ -91,7 +90,7 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
      */
     inject: function(object) {
         var property, name;
-        
+
         if (object && object.requires) {
             // Clone the requires structure so we can remove fulfilled
             // requirements and not trip over anything in the prototype chain.
@@ -188,9 +187,8 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
     /**
      * Internal function to create an object using a lookup into the factories
      * registry.
-     * <p>We lookup <code>id</code> in the <code>factory</code> extension point. 
-     * Look at the documentation for the factory extension point (in builtins.js).
-     * 
+     * <p>We lookup <code>id</code> in the <code>factory</code> extension point.
+     * @see builtins.js
      * @private
      */
     _createFromFactory: function(id, onCreate) {
@@ -202,7 +200,7 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
         this._beingCreated[id] = onCreate;
         try {
             var catalog = this.get("plugins");
-            
+
             var extension = catalog.getExtensionByKey("factory", id);
             if (extension === undefined) {
                 console.trace();

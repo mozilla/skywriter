@@ -64,18 +64,18 @@ exports.ExtensionPoint = SC.Object.extend({
     addExtension: function(extension) {
         this.extensions.push(extension);
     },
-    
-    /*
-    * If we are keeping an index (an indexOn property is set on the
-    * extension point), you can look up an extension by key.
-    */
+
+    /**
+     * If we are keeping an index (an indexOn property is set on the
+     * extension point), you can look up an extension by key.
+     */
     getByKey: function(key) {
         var indexOn = this.get("indexOn");
-        
+
         if (!indexOn) {
             return undefined;
         }
-        
+
         for (var i = 0; i < this.extensions.length; i++) {
             if (this.extensions[i][indexOn] == key) {
                 return this.extensions[i];
@@ -112,8 +112,8 @@ exports.Catalog = SC.Object.extend({
         this.plugins = {};
         this.load(builtins.metadata);
     },
-    
-    /* Retrieve an extension point object by name. */
+
+    /** Retrieve an extension point object by name. */
     getExtensionPoint: function(name) {
         if (this.points[name] === undefined) {
             this.points[name] = exports.ExtensionPoint.create({
@@ -123,10 +123,11 @@ exports.Catalog = SC.Object.extend({
         }
         return this.points[name];
     },
-    
-    /* Retreive the list of extensions for the named extension point.
-    *  If none are defined, this will return an empty array.
-    */
+
+    /**
+     * Retrieve the list of extensions for the named extension point.
+     * If none are defined, this will return an empty array.
+     */
     getExtensions: function(name) {
         var ep = this.points[name];
         if (ep === undefined) {
@@ -134,17 +135,17 @@ exports.Catalog = SC.Object.extend({
         }
         return ep.extensions;
     },
-    
-    /* Look up an extension in an indexed extension point by
-    * the given key. If the extension point or the key are
-    * unknown, undefined will be returned.
-    */
+
+    /**
+     * Look up an extension in an indexed extension point by the given key. If
+     * the extension point or the key are unknown, undefined will be returned.
+     */
     getExtensionByKey: function(name, key) {
         var ep = this.points[name];
         if (ep === undefined) {
             return undefined;
         }
-        
+
         return ep.getByKey(key);
     },
 

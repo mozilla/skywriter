@@ -24,9 +24,14 @@
 
 var SC = require('sproutcore/runtime:package').SC;
 
-var scroller = require("editor/views/scroller");
+var gutter = require('editor/views/gutter');
+var scroller = require('editor/views/scroller');
 
 exports.BespinScrollView = SC.ScrollView.extend({
+    _gutterViewInstantiated: false,
+
+    gutterView: gutter.GutterView,
+
     hasHorizontalScroller: true,
     autohidesHorizontalScroller: false,
     horizontalScrollerView: scroller.BespinScrollerView,
@@ -38,6 +43,29 @@ exports.BespinScrollView = SC.ScrollView.extend({
     verticalScrollerThickness: 24,
 
     tile: function() {
+        var gutterView = this.get('gutterView');
+        if (this._gutterViewInstantiated === false) {
+            // It would be cleaner, theoretically, to do this in
+            // createChildViews(), but there's no way to call sc_super() in
+            // that function, because the SproutCore ScrollView's
+            // createChildViews() implementation isn't written in an
+            // extensible way...
+            this._gutterViewInstantiated = true;
+
+            gutterView = this.createChildView(gutterView, {
+                rowCountBinding: "*parentView.contentView.rowCount"
+            });
+            this.childViews.push(gutterView);
+            this.set('gutterView', gutterView);
+
+            // Retile whenever the gutter frame changes.
+            gutterView.addObserver('frame', this, this.tile);
+        }
+
+        var gutterFrame = gutterView.get('frame');
+        this.get('containerView').set('layout',
+            { left: gutterFrame.width, bottom: 0, top: 0, right: 0 });
+
         var hScroller = this.get('horizontalScrollerView');
         var vScroller = this.get('verticalScrollerView');
         var hScrollerVisible = this.get('isHorizontalScrollerVisible');
@@ -46,7 +74,7 @@ exports.BespinScrollView = SC.ScrollView.extend({
         var hScrollerThickness = this.get('horizontalScrollerThickness');
         var vScrollerThickness = this.get('verticalScrollerThickness');
         if (hScrollerVisible) {
-            var hScroller = this.get('horizontalScrollerView');
+            hScroller = this.get('horizontalScrollerView');
             hScroller.set('scrollerThickness', hScrollerThickness);
             hScroller.set('padding', {
                 top:    0,
@@ -55,31 +83,28 @@ exports.BespinScrollView = SC.ScrollView.extend({
                 right:  6 + vScrollerThickness
             });
             hScroller.set('layout', { 
-                left:   0,
+                left:   gutterFrame.width,
                 bottom: 0,
                 right:  0,
                 height: hScrollerThickness
             });
         }
         if (vScrollerVisible) {
-            var vScroller = this.get('verticalScrollerView');
+            vScroller = this.get('verticalScrollerView');
             vScroller.set('scrollerThickness', vScrollerThickness);
             vScroller.set('padding', {
-                left: 0,
-                right: 6,
-                top: 6,
+                left:   0,
+                right:  6,
+                top:    6,
                 bottom: 6 + hScrollerThickness
             });
             vScroller.set('layout', {
-                top: 0,
-                right: 0,
+                top:    0,
+                right:  0,
                 bottom: 0,
-                width: vScrollerThickness
+                width:  vScrollerThickness
             });
         }
-
-        this.get('containerView').set('layout',
-            { left: 0, bottom: 0, top: 0, right: 0 });
 
         var contentView = this.get('contentView');
         if (contentView.get('hasPadding') === true) {
@@ -88,6 +113,14 @@ exports.BespinScrollView = SC.ScrollView.extend({
                 right:  vScrollerThickness + 6
             });
         }
-    }
+    },
+
+    _bespin_BespinScrollView_verticalScrollOffsetDidChange: function() {
+        this.get('gutterView').adjust({
+            left:   0,
+            top:    -Math.min(this.get('verticalScrollOffset'),
+                        this.get('maximumVerticalScrollOffset'))
+        });
+    }.observes('verticalScrollOffset')
 });
 

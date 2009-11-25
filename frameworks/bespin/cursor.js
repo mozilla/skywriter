@@ -378,8 +378,8 @@ exports.CursorManager = SC.Object.extend({
         var oldPos = exports.copyPos(this.position);
 
         this.moveCursor({
-            row: Math.max(this.editor.editorView.firstVisibleRow
-                - this.editor.editorView.visibleRows, 0)
+            row: Math.max(this.editor.editorView.firstVisibleRow -
+                this.editor.editorView.visibleRows, 0)
         });
 
         this.checkPastEndOfLine(oldPos);
@@ -391,8 +391,8 @@ exports.CursorManager = SC.Object.extend({
         var oldPos = exports.copyPos(this.position);
 
         this.moveCursor({
-            row: Math.min(this.position.row
-                + this.editor.editorView.visibleRows,
+            row: Math.min(this.position.row +
+                this.editor.editorView.visibleRows,
                 this.editor.model.getRowCount() - 1)
         });
 
@@ -407,8 +407,8 @@ exports.CursorManager = SC.Object.extend({
      */
     checkPastEndOfLine: function(oldPos) {
         var isStrictLines = this.settings.values.strictlines;
-        var maxCol
-            = this.editor.editorView.getRowScreenLength(this.position.row);
+        var maxCol =
+            this.editor.editorView.getRowScreenLength(this.position.row);
         if (isStrictLines && this.position.col > maxCol) {
             // this sets this.virtulaCol = 0!
             this.moveToLineEnd();

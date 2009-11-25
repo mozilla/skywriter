@@ -179,13 +179,20 @@ exports.InMemorySettings = SC.Object.extend(/** @lends exports.InMemorySettings 
         // Set the default value up. We do this before __defineSetter__ because
         // we don't want to publish the change to everyone. This might not be
         // the correct behavior. Need experience to tell.
-        this.values[setting.name] = setting.defaultValue;
-        // Add a setter to values so we subclasses can save, and we can publish
+        this.values["_" + setting.name] = setting.defaultValue;
+
+        // Add a setter to values so subclasses can save, and we can publish
+        // This also remaps name to _name so we need the getter below too
         this.values.__defineSetter__(setting.name, function(value) {
-            this.values[setting.name] = value;
+            this.values["_" + setting.name] = value;
             this._changeValue(setting.name, value);
             // TODO: remove this when we've done it all via bindings
-            hub.publish("settings:set:" + setting.name, { value: value });
+            console.log("skipping broadcast to settings:set:" + setting.name);
+            //hub.publish("settings:set:" + setting.name, { value: value });
+        }.bind(this));
+        // Add a getter to values we can remap to the _name version
+        this.values.__defineGetter__(setting.name, function(value) {
+            this.values["_" + setting.name] = value;
         }.bind(this));
     },
 

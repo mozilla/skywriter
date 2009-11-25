@@ -31,6 +31,7 @@ var keys = require('util/keys');
 var clipboard = require("util/clipboard");
 var cursor = require('cursor');
 var scroller = require('editor/views/scroller');
+var canvas = require('editor/mixins/canvas');
 
 var SelectionHelper = SC.Object.extend({
     editor: null,
@@ -67,10 +68,9 @@ bespin.get("settings").addSetting({
 });
 
 // The main editor view.
-exports.EditorView = SC.View.extend({
+exports.EditorView = SC.View.extend(canvas.Canvas, {
     classNames: 'sc-canvas-view',
     displayProperties: ['value', 'shouldAutoResize'],
-    tagName: 'canvas',
 
     rowLengthCache: [],
 
@@ -85,22 +85,13 @@ exports.EditorView = SC.View.extend({
     // is the cursor allowed to toggle? (used by cursorManager.moveCursor)
     toggleCursorAllowed: true,
 
-    horizontalScrollCanvas: null,
-    verticalScrollCanvas: null,
-
     LINE_HEIGHT: 23,
 
     BOTTOM_SCROLL_AFFORDANCE: 30,
 
-    GUTTER_INSETS: { top: 0, left: 6, right: 10, bottom: 6 },
-
     LINE_INSETS: { top: 0, left: 5, right: 0, bottom: 6 },
 
     FALLBACK_CHARACTER_WIDTH: 10,
-
-    DEBUG_GUTTER_WIDTH: 18,
-
-    DEBUG_GUTTER_INSETS: { top: 2, left: 2, right: 2, bottom: 2 },
 
     showCursor: true,
 
@@ -131,6 +122,19 @@ exports.EditorView = SC.View.extend({
      */
     hasPadding: true,
 
+    // Not cacheable, unfortunately, because it depends on the parent view's
+    // frame...
+    layerFrame: function() {
+        var parentView = this.get('parentView');
+        var parentFrame = parentView.get('frame');
+        return {
+            x:      0,
+            y:      0,
+            width:  parentFrame.width,
+            height: parentFrame.height
+        };
+    }.property(),
+
     init: function() {
         var settings = bespin.get("settings");
 
@@ -147,9 +151,6 @@ exports.EditorView = SC.View.extend({
 
         this.selectionHelper = SelectionHelper.create({ editor: this.editor });
         this.actions = actions.Actions.create({ editor: this.editor });
-
-        // this.visibleRows;       // the number of rows visible in the editor; set each time a paint occurs
-        // this.firstVisibleRow;   // first row that is visible in the editor; set each time a paint occurs
 
         // this.selectMouseDownPos;        // position when the user moused down
         // this.selectMouseDetail;         // the detail (number of clicks) for the mouse down.
@@ -172,15 +173,18 @@ exports.EditorView = SC.View.extend({
     },
 
     render: function(context, firstTime) {
-        // TODO: Shouldn't we only do this if !firstTime
-        context.attr('moz-opaque', 'true');
+        sc_super();
+
+        if (!firstTime) {
+            return;
+        }
+
+        context.attr("moz-opaque", "true");
         context.attr("tabindex", "1");
-        context.push('canvas tag not supported by your browser');
     },
 
     didCreateLayer: function() {
         var canvas = this.$()[0];
-        this.set("canvas", canvas);
 
         SC.Event.add(canvas, "blur", this, function(ev) {
             this.focus = true;
@@ -204,6 +208,9 @@ exports.EditorView = SC.View.extend({
         this.onInitActions.forEach(function(action) {
             action();
         });
+
+        this.set('rowCount', this.get('content').getRowCount());
+
         this.inited = true;
     },
 
@@ -216,7 +223,13 @@ exports.EditorView = SC.View.extend({
     },
 
     /**
-     * col is -1 if user clicked in gutter; clicking below last line maps to last line
+     * @private
+     *
+     * Converts a point relative to the top left corner of the editor to a
+     * row-column pair.
+     *
+     * @return An object with 'row' and 'col' properties. If the cursor clicked
+     *      to the left of the first column, the column property is -1.
      */
     convertClientPointToCursorPoint: function(pos) {
         var settings = bespin.get("settings");
@@ -235,10 +248,10 @@ exports.EditorView = SC.View.extend({
             y = Math.floor(ty / lineHeight);
         }
 
-        if (pos.x <= (this.get('gutterWidth') + this.LINE_INSETS.left)) {
+        if (pos.x <= this.LINE_INSETS.left) {
             x = -1;
         } else {
-            var tx = pos.x - this.get('gutterWidth') - this.LINE_INSETS.left;
+            var tx = pos.x - this.LINE_INSETS.left;
             // round vs floor so we can pick the left half vs right half of a character
             x = Math.round(tx / charWidth);
 
@@ -255,6 +268,7 @@ exports.EditorView = SC.View.extend({
 
     /**
      * @private
+     *
      * Translates the coordinates for a mouse event into absolute coordinates,
      * taking the scrolled position of the canvas into account.
      */
@@ -279,7 +293,8 @@ exports.EditorView = SC.View.extend({
 
         if (down.col == -1) {
             down.col = 0;
-            // clicked in gutter; show appropriate lineMarker message
+            // clicked to the left of column 1; show appropriate lineMarker
+            // message
             var lineMarker = bespin.get("parser").getLineMarkers()[down.row + 1];
             if (lineMarker) {
                 bespin.get("commandLine").showHint(lineMarker.msg);
@@ -413,13 +428,6 @@ exports.EditorView = SC.View.extend({
         //finally, and the LAST thing we should do (otherwise we'd mess positioning up)
         //scroll down, up, right, or left a bit if needed.
 
-        //up and down. optimally, we should have a timeout or something to keep checking...
-        if (clientY < 0) {
-            // TODO: tell enclosing ScrollView --pcw
-        } else if (clientY >= this.getHeight()) {
-            // TODO: tell enclosing ScrollView --pcw
-        }
-
         this.editor.paint();
     },
 
@@ -430,7 +438,8 @@ exports.EditorView = SC.View.extend({
             this.toggleCursorAllowed = true;
         }
 
-        if (++this.toggleCursorFullRepaintCounter > 0) {
+        this.toggleCursorFullRepaintCounter++;
+        if (this.toggleCursorFullRepaintCounter > 0) {
             this.toggleCursorFullRepaintCounter = 0;
             this.editor.paint(true);
         } else {
@@ -468,24 +477,6 @@ exports.EditorView = SC.View.extend({
         var absolutePoint = this.absoluteCoordinatesForEvent(e);
         var clientY = absolutePoint.y, clientX = absolutePoint.x;
 
-        var point;
-        if (this.editor.debugMode) {
-            if (clientX < this.DEBUG_GUTTER_WIDTH) {
-                console.log("Clicked in debug gutter");
-                point = { x: clientX, y: clientY };
-                var p = this.convertClientPointToCursorPoint(point);
-
-                var editSession = bespin.get("editSession");
-                if (p && editSession) {
-                    bespin.getComponent("breakpoints", function(breakpoints) {
-                        breakpoints.toggleBreakpoint({ project: editSession.project, path: editSession.path, lineNumber: p.row });
-                        this.editor.paint(true);
-                    }, this);
-                }
-                return true;
-            }
-        }
-
         this.selectMouseDetail = e.detail;
         if (e.shiftKey) {
             this.selectMouseDownPos = (this.editor.selection) ? this.editor.selection.startPos : this.editor.getCursorPos();
@@ -498,7 +489,8 @@ exports.EditorView = SC.View.extend({
 
         // I'm not sure why we should need to manually set focus to the canvas;
         // it happens automatically when there is no mouseDown event handler
-        this.get('canvas').focus();
+        var canvas = this.$()[0];
+        canvas.focus();
 
         return this.handleMouse(e);
     },
@@ -549,7 +541,7 @@ exports.EditorView = SC.View.extend({
     setFocus: function(focus) {
         this.onInit(function() {
             if (this.focus != focus) {
-                var canvas = this.get('canvas');
+                var canvas = this.$()[0];
                 if (focus) {
                     canvas.focus();
                 } else {
@@ -574,7 +566,8 @@ exports.EditorView = SC.View.extend({
      * <p>Used by clipboard.js to adding cut and paste hacks
      */
     _getFocusElement: function() {
-        return this.get('canvas');
+        var canvas = this.$()[0];
+        return canvas;
     },
 
     /**
@@ -590,7 +583,8 @@ exports.EditorView = SC.View.extend({
         // TODO: Why would we ever want to take over keypresses for the whole
         // window????
         // var scope = this.editor.opts.actsAsComponent ? this.editor.canvas : window;
-        var scope = this.get('canvas');
+        var canvas = this.$()[0];
+        var scope = canvas;
 
         if (this.oldkeydown) {
             SC.Event.remove(scope, "keydown", this, this.oldkeydown);
@@ -704,21 +698,12 @@ exports.EditorView = SC.View.extend({
     },
 
     /**
-     * Returns the width in pixels of the entire content area.
-     * TODO: convert to property for improved performance
-     */
-    getWidth: function() {
-        return this.get('gutterWidth') + this.get('textWidth')
-            + this.get('padding').right;
-    },
-
-    /**
      * Returns the height in pixels of the content area.
      * TODO: convert to property for improved performance
      */
     getHeight: function() {
-        return this.get('lineHeight') * this.get('content').getRowCount()
-            + this.get('padding').bottom;
+        return this.get('lineHeight') * this.get('content').getRowCount() +
+            this.get('padding').bottom;
     },
 
     /**
@@ -728,12 +713,9 @@ exports.EditorView = SC.View.extend({
      * TODO: When the theme property moves to this view, these properties
      * should become dependent on it.
      */
-    charWidth: function(key, value) {
-        var ctx = this.get('canvas').getContext('2d');
-        if (ctx.measureText !== undefined)
-            return ctx.measureText("M").width;
-        return this.FALLBACK_CHARACTER_WIDTH;
-    }.property().cacheable(),
+    charWidth: function() {
+        return this.getCharacterWidth(this.editor.theme.editorTextFont);
+    }.property(),
 
     /**
      * @property{Number}
@@ -743,23 +725,11 @@ exports.EditorView = SC.View.extend({
      * should become dependent on this.
      */
     lineHeight: function(key, value) {
-        var ctx = this.get('canvas').getContext('2d');
-        if (ctx.measureText !== undefined) {
-            var t = ctx.measureText("M");
-            if (!isNaN(t.ascent))
-                return Math.floor(t.ascent * 2.8);
-        }
-        return this.LINE_HEIGHT;
+        var theme = this.editor.theme;
+        var userLineHeight = theme.lineHeight;
+        return !SC.none(userLineHeight) ? userLineHeight :
+            this.guessLineHeight(theme.editorTextFont);
     }.property().cacheable(),
-
-    gutterWidth: function() {
-        var width = this.GUTTER_INSETS.left + this.GUTTER_INSETS.right
-            + this.get('content').getRowCount().toString().length
-            * this.get('charWidth');
-        if (this.editor.debugMode)
-            width += this.DEBUG_GUTTER_WIDTH;
-        return width;
-    }.property('content', 'charWidth'),
 
     /**
      * @property{Number}
@@ -768,36 +738,47 @@ exports.EditorView = SC.View.extend({
      * Read-only.
      */
     textWidth: function(key, value) {
-        return this.get('charWidth')
-            * (this.getMaxCols(0, this.get('content').getRowCount() - 1) + 1);
+        return this.get('charWidth') *
+            (this.getMaxCols(0, this.get('content').getRowCount() - 1) + 1);
     }.property('content', 'charWidth'),
 
     /**
-     * Returns the dimensions of the entire content area of the editor.
+     * @property
+     *
+     * Layout for BespinEditorViews is read-only and determined by the text
+     * height and width.
      */
-    computeLayout: function(minimumSize) {
-        var frame = this.get('frame');
-        return {
-            left:   frame.x,
-            top:    frame.y,
-            width:  minimumSize != null
-                    ? Math.max(this.getWidth(), minimumSize.width)
-                    : this.getWidth(),
-            height: minimumSize != null
-                    ? Math.max(this.getHeight(), minimumSize.height)
-                    : this.getHeight()
-        };
-    },
+    layout: function(key, value) {
+        var origin = this._origin;
+        if (!SC.none(value)) {
+            origin.left = value.left;
+            origin.top  = value.top;
+        }
 
-    /**
-     * Override for the View class's layoutStyle property that doesn't
-     * reflect the layout position in the DOM. This prevents flicker resulting
-     * from the base class's implementation of this function moving the canvas
-     * around as the user scrolls.
-     */
-    layoutStyle: function(key, value) {
-        return {};
-    }.property().cacheable(),
+        // FIXME: Until the canvas is set up, we don't know how to measure
+        // text, so lie - this should be fixed when the layer becomes a canvas
+        // as part of the canvas mixin reworking. --pcw
+        var canvas = this.$()[0];
+        if (SC.none(canvas)) {
+            return {
+                left:   origin.left,
+                top:    origin.top,
+                width:  32,
+                height: 32
+            };
+        }
+
+        return {
+            left:   origin.left,
+            top:    origin.top,
+            width:  this.LINE_INSETS.left + this.get('textWidth') +
+                    this.get('padding').right,
+            height: this.get('lineHeight') * this.get('content').getRowCount() +
+                    this.get('padding').bottom
+        };
+    }.property('canvas', 'content', 'lineHeight', 'padding', 'textWidth'),
+
+    _origin: { top: 0, left: 0 },
 
     /**
      * Forces a resize of the canvas
@@ -821,79 +802,38 @@ exports.EditorView = SC.View.extend({
         ctx.fillText(text, x, y);
         ctx.globalAlpha = 1.0;
     },
-
-    // Adjusts the width and height values of the canvas to fill the parent
-    // view.
-    resizeCanvasIfNeeded: function() {
-        if (this._editor_isResizeNeeded !== true)
-            return;
-
-        // At first these are zero, so we can't use them.
-        var parentLayer = this.get('parentView').get('layer');
-        if (parentLayer.clientWidth === 0 || parentLayer.clientHeight === 0)
-            return;
-
-        var canvas = this.get('canvas');
-        if (parentLayer.clientWidth !== canvas.width)
-            canvas.width = parentLayer.clientWidth;
-        if (parentLayer.clientHeight !== canvas.height)
-            canvas.height = parentLayer.clientHeight;
-
-        this._editor_isResizeNeeded = false;
-    },
-    _editor_isResizeNeeded: true,
-
-    /**
-     * @private
-     * Returns the width and height of the containing view (typically a
-     * ScrollView). This is used as the minimum size of the drawing area.
-     */
-    computeContainerSize: function() {
-        var parentLayer = this.get('parentView').get('layer');
-        var size = {
-            width:  parentLayer.clientWidth,
-            height: parentLayer.clientHeight
-        };
-        return size.width == 0 && size.height == 0 ? null : size;
-    },
-
-    /**
-     * @private
-     * Adjusts the width and height of the canvas to match the given size, if
-     * needed.
-     */
-    resizeCanvasToFit: function(size) {
-        var canvas = this.get('canvas');
-        if (size.width !== canvas.width)
-            canvas.width = size.width;
-        if (size.height !== canvas.height)
-            canvas.height = size.height;
-    },
+    
+    // TODO: Yuck, this property should go away once the timeout goes away.
+    _firstPaint: false,
 
     /**
      * This is where the editor is painted from head to toe.
      * The optional "fullRefresh" argument triggers a complete repaint of the
      * editor canvas; otherwise, pitiful tricks are used to draw as little as possible.
      */
-    paint: function(ctx, fullRefresh) {
+    drawRect: function(ctx, visibleFrame) {
         var content = this.get("content");
+
+        if (!this._firstPaint) {
+            // TODO: Get rid of this. On content change, trigger a layout
+            // update.
+            this.propertyWillChange('layout');
+            this.propertyDidChange('layout', this.get('layout'));
+        }
 
         fullRefresh = true; // FIXME --pcw
 
         // these are convenience references so we don't have to type so much
         var ed = this.editor;
-        var c = this.get('canvas');
+        var c = this.$()[0];
         var theme = ed.theme;
 
         // these are commonly used throughout the rendering process so are defined up here to make it clear they are shared
         var x, y;
         var cy;
         var currentLine;
-        var lastLineToRender;
 
         var Rect = scroller.Rect;
-
-        this.resizeCanvasIfNeeded();
 
         // SETUP STATE
         // if the user explicitly requests a full refresh, give it to 'em
@@ -911,24 +851,19 @@ exports.EditorView = SC.View.extend({
         // save the number of lines for the next time paint
         this.lastLineCount = content.getRowCount();
 
-        // cwidth and cheight are set to the dimensions of the parent node of
-        // the canvas element; we'll resize the canvas element
-        // itself a little bit later in this function
-        var cwidth = this.getWidth();
-        var cheight = this.getHeight();
+        // cwidth and cheight are set to the dimensions of the canvas
+        var cwidth = c.width;
+        var cheight = c.height;
 
-        // only paint those lines that can be visible
-        // TODO: calculate using clippingFrame --pcw
         var lineHeight = this.get('lineHeight');
-        this.visibleRows = Math.ceil(cheight / lineHeight);
-        this.firstVisibleRow = 0;
-        lastLineToRender = this.firstVisibleRow + this.visibleRows;
-        if (lastLineToRender > (content.getRowCount() - 1)) {
-            lastLineToRender = content.getRowCount() - 1;
-        }
+
+        var firstVisibleRow = Math.floor(visibleFrame.y / lineHeight);
+        var visibleRows = Math.ceil(visibleFrame.height / lineHeight); 
+        var lastLineToRender = Math.min(firstVisibleRow + visibleRows,
+            content.getRowCount() - 1);
 
         var virtualheight = this.getHeight();
-        var virtualwidth = this.get('textWidth');
+        var virtualwidth = this.LINE_INSETS.left + this.get('textWidth');
 
         // if the current scrolled positions are different than the scroll
         // positions we used for the last paint, refresh the entire canvas
@@ -970,96 +905,15 @@ exports.EditorView = SC.View.extend({
         // take snapshot of current context state so we can roll back later on
         ctx.save();
 
-        // Translate the canvas based on the layout position.
-        var layout = this.get('layout');
-        ctx.translate(layout.left, layout.top);
-
         // if we're doing a full repaint...
-        var clippingFrame = this.get('clippingFrame');
         if (refreshCanvas) {
-            // ...paint the background color over the whole canvas and...
+            // ...paint the background color over the whole canvas.
             ctx.fillStyle = theme.backgroundStyle;
-            ctx.fillRect(clippingFrame.x, clippingFrame.y,
-                clippingFrame.width, clippingFrame.height);
-
-            // ...paint the gutter
-            ctx.fillStyle = theme.gutterStyle;
-            ctx.fillRect(0, clippingFrame.y, this.get('gutterWidth'),
-                clippingFrame.height);
+            ctx.fillRect(visibleFrame.x, visibleFrame.y,
+                visibleFrame.width, visibleFrame.height);
         }
 
-        // the Math.round(this.yoffset) makes the painting nice and not to go over 2 pixels
-        // see for more informations:
-        //  - https://developer.mozilla.org/en/Canvas_tutorial/Applying_styles_and_colors, section "Line styles"
-        //  - https://developer.mozilla.org/@api/deki/files/601/=Canvas-grid.png
-
-        // paint the line numbers
-        if (refreshCanvas) {
-            //line markers first
-            if (bespin.get("parser")) {
-                for (currentLine = this.firstVisibleRow; currentLine <= lastLineToRender; currentLine++) {
-                    if (lineMarkers[currentLine]) {
-                        y = lineHeight * (currentLine - 1);
-                        cy = y + (lineHeight - this.LINE_INSETS.bottom);
-                        ctx.fillStyle = this.editor.theme["lineMarker" + lineMarkers[currentLine].type + "Color"];
-                        ctx.fillRect(0, y, this.get('gutterWidth'),
-                            lineHeight);
-                    }
-                 }
-            }
-            y = (lineHeight * this.firstVisibleRow);
-
-            for (currentLine = this.firstVisibleRow; currentLine <= lastLineToRender; currentLine++) {
-                x = 0;
-
-                // if we're in debug mode...
-                if (this.editor.debugMode) {
-                    // ...check if the current line has a breakpoint
-                    if (breakpoints[currentLine]) {
-                        var bpx = x + this.DEBUG_GUTTER_INSETS.left;
-                        var bpy = y + this.DEBUG_GUTTER_INSETS.top;
-                        var bpw = this.DEBUG_GUTTER_WIDTH - this.DEBUG_GUTTER_INSETS.left - this.DEBUG_GUTTER_INSETS.right;
-                        var bph = lineHeight - this.DEBUG_GUTTER_INSETS.top - this.DEBUG_GUTTER_INSETS.bottom;
-
-                        var bpmidpointx = bpx + parseInt(bpw / 2, 10);
-                        var bpmidpointy = bpy + parseInt(bph / 2, 10);
-
-                        ctx.strokeStyle = "rgb(128, 0, 0)";
-                        ctx.fillStyle = "rgb(255, 102, 102)";
-                        ctx.beginPath();
-                        ctx.arc(bpmidpointx, bpmidpointy, bpw / 2, 0, Math.PI*2, true);
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.stroke();
-                    }
-
-                    // ...and push the line number to the right, leaving a space
-                    // for breakpoint stuff
-                    x += this.DEBUG_GUTTER_WIDTH;
-                }
-
-                x += this.GUTTER_INSETS.left;
-
-                cy = y + (lineHeight - this.LINE_INSETS.bottom);
-
-                ctx.fillStyle = theme.lineNumberColor;
-                ctx.font = this.editor.theme.lineNumberFont;
-                ctx.fillText(currentLine + 1, x, cy);
-
-                y += lineHeight;
-            }
-         }
-
-        // and now we're ready to translate the horizontal axis; while we're at
-        // it, we'll setup a clip to prevent any drawing outside
-        // of code editor region itself (protecting the gutter). this clip is
-        // important to prevent text from bleeding into the gutter.
         ctx.save();
-        ctx.beginPath();
-        ctx.rect(this.get('gutterWidth'), 0.0,
-            cwidth - this.get('gutterWidth'), cheight);
-        ctx.closePath();
-        ctx.clip();
 
         // calculate the first and last visible columns on the screen; these
         // values will be used to try and avoid painting text that the user
@@ -1067,11 +921,10 @@ exports.EditorView = SC.View.extend({
         // TODO: use clippingFrame to calculate these --pcw
         var charWidth = this.get('charWidth');
         var firstColumn = 0;
-        var lastColumn = firstColumn + (Math.ceil((cwidth
-            - this.get('gutterWidth')) / charWidth));
+        var lastColumn = firstColumn + Math.ceil(cwidth / charWidth);
 
         // create the state necessary to render each line of text
-        y = (lineHeight * this.firstVisibleRow);
+        y = lineHeight * firstVisibleRow;
         // the starting column of the current region in the region render loop below
         var cc;
         // the ending column in the same loop
@@ -1085,8 +938,9 @@ exports.EditorView = SC.View.extend({
         var searchStringLength = (this.searchString ? this.searchString.length : -1);
 
         // paint each line
-        for (currentLine = this.firstVisibleRow; currentLine <= lastLineToRender; currentLine++) {
-            x = this.get('gutterWidth');
+        for (currentLine = firstVisibleRow; currentLine <= lastLineToRender;
+                currentLine++) {
+            x = 0;
 
             // if we aren't repainting the entire canvas...
             if (!refreshCanvas) {
@@ -1124,7 +978,7 @@ exports.EditorView = SC.View.extend({
                 // TODO: calculate with clippingFrame --pcw
                 ctx.fillRect(x, y, cwidth, lineHeight);
             // if not on highlight, see if we need to paint the zebra
-            } else if ((currentLine % 2) == 0) {
+            } else if ((currentLine % 2) === 0) {
                 ctx.fillStyle = theme.zebraStripeColor;
                 // TODO: calculate with clippingFrame --pcw
                 ctx.fillRect(x, y, cwidth, lineHeight);
@@ -1284,24 +1138,22 @@ exports.EditorView = SC.View.extend({
         if (this.focus) {
             if (this.showCursor) {
                 if (ed.theme.cursorType == "underline") {
-                    x = this.get('gutterWidth') + this.LINE_INSETS.left
-                        + ed.cursorManager.getCursorPosition().col
-                        * charWidth;
+                    x = this.LINE_INSETS.left +
+                        ed.cursorManager.getCursorPosition().col * charWidth;
                     y = (ed.getCursorPos().row * lineHeight) + (lineHeight - 5);
                     ctx.fillStyle = ed.theme.cursorStyle;
                     ctx.fillRect(x, y, charWidth, 3);
                 } else {
-                    x = this.get('gutterWidth') + this.LINE_INSETS.left
-                        + ed.cursorManager.getCursorPosition().col
-                        * charWidth;
+                    x = this.LINE_INSETS.left +
+                        ed.cursorManager.getCursorPosition().col * charWidth;
                     y = (ed.cursorManager.getCursorPosition().row * lineHeight);
                     ctx.fillStyle = ed.theme.cursorStyle;
                     ctx.fillRect(x, y, 1, lineHeight);
                 }
             }
         } else {
-            x = this.get('gutterWidth') + this.LINE_INSETS.left
-                + ed.cursorManager.getCursorPosition().col * charWidth;
+            x = this.LINE_INSETS.left +
+                ed.cursorManager.getCursorPosition().col * charWidth;
             y = (ed.cursorManager.getCursorPosition().row * lineHeight);
 
             ctx.fillStyle = ed.theme.unfocusedCursorFillStyle;
@@ -1317,7 +1169,8 @@ exports.EditorView = SC.View.extend({
             if (userEntries) {
                 userEntries.forEach(function(userEntry) {
                     if (!userEntry.clientData.isMe) {
-                        x = this.gutterWidth + this.LINE_INSETS.left + userEntry.clientData.cursor.start.col * charWidth;
+                        x = this.LINE_INSETS.left +
+                            userEntry.clientData.cursor.start.col * charWidth;
                         y = userEntry.clientData.cursor.start.row * lineHeight;
                         ctx.fillStyle = "#ee8c00";
                         ctx.fillRect(x, y, 1, lineHeight);
@@ -1342,28 +1195,28 @@ exports.EditorView = SC.View.extend({
                 ctx.strokeStyle = "#211A16";
                 ctx.beginPath();
                 // Line 1 (starting at column 180 - should do better)
-                x = this.gutterWidth + this.LINE_INSETS.left + 180 * charWidth;
+                x = this.LINE_INSETS.left + 180 * charWidth;
                 y = change.start.row * lineHeight;
                 ctx.moveTo(x, y);
-                x = this.gutterWidth + this.LINE_INSETS.left + change.start.col * charWidth;
+                x = this.LINE_INSETS.left + change.start.col * charWidth;
                 ctx.lineTo(x, y);
                 // Line 2
                 y += lineHeight;
                 ctx.lineTo(x, y);
                 // Line 3
-                x = this.gutterWidth + this.LINE_INSETS.left;
+                x = this.LINE_INSETS.left;
                 ctx.lineTo(x, y);
                 // Line 4
                 y = (change.end.row + 1) * lineHeight;
                 ctx.lineTo(x, y);
                 // Line 5
-                x = this.gutterWidth + this.LINE_INSETS.left + change.end.col * charWidth;
+                x = this.LINE_INSETS.left + change.end.col * charWidth;
                 ctx.lineTo(x, y);
                 // Line 6
                 y = change.end.row * lineHeight;
                 ctx.lineTo(x, y);
                 // Line 7
-                x = this.gutterWidth + this.LINE_INSETS.left + 180 * charWidth;
+                x = this.LINE_INSETS.left + 180 * charWidth;
                 ctx.lineTo(x, y);
                 // Line 8
                 y = change.start.row * lineHeight;
@@ -1405,7 +1258,7 @@ exports.EditorView = SC.View.extend({
 
     setSearchString: function(str) {
         var content = this.get("content");
-        if (str && str != '') {
+        if (str && str !== '') {
             this.searchString = str;
         } else {
             delete this.searchString;
@@ -1424,6 +1277,15 @@ exports.EditorView = SC.View.extend({
         console.log("changes=", this.changes);
     },
 
+    /**
+     * @property{Number}
+     * Stores the number of lines in the content.
+     *
+     * TODO: This is kind of lame, because it updates only on cursor movement.
+     * As part of the MVC rework, we should bind this directly to the model.
+     */
+    rowCount: 0,
+
     // Scrolls the view so that the given frame (specified in coordinates
     // relative to the top left of this view) is visible. Returns true if
     // scrolling actually occurred and false otherwise.
@@ -1439,31 +1301,35 @@ exports.EditorView = SC.View.extend({
 
         var targetX;
         var frameRight = frame.x + frame.width;
-        if (frame.x < preferredFrame.x)
+        if (frame.x < preferredFrame.x) {
             targetX = frame.x;                              // off left side
-        else if (frameRight >= preferredFrame.x + preferredFrame.width)
+        } else if (frameRight >= preferredFrame.x + preferredFrame.width) {
             targetX = frameRight - preferredFrame.width;    // off right side
-        else
+        } else {
             targetX = preferredFrame.x;                     // already visible
+        }
 
         var targetY;
         var frameBottom = frame.y + frame.height;
-        if (frame.y < preferredFrame.y)
+        if (frame.y < preferredFrame.y) {
             targetY = frame.y;                              // off left side
-        else if (frameBottom >= preferredFrame.y + preferredFrame.height)
+        } else if (frameBottom >= preferredFrame.y + preferredFrame.height) {
             targetY = frameBottom - preferredFrame.height;  // off right side
-        else
+        } else {
             targetY = preferredFrame.y;                     // already visible
+        }
 
-        if (targetX === preferredFrame.x && targetY === preferredFrame.y)
+        if (targetX === preferredFrame.x && targetY === preferredFrame.y) {
             return false;
+        }
 
         // Grab the enclosing scrollable view.
         var scrollable = this;
         do {
             scrollable = scrollable.get('parentView');
-            if (scrollable === null)
+            if (scrollable === null) {
                 return false;
+            }
         } while (scrollable.get('isScrollable') !== true);
 
         scrollable.scrollToVisible();
@@ -1471,12 +1337,14 @@ exports.EditorView = SC.View.extend({
     },
 
     // Scrolls the view so that the character at the given row and column
-    // (specified as an object with 'row' and 'col' properties) is visible.
+    // (specified as an object with 'row' and 'col' properties) is in the top
+    // left.
     _scrollToCharVisible: function(pos) {
         var charWidth = this.get('charWidth');
         var lineHeight = this.get('lineHeight');
         return this._scrollToFrameVisible({
-            x:      this.get('gutterWidth') + pos.col * charWidth,
+            x:      pos.col === 0 ? 0 :     // scroll far left for convenience
+                    this.LINE_INSETS.left + pos.col * charWidth,
             y:      pos.row * lineHeight,
             width:  charWidth,
             height: lineHeight
@@ -1488,12 +1356,9 @@ exports.EditorView = SC.View.extend({
         return this._scrollToCharVisible(cursorPos);
     },
 
-    _updateCanvasSize: function() {
-        var containerSize = this.computeContainerSize();
-        if (containerSize != null)
-            this.resizeCanvasToFit(containerSize);
-        var layout = this.computeLayout(containerSize);
-        this.adjust(layout);
+    // Updates the rowCount property.
+    _updateRowCount: function() {
+        this.set('rowCount', this.get('content').getRowCount());
     },
 
     /**
@@ -1505,13 +1370,22 @@ exports.EditorView = SC.View.extend({
         // observing) fire at the end of this routine and at the same time.
         // Fixes bug 528089.
         SC.RunLoop.begin();
-        this._updateCanvasSize();
+
+        this.propertyWillChange('layout');
+        this.propertyDidChange('layout', this.get('layout'));
+
         this._scrollToCursorVisible();
+        this._updateRowCount();
         SC.RunLoop.end();
     },
 
     dispose: function() {
-    }
+    },
+
+    _bespin_editorView_parentViewFrameDidChange: function() {
+        this.propertyWillChange('layerFrame');
+        this.propertyDidChange('layerFrame', this.get('layerFrame'));
+    }.observes('*parentView.frame')
 });
 
 /**
@@ -1602,6 +1476,8 @@ bespin.subscribe("settings:set:theme", function(event) {
 
         files.loadContents(files.userSettingsProject, "/themes/" + theme + ".js", onSuccess, onFailure);
     }
+
+    return false;
 });
 
 /**
@@ -1645,9 +1521,9 @@ var EditorWrapper = SC.Object.extend({
         var text = null;
 
         if (selectionObject) {
-            var text = this.editor.model.getChunk(selectionObject);
+            text = this.editor.model.getChunk(selectionObject);
 
-            if (text && text != '') {
+            if (text && text !== '') {
                 this.ui.actions.beginEdit('cut');
                 this.ui.actions.deleteSelection(selectionObject);
                 this.ui.actions.endEdit();

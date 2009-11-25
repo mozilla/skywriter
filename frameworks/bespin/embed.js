@@ -35,6 +35,21 @@ var bespin = require("package");
 var containerMod = require("util/container");
 var util = require("util/util");
 
+var computeLayout = function(element) {
+    var layout = {
+        top:    0,
+        left:   0,
+        width:  element.clientWidth,
+        height: element.clientHeight
+    };
+    while (!SC.none(element)) {
+        layout.top += element.offsetTop + element.clientTop;
+        layout.left += element.offsetLeft + element.clientLeft;
+        element = element.offsetParent;
+    }
+    return layout;
+};
+
 /**
  * Initialize a Bespin component on a given element.
  */
@@ -65,18 +80,26 @@ exports.useBespin = function(element, options) {
         editor = container.get("editor");
 
         var editorPane = SC.Pane.create({
-            layout: editor.computeLayout(),
+            layout: computeLayout(element),
 
-            // And here we tell SproutCore to keep its paws off the element's
-            // CSS (and also make the editor pane fill the enclosing element).
-            layoutStyle: function(key, value) {
-                return { width: '100%', height: '100%' };
-            }.property().cacheable()
+            // Tell SproutCore to keep its paws off the CSS properties 'top'
+            // and 'left'.
+            layoutStyle: function() {
+                var layout = this.get('layout');
+                var style = {
+                    width:  '' + layout.width + 'px',
+                    height: '' + layout.height + 'px'
+                };
+                return style;
+            }.property('layout')
         });
         editorPane.appendChild(editor.ui, null);
         SC.$(element).css('position', 'relative');
         element.innerHTML = "";
         editorPane.appendTo(element);
+
+        editor.element = element;
+        editor.pane = editorPane;
 
         if (options.initialContent) {
             content = options.initialContent;
@@ -101,7 +124,43 @@ exports.useBespin = function(element, options) {
         if (options.lineNumber) {
             editor.setLineNumber(options.lineNumber);
         }
+
+        // Hook the window.onresize event; this catches most of the common
+        // scenarios that result in element resizing.
+        if (SC.none(options.dontHookWindowResizeEvent) ||
+                !options.dontHookWindowResizeEvent) {
+            var handler = function() {
+                exports.elementDimensionsDidChange(editor);
+            };
+
+            if (!SC.none(window.addEventListener)) {
+                window.addEventListener('resize', handler, false);
+            } else if (!SC.none(window.attachEvent)) {
+                window.addEventListener('onresize', handler);
+            }
+        }
     });
 
     return editor;
 };
+
+/**
+ * This function must be called whenever the position or size of the element
+ * containing the Bespin editor might have changed. It triggers a layout
+ * change.
+ */
+exports.elementDimensionsDidChange = function(editor) {
+    SC.RunLoop.begin();
+
+    var pane = editor.pane;
+    var oldLayout = pane.get('layout');
+    var newLayout = computeLayout(editor.element);
+
+    if (!SC.rectsEqual(oldLayout, newLayout)) {
+        pane.adjust(newLayout);
+        pane.updateLayout();    // writes the layoutStyle to the DOM
+    }
+
+    SC.RunLoop.end();
+};
+
