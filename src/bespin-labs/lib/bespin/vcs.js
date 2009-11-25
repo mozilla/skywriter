@@ -208,7 +208,7 @@ exports.commands.addCommand({
                         delete data.password;
                     }
                 }
-                data = dojo.objectToQuery(data);
+                data = util.objectToQuery(data);
                 var outer = dojo.create("div", {});
                 var throbber = dojo.create("img",
                     {src: "/images/throbber.gif"}, outer);

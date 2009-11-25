@@ -61,6 +61,37 @@ exports.queryToObject = function(str, seperator) {
 };
 
 /**
+ * Takes a name/value mapping object and returns a string representing a
+ * URL-encoded version of that object for use in a GET request
+ * <p>For example, given the input:
+ * <code>{ blah: "blah", multi: [ "thud", "thonk" ] }</code>
+ * The following string would be returned:
+ * <code>"blah=blah&multi=thud&multi=thonk"</code>
+ * @param map {Object} The object to convert
+ * @return {string} A URL-encoded version of the input
+ */
+exports.objectToQuery = function(map) {
+    // FIXME: need to implement encodeAscii!!
+    var enc = encodeURIComponent;
+    var pairs = [];
+    var backstop = {};
+    for (var name in map) {
+        var value = map[name];
+        if (value != backstop[name]) {
+            var assign = enc(name) + "=";
+            if (_d.isArray(value)) {
+                for (var i = 0; i < value.length; i++) {
+                    pairs.push(assign + enc(value[i]));
+                }
+            } else {
+                pairs.push(assign + enc(value));
+            }
+        }
+    }
+    return pairs.join("&");
+};
+
+/**
  * Holds the count to keep a unique value for setTimeout
  * @private See rateLimit()
  */
