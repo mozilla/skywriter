@@ -235,3 +235,16 @@ pre {
     border:1px solid #DADADA;
     margin-bottom: 1.8em;
 }
+
+sup {
+    height: 0;
+    line-height: 1;
+    position: relative;
+    top: -0.6em;
+    vertical-align: bottom;
+}
+
+sup a {
+    text-decoration: none;
+    border-bottom: none;
+}

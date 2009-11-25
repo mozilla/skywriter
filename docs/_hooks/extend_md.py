@@ -1,6 +1,6 @@
 import markdown
 
-MARKDOWN_EXTENSIONS = ["def_list", "fenced_code", "codehilite", "tables"]
+MARKDOWN_EXTENSIONS = ["def_list", "fenced_code", "codehilite", "tables", "footnotes"]
 
 def extended_markdown(text):
     if isinstance(text, str):
