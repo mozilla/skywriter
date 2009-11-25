@@ -378,6 +378,7 @@ exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
     mouseExited: function(evt) {
         SC.RunLoop.begin();
         this._isMouseOver = false;
+        this._mouseDownScreenPoint = null;
         this.set('layerNeedsUpdate', true);
         SC.RunLoop.end();
     },
