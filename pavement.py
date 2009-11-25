@@ -40,7 +40,7 @@ import paver.virtual
 
 options(
     version=Bunch(
-        number="0.5",
+        number="0.5.1",
         name="Reboot1",
         api="4"
     ),
