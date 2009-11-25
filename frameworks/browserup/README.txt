@@ -1,1 +1,0 @@
-This is code from Narwhal (http://narwhaljs.org/) that brings browsers up to ECMAScript 5 spec as much as possible.

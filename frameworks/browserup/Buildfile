@@ -1,3 +1,0 @@
-config :browserup,
-  :required => [:tiki, 'tiki/system'],
-  :use_modules => true

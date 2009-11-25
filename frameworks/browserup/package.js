@@ -1,2 +1,0 @@
-require('function');
-require('array');
