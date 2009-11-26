@@ -16,6 +16,7 @@
 ^build/
 ^frameworks/sproutcore
 ^frameworks/tiki
+^frameworks/core_test
 ^abbot
 ^external
 
