@@ -77,12 +77,13 @@ def install_sproutcore(options):
     """Installs the versions of SproutCore that are required.
     Can optionally download using git, so that you can keep
     up to date easier."""
-    abbot_path = path("abbot")
-    if abbot_path.exists():
-        info("abbot directory exists, no action required.")
-        return
 
     def get_component(base_name, dest_name, dest_path=".", branch="master"):
+        dest_complete = path(dest_path) / dest_name
+        if dest_complete.exists():
+            info("%s is already here, no action being taken", base_name)
+            return
+            
         if not options.git:
             print "Downloading %s/%s as a tarball" % (base_name, branch)
             tarball = urllib2.urlopen("http://github.com/sproutit/%s/tarball/%s" % (base_name, branch))

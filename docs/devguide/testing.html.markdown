@@ -17,9 +17,10 @@ very good code coverage
 Running the Tests
 -----------------
 
-As of this writing, you will need [Firebug](http://getfirebug.com/) to view the
-results of the test suite. To run the tests from your browser, fire up the
-development server and then point your browser at 
+As of this writing, the test results are displayed to the browser console,
+so you will need [Firebug](http://getfirebug.com/) or similar. To run the 
+tests from your browser, fire up the development server and then point 
+your browser at 
 [`http://localhost:4020/bespin/en/current/tests/editor.html`](http://localhost:4020/bespin/en/current/tests/editor.html).
 To run other tests, replace `editor` with the name of the test as appropriate.
 (You can find the names of the tests by looking at the names of the files in
