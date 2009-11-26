@@ -27,6 +27,7 @@
 # 
 import sys
 import os
+import os.path
 import subprocess
 import urllib2
 import tarfile
@@ -80,39 +81,27 @@ def install_sproutcore(options):
     if abbot_path.exists():
         info("abbot directory exists, no action required.")
         return
-    if not options.git:
-        print "download sproutcore-abbot/tiki"
-        abbot_tarball = urllib2.urlopen("http://github.com/sproutit/sproutcore-abbot/tarball/tiki")
-        abbot_dirname = abbot_tarball.url.split('/')[-1].split('.')[0]
-        abbot_tar = tarfile.open(name="sproutcore-abbot.tgz", fileobj = StringIO(abbot_tarball.read()))
-        abbot_tar.extractall()
-        abbot_tar.close()
-        os.rename(abbot_dirname, "abbot")
 
-        print "download sproutcore/tiki"
-        sproutcore_tarball = urllib2.urlopen("http://github.com/sproutit/sproutcore/tarball/tiki")
-        sproutcore_dirname = sproutcore_tarball.url.split('/')[-1].split('.')[0]
-        sproutcore_tar = tarfile.open(name="sproutcore.tgz", fileobj = StringIO(sproutcore_tarball.read()))
-        sproutcore_tar.extractall(path = "frameworks")
-        sproutcore_tar.close()
-        os.rename("frameworks/%s" % sproutcore_dirname, "frameworks/sproutcore")
+    def get_component(base_name, dest_name, dest_path=".", branch="master"):
+        if not options.git:
+            print "Downloading %s/%s as a tarball" % (base_name, branch)
+            tarball = urllib2.urlopen("http://github.com/sproutit/%s/tarball/%s" % (base_name, branch))
+            dirname = tarball.url.split('/')[-1].split('.')[0]
+            tar = tarfile.open(name=("%s.tgz" % base_name), fileobj=StringIO(tarball.read()))
+            tar.extractall(dest_path)
+            tar.close()
+            os.rename(os.path.join(dest_path, dirname), os.path.join(dest_path, dest_name))
+            return
 
-        print "download tiki"
-        tiki_tarball = urllib2.urlopen("http://github.com/sproutit/tiki/tarball/master")
-        tiki_dirname = tiki_tarball.url.split('/')[-1].split('.')[0]
-        tiki_tar = tarfile.open(name="tiki.tgz", fileobj = StringIO(tiki_tarball.read()))
-        tiki_tar.extractall(path = "frameworks")
-        tiki_tar.close()
-        os.rename("frameworks/%s" % tiki_dirname, "frameworks/tiki")
-    else:
-        # use git
-        sh("git clone -q git://github.com/sproutit/sproutcore-abbot.git abbot")
-        sh("git checkout -b origin/tiki", cwd=abbot_path)
-        sh("git pull origin tiki", cwd=abbot_path)
-        sh("git clone -q git://github.com/sproutit/sproutcore.git", cwd="frameworks")
-        sh("git checkout -b origin/tiki", cwd="frameworks/sproutcore")
-        sh("git pull origin tiki", cwd="frameworks/sproutcore")
-        sh("git clone -q git://github.com/sproutit/tiki.git", cwd="frameworks")
+        print "Checking out %s/%s" % (base_name, branch)
+        sh("git clone -q git://github.com/sproutit/%s.git %s" % (base_name, dest_name), cwd=dest_path)
+        sh("git checkout -b origin/%s" % branch, cwd=os.path.join(dest_path, dest_name))
+        sh("git pull origin %s" % branch, cwd=os.path.join(dest_path, dest_name))
+
+    get_component("sproutcore-abbot", "abbot", branch="tiki")
+    get_component("sproutcore", "sproutcore", dest_path="frameworks", branch="tiki")
+    get_component("tiki", "tiki", dest_path="frameworks")
+    get_component("core_test", "core_test", dest_path="frameworks")
 
 @task
 @needs(["install_sproutcore"])
