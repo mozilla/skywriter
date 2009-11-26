@@ -161,39 +161,3 @@ component).",
         ]
     }
 };
-
-/*
-These old factory methods were from bespin.js, and we should convert them to
-use the factories system above
-    popup: function(onCreate) {
-        exports.plugins.loadOne("popup", function(popupmod) {
-            onCreate(new popupmod.Window());
-        });
-    },
-    piemenu: function(onCreate) {
-        exports.plugins.loadOne("piemenu", function(piemenumod) {
-            var piemenu = new piemenumod.Window();
-            // the pie menu doesn't animate properly
-            // without restoring control to the UI temporarily
-            setTimeout(function() { onCreate(piemenu); }, 25);
-        });
-    },
-    commandLine: function(onCreate) {
-        exports.plugins.loadOne("commandLine", function(commandline) {
-            onCreate(new commandline.Interface('command', exports.command.store));
-        });
-    },
-    debugbar: function(onCreate) {
-        exports.plugins.loadOne("debugbar", function(debug) {
-            onCreate(new debug.EvalCommandLineInterface('debugbar_command', null, {
-                idPrefix: "debugbar_",
-                parentElement: document.getElementById("debugbar")
-            }));
-        });
-    },
-    breakpoints: function(onCreate) {
-        exports.plugins.loadOne("breakpoints", function(BreakpointManager) {
-            onCreate(new BreakpointManager());
-        });
-    }
-*/

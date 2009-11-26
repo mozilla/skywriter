@@ -24,7 +24,7 @@
 
 var util = require("util/util");
 var builtins = require("builtins");
-var plugins = require("plugins");
+var pluginCatalog = require("plugins").catalog;
 var SC = require("sproutcore/runtime").SC;
 var system = require("system");
 
@@ -59,7 +59,6 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
      */
     init: function() {
         this.register("ioc", this);
-        this.register("plugins", plugins.Catalog.create());
 
         // To prevent a loop where a requires b, requires a we track things we
         // are creating, and if asked to create something that's already there,
@@ -199,9 +198,7 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
 
         this._beingCreated[id] = onCreate;
         try {
-            var catalog = this.get("plugins");
-
-            var extension = catalog.getExtensionByKey("factory", id);
+            var extension = pluginCatalog.getExtensionByKey("factory", id);
             if (extension === undefined) {
                 console.trace();
                 throw "No component factory '" + id + "'";

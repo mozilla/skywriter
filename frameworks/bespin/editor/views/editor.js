@@ -32,6 +32,7 @@ var clipboard = require("util/clipboard");
 var cursor = require('cursor');
 var scroller = require('editor/views/scroller');
 var canvas = require('editor/mixins/canvas');
+var pluginCatalog = require("plugins").catalog;
 
 var SelectionHelper = SC.Object.extend({
     editor: null,
@@ -138,7 +139,6 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
     init: function() {
         var settings = bespin.get("settings");
 
-        var pluginCatalog = bespin.get("plugins");
         var ep = pluginCatalog.getExtensionPoint("syntax.engine");
         // set model to a default that will work until the real thing is loaded
         this.syntaxModel = syntax.Model.create();

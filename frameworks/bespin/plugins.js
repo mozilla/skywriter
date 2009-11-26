@@ -190,6 +190,8 @@ exports.Catalog = SC.Object.extend({
     }
 });
 
+exports.catalog = exports.Catalog.create();
+
 exports.startupHandler = function(ep) {
     ep.load(function(func) {
         console.log("Startup calling: " + ep.pointer);
