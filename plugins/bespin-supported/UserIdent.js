@@ -22,6 +22,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// ---plugin.json---
+var metadata = {
+    "depends": ["BespinServer"],
+    "provides": [ {
+            "ep": "startup",
+            "pointer": "#showSignup"
+        }
+    ]
+};
+// ---
+
 var SC = require("sproutcore/runtime:package").SC;
 var util = require("bespin:util/util");
 var bespin = require("bespin");

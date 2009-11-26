@@ -21,6 +21,10 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * ***** END LICENSE BLOCK ***** */
+ 
+// ---plugin.json---
+{}
+// ---
 
 var bespin = require("bespin");
 var util = require("bespin:util/util");
