@@ -27,9 +27,9 @@ var command = require("bespin/command");
 var webpieces = require("bespin/util/webpieces");
 
 // TODO: For this and for other sub-command sets. I think that the resources
-// exposed here are exposed through the Store ctor keeping a reference to them
+// exposed here are exposed through the Canon ctor keeping a reference to them
 // which has the following implications:
-// - it breaks reload, or could cause Store to get confused as the 'same thing'
+// - it breaks reload, or could cause Canon to get confused as the 'same thing'
 //   is added more than once
 // - it means that we don't need to do any exports at all.
 
@@ -37,7 +37,7 @@ var webpieces = require("bespin/util/webpieces");
  * Command store for the group commands
  * (which are subcommands of the main 'group' command)
  */
-exports.commands = new command.Store(command.store, {
+exports.commands = new command.Canon(command.rootCanon, {
     name: 'project',
     preview: 'Various commands to manage projects'
 });
@@ -244,22 +244,22 @@ exports.commands.addCommand({
 
     upload: function(project) {
         // use the center popup and inject a form in that points to the right place.
-        var el = dojo.byId('centerpopup');
+        var el = document.getElementById('centerpopup');
 
 
         el.innerHTML = "<div id='upload-container'><form method='POST' name='upload' id='upload' enctype='multipart/form-data'><div id='upload-header'>Import project via upload <img id='upload-close' src='images/icn_close_x.png' align='right'></div><div id='upload-content'><div id='upload-status'></div><p>Browse to find the project archive that you wish to archive<br>and then click on the <code>Upload</code> button.</p><center><input type='file' id='filedata' name='filedata' accept='application/zip,application/x-gzip'> <input type='submit' value='Upload'></center></div></form></div>";
 
-        dojo.connect(dojo.byId('upload'), "submit", function() {
-            dojo.byId('upload-status').innerHTML = 'Importing file into new project ' + project;
+        dojo.connect(document.getElementById('upload'), "submit", function() {
+            document.getElementById('upload-status').innerHTML = 'Importing file into new project ' + project;
             dojo.io.iframe.send({
                 url: '/project/import/' + project,
-                form: dojo.byId('upload'),
+                form: document.getElementById('upload'),
                 method: 'POST',
                 handleAs: 'text',
                 preventCache: true,
                 contentType: "multipart/form-data",
                 load: function(data, ioArg) {
-                    dojo.byId('upload-status').innerHTML = 'Thanks for uploading the file!';
+                    document.getElementById('upload-status').innerHTML = 'Thanks for uploading the file!';
                 },
                 error: function(error, ioArg) {
                     setTimeout(function() {
@@ -269,9 +269,9 @@ exports.commands.addCommand({
                             };
                             if (projectNames.some(isProject)) {
                                 bespin.publish("project:created", { project: project });
-                                dojo.byId('upload-status').innerHTML = 'Archive imported and project ' + project + ' has been created!';
+                                document.getElementById('upload-status').innerHTML = 'Archive imported and project ' + project + ' has been created!';
                             } else {
-                                dojo.byId('upload-status').innerHTML = 'Error uploading the file. Sorry, try again!';
+                                document.getElementById('upload-status').innerHTML = 'Error uploading the file. Sorry, try again!';
                             }
                         });
                     }, 100);
@@ -290,8 +290,8 @@ exports.commands.addCommand({
             dojo.disconnect(uploadClose);
             dojo.disconnect(overlay);
         };
-        uploadClose = dojo.connect(dojo.byId("upload-close"), "onclick", hideCenterPopup);
-        overlay = dojo.connect(dojo.byId("overlay"), "onclick", hideCenterPopup);
+        uploadClose = dojo.connect(document.getElementById("upload-close"), "onclick", hideCenterPopup);
+        overlay = dojo.connect(document.getElementById("overlay"), "onclick", hideCenterPopup);
     },
 
     /**

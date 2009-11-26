@@ -67,7 +67,7 @@ exports.wizard = {
 
         // When the HTML fetch succeeds, display it in the centerpopup div
         var onSuccess = function(data) {
-            self.element = dojo.byId('centerpopup');
+            self.element = document.getElementById('centerpopup');
             self.element.innerHTML = data;
             dojo.query("#centerpopup script").forEach(function(node) {
                 eval(node.innerHTML);

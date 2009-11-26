@@ -240,7 +240,7 @@ exports.commands.addCommand({
  * <p>If you "set jetpack on", wire up the toolbar to have the jetpack icon
  */
 bespin.subscribe("settings:set:jetpack", function(event) {
-    var jptb = dojo.byId('toolbar_jetpack');
+    var jptb = document.getElementById('toolbar_jetpack');
 
     // turn it off
     if (event.value) {
@@ -252,7 +252,7 @@ bespin.subscribe("settings:set:jetpack", function(event) {
             jptb.style.display = 'inline';
         } else {
             // <img id="toolbar_jetpack" src="images/icn_jetpack.png" alt="Jetpack" style="padding-left: 10px;" title="Jetpack (show or hide menu)">
-            dojo.byId('toolbar').appendChild(dojo.create("img", {
+            document.getElementById('toolbar').appendChild(dojo.create("img", {
                 id: "toolbar_jetpack",
                 src: "images/icn_jetpack.png",
                 alt: "Jetpack",
@@ -271,7 +271,7 @@ bespin.subscribe("settings:set:jetpack", function(event) {
  */
 bespin.subscribe("toolbar:init", function(event) {
     event.toolbar.addComponent('jetpack', function(toolbar, el) {
-        var jetpack = dojo.byId(el) || dojo.byId("toolbar_jetpack");
+        var jetpack = dojo.byId(el) || document.getElementById("toolbar_jetpack");
 
         var highlightOn = function() {
             jetpack.src = "images/icn_jetpack_on.png";
@@ -283,7 +283,7 @@ bespin.subscribe("toolbar:init", function(event) {
 
         dojo.connect(jetpack, 'mouseover', highlightOn);
         dojo.connect(jetpack, 'mouseout',  function() {
-            var dropdown = dojo.byId('jetpack_dropdown');
+            var dropdown = document.getElementById('jetpack_dropdown');
             if (!dropdown || dropdown.style.display == 'none') {
                 highlightOff();
             }
@@ -291,7 +291,7 @@ bespin.subscribe("toolbar:init", function(event) {
 
         // Change the font size between the small, medium, and large settings
         dojo.connect(jetpack, 'click', function() {
-            var dropdown = dojo.byId('jetpack_dropdown');
+            var dropdown = document.getElementById('jetpack_dropdown');
 
             if (!dropdown || dropdown.style.display == 'none') { // no dropdown or hidden, so show
                 highlightOn();
@@ -321,14 +321,14 @@ bespin.subscribe("toolbar:init", function(event) {
 
                     var cl = bespin.get("commandLine");
                     // create a new jetpack
-                    dojo.connect(dojo.byId('jetpack_dropdown_now_create'), 'click', function() {
-                        cl.executeCommand('jetpack create ' + dojo.byId('jetpack_dropdown_input_create').value);
+                    dojo.connect(document.getElementById('jetpack_dropdown_now_create'), 'click', function() {
+                        cl.executeCommand('jetpack create ' + document.getElementById('jetpack_dropdown_input_create').value);
                         dropdown.style.display = 'none';
                     });
 
                     // install a jetpack
-                    dojo.connect(dojo.byId('jetpack_dropdown_now_install'), 'click', function() {
-                        cl.executeCommand('jetpack install ' + dojo.byId('jetpack_dropdown_input_install').value);
+                    dojo.connect(document.getElementById('jetpack_dropdown_now_install'), 'click', function() {
+                        cl.executeCommand('jetpack install ' + document.getElementById('jetpack_dropdown_input_install').value);
                         dropdown.style.display = 'none';
                     });
 
@@ -361,7 +361,7 @@ exports.install = function(feature) {
 
     // Use the custom event to install
     // var event = document.createEvent("Events");
-    // var element = dojo.byId("jetpackInstallEvent");
+    // var element = document.getElementById("jetpackInstallEvent");
     //
     // // create a jetpack event element if it doesn't exist.
     // if (!element) {
@@ -387,7 +387,7 @@ exports.sizeDropDownBorder = function(dd) {
     if (dd) {
         keephidden = true;
     } else {
-        dd = dojo.byId('jetpack_dropdown');
+        dd = document.getElementById('jetpack_dropdown');
     }
 
     if (keephidden) {
@@ -421,7 +421,7 @@ exports.loadInstallScripts = function() {
             }).join("");
         }
 
-        dojo.byId("jetpack_dropdown_input_install").innerHTML = output;
+        document.getElementById("jetpack_dropdown_input_install").innerHTML = output;
         exports.sizeDropDownBorder();
     });
 };

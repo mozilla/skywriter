@@ -29,7 +29,7 @@ var util = require("bespin/util/util");
 /**
  * 'search' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'search',
     takes: ['searchString'],
     preview: 'searches the current file for the given searchString',
@@ -73,7 +73,7 @@ command.store.addCommand({
             }
         }
     };
-    command.store.addCommand(gotoCmd);
+    command.rootCanon.addCommand(gotoCmd);
     bespin.subscribe("settings:set:syntaxcheck", function () {
         var settings = bespin.get("settings");
         if (settings.values.syntaxcheck) {
@@ -89,7 +89,7 @@ command.store.addCommand({
 /**
  * 'replace' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'replace',
     takes: ['search', 'replace'],
     preview: 's/foo/bar/g',
@@ -102,7 +102,7 @@ command.store.addCommand({
 /**
  * 'sort' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'sort',
     takes: ['direction'],
     preview: 'sort the current buffer',
@@ -120,7 +120,7 @@ command.store.addCommand({
 /**
  * 'entab' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'entab',
     takes: ['tabsize'],
     preview: 'Convert spaces to tabs.',
@@ -143,7 +143,7 @@ command.store.addCommand({
 /**
  * 'detab' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'detab',
     takes: ['tabsize'],
     preview: 'Convert tabs to spaces.',
@@ -166,7 +166,7 @@ command.store.addCommand({
 /**
  * 'trim' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'trim',
     takes: ['side'], // left, right, both
     preview: 'trim trailing or leading whitespace',
@@ -192,7 +192,7 @@ command.store.addCommand({
 /**
  * 'uc' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'uc',
     preview: 'Change all selected text to uppercase',
     withKey: "CMD SHIFT U",
@@ -205,7 +205,7 @@ command.store.addCommand({
 /**
  * 'lc' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'lc',
     preview: 'Change all selected text to lowercase',
     withKey: "CMD SHIFT L",
@@ -218,7 +218,7 @@ command.store.addCommand({
 /**
  * 'outline' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'outline',
     preview: 'show outline of source code',
     withKey: "ALT SHIFT O",

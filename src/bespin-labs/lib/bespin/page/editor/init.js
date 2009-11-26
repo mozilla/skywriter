@@ -50,12 +50,12 @@ var statusScene;
  * (e.g. file view, session view) move the items around
  */
 exports.recalcLayout = function() {
-    //var subheader = dojo.byId("subheader");
-    var footer = dojo.byId("footer");
-    var editor = dojo.byId("editor");
-    var files = dojo.byId("files");
-    var collab = dojo.byId("collab");
-    var target = dojo.byId("target_browsers");
+    //var subheader = document.getElementById("subheader");
+    var footer = document.getElementById("footer");
+    var editor = document.getElementById("editor");
+    var files = document.getElementById("files");
+    var collab = document.getElementById("collab");
+    var target = document.getElementById("target_browsers");
 
     var move = [ editor ];
 
@@ -66,7 +66,7 @@ exports.recalcLayout = function() {
 
     // This should really move into a debugger plugin!
     // note also that this interferes with collab below.
-    var debugbar = dojo.byId("debugbar");
+    var debugbar = document.getElementById("debugbar");
     if (debugbar.style.display == "block") {
         move.forEach(function(item) { item.style.right = "201px"; });
     }
@@ -105,7 +105,7 @@ exports.doResize = function() {
  * It paints "project name [status of clean or dirty] file name"
  */
 var ProjectStatusScene = function() {
-    var scene = new th.Scene(dojo.byId("projectStatus"));
+    var scene = new th.Scene(document.getElementById("projectStatus"));
     var panel = new th.Panel();
 
     var projectLabel = new th.Label({ className: "statusProject" });

@@ -36,7 +36,7 @@ var DIFF_INSERT = diff_match_patch.DIFF_INSERT;
 /**
  * 'files' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'files',
     aliases: ['ls', 'list'],
     takes: ['path'],
@@ -63,7 +63,7 @@ command.store.addCommand({
 /**
  * 'mkdir' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'mkdir',
     takes: ['path'],
     preview: 'create a new directory, use a leading / to create a directory in a different project',
@@ -98,7 +98,7 @@ command.store.addCommand({
 /**
  * 'save' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'save',
     takes: ['filename'],
     preview: 'save the current contents',
@@ -113,7 +113,7 @@ command.store.addCommand({
 /**
  * 'open' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'open',
     aliases: ['load'],
     takes: ['path', 'line'],
@@ -135,7 +135,7 @@ command.store.addCommand({
 /**
  * 'revert' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'revert',
     preview: 'revert the file to the last saved version',
     execute: function(instruction, opts) {
@@ -156,7 +156,7 @@ command.store.addCommand({
 /**
  * 'status' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'status',
     preview: 'get info on the current project and file',
     execute: function(instruction) {
@@ -167,7 +167,7 @@ command.store.addCommand({
 /**
  * 'newfile' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'newfile',
     //aliases: ['new'],
     takes: ['filename'],
@@ -185,7 +185,7 @@ command.store.addCommand({
 /**
  * 'rm' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'rm',
     aliases: ['remove', 'del'],
     takes: ['filename'],
@@ -224,7 +224,7 @@ command.store.addCommand({
 /**
  * 'clear' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'clear',
     aliases: ['cls'],
     preview: 'clear the file',
@@ -236,7 +236,7 @@ command.store.addCommand({
 /**
  * 'quota' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'quota',
     preview: 'show your quota info',
     megabytes: function(bytes) {
@@ -255,7 +255,7 @@ command.store.addCommand({
 /**
  * 'rescan' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'rescan',
     takes: ['project'],
     preview: 'update the project catalog of files used by quick open',
@@ -292,7 +292,7 @@ command.store.addCommand({
 /**
  * 'timemachine' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'timemachine',
     takes: ['revision'],
     preview: 'look at older versions of the current file',

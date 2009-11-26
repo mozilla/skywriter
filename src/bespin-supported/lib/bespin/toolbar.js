@@ -76,7 +76,7 @@ exports.Toolbar = SC.Object.extend({
     setupDefault: function() {
         var self = this;
         this.DEFAULT_TOOLBAR.forEach(function(item) {
-            var item_el = dojo.byId("toolbar_" + item);
+            var item_el = document.getElementById("toolbar_" + item);
             if (item_el) {
                 self.setup(item, item_el);
             }
@@ -91,7 +91,7 @@ exports.Toolbar = SC.Object.extend({
 
     components: {
         collaboration: function(toolbar, el) {
-            var collab = dojo.byId(el) || dojo.byId("toolbar_collaboration");
+            var collab = dojo.byId(el) || document.getElementById("toolbar_collaboration");
             dojo.connect(collab, 'click', function() {
                 toolbar.showCollab = !toolbar.showCollab;
                 editor.recalcLayout();
@@ -99,7 +99,7 @@ exports.Toolbar = SC.Object.extend({
         },
 
         filepopup: function(toolbar, el) {
-            var filepopup = dojo.byId(el) || dojo.byId("toolbar_popup");
+            var filepopup = dojo.byId(el) || document.getElementById("toolbar_popup");
 
             dojo.connect(filepopup, 'click', function() {
                 toolbar.editor.ui.actions.focusFileBrowser();
@@ -117,7 +117,7 @@ exports.Toolbar = SC.Object.extend({
         },
 
         commandline: function(toolbar, el) {
-            var commandline = dojo.byId(el) || dojo.byId("toolbar_commandline");
+            var commandline = dojo.byId(el) || document.getElementById("toolbar_commandline");
 
             dojo.connect(commandline, 'click', function() {
                 toolbar.editor.ui.actions.focusCommandline();
@@ -135,7 +135,7 @@ exports.Toolbar = SC.Object.extend({
         },
 
         target_browsers: function(toolbar, el) {
-            var target = dojo.byId(el) || dojo.byId("toolbar_target_browsers");
+            var target = dojo.byId(el) || document.getElementById("toolbar_target_browsers");
             dojo.connect(target, 'click', function() {
                 toolbar._showTarget = !toolbar._showTarget;
                 target.src = "images/" + ( (toolbar._showTarget) ? "icn_target_on.png" : "icn_target_off.png" );
@@ -152,7 +152,7 @@ exports.Toolbar = SC.Object.extend({
         },
 
         save: function(toolbar, el) {
-            var save = dojo.byId(el) || dojo.byId("toolbar_save");
+            var save = dojo.byId(el) || document.getElementById("toolbar_save");
             dojo.connect(save, 'mouseover', function() {
                 save.src = "images/icn_save_on.png";
             });
@@ -167,7 +167,7 @@ exports.Toolbar = SC.Object.extend({
         },
 
         close: function(toolbar, el) {
-            var close = dojo.byId(el) || dojo.byId("toolbar_close");
+            var close = dojo.byId(el) || document.getElementById("toolbar_close");
             dojo.connect(close, 'mouseover', function() {
                 close.src = "images/icn_close_on.png";
             });
@@ -182,7 +182,7 @@ exports.Toolbar = SC.Object.extend({
         },
 
         undo: function(toolbar, el) {
-            var undo = dojo.byId(el) || dojo.byId("toolbar_undo");
+            var undo = dojo.byId(el) || document.getElementById("toolbar_undo");
             dojo.connect(undo, 'mouseover', function() {
                 undo.src = "images/icn_undo_on.png";
             });
@@ -197,7 +197,7 @@ exports.Toolbar = SC.Object.extend({
         },
 
         redo: function(toolbar, el) {
-            var redo = dojo.byId(el) || dojo.byId("toolbar_undo");
+            var redo = dojo.byId(el) || document.getElementById("toolbar_undo");
 
             dojo.connect(redo, 'mouseover', function() {
                 redo.src = "images/icn_redo_on.png";
@@ -213,7 +213,7 @@ exports.Toolbar = SC.Object.extend({
         },
 
         preview: function(toolbar, el) {
-            var preview = dojo.byId(el) || dojo.byId("toolbar_preview");
+            var preview = dojo.byId(el) || document.getElementById("toolbar_preview");
 
             dojo.connect(preview, 'mouseover', function() {
                 preview.src = "images/icn_preview_on.png";
@@ -230,7 +230,7 @@ exports.Toolbar = SC.Object.extend({
         },
 
         fontsize: function(toolbar, el) {
-            var fontsize = dojo.byId(el) || dojo.byId("toolbar_fontsize");
+            var fontsize = dojo.byId(el) || document.getElementById("toolbar_fontsize");
 
             dojo.connect(fontsize, 'mouseover', function() {
                 fontsize.src = "images/icn_fontsize_on.png";

@@ -80,9 +80,9 @@ exports.show = function(filename, project, type) {
     bespin.get("editor").saveFile(null, filename);
 
     if (type == "inline") {
-        var preview = dojo.byId("preview");
-        var subheader = dojo.byId("subheader");
-        var editor = dojo.byId("editor");
+        var preview = document.getElementById("preview");
+        var subheader = document.getElementById("subheader");
+        var editor = document.getElementById("editor");
         if (dojo.style(preview, "display") == "none") {
             dojo.style(editor, "display", "none");
             dojo.style(subheader, "display", "none");
@@ -109,8 +109,8 @@ exports.show = function(filename, project, type) {
     }
 
     if (type == "iphone") {
-        var centerpopup = dojo.byId("centerpopup");
-        if (dojo.byId("iphoneIframe") == null) {
+        var centerpopup = document.getElementById("centerpopup");
+        if (document.getElementById("iphoneIframe") == null) {
             var iphoneIframe = dojo.create("iframe", {
                 id: "iphoneIframe",
                 frameBorder: 0,

@@ -63,6 +63,6 @@ exports.StatusChecker = SC.Object.extend({
     },
 
     setStatus: function(message) {
-        dojo.byId('message').innerHTML = message;
+        document.getElementById('message').innerHTML = message;
     }
 });
