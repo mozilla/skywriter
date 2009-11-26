@@ -27,15 +27,6 @@ var util = require("bespin/util/util");
 var command = require("bespin/command");
 
 /**
- * Hack copied from dojo. We should probably either decide we need one of these
- * in our utilities library or merge isObject into eval.execute.
- */
-isObject = function(it){
-    return it !== undefined &&
-        (it === null || typeof it == "object" || d.isArray(it) || d.isFunction(it));
-};
-
-/**
  * 'eval' command
  */
 command.store.addCommand({
@@ -59,7 +50,7 @@ command.store.addCommand({
             // converts the function to a well formated string
             msg = (result + '').replace(/\n/g, '<br>').replace(/ /g, '&#160');
             type = 'function';
-        } else if (isObject(result)) {
+        } else if (util.isObject(result)) {
             if (Array.isArray(result)) {
                 type = 'array';
             } else {
@@ -72,7 +63,7 @@ command.store.addCommand({
             for (x in result) {
                 if (util.isFunction(result[x])) {
                     value = "[function]";
-                } else if (isObject(result[x])) {
+                } else if (util.isObject(result[x])) {
                     value = "[object]";
                 } else {
                     value = result[x];

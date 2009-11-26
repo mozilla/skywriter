@@ -133,6 +133,15 @@ exports.isString = function(it) {
 };
 
 /**
+ * Hack copied from dojo.
+ */
+exports.isObject = function(it) {
+    return it !== undefined &&
+        (it === null || typeof it == "object" ||
+        d.isArray(it) || d.isFunction(it));
+};
+
+/**
  * Is the passed object a function?
  * From dojo.isFunction()
  */
