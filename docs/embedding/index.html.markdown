@@ -134,12 +134,12 @@ and keep it updated whenever the window size changes, so normally this all
 occurs behind the scenes and you don't need to worry about it. However, if
 you're altering elements in the DOM through JavaScript in ways that might cause
 the Bespin editor to move around, then you'll need to let Bespin know that its
-position might have changed. You can use the `editorDimensionsDidChange()`
-function to do this. Pass in the editor object that you received from the
-`useBespin()` call whenever you programmatically update the absolute position
-of the editor on the page, whether directly (through altering the style of the
-Bespin element itself) or indirectly (through altering the style of some other
-element that triggers a reflow). For example, suppose we have this page:
+position might have changed. You can use the `dimensionsChanged()` function to
+do this. Pass in the editor object that you received from the `useBespin()` call
+whenever you programmatically update the absolute position of the editor on the
+page, whether directly (through altering the style of the Bespin element itself)
+or indirectly (through altering the style of some other element that triggers a
+reflow). For example, suppose we have this page:
 
     :::html
     <div id="box" style="display: inline-block; width: 100px;">Hello</div>
@@ -153,13 +153,13 @@ And this JavaScript:
 
 Notice that the position of the Bespin editor on the page is determined by the
 width of the box next to it, since both elements have _inline-block_ layout.
-So, if the width of the adjacent box ever changes, `editorDimensionsDidChange()`
-will need to be called. For example:
+So, if the width of the adjacent box ever changes, `dimensionsChanged()` will
+need to be called. For example:
 
     :::js
     var box = document.getElementById('box');
     box.style.width = '200px';                  // will cause Bespin to move
-    embed.editorDimensionsDidChange(bespin);    // tell Bespin
+    embed.dimensionsChanged(bespin);            // tell Bespin
 
 
 Development Mode and onBespinLoad

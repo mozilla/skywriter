@@ -130,7 +130,7 @@ exports.useBespin = function(element, options) {
         if (SC.none(options.dontHookWindowResizeEvent) ||
                 !options.dontHookWindowResizeEvent) {
             var handler = function() {
-                exports.elementDimensionsDidChange(editor);
+                exports.dimensionsChanged(editor);
             };
 
             if (!SC.none(window.addEventListener)) {
@@ -149,7 +149,7 @@ exports.useBespin = function(element, options) {
  * containing the Bespin editor might have changed. It triggers a layout
  * change.
  */
-exports.elementDimensionsDidChange = function(editor) {
+exports.dimensionsChanged = function(editor) {
     SC.RunLoop.begin();
 
     var pane = editor.pane;

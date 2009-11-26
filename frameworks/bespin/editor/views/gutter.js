@@ -56,8 +56,7 @@ exports.GutterView = SC.View.extend(canvas.Canvas, {
         gutterStyle: "#4c4a41",
         lineNumberColor: "#e5c138",
         lineNumberFont: "10pt Monaco, Lucida Console, monospace",
-        editorTextFont: "10pt Monaco, Lucida Console, monospace",
-        lineHeight: 22
+        editorTextFont: "10pt Monaco, Lucida Console, monospace"
     },
 
     /**
