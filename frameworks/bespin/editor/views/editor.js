@@ -492,7 +492,7 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
         var canvas = this.$()[0];
         canvas.focus();
 
-        return this.handleMouse(e);
+        return true;
     },
 
     mouseUp: function(e) {
@@ -502,35 +502,6 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
             this.selectMouseDetail = undefined;
             return false;
         }
-
-        return true;
-    },
-
-    click: function(e) {
-        e.type = "click";
-        return this.handleMouse(e);
-    },
-
-    handleMouse: function(e) {
-        /*
-        // Right click for pie menu
-        if (e.button == 2) {
-            bespin.getComponent("piemenu", function(piemenu) {
-                piemenu.show(null, false, e.clientX, e.clientY);
-            });
-            return false;
-        }
-        */
-
-        var absolutePoint = this.absoluteCoordinatesForEvent(e);
-        var clientY = absolutePoint.y, clientX = absolutePoint.x;
-
-        var scrolled = false;
-
-        var w = this.editor.container.clientWidth;
-        var h = this.editor.container.clientHeight;
-
-        var p = { x: clientX, y:clientY };
 
         return true;
     },
