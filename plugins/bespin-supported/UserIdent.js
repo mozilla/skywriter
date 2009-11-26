@@ -60,6 +60,13 @@ exports.loginController = SC.Object.create({
      */
     onSuccess: function() {
         exports.userIdentPage.get("mainPane").remove();
+        
+        // Load the plugin metadata for the user's plugins
+        var body = document.body;
+        var el = document.createElement('script');
+        el.setAttribute('src', "/server/plugin/register/user");
+        body.appendChild(el);
+        
         console.log("login succeeded");
     },
 
