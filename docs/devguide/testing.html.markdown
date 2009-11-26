@@ -4,10 +4,10 @@ title: Bespin Developer's Guide
 subtitle: Testing Bespin
 ---
 
-Bespin uses [QUnit](http://docs.jquery.com/QUnit) as its unit testing 
-library. Our goal is to have "very good" code coverage for everything
-that is "officially supported" (the bespin-core and bespin-supported 
-packages).
+Bespin uses the SproutCore testing framework as its unit testing library, which
+is derived from [QUnit](http://docs.jquery.com/QUnit). Our goal is to have
+"very good" code coverage for everything that is "officially supported" (the
+_bespin-core_ and _bespin-supported_ packages).
 
 very good code coverage
 :   Everything that can be readily tested without a huge amount of work.
@@ -17,8 +17,13 @@ very good code coverage
 Running the Tests
 -----------------
 
-To run the tests from your browser, fire up the development server
-and then point your browser at 
-[http://localhost:8080/test/](http://localhost:8080/test/).
+As of this writing, you will need [Firebug](http://getfirebug.com/) to view the
+results of the test suite. To run the tests from your browser, fire up the
+development server and then point your browser at 
+[`http://localhost:4020/bespin/en/current/tests/editor.html`](http://localhost:4020/bespin/en/current/tests/editor.html).
+To run other tests, replace `editor` with the name of the test as appropriate.
+(You can find the names of the tests by looking at the names of the files in
+`frameworks/bespin/tests`.)
 
-You can select the portion of the test suite you wish to run.
+In the future, this process will mature as SproutCore's testing framework does.
+
