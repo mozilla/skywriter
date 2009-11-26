@@ -745,8 +745,8 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
     /**
      * @property
      *
-     * Layout for BespinEditorViews is read-only and determined by the text
-     * height and width.
+     * Layout for EditorViews is read-only and determined by the text height
+     * and width.
      */
     layout: function(key, value) {
         var origin = this._origin;
