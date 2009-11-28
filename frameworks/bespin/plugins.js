@@ -110,6 +110,11 @@ exports.Catalog = SC.Object.extend({
     init: function() {
         this.points = {};
         this.plugins = {};
+        
+        // set up the "extensionpoint" extension point.
+        // it indexes on name.
+        var ep = this.getExtensionPoint("extensionpoint");
+        ep.set("indexOn", "name");
         this.load(builtins.metadata);
     },
 
@@ -173,10 +178,9 @@ exports.Catalog = SC.Object.extend({
                     var epname = extension.ep;
                     if (epname == "extensionpoint") {
                         this.registerExtensionPoint(extension);
-                    } else {
-                        var ep = this.getExtensionPoint(extension.ep);
-                        ep.addExtension(extension);
                     }
+                    var ep = this.getExtensionPoint(extension.ep);
+                    ep.addExtension(extension);
                 }
             } else {
                 md.provides = [];
@@ -194,7 +198,6 @@ exports.catalog = exports.Catalog.create();
 
 exports.startupHandler = function(ep) {
     ep.load(function(func) {
-        console.log("Startup calling: " + ep.pointer);
         func();
     });
 };
