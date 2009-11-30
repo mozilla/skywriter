@@ -710,7 +710,7 @@ exports.server = SC.Object.create({
     },
 
     setSettings: function(settings, onSuccess) {
-        this.request('POST', '/settings/', dojo.objectToQuery(settings), {
+        this.request('POST', '/settings/', util.objectToQuery(settings), {
             onSuccess: onSuccess
         });
     },
@@ -741,13 +741,13 @@ exports.server = SC.Object.create({
     lost: function(values, opts) {
         opts = opts || {};
         var url = '/register/lost/';
-        this.request('POST', url, dojo.objectToQuery(values), opts);
+        this.request('POST', url, util.objectToQuery(values), opts);
     },
 
     changePassword: function(username, newPassword, verifyCode, opts) {
         var url = "/register/password/" + username;
         var query = { newPassword: newPassword, code: verifyCode };
-        this.request('POST', url, dojo.objectToQuery(query), opts || {});
+        this.request('POST', url, util.objectToQuery(query), opts || {});
     },
 
     rescan: function(project, instruction, opts) {

@@ -38,6 +38,9 @@ var util = require("bespin:util/util");
 var bespin = require("bespin");
 var server = require("BespinServer").server;
 
+/**
+ * Begin the login process
+ */
 exports.showSignup = function() {
     exports.userIdentPage.get("mainPane").append();
 };
@@ -74,7 +77,8 @@ exports.loginController = SC.Object.create({
      * The login failed.
      */
     onFailure: function() {
-        var pane = SC.AlertPane.error("Login Failed", 'Your Username or Password was not recognized');
+        var pane = SC.AlertPane.error("Login Failed",
+                "Your Username or Password was not recognized");
         pane.append();
         console.log("login failed");
     }
@@ -85,31 +89,46 @@ exports.loginController = SC.Object.create({
  */
 exports.signupController = SC.Object.create({
     username: "",
-    usernameError: function() {
-        var usernameError = this.get('username').length > 4 ? "" :
-                "Must be 4 characters or more";
-        console.log(usernameError);
-    }.property("username").cacheable(),
+    usernameError: "",
 
     password1: "",
-    password1Error: function() {
-        var password1Error = this.get('password1').length >= 6 ? "" :
-                "Must be 6 characters or more";
-        console.log(password1Error);
-    }.property("password1").cacheable(),
+    password1Error: "",
 
     password2: "",
-    password2Error: function() {
-        var password2Error = this.get('password1') == this.get('password2') ? "" :
-                "Passwords do not match";
-        console.log(password2Error);
-    }.property("password2", "password1").cacheable(),
+    password2Error: "",
 
-    /**
-     * Email is only used for
-     */
     email: "",
     emailError: "",
+
+    /**
+     * We only validate fields that have been edited
+     */
+    changed: {},
+
+    /**
+     * Called by commitEditing() on
+     */
+    validate: function(field) {
+        this.changed[field] = true;
+
+        if (this.changed.username) {
+            var usernameError = this.get('username').length > 4 ? "" :
+                    "Must be 4 characters or more";
+            this.set("usernameError", usernameError);
+        }
+
+        if (this.changed.password1) {
+            var password1Error = this.get('password1').length >= 6 ? "" :
+                    "Must be 6 characters or more";
+            this.set("password1Error", password1Error);
+        }
+
+        if (this.changed.password1 && this.changed.password2) {
+            var password2Error = (this.get('password1') == this.get('password2'))
+                    ? "" : "Passwords do not match";
+            this.set("password2Error", password2Error);
+        }
+    },
 
     /**
      * Attempt to register
@@ -149,7 +168,7 @@ exports.dumbController = SC.Object.create({
         var mainPane = exports.userIdentPage.get("mainPane");
         mainPane.get("layout").height = 450;
         mainPane.set("layerNeedsUpdate", true);
-        
+
         return this.get("action") + "View";
     }.property("action").cacheable()
 });
@@ -228,59 +247,97 @@ exports.userIdentPage = SC.Page.design({
     signupView: SC.View.design({
         layout: { left: 0, top: 0, right: 0, bottom: 0 },
         childViews: [
-            "userLabel", "userField",
-            "password1Label", "password1Field",
-            "password2Label", "password2Field",
-            "emailLabel", "emailField",
+            "usernameLabel", "usernameField", "usernameError",
+            "password1Label", "password1Field", "password1Error",
+            "password2Label", "password2Field", "password2Error",
+            "emailLabel", "emailField", "emailError",
             "submit"
         ],
 
-        userLabel: SC.LabelView.design({
+        usernameLabel: SC.LabelView.design({
             value: "Username:",
-            layout: { right: 400-150, top: 0 },
+            layout: { right: 400-150, top: 5 },
             textAlign: "right"
         }),
 
-        userField: SC.TextFieldView.design({
+        usernameField: SC.TextFieldView.design({
+            layout: { left: 155, top: 5, height: 20, width: 105 },
             valueBinding: "UserIdent#signupController.username",
-            layout: { left: 155, top: 0, height: 20, width: 100 }
+            commitEditing: function() {
+                // TODO: Surely we should use exports.signupController here?
+                window.signupController.validate("username");
+            }
+        }),
+
+        usernameError: SC.LabelView.design({
+            classNames: [ "signupValidationError" ],
+            layout: { left: 265, top: 0, height: 30, width: 120 },
+            valueBinding: "signupController.usernameError"
         }),
 
         password1Label: SC.LabelView.design({
             value: "Password:",
-            layout: { right: 400-150, top: 30 },
+            layout: { right: 400-150, top: 35 },
             textAlign: "right"
         }),
 
         password1Field: SC.TextFieldView.design({
+            isPassword: true,
+            layout: { left: 155, top: 35, height: 20, width: 105 },
             valueBinding: "UserIdent#signupController.password1",
-            layout: { left: 155, top: 30, height: 20, width: 100 }
+            commitEditing: function() {
+                // TODO: Surely we should use exports.signupController here?
+                window.signupController.validate("password1");
+            }
+        }),
+
+        password1Error: SC.LabelView.design({
+            classNames: [ "signupValidationError" ],
+            layout: { left: 265, top: 30, height: 30, width: 120 },
+            valueBinding: "signupController.password1Error"
         }),
 
         password2Label: SC.LabelView.design({
             value: "Password (confirm):",
-            layout: { right: 400-150, top: 60 },
+            layout: { right: 400-150, top: 65 },
             textAlign: "right"
         }),
 
         password2Field: SC.TextFieldView.design({
+            isPassword: true,
+            layout: { left: 155, top: 65, height: 20, width: 105 },
             valueBinding: "UserIdent#signupController.password2",
-            layout: { left: 155, top: 60, height: 20, width: 100 }
+            commitEditing: function() {
+                // TODO: Surely we should use exports.signupController here?
+                window.signupController.validate("password2");
+            }
+        }),
+
+        password2Error: SC.LabelView.design({
+            classNames: [ "signupValidationError" ],
+            layout: { left: 265, top: 60, height: 30, width: 120 },
+            valueBinding: "signupController.password2Error"
         }),
 
         emailLabel: SC.LabelView.design({
             value: "Email:",
-            layout: { right: 400-150, top: 90 },
+            layout: { right: 400-150, top: 95 },
             textAlign: "right"
         }),
 
         emailField: SC.TextFieldView.design({
-            valueBinding: "UserIdent#signupController.email",
-            layout: { left: 155, top: 90, height: 20, width: 100 }
+            layout: { left: 155, top: 95, height: 20, width: 105 },
+            valueBinding: "UserIdent#signupController.email"
+        }),
+
+        emailError: SC.LabelView.design({
+            classNames: [ "signupValidationNote" ],
+            layout: { left: 265, top: 90, height: 30, width: 120 },
+            value: "(Optional - only used for password recovery)"
         }),
 
         submit: SC.ButtonView.design({
-            layout: { left: 155, top: 120, width: 80 },
+            layout: { left: 155, top: 125, width: 80 },
             isDefault: true,
             title: "Sign up",
             target: "UserIdent#signupController",

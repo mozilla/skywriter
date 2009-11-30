@@ -99,12 +99,13 @@ exports.Hub = SC.Object.extend(/** @lends exports.Hub */ {
         if (!dispatcher || !dispatcher._listeners) {
             var origDispatcher = dispatcher;
 
+            var self = this;
             var dispatcher = function() {
                 var listeners = arguments.callee._listeners;
                 var target = arguments.callee.target;
 
                 // return value comes from original target function
-                var r = target && target.apply(this, arguments);
+                var r = target && target.apply(self, arguments);
 
                 // make local copy of listener array so it is immutable during
                 // processing
@@ -113,12 +114,12 @@ exports.Hub = SC.Object.extend(/** @lends exports.Hub */ {
                 // invoke listeners after target function
                 for (var i in listeners) {
                     if (!(i in Array.prototype)) {
-                        listeners[i].apply(this, arguments);
+                        listeners[i].apply(self, arguments);
                     }
                 }
                 // return value comes from original target function
                 return r;
-            }.bind(this);
+            };
 
             // following comments pulled out-of-line to prevent cloning them
             // in the returned function.
