@@ -187,8 +187,7 @@ exports.InMemorySettings = SC.Object.extend(/** @lends exports.InMemorySettings 
             this.values["_" + setting.name] = value;
             this._changeValue(setting.name, value);
             // TODO: remove this when we've done it all via bindings
-            console.log("skipping broadcast to settings:set:" + setting.name);
-            //hub.publish("settings:set:" + setting.name, { value: value });
+            hub.publish("settings:set:" + setting.name, { value: value });
         }.bind(this));
         // Add a getter to values we can remap to the _name version
         this.values.__defineGetter__(setting.name, function(value) {
