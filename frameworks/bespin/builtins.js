@@ -157,6 +157,11 @@ component).",
                 "pointer": "cursor#CursorManager",
                 "name": "cursorManager",
                 "ep": "factory"
+            },
+            {
+                "ep": "extensionpoint",
+                "name": "command",
+                "description": "Editor commands/actions. TODO: list parameters here."
             }
         ]
     }

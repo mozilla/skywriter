@@ -22,7 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-"import core_test";
+"import package core_test";
 var SC = require('sproutcore/runtime').SC;
 var plugins = require("plugins");
 
@@ -52,5 +52,65 @@ test("can retrieve an extension by key", function() {
     equals("plugins#startupHandler", ext.get("activate"),
         "activation handler pointer should be set");
 });
+
+test("can set a handler for an extension point", function() {
+    var catalog = plugins.Catalog.create();
+    catalog.load({
+        TestPlugin: {
+            provides: [
+                {
+                    ep: "extensionhandler",
+                    name: "startup",
+                    activate: "foo#bar"
+                }
+            ]
+        }
+    });
+    var ep = catalog.getExtensionPoint("startup");
+    equals(ep.handlers.length, 2);
+});
+
+test("activation handlers are called", function() {
+    exports.loadedCount = 0;
+    
+    var catalog = plugins.Catalog.create();
+    catalog.load({
+        bespin: {
+            provides: [
+                {
+                    ep: "icecream",
+                    name: "chunky monkey"
+                }
+            ]
+        }
+    });
+    catalog.load({
+        bespin: {
+            provides: [
+                {
+                    ep: "extensionpoint",
+                    name: "icecream"
+                },
+                {
+                    ep: "extensionhandler",
+                    name: "icecream",
+                    activate: "tests/plugins#myfunc"
+                },
+                {
+                    ep: "icecream",
+                    name: "Americone Dream"
+                }
+            ]
+        }
+    });
+    var ep = catalog.getExtensionPoint("startup");
+    equals(exports.loadedCount, 2);
+});
+
+exports.loadedCount = 0;
+
+exports.myfunc = function(ext) {
+    exports.loadedCount++;
+};
 
 plan.run();

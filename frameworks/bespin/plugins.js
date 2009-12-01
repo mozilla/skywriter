@@ -34,7 +34,7 @@ exports.Extension = SC.Object.extend({
         tiki.async(this._pluginName).then(function() {
             var fullName;
             // this allows syntax like #foo
-            // which is equivalent to PluginName:package#foo
+            // which is equivalent to PluginName:index#foo
             if (parts[0]) {
                 fullName = self._pluginName + ":" + parts[0];
             } else {
@@ -154,12 +154,25 @@ exports.Catalog = SC.Object.extend({
         return ep.getByKey(key);
     },
 
-    registerExtensionPoint: function(extension) {
+    _registerExtensionPoint: function(extension) {
         var ep = this.getExtensionPoint(extension.name);
         ep.handlers.push(extension);
         if (extension.indexOn) {
             ep.set("indexOn", extension.indexOn);
         }
+    },
+    
+    _registerExtensionHandler: function(extension) {
+        var ep = this.getExtensionPoint(extension.name);
+        ep.handlers.push(extension);
+        if (extension.activate) {
+            extension.load(function(activate) {
+                ep.extensions.forEach(function(ext) {
+                    activate(ext);
+                });
+            }, "activate");
+        }
+        
     },
 
     load: function(metadata) {
@@ -177,7 +190,9 @@ exports.Catalog = SC.Object.extend({
                     provides[i] = extension;
                     var epname = extension.ep;
                     if (epname == "extensionpoint") {
-                        this.registerExtensionPoint(extension);
+                        this._registerExtensionPoint(extension);
+                    } else if (epname == "extensionhandler") {
+                        this._registerExtensionHandler(extension);
                     }
                     var ep = this.getExtensionPoint(extension.ep);
                     ep.addExtension(extension);
