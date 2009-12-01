@@ -996,6 +996,10 @@ def create_bootstrap_script(extra_text, python_version=''):
                + content)
     return content.replace('##EXT' 'END##', extra_text)
 
+def extend_parser(optparse_parser):
+    optparse_parser.add_option('-g', '--git', action='store_true', dest='git',
+        help="use Git to download SproutCore")
+
 def adjust_options(options, args):
     args[:] = ['.']
 
@@ -1005,7 +1009,12 @@ def after_install(options, home_dir):
     else:
         bin_dir = join(home_dir, 'bin')
     subprocess.call([join(bin_dir, 'easy_install'), 'paver==1.0.1'])
-    subprocess.call([join(bin_dir, 'paver'),'initial'])
+
+    paver = join(bin_dir, 'paver')
+    if options.git is not True:
+        subprocess.call([ paver, 'initial' ])
+    else:
+        subprocess.call([ paver, 'initial', '--git' ])
 
 ##file site.py
 SITE_PY = """
