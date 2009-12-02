@@ -1350,6 +1350,19 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
         SC.RunLoop.end();
     },
 
+    /**
+     * Called whenever the text content changes.
+     *
+     * TODO: This should be delegated to a separate layout manager object as
+     * part of the MVC rework.
+     */
+    textStorageEdited: function(sender) {
+        SC.RunLoop.begin();
+        this.notifyPropertyChange('layout', this.get('layout'));
+        this._updateRowCount();
+        SC.RunLoop.end();
+    },
+
     dispose: function() {
     },
 

@@ -92,7 +92,7 @@ exports.GutterView = SC.View.extend(canvas.Canvas, {
                     GUTTER_INSETS.right,
             height: rowCount * this.get('_lineHeight')
         };
-    }.property('_charWidth', '_lineHeight', 'rowCount').cacheable(),
+    }.property('_charWidth', '_lineHeight', 'rowCount'),
 
     _origin: { left: 0, top: 0 },
 

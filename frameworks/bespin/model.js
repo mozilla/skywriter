@@ -32,7 +32,14 @@ var cursor = require("cursor");
  * This representation is encapsulated in Bespin.Editor.DocumentModel
  */
 exports.DocumentModel = SC.Object.extend({
+    // TODO: This reference to the editor should eventually go away. All
+    // communication should go through the more loosely coupled layout manager
+    // as part of the MVC rework. --pcw
     editor: null,
+
+    layoutManager: function() {
+        return this.editor.editorView;
+    }.property(),
 
     init: function() {
         this.clear();
@@ -204,6 +211,8 @@ exports.DocumentModel = SC.Object.extend({
                 characters: string
             });
         }
+
+        this._sendTextEditedNotification();
     },
 
     getDocument: function() {
@@ -701,5 +710,13 @@ exports.DocumentModel = SC.Object.extend({
         this.cacheRowMetadata[row] = meta;
 
         return meta;
+    },
+
+    // Sends a textStorageEdited message to the layout manager.
+    _sendTextEditedNotification: function() {
+        var layoutManager = this.get('layoutManager');
+        if (!SC.none(layoutManager)) {
+            layoutManager.textStorageEdited(this);
+        }
     }
 });

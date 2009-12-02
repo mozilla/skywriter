@@ -52,14 +52,27 @@ exports.BespinScrollView = SC.ScrollView.extend({
             // extensible way...
             this._gutterViewInstantiated = true;
 
+            var thisBespinScrollView = this;
             gutterView = this.createChildView(gutterView, {
-                rowCountBinding: "*parentView.contentView.rowCount"
+                rowCountBinding: "*parentView.contentView.rowCount",
+                didCreateLayer: function() {
+                    // Before the canvas is created, the gutter view has no
+                    // choice but to lie about its dimensions, because it has
+                    // no canvas with which to measureText(). So, once it's
+                    // created, we need to tile, in order to give the
+                    // view a chance to report its dimensions accurately.
+                    thisBespinScrollView.tile();
+                    this.set('layerNeedsUpdate', true);
+                }
             });
             this.childViews.push(gutterView);
             this.set('gutterView', gutterView);
 
             // Retile whenever the gutter frame changes.
             gutterView.addObserver('frame', this, this.tile);
+
+            // Stop for now and wait until the gutter view's layer is created.
+            return; 
         }
 
         var gutterFrame = gutterView.get('frame');
