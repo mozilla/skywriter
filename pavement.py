@@ -182,6 +182,12 @@ paver start
 """
 
 @task
+def create_db(options):
+    """Create the development database."""
+    info("Calling create_db in bespinserver")
+    call_pavement(options.server_pavement, "create_db")
+
+@task
 def start(options):
     """Starts the BespinServer on localhost port 4020 for development.
     """
