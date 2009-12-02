@@ -22,7 +22,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
 var command = require("bespin/command");
 var util = require("bespin/util/util");
 
@@ -30,7 +29,7 @@ var util = require("bespin/util/util");
  * Command store for the cmd commands
  * (which are subcommands of the main 'cmd' command)
  */
-exports.commands = new command.Store(command.store, {
+exports.commands = new command.Canon(command.rootCanon, {
     name: 'cmd',
     preview: 'Various commands to manage commands'
 });
@@ -59,32 +58,29 @@ exports.commands.addCommand({
     preview: 'load up a new command',
     completeText: 'command name to load (required)',
     usage: '[commandname]: Command name required.',
+    requires: { files: "files" },
     execute: function(instruction, commandname) {
         if (!commandname) {
             instruction.addUsageOutput(this);
             return;
         }
 
-        if (!commandname) {
-            instruction.addErrorOutput("Please pass me a command name to load.");
-            return;
-        }
-
+        var project = this.files.userSettingsProject;
         var path = "commands/" + commandname + ".js";
+
         var onSuccess = function(file) {
             try {
                 var command = eval(file.content);
                 // Note: This used to allow multiple commands to be stored in
                 // a single file, however that meant that the file was a (more)
                 // butchered version of JSON - the contents of an array.
-                command.store.addCommand(command);
+                command.rootCanon.addCommand(command);
             } catch (e) {
                 instruction.addErrorOutput("Something is wrong about the command:<br><br>" + e);
             }
         };
 
-        var files = bespin.get('files');
-        files.loadContents(files.userSettingsProject, path, onSuccess, true);
+        this.files.loadContents(project, path, onSuccess, true);
     }
 });
 
@@ -98,6 +94,7 @@ exports.commands.addCommand({
     preview: 'edit the given command (force if doesn\'t exist',
     completeText: 'command name to edit (required)',
     usage: '[commandname]: Command name required.',
+    requires: { files: "files", editor: "editor" },
     execute: function(instruction, commandname) {
         if (!commandname) {
             instruction.addUsageOutput(this);
@@ -120,8 +117,7 @@ exports.commands.addCommand({
             "    }\n" +
             "}";
 
-        var files = bespin.get('files');
-        bespin.get("editor").openFile(files.userSettingsProject, filename, {
+        this.editor.openFile(this.files.userSettingsProject, filename, {
             content: content,
             force: true
         });
@@ -134,15 +130,17 @@ exports.commands.addCommand({
 exports.commands.addCommand({
     name: 'list',
     preview: 'list my custom commands',
+    requires: { files: "files", server: "server" },
     execute: function(instruction) {
-        var files = bespin.get('files');
-        bespin.get('server').list(files.userSettingsProject, 'commands/', function(commands) {
-            var output;
-
+        var project = this.files.userSettingsProject;
+        this.server.list(project, 'commands/', function(commands) {
             if (!commands || commands.length < 1) {
-                output = "You haven't installed any custom commands.<br>Want to <a href='https://wiki.mozilla.org/Labs/Bespin/Roadmap/Commands'>learn how?</a>";
+                instruction.addOutput("You haven't installed any custom commands." +
+                        "<br>Want to " +
+                        "<a href='https://wiki.mozilla.org/Labs/Bespin/Roadmap/Commands'>" +
+                        "learn how?</a>");
             } else {
-                output = "<u>Your Custom Commands</u><br/><br/>";
+                var output = "<u>Your Custom Commands</u><br/><br/>";
 
                 var jsCommands = commands.filter(function(file) {
                     return util.endsWith(file.name, '\\.js');
@@ -151,9 +149,8 @@ exports.commands.addCommand({
                 output += jsCommands.map(function(jsCommand) {
                     return jsCommand.name.replace(/\.js$/, '');
                 }).join("<br>");
+                instruction.addOutput(output);
             }
-
-            instruction.addOutput(output);
         });
     }
 });
@@ -168,26 +165,20 @@ exports.commands.addCommand({
     preview: 'delete a custom command',
     completeText: 'command name to delete (required)',
     usage: '[commandname]: Command name required.',
+    requires: { files: "files", editor: "editor", editSession: "editSession" },
     execute: function(instruction, commandname) {
         if (!commandname) {
             instruction.addUsageOutput(this);
             return;
         }
 
-        var editSession = bespin.get('editSession');
-        var files = bespin.get('files');
-
-        if (!commandname) {
-            instruction.addErrorOutput("Please pass me a command name to delete.");
-            return;
-        }
-
+        var project = this.files.userSettingsProject;
         var commandpath = "commands/" + commandname + ".js";
 
         var onSuccess = instruction.link(function() {
-            if (editSession.checkSameFile(files.userSettingsProject, commandpath)) {
+            if (this.editSession.checkSameFile(project, commandpath)) {
                 // only clear if deleting the same file
-                bespin.get('editor').model.clear();
+                this.editor.model.clear();
             }
             instruction.addOutput('Removed command: ' + commandname);
         });
@@ -196,6 +187,6 @@ exports.commands.addCommand({
             instruction.addOutput("Wasn't able to remove the command <b>" + commandname + "</b><br/><em>Error</em> (probably doesn't exist): " + xhr.responseText);
         });
 
-        files.removeFile(files.userSettingsProject, commandpath, onSuccess, onFailure);
+        this.files.removeFile(project, commandpath, onSuccess, onFailure);
     }
 });

@@ -57,8 +57,8 @@ window.onBespinLoad = function() {
 <div>
   <script>
     function setSetting() {
-        var key = dojo.byId('key').value;
-        var value = dojo.byId('value').value;
+        var key = document.getElementById('key').value;
+        var value = document.getElementById('value').value;
         console.debug(bespin);
         bespin.set(key, value);
     }
@@ -71,10 +71,10 @@ window.onBespinLoad = function() {
 <div>
   <script>
     function copyToTextarea() {
-        dojo.byId('inandout').value = bespin.getContent();
+        document.getElementById('inandout').value = bespin.getContent();
     }
     function copyToEditor() {
-        bespin.setContent(dojo.byId('inandout').value);
+        bespin.setContent(document.getElementById('inandout').value);
     }
   </script>
   <textarea id="inandout" cols="100" rows="10"></textarea><br>

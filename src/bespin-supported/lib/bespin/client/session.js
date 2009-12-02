@@ -922,7 +922,7 @@ exports.EditSession = SC.Object.extend({
      * but no concept of the sidebar
      */
     reportCollaborators: function(userEntries) {
-        var collabList = dojo.byId("collab_list");
+        var collabList = document.getElementById("collab_list");
 
         // Lack of collab_list is likely in the embedded case
         if (!collabList) {

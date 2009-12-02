@@ -22,27 +22,26 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
 var command = require("bespin/command");
 var keys = require("bespin/util/keys");
 
 /**
  * 'editconfig' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'editconfig',
     aliases: ['config'],
     preview: 'load up the config file',
+    requires: { files: "files", editor: "editor" },
     execute: function(instruction) {
-        var files = bespin.get('files');
-        bespin.get("editor").openFile(files.userSettingsProject, "config");
+        this.editor.openFile(this.files.userSettingsProject, "config");
     }
 });
 
 /**
  * 'runconfig' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'runconfig',
     preview: 'run your config file',
     execute: function(instruction) {
@@ -53,20 +52,20 @@ command.store.addCommand({
 /**
  * 'bindkey' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'bindkey',
     takes: ['modifiers', 'key', 'action'],
     preview: 'Bind a key to an action, or show bindings',
     completeText: 'With no arguments show bindings, else give modifier(s), key, and action name to set',
+    requires: { editor: "editor" },
     execute: function(instruction, args) {
-        var editor = bespin.get('editor');
         if (args.key && args.action) { // bind a new key binding
             if (args.modifiers == "none") {
                 args.modifiers = '';
             }
-            editor.bindKey(args.action, args.modifiers + ' ' + args.key, args.selectable);
+            this.editor.bindKey(args.action, args.modifiers + ' ' + args.key, args.selectable);
         } else { // show me the key bindings
-            var descriptions = editor.editorKeyListener.keyMapDescriptions;
+            var descriptions = this.editor.editorKeyListener.keyMapDescriptions;
             var output = "<table>";
 
             for (var keys in descriptions) {
@@ -100,7 +99,7 @@ command.store.addCommand({
 /**
  * 'alias' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'alias',
     takes: ['alias', 'command'],
     preview: 'define and show aliases for commands',
@@ -151,7 +150,7 @@ command.store.addCommand({
 /**
  * 'history' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'history',
     preview: 'Show history of the commands',
     execute: function(instruction) {
@@ -175,15 +174,16 @@ command.store.addCommand({
 /**
  * 'set' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'set',
     takes: ['key', 'value'],
     preview: 'define and show settings',
+    requires: { settings: "settings" },
     execute: function(instruction, setting) {
         var output;
 
-        if (!setting.key) { // -- show all
-            var settings = bespin.get("settings").list();
+        if (!setting.key) {
+            var settings = this.settings.list();
             output = "";
             // first sort the settings based on the key
             settings.sort(function(a, b) {
@@ -204,7 +204,7 @@ command.store.addCommand({
         } else {
             var key = setting.key;
             if (setting.value === undefined) { // show it
-                var value = bespin.get("settings").get(key);
+                var value = this.settings.values[key];
                 if (value) {
                     output = "<strong>" + key + "</strong> = " + value;
                 } else {
@@ -212,15 +212,14 @@ command.store.addCommand({
                 }
             } else {
                 output = "Saving setting: <strong>" + key + "</strong> = " + setting.value;
-                bespin.get("settings").values[key] = setting.value;
+                this.settings.values[key] = setting.value;
             }
         }
         instruction.addOutput(output);
     },
     findCompletions: function(query, callback) {
-        var settings = bespin.get("settings");
         var key = query.action[0];
-        var val = settings.getValue(key);
+        var val = this.settings.getValue(key);
 
         if (query.action.length == 1) {
             // Check if this is an exact match
@@ -231,7 +230,7 @@ command.store.addCommand({
             }
 
             // So no exact matches, we're looking for options
-            var list = settings.list().map(function(entry) {
+            var list = this.settings.list().map(function(entry) {
                 return entry.key;
             });
             var matches = this.parent.filterOptionsByPrefix(list, key);
@@ -239,7 +238,7 @@ command.store.addCommand({
             if (matches.length == 1) {
                 // Single match: go for autofill and hint
                 query.autofill = "set " + matches[0];
-                val = settings.getValue(matches[0]);
+                val = this.settings.getValue(matches[0]);
                 query.hint = "Current value of " + matches[0] + " is '" + val + "'. Enter a new value, or press enter to display in the console.";
             } else if (matches.length == 0) {
                 // No matches, cause an error
@@ -271,14 +270,14 @@ command.store.addCommand({
 /**
  * 'unset' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'unset',
     takes: ['key'],
     preview: 'unset a setting entirely',
     completeText: 'add a key for the setting to delete entirely',
+    requires: { settings: "settings" },
     execute: function(instruction, key) {
-        var settings = bespin.get("settings");
-        if (!settings.getValue(key)) {
+        if (!this.settings.values[key]) {
             instruction.addErrorOutput("No setting for " + key + ".");
         } else {
             settings.resetValue(key);
@@ -286,9 +285,8 @@ command.store.addCommand({
         }
     },
     findCompletions: function(query, callback) {
-        var settings = bespin.get("settings");
         var key = query.action[0];
-        var val = settings.getValue(key);
+        var val = this.settings.values[key];
 
         // Multiple params are an error
         if (query.action.length > 1) {
@@ -305,7 +303,7 @@ command.store.addCommand({
         }
 
         // So no exact matches, we're looking for options
-        var list = settings.list().map(function(entry) {
+        var list = this.settings.list().map(function(entry) {
             return entry.key;
         });
         var matches = this.parent.filterOptionsByPrefix(list, key);
@@ -313,7 +311,7 @@ command.store.addCommand({
         if (matches.length == 1) {
             // Single match: go for autofill and hint
             query.autofill = "set " + matches[0];
-            val = settings.getValue(matches[0]);
+            val = this.settings.getValue(matches[0]);
             query.hint = "Current value of " + matches[0] + " is '" + val + "'. Press enter to remove the setting.";
         } else if (matches.length == 0) {
             // No matches, cause an error

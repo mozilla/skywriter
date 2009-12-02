@@ -22,14 +22,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
 var util = require("bespin/util/util");
 var command = require("bespin/command");
 
 /**
  * 'eval' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'eval',
     takes: ['js-code'],
     preview: 'evals given js code and show the result',
@@ -92,7 +91,7 @@ command.store.addCommand({
 /**
  * 'version' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'version',
     takes: ['command'],
     preview: 'show the version for Bespin or a command',
@@ -120,7 +119,7 @@ command.store.addCommand({
 /**
  * 'bespin' command
  */
-command.store.addCommand({
+command.rootCanon.addCommand({
     name: 'bespin',
     preview: 'has',
     hidden: true,

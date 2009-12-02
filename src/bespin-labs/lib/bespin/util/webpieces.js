@@ -79,7 +79,7 @@ SC.mixin(exports, {
      * Status
      */
     showStatus: function(msg) {
-        dojo.byId("status").innerHTML = msg;
+        document.getElementById("status").innerHTML = msg;
         dojo.style('status', 'display', 'block');
     },
 
@@ -89,7 +89,7 @@ SC.mixin(exports, {
      */
     showContentOverlay: function(msg, options) {
         options = options || {};
-        var el = dojo.byId('centerpopup');
+        var el = document.getElementById('centerpopup');
         var addTags = "";
         var endTags = "";
 

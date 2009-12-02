@@ -34,8 +34,8 @@ exports.login = function() {
         return;
     }
 
-    var username = dojo.byId("username").value;
-    var password = dojo.byId("password").value;
+    var username = document.getElementById("username").value;
+    var password = document.getElementById("password").value;
 
     if (!username || !password) {
         webpieces.showStatus("Please give me both a username and a password");
@@ -54,33 +54,33 @@ exports.logout = function() {
 
 exports.checkUsername = function(idPrefix) {
     var username_error = [];
-    var username = dojo.byId(idPrefix + "_username").value;
+    var username = document.getElementById(idPrefix + "_username").value;
     if (username.length < 4) {
         username_error.push("Usernames must be at least 4 characters long");
     }
     if (/[<>| '"]/.test(username)) {
         username_error.push("Usernames must not contain any of: <>| '\"");
     }
-    dojo.byId(idPrefix + '_username_error').innerHTML = username_error.join(", ");
+    document.getElementById(idPrefix + '_username_error').innerHTML = username_error.join(", ");
 };
 
 exports.checkPassword = function(idPrefix) {
-    dojo.byId(idPrefix + '_password_error').innerHTML =
-        !utils.validatePassword(dojo.byId(idPrefix + '_password').value) ?
+    document.getElementById(idPrefix + '_password_error').innerHTML =
+        !utils.validatePassword(document.getElementById(idPrefix + '_password').value) ?
                 "Password must be between 6 and 20 characters" :
                 "";
 };
 
 exports.checkConfirm = function(idPrefix) {
-    dojo.byId(idPrefix + '_confirm_error').innerHTML =
-        dojo.byId(idPrefix + '_password').value != dojo.byId(idPrefix + '_confirm').value ?
+    document.getElementById(idPrefix + '_confirm_error').innerHTML =
+        document.getElementById(idPrefix + '_password').value != document.getElementById(idPrefix + '_confirm').value ?
             "Passwords do not match" :
             "";
 };
 
 exports.checkEmail = function(idPrefix) {
-    dojo.byId(idPrefix + '_email_error').innerHTML =
-        !utils.validateEmail(dojo.byId(idPrefix + '_email').value) ?
+    document.getElementById(idPrefix + '_email_error').innerHTML =
+        !utils.validateEmail(document.getElementById(idPrefix + '_email').value) ?
             "Invalid email address" :
             "";
 };
@@ -92,52 +92,52 @@ exports.showForm = function() {
     dojo.style("register_form", "display", "block");
     dojo.style('logged_in', 'display', 'none');
     dojo.style('not_logged_in', 'display', 'none');
-    webpieces.showCenterPopup(dojo.byId('centerpopup'), true);
+    webpieces.showCenterPopup(document.getElementById('centerpopup'), true);
 };
 
 exports.hideForm = function() {
-    webpieces.hideCenterPopup(dojo.byId('centerpopup'));
+    webpieces.hideCenterPopup(document.getElementById('centerpopup'));
     dojo.style("register_form", "display", "none");
     server.currentuser(utils.whenAlreadyLoggedIn, utils.whenNotAlreadyLoggedIn);
 };
 
 exports.showLostPassword = function() {
     dojo.style("lost_password_form", "display", "block");
-    webpieces.showCenterPopup(dojo.byId('centerpopup'), true);
+    webpieces.showCenterPopup(document.getElementById('centerpopup'), true);
 };
 
 exports.hideLostPassword = function() {
-    webpieces.hideCenterPopup(dojo.byId('centerpopup'));
+    webpieces.hideCenterPopup(document.getElementById('centerpopup'));
     dojo.style("lost_password_form", "display", "none");
 };
 
 exports.showLostUsername = function() {
     dojo.style("lost_username_form", "display", "block");
-    webpieces.showCenterPopup(dojo.byId('centerpopup'), true);
+    webpieces.showCenterPopup(document.getElementById('centerpopup'), true);
 };
 
 exports.hideLostUsername = function() {
-    webpieces.hideCenterPopup(dojo.byId('centerpopup'));
+    webpieces.hideCenterPopup(document.getElementById('centerpopup'));
     dojo.style("lost_username_form", "display", "none");
 };
 
 exports.showChangePassword = function() {
     dojo.style("change_password_form", "display", "block");
-    webpieces.showCenterPopup(dojo.byId('centerpopup'), true);
+    webpieces.showCenterPopup(document.getElementById('centerpopup'), true);
 };
 
 exports.hideChangePassword = function() {
-    webpieces.hideCenterPopup(dojo.byId('centerpopup'));
+    webpieces.hideCenterPopup(document.getElementById('centerpopup'));
     dojo.style("change_password_form", "display", "none");
 };
 
 exports.send = function() {
-    var pw = dojo.byId('register_password').value;
-    if (utils.validatePassword(pw) && (pw == dojo.byId('register_confirm').value)) {
+    var pw = document.getElementById('register_password').value;
+    if (utils.validatePassword(pw) && (pw == document.getElementById('register_confirm').value)) {
         this.hideForm();
-        server.signup(dojo.byId("register_username").value,
+        server.signup(document.getElementById("register_username").value,
             pw,
-            dojo.byId('register_email').value,
+            document.getElementById('register_email').value,
             {
                 onSuccess: utils.whenLoginSucceeded,
                 on400: utils.whenUserinfoBad,
@@ -153,44 +153,44 @@ exports.cancel = function() {
 };
 
 exports.sendLostPassword = function() {
-    var username = dojo.byId("lost_password_username").value;
+    var username = document.getElementById("lost_password_username").value;
     server.lost({username: username}, {
         onSuccess: function() {
             exports.hideLostPassword();
             bespin.util.webpieces.showStatus("Password change email sent!");
         },
         onFailure: function(xhr) {
-            dojo.byId("lost_password_register_error").innerHTML = xhr.responseText;
+            document.getElementById("lost_password_register_error").innerHTML = xhr.responseText;
         }
     });
 };
 
 exports.sendLostUsername = function() {
-    var email = dojo.byId("lost_username_email").value;
+    var email = document.getElementById("lost_username_email").value;
     server.lost({email: email}, {
         onSuccess: function() {
             exports.hideLostPassword();
             bespin.util.webpieces.showStatus("Username email sent!");
         },
         onFailure: function(xhr) {
-            dojo.byId("lost_username_register_error").innerHTML = xhr.responseText;
+            document.getElementById("lost_username_register_error").innerHTML = xhr.responseText;
         }
     });
 };
 
 exports.sendChangePassword = function() {
-    var pw = dojo.byId("change_password_password").value;
-    if (utils.validatePassword(pw) && (pw == dojo.byId('change_password_confirm').value)) {
+    var pw = document.getElementById("change_password_password").value;
+    if (utils.validatePassword(pw) && (pw == document.getElementById('change_password_confirm').value)) {
         server.changePassword(exports._cpusername, pw, exports._cpcode, {
             onSuccess: function() {
                 exports.hideChangePassword();
                 // log the user in
-                dojo.byId("username").value = exports._cpusername;
-                dojo.byId("password").value = pw;
+                document.getElementById("username").value = exports._cpusername;
+                document.getElementById("password").value = pw;
                 exports.login();
             },
             onFailure: function(xhr) {
-                dojo.byId("change_password_register_error").innerHTML = xhr.responseText;
+                document.getElementById("change_password_register_error").innerHTML = xhr.responseText;
             }
         });
     }

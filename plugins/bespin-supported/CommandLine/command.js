@@ -22,14 +22,19 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("package");
 var SC = require("sproutcore/runtime:package").SC;
+var util = require("bespin/util/util");
 var TokenObject = require("util/tokenobject").TokenObject;
 
 /**
- * A store of commands
+ * A Canon is a set of commands
  */
-exports.Store = SC.Object.extend({
+exports.Canon = SC.Object.extend({
+
+    requires: {
+        editor: "editor",
+        hub: "hub"
+    },
 
     commands: {},
     aliases: {},
@@ -61,6 +66,48 @@ exports.Store = SC.Object.extend({
 
             // add the sub command to the parent store
             this.parent.addCommand(this.command);
+        } else {
+            // This is for the root Canon only
+
+            // Add a command to the root canon on pub/sub.
+            // TODO: We're trying to remove pub/sub for actions, so we should explain this
+            this.hub.subscribe("extension:loaded:bespin.command", function(ext) {
+                ext.execute = function() {
+                    var args = arguments;
+                    this.load(function(execute) {
+                        execute.apply(this, args);
+                    });
+                }.bind(this);
+                exports.rootCanon.addCommand(ext);
+            }.bind(this));
+
+            // Remove a command from the root canon on pub/sub.
+            this.hub.subscribe("extension:removed:bespin.command", function(ext) {
+                this.removeCommand(ext);
+            }.bind(this));
+
+            // 'help' command for the root canon
+            this.addCommand({
+                name: 'help',
+                takes: ['search'],
+                preview: 'show commands',
+                description: 'The <u>help</u> gives you access to the various commands in the Bespin system.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>If you pass in the magic <em>hidden</em> parameter, you will find subtle hidden commands.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!',
+                completeText: 'optionally, narrow down the search',
+                execute: function(instruction, extra) {
+                    var output = this.parent.getHelp(extra, {
+                        prefix: "<h2>Welcome to Bespin - Code in the Cloud</h2><ul>" +
+                            "<li><a href='http://labs.mozilla.com/projects/bespin' target='_blank'>Home Page</a>" +
+                            "<li><a href='https://wiki.mozilla.org/Labs/Bespin' target='_blank'>Wiki</a>" +
+                            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/UserGuide' target='_blank'>User Guide</a>" +
+                            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/Tips' target='_blank'>Tips and Tricks</a>" +
+                            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/FAQ' target='_blank'>FAQ</a>" +
+                            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/DeveloperGuide' target='_blank'>Developers Guide</a>" +
+                            "</ul>",
+                        suffix: "For more information, see the <a href='https://wiki.mozilla.org/Labs/Bespin'>Bespin Wiki</a>."
+                    });
+                    instruction.addOutput(output);
+                }
+            });
         }
     },
 
@@ -84,9 +131,7 @@ exports.Store = SC.Object.extend({
 
         // Add bindings
         if (command.withKey) {
-            bespin.getComponent('editor', function(editor) {
-                editor.bindCommand(command.name, command.withKey);
-            });
+            this.editor.bindCommand(command.name, command.withKey);
         }
 
         // Cache all the aliases in a store wide list
@@ -113,7 +158,7 @@ exports.Store = SC.Object.extend({
 
         if (!command.findCompletions) {
             /**
-             * Like store.findCompletions() but a default that just uses
+             * Like canon.findCompletions() but a default that just uses
              * command.completeText to provide a hint
              */
             command.findCompletions = function(query, callback) {
@@ -124,7 +169,7 @@ exports.Store = SC.Object.extend({
     },
 
     /**
-     * Add a new command to this command store
+     * Add a new command to this canon
      */
     removeCommand: function(command) {
         if (!command) {
@@ -143,7 +188,7 @@ exports.Store = SC.Object.extend({
 
         for (var command in this.commands) { // try the aliases
             if (this.commands[command]['aliases']) {
-                if (bespin.util.include(this.commands[command]['aliases'], commandname)) {
+                if (util.include(this.commands[command]['aliases'], commandname)) {
                     return true;
                 }
             }
@@ -176,28 +221,27 @@ exports.Store = SC.Object.extend({
     },
 
     /**
-     * Find a command from this store from something the user typed at a command
+     * Find a command from this canon from something the user typed at a command
      * line.
      * <p>A null return from this method implies a value that can't be matched
      * to a command, or completed in any way to a command.
      * <p>Examples:<ul>
-     * <li>findCommand("") = root store
-     * <li>findCommand("s") = root store
+     * <li>findCommand("") = root canon
+     * <li>findCommand("s") = root canon
      * <li>findCommand("set") = set command
      * <li>findCommand("set ") = set command
      * <li>findCommand("set invalid params") = set command
-     * <li>findCommand("sett") = null (TODO: Returns root store now)
-     * <li>findCommand("vcs") = vcs store
-     * <li>findCommand("vcs clon") = vcs store
+     * <li>findCommand("sett") = null (TODO: Returns root canon now)
+     * <li>findCommand("vcs") = vcs canon
+     * <li>findCommand("vcs clon") = vcs canon
      * <li>findCommand("vcs clone") = vcs clone command
      * <li>findCommand("vcs clone repo") = vcs clone command
      * </ul>
-     * <p>This works by delegating to child command stored when necessary
-     * having first removed any command prefixes from the matched command store.
-     * e.g. rootStore.findCommand("vcs clone repo") will delegate to the vcs
-     * command store, and ask vcsStore.findCommand("clone repo"). The answer to
-     * this last request is the clone command, because it is not a command
-     * store.
+     * <p>This works by delegating to child command canons when necessary
+     * having first removed any command prefixes from the matched canon.
+     * e.g. rootCanon.findCommand("vcs clone repo") will delegate to the vcs
+     * canon, and ask vcsStore.findCommand("clone repo"). The answer to
+     * this last request is the clone command, because it is not a canon.
      */
     findCommand: function(value) {
         var parts = value.trim().split(/\s+/);
@@ -337,7 +381,7 @@ exports.Store = SC.Object.extend({
     },
 
     /**
-     * Generate some help text for all commands in this store, optionally
+     * Generate some help text for all commands in this canon, optionally
      * filtered by a <code>prefix</code>, and with a <code>helpSuffix</code>
      * appended.
      */
@@ -408,57 +452,6 @@ exports.Store = SC.Object.extend({
 });
 
 /**
- * Add a root command store to the main bespin namespace
+ * Create the root that all commands will be added to
  */
-exports.store = new exports.Store();
-
-exports.executeExtensionCommand = function() {
-    var args = arguments;
-    var self = this;
-    this.load(function(execute) {
-        execute.apply(self, args);
-    });
-};
-
-/**
- * Add a command to the root store on pub/sub.
- * TODO: We're trying to remove pub/sub for actions, so we should explain this
- */
-bespin.subscribe("extension:loaded:bespin.command", function(ext) {
-    ext.execute = exports.command.executeExtensionCommand;
-    exports.store.addCommand(ext);
-});
-
-/**
- * Remove a command from the root store on pub/sub.
- * TODO: We're trying to remove pub/sub for actions, so we should explain this
- */
-bespin.subscribe("extension:removed:bespin.command", function(ext) {
-    exports.store.removeCommand(ext);
-});
-
-/**
- * 'help' command for the root store
- */
-exports.store.addCommand({
-    name: 'help',
-    takes: ['search'],
-    preview: 'show commands',
-    description: 'The <u>help</u> gives you access to the various commands in the Bespin system.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>If you pass in the magic <em>hidden</em> parameter, you will find subtle hidden commands.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!',
-    completeText: 'optionally, narrow down the search',
-    execute: function(instruction, extra) {
-        var output = this.parent.getHelp(extra, {
-            prefix: "<h2>Welcome to Bespin - Code in the Cloud</h2><ul>" +
-                "<li><a href='http://labs.mozilla.com/projects/bespin' target='_blank'>Home Page</a>" +
-                "<li><a href='https://wiki.mozilla.org/Labs/Bespin' target='_blank'>Wiki</a>" +
-                "<li><a href='https://wiki.mozilla.org/Labs/Bespin/UserGuide' target='_blank'>User Guide</a>" +
-                "<li><a href='https://wiki.mozilla.org/Labs/Bespin/Tips' target='_blank'>Tips and Tricks</a>" +
-                "<li><a href='https://wiki.mozilla.org/Labs/Bespin/FAQ' target='_blank'>FAQ</a>" +
-                "<li><a href='https://wiki.mozilla.org/Labs/Bespin/DeveloperGuide' target='_blank'>Developers Guide</a>" +
-                "</ul>",
-            suffix: "For more information, see the <a href='https://wiki.mozilla.org/Labs/Bespin'>Bespin Wiki</a>."
-        });
-        instruction.addOutput(output);
-    }
-});
-
+exports.rootCanon = new exports.Canon();

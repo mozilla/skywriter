@@ -575,7 +575,7 @@ members: {
     // TODO: this isnt called in this file
     sizeCanvas: function(canvas) {
         if (!this.heightDiff) {
-            this.heightDiff = dojo.byId("header").clientHeight + dojo.byId("subheader").clientHeight + dojo.byId("footer").clientHeight;
+            this.heightDiff = document.getElementById("header").clientHeight + document.getElementById("subheader").clientHeight + document.getElementById("footer").clientHeight;
         }
         var height = window.innerHeight - this.heightDiff + 11;
         dojo.attr(canvas, { width: window.innerWidth, height: height });

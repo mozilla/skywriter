@@ -45,17 +45,17 @@ SC.mixin(exports, {
     },
 
     whenUsernameInUse: function(xhr) {
-        dojo.byId("register_register_error").innerHTML = "The username is taken. Please choose another.";
+        document.getElementById("register_register_error").innerHTML = "The username is taken. Please choose another.";
         register.showForm();
     },
 
     whenUserinfoBad: function(xhr) {
-        dojo.byId("register_register_error").innerHTML = xhr.responseText;
+        document.getElementById("register_register_error").innerHTML = xhr.responseText;
         register.showForm();
     },
 
     whenAlreadyLoggedIn: function(userinfo) {
-        dojo.byId('display_username').innerHTML = userinfo.username;
+        document.getElementById('display_username').innerHTML = userinfo.username;
         dojo.style('logged_in', 'display', 'block');
     },
 
@@ -67,11 +67,11 @@ SC.mixin(exports, {
      * make sure that the browser can do our wicked shizzle
      */
     checkBrowserAbility: function() {
-        if (typeof dojo.byId('testcanvas').getContext != "function") {
+        if (typeof document.getElementById('testcanvas').getContext != "function") {
             return false; // no canvas
         }
 
-        var ctx = dojo.byId('testcanvas').getContext("2d");
+        var ctx = document.getElementById('testcanvas').getContext("2d");
 
         if (ctx.fillText || ctx.mozDrawText) {
             return true; // you need text support my friend
@@ -83,7 +83,7 @@ SC.mixin(exports, {
     showingBrowserCompatScreen: function() {
        if (!this.checkBrowserAbility()) {
             // if you don't have the ability
-            webpieces.showCenterPopup(dojo.byId('browser_not_compat'), true);
+            webpieces.showCenterPopup(document.getElementById('browser_not_compat'), true);
             return true;
         } else {
             return false;
