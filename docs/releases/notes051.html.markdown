@@ -54,3 +54,6 @@ Infrastructure
     `plugins/bespin-supported` in the `bespinclient` project.
     The URL for this is http://localhost:4020/server/plugin/register/defaults
 * The Settings API has been cleaned up dramatically.
+* When installing the server for development, the development sqlite database
+    is automatically created for you. 
+    [bug 531985](https://bugzilla.mozilla.org/show_bug.cgi?id=531985)
