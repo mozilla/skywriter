@@ -72,7 +72,7 @@
  * </ul>
  */
 
-var SC = require("sproutcore/runtime:package").SC;
+var SC = require("sproutcore/runtime").SC;
 var util = require("util/util");
 
 /**

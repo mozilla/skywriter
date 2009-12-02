@@ -25,7 +25,7 @@
 // This module is set up to be dependency-less so that Narwhal
 // will be able to run it right away.
 
-var SC = require("sproutcore/runtime:package").SC;
+var SC = require("sproutcore/runtime").SC;
 var embed = tiki.require("bespin:embed");
 
 SC.ready(function() {

@@ -29,8 +29,8 @@
  * up to send to the editor.
  */
 
-var SC = require("sproutcore/runtime:package").SC;
-var bespin = require("package");
+var SC = require("sproutcore/runtime").SC;
+var bespin = require("index");
 
 /**
  * Add a setting to alter the syntax coloring engine

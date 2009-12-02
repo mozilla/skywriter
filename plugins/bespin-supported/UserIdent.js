@@ -33,7 +33,7 @@ var metadata = {
 };
 // ---
 
-var SC = require("sproutcore/runtime:package").SC;
+var SC = require("sproutcore/runtime").SC;
 var util = require("bespin:util/util");
 var bespin = require("bespin");
 var server = require("BespinServer").server;

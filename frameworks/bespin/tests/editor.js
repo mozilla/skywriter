@@ -23,8 +23,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 "import core_test";
-var SC = require('sproutcore/runtime:package').SC;
-var bespin = require('bespin:package');
+var SC = require('sproutcore/runtime').SC;
+var bespin = require('bespin:index');
 var EditorController = require('bespin:editor/controller').EditorController;
 var editor_views_editor = require('bespin:editor/views/editor');
 

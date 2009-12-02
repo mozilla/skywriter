@@ -22,9 +22,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime:package').SC;
+var SC = require('sproutcore/runtime').SC;
 
-var bespin = require('package');
+var bespin = require('index');
 var syntax = require('syntax');
 var actions = require('actions');
 var keys = require('util/keys');

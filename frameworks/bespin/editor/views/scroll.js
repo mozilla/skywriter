@@ -22,7 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime:package').SC;
+var SC = require('sproutcore/runtime').SC;
 
 var gutter = require('editor/views/gutter');
 var scroller = require('editor/views/scroller');

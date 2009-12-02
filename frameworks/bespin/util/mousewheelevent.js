@@ -4,7 +4,7 @@
  * Tweaked to map everything to Mozilla's event.detail result
  */
 
-var SC = require("sproutcore/runtime:package").SC;
+var SC = require("sproutcore/runtime").SC;
 
 SC.mixin(exports, {
     wheel: function(event) {

@@ -30,8 +30,8 @@
 
 require("util/globals");
 
-var SC = require("sproutcore/runtime:package").SC;
-var bespin = require("package");
+var SC = require("sproutcore/runtime").SC;
+var bespin = require("index");
 var containerMod = require("util/container");
 var util = require("util/util");
 

@@ -22,8 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime:package").SC;
-var bespin = require("package");
+var SC = require("sproutcore/runtime").SC;
+var bespin = require("index");
 
 /**
  * Handles the position of the cursor, hiding the complexity of translating

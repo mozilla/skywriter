@@ -26,7 +26,7 @@
  * Handle clipboard operations.
  */
 
-var SC = require("sproutcore/runtime:package").SC;
+var SC = require("sproutcore/runtime").SC;
 var util = require("util/util");
 var keys = require("util/keys");
 

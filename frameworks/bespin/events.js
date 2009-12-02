@@ -22,7 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("package");
+var bespin = require("index");
 var util = require("util/util");
 
 exports.subscribe = function() {

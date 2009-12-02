@@ -22,7 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime:package').SC;
+var SC = require('sproutcore/runtime').SC;
 var canvas = require('editor/mixins/canvas');
 
 var GUTTER_INSETS = { left: 5, right: 10, bottom: 6 };

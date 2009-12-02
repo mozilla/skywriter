@@ -22,7 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime:package').SC;
+var SC = require('sproutcore/runtime').SC;
 
 exports.app = SC.Application.create({
     NAMESPACE: "bespin"

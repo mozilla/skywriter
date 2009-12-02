@@ -26,7 +26,7 @@
 
 var didRun = false;
 
-var bespin = require("bespin:package");
+var bespin = require("bespin");
 var containerMod = require("bespin:util/container");
 var EditorController = require("bespin:editor/controller").EditorController;
 var view = require("view");

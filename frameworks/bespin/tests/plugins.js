@@ -23,7 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 "import core_test";
-var SC = require('sproutcore/runtime:package').SC;
+var SC = require('sproutcore/runtime').SC;
 var plugins = require("plugins");
 
 module("plugins");
