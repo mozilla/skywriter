@@ -85,8 +85,8 @@ def install_sproutcore(options):
             return
             
         if not options.git:
-            print "Downloading %s/%s as a tarball" % (base_name, branch)
-            tarball = urllib2.urlopen("http://github.com/sproutit/%s/tarball/%s" % (base_name, branch))
+            info("Downloading %s/%s as a tarball", base_name, branch)
+            tarball = urllib2.urlopen("http://github.com/%s/%s/tarball/%s" % (account, base_name, branch))
             dirname = tarball.url.split('/')[-1].split('.')[0]
             tar = tarfile.open(name=("%s.tgz" % base_name), fileobj=StringIO(tarball.read()))
             tar.extractall(dest_path)
@@ -94,7 +94,7 @@ def install_sproutcore(options):
             os.rename(os.path.join(dest_path, dirname), os.path.join(dest_path, dest_name))
             return
 
-        print "Checking out %s/%s" % (base_name, branch)
+        info("Checking out %s/%s", base_name, branch)
         sh("git clone -q git://github.com/%s/%s.git %s" % (account, base_name, dest_name), cwd=dest_path)
         if branch:
             sh("git checkout --track origin/%s" % branch, cwd=os.path.join(dest_path, dest_name))
