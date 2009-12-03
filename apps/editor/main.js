@@ -62,7 +62,7 @@ main = function() {
         container.register("editor", editor);
 
         editor.model.insertDocument("Welcome to Bespin.");
-        view.app.getPath("mainPage.mainPane").appendChild(editor.ui);
+        view.app.getPath("mainPage.mainPane").appendChild(editor.dockView);
 
         // Load the plugin metadata for all of the system default plugins
         var body = document.body;

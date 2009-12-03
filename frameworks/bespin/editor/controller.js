@@ -34,7 +34,9 @@ var cursor = require("cursor");
 var model = require("model");
 var history = require("history");
 var view = require("editor/views/editor");
-var scroll = require("editor/views/scroll");
+
+var BespinScrollView = require("editor/views/scroll").BespinScrollView;
+var DockView = require("views/dock").DockView;
 
 /**
  * bespin.editor.API is the root object, the API that others should be able to
@@ -131,14 +133,16 @@ exports.EditorController = SC.Object.extend({
 
         this.model = model.DocumentModel.create({ editor: this });
 
-        // TODO: Should we change this name from 'ui'? Seems confusing... --pcw
-        this.ui = scroll.BespinScrollView.create({
-            contentView: view.EditorView.extend({
-                editor: this,
-                content: this.model
+        this.dockView = DockView.create({
+            centerView: BespinScrollView.extend({
+                contentView: view.EditorView.extend({
+                    editor: this,
+                    content: this.model
+                })
             })
         });
-        this.editorView = this.ui.contentView;
+        this.scrollView = this.dockView.centerView;
+        this.editorView = this.scrollView.contentView;
 
         this.theme = require("theme")['default'];
 
@@ -249,11 +253,11 @@ exports.EditorController = SC.Object.extend({
         var layout = {
             left:   0,
             top:    0,
-            width:  this.ui.clientWidth,
-            height: this.ui.clientHeight
+            width:  this.dockView.clientWidth,
+            height: this.dockView.clientHeight
         };
 
-        var container = this.ui;
+        var container = this.dockView;
         while (container !== null) {
             if (!isNaN(container.offsetLeft))
                 layout.left += container.offsetLeft;
@@ -278,15 +282,15 @@ exports.EditorController = SC.Object.extend({
     resetView: function(data) {
         this.cursorManager.moveCursor(data.cursor);
         this.setSelection(data.selection);
-        this.ui.horizontalScrollOffset = 0;
-        this.ui.verticalScrollOffset = 0;
+        this.scrollView.horizontalScrollOffset = 0;
+        this.scrollView.verticalScrollOffset = 0;
     },
 
     basicView: function() {
         this.cursorManager.moveCursor({row: 0, col: 0});
         this.setSelection(undefined);
-        this.ui.horizontalScrollOffset = 0;
-        this.ui.verticalScrollOffset = 0;
+        this.scrollView.horizontalScrollOffset = 0;
+        this.scrollView.verticalScrollOffset = 0;
     },
 
     getCurrentView: function() {
@@ -375,9 +379,7 @@ exports.EditorController = SC.Object.extend({
      * Useful when you will be creating and destroying editors more than once.
      */
     dispose: function() {
-        // TODO: Isn't bespin.editor == this?
-        // clipboard.uninstall();
-        this.ui.dispose();
+        this.dockView.dispose();
     },
 
     /**
