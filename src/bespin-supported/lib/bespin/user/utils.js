@@ -56,11 +56,11 @@ SC.mixin(exports, {
 
     whenAlreadyLoggedIn: function(userinfo) {
         document.getElementById('display_username').innerHTML = userinfo.username;
-        dojo.style('logged_in', 'display', 'block');
+        document.getElementById('logged_in').style.display = "block";
     },
 
     whenNotAlreadyLoggedIn: function() {
-        dojo.style('not_logged_in', 'display', 'block');
+        document.getElementById('not_logged_in').style.display = "block";
     },
 
     /**

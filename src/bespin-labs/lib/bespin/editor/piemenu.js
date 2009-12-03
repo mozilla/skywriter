@@ -538,7 +538,7 @@ members:
 
     /**
      * Render the toolbar for this slice
-     */
+     *
     renderToolbar: function(d) {
         // Title
         this.ctx.fillStyle = "#bcb9ae";
@@ -577,10 +577,11 @@ members:
             });
         }
     },
+    */
 
     /**
      * Unrender the toolbar for this slice
-     */
+     *
     unrenderToolbar: function() {
         if (this.currentSlice.toolbar) {
             this.currentSlice.toolbar.forEach(function(button) {
@@ -590,6 +591,7 @@ members:
 
         dojo.style(this.closer, 'display', 'none');
     },
+    */
 
     /**
      * Take the center pie point and migrate the clicked point to be relative

@@ -47,11 +47,10 @@ exports.EditorController = SC.Object.extend({
     requires: {
         ioc: 'ioc',
         settings: 'settings',
-        commandLine: 'commandLine',
+        // commandLine: 'commandLine',
         session: 'editSession',
         cursorManager: 'cursorManager',
         files: 'files',
-        settings: 'settings',
         hub: 'hub'
     },
 

@@ -78,7 +78,9 @@ exports.Interface = SC.Object.extend({
     },
 
     buildUI: function() {
-        this.commandLine = dojo.byId(this.commandLine);
+        if (typeof this.commandLine == "string") {
+            this.commandLine = document.getElementById(this.commandLine);
+        }
         this.promptimg = document.getElementById("promptimg");
 
         // Create the div for hints
@@ -291,10 +293,6 @@ exports.Interface = SC.Object.extend({
             return;
         }
 
-        var styles = {
-            display: 'block'
-        };
-
         var elem = document.getElementById("command_hint-content");
 
         // this is an uncommon case that comes up if you're
@@ -304,7 +302,7 @@ exports.Interface = SC.Object.extend({
         }
 
         dojo.attr("command_hint-content", { innerHTML: html });
-        dojo.style(this.commandHint, styles);
+        this.commandHint.style.display = "block";
 
         if (this.hintTimeout) {
             clearTimeout(this.hintTimeout);
@@ -323,7 +321,7 @@ exports.Interface = SC.Object.extend({
      * Reverse the effects of showHint()
      */
     hideHint: function() {
-        dojo.style(this.commandHint, 'display', 'none');
+        this.commandHint.style.display = "none";
         if (this.hintTimeout) {
             clearTimeout(this.hintTimeout);
         }
@@ -354,18 +352,15 @@ exports.Interface = SC.Object.extend({
         var coords = this._savedCoords;
 
         var footerHeight = dojo.style(this.footer, "height") + 2;
-        dojo.style(this.footer, {
-            left: coords.l + "px",
-            width: (coords.w - 10) + "px",
-            bottom: (coords.b - footerHeight) + "px",
-            display: "block"
-        });
 
-        dojo.style(this.commandHint, {
-            left: coords.l + "px",
-            bottom: coords.b + "px",
-            width: coords.w + "px"
-        });
+        this.footer.style.left = coords.l + "px";
+        this.footer.style.width = (coords.w - 10) + "px";
+        this.footer.style.bottom = (coords.b - footerHeight) + "px";
+        this.footer.style.display = "block";
+
+        this.commandHint.style.left = coords.l + "px";
+        this.commandHint.style.bottom = coords.b + "px";
+        this.commandHint.style.width = coords.w + "px";
 
         if (this.currentPanel) {
             if (this.currentPanel == panel && !coordChange) {

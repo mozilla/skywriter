@@ -24,65 +24,54 @@
 
 exports.metadata = {
     "Base Syntax": {
-        "provides": [
-            {
+        "provides": [ {
                 "ep": "extensionpoint",
                 "name": "syntax.engine",
                 "description": "Syntax highlighting engines"
-            },
-            {
+            }, {
                 "ep": "syntax.engine",
                 "name": "simple",
                 "pointer": "bespin/syntax/simple:Model"
-            },
-            {
+            }, {
                 "ep": "extensionpoint",
                 "name": "syntax.simple.highlighter",
                 "description": "Highlighter code for the simple syntax highlighter."
-            },
-            {
+            }, {
                 "ep": "syntax.simple.highlighter",
                 "name": "JavaScript",
                 "extensions": ["js", "json", "javascript", "ecmascript", "jsm", "java"],
                 "pointer": "bespin/syntax/simple/javascript:JavaScript"
-            },
-            {
+            }, {
                 "ep": "syntax.simple.highlighter",
                 "name": "C",
                 "extensions": ['c', 'h'],
                 "pointer": "bespin/syntax/simple/c:C"
-            },
-            {
+            }, {
                 "ep": "syntax.simple.highlighter",
                 "name": "CSharp",
                 "extensions": ['cs'],
                 "pointer": "bespin/syntax/simple/csharp:CSharp"
-            },
-            {
+            }, {
                 "ep": "syntax.simple.highlighter",
                 "name": "CSS",
                 "extensions": ['css'],
                 "pointer": "bespin/syntax/simple/css:CSS"
-            },
-            {
+            }, {
                 "ep": "syntax.simple.highlighter",
                 "name": "HTML",
                 "extensions": ['html', 'htm', 'xml', 'xhtml', 'shtml'],
                 "pointer": "bespin/syntax/simple/html:HTML"
-            },
-            {
+            }, {
                 "ep": "syntax.simple.highlighter",
                 "name": "PHP",
                 "extensions": ['php', 'php3', 'php4', 'php5'],
                 "pointer": "bespin/syntax/simple/php:PHP"
-            },
-            {
+            }, {
                 "ep": "syntax.simple.highlighter",
                 "name": "Python",
                 "extensions": ['py', 'python'],
                 "pointer": "bespin/syntax/simple/python:Python"
-            },
-            {
+            }, {
                 "ep": "syntax.simple.highlighter",
                 "name": "Ruby",
                 "extensions": ['rb', 'ruby'],
@@ -100,23 +89,20 @@ define new extension points. You can provide an 'indexOn' property to name a \
 property of extensions through which you'd like to be able to easily look up the \
 extension. You can also provide an 'activate' property which is a pointer to a \
 function that is called whenever a new extension is discovered."
-            },
-            {
+            }, {
                 "ep": "extensionpoint",
                 "name": "extensionhandler",
                 "description": "extensionhandlers are able to have 'activate' \
 and 'deactivate' pointers to functions that are called with each extension as \
 it is discovered or deactivated."
-            },
-            {
+            }, {
                 "ep": "extensionpoint",
                 "name": "startup",
                 "description": "A function that should be called at startup. This should be used \
 sparingly, as these plugins will be eagerly loaded at the beginning. All that's needed for this \
 extension point is a pointer to a function that takes no arguments.",
                 "activate": "plugins#startupHandler"
-            },
-            {
+            }, {
                 "ep": "extensionpoint",
                 "name": "factory",
                 "description": "Provides a factory for singleton components. Each extension needs to \
@@ -125,56 +111,42 @@ a function), 'create' (if the pointer refers to an SC.Object), 'new' (if the poi
 a traditional JS object) or 'value' (if the pointer refers to the object itself that is the \
 component).",
                 "indexOn": "name"
-            },
-            {
-                "action": "call",
-                "pointer": "util/container#dummyFactory",
+            }, {
+                "ep": "factory",
                 "name": "files",
-                "ep": "factory"
-            },
-            {
-                "action": "create",
-                "pointer": "util/hub#Hub",
+                "action": "call",
+                "pointer": "util/container#dummyFactory"
+            }, {
+                "ep": "factory",
                 "name": "hub",
-                "ep": "factory"
-            },
-            {
                 "action": "create",
-                "pointer": "settings#InMemorySettings",
+                "pointer": "util/hub#Hub"
+            }, {
+                "ep": "factory",
                 "name": "settings",
-                "ep": "factory"
-            },
-            {
-                "action": "call",
-                "pointer": "util/container#dummyFactory",
-                "name": "commandLine",
-                "ep": "factory"
-            },
-            {
-                "action": "call",
-                "pointer": "util/container#dummyFactory",
+                "action": "create",
+                "pointer": "settings#InMemorySettings"
+            }, {
+                "ep": "factory",
                 "name": "parser",
-                "ep": "factory"
-            },
-            {
-                "action": "create",
-                "pointer": "editor/controller#EditorController",
-                "name": "editor",
-                "ep": "factory"
-            },
-            {
                 "action": "call",
-                "pointer": "util/container#dummyFactory",
-                "name": "editSession",
-                "ep": "factory"
-            },
-            {
+                "pointer": "util/container#dummyFactory"
+            }, {
+                "ep": "factory",
+                "name": "editor",
                 "action": "create",
-                "pointer": "cursor#CursorManager",
+                "pointer": "editor/controller#EditorController"
+            }, {
+                "ep": "factory",
+                "name": "editSession",
+                "action": "call",
+                "pointer": "util/container#dummyFactory"
+            }, {
+                "ep": "factory",
                 "name": "cursorManager",
-                "ep": "factory"
-            },
-            {
+                "action": "create",
+                "pointer": "cursor#CursorManager"
+            }, {
                 "ep": "extensionpoint",
                 "name": "command",
                 "description": "Editor commands/actions. TODO: list parameters here."

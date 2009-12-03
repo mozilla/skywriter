@@ -1014,8 +1014,8 @@ exports.EditSession = SC.Object.extend({
 
         var stopped = (this.currentState === this.mobwriteState.stopped);
 
-        dojo.style("collab_off", "display", stopped ? "block" : "none");
-        dojo.style("collab_on",  "display", stopped ? "none" : "block");
+        document.getElementById("collab_off").style.display = stopped ? "block" : "none";
+        document.getElementById("collab_on").style.display = stopped ? "none" : "block";
 
         if (stopped) {
             dojo.attr("toolbar_collaboration", "src", "images/icn_collab_off.png");

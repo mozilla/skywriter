@@ -155,7 +155,7 @@ exports.API = SC.Object.extend({
 
     toggle: function() {
         if (!this.scene.isVisible) {
-            dojo.style("quickopenContainer", "display", "block");
+            document.getElementById("quickopenContainer").style.display = "block";
         }
 
         this.scene.toggle();

@@ -48,8 +48,8 @@ exports.login = function() {
 
 exports.logout = function() {
     server.logout();
-    dojo.style('logged_in', 'display', 'none');
-    dojo.style('not_logged_in', 'display', 'block');
+    document.getElementById('logged_in').style.display = "none";
+    document.getElementById('not_logged_in').style.display = "block";
 };
 
 exports.checkUsername = function(idPrefix) {
@@ -89,46 +89,46 @@ exports.showForm = function() {
     if (utils.showingBrowserCompatScreen()) {
         return;
     }
-    dojo.style("register_form", "display", "block");
-    dojo.style('logged_in', 'display', 'none');
-    dojo.style('not_logged_in', 'display', 'none');
+    document.getElementById("register_form").style.display = "block";
+    document.getElementById('logged_in').style.display = "none";
+    document.getElementById('not_logged_in').style.display = "none";
     webpieces.showCenterPopup(document.getElementById('centerpopup'), true);
 };
 
 exports.hideForm = function() {
     webpieces.hideCenterPopup(document.getElementById('centerpopup'));
-    dojo.style("register_form", "display", "none");
+    document.getElementById("register_form").style.display = "none";
     server.currentuser(utils.whenAlreadyLoggedIn, utils.whenNotAlreadyLoggedIn);
 };
 
 exports.showLostPassword = function() {
-    dojo.style("lost_password_form", "display", "block");
+    document.getElementById("lost_password_form").style.display = "block";
     webpieces.showCenterPopup(document.getElementById('centerpopup'), true);
 };
 
 exports.hideLostPassword = function() {
     webpieces.hideCenterPopup(document.getElementById('centerpopup'));
-    dojo.style("lost_password_form", "display", "none");
+    document.getElementById("lost_password_form").style.display = "none";
 };
 
 exports.showLostUsername = function() {
-    dojo.style("lost_username_form", "display", "block");
+    document.getElementById("lost_username_form").style.display = "block";
     webpieces.showCenterPopup(document.getElementById('centerpopup'), true);
 };
 
 exports.hideLostUsername = function() {
     webpieces.hideCenterPopup(document.getElementById('centerpopup'));
-    dojo.style("lost_username_form", "display", "none");
+    document.getElementById("lost_username_form").style.display = "none";
 };
 
 exports.showChangePassword = function() {
-    dojo.style("change_password_form", "display", "block");
+    document.getElementById("change_password_form").style.display = "block";
     webpieces.showCenterPopup(document.getElementById('centerpopup'), true);
 };
 
 exports.hideChangePassword = function() {
     webpieces.hideCenterPopup(document.getElementById('centerpopup'));
-    dojo.style("change_password_form", "display", "none");
+    document.getElementById("change_password_form").style.display = "none";
 };
 
 exports.send = function() {

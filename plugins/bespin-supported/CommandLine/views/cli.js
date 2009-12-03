@@ -22,16 +22,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// ---plugin.json---
-var metadata = {
-    "provides": [ {
-            "ep": "startup",
-            "pointer": "#showCli"
-        }
-    ]
-};
-// ---
-
 var SC = require("sproutcore/runtime").SC;
 var util = require("bespin:util/util");
 

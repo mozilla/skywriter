@@ -303,14 +303,13 @@ bespin.subscribe("toolbar:init", function(event) {
 
                     var editor_coords = dojo.coords('editor');
                     var jetpack_coorders = dojo.coords(jetpack);
-                    dojo.style(dd, {
-                        position: 'absolute',
-                        padding: '0px',
-                        top: editor_coords.y + 'px',
-                        left: (jetpack_coorders.x - 30) + 'px',
-                        display: 'none',
-                        zIndex: '150'
-                    });
+
+                    dd.style.position = 'absolute';
+                    dd.style.padding = '0px';
+                    dd.style.top = editor_coords.y + 'px';
+                    dd.style.left = (jetpack_coorders.x - 30) + 'px';
+                    dd.style.display = 'none';
+                    dd.style.zIndex = '150';
 
                     dd.innerHTML = '<table id="jetpack_dropdown_content"><tr><th colspan="3">Jetpack Actions</th></tr><tr><td>create</td><td><input type="text" size="7" id="jetpack_dropdown_input_create" value="myjetpack" onfocus="bespin.get(\'editor\').setFocus(false);"></td><td><input id="jetpack_dropdown_now_create" type="button" value="now &raquo;"></td></tr><tr id="jetpack_dropdown_or"><td colspan="3" align="center">or</td></tr><tr><td>install</td><td><select id="jetpack_dropdown_input_install"><option></option></select></td><td><input id="jetpack_dropdown_now_install" type="button" value="now &raquo;"></td></tr></table><div id="jetpack_dropdown_border">&nbsp;</div>';
 
@@ -402,10 +401,9 @@ exports.sizeDropDownBorder = function(dd) {
         dd.style.display = 'none';
     }
 
-    dojo.style('jetpack_dropdown_border', {
-        width: content_coords.w + 'px',
-        height: content_coords.h + 'px'
-    });
+    var styler = document.getElementById("jetpack_dropdown_border").style;
+    styler.width = content_coords.w + 'px';
+    styler.height = content_coords.h + 'px';
 };
 
 /**

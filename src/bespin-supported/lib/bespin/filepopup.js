@@ -548,11 +548,9 @@ members: {
         this.canvas.width = coords.w;
         this.canvas.height = coords.h;
 
-        dojo.style(this.canvas, {
-            display: "block",
-            top: coords.t + "px",
-            left: coords.l + "px"
-        });
+        this.canvas.style.display = "block";
+        this.canvas.style.top = coords.t + "px";
+        this.canvas.style.left = coords.l + "px";
 
         this.scene.render();
         this.canvas.focus();

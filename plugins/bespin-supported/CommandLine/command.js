@@ -23,7 +23,40 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
-var TokenObject = require("tokenobject").TokenObject;
+
+/**
+ * Register new commands as they are discovered in plugins.
+ * A command is a JSON structure that looks something like this:
+ * <pre>
+ * {
+ *     "ep": "command",
+ *     "parent": "git", // Optional - Parent command, e.g. "git checkout"
+ *     "name": "checkout",
+ *     "takes": [ "revision" ],
+ *     "aliases": [ "co" ],
+ *     "hidden": true,
+ *     "preview": "",
+ *     "completeText": "",
+ *     "usage": "",
+ *     "pointer": "git#checkoutCommand"
+ * }
+ * </pre>
+ */
+exports.newCommandHandler = function(ext) {
+    ext.execute = function() {
+        var args = arguments;
+        this.load(function(execute) {
+            execute.apply(this, args);
+        });
+    }.bind(this);
+    exports.rootCanon.addCommand(ext);
+};
+
+// TODO add the deactivation hook here.
+// Remove a command from the root canon on pub/sub.
+// this.hub.subscribe("extension:removed:bespin.command", function(ext) {
+//     this.removeCommand(ext);
+// }.bind(this));
 
 /**
  * A Canon is a set of commands
@@ -65,31 +98,6 @@ exports.Canon = SC.Object.extend({
 
             // add the sub command to the parent store
             this.parent.addCommand(this.command);
-        } else {
-            // This is for the root Canon only
-
-            // 'help' command for the root canon
-            this.addCommand({
-                name: 'help',
-                takes: ['search'],
-                preview: 'show commands',
-                description: 'The <u>help</u> gives you access to the various commands in the Bespin system.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>If you pass in the magic <em>hidden</em> parameter, you will find subtle hidden commands.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!',
-                completeText: 'optionally, narrow down the search',
-                execute: function(instruction, extra) {
-                    var output = this.parent.getHelp(extra, {
-                        prefix: "<h2>Welcome to Bespin - Code in the Cloud</h2><ul>" +
-                            "<li><a href='http://labs.mozilla.com/projects/bespin' target='_blank'>Home Page</a>" +
-                            "<li><a href='https://wiki.mozilla.org/Labs/Bespin' target='_blank'>Wiki</a>" +
-                            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/UserGuide' target='_blank'>User Guide</a>" +
-                            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/Tips' target='_blank'>Tips and Tricks</a>" +
-                            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/FAQ' target='_blank'>FAQ</a>" +
-                            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/DeveloperGuide' target='_blank'>Developers Guide</a>" +
-                            "</ul>",
-                        suffix: "For more information, see the <a href='https://wiki.mozilla.org/Labs/Bespin'>Bespin Wiki</a>."
-                    });
-                    instruction.addOutput(output);
-                }
-            });
         }
     },
 
@@ -325,7 +333,7 @@ exports.Canon = SC.Object.extend({
         var userString = fromUser.join(' ');
 
         if (command.takes['*']) {
-            args = new TokenObject({ input:userString });
+            args = TokenObject.create({ input:userString });
             args.rawinput = userString;
 
             args.varargs = args.pieces; // directly grab the token pieces as an array
@@ -333,7 +341,7 @@ exports.Canon = SC.Object.extend({
             // One argument, so just return that
             args = userString;
         } else {
-            args = new TokenObject({
+            args = TokenObject.create({
                 input: userString,
                 options: { params: command.takes.order.join(' ') }
             });
@@ -433,27 +441,105 @@ exports.Canon = SC.Object.extend({
     }
 });
 
-/*
-* Register new commands as they are discovered in plugins.
-*/
-exports.newCommandHandler = function(ext) {
-    ext.execute = function() {
-        var args = arguments;
-        this.load(function(execute) {
-            execute.apply(this, args);
-        });
-    }.bind(this);
-    exports.rootCanon.addCommand(ext);
-};
-
-// TODO add the deactivation hook here.
-// Remove a command from the root canon on pub/sub.
-// this.hub.subscribe("extension:removed:bespin.command", function(ext) {
-//     this.removeCommand(ext);
-// }.bind(this));
-
-
 /**
  * Create the root that all commands will be added to
  */
 exports.rootCanon = new exports.Canon();
+
+exports.helpCommand = function(instruction, extra) {
+    var output = this.parent.getHelp(extra, {
+        prefix: "<h2>Welcome to Bespin - Code in the Cloud</h2><ul>" +
+            "<li><a href='http://labs.mozilla.com/projects/bespin' target='_blank'>Home Page</a>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin' target='_blank'>Wiki</a>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/UserGuide' target='_blank'>User Guide</a>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/Tips' target='_blank'>Tips and Tricks</a>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/FAQ' target='_blank'>FAQ</a>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/DeveloperGuide' target='_blank'>Developers Guide</a>" +
+            "</ul>",
+        suffix: "For more information, see the <a href='https://wiki.mozilla.org/Labs/Bespin'>Bespin Wiki</a>."
+    });
+    instruction.addOutput(output);
+};
+
+/**
+ * Given a string, make a token object that holds positions and has name access.
+ * <p>Examples:
+ * <pre>
+ * var args = TokenObject.create({ input:userString, options: {
+ *     params: command.takes.order.join(' ')
+ * }});
+ *
+ * var test = TokenObject.create({
+ *     input: document.getElementById("input").value,
+ *     options: {
+ *         splitBy: document.getElementById("regex").value,
+ *         params: document.getElementById("params").value
+ *     }
+ * });
+ *
+ * var test = TokenObject.create({ input:"male 'Dion Almaer'", options: {
+ *     params: 'gender name'
+ * }});
+ * </pre>
+ */
+var TokenObject = SC.Object.extend({
+    input: null,
+    options: { },
+
+    init: function() {
+        this._splitterRegex = new RegExp(this.options.splitBy || '\\s+');
+        this.pieces = this.tokenize(this.input.split(this._splitterRegex));
+
+        if (this.options.params) {
+            this._nametoindex = {};
+            var namedparams = this.options.params.split(' ');
+            for (var x = 0; x < namedparams.length; x++) {
+                this._nametoindex[namedparams[x]] = x;
+
+                // side step if you really don't want this
+                if (!this.options['noshortcutvalues']) {
+                    this[namedparams[x]] = this.pieces[x];
+                }
+            }
+        }
+        sc_super();
+    },
+
+    /**
+     * Split up the input taking into account ' and "
+     */
+    tokenize: function(incoming) {
+        var tokens = [];
+
+        var nextToken;
+        while (nextToken = incoming.shift()) {
+            if (nextToken[0] == '"' || nextToken[0] == "'") { // it's quoting time
+                var eaten = [ nextToken.substring(1, nextToken.length) ];
+                var eataway;
+                while (eataway = incoming.shift()) {
+                    if (eataway[eataway.length - 1] == '"' || eataway[eataway.length - 1] == "'") { // end quoting time
+                        eaten.push(eataway.substring(0, eataway.length - 1));
+                        break;
+                    } else {
+                        eaten.push(eataway);
+                    }
+                }
+                tokens.push(eaten.join(' '));
+            } else {
+                tokens.push(nextToken);
+            }
+        }
+
+        return tokens;
+    },
+
+    param: function(index) {
+        return (typeof index == "number")
+                ? this.pieces[index]
+                : this.pieces[this._nametoindex[index]];
+    },
+
+    length: function() {
+        return this.pieces.length;
+    }
+});

@@ -142,7 +142,6 @@ exports.commands.addCommand({
                         }, td);
                     }
 
-                    // TODO: This is used in dojo.style below before it is defined by dojo.create?!
                     var pwrow;
 
                     // Auth type
@@ -152,9 +151,9 @@ exports.commands.addCommand({
                     var select = dojo.create("select", {name: "authType",
                         onchange: function(e) {
                             if (this.value == "ssh") {
-                                dojo.style(pwrow, "display", "none");
+                                pwrow.style.display = "none";
                             } else {
-                                dojo.style(pwrow, "display", "table-row");
+                                pwrow.style.display = "table-row";
                             }
                         }}, td);
                     exports._createOption(select, "ssh", "SSH Key", currentSetup.authType);
@@ -181,7 +180,7 @@ exports.commands.addCommand({
                     }, td);
 
                     if (!currentSetup.authType || currentSetup.authType == "ssh") {
-                        dojo.style(pwrow, "display", "none");
+                        pwrow.style.display = "none";
                     }
 
                     // Buttons

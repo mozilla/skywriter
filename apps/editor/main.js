@@ -45,7 +45,7 @@ main = function() {
     //   var container = containerMod.Container.create();
     // However until we've got rid of the singleton 'bespin' we cant do that
     var container = bespin._container;
-    
+
     SC.run(function() {
         view.app.getPath("mainPage.mainPane").append();
 

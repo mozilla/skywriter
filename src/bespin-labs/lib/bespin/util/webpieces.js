@@ -32,7 +32,7 @@ SC.mixin(exports, {
         if (isModal) {
             this.showOverlay();
         }
-        dojo.style(el, 'display', 'block');
+        el.style.display = "block";
 
         // retrieve required dimensions
         var elDims = dojo.coords(el);
@@ -43,24 +43,22 @@ SC.mixin(exports, {
         var x = (browserDims.w - elDims.w) / 2;
 
         // set the style of the element so it is centered
-        dojo.style(el, {
-            position: 'absolute',
-            top: y + 'px',
-            left: x + 'px'
-        });
+        el.style.position = "absolute";
+        el.style.top = y + "px";
+        el.style.left = x + "px";
     },
 
     hideCenterPopup: function(el) {
-        dojo.style(el, 'display', 'none');
+        el.style.display = "none";
         this.hideOverlay();
     },
 
     showOverlay: function() {
-        dojo.style('overlay', 'display', 'block');
+        document.getElementById('overlay').style.display = "block";
     },
 
     hideOverlay: function() {
-        dojo.style('overlay', 'display', 'none');
+        document.getElementById('overlay').style.display = "none";
     },
 
     /**
@@ -71,7 +69,7 @@ SC.mixin(exports, {
         var coords = dojo.coords(document.body);
 
         if (coords.h) {
-            dojo.style(dojo.byId('overlay'), 'height', coords.h + "px");
+            document.getElementById('overlay').style.height = coords.h + "px";
         }
     },
 
@@ -80,7 +78,7 @@ SC.mixin(exports, {
      */
     showStatus: function(msg) {
         document.getElementById("status").innerHTML = msg;
-        dojo.style('status', 'display', 'block');
+        document.getElementById('status').style.display = "block";
     },
 
     /**

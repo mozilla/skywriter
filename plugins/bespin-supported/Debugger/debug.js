@@ -27,6 +27,32 @@ var keys = require("bespin/util/keys");
 var commandline = require("bespin/cmd/commandline");
 var plugins = require("bespin/plugins");
 
+/*
+    "debug": {
+        "provides": [
+            ["bespin.subscribe", {
+                "topic": "debugger:running",
+                "pointer": "bespin/debug:debuggerRunning"
+            }],
+            ["bespin.subscribe", {
+                "topic": "debugger:stopped",
+                "pointer": "bespin/debug:debuggerStopped"
+            }],
+            ["bespin.subscribe", {
+                "topic": "debugger:halted",
+                "pointer": "bespin/debug:debuggerHalted"
+            }],
+            ["debugbar", {
+                "pointer": "bespin/debug"
+            }],
+            ["breakpoints", {
+                "pointer": "bespin/debug:BreakpointManager"
+            }]
+        ],
+        "location": "/getscript/js"
+    }
+*/
+
 /**
  * A specialization of commandline.Interface for the Javascript based CLI
  */
