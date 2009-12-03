@@ -144,21 +144,29 @@ exports.Catalog = SC.Object.extend({
             return undefined;
         }
         
+        var obj = ext.get("instance");
+        if (obj) {
+            return obj;
+        }
+        
         var exported = ext._getLoaded();
         var action = ext.action;
         
         if (action == "call") {
-            return exported();
+            obj = exported();
         } else if (action == "create") {
-            return exported.create();
+            obj = exported.create();
         } else if (action == "new") {
-            return new exported();
+            obj = new exported();
         } else if (action == "value") {
-            return exported;
+            obj = exported;
         } else {
             throw "Create action must be call|create|new|value. " +
                     "Found" + action;
         }
+        
+        ext.set("instance", obj);
+        return obj;
     },
 
     /** Retrieve an extension point object by name. */

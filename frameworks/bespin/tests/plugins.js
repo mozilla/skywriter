@@ -146,6 +146,9 @@ test("can retrieve factory objects from the catalog", function() {
     obj = catalog.getObject("itsAClass");
     equals(obj.name, "The Factory Class");
     
+    var obj2 = catalog.getObject("itsAClass");
+    ok(obj === obj2, "should get the same object back -- these are singletons");
+    
     obj = catalog.getObject("traditionalClass");
     equals(obj.name, "traditional");
     
