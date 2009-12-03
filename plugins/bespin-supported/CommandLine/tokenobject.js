@@ -23,7 +23,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 // module: bespin/util/tokenobject
-var bespin = require("index");
 
 /**
  * Given a string, make a token object that holds positions and has name access.

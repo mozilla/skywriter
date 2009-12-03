@@ -22,9 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("index");
 var SC = require("sproutcore/runtime").SC;
-var TokenObject = require("util/tokenobject").TokenObject;
+var TokenObject = require("tokenobject").TokenObject;
 
 /**
  * A Canon is a set of commands
@@ -68,23 +67,6 @@ exports.Canon = SC.Object.extend({
             this.parent.addCommand(this.command);
         } else {
             // This is for the root Canon only
-
-            // Add a command to the root canon on pub/sub.
-            // TODO: We're trying to remove pub/sub for actions, so we should explain this
-            this.hub.subscribe("extension:loaded:bespin.command", function(ext) {
-                ext.execute = function() {
-                    var args = arguments;
-                    this.load(function(execute) {
-                        execute.apply(this, args);
-                    });
-                }.bind(this);
-                exports.rootCanon.addCommand(ext);
-            }.bind(this));
-
-            // Remove a command from the root canon on pub/sub.
-            this.hub.subscribe("extension:removed:bespin.command", function(ext) {
-                this.removeCommand(ext);
-            }.bind(this));
 
             // 'help' command for the root canon
             this.addCommand({
@@ -450,6 +432,26 @@ exports.Canon = SC.Object.extend({
         return output;
     }
 });
+
+/*
+* Register new commands as they are discovered in plugins.
+*/
+exports.newCommandHandler = function(ext) {
+    ext.execute = function() {
+        var args = arguments;
+        this.load(function(execute) {
+            execute.apply(this, args);
+        });
+    }.bind(this);
+    exports.rootCanon.addCommand(ext);
+};
+
+// TODO add the deactivation hook here.
+// Remove a command from the root canon on pub/sub.
+// this.hub.subscribe("extension:removed:bespin.command", function(ext) {
+//     this.removeCommand(ext);
+// }.bind(this));
+
 
 /**
  * Create the root that all commands will be added to

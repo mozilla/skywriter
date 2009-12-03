@@ -94,6 +94,22 @@ exports.metadata = {
         "provides": [
             {
                 "ep": "extensionpoint",
+                "name": "extensionpoint",
+                "description": "Use the 'extensionpoint' extension point to \
+define new extension points. You can provide an 'indexOn' property to name a \
+property of extensions through which you'd like to be able to easily look up the \
+extension. You can also provide an 'activate' property which is a pointer to a \
+function that is called whenever a new extension is discovered."
+            },
+            {
+                "ep": "extensionpoint",
+                "name": "extensionhandler",
+                "description": "extensionhandlers are able to have 'activate' \
+and 'deactivate' pointers to functions that are called with each extension as \
+it is discovered or deactivated."
+            },
+            {
+                "ep": "extensionpoint",
                 "name": "startup",
                 "description": "A function that should be called at startup. This should be used \
 sparingly, as these plugins will be eagerly loaded at the beginning. All that's needed for this \
