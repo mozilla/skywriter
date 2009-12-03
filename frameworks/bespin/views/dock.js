@@ -100,7 +100,6 @@ exports.DockView = SC.View.extend({
                 break;  // silence jslint
             }
         });
-        console.log("_updateChildLayout: resulting layout is", layout);
         this.get('centerView').adjust(layout);
     },
 
