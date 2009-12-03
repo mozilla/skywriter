@@ -78,7 +78,7 @@ def install_sproutcore(options):
     Can optionally download using git, so that you can keep
     up to date easier."""
 
-    def get_component(base_name, dest_name, dest_path=".", branch=None):
+    def get_component(base_name, dest_name, dest_path=".", branch=None, account="dangoor"):
         dest_complete = path(dest_path) / dest_name
         if dest_complete.exists():
             info("%s is already here, no action being taken", base_name)
@@ -95,7 +95,7 @@ def install_sproutcore(options):
             return
 
         print "Checking out %s/%s" % (base_name, branch)
-        sh("git clone -q git://github.com/sproutit/%s.git %s" % (base_name, dest_name), cwd=dest_path)
+        sh("git clone -q git://github.com/%s/%s.git %s" % (account, base_name, dest_name), cwd=dest_path)
         if branch:
             sh("git checkout --track origin/%s" % branch, cwd=os.path.join(dest_path, dest_name))
 
