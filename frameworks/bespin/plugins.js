@@ -27,31 +27,47 @@ var builtins = require("builtins");
 var r = require;
 
 exports.Extension = SC.Object.extend({
-    load: function(callback, property) {
+    _splitPointer: function(property) {
         property = property || "pointer";
         var parts = this.get(property).split("#");
-        var self = this;
+        var modName;
+        // this allows syntax like #foo
+        // which is equivalent to PluginName:index#foo
+        if (parts[0]) {
+            modName = this._pluginName + ":" + parts[0];
+        } else {
+            modName = this._pluginName;
+        }
+        
+        return {
+            modName: modName,
+            objName: parts[1]
+        };
+    },
+    
+    load: function(callback, property) {
+        var pointer = this._splitPointer(property);
+        
         tiki.async(this._pluginName).then(function() {
-            var fullName;
-            // this allows syntax like #foo
-            // which is equivalent to PluginName:index#foo
-            if (parts[0]) {
-                fullName = self._pluginName + ":" + parts[0];
-            } else {
-                fullName = self._pluginName;
-            }
-            
             SC.run(function() {
-                var module = r(fullName);
+                var module = r(pointer.modName);
                 if (callback) {
-                    if (parts[1]) {
-                        callback(module[parts[1]]);
+                    if (pointer.objName) {
+                        callback(module[pointer.objName]);
                     } else {
                         callback(module);
                     }
                 }
             });
         });
+    },
+    _getLoaded: function(property) {
+        var pointer = this._splitPointer(property);
+        var module = r(pointer.modName);
+        if (pointer.objName) {
+            return module[pointer.objName];
+        }
+        return module;
     }
 });
 
@@ -117,6 +133,33 @@ exports.Catalog = SC.Object.extend({
         ep.set("indexOn", "name");
         this.load(builtins.metadata);
     },
+    
+    /*
+    * Retrieve a registered singleton. Returns undefined
+    * if that factory is not registered.
+    */
+    getObject: function(name) {
+        var ext = this.getExtensionByKey("factory", name);
+        if (ext === undefined) {
+            return undefined;
+        }
+        
+        var exported = ext._getLoaded();
+        var action = ext.action;
+        
+        if (action == "call") {
+            return exported();
+        } else if (action == "create") {
+            return exported.create();
+        } else if (action == "new") {
+            return new exported();
+        } else if (action == "value") {
+            return exported;
+        } else {
+            throw "Create action must be call|create|new|value. " +
+                    "Found" + action;
+        }
+    },
 
     /** Retrieve an extension point object by name. */
     getExtensionPoint: function(name) {
@@ -134,7 +177,7 @@ exports.Catalog = SC.Object.extend({
      * If none are defined, this will return an empty array.
      */
     getExtensions: function(name) {
-        var ep = this.points[name];
+        var ep = this.getExtensionPoint(name);
         if (ep === undefined) {
             return [];
         }
@@ -146,7 +189,7 @@ exports.Catalog = SC.Object.extend({
      * the extension point or the key are unknown, undefined will be returned.
      */
     getExtensionByKey: function(name, key) {
-        var ep = this.points[name];
+        var ep = this.getExtensionPoint(name);
         if (ep === undefined) {
             return undefined;
         }

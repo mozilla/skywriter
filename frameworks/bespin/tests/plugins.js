@@ -107,10 +107,74 @@ test("activation handlers are called", function() {
     equals(exports.loadedCount, 2);
 });
 
+test("can retrieve factory objects from the catalog", function() {
+    var catalog = plugins.Catalog.create();
+    catalog.load({
+        bespin: {
+            provides: [
+                {
+                    ep: "factory",
+                    name: "testing",
+                    pointer: "tests/plugins#factoryObj",
+                    action: "value"
+                },
+                {
+                    ep: "factory",
+                    name: "itsAClass",
+                    pointer: "tests/plugins#factoryClass",
+                    action: "create"
+                },
+                {
+                    ep: "factory",
+                    name: "traditionalClass",
+                    pointer: "tests/plugins#traditionalClass",
+                    action: "new"
+                },
+                {
+                    ep: "factory",
+                    name: "simpleFunction",
+                    pointer: "tests/plugins#simpleFunction",
+                    action: "call"
+                }
+            ]
+        }
+    });
+    
+    var obj = catalog.getObject("testing");
+    equals(obj, exports.factoryObj);
+    
+    obj = catalog.getObject("itsAClass");
+    equals(obj.name, "The Factory Class");
+    
+    obj = catalog.getObject("traditionalClass");
+    equals(obj.name, "traditional");
+    
+    obj = catalog.getObject("simpleFunction");
+    equals(obj.name, "just arbitrary");
+});
+
 exports.loadedCount = 0;
 
 exports.myfunc = function(ext) {
     exports.loadedCount++;
+};
+
+exports.factoryObj = {
+    name: "The Factory Object"
+};
+
+exports.factoryClass = SC.Object.extend({
+    name: "The Factory Class"
+});
+
+exports.traditionalClass = function() {
+    this.name = "traditional";
+};
+
+exports.simpleFunction = function() {
+    return {
+        name: "just arbitrary"
+    };
 };
 
 plan.run();
