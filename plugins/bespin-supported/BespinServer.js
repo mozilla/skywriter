@@ -123,11 +123,6 @@ exports.server = SC.Object.create({
             }
         };
 
-        var cl = bespin.get("commandLine");
-        if (cl) {
-            onreadystatechange = cl.link(onreadystatechange);
-        }
-
         xhr.onreadystatechange = onreadystatechange;
         xhr.open(method, this.SERVER_BASE_URL + url, true); // url must have leading /
 
