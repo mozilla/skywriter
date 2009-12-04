@@ -85,6 +85,8 @@ def install_sproutcore(options):
             return
             
         if not options.git:
+            if branch is None:
+                branch = "master"
             info("Downloading %s/%s as a tarball", base_name, branch)
             tarball = urllib2.urlopen("http://github.com/%s/%s/tarball/%s" % (account, base_name, branch))
             dirname = tarball.url.split('/')[-1].split('.')[0]
