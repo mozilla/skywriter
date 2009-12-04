@@ -24,12 +24,13 @@
 
 var SC = require("sproutcore/runtime").SC;
 var util = require("bespin:util/util");
+var cli = require("views/commandline");
 
 /**
  * Begin the login process
  */
 exports.showCli = function() {
-    exports.cliPage.get("mainPane").append();
+    // exports.cliPage.get("mainPane").append();
 };
 
 /**
@@ -37,7 +38,10 @@ exports.showCli = function() {
  */
 exports.cliController = SC.Object.create({
     input: "",
-    output: ""
+    output: "",
+    exec: function() {
+        console.log(this.input);
+    }
 });
 
 /**
@@ -50,23 +54,30 @@ exports.cliPage = SC.Page.design({
         layout: { top: 50, bottom: 0, left: 50, right: 50 },
 
         contentView: SC.View.design({
-            childViews: [ "prompt", "input", "output" ],
+            childViews: [ "prompt", "input", "submit", "output" ],
 
             prompt: SC.LabelView.design({
                 value: ">",
-                fontSize: 20,
                 layout: { left: 0, width: 30, bottom: 0, height: 30 },
                 textAlign: "right"
             }),
 
             input: SC.TextFieldView.design({
-                valueBinding: "cli#cliController.input",
-                layout: { left: 35, bottom: 0, height: 30, right: 0 }
+                valueBinding: "CommandLine#cliController.input",
+                layout: { left: 35, bottom: 0, height: 30, right: 85 }
             }),
 
-            output: SC.TextareaView.design({
-                valueBinding: "cli#cliController.output",
+            output: SC.TextFieldView.design({
+                valueBinding: "CommandLine#cliController.output",
                 layout: { left: 0, top: 0, right: 0, bottom: 30 }
+            }),
+
+            submit: SC.ButtonView.design({
+                layout: { right: 0, bottom: 0, height: 30, width: 80 },
+                isDefault: true,
+                title: "Exec",
+                target: "CommandLine#cliController",
+                action: "exec"
             })
         })
     })

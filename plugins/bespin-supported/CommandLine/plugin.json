@@ -22,7 +22,7 @@
         },
         {
             "ep": "startup",
-            "pointer": "controller#showCLI"
+            "pointer": "views/cli#showCli"
         }
     ]
 }

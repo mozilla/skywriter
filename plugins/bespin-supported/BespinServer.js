@@ -98,7 +98,7 @@ exports.server = SC.Object.create({
 
         var onreadystatechange = function() {
             if (xhr.readyState == 4) {
-                if (xhr.status && xhr.status != 0 && (xhr.status >= 200 && xhr.status < 300)) {
+                if (xhr.status && xhr.status !== 0 && (xhr.status >= 200 && xhr.status < 300)) {
                     var response = xhr.responseText;
 
                     if (options.evalJSON && response) {
@@ -122,6 +122,13 @@ exports.server = SC.Object.create({
                 }
             }
         };
+
+        // TODO: This provided a way to attach async output to the originating
+        // command. We should find a better way to do this.
+        // var cl = bespin.get("commandLine");
+        // if (cl) {
+        //     onreadystatechange = cl.link(onreadystatechange);
+        // }
 
         xhr.onreadystatechange = onreadystatechange;
         xhr.open(method, this.SERVER_BASE_URL + url, true); // url must have leading /

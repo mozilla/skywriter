@@ -24,11 +24,12 @@
 
 // This is a plugin
 
+var SC = require("sproutcore/runtime").SC;
 var bespin = require("bespin");
-var util = require("bespin/util/util");
-var filepopup = require("bespin/editor/filepopup");
+var util = require("bespin:util/util");
+// var filepopup = require("bespin/editor/filepopup");
 var history = require("history");
-var keys = require("bespin/util/keys");
+var keys = require("bespin:util/keys");
 
 /**
  * Add a setting to control the console font size
@@ -54,7 +55,7 @@ exports.Interface = SC.Object.extend({
     commandLine: null,
     store: null,
     idPrefix: "command_",
-    parentElement: dojo.body(),
+    parentElement: document.body,
 
     styles: { bottom: "100px", left: "31px" },
     nodes: [],
@@ -78,26 +79,19 @@ exports.Interface = SC.Object.extend({
     },
 
     buildUI: function() {
-        if (typeof this.commandLine == "string") {
-            this.commandLine = document.getElementById(this.commandLine);
-        }
-        this.promptimg = document.getElementById("promptimg");
-
         // Create the div for hints
-        this.commandHint = dojo.create("table", {
-            id: idPrefix + "hint",
-            cellspacing: 0,
-            style: {
-                display: "none",
-                bottom: this.styles.bottom,
-                left: this.styles.left,
-                width: "500px"
-            }
-        }, this.parentElement);
-        this.nodes.push(idPrefix + "hint");
+        this.commandHint = document.createElement("table");
+        this.commandHint.id = this.idPrefix + "hint";
+        this.commandHint.cellspacing = 0;
+        this.commandHint.style.display = "none";
+        this.commandHint.style.bottom = this.styles.bottom;
+        this.commandHint.style.left = this.styles.left;
+        this.commandHint.style.width = "500px";
+        this.parentElement.appendChild(this.commandHint);
 
-        dojo.attr(this.commandHint, {
-            innerHTML: '<tr class="command_hint-top">' +
+        this.nodes.push(this.idPrefix + "hint");
+
+        this.commandHint.innerHTML = '<tr class="command_hint-top">' +
               '<td id="command_hint-topleftcorner"></td>' +
               '<td id="command_hint-topstretch"></td>' +
               '<td id="command_hint-toprightcorner"></td>' +
@@ -106,58 +100,85 @@ exports.Interface = SC.Object.extend({
               '<td id="command_hint-leftstretch"></td>' +
               '<td id="command_hint-content"></td>' +
               '<td id="command_hint-rightstretch"></td>' +
-            '</tr>'
-        });
+            '</tr>';
 
-        this.connections.push(dojo.connect(this.commandHint, "onclick", this, this.hideHint));
+        this.connect(this.commandHint, "onclick", this, this.hideHint);
 
         // Create the div for real command output
         // TODO move this into the popup
-        this.output = dojo.create("div", {
-            id: idPrefix + "output",
-            style: "display:none"
-        }, this.parentElement);
-        this.nodes.push(idPrefix + "output");
+        this.output = document.createElement("div");
+        this.output.id = this.idPrefix + "output";
+        this.output.style.display = "none";
+        this.parentElement.appendChild(this.output);
+        this.nodes.push(this.idPrefix + "output");
 
         // TOOD move this into the popup
         // The reference pane takes a while to load so we create it here
-        this.refNode = dojo.create("iframe", {
-            style: "display:none",
-            id: "popup_refNode"
-        }, dojo.body());
+        this.refNode = document.createElement("iframe");
+        this.refNode.style.display = "none";
+        this.refNode.id = "popup_refNode";
+        document.body.appendChild(this.output);
         this.nodes.push("popup_refNode");
 
-        this.footer = document.getElementById("footer");
+        this.footer = document.createElement("div");
+        this.footer.className = "footer";
+        this.footer.style.display = "none";
+        document.body.appendChild(this.footer);
+
+        var commandline = document.createElement("table");
+        commandline.className = "commandline";
+        commandline.cellpadding = 0;
+        this.footer.appendChild(commandline);
+
+        var tr = document.createElement("tr");
+
+        var td = document.createElement("td");
+        td.className = "prompt";
+        tr.appendChild(td);
+        this.promptimg = document.createElement("img");
+        this.promptimg.src = "images/icn_command.png";
+        td.appendChild(this.promptimg);
+
+        td = document.createElement("td");
+        tr.appendChild(td);
+        this.commandLine = document.createElement("input");
+        this.commandLine.spellcheck = false;
+        td.appendChild(this.commandLine);
 
         // TODO move this into the popup
-        this.filePanel = new filepopup.FilePanel();
+        //this.filePanel = new filepopup.FilePanel();
+    },
+
+    connect: function(element, event, scope, method) {
+        //this.connections.push(dojo.connect(element, event, scope, method));
+        SC.Event.add(element, event, scope, method);
     },
 
     /**
      * Handle key bindings and other events for the command line
      */
     connectEvents: function() {
-        this.connections.push(dojo.connect(this.commandLine, "onfocus", this, function() {
+        this.connect(this.commandLine, "onfocus", this, function() {
             this.hub.publish("cmdline:focus");
             this.inCommandLine = true;
             if (this.promptimg) {
                 this.promptimg.src = 'images/icn_command_on.png';
             }
-        }.bind(this)));
+        }.bind(this));
 
-        this.connections.push(dojo.connect(this.commandLine, "onblur", this, function() {
+        this.connect(this.commandLine, "onblur", this, function() {
             this.inCommandLine = false;
             if (this.promptimg) {
                 this.promptimg.src = 'images/icn_command.png';
             }
-        }));
+        });
 
-        this.connections.push(dojo.connect(this.commandLine, "onkeyup", this, function(e) {
+        this.connect(this.commandLine, "onkeyup", this, function(e) {
             this._normalizeCommandValue();
             this._findCompletions(e);
-        }));
+        });
 
-        this.connections.push(dojo.connect(this.commandLine, "onkeypress", this, function(e) {
+        this.connect(this.commandLine, "onkeypress", this, function(e) {
             var key = keys.Key;
 
             if (e.keyChar == 'j' && (e.ctrlKey || e.metaKey)) { // send back
@@ -224,10 +245,10 @@ exports.Interface = SC.Object.extend({
             }
 
             return true;
-        }));
+        });
 
         // ESCAPE onkeypress fails on Safari, so we need this.
-        this.connections.push(dojo.connect(this.commandLine, "onkeydown", this, function(e) {
+        this.connect(this.commandLine, "onkeydown", this, function(e) {
             if (e.keyCode == keys.Key.ESCAPE) {
                 this.hideHint();
 
@@ -235,37 +256,36 @@ exports.Interface = SC.Object.extend({
                     popup.hide();
                 });
             }
-        }));
+        });
 
         // If an open file action failed, tell the user.
-        var self = this;
         this.subscriptions.push(bespin.subscribe("editor:openfile:openfail", function(e) {
-            self.showHint('Could not open file: ' + e.filename + " (maybe try &raquo; list)");
-        }));
+            this.showHint('Could not open file: ' + e.filename + " (maybe try &raquo; list)");
+        }.bind(this)));
 
         // The open file action worked, so tell the user
         this.subscriptions.push(bespin.subscribe("editor:openfile:opensuccess", function(e) {
-            self.showHint('Loaded file: ' + e.file.name);
-        }));
+            this.showHint('Loaded file: ' + e.file.name);
+        }.bind(this)));
 
         // When escaped, take out the hints and output
         this.subscriptions.push(bespin.subscribe("ui:escape", function() {
-            self.hideHint();
-            self.hideOutput();
-        }));
+            this.hideHint();
+            this.hideOutput();
+        }.bind(this)));
     },
 
     destroy: function() {
         this.subscriptions.forEach(function(sub) {
-            bespin.unsubscribe(sub);
+            console.log("bespin.unsubscribe(", sub, ");");
         });
 
         this.connections.forEach(function(conn) {
-            dojo.disconnect(conn);
+            console.log("dojo.disconnect(", conn, ");");
         });
 
         this.nodes.forEach(function(nodeId) {
-            dojo.query("#" + nodeId).orphan();
+            console.log("skipping: dojo.query('#" + nodeId + "'1).orphan();");
         });
     },
 
@@ -301,7 +321,7 @@ exports.Interface = SC.Object.extend({
             return;
         }
 
-        dojo.attr("command_hint-content", { innerHTML: html });
+        elem.innerHTML = html;
         this.commandHint.style.display = "block";
 
         if (this.hintTimeout) {
@@ -309,11 +329,10 @@ exports.Interface = SC.Object.extend({
         }
 
         timeout = timeout || 4600;
-        var self = this;
         if (timeout != -1) {
             this.hintTimeout = setTimeout(function() {
-                self.hideHint();
-            }, timeout);
+                this.hideHint();
+            }.bind(this), timeout);
         }
     },
 
@@ -351,7 +370,8 @@ exports.Interface = SC.Object.extend({
     showPanel: function(panel, coordChange) {
         var coords = this._savedCoords;
 
-        var footerHeight = dojo.style(this.footer, "height") + 2;
+        // TODO: This is probably wrong, we should use getComputedStyle
+        var footerHeight = this.footer.style.height + 2;
 
         this.footer.style.left = coords.l + "px";
         this.footer.style.width = (coords.w - 10) + "px";
@@ -375,15 +395,15 @@ exports.Interface = SC.Object.extend({
             bespin.getComponent('popup', function(popup) {
                 popup.setTitle("Command Line");
             });
-            dojo.style(this.output, {
-                left: coords.l + "px",
-                bottom: coords.b + "px",
-                width: coords.w + "px",
-                height: coords.h + "px",
-                display: "block"
-            });
+
+            this.output.style.left = coords.l + "px";
+            this.output.style.bottom = coords.b + "px";
+            this.output.style.width = coords.w + "px";
+            this.output.style.height = coords.h + "px";
+            this.output.style.display = "block";
+
             // TODO: only do this if the user doesn't click on an area below (e.g. let them click on a textbox, but not empty space)
-            // this.connections.push(dojo.connect(this.output, 'mouseup', this, function(e) {
+            // this.connect(this.output, 'mouseup', this, function(e) {
             //     this.focus();
             // }));
         } else if (panel == "reference") {
@@ -395,27 +415,27 @@ exports.Interface = SC.Object.extend({
             if (refNode.src != url) {
                 refNode.src = url;
             }
-            dojo.style(refNode, {
-                left: coords.l + "px",
-                top: coords.t + "px",
-                width: coords.w + "px",
-                height: coords.h + "px",
-                position: "absolute",
-                borderWidth: "0",
-                zIndex: "200",
-                display: "block"
-            });
-            this.connections.push(dojo.connect(refNode, 'mouseup', this, function(e) {
+
+            refNode.style.left = coords.l + "px";
+            refNode.style.top = coords.t + "px";
+            refNode.style.width = coords.w + "px";
+            refNode.style.height = coords.h + "px";
+            refNode.style.position = "absolute";
+            refNode.style.borderWidth = "0";
+            refNode.style.zIndex = "200";
+            refNode.style.display = "block";
+
+            this.connect(refNode, 'mouseup', this, function(e) {
                 this.focus();
-            }));
+            });
         } else {
             bespin.getComponent('popup', function(popup) {
                 popup.setTitle("File Explorer");
             });
             this.filePanel.show(coords);
-            this.connections.push(dojo.connect(this.filePanel, 'mouseup', this, function(e) {
+            this.connect(this.filePanel, 'mouseup', this, function(e) {
                 this.focus();
-            }));
+            });
         }
 
         this.currentPanel = panel;
@@ -423,11 +443,11 @@ exports.Interface = SC.Object.extend({
 
     hidePanel: function(panel) {
         if (this.currentPanel == "output") {
-            dojo.style(this.output, "display", "none");
+            this.output.style.display = "none";
         } else if (this.currentPanel == "files") {
             this.filePanel.hide();
         } else if (this.currentPanel == "reference") {
-            dojo.style(this.refNode, "display", "none");
+            this.refNode.style.display = "none";
         }
     },
 
@@ -435,22 +455,16 @@ exports.Interface = SC.Object.extend({
      * Reverse the effects of showOutput()
      */
     hideOutput: function() {
-        dojo.style(this.commandHint, {
-            left: "32px",
-            bottom: "0px",
-            width: "500px"
-        });
+        this.commandHint.style.left = "32px";
+        this.commandHint.style.bottom = "0px";
+        this.commandHint.style.width = "500px";
 
         this.hidePanel(this.currentPanel);
-
         this.currentPanel = undefined;
 
-        dojo.style(this.footer, {
-            "left": "-10000px",
-            "display": "none"
-        });
+        this.footer.style.left = "-10000px";
+        this.footer.style.display = "none";
         this.maxInfoHeight = null;
-
     },
 
     /**
@@ -528,114 +542,127 @@ exports.Interface = SC.Object.extend({
         var size = this.settings.values.consolefontsize;
         var mode = this.settings.values.historytimemode;
 
-        dojo.attr(this.output, "innerHTML", "");
+        this.output.innerHTML = "";
 
-        var table = dojo.create("table", {
-            className: 'command_table',
-            style: 'font-size:' + size + 'pt'
-        }, this.output);
-
-        var self = this;
+        var table = document.createElement("table");
+        table.className = 'command_table';
+        table.style = 'font-size:' + size + 'pt';
+        this.output.appendChild(table);
 
         var count = 1;
         this.history.instructions.forEach(function(instruction) {
             if (!instruction.historical) {
                 // The row for the input (i.e. what was typed)
-                var rowin = dojo.create("tr", {
-                    className: 'command_rowin',
-                    style: "background-image: url(/images/instruction" + size + ".png)",
-                    onclick: function() {
-                        // A single click on an instruction line in the console
-                        // copies the command to the command line
-                        self.commandLine.value = instruction.typed;
-                    },
-                    ondblclick: function() {
-                        // A double click on an instruction line in the console
-                        // executes the command
-                        self.executeCommand(instruction.typed);
-                    }
-                }, table);
+                var rowin = document.createElement("tr");
+                rowin.className = 'command_rowin';
+                rowin.style.backgroundImage = "url(/images/instruction" + size + ".png)",
+                rowin.onclick = function() {
+                    // A single click on an instruction line in the console
+                    // copies the command to the command line
+                    this.commandLine.value = instruction.typed;
+                }.bind(this);
+                rowin.ondblclick = function() {
+                    // A double click on an instruction line in the console
+                    // executes the command
+                    this.executeCommand(instruction.typed);
+                }.bind(this);
+                table.appendChild(rowin);
 
                 // The opening column with time or history number or nothing
-                var rowid = dojo.create("td", { className: 'command_open' }, rowin);
+                var rowid = document.createElement("td");
+                rowid.className = "command_open";
+                rowin.appendChild(rowid);
+
                 if (mode == "history") {
                     rowid.innerHTML = count;
-                    dojo.addClass(rowid, 'command_open_history');
+                    // TODO: <blush>
+                    SC.RenderContext.fn.addClass(rowid, 'command_open_history');
                 }
                 else if (mode == "time" && instruction.start) {
                     rowid.innerHTML = formatTime(instruction.start);
-                    dojo.addClass(rowid, 'command_open_time');
+                    SC.RenderContext.fn.addClass(rowid, 'command_open_time');
                 }
                 else {
-                    dojo.addClass(rowid, 'command_open_blank');
+                    SC.RenderContext.fn.addClass(rowid, 'command_open_blank');
                 }
 
                 // Cell for the typed command and the hover
-                var typed = dojo.create("td", { className: 'command_main' }, rowin);
+                var typed = document.createElement("td");
+                typed.className = "command_main";
+                rowin.appendChild(typed);
 
                 // The execution time
-                var hover = dojo.create("div", { className: 'command_hover' }, typed);
+                var hover = document.createElement("div");
+                hover.className = "command_hover";
+                typed.appendChild(hover);
 
                 // The execution time
                 if (instruction.start && instruction.end) {
-                    dojo.create("div", {
-                        className: 'command_duration',
-                        innerHTML: ((instruction.end.getTime() - instruction.start.getTime()) / 1000) + " sec "
-                    }, hover);
+                    var div = document.createElement("div");
+                    div.className = "command_duration";
+                    div.innerHTML = ((instruction.end.getTime() - instruction.start.getTime()) / 1000) + " sec ";
+                    hover.appendChild(div);
                 }
 
                 // Toggle output display
-                dojo.create("img", {
-                    src: instruction.hideOutput ? "/images/plus.png" : "/images/minus.png",
-                    style: "vertical-align:middle; padding:2px;",
-                    alt: "Toggle display of the output",
-                    title: "Toggle display of the output",
-                    onclick: function(ev) {
-                        instruction.hideOutput = !instruction.hideOutput;
-                        self.updateOutput();
-                        util.stopEvent(ev);
-                    }
-                }, hover);
+                var img = document.createElement("img");
+                img.src = "/images/" + instruction.hideOutput ? "plus.png" : "minus.png";
+                img.style = "vertical-align:middle; padding:2px;";
+                img.alt = "Toggle display of the output";
+                img.title = "Toggle display of the output";
+                img.onclick = function(ev) {
+                    instruction.hideOutput = !instruction.hideOutput;
+                    this.updateOutput();
+                    util.stopEvent(ev);
+                }.bind(this);
+                hover.appendChild(img);
 
                 // Open/close output
-                dojo.create("img", {
-                    src: "/images/closer.png",
-                    style: "vertical-align:middle; padding:2px;",
-                    alt: "Remove this command from the history",
-                    title: "Remove this command from the history",
-                    onclick: function(ev) {
-                        self.history.remove(instruction);
-                        self.updateOutput();
-                        util.stopEvent(ev);
-                    }
-                }, hover);
+                img = document.createElement("img");
+                img.src = "/images/closer.png";
+                img.style.verticalAlign = "middle";
+                img.style.padding = "2px";
+                img.alt = "Remove this command from the history";
+                img.title = "Remove this command from the history";
+                img.onclick = function(ev) {
+                    this.history.remove(instruction);
+                    this.updateOutput();
+                    util.stopEvent(ev);
+                }.bind(this);
+                hover.appendChild(img);
 
                 // What the user actually typed
-                dojo.create("img", {
-                    className: "nohover",
-                    src: "/images/prompt1.png"
-                }, typed);
-                dojo.create("img", {
-                    className: "hover",
-                    src: "/images/prompt2.png"
-                }, typed);
+                img = document.createElement("img");
+                img.className = "nohover";
+                img.src = "/images/prompt1.png";
+                typed.appendChild(img);
 
-                dojo.create("span", {
-                    innerHTML: instruction.typed,
-                    className: "command_typed"
-                }, typed);
+                img = document.createElement("img");
+                img.className = "hover";
+                img.src = "/images/prompt2.png";
+                typed.appendChild(img);
+
+                var span = document.createElement("span");
+                span.innerHTML = instruction.typed;
+                span.className = "command_typed";
+                typed.appendChild(span);
 
                 // The row for the output (if required)
                 if (!instruction.hideOutput) {
-                    var rowout = dojo.create("tr", { className: 'command_rowout' }, table);
-                    dojo.create("td", { }, rowout);
-                    var td = dojo.create("td", {
-                        colSpan: 2,
-                        className: (instruction.error ? "command_error" : "")
-                    }, rowout);
+
+                    var rowout = document.createElement("tr");
+                    rowout.className = "command_rowout";
+                    table.appendChild(rowout);
+
+                    rowout.appendChild(document.createElement("td"));
+
+                    var td = document.createElement("td");
+                    td.colSpan = 2;
+                    td.className = (instruction.error ? "command_error" : "");
+                    rowout.appendChild(td);
 
                     if (instruction.element) {
-                        dojo.place(instruction.element, td);
+                        td.appendChild(instruction.element);
                     } else {
                         var contents = instruction.output || "";
                         if (!instruction.completed) {
@@ -646,18 +673,17 @@ exports.Interface = SC.Object.extend({
                 }
             }
             count ++;
-        });
+        }.bind(this));
     },
 
     /**
      * Toggle font size between 9,11,14 point fonts
      */
     toggleFontSize: function() {
-        var self = this;
         var setSize = function(size) {
-            self.settings.values.consolefontsize = size;
-            self.updateOutput();
-        };
+            this.settings.values.consolefontsize = size;
+            this.updateOutput();
+        }.bind(this);
 
         var size = this.settings.values.consolefontsize;
         switch (size) {
@@ -672,11 +698,10 @@ exports.Interface = SC.Object.extend({
      * Toggle the time/history mode
      */
     toggleHistoryTimeMode: function() {
-        var self = this;
         var setMode = function(mode) {
-            self.settings.values.historytimemode = mode;
-            self.updateOutput();
-        };
+            this.settings.values.historytimemode = mode;
+            this.updateOutput();
+        }.bind(this);
 
         var size = this.settings.values.historytimemode;
         switch (size) {
@@ -713,7 +738,7 @@ exports.Interface = SC.Object.extend({
             // TODO: maybe we could do better than this error by telling the
             // user other options, or where in the command we failed???
             this.showHint("No matches");
-            dojo.addClass(this.commandLine, "commandLineError");
+            SC.RenderContext.fn.addClass(this.commandLine, "commandLineError");
             return;
         }
 
@@ -721,7 +746,7 @@ exports.Interface = SC.Object.extend({
         // got something to ask what the options are from here.
         // One of the possibilities is that this is an error, however we're
         // going to default to no error so things don't look bad when deleting
-        dojo.removeClass(this.commandLine, "commandLineError");
+        SC.RenderContext.fn.removeClass(this.commandLine, "commandLineError");
 
         // TODO: Error. This makes the assumption that we're using the full
         // name and not an alias. How to fix? We could move prefix assignment to
@@ -750,34 +775,33 @@ exports.Interface = SC.Object.extend({
         };
 
         // Delegate the completions to the command
-        var self = this;
         command.findCompletions(query, function(response) {
-            if (response.value != self.commandLine.value ||
-                response.cursorPos != self.commandLine.selectionStart) {
+            if (response.value != this.commandLine.value ||
+                response.cursorPos != this.commandLine.selectionStart) {
                 console.log("Command line changed during async operation. Ignoring.");
             }
 
             // Only obey auto-fill if we are at the end of the line and we're
             // not deleting text
             if (response.autofill &&
-                response.cursorPos == self.commandLine.value.length &&
+                response.cursorPos == this.commandLine.value.length &&
                 e.keyCode != keys.Key.BACKSPACE &&
                 e.keyCode != keys.Key.DELETE) {
-                self.commandLine.value = response.autofill;
-                self.commandLine.setSelectionRange(response.value.length, response.autofill.length);
+                this.commandLine.value = response.autofill;
+                this.commandLine.setSelectionRange(response.value.length, response.autofill.length);
             }
 
             // Show the hint as to what's next
             if (response.error) {
-                self.showHint(response.error);
+                this.showHint(response.error);
             } else if (response.hint) {
-                self.showHint(response.hint);
+                this.showHint(response.hint);
             } else {
-                self.hideHint();
+                this.hideHint();
             }
 
             // Add or remove the 'error' class to the commandLine element
-            (response.error ? dojo.addClass : dojo.removeClass)(self.commandLine, "commandLineError");
+            (response.error ? SC.RenderContext.fn.addClass : SC.RenderContext.fn.removeClass)(this.commandLine, "commandLineError");
 
             // Show alternative options
             if (response.options) {
@@ -785,12 +809,12 @@ exports.Interface = SC.Object.extend({
                 if (response.options.length > 10) {
                     var more = "<br/>And " + (response.options.length - 9) + " more ...";
                     response.options = response.options.slice(0, 9);
-                    self.showHint(intro + response.options.join('<br/>') + more);
+                    this.showHint(intro + response.options.join('<br/>') + more);
                 } else {
-                    self.showHint(intro + response.options.join('<br/>'));
+                    this.showHint(intro + response.options.join('<br/>'));
                 }
             }
-        });
+        }.bind(this));
     },
 
     /**
@@ -826,12 +850,11 @@ exports.Interface = SC.Object.extend({
             this.history.add(instruction);
         }
 
-        var self = this;
         instruction.onOutput(function() {
-            self.hideHint();
-            self.updateOutput();
-            self.scrollConsole();
-        });
+            this.hideHint();
+            this.updateOutput();
+            this.scrollConsole();
+        }.bind(this));
 
         instruction.exec();
         return instruction;
@@ -852,6 +875,8 @@ exports.Interface = SC.Object.extend({
         return this.executing.link(action, context);
     }
 });
+
+window.cli = exports.Interface.create();
 
 /**
  * Wrapper for something that the user typed
@@ -919,21 +944,20 @@ exports.Instruction = SC.Object.extend({
     link: function(action, context) {
         this._outstanding++;
 
-        var self = this;
         return function() {
             try {
                 action.apply(context || window, arguments);
             } finally {
-                self._outstanding--;
+                this._outstanding--;
 
-                if (self._outstanding == 0) {
-                    self.completed = true;
-                    self._callbacks.forEach(function(callback) {
+                if (this._outstanding == 0) {
+                    this.completed = true;
+                    this._callbacks.forEach(function(callback) {
                         callback();
                     });
                 }
             }
-        };
+        }.bind(this);
     },
 
     /**
