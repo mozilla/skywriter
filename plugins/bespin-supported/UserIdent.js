@@ -168,8 +168,18 @@ exports.dumbController = SC.Object.create({
         var mainPane = exports.userIdentPage.get("mainPane");
         mainPane.get("layout").height = 450;
         mainPane.set("layerNeedsUpdate", true);
-
-        return this.get("action") + "View";
+        
+        var newView = this.get("action") + "View";
+        /**
+         * The TextFieldView usernameField should be focused. We can't call mainPane.makeFirstResponder(...)
+         * by now, as the newView is not yet displayed => got to wait till the current call stack is done and
+         * the newView is displayed. This is achieved by using setTimeout(..., 0).
+         * TODO: Find a better solution for this.
+         */
+        setTimeout(function() {
+            mainPane.makeFirstResponder(exports.userIdentPage.getPath(newView + ".usernameField"));
+        }.bind(this), 0);
+        return newView;
     }.property("action").cacheable()
 });
 
@@ -199,25 +209,25 @@ exports.userIdentPage = SC.Page.design({
             container: SC.ContainerView.design({
                 nowShowingBinding: "UserIdent#dumbController.actionView",
                 layout: { left: 0, top: 100, right: 0, bottom: 0 }
-            })
+            }),
         })
     }),
 
     loginView: SC.View.design({
         layout: { left: 0, top: 0, right: 0, bottom: 0 },
         childViews: [
-            "userLabel", "userField",
+            "usernameLabel", "usernameField",
             "passwordLabel", "passwordField",
             "submit"
         ],
 
-        userLabel: SC.LabelView.design({
+        usernameLabel: SC.LabelView.design({
             value: "Username:",
             layout: { right: 400-150, top: 0 },
             textAlign: "right"
         }),
 
-        userField: SC.TextFieldView.design({
+        usernameField: SC.TextFieldView.design({
             valueBinding: "UserIdent#loginController.username",
             blur: function() { console.log("hai"); },
             layout: { left: 155, top: 0, height: 20, width: 100 }
