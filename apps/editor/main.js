@@ -65,9 +65,6 @@ main = function() {
         view.app.getPath("mainPage.mainPane").appendChild(editor.dockView);
 
         // Load the plugin metadata for all of the system default plugins
-        var body = document.body;
-        var el = document.createElement('script');
-        el.setAttribute('src', "/server/plugin/register/defaults");
-        body.appendChild(el);
+        editor.loadPluginMetadata("/server/plugin/register/defaults");
     });
 };
