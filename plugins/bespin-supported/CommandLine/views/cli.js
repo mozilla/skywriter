@@ -24,13 +24,14 @@
 
 var SC = require("sproutcore/runtime").SC;
 var util = require("bespin:util/util");
-var cli = require("views/commandline");
+var dock = require("bespin:views/dock");
 
 /**
  * Begin the login process
  */
 exports.showCli = function() {
-    // exports.cliPage.get("mainPane").append();
+    var dockView = require.env.bespinEditorController.dockView;
+    dockView.appendChild(dockView.addDockedView(exports.cliView));
 };
 
 /**
@@ -47,38 +48,37 @@ exports.cliController = SC.Object.create({
 /**
  *
  */
-exports.cliPage = SC.Page.design({
+exports.cliView = SC.View.design({
+    dock: dock.DOCK_BOTTOM,
+    layout: { left: 0, bottom: 0, right: 0, height: 30 },
 
-    mainPane: SC.PanelPane.design({
-        classNames: [ "bespin-theme" ],
-        layout: { top: 50, bottom: 0, left: 50, right: 50 },
+    childViews: [ 'prompt', 'input', 'submit' ],
 
-        contentView: SC.View.design({
-            childViews: [ "prompt", "input", "submit", "output" ],
+    prompt: SC.LabelView.design({
+        value: ">",
+        layout: { left: 0, width: 30, bottom: 0, height: 30 },
+        textAlign: "right"
+    }),
 
-            prompt: SC.LabelView.design({
-                value: ">",
-                layout: { left: 0, width: 30, bottom: 0, height: 30 },
-                textAlign: "right"
-            }),
+    input: SC.TextFieldView.design({
+        //valueBinding: "CommandLine#cliController.input",
+        layout: { left: 35, bottom: 0, height: 30, right: 85 }
+    }),
 
-            input: SC.TextFieldView.design({
-                valueBinding: "CommandLine#cliController.input",
-                layout: { left: 35, bottom: 0, height: 30, right: 85 }
-            }),
+    // TODO: Make into a separate pane so it doesn't affect the size of the
+    // main editor.
 
-            output: SC.TextFieldView.design({
-                valueBinding: "CommandLine#cliController.output",
-                layout: { left: 0, top: 0, right: 0, bottom: 30 }
-            }),
+    // output: SC.TextFieldView.design({
+    //     valueBinding: "CommandLine#cliController.output",
+    //     layout: { left: 0, top: 0, right: 0, bottom: 30 }
+    // }),
 
-            submit: SC.ButtonView.design({
-                layout: { right: 0, bottom: 0, height: 30, width: 80 },
-                isDefault: true,
-                title: "Exec",
-                target: "CommandLine#cliController",
-                action: "exec"
-            })
-        })
+    submit: SC.ButtonView.design({
+        layout: { right: 0, bottom: 0, height: 30, width: 80 },
+        isDefault: true,
+        title: "Exec" /*,
+        target: "CommandLine#cliController",
+        action: "exec" */
     })
 });
+
