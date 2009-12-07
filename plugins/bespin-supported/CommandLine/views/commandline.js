@@ -29,12 +29,16 @@ var bespin = require("bespin");
 var util = require("bespin:util/util");
 // var filepopup = require("bespin/editor/filepopup");
 var history = require("history");
+var command = require("command");
 var keys = require("bespin:util/keys");
+
+var settings = bespin.get("settings");
+var hub = bespin.get("hub");
 
 /**
  * Add a setting to control the console font size
  */
-bespin.get("settings").addSetting({
+settings.addSetting({
     name: "consolefontsize",
     type: "number",
     defaultValue: 11
@@ -53,7 +57,7 @@ var caches = {};
  */
 exports.Interface = SC.Object.extend({
     commandLine: null,
-    store: null,
+    canon: null,
     idPrefix: "command_",
     parentElement: document.body,
 
@@ -63,14 +67,6 @@ exports.Interface = SC.Object.extend({
     subscriptions: [],
     inCommandLine: false,
     history: history.InMemoryHistory.create(),
-
-    /** @see container.js */
-    requires: {
-        files: "files",
-        hub: "hub",
-        settings: "settings",
-        editor: "editor"
-    },
 
     init: function() {
         this.buildUI();
@@ -159,7 +155,7 @@ exports.Interface = SC.Object.extend({
      */
     connectEvents: function() {
         this.connect(this.commandLine, "onfocus", this, function() {
-            this.hub.publish("cmdline:focus");
+            hub.publish("cmdline:focus");
             this.inCommandLine = true;
             if (this.promptimg) {
                 this.promptimg.src = 'images/icn_command_on.png';
@@ -235,9 +231,7 @@ exports.Interface = SC.Object.extend({
                 if (e.keyCode == keys.Key.ESCAPE) {
                     // ESCAPE onkeydown fails on Moz, so we need this. Why?
                     this.hideHint();
-                    bespin.getComponent("popup", function(popup) {
-                        popup.hide();
-                    });
+                    popup.hide();
                     util.stopEvent(e);
                     return false;
                 }
@@ -251,25 +245,22 @@ exports.Interface = SC.Object.extend({
         this.connect(this.commandLine, "onkeydown", this, function(e) {
             if (e.keyCode == keys.Key.ESCAPE) {
                 this.hideHint();
-
-                bespin.getComponent("popup", function(popup) {
-                    popup.hide();
-                });
+                popup.hide();
             }
         });
 
         // If an open file action failed, tell the user.
-        this.subscriptions.push(bespin.subscribe("editor:openfile:openfail", function(e) {
+        this.subscriptions.push(hub.subscribe("editor:openfile:openfail", function(e) {
             this.showHint('Could not open file: ' + e.filename + " (maybe try &raquo; list)");
         }.bind(this)));
 
         // The open file action worked, so tell the user
-        this.subscriptions.push(bespin.subscribe("editor:openfile:opensuccess", function(e) {
+        this.subscriptions.push(hub.subscribe("editor:openfile:opensuccess", function(e) {
             this.showHint('Loaded file: ' + e.file.name);
         }.bind(this)));
 
         // When escaped, take out the hints and output
-        this.subscriptions.push(bespin.subscribe("ui:escape", function() {
+        this.subscriptions.push(hub.subscribe("ui:escape", function() {
             this.hideHint();
             this.hideOutput();
         }.bind(this)));
@@ -277,7 +268,7 @@ exports.Interface = SC.Object.extend({
 
     destroy: function() {
         this.subscriptions.forEach(function(sub) {
-            console.log("bespin.unsubscribe(", sub, ");");
+            console.log("hub.unsubscribe(", sub, ");");
         });
 
         this.connections.forEach(function(conn) {
@@ -367,6 +358,9 @@ exports.Interface = SC.Object.extend({
         this.showPanel(this.currentPanel, true);
     },
 
+    /**
+     *
+     */
     showPanel: function(panel, coordChange) {
         var coords = this._savedCoords;
 
@@ -392,9 +386,7 @@ exports.Interface = SC.Object.extend({
         }
 
         if (panel == "output") {
-            bespin.getComponent('popup', function(popup) {
-                popup.setTitle("Command Line");
-            });
+            popup.setTitle("Command Line");
 
             this.output.style.left = coords.l + "px";
             this.output.style.bottom = coords.b + "px";
@@ -441,6 +433,9 @@ exports.Interface = SC.Object.extend({
         this.currentPanel = panel;
     },
 
+    /**
+     *
+     */
     hidePanel: function(panel) {
         if (this.currentPanel == "output") {
             this.output.style.display = "none";
@@ -481,10 +476,16 @@ exports.Interface = SC.Object.extend({
         }
     },
 
+    /**
+     *
+     */
     setCommandText: function(newText) {
         this.commandLine.value = newText;
     },
 
+    /**
+     *
+     */
     appendCommandText: function(moreText) {
         this.commandLine.value = this.commandLine.value + moreText;
     },
@@ -539,14 +540,14 @@ exports.Interface = SC.Object.extend({
             return date.getHours() + ":" + mins + ":" + secs;
         };
 
-        var size = this.settings.values.consolefontsize;
-        var mode = this.settings.values.historytimemode;
+        var size = settings.values.consolefontsize;
+        var mode = settings.values.historytimemode;
 
         this.output.innerHTML = "";
 
         var table = document.createElement("table");
         table.className = 'command_table';
-        table.style = 'font-size:' + size + 'pt';
+        table.style.fontSize = size + 'pt';
         this.output.appendChild(table);
 
         var count = 1;
@@ -607,7 +608,8 @@ exports.Interface = SC.Object.extend({
                 // Toggle output display
                 var img = document.createElement("img");
                 img.src = "/images/" + instruction.hideOutput ? "plus.png" : "minus.png";
-                img.style = "vertical-align:middle; padding:2px;";
+                img.style.verticalAlign = "middle";
+                img.style.padding = "2px;";
                 img.alt = "Toggle display of the output";
                 img.title = "Toggle display of the output";
                 img.onclick = function(ev) {
@@ -681,11 +683,11 @@ exports.Interface = SC.Object.extend({
      */
     toggleFontSize: function() {
         var setSize = function(size) {
-            this.settings.values.consolefontsize = size;
+            settings.values.consolefontsize = size;
             this.updateOutput();
         }.bind(this);
 
-        var size = this.settings.values.consolefontsize;
+        var size = settings.values.consolefontsize;
         switch (size) {
             case 9: setSize(11); break;
             case 11: setSize(14); break;
@@ -699,11 +701,11 @@ exports.Interface = SC.Object.extend({
      */
     toggleHistoryTimeMode: function() {
         var setMode = function(mode) {
-            this.settings.values.historytimemode = mode;
+            settings.values.historytimemode = mode;
             this.updateOutput();
         }.bind(this);
 
-        var size = this.settings.values.historytimemode;
+        var size = settings.values.historytimemode;
         switch (size) {
             case "history": setMode("time"); break;
             case "time": setMode("blank"); break;
@@ -733,7 +735,7 @@ exports.Interface = SC.Object.extend({
         var preCursor = value.substring(0, cursorPos); // "vcs clone rep"
 
         // Can we route this command?
-        var command = this.store.findCommand(value); // clone command
+        var command = this.canon.findCommand(value); // clone command
         if (command == null) {
             // TODO: maybe we could do better than this error by telling the
             // user other options, or where in the command we failed???
@@ -750,7 +752,7 @@ exports.Interface = SC.Object.extend({
 
         // TODO: Error. This makes the assumption that we're using the full
         // name and not an alias. How to fix? We could move prefix assignment to
-        // this.store.findCommand (see above) which is the only thing really
+        // this.canon.findCommand (see above) which is the only thing really
         // qualified to know, or we could say that the commandline should auto
         // replace aliases for the real versions?
         var prefix = command.getFullCommandName(); // "vcs clone"
@@ -840,11 +842,14 @@ exports.Interface = SC.Object.extend({
      * this function.
      */
     executeCommand: function(typed, hidden) {
-        if (!typed || typed == "") {
+        if (!typed || typed === "") {
             return null;
         }
 
-        var instruction = new exports.Instruction(this, typed);
+        var instruction = exports.Instruction.create({
+            commandLine:this,
+            typed: typed
+        });
 
         if (hidden !== true) {
             this.history.add(instruction);
@@ -876,27 +881,33 @@ exports.Interface = SC.Object.extend({
     }
 });
 
-window.cli = exports.Interface.create();
+window.cli = exports.Interface.create({
+    canon: command.rootCanon
+});
 
 /**
  * Wrapper for something that the user typed
  */
 exports.Instruction = SC.Object.extend({
-    init: function(commandLine, typed) {
-        this.typed = typed.trim();
-        this.output = "";
-        this.commandLine = commandLine;
+    commandLine: null,
+    typed: null,
+    output: "",
+    _outstanding: 0,
+    _callbacks: [],
+    completed: false,
+    historical: false,
 
-        this._outstanding = 0;
-        this._callbacks = [];
+    /**
+     *
+     */
+    init: function() {
+        this.typed = this.typed.trim();
 
         // It is valid to not know the commandLine when we are filling the
         // history from disk, but in that case we don't need to parse it
-        if (commandLine != null) {
+        if (this.commandLine != null) {
             this.start = new Date();
-            this.completed = false;
-
-            var ca = this._splitCommandAndArgs(commandLine.store, typed);
+            var ca = this._splitCommandAndArgs(this.commandLine.canon, this.typed);
             if (ca) {
                 this.command = ca[0];
                 this.args = ca[1];
@@ -1053,22 +1064,22 @@ exports.Instruction = SC.Object.extend({
      * Split Command and Args
      * Private method to chop up the typed command
      */
-    _splitCommandAndArgs: function(store, typed, parent) {
+    _splitCommandAndArgs: function(canon, typed, parent) {
         var data = typed.split(/\s+/);
         var commandname = data.shift();
 
         var command;
         var argstr = data.join(' ');
 
-        if (store.commands[commandname]) {
-            command = store.commands[commandname];
-        } else if (store.aliases[commandname]) {
-            var alias = store.aliases[commandname].split(' ');
+        if (canon.commands[commandname]) {
+            command = canon.commands[commandname];
+        } else if (canon.aliases[commandname]) {
+            var alias = canon.aliases[commandname].split(' ');
             var aliascmd = alias.shift();
             if (alias.length > 0) {
                 argstr = alias.join(' ') + ' ' + argstr;
             }
-            command = store.commands[aliascmd];
+            command = canon.commands[aliascmd];
         } else {
             if (commandname == "") {
                 this._parseError = "Missing " + (parent == null ? "command" : "subcommand") + ".<br/>";
@@ -1078,7 +1089,7 @@ exports.Instruction = SC.Object.extend({
 
             // Sometime I hate JavaScript ...
             var length = 0;
-            for (command in store.commands) {
+            for (command in canon.commands) {
                 length++;
             }
 
@@ -1090,8 +1101,8 @@ exports.Instruction = SC.Object.extend({
 
             if (length <= 30) {
                 this._parseError += "Try one of: ";
-                for (command in store.commands) {
-                    this._parseError += store.commands[command].name + ", ";
+                for (command in canon.commands) {
+                    this._parseError += canon.commands[command].name + ", ";
                 }
                 if (parent != null) {
                     this._parseError += "<br/>Or use '" + linkup(parent.name + " help") + "'.";
@@ -1116,6 +1127,6 @@ exports.Instruction = SC.Object.extend({
             return this._splitCommandAndArgs(command.subcommands, argstr, command);
         }
 
-        return [command, store.getArgs(argstr.split(' '), command)];
+        return [command, canon.getArgs(argstr.split(' '), command)];
     }
 });
