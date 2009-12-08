@@ -40,7 +40,7 @@ exports.cliOutputView = SC.View.design({
     layout: { centerX: 0, bottom: 0, right: 0, height: 30 },
     childViews: [ 'output' ],
     output: SC.TextFieldView.design({
-        //valueBinding: "CommandLine#command.cliController.output",
+        //valueBinding: "CommandLine:command#cliController.output",
         layout: { left: 0, top: 0, right: 0, bottom: 30 }
     })
 });
@@ -62,14 +62,14 @@ exports.cliInputView = SC.View.design({
     }),
 
     input: SC.TextFieldView.design({
-        valueBinding: "CommandLine#command:cliController.input",
+        valueBinding: "CommandLine:command#cliController.input",
         layout: { left: 35, bottom: 0, height: 30, right: 85 }
     }),
 
     submit: SC.ButtonView.design({
         isDefault: true,
         title: "Exec",
-        target: "CommandLine#command:cliController",
+        target: "CommandLine:command#cliController",
         action: "exec",
         layout: { right: 0, bottom: 0, height: 30, width: 80 }
     })
