@@ -68,7 +68,10 @@ exports.CodeInfo = SC.Object.define({
         // Show a window with a code structure outline of the current document
         bespin.subscribe("parser:showoutline", function() {
             var html = self.currentMetaInfo ? self.currentMetaInfo.html : "Outline not yet available";
-            bespin.get("commandLine").addOutput(html);
+            // TODO: This used to go into the command line without a command
+            // but that's currently not possible. Find another solution
+            // bespin.get("commandLine").addOutput(html);
+            alert(html);
         });
 
         // Show a window with a code structure outline of the current document
@@ -76,14 +79,18 @@ exports.CodeInfo = SC.Object.define({
             var functionName = event.functionName;
 
             if (!functionName) {
-                bespin.get("commandLine").addErrorOutput("Please pass me a valid function name.");
+                // TODO: Command line usage - see above
+                //bespin.get("commandLine").addErrorOutput("Please pass me a valid function name.");
+                alert("Please pass me a valid function name.");
                 return;
             }
             var matches = self.foldPoints.filter(function(func) {
                 return func['(name)'] == functionName;
             });
             if (matches.length === 0) {
-               bespin.get("commandLine").addErrorOutput("Unable to find the function " + functionName + " in this file.");
+                // TODO: Command line usage - see above
+                // bespin.get("commandLine").addErrorOutput("Unable to find the function " + functionName + " in this file.");
+                alert("Unable to find the function " + functionName + " in this file.");
             } else {
                bespin.get("editor").moveAndCenter(matches[0].row);
             }

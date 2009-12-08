@@ -147,9 +147,12 @@ exports.ServerHistory = exports.InMemoryHistory.extend({
                 var typings = file.content.split(/\n/);
                 var instructions = [];
 
-                typings.forEach(function(typing) {
-                    if (typing && typing != "") {
-                        var instruction = new exports.Instruction(null, typing);
+                typings.forEach(function(typed) {
+                    if (typed && typed != "") {
+                        var instruction = exports.Instruction.create({
+                            typed: typed,
+                            historical: true
+                        });
                         instructions.push(instruction);
                     }
                 });

@@ -32,6 +32,7 @@ var util = require("bespin/util/util");
 var mobwrite = require("bespin/mobwrite/core");
 var diff_match_patch = require("bespin/mobwrite/diff");
 var SC = require("sproutcore");
+var command = require("bespin/command");
 
 /**
  * Add a setting to turn collaboration mode on/off
@@ -128,7 +129,7 @@ var ShareNode = SC.Object.extend({
             }
             this.errorRaised = false;
 
-            bespin.get("commandLine").showHint("Connection to server re-established.");
+            command.showHint("Connection to server re-established.");
         }
     },
 
@@ -167,12 +168,7 @@ var ShareNode = SC.Object.extend({
         var prefix = "<strong>" + (recoverable ? "" : "Fatal ") + "Collaboration Error</strong>: ";
         var suffix = "<br/><strong>Warning</strong>: Changes since the last sync could be lost";
 
-        var commandLine = bespin.get("commandLine");
-        if (commandLine) {
-            commandLine.showHint(prefix + text + suffix, -1);
-        } else {
-            console.error("Missing commandLine to report: " + text);
-        }
+        command.showHint(prefix + text + suffix, -1);
 
         if (!this.errorRaised) {
             this.readOnlyStateBeforeError = this.editor.readonly;
@@ -514,12 +510,7 @@ exports.EditSession = SC.Object.extend({
                         // output has not yet hit the screen, so we hack the
                         // message somewhat, and show a hint later when the
                         // display has happened. Yuck.
-                        var commandLine = bespin.get("commandLine");
-                        commandLine.addOutput("Reverting the following collaboration setting:");
-
-                        setTimeout(function() {
-                            commandLine.showHint("Collaborate is off");
-                        }, 10);
+                        alert("Reverting the collaboration setting.");
                     }
                 } else {
                     self.startSession(self.project, self.path);
@@ -538,14 +529,10 @@ exports.EditSession = SC.Object.extend({
     setReadOnlyIfNotMyProject: function(project) {
         if (!util.isMyProject(project)) {
             bespin.get("editor").setReadOnly(true);
-            // This could be run early in the startup process.
-            // TODO: bespin.getComponent doesn't work with commandLine for some reason?
-            setTimeout(function() {
-                var msg = "To edit files in others projects you must have " +
-                          "'collaborate' set to on." +
-                          " <a href=\"javascript:bespin.get('settings').values.collaborate = true;\">Turn it on now</a>";
-                bespin.get("commandLine").showHint(msg, 10000);
-            }, 100);
+            var msg = "To edit files in others projects you must have " +
+                      "'collaborate' set to on." +
+                      " <a href=\"javascript:bespin.get('settings').values.collaborate = true;\">Turn it on now</a>";
+            command.showHint(msg, 10000);
         }
     },
 

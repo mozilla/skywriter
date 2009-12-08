@@ -26,6 +26,7 @@ var SC = require("sproutcore");
 var bespin = require("bespin");
 var util = require("bespin/util/util");
 var directory = require("bespin/util/path").directory;
+var command = require("bespin/command");
 
 /**
  * This abstracts the remote Web Service file system, and in the future local
@@ -71,7 +72,7 @@ exports.FileSystem = SC.Object.extend({
                 if (util.isFunction(onFailure)) {
                     onFailure({ responseText:'The file ' + path + ' already exists my friend.' });
                 }
-                bespin.get("commandLine").addErrorOutput('The file ' + path + ' already exists my friend.');
+                throw 'The file ' + path + ' already exists my friend.';
             }
         });
     },
@@ -126,8 +127,7 @@ exports.FileSystem = SC.Object.extend({
         scope = scope || defaultScope();
 
         if (!project || !filename) {
-            bespin.get('commandLine').addErrorOutput("Please, I need a project and filename to evaulate");
-            return;
+            throw "Please, I need a project and filename to evaulate";
         }
 
         this.loadContents(project, filename, function(file) {
@@ -136,8 +136,7 @@ exports.FileSystem = SC.Object.extend({
                 try {
                     eval(file.content);
                 } catch (e) {
-                    var html = "There is a error trying to run " + filename + " in project " + project + ":<br>" + e;
-                    bespin.get('commandLine').addErrorOutput(html);
+                    throw "There is a error trying to run " + filename + " in project " + project + ": " + e;
                 }
             }
         }, true);
@@ -331,13 +330,12 @@ var defaultScope = function() {
         require: require,
         publish: bespin.publish,
         subscribe: bespin.subscribe,
-        commandLine: commandLine,
         execute: function(cmd) {
-            commandLine.executeCommand(cmd);
+            command.executeCommand(cmd);
         }
     };
 
-    var components = [ 'editor', 'editSession', 'files', 'server', 'toolbar', 'commandLine' ];
+    var components = [ 'editor', 'editSession', 'files', 'server', 'toolbar' ];
     components.forEach(function(id) {
         var component = bespin.get(id);
         if (component) {
@@ -389,7 +387,7 @@ exports.FileSystem = SC.Object.extend({
                 if (util.isFunction(onFailure)) {
                     onFailure({ responseText:'The file ' + path + ' already exists my friend.' });
                 }
-                bespin.get("commandLine").addErrorOutput('The file ' + path + ' already exists my friend.');
+                throw 'The file ' + path + ' already exists my friend.';
             }
         });
     },
@@ -444,8 +442,7 @@ exports.FileSystem = SC.Object.extend({
         scope = scope || defaultScope();
 
         if (!project || !filename) {
-            bespin.get('commandLine').addErrorOutput("Please, I need a project and filename to evaulate");
-            return;
+            throw "Please, I need a project and filename to evaulate";
         }
 
         this.loadContents(project, filename, function(file) {
@@ -454,8 +451,7 @@ exports.FileSystem = SC.Object.extend({
                 try {
                     eval(file.content);
                 } catch (e) {
-                    var html = "There is a error trying to run " + filename + " in project " + project + ":<br>" + e;
-                    bespin.get('commandLine').addErrorOutput(html);
+                    throw "There is a error trying to run " + filename + " in project " + project + ": " + e;
                 }
             }
         }, true);

@@ -243,9 +243,7 @@ exports._deployCommand = function(instruction, project, opts) {
                     var data = JSON.parse(response);
                     if (data.notConfigured) {
                         instruction.addErrorOutput("<p>Deployment is not configured for this project. Please use the 'deploy setup' command to configure it.");
-                        var cl = bespin.get("commandLine");
-                        cl.setCommandText("deploy setup");
-                        cl.focus();
+                        throw "Should prepopulate CLI with 'deploy setup', however there is no way to do that right now";
                     } else {
                         instruction.addErrorOutput(xhr.responseText);
                     }

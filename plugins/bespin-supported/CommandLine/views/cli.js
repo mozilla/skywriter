@@ -23,32 +23,25 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
-var util = require("bespin:util/util");
 var dock = require("bespin:views/dock");
 
 /**
- * Begin the login process
+ * A Popup to display the command line output
  */
-exports.showCli = function() {
-    var dockView = require.env.bespinEditorController.dockView;
-    dockView.appendChild(dockView.addDockedView(exports.cliView));
-};
-
-/**
- * Show helpers for the command line
- */
-exports.cliController = SC.Object.create({
-    input: "",
-    output: "",
-    exec: function() {
-        console.log(this.input);
-    }
+exports.cliOutputView = SC.View.design({
+    layout: { centerX: 0, bottom: 0, right: 0, height: 30 },
+    childViews: [ 'output' ],
+    output: SC.TextFieldView.design({
+        //valueBinding: "CommandLine#command.cliController.output",
+        layout: { left: 0, top: 0, right: 0, bottom: 30 }
+    })
 });
 
 /**
- *
+ * A view designed to dock in the bottom of the editor, holding the command
+ * line input.
  */
-exports.cliView = SC.View.design({
+exports.cliInputView = SC.View.design({
     dock: dock.DOCK_BOTTOM,
     layout: { left: 0, bottom: 0, right: 0, height: 30 },
 
@@ -61,24 +54,15 @@ exports.cliView = SC.View.design({
     }),
 
     input: SC.TextFieldView.design({
-        //valueBinding: "CommandLine#cliController.input",
+        valueBinding: "CommandLine#command:cliController.input",
         layout: { left: 35, bottom: 0, height: 30, right: 85 }
     }),
 
-    // TODO: Make into a separate pane so it doesn't affect the size of the
-    // main editor.
-
-    // output: SC.TextFieldView.design({
-    //     valueBinding: "CommandLine#cliController.output",
-    //     layout: { left: 0, top: 0, right: 0, bottom: 30 }
-    // }),
-
     submit: SC.ButtonView.design({
-        layout: { right: 0, bottom: 0, height: 30, width: 80 },
         isDefault: true,
-        title: "Exec" /*,
-        target: "CommandLine#cliController",
-        action: "exec" */
+        title: "Exec",
+        target: "CommandLine#command:cliController",
+        action: "exec",
+        layout: { right: 0, bottom: 0, height: 30, width: 80 }
     })
 });
-

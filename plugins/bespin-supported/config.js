@@ -147,7 +147,7 @@ exports.bindkeyCommand = function(instruction, args) {
  * 'alias' command
  */
 exports.aliasCommand = function(instruction, args) {
-    var aliases = instruction.commandLine.store.aliases;
+    var aliases = command.rootCanon.aliases;
 
     if (!args.alias) {
         // * show all
@@ -175,9 +175,9 @@ exports.aliasCommand = function(instruction, args) {
             var value = args.command;
             var aliascmd = value.split(' ')[0];
 
-            if (instruction.commandLine.store.commands[key]) {
+            if (command.rootCanon.commands[key]) {
                 instruction.addErrorOutput("Sorry, there is already a command with the name: " + key);
-            } else if (instruction.commandLine.store.commands[aliascmd]) {
+            } else if (command.rootCanon.commands[aliascmd]) {
                 aliases[key] = value;
                 instruction.addOutput("Saving alias: " + key + " &#x2192; " + value);
             } else if (aliases[aliascmd]) {
@@ -195,7 +195,7 @@ exports.aliasCommand = function(instruction, args) {
  * 'history' command
  */
 exports.historyCommand = function(instruction) {
-    var instructions = instruction.commandLine.history.getInstructions();
+    var instructions = command.history.getInstructions();
     var output = [];
     output.push("<table>");
     var count = 1;

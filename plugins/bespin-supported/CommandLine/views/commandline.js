@@ -61,7 +61,6 @@ exports.Interface = SC.Object.extend({
     idPrefix: "command_",
     parentElement: document.body,
 
-    styles: { bottom: "100px", left: "31px" },
     nodes: [],
     connections: [],
     subscriptions: [],
@@ -80,8 +79,8 @@ exports.Interface = SC.Object.extend({
         this.commandHint.id = this.idPrefix + "hint";
         this.commandHint.cellspacing = 0;
         this.commandHint.style.display = "none";
-        this.commandHint.style.bottom = this.styles.bottom;
-        this.commandHint.style.left = this.styles.left;
+        this.commandHint.style.bottom = "100px";
+        this.commandHint.style.left = "31px";
         this.commandHint.style.width = "500px";
         this.parentElement.appendChild(this.commandHint);
 
@@ -463,20 +462,6 @@ exports.Interface = SC.Object.extend({
     },
 
     /**
-     * Instead of doing output by appending strings, commands can pass in a
-     * DOM node that they update. It is assumed that commands doing this will
-     * provide their own progress indicators.
-     */
-    setElement: function(element) {
-        if (this.executing) {
-            this.executing.setElement(element);
-        } else {
-            console.trace();
-            console.debug("orphan command node:", element);
-        }
-    },
-
-    /**
      *
      */
     setCommandText: function(newText) {
@@ -491,200 +476,12 @@ exports.Interface = SC.Object.extend({
     },
 
     /**
-     * Complete the currently executing command with successful output
-     */
-    addOutput: function(html) {
-        if (this.executing) {
-            this.executing.addOutput(html);
-        } else {
-            console.trace();
-            console.debug("orphan output:", html);
-        }
-    },
-
-    /**
-     * Complete the currently executing command with error output
-     */
-    addErrorOutput: function(html) {
-        if (this.executing) {
-            this.executing.addErrorOutput(html);
-        } else {
-            console.trace();
-            console.debug("orphan error output:", html);
-        }
-    },
-
-    /**
-     * Make the console scroll to the bottom
-     */
-    scrollConsole: function() {
-        // certain browsers have a bug such that scrollHeight is too small
-        // when content does not fill the client area of the element
-        var scrollHeight = Math.max(this.output.scrollHeight, this.output.clientHeight);
-        this.output.scrollTop = scrollHeight - this.output.clientHeight;
-    },
-
-    /**
-     * Redraw the table of executed commands
-     */
-    updateOutput: function() {
-        var formatTime = function(date) {
-            var mins = "0" + date.getMinutes();
-            if (mins.length > 2) {
-                mins = mins.slice(mins.length - 2);
-            }
-            var secs = "0" + date.getSeconds();
-            if (secs.length > 2) {
-                secs = secs.slice(secs.length - 2);
-            }
-            return date.getHours() + ":" + mins + ":" + secs;
-        };
-
-        var size = settings.values.consolefontsize;
-        var mode = settings.values.historytimemode;
-
-        this.output.innerHTML = "";
-
-        var table = document.createElement("table");
-        table.className = 'command_table';
-        table.style.fontSize = size + 'pt';
-        this.output.appendChild(table);
-
-        var count = 1;
-        this.history.instructions.forEach(function(instruction) {
-            if (!instruction.historical) {
-                // The row for the input (i.e. what was typed)
-                var rowin = document.createElement("tr");
-                rowin.className = 'command_rowin';
-                rowin.style.backgroundImage = "url(/images/instruction" + size + ".png)",
-                rowin.onclick = function() {
-                    // A single click on an instruction line in the console
-                    // copies the command to the command line
-                    this.commandLine.value = instruction.typed;
-                }.bind(this);
-                rowin.ondblclick = function() {
-                    // A double click on an instruction line in the console
-                    // executes the command
-                    this.executeCommand(instruction.typed);
-                }.bind(this);
-                table.appendChild(rowin);
-
-                // The opening column with time or history number or nothing
-                var rowid = document.createElement("td");
-                rowid.className = "command_open";
-                rowin.appendChild(rowid);
-
-                if (mode == "history") {
-                    rowid.innerHTML = count;
-                    // TODO: <blush>
-                    SC.RenderContext.fn.addClass(rowid, 'command_open_history');
-                }
-                else if (mode == "time" && instruction.start) {
-                    rowid.innerHTML = formatTime(instruction.start);
-                    SC.RenderContext.fn.addClass(rowid, 'command_open_time');
-                }
-                else {
-                    SC.RenderContext.fn.addClass(rowid, 'command_open_blank');
-                }
-
-                // Cell for the typed command and the hover
-                var typed = document.createElement("td");
-                typed.className = "command_main";
-                rowin.appendChild(typed);
-
-                // The execution time
-                var hover = document.createElement("div");
-                hover.className = "command_hover";
-                typed.appendChild(hover);
-
-                // The execution time
-                if (instruction.start && instruction.end) {
-                    var div = document.createElement("div");
-                    div.className = "command_duration";
-                    div.innerHTML = ((instruction.end.getTime() - instruction.start.getTime()) / 1000) + " sec ";
-                    hover.appendChild(div);
-                }
-
-                // Toggle output display
-                var img = document.createElement("img");
-                img.src = "/images/" + instruction.hideOutput ? "plus.png" : "minus.png";
-                img.style.verticalAlign = "middle";
-                img.style.padding = "2px;";
-                img.alt = "Toggle display of the output";
-                img.title = "Toggle display of the output";
-                img.onclick = function(ev) {
-                    instruction.hideOutput = !instruction.hideOutput;
-                    this.updateOutput();
-                    util.stopEvent(ev);
-                }.bind(this);
-                hover.appendChild(img);
-
-                // Open/close output
-                img = document.createElement("img");
-                img.src = "/images/closer.png";
-                img.style.verticalAlign = "middle";
-                img.style.padding = "2px";
-                img.alt = "Remove this command from the history";
-                img.title = "Remove this command from the history";
-                img.onclick = function(ev) {
-                    this.history.remove(instruction);
-                    this.updateOutput();
-                    util.stopEvent(ev);
-                }.bind(this);
-                hover.appendChild(img);
-
-                // What the user actually typed
-                img = document.createElement("img");
-                img.className = "nohover";
-                img.src = "/images/prompt1.png";
-                typed.appendChild(img);
-
-                img = document.createElement("img");
-                img.className = "hover";
-                img.src = "/images/prompt2.png";
-                typed.appendChild(img);
-
-                var span = document.createElement("span");
-                span.innerHTML = instruction.typed;
-                span.className = "command_typed";
-                typed.appendChild(span);
-
-                // The row for the output (if required)
-                if (!instruction.hideOutput) {
-
-                    var rowout = document.createElement("tr");
-                    rowout.className = "command_rowout";
-                    table.appendChild(rowout);
-
-                    rowout.appendChild(document.createElement("td"));
-
-                    var td = document.createElement("td");
-                    td.colSpan = 2;
-                    td.className = (instruction.error ? "command_error" : "");
-                    rowout.appendChild(td);
-
-                    if (instruction.element) {
-                        td.appendChild(instruction.element);
-                    } else {
-                        var contents = instruction.output || "";
-                        if (!instruction.completed) {
-                            contents += "<img src='/images/throbber.gif'/> Working ...";
-                        }
-                        td.innerHTML = contents;
-                    }
-                }
-            }
-            count ++;
-        }.bind(this));
-    },
-
-    /**
      * Toggle font size between 9,11,14 point fonts
      */
     toggleFontSize: function() {
         var setSize = function(size) {
             settings.values.consolefontsize = size;
-            this.updateOutput();
+            this.updateOutput(false);
         }.bind(this);
 
         var size = settings.values.consolefontsize;
@@ -702,7 +499,7 @@ exports.Interface = SC.Object.extend({
     toggleHistoryTimeMode: function() {
         var setMode = function(mode) {
             settings.values.historytimemode = mode;
-            this.updateOutput();
+            this.updateOutput(false);
         }.bind(this);
 
         var size = settings.values.historytimemode;
@@ -857,31 +654,15 @@ exports.Interface = SC.Object.extend({
 
         instruction.onOutput(function() {
             this.hideHint();
-            this.updateOutput();
-            this.scrollConsole();
+            this.updateOutput(true);
         }.bind(this));
 
         instruction.exec();
         return instruction;
-    },
-
-    /**
-     * Link Function to Instruction
-     * Make a function be part of the thread of execution of an instruction
-     */
-    link: function(action, context) {
-        if (!this.executing) {
-            if (context == null) {
-                return action;
-            }
-            return function() { action.apply(context, arguments); };
-        }
-
-        return this.executing.link(action, context);
     }
 });
 
-window.cli = exports.Interface.create({
+exports.cli = exports.Interface.create({
     canon: command.rootCanon
 });
 
@@ -889,13 +670,13 @@ window.cli = exports.Interface.create({
  * Wrapper for something that the user typed
  */
 exports.Instruction = SC.Object.extend({
-    commandLine: null,
     typed: null,
     output: "",
     _outstanding: 0,
     _callbacks: [],
     completed: false,
     historical: false,
+    canon: null,
 
     /**
      *
@@ -905,16 +686,15 @@ exports.Instruction = SC.Object.extend({
 
         // It is valid to not know the commandLine when we are filling the
         // history from disk, but in that case we don't need to parse it
-        if (this.commandLine != null) {
+        if (!this.historical) {
             this.start = new Date();
-            var ca = this._splitCommandAndArgs(this.commandLine.canon, this.typed);
+            var ca = this._splitCommandAndArgs(command.rootCanon, this.typed);
             if (ca) {
                 this.command = ca[0];
                 this.args = ca[1];
             }
         } else {
             this.completed = true;
-            this.historical = true;
         }
     },
 
@@ -926,7 +706,6 @@ exports.Instruction = SC.Object.extend({
             if (this._parseError) {
                 this.addErrorOutput(this._parseError);
             } else {
-                this.commandLine.executing = this;
                 this.command.execute(this, this.args, this.command);
             }
         }
@@ -937,8 +716,6 @@ exports.Instruction = SC.Object.extend({
             this.addErrorOutput(ex);
         }
         finally {
-            this.commandLine.executing = null;
-
             if (this._outstanding == 0) {
                 this.completed = true;
                 this._callbacks.forEach(function(callback) {
@@ -1000,7 +777,9 @@ exports.Instruction = SC.Object.extend({
      */
     addOutput: function(html) {
         if (html && html != "") {
-            if (this.output != ""){this.output += "<br/>";}
+            if (this.output != "") {
+                this.output += "<br/>";
+            }
             this.output += html;
         }
 
@@ -1053,7 +832,6 @@ exports.Instruction = SC.Object.extend({
         this.end = new Date();
         this.hideOutput = false;
         this.error = false;
-        this.commandLine.showPanel("output");
 
         this._callbacks.forEach(function(callback) {
             callback();

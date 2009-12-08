@@ -33,6 +33,8 @@ var cursor = require('cursor');
 var scroller = require('editor/views/scroller');
 var canvas = require('editor/mixins/canvas');
 var pluginCatalog = require("plugins").catalog;
+//var command = require("command");
+var command = {};
 
 var SelectionHelper = SC.Object.extend({
     editor: null,
@@ -297,7 +299,7 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
             // message
             var lineMarker = bespin.get("parser").getLineMarkers()[down.row + 1];
             if (lineMarker) {
-                bespin.get("commandLine").showHint(lineMarker.msg);
+                command.showHint(lineMarker.msg);
             }
         }
         if (up.col == -1) {
@@ -773,7 +775,7 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
         ctx.fillText(text, x, y);
         ctx.globalAlpha = 1.0;
     },
-    
+
     // TODO: Yuck, this property should go away once the timeout goes away.
     _firstPaint: false,
 
@@ -829,7 +831,7 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
         var lineHeight = this.get('lineHeight');
 
         var firstVisibleRow = Math.floor(visibleFrame.y / lineHeight);
-        var visibleRows = Math.ceil(visibleFrame.height / lineHeight); 
+        var visibleRows = Math.ceil(visibleFrame.height / lineHeight);
         var lastLineToRender = Math.min(firstVisibleRow + visibleRows,
             content.getRowCount() - 1);
 
@@ -1450,12 +1452,16 @@ bespin.subscribe("settings:set:theme", function(event) {
             }
 
             if (!checkSetAndExit()) {
-                bespin.get("commandLine").addErrorOutput("Sorry old chap. No theme called '" + theme + "'. Fancy making it?");
+                // TODO: Command line action goes into instructions
+                // bespin.get("commandLine").addErrorOutput("Sorry old chap. No theme called '" + theme + "'. Fancy making it?");
+                alert("Sorry old chap. No theme called '" + theme + "'. Fancy making it?");
             }
         };
 
         var onFailure = function() {
-            bespin.get("commandLine").addErrorOutput("Sorry old chap. No theme called '" + theme + "'. Fancy making it?");
+            // TODO: Command line action goes into instructions
+            // bespin.get("commandLine").addErrorOutput("Sorry old chap. No theme called '" + theme + "'. Fancy making it?");
+            alert("Sorry old chap. No theme called '" + theme + "'. Fancy making it?");
         };
 
         files.loadContents(files.userSettingsProject, "/themes/" + theme + ".js", onSuccess, onFailure);

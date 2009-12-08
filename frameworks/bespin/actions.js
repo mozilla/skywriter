@@ -855,7 +855,7 @@ exports.Actions = SC.Object.extend({
                 if (count > 1) { msg += 'es'; }
                 msg += " for your search for <em>" + str + "</em>";
 
-                bespin.get('commandLine').showHint(msg);
+                command.showHint(msg);
             break;
 
             case 'searchwindow':
@@ -1002,19 +1002,13 @@ exports.Actions = SC.Object.extend({
 
     gotoLine: function() {
         bespin.getComponent("commandLine", function(cli) {
-            cli.setCommandText("goto ");
-            bespin.getComponent("popup", function(popup) {
-                popup.show("output");
-            });
+            // cli.setCommandText("goto ");
         });
     },
 
     cmdFilesearch: function() {
         bespin.getComponent("commandLine", function(cli) {
-            cli.setCommandText("search ");
-            bespin.getComponent("popup", function(popup) {
-                popup.show("output");
-            });
+            // cli.setCommandText("search ");
         });
     },
 

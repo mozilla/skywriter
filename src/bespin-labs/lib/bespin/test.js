@@ -283,8 +283,7 @@ exports.Assert.prototype.message = function(message) {
  * the strings in the array
  */
 exports.Assert.prototype.command = function(type, expect) {
-    var commandLine = bespin.get("commandLine");
-    var instruction = commandLine.executeCommand(type, true);
+    var instruction = command.executeCommand(type, true);
 
     var self = this;
     var check = function(output) {

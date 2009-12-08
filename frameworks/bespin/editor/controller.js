@@ -37,6 +37,8 @@ var view = require("editor/views/editor");
 
 var BespinScrollView = require("editor/views/scroll").BespinScrollView;
 var DockView = require("views/dock").DockView;
+//var command = require("command");
+var command = {};
 
 /**
  * bespin.editor.API is the root object, the API that others should be able to
@@ -49,7 +51,6 @@ exports.EditorController = SC.Object.extend({
     requires: {
         ioc: 'ioc',
         settings: 'settings',
-        // commandLine: 'commandLine',
         session: 'editSession',
         cursorManager: 'cursorManager',
         files: 'files',
@@ -203,17 +204,6 @@ exports.EditorController = SC.Object.extend({
      */
     onchange: function(callback) {
         this.hub.subscribe("editor:document:changed", callback);
-    },
-
-    /**
-     * Execute a given command
-     */
-    executeCommand: function(command) {
-        try {
-            this.commandLine.executeCommand(command);
-        } catch (e) {
-            // catch the command prompt errors
-        }
     },
 
     /**
@@ -415,7 +405,7 @@ exports.EditorController = SC.Object.extend({
         // -- try an editor action first, else fire off a command
         var actionDescription = "Execute command: '" + action + "'";
         action = this.editorView.actions[action] || function() {
-            this.commandLine.executeCommand(command, true);
+            command.executeCommand(command, true);
         };
 
         if (keyCode && action) {
@@ -431,13 +421,13 @@ exports.EditorController = SC.Object.extend({
     /**
      * Ensure that a given command is executed on each keypress
      */
-    bindCommand: function(command, keySpec) {
+    bindCommand: function(cmd, keySpec) {
         var keyObj = keys.fillArguments(keySpec);
         var keyCode = keys.toKeyCode(keyObj.key);
         var action = function() {
-            this.commandLine.executeCommand(command, true);
+            command.executeCommand(cmd, true);
         };
-        var actionDescription = "Execute command: '" + command + "'";
+        var actionDescription = "Execute command: '" + cmd + "'";
 
         this.editorKeyListener.bindKeyString(keyObj.modifiers, keyCode, action, actionDescription);
     },
@@ -524,7 +514,7 @@ exports.EditorController = SC.Object.extend({
 
         var newOnSuccess = function() {
             document.title = filename + ' - editing with Bespin';
-            this.commandLine.showHint('Saved file: ' + file.name);
+            command.showHint('Saved file: ' + file.name);
 
             this.hub.publish("editor:clean");
 
@@ -534,7 +524,7 @@ exports.EditorController = SC.Object.extend({
         };
 
         var newOnFailure = function(xhr) {
-            this.commandLine.showHint('Save failed: ' + xhr.responseText);
+            command.showHint('Save failed: ' + xhr.responseText);
             if (util.isFunction(onFailure)) {
                 onFailure();
             }
@@ -542,7 +532,7 @@ exports.EditorController = SC.Object.extend({
 
         // If trimonsave is set then we should trim line endings before we save:
         if (this.settings.values.trimonsave) {
-            this.commandLine.executeCommand('trim', true);
+            command.executeCommand('trim', true);
         }
 
         this.file.saveFile(project, file, newOnSuccess, newOnFailure);
@@ -587,7 +577,7 @@ exports.EditorController = SC.Object.extend({
         // Short circuit if we are already open at the requested file
         if (this.session.checkSameFile(project, filename) && !options.reload) {
             if (options.line) {
-                this.commandLine.executeCommand('goto ' + options.line, true);
+                command.executeCommand('goto ' + options.line, true);
             }
             return;
         }
@@ -595,7 +585,7 @@ exports.EditorController = SC.Object.extend({
         // If the current buffer is dirty, for now, save it
         if (this.dirty && !this.session.shouldCollaborate()) {
             onFailure = function(xhr) {
-                this.commandLine.showHint("Trying to save current file. Failed: " + xhr.responseText);
+                command.showHint("Trying to save current file. Failed: " + xhr.responseText);
             };
 
             onSuccess = function() {
@@ -645,7 +635,7 @@ exports.EditorController = SC.Object.extend({
             this.session.setProjectPath(project, filename);
 
             if (options.line) {
-                this.commandLine.executeCommand('goto ' + options.line, true);
+                command.executeCommand('goto ' + options.line, true);
             }
 
             self._addHistoryItem(project, filename, fromFileHistory);

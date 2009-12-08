@@ -63,13 +63,13 @@ exports.loginController = SC.Object.create({
      */
     onSuccess: function() {
         exports.userIdentPage.get("mainPane").remove();
-        
+
         // Load the plugin metadata for the user's plugins
         var body = document.body;
         var el = document.createElement('script');
         el.setAttribute('src', "/server/plugin/register/user");
         body.appendChild(el);
-        
+
         console.log("login succeeded");
     },
 
@@ -186,14 +186,14 @@ exports.userIdentPage = SC.Page.design({
             backgroundColor: '#D1CFC1',
             childViews: [ "action", "container" ],
             action: SC.RadioView.design({
-                layout: { top: 45, left: 140 },
                 valueBinding: "UserIdent#dumbController.action",
                 itemValueKey: 'value',
                 itemTitleKey: 'title',
                 items: [
                     { title: "I have a Bespin account", value: "login" },
                     { title: "I'm new", value: "signup" }
-                ]
+                ],
+                layout: { top: 45, left: 140 }
             }),
 
             container: SC.ContainerView.design({
@@ -213,20 +213,19 @@ exports.userIdentPage = SC.Page.design({
 
         userLabel: SC.LabelView.design({
             value: "Username:",
-            layout: { right: 400-150, top: 0 },
-            textAlign: "right"
+            textAlign: "right",
+            layout: { right: 400-150, top: 0 }
         }),
 
         userField: SC.TextFieldView.design({
             valueBinding: "UserIdent#loginController.username",
-            blur: function() { console.log("hai"); },
             layout: { left: 155, top: 0, height: 20, width: 100 }
         }),
 
         passwordLabel: SC.LabelView.design({
             value: "Password:",
-            layout: { right: 400-150, top: 30 },
-            textAlign: "right"
+            textAlign: "right",
+            layout: { right: 400-150, top: 30 }
         }),
 
         passwordField: SC.TextFieldView.design({
@@ -236,11 +235,11 @@ exports.userIdentPage = SC.Page.design({
         }),
 
         submit: SC.ButtonView.design({
-            layout: { left: 155, top: 60, width: 80 },
             isDefault: true,
             title: "Log in",
             target: "UserIdent#loginController",
-            action: "login"
+            action: "login",
+            layout: { left: 155, top: 60, width: 80 }
         })
     }),
 
@@ -256,57 +255,57 @@ exports.userIdentPage = SC.Page.design({
 
         usernameLabel: SC.LabelView.design({
             value: "Username:",
-            layout: { right: 400-150, top: 5 },
-            textAlign: "right"
+            textAlign: "right",
+            layout: { right: 400-150, top: 5 }
         }),
 
         usernameField: SC.TextFieldView.design({
-            layout: { left: 155, top: 5, height: 20, width: 105 },
             valueBinding: "UserIdent#signupController.username",
             commitEditing: function() {
                 // TODO: Surely we should use exports.signupController here?
                 window.signupController.validate("username");
-            }
+            },
+            layout: { left: 155, top: 5, height: 20, width: 105 }
         }),
 
         usernameError: SC.LabelView.design({
             classNames: [ "signupValidationError" ],
-            layout: { left: 265, top: 0, height: 30, width: 120 },
-            valueBinding: "signupController.usernameError"
+            valueBinding: "UserIdent#signupController.usernameError",
+            layout: { left: 265, top: 0, height: 30, width: 120 }
         }),
 
         password1Label: SC.LabelView.design({
             value: "Password:",
-            layout: { right: 400-150, top: 35 },
-            textAlign: "right"
+            textAlign: "right",
+            layout: { right: 400-150, top: 35 }
         }),
 
         password1Field: SC.TextFieldView.design({
             isPassword: true,
-            layout: { left: 155, top: 35, height: 20, width: 105 },
             valueBinding: "UserIdent#signupController.password1",
             commitEditing: function() {
                 // TODO: Surely we should use exports.signupController here?
                 window.signupController.validate("password1");
-            }
+            },
+            layout: { left: 155, top: 35, height: 20, width: 105 }
         }),
 
         password1Error: SC.LabelView.design({
             classNames: [ "signupValidationError" ],
-            layout: { left: 265, top: 30, height: 30, width: 120 },
-            valueBinding: "signupController.password1Error"
+            valueBinding: "UserIdent#signupController.password1Error",
+            layout: { left: 265, top: 30, height: 30, width: 120 }
         }),
 
         password2Label: SC.LabelView.design({
             value: "Password (confirm):",
-            layout: { right: 400-150, top: 65 },
-            textAlign: "right"
+            textAlign: "right",
+            layout: { right: 400-150, top: 65 }
         }),
 
         password2Field: SC.TextFieldView.design({
             isPassword: true,
-            layout: { left: 155, top: 65, height: 20, width: 105 },
             valueBinding: "UserIdent#signupController.password2",
+            layout: { left: 155, top: 65, height: 20, width: 105 },
             commitEditing: function() {
                 // TODO: Surely we should use exports.signupController here?
                 window.signupController.validate("password2");
@@ -315,33 +314,33 @@ exports.userIdentPage = SC.Page.design({
 
         password2Error: SC.LabelView.design({
             classNames: [ "signupValidationError" ],
-            layout: { left: 265, top: 60, height: 30, width: 120 },
-            valueBinding: "signupController.password2Error"
+            valueBinding: "UserIdent#signupController.password2Error",
+            layout: { left: 265, top: 60, height: 30, width: 120 }
         }),
 
         emailLabel: SC.LabelView.design({
             value: "Email:",
-            layout: { right: 400-150, top: 95 },
-            textAlign: "right"
+            textAlign: "right",
+            layout: { right: 400-150, top: 95 }
         }),
 
         emailField: SC.TextFieldView.design({
-            layout: { left: 155, top: 95, height: 20, width: 105 },
-            valueBinding: "UserIdent#signupController.email"
+            valueBinding: "UserIdent#signupController.email",
+            layout: { left: 155, top: 95, height: 20, width: 105 }
         }),
 
         emailError: SC.LabelView.design({
             classNames: [ "signupValidationNote" ],
-            layout: { left: 265, top: 90, height: 30, width: 120 },
-            value: "(Optional - only used for password recovery)"
+            value: "(Optional - only used for password recovery)",
+            layout: { left: 265, top: 90, height: 30, width: 120 }
         }),
 
         submit: SC.ButtonView.design({
-            layout: { left: 155, top: 125, width: 80 },
             isDefault: true,
             title: "Sign up",
             target: "UserIdent#signupController",
-            action: "signup"
+            action: "signup",
+            layout: { left: 155, top: 125, width: 80 }
         })
     })
 });

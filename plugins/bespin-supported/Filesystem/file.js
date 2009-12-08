@@ -408,7 +408,7 @@ command.rootCanon.addCommand({
             dojo.create("a", {
                 innerHTML: "Overlay",
                 onclick: function() {
-                    bespin.get("commandLine").executeCommand("timemachine " + entry.id);
+                    command.executeCommand("timemachine " + entry.id);
                 }
             }, cell);
             dojo.create("td", { innerHTML: entry.description }, row);

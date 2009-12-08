@@ -27,6 +27,7 @@ var util = require("bespin/util/util");
 var worker = require("bespin/util/worker");
 var codecompletion = require("bespin/edior/codecompletion");
 var SC = require("sproutcore");
+var command = require("bespin/command");
 
 /**
  * Utilizes the bespin.parser infrastructure to suggest possible source
@@ -139,7 +140,7 @@ if (!facade.__hasWorkers__) {
 }
 
 bespin.subscribe("codecomplete:showsuggestion", function(e) {
-    bespin.get("commandLine").showHint("Code Completions<br><br>" + e.candidates.join("<br>"));
+    command.showHint("Code Completions<br><br>" + e.candidates.join("<br>"));
 });
 
 var changeSub;

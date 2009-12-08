@@ -157,7 +157,7 @@ exports.commands.addCommand({
     execute: function(instruction, feature) {
         // For when Aza exposes the Jetpack object :)
         // if (!window['Jetpack']) {
-        //     bespin.get("commandLine").addErrorOutput("To install a Jetpack, you need to have installed the extension.<br><br>For now this lives in Firefox only, and you can <a href='https://wiki.mozilla.org/Labs/Jetpack/API'>check it out, and download the add-on here</a>.");
+        //     instruction.addErrorOutput("To install a Jetpack, you need to have installed the extension.<br><br>For now this lives in Firefox only, and you can <a href='https://wiki.mozilla.org/Labs/Jetpack/API'>check it out, and download the add-on here</a>.");
         //     return;
         // }
 
@@ -173,7 +173,7 @@ exports.commands.addCommand({
         })();
 
         if (!feature) {
-            bespin.get("commandLine").addErrorOutput("Please pass in the name of the Jetpack feature you would like to install");
+            instruction.addErrorOutput("Please pass in the name of the Jetpack feature you would like to install");
         } else {
             exports.install(feature);
         }
@@ -196,7 +196,7 @@ exports.commands.addCommand({
             } else {
                 output = "<u>Your Jetpack Features</u><br/><br/>";
                 output += jetpacks.filter(endsJs).map(function(c) {
-                    return "<a href=\"javascript:bespin.get('commandLine')" +
+                    return "<a href=\"javascript:command" +
                         ".executeCommand('open /" + exports.projectName + "/" + c.name + "');\">" +
                         c.name.replace(/\.js$/, '') + "</a>";
                 }).join("<br>");
@@ -218,7 +218,7 @@ exports.commands.addCommand({
     usage: '[feature]: feature name required.',
     execute: function(instruction, feature) {
         if (!feature) {
-            bespin.get("commandLine").showUsage(this);
+            instruction.showUsage(this);
             return;
         }
 
@@ -229,7 +229,7 @@ exports.commands.addCommand({
                 bespin.get("editor").openFile(exports.projectName, path);
             },
             elseFailed: function() {
-                bespin.get("commandLine").addErrorOutput("No feature called " + feature + ".<br><br><em>Run 'jetpack list' to see what is available.</em>");
+                instruction.addErrorOutput("No feature called " + feature + ".<br><br><em>Run 'jetpack list' to see what is available.</em>");
             }
         });
     }
@@ -318,16 +318,15 @@ bespin.subscribe("toolbar:init", function(event) {
                     // render out of view to get the size info and then hide again
                     exports.sizeDropDownBorder(dd);
 
-                    var cl = bespin.get("commandLine");
                     // create a new jetpack
                     dojo.connect(document.getElementById('jetpack_dropdown_now_create'), 'click', function() {
-                        cl.executeCommand('jetpack create ' + document.getElementById('jetpack_dropdown_input_create').value);
+                        command.executeCommand('jetpack create ' + document.getElementById('jetpack_dropdown_input_create').value);
                         dropdown.style.display = 'none';
                     });
 
                     // install a jetpack
                     dojo.connect(document.getElementById('jetpack_dropdown_now_install'), 'click', function() {
-                        cl.executeCommand('jetpack install ' + document.getElementById('jetpack_dropdown_input_install').value);
+                        command.executeCommand('jetpack install ' + document.getElementById('jetpack_dropdown_input_install').value);
                         dropdown.style.display = 'none';
                     });
 

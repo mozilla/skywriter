@@ -23,6 +23,78 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
+var history = require("history");
+var util = require("bespin:util/util");
+var cli = require("views/cli");
+
+// TODO Should this be part of the command line plugin? Maybe it's core?
+
+/**
+ * Begin the login process
+ */
+exports.showCli = function() {
+    var dockView = require.env.bespinEditorController.dockView;
+    dockView.appendChild(dockView.addDockedView(cli.cliInputView));
+};
+
+window.command = exports;
+
+/**
+ * Show helpers for the command line
+ */
+exports.cliController = SC.Object.create({
+    input: "",
+    output: "",
+    exec: function() {
+        var instruction = command.executeCommand(this.input);
+        console.log(instruction);
+    }
+});
+
+/**
+ * TODO: We should get the implementation of this from the plugin system
+ */
+var history = history.InMemoryHistory.create();
+
+/**
+ * Execute a command
+ */
+exports.executeCommand = function(typed, hidden) {
+    if (!typed || typed === "") {
+        return null;
+    }
+
+    var instruction = exports.Instruction.create({ typed: typed });
+    if (hidden !== true) {
+        history.add(instruction);
+    }
+
+    instruction.onOutput(function() {
+        exports.hideHint();
+        exports.updateOutput(true);
+    }.bind(this));
+
+    instruction.exec();
+    return instruction;
+};
+
+/**
+ * Show a command line hint
+ * TODO: Implement this once to have some UI space for it
+ */
+exports.showHint = function(message, timeout) {
+    console.log(message);
+};
+
+/**
+ * Hide a previously displayed command line hint. This normally happens
+ * automatically, but sometimes we may wish it to go faster.
+ * TODO: (once implemented) check to see if the only uses of this are from the
+ * UI in which case it shouldn't be an exported function.
+ */
+exports.hideHint = function() {
+    // ignore until showHint is implemented
+};
 
 /**
  * Register new commands as they are discovered in plugins.
@@ -48,7 +120,7 @@ exports.newCommandHandler = function(ext) {
         this.load(function(execute) {
             execute.apply(this, args);
         });
-    }.bind(this);
+    };
     exports.rootCanon.addCommand(ext);
 };
 
@@ -447,6 +519,7 @@ exports.Canon = SC.Object.extend({
 exports.rootCanon = new exports.Canon();
 
 exports.helpCommand = function(instruction, extra) {
+    /*
     var output = this.parent.getHelp(extra, {
         prefix: "<h2>Welcome to Bespin - Code in the Cloud</h2><ul>" +
             "<li><a href='http://labs.mozilla.com/projects/bespin' target='_blank'>Home Page</a>" +
@@ -459,6 +532,15 @@ exports.helpCommand = function(instruction, extra) {
         suffix: "For more information, see the <a href='https://wiki.mozilla.org/Labs/Bespin'>Bespin Wiki</a>."
     });
     instruction.addOutput(output);
+    */
+    instruction.addOutput("<h2>Welcome to Bespin - Code in the Cloud</h2><ul>" +
+            "<li><a href='http://labs.mozilla.com/projects/bespin' target='_blank'>Home Page</a>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin' target='_blank'>Wiki</a>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/UserGuide' target='_blank'>User Guide</a>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/Tips' target='_blank'>Tips and Tricks</a>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/FAQ' target='_blank'>FAQ</a>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/DeveloperGuide' target='_blank'>Developers Guide</a>" +
+            "</ul>");
 };
 
 /**

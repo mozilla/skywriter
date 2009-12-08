@@ -1,12 +1,6 @@
 {
     "provides": [
         {
-            "ep": "factory",
-            "name": "commandLine",
-            "action": "create",
-            "pointer": "views/commandline#Interface"
-        },
-        {
             "ep": "extensionhandler",
             "name": "command",
             "activate": "command#newCommandHandler"
@@ -22,7 +16,7 @@
         },
         {
             "ep": "startup",
-            "pointer": "views/cli#showCli"
+            "pointer": "command#showCli"
         }
     ]
 }
