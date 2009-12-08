@@ -79,6 +79,7 @@ exports.ExtensionPoint = SC.Object.extend({
 
     addExtension: function(extension) {
         this.extensions.push(extension);
+        this.activate(extension);
     },
 
     /**
@@ -100,12 +101,27 @@ exports.ExtensionPoint = SC.Object.extend({
         return undefined;
     },
 
-    active: function(extension) {
+    activate: function(extension) {
         this.handlers.forEach(function(handler) {
             if (handler.activate) {
+                console.log("Calling ", handler.activate);
+                console.log(extension);
                 handler.load(function(activate) {
                     activate(extension);
                 }, "activate");
+            }
+        });
+    },
+    
+    deactivate: function(extension) {
+        this.handlers.forEach(function(handler) {
+            console.log("Checking one");
+            if (handler.deactivate) {
+                console.log("Got one: ", handler.deactivate);
+                handler.load(function(deactivate) {
+                    console.log("Calling one");
+                    deactivate(extension);
+                }, "deactivate");
             }
         });
     }
@@ -117,7 +133,17 @@ exports.Plugin = SC.Object.extend({
         self = this;
         this.provides.forEach(function(extension) {
             var ep = self.get("catalog").getExtensionPoint(extension.ep);
-            ep.active(extension);
+            ep.activate(extension);
+        });
+    },
+    
+    deactivate: function() {
+        var provides = this.provides;
+        self = this;
+        this.provides.forEach(function(extension) {
+            console.log("Provides: ", extension);
+            var ep = self.get("catalog").getExtensionPoint(extension.ep);
+            ep.deactivate(extension);
         });
     }
 });
@@ -252,9 +278,6 @@ exports.Catalog = SC.Object.extend({
                 md.provides = [];
             }
             var plugin = exports.Plugin.create(md);
-            if (plugin.active) {
-                plugin.activate();
-            }
             this.plugins[name] = plugin;
         }
     },
@@ -270,8 +293,17 @@ exports.Catalog = SC.Object.extend({
             eval(body);
         }
         params.callback(this, response);
+    },
+    
+    _deactivate: function(pluginName) {
+        this.plugins[pluginName].deactivate();
+    },
+
+    reload: function(pluginName) {
     }
 });
+
+
 
 exports.catalog = exports.Catalog.create();
 

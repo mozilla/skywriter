@@ -70,8 +70,9 @@ test("can set a handler for an extension point", function() {
     equals(ep.handlers.length, 2);
 });
 
-test("activation handlers are called", function() {
+test("activation/deactivation handlers are called", function() {
     exports.loadedCount = 0;
+    exports.deactivatedCount = 0;
     
     var catalog = plugins.Catalog.create();
     catalog.load({
@@ -80,13 +81,7 @@ test("activation handlers are called", function() {
                 {
                     ep: "icecream",
                     name: "chunky monkey"
-                }
-            ]
-        }
-    });
-    catalog.load({
-        bespin: {
-            provides: [
+                },
                 {
                     ep: "extensionpoint",
                     name: "icecream"
@@ -94,7 +89,8 @@ test("activation handlers are called", function() {
                 {
                     ep: "extensionhandler",
                     name: "icecream",
-                    activate: "tests/plugins#myfunc"
+                    activate: "tests/plugins#myfunc",
+                    deactivate: "tests/plugins#defunc"
                 },
                 {
                     ep: "icecream",
@@ -103,8 +99,9 @@ test("activation handlers are called", function() {
             ]
         }
     });
-    var ep = catalog.getExtensionPoint("startup");
-    equals(exports.loadedCount, 2);
+    equals(exports.loadedCount, 2, "Expected both plugins to be activated");
+    catalog._deactivate("bespin");
+    equals(exports.deactivatedCount, 2, "Expected both to be deactivated");
 });
 
 test("can retrieve factory objects from the catalog", function() {
@@ -157,9 +154,17 @@ test("can retrieve factory objects from the catalog", function() {
 });
 
 exports.loadedCount = 0;
+exports.deactivatedCount = 0;
 
 exports.myfunc = function(ext) {
+    console.log("Called from: ");
+    console.log(ext);
+    console.log(arguments.callee.caller);
     exports.loadedCount++;
+};
+
+exports.defunc = function(ext) {
+    exports.deactivatedCount++;
 };
 
 exports.factoryObj = {
