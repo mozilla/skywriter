@@ -159,19 +159,6 @@ exports.EditorController = SC.Object.extend({
     },
 
     /**
-     * Starts loading plugin metadata from the given URL.
-     */
-    loadPluginMetadata: function(url) {
-        require.env.bespinEditorController = this;
-
-        var scriptElement = document.createElement("script");
-        scriptElement.setAttribute("src", url);
-        document.body.appendChild(scriptElement);
-
-        return url;
-    },
-
-    /**
      * Returns the contents of the editor
      */
     getContent: function() {

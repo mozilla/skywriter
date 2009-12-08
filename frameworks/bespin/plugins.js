@@ -257,6 +257,19 @@ exports.Catalog = SC.Object.extend({
             }
             this.plugins[name] = plugin;
         }
+    },
+
+    loadMetadata: function(url, callback) {
+        SC.Request.create({ address: url }).notify(0, this,
+            this._metadataFinishedLoading, { callback: callback }).send("");
+    },
+
+    _metadataFinishedLoading: function(response, params) {
+        if (!response.isError) {
+            var body = response.body();
+            eval(body);
+        }
+        params.callback(this, response);
     }
 });
 

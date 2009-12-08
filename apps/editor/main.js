@@ -29,7 +29,10 @@ var didRun = false;
 var bespin = require("bespin");
 var containerMod = require("bespin:util/container");
 var EditorController = require("bespin:editor/controller").EditorController;
+var catalog = require("bespin:plugins").catalog;
 var view = require("view");
+
+var PLUGIN_METADATA_URL = "/server/plugin/register/defaults";
 
 main = function() {
     if (didRun) {
@@ -65,6 +68,11 @@ main = function() {
         view.app.getPath("mainPage.mainPane").appendChild(editor.dockView);
 
         // Load the plugin metadata for all of the system default plugins
-        editor.loadPluginMetadata("/server/plugin/register/defaults");
+        catalog.loadMetadata(PLUGIN_METADATA_URL, function(sender, response) {
+            if (response.isError) {
+                throw "failed to load plugin metadata: " +
+                    response.errorObject;
+            }
+        });
     });
 };

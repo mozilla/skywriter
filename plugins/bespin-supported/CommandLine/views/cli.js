@@ -29,8 +29,7 @@ var dock = require("bespin:views/dock");
  * Begin the login process
  */
 exports.showCli = function() {
-    var dockView = require.env.bespinEditorController.dockView;
-    dockView.appendChild(dockView.addDockedView(exports.cliInputView));
+    // empty
 };
 
 /**
