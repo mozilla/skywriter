@@ -22,6 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var SC = require("sproutcore/runtime").SC;
+
 /**
  * Store command line history, and keep a pointer to the current command so
  * we can use arrow keys to navigate through the history.

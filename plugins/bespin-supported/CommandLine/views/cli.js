@@ -24,23 +24,28 @@
 
 var SC = require("sproutcore/runtime").SC;
 var dock = require("bespin:views/dock");
-
-/**
- * Begin the login process
- */
-exports.showCli = function() {
-    // empty
-};
+var commandMod = require("command");
 
 /**
  * A Popup to display the command line output
  */
-exports.cliOutputView = SC.View.design({
-    layout: { centerX: 0, bottom: 0, right: 0, height: 30 },
-    childViews: [ 'output' ],
-    output: SC.TextFieldView.design({
-        //valueBinding: "CommandLine:command#cliController.output",
-        layout: { left: 0, top: 0, right: 0, bottom: 30 }
+exports.cliOutputPage = SC.Page.design({
+
+    mainPane: SC.PanelPane.design({
+        layout: { centerX: 0, bottom: 0, right: 0, height: 30 },
+
+        contentView: SC.View.design({
+            childViews: [ "output" ],
+
+            output: SC.TextFieldView.design({
+                layout: { left: 0, top: 0, right: 0, bottom: 0 }
+            }),
+
+            didCreateLayer: function() {
+                console.log("cliOutputView", this);
+                commandMod.output = this.get("layer");
+            }
+        })
     })
 });
 

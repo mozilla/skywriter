@@ -13,10 +13,6 @@
             "description": "The <u>help</u> gives you access to the various commands in the Bespin system.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>If you pass in the magic <em>hidden</em> parameter, you will find subtle hidden commands.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!",
             "completeText": "optionally, narrow down the search",
             "pointer": "command#helpCommand"
-        },
-        {
-            "ep": "startup",
-            "pointer": "views/cli#showCli"
         }
     ]
 }
