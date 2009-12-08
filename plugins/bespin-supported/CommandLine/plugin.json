@@ -16,8 +16,7 @@
         },
         {
             "ep": "startup",
-            "pointer": "command#showCli"
+            "pointer": "views/cli#showCli"
         }
     ]
 }
-

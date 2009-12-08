@@ -42,7 +42,7 @@ var server = require("BespinServer").server;
  * Begin the login process
  */
 exports.showSignup = function() {
-    exports.userIdentPage.get("mainPane").append();
+    //exports.userIdentPage.get("mainPane").append();
 };
 
 /**

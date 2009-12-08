@@ -25,17 +25,6 @@
 var SC = require("sproutcore/runtime").SC;
 var history = require("history");
 var util = require("bespin:util/util");
-var cli = require("views/cli");
-
-// TODO Should this be part of the command line plugin? Maybe it's core?
-
-/**
- * Begin the login process
- */
-exports.showCli = function() {
-    var dockView = require.env.bespinEditorController.dockView;
-    dockView.appendChild(dockView.addDockedView(cli.cliInputView));
-};
 
 window.command = exports;
 
