@@ -1,0 +1,48 @@
+#filesearch Input {
+    font: 8pt Tahoma;
+    color: black;
+    selection-color: #B5D2F3;
+    background-color: #CFCECC;
+    
+    border-image: url(images/splash_editnow_input.png) 5 6 5 6 stretch stretch;
+    border-width: 5px 6px 5px 6px;
+    
+    padding-left: -5;
+}
+
+#filesearch Input:active {
+    border-image: url(images/quickopen/input.png) 5 6 5 6 stretch stretch;
+}
+
+#filesearch TextButton {
+    font: 8pt Tahoma;
+    color: white;
+    padding-top: 2px;
+    margin-right: 20px;
+    
+    background-color: #848179;
+    
+    border-image: url(images/basic_button.png) 4 4 4 4 stretch stretch;
+    border-width: 4px;    
+}
+
+#filesearch TextButton:active {
+    color: #7676FF;
+}
+
+#filesearch {
+    -th-window-label-x: 20;
+    -th-window-label-y: 25;
+    background-color: #94928B;
+    border-image: url(images/quickopen/border.png) 48 22 25 22 stretch stretch;
+    border-width: 48px 22px 25px 22px;
+    padding: 5px;
+}
+
+
+#filesearch WindowLabel {
+    font: 8pt Tahoma;
+    color: white;
+    top: 27px;
+    left: 25px;
+}

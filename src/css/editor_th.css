@@ -1,0 +1,213 @@
+Splitter.horizontal {
+    border-left: 1px solid rgb(106, 105, 98);
+    border-right: 1px solid black;
+    background-image: -webkit-gradient(linear, left top, right top, from(#44423A), to(#3F3D36));
+}
+
+Splitter.vertical {
+    border-top: 1px solid rgb(73, 72, 66);
+    border-bottom: 1px solid black;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#32302A), to(#161613));
+}
+
+#file_browser Label {
+    color: white;
+}
+
+
+
+#projects_label {
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#32302A), to(#161613));
+}
+
+#file_browser Label.evenmore, #file_browser Label.oddmore {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+HorizontalTree {
+    background-color: #2a2522;
+}
+
+HorizontalTree List {
+    background-color: #2a2522;
+}
+
+HorizontalTree Label {
+    font: 9pt Tahoma;
+    color: white;
+}
+
+HorizontalTree Label:active {
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#AF6814), to(#DE8419)), url(../images/filebrowser/file_sm.png);
+    background-repeat: repeat-x, no-repeat;
+    background-position: left top, left center;
+}
+
+HorizontalTree Label.evenmore:active, HorizontalTree Label.oddmore:active {
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#AF6814), to(#DE8419)), url(../images/filebrowser/icn-actions.png), url(../images/filebrowser/folder_sm.png);
+    background-repeat: repeat-x, no-repeat, no-repeat;
+    background-position: left top, right center, left center;
+    padding-right: 31px;
+}
+
+#project_list {
+    background-color: #2a2522;
+}
+
+#project_list Label {
+    background-image: url(../images/filebrowser/project-bg.gif);
+    background-position: top left;
+    background-repeat: repeat-x;
+}
+
+#project_list Label:active {
+    background-image: url(../images/filebrowser/project-bg_selected.gif);
+    background-position: top left;
+    background-repeat: repeat-x;
+}
+
+/* I need to support multiple classes per component; right now I don't, hence, this mess */
+HorizontalTree Label.evenmore, HorizontalTree Label.oddmore {
+    background-image: url(../images/filebrowser/folder_sm.png), url(../images/filebrowser/icn-actions.png);
+    background-repeat: no-repeat, no-repeat;
+    background-position: left center, right center;
+    padding-top: 3px;
+    padding-bottom: 1px;
+    padding-left: 23px;
+    padding-right: 31px;
+}
+
+HorizontalTree Label.even, HorizontalTree Label.odd {
+    background-image: url(../images/filebrowser/file_sm.png);
+    background-repeat: no-repeat;
+    background-position: left center;
+    padding-top: 3px;
+    padding-bottom: 1px;
+    padding-left: 23px;
+}
+
+HorizontalTree Label.even, HorizontalTree Label.evenmore {
+    background-color: #231d1a;
+}
+
+HorizontalTree Label.odd, HorizontalTree Label.oddmore {
+    background-color: #2a2522;
+}
+
+HorizontalTree Panel {
+    background-color: #2a2522;
+}
+
+Panel.folderActions {
+    background-image: url(../images/filebrowser/folderaction_splitter.gif);
+    background-repeat: repeat-x;
+    background-position: left bottom;
+    padding-bottom: 5px;
+}
+
+Label.fileActions {
+    background-color: #2a2522;
+}
+
+Label.fileDetailLabel {
+    background-color: #2a2522;
+    background-image: url(../images/filebrowser/file_lg.png);
+    background-repeat: no-repeat;
+    background-position: left center;
+    font: 14px Tahoma;
+    padding-left: 35px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+Label.folderDetailLabel {
+    background-color: #2a2522;
+    background-image: url(../images/filebrowser/folder_lg.png);
+    background-repeat: no-repeat;
+    background-position: left center;
+    font: 14px Tahoma;
+    padding-left: 35px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+Label.fileActionLabel {
+    background-color: #2a2522;
+    text-align: center;
+}
+
+ActionPanel {
+    background-color: #363432;
+    padding: 0px;
+    margin-left: 20px;
+    margin-right: 15px;
+}
+
+ActionIcon {
+}
+
+/* Project Label Area */
+
+Label.statusProject, Label.statusFile {
+   color: white;
+   font: 10pt Calibri, Arial, sans-serif;
+}
+
+Label.statusSymbol {
+   color: gray;
+   font: 10pt Calibri, Arial, sans-serif;
+}
+
+/* Scrollbars for file browser */
+
+ScrollPane {
+    background-color: rgb(50, 50, 50);
+}
+
+VerticalScrollbar {
+    -th-top-image: url(../images/filebrowser/scroll_gutter-top.gif);
+    -th-middle-image: url(../images/filebrowser/scroll_gutter-mid.gif);
+    -th-bottom-image: url(../images/filebrowser/scroll_gutter-btm.gif);
+    background-color: rgb(50, 50, 50);
+}
+
+VerticalScrollbar > Button.bar {
+    -th-top-image: url(../images/filebrowser/scroll_thumb-top.png);
+    -th-middle-image: url(../images/filebrowser/scroll_thumb-mid.png);
+    -th-bottom-image: url(../images/filebrowser/scroll_thumb-btm.png);
+}
+
+VerticalScrollbar > Button.up {
+    background-image: url(../images/filebrowser/scroll_widget-up.gif);
+}
+
+VerticalScrollbar > Button.down {
+    background-image: url(../images/filebrowser/scroll_widget-dwn.gif);
+}
+
+ResizeNib {
+    background-color: rgb(50, 50, 50);
+}
+
+HorizontalScrollbar {
+    -th-top-image: url(/images/filebrowser/scroll-h_gutter-lft.gif);
+    -th-middle-image: url(/images/filebrowser/scroll-h_gutter-mid.gif);
+    -th-bottom-image: url(/images/filebrowser/scroll-h_gutter-rt.gif);
+}
+
+HorizontalScrollbar > Button.bar {
+    -th-top-image: url(/images/filebrowser/scroll-h_thumb-lft.png);
+    -th-middle-image: url(/images/filebrowser/scroll-h_thumb-mid.png);
+    -th-bottom-image: url(/images/filebrowser/scroll-h_thumb-rt.png);
+}
+
+HorizontalScrollbar > Button.up {
+    background-image: url(/images/filebrowser/scroll-h_widget-lft.gif);
+}
+
+HorizontalScrollbar > Button.down {
+    background-image: url(/images/filebrowser/scroll-h_widget-rt.gif);
+}

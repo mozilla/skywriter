@@ -1,0 +1,68 @@
+#quickopen #input {
+    font: 8pt Tahoma;
+    color: black;
+    selection-color: #C4A174;
+    background-color: #CFCECC;
+    
+    border-image: url(images/quickopen/input_lost_focus.png) 5 6 5 20 stretch stretch;
+    border-width: 5px 6px 5px 20px;
+    
+    margin: 0px 5px 5px 5px;
+}
+
+#quickopen #project {
+    font: 8pt Tahoma;
+    color: black;
+    selection-color: #C4A174;
+    background-color: #CFCECC;
+    
+    border-image: url(images/quickopen/input_lost_focus.png) 5 6 5 20 stretch stretch;
+    border-width: 5px 6px 5px 20px;
+    
+    margin: 5px;
+}
+
+#quickopen #input:active, #quickopen #project:active {
+    border-image: url(images/quickopen/input.png) 5 6 5 20 stretch stretch;
+}
+
+#quickopen #list {
+    border-top: 1px solid black;
+    border-bottom: 1px solid;
+    border-bottom-color: #8A857A;
+    background-color: #D7D1C0;
+}
+
+#list Label {
+    font: 9pt Tahoma;
+    color: #6C6C68;
+    padding-left: 5px;
+}
+
+#list Label:active {
+    background-color: #C4A174;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#C4A174), to(#C4A174));
+    border-width: 0px;
+}
+
+#quickopen #label {
+    font: 9pt Tahoma;
+    color: #16100E;
+    background-color: #D6D1C0;
+}
+
+#quickopen {
+    -th-window-label-x: 20;
+    -th-window-label-y: 25;
+    background-color: #94928B;
+    border-image: url(images/quickopen/border.png) 48 22 25 22 stretch stretch;
+    border-width: 48px 22px 25px 22px;
+}
+
+
+#quickopen WindowLabel {
+    font: 8pt Tahoma;
+    color: white;
+    top: 27px;
+    left: 25px;
+}
