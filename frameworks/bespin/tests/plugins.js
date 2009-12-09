@@ -100,7 +100,7 @@ test("activation/deactivation handlers are called", function() {
         }
     });
     equals(exports.loadedCount, 2, "Expected both plugins to be activated");
-    catalog._deactivate("bespin");
+    catalog._deactivate(catalog.plugins["bespin"]);
     equals(exports.deactivatedCount, 2, "Expected both to be deactivated");
 });
 
@@ -151,6 +151,43 @@ test("can retrieve factory objects from the catalog", function() {
     
     obj = catalog.getObject("simpleFunction");
     equals(obj.name, "just arbitrary");
+});
+
+test("can find dependents of a plugin", function() {
+    var catalog = plugins.Catalog.create();
+    catalog.plugins = {
+        icecream: {
+            depends: ['freezer', 'milk']
+        },
+        milk: {
+            depends: ['cow']
+        },
+        cow: {},
+        freezer: {
+            depends: ['ge', 'electricity']
+        },
+        ge: {},
+        electricity: {
+            depends: ['sun']
+        },
+        sun: {},
+        other: {}
+    };
+    var dependents = {};
+    var pluginList = ['icecream', 'milk', 'freezer', 'ge', 
+        'electricity', 'cow', 'sun', 'other'];
+    catalog._findDependents('icecream', pluginList, dependents);
+    deepEqual(dependents, {}, "for icecream");
+    
+    dependents = {};
+    catalog._findDependents('sun', pluginList, dependents);
+    deepEqual(dependents, {
+        electricity: true, freezer: true, icecream: true
+    }, "for sun");
+    
+    dependents = {};
+    catalog._findDependents('other', pluginList, dependents);
+    deepEqual(dependents, {}, "for other");
 });
 
 exports.loadedCount = 0;

@@ -24,6 +24,7 @@
 
 // ---plugin.json---
 var metadata = {
+    "depends": ["CommandLine"],
     "provides": [ {
         "ep": "command",
         "name": "eval",
@@ -60,8 +61,8 @@ var metadata = {
 };
 // ---
 
-var util = require("bespin/util/util");
-var command = require("bespin/command");
+var util = require("bespin:util/util");
+var command = require("CommandLine:command");
 
 /**
  * 'eval' command

@@ -26,6 +26,18 @@ var SC = require("sproutcore/runtime").SC;
 var builtins = require("builtins");
 var r = require;
 
+var object_keys = Object.keys;
+if (!object_keys) {
+  object_keys = function(obj) {
+    var k, ret = [];
+    for(k in obj) {
+      if (obj.hasOwnProperty(k)) ret.push(k);
+    }
+    return ret ;
+  };
+}
+
+
 exports.Extension = SC.Object.extend({
     _splitPointer: function(property) {
         property = property || "pointer";
@@ -48,8 +60,11 @@ exports.Extension = SC.Object.extend({
     load: function(callback, property) {
         var pointer = this._splitPointer(property);
         
+        var self = this;
+        
         tiki.async(this._pluginName).then(function() {
             SC.run(function() {
+                var foo = self;
                 var module = r(pointer.modName);
                 if (callback) {
                     if (pointer.objName) {
@@ -295,15 +310,149 @@ exports.Catalog = SC.Object.extend({
         params.callback(this, response);
     },
     
-    _deactivate: function(pluginName) {
-        this.plugins[pluginName].deactivate();
+    _deactivate: function(plugin) {
+        plugin.deactivate();
     },
-
+    
+    /*
+    * Figure out which plugins depend on a given plugin. This
+    * will allow the reload behavior to deactivate/reactivate
+    * all of the plugins that depend on the one being reloaded.
+    */
+    _findDependents: function(pluginName, pluginList, dependents) {
+        self = this;
+        pluginList.forEach(function(testPluginName) {
+            if (testPluginName == pluginName) {
+                return;
+            }
+            var plugin = self.plugins[testPluginName];
+            if (plugin && plugin.depends) {
+                plugin.depends.forEach(function(dependName) {
+                    if (dependName == pluginName && !dependents[testPluginName]) {
+                        dependents[testPluginName] = true;
+                        self._findDependents(testPluginName, pluginList, dependents);
+                    }
+                });
+            }
+        });
+    },
+    
+    /*
+    * reloads the named plugin and reinitializes all
+    * dependent plugins
+    */
     reload: function(pluginName) {
+        var plugin = this.plugins[pluginName];
+
+        // find all of the dependents recursively so that
+        // they can all be deactivated
+        var dependents = {};
+        
+        var self = this;
+        
+        var pluginList = object_keys(this.plugins);
+        
+        this._findDependents(pluginName, pluginList, dependents);
+        
+        // notify everyone that this plugin is going away
+        this._deactivate(plugin);
+        
+        for (var dependName in dependents) {
+            this._deactivate(this.plugins[dependName]);
+        }
+        
+        // remove all traces of the plugin
+        
+        var nameMatch = new RegExp("^" + pluginName + ":");
+        
+        _removeFromList(nameMatch, tiki.scripts);
+        _removeFromList(nameMatch, tiki.modules,
+            function(module) {
+                delete tiki._factories[module];
+            });
+        _removeFromList(nameMatch, tiki.stylesheets);
+        _removeFromList(new RegExp("^" + pluginName + "$"), tiki.packages);
+        
+        var promises = tiki._promises;
+        
+        delete promises.catalog[pluginName];
+        delete promises.loads[pluginName];
+        _removeFromObject(nameMatch, promises.modules);
+        _removeFromObject(nameMatch, promises.scripts);
+        _removeFromObject(nameMatch, promises.stylesheets);
+        
+        delete tiki._catalog[pluginName];
+        
+        // clear the sandbox of modules from all of the dependent plugins
+        var fullModList = [];
+        var sandbox = tiki.sandbox;
+        
+        var i = sandbox.modules.length;
+        var dependRegexes = [];
+        for (dependName in dependents) {
+            dependRegexes.push(new RegExp("^" + dependName + ":"));
+        }
+        
+        while (--i >= 0) {
+            var item = sandbox.modules[i];
+            if (nameMatch.exec(item)) {
+                fullModList.push(item);
+            } else {
+                var j = dependRegexes.length;
+                while (--j >= 0) {
+                    if (dependRegexes[j].exec(item)) {
+                        fullModList.push(item);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // make a private Tiki call that clears these
+        // modules from the module cache in the sandbox.
+        sandbox.clear.apply(sandbox, fullModList);
+        
+        // reload the plugin metadata
+        this.loadMetadata("/server/plugin/reload/" + pluginName,
+            function() {
+                // actually load the plugin, so that it's ready
+                // for any dependent plugins
+                tiki.async(pluginName, function() {
+                    // reactivate all of the dependent plugins
+                    for (dependName in dependents) {
+                        self.plugins[dependName].activate();
+                    }
+                });
+            }
+        );
+        
     }
 });
 
+var _removeFromList = function(regex, array, matchFunc) {
+    var i = 0;
+    while (i < array.length) {
+        if (regex.exec(array[i])) {
+            var item = array.splice(i, 1);
+            if (matchFunc) {
+                matchFunc(item);
+            }
+            continue;
+        }
+        i++;
+    }
+};
 
+var _removeFromObject = function(regex, obj) {
+    var keys = object_keys(obj);
+    var i = keys.length;
+    while (--i > 0) {
+        if (regex.exec(keys[i])) {
+            delete obj[keys[i]];
+        }
+    }
+};
+// reactivate all of the dependent plugins
 
 exports.catalog = exports.Catalog.create();
 
