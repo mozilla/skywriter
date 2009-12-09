@@ -1,0 +1,47 @@
+
+/* Jetpack Style */
+#jetpack_dropdown {
+    font-family: Calibri, Arial, sans-serif;
+}
+
+#jetpack_dropdown input[@type="button"] {
+    font-size: smaller;
+}
+
+#jetpack_dropdown_border {
+    position: absolute;
+    margin: 0;
+    padding: -5px;
+    background-color: #d6d1c1;
+    -moz-border-radius-bottomleft: 5px;
+    -moz-border-radius-bottomright: 5px;
+    -webkit-border-bottom-left-radius: 5px;
+    -webkit-border-bottom-right-radius: 5px;
+    opacity: 0.2;
+    z-index: 1;
+}
+
+#jetpack_dropdown_content {
+    position: absolute;
+    margin: 0px 5px 5px 5px;
+    padding: 4px;
+    color: #464646;
+    background-color: #d3cebf;
+    border: 1px solid black;
+    opacity: 1.0;
+    z-index: 2;
+}
+
+#jetpack_dropdown_content tr td {
+    padding: 2px;
+}
+
+#jetpack_dropdown_content tr th {
+    font-size: x-small;
+    color: #111;
+}
+
+tr#jetpack_dropdown_or td {
+    font-size: x-small;
+    color: #666;
+}

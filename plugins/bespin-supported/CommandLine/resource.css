@@ -1,0 +1,162 @@
+
+.commandline {
+    width: 100%;
+}
+
+.commandline input {
+    border: 0;
+    background: none;
+    color: #DDDDDD;
+    font-size: 12pt;
+    font-family: Calibri, Arial, sans-serif;
+    width: 100%;
+}
+
+/* Hmm these don't seem to be working. Wonder why. */
+.commandline input::selection { color: #44A; background: #AA4; }
+.commandline input::-moz-selection { color: #44A; background: #AA4; }
+/* */
+
+.commandline .prompt {
+    width: 11px;
+}
+
+#command.commandLineError {
+    color: red;
+}
+
+#command_output {
+    position: absolute;
+    overflow: auto;
+    color: #999;
+    z-index: 210;
+    font-family: Calibri, Arial, sans-serif;
+}
+
+#command_output table.command_table { width: 100%; border-collapse: collapse; }
+
+#command_output tr.command_rowin {
+    background-repeat: repeat-x;
+    /*
+    background-color: #1e1916;
+    */
+    border-bottom: 2px solid #000;
+    height: 22px;
+    font-size: 110%;
+}
+#command_output tr.command_rowout { }
+#command_output tr.command_rowin:hover .command_main { color: #83bfe1; }
+#command_output tr.command_rowin img { cursor:pointer; }
+#command_output tr.command_rowin img.hover { display:none; }
+#command_output tr.command_rowin img.nohover { display:inline; }
+#command_output tr.command_rowin:hover img.hover { display:inline; }
+#command_output tr.command_rowin:hover img.nohover { display:none; }
+
+#command_output td { vertical-align: top; }
+
+#command_output .command_open_history { width: 20px; }
+#command_output .command_open_time { width: 40px; }
+#command_output .command_open_blank { width: 1px; }
+
+#command_output .command_open { padding: 3px 3px 2px 5px; font-size:80%; color:#666; }
+#command_output .command_main { font-weight: bold; color: #fff; }
+#command_output .command_typed { padding-left: 5px; }
+
+#command_output .command_hover {
+    float: right;
+    font-size: 80%;
+    font-weight: normal;
+    width: 120px;
+    text-align: right;
+    display: none;
+    color: #666;
+}
+
+#command_output .command_hover .command_duration {
+    float: left;
+    padding-top: 2px;
+}
+
+#command_output tr.command_rowin:hover .command_hover { display: block; }
+
+#command_output .command_error { color: #f99; }
+
+#command_output tr.command_rowout th { text-align: left; }
+#command_output tr.command_rowout a { font-weight: bold; color: inherit; }
+#command_output tr.command_rowout a { text-decoration: underline; cursor: pointer; }
+
+#command_hint {
+    position: absolute;
+    color: #999;
+    font-family: Calibri, Arial, sans-serif;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    z-index: 260;
+}
+
+#command_hint a {
+    font-weight: bold;
+    color: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#command_hint td {
+    padding: 0;
+}
+
+#command_hint-topleftcorner, #command_hint-leftstretch, #command_hint-toprightcorner, #command_hint-rightstretch {
+    width: 14px;
+    min-width: 14px;
+}
+
+#command_hint-topleftcorner {
+    background-image: url(../images/info-topleft.png);
+    background-repeat: no-repeat;
+}
+
+#command_hint-toprightcorner {
+    background-image: url(../images/info-topright.png);
+    background-repeat: no-repeat;
+}
+
+#command_hint-leftstretch {
+    background-image: url(../images/info-leftstretch.png);
+    background-repeat: repeat-y;
+}
+
+#command_hint-rightstretch {
+    background-image: url(../images/info-rightstretch.png);
+    background-repeat: repeat-y;
+}
+
+#command_hint-topstretch {
+    background-image: url(../images/info-topstretch.png);
+    background-repeat: repeat-x;
+}
+
+td#command_hint-content {
+    background-image: url(../images/info-bg.png);
+    padding: 4px 6px 6px 6px;
+    color: #666;
+}
+
+#command_hint-topstretch, #command_hint-content {
+    width: 100%;
+}
+
+#command_hint .command_hint-top {
+    height: 13px;
+}
+
+#command_output input[type=password], #command_output input[type=text], #command_output textarea {
+    background: transparent;
+    border: 1px solid #ff9600;
+    color: #fff;
+    font-family: Calibri,Arial,sans-serif;
+    font-size: 100%;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    padding: 3px;
+}

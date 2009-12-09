@@ -1,0 +1,74 @@
+#collab {
+    position: absolute;
+    top: 32px;
+    bottom: 0;
+    right: 0;
+    width: 210px;
+    display: none;
+    background-image: url("../images/collab_pane_bg.png");
+    background-repeat: repeat-y;
+}
+
+#collab a {
+    color: #eee;
+}
+
+#collab_header {
+    background-image: url("../images/collab_hdr_bg.gif");
+    height: 32px;
+    margin-left: 10px;
+}
+
+#collab_header div {
+    font-family: Calibri, Arial, sans-serif;
+    font-size: 12pt;
+    color: #DDDDDD;
+    padding: 5px 0 0 9px;
+}
+
+#collab_on {
+    /* TODO: This height is somewhat arbitrary - people with tall screens may
+    wish to see more collaborators without scrolling, and people with very short
+    screens, etc. We should calculate a max-height on window resize, but this
+    will do for now */
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#collab_on .collab_subheader {
+    background-image: url("../images/collab_categorybar_bg.gif");
+    margin-left: 10px;
+    height: 23px;
+}
+
+#collab_on .collab_subheader div {
+    font-family: Calibri, Arial, sans-serif;
+    font-size: 10pt;
+    color: #dad4ba;
+    padding: 3px 0 0 9px;
+}
+
+.collab_text {
+    margin-top: 10px;
+    margin-left: 10px;
+    font-family: Calibri, Arial, sans-serif;
+    font-size: 10pt;
+    color: #dad4ba;
+    padding: 3px 0 0 9px;
+}
+
+.collab_name {
+    color: #DDDDDD;
+    font-family: Calibri, Arial, sans-serif;
+    font-size: 12pt;
+    padding: 5px 0 0 2px;
+}
+
+.collab_description {
+    color: #DDDDDD;
+    font-family: Calibri, Arial, sans-serif;
+    font-size: 9pt;
+    padding: 0 0 0 2px;
+}
+
