@@ -27,12 +27,12 @@
  * information and handle collaboration.
  */
 
-var bespin = require("bespin");
-var util = require("bespin/util/util");
-var mobwrite = require("bespin/mobwrite/core");
-var diff_match_patch = require("bespin/mobwrite/diff");
 var SC = require("sproutcore");
-var command = require("bespin/command");
+var bespin = require("bespin");
+var util = require("bespin:util/util");
+var command = require("bespin:command");
+var mobwrite = require("mobwrite/core");
+var diff_match_patch = require("mobwrite/diff");
 
 /**
  * Add a setting to turn collaboration mode on/off
@@ -799,7 +799,10 @@ exports.EditSession = SC.Object.extend({
                     self.currentState = self.mobwriteState.running;
                 };
 
-                self.shareNode = new ShareNode({ session: self, onFirstSync: onFirstSync });
+                self.shareNode = ShareNode.create({
+                    session: self,
+                    onFirstSync: onFirstSync
+                });
                 mobwrite.share(self.shareNode);
             };
 
@@ -824,7 +827,7 @@ exports.EditSession = SC.Object.extend({
     stopSession: function(onSuccess, onFailure) {
         // TODO: Something better if we're told to stop while starting?
         if (this.currentState == this.mobwriteState.starting) {
-            console.error("Asked to stop in the middle of starting. I can't let you do that Dave.");
+            console.error("Asked to stop in the middle of starting.");
             onFailure({ responseText: "Can't stop callaboration right now" });
             return;
         }
@@ -966,35 +969,31 @@ exports.EditSession = SC.Object.extend({
                     title += ". Status: " + user.status;
                 }
 
-                var parent = dojo.create("div", {
-                    style: {
-                        // backgroundImage: "url(../images/collab_user_bg.gif)",
-                        marginLeft: "10px",
-                        height: (compact ? "24px" : "48px")
-                    },
-                    title: title
-                }, collabList);
+                var parent =  document.createElement("div");
+                // parent.style.backgroundImage = "url(../images/collab_user_bg.gif)";
+                parent.style.marginLeft = "10px";
+                parent.style.height = (compact ? "24px" : "48px");
+                parent.title = title;
+                collabList.appendChild(parent);
 
-                var icon = dojo.create("img", {
-                    src: "../images/collab_icn_user.png",
-                    style: {
-                        "float": "left",
-                        margin: "4px 8px 0px 8px",
-                        height: (compact ? "20px" : "32px"),
-                        width: (compact ? "20px" : "32px")
-                    }
-                }, parent);
+                var icon = document.create("img");
+                icon.src = "../images/collab_icn_user.png";
+                icon.style["float"] = "left";
+                icon.style.margin = "4px 8px 0px 8px";
+                icon.style.height = compact ? "20px" : "32px";
+                icon.style.width = compact ? "20px" : "32px";
+                parent.appendChild(icon);
 
-                dojo.create("div", {
-                    className: 'collab_name',
-                    innerHTML: username + extra
-                }, parent);
+                var name = document.createElement("div");
+                name.className = "collab_name";
+                name.innerHTML = username + extra;
+                parent.appendChild(name);
 
                 if (!compact) {
-                    dojo.create("div", {
-                        className: 'collab_description',
-                        innerHTML: user.status
-                    }, parent);
+                    var status = document.createElement("div");
+                    status.className = "collab_description";
+                    status.innerHTML = user.status;
+                    parent.appendChild(status);
                 }
             }
         }
@@ -1004,15 +1003,15 @@ exports.EditSession = SC.Object.extend({
         document.getElementById("collab_off").style.display = stopped ? "block" : "none";
         document.getElementById("collab_on").style.display = stopped ? "none" : "block";
 
+        var toggle = document.getElementById("toolbar_collaboration");
         if (stopped) {
-            dojo.attr("toolbar_collaboration", "src", "images/icn_collab_off.png");
+            toggle.src = "images/icn_collab_off.png";
         } else {
             if (userEntries.length > 1) {
-                dojo.attr("toolbar_collaboration", "src", "images/icn_collab_on.png");
+                toggle.src = "images/icn_collab_on.png";
             } else {
-                dojo.attr("toolbar_collaboration", "src", "images/icn_collab_watching.png");
+                toggle.src = "images/icn_collab_watching.png";
             }
         }
     }
 });
-
