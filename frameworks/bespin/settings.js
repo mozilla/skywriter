@@ -94,7 +94,7 @@ var util = require("util/util");
  * </pre>
  * @class
  */
-exports.InMemorySettings = SC.Object.extend(/** @lends exports.InMemorySettings */ {
+exports.InMemorySettings = SC.Object.extend({
     /**
      * The current settings.
      */

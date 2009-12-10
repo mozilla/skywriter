@@ -28,15 +28,16 @@ var r = require;
 
 var object_keys = Object.keys;
 if (!object_keys) {
-  object_keys = function(obj) {
-    var k, ret = [];
-    for(k in obj) {
-      if (obj.hasOwnProperty(k)) ret.push(k);
-    }
-    return ret ;
-  };
+    object_keys = function(obj) {
+        var k, ret = [];
+        for (k in obj) {
+            if (obj.hasOwnProperty(k)) {
+                ret.push(k);
+            }
+        }
+        return ret;
+    };
 }
-
 
 exports.Extension = SC.Object.extend({
     _splitPointer: function(property) {
@@ -50,7 +51,7 @@ exports.Extension = SC.Object.extend({
         } else {
             modName = this._pluginName;
         }
-        
+
         return {
             modName: modName,
             objName: parts[1]
@@ -63,9 +64,9 @@ exports.Extension = SC.Object.extend({
     
     load: function(callback, property) {
         var pointer = this._splitPointer(property);
-        
+
         var self = this;
-        
+
         tiki.async(this._pluginName).then(function() {
             SC.run(function() {
                 var foo = self;
@@ -146,7 +147,7 @@ exports.ExtensionPoint = SC.Object.extend({
             }
         });
     },
-    
+
     unregister: function(extension) {
         this.handlers.forEach(function(handler) {
             if (handler.unregister) {
@@ -167,7 +168,7 @@ exports.Plugin = SC.Object.extend({
             ep.register(extension);
         });
     },
-    
+
     unregister: function() {
         var provides = this.provides;
         self = this;
@@ -192,32 +193,32 @@ exports.Catalog = SC.Object.extend({
     init: function() {
         this.points = {};
         this.plugins = {};
-        
+
         // set up the "extensionpoint" extension point.
         // it indexes on name.
         var ep = this.getExtensionPoint("extensionpoint");
         ep.set("indexOn", "name");
         this.load(builtins.metadata);
     },
-    
-    /*
-    * Retrieve a registered singleton. Returns undefined
-    * if that factory is not registered.
-    */
+
+    /**
+     * Retrieve a registered singleton. Returns undefined
+     * if that factory is not registered.
+     */
     getObject: function(name) {
         var ext = this.getExtensionByKey("factory", name);
         if (ext === undefined) {
             return undefined;
         }
-        
+
         var obj = ext.get("instance");
         if (obj) {
             return obj;
         }
-        
+
         var exported = ext._getLoaded();
         var action = ext.action;
-        
+
         if (action == "call") {
             obj = exported();
         } else if (action == "create") {
@@ -230,7 +231,7 @@ exports.Catalog = SC.Object.extend({
             throw "Create action must be call|create|new|value. " +
                     "Found" + action;
         }
-        
+
         ext.set("instance", obj);
         return obj;
     },
@@ -278,7 +279,7 @@ exports.Catalog = SC.Object.extend({
             ep.set("indexOn", extension.indexOn);
         }
     },
-    
+
     _registerExtensionHandler: function(extension) {
         var ep = this.getExtensionPoint(extension.name);
         ep.handlers.push(extension);
@@ -292,7 +293,7 @@ exports.Catalog = SC.Object.extend({
                 });
             }, "register");
         }
-        
+
     },
 
     load: function(metadata) {
@@ -363,16 +364,16 @@ exports.Catalog = SC.Object.extend({
         }
         params.callback(this, response);
     },
-    
+
     _unregister: function(plugin) {
         plugin.unregister();
     },
     
-    /*
-    * Figure out which plugins depend on a given plugin. This
-    * will allow the reload behavior to unregister/reregister
-    * all of the plugins that depend on the one being reloaded.
-    */
+    /**
+     * Figure out which plugins depend on a given plugin. This
+     * will allow the reload behavior to unregister/reregister
+     * all of the plugins that depend on the one being reloaded.
+     */
     _findDependents: function(pluginName, pluginList, dependents) {
         self = this;
         pluginList.forEach(function(testPluginName) {
@@ -390,35 +391,35 @@ exports.Catalog = SC.Object.extend({
             }
         });
     },
-    
-    /*
-    * reloads the named plugin and reinitializes all
-    * dependent plugins
-    */
+
+    /**
+     * reloads the named plugin and reinitializes all
+     * dependent plugins
+     */
     reload: function(pluginName, metadataURL, callback) {
         var plugin = this.plugins[pluginName];
 
         // find all of the dependents recursively so that
         // they can all be unregisterd
         var dependents = {};
-        
+
         var self = this;
-        
+
         var pluginList = object_keys(this.plugins);
-        
+
         this._findDependents(pluginName, pluginList, dependents);
-        
+
         // notify everyone that this plugin is going away
         this._unregister(plugin);
-        
+
         for (var dependName in dependents) {
             this._unregister(this.plugins[dependName]);
         }
-        
+
         // remove all traces of the plugin
-        
+
         var nameMatch = new RegExp("^" + pluginName + ":");
-        
+
         _removeFromList(nameMatch, tiki.scripts);
         _removeFromList(nameMatch, tiki.modules,
             function(module) {
@@ -426,27 +427,27 @@ exports.Catalog = SC.Object.extend({
             });
         _removeFromList(nameMatch, tiki.stylesheets);
         _removeFromList(new RegExp("^" + pluginName + "$"), tiki.packages);
-        
+
         var promises = tiki._promises;
-        
+
         delete promises.catalog[pluginName];
         delete promises.loads[pluginName];
         _removeFromObject(nameMatch, promises.modules);
         _removeFromObject(nameMatch, promises.scripts);
         _removeFromObject(nameMatch, promises.stylesheets);
-        
+
         delete tiki._catalog[pluginName];
-        
+
         // clear the sandbox of modules from all of the dependent plugins
         var fullModList = [];
         var sandbox = tiki.sandbox;
-        
+
         var i = sandbox.modules.length;
         var dependRegexes = [];
         for (dependName in dependents) {
             dependRegexes.push(new RegExp("^" + dependName + ":"));
         }
-        
+
         while (--i >= 0) {
             var item = sandbox.modules[i];
             if (nameMatch.exec(item)) {
@@ -461,11 +462,11 @@ exports.Catalog = SC.Object.extend({
                 }
             }
         }
-        
+
         // make a private Tiki call that clears these
         // modules from the module cache in the sandbox.
         sandbox.clear.apply(sandbox, fullModList);
-        
+
         // reload the plugin metadata
         this.loadMetadata(metadataURL,
             function() {
@@ -484,7 +485,7 @@ exports.Catalog = SC.Object.extend({
                 });
             }
         );
-        
+
     }
 });
 

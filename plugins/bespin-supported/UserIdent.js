@@ -24,8 +24,10 @@
 
 "define metadata";
 ({
-    "depends": ["BespinServer"],
-    "provides": [ {
+    "depends": [ "BespinServer" ],
+    "provides":
+    [
+        {
             "ep": "startup",
             "pointer": "#showSignup"
         }
@@ -90,7 +92,7 @@ exports.loginController = SC.Object.create({
  */
 exports.signupController = SC.Object.create({
     isValid: true,
-    
+
     username: "",
     usernameError: "",
 
@@ -102,7 +104,7 @@ exports.signupController = SC.Object.create({
 
     email: "",
     emailHint: "(Email optional - only used for password recovery)",
-    
+
     dump: '',
 
     /**
@@ -113,7 +115,7 @@ exports.signupController = SC.Object.create({
     /**
      * Called by commitEditing() on
      */
-    validate: function(field) {                
+    validate: function(field) {
         if (field !== undefined) {
             // We do nothing if the field is empty.
             if (this.get(field) == "") {
@@ -122,11 +124,11 @@ exports.signupController = SC.Object.create({
 
             this.changed[field] = true;
         }
-        
+
         // Store the isValid information in a local var to keep from calling set(...) all the time.
         // The value of this.isValid will be set at the end of this function.
         var isValid = true;
-        
+
         if (this.changed.username || this.get('username') != '') {
             var usernameError = '';
             if (this.get('username').length < 4) {
@@ -157,7 +159,7 @@ exports.signupController = SC.Object.create({
             }
             this.set("password2Error", password2Error);
         }
-        
+
         if (this.changed.email || this.get('email' != '')) {
             if (!this.get('email').match(/.+@.+\...+/)) {
                 this.set("emailHint", "When email is given, it has to be a valid format");
@@ -178,13 +180,13 @@ exports.signupController = SC.Object.create({
         
         // validates the form. 
         this.validate();
-        
+
         if (!this.get('isValid')) {
             pane = SC.AlertPane.error("Correct your signup", "Please correct your signup information.");
             pane.append();
         } else if (this.get('username') == '' || this.get('password1') == '') {
             pane = SC.AlertPane.error("Correct your signup", "Please fill up all required fields (username + password).");
-            pane.append();            
+            pane.append();
         } else {
             var opts = {
                 onSuccess: this.onSuccess.bind(this),
@@ -252,7 +254,7 @@ exports.userIdentPage = SC.Page.design({
         })
     }),
 
-    loginView: SC.View.design({          
+    loginView: SC.View.design({
         layout: { left: 0, top: 0, right: 0, bottom: 0 },
         childViews: [
             "usernameLabel", "usernameField",
@@ -324,7 +326,7 @@ exports.userIdentPage = SC.Page.design({
         usernameError: SC.LabelView.design({
             classNames: [ "signupValidationError" ],
             valueBinding: "UserIdent#signupController.usernameError",
-            layout: { left: 265, top: 0, height: 30, width: 120 }          
+            layout: { left: 265, top: 0, height: 30, width: 120 }
         }),
 
         password1Label: SC.LabelView.design({
@@ -391,7 +393,7 @@ exports.userIdentPage = SC.Page.design({
             },
             layout: { left: 155, top: 95, height: 20, width: 200 }
         }),
-        
+
         submit: SC.ButtonView.design({
             isDefault: true,
             title: "Sign up",
@@ -399,7 +401,7 @@ exports.userIdentPage = SC.Page.design({
             action: "signup",
             layout: { left: 155, top: 160, width: 105 }
         }),
-        
+
         emailHint: SC.LabelView.design({
             classNames: [ "signupValidationNote" ],
             textAlign: "center",

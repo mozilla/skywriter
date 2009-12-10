@@ -22,39 +22,49 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-exports.metadata = {
-    "Base Syntax": {
-        "provides": [{
+exports.metadata =
+{
+    "Base Syntax":
+    {
+        "provides":
+        [
+             {
                 "ep": "syntax.simple.highlighter",
                 "name": "C",
                 "extensions": ['c', 'h'],
                 "pointer": "bespin/syntax/simple/c:C"
-            }, {
+            },
+            {
                 "ep": "syntax.simple.highlighter",
                 "name": "CSharp",
                 "extensions": ['cs'],
                 "pointer": "bespin/syntax/simple/csharp:CSharp"
-            }, {
+            },
+            {
                 "ep": "syntax.simple.highlighter",
                 "name": "CSS",
                 "extensions": ['css'],
                 "pointer": "bespin/syntax/simple/css:CSS"
-            }, {
+            },
+            {
                 "ep": "syntax.simple.highlighter",
                 "name": "HTML",
                 "extensions": ['html', 'htm', 'xml', 'xhtml', 'shtml'],
                 "pointer": "bespin/syntax/simple/html:HTML"
-            }, {
+            },
+            {
                 "ep": "syntax.simple.highlighter",
                 "name": "PHP",
                 "extensions": ['php', 'php3', 'php4', 'php5'],
                 "pointer": "bespin/syntax/simple/php:PHP"
-            }, {
+            },
+            {
                 "ep": "syntax.simple.highlighter",
                 "name": "Python",
                 "extensions": ['py', 'python'],
                 "pointer": "bespin/syntax/simple/python:Python"
-            }, {
+            },
+            {
                 "ep": "syntax.simple.highlighter",
                 "name": "Ruby",
                 "extensions": ['rb', 'ruby'],
@@ -62,8 +72,10 @@ exports.metadata = {
             }
         ]
     },
-    "bespin": {
-        "provides": [
+    "bespin":
+    {
+        "provides":
+        [
             {
                 "ep": "extensionpoint",
                 "name": "extensionpoint",
