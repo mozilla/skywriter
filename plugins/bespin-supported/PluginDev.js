@@ -65,14 +65,7 @@ exports.runTest = function(testmodule) {
     exports.reload(pluginName, function() {
         core_test.module(testmodule);
         var mod = require(testmodule);
-        var testRegex = /^test(.*)/;
-        
-        for (name in mod) {
-            var match = testRegex.exec(name);
-            if (match) {
-                core_test.test(match[1], mod[name]);
-            }
-        }
-        core_test.plan.run();
+        // run the tests, logging to the console
+        test.run(mod, console);
     });
 };
