@@ -341,7 +341,7 @@ exports.Catalog = SC.Object.extend({
     * reloads the named plugin and reinitializes all
     * dependent plugins
     */
-    reload: function(pluginName) {
+    reload: function(pluginName, metadataURL) {
         var plugin = this.plugins[pluginName];
 
         // find all of the dependents recursively so that
@@ -413,7 +413,7 @@ exports.Catalog = SC.Object.extend({
         sandbox.clear.apply(sandbox, fullModList);
         
         // reload the plugin metadata
-        this.loadMetadata("/server/plugin/reload/" + pluginName,
+        this.loadMetadata(metadataURL,
             function() {
                 // actually load the plugin, so that it's ready
                 // for any dependent plugins
