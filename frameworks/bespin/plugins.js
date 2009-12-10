@@ -119,8 +119,6 @@ exports.ExtensionPoint = SC.Object.extend({
     activate: function(extension) {
         this.handlers.forEach(function(handler) {
             if (handler.activate) {
-                console.log("Calling ", handler.activate);
-                console.log(extension);
                 handler.load(function(activate) {
                     activate(extension);
                 }, "activate");
@@ -130,11 +128,8 @@ exports.ExtensionPoint = SC.Object.extend({
     
     deactivate: function(extension) {
         this.handlers.forEach(function(handler) {
-            console.log("Checking one");
             if (handler.deactivate) {
-                console.log("Got one: ", handler.deactivate);
                 handler.load(function(deactivate) {
-                    console.log("Calling one");
                     deactivate(extension);
                 }, "deactivate");
             }
@@ -156,7 +151,6 @@ exports.Plugin = SC.Object.extend({
         var provides = this.provides;
         self = this;
         this.provides.forEach(function(extension) {
-            console.log("Provides: ", extension);
             var ep = self.get("catalog").getExtensionPoint(extension.ep);
             ep.deactivate(extension);
         });
@@ -341,7 +335,7 @@ exports.Catalog = SC.Object.extend({
     * reloads the named plugin and reinitializes all
     * dependent plugins
     */
-    reload: function(pluginName, metadataURL) {
+    reload: function(pluginName, metadataURL, callback) {
         var plugin = this.plugins[pluginName];
 
         // find all of the dependents recursively so that
@@ -417,10 +411,15 @@ exports.Catalog = SC.Object.extend({
             function() {
                 // actually load the plugin, so that it's ready
                 // for any dependent plugins
-                tiki.async(pluginName, function() {
+                tiki.async(pluginName).then(function() {
                     // reactivate all of the dependent plugins
                     for (dependName in dependents) {
                         self.plugins[dependName].activate();
+                    }
+                    
+                    if (callback) {
+                        // at long last, reloading is done.
+                        callback();
                     }
                 });
             }
