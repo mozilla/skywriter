@@ -94,7 +94,7 @@ exports.ExtensionPoint = SC.Object.extend({
 
     addExtension: function(extension) {
         this.extensions.push(extension);
-        this.activate(extension);
+        this.register(extension);
     },
 
     /**
@@ -116,43 +116,43 @@ exports.ExtensionPoint = SC.Object.extend({
         return undefined;
     },
 
-    activate: function(extension) {
+    register: function(extension) {
         this.handlers.forEach(function(handler) {
-            if (handler.activate) {
-                handler.load(function(activate) {
-                    activate(extension);
-                }, "activate");
+            if (handler.register) {
+                handler.load(function(register) {
+                    register(extension);
+                }, "register");
             }
         });
     },
     
-    deactivate: function(extension) {
+    unregister: function(extension) {
         this.handlers.forEach(function(handler) {
-            if (handler.deactivate) {
-                handler.load(function(deactivate) {
-                    deactivate(extension);
-                }, "deactivate");
+            if (handler.unregister) {
+                handler.load(function(unregister) {
+                    unregister(extension);
+                }, "unregister");
             }
         });
     }
 });
 
 exports.Plugin = SC.Object.extend({
-    activate: function() {
+    register: function() {
         var provides = this.provides;
         self = this;
         this.provides.forEach(function(extension) {
             var ep = self.get("catalog").getExtensionPoint(extension.ep);
-            ep.activate(extension);
+            ep.register(extension);
         });
     },
     
-    deactivate: function() {
+    unregister: function() {
         var provides = this.provides;
         self = this;
         this.provides.forEach(function(extension) {
             var ep = self.get("catalog").getExtensionPoint(extension.ep);
-            ep.deactivate(extension);
+            ep.unregister(extension);
         });
     }
 });
@@ -251,12 +251,12 @@ exports.Catalog = SC.Object.extend({
     _registerExtensionHandler: function(extension) {
         var ep = this.getExtensionPoint(extension.name);
         ep.handlers.push(extension);
-        if (extension.activate) {
-            extension.load(function(activate) {
+        if (extension.register) {
+            extension.load(function(register) {
                 ep.extensions.forEach(function(ext) {
-                    activate(ext);
+                    register(ext);
                 });
-            }, "activate");
+            }, "register");
         }
         
     },
@@ -304,13 +304,13 @@ exports.Catalog = SC.Object.extend({
         params.callback(this, response);
     },
     
-    _deactivate: function(plugin) {
-        plugin.deactivate();
+    _unregister: function(plugin) {
+        plugin.unregister();
     },
     
     /*
     * Figure out which plugins depend on a given plugin. This
-    * will allow the reload behavior to deactivate/reactivate
+    * will allow the reload behavior to unregister/reregister
     * all of the plugins that depend on the one being reloaded.
     */
     _findDependents: function(pluginName, pluginList, dependents) {
@@ -339,7 +339,7 @@ exports.Catalog = SC.Object.extend({
         var plugin = this.plugins[pluginName];
 
         // find all of the dependents recursively so that
-        // they can all be deactivated
+        // they can all be unregisterd
         var dependents = {};
         
         var self = this;
@@ -349,10 +349,10 @@ exports.Catalog = SC.Object.extend({
         this._findDependents(pluginName, pluginList, dependents);
         
         // notify everyone that this plugin is going away
-        this._deactivate(plugin);
+        this._unregister(plugin);
         
         for (var dependName in dependents) {
-            this._deactivate(this.plugins[dependName]);
+            this._unregister(this.plugins[dependName]);
         }
         
         // remove all traces of the plugin
@@ -412,9 +412,9 @@ exports.Catalog = SC.Object.extend({
                 // actually load the plugin, so that it's ready
                 // for any dependent plugins
                 tiki.async(pluginName).then(function() {
-                    // reactivate all of the dependent plugins
+                    // reregister all of the dependent plugins
                     for (dependName in dependents) {
-                        self.plugins[dependName].activate();
+                        self.plugins[dependName].register();
                     }
                     
                     if (callback) {
@@ -451,7 +451,7 @@ var _removeFromObject = function(regex, obj) {
         }
     }
 };
-// reactivate all of the dependent plugins
+// reregister all of the dependent plugins
 
 exports.catalog = exports.Catalog.create();
 

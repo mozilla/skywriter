@@ -49,7 +49,7 @@ test("can retrieve an extension by key", function() {
     var ext = catalog.getExtensionByKey("extensionpoint", "startup");
     equals("startup", ext.get("name"), 
         "Name should be startup, since that's what we looked up");
-    equals("plugins#startupHandler", ext.get("activate"),
+    equals("plugins#startupHandler", ext.get("register"),
         "activation handler pointer should be set");
 });
 
@@ -61,7 +61,7 @@ test("can set a handler for an extension point", function() {
                 {
                     ep: "extensionhandler",
                     name: "startup",
-                    activate: "foo#bar"
+                    register: "foo#bar"
                 }
             ]
         }
@@ -72,7 +72,7 @@ test("can set a handler for an extension point", function() {
 
 test("activation/deactivation handlers are called", function() {
     exports.loadedCount = 0;
-    exports.deactivatedCount = 0;
+    exports.unregisterdCount = 0;
     
     var catalog = plugins.Catalog.create();
     catalog.load({
@@ -89,8 +89,8 @@ test("activation/deactivation handlers are called", function() {
                 {
                     ep: "extensionhandler",
                     name: "icecream",
-                    activate: "tests/plugins#myfunc",
-                    deactivate: "tests/plugins#defunc"
+                    register: "tests/plugins#myfunc",
+                    unregister: "tests/plugins#defunc"
                 },
                 {
                     ep: "icecream",
@@ -99,9 +99,9 @@ test("activation/deactivation handlers are called", function() {
             ]
         }
     });
-    equals(exports.loadedCount, 2, "Expected both plugins to be activated");
-    catalog._deactivate(catalog.plugins["bespin"]);
-    equals(exports.deactivatedCount, 2, "Expected both to be deactivated");
+    equals(exports.loadedCount, 2, "Expected both plugins to be registerd");
+    catalog._unregister(catalog.plugins["bespin"]);
+    equals(exports.unregisterdCount, 2, "Expected both to be unregisterd");
 });
 
 test("can retrieve factory objects from the catalog", function() {
@@ -191,7 +191,7 @@ test("can find dependents of a plugin", function() {
 });
 
 exports.loadedCount = 0;
-exports.deactivatedCount = 0;
+exports.unregisterdCount = 0;
 
 exports.myfunc = function(ext) {
     console.log("Called from: ");
@@ -201,7 +201,7 @@ exports.myfunc = function(ext) {
 };
 
 exports.defunc = function(ext) {
-    exports.deactivatedCount++;
+    exports.unregisterdCount++;
 };
 
 exports.factoryObj = {

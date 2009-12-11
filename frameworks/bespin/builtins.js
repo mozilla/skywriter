@@ -87,21 +87,26 @@ exports.metadata = {
                 "description": "Use the 'extensionpoint' extension point to \
 define new extension points. You can provide an 'indexOn' property to name a \
 property of extensions through which you'd like to be able to easily look up the \
-extension. You can also provide an 'activate' property which is a pointer to a \
-function that is called whenever a new extension is discovered."
+extension. You can also provide a 'register' and 'unregister' properties which are \
+pointers to functions that are called whenever a new extension is discovered or \
+removed, respectively. 'register' and 'unregister' \
+should be used sparingly, because your plugin will be loaded whenever a \
+matching plugin is available."
             }, {
                 "ep": "extensionpoint",
                 "name": "extensionhandler",
-                "description": "extensionhandlers are able to have 'activate' \
-and 'deactivate' pointers to functions that are called with each extension as \
-it is discovered or deactivated."
+                "description": "extensionhandlers are able to have 'register' \
+and 'unregister' pointers to functions that are called with each extension as \
+it is discovered or unregistered. Use 'register' sparingly as your plugin will \
+be loaded automatically if there is a matching extension (and not just when \
+your extension's functionality is required)."
             }, {
                 "ep": "extensionpoint",
                 "name": "startup",
                 "description": "A function that should be called at startup. This should be used \
 sparingly, as these plugins will be eagerly loaded at the beginning. All that's needed for this \
 extension point is a pointer to a function that takes no arguments.",
-                "activate": "plugins#startupHandler"
+                "register": "plugins#startupHandler"
             }, {
                 "ep": "extensionpoint",
                 "name": "factory",
