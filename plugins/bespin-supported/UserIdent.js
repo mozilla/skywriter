@@ -88,6 +88,8 @@ exports.loginController = SC.Object.create({
  * Controller for the registration process
  */
 exports.signupController = SC.Object.create({
+    isValid: true,
+    
     username: "",
     usernameError: "",
 
@@ -98,7 +100,9 @@ exports.signupController = SC.Object.create({
     password2Error: "",
 
     email: "",
-    emailError: "",
+    emailHint: "(Email optional - only used for password recovery)",
+    
+    dump: '',
 
     /**
      * We only validate fields that have been edited
@@ -108,18 +112,23 @@ exports.signupController = SC.Object.create({
     /**
      * Called by commitEditing() on
      */
-    validate: function(field) {
-        // We do nothing if the field is empty.
-        if (this.get(field) == "") {
-            return;
+    validate: function(field) {        
+        if (field !== undefined) {
+            // We do nothing if the field is empty.
+            if (this.get(field) == "") {
+                return;
+            }
+
+            this.changed[field] = true;
         }
         
-        this.changed[field] = true;
-
+        this.isValid = true;
+        
         if (this.changed.username) {
             var usernameError = this.get('username').length > 3 ? "" :
                     "At least 4 chars";
             this.set("usernameError", usernameError);
+            this.isValid &= usernameError == '';
         }
 
         if (this.changed.password1) {
@@ -131,12 +140,23 @@ exports.signupController = SC.Object.create({
                 password1Error = "Maximum 20 chars";
             }
             this.set("password1Error", password1Error);
+            this.isValid &= password1Error == '';
         }
 
         if (this.changed.password1 && this.changed.password2) {
             var password2Error = (this.get('password1') == this.get('password2'))
                     ? "" : "Have to match";
             this.set("password2Error", password2Error);
+            this.isValid &= (this.get('password1') == this.get('password2'));
+        }
+        
+        if (this.changed.email) {
+            if (!this.get('email').match(/.+@.+\...+/)) {
+                this.set("emailHint", "When email is given, it has to be a valid format")
+                this.isValid = false;
+            } else {
+                this.set("emailHint", "(Email optional - only used for password recovery)")
+            }
         }
     },
 
@@ -144,11 +164,22 @@ exports.signupController = SC.Object.create({
      * Attempt to register
      */
     signup: function() {
-        var opts = {
-            onSuccess: this.onSuccess.bind(this),
-            onFailure: this.onFailure.bind(this)
-        };
-        server.signup(this.username, this.password1, this.email, opts);
+        // validates the form. 
+        this.validate();
+        
+        if (!this.isValid) {
+            var pane = SC.AlertPane.error("Correct your signup", "Please correct your signup information.");
+            pane.append();
+        } else if (this.get('username') == '' || this.get('password1') == '') {
+            var pane = SC.AlertPane.error("Correct your signup", "Please fill up all required fields (username + password).");
+            pane.append();            
+        } else {
+            var opts = {
+                onSuccess: this.onSuccess.bind(this),
+                onFailure: this.onFailure.bind(this)
+            };
+            server.signup(this.username, this.password1, this.email, opts);
+        }
     },
 
     /**
@@ -182,14 +213,14 @@ exports.userIdentPage = SC.Page.design({
             backgroundColor: '#D1CFC1',
             childViews: [ "action", "container" ],
             action: SC.RadioView.design({
-                layout: { top: 20, left: 140 },
                 itemValueKey: 'value',
                 itemTitleKey: 'title',
                 items: [
                     { title: "I have a Bespin account", value: "loginView" },
                     { title: "I'm new", value: "signupView" }
                 ],
-                value: "loginView"
+                value: "loginView",
+                layout: { top: 20, left: 140 }
             }),
 
             container: SC.ContainerView.design({
@@ -219,33 +250,35 @@ exports.userIdentPage = SC.Page.design({
 
         usernameLabel: SC.LabelView.design({
             value: "Username:",
-            layout: { right: 400-150, top: 5 },
-            textAlign: "right"
+            textAlign: "right",
+            layout: { right: 400-150, top: 5 }
         }),
 
         usernameField: SC.TextFieldView.design({
             valueBinding: "UserIdent#loginController.username",
+            hint: "Your username",
             layout: { left: 155, top: 5, height: 20, width: 100 }
         }),
 
         passwordLabel: SC.LabelView.design({
             value: "Password:",
-            layout: { right: 400-150, top: 35 },
-            textAlign: "right"
+            textAlign: "right",
+            layout: { right: 400-150, top: 35 }
         }),
 
         passwordField: SC.TextFieldView.design({
             valueBinding: "UserIdent#loginController.password",
+            hint: "Your password",
             isPassword: true,
             layout: { left: 155, top: 35, height: 20, width: 100 }
         }),
 
         submit: SC.ButtonView.design({
-            layout: { left: 155, top: 65, width: 100 },
-            isDefault: true,
             title: "Log in",
+            isDefault: true,
             target: "UserIdent#loginController",
-            action: "login"
+            action: "login",
+            layout: { left: 155, top: 65, width: 100 }
         })
     }),
 
@@ -255,108 +288,111 @@ exports.userIdentPage = SC.Page.design({
             "usernameLabel", "usernameField", "usernameError",
             "password1Label", "password1Field", "password1Error",
             "password2Label", "password2Field", "password2Error",
-            "emailLabel", "emailField", "emailError", "emailHint",
+            "emailLabel", "emailField", "emailHint",
             "submit"
         ],
 
         usernameLabel: SC.LabelView.design({
             value: "Username:",
-            layout: { right: 400-150, top: 5 },
-            textAlign: "right"
+            textAlign: "right",
+            layout: { right: 400-150, top: 5 }
         }),
 
         usernameField: SC.TextFieldView.design({
-            layout: { left: 155, top: 5, height: 20, width: 105 },
             valueBinding: "UserIdent#signupController.username",
+            hint: "At least 4 chars",
             commitEditing: function() {
                 arguments.callee.base.apply(this, arguments); //sc_super
                 exports.signupController.validate("username");
                 return true;
-            }
+            },
+            layout: { left: 155, top: 5, height: 20, width: 105 }
         }),
 
         usernameError: SC.LabelView.design({
             classNames: [ "signupValidationError" ],
-            layout: { left: 265, top: 0, height: 30, width: 120 },
-            valueBinding: "UserIdent#signupController.usernameError"
+            valueBinding: "UserIdent#signupController.usernameError",
+            layout: { left: 265, top: 0, height: 30, width: 120 }          
         }),
 
         password1Label: SC.LabelView.design({
             value: "Password:",
-            layout: { right: 400-150, top: 35 },
-            textAlign: "right"
+            textAlign: "right",
+            layout: { right: 400-150, top: 35 }
         }),
 
         password1Field: SC.TextFieldView.design({
             isPassword: true,
-            layout: { left: 155, top: 35, height: 20, width: 105 },
             valueBinding: "UserIdent#signupController.password1",
+            hint: "At least 6 chars",
             commitEditing: function() {
                 arguments.callee.base.apply(this, arguments); //sc_super
                 exports.signupController.validate("password1");
                 return true;
-            }
+            },
+            layout: { left: 155, top: 35, height: 20, width: 105 }
         }),
 
         password1Error: SC.LabelView.design({
             classNames: [ "signupValidationError" ],
-            layout: { left: 265, top: 35, height: 30, width: 120 },
-            valueBinding: "UserIdent#signupController.password1Error"
+            valueBinding: "UserIdent#signupController.password1Error",
+            layout: { left: 265, top: 35, height: 30, width: 120 }
         }),
 
         password2Label: SC.LabelView.design({
             value: "Password (confirm):",
-            layout: { right: 400-150, top: 65 },
-            textAlign: "right"
+            textAlign: "right",
+            layout: { right: 400-150, top: 65 }
         }),
 
         password2Field: SC.TextFieldView.design({
             isPassword: true,
-            layout: { left: 155, top: 65, height: 20, width: 105 },
             valueBinding: "UserIdent#signupController.password2",
+            hint: "Repeat it",
             commitEditing: function() {
                 arguments.callee.base.apply(this, arguments); //sc_super
                 exports.signupController.validate("password2");
                 return true;
-            }
+            },
+            layout: { left: 155, top: 65, height: 20, width: 105 }
         }),
 
         password2Error: SC.LabelView.design({
             classNames: [ "signupValidationError" ],
-            layout: { left: 265, top: 65, height: 30, width: 120 },
-            valueBinding: "UserIdent#signupController.password2Error"
+            valueBinding: "UserIdent#signupController.password2Error",
+            layout: { left: 265, top: 65, height: 30, width: 120 }
         }),
 
         emailLabel: SC.LabelView.design({
             value: "Email (optional):",
-            layout: { right: 400-150, top: 95 },
-            textAlign: "right"
+            textAlign: "right",
+            layout: { right: 400-150, top: 95 }
         }),
 
         emailField: SC.TextFieldView.design({
-            layout: { left: 155, top: 95, height: 20, width: 105 },
-            valueBinding: "UserIdent#signupController.email"
-        }),
-
-        emailError: SC.LabelView.design({
-            classNames: [ "signupValidationError" ],
-            layout: { left: 265, top: 95, height: 30, width: 120 },
-            valueBinding: "UserIdent#signupController.emailError"
+            valueBinding: "UserIdent#signupController.email",
+            hint: "email@example.com",
+            commitEditing: function() {
+                arguments.callee.base.apply(this, arguments); //sc_super
+                exports.signupController.validate("email");
+                return true;
+            },
+            layout: { left: 155, top: 95, height: 20, width: 200 }
         }),
         
         submit: SC.ButtonView.design({
-            layout: { left: 155, top: 125, width: 105 },
             isDefault: true,
             title: "Sign up",
             target: "UserIdent#signupController",
-            action: "signup"
+            action: "signup",
+            layout: { left: 155, top: 160, width: 105 }
         }),
         
         emailHint: SC.LabelView.design({
             classNames: [ "signupValidationNote" ],
             textAlign: "center",
-            layout: { left: 50, top: 160, height: 30, width: 300 },
-            value: "(Email optional - only used for password recovery)"
+            valueBinding: "UserIdent#signupController.emailHint",
+            layout: { left: 50, top: 125, height: 30, width: 300 }
         })
     })
 });
