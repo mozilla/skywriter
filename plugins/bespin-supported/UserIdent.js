@@ -109,23 +109,33 @@ exports.signupController = SC.Object.create({
      * Called by commitEditing() on
      */
     validate: function(field) {
+        // We do nothing if the field is empty.
+        if (this.get(field) == "") {
+            return;
+        }
+        
         this.changed[field] = true;
 
         if (this.changed.username) {
-            var usernameError = this.get('username').length > 4 ? "" :
-                    "Must be 4 characters or more";
+            var usernameError = this.get('username').length > 3 ? "" :
+                    "At least 4 chars";
             this.set("usernameError", usernameError);
         }
 
         if (this.changed.password1) {
-            var password1Error = this.get('password1').length >= 6 ? "" :
-                    "Must be 6 characters or more";
+            var password1Error = '';
+            var l= this.get('password1').length;
+            if (l < 6) {
+                password1Error = "At least 6 chars";
+            } else if (l > 20) {
+                password1Error = "Maximum 20 chars";
+            }
             this.set("password1Error", password1Error);
         }
 
         if (this.changed.password1 && this.changed.password2) {
             var password2Error = (this.get('password1') == this.get('password2'))
-                    ? "" : "Passwords do not match";
+                    ? "" : "Have to match";
             this.set("password2Error", password2Error);
         }
     },
@@ -146,7 +156,7 @@ exports.signupController = SC.Object.create({
      */
     onSuccess: function() {
         exports.userIdentPage.get("mainPane").remove();
-        console.log("login succeeded");
+        console.log("signup succeeded");
     },
 
     /**
@@ -155,22 +165,8 @@ exports.signupController = SC.Object.create({
     onFailure: function(xhr) {
         var pane = SC.AlertPane.error("Signup Failed", xhr.responseText);
         pane.append();
-        console.log("login failed");
+        console.log("signup failed");
     }
-});
-
-/**
- * UI change controller
- */
-exports.dumbController = SC.Object.create({
-    action: "login",
-    actionView: function() {
-        var mainPane = exports.userIdentPage.get("mainPane");
-        mainPane.get("layout").height = 450;
-        mainPane.set("layerNeedsUpdate", true);
-
-        return this.get("action") + "View";
-    }.property("action").cacheable()
 });
 
 /**
@@ -180,66 +176,76 @@ exports.userIdentPage = SC.Page.design({
 
     mainPane: SC.PanelPane.design({
         classNames: [ "bespin-theme" ],
-        layout: { centerX: 0, width: 400, centerY: 0, height: 240 },
+        layout: { centerX: 0, width: 400, centerY: 0, height: 270 },
 
         contentView: SC.View.design({
             backgroundColor: '#D1CFC1',
             childViews: [ "action", "container" ],
             action: SC.RadioView.design({
-                valueBinding: "UserIdent#dumbController.action",
+                layout: { top: 20, left: 140 },
                 itemValueKey: 'value',
                 itemTitleKey: 'title',
                 items: [
-                    { title: "I have a Bespin account", value: "login" },
-                    { title: "I'm new", value: "signup" }
+                    { title: "I have a Bespin account", value: "loginView" },
+                    { title: "I'm new", value: "signupView" }
                 ],
-                layout: { top: 45, left: 140 }
+                value: "loginView"
             }),
 
             container: SC.ContainerView.design({
-                nowShowingBinding: "UserIdent#dumbController.actionView",
-                layout: { left: 0, top: 100, right: 0, bottom: 0 }
-            })
+                nowShowingBinding: "UserIdent#userIdentPage.mainPane.contentView.action.value",
+                contentViewDidChange: function() {
+                    arguments.callee.base.apply(this, arguments); //sc_super()
+                    setTimeout(function() {
+                        this.mainPane.makeFirstResponder(this.getPath(this.mainPane.contentView.action.value + ".usernameField"));
+                    }.bind(exports.userIdentPage), 0);
+                    /**
+                     * TODO: The mainPane's height should be different for the loginView or the signupView.
+                     * How to do this?
+                     */
+                },
+                layout: { left: 0, top: 75, right: 0, bottom: 0 }
+            }),
         })
     }),
 
-    loginView: SC.View.design({
+    loginView: SC.View.design({          
         layout: { left: 0, top: 0, right: 0, bottom: 0 },
         childViews: [
-            "userLabel", "userField",
+            "usernameLabel", "usernameField",
             "passwordLabel", "passwordField",
             "submit"
         ],
 
-        userLabel: SC.LabelView.design({
+        usernameLabel: SC.LabelView.design({
             value: "Username:",
-            textAlign: "right",
-            layout: { right: 400-150, top: 0 }
+            layout: { right: 400-150, top: 5 },
+            textAlign: "right"
         }),
 
-        userField: SC.TextFieldView.design({
+        usernameField: SC.TextFieldView.design({
             valueBinding: "UserIdent#loginController.username",
-            layout: { left: 155, top: 0, height: 20, width: 100 }
+            layout: { left: 155, top: 5, height: 20, width: 100 }
         }),
 
         passwordLabel: SC.LabelView.design({
             value: "Password:",
-            textAlign: "right",
-            layout: { right: 400-150, top: 30 }
+            layout: { right: 400-150, top: 35 },
+            textAlign: "right"
         }),
 
         passwordField: SC.TextFieldView.design({
             valueBinding: "UserIdent#loginController.password",
             isPassword: true,
-            layout: { left: 155, top: 30, height: 20, width: 100 }
+            layout: { left: 155, top: 35, height: 20, width: 100 }
         }),
 
         submit: SC.ButtonView.design({
+            layout: { left: 155, top: 65, width: 100 },
             isDefault: true,
             title: "Log in",
             target: "UserIdent#loginController",
-            action: "login",
-            layout: { left: 155, top: 60, width: 80 }
+            action: "login"
         })
     }),
 
@@ -249,98 +255,108 @@ exports.userIdentPage = SC.Page.design({
             "usernameLabel", "usernameField", "usernameError",
             "password1Label", "password1Field", "password1Error",
             "password2Label", "password2Field", "password2Error",
-            "emailLabel", "emailField", "emailError",
+            "emailLabel", "emailField", "emailError", "emailHint",
             "submit"
         ],
 
         usernameLabel: SC.LabelView.design({
             value: "Username:",
-            textAlign: "right",
-            layout: { right: 400-150, top: 5 }
+            layout: { right: 400-150, top: 5 },
+            textAlign: "right"
         }),
 
         usernameField: SC.TextFieldView.design({
+            layout: { left: 155, top: 5, height: 20, width: 105 },
             valueBinding: "UserIdent#signupController.username",
             commitEditing: function() {
-                // TODO: Surely we should use exports.signupController here?
-                window.signupController.validate("username");
-            },
-            layout: { left: 155, top: 5, height: 20, width: 105 }
+                arguments.callee.base.apply(this, arguments); //sc_super
+                exports.signupController.validate("username");
+                return true;
+            }
         }),
 
         usernameError: SC.LabelView.design({
             classNames: [ "signupValidationError" ],
-            valueBinding: "UserIdent#signupController.usernameError",
-            layout: { left: 265, top: 0, height: 30, width: 120 }
+            layout: { left: 265, top: 0, height: 30, width: 120 },
+            valueBinding: "UserIdent#signupController.usernameError"
         }),
 
         password1Label: SC.LabelView.design({
             value: "Password:",
-            textAlign: "right",
-            layout: { right: 400-150, top: 35 }
+            layout: { right: 400-150, top: 35 },
+            textAlign: "right"
         }),
 
         password1Field: SC.TextFieldView.design({
             isPassword: true,
+            layout: { left: 155, top: 35, height: 20, width: 105 },
             valueBinding: "UserIdent#signupController.password1",
             commitEditing: function() {
-                // TODO: Surely we should use exports.signupController here?
-                window.signupController.validate("password1");
-            },
-            layout: { left: 155, top: 35, height: 20, width: 105 }
+                arguments.callee.base.apply(this, arguments); //sc_super
+                exports.signupController.validate("password1");
+                return true;
+            }
         }),
 
         password1Error: SC.LabelView.design({
             classNames: [ "signupValidationError" ],
-            valueBinding: "UserIdent#signupController.password1Error",
-            layout: { left: 265, top: 30, height: 30, width: 120 }
+            layout: { left: 265, top: 35, height: 30, width: 120 },
+            valueBinding: "UserIdent#signupController.password1Error"
         }),
 
         password2Label: SC.LabelView.design({
             value: "Password (confirm):",
-            textAlign: "right",
-            layout: { right: 400-150, top: 65 }
+            layout: { right: 400-150, top: 65 },
+            textAlign: "right"
         }),
 
         password2Field: SC.TextFieldView.design({
             isPassword: true,
-            valueBinding: "UserIdent#signupController.password2",
             layout: { left: 155, top: 65, height: 20, width: 105 },
+            valueBinding: "UserIdent#signupController.password2",
             commitEditing: function() {
-                // TODO: Surely we should use exports.signupController here?
-                window.signupController.validate("password2");
+                arguments.callee.base.apply(this, arguments); //sc_super
+                exports.signupController.validate("password2");
+                return true;
             }
         }),
 
         password2Error: SC.LabelView.design({
             classNames: [ "signupValidationError" ],
-            valueBinding: "UserIdent#signupController.password2Error",
-            layout: { left: 265, top: 60, height: 30, width: 120 }
+            layout: { left: 265, top: 65, height: 30, width: 120 },
+            valueBinding: "UserIdent#signupController.password2Error"
         }),
 
         emailLabel: SC.LabelView.design({
-            value: "Email:",
-            textAlign: "right",
-            layout: { right: 400-150, top: 95 }
+            value: "Email (optional):",
+            layout: { right: 400-150, top: 95 },
+            textAlign: "right"
         }),
 
         emailField: SC.TextFieldView.design({
-            valueBinding: "UserIdent#signupController.email",
-            layout: { left: 155, top: 95, height: 20, width: 105 }
+            layout: { left: 155, top: 95, height: 20, width: 105 },
+            valueBinding: "UserIdent#signupController.email"
         }),
 
         emailError: SC.LabelView.design({
-            classNames: [ "signupValidationNote" ],
-            value: "(Optional - only used for password recovery)",
-            layout: { left: 265, top: 90, height: 30, width: 120 }
+            classNames: [ "signupValidationError" ],
+            layout: { left: 265, top: 95, height: 30, width: 120 },
+            valueBinding: "UserIdent#signupController.emailError"
         }),
-
+        
         submit: SC.ButtonView.design({
+            layout: { left: 155, top: 125, width: 105 },
             isDefault: true,
             title: "Sign up",
             target: "UserIdent#signupController",
-            action: "signup",
-            layout: { left: 155, top: 125, width: 80 }
+            action: "signup"
+        }),
+        
+        emailHint: SC.LabelView.design({
+            classNames: [ "signupValidationNote" ],
+            textAlign: "center",
+            layout: { left: 50, top: 160, height: 30, width: 300 },
+            value: "(Email optional - only used for password recovery)"
         })
     })
 });
