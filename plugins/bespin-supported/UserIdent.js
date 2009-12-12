@@ -112,7 +112,7 @@ exports.signupController = SC.Object.create({
     /**
      * Called by commitEditing() on
      */
-    validate: function(field) {        
+    validate: function(field) {                
         if (field !== undefined) {
             // We do nothing if the field is empty.
             if (this.get(field) == "") {
@@ -122,42 +122,51 @@ exports.signupController = SC.Object.create({
             this.changed[field] = true;
         }
         
-        this.isValid = true;
+        // Store the isValid information in a local var to keep from calling set(...) all the time.
+        // The value of this.isValid will be set at the end of this function.
+        var isValid = true;
         
-        if (this.changed.username) {
-            var usernameError = this.get('username').length > 3 ? "" :
-                    "At least 4 chars";
+        if (this.changed.username || this.get('username') != '') {
+            var usernameError = '';
+            if (this.get('username').length < 4) {
+                usernameError = "At least 4 chars";
+                isValid = false;
+            }
             this.set("usernameError", usernameError);
-            this.isValid &= usernameError == '';
         }
 
-        if (this.changed.password1) {
+        if (this.changed.password1  || this.get('password1') != '') {
             var password1Error = '';
             var l= this.get('password1').length;
             if (l < 6) {
                 password1Error = "At least 6 chars";
+                isValid = false;
             } else if (l > 20) {
                 password1Error = "Maximum 20 chars";
+                isValid = false;
             }
             this.set("password1Error", password1Error);
-            this.isValid &= password1Error == '';
         }
 
-        if (this.changed.password1 && this.changed.password2) {
-            var password2Error = (this.get('password1') == this.get('password2'))
-                    ? "" : "Have to match";
+        if ((this.changed.password1  || this.get('username') != '') && (this.changed.password2  || this.get('password2') != '')) {
+            var password2Error = '';
+            if (this.get('password1') != this.get('password2')) {
+                password2Error = "Have to match";
+                isValid = false;
+            }
             this.set("password2Error", password2Error);
-            this.isValid &= (this.get('password1') == this.get('password2'));
         }
         
-        if (this.changed.email) {
+        if (this.changed.email || this.get('email' != '')) {
             if (!this.get('email').match(/.+@.+\...+/)) {
                 this.set("emailHint", "When email is given, it has to be a valid format")
-                this.isValid = false;
+                isValid = false;
             } else {
                 this.set("emailHint", "(Email optional - only used for password recovery)")
             }
         }
+
+        this.set('isValid', isValid);
     },
 
     /**
@@ -167,7 +176,7 @@ exports.signupController = SC.Object.create({
         // validates the form. 
         this.validate();
         
-        if (!this.isValid) {
+        if (!this.get('isValid')) {
             var pane = SC.AlertPane.error("Correct your signup", "Please correct your signup information.");
             pane.append();
         } else if (this.get('username') == '' || this.get('password1') == '') {
@@ -226,7 +235,7 @@ exports.userIdentPage = SC.Page.design({
             container: SC.ContainerView.design({
                 nowShowingBinding: "UserIdent#userIdentPage.mainPane.contentView.action.value",
                 contentViewDidChange: function() {
-                    arguments.callee.base.apply(this, arguments); //sc_super()
+                    this.sc_super();
                     setTimeout(function() {
                         this.mainPane.makeFirstResponder(this.getPath(this.mainPane.contentView.action.value + ".usernameField"));
                     }.bind(exports.userIdentPage), 0);
@@ -302,7 +311,7 @@ exports.userIdentPage = SC.Page.design({
             valueBinding: "UserIdent#signupController.username",
             hint: "At least 4 chars",
             commitEditing: function() {
-                arguments.callee.base.apply(this, arguments); //sc_super
+                this.sc_super();
                 exports.signupController.validate("username");
                 return true;
             },
@@ -326,7 +335,7 @@ exports.userIdentPage = SC.Page.design({
             valueBinding: "UserIdent#signupController.password1",
             hint: "At least 6 chars",
             commitEditing: function() {
-                arguments.callee.base.apply(this, arguments); //sc_super
+                this.sc_super();
                 exports.signupController.validate("password1");
                 return true;
             },
@@ -350,7 +359,7 @@ exports.userIdentPage = SC.Page.design({
             valueBinding: "UserIdent#signupController.password2",
             hint: "Repeat it",
             commitEditing: function() {
-                arguments.callee.base.apply(this, arguments); //sc_super
+                this.sc_super();
                 exports.signupController.validate("password2");
                 return true;
             },
@@ -373,7 +382,7 @@ exports.userIdentPage = SC.Page.design({
             valueBinding: "UserIdent#signupController.email",
             hint: "email@example.com",
             commitEditing: function() {
-                arguments.callee.base.apply(this, arguments); //sc_super
+                this.sc_super();
                 exports.signupController.validate("email");
                 return true;
             },
