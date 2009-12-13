@@ -24,24 +24,7 @@
 
 exports.metadata = {
     "Base Syntax": {
-        "provides": [ {
-                "ep": "extensionpoint",
-                "name": "syntax.engine",
-                "description": "Syntax highlighting engines"
-            }, {
-                "ep": "syntax.engine",
-                "name": "simple",
-                "pointer": "bespin/syntax/simple:Model"
-            }, {
-                "ep": "extensionpoint",
-                "name": "syntax.simple.highlighter",
-                "description": "Highlighter code for the simple syntax highlighter."
-            }, {
-                "ep": "syntax.simple.highlighter",
-                "name": "JavaScript",
-                "extensions": ["js", "json", "javascript", "ecmascript", "jsm", "java"],
-                "pointer": "bespin/syntax/simple/javascript:JavaScript"
-            }, {
+        "provides": [{
                 "ep": "syntax.simple.highlighter",
                 "name": "C",
                 "extensions": ['c', 'h'],
@@ -92,7 +75,8 @@ pointers to functions that are called whenever a new extension is discovered or 
 removed, respectively. 'register' and 'unregister' \
 should be used sparingly, because your plugin will be loaded whenever a \
 matching plugin is available."
-            }, {
+            },
+            {
                 "ep": "extensionpoint",
                 "name": "extensionhandler",
                 "description": "extensionhandlers are able to have 'register' \
@@ -100,14 +84,21 @@ and 'unregister' pointers to functions that are called with each extension as \
 it is discovered or unregistered. Use 'register' sparingly as your plugin will \
 be loaded automatically if there is a matching extension (and not just when \
 your extension's functionality is required)."
-            }, {
+            },
+            {
+                "ep": "extensionpoint",
+                "name": "syntax.engine",
+                "description": "Syntax highlighting engines"
+            },
+            {
                 "ep": "extensionpoint",
                 "name": "startup",
                 "description": "A function that should be called at startup. This should be used \
 sparingly, as these plugins will be eagerly loaded at the beginning. All that's needed for this \
 extension point is a pointer to a function that takes no arguments.",
                 "register": "plugins#startupHandler"
-            }, {
+            },
+            {
                 "ep": "extensionpoint",
                 "name": "factory",
                 "description": "Provides a factory for singleton components. Each extension needs to \
@@ -116,42 +107,50 @@ a function), 'create' (if the pointer refers to an SC.Object), 'new' (if the poi
 a traditional JS object) or 'value' (if the pointer refers to the object itself that is the \
 component).",
                 "indexOn": "name"
-            }, {
+            },
+            {
                 "ep": "factory",
                 "name": "files",
                 "action": "call",
                 "pointer": "util/container#dummyFactory"
-            }, {
+            },
+            {
                 "ep": "factory",
                 "name": "hub",
                 "action": "create",
                 "pointer": "util/hub#Hub"
-            }, {
+            },
+            {
                 "ep": "factory",
                 "name": "settings",
                 "action": "create",
                 "pointer": "settings#InMemorySettings"
-            }, {
+            },
+            {
                 "ep": "factory",
                 "name": "parser",
                 "action": "call",
                 "pointer": "util/container#dummyFactory"
-            }, {
+            },
+            {
                 "ep": "factory",
                 "name": "editor",
                 "action": "create",
                 "pointer": "editor/controller#EditorController"
-            }, {
+            },
+            {
                 "ep": "factory",
                 "name": "editSession",
                 "action": "call",
                 "pointer": "util/container#dummyFactory"
-            }, {
+            },
+            {
                 "ep": "factory",
                 "name": "cursorManager",
                 "action": "create",
                 "pointer": "cursor#CursorManager"
-            }, {
+            },
+            {
                 "ep": "extensionpoint",
                 "name": "command",
                 "description": "Editor commands/actions. TODO: list parameters here."

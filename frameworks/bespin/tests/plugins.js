@@ -22,38 +22,38 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-"import package core_test";
 var SC = require('sproutcore/runtime').SC;
 var plugins = require("plugins");
+var t = require("core_test");
 
-module("plugins");
+t.module("plugins");
 
-test("extension points are created as needed", function() {
+t.test("extension points are created as needed", function() {
     var catalog = plugins.Catalog.create();
     var ep = catalog.getExtensionPoint("foobar!");
-    equals("foobar!", ep.get("name"), "Expected name to be set properly");
-    equals(ep, catalog.get("points")['foobar!'], 
+    t.equals("foobar!", ep.get("name"), "Expected name to be set properly");
+    t.equals(ep, catalog.get("points")['foobar!'], 
         "Expected ep to be saved in catalog");
 });
 
-test("can retrieve list of extensions directly", function() {
+t.test("can retrieve list of extensions directly", function() {
     var catalog = plugins.Catalog.create();
     // we know for sure that there are "extensionpoint" extensions
     // defined, because they are defined in builtins.
     var extensions = catalog.getExtensions("extensionpoint");
-    ok(extensions.length > 0, "Expected extension points to be there");
+    t.ok(extensions.length > 0, "Expected extension points to be there");
 });
 
-test("can retrieve an extension by key", function() {
+t.test("can retrieve an extension by key", function() {
     var catalog = plugins.Catalog.create();
     var ext = catalog.getExtensionByKey("extensionpoint", "startup");
-    equals("startup", ext.get("name"), 
+    t.equals("startup", ext.get("name"), 
         "Name should be startup, since that's what we looked up");
-    equals("plugins#startupHandler", ext.get("register"),
+    t.equals("plugins#startupHandler", ext.get("register"),
         "activation handler pointer should be set");
 });
 
-test("can set a handler for an extension point", function() {
+t.test("can set a handler for an extension point", function() {
     var catalog = plugins.Catalog.create();
     catalog.load({
         TestPlugin: {
@@ -67,10 +67,10 @@ test("can set a handler for an extension point", function() {
         }
     });
     var ep = catalog.getExtensionPoint("startup");
-    equals(ep.handlers.length, 2);
+    t.equals(ep.handlers.length, 2);
 });
 
-test("activation/deactivation handlers are called", function() {
+t.test("activation/deactivation handlers are called", function() {
     exports.loadedCount = 0;
     exports.unregisterdCount = 0;
     
@@ -99,12 +99,12 @@ test("activation/deactivation handlers are called", function() {
             ]
         }
     });
-    equals(exports.loadedCount, 2, "Expected both plugins to be registerd");
+    t.equals(exports.loadedCount, 2, "Expected both plugins to be registerd");
     catalog._unregister(catalog.plugins["bespin"]);
-    equals(exports.unregisterdCount, 2, "Expected both to be unregisterd");
+    t.equals(exports.unregisterdCount, 2, "Expected both to be unregisterd");
 });
 
-test("can retrieve factory objects from the catalog", function() {
+t.test("can retrieve factory objects from the catalog", function() {
     var catalog = plugins.Catalog.create();
     catalog.load({
         bespin: {
@@ -138,22 +138,22 @@ test("can retrieve factory objects from the catalog", function() {
     });
     
     var obj = catalog.getObject("testing");
-    equals(obj, exports.factoryObj);
+    t.equals(obj, exports.factoryObj);
     
     obj = catalog.getObject("itsAClass");
-    equals(obj.name, "The Factory Class");
+    t.equals(obj.name, "The Factory Class");
     
     var obj2 = catalog.getObject("itsAClass");
-    ok(obj === obj2, "should get the same object back -- these are singletons");
+    t.ok(obj === obj2, "should get the same object back -- these are singletons");
     
     obj = catalog.getObject("traditionalClass");
-    equals(obj.name, "traditional");
+    t.equals(obj.name, "traditional");
     
     obj = catalog.getObject("simpleFunction");
-    equals(obj.name, "just arbitrary");
+    t.equals(obj.name, "just arbitrary");
 });
 
-test("can find dependents of a plugin", function() {
+t.test("can find dependents of a plugin", function() {
     var catalog = plugins.Catalog.create();
     catalog.plugins = {
         icecream: {
@@ -177,17 +177,17 @@ test("can find dependents of a plugin", function() {
     var pluginList = ['icecream', 'milk', 'freezer', 'ge', 
         'electricity', 'cow', 'sun', 'other'];
     catalog._findDependents('icecream', pluginList, dependents);
-    deepEqual(dependents, {}, "for icecream");
+    t.deepEqual(dependents, {}, "for icecream");
     
     dependents = {};
     catalog._findDependents('sun', pluginList, dependents);
-    deepEqual(dependents, {
+    t.deepEqual(dependents, {
         electricity: true, freezer: true, icecream: true
     }, "for sun");
     
     dependents = {};
     catalog._findDependents('other', pluginList, dependents);
-    deepEqual(dependents, {}, "for other");
+    t.deepEqual(dependents, {}, "for other");
 });
 
 exports.loadedCount = 0;
@@ -222,4 +222,57 @@ exports.simpleFunction = function() {
     };
 };
 
-plan.run();
+exports.testNumber = 1;
+
+MyObserver = SC.Object.extend({
+    catalog: null,
+    callback: null,
+    currentval: 0,
+    
+    makeConnection: function() {
+        var self = this;
+        var ext = this.get("catalog").getExtensions("testpoint");
+        ext[0].observe("bespin", function(obj) {
+            console.log("setting testpoint value to ", obj);
+            self.set("currentval", obj);
+            self.get("callback")();
+        });
+    }
+});
+
+// this test needs to use the async mechanism when it arrives.
+t.test("plugins can observe an extension", function() {
+    var catalog = plugins.Catalog.create();
+    catalog.load({
+        bespin: {
+            provides: [
+                {
+                    ep: "extensionpoint",
+                    name: "testpoint"
+                },
+                {
+                    ep: "testpoint",
+                    pointer: "tests/plugins#testNumber"
+                }
+            ]
+        }
+    });
+    
+    var ob = MyObserver.create({
+        catalog: catalog,
+        callback: function() {
+            console.log("checking result 1");
+            t.equal(ob.get("currentval"), 1);
+            var observers = catalog.plugins.bespin._getObservers();
+            console.log(observers);
+            t.equal(observers.testpoint[0].plugin, "bespin");
+            t.ok(observers.testpoint[0].callback, "Expected function to be set");
+            t.start();
+        }
+    });
+    
+    ob.makeConnection();
+    t.stop(1000);
+});
+
+t.plan.run();

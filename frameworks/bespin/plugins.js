@@ -57,6 +57,10 @@ exports.Extension = SC.Object.extend({
         };
     },
     
+    init: function() {
+        this._observers = [];
+    },
+    
     load: function(callback, property) {
         var pointer = this._splitPointer(property);
         
@@ -76,6 +80,23 @@ exports.Extension = SC.Object.extend({
             });
         });
     },
+    
+    /*
+    * Loads this extension and passes the result to the callback.
+    * Any time this extension changes, the callback is called with
+    * the new value. Note that if this extension goes away, the
+    * callback will be called with undefined.
+    * 
+    * observingPlugin is required, because if that plugin is
+    * torn down, all of its observing callbacks need to be torn down
+    * as well.
+    */ 
+    observe: function(observingPlugin, callback, property) {
+        this._observers.push({plugin: observingPlugin, 
+            callback: callback, property: property});
+        this.load(callback, property);
+    },
+    
     _getLoaded: function(property) {
         var pointer = this._splitPointer(property);
         var module = r(pointer.modName);
@@ -154,6 +175,16 @@ exports.Plugin = SC.Object.extend({
             var ep = self.get("catalog").getExtensionPoint(extension.ep);
             ep.unregister(extension);
         });
+    },
+    
+    _getObservers: function() {
+        var result = {};
+        this.provides.forEach(function(extension) {
+            console.log("ep: ", extension.ep);
+            console.log(extension._observers);
+            result[extension.ep] = extension._observers;
+        });
+        return result;
     }
 });
 
@@ -253,6 +284,9 @@ exports.Catalog = SC.Object.extend({
         ep.handlers.push(extension);
         if (extension.register) {
             extension.load(function(register) {
+                if (!register) {
+                    throw extension.name + " is not ready";
+                }
                 ep.extensions.forEach(function(ext) {
                     register(ext);
                 });
@@ -288,6 +322,20 @@ exports.Catalog = SC.Object.extend({
             }
             var plugin = exports.Plugin.create(md);
             this.plugins[name] = plugin;
+        }
+    },
+    
+    /*
+    * Loads the named plugin, calling the provided callback
+    * when the plugin is loaded. This function is a convenience
+    * for unusual situations and debugging only. Generally,
+    * you should load plugins by calling load() on an Extesnion
+    * object.
+    */
+    loadPlugin: function(pluginName, callback) {
+        var p = tiki.async(pluginName);
+        if (callback) {
+            p.then(callback);
         }
     },
 

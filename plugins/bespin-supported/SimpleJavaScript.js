@@ -22,6 +22,19 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// ---plugin.json---
+var metadata = {
+    "provides": [
+        {
+            "ep": "syntax.simple.highlighter",
+            "name": "JavaScript",
+            "extensions": ["js", "json", "javascript", "ecmascript", "jsm", "java"],
+            "pointer": "#JavaScript"
+        }
+    ]
+};
+// ---
+
 // = JavaScript Syntax Highlighting Implementation =
 //
 // Module for syntax highlighting JavaScript.

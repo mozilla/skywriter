@@ -141,12 +141,12 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
     init: function() {
         var settings = bespin.get("settings");
 
-        var ep = pluginCatalog.getExtensionPoint("syntax.engine");
+        var extensions = pluginCatalog.getExtensions("syntax.engine");
         // set model to a default that will work until the real thing is loaded
         this.syntaxModel = syntax.Model.create();
 
-        if (ep.extensions.length > 0) {
-            ep.extensions[0].load(function(model) {
+        if (extensions.length > 0) {
+            extensions[0].load(function(model) {
                 this.syntaxModel = model.create();
             }.bind(this));
         }
@@ -982,7 +982,7 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
 
             // CHUNK 2: this code uses the SyntaxModel API to render the line
             // syntax highlighting
-
+            
             var lineInfo = this.syntaxModel.getSyntaxStylesPerLine(lineText, currentLine, this.editor.language);
 
             // Define a fill that is aware of the readonly attribute and fades out if applied

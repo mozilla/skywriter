@@ -49,30 +49,30 @@ main = function() {
     // However until we've got rid of the singleton 'bespin' we cant do that
     var container = bespin._container;
 
-    SC.run(function() {
-        view.app.getPath("mainPage.mainPane").append();
+    catalog.loadMetadata(PLUGIN_METADATA_URL, function(sender, response) {
+        if (response.isError) {
+            throw "failed to load plugin metadata: " +
+                response.errorObject;
+        }
+        SC.run(function() {
+            // Load the plugin metadata for all of the system default plugins
+            view.app.getPath("mainPage.mainPane").append();
 
-        // Tell the container about the element that we run inside
-        var element = view.app.getPath("mainPage.mainPane.layer");
-        container.register("container", element);
+            // Tell the container about the element that we run inside
+            var element = view.app.getPath("mainPage.mainPane.layer");
+            container.register("container", element);
 
-        // TODO: the stuff that follows is messy. in SC terms, an EditorView should actually
-        // be created in the mainPane directly via a "design" call, not created by
-        // the controller.
-        // We could also say editor = container.get("editor"); which would allow
-        // users to customize how the editor is built, but see above
-        var editor = EditorController.create();
-        container.register("editor", editor);
+            // TODO: the stuff that follows is messy. in SC terms, an EditorView should actually
+            // be created in the mainPane directly via a "design" call, not created by
+            // the controller.
+            // We could also say editor = container.get("editor"); which would allow
+            // users to customize how the editor is built, but see above
+            var editor = EditorController.create();
+            container.register("editor", editor);
 
-        editor.model.insertDocument("Welcome to Bespin.");
-        view.app.getPath("mainPage.mainPane").appendChild(editor.dockView);
+            editor.model.insertDocument("Welcome to Bespin.");
+            view.app.getPath("mainPage.mainPane").appendChild(editor.dockView);
 
-        // Load the plugin metadata for all of the system default plugins
-        catalog.loadMetadata(PLUGIN_METADATA_URL, function(sender, response) {
-            if (response.isError) {
-                throw "failed to load plugin metadata: " +
-                    response.errorObject;
-            }
         });
     });
 };
