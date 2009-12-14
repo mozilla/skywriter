@@ -55,7 +55,7 @@ var computeLayout = function(element) {
  */
 exports.useBespin = function(element, options) {
     options = options || {};
-
+    
     if (util.isString(element)) {
         element = document.getElementById(element);
     }
@@ -67,6 +67,12 @@ exports.useBespin = function(element, options) {
     // Creating the editor alters the components innerHTML
     var content = element.innerHTML;
     var editor;
+    
+    // This is a hack! Chrome and Safari put all element IDs
+    // onto window directly, which causes an element with the ID
+    // of "editor" to break with the current container implementation.
+    // this will be fixed as the container moves forward...
+    window.editor = undefined;
 
     // The container allows us to keep multiple bespins separate, and constructs
     // objects according to a user controlled recipe.
