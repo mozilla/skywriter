@@ -34,6 +34,21 @@ exports.InMemoryHistory = SC.Object.extend({
     maxEntries: 50,
 
     /**
+     * It's too complex to observe the internals of this class right now, so
+     * instead you should observe this, and only update it via the udpate()
+     * function.
+     */
+    version: 0,
+
+    /**
+     * When the history has changed in any way, call this to update the views
+     */
+    update: function() {
+        // The Sproutcore way of doing this.version++
+        this.set("version", this.get("version") + 1);
+    },
+
+    /**
      * Keep the history to settings.maxEntries
      */
     trim: function() {

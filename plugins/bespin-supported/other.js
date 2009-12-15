@@ -31,36 +31,27 @@
         "takes": [ "js-code" ],
         "preview": "evals given js code and show the result",
         "completeText": "evals given js code and show the result",
-        "usage": "",
-        "pointer": ""
+        "hidden": true,
+        "pointer": "#evalCommand"
     }, {
         "ep": "command",
         "name": "version",
         "takes": [ "command" ],
         "preview": "show the version for Bespin or a command",
         "completeText": "optionally, a command name",
-        "usage": "",
-        "pointer": ""
-    }, {
-        "ep": "command",
-        "name": "",
-        "takes": [ "" ],
-        "aliases": [ "" ],
-        "preview": "",
-        "completeText": "",
-        "usage": "",
-        "pointer": ""
+        "hidden": true,
+        "pointer": "#versionCommand"
     }, {
         "ep": "command",
         "name": "bespin",
         "preview": "has",
         "hidden": true,
-        "usage": "",
-        "pointer": ""
+        "pointer": "#bespinCommand"
     } ]
 });
 "end";
 
+var bespin = require("bespin:index");
 var util = require("bespin:util/util");
 var command = require("CommandLine:command");
 
@@ -144,6 +135,6 @@ var messages = [
  * 'bespin' command
  */
 exports.bespinCommand = function(instruction) {
-    var index = Math.floor(Math.random() * this.messages.length);
-    instruction.addOutput("Bespin " + this.messages[index]);
+    var index = Math.floor(Math.random() * messages.length);
+    instruction.addOutput("Bespin " + messages[index]);
 };

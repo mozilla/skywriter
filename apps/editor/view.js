@@ -1,5 +1,3 @@
-"export package main";
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -24,20 +22,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require("bespin:plugins").catalog;
+var SC = require("sproutcore/runtime").SC;
 
-main = function() {
-    baseurl = window.SERVER_BASE_URL == undefined ? '/server' : SERVER_BASE_URL;
-    catalog.loadMetadata(baseurl + "/plugin/register/defaults",
-        function(sender, response) {
-            if (response.isError) {
-                throw "failed to load plugin metadata: " +
-                    response.errorObject;
-            }
+exports.app = SC.Application.create({
+    NAMESPACE: "bespin"
+});
 
-            tiki.async('EditorApp').then(function() {
-                catalog.getObject('applicationcontroller').create();
-            });
-        });
-};
-exports.main = main;
+exports.app.mainPage = SC.Page.design({
+    mainPane: SC.MainPane.design({
+        layout: { centerX: 0, centerY: 0, width: 640, height: 480 }
+    })
+});

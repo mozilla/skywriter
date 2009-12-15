@@ -1,5 +1,3 @@
-"export package main";
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -24,20 +22,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require("bespin:plugins").catalog;
-
-main = function() {
-    baseurl = window.SERVER_BASE_URL == undefined ? '/server' : SERVER_BASE_URL;
-    catalog.loadMetadata(baseurl + "/plugin/register/defaults",
-        function(sender, response) {
-            if (response.isError) {
-                throw "failed to load plugin metadata: " +
-                    response.errorObject;
-            }
-
-            tiki.async('EditorApp').then(function() {
-                catalog.getObject('applicationcontroller').create();
-            });
-        });
-};
-exports.main = main;
+/**
+ * Image Button.
+ * @class
+ * @extends SC.ButtonView
+ */
+exports.BespinButtonView = SC.ButtonView.extend({
+    classNames: ['sc-bespin-view'],
+    theme: 'bespin',
+    titleMinWidth: 0
+});

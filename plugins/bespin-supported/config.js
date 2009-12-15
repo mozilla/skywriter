@@ -24,63 +24,68 @@
 
 "define metadata";
 ({
-    "provides": [ {
-        "ep": "command",
-        "name": "editconfig",
-        "aliases": [ "config" ],
-        "preview": "load up the config file",
-        "pointer": "config#editconfigCommand"
-    }, {
-        "ep": "command",
-        "name": "runconfig",
-        "preview": "run your config file",
-        "pointer": "config#runconfigCommand"
-    }, {
-        "ep": "command",
-        "name": "bindkey",
-        "takes": [ "modifiers", "key", "action" ],
-        "aliases": [ "" ],
-        "preview": "Bind a key to an action, or show bindings",
-        "completeText": "With no arguments show bindings, else give modifier(s), key, and action name to set",
-        "usage": "",
-        "pointer": "config#bindkeyCommand"
-    }, {
-        "ep": "command",
-        "name": "alias",
-        "takes": [ "alias", "command" ],
-        "aliases": [ "" ],
-        "preview": "define and show aliases for commands",
-        "completeText": "optionally, add your alias name, and then the command name",
-        "usage": "",
-        "pointer": "config#aliasCommand"
-    }, {
-        "ep": "command",
-        "name": "history",
-        "preview": "Show history of the commands",
-        "pointer": "config#historyCommand"
-    }, {
-        "ep": "command",
-        "name": "set",
-        "takes": [ "key", "value" ],
-        "preview": "define and show settings",
-        "pointer": "config#setCommand",
-        "completionPointer": "config#setCompleter"
-    }, {
-        "ep": "command",
-        "name": "unset",
-        "takes": [ "key" ],
-        "aliases": [ "" ],
-        "preview": "unset a setting entirely",
-        "completeText": "add a key for the setting to delete entirely",
-        "pointer": "config#unsetCommand",
-        "completionPointer": "config#unsetCompleter"
-    } ]
+    "provides":
+     [
+         {
+            "ep": "command",
+            "name": "editconfig",
+            "aliases": [ "config" ],
+            "preview": "load up the config file",
+            "pointer": "#editconfigCommand"
+        },
+        {
+            "ep": "command",
+            "name": "runconfig",
+            "preview": "run your config file",
+            "pointer": "#runconfigCommand"
+        },
+        {
+            "ep": "command",
+            "name": "bindkey",
+            "takes": [ "modifiers", "key", "action" ],
+            "preview": "Bind a key to an action, or show bindings",
+            "completeText": "With no arguments show bindings, else give modifier(s), key, and action name to set",
+            "pointer": "#bindkeyCommand"
+        },
+        {
+            "ep": "command",
+            "name": "alias",
+            "takes": [ "alias", "command" ],
+            "preview": "define and show aliases for commands",
+            "completeText": "optionally, add your alias name, and then the command name",
+            "usage": "",
+            "pointer": "#aliasCommand"
+        },
+        {
+            "ep": "command",
+            "name": "history",
+            "preview": "Show history of the commands",
+            "pointer": "#historyCommand"
+        },
+        {
+            "ep": "command",
+            "name": "set",
+            "takes": [ "key", "value" ],
+            "preview": "define and show settings",
+            "pointer": "#setCommand",
+            "completionPointer": "#setCompleter"
+        },
+        {
+            "ep": "command",
+            "name": "unset",
+            "takes": [ "key" ],
+            "preview": "unset a setting entirely",
+            "completeText": "add a key for the setting to delete entirely",
+            "pointer": "#unsetCommand",
+            "completionPointer": "#unsetCompleter"
+        }
+    ]
 });
 "end";
 
-var command = require("bespin/command");
-var keys = require("bespin/util/keys");
-var plugins = require("plugins");
+var command = require("CommandLine:command");
+var keys = require("bespin:util/keys");
+var plugins = require("bespin:plugins");
 
 var files = plugins.catalog.getObject("files");
 var editor = plugins.catalog.getObject("editor");

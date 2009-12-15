@@ -1,0 +1,118 @@
+
+.command_line { background:#1e1916; }
+.command_line .sc-view.sc-text-field-view { background: inherit; }
+
+/* ::-moz-selection appears to only work on divs etc, and not input elements so
+this rule doesn't work, but might in the future */
+.command_line input::selection { color: #44A; background: #AA4; }
+.command_line input::-moz-selection { color: #44A; background: #AA4; }
+
+/* We're in this weird specificity battle with sproutcore, and our our CSS to
+defeat sproutcore. This needs to defeat the sproutcore defeating css. */
+body.sc-theme .command_line .command_prompt {
+  color: #FF8E00; font-weight: bold;
+}
+body.sc-theme .command_line .command_prompt .command_brackets {
+  /*color: #06F;*/ color: #FFF;
+}
+
+
+#command.commandLineError { color: red; }
+
+.command_line .sc-view .sc-text-field-view input {
+  font-family: Calibri, Arial, sans-serif; color: #FFF; font-size: 140%;
+  font-weight: bold; background: #1b1613;
+}
+.command_line .sc-view label.sc-text-field-view .border {
+  -moz-appearance: none; -webkit-appearance: none; border: 0;
+}
+.command_line .sc-view label.sc-text-field-view.focus {
+  outline-width: 0px; outline: 0px;
+}
+
+/* Command Output */
+.command_view {
+  overflow: auto; color: #999; font-family: Calibri, Arial, sans-serif;
+}
+table.command_table { width: 100%; border-collapse: separate; font-size: 120%; }
+table.command_table tr.command_rowin {
+  background-repeat: repeat-x; /* background-color: #1e1916; */
+  font-size: 110%;
+}
+table.command_table tr.command_rowin { background: #1b1613; }
+table.command_table tr.command_rowin td:first-child { padding-left: 5px; }
+table.command_table tr.command_rowin img { cursor: pointer; }
+
+table.command_table th, td { border: 0; padding: 0; }
+table.command_table td { vertical-align: top; }
+table.command_table .command_open_history { width: 20px; }
+table.command_table .command_open_time { width: 40px; }
+table.command_table .command_open_blank { width: 1px; }
+table.command_table .command_open {
+  padding: 3px 3px 2px 5px; font-size:80%; color:#666;
+}
+.command_main { font-weight: bold; color: #fff; }
+table.command_table .command_typed { padding-left: 5px; }
+table.command_table .command_hover {
+  float: right; font-size: 80%; font-weight: normal; height: 100%; color: #666;
+  text-align: right; display: none;
+}
+table.command_table .command_hover * {
+  vertical-align: middle; padding-left: 3px; padding-right: 3px;
+}
+table.command_table .command_hover .command_duration {
+  float: left; padding-top: 2px;
+}
+table.command_table tr.command_rowin:hover .command_hover { display: block; }
+
+table.command_table tr.command_rowout td.command_output { padding-left: 10px; }
+table.command_table tr.command_rowout td.command_error { color: #f99; }
+/* table.command_table tr.command_rowout th { text-align: left; } */
+table.command_table tr.command_rowout a { font-weight: bold; color: inherit; }
+table.command_table tr.command_rowout a { text-decoration: underline;
+  cursor: pointer;
+}
+table.command_table input[type=password], table.command_table input[type=text],
+table.command_table textarea {
+  font-family: Calibri,Arial,sans-serif; background: transparent;
+  border: 1px solid #ff9600; color: #fff; font-size: 100%; border-radius: 5px;
+  padding: 3px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
+}
+
+
+
+
+/* The hint is not currently used, but should be soon */
+#command_hint { font-family: Calibri, Arial, sans-serif; position: absolute;
+  color: #999; z-index: 260; -webkit-user-select: text; -moz-user-select: text;
+}
+#command_hint a {
+  font-weight: bold; color: inherit; text-decoration: underline;
+  cursor: pointer;
+}
+#command_hint td { padding: 0; }
+#command_hint-topleftcorner, #command_hint-leftstretch,
+#command_hint-toprightcorner, #command_hint-rightstretch {
+  width: 14px; min-width: 14px;
+}
+
+#command_hint-topleftcorner {
+  background-image: url(images/hint/topleft.png); background-repeat: no-repeat;
+}
+#command_hint-toprightcorner {
+  background-image: url(images/hint/topright.png); background-repeat: no-repeat;
+}
+#command_hint-leftstretch {
+  background-image: url(images/hint/leftstretch.png); background-repeat: repeat-y;
+}
+#command_hint-rightstretch {
+  background-image: url(images/hint/rightstretch.png); background-repeat: repeat-y;
+}
+#command_hint-topstretch {
+  background-image: url(images/hint/topstretch.png); background-repeat: repeat-x;
+}
+td#command_hint-content {
+  background-image: url(images/hint/bg.png); padding: 4px 6px 6px 6px; color: #666;
+}
+#command_hint-topstretch, #command_hint-content { width: 100%; }
+#command_hint .command_hint-top { height: 13px; }

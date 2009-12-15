@@ -39,7 +39,7 @@
 var SC = require('sproutcore/runtime').SC;
 var DockView = require('bespin:views/dock').DockView;
 var EditorView = require('Editor:views/editor').EditorView;
-var cliInputView = require('CommandLine:views/cli').cliInputView;
+var CliInputView = require('CommandLine:views/cli').CliInputView;
 
 var INITIAL_TEXT;   // defined at the end of the file to reduce ugliness
 
@@ -50,7 +50,7 @@ exports.applicationController = SC.Object.extend({
         mainPane: SC.MainPane.design({
             applicationView: DockView.design({
                 centerView: EditorView.design(),
-                dockedViews: [ cliInputView.design() ]
+                dockedViews: [ CliInputView.design() ]
             }),
             childViews: 'applicationView'.w(),
             layout: { centerX: 0, centerY: 0, width: 640, height: 480 }

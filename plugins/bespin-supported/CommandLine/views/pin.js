@@ -1,5 +1,3 @@
-"export package main";
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -24,20 +22,43 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require("bespin:plugins").catalog;
+/**
+ * Push Pin button.
+ * @class
+ * @extends SC.ButtonView
+ */
+exports.PinView = SC.ButtonView.extend({
 
-main = function() {
-    baseurl = window.SERVER_BASE_URL == undefined ? '/server' : SERVER_BASE_URL;
-    catalog.loadMetadata(baseurl + "/plugin/register/defaults",
-        function(sender, response) {
-            if (response.isError) {
-                throw "failed to load plugin metadata: " +
-                    response.errorObject;
-            }
+    classNames: ['sc-pin-view'],
 
-            tiki.async('EditorApp').then(function() {
-                catalog.getObject('applicationcontroller').create();
-            });
-        });
-};
-exports.main = main;
+    theme: 'pin',
+
+    // TODO: Find a way to make this work
+    // layout: { height: 16, width: 16 },
+
+    titleMinWidth: 0,
+
+    isSelected: false,
+
+    buttonBehavior: SC.TOGGLE_BEHAVIOR,
+
+    /**
+     * This is the value that will be set when the pin is in
+     */
+    toggleOnValue: YES,
+
+    /**
+     * This is the value that will be set when the pin is out
+     */
+    toggleOffValue: NO,
+
+    /** @private */
+    valueBindingDefault: SC.Binding.bool(),
+
+    /** @private */
+    render: function(context, firstTime) {
+        context.push('<img src="',
+                SC.BLANK_IMAGE_URL,
+                '" class="button" alt="" />');
+    }
+});

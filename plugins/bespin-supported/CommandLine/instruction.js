@@ -23,6 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
+var command = require("command");
 
 /**
  * Wrapper for something that the user typed

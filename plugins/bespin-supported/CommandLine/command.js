@@ -26,28 +26,32 @@ var SC = require("sproutcore/runtime").SC;
 var historyMod = require("history");
 var instructionMod = require("instruction");
 var util = require("bespin:util/util");
-var cliMod = require("views/cli");
-
-window.command = exports;
+var plugins = require("bespin:plugins");
 
 /**
  * Show helpers for the command line
  */
 exports.cliController = SC.Object.create({
+    /**
+     * A string containing the current contents of the command line
+     */
     input: "",
-    output: "",
-    exec: function() {
-        cliMod.cliOutputPage.get("mainPane").append();
 
-        var instruction = command.executeCommand(this.input);
-        console.log(instruction);
+    /**
+     * The history of executed commands
+     * TODO: We should get the implementation of this from the plugin system
+     */
+    history: historyMod.InMemoryHistory.create(),
+
+    /**
+     * Called by the UI to execute a command
+     */
+    exec: function() {
+        console.log(this.input);
+        exports.executeCommand(this.input);
+        this.set("input", "");
     }
 });
-
-/**
- * TODO: We should get the implementation of this from the plugin system
- */
-exports.history = historyMod.InMemoryHistory.create();
 
 /**
  * Execute a command
@@ -59,177 +63,16 @@ exports.executeCommand = function(typed, hidden) {
 
     var instruction = instructionMod.Instruction.create({ typed: typed });
     if (hidden !== true) {
-        this.history.add(instruction);
+        exports.cliController.history.add(instruction);
     }
 
     instruction.onOutput(function() {
         exports.hideHint();
-        exports.updateOutput(true);
+        exports.cliController.history.update();
     }.bind(this));
 
     instruction.exec();
     return instruction;
-};
-
-/**
- * Redraw the table of executed commands
- */
-exports.updateOutput = function(scroll) {
-    var formatTime = function(date) {
-        var mins = "0" + date.getMinutes();
-        if (mins.length > 2) {
-            mins = mins.slice(mins.length - 2);
-        }
-        var secs = "0" + date.getSeconds();
-        if (secs.length > 2) {
-            secs = secs.slice(secs.length - 2);
-        }
-        return date.getHours() + ":" + mins + ":" + secs;
-    };
-
-    var size = settings.values.consolefontsize;
-    var mode = settings.values.historytimemode;
-
-    this.output.innerHTML = "";
-
-    var table = document.createElement("table");
-    table.className = 'command_table';
-    table.style.fontSize = size + 'pt';
-    this.output.appendChild(table);
-
-    var count = 1;
-    this.history.instructions.forEach(function(instruction) {
-        if (!instruction.historical) {
-            // The row for the input (i.e. what was typed)
-            var rowin = document.createElement("tr");
-            rowin.className = 'command_rowin';
-            rowin.style.backgroundImage = "url(/images/instruction" + size + ".png)",
-            rowin.onclick = function() {
-                // A single click on an instruction line in the console
-                // copies the command to the command line
-                this.commandLine.value = instruction.typed;
-            }.bind(this);
-            rowin.ondblclick = function() {
-                // A double click on an instruction line in the console
-                // executes the command
-                this.executeCommand(instruction.typed);
-            }.bind(this);
-            table.appendChild(rowin);
-
-            // The opening column with time or history number or nothing
-            var rowid = document.createElement("td");
-            rowid.className = "command_open";
-            rowin.appendChild(rowid);
-
-            if (mode == "history") {
-                rowid.innerHTML = count;
-                // TODO: <blush>
-                SC.RenderContext.fn.addClass(rowid, 'command_open_history');
-            }
-            else if (mode == "time" && instruction.start) {
-                rowid.innerHTML = formatTime(instruction.start);
-                SC.RenderContext.fn.addClass(rowid, 'command_open_time');
-            }
-            else {
-                SC.RenderContext.fn.addClass(rowid, 'command_open_blank');
-            }
-
-            // Cell for the typed command and the hover
-            var typed = document.createElement("td");
-            typed.className = "command_main";
-            rowin.appendChild(typed);
-
-            // The execution time
-            var hover = document.createElement("div");
-            hover.className = "command_hover";
-            typed.appendChild(hover);
-
-            // The execution time
-            if (instruction.start && instruction.end) {
-                var div = document.createElement("div");
-                div.className = "command_duration";
-                div.innerHTML = ((instruction.end.getTime() - instruction.start.getTime()) / 1000) + " sec ";
-                hover.appendChild(div);
-            }
-
-            // Toggle output display
-            var img = document.createElement("img");
-            img.src = "/images/" + instruction.hideOutput ? "plus.png" : "minus.png";
-            img.style.verticalAlign = "middle";
-            img.style.padding = "2px;";
-            img.alt = "Toggle display of the output";
-            img.title = "Toggle display of the output";
-            img.onclick = function(ev) {
-                instruction.hideOutput = !instruction.hideOutput;
-                this.updateOutput();
-                util.stopEvent(ev);
-            }.bind(this);
-            hover.appendChild(img);
-
-            // Open/close output
-            img = document.createElement("img");
-            img.src = "/images/closer.png";
-            img.style.verticalAlign = "middle";
-            img.style.padding = "2px";
-            img.alt = "Remove this command from the history";
-            img.title = "Remove this command from the history";
-            img.onclick = function(ev) {
-                this.history.remove(instruction);
-                this.updateOutput();
-                util.stopEvent(ev);
-            }.bind(this);
-            hover.appendChild(img);
-
-            // What the user actually typed
-            img = document.createElement("img");
-            img.className = "nohover";
-            img.src = "/images/prompt1.png";
-            typed.appendChild(img);
-
-            img = document.createElement("img");
-            img.className = "hover";
-            img.src = "/images/prompt2.png";
-            typed.appendChild(img);
-
-            var span = document.createElement("span");
-            span.innerHTML = instruction.typed;
-            span.className = "command_typed";
-            typed.appendChild(span);
-
-            // The row for the output (if required)
-            if (!instruction.hideOutput) {
-
-                var rowout = document.createElement("tr");
-                rowout.className = "command_rowout";
-                table.appendChild(rowout);
-
-                rowout.appendChild(document.createElement("td"));
-
-                var td = document.createElement("td");
-                td.colSpan = 2;
-                td.className = (instruction.error ? "command_error" : "");
-                rowout.appendChild(td);
-
-                if (instruction.element) {
-                    td.appendChild(instruction.element);
-                } else {
-                    var contents = instruction.output || "";
-                    if (!instruction.completed) {
-                        contents += "<img src='/images/throbber.gif'/> Working ...";
-                    }
-                    td.innerHTML = contents;
-                }
-            }
-        }
-        count ++;
-    }.bind(this));
-
-    if (scroll) {
-        // certain browsers have a bug such that scrollHeight is too small
-        // when content does not fill the client area of the element
-        var scrollHeight = Math.max(this.output.scrollHeight, this.output.clientHeight);
-        this.output.scrollTop = scrollHeight - this.output.clientHeight;
-    }
 };
 
 /**
@@ -269,6 +112,7 @@ exports.hideHint = function() {
  * </pre>
  */
 exports.newCommandHandler = function(ext) {
+    console.log("new command", ext);
     ext.execute = function() {
         var args = arguments;
         this.load(function(execute) {
@@ -283,6 +127,18 @@ exports.newCommandHandler = function(ext) {
 // this.hub.subscribe("extension:removed:bespin.command", function(ext) {
 //     this.removeCommand(ext);
 // }.bind(this));
+
+var formatTime = function(date) {
+    var mins = "0" + date.getMinutes();
+    if (mins.length > 2) {
+        mins = mins.slice(mins.length - 2);
+    }
+    var secs = "0" + date.getSeconds();
+    if (secs.length > 2) {
+        secs = secs.slice(secs.length - 2);
+    }
+    return date.getHours() + ":" + mins + ":" + secs;
+};
 
 /**
  * A Canon is a set of commands
@@ -496,7 +352,7 @@ exports.Canon = SC.Object.extend({
         var typed = query.action[0];
 
         // No hints for a blank command line
-        if (typed.length == 0 && this.parent == null) {
+        if (typed.length === 0 && this.parent == null) {
             callback(query);
             return;
         }
@@ -504,12 +360,12 @@ exports.Canon = SC.Object.extend({
         // Get a list of all commands and aliases. TODO: cache?
         var matches = [];
         for (var command in this.commands) {
-            if (command.indexOf(typed) == 0) {
+            if (command.indexOf(typed) === 0) {
                 matches.push(command);
             }
         }
         for (var alias in this.aliases) {
-            if (alias.indexOf(typed) == 0) {
+            if (alias.indexOf(typed) === 0) {
                 matches.push(alias);
             }
         }
@@ -523,7 +379,7 @@ exports.Canon = SC.Object.extend({
             }
             query.autofill = query.prefix + newValue;
             query.hint = command.preview;
-        } else if (matches.length == 0) {
+        } else if (matches.length === 0) {
             // No matches, cause an error
             query.error = "No matches";
         } else {
@@ -738,7 +594,7 @@ var TokenObject = SC.Object.extend({
                 }
             }
         }
-        sc_super();
+        this.sc_super();
     },
 
     /**
