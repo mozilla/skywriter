@@ -231,5 +231,8 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
  * TODO: Delete this when we don't need to create fake components any more
  */
 exports.dummyFactory = function(onCreate) {
-    onCreate(null);
+    if (onCreate) {
+        onCreate(null);
+    }
+    return null;
 };
