@@ -36,8 +36,6 @@ var SC = require('sproutcore/runtime').SC;
  * example, to fill the container view).
  */
 exports.Canvas = {
-    tagName: "canvas",
-
     _bespin_canvas_frameChanged: function() {
         this.set('layerNeedsUpdate', true);
     }.observes('frame'),
@@ -71,7 +69,7 @@ exports.Canvas = {
             return;
         }
 
-        var canvas = this.$()[0];
+        var canvas = this.$("canvas")[0];
         if (canvas.width !== layerFrame.width) {
             canvas.width = layerFrame.width;
         }
@@ -98,9 +96,11 @@ exports.Canvas = {
 
         if (firstTime) {
             // TODO: is this right?
-            context.attr("width", "" + layerFrame.width);
-            context.attr("height", "" + layerFrame.height);
-            context.push("canvas tag not supported by your browser");
+            var canvasContext = context.begin("canvas");
+            canvasContext.attr("width", "" + layerFrame.width);
+            canvasContext.attr("height", "" + layerFrame.height);
+            canvasContext.push("canvas tag not supported by your browser");
+            canvasContext.end();
             return;
         }
 
@@ -108,7 +108,7 @@ exports.Canvas = {
         visibleFrame.width = layerFrame.width;
         visibleFrame.height = layerFrame.height;
 
-        var canvas = this.$()[0];
+        var canvas = this.$("canvas")[0];
         var drawingContext = canvas.getContext('2d');
 
         drawingContext.save();
@@ -128,7 +128,7 @@ exports.Canvas = {
      * a canvas to measure text...)
      */
     getCharacterWidth: function(font) {
-        var canvas = this.$()[0];
+        var canvas = this.$("canvas")[0];
         if (SC.none(canvas)) {
             return null;
         }
@@ -146,7 +146,7 @@ exports.Canvas = {
      * returns it.
      */
     guessLineHeight: function(font) {
-        var canvas = this.$()[0];
+        var canvas = this.$("canvas")[0];
         if (SC.none(canvas)) {
             return null;    // don't even try
         }

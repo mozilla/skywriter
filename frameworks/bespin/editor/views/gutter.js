@@ -72,7 +72,7 @@ exports.GutterView = SC.View.extend(canvas.Canvas, {
             origin.top  = value.top;
         }
 
-        var canvas = this.$()[0];
+        var canvas = this.$("canvas")[0];
         if (SC.none(canvas)) {
             // Lie until we know for sure...
             return {
