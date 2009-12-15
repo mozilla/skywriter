@@ -76,8 +76,14 @@ exports.BespinScrollView = SC.ScrollView.extend({
         }
 
         var gutterFrame = gutterView.get('frame');
-        this.get('containerView').set('layout',
-            { left: gutterFrame.width, bottom: 0, top: 0, right: 0 });
+        var containerView = this.get('containerView');
+        containerView.adjust({
+            left:   gutterFrame.width,
+            bottom: 0,
+            top:    0,
+            right:  0
+        });
+        containerView.updateLayout();
 
         var hScroller = this.get('horizontalScrollerView');
         var vScroller = this.get('verticalScrollerView');
