@@ -38,6 +38,10 @@ var SC = require('sproutcore/runtime').SC;
 exports.Canvas = {
     tagName: "canvas",
 
+    _bespin_canvas_frameChanged: function() {
+        this.set('layerNeedsUpdate', true);
+    }.observes('frame'),
+
     /**
      * @property{Rect}
      *
