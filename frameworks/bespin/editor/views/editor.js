@@ -186,7 +186,7 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
     },
 
     didCreateLayer: function() {
-        var canvas = this.$()[0];
+        var canvas = this.$("canvas")[0];
 
         SC.Event.add(canvas, "blur", this, function(ev) {
             this.focus = true;
@@ -491,7 +491,7 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
 
         // I'm not sure why we should need to manually set focus to the canvas;
         // it happens automatically when there is no mouseDown event handler
-        var canvas = this.$()[0];
+        var canvas = this.$("canvas")[0];
         canvas.focus();
 
         return true;
@@ -514,7 +514,7 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
     setFocus: function(focus) {
         this.onInit(function() {
             if (this.focus != focus) {
-                var canvas = this.$()[0];
+                var canvas = this.$("canvas")[0];
                 if (focus) {
                     canvas.focus();
                 } else {
@@ -539,7 +539,7 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
      * <p>Used by clipboard.js to adding cut and paste hacks
      */
     _getFocusElement: function() {
-        var canvas = this.$()[0];
+        var canvas = this.$("canvas")[0];
         return canvas;
     },
 
@@ -556,7 +556,7 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
         // TODO: Why would we ever want to take over keypresses for the whole
         // window????
         // var scope = this.editor.opts.actsAsComponent ? this.editor.canvas : window;
-        var canvas = this.$()[0];
+        var canvas = this.$("canvas")[0];
         var scope = canvas;
 
         if (this.oldkeydown) {
@@ -731,7 +731,7 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
         // FIXME: Until the canvas is set up, we don't know how to measure
         // text, so lie - this should be fixed when the layer becomes a canvas
         // as part of the canvas mixin reworking. --pcw
-        var canvas = this.$()[0];
+        var canvas = this.$("canvas")[0];
         if (SC.none(canvas)) {
             return {
                 left:   origin.left,
@@ -798,7 +798,7 @@ exports.EditorView = SC.View.extend(canvas.Canvas, {
 
         // these are convenience references so we don't have to type so much
         var ed = this.editor;
-        var c = this.$()[0];
+        var c = this.$("canvas")[0];
         var theme = ed.theme;
 
         // these are commonly used throughout the rendering process so are defined up here to make it clear they are shared
