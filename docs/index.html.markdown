@@ -18,6 +18,7 @@ Plugin Author Guide
 * [Introduction](pluginguide/index.html)
 * [Built-in Extension Points](pluginguide/extpoints.html)
 * [Distributing Plugins](pluginguide/distributing.html)
+* [Automated Testing](devguide/testing.html)
 
 
 Embedder's Guide
@@ -33,7 +34,6 @@ Developer's Guide
 
 * [Getting Started](devguide/index.html)
 * [A Tour of the Code](devguide/tour.html)
-* [Automated Testing](devguide/testing.html)
 * [Manual Test Plan](devguide/testplan.html)
 
 [1]: https://wiki.mozilla.org/Bespin "The Bespin Wiki"

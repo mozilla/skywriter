@@ -36,7 +36,8 @@ var pluginCatalog = require("bespin:plugins").catalog;
 // Transfer names from core_test so that this is the
 // test interface used by plugins.
 
-var testNames = ["test", "ok", "equals", "deepEquals"];
+var testNames = ["test", "ok", "equal", "notEqual", "deepEqual",
+    "strictEqual", "throws", "start", "stop"];
 
 testNames.forEach(function(name) {
     exports[name] = core_test[name];
