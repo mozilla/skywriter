@@ -42,6 +42,23 @@ exports.Canvas = {
         this.set('layerNeedsUpdate', true);
     }.observes('frame'),
 
+    _bespin_canvas_isVisibleInWindowChanged: function() {
+        // Redraw when we become visible. We must do this because we don't draw
+        // when the layer is invisible (as it's impossible: the frame property
+        // is bogus until the layer is visible in the window, and without that
+        // property there's no way to set the canvas width and height
+        // properly).
+        console.log("isVisibleInWindow changed to",
+            this.get('isVisibleInWindow'));
+
+        this.updateLayout();
+        this.redraw();
+    }.observes('isVisibleInWindow'),
+
+    _bespin_canvas_layerFrameDidChange: function() {
+        this.updateLayout();
+    }.observes('layerFrame'),
+
     /**
      * @property{Rect}
      *
@@ -93,35 +110,6 @@ exports.Canvas = {
         // empty
     },
 
-    render: function(context, firstTime) {
-        var layerFrame = this.get('layerFrame');
-
-        if (firstTime) {
-            // TODO: is this right?
-            context.attr("width", "" + layerFrame.width);
-            context.attr("height", "" + layerFrame.height);
-            context.push("canvas tag not supported by your browser");
-            return;
-        }
-
-        var visibleFrame = SC.cloneRect(this.get('clippingFrame'));
-        visibleFrame.width = layerFrame.width;
-        visibleFrame.height = layerFrame.height;
-
-        var canvas = this.$()[0];
-        var drawingContext = canvas.getContext('2d');
-
-        drawingContext.save();
-
-        var frame = this.get('frame');
-        drawingContext.translate(frame.x - layerFrame.x,
-            frame.y - layerFrame.y);
-
-        this.drawRect(drawingContext, visibleFrame);
-
-        drawingContext.restore();
-    },
-
     /**
      * Returns the width of the character 'M' in the given font, or null if the
      * canvas hasn't been created yet. (It's unfortunate that you actually need
@@ -159,8 +147,49 @@ exports.Canvas = {
         return height;
     },
 
-    _bespin_canvas_layerFrameDidChange: function() {
-        this.updateLayout();
-    }.observes('layerFrame')
+    /**
+     * Computes the visible frame and calls drawRect() to redraw the canvas
+     * contents. Generally, you should not need to call this function unless
+     * you override the default implementations of didCreateLayer() or
+     * render().
+     *
+     * @return True on a successful render, or false if the rendering wasn't
+     *     done because the view wasn't visible.
+     */
+    redraw: function() {
+        if (!this.get('isVisibleInWindow')) {
+            return false;
+        }
+
+        var layerFrame = this.get('layerFrame');
+        var visibleFrame = SC.cloneRect(this.get('clippingFrame'));
+        visibleFrame.width = layerFrame.width;
+        visibleFrame.height = layerFrame.height;
+
+        var canvas = this.$()[0];
+        var context = canvas.getContext('2d');
+
+        context.save();
+        var frame = this.get('frame');
+        if (frame.x < 0) {
+            this.computeFrameWithParentFrame(null);
+        }
+        context.translate(frame.x - layerFrame.x, frame.y - layerFrame.y);
+        this.drawRect(context, visibleFrame);
+        context.restore();
+        return true;
+    },
+
+    render: function(context, firstTime) {
+        if (firstTime) {
+            var layerFrame = this.get('layerFrame');
+            context.attr("width", "" + layerFrame.width);
+            context.attr("height", "" + layerFrame.height);
+            context.push("canvas tag not supported by your browser");
+            return;
+        }
+
+        this.redraw();
+    }
 };
 
