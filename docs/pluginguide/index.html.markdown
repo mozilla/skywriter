@@ -16,9 +16,10 @@ The ability to load functionality lazily is very important, because we expect th
 
 A plugin consists of *metadata* and *everything else*. When you log into Bespin, the metadata for all of your plugins is loaded. Everything else (JavaScript, CSS, images, etc.) is loaded as needed. At its simplest, a plugin is a single .js file that contains a special section for the metadata. Here's a trivial example:
 
-    // ---plugin.json---
-    var metadata = {};
-    // ---
+    :::js
+    "define metadata";
+    ({});
+    "end";
     
     exports.someFunction = function() { };
     
@@ -26,12 +27,14 @@ Clearly, this example doesn't do anything useful. The first step in making a plu
 
 Bespin plugins feature *extensions* that plug into *extension points*. As an example of this, the simple syntax highlighter defines an extension point called "syntax.simple.highlighter". The JavaScript highlighter is one extension that plugs into that extension point. The metadata for the JavaScript highlighter looks like this:
 
+    :::js
     {
         "provides": [
             {
                 "ep": "syntax.simple.highlighter",
                 "name": "JavaScript",
-                "extensions": ["js", "json", "javascript", "ecmascript", "jsm", "java"],
+                "extensions": ["js", "json", "javascript", 
+                    "ecmascript", "jsm", "java"],
                 "pointer": "#JavaScript"
             }
         ],
@@ -46,12 +49,13 @@ The `depends` list in the metadata is a list of the names of plugins upon which 
 
 ## Plugin File Structure ##
 
-A plugin can be a single .js file with it's metadata bordered by specially formatted comments. Here's an example:
+A plugin can be a single .js file with it's metadata bordered by directives that are contained in strings. Here's an example:
 
-    // ---plugin.json---
-    var metadata = {};
-    // ---
+    :::js
+    "define metadata";
+    ({});
+    "end";
     
-You must start the metadata with `// ---plugin.json---` and end it with "// ---". To be legitimate JavaScript, you need to assign the metadata to a variable, but it can be any variable. The assignment and trailing semicolons are automatically stripped off.
+You must start the metadata with `"define metadata";` and end it with `"end";`. The metadata itself is contained in an object. JavaScript does not allow you to put a bare object in a program, so you can either enclose the object in parentheses (as above) or set it to a variable. Bespin can handle either of those formats.
 
-Often, a single file is not going to be enough. When you move beyond a single file, a plugin is defined as a directory with a `plugin.json` file in it. In a single file plugin, the "package module" is the plugin .js file. In a plugin directory, the "package module" is a file called "package.js".
+Often, a single file is not going to be enough. When you move beyond a single file, a plugin is defined as a directory with a `plugin.json` file in it. In a single file plugin, the "package module" is the plugin .js file. In a plugin directory, the "package module" is a file called "index.js".
