@@ -22,16 +22,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// ---plugin.json---
-var metadata = {
+"define metadata";
+({
     "depends": ["BespinServer"],
     "provides": [ {
             "ep": "startup",
             "pointer": "#showSignup"
         }
     ]
-};
-// ---
+});
+"end";
 
 var SC = require("sproutcore/runtime").SC;
 var util = require("bespin:util/util");
@@ -159,10 +159,10 @@ exports.signupController = SC.Object.create({
         
         if (this.changed.email || this.get('email' != '')) {
             if (!this.get('email').match(/.+@.+\...+/)) {
-                this.set("emailHint", "When email is given, it has to be a valid format")
+                this.set("emailHint", "When email is given, it has to be a valid format");
                 isValid = false;
             } else {
-                this.set("emailHint", "(Email optional - only used for password recovery)")
+                this.set("emailHint", "(Email optional - only used for password recovery)");
             }
         }
 
@@ -173,14 +173,16 @@ exports.signupController = SC.Object.create({
      * Attempt to register
      */
     signup: function() {
+        var pane;
+        
         // validates the form. 
         this.validate();
         
         if (!this.get('isValid')) {
-            var pane = SC.AlertPane.error("Correct your signup", "Please correct your signup information.");
+            pane = SC.AlertPane.error("Correct your signup", "Please correct your signup information.");
             pane.append();
         } else if (this.get('username') == '' || this.get('password1') == '') {
-            var pane = SC.AlertPane.error("Correct your signup", "Please fill up all required fields (username + password).");
+            pane = SC.AlertPane.error("Correct your signup", "Please fill up all required fields (username + password).");
             pane.append();            
         } else {
             var opts = {
@@ -245,7 +247,7 @@ exports.userIdentPage = SC.Page.design({
                      */
                 },
                 layout: { left: 0, top: 75, right: 0, bottom: 0 }
-            }),
+            })
         })
     }),
 

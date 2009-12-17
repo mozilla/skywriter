@@ -22,8 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// ---plugin.json---
-var metadata = {
+"define metadata";
+({
     "provides": [ {
         "ep": "command",
         "name": "editconfig",
@@ -75,8 +75,8 @@ var metadata = {
         "pointer": "config#unsetCommand",
         "completionPointer": "config#unsetCompleter"
     } ]
-};
-// ---
+});
+"end";
 
 var command = require("bespin/command");
 var keys = require("bespin/util/keys");

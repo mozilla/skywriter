@@ -22,8 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// ---plugin.json---
-var metadata = {
+"define metadata";
+({
     "depends": ["CommandLine"],
     "provides": [ {
         "ep": "command",
@@ -58,8 +58,8 @@ var metadata = {
         "usage": "",
         "pointer": ""
     } ]
-};
-// ---
+});
+"end";
 
 var util = require("bespin:util/util");
 var command = require("CommandLine:command");

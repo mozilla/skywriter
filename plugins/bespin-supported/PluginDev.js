@@ -22,11 +22,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// ---plugin.json---
-var metadata = {
+"define metadata";
+({
     "depends": ["BespinServer"]
-};
-// ---
+});
+"end";
 
 var core_test = require("core_test");
 var test = require("core_test:system/test");

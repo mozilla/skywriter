@@ -22,8 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// ---plugin.json---
-var metadata = {
+"define metadata";
+({
     "provides": [ {
         // TODO: How to we mark sub commands?
         "ep": "canon",
@@ -65,8 +65,8 @@ var metadata = {
         "usage": "[commandname]: Command name required.",
         "pointer": "cmd#deleteCommand"
     } ]
-};
-// ---
+});
+"end";
 
 var command = require("bespin/command");
 var util = require("bespin/util/util");

@@ -22,9 +22,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// ---plugin.json---
-var metadata = {};
-// ---
+"define metadata";
+({});
+"end";
 
 var bespin = require("bespin");
 var util = require("bespin:util/util");

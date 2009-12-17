@@ -22,8 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// ---plugin.json---
-var metadata = {
+"define metadata";
+({
     "provides": [ {
         "ep": "command",
         "name": "action",
@@ -76,8 +76,8 @@ var metadata = {
         "preview": "create some output, slowly, after a given time (default 5s)",
         "pointer": "debug#slowCommand"
     } ]
-};
-// ---
+});
+"end";
 
 var util = require("bespin/util/util");
 var command = require("bespin/command");

@@ -22,8 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// ---plugin.json---
-var metadata = {
+"define metadata";
+({
     "provides":[
         {
             "ep": "syntax.engine",
@@ -36,8 +36,8 @@ var metadata = {
             "description": "Highlighter code for the simple syntax highlighter."
         }    
     ]
-};
-// ---
+});
+"end";
 
 /**
  * Simple Syntax Highlighting

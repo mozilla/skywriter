@@ -22,8 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// ---plugin.json---
-var metadata = {
+"define metadata";
+({
     "provides": [
         {
             "ep": "syntax.simple.highlighter",
@@ -32,8 +32,8 @@ var metadata = {
             "pointer": "#JavaScript"
         }
     ]
-};
-// ---
+});
+"end";
 
 // = JavaScript Syntax Highlighting Implementation =
 //
