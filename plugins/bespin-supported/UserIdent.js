@@ -43,7 +43,7 @@ var server = require("BespinServer").server;
  */
 exports.showSignup = function() {
     // FIXME: currently broken --pcw
-    // exports.userIdentPage.get("mainPane").append();
+    exports.userIdentPage.get("mainPane").append();
 };
 
 /**
@@ -55,8 +55,8 @@ exports.loginController = SC.Object.create({
     password: "",
 
     login: function() {
-        server.login(this.username, this.password, this.onSuccess,
-                this.onFailure);
+        server.login(this.get("username"), this.get("password"), 
+            this.onSuccess, this.onFailure);
     },
 
     /**

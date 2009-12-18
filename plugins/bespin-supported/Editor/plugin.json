@@ -1,4 +1,5 @@
 {
+    "depends": ["BespinUtils"],
     "provides": [
         {
             "ep": "factory",

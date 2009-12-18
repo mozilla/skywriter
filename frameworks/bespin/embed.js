@@ -28,8 +28,6 @@
  * and easy to learn to the embedding user.
  */
 
-require("util/globals");
-
 var SC = require("sproutcore/runtime").SC;
 var bespin = require("index");
 var containerMod = require("util/container");
