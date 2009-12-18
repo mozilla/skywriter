@@ -112,21 +112,17 @@ exports.EditorView = SC.View.extend(Canvas, {
     },
 
     _recomputeLayout: function() {
-        var layoutManager = this.get('layoutManager');
-        var margin = layoutManager.get('margin');
-        var textLines = layoutManager.get('textLines');
+        var boundingRect = this.get('layoutManager').boundingRect();
+        var padding = this.get('padding');
         var originalLayout = this._layout;
 
+        // The origin can be set by the user, but the width and height are
+        // computed by the layout manager.
         var newLayout = {
-            // The origin can be set by the user...
             left:   originalLayout.left,
             top:    originalLayout.top,
-
-            // ... but the width and height are computed by us.
-            width:  layoutManager.get('maximumWidth') + margin.left +
-                        margin.right,
-            height: textLines.length * textLines[0].lineHeight + margin.top +
-                        margin.bottom
+            width:  boundingRect.width + padding.right,
+            height: boundingRect.height + padding.bottom
         };
 
         this._layout = newLayout;

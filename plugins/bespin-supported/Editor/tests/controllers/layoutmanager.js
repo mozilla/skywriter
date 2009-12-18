@@ -157,9 +157,10 @@ exports.testDimensionsCalculation = function() {
         "Manos: The Hands of Fate\n" +
         "Santa Claus Conquers the Martians\n");
 
-    t.equal(layoutManager.totalHeight, layoutManager._lineHeight * 5,
+    var rect = layoutManager.boundingRect();
+    t.equal(rect.height, layoutManager._lineHeight * 5,
         "the total height and the line height times the number of lines");
-    t.equal(layoutManager.maximumWidth, layoutManager._characterWidth *
+    t.equal(rect.width, layoutManager._characterWidth *
         "Santa Claus Conquers the Martians".length, "the width and the " +
         "character width times the length of the longest line");
 
@@ -170,9 +171,10 @@ exports.testDimensionsCalculation = function() {
         endColumn:      "Santa Claus Conquers the Martians".length
     }, "SuperBabies: Baby Geniuses 2");
 
-    t.equal(layoutManager.totalHeight, layoutManager._lineHeight * 4,
+    rect = layoutManager.boundingRect();
+    t.equal(rect.height, layoutManager._lineHeight * 4,
         "the total and the line height times the new number of lines");
-    t.equal(layoutManager.maximumWidth, layoutManager._characterWidth *
+    t.equal(rect.width, layoutManager._characterWidth *
         "The Star Wars Holiday Special".length, "the width and the " +
         "character width times the length of what is now the longest line");
 };

@@ -30,6 +30,7 @@ exports.LayoutManager = SC.Object.extend({
     _characterWidth: 8,
     _layoutAnnotations: null,
     _lineHeight: 20,
+    _maximumWidth: 0,
 
     /**
      * @property
@@ -95,9 +96,8 @@ exports.LayoutManager = SC.Object.extend({
                 max = width;
             }
         }
-        this.set('maximumWidth', max);
 
-        this.set('totalHeight', textLines.length * this._lineHeight);
+        this._maximumWidth = max;
     },
 
     _recomputeEntireLayout: function() {
@@ -135,6 +135,24 @@ exports.LayoutManager = SC.Object.extend({
         this._layoutAnnotations.forEach(function(annotation) {
             annotation.annotateLayout(textLines, range);
         });
+    },
+
+    /**
+     * Determines the boundaries of the entire text area.
+     *
+     * TODO: Unit test.
+     */
+    boundingRect: function() {
+        var margin = this.get('margin');
+        var lastRowRect = this.lineRectForRow(this.get('textLines').length -
+            1);
+        return {
+            x:      0,
+            y:      0,
+            width:  margin.left + this._maximumWidth + margin.right,
+            height: margin.top + lastRowRect.y + lastRowRect.height +
+                        margin.bottom
+        };
     },
 
     /**
@@ -202,6 +220,23 @@ exports.LayoutManager = SC.Object.extend({
     },
 
     /**
+     * Returns the boundaries of the character at the given position.
+     *
+     * TODO: Unit test.
+     */
+    characterRectForPosition: function(position) {
+        var lineRect = this.lineRectForRow(position.row);
+        var margin = this.get('margin');
+        var characterWidth = this._characterWidth;
+        return {
+            x:      margin.left + position.column * characterWidth,
+            y:      lineRect.y,
+            width:  characterWidth,
+            height: lineRect.height
+        };
+    },
+
+    /**
      * @protected
      *
      * Instantiates the internal text storage object. The default
@@ -232,18 +267,20 @@ exports.LayoutManager = SC.Object.extend({
     },
 
     /**
-     * @property{Number}
+     * Returns the pixel boundaries of the given line.
      *
-     * The width in pixels of the longest line.
+     * TODO: Unit test.
      */
-    maximumWidth: 0,
-
-    /**
-     * @property{Number}
-     *
-     * The total height of the text in pixels.
-     */
-    totalHeight: 0,
+    lineRectForRow: function(row) {
+        var lineHeight = this._lineHeight;
+        var margin = this.get('margin');
+        return {
+            x:      0,
+            y:      margin.top + row * lineHeight,
+            width:  this._maximumWidth,
+            height: lineHeight
+        };
+    },
 
     textStorageEdited: function(sender, range, characters) {
         // Remove text lines as appropriate.
