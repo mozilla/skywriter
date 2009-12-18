@@ -347,7 +347,11 @@ exports.Catalog = SC.Object.extend({
     _metadataFinishedLoading: function(response, params) {
         if (!response.isError) {
             var body = response.body();
-            eval(body);
+            var data = JSON.parse(body);
+            for (var pluginName in data) {
+                tiki.register(pluginName, data[pluginName]);
+            }
+            this.load(data);
         }
         params.callback(this, response);
     },
