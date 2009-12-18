@@ -182,6 +182,26 @@ exports.LayoutManager = SC.Object.extend({
     },
 
     /**
+     * Given a rectangle expressed in pixels, returns the range of characters
+     * that lie at least partially within the rectangle as an object.
+     *
+     * TODO: Write unit tests for this method.
+     */
+    characterRangeForBoundingRect: function(rect) {
+        // TODO: variable line heights, needed for word wrap and perhaps
+        // extensions as well
+        var lineHeight = this.get('textLines')[0].lineHeight;
+        var characterWidth = this._characterWidth;
+        var x = rect.x, y = rect.y;
+        return {
+            startRow:       Math.floor(y / lineHeight),
+            endRow:         Math.ceil((y + rect.height) / lineHeight),
+            startColumn:    Math.floor(x / characterWidth),
+            endColumn:      Math.ceil((x + rect.width) / characterWidth)
+        };
+    },
+
+    /**
      * @protected
      *
      * Instantiates the internal text storage object. The default

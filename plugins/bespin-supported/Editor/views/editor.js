@@ -26,7 +26,6 @@ var SC = require('sproutcore/runtime').SC;
 var Canvas = require('bespin:editor/mixins/canvas').Canvas;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 
-
 exports.EditorView = SC.View.extend(Canvas, {
     _backgroundValid: false,
     _invalidRange: null,
@@ -37,24 +36,6 @@ exports.EditorView = SC.View.extend(Canvas, {
     _lineAscent: 16,
 
     _selectedRanges: null,
-
-    _characterRangeForFrame: function(frame) {
-        var layoutManager = this.get('layoutManager');
-
-        // TODO: variable line heights, needed for word wrap and perhaps
-        // extensions as well
-        var lineHeight = layoutManager.get('textLines')[0].lineHeight;
-        var characterWidth = layoutManager._characterWidth;
-
-        var frameX = frame.x, frameY = frame.y;
-
-        return {
-            startRow:       Math.floor(frameY / lineHeight),
-            endRow:         Math.ceil((frameY + frame.height) / lineHeight),
-            startColumn:    Math.floor(frameX / characterWidth),
-            endColumn:      Math.ceil((frameX + frame.width) / characterWidth)
-        };
-    },
 
     _clippingFrameChanged: function() {
         this._invalidate();
@@ -72,7 +53,8 @@ exports.EditorView = SC.View.extend(Canvas, {
         var characterWidth = layoutManager._characterWidth;
 
         var visibleFrameWidth = visibleFrame.width;
-        var visibleRange = this._characterRangeForFrame(visibleFrame);
+        var visibleRange =
+            layoutManager.characterRangeForBoundingRect(visibleFrame);
 
         var theme = this.get('theme');
 
@@ -125,8 +107,8 @@ exports.EditorView = SC.View.extend(Canvas, {
     // Invalidates the entire visible frame. Does not automatically mark the
     // editor for repainting.
     _invalidate: function() {
-        this._invalidRange = this._characterRangeForFrame(this.get(
-            'clippingFrame'));
+        this._invalidRange = this.get('layoutManager').
+            characterRangeForBoundingRect(this.get('clippingFrame'));
     },
 
     _recomputeLayout: function() {
