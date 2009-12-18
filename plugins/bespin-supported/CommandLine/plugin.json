@@ -1,6 +1,12 @@
 {
     "provides": [
         {
+            "ep": "factory",
+            "name": "commandline",
+            "action": "value",
+            "pointer": "views/cli#cliInputView"
+        },
+        {
             "ep": "extensionhandler",
             "name": "command",
             "activate": "command#newCommandHandler"

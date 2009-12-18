@@ -71,8 +71,12 @@ main = function() {
             container.register("editor", editor);
 
             editor.model.insertDocument("Welcome to Bespin.");
-            view.app.getPath("mainPage.mainPane").appendChild(editor.dockView);
 
+            var dockView = editor.dockView;
+            view.app.getPath("mainPage.mainPane").appendChild(dockView);
+
+            var commandLineView = catalog.getObject('commandline');
+            dockView.appendChild(dockView.addDockedView(commandLineView));
         });
     });
 };
