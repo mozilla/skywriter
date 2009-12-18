@@ -349,6 +349,14 @@ exports.Catalog = SC.Object.extend({
             var body = response.body();
             var data = JSON.parse(body);
             for (var pluginName in data) {
+                if (data[pluginName].errors) {
+                    console.error("Plugin ", pluginName, " has errors:");
+                    data[pluginName].errors.forEach(function(error) {
+                        console.error(error);
+                    });
+                    delete data[pluginName];
+                    continue;
+                }
                 tiki.register(pluginName, data[pluginName]);
             }
             this.load(data);
