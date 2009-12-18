@@ -24,7 +24,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EditorController = require("bespin:editor/controller").EditorController;
 var app = require("view").app;
 var catalog = require("bespin:plugins").catalog;
 

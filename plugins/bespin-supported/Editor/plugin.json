@@ -1,0 +1,23 @@
+{
+    "provides": [
+        {
+            "ep": "factory",
+            "name": "textstorage",
+            "action": "value",
+            "pointer": "models/textstorage#TextStorage"
+        },
+        {
+            "ep": "factory",
+            "name": "layoutmanager",
+            "action": "value",
+            "pointer": "controllers/layoutmanager#LayoutManager"
+        },
+        {
+            "ep": "factory",
+            "name": "editorview",
+            "action": "value",
+            "pointer": "views/editor#EditorView"
+        }
+    ]
+}
+

@@ -30,13 +30,20 @@ var LINE_INSETS = { bottom: 6 };
 
 exports.GutterView = SC.View.extend(canvas.Canvas, {
     classNames: 'sc-gutter-view',
-    tagName: 'canvas',
 
     /**
      * @property{EditorView}
      * The associated editor view.
      */
     editorView: null,
+
+    // FIXME after MVC rework is complete
+    layout: {
+        left:   0,
+        top:    0,
+        width:  GUTTER_INSETS.left + GUTTER_INSETS.right + 12,
+        height: 16
+    },
 
     /**
      * @property{Number}
@@ -58,41 +65,6 @@ exports.GutterView = SC.View.extend(canvas.Canvas, {
         lineNumberFont: "10pt Monaco, Lucida Console, monospace",
         editorTextFont: "10pt Monaco, Lucida Console, monospace"
     },
-
-    /**
-     * @property
-     *
-     * Layout for GutterViews is read-only and determined by the text height
-     * and width.
-     */ 
-    layout: function(key, value) {
-        var origin = this._origin;
-        if (!SC.none(value)) {
-            origin.left = value.left;
-            origin.top  = value.top;
-        }
-
-        var canvas = this.$("canvas")[0];
-        if (SC.none(canvas)) {
-            // Lie until we know for sure...
-            return {
-                left:   origin.left,
-                top:    origin.top,
-                width:  0,
-                height: 0
-            };
-        }
-
-        var rowCount = this.get('rowCount');
-        return {
-            left:   origin.left,
-            top:    origin.top,
-            width:  GUTTER_INSETS.left +
-                    rowCount.toString().length * this.get('_charWidth') +
-                    GUTTER_INSETS.right,
-            height: rowCount * this.get('_lineHeight')
-        };
-    }.property('_charWidth', '_lineHeight', 'rowCount'),
 
     _origin: { left: 0, top: 0 },
 
