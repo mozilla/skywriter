@@ -73,7 +73,6 @@ exports.Container = SC.Object.extend(/** @lends exports.Container */ {
     register: function(id, object) {
         SC.global(id, object);
         this.inject(object);
-        console.log("container.register", id, object);
         return object;
     },
 
