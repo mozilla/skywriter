@@ -46,9 +46,6 @@ exports.Canvas = {
         // is bogus until the layer is visible in the window, and without that
         // property there's no way to set the canvas width and height
         // properly).
-        console.log("isVisibleInWindow changed to",
-            this.get('isVisibleInWindow'));
-
         this.updateLayout();
         this.redraw();
     }.observes('isVisibleInWindow'),

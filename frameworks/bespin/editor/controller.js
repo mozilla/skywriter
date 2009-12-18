@@ -134,7 +134,8 @@ exports.EditorController = SC.Object.extend({
 
         this.model = model.DocumentModel.create({ editor: this });
 
-        this.dockView = DockView.create({
+        this.dockView = SC.View.create({
+            childViews: 'centerView'.w(),
             centerView: BespinScrollView.extend({
                 contentView: view.EditorView.extend({
                     editor: this,

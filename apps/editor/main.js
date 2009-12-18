@@ -24,59 +24,25 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var didRun = false;
-
-var bespin = require("bespin");
-var containerMod = require("bespin:util/container");
 var EditorController = require("bespin:editor/controller").EditorController;
+var app = require("view").app;
 var catalog = require("bespin:plugins").catalog;
-var view = require("view");
-
-var PLUGIN_METADATA_URL = "/server/plugin/register/defaults";
 
 main = function() {
-    if (didRun) {
-        return;
-    }
-    didRun = true;
+    catalog.loadMetadata("/server/plugin/register/defaults",
+        function(sender, response) {
+            if (response.isError) {
+                throw "failed to load plugin metadata: " +
+                    response.errorObject;
+            }
 
-    // The container allows us to keep multiple bespins separate, and constructs
-    // objects according to a user controlled recipe.
-    console.log("Bespin is starting up.");
-
-    // We would like to create a container here, something like this:
-    //   var container = containerMod.Container.create();
-    // However until we've got rid of the singleton 'bespin' we cant do that
-    var container = bespin._container;
-
-    catalog.loadMetadata(PLUGIN_METADATA_URL, function(sender, response) {
-        if (response.isError) {
-            throw "failed to load plugin metadata: " +
-                response.errorObject;
-        }
-        SC.run(function() {
-            // Load the plugin metadata for all of the system default plugins
-            view.app.getPath("mainPage.mainPane").append();
-
-            // Tell the container about the element that we run inside
-            var element = view.app.getPath("mainPage.mainPane.layer");
-            container.register("container", element);
-
-            // TODO: the stuff that follows is messy. in SC terms, an EditorView should actually
-            // be created in the mainPane directly via a "design" call, not created by
-            // the controller.
-            // We could also say editor = container.get("editor"); which would allow
-            // users to customize how the editor is built, but see above
-            var editor = EditorController.create();
-            container.register("editor", editor);
-
-            editor.model.insertDocument("Welcome to Bespin.");
-
-            var dockView = editor.dockView;
-            view.app.getPath("mainPage.mainPane").appendChild(dockView);
-
-            var commandLineView = catalog.getObject('commandline');
-            dockView.appendChild(dockView.addDockedView(commandLineView));
+            tiki.async('EditorApp').then(function() {
+                var mainPane = app.get('mainPage').get('mainPane');
+                catalog.getObject('applicationcontroller').create({
+                    mainPane: mainPane
+                });
+                mainPane.append();
+            });
         });
-    });
 };
+
