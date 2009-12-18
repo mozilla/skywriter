@@ -22,10 +22,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// TODO: How to we mark sub commands?
 "define metadata";
 ({
     "provides": [ {
-        // TODO: How to we mark sub commands?
         "ep": "canon",
         "name": "cmd",
         "preview": "Various commands to manage commands"
@@ -44,7 +44,7 @@
         "name": "edit",
         "takes": [ "commandname" ],
         "aliases": [ "add" ],
-        "preview": "edit the given command (force if doesn\'t exist)",
+        "preview": "edit the given command (force if doesn't exist)",
         "completeText": "command name to edit (required)",
         "usage": "[commandname]: Command name required.",
         "pointer": "cmd#editCommand"
