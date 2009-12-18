@@ -165,7 +165,7 @@ exports.InMemorySettings = SC.Object.extend({
             throw "Settings need 'name' members";
         }
         if (!this._types[setting.type]) {
-            throw "setting.type should be one of [number|boolean|string]";
+            throw "setting.type should be one of [number|boolean|text|object]. Got " + setting.type;
         }
         if (!setting.defaultValue === undefined) {
             throw "Settings need 'defaultValue' members";
