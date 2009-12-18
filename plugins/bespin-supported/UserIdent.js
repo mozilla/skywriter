@@ -42,7 +42,8 @@ var server = require("BespinServer").server;
  * Begin the login process
  */
 exports.showSignup = function() {
-    exports.userIdentPage.get("mainPane").append();
+    // FIXME: currently broken --pcw
+    // exports.userIdentPage.get("mainPane").append();
 };
 
 /**
