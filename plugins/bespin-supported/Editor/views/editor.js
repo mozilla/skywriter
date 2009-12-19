@@ -96,6 +96,22 @@ exports.EditorView = SC.View.extend(Canvas, {
         context.restore();
     },
 
+    _erasePadding: function(context, visibleFrame) {
+        var padding = this.get('padding');
+        var paddingRight = padding.right;
+        var rect = this.get('layoutManager').boundingRect();
+        var contentWidth = rect.width, contentHeight = rect.height;
+
+        context.save();
+
+        context.fillStyle = this.get('theme').backgroundStyle;
+        context.fillRect(contentWidth, 0, paddingRight, contentHeight);
+        context.fillRect(0, rect.height, contentWidth + paddingRight,
+            padding.bottom);
+
+        context.restore();
+    },
+
     // Invalidates the entire visible frame. Does not automatically mark the
     // editor for repainting.
     _invalidate: function() {
@@ -243,6 +259,7 @@ exports.EditorView = SC.View.extend(Canvas, {
             return;
         }
 
+        this._erasePadding(context, visibleFrame);
         this._drawLines(context, visibleFrame);
 
         this._invalidRange = null;
