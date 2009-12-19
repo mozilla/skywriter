@@ -177,8 +177,8 @@ exports.LayoutManager = SC.Object.extend({
 
         var characterWidth = this._characterWidth;
         var lineHeight = this._lineHeight;
-        var column = Math.floor(point.x / characterWidth);
-        var row = Math.floor(point.y / lineHeight);
+        var column = Math.floor(clientX / characterWidth);
+        var row = Math.floor(clientY / lineHeight);
 
         var textLines = this.get('textLines');
         var lineCount = textLines.length;
@@ -208,13 +208,14 @@ exports.LayoutManager = SC.Object.extend({
     characterRangeForBoundingRect: function(rect) {
         // TODO: variable line heights, needed for word wrap and perhaps
         // extensions as well
-        var lineHeight = this.get('textLines')[0].lineHeight;
+        var lineHeight = this._lineHeight;
         var characterWidth = this._characterWidth;
-        var x = rect.x, y = rect.y;
+        var margin = this.get('margin')
+        var x = rect.x - margin.left, y = rect.y - margin.top;
         return {
-            startRow:       Math.floor(y / lineHeight),
+            startRow:       Math.max(Math.floor(y / lineHeight), 0),
             endRow:         Math.ceil((y + rect.height) / lineHeight),
-            startColumn:    Math.floor(x / characterWidth),
+            startColumn:    Math.max(Math.floor(x / characterWidth), 0),
             endColumn:      Math.ceil((x + rect.width) / characterWidth)
         };
     },
