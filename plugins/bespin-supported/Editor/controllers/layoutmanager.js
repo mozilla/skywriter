@@ -49,7 +49,7 @@ exports.LayoutManager = SC.Object.extend({
      * Do not modify the properties of this object directly; clone, adjust, and
      * reset the margin property of the layout manager instead.
      */
-    margin: { left: 0, bottom: 0, top: 0, right: 0 },
+    margin: { left: 5, bottom: 6, top: 0, right: 12 },
 
     /**
      * @property
