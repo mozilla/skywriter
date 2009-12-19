@@ -277,7 +277,7 @@ exports.LayoutManager = SC.Object.extend({
         return {
             x:      0,
             y:      margin.top + row * lineHeight,
-            width:  this._maximumWidth,
+            width:  margin.left + this._maximumWidth + margin.right,
             height: lineHeight
         };
     },
