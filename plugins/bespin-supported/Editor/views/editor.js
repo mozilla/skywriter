@@ -36,6 +36,8 @@ exports.EditorView = SC.View.extend(Canvas, {
     _lineAscent: 16,
 
     _selectedRanges: null,
+    _selecting: false,
+    _selectionPivot: null,
 
     _clippingFrameChanged: function() {
         this._invalidate();
@@ -160,6 +162,16 @@ exports.EditorView = SC.View.extend(Canvas, {
                 range.endColumn = endLine.characters.length;
             }
         });
+    },
+
+    // Returns the character closest to the given point, obeying the selection
+    // rules (including the partialFraction field).
+    _selectionPositionForPoint: function(point) {
+        var position = this.get('layoutManager').characterAtPoint(point);
+        return {
+            row:    position.row,
+            column: position.column + (position.partialFraction >= 0.5 ? 1 : 0)
+        };
     },
 
     /**
@@ -293,6 +305,65 @@ exports.EditorView = SC.View.extend(Canvas, {
         this.set('layerNeedsUpdate', true);
         this._repositionSelection();
         this._recomputeLayout();
+    },
+
+    mouseDown: function(evt) {
+        var point = this.convertFrameFromView({
+            x: evt.clientX,
+            y: evt.clientY
+        });
+
+        var position = this._selectionPositionForPoint(point);
+        this._selectedRanges = [
+            {
+                startRow:       position.row,
+                startColumn:    position.column,
+                endRow:         position.row,
+                endColumn:      position.column
+            }
+        ];
+        this._selecting = true;
+        this._selectionPivot = { row: position.row, column: position.column };
+    },
+
+    mouseExited: function(evt) {
+        this._selecting = false;
+    },
+
+    mouseMoved: function(evt) {
+        if (!this._selecting) {
+            return;
+        }
+
+        var point = this.convertFrameFromView({
+            x: evt.clientX,
+            y: evt.clientY
+        });
+
+        var position = this._selectionPositionForPoint(point);
+
+        // Extending backward or forward?
+        var pivot = this._selectionPivot;
+        if (position.row < pivot.row ||
+            (position.row === pivot.row && position.column < pivot.column)) {
+            this._selectedRanges[0] = {
+                startRow:       position.row,
+                startColumn:    position.column,
+                endRow:         pivot.row,
+                endColumn:      pivot.column
+            };
+        } else {
+            this._selectedRanges[0] = {
+                startRow:       pivot.row,
+                startColumn:    pivot.column,
+                endRow:         position.row,
+                endColumn:      position.column
+            };
+        }
+    },
+
+    mouseUp: function(evt) {
+        this._selecting = false;
     }
 });
 
