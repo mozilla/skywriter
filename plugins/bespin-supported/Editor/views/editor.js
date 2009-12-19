@@ -45,38 +45,24 @@ exports.EditorView = SC.View.extend(Canvas, {
         var layoutManager = this.get('layoutManager');
         var textLines = layoutManager.get('textLines');
         var margin = layoutManager.get('margin');
-
-        // TODO: variable line heights, needed for word wrap and perhaps
-        // extensions as well
-        var lineHeight = textLines[0].lineHeight;
+        var theme = this.get('theme');
         var lineAscent = this._lineAscent;
-        var characterWidth = layoutManager._characterWidth;
 
-        var visibleFrameWidth = visibleFrame.width;
         var visibleRange =
             layoutManager.characterRangeForBoundingRect(visibleFrame);
 
-        var theme = this.get('theme');
+        context.save();
 
-        context.save();                         // start context 1
         context.font = theme.editorTextFont;
 
         var range = this._invalidRange;
         var startRow = range.startRow, endRow = range.endRow;
         for (var row = startRow; row <= endRow; row++) {
-            var y = row * lineHeight;
-
-            var startColumn = row == startRow ? range.startColumn :
-                visibleRange.startColumn;
-            var endColumn = row == endRow ? range.endColumn :
-                visibleRange.endColumn;
-
             context.fillStyle = theme.backgroundStyle;
-            context.fillRect(startColumn * characterWidth,
-                row * lineHeight,
-                (endColumn - startColumn) * characterWidth,
-                lineHeight);
-
+            var lineRect = layoutManager.lineRectForRow(row);
+            context.fillRect(lineRect.x, lineRect.y, lineRect.width,
+                lineRect.height);
+            
             var textLine = textLines[row];
             if (SC.none(textLine)) {
                 continue;
@@ -86,9 +72,13 @@ exports.EditorView = SC.View.extend(Canvas, {
             // text.
             var characters = textLine.characters;
             var length = characters.length;
+            var startColumn = row == startRow ? range.startColumn :
+                visibleRange.startColumn;
             if (startColumn >= length) {
                 continue;
             }
+            var endColumn = row == endRow ? range.endColumn :
+                visibleRange.endColumn;
             if (endColumn >= length) {
                 endColumn = length - 1;
             }
@@ -96,12 +86,14 @@ exports.EditorView = SC.View.extend(Canvas, {
             // And finally draw the line.
             context.fillStyle = theme.editorTextColor;
             for (var col = startColumn; col <= endColumn; col++) {
-                context.fillText(characters.substring(col, col + 1),
-                    col * characterWidth, row * lineHeight + lineAscent);
+                var rect = layoutManager.characterRectForPosition({ row: row,
+                    column: col });
+                context.fillText(characters.substring(col, col + 1), rect.x,
+                    rect.y + lineAscent);
             }
         }
         
-        context.restore();                      // end context 1
+        context.restore();
     },
 
     // Invalidates the entire visible frame. Does not automatically mark the
