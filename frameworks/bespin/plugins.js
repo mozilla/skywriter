@@ -39,23 +39,36 @@ if (!object_keys) {
     };
 }
 
-exports.Extension = SC.Object.extend({
-    _splitPointer: function(property) {
-        property = property || "pointer";
-        var parts = this.get(property).split("#");
-        var modName;
-        // this allows syntax like #foo
-        // which is equivalent to PluginName:index#foo
-        if (parts[0]) {
-            modName = this._pluginName + ":" + parts[0];
-        } else {
-            modName = this._pluginName;
-        }
+var _splitPointer = function(pluginName, pointer) {
+    var parts = pointer.split("#");
+    var modName;
+    
+    // this allows syntax like #foo
+    // which is equivalent to PluginName:index#foo
+    if (parts[0]) {
+        modName = pluginName + ":" + parts[0];
+    } else {
+        modName = pluginName;
+    }
+    
+    return {
+        modName: modName,
+        objName: parts[1]
+    };
+};
 
-        return {
-            modName: modName,
-            objName: parts[1]
-        };
+var _retrieveObject = function(pointerObj) {
+    var module = r(pointerObj.modName);
+    if (pointerObj.objName) {
+        return module[pointerObj.objName];
+    }
+    return module;
+};
+
+exports.Extension = SC.Object.extend({
+    _getPointer: function(property) {
+        property = property || "pointer";
+        return _splitPointer(this._pluginName, this.get(property));
     },
     
     init: function() {
@@ -63,8 +76,8 @@ exports.Extension = SC.Object.extend({
     },
     
     load: function(callback, property) {
-        var pointer = this._splitPointer(property);
-
+        var pointer = this._getPointer(property);
+        
         var self = this;
 
         tiki.async(this._pluginName).then(function() {
@@ -99,12 +112,8 @@ exports.Extension = SC.Object.extend({
     },
     
     _getLoaded: function(property) {
-        var pointer = this._splitPointer(property);
-        var module = r(pointer.modName);
-        if (pointer.objName) {
-            return module[pointer.objName];
-        }
-        return module;
+        var pointer = this._getPointer(property);
+        return _retrieveObject(pointer);
     }
 });
 
@@ -186,6 +195,142 @@ exports.Plugin = SC.Object.extend({
             result[extension.ep] = extension._observers;
         });
         return result;
+    },
+    
+    /*
+    * Figure out which plugins depend on a given plugin. This
+    * will allow the reload behavior to unregister/reregister
+    * all of the plugins that depend on the one being reloaded.
+    */
+    _findDependents: function(pluginList, dependents) {
+        var pluginName = this.name;
+        var self = this;
+        pluginList.forEach(function(testPluginName) {
+            if (testPluginName == pluginName) {
+                return;
+            }
+            var plugin = self.catalog.plugins[testPluginName];
+            if (plugin && plugin.depends) {
+                plugin.depends.forEach(function(dependName) {
+                    if (dependName == pluginName && !dependents[testPluginName]) {
+                        dependents[testPluginName] = true;
+                        plugin._findDependents(pluginList, dependents);
+                    }
+                });
+            }
+        });
+    },
+    
+    /*
+    * reloads the plugin and reinitializes all
+    * dependent plugins
+    */
+    reload: function(callback) {
+        // All reloadable plugins will have a reloadURL
+        if (!this.get("reloadURL")) {
+            return;
+        }
+        
+        var pluginName = this.name;
+        
+        var reloadPointer = this.get("reloadPointer");
+        if (reloadPointer) {
+            var pointer = _splitPointer(pluginName, reloadPointer);
+            var func = _retrieveObject(pointer);
+            if (func) {
+                func();
+            } else {
+                console.error("Reload function could not be loaded. Aborting reload.");
+                return;
+            }
+        }
+        
+        // find all of the dependents recursively so that
+        // they can all be unregisterd
+        var dependents = {};
+        
+        var self = this;
+        
+        var pluginList = object_keys(this.catalog.plugins);
+        
+        this._findDependents(pluginList, dependents);
+        
+        // notify everyone that this plugin is going away
+        this.unregister();
+        
+        for (var dependName in dependents) {
+            this.catalog.plugins[dependName].unregister();
+        }
+        
+        // remove all traces of the plugin
+        
+        var nameMatch = new RegExp("^" + pluginName + ":");
+        
+        _removeFromList(nameMatch, tiki.scripts);
+        _removeFromList(nameMatch, tiki.modules,
+            function(module) {
+                delete tiki._factories[module];
+            });
+        _removeFromList(nameMatch, tiki.stylesheets);
+        _removeFromList(new RegExp("^" + pluginName + "$"), tiki.packages);
+        
+        var promises = tiki._promises;
+        
+        delete promises.catalog[pluginName];
+        delete promises.loads[pluginName];
+        _removeFromObject(nameMatch, promises.modules);
+        _removeFromObject(nameMatch, promises.scripts);
+        _removeFromObject(nameMatch, promises.stylesheets);
+        
+        delete tiki._catalog[pluginName];
+        
+        // clear the sandbox of modules from all of the dependent plugins
+        var fullModList = [];
+        var sandbox = tiki.sandbox;
+        
+        var i = sandbox.modules.length;
+        var dependRegexes = [];
+        for (dependName in dependents) {
+            dependRegexes.push(new RegExp("^" + dependName + ":"));
+        }
+        
+        while (--i >= 0) {
+            var item = sandbox.modules[i];
+            if (nameMatch.exec(item)) {
+                fullModList.push(item);
+            } else {
+                var j = dependRegexes.length;
+                while (--j >= 0) {
+                    if (dependRegexes[j].exec(item)) {
+                        fullModList.push(item);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // make a private Tiki call that clears these
+        // modules from the module cache in the sandbox.
+        sandbox.clear.apply(sandbox, fullModList);
+        
+        // reload the plugin metadata
+        this.catalog.loadMetadata(this.reloadURL,
+            function() {
+                // actually load the plugin, so that it's ready
+                // for any dependent plugins
+                tiki.async(pluginName).then(function() {
+                    // reregister all of the dependent plugins
+                    for (dependName in dependents) {
+                        self.catalog.plugins[dependName].register();
+                    }
+                    
+                    if (callback) {
+                        // at long last, reloading is done.
+                        callback();
+                    }
+                });
+            }
+        );
     }
 });
 
@@ -321,6 +466,7 @@ exports.Catalog = SC.Object.extend({
             } else {
                 md.provides = [];
             }
+            md.name = name;
             var plugin = exports.Plugin.create(md);
             this.plugins[name] = plugin;
         }
@@ -336,7 +482,9 @@ exports.Catalog = SC.Object.extend({
     loadPlugin: function(pluginName, callback) {
         var p = tiki.async(pluginName);
         if (callback) {
-            p.then(callback);
+            p.then(callback, function(reason) {
+                console.error("Plugin loading canceled: ", reason);
+            });
         }
     },
 
@@ -363,129 +511,6 @@ exports.Catalog = SC.Object.extend({
             this.load(data);
         }
         params.callback(this, response);
-    },
-
-    _unregister: function(plugin) {
-        plugin.unregister();
-    },
-    
-    /**
-     * Figure out which plugins depend on a given plugin. This
-     * will allow the reload behavior to unregister/reregister
-     * all of the plugins that depend on the one being reloaded.
-     */
-    _findDependents: function(pluginName, pluginList, dependents) {
-        self = this;
-        pluginList.forEach(function(testPluginName) {
-            if (testPluginName == pluginName) {
-                return;
-            }
-            var plugin = self.plugins[testPluginName];
-            if (plugin && plugin.depends) {
-                plugin.depends.forEach(function(dependName) {
-                    if (dependName == pluginName && !dependents[testPluginName]) {
-                        dependents[testPluginName] = true;
-                        self._findDependents(testPluginName, pluginList, dependents);
-                    }
-                });
-            }
-        });
-    },
-
-    /**
-     * reloads the named plugin and reinitializes all
-     * dependent plugins
-     */
-    reload: function(pluginName, metadataURL, callback) {
-        var plugin = this.plugins[pluginName];
-
-        // find all of the dependents recursively so that
-        // they can all be unregisterd
-        var dependents = {};
-
-        var self = this;
-
-        var pluginList = object_keys(this.plugins);
-
-        this._findDependents(pluginName, pluginList, dependents);
-
-        // notify everyone that this plugin is going away
-        this._unregister(plugin);
-
-        for (var dependName in dependents) {
-            this._unregister(this.plugins[dependName]);
-        }
-
-        // remove all traces of the plugin
-
-        var nameMatch = new RegExp("^" + pluginName + ":");
-
-        _removeFromList(nameMatch, tiki.scripts);
-        _removeFromList(nameMatch, tiki.modules,
-            function(module) {
-                delete tiki._factories[module];
-            });
-        _removeFromList(nameMatch, tiki.stylesheets);
-        _removeFromList(new RegExp("^" + pluginName + "$"), tiki.packages);
-
-        var promises = tiki._promises;
-
-        delete promises.catalog[pluginName];
-        delete promises.loads[pluginName];
-        _removeFromObject(nameMatch, promises.modules);
-        _removeFromObject(nameMatch, promises.scripts);
-        _removeFromObject(nameMatch, promises.stylesheets);
-
-        delete tiki._catalog[pluginName];
-
-        // clear the sandbox of modules from all of the dependent plugins
-        var fullModList = [];
-        var sandbox = tiki.sandbox;
-
-        var i = sandbox.modules.length;
-        var dependRegexes = [];
-        for (dependName in dependents) {
-            dependRegexes.push(new RegExp("^" + dependName + ":"));
-        }
-
-        while (--i >= 0) {
-            var item = sandbox.modules[i];
-            if (nameMatch.exec(item)) {
-                fullModList.push(item);
-            } else {
-                var j = dependRegexes.length;
-                while (--j >= 0) {
-                    if (dependRegexes[j].exec(item)) {
-                        fullModList.push(item);
-                        break;
-                    }
-                }
-            }
-        }
-
-        // make a private Tiki call that clears these
-        // modules from the module cache in the sandbox.
-        sandbox.clear.apply(sandbox, fullModList);
-
-        // reload the plugin metadata
-        this.loadMetadata(metadataURL,
-            function() {
-                // actually load the plugin, so that it's ready
-                // for any dependent plugins
-                tiki.async(pluginName).then(function() {
-                    // reregister all of the dependent plugins
-                    for (dependName in dependents) {
-                        self.plugins[dependName].register();
-                    }
-                    
-                    if (callback) {
-                        // at long last, reloading is done.
-                        callback();
-                    }
-                });
-            }
-        );
-
     }
 });
 

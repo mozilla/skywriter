@@ -25,35 +25,36 @@
 var SC = require('sproutcore/runtime').SC;
 var plugins = require("plugins");
 var t = require("core_test");
+var test = require("core_test:system/test");
 
 t.module("plugins");
 
-t.test("extension points are created as needed", function() {
+exports["test extension points are created as needed"] = function() {
     var catalog = plugins.Catalog.create();
     var ep = catalog.getExtensionPoint("foobar!");
     t.equals("foobar!", ep.get("name"), "Expected name to be set properly");
     t.equals(ep, catalog.get("points")['foobar!'], 
         "Expected ep to be saved in catalog");
-});
+};
 
-t.test("can retrieve list of extensions directly", function() {
+exports["test can retrieve list of extensions directly"] = function() {
     var catalog = plugins.Catalog.create();
     // we know for sure that there are "extensionpoint" extensions
     // defined, because they are defined in builtins.
     var extensions = catalog.getExtensions("extensionpoint");
     t.ok(extensions.length > 0, "Expected extension points to be there");
-});
+};
 
-t.test("can retrieve an extension by key", function() {
+exports["test can retrieve an extension by key"] = function() {
     var catalog = plugins.Catalog.create();
     var ext = catalog.getExtensionByKey("extensionpoint", "startup");
     t.equals("startup", ext.get("name"), 
         "Name should be startup, since that's what we looked up");
     t.equals("plugins#startupHandler", ext.get("register"),
         "activation handler pointer should be set");
-});
+};
 
-t.test("can set a handler for an extension point", function() {
+exports["test can set a handler for an extension point"] = function() {
     var catalog = plugins.Catalog.create();
     catalog.load({
         TestPlugin: {
@@ -68,9 +69,9 @@ t.test("can set a handler for an extension point", function() {
     });
     var ep = catalog.getExtensionPoint("startup");
     t.equals(ep.handlers.length, 2);
-});
+};
 
-t.test("activation/deactivation handlers are called", function() {
+exports["test activation/deactivation handlers are called"] = function() {
     exports.loadedCount = 0;
     exports.unregisterdCount = 0;
     
@@ -100,11 +101,11 @@ t.test("activation/deactivation handlers are called", function() {
         }
     });
     t.equals(exports.loadedCount, 2, "Expected both plugins to be registerd");
-    catalog._unregister(catalog.plugins["bespin"]);
+    catalog.plugins["bespin"].unregister();
     t.equals(exports.unregisterdCount, 2, "Expected both to be unregisterd");
-});
+};
 
-t.test("can retrieve factory objects from the catalog", function() {
+exports["test can retrieve factory objects from the catalog"] = function() {
     var catalog = plugins.Catalog.create();
     catalog.load({
         bespin: {
@@ -151,11 +152,11 @@ t.test("can retrieve factory objects from the catalog", function() {
     
     obj = catalog.getObject("simpleFunction");
     t.equals(obj.name, "just arbitrary");
-});
+};
 
-t.test("can find dependents of a plugin", function() {
+exports["test can find dependents of a plugin"] = function() {
     var catalog = plugins.Catalog.create();
-    catalog.plugins = {
+    catalog.load({
         icecream: {
             depends: ['freezer', 'milk']
         },
@@ -172,23 +173,23 @@ t.test("can find dependents of a plugin", function() {
         },
         sun: {},
         other: {}
-    };
+    });
     var dependents = {};
     var pluginList = ['icecream', 'milk', 'freezer', 'ge', 
         'electricity', 'cow', 'sun', 'other'];
-    catalog._findDependents('icecream', pluginList, dependents);
+    catalog.plugins.icecream._findDependents(pluginList, dependents);
     t.deepEqual(dependents, {}, "for icecream");
     
     dependents = {};
-    catalog._findDependents('sun', pluginList, dependents);
+    catalog.plugins.sun._findDependents(pluginList, dependents);
     t.deepEqual(dependents, {
         electricity: true, freezer: true, icecream: true
     }, "for sun");
     
     dependents = {};
-    catalog._findDependents('other', pluginList, dependents);
+    catalog.plugins.other._findDependents(pluginList, dependents);
     t.deepEqual(dependents, {}, "for other");
-});
+};
 
 exports.loadedCount = 0;
 exports.unregisterdCount = 0;
@@ -240,8 +241,7 @@ MyObserver = SC.Object.extend({
     }
 });
 
-// this test needs to use the async mechanism when it arrives.
-t.test("plugins can observe an extension", function() {
+exports["test plugins can observe an extension"] = function() {
     var catalog = plugins.Catalog.create();
     catalog.load({
         bespin: {
@@ -273,6 +273,23 @@ t.test("plugins can observe an extension", function() {
     
     ob.makeConnection();
     t.stop(1000);
-});
+};
 
-t.plan.run();
+// this requires a development server setup at this point.
+exports["test reload hook is called when a plugin is reloaded"] = function() {
+    plugins.catalog.loadMetadata("/server/plugin/register/tests",
+        t.asyncTester(function() {
+            plugins.catalog.loadPlugin("BespinTesting1", t.asyncTester(function() {
+                t.ok(exports.Testing1Reloaded == undefined, "flag should not be set now");
+                plugins.catalog.plugins.BespinTesting1.reload(
+                 t.asyncTester(function() {
+                    t.ok(exports.Testing1Reloaded, "flag should be set after reload");
+                    t.start();
+                }));
+            }));
+        })
+    );
+    t.stop(1000);
+};
+
+test.run(exports);

@@ -12,6 +12,14 @@ reasons:
    things *look* right
 3. The docs still need to be reviewed.
 
+## Plugin System Tests ##
+
+The plugin system can't use the PluginDev test infrastructure, since PluginDev
+itself is a plugin. To run the plugin system tests, you need to fire up
+the server and go to:
+
+http://localhost:4020/static/bespin/en/current/tests/plugins.html
+
 ## Bespin Embedded ##
 
 Start by creating a new release:
