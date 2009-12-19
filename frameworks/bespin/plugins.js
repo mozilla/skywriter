@@ -444,9 +444,6 @@ exports.Catalog = SC.Object.extend({
     load: function(metadata) {
         for (var name in metadata) {
             var md = metadata[name];
-            if (md.active === undefined) {
-                md.active = true;
-            }
             md.catalog = this;
             if (md.provides) {
                 var provides = md.provides;
@@ -510,7 +507,9 @@ exports.Catalog = SC.Object.extend({
             }
             this.load(data);
         }
-        params.callback(this, response);
+        if (params.callback) {
+            params.callback(this, response);
+        }
     }
 });
 

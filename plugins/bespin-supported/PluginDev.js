@@ -47,7 +47,7 @@ testNames.forEach(function(name) {
 * Reloads the named plugin, calling the callback when it's complete.
 */
 exports.reload = function(pluginName, callback) {
-    pluginCatalog.reload(pluginName, 
+    pluginCatalog.plugins[pluginName].reload( 
         server.SERVER_BASE_URL + "/plugin/reload/" + pluginName, callback);
 };
 

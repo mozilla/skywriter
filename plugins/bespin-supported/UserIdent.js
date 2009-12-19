@@ -39,6 +39,7 @@ var SC = require("sproutcore/runtime").SC;
 var util = require("bespin:util/util");
 var bespin = require("bespin");
 var server = require("BespinServer").server;
+var plugins = require("bespin:plugins");
 
 /**
  * Begin the login process
@@ -68,10 +69,7 @@ exports.loginController = SC.Object.create({
         exports.userIdentPage.get("mainPane").remove();
 
         // Load the plugin metadata for the user's plugins
-        var body = document.body;
-        var el = document.createElement('script');
-        el.setAttribute('src', "/server/plugin/register/user");
-        body.appendChild(el);
+        plugins.catalog.loadMetadata(server.SERVER_BASE_URL + "/plugin/register/user");
 
         console.log("login succeeded");
     },
