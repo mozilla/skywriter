@@ -80,7 +80,7 @@ exports.testObserving = function() {
     var called = false;
     delegate.textStorageEdited = function(storage, range, characters) {
         called = true;
-        t.same(range, deletionRange, "range passed in to textStorageEdited " +
+        t.deepEqual(range, deletionRange, "range passed in to textStorageEdited " +
             "and the actual range deleted");
         t.equal(characters, "", "replaced characters and the empty string");
     };

@@ -47,8 +47,7 @@ testNames.forEach(function(name) {
 * Reloads the named plugin, calling the callback when it's complete.
 */
 exports.reload = function(pluginName, callback) {
-    pluginCatalog.plugins[pluginName].reload( 
-        server.SERVER_BASE_URL + "/plugin/reload/" + pluginName, callback);
+    pluginCatalog.plugins[pluginName].reload(callback);
 };
 
 /*
@@ -64,6 +63,19 @@ exports.runTest = function(testmodule) {
         pluginName = testmodule;
     }
     exports.reload(pluginName, function() {
+        core_test.module(testmodule);
+        var mod = require(testmodule);
+        // run the tests, logging to the console
+        test.run(mod, console);
+    });
+};
+
+exports.tempTest = function(testmodule) {
+    var pluginName = testmodule.split(":", 1)[0];
+    if (!pluginName) {
+        pluginName = testmodule;
+    }
+    pluginCatalog.loadPlugin(pluginName, function() {
         core_test.module(testmodule);
         var mod = require(testmodule);
         // run the tests, logging to the console
