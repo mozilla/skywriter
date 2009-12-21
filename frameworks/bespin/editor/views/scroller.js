@@ -378,7 +378,6 @@ exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
     mouseExited: function(evt) {
         SC.RunLoop.begin();
         this._isMouseOver = false;
-        this._mouseDownScreenPoint = null;
         this.set('layerNeedsUpdate', true);
         SC.RunLoop.end();
     },
@@ -438,37 +437,41 @@ exports.BespinScrollerView = SC.View.extend(canvas.Canvas, {
         SC.RunLoop.end();
     },
 
+    mouseDragged: function(evt) {
+        SC.RunLoop.begin();
+
+        var eventDistance;
+        switch (this.get('layoutDirection')) {
+        case SC.LAYOUT_HORIZONTAL:
+            eventDistance = evt.clientX;
+            break;
+        case SC.LAYOUT_VERTICAL:
+            eventDistance = evt.clientY;
+            break;
+        default:
+            console.assert(false, "unknown layout direction");
+            break;
+        }
+
+        var eventDelta = eventDistance - this._mouseDownScreenPoint;
+
+        var maximum = this.get('maximum');
+        var gutterLength = this.get('_gutterLength');
+
+        var oldValue = this.get('value');
+        this.set('value', oldValue + eventDelta * maximum / gutterLength);
+
+        // If we didn't actually move, don't update the reference point.
+        if (this.get('value') !== oldValue) {
+            this._mouseDownScreenPoint = eventDistance;
+        }
+
+        SC.RunLoop.end();
+    },
+
     mouseUp: function(evt) {
         this._mouseDownScreenPoint = null;
         this._mouseDownValue = null;
-    },
-
-    mouseMoved: function(evt) {
-        SC.RunLoop.begin();
-        if (this._mouseDownScreenPoint !== null) {
-            var eventDistance;
-            switch (this.get('layoutDirection')) {
-            case SC.LAYOUT_HORIZONTAL:
-                eventDistance = evt.clientX;
-                break;
-            case SC.LAYOUT_VERTICAL:
-                eventDistance = evt.clientY;
-                break;
-            default:
-                console.assert(false, "unknown layout direction");
-                break;
-            }
-            var eventDelta = eventDistance - this._mouseDownScreenPoint;
-
-            var maximum = this.get('maximum');
-            var gutterLength = this.get('_gutterLength');
-
-            this.set('value', this.get('value') +
-                eventDelta * maximum / gutterLength);
-
-            this._mouseDownScreenPoint = eventDistance;
-        }
-        SC.RunLoop.end();
     },
 
     _drawNib: function(ctx) {
