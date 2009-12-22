@@ -78,8 +78,8 @@ exports.LayoutManager = SC.Object.extend({
     _computeStandardLayoutInfo: function(range) {
         var textLines = this.get('textLines');
         var lineHeight = this._lineHeight;
-        var startRow = range.startRow, endRow = range.endRow;
-        for (var i = range.startRow; i <= endRow; i++) {
+        var startRow = range.start.row, endRow = range.end.row;
+        for (var i = startRow; i <= endRow; i++) {
             textLines[i].lineHeight = lineHeight;
         }
     },
@@ -103,16 +103,17 @@ exports.LayoutManager = SC.Object.extend({
     _recomputeEntireLayout: function() {
         var lines = this.get('textStorage').get('lines');
         this._recomputeLayoutForRange({
-            startRow:       0,
-            startColumn:    0,
-            endRow:         lines.length - 1,
-            endColumn:      lines[lines.length - 1].length
+            start:  { row: 0, column: 0 },
+            end:    {
+                row:    lines.length - 1,
+                column: lines[lines.length - 1].length
+            }
         });
     },
 
     _recomputeLayoutForRange: function(range) {
-        var startRow = range.startRow;
-        var rowCount = range.endRow - startRow + 1;
+        var startRow = range.start.row;
+        var rowCount = range.end.row - startRow + 1;
         var textStorageLines = this.get('textStorage').get('lines');
         var newTextLines = [];
         for (var i = 0; i < rowCount; i++) {
@@ -210,13 +211,17 @@ exports.LayoutManager = SC.Object.extend({
         // extensions as well
         var lineHeight = this._lineHeight;
         var characterWidth = this._characterWidth;
-        var margin = this.get('margin')
+        var margin = this.get('margin');
         var x = rect.x - margin.left, y = rect.y - margin.top;
         return {
-            startRow:       Math.max(Math.floor(y / lineHeight), 0),
-            endRow:         Math.ceil((y + rect.height) / lineHeight),
-            startColumn:    Math.max(Math.floor(x / characterWidth), 0),
-            endColumn:      Math.ceil((x + rect.width) / characterWidth)
+            start:  {
+                row:    Math.max(Math.floor(y / lineHeight), 0),
+                column: Math.max(Math.floor(x / characterWidth), 0)
+            },
+            end:    {
+                row:    Math.ceil((y + rect.height) / lineHeight),
+                column: Math.ceil((x + rect.width) / characterWidth)
+            }
         };
     },
 
@@ -286,21 +291,22 @@ exports.LayoutManager = SC.Object.extend({
     textStorageEdited: function(sender, range, characters) {
         // Remove text lines as appropriate.
         var insertedLines = characters.split("\n");
-        var startRow = range.startRow, endRow = range.endRow;
+        var startRow = range.start.row, endRow = range.end.row;
         var rowsToDelete = endRow - startRow + 1 - insertedLines.length;
         if (rowsToDelete > 0) {
             this.get('textLines').removeAt(startRow + insertedLines.length,
                 rowsToDelete);
         }
 
-        var startColumn = range.startColumn;
+        var startColumn = range.start.column;
         var insertedEndRow = startRow + insertedLines.length - 1;
         this._recomputeLayoutForRange({
-            startRow:       startRow,
-            startColumn:    startColumn,
-            endRow:         insertedEndRow,
-            endColumn:      (startRow === insertedEndRow ? startColumn : 0) +
+            start:  range.start,
+            end:    {
+                row:    insertedEndRow,
+                column: (startRow === insertedEndRow ? startColumn : 0) +
                             insertedLines[insertedLines.length - 1].length
+            }
         });
     }
 });

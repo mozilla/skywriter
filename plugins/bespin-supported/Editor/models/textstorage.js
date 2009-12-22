@@ -50,10 +50,11 @@ exports.TextStorage = SC.Object.extend({
         if (value !== undefined) {
             var rowCount = lines.length;
             this.replaceCharacters({
-                startRow:       0,
-                startColumn:    0,
-                endRow:         rowCount - 1,
-                endColumn:      lines[rowCount - 1].length
+                start:  { row: 0, column: 0 },
+                end:    {
+                    row:    rowCount - 1,
+                    column: lines[rowCount - 1].length
+                }
             }, value);
         }
 
@@ -63,11 +64,11 @@ exports.TextStorage = SC.Object.extend({
     replaceCharacters: function(range, characters) {
         var addedLines = characters.split("\n");
         var lines = this.get('lines');
-        var startRow = range.startRow, endRow = range.endRow;
-        addedLines[0] = lines[startRow].substring(0, range.startColumn) +
+        var startRow = range.start.row, endRow = range.end.row;
+        addedLines[0] = lines[startRow].substring(0, range.start.column) +
             addedLines[0];
         addedLines[addedLines.length - 1] +=
-            lines[endRow].substring(range.endColumn);
+            lines[endRow].substring(range.end.column);
 
         lines.replace(startRow, endRow - startRow + 1, addedLines);
 
@@ -78,12 +79,7 @@ exports.TextStorage = SC.Object.extend({
     },
 
     insertCharacters: function(position, characters) {
-        this.replaceCharacters({
-            startRow:       position.row,
-            startColumn:    position.column,
-            endRow:         position.row,
-            endColumn:      position.column
-        }, characters);
+        this.replaceCharacters({ start: position, end: position }, characters);
     },
 
     deleteCharacters: function(range) {

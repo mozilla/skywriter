@@ -58,7 +58,7 @@ exports.EditorView = SC.View.extend(Canvas, {
         context.font = theme.editorTextFont;
 
         var range = this._invalidRange;
-        var startRow = range.startRow, endRow = range.endRow;
+        var startRow = range.start.row, endRow = range.end.row;
         for (var row = startRow; row <= endRow; row++) {
             context.fillStyle = theme.backgroundStyle;
             var lineRect = layoutManager.lineRectForRow(row);
@@ -74,13 +74,13 @@ exports.EditorView = SC.View.extend(Canvas, {
             // text.
             var characters = textLine.characters;
             var length = characters.length;
-            var startColumn = row == startRow ? range.startColumn :
-                visibleRange.startColumn;
+            var startColumn = row == startRow ? range.start.column :
+                visibleRange.start.column;
             if (startColumn >= length) {
                 continue;
             }
-            var endColumn = row == endRow ? range.endColumn :
-                visibleRange.endColumn;
+            var endColumn = row == endRow ? range.end.column :
+                visibleRange.end.column;
             if (endColumn >= length) {
                 endColumn = length - 1;
             }
@@ -131,20 +131,20 @@ exports.EditorView = SC.View.extend(Canvas, {
         var textLineLength = textLines.length;
 
         this._selectedRanges.forEach(function(range) {
-            if (range.startRow >= textLineLength) {
-                range.startRow = textLineLength;
+            if (range.start.row >= textLineLength) {
+                range.start.row = textLineLength;
             }
-            var startLine = textLines[range.startRow];
-            if (range.startColumn > startLine.characters.length) {
-                range.startColumn = startLine.characters.length;
+            var startLine = textLines[range.start.row];
+            if (range.start.column > startLine.characters.length) {
+                range.start.column = startLine.characters.length;
             }
 
-            if (range.endRow >= textLineLength) {
-                range.endRow = textLineLength;
+            if (range.end.row >= textLineLength) {
+                range.end.row = textLineLength;
             }
-            var endLine = textLines[range.endRow];
-            if (range.endColumn > endLine.characters.length) {
-                range.endColumn = endLine.characters.length;
+            var endLine = textLines[range.end.row];
+            if (range.end.column > endLine.characters.length) {
+                range.end.column = endLine.characters.length;
             }
         });
     },
@@ -264,9 +264,8 @@ exports.EditorView = SC.View.extend(Canvas, {
     init: function() {
         this.superclass();
         this._invalidRange = null;
-        this._selectedRanges = [
-            { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 }
-        ];
+        this._selectedRanges =
+            [ { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } } ];
 
         // Allow the user to change the fields of the padding object without
         // screwing up the prototype.
@@ -298,14 +297,7 @@ exports.EditorView = SC.View.extend(Canvas, {
         });
 
         var position = this._selectionPositionForPoint(point);
-        this._selectedRanges = [
-            {
-                startRow:       position.row,
-                startColumn:    position.column,
-                endRow:         position.row,
-                endColumn:      position.column
-            }
-        ];
+        this._selectedRanges = [ { start: position, end: position } ];
         this._selecting = true;
         this._selectionPivot = { row: position.row, column: position.column };
     },
@@ -330,19 +322,9 @@ exports.EditorView = SC.View.extend(Canvas, {
         var pivot = this._selectionPivot;
         if (position.row < pivot.row ||
             (position.row === pivot.row && position.column < pivot.column)) {
-            this._selectedRanges[0] = {
-                startRow:       position.row,
-                startColumn:    position.column,
-                endRow:         pivot.row,
-                endColumn:      pivot.column
-            };
+            this._selectedRanges[0] = { start: position, end: pivot };
         } else {
-            this._selectedRanges[0] = {
-                startRow:       pivot.row,
-                startColumn:    pivot.column,
-                endRow:         position.row,
-                endColumn:      position.column
-            };
+            this._selectedRanges[0] = { start: position, end: pivot };
         }
     },
 

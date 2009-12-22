@@ -85,10 +85,8 @@ exports.testLayoutAnnotations = function() {
         "second annotation and the empty string");
 
     t.deepEqual(annotationResults[1].range, {
-        startRow:       0,
-        startColumn:    0,
-        endRow:         0,
-        endColumn:      0
+        start:  { row: 0, column: 0 },
+        end:    { row: 0, column: 0 }
     }, "the range passed into the second annotation and [ 0 0, 0 0 ]");
 };
 
@@ -117,19 +115,15 @@ exports.testLayoutComputation = function() {
     receivedTextLines = null;
     receivedRange = null;
     textStorage.replaceCharacters({
-        startRow:       1,
-        startColumn:    1,
-        endRow:         2,
-        endColumn:      2
+        start:  { row: 1, column: 1 },
+        end:    { row: 2, column: 2 }
     }, "i");
 
     t.equal(textStorage.get('value'), "foo\nbiz\nboo\n",
         "the text storage value and \"foo\\nbiz\\nboo\\n\"");
     t.deepEqual(receivedRange, {
-        startRow:       1,
-        startColumn:    1,
-        endRow:         1,
-        endColumn:      2
+        start:  { row: 1, column: 1 },
+        end:    { row: 1, column: 2 }
     }, "the range received by the annotation and [ 1 1, 1 2 ]");
     t.equal(receivedTextLines.length, 4, "the number of lines received by " +
         "the annotation and 4");
@@ -165,10 +159,8 @@ exports.testDimensionsCalculation = function() {
         "character width times the length of the longest line");
 
     textStorage.replaceCharacters({
-        startRow:       2,
-        startColumn:    0,
-        endRow:         3,
-        endColumn:      "Santa Claus Conquers the Martians".length
+        start:  { row: 2, column: 0 },
+        end:    { row: 3, column: "Santa Claus Conquers the Martians".length }
     }, "SuperBabies: Baby Geniuses 2");
 
     rect = layoutManager.boundingRect();

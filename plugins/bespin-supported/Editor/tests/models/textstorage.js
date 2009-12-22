@@ -39,10 +39,14 @@ exports.testCharacterMutators = function() {
     t.equal(lines[3].length, 0, "length of last row and 0");
 
     storage.deleteCharacters({
-        startRow:       1,
-        startColumn:    1,
-        endRow:         2,
-        endColumn:      2
+        start: {
+            row:    1,
+            column: 1
+        },
+        end: {
+            row:    2,
+            column: 2
+        }
     });
     t.equal(storage.get('value'), "foo\nbz\n",
         "the result of deleting characters from a text storage object and " +
@@ -52,10 +56,14 @@ exports.testCharacterMutators = function() {
     t.equal(lines[2].length, 0, "length of last row and 0");
 
     storage.replaceCharacters({
-        startRow:       0,
-        startColumn:    2,
-        endRow:         1,
-        endColumn:      1
+        start: {
+            row:    0,
+            column: 2
+        },
+        end: {
+            row:    1,
+            column: 1
+        }
     }, "obarba");
     t.equal(storage.get('value'), "foobarbaz\n",
         "the result of replacing characters in a text storage object and " +
@@ -71,10 +79,14 @@ exports.testObserving = function() {
     storage.get('delegates').push(delegate);
 
     var deletionRange = {
-        startRow:       0,
-        startColumn:    1,
-        endRow:         2,
-        endColumn:      2
+        start: {
+            row:    0,
+            column: 1
+        },
+        end: {
+            row:    2,
+            column: 2
+        }
     };
 
     var called = false;
