@@ -27,7 +27,7 @@ var Canvas = require('bespin:editor/mixins/canvas').Canvas;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 
 exports.EditorView = SC.View.extend(Canvas, {
-    _backgroundValid: false,
+    _backgroundInvalid: false,
     _invalidRange: null,
     _layout: { left: 0, top: 0, width: 0, height: 0 },
 
@@ -98,25 +98,10 @@ exports.EditorView = SC.View.extend(Canvas, {
         context.restore();
     },
 
-    _erasePadding: function(context, visibleFrame) {
-        var padding = this.get('padding');
-        var paddingRight = padding.right;
-        var rect = this.get('layoutManager').boundingRect();
-        var contentWidth = rect.width, contentHeight = rect.height;
-
-        context.save();
-
-        context.fillStyle = this.get('theme').backgroundStyle;
-        context.fillRect(contentWidth, 0, paddingRight, contentHeight);
-        context.fillRect(0, rect.height, contentWidth + paddingRight,
-            padding.bottom);
-
-        context.restore();
-    },
-
     // Invalidates the entire visible frame. Does not automatically mark the
     // editor for repainting.
     _invalidate: function() {
+        this._backgroundInvalid = true;
         this._invalidRange = this.get('layoutManager').
             characterRangeForBoundingRect(this.get('clippingFrame'));
     },
@@ -260,18 +245,17 @@ exports.EditorView = SC.View.extend(Canvas, {
      * used to draw as little as possible.
      */
     drawRect: function(context, visibleFrame) {
-        if (!this._backgroundValid) {
+        if (this._backgroundInvalid) {
             context.fillStyle = this.get('theme').backgroundStyle;
             context.fillRect(visibleFrame.x, visibleFrame.y,
                 visibleFrame.width, visibleFrame.height);
-            this._backgroundValid = true;
+            this._backgroundInvalid = false;
         }
 
         if (this._invalidRange === null) {
             return;
         }
 
-        this._erasePadding(context, visibleFrame);
         this._drawLines(context, visibleFrame);
 
         this._invalidRange = null;
