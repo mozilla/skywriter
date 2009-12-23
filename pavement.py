@@ -74,21 +74,40 @@ options(
     server_pavement=lambda: options.server.directory / "pavement.py",
     builddir=path("tmp"),
     install_sproutcore=Bunch(
-        git=False
+        git=False,
+        force=False
     ),
     jsdocs=Bunch(
         download_url="http://jsdoc-toolkit.googlecode.com/files/jsdoc_toolkit-2.3.0.zip",
         download_location=path("external") / "jsdoc_toolkit-2.3.0.zip",
         dest_dir=path("external") / "jsdoc-toolkit"
-    )
+    ),
+    sproutcore_snapshot_url="http://ftp.mozilla.org/pub/mozilla.org/labs/bespin/dev/sproutcore-20091223.tgz"
 )
 
 @task
-@cmdopts([('git', 'g', 'use git to download')])
+@cmdopts([('git', 'g', 'use git to download'), ('force', 'f', 'force download of snapshot')])
 def install_sproutcore(options):
     """Installs the versions of SproutCore that are required.
     Can optionally download using git, so that you can keep
     up to date easier."""
+    
+    if not options.git:
+        snapshot = path("sproutcore")
+        if snapshot.exists():
+            if options.force:
+                snapshot.rmtree()
+            else:
+                info("SproutCore snapshot installed already.")
+                return
+        info("Downloading SproutCore Snapshot")
+        tarball = urllib2.urlopen(options.sproutcore_snapshot_url)
+        base_name = path(options.sproutcore_snapshot_url).basename()
+        info("Extracting SproutCore Snapshot")
+        tar = tarfile.open(name=base_name, fileobj=StringIO(tarball.read()))
+        tar.extractall('.')
+        tar.close()
+        return
 
     def get_component(base_name, dest_name, dest_path=".", branch=None, account="dangoor"):
         dest_complete = path(dest_path) / dest_name
@@ -204,6 +223,16 @@ def create_db(options):
 @task
 def start(options):
     """Starts the BespinServer on localhost port 4020 for development.
+    
+    Go to http://localhost:4020/editor
+    to launch the editor app.
+    
+    Also, if you need to hack on SproutCore and have SC source installed
+    (paver install_sproutcore -g) you can run
+    
+    paver server.abbot=1 start
+    
+    to launch Abbot.
     """
     if options.server.abbot:
         command = "abbot/bin/sc-server"
@@ -263,8 +292,6 @@ def sc_build(options):
     finally:
         resetfiles()
 
-@task
-def sc2(options):
     builddir = options.builddir
     
     snapshot = path("sproutcore")
