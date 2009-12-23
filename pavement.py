@@ -37,7 +37,16 @@ import re
 import zipfile
 
 from paver.easy import *
+from paver.setuputils import setup
 import paver.virtual
+
+from bespinbuild.combiner import combine_sproutcore_files, combine_stylesheets, combine_files
+
+setup(
+    name="BespinBuild",
+    version="0.5.2",
+    packages=["bespinbuild"]
+)
 
 options(
     version=Bunch(
@@ -57,7 +66,8 @@ options(
         async=False,
         config_file=path("devconfig.py"),
         directory=path("../bespinserver/").abspath(),
-        clientdir=path.getcwd()
+        clientdir=path.getcwd(),
+        abbot=False
     ),
     server_pavement=lambda: options.server.directory / "pavement.py",
     builddir=path("tmp"),
@@ -193,10 +203,40 @@ def create_db(options):
 def start(options):
     """Starts the BespinServer on localhost port 4020 for development.
     """
-    command = "abbot/bin/sc-server"
-    popen = subprocess.Popen(command, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
-    call_pavement("../bespinserver/pavement.py", ["clientdir=../bespinclient", "start"])
-    popen.wait()
+    if options.server.abbot:
+        command = "abbot/bin/sc-server"
+        popen = subprocess.Popen(command, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
+        call_pavement("../bespinserver/pavement.py", ["clientdir=../bespinclient", 
+            "server_base_url=server/", "start"])
+        popen.wait()
+    else:
+        static = _update_static()
+        call_pavement("../bespinserver/pavement.py", ["clientdir=../bespinclient", 
+            "staticdir=" + static, "server.port=4020", "start"])
+
+def _update_static():
+    static = path("tmp") / "static"
+    static.rmtree()
+    static.mkdir()
+    for f in path("sproutcore").glob("*"):
+        f.copy(static)
+    
+    editor_dir = static / "editor"
+    editor_dir.mkdir()
+    bt = path("bespinbuild")
+    inline = (bt / "inline.js").bytes()
+    index = (bt / "devindex.html").bytes()
+    index = index.replace("{{inline}}", inline)
+    (editor_dir / "index.html").write_bytes(index)
+    
+    combined = combine_files("editor", path("apps") / "editor", add_main=True)
+    (editor_dir / "editor.js").write_bytes(combined)
+    
+    combined = combine_files("bespin", path("frameworks") / "bespin")
+    (static / "bespin.js").write_bytes(combined)
+    
+    return static
+    
     
 @task
 def build_docs(options):
@@ -208,25 +248,45 @@ def build_docs(options):
     docsdir = builddir / "docs"
     sh("growl.py . ../%s" % docsdir, cwd="docs")
     
+
 @task
+@needs(["install_sproutcore", "hidefiles"])
 def sc_build(options):
-    sh("abbot/bin/sc-build -rc editor")
+    """Create a sproutcore-snapshot from SproutCore source."""
+    try:
+        sh("abbot/bin/sc-build -rc editor")
+    finally:
+        resetfiles()
+
+@task
+def sc2(options):
+    builddir = options.builddir
     
-SPROUTCORE_INLINE="""
-var ENV = {"platform":"classic","mode":"production"};
-var SC=SC||{BUNDLE_INFO:{},LAZY_INSTANTIATION:{}};SC.json=JSON;SC.browser=(function(){var c=navigator.userAgent.toLowerCase();
-var a=(c.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/)||[])[1];var b={version:a,safari:(/webkit/).test(c)?a:0,opera:(/opera/).test(c)?a:0,msie:(/msie/).test(c)&&!(/opera/).test(c)?a:0,mozilla:(/mozilla/).test(c)&&!(/(compatible|webkit)/).test(c)?a:0,mobileSafari:(/apple.*mobile.*safari/).test(c)?a:0,windows:!!(/(windows)/).test(c),mac:!!((/(macintosh)/).test(c)||(/(mac os x)/).test(c)),language:(navigator.language||navigator.browserLanguage).split("-",1)[0]};
-b.current=b.msie?"msie":b.mozilla?"mozilla":b.safari?"safari":b.opera?"opera":"unknown";
-return b})();SC.bundleDidLoad=function(a){var b=this.BUNDLE_INFO[a];if(!b){b=this.BUNDLE_INFO[a]={}
-}b.loaded=true};SC.bundleIsLoaded=function(a){var b=this.BUNDLE_INFO[a];return b?!!b.loaded:false
-};SC.loadBundle=function(){throw"SC.loadBundle(): SproutCore is not loaded."};SC.setupBodyClassNames=function(){var e=document.body;
-if(!e){return}var c,a,f,b,g,d;c=SC.browser.current;a=SC.browser.windows?"windows":SC.browser.mac?"mac":"other-platform";
-d=document.documentElement.style;f=(d.MozBoxShadow!==undefined)||(d.webkitBoxShadow!==undefined)||(d.oBoxShadow!==undefined)||(d.boxShadow!==undefined);
-b=(d.MozBorderRadius!==undefined)||(d.webkitBorderRadius!==undefined)||(d.oBorderRadius!==undefined)||(d.borderRadius!==undefined);
-g=e.className?e.className.split(" "):[];if(f){g.push("box-shadow")}if(b){g.push("border-rad")
-}g.push(c);g.push(a);if(SC.browser.mobileSafari){g.push("mobile-safari")}e.className=g.join(" ")
-};
-"""
+    snapshot = path("sproutcore")
+    snapshot.rmtree()
+    snapshot.mkdir()
+    
+    sproutcore_built = builddir / "production" / "build" / "static"
+    
+    combined = combine_sproutcore_files([sproutcore_built / "tiki", sproutcore_built / "sproutcore"], 
+        filters=["welcome", "tests", "docs", "bootstrap", "mobile", "iphone_theme"],
+        manual_maps=[(re.compile(r'tiki/en/\w+/javascript\.js'), "tiki")])
+    
+    output = snapshot / "sproutcore.js"
+    output.write_bytes(combined)
+    
+    combined = combine_stylesheets(sproutcore_built / "sproutcore")
+    output = snapshot / "sproutcore.css"
+    output.write_bytes(combined)
+    
+    combined = combine_stylesheets(sproutcore_built / "core_test")
+    output = snapshot / "core_test.css"
+    output.write_bytes(combined)
+    
+    combined = combine_sproutcore_files([sproutcore_built / "core_test"])
+    output = snapshot / "core_test.js"
+    output.write_bytes(combined)
+    
 BUILD_POSTAMBLE="""tiki.require("bespin:boot");"""
 
 def _find_build_output(toplevel, name):
@@ -311,7 +371,7 @@ BASE_RULES = FilterRules()
 BASE_RULES.add(Include("bespin"))
 BASE_RULES.add(Include("tiki"))
 BASE_RULES.add(Include("sproutcore"))
-BASE_RULES.add(Include("browserup"))
+BASE_RULES.add(Include("core_test"))
 BASE_RULES.add(Exclude("tiki/frameworks/system/experimental"))
 BASE_RULES.add(Exclude("sproutcore/frameworks", [
     RE("datejs/.*"),
@@ -330,29 +390,17 @@ BASE_RULES.add(Exclude("sproutcore/frameworks/foundation", [
     "controllers/tree.js",
     RE("debug/.*"),
     # RE("mixins/.*"),
-    "mixins/button.js",
     # "mixins/control.js",
-    "mixins/inline_text_field.js",
     # "mixins/string.js",
     # "mixins/tree_item_content.js",
     # "private/tree_item_observer.js",
     "system/datetime.js",
     "system/json.js",
-    RE("tests/.*"),
-    RE("validators/.*"),
+    RE("tests/.*")
 ]))
 BASE_RULES.add(Exclude("sproutcore/frameworks/desktop", [
     RE("debug/.*"),
-    "mixins/collection_group.js",
-    "mixins/collection_row_delegate.js",
-    "mixins/collection_view_delegate.js",
-    RE("panes/.*"),
-    RE("tests/.*"),
-    RE("views/.*")
-]))
-BASE_RULES.add(Include("sproutcore/frameworks/desktop", [
-    "views/scroll.js",
-    "views/scroller.js"
+    RE("tests/.*")
 ]))
 
 @task
@@ -377,13 +425,8 @@ def hidefiles():
             f.rename(f.splitext()[0] + ".js")
 
 @task
-@needs(['hidefiles', 'build_docs'])
+@needs(['build_docs'])
 def release_embed(options):
-    try:
-        sc_build(options)
-    finally:
-        resetfiles()
-        
     builddir = options.builddir
     if not builddir.exists():
         builddir.mkdir()

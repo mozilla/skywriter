@@ -85,7 +85,7 @@ exports.Canvas = {
     minimumRedrawDelay: 1000.0 / 30.0,
 
     renderLayout: function(context, firstTime) {
-        sc_super();
+        this.sc_super();
 
         var layerFrame = this.get('layerFrame');
         if (firstTime) {

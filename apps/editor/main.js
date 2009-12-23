@@ -28,7 +28,8 @@ var app = require("view").app;
 var catalog = require("bespin:plugins").catalog;
 
 main = function() {
-    catalog.loadMetadata("/server/plugin/register/defaults",
+    baseurl = window.SERVER_BASE_URL == undefined ? '/server' : SERVER_BASE_URL;
+    catalog.loadMetadata(baseurl + "/plugin/register/defaults",
         function(sender, response) {
             if (response.isError) {
                 throw "failed to load plugin metadata: " +
@@ -45,3 +46,4 @@ main = function() {
         });
 };
 
+exports.main = main;

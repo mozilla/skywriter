@@ -17,3 +17,8 @@ config :editor,
   :factory_format => :function
 
 proxy '/server/', :to => 'localhost:8080', :url => "/"
+
+mode :production do
+  config :all,
+    :minify => false
+end

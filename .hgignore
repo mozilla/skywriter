@@ -2,6 +2,7 @@
 ^.Python
 ^.project
 ^.settings
+\.pyc$
 ^.pydevproject
 ^bin
 ^lib
@@ -19,4 +20,6 @@
 ^frameworks/core_test
 ^abbot
 ^external
+^sproutcore
+^BespinBuild.egg-info
 
