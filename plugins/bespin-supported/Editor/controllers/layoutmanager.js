@@ -123,7 +123,7 @@ exports.LayoutManager = SC.Object.extend({
 
         this._computeStandardLayoutInfo(range);
         this._recalculateDimensions();
-        this._runAnnotations(range);
+        range = this._runAnnotations(range);
 
         var delegate = this.get('delegate');
         if (!SC.none(delegate)) {
@@ -134,8 +134,9 @@ exports.LayoutManager = SC.Object.extend({
     _runAnnotations: function(range) {
         var textLines = this.get('textLines');
         this._layoutAnnotations.forEach(function(annotation) {
-            annotation.annotateLayout(textLines, range);
+            range = annotation.annotateLayout(textLines, range);
         });
+        return range;
     },
 
     /**
@@ -289,24 +290,34 @@ exports.LayoutManager = SC.Object.extend({
     },
 
     textStorageEdited: function(sender, range, characters) {
-        // Remove text lines as appropriate.
         var insertedLines = characters.split("\n");
-        var startRow = range.start.row, endRow = range.end.row;
-        var rowsToDelete = endRow - startRow + 1 - insertedLines.length;
+
+        // Remove text lines as appropriate.
+        var startRow = range.start.row;
+        var rowsToDelete = range.end.row - startRow + 1 - insertedLines.length;
         if (rowsToDelete > 0) {
             this.get('textLines').removeAt(startRow + insertedLines.length,
                 rowsToDelete);
         }
 
-        var startColumn = range.start.column;
+        // Invalidate the appropriate range.
+        var lines = this.get('textStorage').get('lines');
         var insertedEndRow = startRow + insertedLines.length - 1;
         this._recomputeLayoutForRange({
             start:  range.start,
-            end:    {
-                row:    insertedEndRow,
-                column: (startRow === insertedEndRow ? startColumn : 0) +
-                            insertedLines[insertedLines.length - 1].length
-            }
+            end:    startRow === insertedEndRow ?
+                    {
+                        // Fast path: invalidate just the remainder of this
+                        // row.
+                        row:    insertedEndRow,
+                        column: lines[insertedEndRow].length
+                    } :
+                    {
+                        // Insertion or deletion of rows triggers the slow
+                        // path: invalidate positions for the rest of the file.
+                        row:    lines.length - 1,
+                        column: lines[lines.length - 1].length
+                    }
         });
     }
 });
