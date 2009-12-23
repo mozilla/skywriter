@@ -24,7 +24,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var app = require("view").app;
 var catalog = require("bespin:plugins").catalog;
 
 main = function() {
@@ -37,11 +36,7 @@ main = function() {
             }
 
             tiki.async('EditorApp').then(function() {
-                var mainPane = app.get('mainPage').get('mainPane');
-                catalog.getObject('applicationcontroller').create({
-                    mainPane: mainPane
-                });
-                mainPane.append();
+                catalog.getObject('applicationcontroller').create();
             });
         });
 };

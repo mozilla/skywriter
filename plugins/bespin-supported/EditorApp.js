@@ -45,9 +45,7 @@ var cliInputView = require('CommandLine:views/cli').cliInputView;
 var INITIAL_TEXT;   // defined at the end of the file to reduce ugliness
 
 exports.applicationController = SC.Object.extend({
-    // The main pane in which to place the app view. This field needs to be
-    // filled in upon instantiating the app controller.
-    mainPane: null,
+    _application: SC.Application.extend(),
 
     _applicationView: DockView.design({
         centerView: BespinScrollView.design({
@@ -57,19 +55,31 @@ exports.applicationController = SC.Object.extend({
         dockedViews: [ cliInputView.design() ]
     }),
 
+    _mainPage: SC.Page.extend({
+        mainPane: SC.MainPane.design({
+            layout: { centerX: 0, centerY: 0, width: 640, height: 480 },
+            childViews: 'applicationView'.w(),
+            applicationView: DockView.design({
+                centerView: BespinScrollView.design({
+                    contentView: EditorView.design()
+                }),
+                dockedViews: [ cliInputView.design() ]
+            })
+        })
+    }),
+
     init: function() {
-        this.superclass();
+        arguments.callee.base.apply(this, arguments);
 
-        var applicationView = this._applicationView.create();
-        this._applicationView = applicationView;
+        this._application = this._application.create();
 
-        var editorView = applicationView.get('centerView').get('contentView');
-
-        editorView.get('layoutManager').get('textStorage').set('value',
-            INITIAL_TEXT);
-        console.log("text changed", editorView);
-
-        this.get('mainPane').appendChild(applicationView);
+        var mainPage = this._mainPage.create();
+        this._mainPage = mainPage;
+        
+        var mainPane = mainPage.get('mainPane');
+        mainPane.setPath('applicationView.centerView.contentView.' +
+            'layoutManager.textStorage.value', INITIAL_TEXT);
+        mainPane.append();
     }
 });
 
