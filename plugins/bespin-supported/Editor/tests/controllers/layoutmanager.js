@@ -203,7 +203,7 @@ exports.testPointToCharacterMapping = function() {
         x: 100000,
         y: topMargin + 4 * lineHeight
     });
-    t.deepEqual(pos, { column: 32, row: 4, partialFraction: 1.0 }, "the " +
+    t.deepEqual(pos, { column: 32, row: 4, partialFraction: 0.0 }, "the " +
         "reported character position and the expected character " +
         "position for a character off the right side of the text area");
 };

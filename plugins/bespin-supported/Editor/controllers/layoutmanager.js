@@ -190,10 +190,10 @@ exports.LayoutManager = SC.Object.extend({
 
         var textLineLength = textLine.characters.length;
         var partialFraction;
-        if (column <= textLineLength) {
+        if (column < textLineLength) {
             partialFraction = clientX % characterWidth / characterWidth;
         } else {
-            partialFraction = 1.0;
+            partialFraction = 0.0;
             column = textLineLength;
         }
 
