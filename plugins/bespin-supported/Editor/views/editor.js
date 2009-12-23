@@ -273,13 +273,12 @@ exports.EditorView = SC.View.extend(Canvas, {
         var textLines = this.get('layoutManager').get('textLines');
         var textLineLength = textLines.length;
 
-        var newSelectedRanges = [];
-        this._selectedRanges.forEach(function(range) {
+        this._replaceSelection(this._selectedRanges.map(function(range) {
             var newStartRow = Math.min(range.start.row, textLineLength);
             var newEndRow = Math.min(range.end.row, textLineLength);
             var startLine = textLines[newStartRow];
             var endLine = textLines[newEndRow];
-            newSelectedRanges.push({
+            return {
                 start:  {
                     row:    newStartRow,
                     column: Math.min(range.start.column,
@@ -290,8 +289,8 @@ exports.EditorView = SC.View.extend(Canvas, {
                     column: Math.min(range.end.column,
                                 endLine.characters.length)
                 }
-            });
-        });
+            };
+        }));
     },
 
     // Returns the character closest to the given point, obeying the selection
