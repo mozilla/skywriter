@@ -36,6 +36,9 @@ var SC = require('sproutcore/runtime').SC;
  * example, to fill the container view).
  */
 exports.Canvas = {
+    _bespin_canvas_lastRedrawTime: null,
+    _bespin_canvas_redrawTimer: null,
+
     _bespin_canvas_frameChanged: function() {
         this.set('layerNeedsUpdate', true);
     }.observes('frame'),
@@ -72,6 +75,14 @@ exports.Canvas = {
             top:    "%@px".fmt(layerFrame.y)
         };
     }.property('layerFrame').cacheable(),
+
+    /**
+     * @property{Number}
+     *
+     * The minimum delay between canvas redraws in milliseconds, equal to 1000
+     * divided by the desired number of frames per second.
+     */
+    minimumRedrawDelay: 1000.0 / 30.0,
 
     renderLayout: function(context, firstTime) {
         sc_super();
@@ -172,6 +183,9 @@ exports.Canvas = {
         context.translate(frame.x - layerFrame.x, frame.y - layerFrame.y);
         this.drawRect(context, visibleFrame);
         context.restore();
+
+        this._bespin_canvas_lastRedrawTime = new Date().getTime();
+
         return true;
     },
 
@@ -186,7 +200,31 @@ exports.Canvas = {
             return;
         }
 
-        this.redraw();
+        this.tryRedraw();
+    },
+
+    tryRedraw: function(context, firstTime) {
+        var now = new Date().getTime();
+        var lastRedrawTime = this._bespin_canvas_lastRedrawTime;
+        var minimumRedrawDelay = this.get('minimumRedrawDelay');
+
+        if (lastRedrawTime === null ||
+                now - lastRedrawTime >= minimumRedrawDelay) {
+            this.redraw();
+            return;
+        }
+
+        var redrawTimer = this._bespin_canvas_redrawTimer;
+        if (redrawTimer !== null && redrawTimer.get('isValid')) {
+            return; // already scheduled
+        }
+
+        this._bespin_canvas_redrawTimer = SC.Timer.schedule({
+            target:     this,
+            action:     this.redraw,
+            interval:   minimumRedrawDelay,
+            repeats:    false
+        });
     }
 };
 
