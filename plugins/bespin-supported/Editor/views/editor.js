@@ -25,6 +25,7 @@
 var SC = require('sproutcore/runtime').SC;
 var Canvas = require('bespin:editor/mixins/canvas').Canvas;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
+var Range = require('utils/range');
 
 exports.EditorView = SC.View.extend(Canvas, {
     _backgroundInvalid: false,
@@ -36,17 +37,85 @@ exports.EditorView = SC.View.extend(Canvas, {
     _lineAscent: 16,
 
     _selectedRanges: null,
-    _selecting: false,
-    _selectionPivot: null,
+    _selectionOrigin: null,
 
     _clippingFrameChanged: function() {
         this._invalidate();
     }.observes('clippingFrame'),
 
+    // Creates a path around the given range of text. Useful for drawing
+    // selections, highlights, and backgrounds.
+    _createPathForRange: function(context, range) {
+        var layoutManager = this.get('layoutManager');
+
+        var startPosition = range.start, endPosition = range.end;
+        var startRow = startPosition.row, endRow = endPosition.row;
+
+        var startCharRect =
+            layoutManager.characterRectForPosition(startPosition);
+        var endCharRect = layoutManager.characterRectForPosition(endPosition);
+
+        if (startRow === endRow) {
+            // Plain rectangle
+            context.beginPath();
+            context.moveTo(startCharRect.x, startCharRect.y);
+            context.lineTo(endCharRect.x, endCharRect.y);
+            context.lineTo(endCharRect.x, endCharRect.y + endCharRect.height);
+            context.lineTo(startCharRect.x,
+                startCharRect.y + startCharRect.height);
+            context.closePath();
+            return;
+        }
+
+        //                _____1__________
+        //  _______3_____|2    _____7_____|8
+        // |4_________5_______|6
+
+        var startLineRect = layoutManager.lineRectForRow(startRow);
+        var endLineRect = layoutManager.lineRectForRow(endRow);
+        var padding = this.get('padding');
+
+        context.beginPath();
+        context.moveTo(startLineRect.x + startLineRect.width +
+            padding.right, startLineRect.y);
+        context.lineTo(startCharRect.x, startCharRect.y);           // 1
+        context.lineTo(startCharRect.x,
+            startCharRect.y + startCharRect.height);                // 2
+        context.lineTo(startLineRect.x,
+            startLineRect.y + startLineRect.height);                // 3
+        context.lineTo(endLineRect.x,
+            endLineRect.y + endLineRect.height);                    // 4
+        context.lineTo(endCharRect.x,
+            endCharRect.y + endCharRect.height);                    // 5
+        context.lineTo(endCharRect.x, endCharRect.y);               // 6
+        context.lineTo(endLineRect.x + endLineRect.width + padding.right,
+            endLineRect.y);                                         // 7
+        context.lineTo(startLineRect.x + startLineRect.width +
+            padding.right, startLineRect.y);                        // 8
+        context.closePath();
+    },
+
+    // Draws a single insertion point.
+    _drawInsertionPoint: function(context, visibleFrame) {
+        var range = this._selectedRanges[0];
+        var rect = this.get('layoutManager').
+            characterRectForPosition(range.start);
+
+        context.save();
+       
+        context.strokeStyle = this.get('theme').cursorStyle;
+        context.beginPath();
+        context.moveTo(rect.x + 0.5, rect.y);
+        context.lineTo(rect.x + 0.5, rect.y + rect.height);
+        context.closePath();
+        context.stroke();
+
+        context.restore();
+    },
+
     _drawLines: function(context, visibleFrame) {
         var layoutManager = this.get('layoutManager');
         var textLines = layoutManager.get('textLines');
-        var margin = layoutManager.get('margin');
         var theme = this.get('theme');
         var lineAscent = this._lineAscent;
 
@@ -60,11 +129,6 @@ exports.EditorView = SC.View.extend(Canvas, {
         var range = this._invalidRange;
         var startRow = range.start.row, endRow = range.end.row;
         for (var row = startRow; row <= endRow; row++) {
-            context.fillStyle = theme.backgroundStyle;
-            var lineRect = layoutManager.lineRectForRow(row);
-            context.fillRect(lineRect.x, lineRect.y, lineRect.width,
-                lineRect.height);
-            
             var textLine = textLines[row];
             if (SC.none(textLine)) {
                 continue;
@@ -74,28 +138,69 @@ exports.EditorView = SC.View.extend(Canvas, {
             // text.
             var characters = textLine.characters;
             var length = characters.length;
-            var startColumn = row == startRow ? range.start.column :
+            var startColumn = row === startRow ? range.start.column :
                 visibleRange.start.column;
             if (startColumn >= length) {
                 continue;
             }
-            var endColumn = row == endRow ? range.end.column :
+            var endColumn = row === endRow ? range.end.column :
                 visibleRange.end.column;
-            if (endColumn >= length) {
-                endColumn = length - 1;
+            if (endColumn > length) {
+                endColumn = length;
             }
 
             // And finally draw the line.
             context.fillStyle = theme.editorTextColor;
-            for (var col = startColumn; col <= endColumn; col++) {
+            for (var col = startColumn; col < endColumn; col++) {
                 var rect = layoutManager.characterRectForPosition({ row: row,
                     column: col });
-                context.fillText(characters.substring(col, col + 1), rect.x,
-                    rect.y + lineAscent);
+                context.fillText(characters.substring(col, col + 1),
+                    rect.x - 0.5, rect.y + lineAscent - 0.5);
             }
         }
         
         context.restore();
+    },
+
+    // Draws the background highlight for selections.
+    _drawSelectionHighlight: function(context, visibleFrame) {
+        var theme = this.get('theme');
+        var fillStyle = this.get('isFirstResponder') ?
+            theme.editorSelectedTextBackground :
+            theme.unfocusedCursorFillStyle;
+
+        context.save();
+
+        var thisEditor = this;
+        this._selectedRanges.forEach(function(range) {
+            context.fillStyle = fillStyle;
+            thisEditor._createPathForRange(context, range);
+            context.fill();
+        });
+
+        context.restore();
+    },
+
+    // Draws either the selection or the insertion point.
+    _drawSelection: function(context, visibleFrame) {
+        var selectedRanges = this._selectedRanges;
+        if (selectedRanges.length === 1 &&
+                Range.isZeroLength(selectedRanges[0])) {
+            this._drawInsertionPoint(context, visibleFrame);
+        } else {
+            this._drawSelectionHighlight(context, visibleFrame); 
+        }
+    },
+
+    // Extends the selection from the origin in the natural way (as opposed to
+    // rectangular selection).
+    _extendSelectionFromStandardOrigin: function(position) {
+        var origin = this._selectionOrigin;
+        this._replaceSelection([
+            Range.comparePositions(position, origin) < 0 ?
+            { start: position, end: origin } :
+            { start: origin, end: position }
+        ]);
     },
 
     // Invalidates the entire visible frame. Does not automatically mark the
@@ -104,6 +209,22 @@ exports.EditorView = SC.View.extend(Canvas, {
         this._backgroundInvalid = true;
         this._invalidRange = this.get('layoutManager').
             characterRangeForBoundingRect(this.get('clippingFrame'));
+    },
+
+    _invalidateInsertionPointsInRangeSet: function(rangeSet) {
+        var thisEditor = this;
+        rangeSet.forEach(function(range) {
+            if (Range.isZeroLength(range)) {
+                thisEditor._invalidateRange(Range.extendRange(range,
+                    { row: 0, column: 1 }));
+            }
+        });
+    },
+
+    _invalidateRange: function(newRange) {
+        this.set('layerNeedsUpdate', true);
+        this._invalidRange = this._invalidRange === null ? newRange :
+            Range.union(this._invalidRange, newRange);
     },
 
     _recomputeLayout: function() {
@@ -124,28 +245,52 @@ exports.EditorView = SC.View.extend(Canvas, {
         this.notifyPropertyChange('layout', newLayout);
     },
 
+    // Updates the current selection, invalidating regions appropriately.
+    _replaceSelection: function(newRanges) {
+        var oldRanges = this._selectedRanges;
+        this._selectedRanges = newRanges;
+
+        // Invalidate the parts of the previous selection that aren't in the
+        // new selection.
+        var intersection = Range.intersectRangeSets(oldRanges, newRanges);
+        if (intersection.length !== 0) {
+            this._invalidateRange({
+                start:  intersection[0].start,
+                end:    intersection[intersection.length - 1].end
+            });
+        }
+
+        // Also invalidate any insertion points. These have to be handled
+        // separately, because they're drawn outside of their associated
+        // character regions.
+        this._invalidateInsertionPointsInRangeSet(oldRanges);
+        this._invalidateInsertionPointsInRangeSet(newRanges);
+    },
+
     // Moves the selection, if necessary, to keep all the positions pointing to
     // actual characters.
     _repositionSelection: function() {
         var textLines = this.get('layoutManager').get('textLines');
         var textLineLength = textLines.length;
 
+        var newSelectedRanges = [];
         this._selectedRanges.forEach(function(range) {
-            if (range.start.row >= textLineLength) {
-                range.start.row = textLineLength;
-            }
-            var startLine = textLines[range.start.row];
-            if (range.start.column > startLine.characters.length) {
-                range.start.column = startLine.characters.length;
-            }
-
-            if (range.end.row >= textLineLength) {
-                range.end.row = textLineLength;
-            }
-            var endLine = textLines[range.end.row];
-            if (range.end.column > endLine.characters.length) {
-                range.end.column = endLine.characters.length;
-            }
+            var newStartRow = Math.min(range.start.row, textLineLength);
+            var newEndRow = Math.min(range.end.row, textLineLength);
+            var startLine = textLines[newStartRow];
+            var endLine = textLines[newEndRow];
+            newSelectedRanges.push({
+                start:  {
+                    row:    newStartRow,
+                    column: Math.min(range.start.column,
+                                startLine.characters.length)
+                },
+                end:    {
+                    row:    newEndRow,
+                    column: Math.min(range.end.column,
+                                endLine.characters.length)
+                }
+            });
         });
     },
 
@@ -153,11 +298,11 @@ exports.EditorView = SC.View.extend(Canvas, {
     // rules (including the partialFraction field).
     _selectionPositionForPoint: function(point) {
         var position = this.get('layoutManager').characterAtPoint(point);
-        return {
-            row:    position.row,
-            column: position.column + (position.partialFraction >= 0.5 ? 1 : 0)
-        };
+        return position.partialFraction < 0.5 ? position :
+            { row: position.row, column: position.column + 1 };
     },
+
+    acceptsFirstResponder: true,
 
     /**
      * @property{Boolean}
@@ -224,9 +369,14 @@ exports.EditorView = SC.View.extend(Canvas, {
      * TODO: Convert to a SproutCore theme. This is super ugly.
      */
     theme: {
-        backgroundStyle:    "#2a211c",
-        editorTextFont:     "10pt Monaco, Lucida Console, monospace",
-        editorTextColor:    "rgb(230, 230, 230)"
+        backgroundStyle: "#2a211c",
+        cursorStyle: "#879aff",
+        editorTextColor: "rgb(230, 230, 230)",
+        editorTextFont: "10pt Monaco, Lucida Console, monospace",
+        editorSelectedTextColor: "rgb(240, 240, 240)",
+        editorSelectedTextBackground: "#526da5",
+        unfocusedCursorStrokeStyle: "#ff0033",
+        unfocusedCursorFillStyle: "#73171e"
     },
 
     /**
@@ -252,11 +402,15 @@ exports.EditorView = SC.View.extend(Canvas, {
             this._backgroundInvalid = false;
         }
 
-        if (this._invalidRange === null) {
-            return;
-        }
+        if (this._invalidRange !== null) {
+            this._createPathForRange(context, this._invalidRange);
+            context.fillStyle = this.get('theme').backgroundStyle;
+            context.fill();
+            context.clip();
 
-        this._drawLines(context, visibleFrame);
+            this._drawSelection(context, visibleFrame);
+            this._drawLines(context, visibleFrame);
+        }
 
         this._invalidRange = null;
     },
@@ -279,13 +433,7 @@ exports.EditorView = SC.View.extend(Canvas, {
      * and/or layout has changed.
      */
     layoutManagerChangedLayout: function(sender, range) {
-        if (this._invalidRange !== null) {
-            throw "layout manager changed layout twice without an " +
-                "intervening drawRect";
-        }
-
-        this._invalidRange = range;
-        this.set('layerNeedsUpdate', true);
+        this._invalidateRange(range);
         this._repositionSelection();
         this._recomputeLayout();
     },
@@ -297,39 +445,20 @@ exports.EditorView = SC.View.extend(Canvas, {
         });
 
         var position = this._selectionPositionForPoint(point);
-        this._selectedRanges = [ { start: position, end: position } ];
-        this._selecting = true;
-        this._selectionPivot = { row: position.row, column: position.column };
+        this._replaceSelection([ { start: position, end: position } ]);
+        this._selectionOrigin = position;
+
+        this.set('layerNeedsUpdate', true);
+        this.becomeFirstResponder();
     },
 
-    mouseExited: function(evt) {
-        this._selecting = false;
-    },
+    mouseDragged: function(evt) {
+        this._extendSelectionFromStandardOrigin(
+            this._selectionPositionForPoint(
+            this.convertFrameFromView({ x: evt.clientX, y: evt.clientY })));
 
-    mouseMoved: function(evt) {
-        if (!this._selecting) {
-            return;
-        }
-
-        var point = this.convertFrameFromView({
-            x: evt.clientX,
-            y: evt.clientY
-        });
-
-        var position = this._selectionPositionForPoint(point);
-
-        // Extending backward or forward?
-        var pivot = this._selectionPivot;
-        if (position.row < pivot.row ||
-            (position.row === pivot.row && position.column < pivot.column)) {
-            this._selectedRanges[0] = { start: position, end: pivot };
-        } else {
-            this._selectedRanges[0] = { start: position, end: pivot };
-        }
-    },
-
-    mouseUp: function(evt) {
-        this._selecting = false;
+        this.set('layerNeedsUpdate', true);
+        this.becomeFirstResponder();
     }
 });
 
