@@ -105,6 +105,19 @@ _globals_line = re.compile(r'tiki.global\(["\']([\w/]+)["\']\);')
 def _quotewrap(m):
     return m.group(1) + '"' + m.group(2) + '":'
     
+def _get_file_list(paths, pattern, filters=None):
+    flist = []
+    
+    for p in paths:
+        flist.extend(list(p.walkfiles(pattern)))
+    
+    flist = [f for f in flist if "en" in f]
+    
+    if filters:
+        for filter in filters:
+            flist = [f for f in flist if filter not in f]
+    
+    return flist
 
 def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
     filters=None, manual_maps=[]):
@@ -126,15 +139,9 @@ def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
     stylesheets = set()
     
     newcode = ""
-    flist = []
     
-    for p in paths:
-        flist.extend(list(p.walkfiles(pattern)))
-        
-    if filters:
-        for filter in filters:
-            flist = [f for f in flist if filter not in f]
-        
+    flist = _get_file_list(paths, pattern, filters)
+    
     packages = []
     
     # keep track of whether or not we've seen the "tiki"
@@ -219,7 +226,30 @@ def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
         
     return newcode
 
-def combine_stylesheets(p, combined=""):
-    for f in p.walkfiles("stylesheet.css"):
-        combined += f.bytes()
+_images_url = re.compile(r'url\(.*/en/\w+/images/(.*)[\'"]\)')
+
+def _url_replacer(m):
+    return 'url("images/%s")' % (m.group(1))
+
+def combine_sproutcore_stylesheets(p, combined="", filters=None):
+    flist = _get_file_list([p], "stylesheet.css", filters)
+    for f in flist:
+        content = f.bytes()
+        content = _images_url.sub(_url_replacer, content)
+        combined += content
     return combined
+
+def copy_sproutcore_files(p, dest, filters=None):
+    paths = list(p.walkdirs("images"))
+    if filters:
+        for f in filters:
+            paths = [path for path in paths if f not in path]
+            
+    for p in paths:
+        for f in p.walkfiles():
+            destpath = dest / "images" / p.relpathto(f)
+            destdir = destpath.dirname()
+            if not destdir.exists():
+                destdir.makedirs()
+            f.copy(destpath)
+    

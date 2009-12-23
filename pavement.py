@@ -40,7 +40,9 @@ from paver.easy import *
 from paver.setuputils import setup
 import paver.virtual
 
-from bespinbuild.combiner import combine_sproutcore_files, combine_stylesheets, combine_files
+from bespinbuild.combiner import (combine_sproutcore_files, 
+    combine_sproutcore_stylesheets, combine_files,
+    copy_sproutcore_files)
 
 setup(
     name="BespinBuild",
@@ -219,7 +221,10 @@ def _update_static():
     static.rmtree()
     static.mkdir()
     for f in path("sproutcore").glob("*"):
-        f.copy(static)
+        if not f.isdir():
+            f.copy(static)
+        else:
+            f.copytree(static / f.basename())
     
     editor_dir = static / "editor"
     editor_dir.mkdir()
@@ -268,18 +273,22 @@ def sc2(options):
     
     sproutcore_built = builddir / "production" / "build" / "static"
     
+    sproutcore_filters=["welcome", "tests", "docs", "bootstrap", "mobile", "iphone_theme"]
+    
     combined = combine_sproutcore_files([sproutcore_built / "tiki", sproutcore_built / "sproutcore"], 
-        filters=["welcome", "tests", "docs", "bootstrap", "mobile", "iphone_theme"],
+        filters=sproutcore_filters,
         manual_maps=[(re.compile(r'tiki/en/\w+/javascript\.js'), "tiki")])
     
     output = snapshot / "sproutcore.js"
     output.write_bytes(combined)
     
-    combined = combine_stylesheets(sproutcore_built / "sproutcore")
+    combined = combine_sproutcore_stylesheets(sproutcore_built / "sproutcore", filters=sproutcore_filters)
     output = snapshot / "sproutcore.css"
     output.write_bytes(combined)
     
-    combined = combine_stylesheets(sproutcore_built / "core_test")
+    copy_sproutcore_files(sproutcore_built / "sproutcore", snapshot, filters=sproutcore_filters)
+    
+    combined = combine_sproutcore_stylesheets(sproutcore_built / "core_test")
     output = snapshot / "core_test.css"
     output.write_bytes(combined)
     
