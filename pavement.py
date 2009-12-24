@@ -141,9 +141,10 @@ def install_sproutcore(options):
     get_component("core_test", "core_test", dest_path="frameworks")
 
 @task
-@needs(["develop", "install_sproutcore"])
+@needs(["install_sproutcore"])
 def initial():
     """Initial setup help."""
+    call_task("develop")
     venv_command = "Scripts/activate.bat" if sys.platform == 'win32' \
         else "source bin/activate"
     linux_note = "" if not sys.platform.startswith("linux") else """
