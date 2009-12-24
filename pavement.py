@@ -49,14 +49,18 @@ except ImportError:
 
 setup(
     name="BespinBuild",
-    version="0.5.2",
-    packages=["bespinbuild"]
+    version="0.6",
+    packages=["bespinbuild"],
+    entry_points="""
+[console_scripts]
+bespin=bespinbuild.tool:main
+"""
 )
 
 options(
     version=Bunch(
-        number="0.5.2",
-        name="Reboot1",
+        number="0.6",
+        name="Ash",
         api="4"
     ),
     virtualenv=Bunch(

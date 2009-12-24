@@ -2,7 +2,10 @@
 
 import re
 
-from simplejson import loads
+try:
+    from json import loads
+except ImportError:
+    from simplejson import loads
 
 class Package(object):
     visited = False
