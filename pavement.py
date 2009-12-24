@@ -40,9 +40,12 @@ from paver.easy import *
 from paver.setuputils import setup
 import paver.virtual
 
-from bespinbuild.combiner import (combine_sproutcore_files, 
-    combine_sproutcore_stylesheets, combine_files,
-    copy_sproutcore_files)
+try:
+    from bespinbuild.combiner import (combine_sproutcore_files, 
+        combine_sproutcore_stylesheets, combine_files,
+        copy_sproutcore_files)
+except ImportError:
+    pass
 
 setup(
     name="BespinBuild",
@@ -138,7 +141,7 @@ def install_sproutcore(options):
     get_component("core_test", "core_test", dest_path="frameworks")
 
 @task
-@needs(["install_sproutcore"])
+@needs(["develop", "install_sproutcore"])
 def initial():
     """Initial setup help."""
     venv_command = "Scripts/activate.bat" if sys.platform == 'win32' \
