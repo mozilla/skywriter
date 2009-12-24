@@ -252,7 +252,7 @@ def start(options):
 def _update_static():
     static = path("tmp") / "static"
     static.rmtree()
-    static.mkdir()
+    static.makedirs()
     for f in path("sproutcore").glob("*"):
         if not f.isdir():
             f.copy(static)
