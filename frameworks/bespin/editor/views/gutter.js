@@ -32,10 +32,10 @@ exports.GutterView = SC.View.extend(canvas.Canvas, {
     classNames: 'sc-gutter-view',
 
     /**
-     * @property{EditorView}
-     * The associated editor view.
+     * @property{TextView}
+     * The associated text view.
      */
-    editorView: null,
+    textView: null,
 
     // FIXME after MVC rework is complete
     layout: {

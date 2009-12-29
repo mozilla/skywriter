@@ -15,9 +15,9 @@
         },
         {
             "ep": "factory",
-            "name": "editorview",
+            "name": "textview",
             "action": "value",
-            "pointer": "views/editor#EditorView"
+            "pointer": "views/text#TextView"
         }
     ]
 }

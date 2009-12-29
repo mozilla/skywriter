@@ -27,7 +27,7 @@ var Canvas = require('bespin:editor/mixins/canvas').Canvas;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var Range = require('utils/range');
 
-exports.EditorView = SC.View.extend(Canvas, {
+exports.TextView = SC.View.extend(Canvas, {
     _backgroundInvalid: false,
     _invalidRange: null,
     _layout: { left: 0, top: 0, width: 0, height: 0 },
