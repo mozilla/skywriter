@@ -35,12 +35,17 @@ main = function() {
                 layout: { centerX: 0, centerY: 0, width: 640, height: 480 },
                 childViews: 'sampleInputView'.w(),
                 sampleInputView: SC.View.design(Canvas, TextInput, {
+                    _actionText: "",
                     _writtenText: "",
 
-                    _write: function(text) {
-                        this._writtenText = text;
-                        this.set('layerNeedsUpdate', true);
+                    _write: function(action, insertText) {
+                        this.set('_actionText', action);
+                        this.set('_writtenText', this._writtenText + insertText);
                     },
+
+                    _update: function() {
+                        this.set('layerNeedsUpdate', true);
+                    }.observes('_actionText', '_writtenText'),
 
                     copy: function() {
                         this._write("copy");
@@ -60,7 +65,16 @@ main = function() {
 
                         context.fillStyle = "#ffffff";
                         context.font = "20pt Helvetica, Arial, sans-serif";
-                        context.fillText(this._writtenText, 16, 32);
+                        context.fillText("Action: " + this._actionText, 16, 32);
+
+                        context.fillStyle = "#ffffff";
+                        context.font = "20pt Helvetica, Arial, sans-serif";
+                        context.fillText("Written: " + this._writtenText, 16, 65);
+
+                        // Cursor
+                        var width = context.measureText("Written: " + this._writtenText).width;
+                        context.fillStyle = this.get('isFirstResponder') ? "white" : "gray";
+                        context.fillRect(width + 18, 44, 2, 25);
                     },
 
                     layout: { top: 0, left: 0, width: 640, height: 480 },
@@ -71,7 +85,7 @@ main = function() {
                     },
 
                     pasteData: function(text) {
-                        this._write("pasted '" + text + "'");
+                        this._write("pasted '" + text + "'", text);
                     },
 
                     render: function(context, firstTime) {
@@ -82,7 +96,16 @@ main = function() {
                     },
 
                     textInserted: function(text) {
-                        this._write("inserted '" + text + "'");
+                        this._write("inserted '" + text + "'", text);
+                    },
+
+                    keyDown: function(ev) {
+                        if (ev.keyCode == 8) {
+                            this.set('_writtenText', this._writtenText.substring(0, this._writtenText.length - 1));
+                            this.set('_actionText', "backspace");
+                            return YES;
+                        }
+                        return false;
                     }
                 })
             })
