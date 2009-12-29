@@ -30,7 +30,6 @@ var Range = require('utils/range');
 exports.TextView = SC.View.extend(Canvas, {
     _backgroundInvalid: false,
     _invalidRange: null,
-    _layout: { left: 0, top: 0, width: 0, height: 0 },
 
     // TODO: calculate from the size or let the user override via themes if
     // desired
@@ -227,24 +226,6 @@ exports.TextView = SC.View.extend(Canvas, {
             Range.union(this._invalidRange, newRange);
     },
 
-    _recomputeLayout: function() {
-        var boundingRect = this.get('layoutManager').boundingRect();
-        var padding = this.get('padding');
-        var originalLayout = this._layout;
-
-        // The origin can be set by the user, but the width and height are
-        // computed by the layout manager.
-        var newLayout = {
-            left:   originalLayout.left,
-            top:    originalLayout.top,
-            width:  boundingRect.width + padding.right,
-            height: boundingRect.height + padding.bottom
-        };
-
-        this._layout = newLayout;
-        this.notifyPropertyChange('layout', newLayout);
-    },
-
     // Updates the current selection, invalidating regions appropriately.
     _replaceSelection: function(newRanges) {
         var oldRanges = this._selectedRanges;
@@ -293,6 +274,17 @@ exports.TextView = SC.View.extend(Canvas, {
         }));
     },
 
+    _resize: function() {
+        var boundingRect = this.get('layoutManager').boundingRect();
+        var padding = this.get('padding');
+        this.set('layout', SC.mixin(SC.clone(this.get('layout')), {
+            width:  boundingRect.width + padding.right,
+            height: boundingRect.height + padding.bottom
+        }));
+        console.log("new layout for textview", this.get('layout'),
+            boundingRect);
+    },
+
     // Returns the character closest to the given point, obeying the selection
     // rules (including the partialFraction field).
     _selectionPositionForPoint: function(point) {
@@ -331,23 +323,9 @@ exports.TextView = SC.View.extend(Canvas, {
     /**
      * @property
      *
-     * Changes to the editor layout affect the origin only; the width and
-     * height are read-only and are determined by the text height and width.
+     * The layout manager from which this editor view receives text.
      */
-    layout: function(key, value) {
-        if (!SC.none(value)) {
-            this._layout = value;
-            this._recomputeLayout();
-        }
-        return this._layout;
-    }.property(),
-
-    /**
-     * @property
-     *
-     * The layout manager that this editor view maintains.
-     */
-    layoutManager: LayoutManager,
+    layoutManager: null,
 
     /**
      * @property
@@ -379,17 +357,6 @@ exports.TextView = SC.View.extend(Canvas, {
     },
 
     /**
-     * Creates the layout manager, which in turn creates a text storage object.
-     * The default implementation of this method simply instantiates the
-     * layoutManager property and sets its delegate to this object.
-     */
-    createLayoutManager: function() {
-        var layoutManager = this.get('layoutManager').create();
-        layoutManager.set('delegate', this);
-        this.set('layoutManager', layoutManager);
-    },
-
-    /**
      * This is where the editor is painted from head to toe. Pitiful tricks are
      * used to draw as little as possible.
      */
@@ -415,7 +382,8 @@ exports.TextView = SC.View.extend(Canvas, {
     },
 
     init: function() {
-        this.superclass();
+        arguments.callee.base.apply(this, arguments);
+
         this._invalidRange = null;
         this._selectedRanges =
             [ { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } } ];
@@ -424,7 +392,9 @@ exports.TextView = SC.View.extend(Canvas, {
         // screwing up the prototype.
         this.set('padding', SC.clone(this.get('padding')));
 
-        this.createLayoutManager();
+        this.getPath('layoutManager.delegates').push(this);
+
+        this._resize();
     },
 
     /**
@@ -434,7 +404,7 @@ exports.TextView = SC.View.extend(Canvas, {
     layoutManagerChangedLayout: function(sender, range) {
         this._invalidateRange(range);
         this._repositionSelection();
-        this._recomputeLayout();
+        this._resize();
     },
 
     mouseDown: function(evt) {

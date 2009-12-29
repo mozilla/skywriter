@@ -23,67 +23,28 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var BespinScrollerView = require('views/scroller').BespinScrollerView;
 
-var gutter = require('editor/views/gutter');
-var scroller = require('editor/views/scroller');
+exports.ScrollView = SC.ScrollView.extend({
+    _containerViewLaidOut: false,
 
-exports.BespinScrollView = SC.ScrollView.extend({
-    _gutterViewInstantiated: false,
-
-    gutterView: gutter.GutterView,
-
-    hasHorizontalScroller: true,
     autohidesHorizontalScroller: false,
-    horizontalScrollerView: scroller.BespinScrollerView,
-    hasVerticalScroller: true,
     autohidesVerticalScroller: false,
-    verticalScrollerView: scroller.BespinScrollerView,
-
+    borderStyle: SC.BORDER_NONE,
+    hasHorizontalScroller: true,
+    hasVerticalScroller: true,
     horizontalScrollerThickness: 24,
+    horizontalScrollerView: BespinScrollerView,
     verticalScrollerThickness: 24,
+    verticalScrollerView: BespinScrollerView,
 
     tile: function() {
-        var gutterView = this.get('gutterView');
-        if (this._gutterViewInstantiated === false) {
-            // It would be cleaner, theoretically, to do this in
-            // createChildViews(), but there's no way to call sc_super() in
-            // that function, because the SproutCore ScrollView's
-            // createChildViews() implementation isn't written in an
-            // extensible way...
-            this._gutterViewInstantiated = true;
-
-            var thisBespinScrollView = this;
-            gutterView = this.createChildView(gutterView, {
-                rowCountBinding: "*parentView.contentView.rowCount",
-                didCreateLayer: function() {
-                    // Before the canvas is created, the gutter view has no
-                    // choice but to lie about its dimensions, because it has
-                    // no canvas with which to measureText(). So, once it's
-                    // created, we need to tile, in order to give the
-                    // view a chance to report its dimensions accurately.
-                    thisBespinScrollView.tile();
-                    this.set('layerNeedsUpdate', true);
-                }
-            });
-            this.childViews.push(gutterView);
-            this.set('gutterView', gutterView);
-
-            // Retile whenever the gutter frame changes.
-            gutterView.addObserver('frame', this, this.tile);
-
-            // Stop for now and wait until the gutter view's layer is created.
-            return; 
+        if (!this._containerViewLaidOut) {
+            var containerView = this.get('containerView');
+            containerView.adjust({ left: 0, bottom: 0, top: 0, right: 0 });
+            containerView.updateLayout();
+            this._containerViewLaidOut = true;
         }
-
-        var gutterFrame = gutterView.get('frame');
-        var containerView = this.get('containerView');
-        containerView.adjust({
-            left:   gutterFrame.width,
-            bottom: 0,
-            top:    0,
-            right:  0
-        });
-        containerView.updateLayout();
 
         var hScroller = this.get('horizontalScrollerView');
         var vScroller = this.get('verticalScrollerView');
@@ -102,7 +63,7 @@ exports.BespinScrollView = SC.ScrollView.extend({
                 right:  6 + vScrollerThickness
             });
             hScroller.set('layout', { 
-                left:   gutterFrame.width,
+                left:   0,
                 bottom: 0,
                 right:  0,
                 height: hScrollerThickness
@@ -132,14 +93,6 @@ exports.BespinScrollView = SC.ScrollView.extend({
                 right:  vScrollerThickness + 6
             });
         }
-    },
-
-    _bespin_BespinScrollView_verticalScrollOffsetDidChange: function() {
-        this.get('gutterView').adjust({
-            left:   0,
-            top:    -Math.min(this.get('verticalScrollOffset'),
-                        this.get('maximumVerticalScrollOffset'))
-        });
-    }.observes('verticalScrollOffset')
+    }
 });
 

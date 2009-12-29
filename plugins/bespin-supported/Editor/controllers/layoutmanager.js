@@ -33,12 +33,12 @@ exports.LayoutManager = SC.Object.extend({
     _maximumWidth: 0,
 
     /**
-     * @property
+     * @property{Array}
      *
-     * The delegate object, which receives layoutManagerChangedLayout()
+     * A list of delegate objects, which receive layoutManagerChangedLayout()
      * messages for this layout manager.
      */
-    delegate: null,
+    delegates: [],
 
     /**
      * @property
@@ -125,10 +125,10 @@ exports.LayoutManager = SC.Object.extend({
         this._recalculateDimensions();
         range = this._runAnnotations(range);
 
-        var delegate = this.get('delegate');
-        if (!SC.none(delegate)) {
-            delegate.layoutManagerChangedLayout(this, range);
-        }
+        var thisLayoutManager = this;
+        this.get('delegates').forEach(function(delegate) {
+            delegate.layoutManagerChangedLayout(thisLayoutManager, range);
+        });
     },
 
     _runAnnotations: function(range) {
@@ -256,6 +256,7 @@ exports.LayoutManager = SC.Object.extend({
 
     init: function() {
         this._layoutAnnotations = [];
+        this.set('delegates', SC.clone(this.get('delegates')));
         this.set('textLines', []);
 
         this.createTextStorage();

@@ -23,34 +23,42 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var canvas = require('editor/mixins/canvas');
+var Canvas = require('bespin:editor/mixins/canvas').Canvas;
+var m_scratchcanvas = require('bespin:util/scratchcanvas');
 
-var GUTTER_INSETS = { left: 5, right: 10, bottom: 6 };
-var LINE_INSETS = { bottom: 6 };
+exports.GutterView = SC.View.extend(Canvas, {
+    // TODO: calculate from the size or let the user override via themes if
+    // desired
+    _lineAscent: 16,
 
-exports.GutterView = SC.View.extend(canvas.Canvas, {
-    classNames: 'sc-gutter-view',
-
-    /**
-     * @property{TextView}
-     * The associated text view.
-     */
-    textView: null,
-
-    // FIXME after MVC rework is complete
-    layout: {
-        left:   0,
-        top:    0,
-        width:  GUTTER_INSETS.left + GUTTER_INSETS.right + 12,
-        height: 16
-    },
+    _clippingFrameChanged: function() {
+        this.set('layerNeedsUpdate', true);
+    }.observes('clippingFrame'),
 
     /**
-     * @property{Number}
-     * The number of rows displayed in the text view, which is the number of
-     * rows displayed in the gutter.
+     * @property
+     *
+     * The layer frame of the gutter view stretches from the bottom to the top
+     * of the enclosing view. Not cacheable, because it depends on the frame of
+     * the parent view.
      */
-    rowCount: 0,
+    layerFrame: function() {
+        var layerFrame = {
+            x:      0,
+            y:      0,
+            width:  this.get('layout').width,
+            height: this.get('parentView').get('frame').height
+        };
+        return layerFrame;
+    }.property('layout', 'parentView'),
+
+    /**
+     * @property
+     *
+     * The amount of padding to leave on each side of the gutter, given as an
+     * object with "left" and "right" properties.
+     */
+    padding: { left: 5, right: 10 },
 
     /**
      * @property
@@ -66,68 +74,57 @@ exports.GutterView = SC.View.extend(canvas.Canvas, {
         editorTextFont: "10pt Monaco, Lucida Console, monospace"
     },
 
-    _origin: { left: 0, top: 0 },
-
-    layerFrame: function() {
-        return {
-            x:      0,
-            y:      0,
-            width:  this.get('layout').width,
-            height: this.get('parentView').get('frame').height
-        };
-    }.property('layout', 'parentView'),
-
-    // The width of one character.
-    _charWidth: function() {
-        return this.getCharacterWidth(this.get('theme').editorTextFont);
-    }.property('theme').cacheable(),
-
-    // The height of one character.
-    _lineHeight: function() {
-        var theme = this.get('theme');
-        var userLineHeight = theme.lineHeight;
-        return !SC.none(userLineHeight) ? userLineHeight :
-            this.guessLineHeight(theme.editorTextFont);
-    }.property('theme').cacheable(),
-
-    drawRect: function(ctx, visibleFrame) {
-        var theme = this.get('theme');
-        ctx.fillStyle = theme.gutterStyle;
-        ctx.fillRect(0, visibleFrame.y, visibleFrame.width,
-            visibleFrame.height);
-
-        var lineHeight = this.get('_lineHeight');
-        var firstVisibleRow = Math.floor(visibleFrame.y / lineHeight);
-        var lastLineToRender = Math.min(this.get('rowCount') - 1,
-                Math.ceil((visibleFrame.y + visibleFrame.height) /
-                lineHeight));
-
-        for (var currentLine = firstVisibleRow;
-            currentLine <= lastLineToRender; currentLine++) {
-            // TODO: breakpoints
-
-            ctx.fillStyle = theme.lineNumberColor;
-            ctx.font = theme.lineNumberFont;
-            ctx.fillText("" + (currentLine + 1), GUTTER_INSETS.left,
-                (currentLine + 1) * lineHeight - LINE_INSETS.bottom);
-        }
+    _resize: function() {
+        var layoutManager = this.get('layoutManager');
+        var padding = this.get('padding');
+        this.set('layout', SC.mixin(SC.clone(this.get('layout')), {
+            width:  32, /* padding.left + padding.right +
+                    m_scratchcanvas.get().getContext().
+                    measureStringWidth(this.get('theme').lineNumberFont,
+                    "" + (layoutManager.get('textLines').length + 1)), */
+            height: layoutManager.boundingRect().height
+        }));
     },
 
-    _bespin_gutterView_parentViewFrameDidChange: function() {
-        this.propertyWillChange('layerFrame');
-        this.propertyDidChange('layerFrame', this.get('layerFrame'));
-    }.observes('*parentView.frame'),
+    drawRect: function(context, visibleFrame) {
+        var theme = this.get('theme');
+        context.fillStyle = theme.gutterStyle;
+        context.fillRect(0, visibleFrame.y, visibleFrame.width,
+            visibleFrame.height);
 
-    _bespin_gutterView_rowCountDidChange: function() {
-        this.updateLayout();
+        context.save();
+        
+        var padding = this.get('padding');
+        context.translate(padding.left, 0);
 
-        // Actually only needs to be done if scrolled to the bottom and more
-        // rows are going to be added, but eh...
+        context.fillStyle = theme.lineNumberColor;
+        context.font = theme.lineNumberFont;
+
+        var layoutManager = this.get('layoutManager');
+        var range = layoutManager.characterRangeForBoundingRect(visibleFrame);
+        var endRow = Math.min(range.end.row,
+            layoutManager.get('textLines').length - 1);
+        var lineAscent = this._lineAscent;
+        for (var row = range.start.row; row <= endRow; row++) {
+            // TODO: breakpoints
+            context.fillText("" + (row + 1), -0.5,
+                layoutManager.lineRectForRow(row).y + lineAscent - 0.5);
+        }
+
+        context.restore();
+    },
+
+    init: function() {
+        arguments.callee.base.apply(this, this.arguments);
+
+        this.getPath('layoutManager.delegates').push(this);
+        this._resize();
+    },
+
+    layoutManagerChangedLayout: function(sender, range) {
         this.set('layerNeedsUpdate', true);
-    }.observes('rowCount'),
+        this._resize();
+    },
 
-    _bespin_gutterView_frameDidChange: function() {
-        this.set('layerNeedsUpdate', true);
-    }.observes('frame')
 });
 
