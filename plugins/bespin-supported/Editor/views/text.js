@@ -26,8 +26,9 @@ var SC = require('sproutcore/runtime').SC;
 var Canvas = require('bespin:editor/mixins/canvas').Canvas;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var Range = require('utils/range');
+var TextInput = require('bespin:editor/mixins/textinput').TextInput;
 
-exports.TextView = SC.View.extend(Canvas, {
+exports.TextView = SC.View.extend(Canvas, TextInput, {
     _backgroundInvalid: false,
     _invalidRange: null,
 
@@ -35,11 +36,20 @@ exports.TextView = SC.View.extend(Canvas, {
     // desired
     _lineAscent: 16,
 
+    _previousClippingFrame: null,
     _selectedRanges: null,
     _selectionOrigin: null,
 
     _clippingFrameChanged: function() {
-        this._invalidate();
+        // False positives here are very common, so check to make sure before
+        // we take the slow path.
+        var previousClippingFrame = this._previousClippingFrame;
+        var clippingFrame = this.get('clippingFrame');
+        if (previousClippingFrame === null ||
+                !SC.rectsEqual(clippingFrame, previousClippingFrame)) {
+            this._previousClippingFrame = clippingFrame;
+            this._invalidate();
+        }
     }.observes('clippingFrame'),
 
     // Creates a path around the given range of text. Useful for drawing
@@ -281,8 +291,6 @@ exports.TextView = SC.View.extend(Canvas, {
             width:  boundingRect.width + padding.right,
             height: boundingRect.height + padding.bottom
         }));
-        console.log("new layout for textview", this.get('layout'),
-            boundingRect);
     },
 
     // Returns the character closest to the given point, obeying the selection
@@ -364,6 +372,10 @@ exports.TextView = SC.View.extend(Canvas, {
         unfocusedCursorFillStyle: "#73171e"
     },
 
+    didCreateLayer: function() {
+        this.attachTextInputEvents();
+    },
+
     /**
      * This is where the editor is painted from head to toe. Pitiful tricks are
      * used to draw as little as possible.
@@ -436,6 +448,41 @@ exports.TextView = SC.View.extend(Canvas, {
 
         this.set('layerNeedsUpdate', true);
         this.becomeFirstResponder();
+    },
+
+    render: function(context, firstTime) {
+        arguments.callee.base.apply(this, arguments);
+        if (firstTime) {
+            this.renderTextInput(context, firstTime);
+        }
+    },
+
+    textInserted: function(text) {
+        var textStorage = this.get('layoutManager').get('textStorage');
+        var selectedRanges = this._selectedRanges;
+
+        // Delete text from all ranges except the first (in reverse order, so
+        // that we don't have to check and update positions as we go), then
+        // overwrite the first selected range with the text. This is
+        // "Cocoa-style" behavior, not "TextMate-style".
+        for (var i = selectedRanges.length - 1; i > 0; i--) {
+            textStorage.deleteCharacters(selectedRanges[i]);
+        }
+        var firstRange = selectedRanges[0];
+        textStorage.replaceCharacters(firstRange, text);
+
+        // Update the selection to point immediately after the inserted text.
+        var lines = text.split("\n");
+        var position = lines.length > 1 ?
+            {
+                row:    firstRange.start.row + lines.length - 1,
+                column: lines[lines.length - 1].length
+            } :
+            {
+                row:    firstRange.start.row,
+                column: firstRange.start.column + text.length
+            };
+        this._replaceSelection([ { start: position, end: position } ]);
     }
 });
 
