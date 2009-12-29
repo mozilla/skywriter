@@ -220,7 +220,7 @@ exports.BespinScrollerView = SC.View.extend(Canvas, {
 
     // The length of the scroll bar, not counting any padding. Equal to
     // _clientFrame.width or _clientFrame.height, depending on the scroll bar's
-    // layout direction. Read-only. 
+    // layout direction. Read-only.
     _clientLength: function() {
         var clientFrame = this.get('_clientFrame');
         switch (this.get('layoutDirection')) {
@@ -268,7 +268,7 @@ exports.BespinScrollerView = SC.View.extend(Canvas, {
         }
     }.property('_clientFrame', '_clientThickness', '_gutterFrame', 'maximum',
         'value').cacheable(),
- 
+
     /**
      * @property{Number}
      * The actual maximum value, which will be less than the maximum due to
@@ -581,7 +581,7 @@ exports.BespinScrollerView = SC.View.extend(Canvas, {
         if (this.get('isEnabled') === false || gutterLength <= handleLength) {
             return; // Don't display the scroll bar.
         }
-   
+
         if (this._isMouseOver === false) {
             ctx.globalAlpha = 0.3;
         } else {

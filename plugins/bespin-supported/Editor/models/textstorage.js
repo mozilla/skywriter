@@ -75,7 +75,7 @@ exports.TextStorage = SC.Object.extend({
         var thisTextStorage = this;
         this.get('delegates').forEach(function(delegate) {
             delegate.textStorageEdited(thisTextStorage, range, characters);
-        }); 
+        });
     },
 
     insertCharacters: function(position, characters) {

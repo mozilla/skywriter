@@ -23,7 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var TextStorage = require('models/textstorage').TextStorage; 
+var TextStorage = require('models/textstorage').TextStorage;
 var catalog = require('bespin:plugins').catalog;
 
 exports.LayoutManager = SC.Object.extend({

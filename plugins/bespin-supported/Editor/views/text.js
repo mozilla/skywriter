@@ -101,7 +101,7 @@ exports.TextView = SC.View.extend(Canvas, {
             characterRectForPosition(range.start);
 
         context.save();
-       
+
         context.strokeStyle = this.get('theme').cursorStyle;
         context.beginPath();
         context.moveTo(rect.x + 0.5, rect.y);
@@ -157,7 +157,7 @@ exports.TextView = SC.View.extend(Canvas, {
                     rect.x - 0.5, rect.y + lineAscent - 0.5);
             }
         }
-        
+
         context.restore();
     },
 
@@ -187,7 +187,7 @@ exports.TextView = SC.View.extend(Canvas, {
                 Range.isZeroLength(selectedRanges[0])) {
             this._drawInsertionPoint(context, visibleFrame);
         } else {
-            this._drawSelectionHighlight(context, visibleFrame); 
+            this._drawSelectionHighlight(context, visibleFrame);
         }
     },
 

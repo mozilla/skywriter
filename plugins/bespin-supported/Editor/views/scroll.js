@@ -62,7 +62,7 @@ exports.ScrollView = SC.ScrollView.extend({
                 left:   6,
                 right:  6 + vScrollerThickness
             });
-            hScroller.set('layout', { 
+            hScroller.set('layout', {
                 left:   0,
                 bottom: 0,
                 right:  0,

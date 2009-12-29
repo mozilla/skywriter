@@ -83,14 +83,14 @@ exports.EditorView = SC.View.extend(SC.Border, {
 
     createChildViews: function() {
         var layoutManager = this.get('layoutManager');
-       
+
         var gutterView = this.createChildView(this.get('gutterView'), {
             layout:         { left: 0, top: 0 },
             layoutManager:  layoutManager
         });
         this.set('gutterView', gutterView);
         gutterView.addObserver('frame', this, this._gutterViewFrameChanged);
-       
+
         var scrollViewClass = this.get('scrollView');
         var textViewClass = this.get('textView');
         var scrollView = this.createChildView(scrollViewClass, {

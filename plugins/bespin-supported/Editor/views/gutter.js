@@ -93,7 +93,7 @@ exports.GutterView = SC.View.extend(Canvas, {
             visibleFrame.height);
 
         context.save();
-        
+
         var padding = this.get('padding');
         context.translate(padding.left, 0);
 
