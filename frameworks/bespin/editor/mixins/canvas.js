@@ -117,43 +117,6 @@ exports.Canvas = {
     },
 
     /**
-     * Returns the width of the character 'M' in the given font, or null if the
-     * canvas hasn't been created yet. (It's unfortunate that you actually need
-     * a canvas to measure text...)
-     */
-    getCharacterWidth: function(font) {
-        var canvas = this.$("canvas")[0];
-        if (SC.none(canvas)) {
-            return null;
-        }
-
-        var context = canvas.getContext('2d');
-        context.save();
-        context.font = font;
-        var width = context.measureText("M").width;
-        context.restore();
-        return width;
-    },
-
-    /**
-     * Attempts to determine a reasonable line height for the given font and
-     * returns it.
-     */
-    guessLineHeight: function(font) {
-        var canvas = this.$("canvas")[0];
-        if (SC.none(canvas)) {
-            return null;    // don't even try
-        }
-
-        var context = canvas.getContext('2d');
-        context.save();
-        context.font = font;
-        var height = Math.floor(context.measureText("m").width * 2.8);
-        context.restore();
-        return height;
-    },
-
-    /**
      * Computes the visible frame and calls drawRect() to redraw the canvas
      * contents. Generally, you should not need to call this function unless
      * you override the default implementations of didCreateLayer() or

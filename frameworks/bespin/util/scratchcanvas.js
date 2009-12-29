@@ -53,7 +53,24 @@ var ScratchCanvas = SC.Object.extend({
         element.style.top = "-10000px";
         element.style.left = "-10000px";
         document.body.appendChild(element);
-    }
+    },
+
+    /**
+     * Returns the width in pixels of the given string ("M", by default) in the
+     * given font.
+     */
+    measureStringWidth: function(font, str) {
+        if (SC.none(str)) {
+            str = "M";
+        }
+
+        var context = this.getContext();
+        context.save();
+        context.font = font;
+        var width = context.measureText(str).width;
+        context.restore();
+        return width;
+    },
 });
 
 var singleton = null;
