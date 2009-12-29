@@ -105,7 +105,7 @@ exports.DockView = SC.View.extend({
 
     renderLayout: function(context, firstTime) {
         this._updateChildLayout();
-        this.sc_super();
+        arguments.callee.base.apply(this, arguments);
     }
 });
 
