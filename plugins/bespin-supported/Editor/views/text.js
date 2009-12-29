@@ -304,6 +304,14 @@ exports.TextView = SC.View.extend(Canvas, {
     hasPadding: true,
 
     /**
+     * @property{Boolean}
+     *
+     * This property is inspected by the command listener so that it can
+     * determine where the text view lives in the responder chain.
+     */
+    isTextView: true,
+
+    /**
      * @property
      *
      * The layer frame, which fills the parent view. Not cacheable, because it
