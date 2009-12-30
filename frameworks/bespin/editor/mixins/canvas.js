@@ -38,6 +38,8 @@ var SC = require('sproutcore/runtime').SC;
 exports.Canvas = {
     _bespin_canvas_lastRedrawTime: null,
     _bespin_canvas_redrawTimer: null,
+    _bespin_canvas_canvasId: null,
+    _bespin_canvas_canvasDom: null,
 
     _bespin_canvas_frameChanged: function() {
         this.set('layerNeedsUpdate', true);
@@ -56,6 +58,15 @@ exports.Canvas = {
     _bespin_canvas_layerFrameDidChange: function() {
         this.updateLayout();
     }.observes('layerFrame'),
+
+    /**
+     * @property{2DContext}
+     *
+     * Cache for the canvas' 2d context.
+     */
+    canvasContext2D: function() {
+        return this.get('_bespin_canvas_canvasDom').getContext('2d')
+    }.property('_bespin_canvas_canvasDom').cacheable(),
 
     /**
      * @property{Rect}
@@ -94,7 +105,7 @@ exports.Canvas = {
             return;
         }
 
-        var canvas = this.$("canvas")[0];
+        var canvas = this._bespin_canvas_canvasDom;
         if (canvas.width !== layerFrame.width) {
             canvas.width = layerFrame.width;
         }
@@ -135,8 +146,7 @@ exports.Canvas = {
         visibleFrame.width = layerFrame.width;
         visibleFrame.height = layerFrame.height;
 
-        var canvas = this.$("canvas")[0];
-        var context = canvas.getContext('2d');
+        var context = this.get('canvasContext2D');
 
         context.save();
         var frame = this.get('frame');
@@ -152,10 +162,20 @@ exports.Canvas = {
         return true;
     },
 
+    didCreateLayer: function() {
+        sc_super();
+        this.set('_bespin_canvas_canvasDom', this.$("#" +
+            this._bespin_canvas_canvasId)[0]);
+    },
+
     render: function(context, firstTime) {
+        sc_super();
+
         if (firstTime) {
             var layerFrame = this.get('layerFrame');
-            var canvasContext = context.begin("canvas"); 
+            var canvasContext = context.begin("canvas");
+            this._bespin_canvas_canvasId = SC.guidFor(canvasContext);
+            canvasContext.id(this._bespin_canvas_canvasId);
             canvasContext.attr("width", "" + layerFrame.width);
             canvasContext.attr("height", "" + layerFrame.height);
             canvasContext.push("canvas tag not supported by your browser");
