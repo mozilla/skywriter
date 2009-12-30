@@ -40,6 +40,7 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
     _previousClippingFrame: null,
     _selectedRanges: null,
     _selectionOrigin: null,
+    _virtualInsertionPoint: null,
 
     _clippingFrameChanged: function() {
         // False positives here are very common, so check to make sure before
@@ -211,6 +212,16 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
         ]);
     },
 
+    // Returns the virtual insertion point, which is the origin used for
+    // vertical movement. Normally, the virtual insertion point is the same as
+    // the actual insertion point, but when the cursor moves vertically, the
+    // column of the virtual insertion point remains the same.
+    _getVirtualInsertionPoint: function() {
+        var virtualInsertionPoint = this._virtualInsertionPoint;
+        return virtualInsertionPoint === null ?
+            this._selectedRanges[0].start : virtualInsertionPoint;
+    },
+
     // Replaces the selection with the given text and updates the selection
     // boundaries appropriately.
     _insertText: function(text) {
@@ -264,6 +275,13 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
 
     _rangeSetIsInsertionPoint: function(rangeSet) {
         return Range.isZeroLength(rangeSet[0]);
+    },
+
+    // Clears out the selection and moves the selection origin and the
+    // insertion point to the given position.
+    _reanchorSelection: function(newPosition) {
+        this._replaceSelection([ { start: newPosition, end: newPosition } ]);
+        this._selectionOrigin = newPosition;
     },
 
     // Updates the current selection, invalidating regions appropriately.
@@ -487,14 +505,9 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
     },
 
     mouseDown: function(evt) {
-        var point = this.convertFrameFromView({
-            x: evt.clientX,
-            y: evt.clientY
-        });
-
-        var position = this._selectionPositionForPoint(point);
-        this._replaceSelection([ { start: position, end: position } ]);
-        this._selectionOrigin = position;
+        this._reanchorSelection(this._selectionPositionForPoint(this.
+            convertFrameFromView({ x: evt.clientX, y: evt.clientY })));
+        this._virtualInsertionPoint = null;
 
         this.set('layerNeedsUpdate', true);
         this.becomeFirstResponder();
@@ -507,6 +520,50 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
 
         this.set('layerNeedsUpdate', true);
         this.becomeFirstResponder();
+    },
+
+    moveDown: function(evt) {
+        var selectedRanges = this._selectedRanges;
+        var position;
+        if (this._rangeSetIsInsertionPoint(selectedRanges)) {
+            var point = this._getVirtualInsertionPoint();
+            position = { row: point.row + 1, column: point.column };
+        } else {
+            var range = selectedRanges[0];
+            position = { row: range.end.row + 1, column: range.start.column };
+        }
+
+        this._reanchorSelection(this.getPath('layoutManager.textStorage').
+            clampPosition(position));
+        this._virtualInsertionPoint = position;
+    },
+
+    moveLeft: function(evt) {
+        this._reanchorSelection(this.getPath('layoutManager.textStorage').
+            displacePosition(this._selectedRanges[0].start, -1));
+        this._virtualInsertionPoint = null;
+    },
+
+    moveRight: function(evt) {
+        this._reanchorSelection(this.getPath('layoutManager.textStorage').
+            displacePosition(this._selectedRanges[0].start, 1));
+        this._virtualInsertionPoint = null;
+    },
+
+    moveUp: function(evt) {
+        var selectedRanges = this._selectedRanges;
+        var position;
+        if (this._rangeSetIsInsertionPoint(selectedRanges)) {
+            var point = this._getVirtualInsertionPoint();
+            position = { row: point.row - 1, column: point.column };
+        } else {
+            var rangeStart = selectedRanges[0].start;
+            position = { row: rangeStart.row - 1, column: rangeStart.column };
+        }
+
+        this._reanchorSelection(this.getPath('layoutManager.textStorage').
+            clampPosition(position));
+        this._virtualInsertionPoint = position;
     },
 
     /**

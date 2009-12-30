@@ -10,6 +10,34 @@
         },
         {
             "ep": "command",
+            "name": "move-down",
+            "key": "down",
+            "predicates": [ "isTextView", true ],
+            "action": "moveDown"
+        },
+        {
+            "ep": "command",
+            "name": "move-left",
+            "key": "left",
+            "predicates": [ "isTextView", true ],
+            "action": "moveLeft"
+        },
+        {
+            "ep": "command",
+            "name": "move-right",
+            "key": "right",
+            "predicates": [ "isTextView", true ],
+            "action": "moveRight"
+        },
+        {
+            "ep": "command",
+            "name": "move-up",
+            "key": "up",
+            "predicates": [ "isTextView", true ],
+            "action": "moveUp"
+        },
+        {
+            "ep": "command",
             "name": "newline",
             "key": "return",
             "predicates": [ "isTextView", true ],
