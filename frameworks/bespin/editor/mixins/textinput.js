@@ -51,13 +51,11 @@ var SC = require('sproutcore/runtime').SC;
 exports.TextInput = {
     _TextInput_composing: false,
     _TextInput_ignore: false,
+    _TextInput_textFieldId: undefined,
+    _TextInput_textFieldDom: undefined,
 
     // Keyevents and copy/cut/paste are not the same on Safari and Chrome.
     _isChrome: !!parseFloat(navigator.userAgent.split("Chrome/")[1]),
-
-    _TextInput_getTextField: function() {
-        return this.$("textarea")[0];
-    },
 
     // This function doesn't work on WebKit! The textContent comes out empty...
     _TextInput_textFieldChanged: function() {
@@ -65,7 +63,7 @@ exports.TextInput = {
             return;
         }
 
-        var textField = this._TextInput_getTextField();
+        var textField = this._TextInput_textFieldDom;
         var text = textField.value;
         // On FF textFieldChanged is called sometimes although nothing changed.
         // -> don't call textInserted() in such a case.
@@ -106,7 +104,7 @@ exports.TextInput = {
     },
 
     _TextInput_setValueAndSelect: function(text) {
-        var textField = this._TextInput_getTextField();
+        var textField = this._TextInput_textFieldDom;
         textField.value = text;
         textField.select();
     },
@@ -117,7 +115,7 @@ exports.TextInput = {
      * you should call this function in your implementation.
      */
     focusTextInput: function() {
-        this._TextInput_getTextField().focus();
+        this._TextInput_textFieldDom.focus();
     },
 
     /**
@@ -126,7 +124,7 @@ exports.TextInput = {
      * you should call this function in your implementation.
      */
     unfocusTextInput: function() {
-        this._TextInput_getTextField().blur();
+        this._TextInput_textFieldDom.blur();
     },
 
     /**
@@ -140,6 +138,8 @@ exports.TextInput = {
             // within the current view and hide it under the view.
             var layerFrame = this.get('layerFrame');
             var textFieldContext = context.begin("textarea");
+            this._TextInput_textFieldId = SC.guidFor(textFieldContext);
+            textFieldContext.id(this._TextInput_textFieldId);
             textFieldContext.attr("style", ("position: absolute; " +
                 "z-index: -99999; top: 0px; left: 0px; width: %@px; " +
                 "height: %@px").fmt(layerFrame.width, layerFrame.height));
@@ -155,7 +155,8 @@ exports.TextInput = {
     didCreateLayer: function() {
         arguments.callee.base.apply(this, arguments);
 
-        var textField = this._TextInput_getTextField();
+        var textField = this.$("#" + this._TextInput_textFieldId)[0];
+        this._TextInput_textFieldDom = textField;
         var thisTextInput = this;
 
         // No way that I can see around this ugly browser sniffing, without
