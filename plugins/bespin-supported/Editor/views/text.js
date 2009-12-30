@@ -192,9 +192,7 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
 
     // Draws either the selection or the insertion point.
     _drawSelection: function(context, visibleFrame) {
-        var selectedRanges = this._selectedRanges;
-        if (selectedRanges.length === 1 &&
-                Range.isZeroLength(selectedRanges[0])) {
+        if (this._rangeSetIsInsertionPoint(this._selectedRanges)) {
             this._drawInsertionPoint(context, visibleFrame);
         } else {
             this._drawSelectionHighlight(context, visibleFrame);
@@ -220,20 +218,21 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
             characterRangeForBoundingRect(this.get('clippingFrame'));
     },
 
-    _invalidateInsertionPointsInRangeSet: function(rangeSet) {
-        var thisEditor = this;
-        rangeSet.forEach(function(range) {
-            if (Range.isZeroLength(range)) {
-                thisEditor._invalidateRange(Range.extendRange(range,
-                    { row: 0, column: 1 }));
-            }
-        });
+    _invalidateInsertionPointIfNecessary: function(rangeSet) {
+        if (this._rangeSetIsInsertionPoint(rangeSet)) {
+            this._invalidateRange(Range.extendRange(rangeSet[0],
+                { row: 0, column: 1 }));
+        }
     },
 
     _invalidateRange: function(newRange) {
         this.set('layerNeedsUpdate', true);
         this._invalidRange = this._invalidRange === null ? newRange :
             Range.union(this._invalidRange, newRange);
+    },
+
+    _rangeSetIsInsertionPoint: function(rangeSet) {
+        return Range.isZeroLength(rangeSet[0]);
     },
 
     // Updates the current selection, invalidating regions appropriately.
@@ -254,8 +253,8 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
         // Also invalidate any insertion points. These have to be handled
         // separately, because they're drawn outside of their associated
         // character regions.
-        this._invalidateInsertionPointsInRangeSet(oldRanges);
-        this._invalidateInsertionPointsInRangeSet(newRanges);
+        this._invalidateInsertionPointIfNecessary(oldRanges);
+        this._invalidateInsertionPointIfNecessary(newRanges);
     },
 
     // Moves the selection, if necessary, to keep all the positions pointing to
