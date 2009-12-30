@@ -27,6 +27,7 @@ var Canvas = require('bespin:editor/mixins/canvas').Canvas;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var Range = require('utils/range');
 var TextInput = require('bespin:editor/mixins/textinput').TextInput;
+var catalog = require('bespin:plugins').catalog;
 
 exports.TextView = SC.View.extend(Canvas, TextInput, {
     _backgroundInvalid: false,
@@ -311,14 +312,6 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
     hasPadding: true,
 
     /**
-     * @property{Boolean}
-     *
-     * This property is inspected by the command listener so that it can
-     * determine where the text view lives in the responder chain.
-     */
-    isTextView: true,
-
-    /**
      * @property
      *
      * The layer frame, which fills the parent view. Not cacheable, because it
@@ -414,6 +407,12 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
         this.getPath('layoutManager.delegates').push(this);
 
         this._resize();
+    },
+
+    keyDown: function(evt) {
+        return catalog.getObject('canon').processKeyEvent(evt, this, {
+            isTextView: true
+        });
     },
 
     /**

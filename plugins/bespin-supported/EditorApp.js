@@ -24,7 +24,7 @@
 
 "define metadata";
 ({
-    "depends": [ "CommandLine", "CommandListener", "Editor", "UserIdent" ],
+    "depends": [ "CommandLine", "Editor", "UserIdent" ],
     "provides": [
         {
             "ep":       "factory",
@@ -37,7 +37,6 @@
 "end";
 
 var SC = require('sproutcore/runtime').SC;
-var CommandListener = require('CommandListener:index').CommandListener;
 var DockView = require('bespin:views/dock').DockView;
 var EditorView = require('Editor:views/editor').EditorView;
 var cliInputView = require('CommandLine:views/cli').cliInputView;
@@ -54,15 +53,7 @@ exports.applicationController = SC.Object.extend({
                 dockedViews: [ cliInputView.design() ]
             }),
             childViews: 'applicationView'.w(),
-            defaultResponder: CommandListener,
-            layout: { centerX: 0, centerY: 0, width: 640, height: 480 },
-
-            init: function() {
-                arguments.callee.base.apply(this, arguments);
-
-                this.set('defaultResponder',
-                    this.get('defaultResponder').create({ pane: this }));
-            }
+            layout: { centerX: 0, centerY: 0, width: 640, height: 480 }
         })
     }),
 
