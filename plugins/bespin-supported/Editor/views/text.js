@@ -416,7 +416,7 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
      * Deletes the selection or the previous character, if the selection is an
      * insertion point.
      */
-    backspace: function(evt) {
+    backspace: function() {
         var textStorage = this.getPath('layoutManager.textStorage');
         var lines = textStorage.get('lines');
 
@@ -522,7 +522,7 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
         this.becomeFirstResponder();
     },
 
-    moveDown: function(evt) {
+    moveDown: function() {
         var selectedRanges = this._selectedRanges;
         var position;
         if (this._rangeSetIsInsertionPoint(selectedRanges)) {
@@ -538,19 +538,19 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
         this._virtualInsertionPoint = position;
     },
 
-    moveLeft: function(evt) {
+    moveLeft: function() {
         this._reanchorSelection(this.getPath('layoutManager.textStorage').
             displacePosition(this._selectedRanges[0].start, -1));
         this._virtualInsertionPoint = null;
     },
 
-    moveRight: function(evt) {
+    moveRight: function() {
         this._reanchorSelection(this.getPath('layoutManager.textStorage').
             displacePosition(this._selectedRanges[0].start, 1));
         this._virtualInsertionPoint = null;
     },
 
-    moveUp: function(evt) {
+    moveUp: function() {
         var selectedRanges = this._selectedRanges;
         var position;
         if (this._rangeSetIsInsertionPoint(selectedRanges)) {
@@ -569,7 +569,7 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
     /**
      * Inserts a newline at the insertion point.
      */
-    newline: function(evt) {
+    newline: function() {
         this._insertText("\n");
     },
 
