@@ -35,8 +35,8 @@ var SC = require('sproutcore/runtime').SC;
  * available.
  *
  * To use this mixin, derive from it and implement the functions (don't have to)
- *   - copy: function() { return "text for clippboard" }
- *   - cut: function() { "Cut some text"; return "text for clippboard"}
+ *   - copy: function() { return "text for clipboard" }
+ *   - cut: function() { "Cut some text"; return "text for clipboard"}
  *   - textInserted: function(newInsertedText) { "handle new inserted text"; }
  * Note: Pasted text is provied through the textInserted(pastedText) function.
  *
@@ -209,24 +209,76 @@ exports.TextInput = {
             }, false);
         }
 
-        // Code for copy and cut.
-        var copyCutFn = function(evt) {
-            var copyCutData = evt.type.indexOf('copy') != -1 ?
-                thisTextInput._TextInput_copy() :
-                thisTextInput._TextInput_cut();
-            thisTextInput._TextInput_setValueAndSelect(copyCutData || '');
+        // Here comes the code for copy and cut...
 
-            // On Firefox you have to ignore the textarea's content until it's
-            // copied / cut. Otherwise the value of the textarea is inserted
-            // again.
-            if (SC.browser.isMozilla) {
-                thisTextInput._TextInput_ignore = true;
-                window.setTimeout(function() {
-                    thisTextInput._TextInput_setValueAndSelect('');
-                    thisTextInput._TextInput_ignore = false;
-                }, 0);
-            }
+        // This is the basic copy and cut function. Depending on the
+        // OS and browser this function needs to be extended.
+        var copyCutBaseFn = function(evt) {
+            // Get the data that should be copied/cutted.
+            var copyCutData = evt.type.indexOf('copy') != -1 ?
+                            thisTextInput._TextInput_copy() :
+                            thisTextInput._TextInput_cut();
+            // Set the textField's value equal to the copyCutData.
+            // After this function is called, the real copy or cut
+            // event takes place and the selected text in the
+            // textField is pushed to the OS's clipboard.
+            thisTextInput._TextInput_setValueAndSelect('');
         };
+
+        // For all browsers that are not Safari running on Mac.
+        if (!(SC.browser.isSafari && !this._isChrome && SC.browser.isMac)) {
+            var copyCutMozillaFn = false;
+            if (SC.browser.isMozilla) {
+                // If the browser is Mozilla like, the copyCut function has to
+                // be extended.
+                copyCutMozillaFn = function(evt) {
+                    // Call the basic copyCut function.
+                    copyCutBaseFn(evt);
+
+                    // On Firefox you have to ignore the textarea's content
+                    // until it's copied / cutted. Otherwise the value of the
+                    // textarea is inserted again.
+                    if (SC.browser.isMozilla) {
+                        thisTextInput._TextInput_ignore = true;
+                        window.setTimeout(function() {
+                            thisTextInput._TextInput_setValueAndSelect('');
+                            thisTextInput._TextInput_ignore = false;
+                        }, 0);
+                    }
+                };
+            }
+            textField.addEventListener('copy', copyCutMozillaFn ||
+                copyCutBaseFn, false);
+            textField.addEventListener('cut',  copyCutMozillaFn ||
+                copyCutBaseFn, false);
+         } else {
+            // For Safari on Mac (only!) the copy and cut event only occurs if
+            // you have some text selected. Fortunately, the beforecopy and
+            // beforecut event occurs before the copy or cut event does so we
+            // can put the to be copied or cutted text in the textarea.
+
+            // Also, the cut event is fired twice. If it's fired twice within a
+            // certain time period, the second call will be skipped.
+            var lastCutCall = new Date().getTime();
+            var copyCutSafariMacFn = function(evt) {
+                var doCut = evt.type.indexOf('cut') != -1;
+                if (doCut && new Date().getTime() - lastCutCall < 10) {
+                    return;
+                }
+
+                // Call the basic copyCut function.
+                copyCutBaseFn(evt);
+
+                if (doCut) {
+                    lastCutCall = new Date().getTime();
+                }
+            };
+
+            textField.addEventListener('beforecopy', copyCutSafariMacFn,
+                false);
+            textField.addEventListener('beforecut',  copyCutSafariMacFn,
+                false);
+        }
 
         // Clicking the address bar causes a blur, but SproutCore won't notice
         // unless we tell it explicitly.
