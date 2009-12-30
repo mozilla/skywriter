@@ -37,14 +37,10 @@ var SC = require('sproutcore/runtime').SC;
  * To use this mixin, derive from it and call renderTextInput() in your
  * render() implementation and attachTextInputEvents() in your didCreateLayer()
  * implementation.
- *
- * TODO: Enable Cut and Copy menu items in Firefox and Safari. In Safari this
- * is especially important, since the browser's Cut and Copy won't work at all
- * otherwise.
  */
 exports.TextInput = {
     _TextInput_composing: false,
-    _TextInput_pasting: false,
+    _TextInput_ignore: false,
 
     // Keyevents and copy/cut/paste are not the same on Safari and Chrome.
     _isChrome: !!parseFloat(navigator.userAgent.split("Chrome/")[1]),
@@ -61,12 +57,14 @@ exports.TextInput = {
 
     // This function doesn't work on WebKit! The textContent comes out empty...
     _TextInput_textFieldChanged: function() {
-        if (this._TextInput_composing || this._TextInput_pasting) {
+        if (this._TextInput_composing || this._TextInput_ignore) {
             return;
         }
 
         var textField = this._TextInput_getTextField();
         var text = textField.value;
+        // On FF textFieldChanged is called sometimes although nothing changed.
+        // -> don't call textInserted() in such a case.
         if (text == '') {
             return;
         }
@@ -77,18 +75,16 @@ exports.TextInput = {
 
     _TextInput_copy: function() {
         if (this.respondsTo('copy')) {
-            SC.RunLoop.begin();
-            this.copy();
-            SC.RunLoop.end();
+            return this.copy();
         }
+        return false;
     },
 
     _TextInput_cut: function() {
         if (this.respondsTo('cut')) {
-            SC.RunLoop.begin();
-            this.cut();
-            SC.RunLoop.end();
+            return this.cut();
         }
+        return false;
     },
 
     _TextInput_textInserted: function(text) {
@@ -99,35 +95,10 @@ exports.TextInput = {
         }
     },
 
-    _TextInput_textPasted: function(text) {
-        if (this.respondsTo('pasteData')) {
-            SC.RunLoop.begin();
-            this.pasteData(text);
-            SC.RunLoop.end();
-        }
-    },
-
-    // Firefox specific. Converts the content of a contenteditable div into
-    // plain text.
-    _TextInput_userPastedIntoTextField: function() {
-        this._TextInput_pasting = false;
-
+    _TextInput_setValueAndSelect: function(text) {
         var textField = this._TextInput_getTextField();
-
-        // Fx converts newlines in plaintext to <br>, so reverse that
-        // transformation.
-        var buffer = [];
-        while (textField.firstChild !== null) {
-            var node = textField.firstChild;
-            if (node.nodeType === Node.ELEMENT_NODE && node.tagName === "BR") {
-                buffer.push("\n");
-            } else {
-                buffer.push(node.textContent);
-            }
-            textField.removeChild(node);
-        }
-
-        this._TextInput_textPasted(buffer.join(""));
+        textField.value = text;
+        textField.select();
     },
 
     /**
@@ -154,15 +125,10 @@ exports.TextInput = {
                 thisTextInput._TextInput_textInserted(evt.data);
             }, false);
             textField.addEventListener('paste', function(evt) {
-                thisTextInput._TextInput_textPasted(evt.clipboardData.getData(
-                    'text/plain'));
+                thisTextInput._TextInput_textInserted(evt.clipboardData.
+                    getData('text/plain'));
             }, false);
         } else {
-            // The events DOMNodeInserted and DOMCharacterDataModified are not
-            // fired on FF if the textField is not directly added to the body.
-            // Detection is done using the keypress/keyup event instead.
-            // jviereck 09/12/30
-
             var textFieldChangedFn = function(evt) {
                 thisTextInput._TextInput_textFieldChanged()
             };
@@ -178,31 +144,44 @@ exports.TextInput = {
             }, false);
 
             textField.addEventListener('paste', function(evt) {
-                // Set a flag to ignore all the intervening DOMNodeInserted
-                // events, then deliver all the pasted text to the view.
-                //
                 // FIXME: This is ugly and could result in extraneous text
                 // being included as part of the text if extra DOMNodeInserted
                 // or DOMCharacterDataModified events happen to be in the queue
                 // when this function runs. But until Fx supports TextInput
                 // events, there's nothing better we can do.
-                thisTextInput._TextInput_pasting = true;
+
+                // Waits till the paste content is pasted to the textarea.
+                // Sometimes a delay of 0 is too short for Fx. In such a case
+                // the keyUp events occur a little bit later and the pasted
+                // content is detected there.
+                thisTextInput._TextInput_setValueAndSelect('');
                 window.setTimeout(function() {
-                    thisTextInput._TextInput_userPastedIntoTextField();
+                    thisTextInput._TextInput_textFieldChanged();
                 }, 0);
             }, false);
         }
 
-        textField.addEventListener('copy', function(evt) {
-            var copyData = thisTextInput._TextInput_copyData();
+        // Code for copy and cut.
+        var copyCutFn = function(evt) {
+            var copyCutData = evt.type.indexOf('copy') != -1 ?
+                thisTextInput._TextInput_copy() :
+                thisTextInput._TextInput_cut();
+            thisTextInput._TextInput_setValueAndSelect(copyCutData || '');
 
-        }, false);
-        textField.addEventListener('cut', function(evt) {
-            thisTextInput._TextInput_cut();
-        }, false);
+            // On Firefox you have to ignore the textarea's content until it's
+            // copied / cut. Otherwise the value of the textarea is inserted
+            // again.
+            if (SC.browser.isMozilla) {
+                thisTextInput._TextInput_ignore = true;
+                window.setTimeout(function() {
+                    thisTextInput._TextInput_setValueAndSelect('');
+                    thisTextInput._TextInput_ignore = false;
+                }, 0);
+            }
+        }
 
-        // Clicking the address bar in Fx (at least) causes a blur, but
-        // SproutCore won't notice unless we tell it explicitly.
+        // Clicking the address bar causes a blur, but SproutCore won't notice
+        // unless we tell it explicitly.
         textField.addEventListener('blur', function(evt) {
             thisTextInput.resignFirstResponder();
         }, false);
@@ -221,6 +200,8 @@ exports.TextInput = {
         sc_super();
 
         if (firstTime) {
+            // Add a textarea to handle focus, copy & paste and key input
+            // within the current view and hide it under the view.
             var layerFrame = this.get('layerFrame');
             var textFieldContext = context.begin("textarea");
             textFieldContext.attr("style", ("position: absolute; " +

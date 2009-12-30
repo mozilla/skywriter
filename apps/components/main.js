@@ -35,7 +35,7 @@ main = function() {
                 layout: { centerX: 0, centerY: 0, width: 640, height: 480 },
                 childViews: 'sampleInputView'.w(),
                 sampleInputView: SC.View.design(Canvas, TextInput, {
-                    _actionText: "",
+                    _actionText: "[Click the view to focus is.]",
                     _writtenText: "",
 
                     _write: function(action, insertText) {
@@ -84,12 +84,8 @@ main = function() {
                         this.get('pane').makeFirstResponder(this);
                     },
 
-                    pasteData: function(text) {
-                        this._write("pasted '" + text + "'", text);
-                    },
-
                     textInserted: function(text) {
-                        this._write("inserted '" + text + "'", text);
+                        this._write("inserted '" + text + "'", text.replace('\n','\\n'));
                     },
 
                     keyDown: function(ev) {
