@@ -88,13 +88,6 @@ main = function() {
                         this._write("pasted '" + text + "'", text);
                     },
 
-                    render: function(context, firstTime) {
-                        sc_super();
-                        if (firstTime) {
-                            this.renderTextInput(context, firstTime);
-                        }
-                    },
-
                     textInserted: function(text) {
                         this._write("inserted '" + text + "'", text);
                     },

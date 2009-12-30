@@ -45,10 +45,12 @@ var SC = require('sproutcore/runtime').SC;
 exports.TextInput = {
     _TextInput_composing: false,
     _TextInput_pasting: false,
-    _TextInput_textFieldID: null,
+
+    // Keyevents and copy/cut/paste are not the same on Safari and Chrome.
+    _isChrome: !!parseFloat(navigator.userAgent.split("Chrome/")[1]),
 
     _TextInput_getTextField: function() {
-        return document.getElementById(this._TextInput_textFieldID);
+        return this.$("textarea")[0];
     },
 
     _TextInput_refocusTextField: function() {
@@ -64,8 +66,11 @@ exports.TextInput = {
         }
 
         var textField = this._TextInput_getTextField();
-        var text = textField.textContent;
-        textField.textContent = "";
+        var text = textField.value;
+        if (text == '') {
+            return;
+        }
+        textField.value = "";
 
         this._TextInput_textInserted(text);
     },
@@ -138,9 +143,13 @@ exports.TextInput = {
         // more complicated hacks. No browsers have a complete enough
         // implementation of DOM 3 events at the current time (12/2009). --pcw
         if (SC.browser.safari) {    // Chrome too
-            textField.addEventListener('compositionend', function(evt) {
-                thisTextInput._TextInput_textInserted(evt.data);
-            }, false);
+            // On Chrome the compositionend event is fired as well as the
+            // textInput event, but only one of them has to be handled.
+            if (!this._isChrome) {
+                textField.addEventListener('compositionend', function(evt) {
+                    thisTextInput._TextInput_textInserted(evt.data);
+                }, false);
+            }
             textField.addEventListener('textInput', function(evt) {
                 thisTextInput._TextInput_textInserted(evt.data);
             }, false);
@@ -148,14 +157,18 @@ exports.TextInput = {
                 thisTextInput._TextInput_textPasted(evt.clipboardData.getData(
                     'text/plain'));
             }, false);
-        } else {                    // Firefox 3.5's method
-            textField.addEventListener('DOMNodeInserted', function(evt) {
-                thisTextInput._TextInput_textFieldChanged();
-            }, false);
-            textField.addEventListener('DOMCharacterDataModified',
-                function(evt) {
-                    thisTextInput._TextInput_textFieldChanged();
-                }, false);
+        } else {
+            // The events DOMNodeInserted and DOMCharacterDataModified are not
+            // fired on FF if the textField is not directly added to the body.
+            // Detection is done using the keypress/keyup event instead.
+            // jviereck 09/12/30
+
+            var textFieldChangedFn = function(evt) {
+                thisTextInput._TextInput_textFieldChanged()
+            };
+            textField.addEventListener('keypress', textFieldChangedFn, false);
+            textField.addEventListener('keyup', textFieldChangedFn, false);
+
             textField.addEventListener('compositionstart', function(evt) {
                 thisTextInput._TextInput_composing = true;
             }, false);
@@ -163,6 +176,7 @@ exports.TextInput = {
                 thisTextInput._TextInput_composing = false;
                 thisTextInput._TextInput_textFieldChanged();
             }, false);
+
             textField.addEventListener('paste', function(evt) {
                 // Set a flag to ignore all the intervening DOMNodeInserted
                 // events, then deliver all the pasted text to the view.
@@ -180,7 +194,8 @@ exports.TextInput = {
         }
 
         textField.addEventListener('copy', function(evt) {
-            thisTextInput._TextInput_copy();
+            var copyData = thisTextInput._TextInput_copyData();
+
         }, false);
         textField.addEventListener('cut', function(evt) {
             thisTextInput._TextInput_cut();
@@ -202,31 +217,17 @@ exports.TextInput = {
         this._TextInput_getTextField().focus();
     },
 
-    /**
-     * This function should be called during your implementation of render() to
-     * create the text field.
-     */
-    renderTextInput: function(context, firstTime) {
-        // The text field won't work in Chrome if it's a child of ours, so make
-        // it a child of the body. And it won't work in either Fx or Chrome if
-        // its display is set to 'none', so we have to position it way
-        // offscreen.
+    render: function(context, firstTime) {
+        sc_super();
 
-        var div = document.createElement('div');
-        div.contentEditable = true;
-
-        var id = SC.guidFor(div);
-        div.id = id;
-        this._TextInput_textFieldID = id;
-
-        var style = div.style;
-        style.position = 'absolute';
-        style.top = '-10000px';
-        style.left = '-10000px';
-        style.width = '480px';
-        style.height = '360px';
-
-        document.body.appendChild(div);
+        if (firstTime) {
+            var layerFrame = this.get('layerFrame');
+            var textFieldContext = context.begin("textarea");
+            textFieldContext.attr("style", ("position: absolute; " +
+                "z-index: -99999; top: 0px; left: 0px; width: %@px; " +
+                "height: %@px").fmt(layerFrame.width, layerFrame.height));
+            textFieldContext.end();
+        }
     },
 
     /**
