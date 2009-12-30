@@ -2,6 +2,20 @@
     "depends": [ "BespinUtils", "Canon" ],
     "provides": [
         {
+            "ep": "command",
+            "name": "backspace",
+            "key": "backspace",
+            "predicates": [ "isTextView", true ],
+            "action": "backspace"
+        },
+        {
+            "ep": "command",
+            "name": "newline",
+            "key": "return",
+            "predicates": [ "isTextView", true ],
+            "action": "newline"
+        },
+        {
             "ep": "factory",
             "name": "textstorage",
             "action": "value",

@@ -211,6 +211,36 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
         ]);
     },
 
+    // Replaces the selection with the given text and updates the selection
+    // boundaries appropriately.
+    _insertText: function(text) {
+        var textStorage = this.getPath('layoutManager.textStorage');
+        var selectedRanges = this._selectedRanges;
+
+        // Delete text from all ranges except the first (in reverse order, so
+        // that we don't have to check and update positions as we go), then
+        // overwrite the first selected range with the text. This is
+        // "Cocoa-style" behavior, not "TextMate-style".
+        for (var i = selectedRanges.length - 1; i > 0; i--) {
+            textStorage.deleteCharacters(selectedRanges[i]);
+        }
+        var firstRange = selectedRanges[0];
+        textStorage.replaceCharacters(firstRange, text);
+
+        // Update the selection to point immediately after the inserted text.
+        var lines = text.split("\n");
+        var position = lines.length > 1 ?
+            {
+                row:    firstRange.start.row + lines.length - 1,
+                column: lines[lines.length - 1].length
+            } :
+            {
+                row:    firstRange.start.row,
+                column: firstRange.start.column + text.length
+            };
+        this._replaceSelection([ { start: position, end: position } ]);
+    },
+
     // Invalidates the entire visible frame. Does not automatically mark the
     // editor for repainting.
     _invalidate: function() {
@@ -364,6 +394,37 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
         unfocusedCursorFillStyle: "#73171e"
     },
 
+    /**
+     * Deletes the selection or the previous character, if the selection is an
+     * insertion point.
+     */
+    backspace: function(evt) {
+        var textStorage = this.getPath('layoutManager.textStorage');
+        var lines = textStorage.get('lines');
+
+        // If the selection is an insertion point, extend it back by one
+        // character.
+        var ranges = this._selectedRanges;
+        if (this._rangeSetIsInsertionPoint(ranges)) {
+            var range = ranges[0];
+            ranges = [
+                {
+                    start:  textStorage.displacePosition(range.start, -1),
+                    end:    range.end
+                }
+            ]
+        }
+
+        ranges.forEach(function(range) {
+            textStorage.deleteCharacters(range);
+        });
+
+        // Position the insertion point at the start of all the ranges that
+        // were just deleted.
+        var position = ranges[0].start;
+        this._replaceSelection([ { start: position, end: position } ]);
+    },
+
     didCreateLayer: function() {
         this.attachTextInputEvents();
     },
@@ -448,6 +509,13 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
         this.becomeFirstResponder();
     },
 
+    /**
+     * Inserts a newline at the insertion point.
+     */
+    newline: function(evt) {
+        this._insertText("\n");
+    },
+
     render: function(context, firstTime) {
         arguments.callee.base.apply(this, arguments);
         if (firstTime) {
@@ -456,31 +524,7 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
     },
 
     textInserted: function(text) {
-        var textStorage = this.get('layoutManager').get('textStorage');
-        var selectedRanges = this._selectedRanges;
-
-        // Delete text from all ranges except the first (in reverse order, so
-        // that we don't have to check and update positions as we go), then
-        // overwrite the first selected range with the text. This is
-        // "Cocoa-style" behavior, not "TextMate-style".
-        for (var i = selectedRanges.length - 1; i > 0; i--) {
-            textStorage.deleteCharacters(selectedRanges[i]);
-        }
-        var firstRange = selectedRanges[0];
-        textStorage.replaceCharacters(firstRange, text);
-
-        // Update the selection to point immediately after the inserted text.
-        var lines = text.split("\n");
-        var position = lines.length > 1 ?
-            {
-                row:    firstRange.start.row + lines.length - 1,
-                column: lines[lines.length - 1].length
-            } :
-            {
-                row:    firstRange.start.row,
-                column: firstRange.start.column + text.length
-            };
-        this._replaceSelection([ { start: position, end: position } ]);
+        this._insertText(text);
     }
 });
 
