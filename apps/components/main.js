@@ -65,36 +65,56 @@ main = function() {
 
                         context.fillStyle = "#ffffff";
                         context.font = "20pt Helvetica, Arial, sans-serif";
-                        context.fillText("Action: " + this._actionText, 16, 32);
+                        context.fillText("Action: " + this._actionText, 16,
+                            32);
 
                         context.fillStyle = "#ffffff";
                         context.font = "20pt Helvetica, Arial, sans-serif";
-                        context.fillText("Written: " + this._writtenText, 16, 65);
+                        context.fillText("Written: " + this._writtenText, 16,
+                            65);
 
                         // Cursor
-                        var width = context.measureText("Written: " + this._writtenText).width;
-                        context.fillStyle = this.get('isFirstResponder') ? "white" : "gray";
+                        var width = context.measureText("Written: " +
+                            this._writtenText).width;
+                        context.fillStyle = this.get('isFirstResponder') ?
+                            "white" : "gray";
                         context.fillRect(width + 18, 44, 2, 25);
                     },
 
                     layout: { top: 0, left: 0, width: 640, height: 480 },
 
-                    mouseDown: function(evt) {
-                        // SproutCore won't focus a canvas automatically.
-                        this.get('pane').makeFirstResponder(this);
-                    },
-
-                    textInserted: function(text) {
-                        this._write("inserted '" + text + "'", text.replace('\n','\\n'));
-                    },
-
                     keyDown: function(ev) {
                         if (ev.keyCode == 8) {
-                            this.set('_writtenText', this._writtenText.substring(0, this._writtenText.length - 1));
+                            this.set('_writtenText',
+                                this._writtenText.substring(0,
+                                this._writtenText.length - 1));
                             this.set('_actionText', "backspace");
                             return YES;
                         }
                         return false;
+                    },
+
+                    // ---
+                    // The following functions are called from the TextInput
+                    // mixin.
+
+                    copy: function() {
+                        this.set('_actionText', "copy: '" +
+                            this.get('_writtenText') + "'");
+                        return this.get('_writtenText');
+                    },
+
+                    cut: function() {
+                        var _writtenTextTemp = this.get('_writtenText');
+                        this.set('_actionText', "cut: '" +
+                            this.get('_writtenText') + "'");
+                        this.set('_writtenText', '')
+                        return _writtenTextTemp;
+                    },
+
+                    textInserted: function(text) {
+                        this._write("inserted '" + text + "'",
+                            text.replace('\n','\\n'));
                     }
                 })
             })

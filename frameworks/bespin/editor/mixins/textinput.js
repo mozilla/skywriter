@@ -34,9 +34,19 @@ var SC = require('sproutcore/runtime').SC;
  * in the future this module should use DOM 3 TextInput events directly where
  * available.
  *
- * To use this mixin, derive from it and call renderTextInput() in your
- * render() implementation and attachTextInputEvents() in your didCreateLayer()
- * implementation.
+ * To use this mixin, derive from it and implement the functions (don't have to)
+ *   - copy: function() { return "text for clippboard" }
+ *   - cut: function() { "Cut some text"; return "text for clippboard"}
+ *   - textInserted: function(newInsertedText) { "handle new inserted text"; }
+ * Note: Pasted text is provied through the textInserted(pastedText) function.
+ *
+ * Make sure to call the superclass implementation if you override any of the
+ * following functions:
+ *   - render(context, firstTime)
+ *   - didCreateLayer()
+ *   - mouseDown(event)
+ *   - willBecomeKeyResponderFrom(responder)
+ *   - willLoseKeyResponderTo(responder)
  */
 exports.TextInput = {
     _TextInput_composing: false,
@@ -47,12 +57,6 @@ exports.TextInput = {
 
     _TextInput_getTextField: function() {
         return this.$("textarea")[0];
-    },
-
-    _TextInput_refocusTextField: function() {
-        if (this.get('isFirstResponder')) {
-            this.resignFirstResponder();
-        }
     },
 
     // This function doesn't work on WebKit! The textContent comes out empty...
@@ -74,17 +78,23 @@ exports.TextInput = {
     },
 
     _TextInput_copy: function() {
+        var copyData = false;
         if (this.respondsTo('copy')) {
-            return this.copy();
+            SC.RunLoop.begin();
+            copyData = this.copy();
+            SC.RunLoop.end();
         }
-        return false;
+        return copyData;
     },
 
     _TextInput_cut: function() {
+        var cutData = false;
         if (this.respondsTo('cut')) {
-            return this.cut();
+            SC.RunLoop.begin();
+            cutData = this.cut();
+            SC.RunLoop.end();
         }
-        return false;
+        return cutData;
     },
 
     _TextInput_textInserted: function(text) {
@@ -102,11 +112,49 @@ exports.TextInput = {
     },
 
     /**
-     * Attaches notification listeners to the text field so that your view will
-     * be notified of events. Typically you will call this function in your
-     * didCreateLayer() implementation.
+     * Gives focus to the field editor so that input events will be
+     * delivered to the view. If you override willBecomeKeyResponderFrom(),
+     * you should call this function in your implementation.
      */
-    attachTextInputEvents: function() {
+    focusTextInput: function() {
+        this._TextInput_getTextField().focus();
+    },
+
+    /**
+     * Removes focus from the invisible text input so that input events are no
+     * longer delivered to this view. If you override willLoseKeyResponderTo(),
+     * you should call this function in your implementation.
+     */
+    unfocusTextInput: function() {
+        this._TextInput_getTextField().blur();
+    },
+
+    /**
+     * If you override this method, you should call that function as well.
+     */
+    render: function(context, firstTime) {
+        arguments.callee.base.apply(this, arguments);
+
+        if (firstTime) {
+            // Add a textarea to handle focus, copy & paste and key input
+            // within the current view and hide it under the view.
+            var layerFrame = this.get('layerFrame');
+            var textFieldContext = context.begin("textarea");
+            textFieldContext.attr("style", ("position: absolute; " +
+                "z-index: -99999; top: 0px; left: 0px; width: %@px; " +
+                "height: %@px").fmt(layerFrame.width, layerFrame.height));
+            textFieldContext.end();
+        }
+    },
+
+    /**
+     * Attaches notification listeners to the text field so that your view will
+     * be notified of events. If you override this method, you should call
+     * that function as well.
+     */
+    didCreateLayer: function() {
+        arguments.callee.base.apply(this, arguments);
+
         var textField = this._TextInput_getTextField();
         var thisTextInput = this;
 
@@ -130,7 +178,7 @@ exports.TextInput = {
             }, false);
         } else {
             var textFieldChangedFn = function(evt) {
-                thisTextInput._TextInput_textFieldChanged()
+                thisTextInput._TextInput_textFieldChanged();
             };
             textField.addEventListener('keypress', textFieldChangedFn, false);
             textField.addEventListener('keyup', textFieldChangedFn, false);
@@ -178,7 +226,7 @@ exports.TextInput = {
                     thisTextInput._TextInput_ignore = false;
                 }, 0);
             }
-        }
+        };
 
         // Clicking the address bar causes a blur, but SproutCore won't notice
         // unless we tell it explicitly.
@@ -188,36 +236,12 @@ exports.TextInput = {
     },
 
     /**
-     * Gives focus to the field editor so that input events will be
-     * delivered to the view. If you override willBecomeKeyResponderFrom(),
-     * you should call this function in your implementation.
+     * The default implementation of this event sets the focus. If you
+     * override this method, you should call that function as well.
      */
-    focusTextInput: function() {
-        this._TextInput_getTextField().focus();
-    },
-
-    render: function(context, firstTime) {
-        sc_super();
-
-        if (firstTime) {
-            // Add a textarea to handle focus, copy & paste and key input
-            // within the current view and hide it under the view.
-            var layerFrame = this.get('layerFrame');
-            var textFieldContext = context.begin("textarea");
-            textFieldContext.attr("style", ("position: absolute; " +
-                "z-index: -99999; top: 0px; left: 0px; width: %@px; " +
-                "height: %@px").fmt(layerFrame.width, layerFrame.height));
-            textFieldContext.end();
-        }
-    },
-
-    /**
-     * Removes focus from the invisible text input so that input events are no
-     * longer delivered to this view. If you override willLoseKeyResponderTo(),
-     * you should call this function in your implementation.
-     */
-    unfocusTextInput: function() {
-        this._TextInput_getTextField().blur();
+    mouseDown: function(evt) {
+        arguments.callee.base.apply(this, arguments);
+        this.get('pane').makeFirstResponder(this);
     },
 
     /**
@@ -225,6 +249,7 @@ exports.TextInput = {
      * override this method, you should call that function as well.
      */
     willBecomeKeyResponderFrom: function(responder) {
+        arguments.callee.base.apply(this, arguments);
         this.focusTextInput();
     },
 
@@ -233,6 +258,7 @@ exports.TextInput = {
      * override this method, you should call that function as well.
      */
     willLoseKeyResponderTo: function(responder) {
+        arguments.callee.base.apply(this, arguments);
         this.unfocusTextInput();
     }
 };
