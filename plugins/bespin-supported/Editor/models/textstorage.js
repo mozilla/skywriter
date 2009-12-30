@@ -38,13 +38,6 @@ exports.TextStorage = SC.Object.extend({
      */
     lines: null,
 
-    init: function() {
-        this.superclass();
-
-        this.set('delegates', []);
-        this.set('lines', [ "" ]);
-    },
-
     value: function(key, value) {
         var lines = this.get('lines');
         if (value !== undefined) {
@@ -61,6 +54,72 @@ exports.TextStorage = SC.Object.extend({
         return lines.join("\n");
     }.property('lines.[]'),
 
+    /**
+     * Returns the position of the nearest character to the given position,
+     * according to the selection rules.
+     */
+    clampPosition: function(position) {
+        var lines = this.get('lines');
+        var newRow = Math.max(0, Math.min(position.row, lines.length - 1));
+        return {
+            row:    newRow,
+            column: Math.max(0,
+                        Math.min(position.column, lines[newRow].length))
+        };
+    },
+
+    /**
+     * Deletes characters from the given range.
+     */
+    deleteCharacters: function(range) {
+        this.replaceCharacters(range, "");
+    },
+
+    /**
+     * Returns the result of displacing the given position by one character
+     * forward (if @count is 1) or backward (if @count is -1).
+     */
+    displacePosition: function(position, count) {
+        var row = position.row, column = position.column;
+        switch (count) {
+        case -1:
+            if (row === 0 && column == 0) {
+                return position;
+            }
+            return column === 0 ?
+                { row: row - 1, column: this.get('lines')[row - 1].length   } :
+                { row: row,     column: column - 1                          };
+        case 1:
+            var lines = this.get('lines');
+            var lineCount = lines.length, rowLength = lines[row].length;
+            if (row === lineCount - 1 && column === rowLength) {
+                return position;
+            }
+            return column === rowLength ?
+                { row: row + 1, column: 0           } :
+                { row: row,     column: column + 1  };
+        default:
+            throw "TextStorage.displacePosition(): count must be 1 or -1";
+        }
+    },
+
+    init: function() {
+        this.superclass();
+
+        this.set('delegates', []);
+        this.set('lines', [ "" ]);
+    },
+
+    /**
+     * Inserts the given characters at the supplied position.
+     */
+    insertCharacters: function(position, characters) {
+        this.replaceCharacters({ start: position, end: position }, characters);
+    },
+
+    /**
+     * Replaces the characters within the supplied range with the given string.
+     */
     replaceCharacters: function(range, characters) {
         var addedLines = characters.split("\n");
         var lines = this.get('lines');
@@ -76,14 +135,6 @@ exports.TextStorage = SC.Object.extend({
         this.get('delegates').forEach(function(delegate) {
             delegate.textStorageEdited(thisTextStorage, range, characters);
         });
-    },
-
-    insertCharacters: function(position, characters) {
-        this.replaceCharacters({ start: position, end: position }, characters);
-    },
-
-    deleteCharacters: function(range) {
-        this.replaceCharacters(range, "");
     }
 });
 

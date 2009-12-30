@@ -178,27 +178,18 @@ exports.LayoutManager = SC.Object.extend({
         var clientX = point.x - margin.left, clientY = point.y - margin.top;
 
         var characterWidth = this._characterWidth;
-        var lineHeight = this._lineHeight;
-        var column = Math.floor(clientX / characterWidth);
-        var row = Math.floor(clientY / lineHeight);
+        var textStorage = this.get('textStorage');
+        var clampedPosition = textStorage.clampPosition({
+            row:    Math.floor(clientY / this._lineHeight),
+            column: Math.floor(clientX / characterWidth)
+        });
 
-        var textLines = this.get('textLines');
-        var lineCount = textLines.length;
-        if (row >= lineCount) {
-            row = lineCount - 1;
-        }
-        var textLine = textLines[row];
-
-        var textLineLength = textLine.characters.length;
-        var partialFraction;
-        if (column < textLineLength) {
-            partialFraction = clientX % characterWidth / characterWidth;
-        } else {
-            partialFraction = 0.0;
-            column = textLineLength;
-        }
-
-        return { column: column, row: row, partialFraction: partialFraction };
+        var lineLength = textStorage.get('lines')[clampedPosition.row].length;
+        return SC.mixin(clampedPosition, {
+            partialFraction:
+                clientX < 0 || clampedPosition.column === lineLength ? 0.0 :
+                clientX % characterWidth / characterWidth
+        });
     },
 
     /**

@@ -71,6 +71,64 @@ exports.testCharacterMutators = function() {
     t.equal(lines[0].length, 9, "length of first row and 9");
 };
 
+exports.testClampPosition = function() {
+    var storage = TextStorage.create({});
+    storage.insertCharacters({ row: 0, column: 0 }, "foo\nbar\nbaz\n");
+
+    t.deepEqual(storage.clampPosition({ row: 1, column: 1 }),
+        { row: 1, column: 1 },
+        "(1,1) clamped to the text boundaries and (1,1)");
+
+    t.deepEqual(storage.clampPosition({ row: -1, column: -1 }),
+        { row: 0, column: 0 },
+        "(-1,-1) clamped to the text boundaries and (0,0)");
+    t.deepEqual(storage.clampPosition({ row: -1, column: 1 }),
+        { row: 0, column: 1 },
+        "(-1,1) clamped to the text boundaries and (0,1)");
+    t.deepEqual(storage.clampPosition({ row: -1, column: 4 }),
+        { row: 0, column: 3 },
+        "(-1,4) clamped to the text boundaries and (0,3)");
+
+    t.deepEqual(storage.clampPosition({ row: 1, column: -1 }),
+        { row: 1, column: 0 },
+        "(1,-1) clamped to the text boundaries and (1,0)");
+    t.deepEqual(storage.clampPosition({ row: 1, column: 1 }),
+        { row: 1, column: 1 },
+        "(1,1) clamped to the text boundaries and (1,1)");
+    t.deepEqual(storage.clampPosition({ row: 1, column: 4 }),
+        { row: 1, column: 3 },
+        "(1,4) clamped to the text boundaries and (1,3)");
+
+    t.deepEqual(storage.clampPosition({ row: 4, column: -1 }),
+        { row: 3, column: 0 },
+        "(4,-1) clamped to the text boundaries and (3,0)");
+    t.deepEqual(storage.clampPosition({ row: 4, column: 2 }),
+        { row: 3, column: 0 },
+        "(4,2) clamped to the text boundaries and (3,0)");
+    t.deepEqual(storage.clampPosition({ row: 4, column: 4 }),
+        { row: 3, column: 0 },
+        "(4,4) clamped to the text boundaries and (3,0)");
+};
+
+exports.testDisplacePosition = function() {
+    var storage = TextStorage.create({});
+    storage.insertCharacters({ row: 0, column: 0 }, "foo\nbar\nbaz\n");
+
+    t.deepEqual(storage.displacePosition({ row: 1, column: 1 }, -1),
+        { row: 1, column: 0 }, "(1,1) displaced by -1 and (1,0)");
+    t.deepEqual(storage.displacePosition({ row: 1, column: 0 }, -1),
+        { row: 0, column: 3 }, "(1,0) displaced by -1 and (0,3)");
+    t.deepEqual(storage.displacePosition({ row: 0, column: 0 }, -1),
+        { row: 0, column: 0 }, "(0,0) displaced by -1 and (0,0)");
+
+    t.deepEqual(storage.displacePosition({ row: 1, column: 1 }, 1),
+        { row: 1, column: 2 }, "(1,1) displaced by 1 and (1,2)");
+    t.deepEqual(storage.displacePosition({ row: 1, column: 3 }, 1),
+        { row: 2, column: 0 }, "(1,3) displaced by 1 and (2,0)");
+    t.deepEqual(storage.displacePosition({ row: 3, column: 0 }, 1),
+        { row: 3, column: 0 }, "(3,0) displaced by 1 and (3,0)");
+};
+
 exports.testObserving = function() {
     var storage = TextStorage.create({});
     storage.insertCharacters({ row: 0, column: 0 }, "foo\nbar\nbaz\n");
