@@ -112,6 +112,7 @@ exports.LayoutManager = SC.Object.extend({
     },
 
     _recomputeLayoutForRange: function(range) {
+        console.log("recomputing layout for", range);
         var startRow = range.start.row;
         var rowCount = range.end.row - startRow + 1;
         var textStorageLines = this.get('textStorage').get('lines');
