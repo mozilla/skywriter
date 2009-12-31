@@ -468,10 +468,6 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
         this._replaceSelection([ { start: position, end: position } ]);
     },
 
-    didCreateLayer: function() {
-        this.attachTextInputEvents();
-    },
-
     /**
      * This is where the editor is painted from head to toe. Pitiful tricks are
      * used to draw as little as possible.
@@ -593,13 +589,6 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
      */
     newline: function() {
         this._insertText("\n");
-    },
-
-    render: function(context, firstTime) {
-        arguments.callee.base.apply(this, arguments);
-        if (firstTime) {
-            this.renderTextInput(context, firstTime);
-        }
     },
 
     selectDown: function() {

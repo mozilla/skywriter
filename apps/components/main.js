@@ -55,10 +55,6 @@ main = function() {
                         this._write("cut");
                     },
 
-                    didCreateLayer: function() {
-                        this.attachTextInputEvents();
-                    },
-
                     drawRect: function(context) {
                         context.fillStyle = "#0000ff";
                         context.fillRect(0, 0, 640, 480);
