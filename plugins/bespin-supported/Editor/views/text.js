@@ -545,8 +545,9 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
     },
 
     moveRight: function() {
+        var ranges = this._selectedRanges;
         this._reanchorSelection(this.getPath('layoutManager.textStorage').
-            displacePosition(this._selectedRanges[0].start, 1));
+            displacePosition(ranges[ranges.length - 1].end, 1));
         this._virtualInsertionPoint = null;
     },
 
