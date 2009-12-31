@@ -44,6 +44,34 @@
             "action": "newline"
         },
         {
+            "ep": "command",
+            "name": "select-down",
+            "key": "shift_down",
+            "predicates": [ "isTextView", true ],
+            "action": "selectDown"
+        },
+        {
+            "ep": "command",
+            "name": "select-left",
+            "key": "shift_left",
+            "predicates": [ "isTextView", true ],
+            "action": "selectLeft"
+        },
+        {
+            "ep": "command",
+            "name": "select-right",
+            "key": "shift_right",
+            "predicates": [ "isTextView", true ],
+            "action": "selectRight"
+        },
+        {
+            "ep": "command",
+            "name": "select-up",
+            "key": "shift_up",
+            "predicates": [ "isTextView", true ],
+            "action": "selectUp"
+        },
+        {
             "ep": "factory",
             "name": "textstorage",
             "action": "value",

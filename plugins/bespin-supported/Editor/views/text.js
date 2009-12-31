@@ -270,6 +270,24 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
             Range.union(this._invalidRange, newRange);
     },
 
+    _performVerticalKeyboardSelection: function(offset) {
+        var oldPosition = this._virtualInsertionPoint !== null ?
+            this._virtualInsertionPoint : this._selectionTail();
+        var newPosition = Range.addPositions(oldPosition,
+            { row: offset, column: 0 });
+        var clampedPosition = this.getPath('layoutManager.textStorage').
+            clampPosition(newPosition);
+
+        this._extendSelectionFromStandardOrigin(clampedPosition);
+
+        // Never let the virtual insertion point's row go beyond the boundaries
+        // of the text.
+        this._virtualInsertionPoint = {
+            row:    clampedPosition.row,
+            column: newPosition.column
+        };
+    },
+
     _rangeSetIsInsertionPoint: function(rangeSet) {
         return Range.isZeroLength(rangeSet[0]);
     },
@@ -336,6 +354,16 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
             width:  boundingRect.width + padding.right,
             height: boundingRect.height + padding.bottom
         }));
+    },
+
+    // Returns the position of the tail of the selection, or the farthest
+    // position within the selection from the origin.
+    _selectionTail: function() {
+        var ranges = this._selectedRanges;
+        return Range.comparePositions(ranges[0].start,
+                this._selectionOrigin) === 0 ?
+            ranges[ranges.length - 1].end : // selection extends down
+            ranges[0].start;                // selection extends up
     },
 
     // Returns the character closest to the given point, obeying the selection
@@ -572,6 +600,28 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
         if (firstTime) {
             this.renderTextInput(context, firstTime);
         }
+    },
+
+    selectDown: function() {
+        this._performVerticalKeyboardSelection(1);
+    },
+
+    selectLeft: function() {
+        this._extendSelectionFromStandardOrigin(this.
+            getPath('layoutManager.textStorage').
+            displacePosition(this._selectionTail(), -1));
+        this._virtualInsertionPoint = null;
+    },
+
+    selectRight: function() {
+        this._extendSelectionFromStandardOrigin(this.
+            getPath('layoutManager.textStorage').
+            displacePosition(this._selectionTail(), 1));
+        this._virtualInsertionPoint = null;
+    },
+
+    selectUp: function() {
+        this._performVerticalKeyboardSelection(-1);
     },
 
     textInserted: function(text) {
