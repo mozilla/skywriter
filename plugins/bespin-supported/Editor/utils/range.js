@@ -25,6 +25,13 @@
 var SC = require('sproutcore/runtime').SC;
 
 /**
+ * Returns the result of adding the two positions.
+ */
+exports.addPositions = function(a, b) {
+    return { row: a.row + b.row, column: a.column + b.column };
+};
+
+/**
  * Given two positions a and b, returns a negative number if a < b, 0 if a = b,
  * or a positive number if a > b.
  */

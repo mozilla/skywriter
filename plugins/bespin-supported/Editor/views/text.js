@@ -217,9 +217,8 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
     // the actual insertion point, but when the cursor moves vertically, the
     // column of the virtual insertion point remains the same.
     _getVirtualInsertionPoint: function() {
-        var virtualInsertionPoint = this._virtualInsertionPoint;
-        return virtualInsertionPoint === null ?
-            this._selectedRanges[0].start : virtualInsertionPoint;
+        var point = this._virtualInsertionPoint;
+        return point === null ? this._selectedRanges[0].start : point;
     },
 
     // Replaces the selection with the given text and updates the selection
@@ -245,10 +244,8 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
                 row:    firstRange.start.row + lines.length - 1,
                 column: lines[lines.length - 1].length
             } :
-            {
-                row:    firstRange.start.row,
-                column: firstRange.start.column + text.length
-            };
+            Range.addPositions(firstRange.start,
+                { row: 0, column: text.length });
         this._replaceSelection([ { start: position, end: position } ]);
     },
 
@@ -346,7 +343,7 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
     _selectionPositionForPoint: function(point) {
         var position = this.get('layoutManager').characterAtPoint(point);
         return position.partialFraction < 0.5 ? position :
-            { row: position.row, column: position.column + 1 };
+            Range.addPositions(position, { row: 0, column: 1 });
     },
 
     acceptsFirstResponder: true,
@@ -523,15 +520,16 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
     },
 
     moveDown: function() {
-        var selectedRanges = this._selectedRanges;
+        var ranges = this._selectedRanges;
         var position;
-        if (this._rangeSetIsInsertionPoint(selectedRanges)) {
-            var point = this._getVirtualInsertionPoint();
-            position = { row: point.row + 1, column: point.column };
+        if (this._rangeSetIsInsertionPoint(ranges)) {
+            position = this._getVirtualInsertionPoint();
         } else {
-            var range = selectedRanges[0];
-            position = { row: range.end.row + 1, column: range.start.column };
+            // Yes, this is actually what Cocoa does... weird, huh?
+            var range = ranges[0];
+            position = { row: range.end.row, column: range.start.column };
         }
+        position = Range.addPositions(position, { row: 1, column: 0 });
 
         this._reanchorSelection(this.getPath('layoutManager.textStorage').
             clampPosition(position));
@@ -552,15 +550,10 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
     },
 
     moveUp: function() {
-        var selectedRanges = this._selectedRanges;
-        var position;
-        if (this._rangeSetIsInsertionPoint(selectedRanges)) {
-            var point = this._getVirtualInsertionPoint();
-            position = { row: point.row - 1, column: point.column };
-        } else {
-            var rangeStart = selectedRanges[0].start;
-            position = { row: rangeStart.row - 1, column: rangeStart.column };
-        }
+        var ranges = this._selectedRanges;
+        var position = this._rangeSetIsInsertionPoint(ranges) ?
+            this._getVirtualInsertionPoint() : ranges[0].start;
+        position = Range.addPositions(position, { row: -1, column: 0 });
 
         this._reanchorSelection(this.getPath('layoutManager.textStorage').
             clampPosition(position));

@@ -26,6 +26,18 @@ require('sproutcore/runtime');
 var t = require('PluginDev');
 var Range = require('utils/range');
 
+exports.testAddPositions = function() {
+    t.deepEqual(Range.addPositions({ row: 0, column: 0 },
+        { row: 0, column: 0 }), { row: 0, column: 0 }, "0,0 + 0,0 and 0,0");
+    t.deepEqual(Range.addPositions({ row: 1, column: 0 },
+        { row: 2, column: 0 }), { row: 3, column: 0 }, "1,0 + 2,0 and 3,0");
+    t.deepEqual(Range.addPositions({ row: 0, column: 1 },
+        { row: 0, column: 1 }), { row: 0, column: 2 }, "0,1 + 0,1 and 0,2");
+    t.deepEqual(Range.addPositions({ row: 1, column: 2 },
+        { row: -1, column: -2 }), { row: 0, column: 0 },
+        "1,2 + -1,-2 and 0,0");
+};
+
 exports.testComparePositions = function() {
     t.equal(Range.comparePositions({ row: 0, column: 0 },
         { row: 0, column: 0 }), 0, "0,0 = 0,0");
