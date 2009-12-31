@@ -83,11 +83,11 @@ exports.testClampPosition = function() {
         { row: 0, column: 0 },
         "(-1,-1) clamped to the text boundaries and (0,0)");
     t.deepEqual(storage.clampPosition({ row: -1, column: 1 }),
-        { row: 0, column: 1 },
-        "(-1,1) clamped to the text boundaries and (0,1)");
+        { row: 0, column: 0 },
+        "(-1,1) clamped to the text boundaries and (0,0)");
     t.deepEqual(storage.clampPosition({ row: -1, column: 4 }),
-        { row: 0, column: 3 },
-        "(-1,4) clamped to the text boundaries and (0,3)");
+        { row: 0, column: 0 },
+        "(-1,4) clamped to the text boundaries and (0,0)");
 
     t.deepEqual(storage.clampPosition({ row: 1, column: -1 }),
         { row: 1, column: 0 },

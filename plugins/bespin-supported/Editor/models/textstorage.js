@@ -60,11 +60,17 @@ exports.TextStorage = SC.Object.extend({
      */
     clampPosition: function(position) {
         var lines = this.get('lines');
-        var newRow = Math.max(0, Math.min(position.row, lines.length - 1));
+        var row = position.row;
+        if (row < 0) {
+            return { row: 0, column: 0 };
+        } else if (row >= lines.length) {
+            var lastRow = lines.length - 1;
+            return { row: lastRow, column: lines[lastRow].length };
+        }
+
         return {
-            row:    newRow,
-            column: Math.max(0,
-                        Math.min(position.column, lines[newRow].length))
+            row:    row,
+            column: Math.max(0, Math.min(position.column, lines[row].length))
         };
     },
 
