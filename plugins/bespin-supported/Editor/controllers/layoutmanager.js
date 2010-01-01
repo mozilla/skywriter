@@ -125,10 +125,9 @@ exports.LayoutManager = SC.Object.extend({
         this._recalculateDimensions();
         range = this._runAnnotations(range);
 
-        var thisLayoutManager = this;
         this.get('delegates').forEach(function(delegate) {
-            delegate.layoutManagerChangedLayout(thisLayoutManager, range);
-        });
+            delegate.layoutManagerChangedLayout(this, range);
+        }, this);
     },
 
     _runAnnotations: function(range) {

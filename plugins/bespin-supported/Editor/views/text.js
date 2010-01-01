@@ -182,12 +182,11 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
 
         context.save();
 
-        var thisEditor = this;
         this._selectedRanges.forEach(function(range) {
             context.fillStyle = fillStyle;
-            thisEditor._createPathForRange(context, range);
+            this._createPathForRange(context, range);
             context.fill();
-        });
+        }, this);
 
         context.restore();
     },

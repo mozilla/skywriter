@@ -137,10 +137,9 @@ exports.TextStorage = SC.Object.extend({
 
         lines.replace(startRow, endRow - startRow + 1, addedLines);
 
-        var thisTextStorage = this;
         this.get('delegates').forEach(function(delegate) {
-            delegate.textStorageEdited(thisTextStorage, range, characters);
-        });
+            delegate.textStorageEdited(this, range, characters);
+        }, this);
     }
 });
 
