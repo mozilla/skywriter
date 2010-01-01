@@ -76,6 +76,25 @@ exports.LayoutManager = SC.Object.extend({
      */
     textStorage: TextStorage,
 
+    _computeInvalidRange: function(oldRange, newRange) {
+        var textStorage = this.get('textStorage');
+        var oldEndRow = oldRange.end.row;
+
+        var endPosition;
+        if (oldEndRow === newRange.end.row) {
+            // Fast path: invalidate just the remainder of this row.
+            endPosition = {
+                row:    oldEndRow,
+                column: textStorage.get('lines')[oldEndRow].length
+            };
+        } else {
+            // Slow path: invalidate positions for the rest of this file.
+            endPosition = textStorage.range().end;
+        }
+
+        return { start: oldRange.start, end: endPosition };
+    },
+
     _recalculateDimensions: function() {
         // Lots of room for optimization here if this turns out to be slow. But
         // for now...
@@ -93,31 +112,26 @@ exports.LayoutManager = SC.Object.extend({
     },
 
     _recomputeEntireLayout: function() {
-        var lines = this.get('textStorage').get('lines');
-        this._recomputeLayoutForRange({
-            start:  { row: 0, column: 0 },
-            end:    {
-                row:    lines.length - 1,
-                column: lines[lines.length - 1].length
-            }
-        });
+        var entireRange = this.get('textStorage').range();
+        this._recomputeLayoutForRanges(entireRange, entireRange);
     },
 
-    _recomputeLayoutForRange: function(range) {
-        var startRow = range.start.row;
-        var rowCount = range.end.row - startRow + 1;
-        var textStorageLines = this.get('textStorage').get('lines');
-        var newTextLines = [];
-        for (var i = 0; i < rowCount; i++) {
-            newTextLines[i] = { characters: textStorageLines[startRow + i] };
-        }
-        this.get('textLines').replace(startRow, rowCount, newTextLines);
+    _recomputeLayoutForRanges: function(oldRange, newRange) {
+        var oldStartRow = oldRange.start.row;
+        this.textLines.replace(oldStartRow, oldRange.end.row - oldStartRow + 1,
+            this.getPath('textStorage.lines').slice(oldStartRow,
+            newRange.end.row + 1).map(function(line) {
+                return { characters: line };
+            }));
 
         this._recalculateDimensions();
-        range = this._runAnnotations(range);
 
+        var changedRange = this._runAnnotations(Range.unionRanges(oldRange,
+            newRange));
+
+        var invalidRange = this._computeInvalidRange(oldRange, newRange);
         this.get('delegates').forEach(function(delegate) {
-            delegate.layoutManagerChangedLayout(this, range);
+            delegate.layoutManagerChangedLayout(this, invalidRange);
         }, this);
     },
 
@@ -238,7 +252,7 @@ exports.LayoutManager = SC.Object.extend({
     init: function() {
         this._layoutAnnotations = [];
         this.set('delegates', SC.clone(this.get('delegates')));
-        this.set('textLines', []);
+        this.set('textLines', [ { characters: "" } ]);
 
         this.createTextStorage();
         this.get('textStorage').get('delegates').push(this);
@@ -272,14 +286,7 @@ exports.LayoutManager = SC.Object.extend({
     },
 
     textStorageEdited: function(sender, oldRange, newRange) {
-        // Remove text lines as appropriate.
-        var rowsToDelete = oldRange.end.row - newRange.end.row;
-        if (rowsToDelete > 0) {
-            this.get('textLines').removeAt(oldRange.end.row + 1, rowsToDelete);
-        }
-
-        // Invalidate the appropriate range.
-        this._recomputeLayoutForRange(Range.unionRanges(oldRange, newRange));
+        this._recomputeLayoutForRanges(oldRange, newRange);
     }
 });
 
