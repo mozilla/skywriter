@@ -76,15 +76,6 @@ exports.LayoutManager = SC.Object.extend({
      */
     textStorage: TextStorage,
 
-    _computeStandardLayoutInfo: function(range) {
-        var textLines = this.get('textLines');
-        var lineHeight = this._lineHeight;
-        var startRow = range.start.row, endRow = range.end.row;
-        for (var i = startRow; i <= endRow; i++) {
-            textLines[i].lineHeight = lineHeight;
-        }
-    },
-
     _recalculateDimensions: function() {
         // Lots of room for optimization here if this turns out to be slow. But
         // for now...
@@ -122,7 +113,6 @@ exports.LayoutManager = SC.Object.extend({
         }
         this.get('textLines').replace(startRow, rowCount, newTextLines);
 
-        this._computeStandardLayoutInfo(range);
         this._recalculateDimensions();
         range = this._runAnnotations(range);
 
