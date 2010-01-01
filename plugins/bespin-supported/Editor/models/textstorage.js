@@ -126,19 +126,34 @@ exports.TextStorage = SC.Object.extend({
     /**
      * Replaces the characters within the supplied range with the given string.
      */
-    replaceCharacters: function(range, characters) {
-        var addedLines = characters.split("\n");
-        var lines = this.get('lines');
-        var startRow = range.start.row, endRow = range.end.row;
-        addedLines[0] = lines[startRow].substring(0, range.start.column) +
-            addedLines[0];
-        addedLines[addedLines.length - 1] +=
-            lines[endRow].substring(range.end.column);
+    replaceCharacters: function(oldRange, characters) {
+        var oldStart = oldRange.start, oldEnd = oldRange.end;
+        var oldStartRow = oldStart.row, oldEndRow = oldEnd.row;
+        var oldStartColumn = oldStart.column;
 
-        lines.replace(startRow, endRow - startRow + 1, addedLines);
+        var addedLines = characters.split("\n");
+        var addedLineCount = addedLines.length;
+
+        var lines = this.get('lines');
+        addedLines[0] = lines[oldStartRow].substring(0, oldStartColumn) +
+            addedLines[0];
+        addedLines[addedLineCount - 1] +=
+            lines[oldEndRow].substring(oldEnd.column);
+
+        lines.replace(oldStartRow, oldEndRow - oldStartRow + 1, addedLines);
+
+        var newRange = {
+            start:  oldStart,
+            end:    {
+                row:    oldStartRow + addedLineCount - 1,
+                column: addedLineCount === 1 ?
+                        oldStartColumn + characters.length :
+                        addedLines[addedLineCount - 1].length
+            }
+        };
 
         this.get('delegates').forEach(function(delegate) {
-            delegate.textStorageEdited(this, range, characters);
+            delegate.textStorageEdited(this, oldRange, newRange);
         }, this);
     }
 });

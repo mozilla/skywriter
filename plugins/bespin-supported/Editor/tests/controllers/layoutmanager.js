@@ -124,8 +124,8 @@ exports.testLayoutComputation = function() {
         "the text storage value and \"foo\\nbiz\\nboo\\n\"");
     t.deepEqual(receivedRange, {
         start:  { row: 1, column: 1 },
-        end:    { row: 1, column: 3 }
-    }, "the range received by the annotation and [ 1 1, 1 3 ]");
+        end:    { row: 2, column: 2 }
+    }, "the range received by the annotation and [ 1 1, 2 2 ]");
     t.equal(receivedTextLines.length, 4, "the number of lines received by " +
         "the annotation and 4");
     t.equal(receivedTextLines[0].characters, "foo", "the characters in the " +

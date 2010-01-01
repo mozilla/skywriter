@@ -23,6 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var Range = require('utils/range');
 var TextStorage = require('models/textstorage').TextStorage;
 var catalog = require('bespin:plugins').catalog;
 
@@ -280,36 +281,15 @@ exports.LayoutManager = SC.Object.extend({
         };
     },
 
-    textStorageEdited: function(sender, range, characters) {
-        var insertedLines = characters.split("\n");
-
+    textStorageEdited: function(sender, oldRange, newRange) {
         // Remove text lines as appropriate.
-        var startRow = range.start.row;
-        var rowsToDelete = range.end.row - startRow + 1 - insertedLines.length;
+        var rowsToDelete = oldRange.end.row - newRange.end.row;
         if (rowsToDelete > 0) {
-            this.get('textLines').removeAt(startRow + insertedLines.length,
-                rowsToDelete);
+            this.get('textLines').removeAt(oldRange.end.row + 1, rowsToDelete);
         }
 
         // Invalidate the appropriate range.
-        var lines = this.get('textStorage').get('lines');
-        var insertedEndRow = startRow + insertedLines.length - 1;
-        this._recomputeLayoutForRange({
-            start:  range.start,
-            end:    startRow === insertedEndRow ?
-                    {
-                        // Fast path: invalidate just the remainder of this
-                        // row.
-                        row:    insertedEndRow,
-                        column: lines[insertedEndRow].length
-                    } :
-                    {
-                        // Insertion or deletion of rows triggers the slow
-                        // path: invalidate positions for the rest of the file.
-                        row:    lines.length - 1,
-                        column: lines[lines.length - 1].length
-                    }
-        });
+        this._recomputeLayoutForRange(Range.unionRanges(oldRange, newRange));
     }
 });
 

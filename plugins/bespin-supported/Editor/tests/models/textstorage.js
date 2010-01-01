@@ -148,11 +148,15 @@ exports.testObserving = function() {
     };
 
     var called = false;
-    delegate.textStorageEdited = function(storage, range, characters) {
+    delegate.textStorageEdited = function(storage, oldRange, newRange) {
         called = true;
-        t.deepEqual(range, deletionRange, "range passed in to textStorageEdited " +
-            "and the actual range deleted");
-        t.equal(characters, "", "replaced characters and the empty string");
+        t.deepEqual(oldRange, deletionRange, "the old range passed in to " +
+            "textStorageEdited and the actual range deleted");
+        t.deepEqual(newRange, {
+            start:  deletionRange.start,
+            end:    deletionRange.start
+        }, "the new range passed in to textStorageEdited and a zero-length " +
+            "range located at the start of the deleted range");
     };
 
     storage.deleteCharacters(deletionRange);
