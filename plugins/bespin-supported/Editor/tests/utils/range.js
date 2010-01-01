@@ -68,3 +68,26 @@ exports.testExtendRange = function() {
         }, "[ 7,8 9,10 ] extended by 0,0 remains the same");
 };
 
+exports.testUnionRanges = function() {
+    t.deepEqual(Range.unionRanges({
+            start:  { row: 1, column: 2 },
+            end:    { row: 3, column: 4 },
+        }, {
+            start:  { row: 5, column: 6 },
+            end:    { row: 7, column: 8 }
+        }), {
+            start:  { row: 1, column: 2 },
+            end:    { row: 7, column: 8 }
+        }, "[ 1,2 3,4 ] union [ 5,6 7,8 ] = [ 1,2 7,8 ]");
+    t.deepEqual(Range.unionRanges({
+            start:  { row: 4, column: 4 },
+            end:    { row: 5, column: 5 }
+        }, {
+            start:  { row: 3, column: 3 },
+            end:    { row: 4, column: 5 }
+        }), {
+            start:  { row: 3, column: 3 },
+            end:    { row: 5, column: 5 }
+        }, "[ 4,4 5,5 ] union [ 3,3 4,5 ] = [ 3,3 5,5 ]");
+};
+

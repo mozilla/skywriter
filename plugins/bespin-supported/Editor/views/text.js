@@ -266,7 +266,7 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
     _invalidateRange: function(newRange) {
         this.set('layerNeedsUpdate', true);
         this._invalidRange = this._invalidRange === null ? newRange :
-            Range.union(this._invalidRange, newRange);
+            Range.unionRanges(this._invalidRange, newRange);
     },
 
     _performVerticalKeyboardSelection: function(offset) {

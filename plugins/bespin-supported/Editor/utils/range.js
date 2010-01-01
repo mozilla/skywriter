@@ -113,7 +113,7 @@ exports.toString = function(range) {
 /**
  * Returns the union of the two ranges.
  */
-exports.union = function(a, b) {
+exports.unionRanges = function(a, b) {
     return {
         start:  a.start.row < b.start.row ||
             (a.start.row === b.start.row && a.start.column < b.start.column) ?
