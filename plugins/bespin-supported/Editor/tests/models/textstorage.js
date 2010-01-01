@@ -163,3 +163,21 @@ exports.testObserving = function() {
     t.ok(called, "textStorageEdited() was called");
 };
 
+exports.testRange = function() {
+    var storage = TextStorage.create({});
+    storage.insertCharacters({ row: 0, column: 0 }, "foo\nbar\nbaz\n");
+    t.deepEqual(storage.range(), {
+        start:  { row: 0, column: 0 },
+        end:    { row: 3, column: 0 }
+    }, "the character range and [ 0,0 3,0 ]");
+
+    storage.deleteCharacters({
+        start:  { row: 2, column: 3 },
+        end:    { row: 3, column: 0 }
+    });
+    t.deepEqual(storage.range(), {
+        start:  { row: 0, column: 0 },
+        end:    { row: 2, column: 3 }
+    }, "the character range and [ 0,0 2,3 ]");
+};
+

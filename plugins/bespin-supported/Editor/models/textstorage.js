@@ -39,19 +39,10 @@ exports.TextStorage = SC.Object.extend({
     lines: null,
 
     value: function(key, value) {
-        var lines = this.get('lines');
         if (value !== undefined) {
-            var rowCount = lines.length;
-            this.replaceCharacters({
-                start:  { row: 0, column: 0 },
-                end:    {
-                    row:    rowCount - 1,
-                    column: lines[rowCount - 1].length
-                }
-            }, value);
+            this.replaceCharacters(this.range(), value);
         }
-
-        return lines.join("\n");
+        return this.get('lines').join("\n");
     }.property('lines.[]'),
 
     /**
@@ -64,8 +55,7 @@ exports.TextStorage = SC.Object.extend({
         if (row < 0) {
             return { row: 0, column: 0 };
         } else if (row >= lines.length) {
-            var lastRow = lines.length - 1;
-            return { row: lastRow, column: lines[lastRow].length };
+            return this.range().end;
         }
 
         return {
@@ -121,6 +111,20 @@ exports.TextStorage = SC.Object.extend({
      */
     insertCharacters: function(position, characters) {
         this.replaceCharacters({ start: position, end: position }, characters);
+    },
+
+    /**
+     * Returns the span of the entire text content.
+     */
+    range: function() {
+        var lines = this.get('lines');
+        return {
+            start:  { row: 0, column: 0 },
+            end:    {
+                row:    lines.length - 1,
+                column: lines[lines.length - 1].length
+            }
+        };
     },
 
     /**
