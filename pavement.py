@@ -65,7 +65,7 @@ options(
     server=Bunch(
         # set to true to allow connections from other machines
         address="",
-        port=8080,
+        port=lambda: "4020" if not options.server.abbot else "8080",
         try_build=False,
         dburl=None,
         async=False,
@@ -231,6 +231,14 @@ def start(options):
     Go to http://localhost:4020/editor
     to launch the editor app.
     
+    You can change the port and allow remote connections by setting
+    server.port or server.address on the command line.
+    
+    paver server.address=your.ip.address server.port=8000 start
+    
+    will allow remote connections (assuming you don't have a firewall
+    blocking the connection) and start the server on port 8000.
+    
     Also, if you need to hack on SproutCore and have SC source installed
     (paver install_sproutcore -g) you can run
     
@@ -238,16 +246,27 @@ def start(options):
     
     to launch Abbot.
     """
+    additional_options = []
+    if options.server.address:
+        additional_options.append("server.address=%s" % (options.server.address))
+    
+    if options.server.abbot:
+        additional_options.append("server_base_url=server/")
+    else:
+        static = _update_static()
+        additional_options.append("staticdir=" + static)
+    
+    paver_command = additional_options +     ["clientdir=../bespinclient", 
+            "server.port=%s" % (options.server.port), 
+            "start"]
+        
     if options.server.abbot:
         command = "abbot/bin/sc-server"
         popen = subprocess.Popen(command, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
-        call_pavement("../bespinserver/pavement.py", ["clientdir=../bespinclient", 
-            "server_base_url=server/", "start"])
+        call_pavement("../bespinserver/pavement.py", paver_command)
         popen.wait()
     else:
-        static = _update_static()
-        call_pavement("../bespinserver/pavement.py", ["clientdir=../bespinclient", 
-            "staticdir=" + static, "server.port=4020", "start"])
+        call_pavement("../bespinserver/pavement.py", paver_command)
 
 def _update_static():
     static = path("tmp") / "static"
