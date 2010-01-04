@@ -163,13 +163,13 @@ exports.Canvas = {
     },
 
     didCreateLayer: function() {
-        this.sc_super();
+        arguments.callee.base.apply(this, arguments);
         this.set('_bespin_canvas_canvasDom', this.$("#" +
             this._bespin_canvas_canvasId)[0]);
     },
 
     render: function(context, firstTime) {
-        this.sc_super();
+        arguments.callee.base.apply(this, arguments);
 
         if (firstTime) {
             var layerFrame = this.get('layerFrame');

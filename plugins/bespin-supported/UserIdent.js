@@ -238,7 +238,7 @@ exports.userIdentPage = SC.Page.design({
             container: SC.ContainerView.design({
                 nowShowingBinding: "UserIdent#userIdentPage.mainPane.contentView.action.value",
                 contentViewDidChange: function() {
-                    this.sc_super();
+                    arguments.callee.base.apply(this, arguments);
                     setTimeout(function() {
                         this.mainPane.makeFirstResponder(this.getPath(this.mainPane.contentView.action.value + ".usernameField"));
                     }.bind(exports.userIdentPage), 0);
@@ -314,7 +314,7 @@ exports.userIdentPage = SC.Page.design({
             valueBinding: "UserIdent#signupController.username",
             hint: "At least 4 chars",
             commitEditing: function() {
-                this.sc_super();
+                arguments.callee.base.apply(this, arguments);
                 exports.signupController.validate("username");
                 return true;
             },
@@ -338,7 +338,7 @@ exports.userIdentPage = SC.Page.design({
             valueBinding: "UserIdent#signupController.password1",
             hint: "At least 6 chars",
             commitEditing: function() {
-                this.sc_super();
+                arguments.callee.base.apply(this, arguments);
                 exports.signupController.validate("password1");
                 return true;
             },
@@ -362,7 +362,7 @@ exports.userIdentPage = SC.Page.design({
             valueBinding: "UserIdent#signupController.password2",
             hint: "Repeat it",
             commitEditing: function() {
-                this.sc_super();
+                arguments.callee.base.apply(this, arguments);
                 exports.signupController.validate("password2");
                 return true;
             },
@@ -385,7 +385,7 @@ exports.userIdentPage = SC.Page.design({
             valueBinding: "UserIdent#signupController.email",
             hint: "email@example.com",
             commitEditing: function() {
-                this.sc_super();
+                arguments.callee.base.apply(this, arguments);
                 exports.signupController.validate("email");
                 return true;
             },
