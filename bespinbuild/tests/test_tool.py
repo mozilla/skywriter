@@ -9,3 +9,15 @@ def test_manifest_creation():
 """
     manifest = tool.Manifest.from_json(sample)
     assert manifest.include_core_test
+    assert manifest.errors == []
+
+def test_manifest_errors():
+    sample = """
+{
+    "plugins": ["BogusPlugin"]
+}
+"""
+    manifest = tool.Manifest.from_json(sample)
+    errors = manifest.errors
+    assert errors
+    
