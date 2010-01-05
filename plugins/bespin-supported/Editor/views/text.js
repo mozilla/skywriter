@@ -26,11 +26,14 @@ var SC = require('sproutcore/runtime').SC;
 var Canvas = require('bespin:editor/mixins/canvas').Canvas;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var Range = require('utils/range');
+var Rect = require('utils/rect');
 var TextInput = require('bespin:editor/mixins/textinput').TextInput;
 var catalog = require('bespin:plugins').catalog;
 
 exports.TextView = SC.View.extend(Canvas, TextInput, {
     _backgroundInvalid: false,
+    _dragPoint: null,
+    _dragTimer: null,
     _invalidRange: null,
 
     // TODO: calculate from the size or let the user override via themes if
@@ -104,6 +107,20 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
         context.lineTo(startLineRect.x + startLineRect.width +
             padding.right, startLineRect.y);                        // 8
         context.closePath();
+    },
+
+    _drag: function() {
+        var point = this.convertFrameFromView(this._dragPoint);
+        var offset = Rect.offsetFromRect(this.get('clippingFrame'), point);
+
+        this._extendSelectionFromStandardOrigin(this.
+            _selectionPositionForPoint({
+                x:  point.x - offset.x,
+                y:  point.y - offset.y
+            }));
+
+        this.set('layerNeedsUpdate', true);
+        this.becomeFirstResponder();
     },
 
     // Draws a single insertion point.
@@ -381,6 +398,22 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
             frameY : rectY - height / 2 + rectHeight / 2);
     },
 
+    _scrollWhileDragging: function() {
+        var scrollView = this._scrollView();
+        if (SC.none(scrollView)) {
+            return;
+        }
+
+        var offset = Rect.offsetFromRect(this.get('clippingFrame'),
+            this.convertFrameFromView(this._dragPoint));
+        if (offset.x === 0 && offset.y === 0) {
+            return;
+        }
+
+        scrollView.scrollBy(offset.x, offset.y);
+        this._drag();
+    },
+
     /**
      * @private
      *
@@ -567,17 +600,27 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
             convertFrameFromView({ x: evt.clientX, y: evt.clientY })));
         this._virtualInsertionPoint = null;
 
+        this._dragPoint = { x: evt.clientX, y: evt.clientY };
+        this._dragTimer = SC.Timer.schedule({
+            target:     this,
+            action:     '_scrollWhileDragging',
+            interval:   100,
+            repeats:    true
+        });
+
         this.set('layerNeedsUpdate', true);
         this.becomeFirstResponder();
     },
 
     mouseDragged: function(evt) {
-        this._extendSelectionFromStandardOrigin(
-            this._selectionPositionForPoint(
-            this.convertFrameFromView({ x: evt.clientX, y: evt.clientY })));
+        this._dragPoint = { x: evt.clientX, y: evt.clientY };
+        this._drag();
+    },
 
-        this.set('layerNeedsUpdate', true);
-        this.becomeFirstResponder();
+    mouseUp: function(evt) {
+        if (this._dragTimer !== null) {
+            this._dragTimer.invalidate();
+        }
     },
 
     moveDown: function() {
