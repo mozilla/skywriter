@@ -54,6 +54,8 @@ def test_js_creation():
     assert """tiki.register("plugin2",""" in output
     assert """tiki.module("plugin2:mycode",""" in output
     assert """exports.plugin2func = function""" in output
+    assert "exports.Plugin = SC.Object.extend" in output
+    assert '"depends": ["plugin2"]' in output
     
 def test_js_creation_with_core_test():
     sample = """

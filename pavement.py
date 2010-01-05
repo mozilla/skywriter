@@ -290,11 +290,14 @@ def _update_static():
     index = index.replace("{{inline}}", inline)
     (editor_dir / "index.html").write_bytes(index)
     
-    combined = combine_files("editor", path("apps") / "editor", add_main=True)
-    (editor_dir / "editor.js").write_bytes(combined)
+    editor_path = editor_dir / "editor.js"
+    editor_file = editor_path.open("w")
     
-    combined = combine_files("bespin", path("frameworks") / "bespin")
-    (static / "bespin.js").write_bytes(combined)
+    combine_files(editor_file, None, "editor", path("apps") / "editor", add_main=True)
+    
+    bespin_path = static / "bespin.js"
+    bespin_file = bespin_path.open("w")
+    combine_files(bespin_file, None, "bespin", path("frameworks") / "bespin")
     
     return static
     

@@ -3,9 +3,9 @@ import os
 import optparse
 
 try:
-    from json import loads
+    from json import loads, dumps
 except ImportError:
-    from simplejson import loads
+    from simplejson import loads, dumps
 
 from bespinbuild.path import path
 
@@ -17,7 +17,7 @@ class BuildError(Exception):
 class Manifest(object):
     """A manifest describes what should be built."""
     def __init__(self, include_core_test=False, plugins=None,
-        search_path=None, sproutcore=None):
+        search_path=None, sproutcore=None, bespin=None):
         
         self.include_core_test = include_core_test
         self.plugins = plugins
@@ -34,10 +34,21 @@ class Manifest(object):
         
         if sproutcore is None:
             sproutcore = path("sproutcore")
-            if not sproutcore.exists():
-                raise BuildError("Cannot find SproutCore (looked in %s)" 
-                    % sproutcore.abspath())
+            
+        if not sproutcore or not sproutcore.exists():
+            raise BuildError("Cannot find SproutCore (looked in %s)" 
+                % sproutcore.abspath())
+                
         self.sproutcore = sproutcore
+        
+        if bespin is None:
+            bespin = path("frameworks") / "bespin"
+            
+        if not bespin or not bespin.exists():
+            raise BuildError("Cannot find Bespin core code (looked in %s)"
+                % bespin.abspath())
+
+        self.bespin = bespin
         
     @classmethod
     def from_json(cls, json_string):
@@ -82,12 +93,14 @@ class Manifest(object):
         if self.errors:
             raise BuildError("Errors found, stopping...")
             
+        # include SproutCore
         sproutcore_js = self.sproutcore / "sproutcore.js"
         if not sproutcore_js.exists():
             raise BuildError("sproutcore.js file missing at %s" % (sproutcore_js.abspath()))
         
         output_js.write(sproutcore_js.bytes())
         
+        # include coretest if desired
         if self.include_core_test:
             core_test_js = self.sproutcore / "core_test.js"
             if not core_test_js.exists():
@@ -95,12 +108,26 @@ class Manifest(object):
                     core_test_js.abspath())
             output_js.write(core_test_js.bytes())
         
+        # include Bespin core code
+        exclude_tests = not self.include_core_test
+
+        combiner.combine_files(output_js, output_css, "bespin",
+            self.bespin, exclude_tests=exclude_tests)
+        
+        # finally, package up the plugins
         package_list = [self.get_package(p) 
             for p in self.plugins]
         package_list = combiner.toposort(package_list,
             package_factory=self.get_package)
         
-        exclude_tests = not self.include_core_test
+        # include plugin metadata
+        all_md = dict()
+        for p in package_list:
+            plugin = self.get_plugin(p.name)
+            all_md[plugin.name] = plugin.metadata
+        output_js.write("""
+tiki.require("bespin:plugins").catalog.load(%s)
+""" % (dumps(all_md)))
         
         for package in package_list:
             plugin = self.get_plugin(package.name)
