@@ -72,6 +72,13 @@
             "action": "selectUp"
         },
         {
+            "ep": "command",
+            "name": "tab",
+            "key": "tab",
+            "predicates": [ "isTextView", true ],
+            "action": "tab"
+        },
+        {
             "ep": "factory",
             "name": "textstorage",
             "action": "value",

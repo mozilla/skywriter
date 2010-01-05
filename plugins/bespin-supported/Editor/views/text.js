@@ -693,6 +693,11 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
         this._performVerticalKeyboardSelection(-1);
     },
 
+    tab: function() {
+        this._insertText("        ".substring(0, 8 -
+            this._selectedRanges[0].start.column % 8));
+    },
+
     textInserted: function(text) {
         this._insertText(text);
     }
