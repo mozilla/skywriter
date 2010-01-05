@@ -238,14 +238,13 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
 
         // Update the selection to point immediately after the inserted text.
         var lines = text.split("\n");
-        var position = lines.length > 1 ?
+        this._reanchorSelection(lines.length > 1 ?
             {
                 row:    firstRange.start.row + lines.length - 1,
                 column: lines[lines.length - 1].length
             } :
             Range.addPositions(firstRange.start,
-                { row: 0, column: text.length });
-        this._replaceSelection([ { start: position, end: position } ]);
+                { row: 0, column: text.length }));
     },
 
     // Invalidates the entire visible frame. Does not automatically mark the
@@ -291,11 +290,12 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
         return Range.isZeroLength(rangeSet[0]);
     },
 
-    // Clears out the selection and moves the selection origin and the
-    // insertion point to the given position.
+    // Clears out the selection, moves the selection origin and the insertion
+    // point to the given position, and scrolls to the new selection.
     _reanchorSelection: function(newPosition) {
         this._replaceSelection([ { start: newPosition, end: newPosition } ]);
         this._selectionOrigin = newPosition;
+        this._scrollToPosition(newPosition);
     },
 
     // Updates the current selection, invalidating regions appropriately.
@@ -353,6 +353,45 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
             width:  boundingRect.width + padding.right,
             height: boundingRect.height + padding.bottom
         }));
+    },
+
+    _scrollToPosition: function(position) {
+        var scrollable = this._scrollView();
+        if (SC.none(scrollable)) {
+            return;
+        }
+
+        var rect = this.get('layoutManager').
+            characterRectForPosition(position);
+        var rectX = rect.x, rectY = rect.y;
+        var rectWidth = rect.width, rectHeight = rect.height;
+
+        var frame = this.get('clippingFrame');
+        var frameX = frame.x, frameY = frame.y;
+
+        var padding = this.get('padding');
+        var width = frame.width - padding.right;
+        var height = frame.height - padding.bottom;
+
+        scrollable.scrollTo(rectX >= frameX &&
+            rectX + rectWidth < frameX + width ?
+            frameX : rectX - width / 2 + rectWidth / 2,
+            rectY >= frameY &&
+            rectY + rectHeight < frameY + height ?
+            frameY : rectY - height / 2 + rectHeight / 2);
+    },
+
+    /**
+     * @private
+     *
+     * Returns the parent scroll view, if one exists.
+     */
+    _scrollView: function() {
+        var view = this.get('parentView');
+        while (!SC.none(view) && !view.get('isScrollable')) {
+            view = view.get('parentView');
+        }
+        return view;
     },
 
     // Returns the position of the tail of the selection, or the farthest
@@ -463,8 +502,7 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
 
         // Position the insertion point at the start of all the ranges that
         // were just deleted.
-        var position = ranges[0].start;
-        this._replaceSelection([ { start: position, end: position } ]);
+        this._reanchorSelection(ranges[0].start);
     },
 
     /**
