@@ -7,12 +7,15 @@ d = path('/home/guido/bin')
 for f in d.files('*.py'):
     f.chmod(0755)
 
-This module requires Python 2.2 or later.
+This module requires Python 2.5 or later.
 
 
 URL:     http://www.jorendorff.com/articles/python/path
 Author:  Jason Orendorff <jason.orendorff\x40gmail\x2ecom> (and others - see the url!)
 Date:    9 Mar 2007
+
+Slightly modified to eliminate the deprecationwarning for the md5 module.
+
 """
 
 
@@ -27,9 +30,7 @@ Date:    9 Mar 2007
 #   - guess_content_type() method?
 #   - Perhaps support arguments to touch().
 
-from __future__ import generators
-
-import sys, warnings, os, fnmatch, glob, shutil, codecs, md5
+import sys, warnings, os, fnmatch, glob, shutil, codecs, hashlib
 
 __version__ = '2.2'
 __all__ = ['path']
@@ -767,7 +768,7 @@ class path(_base):
         """
         f = self.open('rb')
         try:
-            m = md5.new()
+            m = hashlib.new("md5")
             while True:
                 d = f.read(8192)
                 if not d:

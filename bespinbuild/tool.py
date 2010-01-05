@@ -7,10 +7,7 @@ try:
 except ImportError:
     from simplejson import loads
 
-try:
-    from path import path
-except ImportError:
-    from bespinbuild.path import path
+from bespinbuild.path import path
 
 from bespinbuild import plugins
 
