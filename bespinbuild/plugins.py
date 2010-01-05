@@ -85,6 +85,12 @@ class Plugin(object):
         except AttributeError:
             return self.load_metadata()
     
+    @property
+    def single_file(self):
+        """Returns true if this is a single file plugin
+        (ie not a directory with a plugin.json file)."""
+        return not self.location.isdir()
+    
     def load_metadata(self):
         """You should use the metadata property to read the metadata.
         When the metadata has not been loaded, this will load it.

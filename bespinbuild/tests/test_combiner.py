@@ -1,3 +1,5 @@
+from cStringIO import StringIO
+
 from path import path
 
 from bespinbuild.combiner import Package, toposort, combine_files
@@ -21,9 +23,20 @@ def test_toposort():
     l = toposort([c,e,a,b,d])
     assert l == [a,b,c,d,e]
     
+def test_toposort_with_undefined_packages():
+    b = Package("b", ["a"])
+    l = toposort([b], package_factory=lambda name: Package(name, []), 
+        reset_first=True)
+    assert l[0].name == "a"
+    assert l[1] == b
+    
+    
 def test_app_combination():
     p = path(__file__).dirname() / "testapp"
-    combined = combine_files("testapp", p, add_main=True)
+    output = StringIO()
+    combine_files(output, StringIO(), "testapp", p, 
+                  add_main=True, exclude_tests=False)
+    combined = output.getvalue()
     print combined
     assert "exports.main = function() {" in combined
     assert """exports.main = require("main").main;""" in combined
@@ -37,7 +50,9 @@ def test_app_combination():
     
 def test_package_index_generation():
     p = path(__file__).dirname() / "noindexapp"
-    combined = combine_files("noindexapp", p)
+    output = StringIO()
+    combine_files(output, StringIO(), "noindexapp", p)
+    combined = output.getvalue()
     print combined
     assert 'tiki.module("noindexapp:index"' in combined
     assert 'tiki.main' not in combined

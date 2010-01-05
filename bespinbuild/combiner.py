@@ -17,9 +17,11 @@ class Package(object):
     def __repr__(self):
         return "Package(%s)" % (self.name)
 
+class NullOutput(object):
+    def write(self, s):
+        pass
 
-
-def toposort(unsorted, reset_first=False):
+def toposort(unsorted, package_factory=None, reset_first=False):
     """Topologically sorts Packages. This algorithm is the
     depth-first version from Wikipedia:
     http://en.wikipedia.org/wiki/Topological_sorting
@@ -38,7 +40,9 @@ def toposort(unsorted, reset_first=False):
                 try:
                     visit(mapping[dependency])
                 except KeyError:
-                    continue
+                    new_package = package_factory(dependency)
+                    mapping[new_package.name] = new_package
+                    visit(new_package)
             l.append(p)
         
     for package in unsorted:
@@ -46,33 +50,55 @@ def toposort(unsorted, reset_first=False):
         
     return l
 
-def combine_files(name, p, add_main=False):
+def combine_files(jsfile, cssfile, name, p, add_main=False, 
+                  exclude_tests=True):
     """Combines the files in an app into a single .js, with all
     of the proper information for Tiki.
     
     Arguments:
+    jsfile: file object to write combined JavaScript to
+    cssfile: file object to write combined CSS to (may be None if 
+        there is no CSS)
     name: application name (will become Tiki package name)
     p: path object pointing to the app's directory
+    add_main: for an app (rather than a plugin) you should add a call
+        to main so that SproutCore will start the app
+    exclude_tests: should contents of tests directories be included in the
+        combined output?
     """
-    combined = """;tiki.register("%s",
+    
+    if cssfile is None:
+        cssfile = NullOutput()
+    
+    jsfile.write(""";tiki.register("%s",
 {"scripts":[{"url":"%s.js","id":"%s.js"}]
 });
-""" % (name, name, name)
+""" % (name, name, name))
     
     has_index = False
     
-    for f in p.walkfiles("*.js"):
+    if p.isdir():
+        for f in p.walkfiles("*.css"):
+            cssfile.write(f.bytes())
+            
+        filelist = p.walkfiles("*.js")
+    else:
+        filelist = [p]
+    
+    for f in filelist:
+        if exclude_tests and "tests" in f.splitall():
+            continue
         modname = p.relpathto(f.splitext()[0])
         if modname == "index":
             has_index = True
-            
-        combined += """
+        
+        jsfile.write("""
 tiki.module("%s:%s",function(require,exports,module) {
-""" % (name, modname)
-        combined += f.bytes()
-        combined += """
+""" % (name, modname))
+        jsfile.write(f.bytes())
+        jsfile.write("""
 });
-"""
+""")
     
     if not has_index:
         if add_main:
@@ -81,20 +107,18 @@ exports.main = require("main").main;
 """
         else:
             module_contents = ""
-        combined += """
+        jsfile.write("""
 tiki.module("%s:index",function(require,exports,module){%s});
-""" % (name, module_contents)
+""" % (name, module_contents))
     
-    combined += """
+    jsfile.write("""
 tiki.script("%s.js");
-""" % (name)
+""" % (name))
     
     if add_main:
-        combined += """
+        jsfile.write("""
 tiki.main("%s", "main");
-""" % (name)
-
-    return combined
+""" % (name))
 
 
 ####

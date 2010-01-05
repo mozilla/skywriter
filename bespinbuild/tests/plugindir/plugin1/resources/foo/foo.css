@@ -1,1 +1,6 @@
-body {}
+/* inverse text is cool */
+
+body {
+    background-color: black;
+    color: white;
+}
