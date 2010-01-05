@@ -668,7 +668,12 @@ exports.TextView = SC.View.extend(Canvas, TextInput, {
      * Inserts a newline at the insertion point.
      */
     newline: function() {
-        this._insertText("\n");
+        // Insert a newline, and copy the spaces at the beginning of the
+        // current row to autoindent.
+        var position = this._selectedRanges[0].start;
+        this._insertText("\n" + /^\s*/.exec(this.
+            getPath('layoutManager.textStorage.lines')[position.row].
+            substring(0, position.column))[0]);
     },
 
     selectDown: function() {
