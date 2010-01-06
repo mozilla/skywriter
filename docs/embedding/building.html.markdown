@@ -35,6 +35,14 @@ the "manifest". It can have any name you want, as you'll see in the next section
         "plugins": ["Editor", "SimpleSyntax", "SimpleJavaScript"]
     }
 
+## Manifest Options ##
+
+output_dir
+:   directory where the finished files should be placed. Note that this
+    directory will be recreated with each build. Do not point to a directory
+    that you don't want to have deleted. The default is `build`.
+
+
 ## Building ##
 
 Use the "bespin" command line tool to build according to the manifest.

@@ -1,0 +1,4 @@
+{
+    "plugins": ["Editor"],
+    "output_dir": "tmp/BespinDropIn"
+}

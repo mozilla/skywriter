@@ -95,4 +95,5 @@ def test_css_creation():
     manifest.generate_output_files(output_js, output_css)
     output_css = output_css.getvalue()
     assert "color: white" in output_css
+    assert "sc-view.handles" in output_css
     

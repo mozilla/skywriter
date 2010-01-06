@@ -17,7 +17,8 @@ class BuildError(Exception):
 class Manifest(object):
     """A manifest describes what should be built."""
     def __init__(self, include_core_test=False, plugins=None,
-        search_path=None, sproutcore=None, bespin=None):
+        search_path=None, sproutcore=None, bespin=None,
+        output_dir="build"):
         
         self.include_core_test = include_core_test
         self.plugins = plugins
@@ -50,10 +51,19 @@ class Manifest(object):
 
         self.bespin = bespin
         
+        if not output_dir:
+            raise BuildError("""Cannot run unless output_dir is set
+(it defaults to 'build'). The contents of the output_dir directory
+will be deleted before the build.""")
+        self.output_dir = path(output_dir)
+        
     @classmethod
     def from_json(cls, json_string):
         """Takes a JSON string and creates a Manifest object from it."""
-        data = loads(json_string)
+        try:
+            data = loads(json_string)
+        except ValueError:
+            raise BuildError("The manifest is not legal JSON: %s" % (json_string))
         scrubbed_data = dict()
         
         # you can't call a constructor with a unicode object
@@ -87,6 +97,16 @@ class Manifest(object):
         plugin = self.get_plugin(name)
         return combiner.Package(plugin.name, plugin.depends)
             
+    def _write_sproutcore_file(self, f, filename):
+        """Writes one of the sproutcore files to the file
+        object f."""
+        fullpath = self.sproutcore / filename
+        if not fullpath.exists():
+            raise BuildError("%s file missing at %s" %
+                (filename, fullpath.abspath()))
+        
+        f.write(fullpath.bytes())
+        
     def generate_output_files(self, output_js, output_css):
         """Generates the combined JavaScript file, putting the
         output into output_file."""
@@ -94,19 +114,13 @@ class Manifest(object):
             raise BuildError("Errors found, stopping...")
             
         # include SproutCore
-        sproutcore_js = self.sproutcore / "sproutcore.js"
-        if not sproutcore_js.exists():
-            raise BuildError("sproutcore.js file missing at %s" % (sproutcore_js.abspath()))
-        
-        output_js.write(sproutcore_js.bytes())
+        self._write_sproutcore_file(output_js, "sproutcore.js")
+        self._write_sproutcore_file(output_css, "sproutcore.css")
         
         # include coretest if desired
         if self.include_core_test:
-            core_test_js = self.sproutcore / "core_test.js"
-            if not core_test_js.exists():
-                raise BuildError("core_test.js file missing at %s" %
-                    core_test_js.abspath())
-            output_js.write(core_test_js.bytes())
+            self._write_sproutcore_file(output_js, "core_test.js")
+            self._write_sproutcore_file(output_css, "core_test.css")
         
         # include Bespin core code
         exclude_tests = not self.include_core_test
@@ -134,6 +148,27 @@ tiki.require("bespin:plugins").catalog.load(%s)
             combiner.combine_files(output_js, output_css, plugin.name, 
                                    plugin.location,
                                    exclude_tests=exclude_tests)
+    
+    def build(self):
+        """Run the build according to the instructions in the manifest.
+        """
+        if self.errors:
+            raise BuildError("Errors found, stopping...")
+        
+        output_dir = self.output_dir
+        print "Placing output in %s" % output_dir
+        if output_dir.exists():
+            output_dir.rmtree()
+        
+        output_dir.mkdir()
+        
+        jsfilename = output_dir / "BespinEmbedded.js"
+        cssfilename = output_dir / "BespinEmbedded.css"
+        jsfile = jsfilename.open("w")
+        cssfile = cssfilename.open("w")
+        self.generate_output_files(jsfile, cssfile)
+        jsfile.close()
+        cssfile.close()
 
 def main(args=None):
     if args is None:
@@ -143,4 +178,16 @@ def main(args=None):
     parser = optparse.OptionParser(
         description="""Builds fast-loading JS and CSS packages.""")
     options, args = parser.parse_args(args)
+    if len(args) > 1:
+        filename = args[1]
+    else:
+        filename = "manifest.json"
+    
+    filename = path(filename)
+    if not filename.exists():
+        raise BuildError("Build manifest file (%s) does not exist" % (filename))
+        
+    print "Using build manifest: ", filename
+    manifest = Manifest.from_json(filename.text())
+    manifest.build()
     
