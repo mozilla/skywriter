@@ -42,7 +42,6 @@ def test_app_combination():
     assert """exports.main = require("main").main;""" in combined
     assert 'tiki.register("testapp"' in combined
     assert 'tiki.module("testapp:index"' in combined
-    assert 'tiki.script("testapp.js");' in combined
     assert 'tiki.main("testapp", "main")' in combined
     
     assert 'exports.bar = 1;' in combined

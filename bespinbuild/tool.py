@@ -14,11 +14,14 @@ from bespinbuild import plugins, combiner
 class BuildError(Exception):
     pass
 
+sample_file = path(__file__).dirname() / "sample.html"
+inline_file = path(__file__).dirname() / "inline.js"
+
 class Manifest(object):
     """A manifest describes what should be built."""
     def __init__(self, include_core_test=False, plugins=None,
         search_path=None, sproutcore=None, bespin=None,
-        output_dir="build"):
+        output_dir="build", include_sample=False):
         
         self.include_core_test = include_core_test
         self.plugins = plugins
@@ -56,6 +59,8 @@ class Manifest(object):
 (it defaults to 'build'). The contents of the output_dir directory
 will be deleted before the build.""")
         self.output_dir = path(output_dir)
+        
+        self.include_sample = include_sample
         
     @classmethod
     def from_json(cls, json_string):
@@ -112,6 +117,8 @@ will be deleted before the build.""")
         output into output_file."""
         if self.errors:
             raise BuildError("Errors found, stopping...")
+        
+        output_js.write(inline_file.bytes())
             
         # include SproutCore
         self._write_sproutcore_file(output_js, "sproutcore.js")
@@ -134,20 +141,24 @@ will be deleted before the build.""")
         package_list = combiner.toposort(package_list,
             package_factory=self.get_package)
         
-        # include plugin metadata
-        all_md = dict()
-        for p in package_list:
-            plugin = self.get_plugin(p.name)
-            all_md[plugin.name] = plugin.metadata
-        output_js.write("""
-tiki.require("bespin:plugins").catalog.load(%s)
-""" % (dumps(all_md)))
-        
         for package in package_list:
             plugin = self.get_plugin(package.name)
             combiner.combine_files(output_js, output_css, plugin.name, 
                                    plugin.location,
                                    exclude_tests=exclude_tests)
+        # include plugin metadata
+        # this comes after the plugins, because some plugins
+        # may need to be importable at the time the metadata
+        # becomes available.
+        all_md = dict()
+        for p in package_list:
+            plugin = self.get_plugin(p.name)
+            all_md[plugin.name] = plugin.metadata
+        output_js.write("""
+tiki.require("bespin:plugins").catalog.load(%s);
+""" % (dumps(all_md)))
+        # output_js.write('tiki.require("bespin:boot");\n')
+        
     
     def build(self):
         """Run the build according to the instructions in the manifest.
@@ -160,7 +171,7 @@ tiki.require("bespin:plugins").catalog.load(%s)
         if output_dir.exists():
             output_dir.rmtree()
         
-        output_dir.mkdir()
+        output_dir.makedirs()
         
         jsfilename = output_dir / "BespinEmbedded.js"
         cssfilename = output_dir / "BespinEmbedded.css"
@@ -169,6 +180,9 @@ tiki.require("bespin:plugins").catalog.load(%s)
         self.generate_output_files(jsfile, cssfile)
         jsfile.close()
         cssfile.close()
+        
+        if self.include_sample:
+            sample_file.copy(output_dir / "sample.html")
 
 def main(args=None):
     if args is None:

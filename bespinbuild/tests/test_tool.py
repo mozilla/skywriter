@@ -56,6 +56,7 @@ def test_js_creation():
     assert """exports.plugin2func = function""" in output
     assert "exports.Plugin = SC.Object.extend" in output
     assert '"depends": ["plugin2"]' in output
+    assert "SC.browser=" in output
     
 def test_js_creation_with_core_test():
     sample = """
@@ -96,4 +97,14 @@ def test_css_creation():
     output_css = output_css.getvalue()
     assert "color: white" in output_css
     assert "sc-view.handles" in output_css
+    
+def test_full_output():
+    tmppath = path.getcwd() / "tmp" / "testoutput"
+    manifest = tool.Manifest(plugins=["Editor"],
+        output_dir=tmppath, include_sample=True)
+    manifest.build()
+    jsfile = tmppath / "BespinEmbedded.js"
+    assert jsfile.exists()
+    samplefile = tmppath / "sample.html"
+    assert samplefile.exists()
     

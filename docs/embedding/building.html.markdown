@@ -37,11 +37,18 @@ the "manifest". It can have any name you want, as you'll see in the next section
 
 ## Manifest Options ##
 
+include\_core_test
+:   should the output include SproutCore's CoreTest unit testing framework?
+    This is useful if you're doing Bespin development in Bespin.
+
+include_sample
+:   should the final output directory include a `sample.html` file that shows
+    off the editor?
+
 output_dir
 :   directory where the finished files should be placed. Note that this
     directory will be recreated with each build. Do not point to a directory
     that you don't want to have deleted. The default is `build`.
-
 
 ## Building ##
 

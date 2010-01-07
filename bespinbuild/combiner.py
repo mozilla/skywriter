@@ -70,10 +70,7 @@ def combine_files(jsfile, cssfile, name, p, add_main=False,
     if cssfile is None:
         cssfile = NullOutput()
     
-    jsfile.write(""";tiki.register("%s",
-{"scripts":[{"url":"%s.js","id":"%s.js"}]
-});
-""" % (name, name, name))
+    jsfile.write(""";tiki.register("%s",{});""" % (name))
     
     has_index = False
     
@@ -110,10 +107,6 @@ exports.main = require("main").main;
         jsfile.write("""
 tiki.module("%s:index",function(require,exports,module){%s});
 """ % (name, module_contents))
-    
-    jsfile.write("""
-tiki.script("%s.js");
-""" % (name))
     
     if add_main:
         jsfile.write("""
