@@ -16,6 +16,7 @@ class BuildError(Exception):
 
 sample_file = path(__file__).dirname() / "sample.html"
 inline_file = path(__file__).dirname() / "inline.js"
+boot_file = path(__file__).dirname() / "boot.js"
 
 class Manifest(object):
     """A manifest describes what should be built."""
@@ -157,7 +158,8 @@ will be deleted before the build.""")
         output_js.write("""
 tiki.require("bespin:plugins").catalog.load(%s);
 """ % (dumps(all_md)))
-        # output_js.write('tiki.require("bespin:boot");\n')
+        
+        output_js.write(boot_file.bytes())
         
     
     def build(self):

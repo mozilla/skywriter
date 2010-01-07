@@ -79,13 +79,20 @@ def combine_files(jsfile, cssfile, name, p, add_main=False,
             cssfile.write(f.bytes())
             
         filelist = p.walkfiles("*.js")
+        single_file = False
     else:
         filelist = [p]
+        single_file = True
     
     for f in filelist:
         if exclude_tests and "tests" in f.splitall():
             continue
-        modname = p.relpathto(f.splitext()[0])
+        
+        if single_file:
+            modname = "index"
+        else:
+            modname = p.relpathto(f.splitext()[0])
+            
         if modname == "index":
             has_index = True
         

@@ -21,6 +21,12 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * ***** END LICENSE BLOCK ***** */
+ 
+"define metadata";
+({
+    "depends": ["Editor"]
+});
+"end";
 
 /**
  * This file provides an API for embedders to use. Its intent is to abstract
@@ -29,9 +35,9 @@
  */
 
 var SC = require("sproutcore/runtime").SC;
-var bespin = require("index");
-var containerMod = require("util/container");
-var util = require("util/util");
+var bespin = require("bespin:index");
+var containerMod = require("bespin:util/container");
+var util = require("bespin:util/util");
 
 var computeLayout = function(element) {
     var layout = {

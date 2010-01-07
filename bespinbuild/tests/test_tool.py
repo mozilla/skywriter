@@ -48,7 +48,6 @@ def test_js_creation():
     output = StringIO()
     manifest.generate_output_files(output, StringIO())
     output = output.getvalue()
-    path("/tmp/foo").write_bytes(output)
     assert "var tiki =" in output
     assert """tiki.register("plugin1",""" in output
     assert """tiki.register("plugin2",""" in output
@@ -57,6 +56,18 @@ def test_js_creation():
     assert "exports.Plugin = SC.Object.extend" in output
     assert '"depends": ["plugin2"]' in output
     assert "SC.browser=" in output
+    assert 'tiki.require("BespinEmbedded")' in output
+
+def test_single_file_plugin_handling():
+    manifest = tool.Manifest(plugins=["SingleFilePlugin1"],
+        search_path=pluginpath, include_core_test=True)
+    output = StringIO()
+    manifest.generate_output_files(output, StringIO())
+    output = output.getvalue()
+    assert "exports.someFunction" in output
+    assert "SingleFilePlugin1:index" in output
+    match = find_with_context(output, 'tiki.module("SingleFilePlugin1:../')
+    assert match is None
     
 def test_js_creation_with_core_test():
     sample = """

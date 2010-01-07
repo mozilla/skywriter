@@ -1,5 +1,5 @@
 {
-    "plugins": ["Editor"],
+    "plugins": ["BespinEmbedded"],
     "output_dir": "tmp/BespinDropIn",
     "include_sample": true
 }
