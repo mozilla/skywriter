@@ -32,8 +32,7 @@ SC.ready(function() {
     for (var i = 0; i < nodes.length; i++) {
         var node = nodes[i];
         var options = node.getAttribute('data-bespinoptions');
-        var bespin = embed.useBespin(node, JSON.parse(options));
-        node.bespin = bespin;
+        embed.useBespin(node, JSON.parse(options));
     }
 
     // If users want a custom startup

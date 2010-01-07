@@ -36,8 +36,8 @@
 
 var SC = require("sproutcore/runtime").SC;
 var bespin = require("bespin:index");
-var containerMod = require("bespin:util/container");
 var util = require("bespin:util/util");
+var EditorView = require('Editor:views/editor').EditorView;
 
 var computeLayout = function(element) {
     var layout = {
@@ -72,24 +72,11 @@ exports.useBespin = function(element, options) {
     var content = element.innerHTML;
     var editor;
     
-    // This is a hack! Chrome and Safari put all element IDs
-    // onto window directly, which causes an element with the ID
-    // of "editor" to break with the current container implementation.
-    // this will be fixed as the container moves forward...
-    window.editor = undefined;
-
-    // The container allows us to keep multiple bespins separate, and constructs
-    // objects according to a user controlled recipe.
-    var container = containerMod.Container.create();
-
-    // We want to move away from the singleton bespin.foo, but until we have ...
-    bespin.container = container;
-
     SC.run(function() {
-        container.register("container", element);
-        editor = container.get("editor");
-
         var editorPane = SC.Pane.create({
+            childViews: "editorView".w(),
+            editorView: EditorView.design(),
+            
             layout: computeLayout(element),
 
             // Tell SproutCore to keep its paws off the CSS properties 'top'
@@ -103,44 +90,44 @@ exports.useBespin = function(element, options) {
                 return style;
             }.property('layout')
         });
-        editorPane.appendChild(editor.ui, null);
         SC.$(element).css('position', 'relative');
         element.innerHTML = "";
         editorPane.appendTo(element);
 
-        editor.element = element;
-        editor.pane = editorPane;
-
         if (options.initialContent) {
             content = options.initialContent;
         }
-        editor.model.insertDocument(content);
+        editorPane.setPath('editorView.layoutManager.' +
+            'textStorage.value', content);
+        
+        // XXX need to reengage these settings, since this is now wired
+        // up completely differently.
 
         // Call editor.setSetting on any settings passed in options.settings
-        if (options.settings) {
-            for (var key in options.settings) {
-                if (options.settings.hasOwnProperty(key)) {
-                    editor.setSetting(key, options.settings[key]);
-                }
-            }
-        }
+        // if (options.settings) {
+        //     for (var key in options.settings) {
+        //         if (options.settings.hasOwnProperty(key)) {
+        //             editor.setSetting(key, options.settings[key]);
+        //         }
+        //     }
+        // }
 
         // stealFocus makes us take focus on startup
-        if (options.stealFocus) {
-            editor.setFocus(true);
-        }
+        // if (options.stealFocus) {
+        //     editor.setFocus(true);
+        // }
 
         // Move to a given line if requested
-        if (options.lineNumber) {
-            editor.setLineNumber(options.lineNumber);
-        }
+        // if (options.lineNumber) {
+        //     editor.setLineNumber(options.lineNumber);
+        // }
 
         // Hook the window.onresize event; this catches most of the common
         // scenarios that result in element resizing.
         if (SC.none(options.dontHookWindowResizeEvent) ||
                 !options.dontHookWindowResizeEvent) {
             var handler = function() {
-                exports.dimensionsChanged(editor);
+                exports.dimensionsChanged(editorPane);
             };
 
             if (!SC.none(window.addEventListener)) {
@@ -150,8 +137,6 @@ exports.useBespin = function(element, options) {
             }
         }
     });
-
-    return editor;
 };
 
 /**
