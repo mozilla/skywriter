@@ -28,6 +28,16 @@ var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 
 var MockCatalog, MockExtension;
 
+var PANGRAMS =
+    "Cwm fjord bank glyphs vext quiz.\n" +
+    "Squdgy fez, blank jimp crwth vox!\n" +
+    "Jink cwm, zag veldt, fob qursh pyx.\n" +
+    "Veldt jynx grimps waqf zho buck.\n" +
+    "Junky qoph-flags vext crwd zimb.\n" +
+    "Quartz glyph job vex'd cwm finks.\n" +
+    "Cwm fjord veg balks nth pyx quiz.\n" +
+    "Vext cwm fly, zing, jabs kurd qoph.\n";
+
 var setup = function() {
     MockCatalog = SC.Object.extend({
         _extensions: null,
@@ -46,6 +56,27 @@ var setup = function() {
             callback(this._annotation);
         }
     });
+};
+
+exports.testCharacterRectForPosition = function() {
+    var layoutManager = LayoutManager.create({
+        margin: { left: 0, bottom: 0, top: 0, right: 0 }
+    });
+    layoutManager.setPath('textStorage.value', PANGRAMS);
+
+    var characterWidth = layoutManager._characterWidth;
+    var lineHeight = layoutManager._lineHeight;
+
+    t.deepEqual(layoutManager.characterRectForPosition({
+            row:    3,
+            column: 3
+        }), {
+            x:      3 * characterWidth,
+            y:      3 * lineHeight,
+            width:  characterWidth,
+            height: lineHeight
+        }, "the character rect and the expected rect for the character at " +
+        "position (3,3)");
 };
 
 exports.testLayoutAnnotations = function() {
@@ -183,16 +214,7 @@ exports.testPointToCharacterMapping = function() {
     var characterWidth = layoutManager._characterWidth;
     var lineHeight = layoutManager._lineHeight;
 
-    var textStorage = layoutManager.get('textStorage');
-    textStorage.set('value',
-        "Cwm fjord bank glyphs vext quiz.\n" +
-        "Squdgy fez, blank jimp crwth vox!\n" +
-        "Jink cwm, zag veldt, fob qursh pyx.\n" +
-        "Veldt jynx grimps waqf zho buck.\n" +
-        "Junky qoph-flags vext crwd zimb.\n" +
-        "Quartz glyph job vex'd cwm finks.\n" +
-        "Cwm fjord veg balks nth pyx quiz.\n" +
-        "Vext cwm fly, zing, jabs kurd qoph.\n");
+    layoutManager.setPath('textStorage.value', PANGRAMS);
 
     var pos = layoutManager.characterAtPoint({
         x: leftMargin + 5 * characterWidth,
@@ -208,5 +230,71 @@ exports.testPointToCharacterMapping = function() {
     t.deepEqual(pos, { column: 32, row: 4, partialFraction: 0.0 }, "the " +
         "reported character position and the expected character " +
         "position for a character off the right side of the text area");
+};
+
+exports.testRectsForRange = function() {
+    var layoutManager = LayoutManager.create({
+        margin: { left: 0, bottom: 0, top: 0, right: 0 }
+    });
+    layoutManager.setPath('textStorage.value', PANGRAMS);
+
+    var characterWidth = layoutManager._characterWidth;
+    var lineHeight = layoutManager._lineHeight;
+    var maximumWidth = layoutManager._maximumWidth;
+
+    var rects = layoutManager.rectsForRange({
+        start:  { row: 2, column: 2 },
+        end:    { row: 5, column: 2 }
+    });
+    t.equal(rects.length, 3, "the length of the rects returned for a " +
+        "complex range and 3");
+    t.deepEqual(rects[0], {
+            x:      2 * characterWidth,
+            y:      2 * lineHeight,
+            width:  characterWidth * (maximumWidth - 2),
+            height: lineHeight
+        }, "the first rect returned for a complex range and the expected " +
+            "rect");
+    t.deepEqual(rects[1], {
+            x:      0,
+            y:      5 * lineHeight,
+            width:  characterWidth * 2,
+            height: lineHeight
+        }, "the second rect returned for a complex range and the expected " +
+            "rect");
+    t.deepEqual(rects[2], {
+            x:      0,
+            y:      3 * lineHeight,
+            width:  characterWidth * maximumWidth,
+            height: 2 * lineHeight
+        }, "the third rect returned for a complex range and the expected " +
+            "rect");
+
+    rects = layoutManager.rectsForRange({
+        start:  { row: 2, column: 0 },
+        end:    { row: 5, column: 0 }
+    });
+    t.equal(rects.length, 1, "the length of the rects returned for a " +
+        "line-spanning range and 1");
+    t.deepEqual(rects[0], {
+            x:      0,
+            y:      2 * lineHeight,
+            width:  characterWidth * maximumWidth,
+            height: 3 * lineHeight
+        }, "the rect returned for a line-spanning range and the expected " +
+            "rect");
+
+    rects = layoutManager.rectsForRange({
+        start:  { row: 2, column: 3 },
+        end:    { row: 2, column: 10 }
+    });
+    t.equal(rects.length, 1, "the length of the rects returned for a " +
+        "single-line range and 1");
+    t.deepEqual(rects[0], {
+            x:      3 * characterWidth,
+            y:      2 * lineHeight,
+            width:  characterWidth * 7,
+            height: lineHeight
+        }, "the rect returned for a single-line range and the expected rect");
 };
 

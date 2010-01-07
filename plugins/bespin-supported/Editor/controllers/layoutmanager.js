@@ -147,17 +147,13 @@ exports.LayoutManager = SC.Object.extend({
      * TODO: Unit test.
      */
     boundingRect: function() {
-        var margin = this.get('margin');
-        var lastRowRect = this.lineRectForRow(this.get('textLines').length -
-            1);
-        return {
-            x:      0,
-            y:      0,
-            width:  margin.left + this._maximumWidth * this._characterWidth +
-                    margin.right,
-            height: margin.top + lastRowRect.y + lastRowRect.height +
-                        margin.bottom
-        };
+        return this.rectsForRange({
+            start:  { row: 0, column: 0 },
+            end:    {
+                row:    this.get('textLines').length - 1,
+                column: this._maximumWidth
+            }
+        })[0];
     },
 
     /**
@@ -222,19 +218,12 @@ exports.LayoutManager = SC.Object.extend({
 
     /**
      * Returns the boundaries of the character at the given position.
-     *
-     * TODO: Unit test.
      */
     characterRectForPosition: function(position) {
-        var lineRect = this.lineRectForRow(position.row);
-        var margin = this.get('margin');
-        var characterWidth = this._characterWidth;
-        return {
-            x:      margin.left + position.column * characterWidth,
-            y:      lineRect.y,
-            width:  characterWidth,
-            height: lineRect.height
-        };
+        return this.rectsForRange({
+            start:  position,
+            end:    { row: position.row, column: position.column + 1 }
+        })[0];
     },
 
     /**
@@ -274,15 +263,78 @@ exports.LayoutManager = SC.Object.extend({
      * TODO: Unit test.
      */
     lineRectForRow: function(row) {
+        return this.rectsForRange({
+            start:  { row: row, column: 0                   },
+            end:    { row: row, column: this._maximumWidth  }
+        })[0];
+    },
+
+    /**
+     * Returns the 1, 2, or 3 rectangles that make up the given range.
+     */
+    rectsForRange: function(range) {
+        var characterWidth = this._characterWidth;
         var lineHeight = this._lineHeight;
+        var maximumWidth = this._maximumWidth;
         var margin = this.get('margin');
-        return {
-            x:      0,
-            y:      margin.top + row * lineHeight,
-            width:  margin.left + this._maximumWidth * this._characterWidth +
-                    margin.right,
-            height: lineHeight
-        };
+
+        var start = range.start, end = range.end;
+        var startRow = start.row, startColumn = start.column;
+        var endRow = end.row, endColumn = end.column;
+
+        if (startRow === endRow) {
+            // The simple rectangle case.
+            return [
+                {
+                    x:      margin.left + characterWidth * startColumn,
+                    y:      margin.top + lineHeight * startRow,
+                    width:  characterWidth * (endColumn - startColumn),
+                    height: lineHeight
+                }
+            ];
+        }
+
+        var rects = [];
+
+        // Top line
+        var middleStartRow;
+        if (startColumn === 0) {
+            middleStartRow = startRow;
+        } else {
+            middleStartRow = startRow + 1;
+            rects.push({
+                x:      margin.left + characterWidth * startColumn,
+                y:      margin.top + lineHeight * startRow,
+                width:  characterWidth * (maximumWidth - startColumn),
+                height: lineHeight
+            });
+        }
+
+        // Bottom line
+        var middleEndRow;
+        if (endColumn === 0) {
+            middleEndRow = endRow - 1;
+        } else if (endColumn === maximumWidth) {
+            middleEndRow = endRow;
+        } else {
+            middleEndRow = endRow - 1;
+            rects.push({
+                x:      margin.left,
+                y:      margin.top + lineHeight * endRow,
+                width:  characterWidth * endColumn,
+                height: lineHeight
+            });
+        }
+
+        // Middle area
+        rects.push({
+            x:      margin.left,
+            y:      margin.top + lineHeight * middleStartRow,
+            width:  characterWidth * maximumWidth,
+            height: lineHeight * (middleEndRow - middleStartRow + 1)
+        });
+
+        return rects;
     },
 
     textStorageEdited: function(sender, oldRange, newRange) {
