@@ -23,10 +23,10 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var Canvas = require('bespin:editor/mixins/canvas').Canvas;
+var CanvasView = require('views/canvas').CanvasView;
 var m_scratchcanvas = require('bespin:util/scratchcanvas');
 
-exports.GutterView = SC.View.extend(Canvas, {
+exports.GutterView = CanvasView.extend({
     // TODO: calculate from the size or let the user override via themes if
     // desired
     _lineAscent: 16,

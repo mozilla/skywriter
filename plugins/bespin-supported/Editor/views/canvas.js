@@ -25,27 +25,27 @@
 var SC = require('sproutcore/runtime').SC;
 
 /**
- * @namespace
+ * @class
  *
- * This mixin provides support for manual scrolling and positioning for canvas-
+ * This class provides support for manual scrolling and positioning for canvas-
  * based elements. Getting these elements to play nicely with SproutCore is
  * tricky and error-prone, so all canvas-based views should consider deriving
- * from this mixin. Derived views should implement drawRect() in order to
- * perform the appropriate canvas drawing logic, and may want to override the
- * viewport property to determine where the canvas should be placed (for
- * example, to fill the container view).
+ * from this. Derived views should implement drawRect() in order to perform the
+ * appropriate canvas drawing logic, and may want to override the viewport
+ * property to determine where the canvas should be placed (for example, to
+ * fill the container view).
  */
-exports.Canvas = {
-    _bespin_canvas_lastRedrawTime: null,
-    _bespin_canvas_redrawTimer: null,
-    _bespin_canvas_canvasId: null,
-    _bespin_canvas_canvasDom: null,
+exports.CanvasView = SC.View.extend({
+    _canvasDom: null,
+    _canvasId: null,
+    _lastRedrawTime: null,
+    _redrawTimer: null,
 
-    _bespin_canvas_frameChanged: function() {
+    _frameChanged: function() {
         this.set('layerNeedsUpdate', true);
     }.observes('frame'),
 
-    _bespin_canvas_isVisibleInWindowChanged: function() {
+    _isVisibleInWindowChanged: function() {
         // Redraw when we become visible. We must do this because we don't draw
         // when the layer is invisible (as it's impossible: the frame property
         // is bogus until the layer is visible in the window, and without that
@@ -55,7 +55,7 @@ exports.Canvas = {
         this.redraw();
     }.observes('isVisibleInWindow'),
 
-    _bespin_canvas_layerFrameDidChange: function() {
+    _layerFrameDidChange: function() {
         this.updateLayout();
     }.observes('layerFrame'),
 
@@ -65,8 +65,8 @@ exports.Canvas = {
      * Cache for the canvas' 2d context.
      */
     canvasContext2D: function() {
-        return this.get('_bespin_canvas_canvasDom').getContext('2d')
-    }.property('_bespin_canvas_canvasDom').cacheable(),
+        return this.get('_canvasDom').getContext('2d')
+    }.property('_canvasDom').cacheable(),
 
     /**
      * @property{Rect}
@@ -105,7 +105,7 @@ exports.Canvas = {
             return;
         }
 
-        var canvas = this._bespin_canvas_canvasDom;
+        var canvas = this._canvasDom;
         if (canvas.width !== layerFrame.width) {
             canvas.width = layerFrame.width;
         }
@@ -157,15 +157,15 @@ exports.Canvas = {
         this.drawRect(context, visibleFrame);
         context.restore();
 
-        this._bespin_canvas_lastRedrawTime = new Date().getTime();
+        this._lastRedrawTime = new Date().getTime();
 
         return true;
     },
 
     didCreateLayer: function() {
         arguments.callee.base.apply(this, arguments);
-        this.set('_bespin_canvas_canvasDom', this.$("#" +
-            this._bespin_canvas_canvasId)[0]);
+        this.set('_canvasDom', this.$("#" +
+            this._canvasId)[0]);
     },
 
     render: function(context, firstTime) {
@@ -174,8 +174,8 @@ exports.Canvas = {
         if (firstTime) {
             var layerFrame = this.get('layerFrame');
             var canvasContext = context.begin("canvas");
-            this._bespin_canvas_canvasId = SC.guidFor(canvasContext);
-            canvasContext.id(this._bespin_canvas_canvasId);
+            this._canvasId = SC.guidFor(canvasContext);
+            canvasContext.id(this._canvasId);
             canvasContext.attr("width", "" + layerFrame.width);
             canvasContext.attr("height", "" + layerFrame.height);
             canvasContext.push("canvas tag not supported by your browser");
@@ -192,7 +192,7 @@ exports.Canvas = {
 
     tryRedraw: function(context, firstTime) {
         var now = new Date().getTime();
-        var lastRedrawTime = this._bespin_canvas_lastRedrawTime;
+        var lastRedrawTime = this._lastRedrawTime;
         var minimumRedrawDelay = this.get('minimumRedrawDelay');
 
         if (lastRedrawTime === null ||
@@ -201,17 +201,17 @@ exports.Canvas = {
             return;
         }
 
-        var redrawTimer = this._bespin_canvas_redrawTimer;
+        var redrawTimer = this._redrawTimer;
         if (redrawTimer !== null && redrawTimer.get('isValid')) {
             return; // already scheduled
         }
 
-        this._bespin_canvas_redrawTimer = SC.Timer.schedule({
+        this._redrawTimer = SC.Timer.schedule({
             target:     this,
             action:     this.redraw,
             interval:   minimumRedrawDelay,
             repeats:    false
         });
     }
-};
+});
 

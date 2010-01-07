@@ -23,14 +23,14 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var Canvas = require('bespin:editor/mixins/canvas').Canvas;
+var CanvasView = require('views/canvas').CanvasView;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var Range = require('utils/range');
 var Rect = require('utils/rect');
 var TextInput = require('bespin:editor/mixins/textinput').TextInput;
 var catalog = require('bespin:plugins').catalog;
 
-exports.TextView = SC.View.extend(Canvas, TextInput, {
+exports.TextView = CanvasView.extend(TextInput, {
     _backgroundInvalid: false,
     _dragPoint: null,
     _dragTimer: null,

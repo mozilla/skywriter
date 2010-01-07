@@ -23,7 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var Canvas = require('bespin:editor/mixins/canvas').Canvas;
+var CanvasView = require('views/canvas').CanvasView;
 
 var NIB_ARROW_PADDING_BEFORE    = 3;
 var NIB_ARROW_PADDING_AFTER     = 5;
@@ -31,7 +31,7 @@ var NIB_LENGTH                  = 15;
 var NIB_PADDING                 = 8;    // 15/2
 
 // The fancy custom Bespin scroll bars.
-exports.BespinScrollerView = SC.View.extend(Canvas, {
+exports.BespinScrollerView = CanvasView.extend({
     classNames: ['bespin-scroller-view'],
 
     _mouseDownScreenPoint: null,

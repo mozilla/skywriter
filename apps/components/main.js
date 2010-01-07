@@ -25,22 +25,25 @@
 "export package main";
 
 var SC = require('sproutcore/runtime').SC;
-var Canvas = require('bespin:editor/mixins/canvas').Canvas;
 var TextInput = require('bespin:editor/mixins/textinput').TextInput;
+var catalog = require('bespin:plugins').catalog;
 
-main = function() {
+var run = function() {
+    var CanvasView = require('Editor:views/canvas').CanvasView;
+
     var app = SC.Application.create({ NAMESPACE: "bespin" });
     app.set('mainPage', SC.Page.create({
             mainPane: SC.MainPane.design({
                 layout: { centerX: 0, centerY: 0, width: 640, height: 480 },
                 childViews: 'sampleInputView'.w(),
-                sampleInputView: SC.View.design(Canvas, TextInput, {
+                sampleInputView: CanvasView.design(TextInput, {
                     _actionText: "[Click the view to focus is.]",
                     _writtenText: "",
 
                     _write: function(action, insertText) {
                         this.set('_actionText', action);
-                        this.set('_writtenText', this._writtenText + insertText);
+                        this.set('_writtenText', this._writtenText +
+                            insertText);
                     },
 
                     _update: function() {
@@ -117,5 +120,19 @@ main = function() {
         }));
 
     app.get('mainPage').get('mainPane').append();
+};
+
+main = function() {
+    baseurl = window.SERVER_BASE_URL === undefined ? "/server" :
+        SERVER_BASE_URL;
+    catalog.loadMetadata(baseurl + "/plugin/register/defaults",
+        function(sender, response) {
+            if (response.isError) {
+                throw "failed to load plugin metadata: " +
+                    response.errorObject;
+            }
+
+            tiki.async('Editor').then(run);
+        });
 };
 
