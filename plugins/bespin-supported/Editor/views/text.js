@@ -559,16 +559,25 @@ exports.TextView = CanvasView.extend(TextInput, {
     },
 
     moveLeft: function() {
-        this._reanchorSelection(this.getPath('layoutManager.textStorage').
-            displacePosition(this._selectedRanges[0].start, -1));
-        this._virtualInsertionPoint = null;
+        var ranges = this._selectedRanges;
+        if (this._rangeSetIsInsertionPoint(ranges)) {
+            this._reanchorSelection(this.getPath('layoutManager.textStorage').
+                displacePosition(ranges[0].start, -1));
+            this._virtualInsertionPoint = null;
+        } else {
+            this._reanchorSelection(ranges[0].start);
+        }
     },
 
     moveRight: function() {
         var ranges = this._selectedRanges;
-        this._reanchorSelection(this.getPath('layoutManager.textStorage').
-            displacePosition(ranges[ranges.length - 1].end, 1));
-        this._virtualInsertionPoint = null;
+        if (this._rangeSetIsInsertionPoint(ranges)) {
+            this._reanchorSelection(this.getPath('layoutManager.textStorage').
+                displacePosition(ranges[ranges.length - 1].end, 1));
+            this._virtualInsertionPoint = null;
+        } else {
+            this._reanchorSelection(ranges[0].end);
+        }
     },
 
     moveUp: function() {
