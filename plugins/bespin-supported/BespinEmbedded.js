@@ -100,6 +100,9 @@ exports.useBespin = function(element, options) {
         editorPane.setPath('editorView.layoutManager.' +
             'textStorage.value', content);
         
+        editorPane.makeFirstResponder();
+        editorPane.becomeKeyPane();
+        
         // XXX need to reengage these settings, since this is now wired
         // up completely differently.
 
