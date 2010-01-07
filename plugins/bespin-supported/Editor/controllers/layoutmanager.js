@@ -95,19 +95,17 @@ exports.LayoutManager = SC.Object.extend({
         return { start: oldRange.start, end: endPosition };
     },
 
-    _recalculateDimensions: function() {
+    _recalculateMaximumWidth: function() {
         // Lots of room for optimization here if this turns out to be slow. But
         // for now...
-        var characterWidth = this._characterWidth;
         var textLines = this.get('textLines');
         var max = 0;
-        for (var i = 0; i < textLines.length; i++) {
-            var width = textLines[i].characters.length * characterWidth;
+        textLines.forEach(function(line) {
+            var width = line.characters.length;
             if (max < width) {
                 max = width;
             }
-        }
-
+        });
         this._maximumWidth = max;
     },
 
@@ -124,7 +122,7 @@ exports.LayoutManager = SC.Object.extend({
                 return { characters: line };
             }));
 
-        this._recalculateDimensions();
+        this._recalculateMaximumWidth();
 
         var changedRange = this._runAnnotations(Range.unionRanges(oldRange,
             newRange));
@@ -155,7 +153,8 @@ exports.LayoutManager = SC.Object.extend({
         return {
             x:      0,
             y:      0,
-            width:  margin.left + this._maximumWidth + margin.right,
+            width:  margin.left + this._maximumWidth * this._characterWidth +
+                    margin.right,
             height: margin.top + lastRowRect.y + lastRowRect.height +
                         margin.bottom
         };
@@ -280,7 +279,8 @@ exports.LayoutManager = SC.Object.extend({
         return {
             x:      0,
             y:      margin.top + row * lineHeight,
-            width:  margin.left + this._maximumWidth + margin.right,
+            width:  margin.left + this._maximumWidth * this._characterWidth +
+                    margin.right,
             height: lineHeight
         };
     },
