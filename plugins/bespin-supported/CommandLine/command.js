@@ -23,10 +23,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
-var historyMod = require("history");
-var instructionMod = require("instruction");
-var util = require("bespin:util/util");
-var plugins = require("bespin:plugins");
+var InMemoryHistory = require("history").InMemoryHistory;
+var Instruction = require("instruction").Instruction;
 
 /**
  * Show helpers for the command line
@@ -41,39 +39,50 @@ exports.cliController = SC.Object.create({
      * The history of executed commands
      * TODO: We should get the implementation of this from the plugin system
      */
-    history: historyMod.InMemoryHistory.create(),
+    history: InMemoryHistory.create(),
 
     /**
      * Called by the UI to execute a command
      */
     exec: function() {
-        console.log(this.input);
-        exports.executeCommand(this.input);
+        this.executeCommand(this.get("input"));
         this.set("input", "");
+    },
+
+    /**
+     * Execute a command manually without using the UI
+     */
+    executeCommand: function(typed, hidden) {
+        console.log("executeCommand '" + typed + "'");
+
+        if (!typed || typed === "") {
+            return null;
+        }
+
+        var instruction = Instruction.create({
+            typed: typed,
+            canon: exports.rootCanon
+        });
+        if (hidden !== true) {
+            exports.cliController.history.add(instruction);
+        }
+
+        instruction.onOutput(function() {
+            exports.hideHint();
+            exports.cliController.history.update();
+        }.bind(this));
+
+        instruction.exec();
+        return instruction;
     }
 });
 
 /**
- * Execute a command
+ * TODO: subsume #showHint and #hideHint
  */
-exports.executeCommand = function(typed, hidden) {
-    if (!typed || typed === "") {
-        return null;
-    }
+exports.growlController = SC.Object.create({
 
-    var instruction = instructionMod.Instruction.create({ typed: typed });
-    if (hidden !== true) {
-        exports.cliController.history.add(instruction);
-    }
-
-    instruction.onOutput(function() {
-        exports.hideHint();
-        exports.cliController.history.update();
-    }.bind(this));
-
-    instruction.exec();
-    return instruction;
-};
+});
 
 /**
  * Show a command line hint
@@ -112,7 +121,6 @@ exports.hideHint = function() {
  * </pre>
  */
 exports.newCommandHandler = function(ext) {
-    console.log("new command", ext);
     ext.execute = function() {
         var args = arguments;
         this.load(function(execute) {
@@ -144,11 +152,6 @@ var formatTime = function(date) {
  * A Canon is a set of commands
  */
 exports.Canon = SC.Object.extend({
-
-    requires: {
-        editor: "editor",
-        hub: "hub"
-    },
 
     commands: {},
     aliases: {},
@@ -250,24 +253,6 @@ exports.Canon = SC.Object.extend({
 
         delete this.commands[command.name];
     },
-
-    /*
-    // Do we need this?
-    hasCommand: function(commandname) {
-        if (this.commands[commandname]) { // yup, there she blows. shortcut
-            return true;
-        }
-
-        for (var command in this.commands) { // try the aliases
-            if (this.commands[command]['aliases']) {
-                if (util.include(this.commands[command]['aliases'], commandname)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    },
-    */
 
     /**
      * Commands can contain sub commands, this gets us the full name of this

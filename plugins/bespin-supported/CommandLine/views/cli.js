@@ -24,12 +24,13 @@
 
 var SC = require("sproutcore/runtime").SC;
 var dock = require("bespin:views/dock");
-var commandMod = require("command");
-var image = require("views/image_button");
-var pin = require("views/pin");
-var plugins = require("bespin:plugins");
+var cliController = require("command").cliController;
+var BespinButtonView = require("views/image_button").BespinButtonView;
+var PinView = require("views/pin").PinView;
+var catalog = require("bespin:plugins").catalog;
+var util = require("bespin:util/util");
 
-var settings = plugins.catalog.getObject("settings");
+var settings = catalog.getObject("settings");
 
 /**
  * Not currently used. Previously there was an option to number or date each
@@ -45,7 +46,9 @@ settings.addSetting({
 /**
  * TODO: move this into server meta-data
  */
-var baseUrl = "/server/plugin/file/supported/CommandLine/views/images/";
+var baseUrl = window.baseurl || "/server";
+var pluginPath = "/plugin/file/supported/";
+var imagePath = baseUrl + pluginPath + "CommandLine/views/images/";
 
 /**
  * The height of the CLI input without and output display. Sort of like the
@@ -72,6 +75,7 @@ exports.CliInputView = SC.View.design({
     childViews: [ "contentView" ],
     contentHeight: 0,
     hasFocus: false,
+    table: null,
 
     /**
      * We need to know if blur events from the input really matter (i.e. are
@@ -99,6 +103,7 @@ exports.CliInputView = SC.View.design({
      */
     historyUpdated: function(cliController) {
         var table = exports.outputHistory();
+        this.set("table", table);
 
         // Update the output layer just by hacking the DOM
         var ele = this.getPath("contentView.display.output.layer");
@@ -122,25 +127,20 @@ exports.CliInputView = SC.View.design({
             }
         }
 
-        // TODO: We shouldn't be using input.isKeyResponder, but instead
-        // checking that the KeyResponser is a child of CliInputView. This
-        // delay fudges around the issue by allowing the pin to work before
-        // taking it off the screen.
         if (this.get("layout").height != height) {
             this.adjust("height", height).updateLayout();
         }
 
-        /*
-        // If we need to scroll to the bottom, this code should do the trick
-        // and it was tricky to get right IIRC. It's been lightly hacked to
-        // keep up with the sproutcore refactoring
-        if (scroll) {
-            // certain browsers have a bug such that scrollHeight is too small
-            // when content does not fill the client area of the element
-            var scrollHeight = Math.max(contentView.display.output.layer.scrollHeight, contentView.display.output.layer.clientHeight);
-            contentView.display.output.layer.scrollTop = scrollHeight - contentView.display.output.layer.clientHeight;
-        }
-        */
+        // Scroll to bottom
+        // TODO: Work out a way to skip this in a variety of cases like:
+        // - the updated instruction is not the last one
+        // - the user has asked for no scroll on update (would they do this?
+        //   it's not like we've got the same input at end of output
+        //   constraints)
+        // - The update comes from an instruction minimize/remove
+        var ele = this.getPath("contentView.display.output.layer");
+        var scrollHeight = Math.max(ele.scrollHeight, ele.clientHeight);
+        ele.scrollTop = scrollHeight - ele.clientHeight;
     }.observes(
         ".hasFocus", // Open whenever we have the focus
         ".contentHeight", // Resize if visible and content changes height
@@ -210,14 +210,14 @@ exports.CliInputView = SC.View.design({
                 layout: { top: 0, bottom: 0, left: 0, width: 30 },
                 childViews: [ "pin" ],
 
-                pin: pin.PinView.design({
+                pin: PinView.design({
                     alt: "Pin/Unpin the console output",
                     layout: { top: 8, height: 16, left: 8, width: 16 }
                 })
             })
         }),
 
-        prompt: image.BespinButtonView.design({
+        prompt: BespinButtonView.design({
             classNames: [ "command_prompt" ],
             titleMinWidth: 0,
             title: "<span class='command_brackets'>{ }</span> &gt;",
@@ -229,7 +229,7 @@ exports.CliInputView = SC.View.design({
             layout: { height: 25, bottom: 3, left: 40, right: 0 }
         }),
 
-        submit: image.BespinButtonView.design({
+        submit: BespinButtonView.design({
             isDefault: true,
             title: "Exec",
             target: "CommandLine:command#cliController",
@@ -240,7 +240,7 @@ exports.CliInputView = SC.View.design({
 });
 
 /**
- * Convert the history of instructions stored in commandMod.history into a DOM
+ * Convert the history of instructions stored in command.history into a DOM
  * node that can be appended to the document somewhere.
  */
 exports.outputHistory = function() {
@@ -248,7 +248,7 @@ exports.outputHistory = function() {
     table.className = 'command_table';
 
     var count = 1;
-    commandMod.cliController.history.instructions.forEach(function(instruction) {
+    cliController.history.instructions.forEach(function(instruction) {
         if (!instruction.historical) {
             exports.outputInstruction(table, instruction, count);
         }
@@ -271,12 +271,12 @@ exports.outputInstruction = function(table, instruction, count) {
     rowin.onclick = function() {
         // A single click on an instruction line in the console
         // copies the command to the command line
-        commandMod.cliController.input = instruction.typed;
+        cliController.input = instruction.typed;
     };
     rowin.ondblclick = function() {
         // A double click on an instruction line in the console
         // executes the command
-        commandMod.executeCommand(instruction.typed);
+        cliController.executeCommand(instruction.typed);
     };
     table.appendChild(rowin);
 
@@ -311,34 +311,35 @@ exports.outputInstruction = function(table, instruction, count) {
     if (instruction.start && instruction.end) {
         var div = document.createElement("div");
         div.className = "command_duration";
-        div.innerHTML = "completed in " + ((instruction.end.getTime() - instruction.start.getTime()) / 1000) + " sec ";
+        var time = instruction.end.getTime() - instruction.start.getTime();
+        div.innerHTML = "completed in " + (time / 1000) + " sec ";
         hover.appendChild(div);
     }
 
     // Toggle output display
     var img = document.createElement("img");
-    img.src = baseUrl + (instruction.hideOutput ? "plus.png" : "minus.png");
+    img.src = imagePath + (instruction.hideOutput ? "plus.png" : "minus.png");
     img.style.verticalAlign = "middle";
     img.style.padding = "2px;";
-    img.alt = instruction.hideOutput ? "Show command output" : "Hide command output";
+    img.alt = (instruction.hideOutput ? "Show" : "Hide") + " command output";
     img.title = img.alt;
     img.onclick = function(ev) {
         instruction.hideOutput = !instruction.hideOutput;
-        commandMod.cliController.history.update();
+        cliController.history.update();
         util.stopEvent(ev);
     };
     hover.appendChild(img);
 
     // Open/close output
     img = document.createElement("img");
-    img.src = baseUrl + "closer.png";
+    img.src = imagePath + "closer.png";
     img.style.verticalAlign = "middle";
     img.style.padding = "2px";
     img.alt = "Remove this command from the history";
     img.title = img.alt;
     img.onclick = function(ev) {
-        commandMod.cliController.history.remove(instruction);
-        commandMod.cliController.history.update();
+        cliController.history.remove(instruction);
+        cliController.history.update();
         util.stopEvent(ev);
     };
     hover.appendChild(img);
@@ -365,7 +366,8 @@ exports.outputInstruction = function(table, instruction, count) {
 
         var td = document.createElement("td");
         td.colSpan = 2;
-        td.className = "command_output" + (instruction.error ? " command_error" : "");
+        td.className = "command_output";
+        td.className += instruction.error ? " command_error" : "";
         rowout.appendChild(td);
 
         if (instruction.element) {
@@ -373,7 +375,8 @@ exports.outputInstruction = function(table, instruction, count) {
         } else {
             var contents = instruction.output || "";
             if (!instruction.completed) {
-                contents += "<img src='" + baseUrl + "throbber.gif'/> Working ...";
+                contents += "<img src='" + imagePath + "throbber.gif'/>";
+                contents += " Working ...";
             }
             td.innerHTML = contents;
         }

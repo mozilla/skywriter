@@ -9,7 +9,7 @@
         {
             "ep": "extensionhandler",
             "name": "command",
-            "activate": "command#newCommandHandler"
+            "register": "command#newCommandHandler"
         },
         {
             "ep": "command",
