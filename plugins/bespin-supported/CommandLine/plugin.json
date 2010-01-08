@@ -19,6 +19,21 @@
             "description": "The <u>help</u> gives you access to the various commands in the Bespin system.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>If you pass in the magic <em>hidden</em> parameter, you will find subtle hidden commands.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!",
             "completeText": "optionally, narrow down the search",
             "pointer": "commands#helpCommand"
+        },
+        {
+            "ep": "command",
+            "name": "alias",
+            "takes": [ "alias", "command" ],
+            "preview": "define and show aliases for commands",
+            "completeText": "optionally, add your alias name, and then the command name",
+            "usage": "",
+            "pointer": "commands#aliasCommand"
+        },
+        {
+            "ep": "command",
+            "name": "history",
+            "preview": "Show history of the commands",
+            "pointer": "commands#historyCommand"
         }
     ]
 }

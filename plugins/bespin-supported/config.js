@@ -49,21 +49,6 @@
         },
         {
             "ep": "command",
-            "name": "alias",
-            "takes": [ "alias", "command" ],
-            "preview": "define and show aliases for commands",
-            "completeText": "optionally, add your alias name, and then the command name",
-            "usage": "",
-            "pointer": "#aliasCommand"
-        },
-        {
-            "ep": "command",
-            "name": "history",
-            "preview": "Show history of the commands",
-            "pointer": "#historyCommand"
-        },
-        {
-            "ep": "command",
             "name": "set",
             "takes": [ "key", "value" ],
             "preview": "define and show settings",
@@ -145,74 +130,6 @@ exports.bindkeyCommand = function(instruction, args) {
         output += "</table>";
         instruction.addOutput(output);
     }
-};
-
-/**
- * 'alias' command
- */
-exports.aliasCommand = function(instruction, args) {
-    var aliases = canon.rootCanon.aliases;
-
-    if (!args.alias) {
-        // * show all
-        var output = "<table>";
-        for (var x in aliases) {
-            if (aliases.hasOwnProperty(x)) {
-                output += "<tr><td style='text-align:right;'>" + x + "</td>" +
-                        "<td>&#x2192;</td><td>" + aliases[x] + "</td></tr>";
-            }
-        }
-        output += "</table>";
-        instruction.addOutput(output);
-    } else {
-        // * show just one
-        if (args.command === undefined) {
-          var alias = aliases[args.alias];
-          if (alias) {
-              instruction.addOutput(args.alias + " &#x2192; " + aliases[args.alias]);
-          } else {
-              instruction.addErrorOutput("No alias set for '" + args.alias + "'");
-          }
-        } else {
-            // * save a new alias
-            var key = args.alias;
-            var value = args.command;
-            var aliascmd = value.split(' ')[0];
-
-            if (canon.rootCanon.commands[key]) {
-                instruction.addErrorOutput("Sorry, there is already a command with the name: " + key);
-            } else if (canon.rootCanon.commands[aliascmd]) {
-                aliases[key] = value;
-                instruction.addOutput("Saving alias: " + key + " &#x2192; " + value);
-            } else if (aliases[aliascmd]) {
-                // TODO: have the symlink to the alias not the end point
-                aliases[key] = value;
-                instruction.addOutput("Saving alias: " + key + " &#x2192; " + aliases[value] + " (" + value + " was an alias itself)");
-            } else {
-                instruction.addErrorOutput("Sorry, no command or alias with that name.");
-            }
-        }
-    }
-};
-
-/**
- * 'history' command
- */
-exports.historyCommand = function(instruction) {
-    var instructions = cliController.history.getInstructions();
-    var output = [];
-    output.push("<table>");
-    var count = 1;
-    instructions.forEach(function(instruction) {
-        output.push("<tr>");
-        output.push('<th>' + count + '</th>');
-        output.push('<td>' + instruction.typed + "</td>");
-        output.push("</tr>");
-        count++;
-    });
-    output.push("</table>");
-
-    instruction.addOutput(output.join(''));
 };
 
 /**
