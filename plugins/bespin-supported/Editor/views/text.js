@@ -40,22 +40,9 @@ exports.TextView = CanvasView.extend(TextInput, {
     // desired
     _lineAscent: 16,
 
-    _previousClippingFrame: null,
     _selectedRanges: null,
     _selectionOrigin: null,
     _virtualInsertionPoint: null,
-
-    _clippingFrameChanged: function() {
-        // False positives here are very common, so check to make sure before
-        // we take the slow path.
-        var previousClippingFrame = this._previousClippingFrame;
-        var clippingFrame = this.get('clippingFrame');
-        if (previousClippingFrame === null ||
-                !SC.rectsEqual(clippingFrame, previousClippingFrame)) {
-            this._previousClippingFrame = clippingFrame;
-            this._invalidate();
-        }
-    }.observes('clippingFrame'),
 
     // Creates a path around the given range of text. Useful for drawing
     // selections, highlights, and backgrounds.
@@ -119,36 +106,36 @@ exports.TextView = CanvasView.extend(TextInput, {
                 y:  point.y - offset.y
             }));
 
-        this.set('layerNeedsUpdate', true);
+        this.setNeedsDisplay();
         this.becomeFirstResponder();
     },
 
     // Draws a single insertion point.
-    _drawInsertionPoint: function(context, visibleFrame) {
+    _drawInsertionPoint: function(rect, context) {
         var range = this._selectedRanges[0];
-        var rect = this.get('layoutManager').
+        var characterRect = this.get('layoutManager').
             characterRectForPosition(range.start);
 
         context.save();
 
         context.strokeStyle = this.get('theme').cursorStyle;
         context.beginPath();
-        context.moveTo(rect.x + 0.5, rect.y);
-        context.lineTo(rect.x + 0.5, rect.y + rect.height);
+        context.moveTo(characterRect.x + 0.5, characterRect.y);
+        context.lineTo(characterRect.x + 0.5,
+            characterRect.y + characterRect.height);
         context.closePath();
         context.stroke();
 
         context.restore();
     },
 
-    _drawLines: function(context, visibleFrame) {
+    _drawLines: function(rect, context) {
         var layoutManager = this.get('layoutManager');
         var textLines = layoutManager.get('textLines');
         var theme = this.get('theme');
         var lineAscent = this._lineAscent;
 
-        var visibleRange =
-            layoutManager.characterRangeForBoundingRect(visibleFrame);
+        var visibleRange = layoutManager.characterRangeForBoundingRect(rect);
 
         context.save();
 
@@ -180,10 +167,12 @@ exports.TextView = CanvasView.extend(TextInput, {
             // And finally draw the line.
             context.fillStyle = theme.editorTextColor;
             for (var col = startColumn; col < endColumn; col++) {
-                var rect = layoutManager.characterRectForPosition({ row: row,
-                    column: col });
+                var characterRect = layoutManager.characterRectForPosition({
+                    row:    row,
+                    column: col
+                });
                 context.fillText(characters.substring(col, col + 1),
-                    rect.x - 0.5, rect.y + lineAscent - 0.5);
+                    characterRect.x - 0.5, characterRect.y + lineAscent - 0.5);
             }
         }
 
@@ -191,7 +180,7 @@ exports.TextView = CanvasView.extend(TextInput, {
     },
 
     // Draws the background highlight for selections.
-    _drawSelectionHighlight: function(context, visibleFrame) {
+    _drawSelectionHighlight: function(rect, context) {
         var theme = this.get('theme');
         var fillStyle = this.get('isFirstResponder') ?
             theme.editorSelectedTextBackground :
@@ -209,11 +198,11 @@ exports.TextView = CanvasView.extend(TextInput, {
     },
 
     // Draws either the selection or the insertion point.
-    _drawSelection: function(context, visibleFrame) {
+    _drawSelection: function(rect, context) {
         if (this._rangeSetIsInsertionPoint(this._selectedRanges)) {
-            this._drawInsertionPoint(context, visibleFrame);
+            this._drawInsertionPoint(rect, context);
         } else {
-            this._drawSelectionHighlight(context, visibleFrame);
+            this._drawSelectionHighlight(rect, context);
         }
     },
 
@@ -280,7 +269,7 @@ exports.TextView = CanvasView.extend(TextInput, {
     },
 
     _invalidateRange: function(newRange) {
-        this.set('layerNeedsUpdate', true);
+        this.setNeedsDisplay();
         this._invalidRange = this._invalidRange === null ? newRange :
             Range.unionRanges(this._invalidRange, newRange);
     },
@@ -542,11 +531,10 @@ exports.TextView = CanvasView.extend(TextInput, {
      * This is where the editor is painted from head to toe. Pitiful tricks are
      * used to draw as little as possible.
      */
-    drawRect: function(context, visibleFrame) {
+    drawRect: function(rect, context) {
         if (this._backgroundInvalid) {
             context.fillStyle = this.get('theme').backgroundStyle;
-            context.fillRect(visibleFrame.x, visibleFrame.y,
-                visibleFrame.width, visibleFrame.height);
+            context.fillRect(rect.x, rect.y, rect.width, rect.height);
             this._backgroundInvalid = false;
         }
 
@@ -556,8 +544,8 @@ exports.TextView = CanvasView.extend(TextInput, {
             context.fill();
             context.clip();
 
-            this._drawSelection(context, visibleFrame);
-            this._drawLines(context, visibleFrame);
+            this._drawSelection(rect, context);
+            this._drawLines(rect, context);
         }
 
         this._invalidRange = null;
@@ -608,7 +596,7 @@ exports.TextView = CanvasView.extend(TextInput, {
             repeats:    true
         });
 
-        this.set('layerNeedsUpdate', true);
+        this.setNeedsDisplay();
         this.becomeFirstResponder();
     },
 

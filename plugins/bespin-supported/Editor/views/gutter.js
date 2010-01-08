@@ -32,7 +32,7 @@ exports.GutterView = CanvasView.extend({
     _lineAscent: 16,
 
     _clippingFrameChanged: function() {
-        this.set('layerNeedsUpdate', true);
+        this.setNeedsDisplay();
     }.observes('clippingFrame'),
 
     /**
@@ -86,7 +86,9 @@ exports.GutterView = CanvasView.extend({
         }));
     },
 
-    drawRect: function(context, visibleFrame) {
+    drawRect: function(rect, context) {
+        var visibleFrame = this.get('clippingFrame');
+
         var theme = this.get('theme');
         context.fillStyle = theme.gutterStyle;
         context.fillRect(0, visibleFrame.y, visibleFrame.width,
@@ -122,7 +124,7 @@ exports.GutterView = CanvasView.extend({
     },
 
     layoutManagerChangedLayout: function(sender, range) {
-        this.set('layerNeedsUpdate', true);
+        this.setNeedsDisplay();
         this._resize();
     },
 

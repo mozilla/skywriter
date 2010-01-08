@@ -23,6 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var Rect = require('utils/rect');
 
 /**
  * @class
@@ -38,12 +39,22 @@ var SC = require('sproutcore/runtime').SC;
 exports.CanvasView = SC.View.extend({
     _canvasDom: null,
     _canvasId: null,
+    _invalidRects: null,
     _lastRedrawTime: null,
+    _previousClippingFrame: null,
     _redrawTimer: null,
 
-    _frameChanged: function() {
-        this.set('layerNeedsUpdate', true);
-    }.observes('frame'),
+    _clippingFrameChanged: function() {
+        // False positives here are very common, so check to make sure before
+        // we take the slow path.
+        var previousClippingFrame = this._previousClippingFrame;
+        var clippingFrame = this.get('clippingFrame');
+        if (previousClippingFrame === null ||
+                !SC.rectsEqual(clippingFrame, previousClippingFrame)) {
+            this._previousClippingFrame = clippingFrame;
+            this.setNeedsDisplay();
+        }
+    }.observes('clippingFrame'),
 
     _isVisibleInWindowChanged: function() {
         // Redraw when we become visible. We must do this because we don't draw
@@ -95,6 +106,63 @@ exports.CanvasView = SC.View.extend({
      */
     minimumRedrawDelay: 1000.0 / 30.0,
 
+    init: function() {
+        arguments.callee.base.apply(this, arguments);
+        this._invalidRects = [];
+    },
+
+    /**
+     * Calls drawRect() on all the invalid rects to redraw the canvas contents.
+     * Generally, you should not need to call this function unless you override
+     * the default implementations of didCreateLayer() or render().
+     *
+     * @return True on a successful render, or false if the rendering wasn't
+     *   done because the view wasn't visible.
+     */
+    redraw: function() {
+        if (!this.get('isVisibleInWindow')) {
+            return false;
+        }
+
+        var frame = this.get('frame');
+        if (frame.x < 0) {
+            this.computeFrameWithParentFrame(null);
+        }
+        var layerFrame = this.get('layerFrame');
+
+        var context = this.get('canvasContext2D');
+        context.save();
+        context.translate(frame.x - layerFrame.x, frame.y - layerFrame.y);
+
+        var clippingFrame = this.get('clippingFrame');
+        this._invalidRects.forEach(function(rect) {
+            context.save();
+
+            rect = SC.intersectRects(rect, clippingFrame);
+            if (rect.width !== 0 && rect.height !== 0) {
+                var x = rect.x, y = rect.y;
+                var width = rect.width, height = rect.height;
+                context.beginPath();
+                context.moveTo(x, y);
+                context.lineTo(x + width, y);
+                context.lineTo(x + width, y + height);
+                context.lineTo(x, y + height);
+                context.closePath();
+                context.clip();
+
+                this.drawRect(rect, context);
+            }
+
+            context.restore();
+        }, this);
+
+        context.restore();
+
+        this._invalidRects = [];
+        this._lastRedrawTime = new Date().getTime();
+        return true;
+    },
+
     renderLayout: function(context, firstTime) {
         arguments.callee.base.apply(this, arguments);
 
@@ -115,51 +183,40 @@ exports.CanvasView = SC.View.extend({
     },
 
     /**
-     * Subclasses should override this method to perform any drawing that they
-     * need to.
-     *
-     * @param context{CanvasRenderingContext2D} The 2D graphics context, taken
-     *      from the canvas.
-     * @param visibleFrame{Rect} The rectangle that is currently visible, which
-     *      is always at least as large as the layer frame.
+     * Invalidates the entire visible region of the canvas.
      */
-    drawRect: function(context, visibleFrame) {
-        // empty
+    setNeedsDisplay: function(rect) {
+        var frame = this.get('frame');
+        this._invalidRects = [
+            {
+                x:      0,
+                y:      0,
+                width:  frame.width,
+                height: frame.height
+            }
+        ];
+        this.set('layerNeedsUpdate', true);
     },
 
     /**
-     * Computes the visible frame and calls drawRect() to redraw the canvas
-     * contents. Generally, you should not need to call this function unless
-     * you override the default implementations of didCreateLayer() or
-     * render().
-     *
-     * @return True on a successful render, or false if the rendering wasn't
-     *     done because the view wasn't visible.
+     * Invalidates the given rect of the canvas, and schedules that portion of
+     * the canvas to be redrawn at the end of the run loop.
      */
-    redraw: function() {
-        if (!this.get('isVisibleInWindow')) {
-            return false;
-        }
+    setNeedsDisplayInRect: function(rect) {
+        this._invalidRects = Rect.addRectToSet(this._invalidRects, rect);
+        this.set('layerNeedsUpdate', true);
+    },
 
-        var layerFrame = this.get('layerFrame');
-        var visibleFrame = SC.cloneRect(this.get('clippingFrame'));
-        visibleFrame.width = layerFrame.width;
-        visibleFrame.height = layerFrame.height;
-
-        var context = this.get('canvasContext2D');
-
-        context.save();
-        var frame = this.get('frame');
-        if (frame.x < 0) {
-            this.computeFrameWithParentFrame(null);
-        }
-        context.translate(frame.x - layerFrame.x, frame.y - layerFrame.y);
-        this.drawRect(context, visibleFrame);
-        context.restore();
-
-        this._lastRedrawTime = new Date().getTime();
-
-        return true;
+    /**
+     * Subclasses should override this method to perform any drawing that they
+     * need to.
+     *
+     * @param rect{Rect} The rectangle to draw in.
+     * @param context{CanvasRenderingContext2D} The 2D graphics context, taken
+     *   from the canvas.
+     */
+    drawRect: function(rect, context) {
+        // empty
     },
 
     didCreateLayer: function() {

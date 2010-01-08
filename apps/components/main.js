@@ -47,7 +47,7 @@ var run = function() {
                     },
 
                     _update: function() {
-                        this.set('layerNeedsUpdate', true);
+                        this.setNeedsDisplay();
                     }.observes('_actionText', '_writtenText'),
 
                     copy: function() {

@@ -41,11 +41,11 @@ exports.BespinScrollerView = CanvasView.extend({
     _value: 0,
 
     _bespinScrollerView_valueDidChange: function() {
-        this.set('layerNeedsUpdate', true);
+        this.setNeedsDisplay();
     }.observes('value'),
 
     _bespinScrollerView_maximumDidChange: function() {
-        this.set('layerNeedsUpdate', true);
+        this.setNeedsDisplay();
     }.observes('maximum'),
 
     // TODO: Make this a real SproutCore theme (i.e. an identifier that gets
@@ -371,14 +371,14 @@ exports.BespinScrollerView = CanvasView.extend({
     mouseEntered: function(evt) {
         SC.RunLoop.begin();
         this._isMouseOver = true;
-        this.set('layerNeedsUpdate', true);
+        this.setNeedsDisplay();
         SC.RunLoop.end();
     },
 
     mouseExited: function(evt) {
         SC.RunLoop.begin();
         this._isMouseOver = false;
-        this.set('layerNeedsUpdate', true);
+        this.setNeedsDisplay();
         SC.RunLoop.end();
     },
 
@@ -535,7 +535,7 @@ exports.BespinScrollerView = CanvasView.extend({
         }
     },
 
-    drawRect: function(ctx, visibleFrame) {
+    drawRect: function(rect, ctx) {
         var alpha = (ctx.globalAlpha) ? ctx.globalAlpha : 1;
         var theme = this.get('theme');
 
