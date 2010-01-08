@@ -43,6 +43,43 @@ exports._distanceFromBounds = function(value, low, high) {
 };
 
 /**
+ * Merges the given rectangle with the given set and returns the resulting set
+ * of non-overlapping rectangles.
+ */
+exports.addRectToSet = function(set, rect) {
+    set = set.concat(rect);
+
+    var modified;
+    do {
+        modified = false;
+        var newSet = [];
+
+        for (var i = 0; i < set.length; i++) {
+            var rectA = set[i];
+            newSet.push(rectA);
+            for (var j = i+1; j < set.length; j++) {
+                var rectB = set[j];
+                if (!exports.rectsIntersect(rectA, rectB)) {
+                    continue;
+                }
+
+                set.removeAt(j, 1);
+
+                // There's room for optimization here...
+                newSet[newSet.length - 1] = SC.unionRects(rectA, rectB);
+
+                modified = true;
+                break;
+            }
+        }
+
+        set = newSet;
+    } while (modified);
+
+    return set;
+};
+
+/**
  * Returns the vector representing the shortest offset between the given
  * rectangle and the given point.
  */
