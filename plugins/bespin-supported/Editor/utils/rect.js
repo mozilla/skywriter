@@ -53,3 +53,12 @@ exports.offsetFromRect = function(rect, point) {
     };
 };
 
+/**
+ * Returns true if the rectanges intersect or false otherwise. Adjacent
+ * rectangles don't count; they must actually overlap some region.
+ */
+exports.rectsIntersect = function(a, b) {
+    var intersection = SC.intersectRects(a, b);
+    return intersection.width !== 0 && intersection.height !== 0;
+};
+

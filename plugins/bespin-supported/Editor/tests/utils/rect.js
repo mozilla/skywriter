@@ -61,3 +61,15 @@ exports.testOffsetFromRect = function() {
         "the offset from (100,2) to the unit square and (99,1)");
 };
 
+exports.testRectsIntersect = function() {
+    t.ok(Rect.rectsIntersect({ x: 0, y: 0, width: 2, height: 2 },
+        { x: 1, y: 1, width: 2, height: 2 }),
+        "(0,0) (2,2) and (1,1) (3,3) intersect");
+    t.ok(!Rect.rectsIntersect({ x: 0, y: 0, width: 1, height: 1 },
+        { x: 0, y: 1, width: 1, height: 1 }),
+        "(0,0) (1,1) and (0,1) (1,1) don't intersect");
+    t.ok(!Rect.rectsIntersect({ x: 0, y: 0, width: 1, height: 1 },
+        { x: 2, y: 2, width: 1, height: 1 }),
+        "(0,0) (1,1) and (2,2) (3,3) don't intersect");
+};
+
