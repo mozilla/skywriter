@@ -76,6 +76,17 @@ exports.LayoutManager = SC.Object.extend({
      */
     textStorage: TextStorage,
 
+    /**
+     * @property
+     *
+     * The theme to use.
+     *
+     * TODO: Convert to a SproutCore theme.
+     */
+    theme: {
+        editorTextColor: "rgb(230, 230, 230)"
+    },
+
     _computeInvalidRects: function(oldRange, newRange) {
         var oldStart = oldRange.start;
         return this.rectsForRange({
@@ -114,11 +125,21 @@ exports.LayoutManager = SC.Object.extend({
     },
 
     _recomputeLayoutForRanges: function(oldRange, newRange) {
+        var theme = this.get('theme');
         var oldStartRow = oldRange.start.row;
         this.textLines.replace(oldStartRow, oldRange.end.row - oldStartRow + 1,
             this.getPath('textStorage.lines').slice(oldStartRow,
             newRange.end.row + 1).map(function(line) {
-                return { characters: line };
+                return {
+                    characters: line,
+                    colors:     [
+                        {
+                            start:  0,
+                            end:    line.length,
+                            color:  theme.editorTextColor
+                        }
+                    ]
+                };
             }));
 
         this._recalculateMaximumWidth();
@@ -253,7 +274,18 @@ exports.LayoutManager = SC.Object.extend({
     init: function() {
         this._layoutAnnotations = [];
         this.set('delegates', SC.clone(this.get('delegates')));
-        this.set('textLines', [ { characters: "" } ]);
+        this.set('textLines', [
+            {
+                characters: "",
+                colors:     [
+                    {
+                        start:  0,
+                        end:    0,
+                        color:  this.get('theme').editorTextColor
+                    }
+                ]
+            }
+        ]);
 
         this.createTextStorage();
         this.get('textStorage').get('delegates').push(this);

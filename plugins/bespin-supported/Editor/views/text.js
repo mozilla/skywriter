@@ -84,7 +84,8 @@ exports.TextView = CanvasView.extend(TextInput, {
         context.font = theme.editorTextFont;
 
         var range = layoutManager.characterRangeForBoundingRect(rect);
-        var startRow = range.start.row, endRow = range.end.row;
+        var rangeStart = range.start, rangeEnd = range.end;
+        var startRow = rangeStart.row, endRow = rangeEnd.row;
         for (var row = startRow; row <= endRow; row++) {
             var textLine = textLines[row];
             if (SC.none(textLine)) {
@@ -95,21 +96,35 @@ exports.TextView = CanvasView.extend(TextInput, {
             // text.
             var characters = textLine.characters;
             var length = characters.length;
-            var endColumn = Math.min(range.end.column, length);
-            var startColumn = range.start.column;
+            var endColumn = Math.min(rangeEnd.column, length);
+            var startColumn = rangeStart.column;
             if (startColumn >= length) {
                 continue;
             }
 
+            // Figure out which color range to start in.
+            var colorRanges = textLine.colors;
+            var colorIndex = 0;
+            while (startColumn < colorRanges[colorIndex].start) {
+                colorIndex++;
+            }
+
             // And finally draw the line.
-            context.fillStyle = theme.editorTextColor;
-            for (var col = startColumn; col < endColumn; col++) {
+            var column = startColumn;
+            while (column < endColumn) {
+                var colorRange = colorRanges[colorIndex];
+                var colorRangeEnd = colorRange.end;
+                context.fillStyle = colorRange.color;
+
                 var characterRect = layoutManager.characterRectForPosition({
                     row:    row,
-                    column: col
+                    column: column
                 });
-                context.fillText(characters.substring(col, col + 1),
-                    characterRect.x - 0.5, characterRect.y + lineAscent - 0.5);
+                context.fillText(characters.substring(column, colorRangeEnd),
+                    characterRect.x, characterRect.y + lineAscent);
+
+                column = colorRangeEnd;
+                colorIndex++;
             }
         }
 
@@ -418,7 +433,6 @@ exports.TextView = CanvasView.extend(TextInput, {
     theme: {
         backgroundStyle: "#2a211c",
         cursorStyle: "#879aff",
-        editorTextColor: "rgb(230, 230, 230)",
         editorTextFont: "10pt Monaco, Lucida Console, monospace",
         editorSelectedTextColor: "rgb(240, 240, 240)",
         editorSelectedTextBackground: "#526da5",
