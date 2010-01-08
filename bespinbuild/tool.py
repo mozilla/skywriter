@@ -146,7 +146,9 @@ will be deleted before the build.""")
             plugin = self.get_plugin(package.name)
             combiner.combine_files(output_js, output_css, plugin.name, 
                                    plugin.location,
-                                   exclude_tests=exclude_tests)
+                                   exclude_tests=exclude_tests,
+                                   image_path_prepend="resources/%s/" 
+                                                      % plugin.name)
         # include plugin metadata
         # this comes after the plugins, because some plugins
         # may need to be importable at the time the metadata
@@ -182,6 +184,8 @@ tiki.require("bespin:plugins").catalog.load(%s);
         self.generate_output_files(jsfile, cssfile)
         jsfile.close()
         cssfile.close()
+        
+        combiner.copy_sproutcore_files(self.sproutcore, output_dir)
         
         if self.include_sample:
             sample_file.copy(output_dir / "sample.html")

@@ -108,6 +108,7 @@ def test_css_creation():
     output_css = output_css.getvalue()
     assert "color: white" in output_css
     assert "sc-view.handles" in output_css
+    assert "background-image: url(resources/plugin1/images/prompt1.png);" in output_css
     
 def test_full_output():
     tmppath = path.getcwd() / "tmp" / "testoutput"
@@ -118,4 +119,16 @@ def test_full_output():
     assert jsfile.exists()
     samplefile = tmppath / "sample.html"
     assert samplefile.exists()
+    
+def test_image_copying():
+    tmppath = path.getcwd() / "tmp" / "testoutput"
+    manifest = tool.Manifest(plugins=["plugin1"],
+        search_path=pluginpath, include_core_test=True)
+    manifest.build()
+    imagedir = tmppath / "images"
+    assert imagedir.exists()
+    themefile = imagedir / "sc-theme-repeat-x.png"
+    assert themefile.exists()
+    # promptfile = imagedir / "prompt1.png"
+    # assert promptfile.exists()
     

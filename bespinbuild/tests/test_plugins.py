@@ -104,7 +104,7 @@ def test_plugin_metadata():
 
 def test_plugin_stylesheets():
     plugin = plugins.lookup_plugin("plugin1", pluginpath)
-    assert plugin.stylesheets == ["resources/foo/foo.css"]
+    assert plugin.stylesheets == ["resources/foo.css"]
     plugin = plugins.lookup_plugin("plugin2", pluginpath)
     assert plugin.stylesheets == []
     plugin = plugins.lookup_plugin("SingleFilePlugin1", pluginpath)
