@@ -32,7 +32,7 @@ var bespin = require("bespin");
 var util = require("bespin:util/util");
 var command = require("bespin:command");
 var mobwrite = require("mobwrite/core");
-var diff_match_patch = require("mobwrite/diff");
+var diff_match_patch = require("Diff");
 
 /**
  * Add a setting to turn collaboration mode on/off

@@ -17,6 +17,16 @@
  * limitations under the License.
  */
 
+// Mozilla: Plugin-metadata
+"define metadata";
+({});
+"end";
+
+// TODO: I suspect this Diff module will become important to Bespin, and likely
+// to be depended on by things in bespin-supported, so it shouldn't have a
+// lower priority. Maybe however there is a need for a bespin-3rdparty or
+// similar???
+
 /**
  * @fileoverview Computes the difference between two texts to create a patch.
  * Applies the patch onto another text, allowing for errors.
