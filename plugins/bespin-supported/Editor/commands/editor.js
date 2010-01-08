@@ -23,13 +23,13 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var command = require("bespin/command");
-var util = require("bespin/util/util");
+var canon = require("CommandLine:canon");
+var util = require("bespin:util/util");
 
 /**
  * 'search' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'search',
     takes: ['searchString'],
     preview: 'searches the current file for the given searchString',
@@ -73,7 +73,7 @@ command.rootCanon.addCommand({
             }
         }
     };
-    command.rootCanon.addCommand(gotoCmd);
+    canon.rootCanon.addCommand(gotoCmd);
     bespin.subscribe("settings:set:syntaxcheck", function () {
         var settings = bespin.get("settings");
         if (settings.values.syntaxcheck) {
@@ -89,7 +89,7 @@ command.rootCanon.addCommand({
 /**
  * 'replace' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'replace',
     takes: ['search', 'replace'],
     preview: 's/foo/bar/g',
@@ -102,7 +102,7 @@ command.rootCanon.addCommand({
 /**
  * 'sort' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'sort',
     takes: ['direction'],
     preview: 'sort the current buffer',
@@ -120,7 +120,7 @@ command.rootCanon.addCommand({
 /**
  * 'entab' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'entab',
     takes: ['tabsize'],
     preview: 'Convert spaces to tabs.',
@@ -143,7 +143,7 @@ command.rootCanon.addCommand({
 /**
  * 'detab' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'detab',
     takes: ['tabsize'],
     preview: 'Convert tabs to spaces.',
@@ -166,7 +166,7 @@ command.rootCanon.addCommand({
 /**
  * 'trim' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'trim',
     takes: ['side'], // left, right, both
     preview: 'trim trailing or leading whitespace',
@@ -192,7 +192,7 @@ command.rootCanon.addCommand({
 /**
  * 'uc' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'uc',
     preview: 'Change all selected text to uppercase',
     withKey: "CMD SHIFT U",
@@ -205,7 +205,7 @@ command.rootCanon.addCommand({
 /**
  * 'lc' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'lc',
     preview: 'Change all selected text to lowercase',
     withKey: "CMD SHIFT L",
@@ -218,7 +218,7 @@ command.rootCanon.addCommand({
 /**
  * 'outline' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'outline',
     preview: 'show outline of source code',
     withKey: "ALT SHIFT O",

@@ -53,7 +53,6 @@
 
 var bespin = require("bespin:index");
 var util = require("bespin:util/util");
-var command = require("CommandLine:command");
 
 /**
  * 'eval' command
@@ -118,7 +117,7 @@ exports.evalCommand = function(instruction, jscode) {
 /**
  * 'version' command
  */
-exports.versionCommand = function(instruction, command) {
+exports.versionCommand = function(instruction) {
     var version = 'Your Bespin is at version ' + bespin.versionNumber +
             ', Code name: "' + bespin.versionCodename + '"';
     instruction.addOutput(version);

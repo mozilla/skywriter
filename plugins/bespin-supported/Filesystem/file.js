@@ -23,10 +23,10 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var command = require("bespin/command");
-var util = require("bespin/util/util");
-var path = require("bespin/util/path");
-var diff_match_patch = require("bespin/mobwrite/diff");
+var canon = require("CommandLine:canon");
+var util = require("bespin:util/util");
+var path = require("bespin:util/path");
+var diff_match_patch = require("Diff");
 
 var DIFF_EQUAL = diff_match_patch.DIFF_EQUAL;
 var DIFF_DELETE = diff_match_patch.DIFF_DELETE;
@@ -36,7 +36,7 @@ var DIFF_INSERT = diff_match_patch.DIFF_INSERT;
 /**
  * 'files' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'files',
     aliases: ['ls', 'list'],
     takes: ['path'],
@@ -63,7 +63,7 @@ command.rootCanon.addCommand({
 /**
  * 'mkdir' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'mkdir',
     takes: ['path'],
     preview: 'create a new directory, use a leading / to create a directory in a different project',
@@ -98,7 +98,7 @@ command.rootCanon.addCommand({
 /**
  * 'save' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'save',
     takes: ['filename'],
     preview: 'save the current contents',
@@ -113,7 +113,7 @@ command.rootCanon.addCommand({
 /**
  * 'open' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'open',
     aliases: ['load'],
     takes: ['path', 'line'],
@@ -135,7 +135,7 @@ command.rootCanon.addCommand({
 /**
  * 'revert' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'revert',
     preview: 'revert the file to the last saved version',
     execute: function(instruction, opts) {
@@ -156,7 +156,7 @@ command.rootCanon.addCommand({
 /**
  * 'status' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'status',
     preview: 'get info on the current project and file',
     execute: function(instruction) {
@@ -167,7 +167,7 @@ command.rootCanon.addCommand({
 /**
  * 'newfile' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'newfile',
     //aliases: ['new'],
     takes: ['filename'],
@@ -185,7 +185,7 @@ command.rootCanon.addCommand({
 /**
  * 'rm' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'rm',
     aliases: ['remove', 'del'],
     takes: ['filename'],
@@ -224,7 +224,7 @@ command.rootCanon.addCommand({
 /**
  * 'clear' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'clear',
     aliases: ['cls'],
     preview: 'clear the file',
@@ -236,7 +236,7 @@ command.rootCanon.addCommand({
 /**
  * 'quota' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'quota',
     preview: 'show your quota info',
     megabytes: function(bytes) {
@@ -255,7 +255,7 @@ command.rootCanon.addCommand({
 /**
  * 'rescan' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'rescan',
     takes: ['project'],
     preview: 'update the project catalog of files used by quick open',
@@ -292,7 +292,7 @@ command.rootCanon.addCommand({
 /**
  * 'timemachine' command
  */
-command.rootCanon.addCommand({
+canon.rootCanon.addCommand({
     name: 'timemachine',
     takes: ['revision'],
     preview: 'look at older versions of the current file',
@@ -408,7 +408,7 @@ command.rootCanon.addCommand({
             dojo.create("a", {
                 innerHTML: "Overlay",
                 onclick: function() {
-                    command.executeCommand("timemachine " + entry.id);
+                    cliController.executeCommand("timemachine " + entry.id);
                 }
             }, cell);
             dojo.create("td", { innerHTML: entry.description }, row);

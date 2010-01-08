@@ -22,10 +22,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require("bespin/util/util");
-var keys = require("bespin/util/keys");
-var commandline = require("bespin/cmd/commandline");
-var plugins = require("bespin/plugins");
+var util = require("bespin:util/util");
+var keys = require("bespin:util/keys");
+var Instruction = require("CommandLine:instruction").Instruction;
+var CliInputView = require("CommandLine:views/cli").CliInputView;
+var plugins = require("bespin:plugins");
 
 /*
     "debug": {
@@ -56,7 +57,7 @@ var plugins = require("bespin/plugins");
 /**
  * A specialization of commandline.Interface for the Javascript based CLI
  */
-exports.EvalCommandLineInterface = commandline.Interface.extend({
+exports.EvalCommandLineInterface = CliInputView.extend({
 
     requires: {
         hub: "hub",
@@ -207,7 +208,10 @@ exports.EvalCommandLineInterface = commandline.Interface.extend({
 
         this.commandLine.value = "";
 
-        var instruction = new commandline.Instruction(null, value);
+        var instruction = Instruction.create({
+            canon:null,
+            typed:value
+        });
         this.executing = instruction;
 
         var frame = null;

@@ -23,12 +23,13 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
-var dock = require("bespin:views/dock");
-var cliController = require("command").cliController;
+var util = require("bespin:util/util");
 var BespinButtonView = require("views/image_button").BespinButtonView;
 var PinView = require("views/pin").PinView;
+
 var catalog = require("bespin:plugins").catalog;
-var util = require("bespin:util/util");
+var dock = require("bespin:views/dock");
+var cliController = require("controller").cliController;
 
 var settings = catalog.getObject("settings");
 
@@ -110,7 +111,7 @@ exports.CliInputView = SC.View.design({
         ele.innerHTML = "";
         ele.appendChild(table);
         this.set("contentHeight", table.clientHeight);
-    }.observes("CommandLine:command#cliController.history.version"),
+    }.observes("CommandLine:controller#cliController.history.version"),
 
     /**
      * Called whenever anything happens that could affect the output display
@@ -154,22 +155,21 @@ exports.CliInputView = SC.View.design({
      * take input)
      */
     checkfocus: function(source, event) {
+        // We don't want old blurs to happen whatever
+        this._cancelBlur("focus event");
+
         var focus = source[event];
         if (focus) {
             // Make sure that something isn't going to undo the hasFocus=true
-            this._cancelBlur();
             this.set("hasFocus", true);
         } else {
             // The current element has lost focus, but does that mean that the
             // whole CliInputView has lost focus? We delay setting hasFocus to
             // false to see if anything grabs the focus
 
-            // It would be bizarre to lose focus twice in 200ms, but not
-            // impossible. Cancel the first if it does.
-            this._cancelBlur();
-
             // We rely on something canceling this if we're not to lose focus
             this._blurTimeout = window.setTimeout(function() {
+                //console.log("_blurTimeout", arguments);
                 this.set("hasFocus", false);
             }.bind(this), 200);
         }
@@ -180,8 +180,11 @@ exports.CliInputView = SC.View.design({
 
     /**
      * We have reason to believe that a blur event shouldn't happen
+     * @param {String} reason For debugging we (where we can) declare why we
+     * are cancelling the blur action
      */
-    _cancelBlur: function() {
+    _cancelBlur: function(reason) {
+        // console.log("_cancelBlur", arguments);
         if (this._blurTimeout) {
             window.clearTimeout(this._blurTimeout);
             this._blurTimeout = null;
@@ -225,14 +228,14 @@ exports.CliInputView = SC.View.design({
         }),
 
         input: SC.TextFieldView.design({
-            valueBinding: "CommandLine:command#cliController.input",
+            valueBinding: "CommandLine:controller#cliController.input",
             layout: { height: 25, bottom: 3, left: 40, right: 0 }
         }),
 
         submit: BespinButtonView.design({
             isDefault: true,
             title: "Exec",
-            target: "CommandLine:command#cliController",
+            target: "CommandLine:controller#cliController",
             action: "exec",
             layout: { height: 25, bottom: 0, width: 80, right: 0 }
         })
@@ -381,4 +384,19 @@ exports.outputInstruction = function(table, instruction, count) {
             td.innerHTML = contents;
         }
     }
+};
+
+/**
+ * Quick utility to format the elapsed time for display as hh:mm:ss
+ */
+var formatTime = function(date) {
+    var mins = "0" + date.getMinutes();
+    if (mins.length > 2) {
+        mins = mins.slice(mins.length - 2);
+    }
+    var secs = "0" + date.getSeconds();
+    if (secs.length > 2) {
+        secs = secs.slice(secs.length - 2);
+    }
+    return date.getHours() + ":" + mins + ":" + secs;
 };

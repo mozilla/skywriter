@@ -23,7 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var command = require("bespin/command");
+var canon = require("CommandLin:canon");
 var webpieces = require("bespin/util/webpieces");
 
 // TODO: For this and for other sub-command sets. I think that the resources
@@ -37,7 +37,7 @@ var webpieces = require("bespin/util/webpieces");
  * Command store for the group commands
  * (which are subcommands of the main 'group' command)
  */
-exports.commands = new command.Canon(command.rootCanon, {
+exports.commands = new canon.Canon(canon.rootCanon, {
     name: 'project',
     preview: 'Various commands to manage projects'
 });

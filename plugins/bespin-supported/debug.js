@@ -79,11 +79,10 @@
 });
 "end";
 
-var util = require("bespin/util/util");
-var command = require("bespin/command");
-var plugins = require("plugins");
+var util = require("bespin:util/util");
+var catalog = require("bespin:plugins").catalog;
 
-var editor = plugins.get("editor");
+var editor = catalog.get("editor");
 
 /**
  * A set of debug commands, that is, commands that could be useful in debugging

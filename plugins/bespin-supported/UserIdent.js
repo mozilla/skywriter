@@ -37,9 +37,8 @@
 
 var SC = require("sproutcore/runtime").SC;
 var util = require("bespin:util/util");
-var bespin = require("bespin");
 var server = require("BespinServer").server;
-var plugins = require("bespin:plugins");
+var catalog = require("bespin:plugins").catalog;
 
 /**
  * Begin the login process
@@ -58,7 +57,7 @@ exports.loginController = SC.Object.create({
     password: "",
 
     login: function() {
-        server.login(this.get("username"), this.get("password"), 
+        server.login(this.get("username"), this.get("password"),
             this.onSuccess, this.onFailure);
     },
 
@@ -69,7 +68,7 @@ exports.loginController = SC.Object.create({
         exports.userIdentPage.get("mainPane").remove();
 
         // Load the plugin metadata for the user's plugins
-        plugins.catalog.loadMetadata(server.SERVER_BASE_URL + "/plugin/register/user");
+        catalog.loadMetadata(server.SERVER_BASE_URL + "/plugin/register/user");
 
         console.log("login succeeded");
     },
@@ -175,8 +174,8 @@ exports.signupController = SC.Object.create({
      */
     signup: function() {
         var pane;
-        
-        // validates the form. 
+
+        // validates the form.
         this.validate();
 
         if (!this.get('isValid')) {

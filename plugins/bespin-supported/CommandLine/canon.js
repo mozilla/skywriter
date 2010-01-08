@@ -23,84 +23,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
-var InMemoryHistory = require("history").InMemoryHistory;
-var Instruction = require("instruction").Instruction;
-
-/**
- * Show helpers for the command line
- */
-exports.cliController = SC.Object.create({
-    /**
-     * A string containing the current contents of the command line
-     */
-    input: "",
-
-    /**
-     * The history of executed commands
-     * TODO: We should get the implementation of this from the plugin system
-     */
-    history: InMemoryHistory.create(),
-
-    /**
-     * Called by the UI to execute a command
-     */
-    exec: function() {
-        this.executeCommand(this.get("input"));
-        this.set("input", "");
-    },
-
-    /**
-     * Execute a command manually without using the UI
-     */
-    executeCommand: function(typed, hidden) {
-        console.log("executeCommand '" + typed + "'");
-
-        if (!typed || typed === "") {
-            return null;
-        }
-
-        var instruction = Instruction.create({
-            typed: typed,
-            canon: exports.rootCanon
-        });
-        if (hidden !== true) {
-            exports.cliController.history.add(instruction);
-        }
-
-        instruction.onOutput(function() {
-            exports.hideHint();
-            exports.cliController.history.update();
-        }.bind(this));
-
-        instruction.exec();
-        return instruction;
-    }
-});
-
-/**
- * TODO: subsume #showHint and #hideHint
- */
-exports.growlController = SC.Object.create({
-
-});
-
-/**
- * Show a command line hint
- * TODO: Implement this once to have some UI space for it
- */
-exports.showHint = function(message, timeout) {
-    console.log(message);
-};
-
-/**
- * Hide a previously displayed command line hint. This normally happens
- * automatically, but sometimes we may wish it to go faster.
- * TODO: (once implemented) check to see if the only uses of this are from the
- * UI in which case it shouldn't be an exported function.
- */
-exports.hideHint = function() {
-    // ignore until showHint is implemented
-};
 
 /**
  * Register new commands as they are discovered in plugins.
@@ -128,24 +50,6 @@ exports.newCommandHandler = function(ext) {
         });
     };
     exports.rootCanon.addCommand(ext);
-};
-
-// TODO add the deactivation hook here.
-// Remove a command from the root canon on pub/sub.
-// this.hub.subscribe("extension:removed:bespin.command", function(ext) {
-//     this.removeCommand(ext);
-// }.bind(this));
-
-var formatTime = function(date) {
-    var mins = "0" + date.getMinutes();
-    if (mins.length > 2) {
-        mins = mins.slice(mins.length - 2);
-    }
-    var secs = "0" + date.getSeconds();
-    if (secs.length > 2) {
-        secs = secs.slice(secs.length - 2);
-    }
-    return date.getHours() + ":" + mins + ":" + secs;
 };
 
 /**
@@ -512,31 +416,6 @@ exports.Canon = SC.Object.extend({
  * Create the root that all commands will be added to
  */
 exports.rootCanon = new exports.Canon();
-
-exports.helpCommand = function(instruction, extra) {
-    /*
-    var output = this.parent.getHelp(extra, {
-        prefix: "<h2>Welcome to Bespin - Code in the Cloud</h2><ul>" +
-            "<li><a href='http://labs.mozilla.com/projects/bespin' target='_blank'>Home Page</a>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin' target='_blank'>Wiki</a>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/UserGuide' target='_blank'>User Guide</a>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/Tips' target='_blank'>Tips and Tricks</a>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/FAQ' target='_blank'>FAQ</a>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/DeveloperGuide' target='_blank'>Developers Guide</a>" +
-            "</ul>",
-        suffix: "For more information, see the <a href='https://wiki.mozilla.org/Labs/Bespin'>Bespin Wiki</a>."
-    });
-    instruction.addOutput(output);
-    */
-    instruction.addOutput("<h2>Welcome to Bespin - Code in the Cloud</h2><ul>" +
-            "<li><a href='http://labs.mozilla.com/projects/bespin' target='_blank'>Home Page</a>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin' target='_blank'>Wiki</a>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/UserGuide' target='_blank'>User Guide</a>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/Tips' target='_blank'>Tips and Tricks</a>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/FAQ' target='_blank'>FAQ</a>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/DeveloperGuide' target='_blank'>Developers Guide</a>" +
-            "</ul>");
-};
 
 /**
  * Given a string, make a token object that holds positions and has name access.

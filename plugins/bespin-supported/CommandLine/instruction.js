@@ -23,7 +23,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
-var command = require("command");
 
 /**
  * Wrapper for something that the user typed
@@ -47,7 +46,7 @@ exports.Instruction = SC.Object.extend({
         // history from disk, but in that case we don't need to parse it
         if (!this.historical) {
             this.start = new Date();
-            var ca = this._splitCommandAndArgs(command.rootCanon, this.typed);
+            var ca = this._splitCommandAndArgs(this.canon, this.typed);
             if (ca) {
                 this.command = ca[0];
                 this.args = ca[1];

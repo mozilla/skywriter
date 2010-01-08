@@ -165,7 +165,7 @@ exports.ServerHistory = exports.InMemoryHistory.extend({
                 var instructions = [];
 
                 typings.forEach(function(typed) {
-                    if (typed && typed != "") {
+                    if (typed && typed !== "") {
                         var instruction = exports.Instruction.create({
                             typed: typed,
                             historical: true
@@ -182,7 +182,7 @@ exports.ServerHistory = exports.InMemoryHistory.extend({
     save: function(instructions) {
         var content = "";
         instructions.forEach(function(instruction) {
-            if (instruction.typed && instruction.typed != "") {
+            if (instruction.typed && instruction.typed !== "") {
                 content += instruction.typed + "\n";
             }
         });

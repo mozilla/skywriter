@@ -83,13 +83,12 @@
 });
 "end";
 
-var command = require("CommandLine:command");
 var keys = require("bespin:util/keys");
-var plugins = require("bespin:plugins");
+var catalog = require("bespin:plugins").catalog;
 
-var files = plugins.catalog.getObject("files");
-var editor = plugins.catalog.getObject("editor");
-var settings = plugins.catalog.getObject("settings");
+var files = catalog.getObject("files");
+var editor = catalog.getObject("editor");
+var settings = catalog.getObject("settings");
 
 /**
  * 'editconfig' command
@@ -152,7 +151,7 @@ exports.bindkeyCommand = function(instruction, args) {
  * 'alias' command
  */
 exports.aliasCommand = function(instruction, args) {
-    var aliases = command.rootCanon.aliases;
+    var aliases = canon.rootCanon.aliases;
 
     if (!args.alias) {
         // * show all
@@ -180,9 +179,9 @@ exports.aliasCommand = function(instruction, args) {
             var value = args.command;
             var aliascmd = value.split(' ')[0];
 
-            if (command.rootCanon.commands[key]) {
+            if (canon.rootCanon.commands[key]) {
                 instruction.addErrorOutput("Sorry, there is already a command with the name: " + key);
-            } else if (command.rootCanon.commands[aliascmd]) {
+            } else if (canon.rootCanon.commands[aliascmd]) {
                 aliases[key] = value;
                 instruction.addOutput("Saving alias: " + key + " &#x2192; " + value);
             } else if (aliases[aliascmd]) {
@@ -200,7 +199,7 @@ exports.aliasCommand = function(instruction, args) {
  * 'history' command
  */
 exports.historyCommand = function(instruction) {
-    var instructions = command.history.getInstructions();
+    var instructions = cliController.history.getInstructions();
     var output = [];
     output.push("<table>");
     var count = 1;

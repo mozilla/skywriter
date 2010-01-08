@@ -68,14 +68,14 @@
 });
 "end";
 
-var command = require("bespin/command");
-var util = require("bespin/util/util");
-var plugins = require("plugins");
+var canon = require("CommandLine:canon");
+var util = require("bespin:util/util");
+var catalog = require("plugins").catalog;
 
-var files = plugins.catalog.getObject("files");
-var editor = plugins.catalog.getObject("editor");
-var editSession = plugins.catalog.getObject("editSession");
-var server = plugins.catalog.getObject("server");
+var files = catalog.getObject("files");
+var editor = catalog.getObject("editor");
+var editSession = catalog.getObject("editSession");
+var server = catalog.getObject("server");
 
 /**
  * 'cmd load'
@@ -95,7 +95,7 @@ exports.loadCommand = function(instruction, commandname) {
             // Note: This used to allow multiple commands to be stored in
             // a single file, however that meant that the file was a (more)
             // butchered version of JSON - the contents of an array.
-            command.rootCanon.addCommand(command);
+            canon.rootCanon.addCommand(command);
         } catch (e) {
             instruction.addErrorOutput("Something is wrong about the command:<br><br>" + e);
         }
