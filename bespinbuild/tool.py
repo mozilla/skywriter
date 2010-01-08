@@ -18,6 +18,9 @@ sample_file = path(__file__).dirname() / "sample.html"
 inline_file = path(__file__).dirname() / "inline.js"
 boot_file = path(__file__).dirname() / "boot.js"
 
+def ignore_css(src, names):
+    return [name for name in names if name.endswith(".css")]
+
 class Manifest(object):
     """A manifest describes what should be built."""
     def __init__(self, include_core_test=False, plugins=None,
@@ -113,9 +116,11 @@ will be deleted before the build.""")
         
         f.write(fullpath.bytes())
         
-    def generate_output_files(self, output_js, output_css):
+    def generate_output_files(self, output_js, output_css, package_list=None):
         """Generates the combined JavaScript file, putting the
         output into output_file."""
+        output_dir = self.output_dir
+        
         if self.errors:
             raise BuildError("Errors found, stopping...")
         
@@ -137,11 +142,10 @@ will be deleted before the build.""")
             self.bespin, exclude_tests=exclude_tests)
         
         # finally, package up the plugins
-        package_list = [self.get_package(p) 
-            for p in self.plugins]
-        package_list = combiner.toposort(package_list,
-            package_factory=self.get_package)
         
+        if package_list is None:
+            package_list = self.get_package_list()
+            
         for package in package_list:
             plugin = self.get_plugin(package.name)
             combiner.combine_files(output_js, output_css, plugin.name, 
@@ -149,6 +153,7 @@ will be deleted before the build.""")
                                    exclude_tests=exclude_tests,
                                    image_path_prepend="resources/%s/" 
                                                       % plugin.name)
+            
         # include plugin metadata
         # this comes after the plugins, because some plugins
         # may need to be importable at the time the metadata
@@ -163,7 +168,13 @@ tiki.require("bespin:plugins").catalog.load(%s);
         
         output_js.write(boot_file.bytes())
         
-    
+    def get_package_list(self):
+        package_list = [self.get_package(p) 
+            for p in self.plugins]
+        package_list = combiner.toposort(package_list,
+            package_factory=self.get_package)
+        return package_list
+        
     def build(self):
         """Run the build according to the instructions in the manifest.
         """
@@ -177,15 +188,25 @@ tiki.require("bespin:plugins").catalog.load(%s);
         
         output_dir.makedirs()
         
+        package_list = self.get_package_list()
+        
         jsfilename = output_dir / "BespinEmbedded.js"
         cssfilename = output_dir / "BespinEmbedded.css"
         jsfile = jsfilename.open("w")
         cssfile = cssfilename.open("w")
-        self.generate_output_files(jsfile, cssfile)
+        self.generate_output_files(jsfile, cssfile, package_list)
         jsfile.close()
         cssfile.close()
         
         combiner.copy_sproutcore_files(self.sproutcore, output_dir)
+        
+        for package in package_list:
+            plugin = self.get_plugin(package.name)
+            resources = plugin.location / "resources"
+            if resources.exists() and resources.isdir():
+                resources.copytree(output_dir / "resources" / plugin.name,
+                    ignore=ignore_css)
+            
         
         if self.include_sample:
             sample_file.copy(output_dir / "sample.html")

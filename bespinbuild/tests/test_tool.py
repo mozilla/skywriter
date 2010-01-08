@@ -123,12 +123,15 @@ def test_full_output():
 def test_image_copying():
     tmppath = path.getcwd() / "tmp" / "testoutput"
     manifest = tool.Manifest(plugins=["plugin1"],
-        search_path=pluginpath, include_core_test=True)
+        search_path=pluginpath, include_core_test=True, 
+        output_dir=tmppath)
     manifest.build()
     imagedir = tmppath / "images"
     assert imagedir.exists()
     themefile = imagedir / "sc-theme-repeat-x.png"
     assert themefile.exists()
-    # promptfile = imagedir / "prompt1.png"
-    # assert promptfile.exists()
+    
+    plugin_image_dir = tmppath / "resources" / "plugin1" / "images"
+    promptfile = plugin_image_dir / "prompt1.png"
+    assert promptfile.exists()
     

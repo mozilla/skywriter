@@ -50,6 +50,8 @@ def toposort(unsorted, package_factory=None, reset_first=False):
         
     return l
 
+_css_images_url = re.compile(r'url\(\s*([\'"]*)images/')
+
 def combine_files(jsfile, cssfile, name, p, add_main=False, 
                   exclude_tests=True, image_path_prepend=None):
     """Combines the files in an app into a single .js, with all
@@ -77,8 +79,7 @@ def combine_files(jsfile, cssfile, name, p, add_main=False,
     if p.isdir():
         for f in p.walkfiles("*.css"):
             if image_path_prepend:
-                content = f.text()
-                content = content.replace("url(images/", "url(%simages/" % (image_path_prepend))
+                content = _css_images_url.sub("url(\\1%simages/" % (image_path_prepend), f.text())
                 cssfile.write(content)
             else:
                 cssfile.write(f.bytes())
