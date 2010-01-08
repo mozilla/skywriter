@@ -96,7 +96,7 @@ exports.Instruction = SC.Object.extend({
             } finally {
                 this._outstanding--;
 
-                if (this._outstanding == 0) {
+                if (this._outstanding === 0) {
                     this.completed = true;
                     this._callbacks.forEach(function(callback) {
                         callback();
@@ -134,8 +134,8 @@ exports.Instruction = SC.Object.extend({
      * Complete the currently executing command with successful output
      */
     addOutput: function(html) {
-        if (html && html != "") {
-            if (this.output != "") {
+        if (html && html !== "") {
+            if (this.output !== "") {
                 this.output += "<br/>";
             }
             this.output += html;

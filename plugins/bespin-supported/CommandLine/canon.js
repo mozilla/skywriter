@@ -42,14 +42,8 @@ var SC = require("sproutcore/runtime").SC;
  * }
  * </pre>
  */
-exports.newCommandHandler = function(ext) {
-    ext.execute = function() {
-        var args = arguments;
-        this.load(function(execute) {
-            execute.apply(this, args);
-        });
-    };
-    exports.rootCanon.addCommand(ext);
+exports.newCommandHandler = function(command) {
+    exports.rootCanon.addCommand(command);
 };
 
 /**
@@ -97,6 +91,14 @@ exports.Canon = SC.Object.extend({
         if (!command) {
             return;
         }
+
+        // Setup the execute function to check for load before executing
+        command.execute = function() {
+            var args = arguments;
+            this.load(function(execute) {
+                execute.apply(command, args);
+            });
+        };
 
         command.parent = this;
 
@@ -241,7 +243,7 @@ exports.Canon = SC.Object.extend({
         var typed = query.action[0];
 
         // No hints for a blank command line
-        if (typed.length === 0 && this.parent == null) {
+        if (typed.length === 0 && this.parent) {
             callback(query);
             return;
         }
@@ -287,7 +289,7 @@ exports.Canon = SC.Object.extend({
      * Does this command take arguments?
      */
     commandTakesArgs: function(command) {
-        return command.takes != undefined;
+        return command.takes !== undefined;
     },
 
     /**
@@ -371,12 +373,12 @@ exports.Canon = SC.Object.extend({
                 commands.push("<h2>Available Commands:</h2>");
             }
 
-            var tobesorted = [];
+            var toBeSorted = [];
             for (name in this.commands) {
-                tobesorted.push(name);
+                toBeSorted.push(name);
             }
 
-            var sorted = tobesorted.sort();
+            var sorted = toBeSorted.sort();
 
             commands.push("<table>");
             for (var i = 0; i < sorted.length; i++) {
@@ -386,7 +388,11 @@ exports.Canon = SC.Object.extend({
                 if (!showHidden && command.hidden) {
                     continue;
                 }
-                if (prefix && name.indexOf(prefix) != 0) {
+                if (command.preview === undefined) {
+                    // Ignore editor actions
+                    continue;
+                }
+                if (prefix && name.indexOf(prefix) !== 0) {
                     continue;
                 }
 
@@ -403,10 +409,10 @@ exports.Canon = SC.Object.extend({
 
         var output = commands.join("");
         if (options && options.prefix) {
-            output = options.prefix + "<br/>" + output;
+            output = options.prefix + output;
         }
         if (options && options.suffix) {
-            output = output + "<br/>" + options.suffix;
+            output = output + options.suffix;
         }
         return output;
     }
@@ -453,7 +459,7 @@ var TokenObject = SC.Object.extend({
                 this._nametoindex[namedparams[x]] = x;
 
                 // side step if you really don't want this
-                if (!this.options['noshortcutvalues']) {
+                if (!this.options.noshortcutvalues) {
                     this[namedparams[x]] = this.pieces[x];
                 }
             }

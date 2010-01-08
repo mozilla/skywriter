@@ -43,7 +43,7 @@ table.command_table tr.command_rowin { background: #1b1613; }
 table.command_table tr.command_rowin td:first-child { padding-left: 5px; }
 table.command_table tr.command_rowin img { cursor: pointer; }
 
-table.command_table th, td { border: 0; padding: 0; }
+div.command_view table.command_table th, td { border: 0; padding: 0 2px; text-align: left; }
 table.command_table td { vertical-align: top; }
 table.command_table .command_open_history { width: 20px; }
 table.command_table .command_open_time { width: 40px; }
