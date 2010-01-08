@@ -204,6 +204,60 @@ exports.testDimensionsCalculation = function() {
         "character width times the length of what is now the longest line");
 };
 
+exports.testInvalidRects = function() {
+    var layoutManager = LayoutManager.create({
+        margin: { left: 0, bottom: 0, top: 0, right: 0 }
+    });
+
+    var textStorage = layoutManager.get('textStorage');
+    textStorage.set('value', "foo\nbar\nbaz\nboo\n");
+
+    var characterWidth = layoutManager._characterWidth;
+    var lineHeight = layoutManager._lineHeight;
+
+    var returnedRects;
+    layoutManager.get('delegates').push({
+        layoutManagerInvalidatedRects: function(sender, rects) {
+            returnedRects = rects;
+        }
+    });
+
+    textStorage.insertCharacters({ row: 1, column: 1 }, "aaa");
+    t.deepEqual(returnedRects[0], {
+            x:      characterWidth,
+            y:      lineHeight,
+            width:  5 * characterWidth,
+            height: lineHeight
+        }, "the returned rect and the expected rect after no lines changed");
+
+    textStorage.deleteCharacters({
+        start:  { row: 1, column: 0 },
+        end:    { row: 2, column: 0 }
+    });
+    t.deepEqual(returnedRects[0], {
+        x:      0,
+        y:      lineHeight,
+        width:  3 * characterWidth,
+        height: 3 * lineHeight
+    }, "the returned rect and the expected rect after one line was deleted");
+
+    textStorage.insertCharacters({ row: 1, column: 1 }, "bar\n");
+    t.deepEqual(returnedRects[0], {
+        x:      characterWidth,
+        y:      lineHeight,
+        width:  3 * characterWidth,
+        height: lineHeight
+    }, "the first returned rect and the expected rect after one line was " +
+        "added");
+    t.deepEqual(returnedRects[1], {
+        x:      0,
+        y:      2 * lineHeight,
+        width:  4 * characterWidth,
+        height: 3 * lineHeight
+    }, "the second returned rect and the expected rect after one line was " +
+        "added");
+};
+
 exports.testPointToCharacterMapping = function() {
     setup();
 

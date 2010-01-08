@@ -31,10 +31,8 @@ var TextInput = require('bespin:editor/mixins/textinput').TextInput;
 var catalog = require('bespin:plugins').catalog;
 
 exports.TextView = CanvasView.extend(TextInput, {
-    _backgroundInvalid: false,
     _dragPoint: null,
     _dragTimer: null,
-    _invalidRange: null,
 
     // TODO: calculate from the size or let the user override via themes if
     // desired
@@ -43,58 +41,6 @@ exports.TextView = CanvasView.extend(TextInput, {
     _selectedRanges: null,
     _selectionOrigin: null,
     _virtualInsertionPoint: null,
-
-    // Creates a path around the given range of text. Useful for drawing
-    // selections, highlights, and backgrounds.
-    _createPathForRange: function(context, range) {
-        var layoutManager = this.get('layoutManager');
-
-        var startPosition = range.start, endPosition = range.end;
-        var startRow = startPosition.row, endRow = endPosition.row;
-
-        var startCharRect =
-            layoutManager.characterRectForPosition(startPosition);
-        var endCharRect = layoutManager.characterRectForPosition(endPosition);
-
-        if (startRow === endRow) {
-            // Plain rectangle
-            context.beginPath();
-            context.moveTo(startCharRect.x, startCharRect.y);
-            context.lineTo(endCharRect.x, endCharRect.y);
-            context.lineTo(endCharRect.x, endCharRect.y + endCharRect.height);
-            context.lineTo(startCharRect.x,
-                startCharRect.y + startCharRect.height);
-            context.closePath();
-            return;
-        }
-
-        //                _____1__________
-        //  _______3_____|2    _____7_____|8
-        // |4_________5_______|6
-
-        var startLineRect = layoutManager.lineRectForRow(startRow);
-        var endLineRect = layoutManager.lineRectForRow(endRow);
-        var padding = this.get('padding');
-
-        context.beginPath();
-        context.moveTo(startLineRect.x + startLineRect.width +
-            padding.right, startLineRect.y);
-        context.lineTo(startCharRect.x, startCharRect.y);           // 1
-        context.lineTo(startCharRect.x,
-            startCharRect.y + startCharRect.height);                // 2
-        context.lineTo(startLineRect.x,
-            startLineRect.y + startLineRect.height);                // 3
-        context.lineTo(endLineRect.x,
-            endLineRect.y + endLineRect.height);                    // 4
-        context.lineTo(endCharRect.x,
-            endCharRect.y + endCharRect.height);                    // 5
-        context.lineTo(endCharRect.x, endCharRect.y);               // 6
-        context.lineTo(endLineRect.x + endLineRect.width + padding.right,
-            endLineRect.y);                                         // 7
-        context.lineTo(startLineRect.x + startLineRect.width +
-            padding.right, startLineRect.y);                        // 8
-        context.closePath();
-    },
 
     _drag: function() {
         var point = this.convertFrameFromView(this._dragPoint);
@@ -135,13 +81,10 @@ exports.TextView = CanvasView.extend(TextInput, {
         var theme = this.get('theme');
         var lineAscent = this._lineAscent;
 
-        var visibleRange = layoutManager.characterRangeForBoundingRect(rect);
-
         context.save();
-
         context.font = theme.editorTextFont;
 
-        var range = this._invalidRange;
+        var range = layoutManager.characterRangeForBoundingRect(rect);
         var startRow = range.start.row, endRow = range.end.row;
         for (var row = startRow; row <= endRow; row++) {
             var textLine = textLines[row];
@@ -153,15 +96,10 @@ exports.TextView = CanvasView.extend(TextInput, {
             // text.
             var characters = textLine.characters;
             var length = characters.length;
-            var startColumn = row === startRow ? range.start.column :
-                visibleRange.start.column;
+            var endColumn = Math.min(range.end.column, length);
+            var startColumn = range.start.column;
             if (startColumn >= length) {
                 continue;
-            }
-            var endColumn = row === endRow ? range.end.column :
-                visibleRange.end.column;
-            if (endColumn > length) {
-                endColumn = length;
             }
 
             // And finally draw the line.
@@ -185,13 +123,15 @@ exports.TextView = CanvasView.extend(TextInput, {
         var fillStyle = this.get('isFirstResponder') ?
             theme.editorSelectedTextBackground :
             theme.unfocusedCursorFillStyle;
+        var layoutManager = this.get('layoutManager');
 
         context.save();
 
         this._selectedRanges.forEach(function(range) {
             context.fillStyle = fillStyle;
-            this._createPathForRange(context, range);
-            context.fill();
+            layoutManager.rectsForRange(range).forEach(function(rect) {
+                context.fillRect(rect.x, rect.y, rect.width, rect.height);
+            });
         }, this);
 
         context.restore();
@@ -253,25 +193,10 @@ exports.TextView = CanvasView.extend(TextInput, {
                 { row: 0, column: text.length }));
     },
 
-    // Invalidates the entire visible frame. Does not automatically mark the
-    // editor for repainting.
-    _invalidate: function() {
-        this._backgroundInvalid = true;
-        this._invalidRange = this.get('layoutManager').
-            characterRangeForBoundingRect(this.get('clippingFrame'));
-    },
-
     _invalidateInsertionPointIfNecessary: function(rangeSet) {
         if (this._rangeSetIsInsertionPoint(rangeSet)) {
-            this._invalidateRange(Range.extendRange(rangeSet[0],
-                { row: 0, column: 1 }));
+            this.setNeedsDisplay(); // TODO
         }
-    },
-
-    _invalidateRange: function(newRange) {
-        this.setNeedsDisplay();
-        this._invalidRange = this._invalidRange === null ? newRange :
-            Range.unionRanges(this._invalidRange, newRange);
     },
 
     _performVerticalKeyboardSelection: function(offset) {
@@ -309,15 +234,10 @@ exports.TextView = CanvasView.extend(TextInput, {
         var oldRanges = this._selectedRanges;
         this._selectedRanges = newRanges;
 
-        // Invalidate the parts of the previous selection that aren't in the
-        // new selection.
-        var intersection = Range.intersectRangeSets(oldRanges, newRanges);
-        if (intersection.length !== 0) {
-            this._invalidateRange({
-                start:  intersection[0].start,
-                end:    intersection[intersection.length - 1].end
-            });
-        }
+        // Invalidate the entire visible region.
+        //
+        // TODO: Be better about this.
+        this.setNeedsDisplay();
 
         // Also invalidate any insertion points. These have to be handled
         // separately, because they're drawn outside of their associated
@@ -532,23 +452,11 @@ exports.TextView = CanvasView.extend(TextInput, {
      * used to draw as little as possible.
      */
     drawRect: function(rect, context) {
-        if (this._backgroundInvalid) {
-            context.fillStyle = this.get('theme').backgroundStyle;
-            context.fillRect(rect.x, rect.y, rect.width, rect.height);
-            this._backgroundInvalid = false;
-        }
+        context.fillStyle = this.get('theme').backgroundStyle;
+        context.fillRect(rect.x, rect.y, rect.width, rect.height);
 
-        if (this._invalidRange !== null) {
-            this._createPathForRange(context, this._invalidRange);
-            context.fillStyle = this.get('theme').backgroundStyle;
-            context.fill();
-            context.clip();
-
-            this._drawSelection(rect, context);
-            this._drawLines(rect, context);
-        }
-
-        this._invalidRange = null;
+        this._drawSelection(rect, context);
+        this._drawLines(rect, context);
     },
 
     init: function() {
@@ -577,8 +485,8 @@ exports.TextView = CanvasView.extend(TextInput, {
      * The layout manager calls this method to signal to the view that the text
      * and/or layout has changed.
      */
-    layoutManagerChangedLayout: function(sender, range) {
-        this._invalidateRange(range);
+    layoutManagerInvalidatedRects: function(sender, rects) {
+        rects.forEach(this.setNeedsDisplayInRect, this);
         this._repositionSelection();
         this._resize();
     },

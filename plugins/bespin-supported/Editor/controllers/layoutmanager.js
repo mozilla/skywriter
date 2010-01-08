@@ -76,23 +76,22 @@ exports.LayoutManager = SC.Object.extend({
      */
     textStorage: TextStorage,
 
-    _computeInvalidRange: function(oldRange, newRange) {
-        var textStorage = this.get('textStorage');
-        var oldEndRow = oldRange.end.row;
+    _computeInvalidRects: function(oldRange, newRange) {
+        var oldStart = oldRange.start;
+        return this.rectsForRange({
+            start:  oldStart,
+            end:    oldRange.end.row !== newRange.end.row ?
+                    this._lastCharacterPosition() :
+                    { row: oldStart.row, column: this._maximumWidth }
+        });
+    },
 
-        var endPosition;
-        if (oldEndRow === newRange.end.row) {
-            // Fast path: invalidate just the remainder of this row.
-            endPosition = {
-                row:    oldEndRow,
-                column: textStorage.get('lines')[oldEndRow].length
-            };
-        } else {
-            // Slow path: invalidate positions for the rest of this file.
-            endPosition = textStorage.range().end;
-        }
-
-        return { start: oldRange.start, end: endPosition };
+    // Returns the last valid position in the buffer.
+    _lastCharacterPosition: function() {
+        return {
+            row:    this.get('textLines').length - 1,
+            column: this._maximumWidth
+        };
     },
 
     _recalculateMaximumWidth: function() {
@@ -127,10 +126,24 @@ exports.LayoutManager = SC.Object.extend({
         var changedRange = this._runAnnotations(Range.unionRanges(oldRange,
             newRange));
 
-        var invalidRange = this._computeInvalidRange(oldRange, newRange);
+        var invalidRects = this._computeInvalidRects(oldRange, newRange);
         this.get('delegates').forEach(function(delegate) {
-            delegate.layoutManagerChangedLayout(this, invalidRange);
+            delegate.layoutManagerInvalidatedRects(this, invalidRects);
         }, this);
+    },
+
+    // Starting at the character at the given position, returns the boundaries
+    // of the rest of the line.
+    _rectForRemainderOfLine: function(position) {
+        var lineRect = this.lineRectForRow(position.row);
+        var characterRect = this.characterRectForPosition(position);
+        var characterRectX = characterRect.x;
+        return {
+            x:      characterRectX,
+            y:      characterRect.y,
+            width:  lineRect.width - characterRectX,
+            height: lineRect.height
+        };
     },
 
     _runAnnotations: function(range) {
