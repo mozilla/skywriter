@@ -223,8 +223,8 @@ exports.LayoutManager = SC.Object.extend({
                 column: Math.max(Math.floor(x / characterWidth), 0)
             },
             end:    {
-                row:    Math.ceil((y + rect.height) / lineHeight),
-                column: Math.ceil((x + rect.width) / characterWidth)
+                row:    Math.floor((y + rect.height - 1) / lineHeight),
+                column: Math.floor((x + rect.width - 1) / characterWidth) + 1
             }
         };
     },
