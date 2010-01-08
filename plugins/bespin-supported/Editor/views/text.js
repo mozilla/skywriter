@@ -52,7 +52,6 @@ exports.TextView = CanvasView.extend(TextInput, {
                 y:  point.y - offset.y
             }));
 
-        this.setNeedsDisplay();
         this.becomeFirstResponder();
     },
 
@@ -194,9 +193,18 @@ exports.TextView = CanvasView.extend(TextInput, {
     },
 
     _invalidateInsertionPointIfNecessary: function(rangeSet) {
-        if (this._rangeSetIsInsertionPoint(rangeSet)) {
-            this.setNeedsDisplay(); // TODO
+        if (!this._rangeSetIsInsertionPoint(rangeSet)) {
+            return;
         }
+
+        var rect = this.get('layoutManager').
+            characterRectForPosition(rangeSet[0].start);
+        this.setNeedsDisplayInRect({
+            x:      rect.x,
+            y:      rect.y,
+            width:  1,
+            height: rect.height
+        });
     },
 
     _performVerticalKeyboardSelection: function(offset) {
@@ -234,10 +242,11 @@ exports.TextView = CanvasView.extend(TextInput, {
         var oldRanges = this._selectedRanges;
         this._selectedRanges = newRanges;
 
-        // Invalidate the entire visible region.
-        //
-        // TODO: Be better about this.
-        this.setNeedsDisplay();
+        var layoutManager = this.get('layoutManager');
+        oldRanges.concat(newRanges).forEach(function(range) {
+            layoutManager.rectsForRange(range).
+                forEach(this.setNeedsDisplayInRect, this);
+        }, this);
 
         // Also invalidate any insertion points. These have to be handled
         // separately, because they're drawn outside of their associated
@@ -504,7 +513,6 @@ exports.TextView = CanvasView.extend(TextInput, {
             repeats:    true
         });
 
-        this.setNeedsDisplay();
         this.becomeFirstResponder();
     },
 
