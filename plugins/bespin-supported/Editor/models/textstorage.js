@@ -23,10 +23,11 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var TextBuffer = require('mixins/textbuffer').TextBuffer;
 
-exports.TextStorage = SC.Object.extend({
+exports.TextStorage = SC.Object.extend(TextBuffer, {
     /**
-     * A list of delegates objects. All objects in this array receive
+     * A list of delegate objects. All objects in this array receive
      * textStorageEdited() messages.
      */
     delegates: null,
@@ -65,13 +66,6 @@ exports.TextStorage = SC.Object.extend({
     },
 
     /**
-     * Deletes characters from the given range.
-     */
-    deleteCharacters: function(range) {
-        this.replaceCharacters(range, "");
-    },
-
-    /**
      * Returns the result of displacing the given position by one character
      * forward (if @count is 1) or backward (if @count is -1).
      */
@@ -107,13 +101,6 @@ exports.TextStorage = SC.Object.extend({
     },
 
     /**
-     * Inserts the given characters at the supplied position.
-     */
-    insertCharacters: function(position, characters) {
-        this.replaceCharacters({ start: position, end: position }, characters);
-    },
-
-    /**
      * Returns the span of the entire text content.
      */
     range: function() {
@@ -131,12 +118,14 @@ exports.TextStorage = SC.Object.extend({
      * Replaces the characters within the supplied range with the given string.
      */
     replaceCharacters: function(oldRange, characters) {
+        var addedLines = characters.split("\n");
+        var addedLineCount = addedLines.length;
+
+        var newRange = this.resultingRangeForReplacement(oldRange, addedLines);
+
         var oldStart = oldRange.start, oldEnd = oldRange.end;
         var oldStartRow = oldStart.row, oldEndRow = oldEnd.row;
         var oldStartColumn = oldStart.column;
-
-        var addedLines = characters.split("\n");
-        var addedLineCount = addedLines.length;
 
         var lines = this.get('lines');
         addedLines[0] = lines[oldStartRow].substring(0, oldStartColumn) +
@@ -145,16 +134,6 @@ exports.TextStorage = SC.Object.extend({
             lines[oldEndRow].substring(oldEnd.column);
 
         lines.replace(oldStartRow, oldEndRow - oldStartRow + 1, addedLines);
-
-        var newRange = {
-            start:  oldStart,
-            end:    {
-                row:    oldStartRow + addedLineCount - 1,
-                column: addedLineCount === 1 ?
-                        oldStartColumn + characters.length :
-                        addedLines[addedLineCount - 1].length
-            }
-        };
 
         this.get('delegates').forEach(function(delegate) {
             delegate.textStorageEdited(this, oldRange, newRange);
