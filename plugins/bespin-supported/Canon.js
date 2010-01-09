@@ -59,7 +59,7 @@ exports.Canon = SC.Object.extend({
     /**
      * Searches through the command canon for an event matching the given flags
      * with a key equivalent matching the given SproutCore event, and, if the
-     * command is found, sends a message to the sender.
+     * command is found, sends a message to the appropriate target.
      *
      * @return True if a matching command was found, false otherwise.
      */
@@ -70,7 +70,10 @@ exports.Canon = SC.Object.extend({
             var command = commands[i];
             if (command.key === symbolicName &&
                     this._commandMatches(command, flags)) {
-                sender[command.action]();
+                var targetID = command.target;
+                var target = SC.none(targetID) ? sender :
+                    catalog.getObject(targetID);
+                target[command.action]();
                 return true;
             }
         }

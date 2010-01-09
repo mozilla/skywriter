@@ -24,7 +24,7 @@
 
 "define metadata";
 ({
-    "depends": [ "CommandLine", "Editor", "UserIdent" ],
+    "depends": [ "AppSupport", "CommandLine", "Editor", "UserIdent" ],
     "provides": [
         {
             "ep":       "factory",
@@ -37,9 +37,10 @@
 "end";
 
 var SC = require('sproutcore/runtime').SC;
+var CliInputView = require('CommandLine:views/cli').CliInputView;
 var DockView = require('bespin:views/dock').DockView;
 var EditorView = require('Editor:views/editor').EditorView;
-var CliInputView = require('CommandLine:views/cli').CliInputView;
+var KeyListener = require('AppSupport:views/keylistener').KeyListener;
 
 var INITIAL_TEXT;   // defined at the end of the file to reduce ugliness
 
@@ -53,6 +54,7 @@ exports.applicationController = SC.Object.extend({
                 dockedViews: [ CliInputView.design() ]
             }),
             childViews: 'applicationView'.w(),
+            defaultResponder: KeyListener.create(),
             layout: { centerX: 0, centerY: 0, width: 640, height: 480 }
         })
     }),
