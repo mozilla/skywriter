@@ -1,5 +1,28 @@
 {
     "depends": [],
-    "provides": []
+    "provides": [
+        {
+            "ep":           "command",
+            "name":         "redo",
+            "key":          "ctrl_shift_z",
+            "predicates":   [ "isApplication", true ],
+            "target":       "undoManager",
+            "action":       "redo"
+        },
+        {
+            "ep":           "command",
+            "name":         "undo",
+            "key":          "ctrl_z",
+            "predicates":   [ "isApplication", true ],
+            "target":       "undoManager",
+            "action":       "undo"
+        },
+        {
+            "ep":       "factory",
+            "name":     "undoManager",
+            "action":   "create",
+            "pointer":  "controllers/undomanager#UndoManager"
+        }
+    ]
 }
 
