@@ -275,6 +275,19 @@ exports["test plugins can observe an extension"] = function() {
     t.stop(1000);
 };
 
+exports["test getResourceURL"] = function() {
+    var testURL = "/server/file/at/plugins/MyPlugin/resources/";
+    var catalog = plugins.Catalog.create();
+    catalog.load({
+        MyPlugin: {
+            resourceURL: testURL
+        }
+    });
+    t.equal(catalog.getResourceURL("MyPlugin"), testURL);
+    
+};
+
+
 // this requires a development server setup at this point.
 exports["test reload hook is called when a plugin is reloaded"] = function() {
     plugins.catalog.loadMetadata("/server/plugin/register/tests",

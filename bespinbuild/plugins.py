@@ -21,6 +21,7 @@
 # ***** END LICENSE BLOCK *****
 # 
 import re
+from urllib import quote as urlquote
 
 try:
     from json import loads
@@ -119,6 +120,8 @@ class Plugin(object):
         except Exception, e:
             self._errors = ["Problem with metadata JSON: %s" % (e)]
             md = {}
+        
+        md["resourceURL"] = "resources/%s/" % urlquote(self.name)
         
         if self._errors:
             md['errors'] = self._errors

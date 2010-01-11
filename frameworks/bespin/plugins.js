@@ -489,6 +489,18 @@ exports.Catalog = SC.Object.extend({
         SC.Request.create({ address: url }).notify(0, this,
             this._metadataFinishedLoading, { callback: callback }).send("");
     },
+    
+    /*
+    * for the given plugin, get the first part of the URL required to
+    * get at that plugin's resources (images, etc.).
+    */
+    getResourceURL: function(pluginName) {
+        var plugin = this.plugins[pluginName];
+        if (plugin == undefined) {
+            return undefined;
+        }
+        return plugin.resourceURL;
+    },
 
     _metadataFinishedLoading: function(response, params) {
         if (!response.isError) {

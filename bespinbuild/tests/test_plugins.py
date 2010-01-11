@@ -120,3 +120,8 @@ def test_lookup_plugin():
     plugin = plugins.lookup_plugin("SingleFilePlugin1", pluginpath)
     assert not plugin.errors
     
+def test_resource_url():
+    plugin = plugins.lookup_plugin("plugin1", pluginpath)
+    md = plugin.metadata
+    assert md["resourceURL"] == "resources/plugin1/"
+    
