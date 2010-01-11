@@ -22,8 +22,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime").SC;
-
 "define metadata";
 ({
     "depends": [ "BespinUtils" ],
@@ -36,6 +34,8 @@ var SC = require("sproutcore/runtime").SC;
     ]
 });
 "end";
+
+var SC = require("sproutcore/runtime").SC;
 
 /**
  * Register new commands as they are discovered in plugins.
