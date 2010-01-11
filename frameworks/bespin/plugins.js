@@ -23,6 +23,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
+require("globals");
+
 var builtins = require("builtins");
 var r = require;
 

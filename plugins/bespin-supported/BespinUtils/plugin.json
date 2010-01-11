@@ -1,8 +1,0 @@
-{
-    "provides": [
-        {
-            "ep": "startup",
-            "pointer": "globals#install"
-        }
-    ]
-}

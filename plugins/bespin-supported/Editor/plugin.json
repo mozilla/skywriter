@@ -1,5 +1,5 @@
 {
-    "depends": [ "BespinUtils", "Canon" ],
+    "depends": [ "Canon" ],
     "provides": [
         {
             "ep": "command",

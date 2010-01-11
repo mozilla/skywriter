@@ -29,7 +29,6 @@ while we refactor things and decide what to do with them.
 
 "define metadata";
 ({
-    "depends": [ "BespinUtils" ],
     "provides": [
         {
             "ep": "command",

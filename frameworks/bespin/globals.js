@@ -24,7 +24,10 @@
 
 var SC = require("sproutcore/runtime").SC;
 
-exports.install = function() {
+/*
+* Installs ES5 and SproutCore monkeypatches as needed.
+*/
+var installGlobals = function() {
     /**
      * Array detector.
      * Firefox 3.5 and Safari 4 have this already. Chrome 4 however ...
@@ -83,3 +86,4 @@ exports.install = function() {
     };
 };
 
+installGlobals();

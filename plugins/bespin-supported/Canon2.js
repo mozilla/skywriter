@@ -24,7 +24,6 @@
 
 "define metadata";
 ({
-    "depends": [ "BespinUtils" ],
     "provides": [
         {
             "ep": "extensionhandler",
