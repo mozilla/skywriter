@@ -73,7 +73,7 @@
  */
 
 var SC = require("sproutcore/runtime").SC;
-var util = require("util/util");
+var util = require("bespin:util/util");
 
 /**
  * A base class for all the various methods of storing settings.
