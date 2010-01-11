@@ -33,10 +33,10 @@ exports.setCommand = function(instruction, setting) {
     var output;
 
     if (!setting.key) {
-        var settings = settings.list();
+        var settingsList = settings.list();
         output = "";
-        // first sort the settings based on the key
-        settings.sort(function(a, b) {
+        // first sort the settingsList based on the key
+        settingsList.sort(function(a, b) {
             if (a.key < b.key) {
                 return -1;
             } else if (a.key == b.key) {
@@ -46,7 +46,7 @@ exports.setCommand = function(instruction, setting) {
             }
         });
         // now add to output unless hidden settings (start with a _)
-        settings.forEach(function(setting) {
+        settingsList.forEach(function(setting) {
             if (setting.key[0] != '_') {
                 output += "<a class='setting' href='https://wiki.mozilla.org/Labs/Bespin/Settings#" + setting.key + "' title='View external documentation on setting: " + setting.key + "' target='_blank'>" + setting.key + "</a> = " + setting.value + "<br/>";
             }

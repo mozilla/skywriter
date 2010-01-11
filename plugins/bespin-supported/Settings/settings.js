@@ -160,7 +160,15 @@ exports.InMemorySettings = SC.Object.extend({
             throw "Settings need 'name' members";
         }
         if (!this._types[setting.type]) {
-            throw "setting.type should be one of [number|boolean|text|object]. Got " + setting.type;
+            // Make a list of the valid type names
+            var validNames = [];
+            for (valid in this._types) {
+                if (this._types.hasOwnProperty(valid)) {
+                    validNames += valid;
+                }
+            }
+            validNames = "[" + validNames.join("|") + "]";
+            throw "setting.type should be one of " + validNames + ". Got " + setting.type;
         }
         if (!setting.defaultValue === undefined) {
             throw "Settings need 'defaultValue' members";
@@ -294,71 +302,5 @@ exports.InMemorySettings = SC.Object.extend({
             }
         }
         return defaultValues;
-    }
-});
-
-/**
- * Save the settings in a cookie
- * This code has not been tested since reboot
- * @class
- * @augments exports.InMemorySettings
- */
-exports.CookieSettings = exports.InMemorySettings.extend(/** @lends exports.CookieSettings */{
-    _loadInitialValues: function() {
-        this._loadDefaultValues();
-        var data = cookie.get("settings");
-        this._loadFromObject(JSON.parse(data));
-    },
-
-    _changeValue: function(key, value) {
-        var data = JSON.stringify(this._saveToObject());
-        cookie.set("settings", data);
-    }
-});
-
-/**
- * Save the settings using the server.
- * This code has not been tested since reboot
- * @class
- * @augments exports.InMemorySettings
- */
-exports.ServerSettings = exports.InMemorySettings.extend(/** @lends exports.ServerSettings */ {
-    requires: {
-        files: 'files'
-    },
-
-    _loadInitialValues: function() {
-        this._loadDefaultValues();
-
-        var onLoad = function(file) {
-            // Strip \n\n from the end of the file and insert into this.settings
-            file.content.split(/\n/).forEach(function(setting) {
-                if (setting.match(/^\s*#/)) {
-                    return; // if comments are added ignore
-                }
-                if (setting.match(/\S+\s+\S+/)) {
-                    var pieces = setting.split(/\s+/);
-                    this.values[pieces[0].trim()] = pieces[1].trim();
-                }
-            });
-        };
-
-        this.files.loadContents(this.files.userSettingsProject, "settings", onLoad);
-    },
-
-    _changeValue: function(key, value) {
-        // Aggregate the settings into a file
-        var content = "";
-        for (var key in this.values) {
-            if (this.values.hasOwnProperty(key)) {
-                content += key + " " + this.values[key] + "\n";
-            }
-        }
-        // Send it to the server
-        this.files.saveFile(this.files.userSettingsProject, {
-            name: "settings",
-            content: content,
-            timestamp: new Date().getTime()
-        });
     }
 });
