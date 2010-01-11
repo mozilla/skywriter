@@ -44,12 +44,7 @@ settings.addSetting({
     defaultValue: "time"
 });
 
-/**
- * TODO: move this into server meta-data
- */
-var baseUrl = window.baseurl || "/server";
-var pluginPath = "/plugin/file/supported/";
-var imagePath = baseUrl + pluginPath + "CommandLine/views/images/";
+var imagePath = catalog.getResourceURL("CommandLine") + "images/";
 
 /**
  * The height of the CLI input without and output display. Sort of like the
