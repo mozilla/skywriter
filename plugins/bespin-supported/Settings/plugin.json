@@ -1,11 +1,28 @@
 {
-    "depends": [ ],
+    "depends": [ "bespin" ],
     "provides": [
         {
             "ep": "factory",
             "name": "settings",
             "action": "create",
             "pointer": "settings#InMemorySettings"
+        },
+        {
+            "ep": "command",
+            "name": "set",
+            "takes": [ "key", "value" ],
+            "preview": "define and show settings",
+            "pointer": "commands#setCommand",
+            "completionPointer": "commands#setCompleter"
+        },
+        {
+            "ep": "command",
+            "name": "unset",
+            "takes": [ "key" ],
+            "preview": "unset a setting entirely",
+            "completeText": "add a key for the setting to delete entirely",
+            "pointer": "commands#unsetCommand",
+            "completionPointer": "commands#unsetCompleter"
         }
     ]
 }
