@@ -23,7 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var canon = require("CommandLin:canon");
+var canon = require("Canon2");
 var webpieces = require("bespin/util/webpieces");
 
 // TODO: For this and for other sub-command sets. I think that the resources

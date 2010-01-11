@@ -23,7 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var canon = require("CommandLine:canon");
+var canon = require("Canon2");
 var util = require("bespin:util/util");
 
 /**

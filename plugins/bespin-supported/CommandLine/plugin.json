@@ -7,11 +7,6 @@
             "pointer": "views/cli#cliInputView"
         },
         {
-            "ep": "extensionhandler",
-            "name": "command",
-            "register": "canon#newCommandHandler"
-        },
-        {
             "ep": "command",
             "name": "help",
             "takes": [ "search" ],

@@ -24,6 +24,19 @@
 
 var SC = require("sproutcore/runtime").SC;
 
+"define metadata";
+({
+    "depends": [ "BespinUtils" ],
+    "provides": [
+        {
+            "ep": "extensionhandler",
+            "name": "command",
+            "register": "#newCommandHandler"
+        }
+    ]
+});
+"end";
+
 /**
  * Register new commands as they are discovered in plugins.
  * A command is a JSON structure that looks something like this:

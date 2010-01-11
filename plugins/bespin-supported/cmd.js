@@ -25,50 +25,56 @@
 // TODO: How to we mark sub commands?
 "define metadata";
 ({
-    "provides": [ {
-        "ep": "canon",
-        "name": "cmd",
-        "preview": "Various commands to manage commands"
-    }, {
-        "ep": "command",
-        "parent": "cmd",
-        "name": "load",
-        "takes": [ "commandname" ],
-        "preview": "load up a new command",
-        "completeText": "command name to load (required)",
-        "usage": "[commandname]: Command name required.",
-        "pointer": "cmd#loadCommand"
-    }, {
-        "ep": "command",
-        "parent": "cmd",
-        "name": "edit",
-        "takes": [ "commandname" ],
-        "aliases": [ "add" ],
-        "preview": "edit the given command (force if doesn't exist)",
-        "completeText": "command name to edit (required)",
-        "usage": "[commandname]: Command name required.",
-        "pointer": "cmd#editCommand"
-    }, {
-        "ep": "command",
-        "parent": "cmd",
-        "name": "list",
-        "preview": "list my custom commands",
-        "pointer": "cmd#listCommand"
-    }, {
-        "ep": "command",
-        "parent": "cmd",
-        "name": "rm",
-        "takes": [ "commandname" ],
-        "aliases": [ "del", "delete" ],
-        "preview": "delete a custom command",
-        "completeText": "command name to delete (required)",
-        "usage": "[commandname]: Command name required.",
-        "pointer": "cmd#deleteCommand"
-    } ]
+    "provides": [
+        {
+            "ep": "canon",
+            "name": "cmd",
+            "preview": "Various commands to manage commands"
+        },
+        {
+            "ep": "command",
+            "parent": "cmd",
+            "name": "load",
+            "takes": [ "commandname" ],
+            "preview": "load up a new command",
+            "completeText": "command name to load (required)",
+            "usage": "[commandname]: Command name required.",
+            "pointer": "cmd#loadCommand"
+        },
+        {
+            "ep": "command",
+            "parent": "cmd",
+            "name": "edit",
+            "takes": [ "commandname" ],
+            "aliases": [ "add" ],
+            "preview": "edit the given command (force if doesn't exist)",
+            "completeText": "command name to edit (required)",
+            "usage": "[commandname]: Command name required.",
+            "pointer": "cmd#editCommand"
+        },
+        {
+            "ep": "command",
+            "parent": "cmd",
+            "name": "list",
+            "preview": "list my custom commands",
+            "pointer": "cmd#listCommand"
+        },
+        {
+            "ep": "command",
+            "parent": "cmd",
+            "name": "rm",
+            "takes": [ "commandname" ],
+            "aliases": [ "del", "delete" ],
+            "preview": "delete a custom command",
+            "completeText": "command name to delete (required)",
+            "usage": "[commandname]: Command name required.",
+            "pointer": "cmd#deleteCommand"
+        }
+    ]
 });
 "end";
 
-var canon = require("CommandLine:canon");
+var rootCanon = require("Canon2").rootCanon;
 var util = require("bespin:util/util");
 var catalog = require("plugins").catalog;
 
@@ -95,7 +101,7 @@ exports.loadCommand = function(instruction, commandname) {
             // Note: This used to allow multiple commands to be stored in
             // a single file, however that meant that the file was a (more)
             // butchered version of JSON - the contents of an array.
-            canon.rootCanon.addCommand(command);
+            rootCanon.addCommand(command);
         } catch (e) {
             instruction.addErrorOutput("Something is wrong about the command:<br><br>" + e);
         }

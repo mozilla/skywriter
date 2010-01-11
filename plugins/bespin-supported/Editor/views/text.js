@@ -458,7 +458,7 @@ exports.TextView = CanvasView.extend(TextInput, {
                     start:  textStorage.displacePosition(range.start, -1),
                     end:    range.end
                 }
-            ]
+            ];
         }
 
         ranges.forEach(function(range) {

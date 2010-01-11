@@ -25,7 +25,7 @@
 var SC = require("sproutcore/runtime").SC;
 var InMemoryHistory = require("history").InMemoryHistory;
 var Instruction = require("instruction").Instruction;
-var rootCanon = require("canon").rootCanon;
+var rootCanon = require("Canon2").rootCanon;
 
 /**
  * Command line controller.
