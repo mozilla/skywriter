@@ -81,12 +81,6 @@ component).",
             },
             {
                 "ep": "factory",
-                "name": "settings",
-                "action": "create",
-                "pointer": "settings#InMemorySettings"
-            },
-            {
-                "ep": "factory",
                 "name": "parser",
                 "action": "call",
                 "pointer": "util/container#dummyFactory"
