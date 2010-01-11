@@ -22,39 +22,42 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+"define metadata";
+({
+    "depends": [ ],
+    "provides": [
+        {
+            "ep": "choice",
+            "name": "preview",
+            "description": "Add a setting to alter how previews are displayed",
+            "type": "text",
+            "defaultValue": "window"
+        },
+        {
+            "ep": "command",
+            "name": "preview",
+            "takes": [ "filename" ],
+            "preview": "view the file in a new browser window",
+            "completeText": "add the filename to view or use the current file",
+            "withKey": "CMD B",
+            "pointer": "#previewCommand"
+        }
+    ]
+});
+"end";
+
 var bespin  = require("bespin");
-var command = require("bespin/command");
-var path = require("bespin/util/path");
-var keys = require("bespin/util/keys");
-var webpieces = require("bespin/util/webpieces");
+var rootCanon = require("Canon2").rootCanon;
+var path = require("bespin:util/path");
+var keys = require("bespin:util/keys");
+var webpieces = require("bespin:util/webpieces");
 
 /**
- * TODO: We need to find a way to add in a key-sequence for this. Currently
- * it's in with all the other key sequences ...
+ * The preview command
  */
-
-/**
- * Add a setting to alter how previews are displayed
- */
-bespin.get("settings").addSetting({
-    name: "preview",
-    type: "text",
-    defaultValue: "window"
-});
-
-/**
- * Add in the preview command
- */
-command.store.addCommand({
-    name: 'preview',
-    takes: ['filename'],
-    preview: 'view the file in a new browser window',
-    completeText: 'add the filename to view or use the current file',
-    withKey: "CMD B",
-    execute: function(instruction, filename) {
-        exports.show(filename);
-    }
-});
+exports.previewCommand = function(instruction, filename) {
+    exports.show(filename);
+};
 
 /**
  * Preview the given file in a browser context

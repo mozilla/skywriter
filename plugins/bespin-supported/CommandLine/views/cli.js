@@ -32,18 +32,6 @@ var dock = require("bespin:views/dock");
 var cliController = require("controller").cliController;
 
 var settings = catalog.getObject("settings");
-
-/**
- * Not currently used. Previously there was an option to number or date each
- * historical instruction. The options were time|history|none. The code in
- * #exports.outputInstruction() follows the none path at the moment.
- */
-settings.addSetting({
-    name: "historytimemode",
-    type: "text",
-    defaultValue: "time"
-});
-
 var imagePath = catalog.getResourceURL("CommandLine") + "images/";
 
 /**

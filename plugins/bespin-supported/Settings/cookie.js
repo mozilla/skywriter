@@ -22,7 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var InMemorySettings = require("memory").InMemorySettings;
+var MemorySettings = require("memory").MemorySettings;
 var cookie = require("bespin:util/cookie");
 
 /**
@@ -30,7 +30,7 @@ var cookie = require("bespin:util/cookie");
  * This code has not been tested since reboot
  * @class
  */
-exports.CookieSettings = InMemorySettings.extend({
+exports.CookieSettings = MemorySettings.extend({
     _loadInitialValues: function() {
         this._loadDefaultValues();
         var data = cookie.get("settings");

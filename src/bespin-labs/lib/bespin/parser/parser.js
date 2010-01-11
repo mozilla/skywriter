@@ -22,8 +22,34 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
-var worker = require("bespin/util/worker");
+"define metadata";
+({
+    "depends": [ ],
+    "provides": [
+        {
+            "ep": "choice",
+            "name": "syntaxmarkers",
+            "description": "Unknown",
+            "type": "text",
+            "defaultValue": "all"
+        },
+        {
+            "ep": "choice",
+            "name": "jslint",
+            "description": "A setting to turn jslint parsing on or off",
+            "type": "text",
+            "defaultValue": ""
+        },
+        {
+            "ep": "choice",
+            "name": "syntaxcheck",
+            "description": "A setting to turn syntax checking of a file on/off",
+            "type": "boolean",
+            "defaultValue": false
+        }
+    ]
+});
+"end";
 
 /**
  * Module for dealing parsing and getting meta info about source.
@@ -32,23 +58,8 @@ var worker = require("bespin/util/worker");
  * Works similar to syntax highlighting engine
  */
 
-/**
- * TODO: What's this?
- */
-bespin.get("settings").addSetting({
-    name: "syntaxmarkers",
-    type: "text",
-    defaultValue: "all"
-});
-
-/**
- * Add a setting to turn jslint parsing on or off
- */
-bespin.get("settings").addSetting({
-    name: "jslint",
-    type: "text",
-    defaultValue: ''
-});
+var bespin = require("bespin");
+var worker = require("bespin:util/worker");
 
 /**
  * Saves Info about current source code
@@ -670,15 +681,6 @@ bespin.subscribe("settings:set:syntaxcheck", function (data) {
     } else {
         bespin.publish("parser:stop");
     }
-});
-
-/**
- * Add a setting to turn syntax checking of a file on/off
- */
-bespin.get("settings").addSetting({
-    name: "syntaxcheck",
-    type: "boolean",
-    defaultValue: false
 });
 
 /**

@@ -35,15 +35,6 @@ var mobwrite = require("mobwrite/core");
 var diff_match_patch = require("Diff");
 
 /**
- * Add a setting to turn collaboration mode on/off
- */
-bespin.get("settings").addSetting({
-    name: "collaborate",
-    type: "boolean",
-    defaultValue: false
-});
-
-/**
  * Mobwrite has a set of shareObjs which are designed to wrap DOM nodes.
  * This creates a fake DOM node to be wrapped in a Mobwrite ShareObj.
  * @param onFirstSync a function to call when the first sync has happened

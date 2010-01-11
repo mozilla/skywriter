@@ -4,7 +4,12 @@
             "ep": "factory",
             "name": "settings",
             "action": "create",
-            "pointer": "settings#InMemorySettings"
+            "pointer": "memory#MemorySettings"
+        },
+        {
+            "ep": "extensionhandler",
+            "name": "choice",
+            "register": "choice#addChoice"
         },
         {
             "ep": "command",

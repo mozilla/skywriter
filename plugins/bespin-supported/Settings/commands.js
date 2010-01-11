@@ -33,7 +33,7 @@ exports.setCommand = function(instruction, setting) {
     var output;
 
     if (!setting.key) {
-        var settingsList = settings.list();
+        var settingsList = settings._list();
         output = "";
         // first sort the settingsList based on the key
         settingsList.sort(function(a, b) {
@@ -84,7 +84,7 @@ exports.setCompleter = function(query, callback) {
         }
 
         // So no exact matches, we're looking for options
-        var list = settings.list().map(function(entry) {
+        var list = settings._list().map(function(entry) {
             return entry.key;
         });
         var matches = this.parent.filterOptionsByPrefix(list, key);
@@ -154,7 +154,7 @@ exports.unsetCompleter = function(query, callback) {
     }
 
     // So no exact matches, we're looking for options
-    var list = settings.list().map(function(entry) {
+    var list = settings._list().map(function(entry) {
         return entry.key;
     });
     var matches = this.parent.filterOptionsByPrefix(list, key);

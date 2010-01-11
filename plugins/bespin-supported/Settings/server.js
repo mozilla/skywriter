@@ -22,7 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var InMemorySettings = require("memory").InMemorySettings;
+var MemorySettings = require("memory").MemorySettings;
 var catalog = require("bespin:plugins").catalog;
 
 var files = catalog.getObject("files");
@@ -32,7 +32,7 @@ var files = catalog.getObject("files");
  * This code has not been tested since reboot
  * @class
  */
-exports.ServerSettings = InMemorySettings.extend({
+exports.ServerSettings = MemorySettings.extend({
     _loadInitialValues: function() {
         this._loadDefaultValues();
 
@@ -47,7 +47,7 @@ exports.ServerSettings = InMemorySettings.extend({
                     this.values[pieces[0].trim()] = pieces[1].trim();
                 }
             });
-        };
+        }.bind(this);
 
         files.loadContents(files.userSettingsProject, "settings", onLoad);
     },
