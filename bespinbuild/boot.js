@@ -42,4 +42,8 @@ SC.ready(function() {
 }
 );
 
-window.onload=SC.didLoad;
+// Let SC know when the page is loaded
+document.addEventListener("DOMContentLoaded", SC.didLoad, false);
+
+// Set up any globals that should leak out of our closure
+window.tiki = tiki;

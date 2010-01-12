@@ -124,6 +124,12 @@ will be deleted before the build.""")
         if self.errors:
             raise BuildError("Errors found, stopping...")
         
+        # Wrap the whole thing in a closure to protect the global
+        # namespace.
+        # commented out for now (see the note at the end of this
+        # function where the closure is closed off)
+#         output_js.write("""var tiki = function(){
+# """)
         output_js.write(inline_file.bytes())
             
         # include SproutCore
@@ -167,6 +173,15 @@ tiki.require("bespin:plugins").catalog.load(%s);
 """ % (dumps(all_md)))
         
         output_js.write(boot_file.bytes())
+        
+        # close off our closure
+        # commented out because this doesn't work yet
+        # we have *two* SC namespaces showing up and need to
+        # reconcile that first.
+#         output_js.write("""
+#     return tiki;
+# }();
+# """)
         
     def get_package_list(self):
         package_list = [self.get_package(p) 
