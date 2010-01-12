@@ -24,58 +24,66 @@
 
 "define metadata";
 ({
-    "provides": [ {
-        "ep": "command",
-        "name": "action",
-        "takes": [ "actionname" ],
-        "hidden": true,
-        "preview": "execute any editor action",
-        "pointer": "debug#actionCommand"
-    }, {
-        "ep": "command",
-        "name": "echo",
-        "takes": [ "message ..." ],
-        "hidden": true,
-        "preview": "A test echo command",
-        "pointer": "debug#echoCommand"
-    }, {
-        "ep": "command",
-        "name": "insert",
-        "takes": [ "text" ],
-        "hidden": true,
-        "preview": "insert the given text at this point.",
-        "pointer": "debug#insertCommand"
-    }, {
-        "ep": "command",
-        "name": "readonly",
-        "takes": [ "flag" ],
-        "hidden": true,
-        "preview": "Turn on and off readonly mode",
-        "pointer": "debug#readonlyCommand"
-    }, {
-        "ep": "command",
-        "name": "template",
-        "takes": [ "type" ],
-        "hidden": true,
-        "preview": "insert templates",
-        "completeText": "pass in the template name",
-        "pointer": "debug#templateCommand"
-    }, {
-        "ep": "command",
-        "name": "use",
-        "takes": [ "type" ],
-        "hidden": true,
-        "preview": "use patterns to bring in code",
-        "completeText": "'sound' will add sound support",
-        "pointer": "debug#useCommand"
-    }, {
-        "ep": "command",
-        "name": "slow",
-        "takes": [ "seconds" ],
-        "hidden": true,
-        "preview": "create some output, slowly, after a given time (default 5s)",
-        "pointer": "debug#slowCommand"
-    } ]
+    "provides": [
+        {
+            "ep": "command",
+            "name": "action",
+            "takes": [ "actionname" ],
+            "hidden": true,
+            "preview": "execute any editor action",
+            "pointer": "debug#actionCommand"
+        },
+        {
+            "ep": "command",
+            "name": "echo",
+            "takes": [ "message ..." ],
+            "hidden": true,
+            "preview": "A test echo command",
+            "pointer": "debug#echoCommand"
+        },
+        {
+            "ep": "command",
+            "name": "insert",
+            "takes": [ "text" ],
+            "hidden": true,
+            "preview": "insert the given text at this point.",
+            "pointer": "debug#insertCommand"
+        },
+        {
+            "ep": "command",
+            "name": "readonly",
+            "takes": [ "flag" ],
+            "hidden": true,
+            "preview": "Turn on and off readonly mode",
+            "pointer": "debug#readonlyCommand"
+        },
+        {
+            "ep": "command",
+            "name": "template",
+            "takes": [ "type" ],
+            "hidden": true,
+            "preview": "insert templates",
+            "completeText": "pass in the template name",
+            "pointer": "debug#templateCommand"
+        },
+        {
+            "ep": "command",
+            "name": "use",
+            "takes": [ "type" ],
+            "hidden": true,
+            "preview": "use patterns to bring in code",
+            "completeText": "'sound' will add sound support",
+            "pointer": "debug#useCommand"
+        },
+        {
+            "ep": "command",
+            "name": "slow",
+            "takes": [ "seconds" ],
+            "hidden": true,
+            "preview": "create some output, slowly, after a given time (default 5s)",
+            "pointer": "debug#slowCommand"
+        }
+    ]
 });
 "end";
 
