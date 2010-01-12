@@ -22,14 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-"define metadata";
-({
-    "depends": []
-});
-"end";
-
 var SC = require('sproutcore/runtime').SC;
-var catalog = require('bespin:plugins').catalog;
+var keyboardManager = require('Canon:keyboard').keyboardManager;
 
 /**
  * @class
@@ -39,8 +33,6 @@ var catalog = require('bespin:plugins').catalog;
  */
 exports.KeyListener = SC.Responder.extend({
     performKeyEquivalent: function(key, evt) {
-        catalog.getObject('canon').processKeyEvent(evt, this,
-            { "isApplication": true });
+        keyboardManager.processKeyEvent(evt, this, { "isApplication": true });
     }
 });
-

@@ -22,22 +22,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-"define metadata";
-({
-    "provides":
-     [
-        {
-            "ep": "command",
-            "name": "bindkey",
-            "takes": [ "modifiers", "key", "action" ],
-            "preview": "Bind a key to an action, or show bindings",
-            "completeText": "With no arguments show bindings, else give modifier(s), key, and action name to set",
-            "pointer": "#bindkeyCommand"
-        }
-    ]
-});
-"end";
-
 var catalog = require("bespin:plugins").catalog;
 
 var editor = catalog.getObject("editor");

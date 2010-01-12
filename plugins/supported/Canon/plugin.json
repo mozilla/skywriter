@@ -1,0 +1,10 @@
+{
+    "depends": [],
+    "provides": [
+        {
+            "ep": "extensionhandler",
+            "name": "command",
+            "register": "directory#newCommandHandler"
+        }
+    ]
+}

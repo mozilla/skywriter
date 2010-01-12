@@ -30,7 +30,7 @@ var MultiDelegateSupport =
 var Range = require('utils/range');
 var Rect = require('utils/rect');
 var TextInput = require('bespin:editor/mixins/textinput').TextInput;
-var catalog = require('bespin:plugins').catalog;
+var keyboardManager = require('Canon:keyboard').keyboardManager;
 
 exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     _dragPoint: null,
@@ -525,9 +525,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     keyDown: function(evt) {
-        return catalog.getObject('canon').processKeyEvent(evt, this, {
-            isTextView: true
-        });
+        return keyboardManager.processKeyEvent(evt, this, { isTextView: true });
     },
 
     /**

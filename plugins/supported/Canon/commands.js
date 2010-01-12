@@ -23,58 +23,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 // TODO: How to we mark sub commands?
-"define metadata";
-({
-    "provides": [
-        {
-            "ep": "canon",
-            "name": "cmd",
-            "preview": "Various commands to manage commands"
-        },
-        {
-            "ep": "command",
-            "parent": "cmd",
-            "name": "load",
-            "takes": [ "commandname" ],
-            "preview": "load up a new command",
-            "completeText": "command name to load (required)",
-            "usage": "[commandname]: Command name required.",
-            "pointer": "cmd#loadCommand"
-        },
-        {
-            "ep": "command",
-            "parent": "cmd",
-            "name": "edit",
-            "takes": [ "commandname" ],
-            "aliases": [ "add" ],
-            "preview": "edit the given command (force if doesn't exist)",
-            "completeText": "command name to edit (required)",
-            "usage": "[commandname]: Command name required.",
-            "pointer": "cmd#editCommand"
-        },
-        {
-            "ep": "command",
-            "parent": "cmd",
-            "name": "list",
-            "preview": "list my custom commands",
-            "pointer": "cmd#listCommand"
-        },
-        {
-            "ep": "command",
-            "parent": "cmd",
-            "name": "rm",
-            "takes": [ "commandname" ],
-            "aliases": [ "del", "delete" ],
-            "preview": "delete a custom command",
-            "completeText": "command name to delete (required)",
-            "usage": "[commandname]: Command name required.",
-            "pointer": "cmd#deleteCommand"
-        }
-    ]
-});
-"end";
 
-var rootCanon = require("Canon2").rootCanon;
+var rootCanon = require("Canon:directory").rootCanon;
 var util = require("bespin:util/util");
 var catalog = require("plugins").catalog;
 

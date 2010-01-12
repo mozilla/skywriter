@@ -22,18 +22,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-"define metadata";
-({
-    "provides": [
-        {
-            "ep": "extensionhandler",
-            "name": "command",
-            "register": "#newCommandHandler"
-        }
-    ]
-});
-"end";
-
 var SC = require("sproutcore/runtime").SC;
 
 /**
@@ -120,11 +108,6 @@ exports.Canon = SC.Object.extend({
         // Allow for the default [ ] takes style by expanding it to something bigger
         if (command.takes && Array.isArray(command.takes)) {
             command = this.normalizeTakes(command);
-        }
-
-        // Add bindings
-        if (command.withKey) {
-            // this.editor.bindCommand(command.name, command.withKey);
         }
 
         // Cache all the aliases in a store wide list

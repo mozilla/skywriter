@@ -22,30 +22,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-"define metadata";
-({
-    "depends": [],
-    "provides": [
-        {
-            "ep":       "factory",
-            "name":     "canon",
-            "action":   "create",
-            "pointer":  "#Canon"
-        }
-    ]
-});
-"end";
-
 var SC = require('sproutcore/runtime').SC;
 var catalog = require('bespin:plugins').catalog;
 
 /**
- * @class
- *
  * The canon, or the repository of commands, contains functions to process
  * events and dispatch command messages to targets.
+ * @class
  */
-exports.Canon = SC.Object.extend({
+var KeyboardManager = SC.Object.extend({
     _commandMatches: function(command, flags) {
         var predicates = command.predicates;
         for (var i = 0; i < predicates.length; i += 2) {
@@ -81,3 +66,7 @@ exports.Canon = SC.Object.extend({
     }
 });
 
+/**
+ * The global exported KeyboardManager
+ */
+exports.keyboardManager = KeyboardManager.create();
