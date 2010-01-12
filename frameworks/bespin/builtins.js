@@ -69,33 +69,9 @@ component).",
             },
             {
                 "ep": "factory",
-                "name": "files",
-                "action": "call",
-                "pointer": "util/container#dummyFactory"
-            },
-            {
-                "ep": "factory",
                 "name": "hub",
                 "action": "create",
                 "pointer": "util/hub#Hub"
-            },
-            {
-                "ep": "factory",
-                "name": "parser",
-                "action": "call",
-                "pointer": "util/container#dummyFactory"
-            },
-            {
-                "ep": "factory",
-                "name": "editSession",
-                "action": "call",
-                "pointer": "util/container#dummyFactory"
-            },
-            {
-                "ep": "factory",
-                "name": "cursorManager",
-                "action": "create",
-                "pointer": "cursor#CursorManager"
             },
             {
                 "ep": "extensionpoint",
