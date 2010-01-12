@@ -23,23 +23,17 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var MultiDelegateSupport =
+    require('mixins/multidelegate').MultiDelegateSupport;
 var Range = require('utils/range');
 var TextStorage = require('models/textstorage').TextStorage;
 var catalog = require('bespin:plugins').catalog;
 
-exports.LayoutManager = SC.Object.extend({
+exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     _characterWidth: 8,
     _layoutAnnotations: null,
     _lineHeight: 20,
     _maximumWidth: 0,
-
-    /**
-     * @property{Array}
-     *
-     * A list of delegate objects, which receive layoutManagerChangedLayout()
-     * messages for this layout manager.
-     */
-    delegates: [],
 
     /**
      * @property
@@ -148,9 +142,7 @@ exports.LayoutManager = SC.Object.extend({
             newRange));
 
         var invalidRects = this._computeInvalidRects(oldRange, newRange);
-        this.get('delegates').forEach(function(delegate) {
-            delegate.layoutManagerInvalidatedRects(this, invalidRects);
-        }, this);
+        this.notifyDelegates('layoutManagerInvalidatedRects', invalidRects);
     },
 
     // Starting at the character at the given position, returns the boundaries
@@ -273,7 +265,6 @@ exports.LayoutManager = SC.Object.extend({
 
     init: function() {
         this._layoutAnnotations = [];
-        this.set('delegates', SC.clone(this.get('delegates')));
         this.set('textLines', [
             {
                 characters: "",
@@ -288,7 +279,7 @@ exports.LayoutManager = SC.Object.extend({
         ]);
 
         this.createTextStorage();
-        this.get('textStorage').get('delegates').push(this);
+        this.get('textStorage').addDelegate(this);
 
         var thisLayoutManager = this;
         this.get('pluginCatalog').getExtensions('layoutannotations').

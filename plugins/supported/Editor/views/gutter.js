@@ -119,7 +119,7 @@ exports.GutterView = CanvasView.extend({
     init: function() {
         arguments.callee.base.apply(this, this.arguments);
 
-        this.getPath('layoutManager.delegates').push(this);
+        this.get('layoutManager').addDelegate(this);
         this._resize();
     },
 

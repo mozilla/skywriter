@@ -134,7 +134,7 @@ exports.testObserving = function() {
     storage.insertCharacters({ row: 0, column: 0 }, "foo\nbar\nbaz\n");
 
     var delegate = {};
-    storage.get('delegates').push(delegate);
+    storage.addDelegate(delegate);
 
     var deletionRange = {
         start: {

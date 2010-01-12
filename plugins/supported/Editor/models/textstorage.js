@@ -23,15 +23,11 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var MultiDelegateSupport =
+    require('mixins/multidelegate').MultiDelegateSupport;
 var TextBuffer = require('mixins/textbuffer').TextBuffer;
 
-exports.TextStorage = SC.Object.extend(TextBuffer, {
-    /**
-     * A list of delegate objects. All objects in this array receive
-     * textStorageEdited() messages.
-     */
-    delegates: null,
-
+exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
     /**
      * @property{Array<String>}
      *
@@ -135,9 +131,7 @@ exports.TextStorage = SC.Object.extend(TextBuffer, {
 
         lines.replace(oldStartRow, oldEndRow - oldStartRow + 1, addedLines);
 
-        this.get('delegates').forEach(function(delegate) {
-            delegate.textStorageEdited(this, oldRange, newRange);
-        }, this);
+        this.notifyDelegates('textStorageEdited', oldRange, newRange);
     }
 });
 

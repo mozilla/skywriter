@@ -216,7 +216,7 @@ exports.testInvalidRects = function() {
     var lineHeight = layoutManager._lineHeight;
 
     var returnedRects;
-    layoutManager.get('delegates').push({
+    layoutManager.addDelegate({
         layoutManagerInvalidatedRects: function(sender, rects) {
             returnedRects = rects;
         }

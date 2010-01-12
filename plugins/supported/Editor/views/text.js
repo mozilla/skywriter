@@ -493,7 +493,7 @@ exports.TextView = CanvasView.extend(TextInput, {
         // screwing up the prototype.
         this.set('padding', SC.clone(this.get('padding')));
 
-        this.getPath('layoutManager.delegates').push(this);
+        this.get('layoutManager').addDelegate(this);
 
         this._resize();
     },
