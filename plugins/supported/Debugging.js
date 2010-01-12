@@ -39,7 +39,7 @@
             "takes": [ "message ..." ],
             "hidden": true,
             "preview": "A test echo command",
-            "pointer": "debug#echoCommand"
+            "pointer": "#echoCommand"
         },
         {
             "ep": "command",
@@ -47,7 +47,7 @@
             "takes": [ "text" ],
             "hidden": true,
             "preview": "insert the given text at this point.",
-            "pointer": "debug#insertCommand"
+            "pointer": "#insertCommand"
         },
         {
             "ep": "command",
@@ -55,7 +55,7 @@
             "takes": [ "flag" ],
             "hidden": true,
             "preview": "Turn on and off readonly mode",
-            "pointer": "debug#readonlyCommand"
+            "pointer": "#readonlyCommand"
         },
         {
             "ep": "command",
@@ -64,7 +64,7 @@
             "hidden": true,
             "preview": "insert templates",
             "completeText": "pass in the template name",
-            "pointer": "debug#templateCommand"
+            "pointer": "#templateCommand"
         },
         {
             "ep": "command",
@@ -73,7 +73,7 @@
             "hidden": true,
             "preview": "use patterns to bring in code",
             "completeText": "'sound' will add sound support",
-            "pointer": "debug#useCommand"
+            "pointer": "#useCommand"
         },
         {
             "ep": "command",
@@ -81,22 +81,22 @@
             "takes": [ "seconds" ],
             "hidden": true,
             "preview": "create some output, slowly, after a given time (default 5s)",
-            "pointer": "debug#slowCommand"
+            "pointer": "#slowCommand"
         }
     ]
 });
 "end";
-
-var util = require("bespin:util/util");
-var catalog = require("bespin:plugins").catalog;
-
-var editor = catalog.get("editor");
 
 /**
  * A set of debug commands, that is, commands that could be useful in debugging
  * bespin, as opposed to commands that are useful when using bespin to do
  * debugging.
  */
+
+var util = require("bespin:util/util");
+var catalog = require("bespin:plugins").catalog;
+
+var editor = catalog.get("editor");
 
 /**
  * The 'action' command

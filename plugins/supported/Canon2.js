@@ -124,7 +124,7 @@ exports.Canon = SC.Object.extend({
 
         // Add bindings
         if (command.withKey) {
-            this.editor.bindCommand(command.name, command.withKey);
+            // this.editor.bindCommand(command.name, command.withKey);
         }
 
         // Cache all the aliases in a store wide list
