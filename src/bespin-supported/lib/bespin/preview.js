@@ -46,11 +46,17 @@
 });
 "end";
 
-var bespin  = require("bespin");
-var rootCanon = require("Canon2").rootCanon;
 var path = require("bespin:util/path");
-var keys = require("bespin:util/keys");
-var webpieces = require("bespin:util/webpieces");
+var catalog = require("bespin:plugin").catalog;
+
+var editSession = catalog.getObject("editSession");
+var settings = catalog.getObject("settings");
+var editor = catalog.getObject("editor");
+
+/**
+ * TODO: What is the key code for escape?
+ */
+var ESCAPE = -1;
 
 /**
  * The preview command
@@ -60,12 +66,27 @@ exports.previewCommand = function(instruction, filename) {
 };
 
 /**
+ * Hack to make sure we're not going to fail to load
+ */
+var dojo = {
+    connect: function() {
+        throw "Find an alternative for dojo.connect()";
+    },
+    disconnect: function() {
+        throw "Find an alternative for dojo.disconnect()";
+    },
+    style: function() {
+        throw "Find an alternative for dojo.style()";
+    },
+    create: function() {
+        throw "Find an alternative for dojo.create()";
+    }
+};
+
+/**
  * Preview the given file in a browser context
  */
 exports.show = function(filename, project, type) {
-    var editSession = bespin.get('editSession');
-    var settings = bespin.get("settings");
-
     // Provide defaults
     var filename = filename || editSession.path;
     var project = project || editSession.project;
@@ -80,7 +101,7 @@ exports.show = function(filename, project, type) {
 
     // Make sure to save the file first
     // TODO: add onSuccess/onFailure
-    bespin.get("editor").saveFile(null, filename);
+    editor.saveFile(null, filename);
 
     if (type == "inline") {
         var preview = document.getElementById("preview");
@@ -99,7 +120,7 @@ exports.show = function(filename, project, type) {
 
             var esc = dojo.connect(document, "onkeypress", function(e) {
                 var key = e.keyCode || e.charCode;
-                if (key == keys.Key.ESCAPE) {
+                if (key == ESCAPE) {
                     preview.removeChild(inlineIframe);
                     dojo.style(preview, "display", "none");
                     dojo.style(subheader, "display", "block");
@@ -113,19 +134,19 @@ exports.show = function(filename, project, type) {
 
     if (type == "iphone") {
         var centerpopup = document.getElementById("centerpopup");
-        if (document.getElementById("iphoneIframe") == null) {
+        if (document.getElementById("iphoneIframe") === null) {
             var iphoneIframe = dojo.create("iframe", {
                 id: "iphoneIframe",
                 frameBorder: 0,
                 src: url,
                 style: "border:0; width:320px; height:460px; background-color: white; display:block"
             }, centerpopup);
-            webpieces.showCenterPopup(centerpopup);
+            // webpieces.showCenterPopup(centerpopup);
             var esc = dojo.connect(document, "onkeypress", function(e) {
                 var key = e.keyCode || e.charCode;
-                if (key == keys.Key.ESCAPE) {
+                if (key == ESCAPE) {
                     centerpopup.removeChild(iphoneIframe);
-                    webpieces.hideCenterPopup(centerpopup);
+                    // webpieces.hideCenterPopup(centerpopup);
                     dojo.disconnect(esc);
                 }
             });
