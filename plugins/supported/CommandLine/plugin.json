@@ -36,6 +36,31 @@
             "description": "Display number|date|none next to each historical instruction",
             "type": "text",
             "defaultValue": "time"
+        },
+        {
+            "ep": "command",
+            "name": "eval",
+            "takes": [ "js-code" ],
+            "preview": "evals given js code and show the result",
+            "completeText": "evals given js code and show the result",
+            "hidden": true,
+            "pointer": "basiccommands#evalCommand"
+        },
+        {
+            "ep": "command",
+            "name": "version",
+            "takes": [ "command" ],
+            "preview": "show the version for Bespin or a command",
+            "completeText": "optionally, a command name",
+            "hidden": true,
+            "pointer": "basiccommands#versionCommand"
+        },
+        {
+            "ep": "command",
+            "name": "bespin",
+            "preview": "has",
+            "hidden": true,
+            "pointer": "basiccommands#bespinCommand"
         }
     ]
 }

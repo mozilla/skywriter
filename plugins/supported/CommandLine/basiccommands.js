@@ -22,35 +22,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-"define metadata";
-({
-    "depends": ["CommandLine"],
-    "provides": [ {
-        "ep": "command",
-        "name": "eval",
-        "takes": [ "js-code" ],
-        "preview": "evals given js code and show the result",
-        "completeText": "evals given js code and show the result",
-        "hidden": true,
-        "pointer": "#evalCommand"
-    }, {
-        "ep": "command",
-        "name": "version",
-        "takes": [ "command" ],
-        "preview": "show the version for Bespin or a command",
-        "completeText": "optionally, a command name",
-        "hidden": true,
-        "pointer": "#versionCommand"
-    }, {
-        "ep": "command",
-        "name": "bespin",
-        "preview": "has",
-        "hidden": true,
-        "pointer": "#bespinCommand"
-    } ]
-});
-"end";
-
 var bespin = require("bespin:index");
 var util = require("bespin:util/util");
 
