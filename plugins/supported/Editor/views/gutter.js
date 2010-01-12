@@ -126,7 +126,7 @@ exports.GutterView = CanvasView.extend({
     layoutManagerInvalidatedRects: function(sender, rects) {
         this.setNeedsDisplay();
         this._resize();
-    },
+    }
 
 });
 

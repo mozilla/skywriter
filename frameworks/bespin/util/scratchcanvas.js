@@ -70,7 +70,7 @@ var ScratchCanvas = SC.Object.extend({
         var width = context.measureText(str).width;
         context.restore();
         return width;
-    },
+    }
 });
 
 var singleton = null;
