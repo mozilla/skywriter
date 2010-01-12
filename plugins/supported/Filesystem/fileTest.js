@@ -22,9 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
-var file = require("bespin/cmd/file");
-var test = require("bespin/test");
+var file = require("file");
+var test = require("bespin:test");
 
 /**
  *

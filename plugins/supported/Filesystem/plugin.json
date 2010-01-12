@@ -1,0 +1,170 @@
+{
+    "depends": [ "Canon" ],
+    "provides": [
+        {
+            "ep": "command",
+            "name": "files",
+            "takes": [ "path" ],
+            "aliases": [ "ls", "list" ],
+            "preview": "show files",
+            "completeText": "list files relative to current file, or start with /projectname",
+            "pointer": "file#filesCommand",
+            "findCompletionsPointer": "file#fileFindCompletions"
+        },
+        {
+            "ep": "command",
+            "name": "mkdir",
+            "takes": [ "path" ],
+            "preview": "create a new directory, use a leading / to create a directory in a different project",
+            "usage": "[path]",
+            "pointer": "file#mkdirCommand"
+        },
+        {
+            "ep": "command",
+            "name": "save",
+            "takes": [ "filename" ],
+            "preview": "save the current contents",
+            "completeText": "add the filename to save as, or use the current file",
+            "withKey": "CMD S",
+            "pointer": "file#saveCommand"
+        },
+        {
+            "ep": "command",
+            "name": "open",
+            "takes": [ "path", "line" ],
+            "aliases": [ "load" ],
+            "preview": "load up the contents of the file",
+            "completeText": "add the filename to open",
+            "pointer": "file#openCommand",
+            "findCompletionsPointer": "file#openFindCompletions"
+        },
+        {
+            "ep": "command",
+            "name": "revert",
+            "preview": "revert the file to the last saved version",
+            "pointer": "file#revertCommand"
+        },
+        {
+            "ep": "command",
+            "name": "status",
+            "preview": "get info on the current project and file",
+            "pointer": "file#statusCommand"
+        },
+        {
+            "ep": "command",
+            "name": "newfile",
+            "takes": [ "filename" ],
+            "preview": "create a new buffer for file",
+            "completeText": "optionally, you can specify a full path including project by starting the filename with '/'",
+            "withKey": "CTRL SHIFT N",
+            "pointer": "file#newfileCommand"
+        },
+        {
+            "ep": "command",
+            "name": "rm",
+            "takes": [ "filename" ],
+            "aliases": [ "remove", "del" ],
+            "preview": "remove the file",
+            "completeText": "add the filename to remove, give a full path starting with '/' to delete from a different project. To delete a directory end the path in a '/'",
+            "pointer": "file#rmCommand",
+            "findCompletionsPointer": "file#rmFindCompletions"
+        },
+        {
+            "ep": "command",
+            "name": "clear",
+            "aliases": [ "cls" ],
+            "preview": "clear the file",
+            "pointer": "file#clearCommand"
+        },
+        {
+            "ep": "command",
+            "name": "quota",
+            "takes": [ "" ],
+            "aliases": [ "" ],
+            "preview": "show your quota info",
+            "completeText": "",
+            "usage": "",
+            "pointer": "file#quotaCommand"
+        },
+        {
+            "ep": "command",
+            "name": "rescan",
+            "takes": [ "project" ],
+            "preview": "update the project catalog of files used by quick open",
+            "pointer": "file#rescanCommand"
+        },
+        {
+            "ep": "command",
+            "name": "timemachine",
+            "takes": [ "revision" ],
+            "preview": "look at older versions of the current file",
+            "completeText": "No-arguments: display list of older versions, add revision to compare with a specific version",
+            "pointer": "file#Command"
+        },
+        {
+            "ep": "canon",
+            "name": "project",
+            "preview": "Various commands to manage projects"
+        },
+        {
+            "ep": "command",
+            "parent": "project",
+            "name": "show",
+            "preview": "show the current project",
+            "pointer": "project#showCommand"
+        },
+        {
+            "ep": "command",
+            "parent": "project",
+            "name": "list",
+            "preview": "show projects",
+            "pointer": "project#listCommand"
+        },
+        {
+            "ep": "command",
+            "parent": "project",
+            "name": "create",
+            "takes": [ "projectname" ],
+            "preview": "create a new project",
+            "usage": "[newprojectname]",
+            "pointer": "project#createCommand"
+        },
+        {
+            "ep": "command",
+            "parent": "project",
+            "name": "delete",
+            "takes": [ "projectname" ],
+            "preview": "delete a project",
+            "usage": "[projectname]",
+            "pointer": "project#deleteCommand"
+        },
+        {
+            "ep": "command",
+            "parent": "project",
+            "name": "rename",
+            "takes": [ "currentProject", "newProject" ],
+            "preview": "rename a project",
+            "usage": "[currentProject], [newProject]",
+            "pointer": "project#renameCommand"
+        },
+        {
+            "ep": "command",
+            "parent": "project",
+            "name": "export",
+            "takes": [ "project", "archivetype" ],
+            "preview": "export the given project with an archivetype of zip or tgz<br><code>project export myproject</code>",
+            "completeText": "project name, archivetype (zip | tgz, defaults to zip)",
+            "pointer": "project#Command"
+        },
+        {
+            "ep": "command",
+            "parent": "project",
+            "name": "import",
+            "takes": [ "url", "project" ],
+            "preview": "If a URL is given, import that URL (e.g. <code>project import http://foo.com/bar.zip MyProject</code>).<br><br>If only a project is given, then a file upload dialog will ask to upload a local file (e.g. <code>project import MyProject</code>).",
+            "completeText": "import from a URL: <code>project import http://foo.com/yourarchive.zip [projectname]</code><br><br>upload from your machine: <code>project import YourProjectName</code><br><br><em>If only a URL is given, the projectname will be implied<br><br>If only a project name is given, a file upload window will be shown to upload.</em>",
+            "usage": "import from a URL: <code>project import http://foo.com/yourarchive.zip [projectname]</code><br><br>upload from your machine: <code>project import YourProjectName</code><br><br><em>If only a URL is given, the projectname will be implied<br><br>If only a project name is given, a file upload window will be shown to upload.</em>",
+            "pointer": "project#importCommand"
+        }
+    ]
+}
