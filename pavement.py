@@ -510,7 +510,8 @@ def release_embed(options):
         % (version))
     
     info("Building DropIn using dryice")
-    info(sh('dryice -Doutput_dir=\\"%s\\" dropin.json' % (outputdir), 
+    info(sh('dryice -j%s -c%s -Doutput_dir=\\"%s\\" dropin.json' % 
+        (closure_compiler, yui_compressor, outputdir), 
         capture=True, ignore_error=True))
     
     path("LICENSE.txt").copy(outputdir / "LICENSE.txt")
