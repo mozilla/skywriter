@@ -48,12 +48,12 @@ except ImportError:
     pass
 
 setup(
-    name="BespinBuild",
+    name="dryice",
     version="0.6",
-    packages=["bespinbuild"],
+    packages=["dryice"],
     entry_points="""
 [console_scripts]
-bespin=bespinbuild.tool:main
+dryice=dryice.tool:main
 """
 )
 
