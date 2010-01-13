@@ -28,7 +28,7 @@ except ImportError:
 
 from path import path
 
-from bespinbuild import plugins
+from dryice import plugins
 
 plugindir = (path(__file__).dirname() / "plugindir").abspath()
 pluginpath = [dict(name="testplugins", path=plugindir, 

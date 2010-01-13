@@ -24,7 +24,7 @@ from cStringIO import StringIO
 
 from path import path
 
-from bespinbuild.combiner import Package, toposort, combine_files
+from dryice.combiner import Package, toposort, combine_files
 
 def test_toposort():
     a = Package("a", [])

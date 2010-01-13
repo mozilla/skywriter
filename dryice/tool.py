@@ -31,9 +31,9 @@ try:
 except ImportError:
     from simplejson import loads, dumps
 
-from bespinbuild.path import path
+from dryice.path import path
 
-from bespinbuild import plugins, combiner
+from dryice import plugins, combiner
 
 class BuildError(Exception):
     pass
@@ -91,7 +91,7 @@ will be deleted before the build.""")
         self.include_sample = include_sample
         
     @classmethod
-    def from_json(cls, json_string):
+    def from_json(cls, json_string, overrides=None):
         """Takes a JSON string and creates a Manifest object from it."""
         try:
             data = loads(json_string)
@@ -102,6 +102,9 @@ will be deleted before the build.""")
         # you can't call a constructor with a unicode object
         for key in data:
             scrubbed_data[str(key)] = data[key]
+        
+        if overrides:
+            scrubbed_data.update(overrides)
             
         return cls(**scrubbed_data)
     
@@ -274,14 +277,24 @@ def main(args=None):
     if args is None:
         args = sys.argv
     
-    print "The Bespin Build tool"
+    print "dryice: the Bespin build tool"
     parser = optparse.OptionParser(
         description="""Builds fast-loading JS and CSS packages.""")
     parser.add_option("-j", "--jscompressor", dest="jscompressor",
         help="path to Closure Compiler to compress the JS output")
     parser.add_option("-c", "--csscompressor", dest="csscompressor",
         help="path to YUI Compressor to compress the CSS output")
+    parser.add_option("-D", "--variable", dest="variables",
+        action="append", 
+        help="override values in the manifest (use format KEY=VALUE)")
     options, args = parser.parse_args(args)
+    
+    overrides = {}
+    if options.variables:
+        for setting in options.variables:
+            key, value = setting.split("=")
+            overrides[key] = value
+    
     if len(args) > 1:
         filename = args[1]
     else:
@@ -292,7 +305,7 @@ def main(args=None):
         raise BuildError("Build manifest file (%s) does not exist" % (filename))
         
     print "Using build manifest: ", filename
-    manifest = Manifest.from_json(filename.text())
+    manifest = Manifest.from_json(filename.text(), overrides=overrides)
     manifest.build()
     
     if options.jscompressor:

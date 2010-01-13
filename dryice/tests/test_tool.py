@@ -1,7 +1,7 @@
 from cStringIO import StringIO
 
-from bespinbuild import tool
-from bespinbuild.path import path
+from dryice import tool
+from dryice.path import path
 
 plugindir = path(__file__).dirname() / "plugindir"
 pluginpath = [dict(name="pl", path=plugindir)]
@@ -16,6 +16,16 @@ def test_manifest_creation():
     manifest = tool.Manifest.from_json(sample)
     assert manifest.include_core_test
     assert manifest.errors == []
+
+def test_manifest_overrides():
+    sample = """
+    {
+        "output_dir": "foo",
+        "plugins": ["Editor"]
+    }
+"""
+    manifest = tool.Manifest.from_json(sample, dict(output_dir="bar"))
+    assert manifest.output_dir == "bar"
 
 def test_manifest_errors():
     sample = """
