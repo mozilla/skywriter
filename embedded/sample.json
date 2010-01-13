@@ -1,5 +1,5 @@
 {
     "output_dir": "tmp",
-    "plugins": ["BespinEmbedded"],
+    "plugins": ["Embedded"],
     "include_sample": true
 }
