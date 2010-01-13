@@ -24,7 +24,7 @@
 
 "define metadata";
 ({
-    "depends": [],
+    "depends": []
 });
 "end";
 
