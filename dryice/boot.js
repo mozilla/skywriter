@@ -27,7 +27,7 @@
 
 
 SC.ready(function() {
-    var embed = tiki.require("BespinEmbedded");
+    var embed = tiki.require("Embedded");
     var nodes = document.querySelectorAll(".bespin");
     for (var i = 0; i < nodes.length; i++) {
         var node = nodes[i];

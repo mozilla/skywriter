@@ -26,7 +26,8 @@ Start by creating a new release:
 
     paver release_embed
 
-You'll find the release in `tmp/BespinEmbedded-VERSION/`. Next, you'll want 
+You'll find the release in `tmp/BespinEmbedded-DropIn-VERSION/` and
+`tmp/BespinEmbedded-Customizable-VERSION/`. Next, you'll want 
 to make sure the release works. Make sure that you're in the virtualenv (you 
 should see `(bespinclient)` at the beginning of your command prompt).
 If you aren't in the virtualenv, run
@@ -35,13 +36,48 @@ If you aren't in the virtualenv, run
 
 Once you're set, you can take a look at the sample.html:
 
-    cd tmp/BespinEmbedded-VERSION
+    cd tmp/BespinEmbedded-DropIn-VERSION
     static . localhost:8080
 
 Point your web browser at [http://localhost:8080/sample.html](http://localhost:8080/sample.html) [^1].
 
 Make sure that the **editor displays fine** and that you can **successfully resize 
 the window** without any strange effects.
+
+Next, get out of the virtualenv by running:
+
+    deactivate
+
+Then, try to run and test a build:
+
+    cd tmp/BespinEmbedded-Customizable-VERSION
+    dryice sample.json
+    cd tmp
+    static . localhost:8080
+
+Point your web browser at [http://localhost:8080/sample.html](http://localhost:8080/sample.html) [^1].
+
+This editor should work as well.
+
+## Editor Behavior ##
+
+As we use Bespin to edit itself more, there will be less need for this test.
+Until that time, we should test common editor behavior:
+
+* ARROW KEYS to move around
+* HOME to move to the beginning of the line
+* END to move to the end of the line
+* PAGE UP to move up a screenful
+* PAGE DOWN to move down a screenful
+* CMD C to copy
+* CMD X to cut
+* CMD V to paste
+* SHIFT ARROW KEYS to change the selection
+* Mouse to change the selection
+* Mouse past the bottom and top of the screen to confirm scrolling
+* BACKSPACE or DELETE to remove the selected text
+
+## Documentation ##
 
 Finally, run
 
@@ -58,6 +94,6 @@ in this release** and ensure that they are correct.
 [^1]: You can't just open sample.html directly in Firefox, because you'll get 
     a permission denied error. The Python "static" package includes this easy
     command line static file server. You can successfully open sample.html
-    in Safari.
+    in Safari and Chrome.
 
 [Release Notes]: ../releases/index.html

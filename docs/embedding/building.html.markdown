@@ -4,21 +4,8 @@ title: Bespin Embedded Guide
 subtitle: Building
 ---
 
-Bespin is designed to scale up from simple text area replacement to a 
-full-blown, powerful editing environment. This is accomplished through
-plugins. The Bespin Embedded package comes in two flavors:
-
-* Drop In
-* Customizable
-
-With the Drop In flavor, you get a single .js and a single .css file that you can
-include on your server simply. You don't need anything else to use it.
-
-With the Customizable flavor, you are able to tailor which plugins are
-installed for use with your Bespin.
-
-This section is all about using Bespin Embedded Customizable to create a custom
-embedded build.
+If you have a Bespin Embedded Customizable package, you can build your own
+custom version of Bespin Embedded, with just the plugins you want. 
 
 ## Prerequisites ##
 
@@ -29,11 +16,19 @@ You will need Python 2.5 or 2.6 in order to build a custom Bespin. If you're usi
 To define what is included in your build, you will create a .json file called
 the "manifest". It can have any name you want, as you'll see in the next section.
 
+Here is a simple manifest:
+
     :::js
     {
         "include_core_test": true,
-        "plugins": ["Editor", "SimpleSyntax", "SimpleJavaScript"]
+        "plugins": ["Editor", "CommandLine"]
     }
+
+You'll want the Editor plugin, to be sure. Embedded builds will usually use
+the Embedded plugin, which depends on the Editor plugin. When you list a 
+plugin in the manifest, the plugin and all of its dependencies will be
+incorporated into the final build. The manifest for the Drop In package,
+for example, just lists the "Embedded" plugin and that's all it needs.
 
 ## Manifest Options ##
 
@@ -50,8 +45,46 @@ output_dir
     directory will be recreated with each build. Do not point to a directory
     that you don't want to have deleted. The default is `build`.
 
+plugins
+:   list of plugins (but you don't need to list their dependencies) to include
+    in the build output
+
 ## Building ##
 
-Use the "bespin" command line tool to build according to the manifest.
+Use the "dryice" command line tool to build according to the manifest.
 
-Run "bespin -h" for up-to-date usage information.
+Run "dryice -h" for up-to-date usage information.
+
+Generally speaking, using dryice is just a matter of pointing the tool at
+your manifest file, which describes what needs to be built.
+
+After the JavaScript and CSS are generated, you will likely want to compress 
+those files for faster loading over the internet. dryice can do this for
+you, using the Closure Compiler for the JavaScript and YUI Compressor for
+the CSS. These are both included in the Customizable package in the
+"compressors" directory. To activate dryice compression, run a command like
+this one:
+
+    dryice -j compressors/compiler.jar -c compressors/yuicompressor.jar MANIFEST.JSON
+
+If you're testing out your builds, leaving the compression step off is
+a good idea, because it takes far longer to run the compressors than it does
+for dryice to do its work.
+
+Also of note: you can override options in the manifest file using the
+-D flag. You use -Dkey=value, and you can have multiple of them on the command
+line. Note that the `value` part of that should be a JSON value. So, if it's
+a string, it should be enclosed in quotes. Reminder: in many Unix shells
+you'll need to put a backslash before the " character so that the shell knows
+that you want to include that literally in the parameter to the command.
+
+## Bespin Server ##
+
+It is not necessary to use the Bespin Server when you're working with Bespin
+Embedded. However, it may be useful to do so if you're developing your own
+custom behavior for Bespin. The Bespin Server has the ability to dynamically
+load plugins, whereas the Bespin Embedded package does not -- the plugins
+are baked right into the .js file. You would find yourself running dryice
+an awful lot to develop your own plugins. A better way to go would be to
+develop your custom plugins using the Bespin Server and then run dryice
+only when you're done.

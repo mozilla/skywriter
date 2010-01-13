@@ -11,6 +11,44 @@ The current Bespin Embedded release is a *preview release*, and the API has
 not yet been finalized. Changes from release-to-release are still possible
 at this stage, and will be noted in the release notes for each release.
 
+The Two Flavors of Bespin Embedded
+==================================
+
+Bespin is designed to scale up from simple text area replacement to a 
+full-blown, powerful editing environment. This is accomplished through
+plugins. The Bespin Embedded package comes in two flavors:
+
+* Drop In
+* Customizable
+
+With the Drop In flavor, you get a single .js and a single .css file that you can
+include on your server simply. You don't need anything else to use it.
+
+With the Customizable flavor, you are able to tailor which plugins are
+installed for use with your Bespin.
+
+The instructions on this page tell you how to deploy Bespin on your site, and 
+apply regardless of which flavor of Bespin Embedded you're using. If you are
+using the Customizable flavor, you can take a look at the 
+[building instructions](building.html) for information on how to change
+what is built into your Bespin.
+
+Compressed vs. Uncompressed
+===========================
+
+The Drop In package comes with both compressed and uncompressed JavaScript
+and CSS files. For live site use, you will likely want to use the compressed
+JavaScript because it is *much* smaller than the uncompressed version.
+If you are trying to troubleshoot a problem, you should use the uncompressed
+version.
+
+`BespinEmbedded.js` is uncompressed. `BespinEmbedded.compressed.js` is,
+unsurprisingly, compressed.
+
+I suggest that you have your HTML refer to BespinEmbedded.js and just put
+the version of the file you need in place at that URL. The examples that
+follow all make the assumption that you're doing just that.
+
 How to embed Bespin in your site
 ================================
 
@@ -37,22 +75,22 @@ Then, elsewhere on your page, you can transform an element (such as a
 &lt;div&gt; or &lt;textarea&gt;) into a Bespin editor:
 
     :::html
-    <textarea class="bespin">Initial contents</textarea>
+    <div class="bespin">Initial contents</div>
 
 There are a number of options to customize how Bespin loads. You can request
 Bespin to use these as follows:
 
     :::html
-    <textarea class="bespin" data-bespinoptions='{ "stealFocus":true }'>
-    </textarea>
+    <div class="bespin" data-bespinoptions='{ "stealFocus":true }'>
+    </div>
 
 data-bespinoptions uses a JSON structure (so make sure you [follow the rules][1]
 about escaping strings).
 
-The element to be upgraded does not have to be a textarea. Any element type will
-do.
+The element to be upgraded does not have to be a div, though there is a known
+issue that other element types such as textarea are not working right now.
 
-The [Bespin startup options][2] are documented.
+The [Bespin startup options][2] are documented elsewhere.
 
 Bespin does not allow multiple elements in a page to become Bespin editors - 
 there can only be one.
@@ -72,7 +110,7 @@ won't work, and you'll need to tell Bespin to use an element:
     :::html
     <script src="/path/to/BespinEmbedded.js"><script>
     <script>
-    var embed = tiki.require("bespin:embed");
+    var embed = tiki.require("Embedded");
     var node = document.getElementById("edit");
     embed.useBespin(node);
     </script>
@@ -83,12 +121,12 @@ Rather than passing in a node, you can also simply pass in an string identifier
 as follows:
 
     :::js
-    tiki.require("bespin:embed").useBespin("edit");
+    tiki.require("Embedded").useBespin("edit");
 
 And as with level 1 above, you can also use options to customize the display:
 
     :::js
-    tiki.require("bespin:embed").useBespin("edit", {
+    tiki.require("Embedded").useBespin("edit", {
         stealFocus: true
     });
 
@@ -98,6 +136,8 @@ where they are when using data-bespinoptions.
 
 The Embedded API
 ----------------
+
+XXX This section needs to be updated.
 
 It is possible to interact with a Bespin instance on a page, to alter contents
 for example.

@@ -103,6 +103,8 @@ exports.useBespin = function(element, options) {
         editorPane.makeFirstResponder();
         editorPane.becomeKeyPane();
         
+        element.editor = editorPane.get("editorView");
+        
         // XXX need to reengage these settings, since this is now wired
         // up completely differently.
 

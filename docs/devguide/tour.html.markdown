@@ -8,8 +8,12 @@ layout: default
 
 At the highest level, there are two separate projects that make up the whole of the Bespin codebase:
 
-* bespinclient - The JavaScript code that makes up the Bespin user interface. This is considered to be the "main" repository.
-* bespinserver - This is currently the Python server. Bespin expects a certain server API and any server that adheres to that API could be made to work with Bespin.
+* bespinclient - The JavaScript code that makes up the Bespin user interface. This is
+  considered to be the "main" repository and is all that is actually used for Bespin
+  Embedded. However, when working on your own customizations to Bespin Embedded
+  it is often useful to use the Bespin Server.
+* bespinserver - This is currently the Python server. Bespin expects a certain server
+  API and any server that adheres to that API could be made to work with Bespin.
 
 Most people hacking on Bespin will never need to do anything inside of the bespinserver project.
 
@@ -18,16 +22,16 @@ Most people hacking on Bespin will never need to do anything inside of the bespi
 In a fresh bespinclient checkout, there are four top-level directories of note:
 
 * docs - the documentation source files, of which this tour is a part.
-* frameworks - the project source code.
+* frameworks - the location of Bespin's plugin system.
 * apps - the location of the applications (in SproutCore terminology) that
   are built on the infrastructure in frameworks.
-* src - this directory is from the initial Reboot work and will go away
-  once everything has migrated to the frameworks directory.
+* plugins - this is where most of Bespin lives
+* sproutcore - a snapshot of [SproutCore](http://sproutcore.com), which is
+  a JavaScript GUI toolkit that Bespin relies on.
 
 When things are fully set up, there are also some other directories of interest:
 
 * bin - this is the Python virtualenv bin directory, containing various scripts used to manage the project and start things up.
-* abbot - the SproutCore build system
 
 There are a couple of directories that are not interesting:
 
@@ -36,26 +40,22 @@ There are a couple of directories that are not interesting:
 
 # Frameworks #
 
-* bespin - the minimal set of code required to create a functioning editor environment
+* bespin - the minimal set of code required to create a functioning plugin loading
+  environment. We try to keep everything else in plugins
 
-# Inside bespin #
+# Plugins #
 
-If you look in the frameworks/bespin directory, you will see the JavaScript code for the
-editor, and a `Buildfile`. The `Buildfile` provides instructions to SproutCore's Abbot build 
-system.
+Bespin is built completely around plugins. The vast majority of the JavaScript
+for Bespin is in the plugins directory. In the plugins directory, there are
+three categories of plugins represented:
 
-There are four categories of code in bespin:
+1. supported - these are the plugins that are core bits of Bespin and that
+   we are subjecting to increasingly rigorous demands in terms of documentation
+   and testing.
+2. labs - these are more experimental parts of Bespin and we will be a bit
+   less restrictive about what goes in here. The intention, however, is that
+   things in the labs part of Bespin are likely to become part of
+   `supported` someday.
+3. testing - these exist solely for the purpose of unit testing
 
-1. bespin:* - infrastructure code, such as `bespin/plugins`, which is required for the editor to work
-2. bespin:util - utility code that is not necessarily Bespin-specific but is also required for the editor
-3. bespin:editor - this is where all of the code that is specific to the Bespin text editor lives
-4. bespin:tests - unit test suites
-
-`bespin:embed` notably provides the useBespin function, which is how the embedded editor gets dropped into pages.
-
-`bespin:editor/controller` is the controller in the ["model/view/controller"][mvc] sense. It provides the main API for managing the text editor control and for connecting the data with the view.
-
-`bespin:editor/views/editor.js` provides the visible editor component. It is responsible for drawing on the canvas and for managing events that come in.
-
-[mvc]: http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller
 

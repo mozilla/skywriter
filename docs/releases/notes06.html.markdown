@@ -36,3 +36,12 @@ Features
 * Commands and editor actions are now the same thing (pre-Reboot, they were
   separate). They can both be implemented by plugins, and the plugins are
   lazily loaded once the command is actually invoked.
+
+Changes
+-------
+
+* In Bespin Embedded 0.5.x, you would use tiki.require("bespin:embed") to
+  access the embedded API. In 0.6, this has moved to a new Embedded plugin.
+  tiki.require("Embedded") is equivalent to the old 
+  tiki.require("bespin:embed"). The examples in the documentation have been
+  updated accordingly.
