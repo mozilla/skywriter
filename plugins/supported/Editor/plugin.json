@@ -1,5 +1,5 @@
 {
-    "depends": [ "Canon" ],
+    "depends": [ "AppSupport", "Canon", "Patch" ],
     "provides": [
         {
             "ep": "command",

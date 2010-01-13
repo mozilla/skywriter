@@ -24,7 +24,9 @@
 
 "define metadata";
 ({
-    "depends": [ "AppSupport", "CommandLine", "Editor", "UserIdent", "Settings" ],
+    "depends": [
+        "AppSupport", "CommandLine", "Editor", "UserIdent", "Settings"
+    ],
     "provides": [
         {
             "ep":       "factory",

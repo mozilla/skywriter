@@ -25,14 +25,17 @@
 var SC = require('sproutcore/runtime').SC;
 var CanvasView = require('views/canvas').CanvasView;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
+var MultiDelegateSupport =
+    require('mixins/multidelegate').MultiDelegateSupport;
 var Range = require('utils/range');
 var Rect = require('utils/rect');
 var TextInput = require('bespin:editor/mixins/textinput').TextInput;
 var catalog = require('bespin:plugins').catalog;
 
-exports.TextView = CanvasView.extend(TextInput, {
+exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     _dragPoint: null,
     _dragTimer: null,
+    _inChangeGroup: false,
 
     // TODO: calculate from the size or let the user override via themes if
     // desired
@@ -41,6 +44,16 @@ exports.TextView = CanvasView.extend(TextInput, {
     _selectedRanges: null,
     _selectionOrigin: null,
     _virtualInsertionPoint: null,
+
+    _beginChangeGroup: function() {
+        if (this._inChangeGroup) {
+            throw "TextView._beginChangeGroup() called while already in a " +
+                "change group";
+        }
+
+        this._inChangeGroup = true;
+        this.notifyDelegates('textViewBeganChangeGroup', this._selectedRanges);
+    },
 
     _drag: function() {
         var point = this.convertFrameFromView(this._dragPoint);
@@ -160,11 +173,21 @@ exports.TextView = CanvasView.extend(TextInput, {
         }
     },
 
+    _endChangeGroup: function() {
+        if (!this._inChangeGroup) {
+            throw "TextView._endChangeGroup() called while not in a change " +
+                "group";
+        }
+
+        this._inChangeGroup = false;
+        this.notifyDelegates('textViewEndedChangeGroup', this._selectedRanges);
+    },
+
     // Extends the selection from the origin in the natural way (as opposed to
     // rectangular selection).
     _extendSelectionFromStandardOrigin: function(position) {
         var origin = this._selectionOrigin;
-        this._replaceSelection([
+        this.setSelection([
             Range.comparePositions(position, origin) < 0 ?
             { start: position, end: origin } :
             { start: origin, end: position }
@@ -183,18 +206,19 @@ exports.TextView = CanvasView.extend(TextInput, {
     // Replaces the selection with the given text and updates the selection
     // boundaries appropriately.
     _insertText: function(text) {
-        var textStorage = this.getPath('layoutManager.textStorage');
         var selectedRanges = this._selectedRanges;
+        var textStorage = this.getPath('layoutManager.textStorage');
 
         // Delete text from all ranges except the first (in reverse order, so
         // that we don't have to check and update positions as we go), then
         // overwrite the first selected range with the text. This is
         // "Cocoa-style" behavior, not "TextMate-style".
         for (var i = selectedRanges.length - 1; i > 0; i--) {
-            textStorage.deleteCharacters(selectedRanges[i]);
+            this._replaceCharacters(selectedRanges[i], "");
         }
+
         var firstRange = selectedRanges[0];
-        textStorage.replaceCharacters(firstRange, text);
+        this._replaceCharacters(firstRange, text);
 
         // Update the selection to point immediately after the inserted text.
         var lines = text.split("\n");
@@ -247,27 +271,26 @@ exports.TextView = CanvasView.extend(TextInput, {
     // Clears out the selection, moves the selection origin and the insertion
     // point to the given position, and scrolls to the new selection.
     _reanchorSelection: function(newPosition) {
-        this._replaceSelection([ { start: newPosition, end: newPosition } ]);
+        this.setSelection([ { start: newPosition, end: newPosition } ]);
         this._selectionOrigin = newPosition;
         this._scrollToPosition(newPosition);
     },
 
-    // Updates the current selection, invalidating regions appropriately.
-    _replaceSelection: function(newRanges) {
-        var oldRanges = this._selectedRanges;
-        this._selectedRanges = newRanges;
+    // Replaces the characters in the range with the given characters, and
+    // notifies the delegates (typically the undo manager).
+    _replaceCharacters: function(oldRange, characters) {
+        if (!this._inChangeGroup) {
+            throw "TextView._replaceCharacters() called without a change " +
+                "group";
+        }
 
-        var layoutManager = this.get('layoutManager');
-        oldRanges.concat(newRanges).forEach(function(range) {
-            layoutManager.rectsForRange(range).
-                forEach(this.setNeedsDisplayInRect, this);
-        }, this);
+        this.notifyDelegates('textViewWillReplaceRange', oldRange);
 
-        // Also invalidate any insertion points. These have to be handled
-        // separately, because they're drawn outside of their associated
-        // character regions.
-        this._invalidateInsertionPointIfNecessary(oldRanges);
-        this._invalidateInsertionPointIfNecessary(newRanges);
+        this.getPath('layoutManager.textStorage').replaceCharacters(oldRange,
+            characters);
+
+        this.notifyDelegates('textViewReplacedCharacters', oldRange,
+            characters);
     },
 
     // Moves the selection, if necessary, to keep all the positions pointing to
@@ -276,7 +299,7 @@ exports.TextView = CanvasView.extend(TextInput, {
         var textLines = this.get('layoutManager').get('textLines');
         var textLineLength = textLines.length;
 
-        this._replaceSelection(this._selectedRanges.map(function(range) {
+        this.setSelection(this._selectedRanges.map(function(range) {
             var newStartRow = Math.min(range.start.row, textLineLength);
             var newEndRow = Math.min(range.end.row, textLineLength);
             var startLine = textLines[newStartRow];
@@ -445,8 +468,9 @@ exports.TextView = CanvasView.extend(TextInput, {
      * insertion point.
      */
     backspace: function() {
+        this._beginChangeGroup();
+
         var textStorage = this.getPath('layoutManager.textStorage');
-        var lines = textStorage.get('lines');
 
         // If the selection is an insertion point, extend it back by one
         // character.
@@ -462,12 +486,14 @@ exports.TextView = CanvasView.extend(TextInput, {
         }
 
         ranges.forEach(function(range) {
-            textStorage.deleteCharacters(range);
-        });
+            this._replaceCharacters(range, "");
+        }, this);
 
         // Position the insertion point at the start of all the ranges that
         // were just deleted.
         this._reanchorSelection(ranges[0].start);
+
+        this._endChangeGroup();
     },
 
     /**
@@ -598,9 +624,11 @@ exports.TextView = CanvasView.extend(TextInput, {
         // Insert a newline, and copy the spaces at the beginning of the
         // current row to autoindent.
         var position = this._selectedRanges[0].start;
+        this._beginChangeGroup();
         this._insertText("\n" + /^\s*/.exec(this.
             getPath('layoutManager.textStorage.lines')[position.row].
             substring(0, position.column))[0]);
+        this._endChangeGroup();
     },
 
     selectDown: function() {
@@ -625,13 +653,38 @@ exports.TextView = CanvasView.extend(TextInput, {
         this._performVerticalKeyboardSelection(-1);
     },
 
+    /**
+     * Directly replaces the current selection with a new one. No bounds
+     * checking is performed, and the user is not able to undo this action.
+     */
+    setSelection: function(newRanges) {
+        var oldRanges = this._selectedRanges;
+        this._selectedRanges = newRanges;
+
+        var layoutManager = this.get('layoutManager');
+        oldRanges.concat(newRanges).forEach(function(range) {
+            layoutManager.rectsForRange(range).
+                forEach(this.setNeedsDisplayInRect, this);
+        }, this);
+
+        // Also invalidate any insertion points. These have to be handled
+        // separately, because they're drawn outside of their associated
+        // character regions.
+        this._invalidateInsertionPointIfNecessary(oldRanges);
+        this._invalidateInsertionPointIfNecessary(newRanges);
+    },
+
     tab: function() {
+        this._beginChangeGroup();
         this._insertText("        ".substring(0, 8 -
             this._selectedRanges[0].start.column % 8));
+        this._endChangeGroup();
     },
 
     textInserted: function(text) {
+        this._beginChangeGroup();
         this._insertText(text);
+        this._endChangeGroup();
     }
 });
 

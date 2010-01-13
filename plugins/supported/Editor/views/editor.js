@@ -27,6 +27,7 @@ var GutterView = require('views/gutter').GutterView;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var ScrollView = require('views/scroll').ScrollView;
 var TextView = require('views/text').TextView;
+var UndoController = require('controllers/undo').UndoController;
 
 /**
  * @class
@@ -69,6 +70,14 @@ exports.EditorView = SC.View.extend(SC.Border, {
      */
     textView: TextView,
 
+    /**
+     * @property{UndoController}
+     *
+     * The undo controller class to use. This field will be instantiated when
+     * the child views are created.
+     */
+    undoController: UndoController,
+
     _gutterViewFrameChanged: function() {
         this.get('scrollView').adjust({
             left: this.getPath('gutterView.frame').width
@@ -95,7 +104,8 @@ exports.EditorView = SC.View.extend(SC.Border, {
         var textViewClass = this.get('textView');
         var scrollView = this.createChildView(scrollViewClass, {
             contentView: textViewClass.extend({
-                layoutManager: layoutManager
+                layoutManager: layoutManager,
+                undoController: this.get('undoController')
             }),
             layout: {
                 left:   gutterView.get('frame').width,
@@ -105,16 +115,21 @@ exports.EditorView = SC.View.extend(SC.Border, {
             }
         });
         this.set('scrollView', scrollView);
-        this.set('textView', scrollView.get('contentView'));
         scrollView.addObserver('verticalScrollOffset', this,
             this._scrollViewVerticalScrollOffsetChanged);
+
+        var textView = scrollView.get('contentView');
+        this.set('textView', textView);
+
+        this.set('undoController', this.get('undoController').create({
+            textView: textView
+        }));
 
         this.set('childViews', [ gutterView, scrollView ]);
     },
 
     init: function() {
-        var layoutManager = this.get('layoutManager').create();
-        this.set('layoutManager', layoutManager);
+        this.set('layoutManager', this.get('layoutManager').create());
         return arguments.callee.base.apply(this, arguments);
     }
 });
