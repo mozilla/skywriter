@@ -8,10 +8,10 @@ Bespin is designed to scale up from simple text area replacement to a
 full-blown, powerful editing environment. This is accomplished through
 plugins. The Bespin Embedded package comes in two flavors:
 
-* Drop-in
+* Drop In
 * Customizable
 
-With the Drop-in flavor, you get a single .js and a single .css file that you can
+With the Drop In flavor, you get a single .js and a single .css file that you can
 include on your server simply. You don't need anything else to use it.
 
 With the Customizable flavor, you are able to tailor which plugins are

@@ -3,7 +3,7 @@ layout: default
 title: Bespin 0.5.1 Release Notes
 ---
 
-[Up](index.html) - [Previous Release](notes05.html)
+[Up](index.html) - [Next Release](notes06.html) - [Previous Release](notes05.html)
 
 Known Bugs
 ----------
