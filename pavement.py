@@ -503,28 +503,16 @@ def release_embed(options):
         builddir.mkdir()
     
     version = options.version.number
-    outputdir = builddir / ("BespinEmbedded-%s" 
+    outputdir = builddir / ("BespinEmbedded-DropIn-%s" 
         % (version))
-    if outputdir.exists():
-        outputdir.rmtree()
-    outputdir.mkdir()
     
-    sproutcore_built = builddir / "production" / "build" / "static"
-    bespin_dir = _find_build_output(sproutcore_built, "bespin")
-    bespin_js = bespin_dir / "javascript-packed.js"
-    info("Generating BespinEmbedded.js based on %s", bespin_js)
-    jsinput = bespin_js.text()
-    jsoutput = (outputdir / "BespinEmbedded.js").open("w")
-    jsoutput.write(SPROUTCORE_INLINE)
-    jsoutput.write(jsinput)
-    jsoutput.write(BUILD_POSTAMBLE)
-    jsoutput.close()
+    info("Building DropIn using dryice")
+    info(sh('dryice -Doutput_dir=\\"%s\\" dropin.json' % (outputdir), capture=True, ignore_error=True))
     
-    path("LICENSE.txt").copy(outputdir)
-    (path("src") / "bespin-build" / "sample.html").copy(outputdir)
-    (path("src") / "html" / "sproutcore.css").copy(outputdir / "BespinEmbedded.css")
+    path("LICENSE.txt").copy(outputdir / "LICENSE.txt")
+    path("embedded/README-DropIn.txt").copy(outputdir / "README.txt")
     (builddir / "docs").copytree(outputdir / "docs")
-    sh("tar czf BespinEmbedded-%s.tar.gz BespinEmbedded-%s" % \
+    sh("tar czf BespinEmbedded-DropIn-%s.tar.gz BespinEmbedded-DropIn-%s" % \
         (version, version), cwd="tmp")
     
     

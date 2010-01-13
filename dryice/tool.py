@@ -286,14 +286,14 @@ def main(args=None):
         help="path to YUI Compressor to compress the CSS output")
     parser.add_option("-D", "--variable", dest="variables",
         action="append", 
-        help="override values in the manifest (use format KEY=VALUE)")
+        help="override values in the manifest (use format KEY=VALUE, where VALUE is JSON)")
     options, args = parser.parse_args(args)
     
     overrides = {}
     if options.variables:
         for setting in options.variables:
             key, value = setting.split("=")
-            overrides[key] = value
+            overrides[key] = loads(value)
     
     if len(args) > 1:
         filename = args[1]
