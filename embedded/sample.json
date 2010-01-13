@@ -1,0 +1,5 @@
+{
+    "output_dir": "tmp",
+    "plugins": ["BespinEmbedded"],
+    "include_sample": true
+}

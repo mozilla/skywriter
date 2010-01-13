@@ -502,12 +502,16 @@ def release_embed(options):
     if not builddir.exists():
         builddir.mkdir()
     
+    yui_compressor = path("abbot/vendor/yui-compressor/yuicompressor-2.4.2.jar")
+    closure_compiler = options.fetch_compiler.dest_dir / "compiler.jar"
+    
     version = options.version.number
     outputdir = builddir / ("BespinEmbedded-DropIn-%s" 
         % (version))
     
     info("Building DropIn using dryice")
-    info(sh('dryice -Doutput_dir=\\"%s\\" dropin.json' % (outputdir), capture=True, ignore_error=True))
+    info(sh('dryice -Doutput_dir=\\"%s\\" dropin.json' % (outputdir), 
+        capture=True, ignore_error=True))
     
     path("LICENSE.txt").copy(outputdir / "LICENSE.txt")
     path("embedded/README-DropIn.txt").copy(outputdir / "README.txt")
@@ -515,6 +519,39 @@ def release_embed(options):
     sh("tar czf BespinEmbedded-DropIn-%s.tar.gz BespinEmbedded-DropIn-%s" % \
         (version, version), cwd="tmp")
     
+    outputdir = builddir / ("BespinEmbedded-Customizable-%s" % (version))
+    info("Building Customizable package")
+    if outputdir.exists():
+        outputdir.rmtree()
+    outputdir.mkdir()
+    path("LICENSE.txt").copy(outputdir / "LICENSE.txt")
+    path("embedded/README-Customizable.txt").copy(outputdir / "README.txt")
+    (builddir / "docs").copytree(outputdir / "docs")
+    
+    frameworks_dir = outputdir / "frameworks"
+    frameworks_dir.mkdir()
+    path("frameworks/bespin").copytree(frameworks_dir / "bespin")
+    path("sproutcore").copytree(outputdir / "sproutcore")
+    
+    libdir = outputdir / "lib"
+    libdir.mkdir()
+    dryice_dest = libdir / "dryice"
+    path("dryice").copytree(dryice_dest)
+    for f in dryice_dest.walkfiles("*.pyc"):
+        f.unlink()
+        
+    path("embedded/dryice.py").copy(outputdir / "dryice.py")
+    path("plugins").copytree(outputdir / "plugins")
+    path("embedded/sample.json").copy(outputdir / "sample.json")
+    
+    compressors_dir = outputdir / "compressors"
+    compressors_dir.mkdir()
+    
+    yui_compressor.copy(compressors_dir / "yuicompressor.jar")
+    closure_compiler.copy(compressors_dir / "compiler.jar")
+    
+    sh("tar czf BespinEmbedded-Customizable-%s.tar.gz BespinEmbedded-Customizable-%s" % \
+        (version, version), cwd="tmp")
     
 def _fetchfile(name, dest_dir, download_location, download_url):
     external = path("external")
