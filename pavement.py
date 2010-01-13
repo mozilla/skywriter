@@ -89,7 +89,12 @@ options(
         download_location=path("external") / "jsdoc_toolkit-2.3.0.zip",
         dest_dir=path("external") / "jsdoc-toolkit"
     ),
-    sproutcore_snapshot_url="http://ftp.mozilla.org/pub/mozilla.org/labs/bespin/dev/sproutcore-20091223.tgz"
+    sproutcore_snapshot_url="http://ftp.mozilla.org/pub/mozilla.org/labs/bespin/dev/sproutcore-20091223.tgz",
+    fetch_compiler=Bunch(
+        dest_dir=path("external") / "compiler",
+        download_url="http://closure-compiler.googlecode.com/files/compiler-latest.zip",
+        download_location=path("external") / "compiler-latest.zip"
+    )
 )
 
 @task
@@ -491,7 +496,7 @@ def hidefiles():
             f.rename(f.splitext()[0] + ".js")
 
 @task
-@needs(['build_docs'])
+@needs(['build_docs', 'fetch_compiler'])
 def release_embed(options):
     builddir = options.builddir
     if not builddir.exists():
@@ -522,24 +527,30 @@ def release_embed(options):
     sh("tar czf BespinEmbedded-%s.tar.gz BespinEmbedded-%s" % \
         (version, version), cwd="tmp")
     
-@task
-def jsdocs(options):
-    """Generate API documentation using the jsdoc-toolkit."""
     
+def _fetchfile(name, dest_dir, download_location, download_url):
     external = path("external")
-    if not options.dest_dir.exists():
+    if not dest_dir.exists():
         external.mkdir()
-        if not options.download_location.exists():
-            info("Downloading jsdoc-toolkit from %s", options.download_url)
-            jsdocs_zipinput = urllib2.urlopen(options.download_url)
-            jsdocs_zipoutput = open(options.download_location, "wb")
-            jsdocs_zipoutput.write(jsdocs_zipinput.read())
-            jsdocs_zipoutput.close()
-            jsdocs_zipinput.close()
+        if not download_location.exists():
+            info("Downloading %s from %s", name, download_url)
+            zi = urllib2.urlopen(download_url)
+            zo = open(download_location, "wb")
+            zo.write(zi.read())
+            zo.close()
+            zi.close()
         
-        info("Uncompressing jsdoc-toolkit")    
-        zf = zipfile.ZipFile(options.download_location)
+        info("Uncompressing %s", name)    
+        zf = zipfile.ZipFile(download_location)
         for name in zf.namelist():
+            pieces = name.split('/', 1)
+            if len(pieces) == 1:
+                dest_dir.makedirs()
+                
+                info("Expanding %s", name)
+                open(dest_dir / name, "wb").write(zf.read(name))
+                continue
+                
             outname = name.split('/', 1)[1]
             if name.endswith('/'):
                 (external / outname).makedirs()
@@ -547,6 +558,19 @@ def jsdocs(options):
                 info("Expanding %s", outname)
                 open(external / outname, "wb").write(zf.read(name))
     
+    
+@task
+def fetch_compiler(options):
+    """Fetches the Closure Compiler used to compress builds."""
+    _fetchfile("Closure Compiler", options.dest_dir, options.download_location,
+        options.download_url)
+    
+@task
+def jsdocs(options):
+    """Generate API documentation using the jsdoc-toolkit."""
+    _fetchfile("jsdoc-toolkit", options.dest_dir, options.download_location,
+        options.download_url)
+        
     outputdir = options.builddir / "docs" / "api"
     if outputdir.exists():
         outputdir.rmtree()

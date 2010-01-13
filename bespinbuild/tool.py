@@ -1,6 +1,7 @@
 import sys
 import os
 import optparse
+import subprocess
 
 try:
     from json import loads, dumps
@@ -225,6 +226,26 @@ tiki.require("bespin:plugins").catalog.load(%s);
         
         if self.include_sample:
             sample_file.copy(output_dir / "sample.html")
+        
+    def compress_js(self, compressor):
+        """Compress the output using Closure Compiler."""
+        print "Compressing JavaScript with Closure Compiler"
+        compressor = path(compressor).abspath()
+        subprocess.call("java -jar %s "
+            "--js=BespinEmbedded.js"
+            " --js_output_file=BespinEmbedded.compressed.js" 
+            " --warning_level=QUIET" % compressor,
+            shell=True, cwd=self.output_dir)
+    
+    def compress_css(self, compressor):
+        """Compress the CSS using YUI Compressor."""
+        print "Compressing CSS with YUI Compressor"
+        compressor = path(compressor).abspath()
+        subprocess.call("java -jar %s"
+            " --type css -o BespinEmbedded.compressed.css"
+            " BespinEmbedded.css" % compressor, shell=True,
+            cwd=self.output_dir)
+        
 
 def main(args=None):
     if args is None:
@@ -233,6 +254,10 @@ def main(args=None):
     print "The Bespin Build tool"
     parser = optparse.OptionParser(
         description="""Builds fast-loading JS and CSS packages.""")
+    parser.add_option("-j", "--jscompressor", dest="jscompressor",
+        help="path to Closure Compiler to compress the JS output")
+    parser.add_option("-c", "--csscompressor", dest="csscompressor",
+        help="path to YUI Compressor to compress the CSS output")
     options, args = parser.parse_args(args)
     if len(args) > 1:
         filename = args[1]
@@ -246,4 +271,10 @@ def main(args=None):
     print "Using build manifest: ", filename
     manifest = Manifest.from_json(filename.text())
     manifest.build()
+    
+    if options.jscompressor:
+        manifest.compress_js(options.jscompressor)
+    
+    if options.csscompressor:
+        manifest.compress_css(options.csscompressor)
     
