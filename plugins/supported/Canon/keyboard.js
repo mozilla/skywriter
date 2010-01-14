@@ -33,9 +33,11 @@ var catalog = require('bespin:plugins').catalog;
 var KeyboardManager = SC.Object.extend({
     _commandMatches: function(command, flags) {
         var predicates = command.predicates;
-        for (var i = 0; i < predicates.length; i += 2) {
-            if (flags[predicates[i]] !== predicates[i + 1]) {
-                return false;
+        if (predicates !== undefined) {
+            for (var i = 0; i < predicates.length; i += 2) {
+                if (flags[predicates[i]] !== predicates[i + 1]) {
+                    return false;
+                }
             }
         }
         return true;
