@@ -137,8 +137,6 @@ where they are when using data-bespinoptions.
 The Embedded API
 ----------------
 
-XXX This section needs to be updated.
-
 It is possible to interact with a Bespin instance on a page, to alter contents
 for example.
 
@@ -155,15 +153,14 @@ instantly have access to the Bespin Component. Fortunately, you can get access
 to it fairly easily:
 
     :::html
-    <textarea id="edit" class="bespin">Initial contents</textarea>
+    <div id="edit" class="bespin">Initial contents</div>
     <script>
     var bespin = document.getElementById("edit").bespin;
     bespin.setContent("Hello, World!");
     </script>
 
-That is to say, when Bespin upgrades an element, it adds the corresponding
-Component as a member of the parent DOM node, called 'bespin'.
-
+The DOM node that contains the editor gets a "bespin" property on it with
+the embedded editor convenience API.
 
 Dimensions
 ----------
@@ -199,7 +196,7 @@ need to be called. For example:
     :::js
     var box = document.getElementById('box');
     box.style.width = '200px';                  // will cause Bespin to move
-    embed.dimensionsChanged(bespin);            // tell Bespin
+    bespin.dimensionsChanged();                 // tell Bespin
 
 
 Development Mode and onBespinLoad
