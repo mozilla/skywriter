@@ -11,6 +11,14 @@
         },
         {
             "ep": "command",
+            "name": "deleteSelectionOrNextCharacter",
+            "key": "delete",
+            "predicates": [ "isTextView", true ],
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
             "name": "moveDown",
             "key": "down",
             "predicates": [ "isTextView", true ],
@@ -43,8 +51,112 @@
         },
         {
             "ep": "command",
+            "name": "scrollDocStart",
+            "key": "ctrl_home",
+            "predicates": [ "isTextView", true ],
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
+            "name": "moveDocStart",
+            "key": "ctrl_up",
+            "predicates": [ "isTextView", true ],
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
+            "name": "selectAll",
+            "key": "ctrl_a",
+            "predicates": [ "isTextView", true ],
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
+            "name": "selectDocStart",
+            "key": "ctrl_shift_up",
+            "predicates": [ "isTextView", true ],
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
+            "name": "scrollDocEnd",
+            "key": "ctrl_end",
+            "predicates": [ "isTextView", true ],
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
+            "name": "moveDocEnd",
+            "key": "ctrl_down",
+            "predicates": [ "isTextView", true ],
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
+            "name": "selectDocEnd",
+            "key": "ctrl_shift_down",
+            "predicates": [ "isTextView", true ],
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
+            "name": "moveLineStart",
+            "key": ["home", "ctrl_left"],
+            "predicates": [ "isTextView", true ],
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
+            "name": "selectLineStart",
+            "key": ["shift_home", "ctrl_shift_left"],
+            "predicates": [ "isTextView", true ],
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
+            "name": "moveLineEnd",
+            "key": ["end", "ctrl_right"],
+            "predicates": [ "isTextView", true ],
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
+            "name": "selectLineEnd",
+            "key": ["shift_end", "ctrl_shift_right"],
+            "predicates": [ "isTextView", true ],
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
             "name": "newline",
             "key": "return",
+            "predicates": [ "isTextView", true ],
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
+            "name": "scrollPageDown",
+            "key": "pagedown",
+            "predicates": [ "isTextView", true ],
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
+            "name": "scrollPageUp",
+            "key": "pageup",
             "predicates": [ "isTextView", true ],
             "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"

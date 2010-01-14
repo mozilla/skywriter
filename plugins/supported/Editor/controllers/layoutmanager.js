@@ -317,6 +317,18 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         })[0];
     },
 
+    rectForPosition: function(position) {
+        var margin = this.get('margin');
+        var characterWidth = this._characterWidth;
+        var lineHeight = this._lineHeight;
+        return {
+            x:      margin.left + characterWidth * position.column,
+            y:      margin.top + lineHeight * position.row,
+            width:  characterWidth,
+            height: lineHeight
+        };
+    },
+
     /**
      * Returns the 1, 2, or 3 rectangles that make up the given range.
      */

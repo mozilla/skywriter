@@ -236,7 +236,7 @@ exports.TextInput = {
             // After this function is called, the real copy or cut
             // event takes place and the selected text in the
             // textField is pushed to the OS's clipboard.
-            thisTextInput._TextInput_setValueAndSelect('');
+            thisTextInput._TextInput_setValueAndSelect(copyCutData);
         };
 
         // For all browsers that are not Safari running on Mac.

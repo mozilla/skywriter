@@ -54,9 +54,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     // desired
     _lineAscent: 16,
 
-    _selectedRanges: null,
-    _selectionOrigin: null,
-    _virtualInsertionPoint: null,
+    _selectedRange: null,
+    _selectedRangeEndVirtual: null,
 
     _beginChangeGroup: function() {
         if (this._inChangeGroup) {
@@ -65,25 +64,24 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }
 
         this._inChangeGroup = true;
-        this.notifyDelegates('textViewBeganChangeGroup', this._selectedRanges);
+        this.notifyDelegates('textViewBeganChangeGroup', this._selectedRange);
     },
 
     _drag: function() {
         var point = this.convertFrameFromView(this._dragPoint);
         var offset = Rect.offsetFromRect(this.get('clippingFrame'), point);
 
-        this._extendSelectionFromStandardOrigin(this.
-            _selectionPositionForPoint({
+        this._moveCursorTo(this._selectionPositionForPoint({
                 x:  point.x - offset.x,
                 y:  point.y - offset.y
-            }));
+            }), false, true);
 
         this.becomeFirstResponder();
     },
 
     // Draws a single insertion point.
     _drawInsertionPoint: function(rect, context) {
-        var range = this._selectedRanges[0];
+        var range = this._selectedRange;
         var characterRect = this.get('layoutManager').
             characterRectForPosition(range.start);
 
@@ -167,19 +165,18 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
         context.save();
 
-        this._selectedRanges.forEach(function(range) {
-            context.fillStyle = fillStyle;
-            layoutManager.rectsForRange(range).forEach(function(rect) {
-                context.fillRect(rect.x, rect.y, rect.width, rect.height);
-            });
-        }, this);
+        var range = Range.normalizeRange(this._selectedRange);
+        context.fillStyle = fillStyle;
+        layoutManager.rectsForRange(range).forEach(function(rect) {
+            context.fillRect(rect.x, rect.y, rect.width, rect.height);
+        });
 
         context.restore();
     },
 
     // Draws either the selection or the insertion point.
     _drawSelection: function(rect, context) {
-        if (this._rangeSetIsInsertionPoint(this._selectedRanges)) {
+        if (this._rangeIsInsertionPoint(this._selectedRange)) {
             this._drawInsertionPoint(rect, context);
         } else {
             this._drawSelectionHighlight(rect, context);
@@ -193,64 +190,46 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }
 
         this._inChangeGroup = false;
-        this.notifyDelegates('textViewEndedChangeGroup', this._selectedRanges);
+        this.notifyDelegates('textViewEndedChangeGroup', this._selectedRange);
     },
 
-    // Extends the selection from the origin in the natural way (as opposed to
-    // rectangular selection).
-    _extendSelectionFromStandardOrigin: function(position) {
-        var origin = this._selectionOrigin;
-        this.setSelection([
-            Range.comparePositions(position, origin) < 0 ?
-            { start: position, end: origin } :
-            { start: origin, end: position }
-        ]);
-    },
-
-    // Returns the virtual insertion point, which is the origin used for
-    // vertical movement. Normally, the virtual insertion point is the same as
-    // the actual insertion point, but when the cursor moves vertically, the
-    // column of the virtual insertion point remains the same.
-    _getVirtualInsertionPoint: function() {
-        var point = this._virtualInsertionPoint;
-        return point === null ? this._selectedRanges[0].start : point;
+    _getVirtualSelection: function(startPropertyAsWell) {
+        return {
+            start:  startPropertyAsWell && this._selectedRangeEndVirtual ?
+                    this._selectedRangeEndVirtual : this._selectedRange.start,
+            end:    this._selectedRangeEndVirtual || this._selectedRange.end
+        };
     },
 
     // Replaces the selection with the given text and updates the selection
     // boundaries appropriately.
     _insertText: function(text) {
-        var selectedRanges = this._selectedRanges;
+        this._beginChangeGroup();
+
         var textStorage = this.getPath('layoutManager.textStorage');
+        var range = Range.normalizeRange(this._selectedRange);
 
-        // Delete text from all ranges except the first (in reverse order, so
-        // that we don't have to check and update positions as we go), then
-        // overwrite the first selected range with the text. This is
-        // "Cocoa-style" behavior, not "TextMate-style".
-        for (var i = selectedRanges.length - 1; i > 0; i--) {
-            this._replaceCharacters(selectedRanges[i], "");
-        }
-
-        var firstRange = selectedRanges[0];
-        this._replaceCharacters(firstRange, text);
+        this._replaceCharacters(range, text);
 
         // Update the selection to point immediately after the inserted text.
         var lines = text.split("\n");
-        this._reanchorSelection(lines.length > 1 ?
+        this._moveCursorTo(lines.length > 1 ?
             {
-                row:    firstRange.start.row + lines.length - 1,
+                row:    range.start.row + lines.length - 1,
                 column: lines[lines.length - 1].length
             } :
-            Range.addPositions(firstRange.start,
-                { row: 0, column: text.length }));
+            Range.addPositions(range.start, { row: 0, column: text.length }));
+
+        this._endChangeGroup();
     },
 
-    _invalidateInsertionPointIfNecessary: function(rangeSet) {
-        if (!this._rangeSetIsInsertionPoint(rangeSet)) {
+    _invalidateInsertionPointIfNecessary: function(range) {
+        if (!this._rangeIsInsertionPoint(range)) {
             return;
         }
 
         var rect = this.get('layoutManager').
-            characterRectForPosition(rangeSet[0].start);
+            characterRectForPosition(range.start);
         this.setNeedsDisplayInRect({
             x:      rect.x,
             y:      rect.y,
@@ -259,49 +238,111 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         });
     },
 
+    _isDelimiter: function(character) {
+        return [
+            "=", " ", "\t", ">", "<", ".", ",", "(", ")", "{", "}", ":", '"',
+            "'", ";"
+        ].indexOf(character) > -1;
+    },
+
+    _moveCursorTo: function(position, doSaveVirtualEnd, selection) {
+        var positionToUse;
+        var textStorage = this.getPath('layoutManager.textStorage');
+
+        positionToUse = textStorage.clampPosition(position);
+
+        this.setSelection({
+            start:  selection ? this._selectedRange.start : positionToUse,
+            end:    positionToUse
+        });
+
+        if (doSaveVirtualEnd) {
+            if (position.row > 0 && position.row < textStorage.lines.length) {
+                this._selectedRangeEndVirtual = position;
+            } else {
+                this._selectedRangeEndVirtual = position;
+            }
+        } else {
+            this._selectedRangeEndVirtual = null;
+        }
+
+        this._scrollToPosition(this._selectedRange.end);
+    },
+
+    _moveOrSelectEnd: function(shift, inLine) {
+        var lines = this.getPath('layoutManager.textStorage.lines');
+        var row = inLine ? this._selectedRange.end.row : lines.length - 1;
+        this._moveCursorTo({ row: row, column: lines[row].length }, false,
+            shift);
+    },
+
+    _moveOrSelectStart: function(shift, inLine) {
+        var range = this._selectedRange;
+        var row = inLine ? range.end.row : 0;
+        var position = {
+            row: row,
+            column: 0
+        };
+
+        this._moveCursorTo(position, false, shift);
+    },
+
+    _performBackspaceOrDelete: function(isBackspace) {
+        this._beginChangeGroup();
+
+        var textStorage = this.getPath('layoutManager.textStorage');
+        var lines = textStorage.get('lines');
+
+        // If the selection is an insertion point...
+        var range = Range.normalizeRange(this._selectedRange);
+        if (this._rangeIsInsertionPoint(range)) {
+            if (isBackspace) {
+                // ... extend it backward by one character.
+                range = {
+                    start:  textStorage.displacePosition(range.start, -1),
+                    end:    range.end
+                };
+            } else {
+                // ... otherwise, extend it forward by one character.
+                range = {
+                    start:  range.start,
+                    end:    textStorage.displacePosition(range.end, 1)
+                };
+            }
+        }
+
+        this._replaceCharacters(range, "");
+
+        // Position the insertion point at the start of all the ranges that
+        // were just deleted.
+        this._moveCursorTo(range.start);
+
+        this._endChangeGroup();
+    },
+
     _performVerticalKeyboardSelection: function(offset) {
-        var oldPosition = this._virtualInsertionPoint !== null ?
-            this._virtualInsertionPoint : this._selectionTail();
+        var textStorage = this.getPath('layoutManager.textStorage');
+        var oldPosition = this._selectedRangeEndVirtual !== null ?
+            this._selectedRangeEndVirtual : this._selectedRange.end;
         var newPosition = Range.addPositions(oldPosition,
             { row: offset, column: 0 });
-        var clampedPosition = this.getPath('layoutManager.textStorage').
-            clampPosition(newPosition);
 
-        this._extendSelectionFromStandardOrigin(clampedPosition);
-
-        // Never let the virtual insertion point's row go beyond the boundaries
-        // of the text.
-        this._virtualInsertionPoint = {
-            row:    clampedPosition.row,
-            column: newPosition.column
-        };
+        this._moveCursorTo(newPosition, true, true);
     },
 
-    _rangeSetIsInsertionPoint: function(rangeSet) {
-        return Range.isZeroLength(rangeSet[0]);
+    _rangeIsInsertionPoint: function(range) {
+        return Range.isZeroLength(range);
     },
 
-    // Clears out the selection, moves the selection origin and the insertion
-    // point to the given position, and scrolls to the new selection.
-    _reanchorSelection: function(newPosition) {
-        this.setSelection([ { start: newPosition, end: newPosition } ]);
-        this._selectionOrigin = newPosition;
-        this._scrollToPosition(newPosition);
-    },
-
-    // Replaces the characters in the range with the given characters, and
-    // notifies the delegates (typically the undo controller).
     _replaceCharacters: function(oldRange, characters) {
         if (!this._inChangeGroup) {
             throw "TextView._replaceCharacters() called without a change " +
                 "group";
         }
-
+        oldRange = Range.normalizeRange(oldRange);
         this.notifyDelegates('textViewWillReplaceRange', oldRange);
-
         this.getPath('layoutManager.textStorage').replaceCharacters(oldRange,
             characters);
-
         this.notifyDelegates('textViewReplacedCharacters', oldRange,
             characters);
     },
@@ -309,27 +350,25 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     // Moves the selection, if necessary, to keep all the positions pointing to
     // actual characters.
     _repositionSelection: function() {
-        var textLines = this.get('layoutManager').get('textLines');
+        var textLines = this.getPath('layoutManager.textLines');
         var textLineLength = textLines.length;
 
-        this.setSelection(this._selectedRanges.map(function(range) {
-            var newStartRow = Math.min(range.start.row, textLineLength - 1);
-            var newEndRow = Math.min(range.end.row, textLineLength - 1);
-            var startLine = textLines[newStartRow];
-            var endLine = textLines[newEndRow];
-            return {
-                start:  {
-                    row:    newStartRow,
-                    column: Math.min(range.start.column,
-                                startLine.characters.length)
-                },
-                end:    {
-                    row:    newEndRow,
-                    column: Math.min(range.end.column,
-                                endLine.characters.length)
-                }
-            };
-        }));
+        var range = this._selectedRange;
+        var newStartRow = Math.min(range.start.row, textLineLength - 1);
+        var newEndRow = Math.min(range.end.row, textLineLength - 1);
+        var startLine = textLines[newStartRow];
+        var endLine = textLines[newEndRow];
+        this.setSelection({
+            start:  {
+                row:    newStartRow,
+                column: Math.min(range.start.column,
+                            startLine.characters.length)
+            },
+            end:    {
+                row:    newEndRow,
+                column: Math.min(range.end.column, endLine.characters.length)
+            }
+        });
     },
 
     _resize: function() {
@@ -342,6 +381,13 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             height: Math.max(parentFrame.height,
                     boundingRect.height + padding.bottom)
         }));
+    },
+
+    _scrollPage: function(scrollUp) {
+        var scrollable = this._scrollView();
+        var visibleFrame = this.get('clippingFrame');
+        scrollable.scrollTo(visibleFrame.x, visibleFrame.y +
+            (visibleFrame.height + this._lineAscent) * (scrollUp ? -1 : 1));
     },
 
     _scrollToPosition: function(position) {
@@ -370,6 +416,19 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             frameY : rectY - height / 2 + rectHeight / 2);
     },
 
+    /**
+     * @private
+     *
+     * Returns the parent scroll view, if one exists.
+     */
+    _scrollView: function() {
+        var view = this.get('parentView');
+        while (!SC.none(view) && !view.get('isScrollable')) {
+            view = view.get('parentView');
+        }
+        return view;
+    },
+
     _scrollWhileDragging: function() {
         var scrollView = this._scrollView();
         if (SC.none(scrollView)) {
@@ -384,29 +443,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
         scrollView.scrollBy(offset.x, offset.y);
         this._drag();
-    },
-
-    /**
-     * @private
-     *
-     * Returns the parent scroll view, if one exists.
-     */
-    _scrollView: function() {
-        var view = this.get('parentView');
-        while (!SC.none(view) && !view.get('isScrollable')) {
-            view = view.get('parentView');
-        }
-        return view;
-    },
-
-    // Returns the position of the tail of the selection, or the farthest
-    // position within the selection from the origin.
-    _selectionTail: function() {
-        var ranges = this._selectedRanges;
-        return Range.comparePositions(ranges[0].start,
-                this._selectionOrigin) === 0 ?
-            ranges[ranges.length - 1].end : // selection extends down
-            ranges[0].start;                // selection extends up
     },
 
     // Returns the character closest to the given point, obeying the selection
@@ -467,32 +503,29 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
      * insertion point.
      */
     backspace: function() {
-        this._beginChangeGroup();
+        this._performBackspaceOrDelete(true);
+    },
 
-        var textStorage = this.getPath('layoutManager.textStorage');
+    copy: function() {
+        return this.getSelectedCharacters();
+    },
 
-        // If the selection is an insertion point, extend it back by one
-        // character.
-        var ranges = this._selectedRanges;
-        if (this._rangeSetIsInsertionPoint(ranges)) {
-            var range = ranges[0];
-            ranges = [
-                {
-                    start:  textStorage.displacePosition(range.start, -1),
-                    end:    range.end
-                }
-            ];
+    cut: function() {
+        var cutData = this.getSelectedCharacters();
+
+        if (cutData != '') {
+            this.deleteSelectionOrNextCharacter();
         }
 
-        ranges.forEach(function(range) {
-            this._replaceCharacters(range, "");
-        }, this);
+        return cutData;
+    },
 
-        // Position the insertion point at the start of all the ranges that
-        // were just deleted.
-        this._reanchorSelection(ranges[0].start);
-
-        this._endChangeGroup();
+    /**
+     * Deletes the selection or the next character, if the selection is an
+     * insertion point.
+     */
+    deleteSelectionOrNextCharacter: function() {
+        this._performBackspaceOrDelete(false);
     },
 
     /**
@@ -507,12 +540,22 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         this._drawLines(rect, context);
     },
 
+    /**
+     * Returns the characters that are currently selected as a string, or the
+     * empty string if none are selected.
+     */
+    getSelectedCharacters: function() {
+        return this._rangeIsInsertionPoint(this._selectedRange) ? "" :
+            this.getPath('layoutManager.textStorage').getCharacters(Range.
+            normalizeRange(this._selectedRange));
+    },
+
     init: function() {
         arguments.callee.base.apply(this, arguments);
 
         this._invalidRange = null;
-        this._selectedRanges =
-            [ { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } } ];
+        this._selectedRange =
+            { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } };
 
         // Allow the user to change the fields of the padding object without
         // screwing up the prototype.
@@ -524,7 +567,18 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     keyDown: function(evt) {
-        return keyboardManager.processKeyEvent(evt, this, { isTextView: true });
+        // SC puts keyDown and keyPress event together. Here we only want to
+        // handle the real/browser's keydown event. To do so, we have to check
+        // if the evt.charCode value is set. If this isn't set, we have been
+        // called after a keypress event took place.
+        if (evt.charCode === 0) {
+            return keyboardManager.processKeyEvent(evt, this,
+                { isTextView: true })
+        } else {
+            // This is a real keyPress event. This should not be handled,
+            // otherwise the textInput mixin can't detect the key events.
+            return false;
+        }
     },
 
     /**
@@ -538,9 +592,72 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     mouseDown: function(evt) {
-        this._reanchorSelection(this._selectionPositionForPoint(this.
-            convertFrameFromView({ x: evt.clientX, y: evt.clientY })));
-        this._virtualInsertionPoint = null;
+        switch (evt.clickCount) {
+        case 1:
+            var pos = this._selectionPositionForPoint(this.
+                convertFrameFromView({
+                    x:  evt.clientX,
+                    y:  evt.clientY
+                }));
+            this._moveCursorTo(pos, false, evt.shiftKey);
+            break;
+
+        // Select the word under the cursor.
+        case 2:
+            var pos = this._selectionPositionForPoint(this.
+                convertFrameFromView({ x: evt.clientX, y: evt.clientY }));
+            var line = this.getPath('layoutManager.textStorage').
+                                                        lines[pos.row];
+
+            // If there is nothing to select in this line, then skip.
+            if (line.length === 0) {
+                return;
+            }
+
+            pos.column -= (pos.column == line.length ? 1 : 0);
+            var skipOnDelimiter = !this._isDelimiter(line[pos.column]);
+
+            var thisTextView = this;
+            var searchForDelimiter = function(pos, dir) {
+                for (pos; pos > -1 && pos < line.length; pos += dir) {
+                    if (thisTextView._isDelimiter(line[pos]) ===
+                            skipOnDelimiter) {
+                        break;
+                    }
+                }
+                return pos + (dir == 1 ? 0 : 1);
+            }
+
+            var columnFrom = searchForDelimiter(pos.column, -1);
+            var columnTo   = searchForDelimiter(pos.column, 1);
+
+            this._moveCursorTo({
+                    row: pos.row,
+                    column: columnFrom
+            });
+            this._moveCursorTo({
+                    row: pos.row,
+                    column: columnTo
+            }, false, true);
+
+            break;
+
+        case 3:
+            var lines = this.getPath('layoutManager.textStorage').lines;
+            var pos = this._selectionPositionForPoint(this.
+                convertFrameFromView({ x: evt.clientX, y: evt.clientY }));
+            this.setSelection({
+                start: {
+                    row: pos.row,
+                    column: 0
+                },
+                end: {
+                    row: pos.row,
+                    column: lines[pos.row].length
+                }
+            })
+            break;
+        }
 
         this._dragPoint = { x: evt.clientX, y: evt.clientY };
         this._dragTimer = SC.Timer.schedule({
@@ -564,54 +681,81 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }
     },
 
+    moveDocEnd: function() {
+        this._moveOrSelectEnd(false, false);
+    },
+
+    moveDocStart: function() {
+        this._moveOrSelectStart(false, false);
+    },
+
     moveDown: function() {
-        var ranges = this._selectedRanges;
+        var selection = this._getVirtualSelection();
+        var range = Range.normalizeRange(selection);
         var position;
-        if (this._rangeSetIsInsertionPoint(ranges)) {
-            position = this._getVirtualInsertionPoint();
+        if (this._rangeIsInsertionPoint(this._selectedRange)) {
+            position = range.end;
         } else {
             // Yes, this is actually what Cocoa does... weird, huh?
-            var range = ranges[0];
             position = { row: range.end.row, column: range.start.column };
         }
         position = Range.addPositions(position, { row: 1, column: 0 });
 
-        this._reanchorSelection(this.getPath('layoutManager.textStorage').
-            clampPosition(position));
-        this._virtualInsertionPoint = position;
+        this._moveCursorTo(position, true);
     },
 
     moveLeft: function() {
-        var ranges = this._selectedRanges;
-        if (this._rangeSetIsInsertionPoint(ranges)) {
-            this._reanchorSelection(this.getPath('layoutManager.textStorage').
-                displacePosition(ranges[0].start, -1));
-            this._virtualInsertionPoint = null;
+        var range = Range.normalizeRange(this._selectedRange);
+        if (this._rangeIsInsertionPoint(range)) {
+            this._moveCursorTo(this.getPath('layoutManager.textStorage').
+                displacePosition(range.start, -1));
         } else {
-            this._reanchorSelection(ranges[0].start);
+            this._moveCursorTo(range.start);
         }
     },
 
+    moveLineEnd: function() {
+        this._moveOrSelectEnd(false, true);
+    },
+
+    moveLineStart: function () {
+        this._moveOrSelectStart(false, true);
+    },
+
     moveRight: function() {
-        var ranges = this._selectedRanges;
-        if (this._rangeSetIsInsertionPoint(ranges)) {
-            this._reanchorSelection(this.getPath('layoutManager.textStorage').
-                displacePosition(ranges[ranges.length - 1].end, 1));
-            this._virtualInsertionPoint = null;
+        var range = Range.normalizeRange(this._selectedRange);
+        if (this._rangeIsInsertionPoint(range)) {
+            this._moveCursorTo(this.getPath('layoutManager.textStorage').
+                displacePosition(range.end, 1));
         } else {
-            this._reanchorSelection(ranges[0].end);
+            this._moveCursorTo(range.end);
         }
     },
 
     moveUp: function() {
-        var ranges = this._selectedRanges;
-        var position = this._rangeSetIsInsertionPoint(ranges) ?
-            this._getVirtualInsertionPoint() : ranges[0].start;
-        position = Range.addPositions(position, { row: -1, column: 0 });
+        var range = Range.normalizeRange(this._getVirtualSelection(true));
+        position = Range.addPositions({
+            row: range.start.row,
+            column: this._getVirtualSelection().end.column
+        }, { row: -1, column: 0 });
 
-        this._reanchorSelection(this.getPath('layoutManager.textStorage').
-            clampPosition(position));
-        this._virtualInsertionPoint = position;
+        this._moveCursorTo(position, true);
+    },
+
+    selectDocEnd: function() {
+        this._moveOrSelectEnd(true, false);
+    },
+
+    selectDocStart: function() {
+        this._moveOrSelectStart(true, false);
+    },
+
+    selectLineEnd: function() {
+        this._moveOrSelectEnd(true, true);
+    },
+
+    selectLineStart: function() {
+        this._moveOrSelectStart(true, true);
     },
 
     /**
@@ -620,12 +764,37 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     newline: function() {
         // Insert a newline, and copy the spaces at the beginning of the
         // current row to autoindent.
-        var position = this._selectedRanges[0].start;
-        this._beginChangeGroup();
+        var position = this._selectedRange.start;
         this._insertText("\n" + /^\s*/.exec(this.
             getPath('layoutManager.textStorage.lines')[position.row].
             substring(0, position.column))[0]);
-        this._endChangeGroup();
+    },
+
+    scrollDocStart: function() {
+        this._scrollToPosition({ column: 0, row: 0 });
+    },
+
+    scrollDocEnd: function() {
+        this._scrollToPosition(this.getPath('layoutManager.textStorage').
+            range().end);
+    },
+
+    scrollPageDown: function() {
+        this._scrollPage(false);
+    },
+
+    scrollPageUp: function() {
+        this._scrollPage(true);
+    },
+
+    selectAll: function() {
+        var range = this._selectedRange;
+        var lines = this.getPath('layoutManager.textStorage.lines');
+        var lastRow = lines.length - 1;
+        this.setSelection({
+            start:  { row: 0, column: 0 },
+            end:    { row: lastRow, column: lines[lastRow].length }
+        });
     },
 
     selectDown: function() {
@@ -633,17 +802,13 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     selectLeft: function() {
-        this._extendSelectionFromStandardOrigin(this.
-            getPath('layoutManager.textStorage').
-            displacePosition(this._selectionTail(), -1));
-        this._virtualInsertionPoint = null;
+        this._moveCursorTo((this.getPath('layoutManager.textStorage').
+            displacePosition(this._selectedRange.end, -1)), false, true);
     },
 
     selectRight: function() {
-        this._extendSelectionFromStandardOrigin(this.
-            getPath('layoutManager.textStorage').
-            displacePosition(this._selectionTail(), 1));
-        this._virtualInsertionPoint = null;
+        this._moveCursorTo((this.getPath('layoutManager.textStorage').
+            displacePosition(this._selectedRange.end, 1)), false, true);
     },
 
     selectUp: function() {
@@ -654,34 +819,33 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
      * Directly replaces the current selection with a new one. No bounds
      * checking is performed, and the user is not able to undo this action.
      */
-    setSelection: function(newRanges) {
-        var oldRanges = this._selectedRanges;
-        this._selectedRanges = newRanges;
+    setSelection: function(newRange) {
+        var lines = this.getPath('layoutManager.textStorage').lines.length - 1;
+
+        var oldRangeOrdered = Range.normalizeRange(this._selectedRange);
+        var newRangeOrdered = Range.normalizeRange(newRange);
+        this._selectedRange = newRange;
 
         var layoutManager = this.get('layoutManager');
-        oldRanges.concat(newRanges).forEach(function(range) {
-            layoutManager.rectsForRange(range).
+        layoutManager.rectsForRange(oldRangeOrdered).
                 forEach(this.setNeedsDisplayInRect, this);
-        }, this);
+        layoutManager.rectsForRange(newRangeOrdered).
+                forEach(this.setNeedsDisplayInRect, this);
 
         // Also invalidate any insertion points. These have to be handled
         // separately, because they're drawn outside of their associated
         // character regions.
-        this._invalidateInsertionPointIfNecessary(oldRanges);
-        this._invalidateInsertionPointIfNecessary(newRanges);
+        this._invalidateInsertionPointIfNecessary(oldRangeOrdered);
+        this._invalidateInsertionPointIfNecessary(newRangeOrdered);
     },
 
     tab: function() {
-        this._beginChangeGroup();
         this._insertText("        ".substring(0, 8 -
-            this._selectedRanges[0].start.column % 8));
-        this._endChangeGroup();
+            this._selectedRange.start.column % 8));
     },
 
     textInserted: function(text) {
-        this._beginChangeGroup();
         this._insertText(text);
-        this._endChangeGroup();
     }
 });
 
