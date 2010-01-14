@@ -49,6 +49,56 @@ plugins
 :   list of plugins (but you don't need to list their dependencies) to include
     in the build output
 
+search_path
+:   provide a list of relative (to the current directory) or absolute paths
+    to search for plugins. These paths are added to the beginning of the
+    search path. The directories within the "plugins" directory in the current
+    directory are automatically added to the end of the search path.
+
+## Writing Your Own Plugins ##
+
+One of the main reasons to use the Customizable package is that you want to,
+well, customize Bespin. Generally speaking, this means adding your own
+collection of plugins. Let's create a "hello world" style plugin to see how
+we can build it into Bespin.
+
+Start by creating a directory *next to* your Bespin Embedded directory.
+The reason we create this directory next to your Bespin directory is that 
+you're likely to update Bespin from time to time and you wouldn't want to
+overwrite your plugins. We'll call the directory "MyPlugins".
+
+In the same directory as the MyPlugins directory, create a "mybespin.json"
+manifest that looks like this:
+
+    {
+        "output_dir": "tmp",
+        "plugins": ["Embedded", "HelloWorld"],
+        "include_sample": true,
+        "search_path": ["../MyPlugins"]
+    }
+
+Finally, we create the plugin itself. This is a file called HelloWorld.js
+in the MyPlugins directory that you just created.
+
+    "define metadata";
+    ({
+        "provides": [
+            {
+                "ep": "command",
+                "name": "alert",
+                "key": "cmd_a",
+                "pointer": "#showMessage"
+            }
+        ]
+    });
+    "end";
+
+    exports.showMessage = function() {
+        alert("Greetings from the Cloud!");
+    };
+
+
+
 ## Building ##
 
 Use the "dryice" command line tool to build according to the manifest.

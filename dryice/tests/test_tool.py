@@ -27,6 +27,17 @@ def test_manifest_overrides():
     manifest = tool.Manifest.from_json(sample, dict(output_dir="bar"))
     assert manifest.output_dir == "bar"
 
+def test_search_path_adds_to_front():
+    sample = """
+    {
+        "plugins": ["Editor"],
+        "search_path": ["foo"]
+    }
+"""
+    manifest = tool.Manifest.from_json(sample)
+    assert len(manifest.search_path) > 1, "search path in file is in addition"
+    assert manifest.search_path[0]['path'] == 'foo'
+
 def test_manifest_errors():
     sample = """
 {
@@ -66,7 +77,7 @@ def test_js_creation():
     assert "exports.Plugin = SC.Object.extend" in output
     assert '"depends": ["plugin2"]' in output
     assert "SC.browser=" in output
-    assert 'tiki.require("BespinEmbedded")' in output
+    assert 'tiki.require("Embedded")' in output
 
 def test_single_file_plugin_handling():
     manifest = tool.Manifest(plugins=["SingleFilePlugin1"],

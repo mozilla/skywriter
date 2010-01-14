@@ -54,14 +54,28 @@ class Manifest(object):
         self.include_core_test = include_core_test
         self.plugins = plugins
         
-        if search_path is None:
+        if search_path is not None:
+            for i in range(0, len(search_path)):
+                name = search_path[i]
+                
+                # did we get handed a dict already?
+                if not isinstance(name, basestring):
+                    continue
+                
+                # convert to the dict format that is used by
+                # the plugin module    
+                search_path[i] = dict(name=name, path=path(name))
+        else:
             search_path = []
-            plugindir = path("plugins")
-            if plugindir.exists():
-                for name in plugindir.glob("*"):
-                    if not name.isdir():
-                        continue
-                    search_path.append(dict(name=name, path=name))
+            
+        # add the default plugin directory, if it exists
+        plugindir = path("plugins")
+        if plugindir.exists():
+            for name in plugindir.glob("*"):
+                if not name.isdir():
+                    continue
+                search_path.append(dict(name=name, path=name))
+                
         self.search_path = search_path
         
         if sproutcore is None:
