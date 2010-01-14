@@ -93,17 +93,19 @@ exports.useBespin = function(element, options) {
         SC.$(element).css('position', 'relative');
         element.innerHTML = "";
         editorPane.appendTo(element);
+        
+        var bespin = editorPane.get("editorView").get("textView");
 
         if (options.initialContent) {
             content = options.initialContent;
         }
-        editorPane.setPath('editorView.layoutManager.' +
-            'textStorage.value', content);
+        
+        bespin.setContent(content);
         
         editorPane.makeFirstResponder();
         editorPane.becomeKeyPane();
         
-        element.editor = editorPane.get("editorView");
+        element.bespin = bespin;
         
         // XXX need to reengage these settings, since this is now wired
         // up completely differently.

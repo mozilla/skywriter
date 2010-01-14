@@ -36,7 +36,7 @@ main = function() {
             }
 
             tiki.async('EditorApp').then(function() {
-                catalog.getObject('applicationcontroller').create();
+                catalog.getObject('applicationcontroller');
             });
         });
 };

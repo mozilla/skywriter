@@ -32,7 +32,7 @@
             "ep":       "factory",
             "name":     "applicationcontroller",
             "pointer":  "#applicationController",
-            "action":   "value"
+            "action":   "create"
         }
     ]
 });
