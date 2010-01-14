@@ -54,6 +54,47 @@ var computeLayout = function(element) {
     return layout;
 };
 
+exports.EmbeddedEditor = SC.Object.extend({
+    setContent: function(text) {
+        this.setPath("editorPane.editorView.layoutManager.textStorage.value", text);
+    },
+    
+    getContent: function() {
+        return this.getPath("editorPane.editorView.layoutManager.textStorage.value");
+    },
+    
+    setFocus: function(makeFocused) {
+        var editorPane = this.get("editorPane");
+        if (makeFocused) {
+            editorPane.makeFirstResponder();
+            editorPane.becomeKeyPane();
+        } else {
+            editorPane.resignFirstResponder();
+            editorPane.resignKeyPane();
+        }
+    },
+    
+    /**
+     * This function must be called whenever the position or size of the element
+     * containing the Bespin editor might have changed. It triggers a layout
+     * change.
+     */
+    dimensionsChanged: function() {
+        SC.RunLoop.begin();
+
+        var pane = this.get("editorPane");
+        var oldLayout = pane.get('layout');
+        var newLayout = computeLayout(this.get("element"));
+
+        if (!SC.rectsEqual(oldLayout, newLayout)) {
+            pane.adjust(newLayout);
+            pane.updateLayout();    // writes the layoutStyle to the DOM
+        }
+
+        SC.RunLoop.end();
+    }
+});
+
 /**
  * Initialize a Bespin component on a given element.
  */
@@ -88,22 +129,24 @@ exports.useBespin = function(element, options) {
                     height: '' + layout.height + 'px'
                 };
                 return style;
-            }.property('layout')
+            }.property('layout'),
+            
+            element: element
         });
+        
+        var bespin = exports.EmbeddedEditor.create({
+            editorPane: editorPane
+        });
+        
         SC.$(element).css('position', 'relative');
         element.innerHTML = "";
-        editorPane.appendTo(element);
+        bespin.get("editorPane").appendTo(element);
         
-        var bespin = editorPane.get("editorView").get("textView");
-
         if (options.initialContent) {
             content = options.initialContent;
         }
         
         bespin.setContent(content);
-        
-        editorPane.makeFirstResponder();
-        editorPane.becomeKeyPane();
         
         element.bespin = bespin;
         
@@ -120,9 +163,9 @@ exports.useBespin = function(element, options) {
         // }
 
         // stealFocus makes us take focus on startup
-        // if (options.stealFocus) {
-        //     editor.setFocus(true);
-        // }
+        if (options.stealFocus) {
+            bespin.setFocus(true);
+        }
 
         // Move to a given line if requested
         // if (options.lineNumber) {
@@ -134,7 +177,7 @@ exports.useBespin = function(element, options) {
         if (SC.none(options.dontHookWindowResizeEvent) ||
                 !options.dontHookWindowResizeEvent) {
             var handler = function() {
-                exports.dimensionsChanged(editorPane);
+                bespin.dimensionsChanged();
             };
 
             if (!SC.none(window.addEventListener)) {
@@ -144,25 +187,5 @@ exports.useBespin = function(element, options) {
             }
         }
     });
-};
-
-/**
- * This function must be called whenever the position or size of the element
- * containing the Bespin editor might have changed. It triggers a layout
- * change.
- */
-exports.dimensionsChanged = function(editor) {
-    SC.RunLoop.begin();
-
-    var pane = editor.pane;
-    var oldLayout = pane.get('layout');
-    var newLayout = computeLayout(editor.element);
-
-    if (!SC.rectsEqual(oldLayout, newLayout)) {
-        pane.adjust(newLayout);
-        pane.updateLayout();    // writes the layoutStyle to the DOM
-    }
-
-    SC.RunLoop.end();
 };
 

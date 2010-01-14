@@ -685,16 +685,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         this._beginChangeGroup();
         this._insertText(text);
         this._endChangeGroup();
-    },
-    
-    /**
-     * Replaces all of the content with text.
-     */
-    setContent: function(text) {
-        this._beginChangeGroup();
-        var textStorage = this.getPath('layoutManager.textStorage');
-        textStorage.set("value", text);
-        this._endChangeGroup();
     }
 });
 
