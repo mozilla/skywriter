@@ -32,21 +32,17 @@ var CONTEXT_LINES = 2;
 /**
  * @class
  *
- * The undo controller is a delegate of the text view that records all change
- * groups into a log. The transactions can be replayed with undo() and redo().
+ * The editor undo controller is a delegate of the text view that groups
+ * changes into patches and saves them with the undo manager.
  *
  * This object does not assume that it has exclusive write access to the text
  * storage object, and as such it tries to maintain sensible behavior in the
  * presence of direct modification to the text storage by other objects. This
  * is important for collaboration.
  */
-exports.UndoController = SC.Object.extend({
+exports.EditorUndoController = SC.Object.extend({
     _inTransaction: false,
-    _patches: null,
-    _redoStack: null,
-    _selectionAfter: null,
-    _selectionBefore: null,
-    _undoStack: null,
+    _record: null,
 
     /**
      * @property{TextView}
@@ -64,7 +60,7 @@ exports.UndoController = SC.Object.extend({
         }
 
         this._inTransaction = true;
-        this._patches = [];
+        this._record = { patches: [] };
     },
 
     _endTransaction: function() {
@@ -73,19 +69,8 @@ exports.UndoController = SC.Object.extend({
                 "transaction in place";
         }
 
-        this._undoStack.push({
-            patches:            this._patches,
-            selectionAfter:     this._selectionAfter,
-            selectionBefore:    this._selectionBefore
-        });
-
-        this._patches = null;
-        this._selection = null;
-
-        var thisUndoController = this;
-        catalog.getObject('undoManager').registerUndo(function() {
-            thisUndoController.undo();
-        }, "Typing");
+        catalog.getObject('undoManager').registerUndo(this, this._record);
+        this._record = null;
 
         this._inTransaction = false;
     },
@@ -114,7 +99,7 @@ exports.UndoController = SC.Object.extend({
         return true;
     },
 
-    _undoOrRedo: function(op) {
+    _undoOrRedo: function(patches, selection) {
         if (this._inTransaction) {
             // Can't think of any reason why this should be supported, and it's
             // often an indication that someone forgot an endTransaction()
@@ -122,44 +107,12 @@ exports.UndoController = SC.Object.extend({
             throw "UndoController._undoOrRedo() called while in a transaction";
         }
 
-        var stack, otherStack, reverseOp, selection;
-        switch (op) {
-        case 'undo':
-            otherStack = this._redoStack;
-            reverseOp = 'redo';
-            selection = 'selectionBefore';
-            stack = this._undoStack;
-            break;
-        case 'redo':
-            otherStack = this._undoStack;
-            reverseOp = 'undo';
-            selection = 'selectionAfter';
-            stack = this._redoStack;
-            break;
-        }
-
-        if (stack.length === 0) {
-            throw "UndoController._undoOrRedo() called with an empty stack";
-        }
-
-        var record = stack.pop();
-
-        var patches = op === 'undo' ?
-            record.patches.map(function(patch) { return patch.reverse(); }) :
-            record.patches;
-
         if (!this._tryApplyingPatches(patches)) {
-            return;
+            return false;
         }
 
-        this.get('textView').setSelection(record[selection]);
-
-        otherStack.push(record);
-
-        var thisUndoController = this;
-        catalog.getObject('undoManager').registerUndo(function() {
-            thisUndoController[reverseOp]();
-        });
+        this.get('textView').setSelection(selection);
+        return true;
     },
 
     init: function() {
@@ -169,17 +122,17 @@ exports.UndoController = SC.Object.extend({
         this.get('textView').addDelegate(this);
     },
 
-    redo: function() {
-        this._undoOrRedo('redo');
+    redo: function(record) {
+        return this._undoOrRedo(record.patches, record.selectionAfter);
     },
 
     textViewBeganChangeGroup: function(sender, selection) {
         this._beginTransaction();
-        this._selectionBefore = selection;
+        this._record.selectionBefore = selection;
     },
 
     textViewEndedChangeGroup: function(sender, selection) {
-        this._selectionAfter = selection;
+        this._record.selectionAfter = selection;
         this._endTransaction();
     },
 
@@ -212,7 +165,7 @@ exports.UndoController = SC.Object.extend({
             };
         };
 
-        this._patches.push(Patch.create({
+        this._record.patches.push(Patch.create({
             hunks: [
                 {
                     oldRange:   {
@@ -246,8 +199,10 @@ exports.UndoController = SC.Object.extend({
             oldRange.end.row + 1);
     },
 
-    undo: function() {
-        this._undoOrRedo('undo');
+    undo: function(record) {
+        return this._undoOrRedo(record.patches.map(function(patch) {
+                return patch.reverse();
+            }), record.selectionBefore);
     }
 });
 

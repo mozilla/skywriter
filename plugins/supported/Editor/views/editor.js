@@ -27,7 +27,7 @@ var GutterView = require('views/gutter').GutterView;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var ScrollView = require('views/scroll').ScrollView;
 var TextView = require('views/text').TextView;
-var UndoController = require('controllers/undo').UndoController;
+var EditorUndoController = require('controllers/undo').EditorUndoController;
 
 /**
  * @class
@@ -71,12 +71,12 @@ exports.EditorView = SC.View.extend(SC.Border, {
     textView: TextView,
 
     /**
-     * @property{UndoController}
+     * @property{EditorUndoController}
      *
      * The undo controller class to use. This field will be instantiated when
      * the child views are created.
      */
-    undoController: UndoController,
+    undoController: EditorUndoController,
 
     _gutterViewFrameChanged: function() {
         this.get('scrollView').adjust({

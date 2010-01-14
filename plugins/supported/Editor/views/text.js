@@ -277,7 +277,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     // Replaces the characters in the range with the given characters, and
-    // notifies the delegates (typically the undo manager).
+    // notifies the delegates (typically the undo controller).
     _replaceCharacters: function(oldRange, characters) {
         if (!this._inChangeGroup) {
             throw "TextView._replaceCharacters() called without a change " +
