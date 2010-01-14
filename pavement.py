@@ -41,7 +41,7 @@ from paver.setuputils import setup
 import paver.virtual
 
 try:
-    from bespinbuild.combiner import (combine_sproutcore_files, 
+    from dryice.combiner import (combine_sproutcore_files, 
         combine_sproutcore_stylesheets, combine_files,
         copy_sproutcore_files)
 except ImportError:
@@ -289,7 +289,7 @@ def _update_static():
     
     editor_dir = static / "editor"
     editor_dir.mkdir()
-    bt = path("bespinbuild")
+    bt = path("dryice")
     inline = (bt / "inline.js").bytes()
     index = (bt / "devindex.html").bytes()
     index = index.replace("{{inline}}", inline)
