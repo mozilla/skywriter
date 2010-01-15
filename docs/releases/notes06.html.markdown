@@ -9,7 +9,9 @@ Known Issues
 ------------
 
 Bespin Embedded 0.6 is *alpha* software. It is still under active development
-and APIs are subject to change.
+and APIs are subject to change. Note also that 0.6 features a complete retooling
+of the editor component, so it is likely that there will be some new bugs
+in the editor.
 
 * Command line completion is not yet implemented. (bug 539446)
 
@@ -20,8 +22,8 @@ Features
   It now more closely follows the Model/View/Controller pattern.
 * Non-US characters and keyboards now work with Bespin. A big thanks to Julian
   Viereck for a lot of work and testing on this.
-* The undo system is now based on patches, which means that it should be
-  more robust during collaboration.
+* The undo system is now based on patches. Ultimately, this new way of
+  doing undo will be more robust in conjunction with collaboration.
 * Embedded now comes in two flavors: Drop In and Customizable. The Drop In 
   flavor is equivalent to the packaging of Bespin Embedded 0.5.x
 * The Drop In package now includes both compressed and uncompressed JavaScript

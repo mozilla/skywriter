@@ -120,3 +120,9 @@ the plugin is to be reloaded. Here's an example:
         // remove the UI from the DOM, parent view, etc.
     };
 
+## How To Learn More ##
+
+We will be expanding on the plugin development docs over time. In the meantime,
+it's worth noting that all of Bespin's major functionality is implemented as
+plugins. In a checkout of the [bespinclient repository](http://hg.mozilla.org/labs/bespinclient), take a look at the
+plugins/supported directory for the bulk of Bespin's code.
