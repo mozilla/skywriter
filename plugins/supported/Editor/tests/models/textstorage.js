@@ -151,7 +151,19 @@ exports.testObserving = function() {
     var storage = TextStorage.create({});
     storage.insertCharacters({ row: 0, column: 0 }, "foo\nbar\nbaz\n");
 
-    var delegate = {};
+    var called = false;
+    var delegate = SC.Object.create({
+        textStorageEdited: function(storage, oldRange, newRange) {
+            called = true;
+            t.deepEqual(oldRange, deletionRange, "the old range passed in " +
+                "to textStorageEdited and the actual range deleted");
+            t.deepEqual(newRange, {
+                start:  deletionRange.start,
+                end:    deletionRange.start
+            }, "the new range passed in to textStorageEdited and a zero-" +
+                "length range located at the start of the deleted range");
+        }
+    });
     storage.addDelegate(delegate);
 
     var deletionRange = {
@@ -163,18 +175,6 @@ exports.testObserving = function() {
             row:    2,
             column: 2
         }
-    };
-
-    var called = false;
-    delegate.textStorageEdited = function(storage, oldRange, newRange) {
-        called = true;
-        t.deepEqual(oldRange, deletionRange, "the old range passed in to " +
-            "textStorageEdited and the actual range deleted");
-        t.deepEqual(newRange, {
-            start:  deletionRange.start,
-            end:    deletionRange.start
-        }, "the new range passed in to textStorageEdited and a zero-length " +
-            "range located at the start of the deleted range");
     };
 
     storage.deleteCharacters(deletionRange);
