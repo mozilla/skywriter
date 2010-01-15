@@ -300,8 +300,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         var textLineLength = textLines.length;
 
         this.setSelection(this._selectedRanges.map(function(range) {
-            var newStartRow = Math.min(range.start.row, textLineLength);
-            var newEndRow = Math.min(range.end.row, textLineLength);
+            var newStartRow = Math.min(range.start.row, textLineLength - 1);
+            var newEndRow = Math.min(range.end.row, textLineLength - 1);
             var startLine = textLines[newStartRow];
             var endLine = textLines[newEndRow];
             return {
