@@ -24,7 +24,21 @@
  
 "define metadata";
 ({
-    "depends": [ "AppSupport", "Editor" ]
+    "depends": [ "AppSupport", "Editor" ],
+    "provides": [
+        {
+            "ep": "factory",
+            "name": "view",
+            "pointer": "#view",
+            "action": "value"
+        },
+        {
+            "ep": "factory",
+            "name": "model",
+            "pointer": "#model",
+            "action": "value"
+        }
+    ]
 });
 "end";
 
