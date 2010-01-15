@@ -31,7 +31,7 @@ var SC = require('sproutcore/runtime').SC;
  * It's similar to SproutCore's UndoManager class, but it separates undo and
  * redo and correctly flushes the redo stack when an action is performed.
  */
-exports.UndoManager = SC.Object.extend({
+exports.undoManager = SC.Object.create({
     _redoStack: null,
     _undoStack: null,
 
@@ -87,4 +87,8 @@ exports.UndoManager = SC.Object.extend({
         return this._undoOrRedo('undo', this._undoStack, this._redoStack);
     }
 });
+
+exports.undoManagerCommand = function(instruction, args, command) {
+    exports.undoManager[command.name]();
+};
 
