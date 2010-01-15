@@ -170,13 +170,13 @@ exports.useBespin = function(element, options) {
                 height: '' + layout.height + 'px'
             };
             return style;
-        }.property('layout'),
+        }.property('layout')
         
-        element: element
     });
     
     var bespin = exports.EmbeddedEditor.create({
-        editorPane: editorPane
+        editorPane: editorPane,
+        element: element
     });
     
     
@@ -184,6 +184,11 @@ exports.useBespin = function(element, options) {
         SC.$(element).css('position', 'relative');
         element.innerHTML = "";
         bespin.get("editorPane").appendTo(element);
+        
+        exports.view = editorPane.getPath("editorView.textView");
+        exports.model = editorPane.getPath('editorView.layoutManager.' +
+            'textStorage');
+        
         
         if (options.initialContent) {
             content = options.initialContent;
