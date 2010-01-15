@@ -140,7 +140,6 @@
         {
             "ep": "command",
             "name": "newline",
-            "key": "return",
             "predicates": [ "isTextView", true ],
             "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"

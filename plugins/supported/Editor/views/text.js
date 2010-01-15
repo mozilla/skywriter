@@ -845,7 +845,11 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     textInserted: function(text) {
-        this._insertText(text);
+        if (text === "\n") {
+            this.newline();
+        } else {
+            this._insertText(text);
+        }
     }
 });
 
