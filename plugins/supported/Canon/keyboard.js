@@ -33,32 +33,70 @@ var canon = require("directory").rootCanon;
  * @class
  */
 var KeyboardManager = SC.Object.extend({
-    _commandMatches: function(command, flags) {
-        var predicates = command.predicates;
-        if (predicates !== undefined) {
-            for (var i = 0; i < predicates.length; i += 2) {
-                if (flags[predicates[i]] !== predicates[i + 1]) {
+    _commandMatches: function(command, symbolicName, flags) {
+        var mappedKeys = command.key;
+        if (!mappedKeys) {
+            return false;
+        }
+        if (typeof(mappedKeys) == "string") {
+            if (mappedKeys != symbolicName) {
+                return false;
+            }
+            return true;
+        }
+        
+        if (!mappedKeys.isArray) {
+            mappedKeys = [mappedKeys];
+            command.key = mappedKeys;
+        }
+        
+        for (var i = 0; i < mappedKeys.length; i++) {
+            var keymap = mappedKeys[i];
+            if (typeof(keymap) == "string") {
+                if (keymap == symbolicName) {
+                    return true;
+                }
+                continue;
+            }
+            
+            if (keymap.key != symbolicName) {
+                continue;
+            }
+            
+            var predicates = keymap.predicates;
+            
+            if (!predicates) {
+                return true;
+            }
+            
+            for (var flagName in predicates) {
+                if (!flags || flags[flagName] != predicates[flagName]) {
                     return false;
                 }
             }
+            return true;
         }
-        return true;
+        return false;
     },
 
     /**
      * Searches through the command canon for an event matching the given flags
      * with a key equivalent matching the given SproutCore event, and, if the
      * command is found, sends a message to the appropriate target.
+     * 
+     * This will get a couple of upgrades in the not-too-distant future:
+     * 1. caching in the Canon for fast lookup based on key
+     * 2. there will be an extra layer in between to allow remapping via
+     *    user preferences and keyboard mapping plugins
      *
      * @return True if a matching command was found, false otherwise.
      */
     processKeyEvent: function(evt, sender, flags) {
         var symbolicName = evt.commandCodes()[0];
         var commands = canon.get("commands");
-        for (var key in commands) {
-            var command = commands[key];
-            if (command.key === symbolicName &&
-                    this._commandMatches(command, flags)) {
+        for (var commandName in commands) {
+            var command = commands[commandName];
+            if (this._commandMatches(command, symbolicName, flags)) {
                 command.getArgs([], function(args) {
                     var instruction = Instruction.create({
                         command: command,
