@@ -165,7 +165,7 @@ exports.GutterView = SC.View.extend({
 
     layoutManagerInvalidatedRects: function(sender, rects) {
         this._recomputeLayout();
-    },
+    }
 
 
 });
