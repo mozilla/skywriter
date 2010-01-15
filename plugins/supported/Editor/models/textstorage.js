@@ -89,6 +89,22 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
         }
     },
 
+    /**
+     * Returns the characters in the given range as a string.
+     */
+    getCharacters: function(range) {
+        var lines = this.get('lines');
+        var start = range.start, end = range.end;
+        var startRow = start.row, endRow = end.row;
+        var startColumn = start.column, endColumn = end.column;
+        if (startRow === endRow) {
+            return lines[startRow].substring(startColumn, endColumn);
+        }
+        return [ lines[startRow].substring(startColumn) ].
+            concat(lines.slice(startRow + 1, endRow),
+            lines[endRow].substring(0, endColumn)).join("\n");
+    },
+
     init: function() {
         this.superclass();
 

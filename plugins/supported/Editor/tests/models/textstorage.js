@@ -129,6 +129,24 @@ exports.testDisplacePosition = function() {
         { row: 3, column: 0 }, "(3,0) displaced by 1 and (3,0)");
 };
 
+exports.testGetCharacters = function() {
+    var storage = TextStorage.create();
+    storage.set('value', "foo\nbar\nbaz\n");
+
+    t.equal(storage.getCharacters({
+            start:  { row: 0, column: 1 },
+            end:    { row: 1, column: 2 }
+        }), "oo\nba", "the characters in the range (0,1 1,2) and \"oo\\nba\"");
+    t.equal(storage.getCharacters({
+            start:  { row: 2, column: 0 },
+            end:    { row: 2, column: 3 }
+        }), "baz", "the characters in the range (2,0 2,3) and \"baz\"");
+    t.equal(storage.getCharacters({
+            start:  { row: 2, column: 3 },
+            end:    { row: 3, column: 0 }
+        }), "\n", "the characters in the range (2,3 3,0) and \"\\n\"");
+};
+
 exports.testObserving = function() {
     var storage = TextStorage.create({});
     storage.insertCharacters({ row: 0, column: 0 }, "foo\nbar\nbaz\n");

@@ -23,11 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var Patch = require('Patch:utils/patch').Patch;
-var catalog = require('bespin:plugins').catalog;
-
-// Use 2 lines of context by default.
-var CONTEXT_LINES = 2;
+var undoManager = require('AppSupport:controllers/undomanager').undoManager;
 
 /**
  * @class
@@ -69,7 +65,7 @@ exports.EditorUndoController = SC.Object.extend({
                 "transaction in place";
         }
 
-        catalog.getObject('undoManager').registerUndo(this, this._record);
+        undoManager.registerUndo(this, this._record);
         this._record = null;
 
         this._inTransaction = false;
@@ -77,25 +73,9 @@ exports.EditorUndoController = SC.Object.extend({
 
     _tryApplyingPatches: function(patches) {
         var textStorage = this.getPath('textView.layoutManager.textStorage');
-
-        // Apply as many patches as possible.
-        var i;
-        for (i = patches.length - 1; i >= 0; i--) {
-            if (!patches[i].applyTo(textStorage)) {
-                break;
-            }
-        }
-
-        // If any of them failed (i.e. we terminated early), then reverse what
-        // we did.
-        if (i >= 0) {
-            while (i < patches.length) {
-                patches[i].reverse().applyTo(textStorage);
-                i++;
-            }
-            return false;
-        }
-
+        patches.forEach(function(patch) {
+            textStorage.replaceCharacters(patch.oldRange, patch.newCharacters);
+        });
         return true;
     },
 
@@ -142,49 +122,16 @@ exports.EditorUndoController = SC.Object.extend({
                 "outside a transaction";
         }
 
-        var textStorage = this.getPath('textView.layoutManager.textStorage');
-        var lines = textStorage.get('lines');
-        var oldStartRow = oldRange.start.row, oldEndRow = oldRange.end.row;
+        this._record.patches.push({
+            oldCharacters:  this._deletedCharacters,
+            oldRange:       oldRange,
+            newCharacters:  characters,
+            newRange:       this.getPath('textView.layoutManager.textStorage').
+                            resultingRangeForReplacement(oldRange,
+                            characters.split("\n"))
+        });
 
-        var leadingContextStart = Math.max(oldStartRow - CONTEXT_LINES, 0);
-        var leadingContext = lines.slice(leadingContextStart, oldStartRow);
-        var trailingContextEnd = Math.min(oldEndRow + CONTEXT_LINES,
-            lines.length - 1);
-        var trailingContext = lines.slice(oldEndRow + 1,
-            trailingContextEnd + 1);
-
-        var newRange = textStorage.resultingRangeForReplacement(oldRange,
-            characters.split("\n"));
-        var newEndRow = newRange.end.row;
-
-        var inserted = lines.slice(oldStartRow, newEndRow + 1);
-
-        var buildOperation = function(operation) {
-            return function(line) {
-                return { op: operation, line: line };
-            };
-        };
-
-        this._record.patches.push(Patch.create({
-            hunks: [
-                {
-                    oldRange:   {
-                                    start:  leadingContextStart,
-                                    end:    trailingContextEnd
-                                },
-                    newRange:   {
-                                    start:  leadingContextStart,
-                                    end:    Math.min(newEndRow + 2,
-                                            lines.length - 1)
-                                },
-                    operations: leadingContext.map(buildOperation(' ')).
-                                concat(this._deletedCharacters.
-                                    map(buildOperation('-')),
-                                inserted.map(buildOperation('+')),
-                                trailingContext.map(buildOperation(' ')))
-                }
-            ]
-        }));
+        this._deletedCharacters = null;
     },
 
     textViewWillReplaceRange: function(sender, oldRange) {
@@ -193,15 +140,18 @@ exports.EditorUndoController = SC.Object.extend({
                 "a transaction";
         }
 
-        this._oldRange = oldRange;
         this._deletedCharacters = this.getPath('textView.layoutManager.' +
-            'textStorage.lines').slice(oldRange.start.row,
-            oldRange.end.row + 1);
+            'textStorage').getCharacters(oldRange);
     },
 
     undo: function(record) {
         return this._undoOrRedo(record.patches.map(function(patch) {
-                return patch.reverse();
+                return {
+                    oldCharacters:  patch.newCharacters,
+                    oldRange:       patch.newRange,
+                    newCharacters:  patch.oldCharacters,
+                    newRange:       patch.oldRange
+                };
             }), record.selectionBefore);
     }
 });
