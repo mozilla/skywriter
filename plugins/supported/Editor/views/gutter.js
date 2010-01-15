@@ -26,39 +26,10 @@ var SC = require('sproutcore/runtime').SC;
 var CanvasView = require('views/canvas').CanvasView;
 var m_scratchcanvas = require('bespin:util/scratchcanvas');
 
-exports.GutterView = CanvasView.extend({
+var InteriorGutterView = CanvasView.extend({
     // TODO: calculate from the size or let the user override via themes if
     // desired
     _lineAscent: 16,
-
-    _clippingFrameChanged: function() {
-        this.setNeedsDisplay();
-    }.observes('clippingFrame'),
-
-    /**
-     * @property
-     *
-     * The layer frame of the gutter view stretches from the bottom to the top
-     * of the enclosing view. Not cacheable, because it depends on the frame of
-     * the parent view.
-     */
-    layerFrame: function() {
-        var layerFrame = {
-            x:      0,
-            y:      0,
-            width:  this.get('layout').width,
-            height: this.get('parentView').get('frame').height
-        };
-        return layerFrame;
-    }.property('layout', 'parentView'),
-
-    /**
-     * @property
-     *
-     * The amount of padding to leave on each side of the gutter, given as an
-     * object with "left" and "right" properties.
-     */
-    padding: { left: 5, right: 10 },
 
     /**
      * @property
@@ -74,36 +45,29 @@ exports.GutterView = CanvasView.extend({
         editorTextFont: "10pt Monaco, Lucida Console, monospace"
     },
 
-    _resize: function() {
-        var layoutManager = this.get('layoutManager');
-        var padding = this.get('padding');
-        this.set('layout', SC.mixin(SC.clone(this.get('layout')), {
-            width:  32, /* padding.left + padding.right +
-                    m_scratchcanvas.get().getContext().
-                    measureStringWidth(this.get('theme').lineNumberFont,
-                    "" + (layoutManager.get('textLines').length + 1)), */
-            height: layoutManager.boundingRect().height
-        }));
-    },
+    _frameChanged: function() {
+        // We have to be more aggressive than the canvas view alone would be,
+        // because of the possibility that we will have to draw additional line
+        // numbers in the gutter when the height of the text changes.
+        this.setNeedsDisplay();
+    }.observes('frame'),
 
     drawRect: function(rect, context) {
-        var visibleFrame = this.get('clippingFrame');
-
         var theme = this.get('theme');
         context.fillStyle = theme.gutterStyle;
-        context.fillRect(0, visibleFrame.y, visibleFrame.width,
-            visibleFrame.height);
+        context.fillRect(rect.x, rect.y, rect.width, rect.height);
 
         context.save();
 
-        var padding = this.get('padding');
+        var parentView = this.get('parentView');
+        var padding = parentView.get('padding');
         context.translate(padding.left, 0);
 
         context.fillStyle = theme.lineNumberColor;
         context.font = theme.lineNumberFont;
 
-        var layoutManager = this.get('layoutManager');
-        var range = layoutManager.characterRangeForBoundingRect(visibleFrame);
+        var layoutManager = parentView.get('layoutManager');
+        var range = layoutManager.characterRangeForBoundingRect(rect);
         var endRow = Math.min(range.end.row,
             layoutManager.get('textLines').length - 1);
         var lineAscent = this._lineAscent;
@@ -114,19 +78,82 @@ exports.GutterView = CanvasView.extend({
         }
 
         context.restore();
+    }
+});
+
+exports.GutterView = SC.View.extend({
+    _interiorView: null,
+
+    layout: { left: 0, top: 0, bottom: 0, width: 32 },
+
+    /**
+     * @property{LayoutManager}
+     *
+     * The layout manager to monitor. This property must be filled in upon
+     * instantiating the gutter view.
+     */
+    layoutManager: null,
+
+    /**
+     * @property
+     *
+     * The amount of padding to leave on the sides of the gutter, given as an
+     * object with "bottom", "left", and "right" properties.
+     */
+    padding: { bottom: 30, left: 5, right: 10 },
+
+    /**
+     * @property{number}
+     *
+     * The amount by which the user has scrolled the neighboring editor in
+     * pixels.
+     */
+    verticalScrollOffset: 0,
+
+    _recomputeLayout: function() {
+        var layoutManager = this.get('layoutManager');
+        var padding = this.get('padding');
+
+        var width = 32;
+        // padding.left + padding.right + m_scratchcanvas.get().getContext().
+        // measureStringWidth(this.get('theme').lineNumberFont,
+        // "" + (layoutManager.get('textLines').length + 1))
+
+        this.set('layout', SC.mixin(SC.clone(this.get('layout')), {
+            width: width
+        }));
+        this._interiorView.set('layout', {
+            left:   0,
+            top:    -this.get('verticalScrollOffset'),
+            width:  this.get('frame').width,
+            height: layoutManager.boundingRect().height + padding.bottom
+        });
+    },
+
+    _verticalScrollOffsetChanged: function() {
+        this._recomputeLayout();
+    }.observes('verticalScrollOffset'),
+
+    createChildViews: function() {
+        var interiorView = this.createChildView(InteriorGutterView);
+        this._interiorView = interiorView;
+
+        var frame = this.get('frame');
+        this._recomputeLayout();
+
+        this.set('childViews', [ interiorView ]);
     },
 
     init: function() {
-        arguments.callee.base.apply(this, this.arguments);
+        arguments.callee.base.apply(this, arguments);
 
         this.get('layoutManager').addDelegate(this);
-        this._resize();
     },
 
     layoutManagerInvalidatedRects: function(sender, rects) {
-        this.setNeedsDisplay();
-        this._resize();
-    }
+        this._recomputeLayout();
+    },
+
 
 });
 

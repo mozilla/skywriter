@@ -96,6 +96,13 @@ exports.isZeroLength = function(range) {
 };
 
 /**
+ * Returns the greater of the two positions.
+ */
+exports.maxPosition = function(a, b) {
+    return exports.comparePositions(a, b) > 0 ? a : b;
+};
+
+/**
  * Returns a single range that spans the entire given set of ranges.
  */
 exports.rangeSetBoundaries = function(rangeSet) {

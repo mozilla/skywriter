@@ -322,9 +322,12 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     _resize: function() {
         var boundingRect = this.get('layoutManager').boundingRect();
         var padding = this.get('padding');
+        var parentFrame = this.getPath('parentView.frame');
         this.set('layout', SC.mixin(SC.clone(this.get('layout')), {
-            width:  boundingRect.width + padding.right,
-            height: boundingRect.height + padding.bottom
+            width:  Math.max(parentFrame.width,
+                    boundingRect.width + padding.right),
+            height: Math.max(parentFrame.height,
+                    boundingRect.height + padding.bottom)
         }));
     },
 
@@ -410,23 +413,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
      * The BespinScrollView uses this.
      */
     hasPadding: true,
-
-    /**
-     * @property
-     *
-     * The layer frame, which fills the parent view. Not cacheable, because it
-     * depends on the frame of the parent view.
-     */
-    layerFrame: function() {
-        var parentView = this.get('parentView');
-        var parentFrame = parentView.get('frame');
-        return {
-            x:      0,
-            y:      0,
-            width:  parentFrame.width,
-            height: parentFrame.height
-        };
-    }.property(),
 
     /**
      * @property

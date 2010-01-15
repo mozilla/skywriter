@@ -82,13 +82,26 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     },
 
     _computeInvalidRects: function(oldRange, newRange) {
-        var oldStart = oldRange.start;
-        return this.rectsForRange({
-            start:  oldStart,
-            end:    oldRange.end.row !== newRange.end.row ?
-                    this._lastCharacterPosition() :
-                    { row: oldStart.row, column: this._maximumWidth }
-        });
+        var startRect = this.characterRectForPosition(oldRange.start);
+
+        var lineRect = {
+            x:      startRect.x,
+            y:      startRect.y,
+            width:  Number.MAX_VALUE,
+            height: startRect.height
+        };
+
+        return oldRange.end.row === newRange.end.row ?
+            [ lineRect ] :
+            [
+                lineRect,
+                {
+                    x:      0,
+                    y:      startRect.y + this._lineHeight,
+                    width:  Number.MAX_VALUE,
+                    height: Number.MAX_VALUE
+                }
+            ];
     },
 
     // Returns the last valid position in the buffer.
@@ -143,20 +156,6 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
 
         var invalidRects = this._computeInvalidRects(oldRange, newRange);
         this.notifyDelegates('layoutManagerInvalidatedRects', invalidRects);
-    },
-
-    // Starting at the character at the given position, returns the boundaries
-    // of the rest of the line.
-    _rectForRemainderOfLine: function(position) {
-        var lineRect = this.lineRectForRow(position.row);
-        var characterRect = this.characterRectForPosition(position);
-        var characterRectX = characterRect.x;
-        return {
-            x:      characterRectX,
-            y:      characterRect.y,
-            width:  lineRect.width - characterRectX,
-            height: lineRect.height
-        };
     },
 
     _runAnnotations: function(range) {

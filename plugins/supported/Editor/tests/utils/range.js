@@ -68,6 +68,19 @@ exports.testExtendRange = function() {
         }, "[ 7,8 9,10 ] extended by 0,0 remains the same");
 };
 
+exports.testMaxPosition = function() {
+    t.deepEqual(Range.maxPosition({ row: 0, column: 0 },
+        { row: 0, column: 0 }), { row: 0, column: 0 }, "max(0,0 0,0) = 0,0");
+    t.deepEqual(Range.maxPosition({ row: 0, column: 0 },
+        { row: 1, column: 0 }), { row: 1, column: 0 }, "max(0,0 1,0) = 1,0");
+    t.deepEqual(Range.maxPosition({ row: 0, column: 0 },
+        { row: 0, column: 1 }), { row: 0, column: 1 }, "max(0,0 0,1) = 0,1");
+    t.deepEqual(Range.maxPosition({ row: 1, column: 0 },
+        { row: 0, column: 0 }), { row: 1, column: 0 }, "max(1,0 0,0) = 1,0");
+    t.deepEqual(Range.maxPosition({ row: 0, column: 1 },
+        { row: 0, column: 0 }), { row: 0, column: 1 }, "max(0,1 0,0) = 0,1");
+};
+
 exports.testUnionRanges = function() {
     t.deepEqual(Range.unionRanges({
             start:  { row: 1, column: 2 },

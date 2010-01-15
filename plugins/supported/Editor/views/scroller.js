@@ -25,28 +25,20 @@
 var SC = require('sproutcore/runtime').SC;
 var CanvasView = require('views/canvas').CanvasView;
 
+var LINE_HEIGHT                 = 15;
+var MINIMUM_HANDLE_SIZE         = 20;
 var NIB_ARROW_PADDING_BEFORE    = 3;
 var NIB_ARROW_PADDING_AFTER     = 5;
 var NIB_LENGTH                  = 15;
 var NIB_PADDING                 = 8;    // 15/2
 
 // The fancy custom Bespin scroll bars.
-exports.BespinScrollerView = CanvasView.extend({
+var ScrollerCanvasView = CanvasView.extend({
     classNames: ['bespin-scroller-view'],
 
     _mouseDownScreenPoint: null,
     _mouseDownValue: null,
     _isMouseOver: false,
-
-    _value: 0,
-
-    _bespinScrollerView_valueDidChange: function() {
-        this.setNeedsDisplay();
-    }.observes('value'),
-
-    _bespinScrollerView_maximumDidChange: function() {
-        this.setNeedsDisplay();
-    }.observes('maximum'),
 
     // TODO: Make this a real SproutCore theme (i.e. an identifier that gets
     // prepended to CSS properties), perhaps?
@@ -65,413 +57,6 @@ exports.BespinScrollerView = CanvasView.extend({
         scrollBarFillGradientTopStop: "rgba(40, 40, 40, %a)",
         scrollBarFillGradientBottomStart: "rgba(22, 22, 22, %a)",
         scrollBarFillGradientBottomStop: "rgba(44, 44, 44, %a)"
-    },
-
-    /**
-     * @property
-     * The thickness of this scroll bar. The default is
-     * SC.NATURAL_SCROLLER_THICKNESS (16 as of this writing on the desktop).
-     */
-    scrollerThickness: SC.NATURAL_SCROLLER_THICKNESS,
-
-    /**
-     * @property
-     * The minimum size of the scroll bar handle/knob.
-     */
-    minimumHandleSize: 20,
-
-    /**
-     * @property
-     * The amount to scroll when the nibs/arrows are clicked.
-     */
-    lineHeight: 15,
-
-    /**
-     * @property
-     * Specifies the direction of the scroll bar: one of SC.LAYOUT_HORIZONTAL
-     * or SC.LAYOUT_VERTICAL.
-     *
-     * Changes to this value after the view has been created have no effect.
-     */
-    layoutDirection: SC.LAYOUT_VERTICAL,
-
-    /**
-     * @property
-     * Specifies whether the scroll bar is enabled. Even if this property is
-     * set to YES, the scroll bar will still be disabled if the scroll bar is
-     * too large for the maximum value.
-     */
-    isEnabled: true,
-
-    /**
-     * @property{String}
-     * The property of the owning view that the scroll bar should modify
-     * whenever its value changes. By default the scroll bar updates
-     * verticalScrollOffset if its layoutDirection is SC.LAYOUT_VERTICAL or
-     * horizontalScrollOffset if its layoutDirection is SC.LAYOUT_HORIZONTAL.
-     * Read-only.
-     */
-    ownerScrollValueKey: function() {
-        switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_VERTICAL:    return 'verticalScrollOffset';
-        case SC.LAYOUT_HORIZONTAL:  return 'horizontalScrollOffset';
-        default:                    return null;
-        }
-    }.property('layoutDirection').cacheable(),
-
-    /**
-     * @property
-     * The dimensions of transparent space inside the frame, given as an object
-     * with 'left', 'bottom', 'top', and 'right' properties.
-     *
-     * Note that the scrollerThickness property includes the padding on the
-     * sides of the bar.
-     */
-    padding: { left: 0, bottom: 0, top: 0, right: 0 },
-
-    // The frame of the scroll bar, not counting any padding. Read-only.
-    _clientFrame: function() {
-        var frame = this.get('frame'), padding = this.get('padding');
-        return {
-            x:      padding.left,
-            y:      padding.top,
-            width:  frame.width - (padding.left + padding.right),
-            height: frame.height - (padding.top + padding.bottom)
-        };
-    }.property('frame', 'padding').cacheable(),
-
-    // The thickness of the scroll bar, not counting any padding. Read-only.
-    _clientThickness: function() {
-        var padding = this.get('padding');
-        var scrollerThickness = this.get('scrollerThickness');
-        switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_VERTICAL:
-            return scrollerThickness - (padding.left + padding.right);
-        case SC.LAYOUT_HORIZONTAL:
-            return scrollerThickness - (padding.top + padding.bottom);
-        default:
-            console.assert(false, "unknown layout direction");
-            return null;
-        }
-    }.property('layoutDirection', 'padding', 'scrollerThickness').cacheable(),
-
-    // The dimensions of the gutter (the middle area between the buttons, which
-    // contains the handle or knob). Read-only.
-    _gutterFrame: function() {
-        var clientFrame = this.get('_clientFrame');
-        var thickness = this.get('_clientThickness');
-        switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_VERTICAL:
-            return {
-                x:      clientFrame.x,
-                y:      clientFrame.y + NIB_LENGTH,
-                width:  thickness,
-                height: Math.max(0, clientFrame.height - 2*NIB_LENGTH)
-            };
-        case SC.LAYOUT_HORIZONTAL:
-            return {
-                x:      clientFrame.x + NIB_LENGTH,
-                y:      clientFrame.y,
-                width:  Math.max(0, clientFrame.width - 2*NIB_LENGTH),
-                height: thickness
-            };
-        default:
-            console.assert(false, "unknown layout direction");
-            return null;
-        }
-    }.property('_clientFrame', '_clientThickness',
-        'layoutDirection').cacheable(),
-
-    // The length of the gutter, equal to _gutterFrame.width or
-    // _gutterFrame.height depending on the scroll bar's layout direction.
-    // Read-only.
-    _gutterLength: function() {
-        var gutterFrame = this.get('_gutterFrame');
-        var gutterLength;
-        switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_HORIZONTAL:
-            gutterLength = gutterFrame.width;
-            break;
-        case SC.LAYOUT_VERTICAL:
-            gutterLength = gutterFrame.height;
-            break;
-        default:
-            console.assert(false, "unknown layout direction");
-            break;
-        }
-        return gutterLength;
-    }.property('_gutterFrame', 'layoutDirection').cacheable(),
-
-    // The length of the scroll bar, counting the padding. Equal to frame.width
-    // or frame.height, depending on the layout direction of the bar.
-    // Read-only.
-    _frameLength: function() {
-        var frame = this.get('frame');
-        switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_HORIZONTAL:
-            return frame.width;
-        case SC.LAYOUT_VERTICAL:
-            return frame.height;
-        default:
-            console.assert(false, "unknown layout direction");
-            return null;
-        }
-    }.property('frame', 'layoutDirection').cacheable(),
-
-    // The length of the scroll bar, not counting any padding. Equal to
-    // _clientFrame.width or _clientFrame.height, depending on the scroll bar's
-    // layout direction. Read-only.
-    _clientLength: function() {
-        var clientFrame = this.get('_clientFrame');
-        switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_HORIZONTAL:
-            return clientFrame.width;
-        case SC.LAYOUT_VERTICAL:
-            return clientFrame.height;
-        default:
-            console.assert(false, "unknown layout direction");
-            return null;
-        }
-    }.property('_clientFrame', 'layoutDirection').cacheable(),
-
-    // The dimensions of the handle or knob. Read-only.
-    _handleFrame: function() {
-        var value = this.get('value');
-        var maximum = this.get('maximum');
-        var frame = this.get('frame');
-        var clientFrame = this.get('_clientFrame');
-        var gutterFrame = this.get('_gutterFrame');
-        var clientThickness = this.get('_clientThickness');
-
-        switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_VERTICAL:
-            return {
-                x:      clientFrame.x,
-                y:      clientFrame.y + NIB_LENGTH +
-                        value * gutterFrame.height / maximum,
-                width:  clientThickness,
-                height: Math.min(frame.height, maximum) * gutterFrame.height /
-                        maximum
-            };
-        case SC.LAYOUT_HORIZONTAL:
-            return {
-                x:      clientFrame.x + NIB_LENGTH +
-                        value * gutterFrame.width / maximum,
-                y:      clientFrame.y,
-                width:  Math.min(frame.width, maximum) * gutterFrame.width /
-                        maximum,
-                height: clientThickness
-            };
-        default:
-            console.assert(false, "unknown layout direction");
-            return null;
-        }
-    }.property('_clientFrame', '_clientThickness', '_gutterFrame', 'maximum',
-        'value').cacheable(),
-
-    /**
-     * @property{Number}
-     * The actual maximum value, which will be less than the maximum due to
-     * accounting for the frame length. Read-only.
-     */
-    maximumValue: function() {
-        return Math.max(this.get('maximum') - this.get('_frameLength'), 0);
-    }.property('_frameLength', 'maximum').cacheable(),
-
-    /**
-     * @property
-     * The current position that the scroll bar is scrolled to.
-     */
-    value: function(key, value) {
-        var maximumValue = this.get('maximumValue');
-        if (value !== undefined) {
-            if (value < 0) {
-                value = 0;
-            } else if (value > maximumValue) {
-                value = maximumValue;
-            }
-
-            this._value = value;
-            return value;
-        }
-
-        return Math.min(this._value || 0, maximumValue);
-    }.property('maximumValue').cacheable(),
-
-    /**
-     * @property{Number}
-     * The maximum value for the scroll bar.
-     *
-     * TODO: When set to a value less than the width or height of the knob, the
-     * scroll bar is disabled.
-     *
-     */
-    maximum: 0,
-
-    _segmentForMouseEvent: function(evt) {
-        var point = this.convertFrameFromView({ x: evt.pageX, y: evt.pageY });
-        var clientFrame = this.get('_clientFrame');
-
-        if (!SC.pointInRect(point, clientFrame)) {
-            return null;
-        }
-
-        var layoutDirection = this.get('layoutDirection');
-        switch (layoutDirection) {
-        case SC.LAYOUT_HORIZONTAL:
-            if (point.x < NIB_LENGTH) {
-                return 'nib-start';
-            } else if (point.x >= clientFrame.width - NIB_LENGTH) {
-                return 'nib-end';
-            }
-            break;
-        case SC.LAYOUT_VERTICAL:
-            if (point.y < NIB_LENGTH) {
-                return 'nib-start';
-            } else if (point.y >= clientFrame.height - NIB_LENGTH) {
-                return 'nib-end';
-            }
-            break;
-        default:
-            console.assert(false, "unknown layout direction");
-            break;
-        }
-
-        var handleFrame = this.get('_handleFrame');
-        if (SC.pointInRect(point, handleFrame)) {
-            return 'handle';
-        }
-
-        switch (layoutDirection) {
-        case SC.LAYOUT_HORIZONTAL:
-            if (point.x < handleFrame.x) {
-                return 'gutter-before';
-            } else if (point.x >= handleFrame.x + handleFrame.width) {
-                return 'gutter-after';
-            }
-            break;
-        case SC.LAYOUT_VERTICAL:
-            if (point.y < handleFrame.y) {
-                return 'gutter-before';
-            } else if (point.y >= handleFrame.y + handleFrame.height) {
-                return 'gutter-after';
-            }
-            break;
-        default:
-            console.assert(false, "unknown layout direction");
-            break;
-        }
-
-        console.assert(false, "_segmentForMouseEvent: point ", point,
-            " outside view with handle frame ", handleFrame,
-            " and client frame ", clientFrame);
-        return null;
-    },
-
-    mouseEntered: function(evt) {
-        SC.RunLoop.begin();
-        this._isMouseOver = true;
-        this.setNeedsDisplay();
-        SC.RunLoop.end();
-    },
-
-    mouseExited: function(evt) {
-        SC.RunLoop.begin();
-        this._isMouseOver = false;
-        this.setNeedsDisplay();
-        SC.RunLoop.end();
-    },
-
-    mouseWheel: function(evt) {
-        SC.RunLoop.begin();
-        var delta;
-        switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_HORIZONTAL:
-            delta = evt.wheelDeltaX;
-            break;
-        case SC.LAYOUT_VERTICAL:
-            delta = evt.wheelDeltaY;
-            break;
-        default:
-            console.assert(false, "unknown layout direction");
-            return;
-        }
-        this.set('value', this.get('value') + 2*delta);
-        SC.RunLoop.end();
-    },
-
-    mouseDown: function(evt) {
-        SC.RunLoop.begin();
-        var value = this.get('value');
-        var gutterLength = this.get('_gutterLength');
-
-        switch (this._segmentForMouseEvent(evt)) {
-        case 'nib-start':
-            this.set('value', value - this.get('lineHeight'));
-            break;
-        case 'nib-end':
-            this.set('value', value + this.get('lineHeight'));
-            break;
-        case 'gutter-before':
-            this.set('value', value - gutterLength);
-            break;
-        case 'gutter-after':
-            this.set('value', value + gutterLength);
-            break;
-        case 'handle':
-            switch (this.get('layoutDirection')) {
-            case SC.LAYOUT_HORIZONTAL:
-                this._mouseDownScreenPoint = evt.clientX;
-                break;
-            case SC.LAYOUT_VERTICAL:
-                this._mouseDownScreenPoint = evt.clientY;
-                break;
-            default:
-                console.assert(false, "unknown layout direction");
-                break;
-            }
-        default:
-            console.assert("_segmentForMouseEvent returned an unknown value");
-            break;
-        }
-        SC.RunLoop.end();
-    },
-
-    mouseDragged: function(evt) {
-        SC.RunLoop.begin();
-
-        var eventDistance;
-        switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_HORIZONTAL:
-            eventDistance = evt.clientX;
-            break;
-        case SC.LAYOUT_VERTICAL:
-            eventDistance = evt.clientY;
-            break;
-        default:
-            console.assert(false, "unknown layout direction");
-            break;
-        }
-
-        var eventDelta = eventDistance - this._mouseDownScreenPoint;
-
-        var maximum = this.get('maximum');
-        var gutterLength = this.get('_gutterLength');
-
-        var oldValue = this.get('value');
-        this.set('value', oldValue + eventDelta * maximum / gutterLength);
-
-        // If we didn't actually move, don't update the reference point.
-        if (this.get('value') !== oldValue) {
-            this._mouseDownScreenPoint = eventDistance;
-        }
-
-        SC.RunLoop.end();
-    },
-
-    mouseUp: function(evt) {
-        this._mouseDownScreenPoint = null;
-        this._mouseDownValue = null;
     },
 
     _drawNib: function(ctx) {
@@ -510,8 +95,8 @@ exports.BespinScrollerView = CanvasView.extend({
 
     _drawNibs: function(ctx) {
         var isMouseOver = this._isMouseOver;
-        var thickness = this.get('_clientThickness');
-        var value = this.get('value');
+        var thickness = this._getClientThickness();
+        var value = this.getPath('parentView.value');
 
         // Starting nib
         if (isMouseOver || value !== 0) {
@@ -524,15 +109,229 @@ exports.BespinScrollerView = CanvasView.extend({
         }
 
         // Ending nib
-        if (isMouseOver || value !== this.get('maximumValue')) {
+        if (isMouseOver || value !== this.getMaximumValue()) {
             ctx.save();
-            ctx.translate(this.get('_clientLength') - NIB_PADDING,
+            ctx.translate(this._getClientLength() - NIB_PADDING,
                 thickness / 2);
             ctx.rotate(Math.PI * 0.5);
             ctx.moveTo(0, 0);
             this._drawNib(ctx);
             ctx.restore();
         }
+    },
+
+    // Returns the frame of the scroll bar, not counting any padding.
+    _getClientFrame: function() {
+        var frame = this.get('frame');
+        var padding = this.getPath('parentView.padding');
+        return {
+            x:      padding.left,
+            y:      padding.top,
+            width:  frame.width - (padding.left + padding.right),
+            height: frame.height - (padding.top + padding.bottom)
+        };
+    },
+
+    // Returns the length of the scroll bar, not counting any padding. Equal to
+    // the width or height of the client frame, depending on the layout
+    // direction.
+    _getClientLength: function() {
+        var clientFrame = this._getClientFrame();
+        switch (this.getPath('parentView.layoutDirection')) {
+        case SC.LAYOUT_HORIZONTAL:
+            return clientFrame.width;
+        case SC.LAYOUT_VERTICAL:
+            return clientFrame.height;
+        default:
+            console.assert(false, "unknown layout direction");
+            return null;
+        }
+    },
+
+    // Returns the thickness of the scroll bar, not counting any padding.
+    _getClientThickness: function() {
+        var parentView = this.get('parentView');
+        var padding = parentView.get('padding');
+        var scrollerThickness = parentView.get('scrollerThickness');
+
+        switch (parentView.get('layoutDirection')) {
+        case SC.LAYOUT_VERTICAL:
+            return scrollerThickness - (padding.left + padding.right);
+        case SC.LAYOUT_HORIZONTAL:
+            return scrollerThickness - (padding.top + padding.bottom);
+        default:
+            console.assert(false, "unknown layout direction");
+            return null;
+        }
+    }.property(),
+
+    // The length of the scroll bar, counting the padding. Equal to frame.width
+    // or frame.height, depending on the layout direction of the bar.
+    // Read-only.
+    _getFrameLength: function() {
+        var frame = this.get('frame');
+        switch (this.getPath('parentView.layoutDirection')) {
+        case SC.LAYOUT_HORIZONTAL:
+            return frame.width;
+        case SC.LAYOUT_VERTICAL:
+            return frame.height;
+        default:
+            console.assert(false, "unknown layout direction");
+            return null;
+        }
+    },
+
+    // The dimensions of the gutter (the middle area between the buttons, which
+    // contains the handle or knob).
+    _getGutterFrame: function() {
+        var clientFrame = this._getClientFrame();
+        var thickness = this._getClientThickness();
+        switch (this.getPath('parentView.layoutDirection')) {
+        case SC.LAYOUT_VERTICAL:
+            return {
+                x:      clientFrame.x,
+                y:      clientFrame.y + NIB_LENGTH,
+                width:  thickness,
+                height: Math.max(0, clientFrame.height - 2*NIB_LENGTH)
+            };
+        case SC.LAYOUT_HORIZONTAL:
+            return {
+                x:      clientFrame.x + NIB_LENGTH,
+                y:      clientFrame.y,
+                width:  Math.max(0, clientFrame.width - 2*NIB_LENGTH),
+                height: thickness
+            };
+        default:
+            console.assert(false, "unknown layout direction");
+            return null;
+        }
+    },
+
+    // The length of the gutter, equal to gutterFrame.width or
+    // gutterFrame.height depending on the scroll bar's layout direction.
+    _getGutterLength: function() {
+        var gutterFrame = this._getGutterFrame();
+        var gutterLength;
+        switch (this.getPath('parentView.layoutDirection')) {
+        case SC.LAYOUT_HORIZONTAL:
+            gutterLength = gutterFrame.width;
+            break;
+        case SC.LAYOUT_VERTICAL:
+            gutterLength = gutterFrame.height;
+            break;
+        default:
+            console.assert(false, "unknown layout direction");
+            break;
+        }
+        return gutterLength;
+    },
+
+    // Returns the dimensions of the handle or knob.
+    _getHandleFrame: function() {
+        var parentView = this.get('parentView');
+        var value = parentView.get('value');
+        var maximum = parentView.get('maximum');
+        var frame = this.get('frame');
+        var clientFrame = this._getClientFrame();
+        var gutterFrame = this._getGutterFrame();
+        var clientThickness = this._getClientThickness();
+
+        switch (parentView.get('layoutDirection')) {
+        case SC.LAYOUT_VERTICAL:
+            return {
+                x:      clientFrame.x,
+                y:      clientFrame.y + NIB_LENGTH +
+                        value * gutterFrame.height / maximum,
+                width:  clientThickness,
+                height: Math.min(frame.height, maximum) * gutterFrame.height /
+                        maximum
+            };
+        case SC.LAYOUT_HORIZONTAL:
+            return {
+                x:      clientFrame.x + NIB_LENGTH +
+                        value * gutterFrame.width / maximum,
+                y:      clientFrame.y,
+                width:  Math.min(frame.width, maximum) * gutterFrame.width /
+                        maximum,
+                height: clientThickness
+            };
+        default:
+            console.assert(false, "unknown layout direction");
+            return null;
+        }
+    },
+
+    _segmentForMouseEvent: function(evt) {
+        var point = this.convertFrameFromView({ x: evt.pageX, y: evt.pageY });
+        var clientFrame = this._getClientFrame();
+
+        if (!SC.pointInRect(point, clientFrame)) {
+            return null;
+        }
+
+        var layoutDirection = this.getPath('parentView.layoutDirection');
+        switch (layoutDirection) {
+        case SC.LAYOUT_HORIZONTAL:
+            if (point.x < NIB_LENGTH) {
+                return 'nib-start';
+            } else if (point.x >= clientFrame.width - NIB_LENGTH) {
+                return 'nib-end';
+            }
+            break;
+        case SC.LAYOUT_VERTICAL:
+            if (point.y < NIB_LENGTH) {
+                return 'nib-start';
+            } else if (point.y >= clientFrame.height - NIB_LENGTH) {
+                return 'nib-end';
+            }
+            break;
+        default:
+            console.assert(false, "unknown layout direction");
+            break;
+        }
+
+        var handleFrame = this._getHandleFrame();
+        if (SC.pointInRect(point, handleFrame)) {
+            return 'handle';
+        }
+
+        switch (layoutDirection) {
+        case SC.LAYOUT_HORIZONTAL:
+            if (point.x < handleFrame.x) {
+                return 'gutter-before';
+            } else if (point.x >= handleFrame.x + handleFrame.width) {
+                return 'gutter-after';
+            }
+            break;
+        case SC.LAYOUT_VERTICAL:
+            if (point.y < handleFrame.y) {
+                return 'gutter-before';
+            } else if (point.y >= handleFrame.y + handleFrame.height) {
+                return 'gutter-after';
+            }
+            break;
+        default:
+            console.assert(false, "unknown layout direction");
+            break;
+        }
+
+        console.assert(false, "_segmentForMouseEvent: point ", point,
+            " outside view with handle frame ", handleFrame,
+            " and client frame ", clientFrame);
+        return null;
+    },
+
+    /**
+     * Adjusts the canvas view's frame to match the parent container's frame.
+     */
+    adjustFrame: function() {
+        var parentFrame = this.getPath('parentView.frame');
+        this.set('layout', {
+            left:   0,
+            top:    0,
+            width:  parentFrame.width,
+            height: parentFrame.height
+        });
     },
 
     drawRect: function(rect, ctx) {
@@ -546,15 +345,16 @@ exports.BespinScrollerView = CanvasView.extend({
         ctx.save();
 
         // Translate so that we're only drawing in the padding.
-        var padding = this.get('padding');
+        var parentView = this.get('parentView');
+        var padding = parentView.get('padding');
         ctx.translate(padding.left, padding.top);
 
-        var handleFrame = this.get('_handleFrame');
-        var gutterLength = this.get('_gutterLength');
-        var thickness = this.get('_clientThickness');
+        var handleFrame = this._getHandleFrame();
+        var gutterLength = this._getGutterLength();
+        var thickness = this._getClientThickness();
         var halfThickness = thickness / 2;
 
-        var layoutDirection = this.get('layoutDirection');
+        var layoutDirection = parentView.get('layoutDirection');
         var handleDistance, handleLength;
         switch (layoutDirection) {
         case SC.LAYOUT_VERTICAL:
@@ -578,7 +378,7 @@ exports.BespinScrollerView = CanvasView.extend({
             break;
         }
 
-        if (this.get('isEnabled') === false || gutterLength <= handleLength) {
+        if (gutterLength <= handleLength) {
             return; // Don't display the scroll bar.
         }
 
@@ -586,7 +386,7 @@ exports.BespinScrollerView = CanvasView.extend({
             ctx.globalAlpha = 0.3;
         } else {
             // Draw the scroll track rectangle.
-            var clientLength = this.get('_clientLength');
+            var clientLength = this._getClientLength();
             ctx.fillStyle = theme.scrollTrackFillStyle;
             ctx.fillRect(NIB_PADDING + 0.5, 0.5,
                 clientLength - 2*NIB_PADDING, thickness - 1);
@@ -664,6 +464,197 @@ exports.BespinScrollerView = CanvasView.extend({
 
         ctx.restore();
         // End master drawing context
+    },
+
+    /**
+     * Returns the actual maximum value, which will be less than the maximum
+     * due to accounting for the frame length.
+     */
+    getMaximumValue: function() {
+        return Math.max(this.getPath('parentView.maximum') -
+            this._getFrameLength(), 0);
+    },
+
+    mouseDown: function(evt) {
+        var parentView = this.get('parentView');
+        var value = parentView.get('value');
+        var gutterLength = this._getGutterLength();
+
+        switch (this._segmentForMouseEvent(evt)) {
+        case 'nib-start':
+            parentView.set('value', value - this.get('lineHeight'));
+            break;
+        case 'nib-end':
+            parentView.set('value', value + this.get('lineHeight'));
+            break;
+        case 'gutter-before':
+            parentView.set('value', value - gutterLength);
+            break;
+        case 'gutter-after':
+            parentView.set('value', value + gutterLength);
+            break;
+        case 'handle':
+            switch (parentView.get('layoutDirection')) {
+            case SC.LAYOUT_HORIZONTAL:
+                this._mouseDownScreenPoint = evt.clientX;
+                break;
+            case SC.LAYOUT_VERTICAL:
+                this._mouseDownScreenPoint = evt.clientY;
+                break;
+            default:
+                console.assert(false, "unknown layout direction");
+                break;
+            }
+        default:
+            console.assert("_segmentForMouseEvent returned an unknown value");
+            break;
+        }
+    },
+
+    mouseDragged: function(evt) {
+        var parentView = this.get('parentView');
+
+        var eventDistance;
+        switch (parentView.get('layoutDirection')) {
+        case SC.LAYOUT_HORIZONTAL:
+            eventDistance = evt.clientX;
+            break;
+        case SC.LAYOUT_VERTICAL:
+            eventDistance = evt.clientY;
+            break;
+        default:
+            console.assert(false, "unknown layout direction");
+            break;
+        }
+
+        var eventDelta = eventDistance - this._mouseDownScreenPoint;
+
+        var maximum = parentView.get('maximum');
+        var gutterLength = this._getGutterLength();
+
+        var oldValue = parentView.get('value');
+        parentView.set('value', oldValue + eventDelta * maximum /
+            gutterLength);
+
+        // If we didn't actually move, don't update the reference point.
+        if (parentView.get('value') !== oldValue) {
+            this._mouseDownScreenPoint = eventDistance;
+        }
+    },
+
+    mouseEntered: function(evt) {
+        this._isMouseOver = true;
+        this.setNeedsDisplay();
+    },
+
+    mouseExited: function(evt) {
+        this._isMouseOver = false;
+        this.setNeedsDisplay();
+    },
+
+    mouseUp: function(evt) {
+        this._mouseDownScreenPoint = null;
+        this._mouseDownValue = null;
+    },
+
+    mouseWheel: function(evt) {
+        var parentView = this.get('parentView');
+
+        var delta;
+        switch (parentView.get('layoutDirection')) {
+        case SC.LAYOUT_HORIZONTAL:
+            delta = evt.wheelDeltaX;
+            break;
+        case SC.LAYOUT_VERTICAL:
+            delta = evt.wheelDeltaY;
+            break;
+        default:
+            console.assert(false, "unknown layout direction");
+            return;
+        }
+
+        parentView.set('value', parentView.get('value') + 2*delta);
+    }
+});
+
+/**
+ * @class
+ *
+ * A canvas-based scroller view.
+ */
+exports.BespinScrollerView = SC.View.extend({
+    _scrollerCanvasView: null,
+
+    _frameChanged: function() {
+        this._scrollerCanvasView.adjustFrame();
+    }.observes('frame'),
+
+    _maximumChanged: function() {
+        this._scrollerCanvasView.adjustFrame();
+    }.observes('maximum'),
+
+    _valueChanged: function() {
+        var scrollerCanvasView = this._scrollerCanvasView;
+        var maximumValue = scrollerCanvasView.getMaximumValue();
+
+        var value = this.get('value');
+        if (value < 0) {
+            this.set('value', 0);
+        } else if (value > maximumValue) {
+            this.set('value', maximumValue);
+        }
+
+        scrollerCanvasView.setNeedsDisplay();
+    }.observes('value'),
+
+    /**
+     * @property
+     * Specifies the direction of the scroll bar: one of SC.LAYOUT_HORIZONTAL
+     * or SC.LAYOUT_VERTICAL.
+     *
+     * Changes to this value after the view has been created have no effect.
+     */
+    layoutDirection: SC.LAYOUT_VERTICAL,
+
+    /**
+     * @property{Number}
+     * The maximum value for the scroll bar.
+     *
+     * TODO: When set to a value less than the width or height of the knob, the
+     * scroll bar is disabled.
+     *
+     */
+    maximum: 0,
+
+    /**
+     * @property
+     * The dimensions of transparent space inside the frame, given as an object
+     * with 'left', 'bottom', 'top', and 'right' properties.
+     *
+     * Note that the scrollerThickness property includes the padding on the
+     * sides of the bar.
+     */
+    padding: { left: 0, bottom: 0, top: 0, right: 0 },
+
+    /**
+     * @property
+     * The thickness of this scroll bar. The default is
+     * SC.NATURAL_SCROLLER_THICKNESS.
+     */
+    scrollerThickness: SC.NATURAL_SCROLLER_THICKNESS,
+
+    /**
+     * @property
+     * The current position that the scroll bar is scrolled to.
+     */
+    value: 0,
+
+    createChildViews: function() {
+        var scrollerCanvasView = this.createChildView(ScrollerCanvasView);
+        scrollerCanvasView.adjustFrame();
+        this._scrollerCanvasView = scrollerCanvasView;
+
+        this.set('childViews', [ scrollerCanvasView ]);
     }
 });
 

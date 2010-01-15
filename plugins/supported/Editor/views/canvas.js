@@ -31,10 +31,11 @@ var Rect = require('utils/rect');
  * This class provides support for manual scrolling and positioning for canvas-
  * based elements. Getting these elements to play nicely with SproutCore is
  * tricky and error-prone, so all canvas-based views should consider deriving
- * from this. Derived views should implement drawRect() in order to perform the
- * appropriate canvas drawing logic, and may want to override the viewport
- * property to determine where the canvas should be placed (for example, to
- * fill the container view).
+ * from this class. Derived views should implement drawRect() in order to
+ * perform the appropriate canvas drawing logic.
+ *
+ * The actual size of the canvas is always the size of the container the canvas
+ * view is placed in.
  */
 exports.CanvasView = SC.View.extend({
     _canvasDom: null,
@@ -57,18 +58,35 @@ exports.CanvasView = SC.View.extend({
     }.observes('clippingFrame'),
 
     _isVisibleInWindowChanged: function() {
-        // Redraw when we become visible. We must do this because we don't draw
-        // when the layer is invisible (as it's impossible: the frame property
-        // is bogus until the layer is visible in the window, and without that
-        // property there's no way to set the canvas width and height
-        // properly).
-        this.updateLayout();
-        this.redraw();
+        if (this.get('isVisibleInWindow')) {
+            this.redraw();
+        }
     }.observes('isVisibleInWindow'),
 
-    _layerFrameDidChange: function() {
-        this.updateLayout();
-    }.observes('layerFrame'),
+    _layoutChanged: function() {
+        this._resizeToFit();
+    }.observes('layout'),
+
+    _parentViewFrameChanged: function() {
+        this._resizeToFit();
+    },
+
+    _resizeToFit: function() {
+        var parentFrame = this.getPath('parentView.frame');
+        var frame = this.get('frame');
+        var frameWidth = frame.width, frameHeight = frame.height;
+        var parentWidth = parentFrame.width, parentHeight = parentFrame.height;
+        if (frameWidth >= parentWidth && frameHeight >= parentHeight) {
+            return;
+        }
+
+        this.set('layout', {
+            left:   frame.x,
+            top:    frame.y,
+            width:  Math.max(frameWidth, parentWidth),
+            height: Math.max(frameHeight, parentHeight)
+        });
+    },
 
     /**
      * @property{2DContext}
@@ -79,24 +97,7 @@ exports.CanvasView = SC.View.extend({
         return this.get('_canvasDom').getContext('2d')
     }.property('_canvasDom').cacheable(),
 
-    /**
-     * @property{Rect}
-     *
-     * Specifies the size and position of the canvas element. By default, this
-     * property is bound to the frame property, but canvas views that want to
-     * fill the boundaries of their parent views should override this property.
-     */
-    layerFrame: function() {
-        return this.get('frame');
-    }.property('frame').cacheable(),
-
-    layoutStyle: function() {
-        var layerFrame = this.get('layerFrame');
-        return {
-            left:   "%@px".fmt(layerFrame.x),
-            top:    "%@px".fmt(layerFrame.y)
-        };
-    }.property('layerFrame').cacheable(),
+    layoutStyle: { left: "0px", top: "0px" },
 
     /**
      * @property{Number}
@@ -109,6 +110,8 @@ exports.CanvasView = SC.View.extend({
     init: function() {
         arguments.callee.base.apply(this, arguments);
         this._invalidRects = [];
+        this.get('parentView').addObserver('frame', this,
+            this._parentViewFrameChanged);
     },
 
     /**
@@ -128,11 +131,10 @@ exports.CanvasView = SC.View.extend({
         if (frame.x < 0) {
             this.computeFrameWithParentFrame(null);
         }
-        var layerFrame = this.get('layerFrame');
 
         var context = this.get('canvasContext2D');
         context.save();
-        context.translate(frame.x - layerFrame.x, frame.y - layerFrame.y);
+        context.translate(frame.x, frame.y);
 
         var clippingFrame = this.get('clippingFrame');
         this._invalidRects.forEach(function(rect) {
@@ -166,20 +168,59 @@ exports.CanvasView = SC.View.extend({
     renderLayout: function(context, firstTime) {
         arguments.callee.base.apply(this, arguments);
 
-        var layerFrame = this.get('layerFrame');
+        var parentFrame = this.getPath('parentView.frame');
         if (firstTime) {
-            context.attr('width', layerFrame.width);
-            context.attr('height', layerFrame.height);
+            context.attr('width', parentFrame.width);
+            context.attr('height', parentFrame.height);
             return;
         }
 
         var canvas = this._canvasDom;
-        if (canvas.width !== layerFrame.width) {
-            canvas.width = layerFrame.width;
+        if (canvas.width !== parentFrame.width) {
+            canvas.width = parentFrame.width;
         }
-        if (canvas.height !== layerFrame.height) {
-            canvas.height = layerFrame.height;
+        if (canvas.height !== parentFrame.height) {
+            canvas.height = parentFrame.height;
         }
+    },
+
+    /**
+     * Subclasses should override this method to perform any drawing that they
+     * need to.
+     *
+     * @param rect{Rect} The rectangle to draw in.
+     * @param context{CanvasRenderingContext2D} The 2D graphics context, taken
+     *   from the canvas.
+     */
+    drawRect: function(rect, context) {
+        // empty
+    },
+
+    didCreateLayer: function() {
+        arguments.callee.base.apply(this, arguments);
+        this.set('_canvasDom', this.$("#" + this._canvasId)[0]);
+    },
+
+    render: function(context, firstTime) {
+        arguments.callee.base.apply(this, arguments);
+
+        if (firstTime) {
+            var parentFrame = this.getPath('parentView.frame');
+            var canvasContext = context.begin("canvas");
+            this._canvasId = SC.guidFor(canvasContext);
+            canvasContext.id(this._canvasId);
+            canvasContext.attr("width", "" + parentFrame.width);
+            canvasContext.attr("height", "" + parentFrame.height);
+            canvasContext.push("canvas tag not supported by your browser");
+            canvasContext.end();
+            return;
+        }
+
+        // The render() method can actually get called multiple times during a
+        // run loop, because other calls to render() can be queued after the
+        // first render() runs. This workaround forces tryRedraw() to be called
+        // only once per run loop.
+        SC.RunLoop.currentRunLoop.invokeLast(this, this.tryRedraw);
     },
 
     /**
@@ -205,46 +246,6 @@ exports.CanvasView = SC.View.extend({
     setNeedsDisplayInRect: function(rect) {
         this._invalidRects = Rect.addRectToSet(this._invalidRects, rect);
         this.set('layerNeedsUpdate', true);
-    },
-
-    /**
-     * Subclasses should override this method to perform any drawing that they
-     * need to.
-     *
-     * @param rect{Rect} The rectangle to draw in.
-     * @param context{CanvasRenderingContext2D} The 2D graphics context, taken
-     *   from the canvas.
-     */
-    drawRect: function(rect, context) {
-        // empty
-    },
-
-    didCreateLayer: function() {
-        arguments.callee.base.apply(this, arguments);
-        this.set('_canvasDom', this.$("#" +
-            this._canvasId)[0]);
-    },
-
-    render: function(context, firstTime) {
-        arguments.callee.base.apply(this, arguments);
-
-        if (firstTime) {
-            var layerFrame = this.get('layerFrame');
-            var canvasContext = context.begin("canvas");
-            this._canvasId = SC.guidFor(canvasContext);
-            canvasContext.id(this._canvasId);
-            canvasContext.attr("width", "" + layerFrame.width);
-            canvasContext.attr("height", "" + layerFrame.height);
-            canvasContext.push("canvas tag not supported by your browser");
-            canvasContext.end();
-            return;
-        }
-
-        // The render() method can actually get called multiple times during a
-        // run loop, because other calls to render() can be queued after the
-        // first render() runs. This workaround forces tryRedraw() to be called
-        // only once per run loop.
-        SC.RunLoop.currentRunLoop.invokeLast(this, this.tryRedraw);
     },
 
     tryRedraw: function(context, firstTime) {

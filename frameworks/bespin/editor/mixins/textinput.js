@@ -136,13 +136,13 @@ exports.TextInput = {
         if (firstTime) {
             // Add a textarea to handle focus, copy & paste and key input
             // within the current view and hide it under the view.
-            var layerFrame = this.get('layerFrame');
+            var frame = this.get('frame');
             var textFieldContext = context.begin("textarea");
             this._TextInput_textFieldId = SC.guidFor(textFieldContext);
             textFieldContext.id(this._TextInput_textFieldId);
             textFieldContext.attr("style", ("position: absolute; " +
                 "z-index: -99999; top: 0px; left: 0px; width: %@px; " +
-                "height: %@px").fmt(layerFrame.width, layerFrame.height));
+                "height: %@px").fmt(frame.width, frame.height));
             textFieldContext.end();
         }
     },

@@ -85,22 +85,22 @@ exports.EditorView = SC.View.extend(SC.Border, {
     },
 
     _scrollViewVerticalScrollOffsetChanged: function() {
-        this.get('gutterView').adjust({
-            top: -this.getPath('scrollView.verticalScrollOffset')
-        });
+        // FIXME: property binding?
+        this.setPath('gutterView.verticalScrollOffset',
+            this.getPath('scrollView.verticalScrollOffset'));
     },
 
     createChildViews: function() {
         var layoutManager = this.get('layoutManager');
 
+        var scrollViewClass = this.get('scrollView');
+
         var gutterView = this.createChildView(this.get('gutterView'), {
-            layout:         { left: 0, top: 0 },
-            layoutManager:  layoutManager
+            layoutManager: layoutManager
         });
         this.set('gutterView', gutterView);
         gutterView.addObserver('frame', this, this._gutterViewFrameChanged);
 
-        var scrollViewClass = this.get('scrollView');
         var textViewClass = this.get('textView');
         var scrollView = this.createChildView(scrollViewClass, {
             contentView: textViewClass.extend({
