@@ -67,6 +67,25 @@ var util = require("bespin:util/util");
 var EditorView = require('Editor:views/editor').EditorView;
 var KeyListener = require('AppSupport:views/keylistener').KeyListener;
 
+var attachEmbeddedEvents = function(pane, bespin) {
+    var paneLayer = pane.get('layer');
+
+    var becomeKey = function() { bespin.setFocus(true);     };
+    var resignKey = function() { bespin.setFocus(false);    };
+
+    var addFocusEvents = function(element, isPane) {
+        while (element !== null) {
+            var thisIsPane = isPane || element === paneLayer;
+            element.addEventListener('mousedown',
+                thisIsPane ? becomeKey : resignKey, true);
+            addFocusEvents(element.firstChild, thisIsPane);
+            element = element.nextSibling;
+        }
+    };
+
+    addFocusEvents(document.body, false);
+};
+
 var computeLayout = function(element) {
     var layout = {
         top:    0,
@@ -83,6 +102,8 @@ var computeLayout = function(element) {
 };
 
 exports.EmbeddedEditor = SC.Object.extend({
+    _focused: false,
+
     setContent: function(text) {
         SC.RunLoop.begin();
         this.setPath("editorPane.editorView.layoutManager.textStorage.value", text);
@@ -95,11 +116,14 @@ exports.EmbeddedEditor = SC.Object.extend({
     
     setFocus: function(makeFocused) {
         var editorPane = this.get("editorPane");
+        if (this._focused === makeFocused) {
+            return;
+        }
+
+        this._focused = makeFocused;
         if (makeFocused) {
-            editorPane.makeFirstResponder();
             editorPane.becomeKeyPane();
         } else {
-            editorPane.resignFirstResponder();
             editorPane.resignKeyPane();
         }
     },
@@ -234,6 +258,8 @@ exports.useBespin = function(element, options) {
                 window.addEventListener('onresize', handler);
             }
         }
+
+        attachEmbeddedEvents(editorPane, bespin);
     });
     
     return bespin;
