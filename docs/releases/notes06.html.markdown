@@ -18,6 +18,9 @@ in the editor.
 Features
 --------
 
+* The license has changed! Bespin 0.6 onward is now licensed with the
+  tri-license commonly used by Mozilla projects. MPL/GPL/LGPL. This means
+  that Bespin is now official GPL compatible.
 * The Editor component has been completely revamped as a SproutCore component.
   It now more closely follows the Model/View/Controller pattern.
 * Non-US characters and keyboards now work with Bespin. A big thanks to Julian
