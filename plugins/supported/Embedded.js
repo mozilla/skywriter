@@ -24,7 +24,7 @@
  
 "define metadata";
 ({
-    "depends": ["Editor"]
+    "depends": [ "AppSupport", "Editor" ]
 });
 "end";
 
@@ -38,6 +38,7 @@ var SC = require("sproutcore/runtime").SC;
 var bespin = require("bespin:index");
 var util = require("bespin:util/util");
 var EditorView = require('Editor:views/editor').EditorView;
+var KeyListener = require('AppSupport:views/keylistener').KeyListener;
 
 var computeLayout = function(element) {
     var layout = {
@@ -128,6 +129,7 @@ exports.useBespin = function(element, options) {
     
     var editorPane = SC.Pane.create({
         childViews: "editorView".w(),
+        defaultResponder: KeyListener.create(),
         editorView: EditorView.design(),
         
         layout: computeLayout(element),
