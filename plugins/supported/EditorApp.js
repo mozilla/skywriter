@@ -25,7 +25,8 @@
 "define metadata";
 ({
     "depends": [
-        "AppSupport", "CommandLine", "Editor", "UserIdent", "Settings"
+        "AppSupport", "CommandLine", "Editor", "UserIdent", "Settings",
+        "PluginDev"
     ],
     "provides": [
         {
@@ -33,6 +34,18 @@
             "name":     "applicationcontroller",
             "pointer":  "#applicationController",
             "action":   "create"
+        },
+        {
+            "ep": "factory",
+            "name": "view",
+            "pointer": "#view",
+            "action": "value"
+        },
+        {
+            "ep": "factory",
+            "name": "model",
+            "pointer": "#model",
+            "action": "value"
         }
     ]
 });
@@ -73,6 +86,9 @@ exports.applicationController = SC.Object.extend({
         mainPane.setPath('applicationView.centerView.layoutManager.' +
             'textStorage.value', INITIAL_TEXT);
         mainPane.append();
+        exports.view = mainPane.getPath("applicationView.centerView.textView");
+        exports.model = mainPane.getPath('applicationView.centerView.layoutManager.' +
+            'textStorage');
     }
 });
 

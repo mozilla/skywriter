@@ -24,16 +24,13 @@
 
 var SC = require("sproutcore/runtime").SC;
 
+var BaseInstruction = require("Canon:instruction").Instruction;
+
 /**
  * Wrapper for something that the user typed
  */
-exports.Instruction = SC.Object.extend({
+exports.Instruction = BaseInstruction.extend({
     typed: null,
-    output: "",
-    _outstanding: 0,
-    _callbacks: [],
-    completed: false,
-    historical: false,
     canon: null,
 
     /**
@@ -57,68 +54,6 @@ exports.Instruction = SC.Object.extend({
     },
 
     /**
-     * Execute the command
-     */
-    exec: function() {
-        try {
-            if (this._parseError) {
-                this.addErrorOutput(this._parseError);
-            } else {
-                this.command.execute(this, this.args, this.command);
-            }
-        }
-        catch (ex) {
-            if (ex instanceof TypeError) {
-                console.error(ex);
-            }
-            this.addErrorOutput(ex);
-        }
-        finally {
-            if (this._outstanding == 0) {
-                this.completed = true;
-                this._callbacks.forEach(function(callback) {
-                    callback();
-                });
-            }
-        }
-    },
-
-    /**
-     * Link Function to Instruction
-     * Make a function be part of the thread of execution of an instruction
-     */
-    link: function(action, context) {
-        this._outstanding++;
-
-        return function() {
-            try {
-                action.apply(context || window, arguments);
-            } finally {
-                this._outstanding--;
-
-                if (this._outstanding === 0) {
-                    this.completed = true;
-                    this._callbacks.forEach(function(callback) {
-                        callback();
-                    });
-                }
-            }
-        }.bind(this);
-    },
-
-    /**
-     * A hack to allow an instruction that has called link to forget all the
-     * linked functions.
-     */
-    unlink: function() {
-        this._outstanding = 0;
-        this.completed = true;
-        this._callbacks.forEach(function(callback) {
-            callback();
-        });
-    },
-
-    /**
      * A string version of this Instruction suitable for serialization
      */
     toString: function() {
@@ -127,72 +62,6 @@ exports.Instruction = SC.Object.extend({
             output: this.output,
             start: this.start ? this.start.getTime() : -1,
             end: this.end ? this.end.getTime() : -1
-        });
-    },
-
-    /**
-     * Complete the currently executing command with successful output
-     */
-    addOutput: function(html) {
-        if (html && html !== "") {
-            if (this.output !== "") {
-                this.output += "<br/>";
-            }
-            this.output += html;
-        }
-
-        this.element = null;
-        this.hideOutput = false;
-        this.end = new Date();
-
-        this._callbacks.forEach(function(callback) {
-            callback(html);
-        });
-    },
-
-    /**
-     * Complete the currently executing command with error output
-     */
-    addErrorOutput: function(html) {
-        this.error = true;
-        this.addOutput(html);
-    },
-
-    /**
-     * Complete the currently executing command with usage output
-     * TODO: Why do we need to pass the command in?
-     */
-    addUsageOutput: function(command) {
-        this.error = true;
-        var usage = command.usage || "no usage information found for " + command.name;
-        this.addOutput("Usage: " + command.name + " " + usage);
-    },
-
-    /**
-     * Monitor output that goes to an instruction
-     */
-    onOutput: function(callback) {
-        // Catch-up on the output so far
-        callback.call(null, this.output);
-
-        this._callbacks.push(callback);
-
-        // TODO: return an element to allow us to unregister the listener
-    },
-
-    /**
-     * Instead of doing output by appending strings, commands can pass in a
-     * DOM node that they update. It is assumed that commands doing this will
-     * provide their own progress indicators.
-     */
-    setElement: function(element) {
-        this.element = element;
-        this.end = new Date();
-        this.hideOutput = false;
-        this.error = false;
-
-        this._callbacks.forEach(function(callback) {
-            callback();
         });
     },
 

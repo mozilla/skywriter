@@ -2,6 +2,38 @@
     "depends": [],
     "provides": [
         {
+            "ep": "extensionpoint",
+            "name": "argumentType",
+            "description": "Commands can accept various arguments that the user enters or that are automatically supplied by the environment. Those arguments have types that define how they are supplied or completed. The pointer points to an object with methods convert(str value) and getDefault(). Both functions have `this` set to the command's `takes` parameter. If getDefault is not defined, the default on the command's `takes` is used, if there is one. The object can have a noInput property that is set to true to reflect that this type is provided directly by the system. getDefault must be defined in that case.",
+            "indexOn": "name"
+        },
+        {
+            "ep": "argumentType",
+            "name": "string",
+            "description": "Text that the user needs to enter.",
+            "pointer": "arguments#string"
+        },
+        {
+            "ep": "argumentType",
+            "name": "int",
+            "description": "An integer",
+            "pointer": "arguments#integer"
+        },
+        {
+            "ep": "argumentType",
+            "name": "model",
+            "noInput": true,
+            "description": "the editor model",
+            "pointer": "arguments#model"
+        },
+        {
+            "ep": "argumentType",
+            "name": "view",
+            "noInput": true,
+            "description": "the editor view",
+            "pointer": "arguments#view"
+        },
+        {
             "ep": "extensionhandler",
             "name": "command",
             "register": "directory#newCommandHandler"

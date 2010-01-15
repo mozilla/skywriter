@@ -6,95 +6,88 @@
             "name": "backspace",
             "key": "backspace",
             "predicates": [ "isTextView", true ],
-            "action": "backspace"
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
-            "name": "move-down",
+            "name": "moveDown",
             "key": "down",
             "predicates": [ "isTextView", true ],
-            "action": "moveDown"
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
-            "name": "move-left",
+            "name": "moveLeft",
             "key": "left",
             "predicates": [ "isTextView", true ],
-            "action": "moveLeft"
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
-            "name": "move-right",
+            "name": "moveRight",
             "key": "right",
             "predicates": [ "isTextView", true ],
-            "action": "moveRight"
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
-            "name": "move-up",
+            "name": "moveUp",
             "key": "up",
             "predicates": [ "isTextView", true ],
-            "action": "moveUp"
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "newline",
             "key": "return",
             "predicates": [ "isTextView", true ],
-            "action": "newline"
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
-            "name": "select-down",
+            "name": "selectDown",
             "key": "shift_down",
             "predicates": [ "isTextView", true ],
-            "action": "selectDown"
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
-            "name": "select-left",
+            "name": "selectLeft",
             "key": "shift_left",
             "predicates": [ "isTextView", true ],
-            "action": "selectLeft"
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
-            "name": "select-right",
+            "name": "selectRight",
             "key": "shift_right",
             "predicates": [ "isTextView", true ],
-            "action": "selectRight"
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
-            "name": "select-up",
+            "name": "selectUp",
             "key": "shift_up",
             "predicates": [ "isTextView", true ],
-            "action": "selectUp"
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "tab",
             "key": "tab",
             "predicates": [ "isTextView", true ],
-            "action": "tab"
-        },
-        {
-            "ep": "factory",
-            "name": "textstorage",
-            "action": "value",
-            "pointer": "models/textstorage#TextStorage"
-        },
-        {
-            "ep": "factory",
-            "name": "layoutmanager",
-            "action": "value",
-            "pointer": "controllers/layoutmanager#LayoutManager"
-        },
-        {
-            "ep": "factory",
-            "name": "textview",
-            "action": "value",
-            "pointer": "views/text#TextView"
+            "takes": [{"type": "view"}],
+            "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",

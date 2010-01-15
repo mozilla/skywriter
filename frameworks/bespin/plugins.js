@@ -42,6 +42,10 @@ if (!object_keys) {
 }
 
 var _splitPointer = function(pluginName, pointer) {
+    if (!pointer) {
+        return undefined;
+    }
+    
     var parts = pointer.split("#");
     var modName;
     
@@ -79,6 +83,12 @@ exports.Extension = SC.Object.extend({
     
     load: function(callback, property) {
         var pointer = this._getPointer(property);
+        
+        if (!pointer) {
+            console.error("Extension cannot be loaded because it has no poitner");
+            console.log(this);
+            return;
+        }
         
         var self = this;
 

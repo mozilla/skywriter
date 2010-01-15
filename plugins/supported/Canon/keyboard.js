@@ -23,7 +23,9 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var catalog = require('bespin:plugins').catalog;
+var Instruction = require("instruction").Instruction;
+
+var canon = require("directory").rootCanon;
 
 /**
  * The canon, or the repository of commands, contains functions to process
@@ -52,15 +54,18 @@ var KeyboardManager = SC.Object.extend({
      */
     processKeyEvent: function(evt, sender, flags) {
         var symbolicName = evt.commandCodes()[0];
-        var commands = catalog.getExtensions('command');
-        for (var i = 0; i < commands.length; i++) {
-            var command = commands[i];
+        var commands = canon.get("commands");
+        for (var key in commands) {
+            var command = commands[key];
             if (command.key === symbolicName &&
                     this._commandMatches(command, flags)) {
-                var targetID = command.target;
-                var target = SC.none(targetID) ? sender :
-                    catalog.getObject(targetID);
-                target[command.action]();
+                command.getArgs([], function(args) {
+                    var instruction = Instruction.create({
+                        command: command,
+                        args: args
+                    });
+                    instruction.exec();
+                });
                 return true;
             }
         }
