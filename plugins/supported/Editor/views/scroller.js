@@ -75,7 +75,7 @@ var ScrollerCanvasView = CanvasView.extend({
     _drawNib: function(ctx) {
         var theme = this.get('theme');
         var fillStyle, arrowStyle, strokeStyle;
-        if (this._isMouseOver) {
+        if (this._isHighlighted()) {
             fillStyle   = theme.fullNibStyle;
             arrowStyle  = theme.fullNibArrowStyle;
             strokeStyle = theme.fullNibStrokeStyle;
@@ -107,12 +107,12 @@ var ScrollerCanvasView = CanvasView.extend({
     },
 
     _drawNibs: function(ctx) {
-        var isMouseOver = this._isMouseOver;
         var thickness = this._getClientThickness();
         var value = this.getPath('parentView.value');
+        var highlighted = this._isHighlighted();
 
         // Starting nib
-        if (isMouseOver || value !== 0) {
+        if (highlighted || value !== 0) {
             ctx.save();
             ctx.translate(NIB_PADDING, thickness / 2);
             ctx.rotate(Math.PI * 1.5);
@@ -122,7 +122,7 @@ var ScrollerCanvasView = CanvasView.extend({
         }
 
         // Ending nib
-        if (isMouseOver || value !== this.getMaximumValue()) {
+        if (highlighted || value !== this.getMaximumValue()) {
             ctx.save();
             ctx.translate(this._getClientLength() - NIB_PADDING,
                 thickness / 2);
@@ -274,6 +274,12 @@ var ScrollerCanvasView = CanvasView.extend({
         }
     },
 
+    // Determines whether the scroll bar is highlighted.
+    _isHighlighted: function() {
+        return this._isMouseOver === true ||
+            this._mouseDownScreenPoint !== null;
+    },
+
     _segmentForMouseEvent: function(evt) {
         var point = this.convertFrameFromView({ x: evt.pageX, y: evt.pageY });
         var clientFrame = this._getClientFrame();
@@ -350,6 +356,7 @@ var ScrollerCanvasView = CanvasView.extend({
     drawRect: function(rect, ctx) {
         var alpha = (ctx.globalAlpha) ? ctx.globalAlpha : 1;
         var theme = this.get('theme');
+        var highlighted = this._isHighlighted();
 
         var frame = this.get('frame');
         ctx.clearRect(0, 0, frame.width, frame.height);
@@ -395,7 +402,7 @@ var ScrollerCanvasView = CanvasView.extend({
             return; // Don't display the scroll bar.
         }
 
-        if (this._isMouseOver === false) {
+        if (!highlighted) {
             ctx.globalAlpha = 0.3;
         } else {
             // Draw the scroll track rectangle.
@@ -469,7 +476,7 @@ var ScrollerCanvasView = CanvasView.extend({
         ctx.restore();
         // End handle outline context
 
-        if (this._isMouseOver === false) {
+        if (!highlighted) {
             ctx.globalAlpha = 1.0;
         }
 
@@ -568,6 +575,7 @@ var ScrollerCanvasView = CanvasView.extend({
     mouseUp: function(evt) {
         this._mouseDownScreenPoint = null;
         this._mouseDownValue = null;
+        this.setNeedsDisplay();
     },
 
     mouseWheel: function(evt) {
