@@ -46,7 +46,7 @@ exports.Instruction = BaseInstruction.extend({
             var ca = this._splitCommandAndArgs(this.canon, this.typed);
             if (ca) {
                 this.command = ca[0];
-                this.args = ca[1];
+                this.argList = ca[1];
             }
         } else {
             this.completed = true;
@@ -132,6 +132,6 @@ exports.Instruction = BaseInstruction.extend({
             return this._splitCommandAndArgs(command.subcommands, argstr, command);
         }
 
-        return [command, canon.getArgs(argstr.split(' '), command)];
+        return [command, argstr.split(' ')];
     }
 });

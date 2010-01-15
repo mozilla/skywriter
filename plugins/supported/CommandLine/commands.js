@@ -28,8 +28,8 @@ var rootCanon = require("Canon:directory").rootCanon;
 /**
  * TODO: make this automatic
  */
-exports.helpCommand = function(instruction, extra) {
-    var output = this.parent.getHelp(extra, {
+exports.helpCommand = function(instruction, args) {
+    var output = this.parent.getHelp(args.search, {
         prefix: "<h2>Welcome to Bespin - Code in the Cloud</h2><ul>" +
             "<li><a href='http://labs.mozilla.com/projects/bespin' target='_blank'>Home Page</a>" +
             "<li><a href='https://wiki.mozilla.org/Labs/Bespin' target='_blank'>Wiki</a>" +

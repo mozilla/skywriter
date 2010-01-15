@@ -54,7 +54,7 @@ exports.cliController = SC.Object.create({
         console.log("executeCommand '" + typed + "'");
 
         if (!typed || typed === "") {
-            return null;
+            return;
         }
 
         var instruction = Instruction.create({
@@ -69,9 +69,11 @@ exports.cliController = SC.Object.create({
         instruction.onOutput(function() {
             this.history.update();
         }.bind(this));
-
-        instruction.exec();
-        return instruction;
+        
+        instruction.command.getArgs(instruction.argList, function(args) {
+            instruction.set("args", args);
+            instruction.exec();
+        });
     },
 
     /**

@@ -458,7 +458,7 @@ exports.Canon = SC.Object.extend({
                     continue;
                 }
 
-                var args = (command.takes) ? ' [' + command.takes.order.join('] [') + ']' : '';
+                var args = (command.takes) ? ' [' + command._paramList.split(' ').join('] [') + ']' : '';
 
                 commands.push("<tr>");
                 commands.push('<th>' + name + '</th>');
