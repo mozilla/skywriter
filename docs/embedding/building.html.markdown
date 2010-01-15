@@ -86,7 +86,7 @@ in the MyPlugins directory that you just created.
             {
                 "ep": "command",
                 "name": "alert",
-                "key": "cmd_a",
+                "key": "meta_a",
                 "pointer": "#showMessage"
             }
         ]
@@ -97,7 +97,18 @@ in the MyPlugins directory that you just created.
         alert("Greetings from the Cloud!");
     };
 
+OK, now we're all set to try out our new plugin in a customized Bespin.
+We'll use the dryice tool (described in more detail in the next section)
+to create the build. Switch to the Bespin Embedded directory and then
+run:
 
+    python dryice.py ../mybespin.json
+    cd tmp
+    
+If you look at the files in your tmp directory, you'll see a fresh
+BespinEmbedded.js. That one will actually include your plugin! Open the
+sample.html file in your web browser, click on the editor and press
+cmd-A (probably alt-A on Windows) and you'll see your alert pop up.
 
 ## Building ##
 
