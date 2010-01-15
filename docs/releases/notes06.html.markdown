@@ -29,7 +29,8 @@ Features
 * The Customizable package includes the new "dryice" build tool. Using dryice,
   you can build an embedded version with whichever collection of plugins you
   need.
-* The Command Line is back, mounted at the bottom of the editor.
+* The Command Line is back, mounted at the bottom of the editor. It is not
+  yet available in the Embedded version.
 * Command line output is now in a view that appears above the command line.
   This view automatically disappears when you leave the command line, but it
   can also be "pinned" below the editor.
