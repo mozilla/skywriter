@@ -14,6 +14,12 @@ of the editor component, so it is likely that there will be some new bugs
 in the editor.
 
 * Command line completion is not yet implemented. (bug 539446)
+* Syntax highlighting is not back yet
+* Text selection in fields *other than* the Bespin editor on the page (in an
+  embedded use) does not work (bug 540081)
+* The editor has gotten larger by about 100K (before gzipping). Shrinking
+  it down is fairly low priority at the moment.
+* The cursor doesn't blink (bug 540112)
 
 Features
 --------
