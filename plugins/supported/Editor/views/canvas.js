@@ -189,11 +189,16 @@ exports.CanvasView = SC.View.extend({
         }
 
         var canvas = this._canvasDom;
-        if (canvas.width !== parentFrame.width) {
+        var widthChanged = canvas.width !== parentFrame.width;
+        var heightChanged = canvas.height !== parentFrame.height;
+        if (widthChanged) {
             canvas.width = parentFrame.width;
         }
-        if (canvas.height !== parentFrame.height) {
+        if (heightChanged) {
             canvas.height = parentFrame.height;
+        }
+        if (widthChanged || heightChanged) {
+            this.setNeedsDisplay();
         }
     },
 

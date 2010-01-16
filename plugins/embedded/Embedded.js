@@ -129,9 +129,9 @@ exports.EmbeddedEditor = SC.Object.extend({
     },
     
     /**
-     * This function must be called whenever the position or size of the element
-     * containing the Bespin editor might have changed. It triggers a layout
-     * change.
+     * This function must be called whenever the position or size of the
+     * element containing the Bespin editor might have changed. It triggers a
+     * layout change.
      */
     dimensionsChanged: function() {
         SC.RunLoop.begin();
