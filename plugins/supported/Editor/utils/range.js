@@ -116,6 +116,17 @@ exports.maxPosition = function(a, b) {
 };
 
 /**
+ * Converts a range with swapped 'end' and 'start' values into one with the
+ * values in the correct order.
+ *
+ * TODO: Unit test.
+ */
+exports.normalizeRange = function(range) {
+    return this.comparePositions(range.start, range.end) < 0 ? range :
+        { start: range.end, end: range.start };
+};
+
+/**
  * Returns a single range that spans the entire given set of ranges.
  */
 exports.rangeSetBoundaries = function(rangeSet) {

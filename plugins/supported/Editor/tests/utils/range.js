@@ -94,6 +94,30 @@ exports.testMaxPosition = function() {
         { row: 0, column: 0 }), { row: 0, column: 1 }, "max(0,1 0,0) = 0,1");
 };
 
+exports.testNormalizeRange = function() {
+    t.deepEqual(Range.normalizeRange({
+            start:  { row: 0, column: 0 },
+            end:    { row: 0, column: 0 }
+        }), {
+            start:  { row: 0, column: 0 },
+            end:    { row: 0, column: 0 }
+        }, "normalize(0,0 0,0) and (0,0 0,0)");
+    t.deepEqual(Range.normalizeRange({
+            start:  { row: 1, column: 2 },
+            end:    { row: 3, column: 4 }
+        }), {
+            start:  { row: 1, column: 2 },
+            end:    { row: 3, column: 4 }
+        }, "normalize(1,2 3,4) and (1,2 3,4)");
+    t.deepEqual(Range.normalizeRange({
+            start:  { row: 4, column: 3 },
+            end:    { row: 2, column: 1 }
+        }), {
+            start:  { row: 2, column: 1 },
+            end:    { row: 4, column: 3 }
+        }, "normalize(4,3 2,1) and (2,1 4,3)");
+};
+
 exports.testUnionRanges = function() {
     t.deepEqual(Range.unionRanges({
             start:  { row: 1, column: 2 },
