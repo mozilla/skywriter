@@ -68,7 +68,7 @@
         {
             "ep": "command",
             "name": "selectAll",
-            "key": "ctrl_a",
+            "key": [ "ctrl_a", "meta_a" ],
             "predicates": [ "isTextView", true ],
             "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
