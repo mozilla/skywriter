@@ -29,16 +29,16 @@ var vcs = require("bespin/vcs");
 var server = require("bespin/client/server");
 
 exports.commands = new command.Store(command.store, {
-    name: 'deploy',
-    preview: 'Deploy your project to an external server',
-    subcommanddefault: 'now'
+    "name": "deploy",
+    "description": "Deploy your project to an external server",
+    "subcommanddefault": "now"
 });
 
 exports.commands.addCommand({
-    name: 'help',
-    takes: ['search'],
-    preview: 'show commands for deploy subcommand',
-    completeText: 'optionally, narrow down the search',
+    "name": "help",
+    "takes": [ "search" ],
+    "description": "show commands for deploy subcommand",
+    "completeText": "optionally, narrow down the search",
     execute: function(instruction, extra) {
         var output = this.parent.getHelp(extra, {});
         instruction.addOutput(output);
@@ -58,13 +58,13 @@ exports._createOption = function(select, value, label, currentValue) {
 };
 
 exports.commands.addCommand({
-    name: 'setup',
-    preview: 'Set deployment options for the project',
-    takes: ['project'],
-    completeText: "Optionally provide the project to deploy",
+    "name": "setup",
+    "description": "Set deployment options for the project",
+    "takes": [ "project" ],
+    "completeText": "Optionally provide the project to deploy",
     execute: function(instruction, project) {
         if (!project) {
-            var session = bespin.get('editSession');
+            var session = bespin.get("editSession");
             if (session) {
                 project = session.project;
             }
@@ -202,7 +202,7 @@ exports.commands.addCommand({
 
 exports._deployCommand = function(instruction, project, opts) {
     if (!project) {
-        var session = bespin.get('editSession');
+        var session = bespin.get("editSession");
         if (session) {
             project = session.project;
         }
@@ -258,10 +258,10 @@ exports._deployCommand = function(instruction, project, opts) {
 };
 
 exports.commands.addCommand({
-    name: 'test',
-    preview: 'Do a "dry run" to see what would happen in deployment',
-    takes: ['project'],
-    completeText: "Optionally provide the project to deploy",
+    "name": "test",
+    "description": "Do a 'dry run' to see what would happen in deployment",
+    "takes": [ "project" ],
+    "completeText": "Optionally provide the project to deploy",
     execute: function(instruction, project) {
         exports._deployCommand(instruction, project, {
             dryRun: true
@@ -270,10 +270,10 @@ exports.commands.addCommand({
 });
 
 exports.commands.addCommand({
-    name: 'now',
-    preview: 'Deploy project to the server now',
-    takes: ['project'],
-    completeText: "Optionally provide the project to deploy",
+    "name": "now",
+    "description": "Deploy project to the server now",
+    "takes": [ "project" ],
+    "completeText": "Optionally provide the project to deploy",
     execute: function(instruction, project) {
         exports._deployCommand(instruction, project, {
             dryRun: false
@@ -286,7 +286,7 @@ var saveDeploySetup = function(project, data, opts) {
     opts.evalJSON = true;
     var url = "/project/deploy/" + encodeURI(project) + "/setup";
     data = JSON.stringify(data);
-    bespin.get("server").request('PUT', url, data, opts);
+    bespin.get("server").request("PUT", url, data, opts);
 };
 
 var getDeploySetup = function(project, data, opts) {
@@ -294,7 +294,7 @@ var getDeploySetup = function(project, data, opts) {
     opts.evalJSON = true;
     var url = "/project/deploy/" + encodeURI(project) + "/setup";
     data = JSON.stringify(data);
-    bespin.get("server").request('POST', url, data, opts);
+    bespin.get("server").request("POST", url, data, opts);
 };
 
 var runDeploy = function(instruction, project, data, opts) {
@@ -302,5 +302,5 @@ var runDeploy = function(instruction, project, data, opts) {
     opts.evalJSON = true;
     var url = "/project/deploy/" + encodeURI(project) + "/";
     data = JSON.stringify(data);
-    bespin.get("server").requestDisconnected('POST', url, data, instruction, opts);
+    bespin.get("server").requestDisconnected("POST", url, data, instruction, opts);
 };

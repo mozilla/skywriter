@@ -32,7 +32,7 @@ var command = require("Canon");
  */
 exports.commands = new command.Store(command.store, {
     "name": "vcs",
-    "preview": "run a version control command",
+    "description": "run a version control command",
     "completeText": "subcommands: add, clone, commit, diff, getkey, help, push, remove, resolved, update"
 });
 
@@ -42,7 +42,7 @@ exports.commands = new command.Store(command.store, {
 exports.commands.addCommand({
     "name": "help",
     "takes": [ "search" ],
-    "preview": "show commands for vcs subcommand",
+    "description": "show commands for vcs subcommand",
     "completeText": "optionally, narrow down the search",
     execute: function(instruction, extra) {
         var output = this.parent.getHelp(extra, {
@@ -152,7 +152,7 @@ exports.getInfoFromUser = function(instruction, callback, opts) {
  */
 exports.commands.addCommand({
     "name": "add",
-    "preview": "Adds missing files to the project",
+    "description": "Adds missing files to the project",
     "takes": [ "*" ],
     "completeText": "Use the current file, add -a for all files or add filenames",
     "manual": "Without any options, the vcs add command will add the currently selected file. If you pass in -a, the command will add <em>all</em> files. Finally, you can list files individually.",
@@ -169,7 +169,7 @@ exports.commands.addCommand({
     "name": "clone",
     "takes": [ "url" ],
     "aliases": [ "checkout" ],
-    "preview": "checkout or clone the project into a new Bespin project",
+    "description": "checkout or clone the project into a new Bespin project",
     /**
      * Display the clone dialog to allow the user to fill out additional details
      * to the clone process
@@ -404,7 +404,7 @@ exports.commands.addCommand({
     "name": "commit",
     "takes": [ "message" ],
     "aliases": [ "ci" ],
-    "preview": "Commit to the local (in-bespin) repository",
+    "description": "Commit to the local (in-bespin) repository",
     execute: function(instruction, message) {
         var doCommit = function(values) {
             var project;
@@ -443,7 +443,7 @@ exports.commands.addCommand({
  */
 exports.commands.addCommand({
     "name": "diff",
-    "preview": "Display the differences in the checkout out files",
+    "description": "Display the differences in the checkout out files",
     "takes": [ "*" ],
     "completeText": "Use the current file, add -a for all files or add filenames",
     "manual": "Without any options, the vcs diff command will diff the currently selected file against the repository copy. If you pass in -a, the command will diff <em>all</em> files. Finally, you can list files to diff individually.",
@@ -458,7 +458,7 @@ exports.commands.addCommand({
  */
 exports.commands.addCommand({
     "name": "revert",
-    "preview": "Revert files back to their checked-in state",
+    "description": "Revert files back to their checked-in state",
     "takes": [ "*" ],
     "completeText": "Use the current file, add -a for all files or add filenames",
     "manual": "Without any options, the vcs revert command will revert the currently selected file against the repository copy. If you pass in -a, the command will revert <em>all</em> files. Finally, you can list files to revert individually. No backups are kept!",
@@ -480,7 +480,7 @@ exports.getkey = {
     "name": "getkey",
     "takes": [ "password" ],
     "completeText": "Recommended: Don\'t pass in a password, put it in the following dialog",
-    "preview": "Get your SSH public key that Bespin can use for remote repository authentication. (May prompt for your keychain password)",
+    "description": "Get your SSH public key that Bespin can use for remote repository authentication. (May prompt for your keychain password)",
     execute: function(instruction, kcpass) {
         if (kcpass == "") {
             kcpass = undefined;
@@ -526,7 +526,7 @@ exports.commands.addCommand(exports.getkey);
  */
 exports.commands.addCommand({
     "name": "push",
-    "preview": "push to the remote repository",
+    "description": "push to the remote repository",
     execute: function(instruction, args) {
         var project;
 
@@ -556,7 +556,7 @@ exports.commands.addCommand({
 exports.commands.addCommand({
     "name": "remove",
     "aliases": [ "rm" ],
-    "preview": "Remove a file from version control (also deletes it)",
+    "description": "Remove a file from version control (also deletes it)",
     "takes": [ "*" ],
     "manual": "The files presented will be deleted and removed from version control.",
     execute: function(instruction, args) {
@@ -573,7 +573,7 @@ exports.commands.addCommand({
     "name": "resolved",
     "takes": [ "*" ],
     "aliases": [ "resolve" ],
-    "preview": "Mark files as resolved",
+    "description": "Mark files as resolved",
     "completeText": "Use the current file, add -a for all files or add filenames",
     "manual": "Without any options, the vcs resolved command will mark the currently selected file as resolved. If you pass in -a, the command will resolve <em>all</em> files. Finally, you can list files individually.",
     execute: function(instruction, args) {
@@ -588,7 +588,7 @@ exports.commands.addCommand({
 exports.commands.addCommand({
     "name": "status",
     "aliases": [ "st" ],
-    "preview": "Display the status of the repository files.",
+    "description": "Display the status of the repository files.",
     "manual": "Shows the current state of the files in the repository<br>M for modified, ? for unknown (you may need to add), R for removed, ! for files that are deleted but not removed",
     execute: function(instruction, args) {
         var project;
@@ -616,7 +616,7 @@ exports.commands.addCommand({
  */
 exports.commands.addCommand({
     "name": "log",
-    "preview": "Display the changes to the current file.",
+    "description": "Display the changes to the current file.",
     execute: function(instruction, args) {
         var session = bespin.get("editSession");
         vcs(session.project,
@@ -633,7 +633,7 @@ exports.commands.addCommand({
 exports.commands.addCommand({
     "name": "update",
     "aliases": [ "up", "co" ],
-    "preview": "Update your working copy from the remote repository",
+    "description": "Update your working copy from the remote repository",
     execute: function(instruction) {
         var project;
 
@@ -681,7 +681,7 @@ exports.commands.addCommand({
  */
 exports.hgCommands = new command.Store(command.store, {
     "name": "hg",
-    "preview": "run a Mercurial command"
+    "description": "run a Mercurial command"
 });
 
 /**
@@ -690,7 +690,7 @@ exports.hgCommands = new command.Store(command.store, {
 exports.hgCommands.addCommand({
     "name": "help",
     "takes": [ "search" ],
-    "preview": "show commands for hg subcommand",
+    "description": "show commands for hg subcommand",
     "completeText": "optionally, narrow down the search",
     execute: function(instruction, extra) {
         var output = this.parent.getHelp(extra);
@@ -703,7 +703,7 @@ exports.hgCommands.addCommand({
  */
 exports.hgCommands.addCommand({
     "name": "init",
-    "preview": "initialize a new hg repository",
+    "description": "initialize a new hg repository",
     "manual": "This will create a new repository in this project.",
     execute: function(instruction) {
         var project;
@@ -731,7 +731,7 @@ exports.hgCommands.addCommand({
  */
 exports.svnCommands = new command.Store(command.store, {
     "name": "svn",
-    "preview": "run a Subversion command"
+    "description": "run a Subversion command"
 });
 
 /**
@@ -740,7 +740,7 @@ exports.svnCommands = new command.Store(command.store, {
 exports.svnCommands.addCommand({
     "name": "help",
     "takes": [ "search" ],
-    "preview": "show commands for svn subcommand",
+    "description": "show commands for svn subcommand",
     "completeText": "optionally, narrow down the search",
     execute: function(instruction, extra) {
         var output = this.parent.getHelp(extra);
@@ -1000,7 +1000,7 @@ var clone = function(data, instruction, opts) {
 exports.svnCommands.addCommand({
     "name": "add",
     "takes": [ "*" ],
-    "preview": "add: Put files and directories under version control, schedulingthem for addition to repository",
+    "description": "add: Put files and directories under version control, schedulingthem for addition to repository",
     "manual": "usage: svn add [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
         "               {empty,files,immediates,infinity}] [--force] [--no-ignore]\n" +
         "               [--auto-props] [--no-auto-props] [--parents]\n" +
@@ -1033,7 +1033,7 @@ exports.svnCommands.addCommand({
     "name": "merge",
     "takes": [ "*" ],
     "keychain": true,
-    "preview": "Apply the differences between two sources to a working copy path",
+    "description": "Apply the differences between two sources to a working copy path",
     "manual": "usage: svn merge [--help] [--revision REVISION] [--quiet] [--changelist\n" +
         "                 CHANGELIST] [--depth {empty,files,immediates,infinity}]\n" +
         "                 [--force] [--accept {base,working,mine-full,theirs-full}]\n" +
@@ -1115,7 +1115,7 @@ exports.svnCommands.addCommand({
     "takes": [ "*" ],
     "aliases": [ "praise", "annotate", "ann" ],
     "keychain": true,
-    "preview": "blame (praise, annotate, ann): Output the content of specified files with revision and author information in-line",
+    "description": "blame (praise, annotate, ann): Output the content of specified files with revision and author information in-line",
     "manual": "usage: svn blame [--help] [--revision REVISION] [--quiet] [--verbose]\n" +
         "                 [--changelist CHANGELIST] [--depth\n" +
         "                 {empty,files,immediates,infinity}] [--xml] [--incremental]\n" +
@@ -1172,7 +1172,7 @@ exports.svnCommands.addCommand({
 
         return null;
     },
-    "preview": "copy (cp): Duplicate something in working copy or repository, remembering history",
+    "description": "copy (cp): Duplicate something in working copy or repository, remembering history",
     "manual": "usage: svn copy [--help] [--revision REVISION] [--quiet] [--message MESSAGE]\n" +
         "                [--parents] [--with-revprop WITH_REVPROP]\n" +
         "                src [src ...] dst\n" +
@@ -1224,7 +1224,7 @@ exports.svnCommands.addCommand({
     "takes": [ "*" ],
     "aliases": [ "del", "remove", "rm" ],
     "keychain": true,
-    "preview": "Remove files and directories from version control",
+    "description": "Remove files and directories from version control",
     "manual": "usage: svn delete [--help] [--quiet] [--message MESSAGE] [--force] [--keep-\n" +
         "                  local]\n" +
         "                  PATH_OR_URL [PATH_OR_URL ...]\n" +
@@ -1263,7 +1263,7 @@ exports.svnCommands.addCommand({
     "takes": [ "*" ],
     "aliases": [ "sw" ],
     "keychain": true,
-    "preview": "Update the working copy to a different URL",
+    "description": "Update the working copy to a different URL",
     "manual": "usage: svn switch [--help] [--revision REVISION] [--quiet] [--depth\n" +
         "                  {empty,files,immediates,infinity}] [--force] [--accept\n" +
         "                  {base,working,mine-full,theirs-full}] [--relocate FROM]\n" +
@@ -1333,7 +1333,7 @@ exports.svnCommands.addCommand({
     "takes": [ "*" ],
     "aliases": [ "mv", "rename", "ren" ],
     "keychain": true,
-    "preview": "Move and/or rename something in working copy or repository",
+    "description": "Move and/or rename something in working copy or repository",
     "manual": "usage: svn move [--help] [--quiet] [--message MESSAGE] [--force] [--parents]\n" +
         "                [--with-revprop WITH_REVPROP]\n" +
         "                src [src ...] dst\n" +
@@ -1379,7 +1379,7 @@ exports.svnCommands.addCommand({
         }
         return { getKeychain: true, getMessage: true };
     },
-    "preview": "commit (ci): Send changes from your working copy to the repository",
+    "description": "commit (ci): Send changes from your working copy to the repository",
     "manual": "usage: svn commit [--help] [--quiet] [--message MESSAGE] [--changelist\n" +
         "                  CHANGELIST] [--depth {empty,files,immediates,infinity}]\n" +
         "                  [--no-unlock] [--with-revprop WITH_REVPROP] [--keep-\n" +
@@ -1413,7 +1413,7 @@ exports.svnCommands.addCommand({
 exports.svnCommands.addCommand({
     "name": "cleanup",
     "takes": [ "*" ],
-    "preview": "cleanup: Recursively clean up the working copy, removing locks, resuming unfinished operations, etc",
+    "description": "cleanup: Recursively clean up the working copy, removing locks, resuming unfinished operations, etc",
     "manual": "usage: svn cleanup [--help] [files [files ...]]\n" +
         "\n" +
         "cleanup: Recursively clean up the working copy, removing locks, resuming unfinished operations, etc.\n" +
@@ -1431,7 +1431,7 @@ exports.svnCommands.addCommand({
     "name": "propset",
     "takes": [ "*" ],
     "aliases": [ "pset", "ps" ],
-    "preview": "Set the value of a property on files, dirs, or revisions",
+    "description": "Set the value of a property on files, dirs, or revisions",
     "manual": "usage: svn propset [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
         "                   {empty,files,immediates,infinity}] [--force]\n" +
         "                   propname propval path [path ...]\n" +
@@ -1510,7 +1510,7 @@ exports.svnCommands.addCommand({
     "takes": [ "*" ],
     "aliases": [ "up" ],
     "keychain": true,
-    "preview": "update (up): Bring changes from the repository into the working copy",
+    "description": "update (up): Bring changes from the repository into the working copy",
     "manual": "usage: svn update [--help] [--revision REVISION] [--quiet] [--changelist\n" +
         "                  CHANGELIST] [--depth {empty,files,immediates,infinity}]\n" +
         "                  [--force] [--set-depth {empty,files,immediates,infinity}]\n" +
@@ -1586,7 +1586,7 @@ exports.svnCommands.addCommand({
 exports.svnCommands.addCommand({
     "name": "revert",
     "takes": [ "*" ],
-    "preview": "revert: Restore pristine working copy file (undo most local edits)",
+    "description": "revert: Restore pristine working copy file (undo most local edits)",
     "manual": "usage: svn revert [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
         "                  {empty,files,immediates,infinity}] [--recursive]\n" +
         "                  [files [files ...]]\n" +
@@ -1613,7 +1613,7 @@ exports.svnCommands.addCommand({
     "name": "log",
     "takes": [ "*" ],
     "keychain": true,
-    "preview": "log: Show the log messages for a set of revision(s) and/or file(s)",
+    "description": "log: Show the log messages for a set of revision(s) and/or file(s)",
     "manual": "usage: svn log [--help] [--revision REVISION] [--quiet] [--verbose]\n" +
         "               [--changelist CHANGELIST] [--depth\n" +
         "               {empty,files,immediates,infinity}] [--xml] [--incremental]\n" +
@@ -1685,7 +1685,7 @@ exports.svnCommands.addCommand({
     "name": "cat",
     "takes": [ "*" ],
     "keychain": true,
-    "preview": "Output the content of specified files or URLs",
+    "description": "Output the content of specified files or URLs",
     "manual": "usage: svn cat [--help] [--revision REVISION] targets [targets ...]\n" +
         "\n" +
         "Output the content of specified files or URLs.\n" +
@@ -1714,7 +1714,7 @@ exports.svnCommands.addCommand({
 exports.svnCommands.addCommand({
     "name": "info",
     "takes": [ "*" ],
-    "preview": "info: Display information about a local or remote item",
+    "description": "info: Display information about a local or remote item",
     "manual": "usage: svn info [--help] [--revision REVISION] [--quiet] [--changelist\n" +
         "                CHANGELIST] [--depth {empty,files,immediates,infinity}]\n" +
         "                [--xml] [--incremental]\n" +
@@ -1752,7 +1752,7 @@ exports.svnCommands.addCommand({
     "name": "propget",
     "takes": [ "*" ],
     "aliases": [ "pg", "pget" ],
-    "preview": "Print the value of a property on files, dirs, or revisions",
+    "description": "Print the value of a property on files, dirs, or revisions",
     "manual": "usage: svn propget [--help] [--revision REVISION] [--changelist CHANGELIST]\n" +
         "                   [--depth {empty,files,immediates,infinity}] [--strict]\n" +
         "                   [--xml]\n" +
@@ -1795,7 +1795,7 @@ exports.svnCommands.addCommand({
     "name": "proplist",
     "takes": [ "*" ],
     "aliases": [ "plist", "pl" ],
-    "preview": "List all properties on files, dirs, or revisions",
+    "description": "List all properties on files, dirs, or revisions",
     "manual": "usage: svn proplist [--help] [--quiet] [--verbose] [--changelist CHANGELIST]\n" +
         "                    [--depth {empty,files,immediates,infinity}] [--xml]\n" +
         "                    [files [files ...]]\n" +
@@ -1823,7 +1823,7 @@ exports.svnCommands.addCommand({
     "name": "status",
     "takes": [ "*" ],
     "aliases": [ "st", "stat" ],
-    "preview": "Print the status of working copy files and directories",
+    "description": "Print the status of working copy files and directories",
     "manual": "usage: svn status [--help] [--quiet] [--verbose] [--changelist CHANGELIST]\n" +
         "                  [--depth {empty,files,immediates,infinity}] [--xml]\n" +
         "                  [--incremental] [--show-updates] [--ignore-externals]\n" +
@@ -1925,7 +1925,7 @@ exports.svnCommands.addCommand({
     "name": "mkdir",
     "takes": [ "*" ],
     "keychain": true,
-    "preview": "Create a new directory under version control",
+    "description": "Create a new directory under version control",
     "manual": "usage: svn mkdir [--help] [--quiet] [--message MESSAGE] [--changelist\n" +
         "                 CHANGELIST] [--parents]\n" +
         "                 path [path ...]\n" +
@@ -1962,7 +1962,7 @@ exports.svnCommands.addCommand({
     "name": "propdel",
     "takes": [ "*" ],
     "aliases": [ "pdel", "pd" ],
-    "preview": "Remove a property from files, dirs, or revisions",
+    "description": "Remove a property from files, dirs, or revisions",
     "manual": "usage: svn propdel [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
         "                   {empty,files,immediates,infinity}]\n" +
         "                   propname [files [files ...]]\n" +
@@ -1988,7 +1988,7 @@ exports.svnCommands.addCommand({
 exports.svnCommands.addCommand({
     "name": "resolve",
     "takes": [ "*" ],
-    "preview": "Resolve conflicts on working copy files or directories",
+    "description": "Resolve conflicts on working copy files or directories",
     "manual": "usage: svn resolve [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
         "                   {empty,files,immediates,infinity}] [--accept {base,working\n" +
         "                   ,mine-full,theirs-full}]\n" +
