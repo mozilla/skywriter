@@ -1,0 +1,10 @@
+{
+    "provides": [
+        {
+            "ep": "command",
+            "name": "timemachine",
+            "hidden": true,
+            "pointer": "experiment#timemachineCommand"
+        }
+    ]
+}
