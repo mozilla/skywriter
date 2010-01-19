@@ -23,28 +23,27 @@
  * ***** END LICENSE BLOCK ***** */
 
 var bespin = require("bespin");
-var util = require("bespin/util/util");
-var command = require("bespin/command");
+var util = require("bespin:util/util");
+var command = require("Canon");
 
 /**
  * Command store for the VCS commands
  * (which are subcommands of the main 'vcs' command)
  */
 exports.commands = new command.Store(command.store, {
-    name: 'vcs',
-    preview: 'run a version control command',
-    completeText: 'subcommands: add, clone, commit, diff, getkey, help, push, remove, resolved, update',
-    subcommanddefault: 'help'
+    "name": "vcs",
+    "preview": "run a version control command",
+    "completeText": "subcommands: add, clone, commit, diff, getkey, help, push, remove, resolved, update"
 });
 
 /**
  * Display sub-command help
  */
 exports.commands.addCommand({
-    name: 'help',
-    takes: ['search'],
-    preview: 'show commands for vcs subcommand',
-    completeText: 'optionally, narrow down the search',
+    "name": "help",
+    "takes": [ "search" ],
+    "preview": "show commands for vcs subcommand",
+    "completeText": "optionally, narrow down the search",
     execute: function(instruction, extra) {
         var output = this.parent.getHelp(extra, {
             suffix: "For more information about Bespin's VCS support see the <a href='https://wiki.mozilla.org/Labs/Bespin/UserGuide#VCS_Commands' target='_blank'>VCS section of the user guide</a>."
@@ -152,11 +151,11 @@ exports.getInfoFromUser = function(instruction, callback, opts) {
  * Add the specified files on the next commit
  */
 exports.commands.addCommand({
-    name: 'add',
-    preview: 'Adds missing files to the project',
-    takes: ['*'],
-    completeText: 'Use the current file, add -a for all files or add filenames',
-    manual: 'Without any options, the vcs add command will add the currently selected file. If you pass in -a, the command will add <em>all</em> files. Finally, you can list files individually.',
+    "name": "add",
+    "preview": "Adds missing files to the project",
+    "takes": [ "*" ],
+    "completeText": "Use the current file, add -a for all files or add filenames",
+    "manual": "Without any options, the vcs add command will add the currently selected file. If you pass in -a, the command will add <em>all</em> files. Finally, you can list files individually.",
     execute: function(instruction, args) {
         exports._performVCSCommandWithFiles("add", instruction, args);
     }
@@ -167,10 +166,10 @@ exports.commands.addCommand({
  * Create a copy of an existing repository in a new directory
  */
 exports.commands.addCommand({
-    name: 'clone',
-    takes: ['url'],
-    aliases: ['checkout'],
-    preview: 'checkout or clone the project into a new Bespin project',
+    "name": "clone",
+    "takes": [ "url" ],
+    "aliases": [ "checkout" ],
+    "preview": "checkout or clone the project into a new Bespin project",
     /**
      * Display the clone dialog to allow the user to fill out additional details
      * to the clone process
@@ -178,7 +177,7 @@ exports.commands.addCommand({
     execute: function(instruction, url) {
         url = url || "";
 
-        var form = dojo.create('form', {
+        var form = dojo.create("form", {
             onsubmit: function(e) {
                 util.stopEvent(e);
                 var data = dojo.formToObject(form);
@@ -252,13 +251,14 @@ exports.commands.addCommand({
         row = dojo.create("tr", {}, tbody);
         cell = dojo.create("td", {innerHTML: "Project name:"}, row);
         cell = dojo.create("td", {}, row);
-        cell.innerHTML = '<input type="text" name="dest" value=""> (defaults to last part of URL path)';
+        cell.innerHTML = "<input type='text' name='dest' value=''> (defaults to last part of URL path)";
 
         row = dojo.create("tr", {}, tbody);
         cell = dojo.create("td", {innerHTML: "VCS Type:"}, row);
         cell = dojo.create("td", {}, row);
         // vcs
-        var vcsField = select = dojo.create("select", {name:"vcs",
+        var vcsField = select = dojo.create("select", {
+            name: "vcs",
             onchange: function(e) {
                 if (this.value == "svn") {
                     dojo.style(vcsUserRow, "display", "none");
@@ -286,7 +286,8 @@ exports.commands.addCommand({
         cell = dojo.create("td", {}, row);
 
         // remoteauth
-        select = dojo.create("select", {name: "remoteauth",
+        select = dojo.create("select", {
+            name: "remoteauth",
             onchange: function(e) {
                 var newval = this.value;
                 if (newval == "") {
@@ -320,27 +321,41 @@ exports.commands.addCommand({
         cell = dojo.create("td", {}, row);
 
         // kcpass
-        var kcpassField = dojo.create("input", {type: "password", name: "kcpass"}, cell);
+        var kcpassField = dojo.create("input", {
+            type: "password",
+            name: "kcpass"
+        }, cell);
 
         // push_row
         var pushRow = row = dojo.create("tr", {style: "display:none", className: "authfields"}, tbody);
         dojo.create("td", {innerHTML: "Push to URL"}, row);
         cell = dojo.create("td", {}, row);
         // pushfield
-        var pushField = dojo.create("input", {type: "text", name: "push",
-            style: "width:85%", value: url}, cell);
+        var pushField = dojo.create("input", {
+            type: "text",
+            name: "push",
+            style: "width:85%",
+            value: url
+        }, cell);
 
         // authtype_row
-        var authtypeRow = row = dojo.create("tr", {style: "display: none", className: "authfields"}, tbody);
+        var authtypeRow = row = dojo.create("tr", {
+            style: "display: none",
+            className: "authfields"
+        }, tbody);
         cell = dojo.create("td", {innerHTML: "Authentication type"}, row);
         cell = dojo.create("td", {}, row);
 
         // authtype
-        var authtypeField = select = dojo.create("select", {name: "authtype",
-            onchange: setUserfields}, cell);
+        var authtypeField = select = dojo.create("select", {
+            name: "authtype",
+            onchange: setUserfields
+        }, cell);
         dojo.create("option", {value: "ssh", innerHTML: "SSH"}, select);
-        dojo.create("option", {value: "password",
-            innerHTML: "Username/Password"}, select);
+        dojo.create("option", {
+            value: "password",
+            innerHTML: "Username/Password"
+        }, select);
 
         // username_row
         row = dojo.create("tr", {style: "display:none",
@@ -349,21 +364,24 @@ exports.commands.addCommand({
         cell = dojo.create("td", {}, row);
 
         // usernamefield
-        var usernameField = dojo.create("input", {type: "text", name: "username"}, cell);
+        var usernameField = dojo.create("input", {
+            type: "text",
+            name: "username"
+        }, cell);
 
         // password_row
         row = dojo.create("tr", {
             style: "display:none",
             className: "authfields userfields"
         }, tbody);
-        dojo.create("td", {innerHTML: "Password"}, row);
+        dojo.create("td", { innerHTML: "Password" }, row);
         cell = dojo.create("td", {}, row);
-        dojo.create("input", {type: "password", name: "password"}, cell);
+        dojo.create("input", { type: "password", name: "password" }, cell);
         row = dojo.create("tr", {}, tbody);
-        dojo.create("td", {innerHTML: "&nbsp;"}, row);
+        dojo.create("td", { innerHTML: "&nbsp;" }, row);
         cell = dojo.create("td", {}, row);
         // vcsauthsubmit
-        dojo.create("input", {type: "submit", value: "Ok"}, cell);
+        dojo.create("input", { type: "submit", value: "Ok" }, cell);
 
         // vcsauthcancel
         dojo.create("input", {
@@ -383,15 +401,15 @@ exports.commands.addCommand({
  * Commit all outstanding changes
  */
 exports.commands.addCommand({
-    name: 'commit',
-    takes: ['message'],
-    aliases: [ 'ci' ],
-    preview: 'Commit to the local (in-bespin) repository',
+    "name": "commit",
+    "takes": [ "message" ],
+    "aliases": [ "ci" ],
+    "preview": "Commit to the local (in-bespin) repository",
     execute: function(instruction, message) {
         var doCommit = function(values) {
             var project;
 
-            var session = bespin.get('editSession');
+            var session = bespin.get("editSession");
             if (session) {
                 project = session.project;
             }
@@ -401,7 +419,7 @@ exports.commands.addCommand({
                 return;
             }
             vcs(project,
-                { command: [ 'commit', '-m', values.message ] },
+                { command: [ "commit", "-m", values.message ] },
                 instruction,
                 exports._createStandardHandler(instruction));
         };
@@ -424,11 +442,11 @@ exports.commands.addCommand({
  * Report on the changes between the working files and the repository
  */
 exports.commands.addCommand({
-    name: 'diff',
-    preview: 'Display the differences in the checkout out files',
-    takes: ['*'],
-    completeText: 'Use the current file, add -a for all files or add filenames',
-    manual: 'Without any options, the vcs diff command will diff the currently selected file against the repository copy. If you pass in -a, the command will diff <em>all</em> files. Finally, you can list files to diff individually.',
+    "name": "diff",
+    "preview": "Display the differences in the checkout out files",
+    "takes": [ "*" ],
+    "completeText": "Use the current file, add -a for all files or add filenames",
+    "manual": "Without any options, the vcs diff command will diff the currently selected file against the repository copy. If you pass in -a, the command will diff <em>all</em> files. Finally, you can list files to diff individually.",
     execute: function(instruction, args) {
         exports._performVCSCommandWithFiles("diff", instruction, args);
     }
@@ -439,11 +457,11 @@ exports.commands.addCommand({
  * Report on the changes between the working files and the repository
  */
 exports.commands.addCommand({
-    name: 'revert',
-    preview: 'Revert files back to their checked-in state',
-    takes: ['*'],
-    completeText: 'Use the current file, add -a for all files or add filenames',
-    manual: 'Without any options, the vcs revert command will revert the currently selected file against the repository copy. If you pass in -a, the command will revert <em>all</em> files. Finally, you can list files to revert individually. No backups are kept!',
+    "name": "revert",
+    "preview": "Revert files back to their checked-in state",
+    "takes": [ "*" ],
+    "completeText": "Use the current file, add -a for all files or add filenames",
+    "manual": "Without any options, the vcs revert command will revert the currently selected file against the repository copy. If you pass in -a, the command will revert <em>all</em> files. Finally, you can list files to revert individually. No backups are kept!",
     execute: function(instruction, args) {
         exports._performVCSCommandWithFiles("revert", instruction, args, {
             acceptAll: true,
@@ -459,12 +477,12 @@ exports.commands.addCommand({
  * Retrieve an SSH public key for authentication use
  */
 exports.getkey = {
-    name: 'getkey',
-    takes: [ 'password' ],
-    completeText: 'Recommended: Don\'t pass in a password, put it in the following dialog',
-    preview: 'Get your SSH public key that Bespin can use for remote repository authentication. (May prompt for your keychain password)',
+    "name": "getkey",
+    "takes": [ "password" ],
+    "completeText": "Recommended: Don\'t pass in a password, put it in the following dialog",
+    "preview": "Get your SSH public key that Bespin can use for remote repository authentication. (May prompt for your keychain password)",
     execute: function(instruction, kcpass) {
-        if (kcpass == '') {
+        if (kcpass == "") {
             kcpass = undefined;
         }
         getkey(kcpass, {
@@ -507,12 +525,12 @@ exports.commands.addCommand(exports.getkey);
  * Push changes to the specified destination
  */
 exports.commands.addCommand({
-    name: 'push',
-    preview: 'push to the remote repository',
+    "name": "push",
+    "preview": "push to the remote repository",
     execute: function(instruction, args) {
         var project;
 
-        var session = bespin.get('editSession');
+        var session = bespin.get("editSession");
         if (session) {
             project = session.project;
         }
@@ -524,7 +542,7 @@ exports.commands.addCommand({
 
         exports.getInfoFromUser(instruction, function(values) {
             vcs(project,
-                { command: ['push', '_BESPIN_PUSH'], kcpass: values.kcpass },
+                { command: ["push", "_BESPIN_PUSH"], kcpass: values.kcpass },
                 instruction,
                 exports._createStandardHandler(instruction));
         }, {getKeychain: true});
@@ -536,14 +554,14 @@ exports.commands.addCommand({
  * Remove the specified files on the next commit
  */
 exports.commands.addCommand({
-    name: 'remove',
-    aliases: [ 'rm' ],
-    preview: 'Remove a file from version control (also deletes it)',
-    takes: ['*'],
-    manual: 'The files presented will be deleted and removed from version control.',
+    "name": "remove",
+    "aliases": [ "rm" ],
+    "preview": "Remove a file from version control (also deletes it)",
+    "takes": [ "*" ],
+    "manual": "The files presented will be deleted and removed from version control.",
     execute: function(instruction, args) {
-    exports._performVCSCommandWithFiles("remove", instruction, args,
-            { acceptAll: false });
+        exports._performVCSCommandWithFiles("remove", instruction, args,
+                { acceptAll: false });
     }
 });
 
@@ -552,12 +570,12 @@ exports.commands.addCommand({
  * Retry file merges from a merge or update
  */
 exports.commands.addCommand({
-    name: 'resolved',
-    takes: ['*'],
-    aliases: [ 'resolve' ],
-    preview: 'Mark files as resolved',
-    completeText: 'Use the current file, add -a for all files or add filenames',
-    manual: 'Without any options, the vcs resolved command will mark the currently selected file as resolved. If you pass in -a, the command will resolve <em>all</em> files. Finally, you can list files individually.',
+    "name": "resolved",
+    "takes": [ "*" ],
+    "aliases": [ "resolve" ],
+    "preview": "Mark files as resolved",
+    "completeText": "Use the current file, add -a for all files or add filenames",
+    "manual": "Without any options, the vcs resolved command will mark the currently selected file as resolved. If you pass in -a, the command will resolve <em>all</em> files. Finally, you can list files individually.",
     execute: function(instruction, args) {
         exports._performVCSCommandWithFiles("resolved", instruction, args);
     }
@@ -568,14 +586,14 @@ exports.commands.addCommand({
  * Show changed files under the working directory
  */
 exports.commands.addCommand({
-    name: 'status',
-    aliases: [ 'st' ],
-    preview: 'Display the status of the repository files.',
-    manual: 'Shows the current state of the files in the repository<br>M for modified, ? for unknown (you may need to add), R for removed, ! for files that are deleted but not removed',
+    "name": "status",
+    "aliases": [ "st" ],
+    "preview": "Display the status of the repository files.",
+    "manual": "Shows the current state of the files in the repository<br>M for modified, ? for unknown (you may need to add), R for removed, ! for files that are deleted but not removed",
     execute: function(instruction, args) {
         var project;
 
-        var session = bespin.get('editSession');
+        var session = bespin.get("editSession");
         if (session) {
             project = session.project;
         }
@@ -586,7 +604,7 @@ exports.commands.addCommand({
         }
 
         vcs(project,
-            { command: ['status'] },
+            { command: ["status"] },
             instruction,
             exports._createStandardHandler(instruction));
     }
@@ -597,13 +615,12 @@ exports.commands.addCommand({
  * Show changed files under the working directory
  */
 exports.commands.addCommand({
-    name: 'log',
-    preview: 'Display the changes to the current file.',
-    manual: '',
+    "name": "log",
+    "preview": "Display the changes to the current file.",
     execute: function(instruction, args) {
         var session = bespin.get("editSession");
         vcs(session.project,
-            { command: [ 'log', session.path ] },
+            { command: [ "log", session.path ] },
             instruction,
             exports._createStandardHandler(instruction, { acceptAll: true }));
     }
@@ -614,13 +631,13 @@ exports.commands.addCommand({
  * Pull updates from the repository into the current working directory
  */
 exports.commands.addCommand({
-    name: 'update',
-    aliases: [ 'up', 'co' ],
-    preview: 'Update your working copy from the remote repository',
+    "name": "update",
+    "aliases": [ "up", "co" ],
+    "preview": "Update your working copy from the remote repository",
     execute: function(instruction) {
         var project;
 
-        var session = bespin.get('editSession');
+        var session = bespin.get("editSession");
         if (session) {
             project = session.project;
         }
@@ -632,7 +649,7 @@ exports.commands.addCommand({
 
         var sendRequest = function(values) {
             var command = {
-                command: ['update', '_BESPIN_REMOTE_URL']
+                command: ["update", "_BESPIN_REMOTE_URL"]
             };
 
             if (values !== undefined) {
@@ -663,20 +680,18 @@ exports.commands.addCommand({
  * (which are subcommands of the main 'hg' command)
  */
 exports.hgCommands = new command.Store(command.store, {
-    name: 'hg',
-    preview: 'run a Mercurial command',
-    subcommanddefault: 'help'
+    "name": "hg",
+    "preview": "run a Mercurial command"
 });
 
 /**
  * Display sub-command help
  */
 exports.hgCommands.addCommand({
-    name: 'help',
-    takes: ['search'],
-    preview: 'show commands for hg subcommand',
-    manual: 'The <u>help</u> gives you access to the various commands in the hg subcommand space.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!',
-    completeText: 'optionally, narrow down the search',
+    "name": "help",
+    "takes": [ "search" ],
+    "preview": "show commands for hg subcommand",
+    "completeText": "optionally, narrow down the search",
     execute: function(instruction, extra) {
         var output = this.parent.getHelp(extra);
         instruction.addOutput(output);
@@ -687,13 +702,13 @@ exports.hgCommands.addCommand({
  * Initialize an HG repository
  */
 exports.hgCommands.addCommand({
-    name: 'init',
-    preview: 'initialize a new hg repository',
-    manual: 'This will create a new repository in this project.',
+    "name": "init",
+    "preview": "initialize a new hg repository",
+    "manual": "This will create a new repository in this project.",
     execute: function(instruction) {
         var project;
 
-        var session = bespin.get('editSession');
+        var session = bespin.get("editSession");
         if (session) {
             project = session.project;
         }
@@ -704,7 +719,7 @@ exports.hgCommands.addCommand({
         }
 
         vcs(project,
-            { command: ['hg', 'init'] },
+            { command: ["hg", "init"] },
             instruction,
             exports._createStandardHandler(instruction));
     }
@@ -715,20 +730,18 @@ exports.hgCommands.addCommand({
  * (which are subcommands of the main 'svn' command)
  */
 exports.svnCommands = new command.Store(command.store, {
-    name: 'svn',
-    preview: 'run a Subversion command',
-    subcommanddefault: 'help'
+    "name": "svn",
+    "preview": "run a Subversion command"
 });
 
 /**
  * Display sub-command help
  */
 exports.svnCommands.addCommand({
-    name: 'help',
-    takes: ['search'],
-    preview: 'show commands for svn subcommand',
-    manual: 'The <u>help</u> gives you access to the various commands in the svn subcommand space.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!',
-    completeText: 'optionally, narrow down the search',
+    "name": "help",
+    "takes": [ "search" ],
+    "preview": "show commands for svn subcommand",
+    "completeText": "optionally, narrow down the search",
     execute: function(instruction, extra) {
         var output = this.parent.getHelp(extra);
         instruction.addOutput(output);
@@ -738,7 +751,7 @@ exports.svnCommands.addCommand({
 exports.svnCommands.genericExecute = function(instruction, args) {
     var project;
 
-    var session = bespin.get('editSession');
+    var session = bespin.get("editSession");
     if (session) {
         project = session.project;
     }
@@ -789,7 +802,7 @@ exports._performVCSCommandWithFiles = function(vcsCommand, instruction, args, op
     var project;
     var path;
 
-    var session = bespin.get('editSession');
+    var session = bespin.get("editSession");
     if (session) {
         project = session.project;
         path = session.path;
@@ -930,8 +943,8 @@ exports._createCancelHandler = function(instruction) {
  * remoteauth values to vcs:remoteauthUpdate and sent to the callback.
  */
 var remoteauth = function(project, callback) {
-    var url = '/vcs/remoteauth/' + escape(project) + '/';
-    bespin.get('server').request('GET', url, null, {
+    var url = "/vcs/remoteauth/" + escape(project) + "/";
+    bespin.get("server").request("GET", url, null, {
         onSuccess: function(result) {
             var event = {
                 project: project,
@@ -951,28 +964,28 @@ var remoteauth = function(project, callback) {
  * string containing the user's keychain password.
  */
 var vcs = function(project, command, instruction, opts) {
-    var url = '/vcs/command/' + project + '/';
-    bespin.get('server').requestDisconnected('POST', url, JSON.stringify(command), instruction, opts);
+    var url = "/vcs/command/" + project + "/";
+    bespin.get("server").requestDisconnected("POST", url, JSON.stringify(command), instruction, opts);
 };
 
 /**
  * Sets authentication for a project
  */
 var setauth = function(project, form, opts) {
-    var url = '/vcs/setauth/' + project + '/';
-    bespin.get('server').request('POST', url, dojo.formToQuery(form), opts);
+    var url = "/vcs/setauth/" + project + "/";
+    bespin.get("server").request("POST", url, dojo.formToQuery(form), opts);
 };
 
 /**
  * Retrieves the user's SSH public key that can be used for VCS functions
  */
 var getkey = function(kcpass, opts) {
-    var url = '/vcs/getkey/';
+    var url = "/vcs/getkey/";
     if (kcpass == null) {
-        bespin.get('server').request('POST', url, null, opts);
+        bespin.get("server").request("POST", url, null, opts);
     } else {
         var params = "kcpass=" + escape(kcpass);
-        bespin.get('server').request('POST', url, params, opts);
+        bespin.get("server").request("POST", url, params, opts);
     }
 };
 
@@ -980,15 +993,15 @@ var getkey = function(kcpass, opts) {
  * Clone a remote repository
  */
 var clone = function(data, instruction, opts) {
-    bespin.get('server').requestDisconnected('POST', '/vcs/clone/', data, instruction, opts);
+    bespin.get("server").requestDisconnected("POST", "/vcs/clone/", data, instruction, opts);
 };
 
 /* PASTEHERE: VCS commands that are generated by paver generate_vcs */
 exports.svnCommands.addCommand({
-    name: 'add',
-    takes: ['*'],
-    preview: 'add: Put files and directories under version control, schedulingthem for addition to repository',
-    manual:         "usage: svn add [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
+    "name": "add",
+    "takes": [ "*" ],
+    "preview": "add: Put files and directories under version control, schedulingthem for addition to repository",
+    "manual": "usage: svn add [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
         "               {empty,files,immediates,infinity}] [--force] [--no-ignore]\n" +
         "               [--auto-props] [--no-auto-props] [--parents]\n" +
         "               [files [files ...]]\n" +
@@ -1017,11 +1030,11 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'merge',
-    takes: ['*'],
-    keychain: true,
-    preview: 'Apply the differences between two sources to a working copy path',
-    manual:         "usage: svn merge [--help] [--revision REVISION] [--quiet] [--changelist\n" +
+    "name": "merge",
+    "takes": [ "*" ],
+    "keychain": true,
+    "preview": "Apply the differences between two sources to a working copy path",
+    "manual": "usage: svn merge [--help] [--revision REVISION] [--quiet] [--changelist\n" +
         "                 CHANGELIST] [--depth {empty,files,immediates,infinity}]\n" +
         "                 [--force] [--accept {base,working,mine-full,theirs-full}]\n" +
         "                 [--change CHANGE] [--dry-run] [--record-only] [--ignore-\n" +
@@ -1098,12 +1111,12 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'blame',
-    takes: ['*'],
-    aliases: ['praise', 'annotate', 'ann'],
-    keychain: true,
-    preview: 'blame (praise, annotate, ann): Output the content of specified files with revision and author information in-line',
-    manual:         "usage: svn blame [--help] [--revision REVISION] [--quiet] [--verbose]\n" +
+    "name": "blame",
+    "takes": [ "*" ],
+    "aliases": [ "praise", "annotate", "ann" ],
+    "keychain": true,
+    "preview": "blame (praise, annotate, ann): Output the content of specified files with revision and author information in-line",
+    "manual": "usage: svn blame [--help] [--revision REVISION] [--quiet] [--verbose]\n" +
         "                 [--changelist CHANGELIST] [--depth\n" +
         "                 {empty,files,immediates,infinity}] [--xml] [--incremental]\n" +
         "                 [--force] [--use-merge-history]\n" +
@@ -1140,9 +1153,9 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'copy',
-    takes: ['*'],
-    aliases: ['cp'],
+    "name": "copy",
+    "takes": [ "*" ],
+    "aliases": [ "cp" ],
     prompting: function(command) {
         var dst = command[command.length - 1];
         var lastsrc = command[command.length - 2];
@@ -1159,8 +1172,8 @@ exports.svnCommands.addCommand({
 
         return null;
     },
-    preview: 'copy (cp): Duplicate something in working copy or repository, remembering history',
-    manual:         "usage: svn copy [--help] [--revision REVISION] [--quiet] [--message MESSAGE]\n" +
+    "preview": "copy (cp): Duplicate something in working copy or repository, remembering history",
+    "manual": "usage: svn copy [--help] [--revision REVISION] [--quiet] [--message MESSAGE]\n" +
         "                [--parents] [--with-revprop WITH_REVPROP]\n" +
         "                src [src ...] dst\n" +
         "\n" +
@@ -1207,12 +1220,12 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'delete',
-    takes: ['*'],
-    aliases: ['del', 'remove', 'rm'],
-    keychain: true,
-    preview: 'Remove files and directories from version control',
-    manual:         "usage: svn delete [--help] [--quiet] [--message MESSAGE] [--force] [--keep-\n" +
+    "name": "delete",
+    "takes": [ "*" ],
+    "aliases": [ "del", "remove", "rm" ],
+    "keychain": true,
+    "preview": "Remove files and directories from version control",
+    "manual": "usage: svn delete [--help] [--quiet] [--message MESSAGE] [--force] [--keep-\n" +
         "                  local]\n" +
         "                  PATH_OR_URL [PATH_OR_URL ...]\n" +
         "\n" +
@@ -1246,12 +1259,12 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'switch',
-    takes: ['*'],
-    aliases: ['sw'],
-    keychain: true,
-    preview: 'Update the working copy to a different URL',
-    manual:         "usage: svn switch [--help] [--revision REVISION] [--quiet] [--depth\n" +
+    "name": "switch",
+    "takes": [ "*" ],
+    "aliases": [ "sw" ],
+    "keychain": true,
+    "preview": "Update the working copy to a different URL",
+    "manual": "usage: svn switch [--help] [--revision REVISION] [--quiet] [--depth\n" +
         "                  {empty,files,immediates,infinity}] [--force] [--accept\n" +
         "                  {base,working,mine-full,theirs-full}] [--relocate FROM]\n" +
         "                  [--ignore-externals]\n" +
@@ -1316,12 +1329,12 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'move',
-    takes: ['*'],
-    aliases: ['mv', 'rename', 'ren'],
-    keychain: true,
-    preview: 'Move and/or rename something in working copy or repository',
-    manual:         "usage: svn move [--help] [--quiet] [--message MESSAGE] [--force] [--parents]\n" +
+    "name": "move",
+    "takes": [ "*" ],
+    "aliases": [ "mv", "rename", "ren" ],
+    "keychain": true,
+    "preview": "Move and/or rename something in working copy or repository",
+    "manual": "usage: svn move [--help] [--quiet] [--message MESSAGE] [--force] [--parents]\n" +
         "                [--with-revprop WITH_REVPROP]\n" +
         "                src [src ...] dst\n" +
         "\n" +
@@ -1357,17 +1370,17 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'commit',
-    takes: ['*'],
-    aliases: ['ci'],
+    "name": "commit",
+    "takes": [ "*" ],
+    "aliases": [ "ci" ],
     prompting: function(command) {
         if (util.include(command, "-m")) {
             return { getKeychain: true };
         }
         return { getKeychain: true, getMessage: true };
     },
-    preview: 'commit (ci): Send changes from your working copy to the repository',
-    manual:         "usage: svn commit [--help] [--quiet] [--message MESSAGE] [--changelist\n" +
+    "preview": "commit (ci): Send changes from your working copy to the repository",
+    "manual": "usage: svn commit [--help] [--quiet] [--message MESSAGE] [--changelist\n" +
         "                  CHANGELIST] [--depth {empty,files,immediates,infinity}]\n" +
         "                  [--no-unlock] [--with-revprop WITH_REVPROP] [--keep-\n" +
         "                  changelists]\n" +
@@ -1398,10 +1411,10 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'cleanup',
-    takes: ['*'],
-    preview: 'cleanup: Recursively clean up the working copy, removing locks, resuming unfinished operations, etc',
-    manual:         "usage: svn cleanup [--help] [files [files ...]]\n" +
+    "name": "cleanup",
+    "takes": [ "*" ],
+    "preview": "cleanup: Recursively clean up the working copy, removing locks, resuming unfinished operations, etc",
+    "manual": "usage: svn cleanup [--help] [files [files ...]]\n" +
         "\n" +
         "cleanup: Recursively clean up the working copy, removing locks, resuming unfinished operations, etc.\n" +
         "\n" +
@@ -1415,11 +1428,11 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'propset',
-    takes: ['*'],
-    aliases: ['pset', 'ps'],
-    preview: 'Set the value of a property on files, dirs, or revisions',
-    manual:         "usage: svn propset [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
+    "name": "propset",
+    "takes": [ "*" ],
+    "aliases": [ "pset", "ps" ],
+    "preview": "Set the value of a property on files, dirs, or revisions",
+    "manual": "usage: svn propset [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
         "                   {empty,files,immediates,infinity}] [--force]\n" +
         "                   propname propval path [path ...]\n" +
         "\n" +
@@ -1493,12 +1506,12 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'update',
-    takes: ['*'],
-    aliases: ['up'],
-    keychain: true,
-    preview: 'update (up): Bring changes from the repository into the working copy',
-    manual:         "usage: svn update [--help] [--revision REVISION] [--quiet] [--changelist\n" +
+    "name": "update",
+    "takes": [ "*" ],
+    "aliases": [ "up" ],
+    "keychain": true,
+    "preview": "update (up): Bring changes from the repository into the working copy",
+    "manual": "usage: svn update [--help] [--revision REVISION] [--quiet] [--changelist\n" +
         "                  CHANGELIST] [--depth {empty,files,immediates,infinity}]\n" +
         "                  [--force] [--set-depth {empty,files,immediates,infinity}]\n" +
         "                  [--ignore-externals] [--accept {postpone,base,mine-full\n" +
@@ -1571,10 +1584,10 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'revert',
-    takes: ['*'],
-    preview: 'revert: Restore pristine working copy file (undo most local edits)',
-    manual:         "usage: svn revert [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
+    "name": "revert",
+    "takes": [ "*" ],
+    "preview": "revert: Restore pristine working copy file (undo most local edits)",
+    "manual": "usage: svn revert [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
         "                  {empty,files,immediates,infinity}] [--recursive]\n" +
         "                  [files [files ...]]\n" +
         "\n" +
@@ -1597,11 +1610,11 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'log',
-    takes: ['*'],
-    keychain: true,
-    preview: 'log: Show the log messages for a set of revision(s) and/or file(s)',
-    manual:         "usage: svn log [--help] [--revision REVISION] [--quiet] [--verbose]\n" +
+    "name": "log",
+    "takes": [ "*" ],
+    "keychain": true,
+    "preview": "log: Show the log messages for a set of revision(s) and/or file(s)",
+    "manual": "usage: svn log [--help] [--revision REVISION] [--quiet] [--verbose]\n" +
         "               [--changelist CHANGELIST] [--depth\n" +
         "               {empty,files,immediates,infinity}] [--xml] [--incremental]\n" +
         "               [--use-merge-history] [--change CHANGE] [--stop-on-copy]\n" +
@@ -1669,11 +1682,11 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'cat',
-    takes: ['*'],
-    keychain: true,
-    preview: 'Output the content of specified files or URLs',
-    manual:         "usage: svn cat [--help] [--revision REVISION] targets [targets ...]\n" +
+    "name": "cat",
+    "takes": [ "*" ],
+    "keychain": true,
+    "preview": "Output the content of specified files or URLs",
+    "manual": "usage: svn cat [--help] [--revision REVISION] targets [targets ...]\n" +
         "\n" +
         "Output the content of specified files or URLs.\n" +
         "\n" +
@@ -1699,10 +1712,10 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'info',
-    takes: ['*'],
-    preview: 'info: Display information about a local or remote item',
-    manual:         "usage: svn info [--help] [--revision REVISION] [--quiet] [--changelist\n" +
+    "name": "info",
+    "takes": [ "*" ],
+    "preview": "info: Display information about a local or remote item",
+    "manual": "usage: svn info [--help] [--revision REVISION] [--quiet] [--changelist\n" +
         "                CHANGELIST] [--depth {empty,files,immediates,infinity}]\n" +
         "                [--xml] [--incremental]\n" +
         "                [files [files ...]]\n" +
@@ -1736,11 +1749,11 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'propget',
-    takes: ['*'],
-    aliases: ['pg', 'pget'],
-    preview: 'Print the value of a property on files, dirs, or revisions',
-    manual:         "usage: svn propget [--help] [--revision REVISION] [--changelist CHANGELIST]\n" +
+    "name": "propget",
+    "takes": [ "*" ],
+    "aliases": [ "pg", "pget" ],
+    "preview": "Print the value of a property on files, dirs, or revisions",
+    "manual": "usage: svn propget [--help] [--revision REVISION] [--changelist CHANGELIST]\n" +
         "                   [--depth {empty,files,immediates,infinity}] [--strict]\n" +
         "                   [--xml]\n" +
         "                   propname [files [files ...]]\n" +
@@ -1779,11 +1792,11 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'proplist',
-    takes: ['*'],
-    aliases: ['plist', 'pl'],
-    preview: 'List all properties on files, dirs, or revisions',
-    manual:         "usage: svn proplist [--help] [--quiet] [--verbose] [--changelist CHANGELIST]\n" +
+    "name": "proplist",
+    "takes": [ "*" ],
+    "aliases": [ "plist", "pl" ],
+    "preview": "List all properties on files, dirs, or revisions",
+    "manual": "usage: svn proplist [--help] [--quiet] [--verbose] [--changelist CHANGELIST]\n" +
         "                    [--depth {empty,files,immediates,infinity}] [--xml]\n" +
         "                    [files [files ...]]\n" +
         "\n" +
@@ -1807,11 +1820,11 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'status',
-    takes: ['*'],
-    aliases: ['st', 'stat'],
-    preview: 'Print the status of working copy files and directories',
-    manual:         "usage: svn status [--help] [--quiet] [--verbose] [--changelist CHANGELIST]\n" +
+    "name": "status",
+    "takes": [ "*" ],
+    "aliases": [ "st", "stat" ],
+    "preview": "Print the status of working copy files and directories",
+    "manual": "usage: svn status [--help] [--quiet] [--verbose] [--changelist CHANGELIST]\n" +
         "                  [--depth {empty,files,immediates,infinity}] [--xml]\n" +
         "                  [--incremental] [--show-updates] [--ignore-externals]\n" +
         "                  [files [files ...]]\n" +
@@ -1909,11 +1922,11 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'mkdir',
-    takes: ['*'],
-    keychain: true,
-    preview: 'Create a new directory under version control',
-    manual:         "usage: svn mkdir [--help] [--quiet] [--message MESSAGE] [--changelist\n" +
+    "name": "mkdir",
+    "takes": [ "*" ],
+    "keychain": true,
+    "preview": "Create a new directory under version control",
+    "manual": "usage: svn mkdir [--help] [--quiet] [--message MESSAGE] [--changelist\n" +
         "                 CHANGELIST] [--parents]\n" +
         "                 path [path ...]\n" +
         "\n" +
@@ -1946,11 +1959,11 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'propdel',
-    takes: ['*'],
-    aliases: ['pdel', 'pd'],
-    preview: 'Remove a property from files, dirs, or revisions',
-    manual:         "usage: svn propdel [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
+    "name": "propdel",
+    "takes": [ "*" ],
+    "aliases": [ "pdel", "pd" ],
+    "preview": "Remove a property from files, dirs, or revisions",
+    "manual": "usage: svn propdel [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
         "                   {empty,files,immediates,infinity}]\n" +
         "                   propname [files [files ...]]\n" +
         "\n" +
@@ -1973,10 +1986,10 @@ exports.svnCommands.addCommand({
 });
 
 exports.svnCommands.addCommand({
-    name: 'resolve',
-    takes: ['*'],
-    preview: 'Resolve conflicts on working copy files or directories',
-    manual:         "usage: svn resolve [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
+    "name": "resolve",
+    "takes": [ "*" ],
+    "preview": "Resolve conflicts on working copy files or directories",
+    "manual": "usage: svn resolve [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
         "                   {empty,files,immediates,infinity}] [--accept {base,working\n" +
         "                   ,mine-full,theirs-full}]\n" +
         "                   [files [files ...]]\n" +
@@ -1992,7 +2005,6 @@ exports.svnCommands.addCommand({
         "  --changelist CHANGELIST, --cl CHANGELIST\n" +
         "                        operate only on members of changelist ARG\n" +
         "  --depth {empty,files,immediates,infinity}\n" +
-        "                        limit operation by depth ARG ('empty', 'files',\n" +
         "                        'immediates', or 'infinity')\n" +
         "  --accept {base,working,mine-full,theirs-full}\n" +
         "                        specify automatic conflict resolution source\n" +
