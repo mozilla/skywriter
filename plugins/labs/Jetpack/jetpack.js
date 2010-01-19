@@ -97,23 +97,23 @@ if (this.opts.jetpack) {
  * (which are subcommands of the main 'jetpack' command)
  */
 exports.commands = new command.Store(command.store, {
-    name: 'jetpack',
-    preview: 'play with jetpack features',
-    completeText: 'jetpack subcommands:<br><br> create [name] [type]<br> install [name]<br> list<br> edit [name]',
-    subcommanddefault: 'help'
+    "name": "jetpack",
+    "description": "play with jetpack features",
+    "completeText": "jetpack subcommands:<br><br> create [name] [type]<br> install [name]<br> list<br> edit [name]"
 });
 
 /**
  * 'jetpack help' command
  */
 exports.commands.addCommand({
-    name: 'help',
-    takes: ['search'],
-    preview: 'show commands for jetpack subcommand',
-    completeText: 'optionally, narrow down the search',
+    "name": "help",
+    "takes": [ "search" ],
+    "description": "show commands for jetpack subcommand",
+    "completeText": "optionally, narrow down the search",
     execute: function(instruction, extra) {
         var output = this.parent.getHelp(extra, {
-            suffix:  "For more info and help on the available API, <a href='https://wiki.mozilla.org/Labs/Jetpack/API'>check out the Reference</a>"
+            suffix: "For more info and help on the available API, " +
+            		"<a href='https://wiki.mozilla.org/Labs/Jetpack/API'>check out the Reference</a>"
         });
         instruction.addOutput(output);
     }
@@ -123,13 +123,13 @@ exports.commands.addCommand({
  * 'jetpack create' command
  */
 exports.commands.addCommand({
-    name: 'create',
-    takes: ['feature', 'type'],
-    preview: 'Create a new jetpack feature that you can install into Firefox with the new Jetpack goodness.',
-    completeText: 'name of your feature, type of JetPack template (sidebar, content, toolbar)',
+    "name": "create",
+    "takes": [ "feature", "type" ],
+    "description": "Create a new jetpack feature that you can install into Firefox with the new Jetpack goodness.",
+    "completeText": "name of your feature, type of JetPack template (sidebar, content, toolbar)",
     execute: function(instruction, opts) {
-        var feature = opts.feature || 'newjetpack';
-        var type = opts.type || 'sidebar';
+        var feature = opts.feature || "newjetpack";
+        var type = opts.type || "sidebar";
         var project = exports.projectName;
         var filename = feature + ".js";
 
@@ -160,25 +160,25 @@ exports.commands.addCommand({
  * 'jetpack install' command
  */
 exports.commands.addCommand({
-    name: 'install',
-    takes: ['feature'],
-    preview: 'Install a Jetpack feature, either the current file, or the named feature',
-    completeText: 'optionally, the name of the feature to install',
+    "name": "install",
+    "takes": [ "feature" ],
+    "description": "Install a Jetpack feature, either the current file, or the named feature",
+    "completeText": "optionally, the name of the feature to install",
     execute: function(instruction, feature) {
         // For when Aza exposes the Jetpack object :)
-        // if (!window['Jetpack']) {
+        // if (!window["Jetpack"]) {
         //     instruction.addErrorOutput("To install a Jetpack, you need to have installed the extension.<br><br>For now this lives in Firefox only, and you can <a href='https://wiki.mozilla.org/Labs/Jetpack/API'>check it out, and download the add-on here</a>.");
         //     return;
         // }
 
         // Use the given name, or default to the current jetpack
         feature = feature || (function() {
-            var editSession = bespin.get('editSession');
+            var editSession = bespin.get("editSession");
             if (editSession.project != exports.projectName) {
                 // jump out if not in the jetpack project
                 return;
             }
-            var bits = editSession.path.split('.');
+            var bits = editSession.path.split(".");
             return bits[bits.length - 2];
         })();
 
@@ -194,10 +194,10 @@ exports.commands.addCommand({
  * 'jetpack list' command
  */
 exports.commands.addCommand({
-    name: 'list',
-    preview: 'List the Jetpacks available in BespinSettings/jetpacks. NOTE: This is not the same as which Jetpacks you have installed in Firefox',
+    "name": "list",
+    "description": "List the Jetpacks available in BespinSettings/jetpacks. NOTE: This is not the same as which Jetpacks you have installed in Firefox",
     execute: function(instruction, extra) {
-        bespin.get('server').list(exports.projectName, '', function(jetpacks) {
+        bespin.get("server").list(exports.projectName, "", function(jetpacks) {
             var output;
 
             if (!jetpacks || jetpacks.length < 1) {
@@ -220,19 +220,19 @@ exports.commands.addCommand({
  * 'jetpack edit' command
  */
 exports.commands.addCommand({
-    name: 'edit',
-    takes: ['feature'],
-    preview: 'edit the given Jetpack feature',
-    completeText: 'feature name to edit (required)',
+    "name": "edit",
+    "takes": [ "feature" ],
+    "description": "edit the given Jetpack feature",
+    "completeText": "feature name to edit (required)",
     execute: function(instruction, feature) {
         if (!feature) {
             instruction.showUsage(this);
             return;
         }
 
-        var path = feature + '.js';
+        var path = feature + ".js";
 
-        bespin.get('files').whenFileExists(exports.projectName, path, {
+        bespin.get("files").whenFileExists(exports.projectName, path, {
             execute: function() {
                 bespin.get("editor").openFile(exports.projectName, path);
             },
@@ -248,19 +248,19 @@ exports.commands.addCommand({
  * <p>If you "set jetpack on", wire up the toolbar to have the jetpack icon
  */
 bespin.subscribe("settings:set:jetpack", function(event) {
-    var jptb = document.getElementById('toolbar_jetpack');
+    var jptb = document.getElementById("toolbar_jetpack");
 
     // turn it off
     if (event.value) {
         if (jptb) {
-            jptb.style.display = 'none';
+            jptb.style.display = "none";
         }
     } else { // turn it on
         if (jptb) {
-            jptb.style.display = 'inline';
+            jptb.style.display = "inline";
         } else {
             // <img id="toolbar_jetpack" src="images/icn_jetpack.png" alt="Jetpack" style="padding-left: 10px;" title="Jetpack (show or hide menu)">
-            document.getElementById('toolbar').appendChild(dojo.create("img", {
+            document.getElementById("toolbar").appendChild(dojo.create("img", {
                 id: "toolbar_jetpack",
                 src: "images/icn_jetpack.png",
                 alt: "Jetpack",
@@ -278,7 +278,7 @@ bespin.subscribe("settings:set:jetpack", function(event) {
  * Jetpack toolbar item
  */
 bespin.subscribe("toolbar:init", function(event) {
-    event.toolbar.addComponent('jetpack', function(toolbar, el) {
+    event.toolbar.addComponent("jetpack", function(toolbar, el) {
         var jetpack = dojo.byId(el) || document.getElementById("toolbar_jetpack");
 
         var highlightOn = function() {
@@ -289,37 +289,54 @@ bespin.subscribe("toolbar:init", function(event) {
             jetpack.src = "images/icn_jetpack.png";
         };
 
-        dojo.connect(jetpack, 'mouseover', highlightOn);
-        dojo.connect(jetpack, 'mouseout',  function() {
-            var dropdown = document.getElementById('jetpack_dropdown');
-            if (!dropdown || dropdown.style.display == 'none') {
+        dojo.connect(jetpack, "mouseover", highlightOn);
+        dojo.connect(jetpack, "mouseout",  function() {
+            var dropdown = document.getElementById("jetpack_dropdown");
+            if (!dropdown || dropdown.style.display == "none") {
                 highlightOff();
             }
         });
 
         // Change the font size between the small, medium, and large settings
-        dojo.connect(jetpack, 'click', function() {
-            var dropdown = document.getElementById('jetpack_dropdown');
+        dojo.connect(jetpack, "click", function() {
+            var dropdown = document.getElementById("jetpack_dropdown");
 
-            if (!dropdown || dropdown.style.display == 'none') { // no dropdown or hidden, so show
+            if (!dropdown || dropdown.style.display == "none") { // no dropdown or hidden, so show
                 highlightOn();
 
                 dropdown = dropdown || (function() {
                     var dd = dojo.create("div", {
-                        id: 'jetpack_dropdown'
+                        id: "jetpack_dropdown"
                     });
 
-                    var editor_coords = dojo.coords('editor');
+                    var editor_coords = dojo.coords("editor");
                     var jetpack_coorders = dojo.coords(jetpack);
 
-                    dd.style.position = 'absolute';
-                    dd.style.padding = '0px';
-                    dd.style.top = editor_coords.y + 'px';
-                    dd.style.left = (jetpack_coorders.x - 30) + 'px';
-                    dd.style.display = 'none';
-                    dd.style.zIndex = '150';
+                    dd.style.position = "absolute";
+                    dd.style.padding = "0px";
+                    dd.style.top = editor_coords.y + "px";
+                    dd.style.left = (jetpack_coorders.x - 30) + "px";
+                    dd.style.display = "none";
+                    dd.style.zIndex = "150";
 
-                    dd.innerHTML = '<table id="jetpack_dropdown_content"><tr><th colspan="3">Jetpack Actions</th></tr><tr><td>create</td><td><input type="text" size="7" id="jetpack_dropdown_input_create" value="myjetpack" onfocus="bespin.get(\'editor\').setFocus(false);"></td><td><input id="jetpack_dropdown_now_create" type="button" value="now &raquo;"></td></tr><tr id="jetpack_dropdown_or"><td colspan="3" align="center">or</td></tr><tr><td>install</td><td><select id="jetpack_dropdown_input_install"><option></option></select></td><td><input id="jetpack_dropdown_now_install" type="button" value="now &raquo;"></td></tr></table><div id="jetpack_dropdown_border">&nbsp;</div>';
+                    dd.innerHTML = "<table id='jetpack_dropdown_content'>" +
+                            "<tr><th colspan='3'>Jetpack Actions</th></tr>" +
+                            "<tr><td>create</td><td>" +
+                            "<input type='text' size='7' value='myjetpack' " +
+                                "id='jetpack_dropdown_input_create' " +
+                                "onfocus='bespin.get(\'editor\').setFocus(false);'>" +
+                            "</td><td>" +
+                            "<input id='jetpack_dropdown_now_create' " +
+                                "type='button' value='now &raquo;'></td></tr>" +
+                            "<tr id='jetpack_dropdown_or'>" +
+                            "<td colspan='3' align='center'>or</td></tr>" +
+                            "<tr><td>install</td>" +
+                            "<td><select id='jetpack_dropdown_input_install'>" +
+                            "<option></option></select></td><td>" +
+                            "<input id='jetpack_dropdown_now_install' " +
+                                "type='button' value='now &raquo;'>" +
+                            "</td></tr></table>" +
+                            "<div id='jetpack_dropdown_border'>&nbsp;</div>";
 
                     document.body.appendChild(dd);
 
@@ -327,27 +344,27 @@ bespin.subscribe("toolbar:init", function(event) {
                     exports.sizeDropDownBorder(dd);
 
                     // create a new jetpack
-                    dojo.connect(document.getElementById('jetpack_dropdown_now_create'), 'click', function() {
-                        command.executeCommand('jetpack create ' + document.getElementById('jetpack_dropdown_input_create').value);
-                        dropdown.style.display = 'none';
+                    dojo.connect(document.getElementById("jetpack_dropdown_now_create"), "click", function() {
+                        command.executeCommand("jetpack create " + document.getElementById("jetpack_dropdown_input_create").value);
+                        dropdown.style.display = "none";
                     });
 
                     // install a jetpack
-                    dojo.connect(document.getElementById('jetpack_dropdown_now_install'), 'click', function() {
-                        command.executeCommand('jetpack install ' + document.getElementById('jetpack_dropdown_input_install').value);
-                        dropdown.style.display = 'none';
+                    dojo.connect(document.getElementById("jetpack_dropdown_now_install"), "click", function() {
+                        command.executeCommand("jetpack install " + document.getElementById("jetpack_dropdown_input_install").value);
+                        dropdown.style.display = "none";
                     });
 
                     return dd;
                 })();
 
-                dropdown.style.display = 'block';
+                dropdown.style.display = "block";
 
                 exports.loadInstallScripts();
             } else { // hide away
                 highlightOff();
 
-                dropdown.style.display = 'none';
+                dropdown.style.display = "none";
             }
         });
     });
@@ -360,7 +377,7 @@ exports.install = function(feature) {
     // add the link tag to the body
     // <link rel="jetpack" href="path/feature.js">
     var link = dojo.create("link", {
-        rel: 'jetpack',
+        rel: "jetpack",
         href: path.combine("preview/at", exports.projectName, feature + ".js"),
         name: feature
     }, dojo.body());
@@ -393,36 +410,36 @@ exports.sizeDropDownBorder = function(dd) {
     if (dd) {
         keephidden = true;
     } else {
-        dd = document.getElementById('jetpack_dropdown');
+        dd = document.getElementById("jetpack_dropdown");
     }
 
     if (keephidden) {
-        dd.style.right = '-50000px';
-        dd.style.display = 'block';
+        dd.style.right = "-50000px";
+        dd.style.display = "block";
     }
 
-    var content_coords = dojo.coords('jetpack_dropdown_content');
+    var content_coords = dojo.coords("jetpack_dropdown_content");
 
     if (keephidden) {
-        dd.style.right = '';
-        dd.style.display = 'none';
+        dd.style.right = "";
+        dd.style.display = "none";
     }
 
     var styler = document.getElementById("jetpack_dropdown_border").style;
-    styler.width = content_coords.w + 'px';
-    styler.height = content_coords.h + 'px';
+    styler.width = content_coords.w + "px";
+    styler.height = content_coords.h + "px";
 };
 
 /**
  * Utility to load the installation scripts
  */
 exports.loadInstallScripts = function() {
-    bespin.get('server').list(exports.projectName, '', function(jetpacks) {
+    bespin.get("server").list(exports.projectName, "", function(jetpacks) {
         var output;
 
         if (jetpacks && jetpacks.length > 0) {
             output += jetpacks.filter(endsJs).map(function(c) {
-                return "<option>" + c.name.replace(/\.js$/, '') + "</option>";
+                return "<option>" + c.name.replace(/\.js$/, "") + "</option>";
             }).join("");
         }
 
@@ -432,8 +449,8 @@ exports.loadInstallScripts = function() {
 };
 
 /**
- * Private utility to check if the file.name ends with '.js'
+ * Private utility to check if the file.name ends with ".js"
  */
 var endsJs = function(file) {
-    return util.endsWith(file.name, '\\.js');
+    return util.endsWith(file.name, "\\.js");
 };

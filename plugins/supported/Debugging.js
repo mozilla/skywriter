@@ -43,7 +43,7 @@
             "name": "action",
             "takes": [ "actionname" ],
             "hidden": true,
-            "preview": "execute any editor action",
+            "description": "execute any editor action",
             "pointer": "debug#actionCommand"
         },
         {
@@ -51,7 +51,7 @@
             "name": "echo",
             "takes": [ "message ..." ],
             "hidden": true,
-            "preview": "A test echo command",
+            "description": "A test echo command",
             "pointer": "#echoCommand"
         },
         {
@@ -59,7 +59,7 @@
             "name": "insert",
             "takes": [ "text" ],
             "hidden": true,
-            "preview": "insert the given text at this point.",
+            "description": "insert the given text at this point.",
             "pointer": "#insertCommand"
         },
         {
@@ -67,7 +67,7 @@
             "name": "readonly",
             "takes": [ "flag" ],
             "hidden": true,
-            "preview": "Turn on and off readonly mode",
+            "description": "Turn on and off readonly mode",
             "pointer": "#readonlyCommand"
         },
         {
@@ -75,7 +75,7 @@
             "name": "template",
             "takes": [ "type" ],
             "hidden": true,
-            "preview": "insert templates",
+            "description": "insert templates",
             "completeText": "pass in the template name",
             "pointer": "#templateCommand"
         },
@@ -84,7 +84,7 @@
             "name": "use",
             "takes": [ "type" ],
             "hidden": true,
-            "preview": "use patterns to bring in code",
+            "description": "use patterns to bring in code",
             "completeText": "'sound' will add sound support",
             "pointer": "#useCommand"
         },
@@ -93,7 +93,7 @@
             "name": "slow",
             "takes": [ "seconds" ],
             "hidden": true,
-            "preview": "create some output, slowly, after a given time (default 5s)",
+            "description": "create some output, slowly, after a given time (default 5s)",
             "pointer": "#slowCommand"
         }
     ]

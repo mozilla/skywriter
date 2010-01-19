@@ -205,7 +205,7 @@
             "ep": "command",
             "name": "goto",
             "takes": [ "value" ],
-            "preview": "move it! make the editor head to a line number.",
+            "description": "move it! make the editor head to a line number.",
             "completeText": "add the line number to move to in the file",
             "pointer": "commands/editor#gotoCommand"
         },
@@ -213,7 +213,7 @@
             "ep": "command",
             "name": "replace",
             "takes": [ "search", "replace" ],
-            "preview": "s/foo/bar/g",
+            "description": "s/foo/bar/g",
             "completeText": "add the search regex, and then the replacement text",
             "pointer": "commands/editor#replaceCommand"
         },
@@ -221,7 +221,7 @@
             "ep": "command",
             "name": "sort",
             "takes": [ "direction" ],
-            "preview": "sort the current buffer",
+            "description": "sort the current buffer",
             "completeText": "optionally, sort descending",
             "pointer": "commands/editor#sortCommand"
         },
@@ -229,7 +229,7 @@
             "ep": "command",
             "name": "entab",
             "takes": [ "tabsize" ],
-            "preview": "Convert spaces to tabs.",
+            "description": "Convert spaces to tabs.",
             "completeText": "Optionally, specify a tab size. (Defaults to setting.)",
             "pointer": "commands/editor#entabCommand"
         },
@@ -237,7 +237,7 @@
             "ep": "command",
             "name": "detab",
             "takes": [ "tabsize" ],
-            "preview": "Convert tabs to spaces.",
+            "description": "Convert tabs to spaces.",
             "completeText": "Optionally, specify a tab size. (Defaults to setting.)",
             "pointer": "commands/editor#detabCommand"
         },
@@ -245,21 +245,21 @@
             "ep": "command",
             "name": "trim",
             "takes": [ "side" ],
-            "preview": "trim trailing or leading whitespace",
+            "description": "trim trailing or leading whitespace",
             "completeText": "optionally, give a side of left, right, or both (defaults to right)",
             "pointer": "commands/editor#trimCommand"
         },
         {
             "ep": "command",
             "name": "uc",
-            "preview": "Change all selected text to uppercase",
+            "description": "Change all selected text to uppercase",
             "withKey": "CMD SHIFT U",
             "pointer": "commands/editor#ucCommand"
         },
         {
             "ep": "command",
             "name": "lc",
-            "preview": "Change all selected text to lowercase",
+            "description": "Change all selected text to lowercase",
             "withKey": "CMD SHIFT L",
             "pointer": "commands/editor#lcCommand"
         }

@@ -10,7 +10,7 @@
             "ep": "command",
             "name": "help",
             "takes": [ "search" ],
-            "preview": "Get help on the available commands. Add an optional search string to narrow the output.",
+            "description": "Get help on the available commands. Add an optional search string to narrow the output.",
             "completeText": "optionally, narrow down the search",
             "pointer": "commands#helpCommand"
         },
@@ -18,7 +18,7 @@
             "ep": "command",
             "name": "alias",
             "takes": [ "alias", "command" ],
-            "preview": "define and show aliases for commands",
+            "description": "define and show aliases for commands",
             "completeText": "optionally, add your alias name, and then the command name",
             "usage": "",
             "pointer": "commands#aliasCommand"
@@ -26,7 +26,7 @@
         {
             "ep": "command",
             "name": "history",
-            "preview": "Show history of the commands",
+            "description": "Show history of the commands",
             "pointer": "commands#historyCommand"
         },
         {
@@ -40,7 +40,7 @@
             "ep": "command",
             "name": "eval",
             "takes": [ "js-code" ],
-            "preview": "evals given js code and show the result",
+            "description": "evals given js code and show the result",
             "completeText": "evals given js code and show the result",
             "hidden": true,
             "pointer": "basiccommands#evalCommand"
@@ -49,7 +49,7 @@
             "ep": "command",
             "name": "version",
             "takes": [ "command" ],
-            "preview": "show the version for Bespin or a command",
+            "description": "show the version for Bespin or a command",
             "completeText": "optionally, a command name",
             "hidden": true,
             "pointer": "basiccommands#versionCommand"
@@ -57,7 +57,7 @@
         {
             "ep": "command",
             "name": "bespin",
-            "preview": "has",
+            "description": "has",
             "hidden": true,
             "pointer": "basiccommands#bespinCommand"
         }

@@ -46,18 +46,18 @@ exports.API = SC.Object.extend({
         });
 
         this.focusManager = this.scene.focusManager;
-        this.input = this.scene.byId('input');
+        this.input = this.scene.byId("input");
         this.input.selectAll();
-        this.inputProject = this.scene.byId('project');
+        this.inputProject = this.scene.byId("project");
 
-        this.list = this.scene.byId('list');
-        this.list.items = [ 'Loading...'];
+        this.list = this.scene.byId("list");
+        this.list.items = [ "Loading..." ];
         this.list.remove(this.list.renderer);
         this.list.renderer = new th.HtmlLabel();
         this.list.add(this.list.renderer);
-        this.list.renderer.addCss('padding', '2px 5px');
+        this.list.renderer.addCss("padding", "2px 5px");
 
-        this.label = this.scene.byId('label');
+        this.label = this.scene.byId("label");
 
         this.focusManager.subscribe(this.inputProject);
         this.focusManager.subscribe(this.input);
@@ -94,14 +94,14 @@ exports.API = SC.Object.extend({
             // the text has changed!
             if (this.requestFinished) {
                 this.requestFinished = false;
-                bespin.get('server').searchFiles(this.currentProject, this.input.text, this.currentProjectInclude, this.displayResult);
+                bespin.get("server").searchFiles(this.currentProject, this.input.text, this.currentProjectInclude, this.displayResult);
             } else {
                 this.preformNewRequest = true;
             }
         }, this);
 
         this.scene.bus.bind("text:changed:newChar", this.inputProject, function() {
-            if (!this.inputProject.text == '') {
+            if (!this.inputProject.text == "") {
                 var newText = this.inputProject.text.toLowerCase();
                 // the text has changed!
                 for (var i=0; i < this.projects.length; i++) {
@@ -118,21 +118,21 @@ exports.API = SC.Object.extend({
             for (var i=0; i < this.projects.length; i++) {
                 if (this.projects[i].toLowerCase() == newText) {
                     this.setProject(this.projects[i]);
-                    if (this.input.text == 'no such project') {
-                        this.input.setText('', true);
+                    if (this.input.text == "no such project") {
+                        this.input.setText("", true);
                     }
                     // TODO: put in recent files
                     this.showFiles([]);
-                    this.label.text = 'Loading List...';
-                    bespin.get('server').searchFiles(this.currentProject, this.input.text, this.currentProjectInclude, this.displayResult);
+                    this.label.text = "Loading List...";
+                    bespin.get("server").searchFiles(this.currentProject, this.input.text, this.currentProjectInclude, this.displayResult);
                     return;
                 }
             }
             // there was no such project as typed => show this the to the user!
-            this.input.setText('no such project', true);
+            this.input.setText("no such project", true);
             this.list.items = [];
             delete this.list.selected;
-            this.label.text = '';
+            this.label.text = "";
             this.scene.render();
         }, this);
 
@@ -145,10 +145,10 @@ exports.API = SC.Object.extend({
         }, this.input);
 
         var self = this;
-        bespin.subscribe('ui:escape', function() {
+        bespin.subscribe("ui:escape", function() {
             if (self.scene.isVisible) {
                 self.toggle();
-                bespin.get('editor').setFocus(true);
+                bespin.get("editor").setFocus(true);
             }
         });
     },
@@ -164,8 +164,8 @@ exports.API = SC.Object.extend({
             this.focusManager.removeFocus();
         } else {
             this.focusManager.focus(this.input);
-            this.setProject(bespin.get('editSession').project);
-            this.input.setText('');
+            this.setProject(bespin.get("editSession").project);
+            this.input.setText("");
             this.loadProjects();
         }
     },
@@ -177,7 +177,7 @@ exports.API = SC.Object.extend({
         }
 
         // save the current file and load up the new one
-        var editor = bespin.get('editor');
+        var editor = bespin.get("editor");
         editor.saveFile();
         editor.openFile(this.currentProject, item.filename);
 
@@ -194,31 +194,31 @@ exports.API = SC.Object.extend({
     },
 
     highlightText: function(text, highlight) {
-        if (highlight == '') {
+        if (highlight == "") {
             return text;
         }
         var lastIndex = 0, startIndex = -1;
         var lowerText = text.toLowerCase();
         highlight = highlight.toLowerCase();
-        var result = '';
+        var result = "";
         for (var i=0; i < highlight.length; i++) {
             lastIndex = startIndex;
             startIndex = lowerText.indexOf(highlight[i], startIndex);
             if (startIndex == -1) {
                 break;
             }
-            result += text.substring(lastIndex + 1, startIndex) + '<#000000>' + text[startIndex] + '</#000000>';
+            result += text.substring(lastIndex + 1, startIndex) + "<#000000>" + text[startIndex] + "</#000000>";
         }
         result += text.substring(startIndex + 1);
-        return result.replace(/<\/#000000><#000000>/g, '');
+        return result.replace(/<\/#000000><#000000>/g, "");
     },
 
     showFiles: function(files, sortFiles) {
         sortFiles = sortFiles || false;
         var items = [];
         var sortedItems = [];
-        var quickopen = bespin.get('quickopen');
-        var settings = bespin.get('settings');
+        var quickopen = bespin.get("quickopen");
+        var settings = bespin.get("settings");
         var lastFolder;
         var name;
         var path;
@@ -228,7 +228,7 @@ exports.API = SC.Object.extend({
         if (files === undefined || files.length == 0) {
             quickopen.list.items = [];
             delete quickopen.list.selected;
-            quickopen.label.text = 'No File was found!';
+            quickopen.label.text = "No File was found!";
             quickopen.scene.render();
             return;
         }
@@ -238,7 +238,7 @@ exports.API = SC.Object.extend({
             lastSlash = file.lastIndexOf("/");
             path = (lastSlash == -1) ? "" : file.substring(0, lastSlash);
             name = (lastSlash == -1) ? file : file.substring(lastSlash + 1);
-            if (!settings.values.dotmode && name[0] == '.') {
+            if (!settings.values.dotmode && name[0] == ".") {
                 continue;
             }
 
@@ -247,12 +247,12 @@ exports.API = SC.Object.extend({
             for (var y = items.length - 1; y != -1 ; y--) {
                 if (items[y].name == name) {
                     if (!items[y].lastFolder) {
-                        lastFolder = items[y].filename.split('/');
-                        items[y].lastFolder = (lastFolder.length > 1 ? lastFolder[lastFolder.length - 2] : '');
+                        lastFolder = items[y].filename.split("/");
+                        items[y].lastFolder = (lastFolder.length > 1 ? lastFolder[lastFolder.length - 2] : "");
                     }
 
-                    lastFolder = file.split('/');
-                    lastFolder = (lastFolder.length > 1 ? lastFolder[lastFolder.length - 2] : '');
+                    lastFolder = file.split("/");
+                    lastFolder = (lastFolder.length > 1 ? lastFolder[lastFolder.length - 2] : "");
                     break;
                 }
             }
@@ -276,7 +276,7 @@ exports.API = SC.Object.extend({
 
         for (var i=0; i < items.length; i++) {
             items[i].text = quickopen.highlightText(items[i].name, quickopen.input.text) +
-                    (items[i].lastFolder == false ? '' :  ' - ' + items[i].lastFolder);
+                    (items[i].lastFolder == false ? "" :  " - " + items[i].lastFolder);
         }
 
         quickopen.list.items = items;
@@ -289,7 +289,7 @@ exports.API = SC.Object.extend({
     },
 
     displayResult: function(files) {
-        var quickopen = bespin.get('quickopen');
+        var quickopen = bespin.get("quickopen");
         quickopen.showFiles(files);
 
         quickopen.requestFinished = true;
@@ -298,7 +298,7 @@ exports.API = SC.Object.extend({
             quickopen.requestFinished = false;
             quickopen.preformNewRequest = false;
             quickopen.requestText = quickopen.input.text;
-            bespin.get('server').searchFiles(quickopen.currentProject, quickopen.input.text, quickopen.currentProjectInclude, quickopen.displayResult);
+            bespin.get("server").searchFiles(quickopen.currentProject, quickopen.input.text, quickopen.currentProjectInclude, quickopen.displayResult);
         }
     },
 
@@ -323,7 +323,7 @@ exports.API = SC.Object.extend({
         this.currentProject = name;
         this.currentProjectInclude = [];
 
-        var settings = bespin.get('settings');
+        var settings = bespin.get("settings");
         if (settings) {
             var includeFolders = settings.values.quickopenInclude;
             if (includeFolders) {
@@ -339,24 +339,24 @@ exports.API = SC.Object.extend({
  * The 'quickopen' command
  */
 command.store.addCommand({
-    name: 'quickopen',
-    takes: ['task', 'project', 'path'],
-    preview: 'list, add or remove a folder from the list quickopen uses to search in for files',
+    "name": "quickopen",
+    "takes": [ "task", "project", "path"],
+    "description": "list, add or remove a folder from the list quickopen uses to search in for files",
     // TODO: include this help text somewhere?
-    //usage: '[add|remove] [project] [path to be added or removed]',
+    //usage: "[add|remove] [project] [path to be added or removed]",
     execute: function(instruction, args) {
-        var settings = bespin.get('settings');
+        var settings = bespin.get("settings");
         var includes;
 
         if (!args.task) {
-            instruction.addOutput(this.preview);
+            instruction.addOutput(this.description);
             instruction.addOutput("Usage: quickopen [add|remove] [project] [path to be added or removed]");
 
             includes = settings.values.quickopenInclude;
             if (includes === undefined) {
                 return;
             }
-            var output = '<br/>';
+            var output = "<br/>";
             for (var projects in includes) {
                 if (includes[projects].length == 0) {
                     continue;
@@ -364,7 +364,7 @@ command.store.addCommand({
                 output += "<u><b>Project: " + projects + "</b></u>";
                 output += "<ul>";
                 for (var i=0; i < includes[projects].length; i++) {
-                    output += '<li>' + includes[projects][i] + "</li>";
+                    output += "<li>" + includes[projects][i] + "</li>";
                 }
                 output += "</ul><br/>";
             }
@@ -382,7 +382,7 @@ command.store.addCommand({
             return;
         }
 
-        if (args.task == 'add') {
+        if (args.task == "add") {
             includes = settings.values.quickopenInclude;
             if (includes === undefined) {
                 includes = {};
@@ -392,7 +392,7 @@ command.store.addCommand({
             }
             includes[args.project].push(args.path);
             settings.values.quickopenInclude = includes;
-        } else if (args.task == 'remove') {
+        } else if (args.task == "remove") {
             includes = settings.values.quickopenInclude;
             if (includes === undefined) {
                 return;

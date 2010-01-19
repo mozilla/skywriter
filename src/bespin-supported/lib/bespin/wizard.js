@@ -67,7 +67,7 @@ exports.wizard = {
 
         // When the HTML fetch succeeds, display it in the centerpopup div
         var onSuccess = function(data) {
-            self.element = document.getElementById('centerpopup');
+            self.element = document.getElementById("centerpopup");
             self.element.innerHTML = data;
             dojo.query("#centerpopup script").forEach(function(node) {
                 eval(node.innerHTML);
@@ -79,7 +79,7 @@ exports.wizard = {
             }
         };
 
-        bespin.get('server').fetchResource(wizard.url, onSuccess, onFailure);
+        bespin.get("server").fetchResource(wizard.url, onSuccess, onFailure);
     },
 
     /**
@@ -115,11 +115,11 @@ exports.wizard = {
  * The wizard command to show a wizard
  */
 command.store.addCommand({
-    name: 'wizard',
-    takes: ['type'],
-    hidden: true,
-    preview: 'display a named wizard to step through some process',
-    completeText: 'The name of the wizard to run. Leave blank to list known wizards',
+    "name": "wizard",
+    "takes": [ "type" ],
+    "hidden": true,
+    "description": "display a named wizard to step through some process",
+    "completeText": "The name of the wizard to run. Leave blank to list known wizards",
     execute: function(instruction, type) {
         if (!type) {
             var list = "";

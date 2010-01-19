@@ -37,7 +37,7 @@
             "ep": "command",
             "name": "preview",
             "takes": [ "filename" ],
-            "preview": "view the file in a new browser window",
+            "description": "view the file in a new browser window",
             "completeText": "add the filename to view or use the current file",
             "withKey": "CMD B",
             "pointer": "#previewCommand"

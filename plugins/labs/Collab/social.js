@@ -44,7 +44,7 @@ var metadata =
             "ep": "command",
             "name": "follow",
             "takes": [ "username ..." ],
-            "preview": "add to the list of users we are following, or (with no args) list the current set",
+            "description": "add to the list of users we are following, or (with no args) list the current set",
             "completeText": "username(s) of person(s) to follow",
             "usage": "[username] ...<br><br><em>(username optional. Will list current followed users if not provided)</em>",
             "pointer": "social#followCommand"
@@ -53,7 +53,7 @@ var metadata =
             "ep": "command",
             "name": "unfollow",
             "takes": [ "username ..." ],
-            "preview": "remove from the list of users we are following",
+            "description": "remove from the list of users we are following",
             "completeText": "username(s) of person(s) to stop following",
             "usage": "[username] ...<br><br><em>The username(s) to stop following</em>",
             "pointer": "social#unfollowCommand"
@@ -61,7 +61,7 @@ var metadata =
         {
             "ep": "command",
             "name": "group",
-            "preview": "Collect the people you follow into groups, and display the existing groups",
+            "description": "Collect the people you follow into groups, and display the existing groups",
             "completeText": "subcommands: add, remove, list, help"
         },
         {
@@ -69,7 +69,7 @@ var metadata =
             "parent": "group",
             "name": "help",
             "takes": [ "search" ],
-            "preview": "show subcommands for group command",
+            "description": "show subcommands for group command",
             "completeText": "optionally, narrow down the search",
             "usage": "The <u>help</u> gives you access to the various subcommands in the group command space.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!",
             "pointer": ""
@@ -79,7 +79,7 @@ var metadata =
             "parent": "group",
             "name": "list",
             "takes": [ "group" ],
-            "preview": "List the current group and group members",
+            "description": "List the current group and group members",
             "completeText": "An optional group name or leave blank to list groups",
             "usage": "List the current group and group members.",
             "pointer": "social#groupListCommand"
@@ -89,7 +89,7 @@ var metadata =
             "parent": "group",
             "name": "add",
             "takes": [ "group", "'member ..." ],
-            "preview": "Add members to a new or existing group",
+            "description": "Add members to a new or existing group",
             "completeText": "A group name followed by a list of members to add",
             "usage": "Add members to a new or existing group",
             "pointer": "social#groupAddCommand"
@@ -99,7 +99,7 @@ var metadata =
             "parent": "group",
             "name": "remove",
             "takes": [ "group", "member ..." ],
-            "preview": "Remove members from an existing group (and remove group if empty)",
+            "description": "Remove members from an existing group (and remove group if empty)",
             "completeText": "A group name followed by a list of members to remove",
             "usage": "Remove members from an existing group (and remove group if empty)",
             "pointer": "social#groupRemoveCommand"
@@ -107,7 +107,7 @@ var metadata =
         {
             "ep": "command",
             "name": "share",
-            "preview": "Manage the projects that you share to other users",
+            "description": "Manage the projects that you share to other users",
             "completeText": "subcommands: add, remove, list, help"
         },
         {
@@ -115,7 +115,7 @@ var metadata =
             "parent": "share",
             "name": "help",
             "takes": [ "search" ],
-            "preview": "show subcommands for share command",
+            "description": "show subcommands for share command",
             "completeText": "optionally, narrow down the search",
             "usage": "The <u>help</u> gives you access to the various subcommands in the share command space.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!",
             "pointer": "social#shareHelpCommand"
@@ -125,7 +125,7 @@ var metadata =
             "parent": "share",
             "name": "list",
             "takes": [ "project" ],
-            "preview": "List the current shared projects",
+            "description": "List the current shared projects",
             "completeText": "An optional project name or leave blank to list shared projects",
             "usage": "List the current shared projects.",
             "pointer": "social#shareListCommand"
@@ -135,7 +135,7 @@ var metadata =
             "parent": "share",
             "name": "remove",
             "takes": [ "project", "member" ],
-            "preview": "Remove a share from the current shared projects",
+            "description": "Remove a share from the current shared projects",
             "completeText": "A project name and a optional user or group (or leave blank for all users and groups)",
             "usage": "Remove a share from the current shared projects.",
             "pointer": "social#shareRemoveCommand"
@@ -145,7 +145,7 @@ var metadata =
             "parent": "share",
             "name": "add",
             "takes": [ "project", "member", "permission" ],
-            "preview": "Add a share to the current shared projects",
+            "description": "Add a share to the current shared projects",
             "completeText": "A project name or leave blank to list shared projects",
             "usage": "Add a share to the current shared projects.",
             "pointer": "social#shareAddCommand"
@@ -158,7 +158,7 @@ var metadata =
         {
             "ep": "command",
             "name": "viewme",
-            "preview": "List and alter user\'s ability to see what I\'m working on",
+            "description": "List and alter user\'s ability to see what I\'m working on",
             "pointer": "social#viewmeCommand"
         },
 */

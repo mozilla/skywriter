@@ -47,13 +47,13 @@ while we refactor things and decide what to do with them.
             "ep": "command",
             "name": "editconfig",
             "aliases": [ "config" ],
-            "preview": "load up the config file",
+            "description": "load up the config file",
             "pointer": "#editconfigCommand"
         },
         {
             "ep": "command",
             "name": "runconfig",
-            "preview": "run your config file",
+            "description": "run your config file",
             "pointer": "#runconfigCommand"
         }
     ]

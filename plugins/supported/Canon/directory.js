@@ -48,7 +48,7 @@ var catalog = require("bespin:plugins").catalog;
  *     "name": "checkout",
  *     "takes": [ "revision" ],
  *     "hidden": true,
- *     "preview": "",
+ *     "description": "",
  *     "completeText": "",
  *     "usage": "",
  *     "pointer": "git#checkoutCommand",
@@ -403,7 +403,7 @@ exports.Canon = SC.Object.extend({
                 newValue = newValue + " ";
             }
             query.autofill = query.prefix + newValue;
-            query.hint = command.preview;
+            query.hint = command.description;
         } else if (matches.length === 0) {
             // No matches, cause an error
             query.error = "No matches";
@@ -430,7 +430,7 @@ exports.Canon = SC.Object.extend({
 
         if (this.commands[prefix]) { // caught a real command
             command = this.commands[prefix];
-            commands.push(command.description ? command.description : command.preview);
+            commands.push(command.description);
         } else {
             var showHidden = false;
 
@@ -464,7 +464,7 @@ exports.Canon = SC.Object.extend({
                 if (!showHidden && command.hidden) {
                     continue;
                 }
-                if (command.preview === undefined) {
+                if (command.description === undefined) {
                     // Ignore editor actions
                     continue;
                 }
@@ -476,7 +476,7 @@ exports.Canon = SC.Object.extend({
 
                 commands.push("<tr>");
                 commands.push('<th>' + name + '</th>');
-                commands.push('<td>' + command.preview + "</td>");
+                commands.push('<td>' + command.description + "</td>");
                 commands.push('<td>' + args + '</td>');
                 commands.push("</tr>");
             }
