@@ -37,8 +37,8 @@
 
 var bespin = require("bespin");
 var command = require("bespin/command");
-var util = require("bespin/util/util");
-var path = require("bespin/util/path");
+var util = require("bespin:util/util");
+var path = require("bespin:util/path");
 
 /**
  * Jetpack Plugin
@@ -110,7 +110,6 @@ exports.commands.addCommand({
     name: 'help',
     takes: ['search'],
     preview: 'show commands for jetpack subcommand',
-    description: 'The <u>help</u> gives you access to the various commands in the Bespin system.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!',
     completeText: 'optionally, narrow down the search',
     execute: function(instruction, extra) {
         var output = this.parent.getHelp(extra, {
@@ -126,8 +125,7 @@ exports.commands.addCommand({
 exports.commands.addCommand({
     name: 'create',
     takes: ['feature', 'type'],
-    preview: 'create a new jetpack feature of the given type (defaults to sidebar)',
-    description: 'Create a new jetpack feature that you can install into Firefox with the new Jetpack goodness.',
+    preview: 'Create a new jetpack feature that you can install into Firefox with the new Jetpack goodness.',
     completeText: 'name of your feature, type of JetPack template (sidebar, content, toolbar)',
     execute: function(instruction, opts) {
         var feature = opts.feature || 'newjetpack';
@@ -164,8 +162,7 @@ exports.commands.addCommand({
 exports.commands.addCommand({
     name: 'install',
     takes: ['feature'],
-    preview: 'install a jetpack feature',
-    description: 'Install a Jetpack feature, either the current file, or the named feature',
+    preview: 'Install a Jetpack feature, either the current file, or the named feature',
     completeText: 'optionally, the name of the feature to install',
     execute: function(instruction, feature) {
         // For when Aza exposes the Jetpack object :)
@@ -198,8 +195,7 @@ exports.commands.addCommand({
  */
 exports.commands.addCommand({
     name: 'list',
-    preview: 'list out the Jetpacks that you have written',
-    description: 'Which Jetpacks have you written and have available in BespinSettings/jetpacks. NOTE: This is not the same as which Jetpacks you have installed in Firefox!',
+    preview: 'List the Jetpacks available in BespinSettings/jetpacks. NOTE: This is not the same as which Jetpacks you have installed in Firefox',
     execute: function(instruction, extra) {
         bespin.get('server').list(exports.projectName, '', function(jetpacks) {
             var output;

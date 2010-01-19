@@ -38,7 +38,6 @@ exports.commands.addCommand({
     name: 'help',
     takes: ['search'],
     preview: 'show commands for deploy subcommand',
-    description: 'The <u>help</u> gives you access to the various commands in the deploy subcommand space.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!',
     completeText: 'optionally, narrow down the search',
     execute: function(instruction, extra) {
         var output = this.parent.getHelp(extra, {});

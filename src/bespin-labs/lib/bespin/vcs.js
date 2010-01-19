@@ -44,7 +44,6 @@ exports.commands.addCommand({
     name: 'help',
     takes: ['search'],
     preview: 'show commands for vcs subcommand',
-    description: 'The <u>help</u> gives you access to the various commands in the vcs subcommand space.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!',
     completeText: 'optionally, narrow down the search',
     execute: function(instruction, extra) {
         var output = this.parent.getHelp(extra, {
@@ -157,7 +156,7 @@ exports.commands.addCommand({
     preview: 'Adds missing files to the project',
     takes: ['*'],
     completeText: 'Use the current file, add -a for all files or add filenames',
-    description: 'Without any options, the vcs add command will add the currently selected file. If you pass in -a, the command will add <em>all</em> files. Finally, you can list files individually.',
+    manual: 'Without any options, the vcs add command will add the currently selected file. If you pass in -a, the command will add <em>all</em> files. Finally, you can list files individually.',
     execute: function(instruction, args) {
         exports._performVCSCommandWithFiles("add", instruction, args);
     }
@@ -429,7 +428,7 @@ exports.commands.addCommand({
     preview: 'Display the differences in the checkout out files',
     takes: ['*'],
     completeText: 'Use the current file, add -a for all files or add filenames',
-    description: 'Without any options, the vcs diff command will diff the currently selected file against the repository copy. If you pass in -a, the command will diff <em>all</em> files. Finally, you can list files to diff individually.',
+    manual: 'Without any options, the vcs diff command will diff the currently selected file against the repository copy. If you pass in -a, the command will diff <em>all</em> files. Finally, you can list files to diff individually.',
     execute: function(instruction, args) {
         exports._performVCSCommandWithFiles("diff", instruction, args);
     }
@@ -444,7 +443,7 @@ exports.commands.addCommand({
     preview: 'Revert files back to their checked-in state',
     takes: ['*'],
     completeText: 'Use the current file, add -a for all files or add filenames',
-    description: 'Without any options, the vcs revert command will revert the currently selected file against the repository copy. If you pass in -a, the command will revert <em>all</em> files. Finally, you can list files to revert individually. No backups are kept!',
+    manual: 'Without any options, the vcs revert command will revert the currently selected file against the repository copy. If you pass in -a, the command will revert <em>all</em> files. Finally, you can list files to revert individually. No backups are kept!',
     execute: function(instruction, args) {
         exports._performVCSCommandWithFiles("revert", instruction, args, {
             acceptAll: true,
@@ -541,7 +540,7 @@ exports.commands.addCommand({
     aliases: [ 'rm' ],
     preview: 'Remove a file from version control (also deletes it)',
     takes: ['*'],
-    description: 'The files presented will be deleted and removed from version control.',
+    manual: 'The files presented will be deleted and removed from version control.',
     execute: function(instruction, args) {
     exports._performVCSCommandWithFiles("remove", instruction, args,
             { acceptAll: false });
@@ -558,7 +557,7 @@ exports.commands.addCommand({
     aliases: [ 'resolve' ],
     preview: 'Mark files as resolved',
     completeText: 'Use the current file, add -a for all files or add filenames',
-    description: 'Without any options, the vcs resolved command will mark the currently selected file as resolved. If you pass in -a, the command will resolve <em>all</em> files. Finally, you can list files individually.',
+    manual: 'Without any options, the vcs resolved command will mark the currently selected file as resolved. If you pass in -a, the command will resolve <em>all</em> files. Finally, you can list files individually.',
     execute: function(instruction, args) {
         exports._performVCSCommandWithFiles("resolved", instruction, args);
     }
@@ -572,7 +571,7 @@ exports.commands.addCommand({
     name: 'status',
     aliases: [ 'st' ],
     preview: 'Display the status of the repository files.',
-    description: 'Shows the current state of the files in the repository<br>M for modified, ? for unknown (you may need to add), R for removed, ! for files that are deleted but not removed',
+    manual: 'Shows the current state of the files in the repository<br>M for modified, ? for unknown (you may need to add), R for removed, ! for files that are deleted but not removed',
     execute: function(instruction, args) {
         var project;
 
@@ -600,7 +599,7 @@ exports.commands.addCommand({
 exports.commands.addCommand({
     name: 'log',
     preview: 'Display the changes to the current file.',
-    description: '',
+    manual: '',
     execute: function(instruction, args) {
         var session = bespin.get("editSession");
         vcs(session.project,
@@ -676,7 +675,7 @@ exports.hgCommands.addCommand({
     name: 'help',
     takes: ['search'],
     preview: 'show commands for hg subcommand',
-    description: 'The <u>help</u> gives you access to the various commands in the hg subcommand space.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!',
+    manual: 'The <u>help</u> gives you access to the various commands in the hg subcommand space.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!',
     completeText: 'optionally, narrow down the search',
     execute: function(instruction, extra) {
         var output = this.parent.getHelp(extra);
@@ -690,7 +689,7 @@ exports.hgCommands.addCommand({
 exports.hgCommands.addCommand({
     name: 'init',
     preview: 'initialize a new hg repository',
-    description: 'This will create a new repository in this project.',
+    manual: 'This will create a new repository in this project.',
     execute: function(instruction) {
         var project;
 
@@ -728,7 +727,7 @@ exports.svnCommands.addCommand({
     name: 'help',
     takes: ['search'],
     preview: 'show commands for svn subcommand',
-    description: 'The <u>help</u> gives you access to the various commands in the svn subcommand space.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!',
+    manual: 'The <u>help</u> gives you access to the various commands in the svn subcommand space.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!',
     completeText: 'optionally, narrow down the search',
     execute: function(instruction, extra) {
         var output = this.parent.getHelp(extra);
@@ -989,7 +988,7 @@ exports.svnCommands.addCommand({
     name: 'add',
     takes: ['*'],
     preview: 'add: Put files and directories under version control, schedulingthem for addition to repository',
-    description:         "usage: svn add [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
+    manual:         "usage: svn add [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
         "               {empty,files,immediates,infinity}] [--force] [--no-ignore]\n" +
         "               [--auto-props] [--no-auto-props] [--parents]\n" +
         "               [files [files ...]]\n" +
@@ -1022,7 +1021,7 @@ exports.svnCommands.addCommand({
     takes: ['*'],
     keychain: true,
     preview: 'Apply the differences between two sources to a working copy path',
-    description:         "usage: svn merge [--help] [--revision REVISION] [--quiet] [--changelist\n" +
+    manual:         "usage: svn merge [--help] [--revision REVISION] [--quiet] [--changelist\n" +
         "                 CHANGELIST] [--depth {empty,files,immediates,infinity}]\n" +
         "                 [--force] [--accept {base,working,mine-full,theirs-full}]\n" +
         "                 [--change CHANGE] [--dry-run] [--record-only] [--ignore-\n" +
@@ -1104,7 +1103,7 @@ exports.svnCommands.addCommand({
     aliases: ['praise', 'annotate', 'ann'],
     keychain: true,
     preview: 'blame (praise, annotate, ann): Output the content of specified files with revision and author information in-line',
-    description:         "usage: svn blame [--help] [--revision REVISION] [--quiet] [--verbose]\n" +
+    manual:         "usage: svn blame [--help] [--revision REVISION] [--quiet] [--verbose]\n" +
         "                 [--changelist CHANGELIST] [--depth\n" +
         "                 {empty,files,immediates,infinity}] [--xml] [--incremental]\n" +
         "                 [--force] [--use-merge-history]\n" +
@@ -1161,7 +1160,7 @@ exports.svnCommands.addCommand({
         return null;
     },
     preview: 'copy (cp): Duplicate something in working copy or repository, remembering history',
-    description:         "usage: svn copy [--help] [--revision REVISION] [--quiet] [--message MESSAGE]\n" +
+    manual:         "usage: svn copy [--help] [--revision REVISION] [--quiet] [--message MESSAGE]\n" +
         "                [--parents] [--with-revprop WITH_REVPROP]\n" +
         "                src [src ...] dst\n" +
         "\n" +
@@ -1213,7 +1212,7 @@ exports.svnCommands.addCommand({
     aliases: ['del', 'remove', 'rm'],
     keychain: true,
     preview: 'Remove files and directories from version control',
-    description:         "usage: svn delete [--help] [--quiet] [--message MESSAGE] [--force] [--keep-\n" +
+    manual:         "usage: svn delete [--help] [--quiet] [--message MESSAGE] [--force] [--keep-\n" +
         "                  local]\n" +
         "                  PATH_OR_URL [PATH_OR_URL ...]\n" +
         "\n" +
@@ -1252,7 +1251,7 @@ exports.svnCommands.addCommand({
     aliases: ['sw'],
     keychain: true,
     preview: 'Update the working copy to a different URL',
-    description:         "usage: svn switch [--help] [--revision REVISION] [--quiet] [--depth\n" +
+    manual:         "usage: svn switch [--help] [--revision REVISION] [--quiet] [--depth\n" +
         "                  {empty,files,immediates,infinity}] [--force] [--accept\n" +
         "                  {base,working,mine-full,theirs-full}] [--relocate FROM]\n" +
         "                  [--ignore-externals]\n" +
@@ -1322,7 +1321,7 @@ exports.svnCommands.addCommand({
     aliases: ['mv', 'rename', 'ren'],
     keychain: true,
     preview: 'Move and/or rename something in working copy or repository',
-    description:         "usage: svn move [--help] [--quiet] [--message MESSAGE] [--force] [--parents]\n" +
+    manual:         "usage: svn move [--help] [--quiet] [--message MESSAGE] [--force] [--parents]\n" +
         "                [--with-revprop WITH_REVPROP]\n" +
         "                src [src ...] dst\n" +
         "\n" +
@@ -1368,7 +1367,7 @@ exports.svnCommands.addCommand({
         return { getKeychain: true, getMessage: true };
     },
     preview: 'commit (ci): Send changes from your working copy to the repository',
-    description:         "usage: svn commit [--help] [--quiet] [--message MESSAGE] [--changelist\n" +
+    manual:         "usage: svn commit [--help] [--quiet] [--message MESSAGE] [--changelist\n" +
         "                  CHANGELIST] [--depth {empty,files,immediates,infinity}]\n" +
         "                  [--no-unlock] [--with-revprop WITH_REVPROP] [--keep-\n" +
         "                  changelists]\n" +
@@ -1402,7 +1401,7 @@ exports.svnCommands.addCommand({
     name: 'cleanup',
     takes: ['*'],
     preview: 'cleanup: Recursively clean up the working copy, removing locks, resuming unfinished operations, etc',
-    description:         "usage: svn cleanup [--help] [files [files ...]]\n" +
+    manual:         "usage: svn cleanup [--help] [files [files ...]]\n" +
         "\n" +
         "cleanup: Recursively clean up the working copy, removing locks, resuming unfinished operations, etc.\n" +
         "\n" +
@@ -1420,7 +1419,7 @@ exports.svnCommands.addCommand({
     takes: ['*'],
     aliases: ['pset', 'ps'],
     preview: 'Set the value of a property on files, dirs, or revisions',
-    description:         "usage: svn propset [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
+    manual:         "usage: svn propset [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
         "                   {empty,files,immediates,infinity}] [--force]\n" +
         "                   propname propval path [path ...]\n" +
         "\n" +
@@ -1499,7 +1498,7 @@ exports.svnCommands.addCommand({
     aliases: ['up'],
     keychain: true,
     preview: 'update (up): Bring changes from the repository into the working copy',
-    description:         "usage: svn update [--help] [--revision REVISION] [--quiet] [--changelist\n" +
+    manual:         "usage: svn update [--help] [--revision REVISION] [--quiet] [--changelist\n" +
         "                  CHANGELIST] [--depth {empty,files,immediates,infinity}]\n" +
         "                  [--force] [--set-depth {empty,files,immediates,infinity}]\n" +
         "                  [--ignore-externals] [--accept {postpone,base,mine-full\n" +
@@ -1575,7 +1574,7 @@ exports.svnCommands.addCommand({
     name: 'revert',
     takes: ['*'],
     preview: 'revert: Restore pristine working copy file (undo most local edits)',
-    description:         "usage: svn revert [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
+    manual:         "usage: svn revert [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
         "                  {empty,files,immediates,infinity}] [--recursive]\n" +
         "                  [files [files ...]]\n" +
         "\n" +
@@ -1602,7 +1601,7 @@ exports.svnCommands.addCommand({
     takes: ['*'],
     keychain: true,
     preview: 'log: Show the log messages for a set of revision(s) and/or file(s)',
-    description:         "usage: svn log [--help] [--revision REVISION] [--quiet] [--verbose]\n" +
+    manual:         "usage: svn log [--help] [--revision REVISION] [--quiet] [--verbose]\n" +
         "               [--changelist CHANGELIST] [--depth\n" +
         "               {empty,files,immediates,infinity}] [--xml] [--incremental]\n" +
         "               [--use-merge-history] [--change CHANGE] [--stop-on-copy]\n" +
@@ -1674,7 +1673,7 @@ exports.svnCommands.addCommand({
     takes: ['*'],
     keychain: true,
     preview: 'Output the content of specified files or URLs',
-    description:         "usage: svn cat [--help] [--revision REVISION] targets [targets ...]\n" +
+    manual:         "usage: svn cat [--help] [--revision REVISION] targets [targets ...]\n" +
         "\n" +
         "Output the content of specified files or URLs.\n" +
         "\n" +
@@ -1703,7 +1702,7 @@ exports.svnCommands.addCommand({
     name: 'info',
     takes: ['*'],
     preview: 'info: Display information about a local or remote item',
-    description:         "usage: svn info [--help] [--revision REVISION] [--quiet] [--changelist\n" +
+    manual:         "usage: svn info [--help] [--revision REVISION] [--quiet] [--changelist\n" +
         "                CHANGELIST] [--depth {empty,files,immediates,infinity}]\n" +
         "                [--xml] [--incremental]\n" +
         "                [files [files ...]]\n" +
@@ -1741,7 +1740,7 @@ exports.svnCommands.addCommand({
     takes: ['*'],
     aliases: ['pg', 'pget'],
     preview: 'Print the value of a property on files, dirs, or revisions',
-    description:         "usage: svn propget [--help] [--revision REVISION] [--changelist CHANGELIST]\n" +
+    manual:         "usage: svn propget [--help] [--revision REVISION] [--changelist CHANGELIST]\n" +
         "                   [--depth {empty,files,immediates,infinity}] [--strict]\n" +
         "                   [--xml]\n" +
         "                   propname [files [files ...]]\n" +
@@ -1784,7 +1783,7 @@ exports.svnCommands.addCommand({
     takes: ['*'],
     aliases: ['plist', 'pl'],
     preview: 'List all properties on files, dirs, or revisions',
-    description:         "usage: svn proplist [--help] [--quiet] [--verbose] [--changelist CHANGELIST]\n" +
+    manual:         "usage: svn proplist [--help] [--quiet] [--verbose] [--changelist CHANGELIST]\n" +
         "                    [--depth {empty,files,immediates,infinity}] [--xml]\n" +
         "                    [files [files ...]]\n" +
         "\n" +
@@ -1812,7 +1811,7 @@ exports.svnCommands.addCommand({
     takes: ['*'],
     aliases: ['st', 'stat'],
     preview: 'Print the status of working copy files and directories',
-    description:         "usage: svn status [--help] [--quiet] [--verbose] [--changelist CHANGELIST]\n" +
+    manual:         "usage: svn status [--help] [--quiet] [--verbose] [--changelist CHANGELIST]\n" +
         "                  [--depth {empty,files,immediates,infinity}] [--xml]\n" +
         "                  [--incremental] [--show-updates] [--ignore-externals]\n" +
         "                  [files [files ...]]\n" +
@@ -1914,7 +1913,7 @@ exports.svnCommands.addCommand({
     takes: ['*'],
     keychain: true,
     preview: 'Create a new directory under version control',
-    description:         "usage: svn mkdir [--help] [--quiet] [--message MESSAGE] [--changelist\n" +
+    manual:         "usage: svn mkdir [--help] [--quiet] [--message MESSAGE] [--changelist\n" +
         "                 CHANGELIST] [--parents]\n" +
         "                 path [path ...]\n" +
         "\n" +
@@ -1951,7 +1950,7 @@ exports.svnCommands.addCommand({
     takes: ['*'],
     aliases: ['pdel', 'pd'],
     preview: 'Remove a property from files, dirs, or revisions',
-    description:         "usage: svn propdel [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
+    manual:         "usage: svn propdel [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
         "                   {empty,files,immediates,infinity}]\n" +
         "                   propname [files [files ...]]\n" +
         "\n" +
@@ -1977,7 +1976,7 @@ exports.svnCommands.addCommand({
     name: 'resolve',
     takes: ['*'],
     preview: 'Resolve conflicts on working copy files or directories',
-    description:         "usage: svn resolve [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
+    manual:         "usage: svn resolve [--help] [--quiet] [--changelist CHANGELIST] [--depth\n" +
         "                   {empty,files,immediates,infinity}] [--accept {base,working\n" +
         "                   ,mine-full,theirs-full}]\n" +
         "                   [files [files ...]]\n" +

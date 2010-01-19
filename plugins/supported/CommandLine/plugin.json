@@ -10,8 +10,7 @@
             "ep": "command",
             "name": "help",
             "takes": [ "search" ],
-            "preview": "show commands",
-            "description": "The <u>help</u> gives you access to the various commands in the Bespin system.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>If you pass in the magic <em>hidden</em> parameter, you will find subtle hidden commands.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!",
+            "preview": "Get help on the available commands. Add an optional search string to narrow the output.",
             "completeText": "optionally, narrow down the search",
             "pointer": "commands#helpCommand"
         },
