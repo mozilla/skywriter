@@ -71,7 +71,7 @@ exports.fileFindCompletions = function(query, callback) {
  */
 exports.mkdirCommand = function(instruction, givenPath) {
     if (!givenPath) {
-        instruction.addUsageOutput(this);
+        instruction.addParameterError("givenPath", "Value missing");
         return;
     }
 

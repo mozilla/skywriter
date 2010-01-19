@@ -44,15 +44,16 @@ var catalog = require("bespin:plugins").catalog;
  * <pre>
  * {
  *     "ep": "command",
- *     "parent": "git", // Optional - Parent command, e.g. "git checkout"
+ *     "parent": "git",        // Optional - Parent command, e.g. "git checkout"
  *     "name": "checkout",
  *     "takes": [ "revision" ],
- *     "aliases": [ "co" ],
  *     "hidden": true,
  *     "preview": "",
  *     "completeText": "",
  *     "usage": "",
- *     "pointer": "git#checkoutCommand"
+ *     "pointer": "git#checkoutCommand",
+ *
+ *     "aliases": [ "co" ]
  * }
  * </pre>
  */
@@ -62,16 +63,16 @@ exports.newCommandHandler = function(command) {
 
 exports.Command = SC.Object.extend({
     extension: null,
-    
+
     init: function() {
         this.set("takesArgs", this.get("takes") != undefined);
         this._normalizeTakes();
     },
-    
+
     load: function(callback) {
         this.get("extension").load(callback);
     },
-    
+
     execute: function() {
         var args = arguments;
         var self = this;
@@ -79,14 +80,14 @@ exports.Command = SC.Object.extend({
             execute.apply(self, args);
         });
     },
-    
+
     _normalizeTakes: function() {
         var paramList = [];
         var self = this;
         this._noInputList = [];
-        
+
         var takes = this.get("takes");
-        
+
         if (takes) {
             takes.forEach(function(item) {
                 if (typeof(item) == "string") {
@@ -96,8 +97,8 @@ exports.Command = SC.Object.extend({
                     var argType = catalog.getExtensionByKey("argumentType",
                         itemType);
                     if (!argType) {
-                        console.error("Command ", item.name, 
-                            " requires an argument of type ", itemType, 
+                        console.error("Command ", item.name,
+                            " requires an argument of type ", itemType,
                             " which is undefined");
                         return;
                     }
@@ -113,10 +114,10 @@ exports.Command = SC.Object.extend({
                 }
             });
         }
-        
+
         this._paramList = paramList.join(" ");
     },
-    
+
     /**
      * Calculate the args object to be passed into the command.
      * Split the arguments up for the command and send in an object.
@@ -130,14 +131,14 @@ exports.Command = SC.Object.extend({
 
         var args;
         var userString = fromUser.join(' ');
-        
+
         // Commenting out the old-style varargs for now.
         // Likely want to do something different with the new
         // 'takes' options.
         // if (command.takes['*']) {
         //     args = TokenObject.create({ input:userString });
         //     args.rawinput = userString;
-        // 
+        //
         //     args.varargs = args.pieces; // directly grab the token pieces as an array
         // } else {
         args = TokenObject.create({
@@ -145,20 +146,20 @@ exports.Command = SC.Object.extend({
             options: { params: this._paramList }
         });
         args.rawinput = userString;
-        
+
         this.convertArguments(args, callback);
         // }
     },
-    
+
     convertArguments: function(args, callback) {
         // counter to keep track of how many conversions
         // are done, since they're done asynchronously.
         // should probably be using promises here
         var accounted = 0;
         var fired = false;
-        
+
         var total = this.get("takes").length;
-        
+
         this.get("takes").forEach(function(item) {
             if (typeof(item) == "string") {
                 accounted++;
@@ -172,7 +173,7 @@ exports.Command = SC.Object.extend({
                 accounted++;
                 return;
             }
-            
+
             argTypeExt.load(function(argType) {
                 accounted++;
                 if (args[itemName] != undefined) {
@@ -192,12 +193,12 @@ exports.Command = SC.Object.extend({
                 }
             });
         });
-        
+
         if (accounted == total && !fired) {
             callback(args);
         }
     },
-    
+
     /**
      * This is like store.getFullCommandName() but for commands
      */
@@ -208,7 +209,7 @@ exports.Command = SC.Object.extend({
         }
         return name.trim();
     },
-    
+
     /**
      * Like canon.findCompletions() but a default that just uses
      * command.completeText to provide a hint
@@ -264,7 +265,7 @@ exports.Canon = SC.Object.extend({
         if (!extension) {
             return;
         }
-        
+
         var command = exports.Command.create(extension);
 
         command.set("parent", this);
@@ -272,7 +273,7 @@ exports.Canon = SC.Object.extend({
 
         // Remember the command
         this.commands[command.get("name")] = command;
-        
+
         // Cache all the aliases in a store wide list
         if (command.aliases) {
             command.aliases.forEach(function(alias) {
@@ -280,7 +281,7 @@ exports.Canon = SC.Object.extend({
             }, this);
         }
     },
-    
+
 
     /**
      * Add a new command to this canon

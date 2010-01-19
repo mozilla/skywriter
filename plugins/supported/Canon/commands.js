@@ -51,7 +51,7 @@ var server = catalog.getObject("server");
  */
 exports.loadCommand = function(instruction, commandname) {
     if (!commandname) {
-        instruction.addUsageOutput(this);
+        instruction.addParameterError("commandname", "Value missing");
         return;
     }
 
@@ -78,7 +78,7 @@ exports.loadCommand = function(instruction, commandname) {
  */
 exports.editCommand = function(instruction, commandname) {
     if (!commandname) {
-        instruction.addUsageOutput(this);
+        instruction.addParameterError("commandname", "Value missing");
         return;
     }
 
@@ -130,7 +130,7 @@ exports.listCommand = function(instruction) {
  */
 exports.deleteCommand = function(instruction, commandname) {
     if (!commandname) {
-        instruction.addUsageOutput(this);
+        instruction.addParameterError("commandname", "Value missing");
         return;
     }
 

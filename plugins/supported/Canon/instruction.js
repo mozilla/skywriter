@@ -162,13 +162,15 @@ exports.Instruction = SC.Object.extend({
     },
 
     /**
-     * Complete the currently executing command with usage output
-     * TODO: Why do we need to pass the command in?
+     * There is an error with one of the parameters. Report it.
+     * This is slightly formalized to allow us to be smarter in the future
+     * @param name {String} The name of the parameter that is broken.
+     * This should be available as this.params[x].name
+     * @param message {String} The error message
      */
-    addUsageOutput: function(command) {
+    addParameterError: function(name, message) {
         this.error = true;
-        var usage = command.usage || "no usage information found for " + command.name;
-        this.addOutput("Usage: " + command.name + " " + usage);
+        this.addOutput("Error with " + name + " parameter: " + message);
     },
 
     /**

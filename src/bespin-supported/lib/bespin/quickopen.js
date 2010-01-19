@@ -342,15 +342,15 @@ command.store.addCommand({
     name: 'quickopen',
     takes: ['task', 'project', 'path'],
     preview: 'list, add or remove a folder from the list quickopen uses to search in for files',
-    usage: '[add|remove] [project] [path to be added or removed]',
+    // TODO: include this help text somewhere?
+    //usage: '[add|remove] [project] [path to be added or removed]',
     execute: function(instruction, args) {
         var settings = bespin.get('settings');
         var includes;
 
         if (!args.task) {
             instruction.addOutput(this.preview);
-            instruction.addUsageOutput(this);
-            instruction.error = false;
+            instruction.addOutput("Usage: quickopen [add|remove] [project] [path to be added or removed]");
 
             includes = settings.values.quickopenInclude;
             if (includes === undefined) {
@@ -372,15 +372,24 @@ command.store.addCommand({
             return;
         }
 
-        if (!args.path || !args.project) {
-            instruction.addUsageOutput(this);
+        if (!args.path) {
+            instruction.addParameterError("path", "Value missing");
+            return;
+        }
+
+        if (!args.project) {
+            instruction.addParameterError("project", "Value missing");
             return;
         }
 
         if (args.task == 'add') {
             includes = settings.values.quickopenInclude;
-            if (includes === undefined){includes = {};}
-            if (includes[args.project] === undefined){includes[args.project] = [];}
+            if (includes === undefined) {
+                includes = {};
+            }
+            if (includes[args.project] === undefined) {
+                includes[args.project] = [];
+            }
             includes[args.project].push(args.path);
             settings.values.quickopenInclude = includes;
         } else if (args.task == 'remove') {

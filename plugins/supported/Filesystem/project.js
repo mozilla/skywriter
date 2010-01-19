@@ -68,7 +68,7 @@ exports.listCommand = function(instruction, extra) {
  */
 exports.createCommand = function(instruction, project) {
     if (!project) {
-        instruction.addUsageOutput(this);
+        instruction.addParameterError("project", "Value missing");
         return;
     }
 
@@ -91,7 +91,7 @@ exports.createCommand = function(instruction, project) {
  */
 exports.deleteCommand = function(instruction, project) {
     if (!project) {
-        instruction.addUsageOutput(this);
+        instruction.addParameterError("project", "Value missing");
         return;
     }
 
@@ -119,29 +119,31 @@ exports.deleteCommand = function(instruction, project) {
  * 'project rename' command
  */
 exports.renameCommand = function(instruction, args) {
-    if (!args.currentProject || !args.newProject) {
-        instruction.addUsageOutput(this);
+    if (!args.currentProject) {
+        instruction.addParameterError("currentProject", "Value missing");
         return;
     }
 
-    var currentProject = args.currentProject;
-    var newProject = args.newProject;
-
-    if ((!currentProject || !newProject) || (currentProject == newProject)) {
+    if (!args.newProject) {
+        instruction.addParameterError("newProject", "Value missing");
         return;
     }
 
-    server.renameProject(currentProject, newProject, {
+    if (args.currentProject == args.newProject) {
+        return;
+    }
+
+    server.renameProject(args.currentProject, args.newProject, {
         onSuccess: instruction.link(function() {
-            editSession.setProject(newProject);
+            editSession.setProject(args.newProject);
             instruction.unlink();
             // publish("project:renamed", {
-            //     oldName: currentProject, newName: newProject });
+            //     oldName: args.currentProject, newName: args.newProject });
         }),
         onFailure: instruction.link(function(xhr) {
             instruction.addErrorOutput('Unable to rename project from ' +
-                    currentProject + " to " + newProject +
-                    "<br><br><em>Are you sure that the " + currentProject +
+                    args.currentProject + " to " + args.newProject +
+                    "<br><br><em>Are you sure that the " + args.currentProject +
                     " project exists?</em>");
             instruction.unlink();
         })
@@ -292,7 +294,7 @@ exports.importCommand = function(instruction, args) {
 
     // Fail fast. Nothing given?
     if (!args.url) {
-        instruction.addUsageOutput(this);
+        instruction.addParameterError("url", "Value missing");
         return;
         // Checking - import http://foo.com/path/to/archive.zip
     } else if (!args.project && isURL(args.url)) {

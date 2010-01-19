@@ -120,7 +120,6 @@ command.store.addCommand({
     hidden: true,
     preview: 'display a named wizard to step through some process',
     completeText: 'The name of the wizard to run. Leave blank to list known wizards',
-    usage: "[type] ...<br><br><em>[type] The name of the user to run (or blank to list wizards)</em>",
     execute: function(instruction, type) {
         if (!type) {
             var list = "";

@@ -228,7 +228,6 @@ exports.commands.addCommand({
     takes: ['feature'],
     preview: 'edit the given Jetpack feature',
     completeText: 'feature name to edit (required)',
-    usage: '[feature]: feature name required.',
     execute: function(instruction, feature) {
         if (!feature) {
             instruction.showUsage(this);
