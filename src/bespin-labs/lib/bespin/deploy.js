@@ -271,7 +271,7 @@ exports.commands.addCommand({
 
 exports.commands.addCommand({
     name: 'now',
-    preview: 'Deploy projet to the server now',
+    preview: 'Deploy project to the server now',
     takes: ['project'],
     completeText: "Optionally provide the project to deploy",
     execute: function(instruction, project) {
