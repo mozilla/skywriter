@@ -41,10 +41,15 @@
  */
 
 var SC = require("sproutcore");
-var bespin = require("bespin");
+
+var settings = require("plugins").getObject("settings");
+var editor = require("plugins").getObject("editor");
+// I'm sure there will be a better way to do this
+var serverCapabilities = require("plugins").getObject("serverCapabilities");
+
 var util = require("bespin:util/util");
-var command = require("bespin:command");
-var mobwrite = require("mobwrite/core");
+var notifier = require("Notifier").notifier;
+var mobwrite = require("Collab:mobwrite/core");
 var diff_match_patch = require("Diff");
 
 /**
@@ -133,7 +138,7 @@ var ShareNode = SC.Object.extend({
             }
             this.errorRaised = false;
 
-            command.showHint("Connection to server re-established.");
+            notifier.showHint("Connection to server re-established.");
         }
     },
 
@@ -172,7 +177,7 @@ var ShareNode = SC.Object.extend({
         var prefix = "<strong>" + (recoverable ? "" : "Fatal ") + "Collaboration Error</strong>: ";
         var suffix = "<br/><strong>Warning</strong>: Changes since the last sync could be lost";
 
-        command.showHint(prefix + text + suffix, -1);
+        notifier.showHint(prefix + text + suffix, -1);
 
         if (!this.errorRaised) {
             this.readOnlyStateBeforeError = this.editor.readonly;
@@ -198,7 +203,7 @@ var ShareNode = SC.Object.extend({
         var offsets = [];
         if (cursor) {
             offsets[0] = cursor.startOffset;
-            if ('endOffset' in cursor) {
+            if ("endOffset" in cursor) {
                 offsets[1] = cursor.endOffset;
             }
         }
@@ -259,7 +264,7 @@ var ShareNode = SC.Object.extend({
             if (start_loc == -1) {
                 // No match found.  :(
                 if (mobwrite.debug) {
-                    window.console.warn('Patch failed: ' + patches[x]);
+                    window.console.warn("Patch failed: " + patches[x]);
                 }
             } else {
                 // Found a match.  :)
@@ -403,7 +408,7 @@ var ShareNode = SC.Object.extend({
 
         if (cursorStartPoint !== null) {
             pattern2 = newText.substring(cursorStartPoint, cursorStartPoint + pattern1.length);
-            //alert(pattern1 + '\nvs\n' + pattern2);
+            //alert(pattern1 + "\nvs\n" + pattern2);
             // Run a diff to get a framework of equivalent indices.
             diff = dmp.diff_main(pattern1, pattern2, false);
             cursorStartPoint += dmp.diff_xIndex(diff, cursor.startPrefix.length);
@@ -419,7 +424,7 @@ var ShareNode = SC.Object.extend({
 
             if (cursorEndPoint !== null) {
                 pattern2 = newText.substring(cursorEndPoint, cursorEndPoint + pattern1.length);
-                //alert(pattern1 + '\nvs\n' + pattern2);
+                //alert(pattern1 + "\nvs\n" + pattern2);
                 // Run a diff to get a framework of equivalent indices.
                 diff = dmp.diff_main(pattern1, pattern2, false);
                 cursorEndPoint += dmp.diff_xIndex(diff, cursor.endPrefix.length);
@@ -484,7 +489,7 @@ exports.EditSession = SC.Object.extend({
         this.reportCollaborators([]);
 
         // Take note of in-flight collaboration status changes
-        bespin.subscribe("settings:set:collaborate", function(ev) {
+        hub.subscribe("settings:set:collaborate", function(ev) {
             if (!window.mobwrite) {
                 // Ignore if there is no mobwrite
                 return;
@@ -507,7 +512,7 @@ exports.EditSession = SC.Object.extend({
                     } else {
                         // Not OK to save, bail out of collaboration
                         self.bailingOutOfCollaboration = true;
-                        bespin.get("settings").values.collaborate = false;
+                        setings.values.collaborate = false;
                         self.bailingOutOfCollaboration = false;
 
                         // We have reset the collaborate setting, but the
@@ -532,11 +537,11 @@ exports.EditSession = SC.Object.extend({
      */
     setReadOnlyIfNotMyProject: function(project) {
         if (!util.isMyProject(project)) {
-            bespin.get("editor").setReadOnly(true);
+            editor.setReadOnly(true);
             var msg = "To edit files in others projects you must have " +
                       "'collaborate' set to on." +
-                      " <a href=\"javascript:bespin.get('settings').values.collaborate = true;\">Turn it on now</a>";
-            command.showHint(msg, 10000);
+                      " <a href=\"javascript:settings.values.collaborate = true;\">Turn it on now</a>";
+            notifier.showHint(msg, 10000);
         }
     },
 
@@ -544,15 +549,14 @@ exports.EditSession = SC.Object.extend({
      * Should we attempt to use collaboration features?
      */
     shouldCollaborate: function() {
-        var collab = bespin.get('settings').values.collaborate;
+        var collab = settings.values.collaborate;
 
         if (collab && !window.mobwrite) {
             console.log("Missing mobwrite: Forcing 'collaborate' to off in filesystem.js:isCollaborationOn");
             collab = false;
         }
 
-        var capabilities = bespin.get("serverCapabilities");
-        if (collab && capabilities.indexOf("collab") == -1) {
+        if (collab && serverCapabilities.indexOf("collab") == -1) {
             console.log("Server doesn't support collab: Forcing 'collaborate' to off in filesystem.js:isCollaborationOn");
             collab = false;
         }
@@ -609,8 +613,8 @@ exports.EditSession = SC.Object.extend({
      * TODO: What happens when project == null. Should that ever happen?
      */
     getStatus: function() {
-        var file = this.path || 'a new scratch file';
-        return 'Hey ' + this.username + ', you are editing ' + file + ' in project ' + this.project;
+        var file = this.path || "a new scratch file";
+        return "Hey " + this.username + ", you are editing " + file + " in project " + this.project;
     },
 
     /**
@@ -695,7 +699,7 @@ exports.EditSession = SC.Object.extend({
      */
     openFromHistory: function() {
         var historyItem = this.fileHistory[this.fileHistoryIndex];
-        bespin.get("editor").saveFile();
+        editor.saveFile();
         this.editor.openFile(historyItem.project, historyItem.filename, { fromFileHistory: true });
     },
 

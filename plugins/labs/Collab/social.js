@@ -35,137 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// ---plugin.json---
-var metadata =
-{
-    "provides":
-    [
-        {
-            "ep": "command",
-            "name": "follow",
-            "takes": [ "username ..." ],
-            "description": "add to the list of users we are following, or (with no args) list the current set",
-            "completeText": "username(s) of person(s) to follow",
-            "usage": "[username] ...<br><br><em>(username optional. Will list current followed users if not provided)</em>",
-            "pointer": "social#followCommand"
-        },
-        {
-            "ep": "command",
-            "name": "unfollow",
-            "takes": [ "username ..." ],
-            "description": "remove from the list of users we are following",
-            "completeText": "username(s) of person(s) to stop following",
-            "usage": "[username] ...<br><br><em>The username(s) to stop following</em>",
-            "pointer": "social#unfollowCommand"
-        },
-        {
-            "ep": "command",
-            "name": "group",
-            "description": "Collect the people you follow into groups, and display the existing groups",
-            "completeText": "subcommands: add, remove, list, help"
-        },
-        {
-            "ep": "command",
-            "parent": "group",
-            "name": "help",
-            "takes": [ "search" ],
-            "description": "show subcommands for group command",
-            "completeText": "optionally, narrow down the search",
-            "usage": "The <u>help</u> gives you access to the various subcommands in the group command space.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!",
-            "pointer": ""
-        },
-        {
-            "ep": "command",
-            "parent": "group",
-            "name": "list",
-            "takes": [ "group" ],
-            "description": "List the current group and group members",
-            "completeText": "An optional group name or leave blank to list groups",
-            "usage": "List the current group and group members.",
-            "pointer": "social#groupListCommand"
-        },
-        {
-            "ep": "command",
-            "parent": "group",
-            "name": "add",
-            "takes": [ "group", "'member ..." ],
-            "description": "Add members to a new or existing group",
-            "completeText": "A group name followed by a list of members to add",
-            "usage": "Add members to a new or existing group",
-            "pointer": "social#groupAddCommand"
-        },
-        {
-            "ep": "command",
-            "parent": "group",
-            "name": "remove",
-            "takes": [ "group", "member ..." ],
-            "description": "Remove members from an existing group (and remove group if empty)",
-            "completeText": "A group name followed by a list of members to remove",
-            "usage": "Remove members from an existing group (and remove group if empty)",
-            "pointer": "social#groupRemoveCommand"
-        },
-        {
-            "ep": "command",
-            "name": "share",
-            "description": "Manage the projects that you share to other users",
-            "completeText": "subcommands: add, remove, list, help"
-        },
-        {
-            "ep": "command",
-            "parent": "share",
-            "name": "help",
-            "takes": [ "search" ],
-            "description": "show subcommands for share command",
-            "completeText": "optionally, narrow down the search",
-            "usage": "The <u>help</u> gives you access to the various subcommands in the share command space.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!",
-            "pointer": "social#shareHelpCommand"
-        },
-        {
-            "ep": "command",
-            "parent": "share",
-            "name": "list",
-            "takes": [ "project" ],
-            "description": "List the current shared projects",
-            "completeText": "An optional project name or leave blank to list shared projects",
-            "usage": "List the current shared projects.",
-            "pointer": "social#shareListCommand"
-        },
-        {
-            "ep": "command",
-            "parent": "share",
-            "name": "remove",
-            "takes": [ "project", "member" ],
-            "description": "Remove a share from the current shared projects",
-            "completeText": "A project name and a optional user or group (or leave blank for all users and groups)",
-            "usage": "Remove a share from the current shared projects.",
-            "pointer": "social#shareRemoveCommand"
-        },
-        {
-            "ep": "command",
-            "parent": "share",
-            "name": "add",
-            "takes": [ "project", "member", "permission" ],
-            "description": "Add a share to the current shared projects",
-            "completeText": "A project name or leave blank to list shared projects",
-            "usage": "Add a share to the current shared projects.",
-            "pointer": "social#shareAddCommand"
-        }
-    ]
-};
-// ---
-
-/*
-        {
-            "ep": "command",
-            "name": "viewme",
-            "description": "List and alter user\'s ability to see what I\'m working on",
-            "pointer": "social#viewmeCommand"
-        },
-*/
-
-var bespin = require("bespin");
-var command = require("bespin/command");
-var server = require("bespin/client/server");
+var server = require("plugins").getObject("server");
+var cliController = require("controller").cliController;
 
 /**
  * Utility to take an string array of strings, and publish a ul list to the
@@ -236,7 +107,7 @@ exports.followCommand = function(instruction, args) {
                 }
 
                 // TODO: Rename this event
-                bespin.publish("project:created");
+                hub.publish("project:created");
 
                 var parent = exports.displayFollowers(followers);
                 instruction.setElement(parent);
@@ -249,11 +120,11 @@ exports.followCommand = function(instruction, args) {
 };
 
 /**
- * Extend bespin.client.Server with follow / followers methods
+ * follow / followers methods
  */
 function follow(usernames, opts) {
     var body = JSON.stringify(usernames);
-    bespin.get('server').request('POST', '/network/follow/', body, opts);
+    server.request("POST", "/network/follow/", body, opts);
 };
 
 /**
@@ -278,7 +149,7 @@ exports.displayFollowers = function(followers) {
         dojo.create("a", {
             innerHTML: "<small>(unfollow)</small>",
             onclick: function() {
-                command.executeCommand("unfollow " + follower);
+                cliController.executeCommand("unfollow " + follower);
             }
         }, cell);
     });
@@ -293,7 +164,7 @@ exports.displayFollowers = function(followers) {
 exports.unfollowCommand = function(instruction, args) {
     var usernames = toArgArray(args);
     if (usernames.length === 0) {
-        instruction.addErrorOutput('Please specify the users to cease following');
+        instruction.addErrorOutput("Please specify the users to cease following");
     }
     else {
         unfollow(usernames, {
@@ -305,7 +176,7 @@ exports.unfollowCommand = function(instruction, args) {
                 }
 
                 // TODO: Rename this event
-                bespin.publish("project:created");
+                hub.publish("project:created");
 
                 var parent = exports.displayFollowers(followers);
                 instruction.setElement(parent);
@@ -318,10 +189,10 @@ exports.unfollowCommand = function(instruction, args) {
 };
 
 /**
- * Extend bespin.client.Server with an unfollow method
+ * unfollow method
  */
 function unfollow(users, opts) {
-    bespin.get('server').request('POST', '/network/unfollow/', JSON.stringify(users), opts);
+    server.request("POST", "/network/unfollow/", JSON.stringify(users), opts);
 };
 
 // =============================================================================
@@ -365,14 +236,14 @@ exports.groupListCommand = function(instruction, group) {
                     dojo.create("a", {
                         innerHTML: "<small>(remove)</small>",
                         onclick: function() {
-                            command.executeCommand("group remove " + group);
+                            cliController.executeCommand("group remove " + group);
                         }
                     }, cell);
                     dojo.create("span", { innerHTML:" " }, cell);
                     dojo.create("a", {
                         innerHTML: "<small>(list)</small>",
                         onclick: function() {
-                            command.executeCommand("group list " + group);
+                            cliController.executeCommand("group list " + group);
                         }
                     }, cell);
                 });
@@ -410,7 +281,7 @@ exports.groupListCommand = function(instruction, group) {
                     dojo.create("a", {
                         innerHTML: "<small>(ungroup)</small>",
                         onclick: function() {
-                            command.executeCommand("group remove " + group + " " + member);
+                            cliController.executeCommand("group remove " + group + " " + member);
                         }
                     }, cell);
                 });
@@ -472,39 +343,39 @@ export.groupRemoveCommand = function(instruction, args) {
  * Get a list of the users the current user is following
  */
 function groupListAll(opts) {
-    bespin.get('server').request('GET', '/group/list/all/', null, opts);
+    server.request("GET", "/group/list/all/", null, opts);
 };
 
 /**
  * Get a list of the users the current user is following
  */
 function groupList(group, opts) {
-    var url = '/group/list/' + group + '/';
-    bespin.get('server').request('GET', url, null, opts);
+    var url = "/group/list/" + group + "/";
+    server.request("GET", url, null, opts);
 };
 
 /**
  * Get a list of the users the current user is following
  */
 function groupRemove(group, users, opts) {
-    var url = '/group/remove/' + group + '/';
-    bespin.get('server').request('POST', url, JSON.stringify(users), opts);
+    var url = "/group/remove/" + group + "/";
+    server.request("POST", url, JSON.stringify(users), opts);
 };
 
 /**
  * Get a list of the users the current user is following
  */
 function groupRemoveAll(group, opts) {
-    var url = '/group/remove/all/' + group + '/';
-    bespin.get('server').request('POST', url, null, opts);
+    var url = "/group/remove/all/" + group + "/";
+    server.request("POST", url, null, opts);
 };
 
 /**
  * Get a list of the users the current user is following
  */
 function groupAdd(group, users, opts) {
-    var url = '/group/add/' + group + '/';
-    bespin.get('server').request('POST', url, JSON.stringify(users), opts);
+    var url = "/group/add/" + group + "/";
+    server.request("POST", url, JSON.stringify(users), opts);
 };
 
 // =============================================================================
@@ -593,7 +464,7 @@ var createShareDisplayElement = function(shares) {
         dojo.create("a", {
             innerHTML: "<small>(unshare)</small>",
             onclick: function() {
-                command.executeCommand("share remove " + share.project);
+                cliController.executeCommand("share remove " + share.project);
             }
         }, cell);
     });
@@ -606,7 +477,7 @@ var createShareDisplayElement = function(shares) {
  */
 exports.shareAddCommand = function(instruction, args) {
     if (!args.project || args.project == "") {
-        instruction.addErrorOutput('Missing project.<br/>Syntax: share remove project [{user}|{group}|everyone]');
+        instruction.addErrorOutput("Missing project.<br/>Syntax: share remove project [{user}|{group}|everyone]");
     }
 
     if (!args.member || args.member == "") {
@@ -635,11 +506,11 @@ exports.shareAddCommand = function(instruction, args) {
  */
 exports.shareAddCommand = function(instruction, args) {
     if (!args.project || args.project == "") {
-        instruction.addErrorOutput('Missing project.<br/>Syntax: share add project {user}|{group}|everyone [edit]');
+        instruction.addErrorOutput("Missing project.<br/>Syntax: share add project {user}|{group}|everyone [edit]");
     }
 
     if (!args.member || args.member == "") {
-        instruction.addErrorOutput('Missing user/group.<br/>Syntax: share add project {user}|{group}|everyone [edit]');
+        instruction.addErrorOutput("Missing user/group.<br/>Syntax: share add project {user}|{group}|everyone [edit]");
     }
 
     shareAdd(args.project, args.member, args.permission || "", {
@@ -656,50 +527,59 @@ exports.shareAddCommand = function(instruction, args) {
  * List all project shares
  */
 function shareListAll(opts) {
-    bespin.get('server').request('GET', '/share/list/all/', null, opts);
+    server.request("GET", "/share/list/all/", null, opts);
 };
 
 /**
  * List sharing for a given project
  */
 function shareListProject(project, opts) {
-    var url = '/share/list/' + project + '/';
-    bespin.get('server').request('GET', url, null, opts);
+    var url = "/share/list/" + project + "/";
+    server.request("GET", url, null, opts);
 };
 
 /**
  * List sharing for a given project and member
  */
 function shareListProjectMember(project, member, opts) {
-    var url = '/share/list/' + project + '/' + member + '/';
-    bespin.get('server').request('GET', url, null, opts);
+    var url = "/share/list/" + project + "/" + member + "/";
+    server.request("GET", url, null, opts);
 };
 
 /**
  * Remove all sharing from a project
  */
 function shareRemoveAll(project, opts) {
-    var url = '/share/remove/' + project + '/all/';
-    bespin.get('server').request('POST', url, null, opts);
+    var url = "/share/remove/" + project + "/all/";
+    server.request("POST", url, null, opts);
 };
 
 /**
  * Remove project sharing from a given member
  */
 function shareRemove(project, member, opts) {
-    var url = '/share/remove/' + project + '/' + member + '/';
-    bespin.get('server').request('POST', url, null, opts);
+    var url = "/share/remove/" + project + "/" + member + "/";
+    server.request("POST", url, null, opts);
 };
 
 /**
  * Add a member to the sharing list for a project
  */
 function shareAdd(project, member, options, opts) {
-    var url = '/share/add/' + project + '/' + member + '/';
-    bespin.get('server').request('POST', url, JSON.stringify(options), opts);
+    var url = "/share/add/" + project + "/" + member + "/";
+    server.request("POST", url, JSON.stringify(options), opts);
 };
 
 // =============================================================================
+
+/*
+        {
+            "ep": "command",
+            "name": "viewme",
+            "description": "List and alter user\'s ability to see what I\'m working on",
+            "pointer": "social#viewmeCommand"
+        },
+*/
 
 /**
  * Add a 'viewme' command to allow people to screencast
@@ -733,8 +613,8 @@ exports.viewmeCommand = function(instruction, args) {
         });
     }
     else if (args.length === 2) {
-        if (args[1] != 'false' && args[1] != 'true' && args[1] != 'default') {
-            _syntaxError('Valid viewme settings are {true|false|deafult}');
+        if (args[1] != "false" && args[1] != "true" && args[1] != "default") {
+            _syntaxError("Valid viewme settings are {true|false|deafult}");
         }
         else {
             // === Alter the view setting for a given member ===
@@ -751,12 +631,12 @@ exports.viewmeCommand = function(instruction, args) {
         }
     }
     else {
-        _syntaxError('Too many arguments. Maximum 2 arguments to \'viewme\' command.');
+        _syntaxError("Too many arguments. Maximum 2 arguments to \'viewme\' command.");
     }
 };
 
 var _syntaxError: function(message) {
-    instruction.addErrorOutput('Syntax error - viewme ({user}|{group}|everyone) (true|false|default)');
+    instruction.addErrorOutput("Syntax error - viewme ({user}|{group}|everyone) (true|false|default)");
 };
 // */
 
@@ -764,22 +644,22 @@ var _syntaxError: function(message) {
  * List all the members with view settings on me
  *
 function viewmeListAll(opts) {
-    bespin.get('server').request('GET', '/viewme/list/all/', null, opts);
+    server.request("GET", "/viewme/list/all/", null, opts);
 };
 
 /**
  * List the view settings for a given member
  *
 function viewmeList(member, opts) {
-    var url = '/viewme/list/' + member + '/';
-    bespin.get('server').request('GET', url, null, opts);
+    var url = "/viewme/list/" + member + "/";
+    server.request("GET", url, null, opts);
 };
 
 /**
  * Alter the view setting for a given member
  *
 function viewmeSet(member, value, opts) {
-    var url = '/viewme/set/' + member + '/' + value + '/';
-    bespin.get('server').request('POST', url, null, opts);
+    var url = "/viewme/set/" + member + "/" + value + "/";
+    server.request("POST", url, null, opts);
 };
 */

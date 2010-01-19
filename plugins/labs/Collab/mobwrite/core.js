@@ -22,7 +22,8 @@
  * @author fraser@google.com (Neil Fraser)
  */
 
-var bespin = require("bespin");
+var server = require("plugins").getObject("server");
+
 var diff_match_patch = require("Diff");
 
 var DIFF_EQUAL = diff_match_patch.DIFF_EQUAL;
@@ -986,7 +987,7 @@ mobwrite.syncLoadAjax_ = function(url, post, callback) {
     req.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
 
     // CSRF protection as defined by Bespin
-    bespin.get("server").protectXhrAgainstCsrf(req);
+    server.protectXhrAgainstCsrf(req);
 
     req.send(post);
   }
