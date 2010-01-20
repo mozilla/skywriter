@@ -69,23 +69,39 @@ var CliInputView = require('CommandLine:views/cli').CliInputView;
 var DockView = require('bespin:views/dock').DockView;
 var EditorView = require('Editor:views/editor').EditorView;
 var KeyListener = require('AppSupport:views/keylistener').KeyListener;
+var loginController = require('UserIdent').loginController;
 
 var INITIAL_TEXT;   // defined at the end of the file to reduce ugliness
 
 exports.applicationController = SC.Object.extend({
     _application: SC.Application.extend(),
 
+    _applicationView: DockView.extend({
+        centerView: EditorView.extend(),
+        dockedViews: [ CliInputView.extend() ]
+    }),
+
     _mainPage: SC.Page.extend({
         mainPane: SC.MainPane.design({
-            applicationView: DockView.design({
-                centerView: EditorView.design(),
-                dockedViews: [ CliInputView.design() ]
-            }),
-            childViews: 'applicationView'.w(),
             defaultResponder: KeyListener.create(),
             layout: { centerX: 0, centerY: 0, width: 640, height: 480 }
         })
     }),
+
+    _showEditor: function() {
+        var applicationView = this._applicationView.create();
+        this._applicationView = applicationView;
+
+        var mainPane = this._mainPage.get('mainPane');
+        mainPane.appendChild(applicationView);
+
+        var editorView = applicationView.get('centerView');
+        var textStorage = editorView.getPath('layoutManager.textStorage');
+        textStorage.set('value', INITIAL_TEXT);
+
+        exports.model = textStorage;
+        exports.view = editorView.get('textView');
+    },
 
     init: function() {
         arguments.callee.base.apply(this, arguments);
@@ -94,14 +110,14 @@ exports.applicationController = SC.Object.extend({
 
         var mainPage = this._mainPage.create();
         this._mainPage = mainPage;
+        mainPage.get('mainPane').append();
 
-        var mainPane = mainPage.get('mainPane');
-        mainPane.setPath('applicationView.centerView.layoutManager.' +
-            'textStorage.value', INITIAL_TEXT);
-        mainPane.append();
-        exports.view = mainPane.getPath("applicationView.centerView.textView");
-        exports.model = mainPane.getPath('applicationView.centerView.layoutManager.' +
-            'textStorage');
+        loginController.addDelegate(this);
+        loginController.show();
+    },
+
+    loginControllerAcceptedLogin: function(sender) {
+        this._showEditor();
     }
 });
 

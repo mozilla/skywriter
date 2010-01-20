@@ -37,41 +37,37 @@
 
 "define metadata";
 ({
-    "depends": [ "BespinServer" ],
-    "provides":
-    [
-        {
-            "ep": "startup",
-            "pointer": "#showSignup"
-        }
-    ]
+    "depends": [ "BespinServer", "DelegateSupport" ]
 });
 "end";
 
 var SC = require("sproutcore/runtime").SC;
+var MultiDelegateSupport = require('DelegateSupport').MultiDelegateSupport;
 var util = require("bespin:util/util");
 var server = require("BespinServer").server;
 var catalog = require("bespin:plugins").catalog;
 
 /**
- * Begin the login process
- */
-exports.showSignup = function() {
-    // FIXME: currently broken --pcw
-    exports.userIdentPage.get("mainPane").append();
-};
-
-/**
  * Controller for the sign-in process
  */
-exports.loginController = SC.Object.create({
+exports.loginController = SC.Object.create(MultiDelegateSupport, {
     username: "",
 
     password: "",
 
     login: function() {
         server.login(this.get("username"), this.get("password"),
-            this.onSuccess, this.onFailure);
+            this.onSuccess.bind(this), this.onFailure.bind(this));
+    },
+
+    /**
+     * The login failed.
+     */
+    onFailure: function() {
+        var pane = SC.AlertPane.error("Login Failed",
+                "Your Username or Password was not recognized");
+        pane.append();
+        pane.becomeKeyPane();
     },
 
     /**
@@ -83,17 +79,13 @@ exports.loginController = SC.Object.create({
         // Load the plugin metadata for the user's plugins
         catalog.loadMetadata(server.SERVER_BASE_URL + "/plugin/register/user");
 
-        console.log("login succeeded");
+        this.notifyDelegates('loginControllerAcceptedLogin');
     },
 
-    /**
-     * The login failed.
-     */
-    onFailure: function() {
-        var pane = SC.AlertPane.error("Login Failed",
-                "Your Username or Password was not recognized");
+    show: function() {
+        var pane = exports.userIdentPage.get('mainPane');
         pane.append();
-        console.log("login failed");
+        pane.becomeKeyPane();
     }
 });
 
