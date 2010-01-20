@@ -51,6 +51,7 @@ var Rect = require('utils/rect');
  * view is placed in.
  */
 exports.CanvasView = SC.View.extend({
+    _canvasContext: null,
     _canvasDom: null,
     _canvasId: null,
     _invalidRects: null,
@@ -69,6 +70,13 @@ exports.CanvasView = SC.View.extend({
             this.setNeedsDisplay();
         }
     }.observes('clippingFrame'),
+
+    _getContext: function() {
+        if (this._canvasContext === null) {
+            this._canvasContext = this._canvasDom.getContext('2d');
+        }
+        return this._canvasContext;
+    },
 
     _isVisibleInWindowChanged: function() {
         if (this.get('isVisibleInWindow')) {
@@ -100,15 +108,6 @@ exports.CanvasView = SC.View.extend({
             height: Math.max(frameHeight, parentHeight)
         });
     },
-
-    /**
-     * @property{2DContext}
-     *
-     * Cache for the canvas' 2d context.
-     */
-    canvasContext2D: function() {
-        return this.get('_canvasDom').getContext('2d')
-    }.property('_canvasDom').cacheable(),
 
     layoutStyle: { left: "0px", top: "0px" },
 
@@ -145,7 +144,7 @@ exports.CanvasView = SC.View.extend({
             this.computeFrameWithParentFrame(null);
         }
 
-        var context = this.get('canvasContext2D');
+        var context = this._getContext();
         context.save();
         context.translate(frame.x, frame.y);
 
@@ -216,7 +215,7 @@ exports.CanvasView = SC.View.extend({
 
     didCreateLayer: function() {
         arguments.callee.base.apply(this, arguments);
-        this.set('_canvasDom', this.$("#" + this._canvasId)[0]);
+        this._canvasDom = this.$("#" + this._canvasId)[0];
     },
 
     render: function(context, firstTime) {
