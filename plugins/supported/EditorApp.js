@@ -38,8 +38,8 @@
 "define metadata";
 ({
     "depends": [
-        "AppSupport", "CommandLine", "Editor", "UserIdent", "Settings",
-        "PluginDev"
+        "BespinTheme", "AppSupport", "CommandLine", "Editor", "UserIdent",
+        "Settings", "PluginDev"
     ],
     "provides": [
         {
