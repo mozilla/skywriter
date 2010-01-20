@@ -120,6 +120,42 @@ the plugin is to be reloaded. Here's an example:
         // remove the UI from the DOM, parent view, etc.
     };
 
+## CSS, Images and Other Files ##
+
+Without any additional configuration, you can include CSS files the provide styles for the UI elements in your plugins. To do so, you create a resources directory with the CSS files at the top level of that directory.
+
+You can also include images in your plugins. Create an images directory under resources and put your images in there. In your CSS file, you can use relative links to refer to the images. For example, if you have a directory structure like this:
+
+    resources/
+        mystyles.css
+        images/
+            bg.png
+        data/
+            us_states.json
+            
+you can refer to bg.png from mystyles.css like so:
+
+    background-image: url(images/bg.png)
+    
+By arranging your stylesheets and images this way, your plugin will work 
+properly in both a live Bespin site context *and* an Embedded Bespin context.
+The dryice build tool automatically combines stylesheets from the included
+plugins and following this directory structure is important for ensuring
+that the images still work once the plugin is embedded.
+
+If you need access to a file via JavaScript, you can get to it using the
+`getResourceURL` method on the plugin catalog object. If you need to look
+up the us_states.json file from the example above, you can get its URL
+like this:
+
+    var catalog = require("bespin:plugins").catalog;
+    
+    var statesURL = catalog.getResourceURL("MyPluginName") + "data/us_states.json";
+
+`getResourceURL` returns the URL to access the resources directory of the
+plugin named. Usually, you'll only want to access the resources of your own
+plugin.
+
 ## How To Learn More ##
 
 We will be expanding on the plugin development docs over time. In the meantime,
