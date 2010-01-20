@@ -36,8 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var MultiDelegateSupport =
-    require('mixins/multidelegate').MultiDelegateSupport;
+var MultiDelegateSupport = require('DelegateSupport').MultiDelegateSupport;
 var TextBuffer = require('mixins/textbuffer').TextBuffer;
 
 exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {

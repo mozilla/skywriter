@@ -38,8 +38,7 @@
 var SC = require('sproutcore/runtime').SC;
 var CanvasView = require('views/canvas').CanvasView;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
-var MultiDelegateSupport =
-    require('mixins/multidelegate').MultiDelegateSupport;
+var MultiDelegateSupport = require('DelegateSupport').MultiDelegateSupport;
 var Range = require('utils/range');
 var Rect = require('utils/rect');
 var TextInput = require('bespin:editor/mixins/textinput').TextInput;

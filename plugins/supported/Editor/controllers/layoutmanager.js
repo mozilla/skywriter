@@ -36,8 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var MultiDelegateSupport =
-    require('mixins/multidelegate').MultiDelegateSupport;
+var MultiDelegateSupport = require('DelegateSupport').MultiDelegateSupport;
 var Range = require('utils/range');
 var TextStorage = require('models/textstorage').TextStorage;
 var catalog = require('bespin:plugins').catalog;
