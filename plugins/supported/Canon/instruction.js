@@ -37,6 +37,8 @@
 
 var SC = require("sproutcore/runtime").SC;
 
+var catalog = require("bespin:plugins").catalog;
+
 /**
  * Wrapper for a command execution that the user typed
  */
@@ -46,6 +48,24 @@ exports.Instruction = SC.Object.extend({
     _callbacks: [],
     completed: false,
     historical: false,
+
+    /**
+     * When we allow multiple views for a model then we're going to change how
+     * this finds the view. In the mean time, you should always use
+     * <code>instruction.get("view")</code> to access the view.
+     */
+    view: function() {
+        return catalog.getObject("view");
+    }.property().cacheable(),
+
+    /**
+     * The current editor model might not always be easy to find so you should
+     * use <code>instruction.get("model")</code> to access the view where
+     * possible.
+     */
+    model: function() {
+        return catalog.getObject("model");
+    }.property().cacheable(),
 
     /**
      *

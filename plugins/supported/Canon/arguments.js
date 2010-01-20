@@ -35,8 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require("bespin:plugins").catalog;
-
 /**
 * string argument conversion. Very simple, since arguments
 * start as strings. This is the default if no type is given.
@@ -53,25 +51,5 @@ exports.string = {
 exports.integer = {
     convert: function(value) {
         return parseInt(value, 10);
-    }
-};
-
-/**
-* The editor model
-*/
-exports.model = {
-    acceptsInput: false,
-    getDefault: function() {
-        return catalog.getObject("model");
-    }
-};
-
-/**
-* The editor view
-*/
-exports.view = {
-    acceptsInput: false,
-    getDefault: function() {
-        return catalog.getObject("view");
     }
 };

@@ -20,20 +20,6 @@
             "pointer": "arguments#integer"
         },
         {
-            "ep": "argumentType",
-            "name": "model",
-            "noInput": true,
-            "description": "the editor model",
-            "pointer": "arguments#model"
-        },
-        {
-            "ep": "argumentType",
-            "name": "view",
-            "noInput": true,
-            "description": "the editor view",
-            "pointer": "arguments#view"
-        },
-        {
             "ep": "extensionhandler",
             "name": "command",
             "register": "directory#newCommandHandler"

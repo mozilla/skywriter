@@ -6,7 +6,6 @@
             "name": "backspace",
             "key": "backspace",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -14,7 +13,6 @@
             "name": "deleteSelectionOrNextCharacter",
             "key": "delete",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -22,7 +20,6 @@
             "name": "moveDown",
             "key": "down",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -30,7 +27,6 @@
             "name": "moveLeft",
             "key": "left",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -38,7 +34,6 @@
             "name": "moveRight",
             "key": "right",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -46,7 +41,6 @@
             "name": "moveUp",
             "key": "up",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -54,7 +48,6 @@
             "name": "scrollDocStart",
             "key": "ctrl_home",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -62,7 +55,6 @@
             "name": "moveDocStart",
             "key": "ctrl_up",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -70,7 +62,6 @@
             "name": "selectAll",
             "key": [ "ctrl_a", "meta_a" ],
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -78,7 +69,6 @@
             "name": "selectDocStart",
             "key": "ctrl_shift_up",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -86,7 +76,6 @@
             "name": "scrollDocEnd",
             "key": "ctrl_end",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -94,7 +83,6 @@
             "name": "moveDocEnd",
             "key": "ctrl_down",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -102,7 +90,6 @@
             "name": "selectDocEnd",
             "key": "ctrl_shift_down",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -110,7 +97,6 @@
             "name": "moveLineStart",
             "key": ["home", "ctrl_left"],
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -118,7 +104,6 @@
             "name": "selectLineStart",
             "key": ["shift_home", "ctrl_shift_left"],
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -126,7 +111,6 @@
             "name": "moveLineEnd",
             "key": ["end", "ctrl_right"],
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -134,14 +118,12 @@
             "name": "selectLineEnd",
             "key": ["shift_end", "ctrl_shift_right"],
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "newline",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -149,7 +131,6 @@
             "name": "scrollPageDown",
             "key": "pagedown",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -157,7 +138,6 @@
             "name": "scrollPageUp",
             "key": "pageup",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -165,7 +145,6 @@
             "name": "selectDown",
             "key": "shift_down",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -173,7 +152,6 @@
             "name": "selectLeft",
             "key": "shift_left",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -181,7 +159,6 @@
             "name": "selectRight",
             "key": "shift_right",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -189,7 +166,6 @@
             "name": "selectUp",
             "key": "shift_up",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {
@@ -197,7 +173,6 @@
             "name": "tab",
             "key": "tab",
             "predicates": [ "isTextView", true ],
-            "takes": [{"type": "view"}],
             "pointer": "views/text#textViewCommand"
         },
         {

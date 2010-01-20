@@ -840,8 +840,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     tab: function() {
-        this._insertText("        ".substring(0, 8 -
-            this._selectedRange.start.column % 8));
+        this._insertText("        ".substring(0,
+                8 - this._selectedRange.start.column % 8));
     },
 
     textInserted: function(text) {
@@ -854,7 +854,5 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 });
 
 exports.textViewCommand = function(instruction, args, command) {
-    var view = args.view;
-    var methodName = command.name;
-    view[methodName]();
+    instruction.get("view")[command.name]();
 };
