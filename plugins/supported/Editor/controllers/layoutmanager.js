@@ -44,7 +44,6 @@ var catalog = require('bespin:plugins').catalog;
 
 exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     _characterWidth: 8,
-    _layoutAnnotations: null,
     _lineHeight: 20,
     _maximumWidth: 0,
 
@@ -68,11 +67,10 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     pluginCatalog: catalog,
 
     /**
-     * @property{Array}
+     * @property{Array<object>}
      *
-     * The marked-up lines of text, consisting of an array of objects with
-     * 'character' and 'lineHeight' properties, along with any other properties
-     * that annotations may have added. Read-only.
+     * The marked-up lines of text. Each line has the properties "characters",
+     * "colors", and "lineHeight".
      */
     textLines: null,
 
@@ -164,19 +162,8 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
 
         this._recalculateMaximumWidth();
 
-        var changedRange = this._runAnnotations(Range.unionRanges(oldRange,
-            newRange));
-
         var invalidRects = this._computeInvalidRects(oldRange, newRange);
         this.notifyDelegates('layoutManagerInvalidatedRects', invalidRects);
-    },
-
-    _runAnnotations: function(range) {
-        var textLines = this.get('textLines');
-        this._layoutAnnotations.forEach(function(annotation) {
-            range = annotation.annotateLayout(textLines, range);
-        });
-        return range;
     },
 
     /**
@@ -276,7 +263,6 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     },
 
     init: function() {
-        this._layoutAnnotations = [];
         this.set('textLines', [
             {
                 characters: "",
@@ -292,15 +278,6 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
 
         this.createTextStorage();
         this.get('textStorage').addDelegate(this);
-
-        var thisLayoutManager = this;
-        this.get('pluginCatalog').getExtensions('layoutannotations').
-            forEach(function(extension) {
-                extension.load(function(annotation) {
-                    thisLayoutManager._layoutAnnotations.push(annotation);
-                    thisLayoutManager._recomputeEntireLayout();
-                }, 'layoutannotation');
-            });
 
         this._recomputeEntireLayout();
     },
