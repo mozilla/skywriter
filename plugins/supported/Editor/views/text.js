@@ -742,22 +742,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         this._moveCursorTo(position, true);
     },
 
-    selectDocEnd: function() {
-        this._moveOrSelectEnd(true, false);
-    },
-
-    selectDocStart: function() {
-        this._moveOrSelectStart(true, false);
-    },
-
-    selectLineEnd: function() {
-        this._moveOrSelectEnd(true, true);
-    },
-
-    selectLineStart: function() {
-        this._moveOrSelectStart(true, true);
-    },
-
     /**
      * Inserts a newline at the insertion point.
      */
@@ -797,6 +781,14 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         });
     },
 
+    selectDocEnd: function() {
+        this._moveOrSelectEnd(true, false);
+    },
+
+    selectDocStart: function() {
+        this._moveOrSelectStart(true, false);
+    },
+
     selectDown: function() {
         this._performVerticalKeyboardSelection(1);
     },
@@ -804,6 +796,14 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     selectLeft: function() {
         this._moveCursorTo((this.getPath('layoutManager.textStorage').
             displacePosition(this._selectedRange.end, -1)), false, true);
+    },
+
+    selectLineEnd: function() {
+        this._moveOrSelectEnd(true, true);
+    },
+
+    selectLineStart: function() {
+        this._moveOrSelectStart(true, true);
     },
 
     selectRight: function() {
