@@ -78,12 +78,6 @@ exports.CanvasView = SC.View.extend({
         return this._canvasContext;
     },
 
-    _isVisibleInWindowChanged: function() {
-        if (this.get('isVisibleInWindow')) {
-            this.redraw();
-        }
-    }.observes('isVisibleInWindow'),
-
     _layoutChanged: function() {
         this._resizeToFit();
     }.observes('layout'),
@@ -135,10 +129,6 @@ exports.CanvasView = SC.View.extend({
      *   done because the view wasn't visible.
      */
     redraw: function() {
-        if (!this.get('isVisibleInWindow')) {
-            return false;
-        }
-
         var frame = this.get('frame');
         if (frame.x < 0) {
             this.computeFrameWithParentFrame(null);
@@ -216,6 +206,7 @@ exports.CanvasView = SC.View.extend({
     didCreateLayer: function() {
         arguments.callee.base.apply(this, arguments);
         this._canvasDom = this.$("#" + this._canvasId)[0];
+        this.redraw();
     },
 
     render: function(context, firstTime) {
