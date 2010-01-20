@@ -229,17 +229,17 @@ exports.testInvalidRects = function() {
     var lineHeight = layoutManager._lineHeight;
 
     var returnedRects;
-    layoutManager.addDelegate({
+    layoutManager.addDelegate(SC.Object.create({
         layoutManagerInvalidatedRects: function(sender, rects) {
             returnedRects = rects;
         }
-    });
+    }));
 
     textStorage.insertCharacters({ row: 1, column: 1 }, "aaa");
     t.deepEqual(returnedRects[0], {
             x:      characterWidth,
             y:      lineHeight,
-            width:  5 * characterWidth,
+            width:  Number.MAX_VALUE,
             height: lineHeight
         }, "the returned rect and the expected rect after no lines changed");
 
@@ -250,23 +250,31 @@ exports.testInvalidRects = function() {
     t.deepEqual(returnedRects[0], {
         x:      0,
         y:      lineHeight,
-        width:  3 * characterWidth,
-        height: 3 * lineHeight
-    }, "the returned rect and the expected rect after one line was deleted");
+        width:  Number.MAX_VALUE,
+        height: lineHeight
+    }, "the first returned rect and the expected rect after one line was " +
+        "deleted");
+    t.deepEqual(returnedRects[1], {
+        x:      0,
+        y:      2 * lineHeight,
+        width:  Number.MAX_VALUE,
+        height: Number.MAX_VALUE
+    }, "the second returned rect and the expected rect after one line was " +
+        "deleted");
 
     textStorage.insertCharacters({ row: 1, column: 1 }, "bar\n");
     t.deepEqual(returnedRects[0], {
         x:      characterWidth,
         y:      lineHeight,
-        width:  3 * characterWidth,
+        width:  Number.MAX_VALUE,
         height: lineHeight
     }, "the first returned rect and the expected rect after one line was " +
         "added");
     t.deepEqual(returnedRects[1], {
         x:      0,
         y:      2 * lineHeight,
-        width:  4 * characterWidth,
-        height: 3 * lineHeight
+        width:  Number.MAX_VALUE,
+        height: Number.MAX_VALUE
     }, "the second returned rect and the expected rect after one line was " +
         "added");
 };
