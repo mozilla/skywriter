@@ -41,7 +41,7 @@
     "provides":
     [
         {
-            "ep": "DISABLED startup",
+            "ep": "startup",
             "pointer": "#showSignup"
         }
     ]
