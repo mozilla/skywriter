@@ -37,7 +37,7 @@
 
 var SC = require('sproutcore/runtime').SC;
 var MultiDelegateSupport = require('DelegateSupport').MultiDelegateSupport;
-var Range = require('utils/range');
+var Range = require('RangeUtils');
 var TextStorage = require('models/textstorage').TextStorage;
 var catalog = require('bespin:plugins').catalog;
 

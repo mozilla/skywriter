@@ -35,6 +35,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+"define metadata";
+({
+    "depends": []
+});
+"end";
+
 var SC = require('sproutcore/runtime').SC;
 
 /**
