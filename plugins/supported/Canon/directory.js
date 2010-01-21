@@ -84,7 +84,6 @@ exports.Command = SC.Object.extend({
     _normalizeTakes: function() {
         var paramList = [];
         var self = this;
-        this._noInputList = [];
 
         var takes = this.get("takes");
 
@@ -93,23 +92,19 @@ exports.Command = SC.Object.extend({
                 if (typeof(item) == "string") {
                     paramList.push(item);
                 } else {
-                    var itemType = item.type || "string";
-                    var argType = catalog.getExtensionByKey("argumentType",
-                        itemType);
+                    var itemType = item.type || "text";
+                    var argType = catalog.getExtensionByKey("type", itemType);
                     if (!argType) {
                         console.error("Command ", item.name,
                             " requires an argument of type ", itemType,
                             " which is undefined");
                         return;
                     }
-                    if (argType.noInput) {
-                        self._noInputList.push(argType);
+
+                    if (item.name) {
+                        paramList.push(item.name);
                     } else {
-                        if (item.name) {
-                            paramList.push(item.name);
-                        } else {
-                            paramList.push(itemType);
-                        }
+                        paramList.push(itemType);
                     }
                 }
             });
@@ -165,10 +160,9 @@ exports.Command = SC.Object.extend({
                 accounted++;
                 return;
             }
-            var itemType = item.type || "string";
+            var itemType = item.type || "text";
             var itemName = item.name || item.type;
-            var argTypeExt = catalog.getExtensionByKey("argumentType",
-                itemType);
+            var argTypeExt = catalog.getExtensionByKey("type", itemType);
             if (!argTypeExt) {
                 accounted++;
                 return;
@@ -177,8 +171,8 @@ exports.Command = SC.Object.extend({
             argTypeExt.load(function(argType) {
                 accounted++;
                 if (args[itemName] != undefined) {
-                    if (argType.convert) {
-                        args[itemName] = argType.convert(args[itemName]);
+                    if (argType.fromString) {
+                        args[itemName] = argType.fromString(args[itemName]);
                     }
                 } else {
                     if (item["default"]) {

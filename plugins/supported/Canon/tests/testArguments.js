@@ -35,16 +35,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var arg = require("arguments");
+var types = require("Types");
 var t = require("PluginDev");
 
 var testType = function(type, method, context, value) {
-    var typeObj = arg[type];
+    var typeObj = types[type];
     return typeObj[method].call(context, value);
 };
 
 exports.testStringType = function() {
-    t.equal(testType("string", "convert", {}, "Foo"), "Foo", 
+    t.equal(testType("string", "convert", {}, "Foo"), "Foo",
         "string conversion does nothing");
 };
 
