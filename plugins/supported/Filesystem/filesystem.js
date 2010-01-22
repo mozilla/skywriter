@@ -24,19 +24,49 @@
 
 var SC = require("sproutcore/runtime").SC;
 var util = require("bespin:util/util");
-var path = require("bespin:util/path");
+var path = require("path");
 var cliController = require("controller").cliController;
 
-var server = require("plugins").getObject("server");
-var editSession = require("plugins").getObject("editSession");
-var files = require("plugins").getObject("files");
+var NEW = exports.NEW = 0;
+var LOADING = exports.LOADING = 1;
+var READY = exports.READY = 2;
+
+exports.Directory = SC.Object.extend({
+    // the FileSource that is used for this directory
+    source: null,
+    
+    // the parent of this directory, null if this is a root
+    parent: null,
+    
+    // name of this directory -- does not include the parent segments
+    name: null,
+    
+    // whether or not we have data for this directory
+    status: NEW,
+    
+    init: function() {
+        var source = this.get("source");
+        if (typeof(source) == "string") {
+            this.set("source", SC.objectForPropertyPath(source));
+        }
+    }
+});
+
+exports.File = SC.Object.extend({
+    // the directory this belongs to
+    directory: null,
+    
+    // name of this file, does not include directory
+    name: null
+});
+
 
 /**
  * This abstracts the remote Web Service file system, and in the future local
  * file systems too.
  * It ties into the bespin.client.Server object for remote access.
  */
-exports.FileSystem = SC.Object.extend({
+exports.FileSystemOld = SC.Object.extend({
     /** The name of the project that contains the users client side settings */
     userSettingsProject: "BespinSettings",
 
