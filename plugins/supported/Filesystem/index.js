@@ -25,11 +25,10 @@
 var SC = require("sproutcore/runtime").SC;
 var util = require("bespin:util/util");
 var path = require("path");
-var cliController = require("controller").cliController;
 
-var NEW = exports.NEW = 0;
-var LOADING = exports.LOADING = 1;
-var READY = exports.READY = 2;
+var NEW = exports.NEW = {name: "NEW"};
+var LOADING = exports.LOADING = {name: "LOADING"};
+var READY = exports.READY = {name: "READY"};
 
 exports.Directory = SC.Object.extend({
     // the FileSource that is used for this directory
@@ -41,6 +40,12 @@ exports.Directory = SC.Object.extend({
     // name of this directory -- does not include the parent segments
     name: null,
     
+    // set of subdirectories
+    directories: null,
+    
+    // set of files
+    files: null,
+    
     // whether or not we have data for this directory
     status: NEW,
     
@@ -49,6 +54,81 @@ exports.Directory = SC.Object.extend({
         if (typeof(source) == "string") {
             this.set("source", SC.objectForPropertyPath(source));
         }
+        
+        if (!this.get("source")) {
+            throw "Directory must have a source.";
+        }
+        
+        if (this.get("name") == null) {
+            if (this.get("parent") != null) {
+                throw "Directories must have a name, except for the root";
+            }
+            this.set("name", "/");
+        }
+    },
+    
+    /*
+    * Populates this directory object asynchronously with data.
+    * If everything goes well, onSuccess is called with this directory
+    * object as the argument. Otherwise, onFailure is called with an
+    * error object containing, at the least, "message".
+    * 
+    * Call loadDirectory on the FileSource with the parameters
+    * path, directory handler delegate (this), and the onSuccess and onFailure
+    * callbacks.
+    */
+    load: function(onSuccess, onFailure) {
+        this.set("status", LOADING);
+        var pr = this.get("source").loadDirectory(this);
+        pr.then(function(data) {
+            this.populateDirectory(data);
+            if (typeof(onSuccess) == "function") {
+                onSuccess(this);
+            }
+        }.bind(this),
+        function(error) {
+            if (typeof(onFailure) == "function") {
+                onFailure({
+                    message: error.toString(),
+                    error: error,
+                    directory: this
+                });
+            }
+        }.bind(this));
+    },
+    
+    path: function() {
+        return this.get("name");
+    }.property().cacheable(),
+    
+    /*
+    * Generally by a FileSource to put the data in this Directory.
+    * It contains an array of objects. Each one needs to minimally have
+    * a name. If the name ends with "/" it is assumed to be a directory.
+    * Object references will be properly filled in (parent and source
+    * on directories, directory on files).
+    */
+    populateDirectory: function(data) {
+        this.set("status", READY);
+        var files = [];
+        var directories = [];
+        var source = this.get("source");
+        data.forEach(function(item) {
+            if (!item.name) {
+                console.error("Bad data, no directory/file name: ", item);
+                return;
+            }
+            if (util.endsWith(item.name, "/")) {
+                item.parent = this;
+                item.source = source;
+                directories.push(exports.Directory.create(item));
+            } else {
+                item.directory = this;
+                files.push(exports.File.create(item));
+            }
+        });
+        this.set("directories", directories);
+        this.set("files", files);
     }
 });
 

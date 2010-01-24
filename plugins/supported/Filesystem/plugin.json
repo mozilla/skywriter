@@ -1,5 +1,5 @@
 {
-    "depends": [ "BespinServer" ],
+    "depends": [],
     "provides": [
         {
             "ep": "command",

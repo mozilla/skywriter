@@ -23,7 +23,78 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
+var Promise = require("promise").Promise;
+var t = require("PluginDev");
+var util = require("bespin:util/util");
+var pathUtil = require("path");
 
 exports.DummyFileSource = SC.Object.extend({
+    // populate this list of files
+    // should be a list, each item an object with path
+    // (ending in / for directories) and contents for files.
+    files: null,
     
+    // the list of requests made
+    requests: null,
+    
+    // set this to check for this status on the next status-changing call
+    checkStatus: null,
+    
+    init: function() {
+        this.reset();
+    },
+    
+    reset: function() {
+        this.requests = [];
+    },
+    
+    loadDirectory: function(directory) {
+        this.requests.push(["loadDirectory", arguments]);
+        
+        var checkStatus = this.get("checkStatus");
+        if (checkStatus != null) {
+            t.equal(directory.get("status"), checkStatus, 
+                "loadDirectory: directory status not as expected");
+            this.set("checkStatus", null);
+        }
+        
+        var pr = new Promise();
+        var matches = this.findMatching(directory.get("path"));
+        pr.resolve(matches);
+        return pr;
+    },
+    
+    findMatching: function(path) {
+        if (util.endsWith(path, "/")) {
+            return this._findInDirectory(path);
+        } else {
+            return this._findFile(path);
+        }
+    },
+    
+    _findInDirectory: function(path) {
+        path = pathUtil.trimLeadingSlash(path);
+        var segments = path.split("/");
+        if (path == "") {
+            segments = [];
+        }
+        var matches = [];
+        this.files.forEach(function(f) {
+            var fSegments = f.name.split("/");
+            console.log("check: ", segments, fSegments);
+            for (var i = 0; i < segments.length; i++) {
+                if (segments[i] != fSegments[i]) {
+                    return;
+                }
+            }
+            
+            // is this a directory?
+            if (fSegments.length > segments.length + 1) {
+                matches.push({name: fSegments[i] + "/"});
+            } else {
+                matches.push({name: fSegments[i]});
+            }
+        });
+        return matches;
+    }
 });

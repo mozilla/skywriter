@@ -39,15 +39,9 @@
 ({
     "depends": [
         "BespinTheme", "AppSupport", "CommandLine", "Editor", "UserIdent",
-        "Settings", "PluginDev"
+        "Settings", "PluginDev", "Filesystem", "BespinServer"
     ],
     "provides": [
-        {
-            "ep":       "factory",
-            "name":     "applicationcontroller",
-            "pointer":  "#applicationController",
-            "action":   "create"
-        },
         {
             "ep": "factory",
             "name": "view",
@@ -58,6 +52,12 @@
             "ep": "factory",
             "name": "model",
             "pointer": "#model",
+            "action": "value"
+        },
+        {
+            "ep": "factory",
+            "name": "files",
+            "pointer": "#files",
             "action": "value"
         }
     ]
@@ -70,10 +70,12 @@ var DockView = require('bespin:views/dock').DockView;
 var EditorView = require('Editor:views/editor').EditorView;
 var KeyListener = require('AppSupport:views/keylistener').KeyListener;
 var loginController = require('UserIdent').loginController;
+var BespinFileSource = require("BespinServer:filesource").BespinFileSource;
+var Directory = require("Filesystem").Directory;
 
 var INITIAL_TEXT;   // defined at the end of the file to reduce ugliness
 
-exports.applicationController = SC.Object.extend({
+exports.applicationController = SC.Object.create({
     _application: SC.Application.extend(),
 
     _applicationView: DockView.extend({
@@ -117,6 +119,7 @@ exports.applicationController = SC.Object.extend({
     },
 
     loginControllerAcceptedLogin: function(sender) {
+        exports.files = Directory.create({source: BespinFileSource.create()});
         this._showEditor();
     }
 });

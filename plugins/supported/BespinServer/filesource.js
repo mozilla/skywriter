@@ -34,3 +34,29 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+
+var SC = require("sproutcore/runtime").SC;
+var Promise = require("promise").Promise;
+var server = require("BespinServer").server;
+var pathUtil = require("Filesystem:path");
+
+exports.BespinFileSource = SC.Object.extend({
+    loadDirectory: function(directory) {
+        var path = directory.get("path");
+        var url = pathUtil.combine('/file/list/', path || '/');
+        var pr = new Promise();
+        var opts = {
+            onSuccess: function(data) {
+                console.log(data);
+                pr.resolve(data);
+            },
+            onFailure: function(error) {
+                pr.reject(error);
+            },
+            evalJSON: true,
+            log: "Listing files in: " + url
+        };
+        server.request('GET', url, null, opts);
+        return pr;
+    }
+});
