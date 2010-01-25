@@ -296,6 +296,56 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             shift);
     },
 
+    _moveOrSelectNextWord: function(shiftDown) {
+        var lines = this.getPath('layoutManager.textStorage.lines');
+        var end = this._selectedRange.end;
+        var row = end.row, column = end.column;
+
+        var currentLine = lines[row];
+        var changedRow = false;
+
+        if (column >= currentLine.length) {
+            row++;
+            changedRow = true;
+            if (row < lines.length) {
+                column = 0;
+                currentLine = lines[row];
+            } else {
+                currentLine = '';
+            }
+        }
+
+        column = this._seekNextStop(currentLine, column, 1, changedRow);
+
+        this._moveCursorTo({ row: row, column: column }, false, shiftDown);
+    },
+
+    _moveOrSelectPreviousWord: function(shiftDown) {
+        var lines = this.getPath('layoutManager.textStorage.lines');
+        var end = this._selectedRange.end;
+        var row = end.row, column = end.column;
+
+        var currentLine = lines[row];
+        var changedRow = false;
+
+        if (column > currentLine.length) {
+            column = currentLine.length;
+        } else if (column == 0) {
+            row--;
+            changedRow = true;
+            if (row > -1) {
+                currentLine = lines[row];
+                column = currentLine.length;
+            } else {
+                currentLine = '';
+            }
+        }
+
+        column = this._seekNextStop(currentLine, column, -1, changedRow);
+
+        this._moveCursorTo({ row: row, column: column }, false, shiftDown);
+    },
+
     _moveOrSelectStart: function(shift, inLine) {
         var range = this._selectedRange;
         var row = inLine ? range.end.row : 0;
@@ -463,6 +513,38 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
         scrollView.scrollBy(offset.x, offset.y);
         this._drag();
+    },
+
+    _seekNextStop: function(text, column, dir, rowChanged) {
+        var isDelim;
+        var countDelim = 0;
+        var wasOverNonDelim = false;
+
+        if (dir < 0) {
+            column--;
+            if (rowChanged) {
+                countDelim = 1;
+            }
+        }
+
+        while (column < text.length && column > -1) {
+            isDelim = this._isDelimiter(text[column]);
+            if (isDelim) {
+                countDelim++;
+            } else {
+                wasOverNonDelim = true;
+            }
+            if ((isDelim || countDelim > 1) && wasOverNonDelim) {
+                break;
+            }
+            column += dir;
+        }
+
+        if (dir < 0) {
+            column++;
+        }
+
+        return column;
     },
 
     // Returns the character closest to the given point, obeying the selection
@@ -836,6 +918,14 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         this._moveCursorTo(position, true);
     },
 
+    moveNextWord: function() {
+        this._moveOrSelectNextWord(false);
+    },
+
+    movePreviousWord: function() {
+        this._moveOrSelectPreviousWord(false);
+    },
+
     /**
      * Inserts a newline at the insertion point.
      */
@@ -898,6 +988,14 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     selectLineStart: function() {
         this._moveOrSelectStart(true, true);
+    },
+
+    selectNextWord: function() {
+        this._moveOrSelectNextWord(true);
+    },
+
+    selectPreviousWord: function() {
+        this._moveOrSelectPreviousWord(true);
     },
 
     selectRight: function() {
