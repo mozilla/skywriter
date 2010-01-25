@@ -38,8 +38,6 @@
 var catalog = require("bespin:plugins").catalog;
 var pathUtil = require("Filesystem:path");
 
-var files = catalog.getObject("files");
-
 /**
  * 'files' command
  */
@@ -49,7 +47,7 @@ exports.filesCommand = function(instruction, args) {
         path += "/";
     }
     
-    files.loadPath(path, function(dir) {
+    instruction.get("files").loadPath(path, function(dir) {
         var files = "";
         var contents = dir.get("contents");
         for (var x = 0; x < contents.length; x++) {

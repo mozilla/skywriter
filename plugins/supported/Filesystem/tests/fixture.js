@@ -81,7 +81,6 @@ exports.DummyFileSource = SC.Object.extend({
         var matches = [];
         this.files.forEach(function(f) {
             var fSegments = f.name.split("/");
-            console.log("check: ", segments, fSegments);
             for (var i = 0; i < segments.length; i++) {
                 if (segments[i] != fSegments[i]) {
                     return;

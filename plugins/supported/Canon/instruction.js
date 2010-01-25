@@ -66,6 +66,14 @@ exports.Instruction = SC.Object.extend({
     model: function() {
         return catalog.getObject("model");
     }.property().cacheable(),
+    
+    /*
+    * If files are available, this will get them. Perhaps we need some other
+    * mechanism for populating these things from the catalog?
+    */
+    files: function() {
+        return catalog.getObject("files");
+    }.property().cacheable(),
 
     /**
      *
