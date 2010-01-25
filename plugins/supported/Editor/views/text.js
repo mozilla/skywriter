@@ -272,10 +272,15 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         });
 
         if (doSaveVirtualEnd) {
-            if (position.row > 0 && position.row < textStorage.lines.length) {
+            var lineCount = textStorage.get('lines').length;
+            var row = position.row, column = position.column;
+            if (row > 0 && row < lineCount) {
                 this._selectedRangeEndVirtual = position;
             } else {
-                this._selectedRangeEndVirtual = position;
+                this._selectedRangeEndVirtual = {
+                    row:    row < 1 ? 0 : lineCount - 1,
+                    column: column
+                };
             }
         } else {
             this._selectedRangeEndVirtual = null;
