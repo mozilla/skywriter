@@ -179,6 +179,9 @@ exports.isFunction = (function() {
  * A la Prototype endsWith(). Takes a regex excluding the '$' end marker
  */
 exports.endsWith = function(str, end) {
+    if (!str) {
+        return false;
+    }
     return str.match(new RegExp(end + "$"));
 };
 

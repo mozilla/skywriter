@@ -39,7 +39,7 @@
 ({
     "depends": [
         "BespinTheme", "AppSupport", "CommandLine", "Editor", "UserIdent",
-        "Settings", "PluginDev", "Filesystem", "BespinServer"
+        "Settings", "PluginDev", "Filesystem", "FileCommands", "BespinServer"
     ],
     "provides": [
         {

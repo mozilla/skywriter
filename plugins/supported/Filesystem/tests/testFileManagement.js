@@ -53,8 +53,8 @@ exports.testRootLoading = function() {
     t.equal(null, root.get("parent"), "Parent should not be set on root");
     t.equal("/", root.get("name"), "Root's name is /");
     t.equal("/", root.get("path"), "Root's path is /");
-    t.equal(null, root.get("files"), "No files now");
-    t.equal(null, root.get("directories", "No directories yet"));
+    t.deepEqual([], root.get("files"), "No files now");
+    t.deepEqual([], root.get("directories", "No directories yet"));
     t.equal(fs.NEW, root.get("status"), "status should be new now");
     t.equal(0, source.requests.length);
     
@@ -72,8 +72,62 @@ exports.testRootLoading = function() {
             "first should be foo/");
         t.equal(dir.get("directories")[1].name, "deeply/", 
             "second should be deeply");
-        t.start();
+        t.equal(dir.get("contents").length, 4,
+            "2 files + 2 directories = 4 items");
+        
+        root.load(function(dir) {
+            t.equal(source.requests.length, 1, 
+                "should not have loaded again, because it's already loaded");
+            t.start();
+        });
     }, genericFailureHandler);
     
     t.stop();
+};
+
+exports.testGetObject = function() {
+    source.reset();
+    var root = getNewRoot();
+    var myDir = root._getObject("foo/bar/");
+    t.equal(myDir.name, "bar/", "final object should be created correctly");
+    t.equal(root.get("directories")[0].name, "foo/",
+        "new directory should be created under root");
+    t.equal(myDir.parent, root.get("directories")[0], 
+        "same directory object in both places");
+    var myFile = root._getObject("foo/bar/file.js");
+    t.equal(myFile.get("directory"), myDir, 
+        "file should be populated with the same directory object");
+    t.equal(myFile.get("name"), "file.js");
+    
+    var fooDir = root._getObject("foo/");
+    t.equal(myDir.get("parent"), fooDir, 
+        "should be able to retrieve the same directory");
+    
+    myDir = root._getObject("newtop/");
+    t.equal(root.get("directories").length, 2,
+        "should have two directories now");
+    myFile = root._getObject("newone.txt");
+    t.equal(root.get("files").length, 1, 
+        "should have one file now");
+};
+
+exports.testSubdirLoading = function() {
+    source.reset();
+    var root = getNewRoot();
+    root.loadPath("deeply/nested/", function(dir) {
+        t.equal(dir.get("name"), "nested/");
+        t.equal(dir.get("status"), fs.READY);
+        t.equal(root.get("status"), fs.NEW);
+        
+        var obj = root._getObject("deeply/nested/notthere/");
+        t.equal(obj, null, 
+            "directory is loaded, so non-existent name should not be created");
+        
+        t.equal(dir.get("path"), "/deeply/nested/",
+            "can get back our path");
+        
+        t.start();
+    }, genericFailureHandler);
+    
+    t.stop(1500);
 };

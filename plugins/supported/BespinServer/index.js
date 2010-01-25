@@ -39,6 +39,7 @@ var bespin = require("bespin");
 var util = require("bespin:util/util");
 var cookie = require("bespin:util/cookie");
 var SC = require("sproutcore/runtime").SC;
+var Promise = require("promise").Promise;
 
 /**
  * The Server object implements the Bespin Server API (See
@@ -104,6 +105,11 @@ exports.server = SC.Object.create({
         var server = this;
         var xhr = new XMLHttpRequest();
         options = options || {};
+        
+        var pr = null;
+        if (!options.onSuccess) {
+            pr = new Promise();
+        }
 
         var onreadystatechange = function() {
             if (xhr.readyState == 4) {
@@ -117,16 +123,25 @@ exports.server = SC.Object.create({
                             console.log("Couldn't eval the JSON: " + response + " (SyntaxError: " + syntaxException + ")");
                         }
                     }
+                    
+                    if (pr) {
+                        pr.resolve(response);
+                    } else {
+                        var handled = server._callCallback(options, "onSuccess", [ response, xhr ]);
 
-                    var handled = server._callCallback(options, "onSuccess", [ response, xhr ]);
-
-                    if (!handled && options.log) {
-                        console.log(options.log);
+                        if (!handled && options.log) {
+                            console.log(options.log);
+                        }
                     }
                 } else {
-                    handled = server._callCallback(options, 'on' + xhr.status, [ xhr ]);
-                    if (!handled) {
-                        server._callCallback(options, 'onFailure', [ xhr ]);
+                    if (pr) {
+                        pr.reject({message: "Server returned " + xhr.status,
+                        xhr: xhr});
+                    } else {
+                        handled = server._callCallback(options, 'on' + xhr.status, [ xhr ]);
+                        if (!handled) {
+                            server._callCallback(options, 'onFailure', [ xhr ]);
+                        }
                     }
                 }
             }
@@ -147,6 +162,7 @@ exports.server = SC.Object.create({
         }
 
         xhr.send(payload);
+        return pr;
     },
 
     /**

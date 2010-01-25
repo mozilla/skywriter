@@ -35,6 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var util = require("bespin:util/util");
+
 /**
  * Take the given arguments and combine them with one path separator:
  * <pre>
@@ -80,7 +82,7 @@ exports.directory = function(path) {
  * </pre>
  */
 exports.makeDirectory = function(path) {
-    if (!/\/$/.test(path)){path += '/';}
+    if (!(/\/$/).test(path)){path += '/';}
     return path;
 };
 
@@ -112,7 +114,7 @@ exports.trimLeadingSlash = function(path) {
         path = path.substring(1, path.length);
     }
     return path;
-},
+};
 
 /**
  * This function returns a file type based on the extension
@@ -125,4 +127,11 @@ exports.fileType = function(path) {
             return split[split.length - 1];
         }
     }
+};
+
+/*
+* Returns true if the path points to a directory (ends with a /).
+*/
+exports.isDir = function(path) {
+    return util.endsWith(path, "/");
 };

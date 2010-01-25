@@ -1,13 +1,14 @@
 {
+    "depends": ["Filesystem"],
     "provides": [
     {
         "ep": "command",
         "name": "files",
-        "takes": [ "path" ],
+        "takes": [ {"name":"path", "default": "/"} ],
         "aliases": [ "ls", "list" ],
         "description": "show files",
         "completeText": "list files relative to current file, or start with /projectname",
-        "pointer": "#filesCommand",
+        "pointer": "#filesCommand"
     },
     {
         "ep": "command",

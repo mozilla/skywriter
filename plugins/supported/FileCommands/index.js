@@ -35,24 +35,30 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require("bespin:plugin").catalog;
+var catalog = require("bespin:plugins").catalog;
+var pathUtil = require("Filesystem:path");
 
-var server = catalog.getObject("server");
-var editSession = catalog.getObject("editSession");
 var files = catalog.getObject("files");
-var editor = catalog.getObject("editor");
 
 /**
  * 'files' command
  */
-exports.filesCommand = function(instruction, givenPath) {
-    var list = parseArguments(givenPath, { filter: true });
-    server.list(list.project, list.path, function(filenames) {
+exports.filesCommand = function(instruction, args) {
+    var path = args.path;
+    if (!pathUtil.isDir(path)) {
+        path += "/";
+    }
+    
+    files.loadPath(path, function(dir) {
         var files = "";
-        for (var x = 0; x < filenames.length; x++) {
-            files += filenames[x].name + "<br/>";
+        var contents = dir.get("contents");
+        for (var x = 0; x < contents.length; x++) {
+            files += contents[x].name + "<br/>";
         }
         instruction.addOutput(files);
+        
+    }, function(error) {
+        instruction.addError(error.message);
     });
 };
 

@@ -1,0 +1,70 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License
+ * Version 1.1 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.
+ * See the License for the specific language governing rights and
+ * limitations under the License.
+ *
+ * The Original Code is Bespin.
+ *
+ * The Initial Developer of the Original Code is Mozilla.
+ * Portions created by the Initial Developer are Copyright (C) 2009
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Bespin Team (bespin@mozilla.com)
+ *
+ * ***** END LICENSE BLOCK ***** */
+
+var t = require("PluginDev");
+var fs = require("Filesystem");
+var SC = require("sproutcore/runtime").SC;
+var Promise = require("promise").Promise;
+var filesource = require("filesource");
+
+var DummyServer = SC.Object.extend({
+    request: function(method, url, payload, options) {
+        this.method = method;
+        this.url = url;
+        this.payload = payload;
+        this.options = options;
+        
+        var pr = new Promise();
+        if (this.get("responseData")) {
+            pr.resolve(this.get("responseData"));
+        }
+        return pr;
+    }
+});
+
+exports.testLoadDirectory = function() {
+    var server = DummyServer.create({
+        responseData: [
+            {name: "foo.js"}
+        ]
+    });
+    var source = filesource.BespinFileSource.create({
+        server: server
+    });
+    
+    var root = fs.Directory.create({
+        source: source
+    });
+    
+    var pr = source.loadDirectory(root);
+    console.log(pr);
+    t.ok(typeof(pr.then) == "function", "expected to get Promise back");
+    t.equal(server.method, "GET");
+    t.equal(server.url, "/file/list/");
+    pr.then(function(data) {
+        t.equal(data[0].name, "foo.js", "expected dummy data passed through");
+        t.start();
+    });
+    t.stop();
+};

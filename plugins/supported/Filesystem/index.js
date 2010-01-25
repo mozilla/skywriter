@@ -24,7 +24,7 @@
 
 var SC = require("sproutcore/runtime").SC;
 var util = require("bespin:util/util");
-var path = require("path");
+var pathUtil = require("path");
 
 var NEW = exports.NEW = {name: "NEW"};
 var LOADING = exports.LOADING = {name: "LOADING"};
@@ -49,6 +49,10 @@ exports.Directory = SC.Object.extend({
     // whether or not we have data for this directory
     status: NEW,
     
+    contents: function() {
+        return this.get("directories").concat(this.get("files"));
+    }.property('directories', 'files').cacheable(),
+    
     init: function() {
         var source = this.get("source");
         if (typeof(source) == "string") {
@@ -65,6 +69,12 @@ exports.Directory = SC.Object.extend({
             }
             this.set("name", "/");
         }
+        if (this.get("directories") == null) {
+            this.set("directories", []);
+        }
+        if (this.get("files") == null) {
+            this.set("files", []);
+        }
     },
     
     /*
@@ -78,6 +88,10 @@ exports.Directory = SC.Object.extend({
     * callbacks.
     */
     load: function(onSuccess, onFailure) {
+        if (this.get("status") == READY) {
+            onSuccess(this);
+            return;
+        }
         this.set("status", LOADING);
         var pr = this.get("source").loadDirectory(this);
         pr.then(function(data) {
@@ -97,9 +111,122 @@ exports.Directory = SC.Object.extend({
         }.bind(this));
     },
     
+    /*
+    * Retrieve the object at the path given, and load it (if it's
+    * a directory)
+    */
+    loadPath: function(path, onSuccess, onFailure) {
+        var obj = this._getObject(path);
+        if (obj == null) {
+            onFailure({
+                message: "Cannot find " + path
+            });
+            return;
+        }
+        if (pathUtil.isDir(path)) {
+            obj.load(onSuccess, onFailure);
+        } else {
+            onSuccess(obj);
+        }
+    },
+    
+    _getItem: function(name) {
+        var isDir = util.endsWith(name, "/");
+        var collection;
+        if (isDir) {
+            collection = this.get("directories");
+        } else {
+            collection = this.get("files");
+        }
+        return collection.findProperty("name", name);
+    },
+    
+    /*
+    * Retrieves an object (File or Directory) under this Directory
+    * at the path given. If necessary, it will create objects along
+    * the way.
+    */
+    _getObject: function(path) {
+        var segments = path.split("/");
+        var isDir = pathUtil.isDir(path);
+        if (isDir) {
+            segments.pop();
+        }
+        var curDir = this;
+        for (var i = 0; i < segments.length - 1; i++) {
+            var segment = segments[i] + "/";
+            var nextDir = curDir._getItem(segment);
+            if (nextDir == null) {
+                // When the directory has been loaded, if
+                // we don't know about the given name,
+                // we're not going to create it.
+                if (curDir.get("status") == READY) {
+                    return null;
+                }
+                nextDir = exports.Directory.create({
+                    source: curDir.get("source"),
+                    name: segment,
+                    parent: curDir
+                });
+                curDir.get("directories").push(nextDir);
+            }
+            curDir = nextDir;
+        }
+        
+        var lastSegment = segments[i];
+        if (isDir) {
+            lastSegment += "/";
+        }
+        var retval = curDir._getItem(lastSegment);
+        if (!retval) {
+            if (curDir.get("status") == READY) {
+                return null;
+            }
+            if (isDir) {
+                retval = exports.Directory.create({
+                    name: lastSegment,
+                    source: curDir.get("source"),
+                    parent: curDir
+                });
+                curDir.get("directories").push(retval);
+            } else {
+                retval = exports.File.create({
+                    name: lastSegment,
+                    directory: curDir
+                });
+                curDir.get("files").push(retval);
+            }
+        }
+        return retval;
+    },
+    
     path: function() {
+        var parent = this.get("parent");
+        if (parent) {
+            return pathUtil.combine(parent.get("path"), this.get("name"));
+        }
         return this.get("name");
     }.property().cacheable(),
+    
+    /*
+    * The originPath finds the path within the same file source.
+    * So, if you have a hierarchy of directories built from different
+    * sources, this path is guaranteed to only include the parts of
+    * the path from the same source as this directory.
+    * 
+    * If you're looking up a file on a server, for example, you would
+    * use this path.
+    * 
+    * At the moment, originPath is not truly implemented (it just returns
+    * the path). However, filesources should use this.
+    */
+    originPath: function() {
+        return this.get("path");
+    }.property().cacheable(),
+    
+    toString: function() {
+        return "Directory " + this.get("name");
+    },
     
     /*
     * Generally by a FileSource to put the data in this Directory.
