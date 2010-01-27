@@ -59,21 +59,34 @@ exports.DummyFileSource = SC.Object.extend({
         }
         
         var pr = new Promise();
-        var matches = this.findMatching(directory.get("path"));
+        var matches = this._findMatching(directory.get("path"));
         pr.resolve(matches);
         return pr;
     },
     
-    findMatching: function(path) {
-        if (util.endsWith(path, "/")) {
+    loadContents: function(file) {
+        this.requests.push(["loadContents", arguments]);
+        var pr = new Promise();
+        var matches = this._findMatching(file.get("path"));
+        pr.resolve({file: file, contents: matches.contents});
+        return pr;
+    },
+    
+    _findMatching: function(path) {
+        path = pathUtil.trimLeadingSlash(path);
+        if (pathUtil.isDir(path)) {
             return this._findInDirectory(path);
         } else {
             return this._findFile(path);
         }
     },
     
+    _findFile: function(path) {
+        var f = this.files.findProperty("name", path);
+        return f;
+    },
+    
     _findInDirectory: function(path) {
-        path = pathUtil.trimLeadingSlash(path);
         var segments = path.split("/");
         if (path == "") {
             segments = [];

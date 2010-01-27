@@ -51,5 +51,14 @@ exports.BespinFileSource = SC.Object.extend({
             log: "Listing files in: " + url
         };
         return this.server.request('GET', url, null, opts);
+    },
+    
+    loadContents: function(file) {
+        var path = file.get("originPath");
+        var url = pathUtil.combine("/file/at/", path);
+        var pr = this.server.request('GET', url, null);
+        return pr.then(function(contents) {
+            return {file: file, contents: contents};
+        });
     }
 });

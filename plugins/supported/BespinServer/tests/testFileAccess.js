@@ -68,3 +68,29 @@ exports.testLoadDirectory = function() {
     });
     t.stop();
 };
+
+exports.testLoadContents = function() {
+    var server = DummyServer.create({
+        responseData: "This is the exciting data in the file."
+    });
+    var source = filesource.BespinFileSource.create({
+        server: server
+    });
+    
+    var root = fs.Directory.create({
+        source: source
+    });
+    
+    var f = root.getObject("myfile.txt");
+    
+    var pr = source.loadContents(f);
+    t.ok(typeof(pr.then) == "function", "expected to get Promise back");
+    t.equal(server.method, "GET");
+    t.equal(server.url, "/file/at/myfile.txt");
+    pr.then(function(data) {
+        t.equal(data.file, f, "expected same file back");
+        t.equal(data.contents, "This is the exciting data in the file.");
+        t.start();
+    });
+    t.stop();
+};

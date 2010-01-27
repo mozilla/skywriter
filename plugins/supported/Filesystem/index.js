@@ -116,7 +116,7 @@ exports.Directory = SC.Object.extend({
     * a directory)
     */
     loadPath: function(path, onSuccess, onFailure) {
-        var obj = this._getObject(path);
+        var obj = this.getObject(path);
         if (obj == null) {
             onFailure({
                 message: "Cannot find " + path
@@ -146,7 +146,7 @@ exports.Directory = SC.Object.extend({
     * at the path given. If necessary, it will create objects along
     * the way.
     */
-    _getObject: function(path) {
+    getObject: function(path) {
         var segments = path.split("/");
         var isDir = pathUtil.isDir(path);
         if (isDir) {
@@ -264,7 +264,28 @@ exports.File = SC.Object.extend({
     directory: null,
     
     // name of this file, does not include directory
-    name: null
+    name: null,
+    
+    source: function() {
+        return this.get("directory").get("source");
+    }.property(),
+    
+    path: function() {
+        return pathUtil.combine(this.get("directory").get("path"), this.get("name"));
+    }.property().cacheable(),
+    
+    /*
+    * See Directory.originPath
+    */
+    originPath: function() {
+        return this.get("path");
+    }.property().cacheable(),
+        
+    loadContents: function(onSuccess, onFailure) {
+        var source = this.get("source");
+        var self = this;
+        source.loadContents(this).then(onSuccess, onFailure);
+    }
 });
 
 

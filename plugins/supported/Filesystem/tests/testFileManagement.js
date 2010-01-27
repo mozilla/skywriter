@@ -88,25 +88,25 @@ exports.testRootLoading = function() {
 exports.testGetObject = function() {
     source.reset();
     var root = getNewRoot();
-    var myDir = root._getObject("foo/bar/");
+    var myDir = root.getObject("foo/bar/");
     t.equal(myDir.name, "bar/", "final object should be created correctly");
     t.equal(root.get("directories")[0].name, "foo/",
         "new directory should be created under root");
     t.equal(myDir.parent, root.get("directories")[0], 
         "same directory object in both places");
-    var myFile = root._getObject("foo/bar/file.js");
+    var myFile = root.getObject("foo/bar/file.js");
     t.equal(myFile.get("directory"), myDir, 
         "file should be populated with the same directory object");
     t.equal(myFile.get("name"), "file.js");
     
-    var fooDir = root._getObject("foo/");
+    var fooDir = root.getObject("foo/");
     t.equal(myDir.get("parent"), fooDir, 
         "should be able to retrieve the same directory");
     
-    myDir = root._getObject("newtop/");
+    myDir = root.getObject("newtop/");
     t.equal(root.get("directories").length, 2,
         "should have two directories now");
-    myFile = root._getObject("newone.txt");
+    myFile = root.getObject("newone.txt");
     t.equal(root.get("files").length, 1, 
         "should have one file now");
 };
@@ -119,7 +119,7 @@ exports.testSubdirLoading = function() {
         t.equal(dir.get("status"), fs.READY);
         t.equal(root.get("status"), fs.NEW);
         
-        var obj = root._getObject("deeply/nested/notthere/");
+        var obj = root.getObject("deeply/nested/notthere/");
         t.equal(obj, null, 
             "directory is loaded, so non-existent name should not be created");
         
@@ -130,4 +130,18 @@ exports.testSubdirLoading = function() {
     }, genericFailureHandler);
     
     t.stop(1500);
+};
+
+exports.testContentRetrieval = function() {
+    source.reset();
+    var root = getNewRoot();
+    
+    var f = root.getObject("atTheTop.js");
+    f.loadContents(function(result) {
+        t.equal(result.file, f, "should get the same file in");
+        t.equal(result.contents, "the top file", "Content should be as expected");
+        t.start();
+    });
+    
+    t.stop();
 };
