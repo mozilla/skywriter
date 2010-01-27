@@ -341,6 +341,16 @@ def sc_build(options):
         filters=sproutcore_filters,
         manual_maps=[(re.compile(r'tiki/en/\w+/javascript\.js'), "tiki")])
     
+    # this is a temporary hack. Once SproutCore has become fully Tiki, this can go away.
+    # until then, we need to do this to avoid the creation of two unrelated SC objects
+    combined = combined.replace("SC = SproutCore = {} ;", """
+    if (window.SC == undefined) {
+        SC = SproutCore = {} ; 
+    } else {
+        SC = window.SC;
+    }
+""")
+    
     output = snapshot / "sproutcore.js"
     output.write_bytes(combined)
     
@@ -354,7 +364,7 @@ def sc_build(options):
     output = snapshot / "core_test.css"
     output.write_bytes(combined)
     
-    combined = combine_sproutcore_files([sproutcore_built / "core_test"])
+    combined = combine_sproutcore_files([sproutcore_built / "core_test"], ignore_dependencies=True)
     output = snapshot / "core_test.js"
     output.write_bytes(combined)
     
@@ -456,15 +466,7 @@ BASE_RULES.add(Exclude("sproutcore/frameworks/runtime", [
     RE("debug/.*")
 ]))
 BASE_RULES.add(Exclude("sproutcore/frameworks/foundation", [
-    "controllers/array.js",
-    "controllers/object.js",
-    "controllers/tree.js",
     RE("debug/.*"),
-    # RE("mixins/.*"),
-    # "mixins/control.js",
-    # "mixins/string.js",
-    # "mixins/tree_item_content.js",
-    # "private/tree_item_observer.js",
     "system/datetime.js",
     "system/json.js",
     RE("tests/.*")

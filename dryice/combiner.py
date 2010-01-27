@@ -77,6 +77,8 @@ def toposort(unsorted, package_factory=None, reset_first=False):
                 try:
                     visit(mapping[dependency])
                 except KeyError:
+                    if not package_factory:
+                        raise ValueError("Dependency %s for package %s not found, not package factory available (mapping: %r)" % (dependency, p.name, mapping))
                     new_package = package_factory(dependency)
                     mapping[new_package.name] = new_package
                     visit(new_package)
@@ -190,7 +192,7 @@ def _get_file_list(paths, pattern, filters=None):
     return flist
 
 def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
-    filters=None, manual_maps=[]):
+    filters=None, manual_maps=[], ignore_dependencies=False):
     """Combines files that are output by Abbot, taking extra care with the
     stylesheets because we want to explicitly register them rather than
     loading them individually.
@@ -270,7 +272,7 @@ def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
             
         p = Package(name, data.get('depends', []))
         packages.append(p)
-        p.content = f.bytes()
+        p.content = f.text()
     
     # commented out for the moment. this is not necessary (and may actually
     # even be a problem)
@@ -286,13 +288,15 @@ def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
                 s for s in stylesheets) + newcode
     else:
         newcode = starting + newcode
+    
+    if not ignore_dependencies:
+        packages = toposort(packages)
         
-    packages = toposort(packages)
     for p in packages:
-        newcode += p.content
+        newcode += p.content.encode("utf-8")
         if found_tiki and p.name == "tiki":
             newcode += "".join('tiki.stylesheet("%s");' % 
-                    s for s in stylesheets)
+                    s.encode("utf-8") for s in stylesheets)
         
     return newcode
 
