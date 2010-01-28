@@ -74,7 +74,7 @@ exports.DummyFileSource = SC.Object.extend({
     
     _findMatching: function(path) {
         path = pathUtil.trimLeadingSlash(path);
-        if (pathUtil.isDir(path)) {
+        if (path == "" || pathUtil.isDir(path)) {
             return this._findInDirectory(path);
         } else {
             return this._findFile(path);

@@ -38,8 +38,9 @@
 "define metadata";
 ({
     "depends": [
+        "EditSession",
         "BespinTheme", "AppSupport", "CommandLine", "Editor", "UserIdent",
-        "Settings", "PluginDev", "Filesystem", "FileCommands", "BespinServer"
+        "Settings", "PluginDev", "Filesystem", "BespinServer"
     ],
     "provides": [
         {

@@ -25,6 +25,7 @@
 var SC = require("sproutcore/runtime").SC;
 var util = require("bespin:util/util");
 var pathUtil = require("path");
+var Promise = require("promise").Promise;
 
 var NEW = exports.NEW = {name: "NEW"};
 var LOADING = exports.LOADING = {name: "LOADING"};
@@ -87,46 +88,50 @@ exports.Directory = SC.Object.extend({
     * path, directory handler delegate (this), and the onSuccess and onFailure
     * callbacks.
     */
-    load: function(onSuccess, onFailure) {
+    load: function() {
+        var pr = new Promise();
         if (this.get("status") == READY) {
-            onSuccess(this);
-            return;
+            pr.resolve(this);
+            return pr;
         }
         this.set("status", LOADING);
-        var pr = this.get("source").loadDirectory(this);
-        pr.then(function(data) {
-            this.populateDirectory(data);
-            if (typeof(onSuccess) == "function") {
-                onSuccess(this);
-            }
-        }.bind(this),
-        function(error) {
-            if (typeof(onFailure) == "function") {
-                onFailure({
+        var self = this;
+        this.get("source").loadDirectory(this).then(
+            function(data) {
+                self.populateDirectory(data);
+                pr.resolve(self);
+            },
+            function(error) {
+                pr.reject({
                     message: error.toString(),
                     error: error,
-                    directory: this
+                    directory: self
                 });
             }
-        }.bind(this));
+        );
+        return pr;
     },
     
     /*
     * Retrieve the object at the path given, and load it (if it's
     * a directory)
     */
-    loadPath: function(path, onSuccess, onFailure) {
+    loadPath: function(path) {
+        var pr;
         var obj = this.getObject(path);
         if (obj == null) {
-            onFailure({
+            pr = new Promise();
+            pr.reject({
                 message: "Cannot find " + path
             });
-            return;
+            return pr;
         }
         if (pathUtil.isDir(path)) {
-            obj.load(onSuccess, onFailure);
+            return obj.load();
         } else {
-            onSuccess(obj);
+            pr = new Promise();
+            pr.resolve(obj);
+            return pr;
         }
     },
     
@@ -281,10 +286,10 @@ exports.File = SC.Object.extend({
         return this.get("path");
     }.property().cacheable(),
         
-    loadContents: function(onSuccess, onFailure) {
+    loadContents: function() {
         var source = this.get("source");
         var self = this;
-        source.loadContents(this).then(onSuccess, onFailure);
+        return source.loadContents(this);
     }
 });
 

@@ -59,7 +59,7 @@ exports.testRootLoading = function() {
     t.equal(0, source.requests.length);
     
     source.set("checkStatus", fs.LOADING);
-    root.load(function(dir) {
+    root.load().then(function(dir) {
         t.equal(dir, root, "should have been passed in the root directory");
         t.equal(source.requests.length, 1, "should have made a request to the source");
         t.equal(dir.get("status"), fs.READY, "Directory should be ready");
@@ -75,7 +75,7 @@ exports.testRootLoading = function() {
         t.equal(dir.get("contents").length, 4,
             "2 files + 2 directories = 4 items");
         
-        root.load(function(dir) {
+        root.load().then(function(dir) {
             t.equal(source.requests.length, 1, 
                 "should not have loaded again, because it's already loaded");
             t.start();
@@ -114,7 +114,7 @@ exports.testGetObject = function() {
 exports.testSubdirLoading = function() {
     source.reset();
     var root = getNewRoot();
-    root.loadPath("deeply/nested/", function(dir) {
+    root.loadPath("deeply/nested/").then(function(dir) {
         t.equal(dir.get("name"), "nested/");
         t.equal(dir.get("status"), fs.READY);
         t.equal(root.get("status"), fs.NEW);
@@ -129,7 +129,7 @@ exports.testSubdirLoading = function() {
         t.start();
     }, genericFailureHandler);
     
-    t.stop(1500);
+    t.stop(1000);
 };
 
 exports.testContentRetrieval = function() {
@@ -137,7 +137,7 @@ exports.testContentRetrieval = function() {
     var root = getNewRoot();
     
     var f = root.getObject("atTheTop.js");
-    f.loadContents(function(result) {
+    f.loadContents().then(function(result) {
         t.equal(result.file, f, "should get the same file in");
         t.equal(result.contents, "the top file", "Content should be as expected");
         t.start();

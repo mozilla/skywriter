@@ -47,7 +47,7 @@ exports.filesCommand = function(instruction, args) {
         path += "/";
     }
     
-    instruction.get("files").loadPath(path, function(dir) {
+    instruction.get("files").loadPath(path).then(function(dir) {
         var files = "";
         var contents = dir.get("contents");
         for (var x = 0; x < contents.length; x++) {
