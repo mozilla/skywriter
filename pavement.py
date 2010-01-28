@@ -350,6 +350,13 @@ def sc_build(options):
         SC = window.SC;
     }
 """)
+    combined = combined.replace("console = (env && env.global) ? env.global.console : null;", """
+    if (window.console == undefined) {
+        console = (env && env.global) ? env.global.console : null;
+    } else {
+        console = window.console;
+    }
+""")
     
     output = snapshot / "sproutcore.js"
     output.write_bytes(combined)
