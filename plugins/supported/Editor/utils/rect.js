@@ -70,17 +70,16 @@ exports.merge = function(set) {
             newSet.push(rectA);
             for (var j = i+1; j < set.length; j++) {
                 var rectB = set[j];
-                if (!exports.rectsIntersect(rectA, rectB)) {
-                    continue;
+                if (exports.rectsSideBySide(rectA, rectB) ||
+                                        exports.rectsIntersect(rectA, rectB)) {
+                    set.removeAt(j, 1);
+
+                    // There's room for optimization here...
+                    newSet[newSet.length - 1] = SC.unionRects(rectA, rectB);
+
+                    modified = true;
+                    break;
                 }
-
-                set.removeAt(j, 1);
-
-                // There's room for optimization here...
-                newSet[newSet.length - 1] = SC.unionRects(rectA, rectB);
-
-                modified = true;
-                break;
             }
         }
 
@@ -108,5 +107,31 @@ exports.offsetFromRect = function(rect, point) {
 exports.rectsIntersect = function(a, b) {
     var intersection = SC.intersectRects(a, b);
     return intersection.width !== 0 && intersection.height !== 0;
+};
+
+/**
+ * Checks if two rects lay side by side. Returns true if this is true.
+ * For example:
+ *      +------------+---------------+
+ *      |    A       |       B       |
+ *      +------------+---------------+
+ * will be true, but if B is only one pixel shifted up,
+ * then it would return false.
+ */
+exports.rectsSideBySide = function(a, b) {
+    if (a.x == b.x && a.width == b.width) {
+        if (a.y < b.y) {
+            return (a.y + a.height) == b.y;
+        } else {
+            return (b.y + b.height) == a.y;
+        }
+    } else if (a.y == b.y && a.height == b.height) {
+        if (a.x < b.x) {
+            return (a.x + a.width) == b.x;
+        } else {
+            return (b.x + b.width) == a.x;
+        }
+    }
+    return false;
 };
 

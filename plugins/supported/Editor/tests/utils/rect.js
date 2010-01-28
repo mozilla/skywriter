@@ -119,3 +119,25 @@ exports.testRectsIntersect = function() {
         "(0,0) (1,1) and (2,2) (3,3) don't intersect");
 };
 
+exports.testRectsSideBySide = function() {
+    var unit = { x: 0, y: 0, width: 1, height: 1 };
+    t.ok(!Rect.rectsSideBySide(unit, { x: -1, y: -1, width: 1, height: 1 }),
+        "(0,0) (1,1) and (-1,1) and (0,0) are not side-by-side");
+    t.ok( Rect.rectsSideBySide(unit, { x: 0,  y: -1, width: 1, height: 1 }),
+        "(0,0) (1,1) and (0,-1) (1,0) are side-by-side");
+    t.ok(!Rect.rectsSideBySide(unit, { x: 1,  y: -1, width: 1, height: 1 }),
+        "(0,0) (1,1) and (1,-1) (2,0) are not side-by-side");
+    t.ok( Rect.rectsSideBySide(unit, { x: -1, y: 0,  width: 1, height: 1 }),
+        "(0,0) (1,1) and (-1,0) (0,1) are side-by-side");
+    t.ok(!Rect.rectsSideBySide(unit, unit),
+        "(0,0) (1,1) and (0,0) (1,1) are not side-by-side");
+    t.ok( Rect.rectsSideBySide(unit, { x: 1,  y: 0,  width: 1, height: 1 }),
+        "(0,0) (1,1) and (1,0) (2,1) are side-by-side");
+    t.ok(!Rect.rectsSideBySide(unit, { x: -1, y: 1,  width: 1, height: 1 }),
+        "(0,0) (1,1) and (-1,1) (0,2) are not side-by-side");
+    t.ok( Rect.rectsSideBySide(unit, { x: 0,  y: 1,  width: 1, height: 1 }),
+        "(0,0) (1,1) and (0,1) (1,2) are side-by-side");
+    t.ok(!Rect.rectsSideBySide(unit, { x: 1,  y: 1,  width: 1, height: 1 }),
+        "(0,0) (1,1) and (1,1) (2,2) are not side-by-side");
+};
+
