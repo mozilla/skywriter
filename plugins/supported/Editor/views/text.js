@@ -852,6 +852,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     }
 });
 
-exports.textViewCommand = function(instruction, args, command) {
-    instruction.get("view")[command.name]();
+exports.textViewCommand = function(env, args, command) {
+    env.get("view")[command.name]();
 };

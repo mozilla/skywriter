@@ -103,3 +103,16 @@ exports.Buffer = SC.Object.extend({
         this.propertyDidChange("file");
     }
 });
+
+exports.EditSession = SC.Object.extend({
+    /*
+    * The "current" view is the editor component that most recently had
+    * the focus.
+    */
+    currentView: null,
+    
+    /*
+    * The "current" Buffer is the one that backs the currentView.
+    */
+    currentBuffer: null
+});

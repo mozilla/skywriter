@@ -48,15 +48,25 @@ exports.Instruction = SC.Object.extend({
     _callbacks: [],
     completed: false,
     historical: false,
+    
+    /**
+    * Retrieves the EditSession
+    */
+    session: function() {
+        return catalog.getObject("session");
+    }.property(),
 
     /**
-     * When we allow multiple views for a model then we're going to change how
-     * this finds the view. In the mean time, you should always use
-     * <code>instruction.get("view")</code> to access the view.
+    * gets the currentView from the session.
      */
     view: function() {
-        return catalog.getObject("view");
-    }.property().cacheable(),
+        var session = this.get("session");
+        if (!session) {
+            console.error("command attempted to get view but there's no session");
+            return undefined;
+        }
+        return session.get("currentView");
+    }.property(),
 
     /**
      * The current editor model might not always be easy to find so you should
@@ -64,8 +74,25 @@ exports.Instruction = SC.Object.extend({
      * possible.
      */
     model: function() {
-        return catalog.getObject("model");
-    }.property().cacheable(),
+        var session = this.get("session");
+        if (!session) {
+            console.error("command attempted to get model but there's no session");
+            return undefined;
+        }
+        return session.get("currentBuffer").get("model");
+    }.property(),
+    
+    /*
+    * The current Buffer from the session
+    */
+    buffer: function() {
+        var session = this.get("session");
+        if (!session) {
+            console.error("command attempted to get buffer but there's no session");
+            return undefined;
+        }
+        return session.get("currentBuffer");
+    }.property(),
     
     /*
     * If files are available, this will get them. Perhaps we need some other
@@ -100,6 +127,7 @@ exports.Instruction = SC.Object.extend({
             }
         }
         catch (ex) {
+            console.log(ex.stack);
             if (ex instanceof TypeError) {
                 console.error(ex);
             }

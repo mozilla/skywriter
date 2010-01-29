@@ -34,7 +34,7 @@
         "aliases": [ "load" ],
         "description": "load up the contents of the file",
         "completeText": "add the filename to open",
-        "pointer": "file#openCommand",
+        "pointer": "#openCommand",
         "findCompletionsPointer": "file#openFindCompletions"
     },
     {

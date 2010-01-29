@@ -45,14 +45,8 @@
     "provides": [
         {
             "ep": "factory",
-            "name": "view",
-            "pointer": "#view",
-            "action": "value"
-        },
-        {
-            "ep": "factory",
-            "name": "model",
-            "pointer": "#model",
+            "name": "session",
+            "pointer": "#session",
             "action": "value"
         },
         {
@@ -73,6 +67,9 @@ var KeyListener = require('AppSupport:views/keylistener').KeyListener;
 var loginController = require('UserIdent').loginController;
 var BespinFileSource = require("BespinServer:filesource").BespinFileSource;
 var Directory = require("Filesystem").Directory;
+var editsession = require("EditSession");
+
+exports.session = editsession.EditSession.create();
 
 var INITIAL_TEXT;   // defined at the end of the file to reduce ugliness
 
@@ -101,9 +98,13 @@ exports.applicationController = SC.Object.create({
         var editorView = applicationView.get('centerView');
         var textStorage = editorView.getPath('layoutManager.textStorage');
         textStorage.set('value', INITIAL_TEXT);
-
-        exports.model = textStorage;
-        exports.view = editorView.get('textView');
+        
+        var buffer = editsession.Buffer.create({
+            model: textStorage
+        });
+        
+        exports.session.set("currentView", editorView.get("textView"));
+        exports.session.set("currentBuffer", buffer);
     },
 
     init: function() {

@@ -35,28 +35,27 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require("bespin:plugins").catalog;
 var pathUtil = require("Filesystem:path");
 
 /**
  * 'files' command
  */
-exports.filesCommand = function(instruction, args) {
+exports.filesCommand = function(env, args) {
     var path = args.path;
     if (!pathUtil.isDir(path)) {
         path += "/";
     }
     
-    instruction.get("files").loadPath(path).then(function(dir) {
+    env.get("files").loadPath(path).then(function(dir) {
         var files = "";
         var contents = dir.get("contents");
         for (var x = 0; x < contents.length; x++) {
             files += contents[x].name + "<br/>";
         }
-        instruction.addOutput(files);
+        env.addOutput(files);
         
     }, function(error) {
-        instruction.addError(error.message);
+        env.addError(error.message);
     });
 };
 
@@ -112,9 +111,13 @@ exports.saveCommand = function(instruction, filename) {
 /**
  * 'open' command
  */
-exports.openCommand = function(instruction, opts) {
-    var info = parseArguments(opts.path);
-    editor.openFile(info.project, info.path, { line: opts.line });
+exports.openCommand = function(env, args) {
+    var files = env.get("files");
+    var buffer = env.get("buffer");
+    
+    // TODO: handle line number in args
+    var file = files.getObject(args.path);
+    buffer.set("file", file);
 };
 
 /**
