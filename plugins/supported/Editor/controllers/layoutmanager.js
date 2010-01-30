@@ -38,6 +38,8 @@
 var SC = require('sproutcore/runtime').SC;
 var MultiDelegateSupport = require('DelegateSupport').MultiDelegateSupport;
 var Range = require('RangeUtils:utils/range');
+var SyntaxManager = require('SyntaxManager:controllers/syntaxmanager').
+    SyntaxManager;
 var TextStorage = require('models/textstorage').TextStorage;
 var catalog = require('bespin:plugins').catalog;
 
@@ -66,6 +68,13 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     pluginCatalog: catalog,
 
     /**
+     * @property{SyntaxManager}
+     *
+     * The syntax manager class to use.
+     */
+    syntaxManager: SyntaxManager,
+
+    /**
      * @property{Array<object>}
      *
      * The marked-up lines of text. Each line has the properties "characters",
@@ -88,7 +97,9 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
      * TODO: Convert to a SproutCore theme.
      */
     theme: {
-        editorTextColor: "rgb(230, 230, 230)"
+        editorTextColor:            "rgb(230, 230, 230)",
+        editorTextColor_keyword:    "rgb(230, 230, 230)",
+        editorTextColor_plain:      "rgb(230, 230, 230)"
     },
 
     _computeInvalidRects: function(oldRange, newRange) {
@@ -142,22 +153,38 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     },
 
     _recomputeLayoutForRanges: function(oldRange, newRange) {
+        var oldStartRow = oldRange.start.row, oldEndRow = oldRange.end.row;
+        var newEndRow = newRange.end.row;
+        var newRowCount = newEndRow - oldStartRow + 1;
+
+        var lines = this.getPath('textStorage.lines');
         var theme = this.get('theme');
-        var oldStartRow = oldRange.start.row;
-        this.textLines.replace(oldStartRow, oldRange.end.row - oldStartRow + 1,
-            this.getPath('textStorage.lines').slice(oldStartRow,
-            newRange.end.row + 1).map(function(line) {
-                return {
-                    characters: line,
-                    colors:     [
-                        {
-                            start:  0,
-                            end:    line.length,
-                            color:  theme.editorTextColor
-                        }
-                    ]
-                };
-            }));
+
+        var attributedText = this.get('syntaxManager').
+            attributedTextForRows(oldStartRow, newEndRow);
+
+        var newTextLines = [];
+        for (var i = 0; i < newRowCount; i++) {
+            var line = lines[oldStartRow + i];
+            newTextLines[i] = {
+                characters: line,
+                colors: attributedText[i].map(function(range) {
+                    var rangeEnd = range.end;
+                    var contexts = range.contexts;
+                    var tag = contexts === null ? 'plain' :
+                        contexts[contexts.length - 1].tag;
+                    var color = theme["editorTextColor_" + tag];
+                    return {
+                        start:  range.start,
+                        end:    rangeEnd !== null ? rangeEnd : line.length,
+                        color:  color
+                    };
+                })
+            };
+        }
+
+        this.textLines.replace(oldStartRow, oldEndRow - oldStartRow + 1,
+            newTextLines);
 
         this._recalculateMaximumWidth();
 
@@ -253,6 +280,19 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     /**
      * @protected
      *
+     * Instantiates the internal syntax manager object. The default
+     * implementation of this method simply calls create() on the internal
+     * syntaxManager property.
+     */
+    createSyntaxManager: function() {
+        this.set('syntaxManager', this.get('syntaxManager').create({
+            textStorage: this.get('textStorage')
+        }));
+    },
+
+    /**
+     * @protected
+     *
      * Instantiates the internal text storage object. The default
      * implementation of this method simply calls create() on the internal
      * textStorage property.
@@ -277,6 +317,8 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
 
         this.createTextStorage();
         this.get('textStorage').addDelegate(this);
+
+        this.createSyntaxManager();
 
         this._recomputeEntireLayout();
     },
@@ -374,6 +416,8 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     },
 
     textStorageEdited: function(sender, oldRange, newRange) {
+        this.get('syntaxManager').layoutManagerReplacedText(oldRange,
+            newRange);
         this._recomputeLayoutForRanges(oldRange, newRange);
     }
 });

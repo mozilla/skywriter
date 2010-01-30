@@ -1,0 +1,11 @@
+{
+    "depends": [],
+    "provides": [
+        {
+            "ep": "extensionhandler",
+            "name": "syntax",
+            "register": "controllers/syntaxdirectory#discoveredNewSyntax"
+        }
+    ]
+}
+

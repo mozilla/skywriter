@@ -39,6 +39,8 @@ var SC = require('sproutcore/runtime').SC;
 var GutterView = require('views/gutter').GutterView;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var ScrollView = require('views/scroll').ScrollView;
+var SyntaxManager = require('SyntaxManager:controllers/syntaxmanager').
+    SyntaxManager;
 var TextView = require('views/text').TextView;
 var EditorUndoController = require('controllers/undo').EditorUndoController;
 
@@ -74,6 +76,14 @@ exports.EditorView = SC.View.extend(SC.Border, {
      * child views are created.
      */
     scrollView: ScrollView,
+
+    /**
+     * @property
+     *
+     * The syntax manager class to use. This field will be instantiated when
+     * the child views are created.
+     */
+    syntaxManager: SyntaxManager,
 
     /**
      * @property

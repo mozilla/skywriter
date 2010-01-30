@@ -1,5 +1,11 @@
 {
-    "depends": [ "AppSupport", "Canon", "DelegateSupport", "RangeUtils" ],
+    "depends": [
+        "AppSupport",
+        "Canon",
+        "DelegateSupport",
+        "RangeUtils",
+        "SyntaxManager"
+    ],
     "provides": [
         {
             "ep": "command",
