@@ -118,7 +118,6 @@ exports.applicationController = SC.Object.create({
 
         loginController.addDelegate(this);
         loginController.show();
-        this._showEditor();
     },
 
     loginControllerAcceptedLogin: function(sender) {
