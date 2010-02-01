@@ -116,8 +116,8 @@ exports.applicationController = SC.Object.create({
         this._mainPage = mainPage;
         mainPage.get('mainPane').append();
 
-        // loginController.addDelegate(this);
-        // loginController.show();
+        loginController.addDelegate(this);
+        loginController.show();
         this._showEditor();
     },
 
