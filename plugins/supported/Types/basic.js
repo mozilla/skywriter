@@ -35,59 +35,19 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-"define metadata";
-({
-    "provides":
-    [
-        {
-            "ep": "extensionpoint",
-            "name": "type",
-            "description": "Commands can accept various arguments that the user enters or that are automatically supplied by the environment. Those arguments have types that define how they are supplied or completed. The pointer points to an object with methods convert(str value) and getDefault(). Both functions have `this` set to the command's `takes` parameter. If getDefault is not defined, the default on the command's `takes` is used, if there is one. The object can have a noInput property that is set to true to reflect that this type is provided directly by the system. getDefault must be defined in that case.",
-            "indexOn": "name"
-        },
-        {
-            "ep": "type",
-            "name": "text",
-            "description": "Text that the user needs to enter.",
-            "pointer": "#text"
-        },
-        {
-            "ep": "type",
-            "name": "number",
-            "description": "A JavaScript number",
-            "pointer": "#number"
-        },
-        {
-            "ep": "type",
-            "name": "boolean",
-            "description": "A true/false value",
-            "pointer": "#boolean"
-        },
-        {
-            "ep": "type",
-            "name": "object",
-            "description": "An object that converts via JavaScript",
-            "pointer": "#object"
-        }
-    ]
-});
-"end";
-
 /**
- * These are the types that we accept. They are vaguely based on the Jetpack
- * settings system (https://wiki.mozilla.org/Labs/Jetpack/JEP/24) although
- * clearly more restricted.
+ * These are the basic types that we accept. They are vaguely based on the
+ * Jetpack settings system (https://wiki.mozilla.org/Labs/Jetpack/JEP/24)
+ * although clearly more restricted.
  * <p>In addition to these types, Jetpack also accepts range, member, password
  * that we are thinking of adding in the short term.
- * <p>In theory we could make this list extensible, however we're going to leave
- * that until we see a need.
  */
 
 /**
  * 'text' is the default if no type is given.
  */
 exports.text = {
-    validator: function(value) {
+    isValid: function(value) {
         return typeof value == "string";
     },
 
@@ -105,7 +65,7 @@ exports.text = {
  * JavaScript damnit!
  */
 exports.number = {
-    validator: function(value) {
+    isValid: function(value) {
         return typeof value == "number";
     },
 
@@ -122,7 +82,7 @@ exports.number = {
  * true/false values
  */
 exports.boolean = {
-    validator: function(value) {
+    isValid: function(value) {
         return typeof value == "boolean";
     },
 
@@ -139,7 +99,7 @@ exports.boolean = {
  * TODO: Check to see how this works out.
  */
 exports.object = {
-    validator: function(value) {
+    isValid: function(value) {
         return typeof value == "object";
     },
 

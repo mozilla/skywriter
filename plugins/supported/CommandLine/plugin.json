@@ -1,10 +1,23 @@
 {
+    "depends": [ "Canon" ],
     "provides": [
         {
             "ep": "factory",
             "name": "commandline",
             "action": "value",
             "pointer": "views/cli#cliInputView"
+        },
+        {
+            "ep": "factory",
+            "name": "tokenizer",
+            "action": "value",
+            "pointer": "tokenizer#tokenize"
+        },
+        {
+            "ep": "factory",
+            "name": "history",
+            "action": "create",
+            "pointer": "history#InMemoryHistory"
         },
         {
             "ep": "command",

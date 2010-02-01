@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var cliController = require("controller").cliController;
-var rootCanon = require("Canon:directory").rootCanon;
+var rootCanon = require("Canon:canon").rootCanon;
 
 /**
  * TODO: make this automatic

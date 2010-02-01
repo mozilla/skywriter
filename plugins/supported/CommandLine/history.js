@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
+//var Instruction = require("instruction").Instruction;
 
 /**
  * Store command line history, and keep a pointer to the current command so
@@ -179,7 +180,7 @@ exports.ServerHistory = exports.InMemoryHistory.extend({
 
                 typings.forEach(function(typed) {
                     if (typed && typed !== "") {
-                        var instruction = exports.Instruction.create({
+                        var instruction = Instruction.create({
                             typed: typed,
                             historical: true
                         });

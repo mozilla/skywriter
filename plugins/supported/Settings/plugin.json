@@ -1,6 +1,7 @@
 {
     "depends": [ "Types" ],
-    "provides": [
+    "provides":
+    [
         {
             "ep": "factory",
             "name": "settings",
@@ -16,19 +17,30 @@
         {
             "ep": "command",
             "name": "set",
-            "takes": [ "key", "value" ],
+            "params":
+            [
+                {
+                    "name": "choice",
+                    "type": "text",
+                    "description": "The name of the choice to display or alter",
+                    "default": null
+                },
+                {
+                    "name": "value",
+                    "type": "text",
+                    "description": "The new value for the chosen setting",
+                    "default": null
+                }
+            ],
             "description": "define and show settings",
-            "pointer": "commands#setCommand",
-            "completionPointer": "commands#setCompleter"
+            "pointer": "commands#setCommand"
         },
         {
             "ep": "command",
             "name": "unset",
-            "takes": [ "key" ],
+            "params": [ { "name": "key", "type": "text" } ],
             "description": "unset a setting entirely",
-            "completeText": "add a key for the setting to delete entirely",
-            "pointer": "commands#unsetCommand",
-            "completionPointer": "commands#unsetCompleter"
+            "pointer": "commands#unsetCommand"
         }
     ]
 }

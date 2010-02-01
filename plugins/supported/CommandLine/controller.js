@@ -36,9 +36,12 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
-var InMemoryHistory = require("history").InMemoryHistory;
-var Instruction = require("instruction").Instruction;
-var rootCanon = require("Canon:directory").rootCanon;
+var canon = require("Canon:canon");
+var env = require("Canon:environment");
+var types = require("Types:types");
+var output = require("Canon:output");
+
+var tokenizer = require("bespin:plugins").catalog.getObject("tokenizer");
 
 /**
  * Command line controller.
@@ -61,37 +64,59 @@ exports.cliController = SC.Object.create({
     /**
      * Execute a command manually without using the UI
      * @param typed {String} The command to turn into an Instruction and execute
-     * @param hidden {boolean} Should the Instruction be added to the #history?
      */
-    executeCommand: function(typed, hidden) {
+    executeCommand: function(typed) {
         console.log("executeCommand '" + typed + "'");
 
         if (!typed || typed === "") {
             return;
         }
 
-        var instruction = Instruction.create({
-            typed: typed,
-            canon: rootCanon
-        });
+        var parts = tokenizer(typed);
+        var cmdArgs = canon.splitCommandAndArgs(parts);
 
-        if (hidden !== true) {
-            this.history.add(instruction);
-        }
+        this._convertTypes(cmdArgs.commandExt, cmdArgs.remainder, function(args) {
+            cmdArgs.commandExt.load(function(command) {
 
-        instruction.onOutput(function() {
-            this.history.update();
-        }.bind(this));
-        
-        instruction.command.getArgs(instruction.argList, function(args) {
-            instruction.set("args", args);
-            instruction.exec();
+                var invocation = output.Invocation.create({
+                    command: command,
+                    commandExt: cmdArgs.commandExt,
+                    typed: typed,
+                    args: args
+                });
+
+                try {
+                    command(env.global, args, invocation);
+                } catch (ex) {
+                    // TODO: Some UI?
+                    console.group("Error calling command: " + cmdArgs.commandExt.name);
+                    console.log("- typed: '", typed, "'");
+                    console.log("- arguments: ", args);
+                    console.error(ex);
+                    console.trace();
+                    console.groupEnd();
+                }
+            });
         });
     },
 
     /**
-     * The history of executed commands
-     * TODO: We should get the implementation of this from the plugin system
+     * Convert the passed string array into an args object as specified by the
+     * command.params declaration.
      */
-    history: InMemoryHistory.create()
+    _convertTypes: function(command, remainder, onConvert) {
+        var args = {};
+        var i = 0; // Which arg are we converting
+        var done = 0; // Call onConvert when we're done
+        command.params.forEach(function(param) {
+            var arg = remainder.length > i ? remainder[i] : null;
+            types.fromString(param.type, arg, function(converted) {
+                args[param.name] = converted;
+                done++;
+                if (done == command.params.length) {
+                    onConvert(args);
+                }
+            });
+        });
+    }
 });

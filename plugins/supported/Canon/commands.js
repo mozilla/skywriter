@@ -37,7 +37,7 @@
 
 // TODO: How to we mark sub commands?
 
-var rootCanon = require("Canon:directory").rootCanon;
+var rootCanon = require("Canon:canon").rootCanon;
 var util = require("bespin:util/util");
 var catalog = require("plugins").catalog;
 

@@ -36,46 +36,51 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
-
-var BaseInstruction = require("Canon:instruction").Instruction;
+var catalog = require("bespin:plugins").catalog;
 
 /**
  * Wrapper for something that the user typed
  */
-exports.Instruction = BaseInstruction.extend({
+exports.Instruction = SC.Object.extend({
     typed: null,
     canon: null,
+
+    _outstanding: 0,
+    completed: false,
+    historical: false,
 
     /**
      *
      */
     init: function() {
-        this.typed = this.typed.trim();
-
         // It is valid to not know the commandLine when we are filling the
         // history from disk, but in that case we don't need to parse it
         if (!this.historical) {
-            this.start = new Date();
             var ca = this._splitCommandAndArgs(this.canon, this.typed);
             if (ca) {
                 this.command = ca[0];
                 this.argList = ca[1];
             }
-        } else {
-            this.completed = true;
         }
     },
 
     /**
-     * A string version of this Instruction suitable for serialization
+     * Execute the command
      */
-    toString: function() {
-        return JSON.stringify({
-            typed: this.typed,
-            output: this.output,
-            start: this.start ? this.start.getTime() : -1,
-            end: this.end ? this.end.getTime() : -1
-        });
+    exec: function() {
+        try {
+            if (this._parseError) {
+                this.addErrorOutput(this._parseError);
+            } else {
+                this.command.execute(this, this.args, this.command);
+            }
+        }
+        catch (ex) {
+            if (ex instanceof TypeError) {
+                console.error(ex);
+            }
+            this.addErrorOutput(ex);
+        }
     },
 
     /**

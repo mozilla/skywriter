@@ -78,7 +78,7 @@ exports.addChoice = function(choice) {
 
     // Load the type so we can check the validator
     typeExt.load(function(type) {
-        if (!type.validator(choice.defaultValue)) {
+        if (!type.isValid(choice.defaultValue)) {
             throw "Default value " + choice.defaultValue +
                     " is not a valid " + choice.type;
         }

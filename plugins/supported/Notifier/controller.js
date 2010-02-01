@@ -41,22 +41,94 @@ When we come to write a growl system, there are many places in the code where
 we do showHint or hideHint that need replacing with whatever API the growl
 system uses.
 
+TODO: Search for showHint( and hideHint( and replace with this API
+
 */
 
 /**
- * Show a command line hint
- * TODO: Implement this once to have some UI space for it
+ *
  */
-exports.showHint = function(message, timeout) {
-    console.log(message);
-};
+exports.notifications = [];
 
 /**
- * Hide a previously displayed command line hint. This normally happens
- * automatically, but sometimes we may wish it to go faster.
- * TODO: (once implemented) check to see if the only uses of this are from the
- * UI in which case it shouldn't be an exported function.
+ * Internal - to allow? TODO: Do we need this?
  */
-exports.hideHint = function() {
-    // ignore until showHint is implemented
-};
+var nextId = 0;
+
+/**
+ * This API follows the broad principles of the Gears notification API in the
+ * hope that a future HTML spec might
+ */
+exports.Notification = SC.Object.extend({
+    /**
+     * Specifies the title of the notification.
+     * Recommended read-write string
+     */
+    title: null,
+
+    /**
+     * Specifies the URL of the icon to display.
+     * Recommended read-write string
+     */
+    icon: null,
+
+    /**
+     * Specifies the additional subtitle. For example, this could be used to
+     * display the appointment time for the calendar notification.
+     * Optional read-write string
+     */
+    subtitle: null,
+
+    /**
+     * Specifies the main content of the notification. For example, email
+     * notifications could put a snippet in this field.
+     * Optional read-write string
+     */
+    description: null,
+
+    /**
+     * This is the time when the notification is meant to be displayed.
+     * If this is not provided, the notification will be displayed immediately.
+     * Optional read-write Date
+     */
+    displayAtTime: null,
+
+    /**
+     * This is the time when the notification is meant to go away.
+     * If this is not set, the notification just get displayed and goes away
+     * after the default timeout. If it is set, then once displayed, the
+     * notification will remain on screen until the user dismisses it or the
+     * desired time has arrived.
+     * Optional read-write Date
+     */
+    displayUntilTime: null,
+
+    /**
+     * A unique ID for the notification. It can be used for duplicate detection.
+     * If this is not set, a unique ID will be generated.
+     * Mandatory private read-only string
+     */
+    _id: null,
+
+    /**
+     * @see #addAction()
+     */
+    _actions: SC.Array.create(),
+
+    /**
+     *
+     */
+    init: function() {
+        this._id = "" + (nextId++);
+    },
+
+    /**
+     * Adds an action for this notification.
+     * The parameter text specifies the text to display for the action.
+     * The action is a JavaScript function to use when the user selects the
+     * action.
+     */
+    addAction: function(text, action) {
+        this._actions.pushObject({ text:text, action:action });
+    }
+});

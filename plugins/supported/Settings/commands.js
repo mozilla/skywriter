@@ -42,12 +42,12 @@ var settings = catalog.getObject("settings");
 /**
  * 'set' command
  */
-exports.setCommand = function(instruction, setting) {
-    var output;
+exports.setCommand = function(env, args, invocation) {
+    var html;
 
-    if (!setting.key) {
+    if (!args.choice) {
         var settingsList = settings._list();
-        output = "";
+        html = "";
         // first sort the settingsList based on the key
         settingsList.sort(function(a, b) {
             if (a.key < b.key) {
@@ -60,134 +60,45 @@ exports.setCommand = function(instruction, setting) {
         });
         // now add to output unless hidden settings (start with a _)
         settingsList.forEach(function(setting) {
-            if (setting.key[0] != '_') {
-                output += "<a class='setting' href='https://wiki.mozilla.org/Labs/Bespin/Settings#" + setting.key + "' title='View external documentation on setting: " + setting.key + "' target='_blank'>" + setting.key + "</a> = " + setting.value + "<br/>";
-            }
+            html += "<a class='setting' href='https://wiki.mozilla.org/Labs/Bespin/Settings#" +
+                    setting.key +
+                    "' title='View external documentation on setting: " +
+                    setting.key +
+                    "' target='_blank'>" +
+                    setting.key +
+                    "</a> = " +
+                    setting.value +
+                    "<br/>";
         });
     } else {
-        var key = setting.key;
-        if (setting.value === undefined) { // show it
+        var key = args.key;
+        if (args.value === undefined) { // show it
             var value = settings.values[key];
             if (value) {
-                output = "<strong>" + key + "</strong> = " + value;
+                html = "<strong>" + key + "</strong> = " + value;
             } else {
-                output = "You do not have a setting for '" + key + "'";
+                html = "You do not have a setting for '" + key + "'";
             }
         } else {
-            output = "Saving setting: <strong>" + key + "</strong> = " + setting.value;
-            settings.values[key] = setting.value;
+            html = "Saving setting: <strong>" + key + "</strong> = " + args.value;
+            settings.values[key] = args.value;
         }
     }
-    instruction.addOutput(output);
-};
 
-/**
- * Auto-completion for 'set'
- */
-exports.setCompleter = function(query, callback) {
-    var key = query.action[0];
-    var val = settings.getValue(key);
-
-    if (query.action.length == 1) {
-        // Check if this is an exact match
-        if (val) {
-            query.hint = "Current value of " + key + " is '" + val + "'. Enter a new value, or press enter to display in the console.";
-            callback(query);
-            return;
-        }
-
-        // So no exact matches, we're looking for options
-        var list = settings._list().map(function(entry) {
-            return entry.key;
-        });
-        var matches = this.parent.filterOptionsByPrefix(list, key);
-
-        if (matches.length == 1) {
-            // Single match: go for autofill and hint
-            query.autofill = "set " + matches[0];
-            val = settings.getValue(matches[0]);
-            query.hint = "Current value of " + matches[0] + " is '" + val + "'. Enter a new value, or press enter to display in the console.";
-        } else if (matches.length === 0) {
-            // No matches, cause an error
-            query.error = "No matching settings";
-        } else {
-            // Multiple matches, present a list
-            matches.sort(function(a, b) {
-                return a.localeCompare(b);
-            });
-            query.options = matches;
-        }
-
-        callback(query);
-        return;
-    }
-
-    if (val) {
-        query.hint = "Current value of " + key + " is '" + val + "'. Enter a new value, or press enter to display in the console.";
-        callback(query);
-        return;
-    }
-
-    query.error = "No setting for '" + key + "'";
-    callback(query);
-    return;
+    invocation.done(html);
 };
 
 /**
  * 'unset' command
  */
-exports.unsetCommand = function(instruction, key) {
-    if (!settings.values[key]) {
-        instruction.addErrorOutput("No setting for " + key + ".");
+exports.unsetCommand = function(env, args, invocation) {
+    var html;
+    if (!settings.values[args.key]) {
+        html = "No setting for " + args.key + ".";
     } else {
-        settings.resetValue(key);
-        instruction.addOutput("Unset the setting for " + key + ".");
-    }
-};
-
-/**
- * Auto-completion for 'unset'
- */
-exports.unsetCompleter = function(query, callback) {
-    var key = query.action[0];
-    var val = settings.values[key];
-
-    // Multiple params are an error
-    if (query.action.length > 1) {
-        query.error = "Can only unset one setting at a time";
-        callback(query);
-        return;
+        settings.resetValue(args.key);
+        html = "Unset the setting for " + args.key + ".";
     }
 
-    // Exact match
-    if (val) {
-        query.hint = "Current value of " + key + " is '" + val + "'. Press enter to remove the setting.";
-        callback(query);
-        return;
-    }
-
-    // So no exact matches, we're looking for options
-    var list = settings._list().map(function(entry) {
-        return entry.key;
-    });
-    var matches = this.parent.filterOptionsByPrefix(list, key);
-
-    if (matches.length == 1) {
-        // Single match: go for autofill and hint
-        query.autofill = "set " + matches[0];
-        val = settings.getValue(matches[0]);
-        query.hint = "Current value of " + matches[0] + " is '" + val + "'. Press enter to remove the setting.";
-    } else if (matches.length === 0) {
-        // No matches, cause an error
-        query.error = "No matching settings";
-    } else {
-        // Multiple matches, present a list
-        matches.sort(function(a, b) {
-            return a.localeCompare(b);
-        });
-        query.options = matches;
-    }
-
-    callback(query);
-    return;
+    invocation.done(html);
 };

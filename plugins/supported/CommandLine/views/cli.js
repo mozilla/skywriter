@@ -43,6 +43,7 @@ var PinView = require("views/pin").PinView;
 var catalog = require("bespin:plugins").catalog;
 var dock = require("bespin:views/dock");
 var cliController = require("controller").cliController;
+var output = require("Canon:output");
 
 var settings = catalog.getObject("settings");
 var imagePath = catalog.getResourceURL("CommandLine") + "images/";
@@ -58,6 +59,225 @@ var compactHeight = 30;
  */
 var maxHeight = 300;
 
+//SC.LOG_BINDINGS = true;
+//SC.LOG_OBSERVERS = true;
+
+var endWithId = function(ele) {
+    var id = SC.guidFor(ele);
+    ele.id(id).end();
+    return id;
+};
+
+var InstructionView = SC.View.extend(SC.StaticLayout, {
+    //layout: { top:0, bottom: 0, left: 0, right: 0 },
+    classNames: [ "instruction_view" ],
+    // childViews: [ "prompt", "typed", "data", "output" ],
+    useStaticLayout: true,
+
+    link: function(root, path, updater) {
+        (function() {
+            root.addObserver(path, this, function(sender, key) {
+                console.log("updating", path, "to", root.getPath(path));
+                // sender should = root, key should = path
+                updater(root.getPath(path));
+            });
+            console.log("initially setting", path, "to", root.getPath(path));
+            updater(root.getPath(path));
+        }).invokeLater(this);
+    },
+
+    render: function(context, firstTime) {
+        if (firstTime) {
+            var content = this.get("content");
+            content.set("hideOutput", false);
+
+            // The div for the input (i.e. what was typed)
+            var rowin = context.begin("div").addClass("cmd_rowin").attr({
+                onclick: function() {
+                    // A single click on an invocation line in the console
+                    // copies the command to the command line
+                    cliController.input = content.get("typed");
+                },
+                ondblclick: function() {
+                    // A double click on an invocation line in the console
+                    // executes the command
+                    cliController.executeCommand(content.get("typed"));
+                }
+            });
+
+            var historyEle = rowin.begin("div").addClass("cmd_open");
+            var historyId = endWithId(historyEle);
+
+            // Cell for the typed command and the hover
+            var input = rowin.begin("div").addClass("cmd_main");
+
+            // The execution time
+            var hover = input.begin("div").addClass("cmd_hover");
+            var durationEle = hover.begin("span").addClass("cmd_duration");
+            var durationId = endWithId(durationEle);
+
+            // Toggle output display
+            var hideOutputEle = hover.begin("img").attr({
+                onclick: function() {
+                    content.set("hideOutput", !content.get("hideOutput"));
+                }
+            }).css({
+                verticalAlign: "middle",
+                padding: "2px;"
+            });
+            var hideOutputId = endWithId(hideOutputEle);
+
+            // Open/close output
+            var closeEle = hover.begin("img");
+            closeEle.attr({
+                src: imagePath + "closer.png",
+                alt: "Remove this command from the history",
+                title: "Remove this command from the history",
+                onclick: function() {
+                    output.history.remove(content);
+                }
+            });
+            closeEle.css({
+                verticalAlign: "middle",
+                padding: "2px"
+            });
+            closeEle.end();
+
+            hover.end();
+
+            // What the user actually typed
+            var prompt = input.begin("span")
+                    .addClass("cmd_prompt")
+                    .html("> ");
+            prompt.end();
+
+            var typedEle = input.begin("span").addClass("cmd_typed");
+            var typedId = endWithId(typedEle);
+
+            input.end();
+            rowin.end();
+
+            var rowout = context.begin("div").addClass("cmd_rowout");
+
+            var outputEle = rowout.begin("div").addClass("cmd_output");
+            var outputId = endWithId(outputEle);
+
+            var throbEle = rowout.begin("img").attr({
+                src: imagePath + "throbber.gif"
+            });
+            var throbId = endWithId(throbEle);
+
+            rowout.end();
+
+            this.link(settings, "historytimemode", function(mode) {
+                if (mode == "history") {
+                    // TODO: replace # with invocation id
+                    SC.$("#" + historyId).html("#").addClass("cmd_open_history");
+                }
+                else if (mode == "time" && start) {
+                    SC.$("#" + historyId).html(formatTime(start)).addClass("cmd_open_time");
+                }
+                else {
+                    SC.$("#" + historyId).addClass("cmd_open_blank");
+                }
+            });
+
+            this.link(content, "duration", function(duration) {
+                if (duration) {
+                    SC.$("#" + durationId).html("completed in " + (duration / 1000) + " sec ");
+                } else {
+                    SC.$("#" + durationId).html("");
+                }
+            });
+
+            this.link(content, "hideOutput", function(hideOutput) {
+                if (hideOutput) {
+                    SC.$("#" + hideOutputId).attr({
+                        src: imagePath + "plus.png",
+                        alt: "Show command output",
+                        title: "Show command output"
+                    });
+                    SC.$("#" + hideOutputId).attr("display", "none");
+                } else {
+                    SC.$("#" + hideOutputId).attr({
+                        src: imagePath + "minus.png",
+                        alt: "Hide command output",
+                        title: "Hide command output"
+                    });
+                    SC.$("#" + outputId).attr("display", "block");
+                }
+            });
+
+            this.link(content, "typed", function(typed) {
+                SC.$("#" + typedId).html(typed);
+            });
+
+            this.link(content, "_hack", function(hack) {
+                SC.$("#" + outputId).html(hack);
+            });
+
+            /*
+            this.link(content, "outputs.[]", function(outputs) {
+                outputs.forEach(function(output) {
+                    var node;
+                    if (typeof output == "string") {
+                        node = document.createElement("p");
+                        node.innerHTML = output;
+                    } else {
+                        node = output;
+                    }
+                    outputEle.element().appendChild(node);
+                });
+            });
+            */
+
+            this.link(content, "error", function(error) {
+                if (error) {
+                    SC.$("#" + outputId).addClass("cmd_error");
+                } else {
+                    SC.$("#" + outputId).removeClass("cmd_error");
+                }
+            });
+
+            this.link(content, "completed", function(completed) {
+                SC.$("#" + throbId).css({
+                    "display": completed ? "none" : "block"
+                });
+            });
+        }
+    }
+
+    /*
+    prompt: SC.LabelView.design({
+        value: ">",
+        layout: { top: 0, height: 30, left: 0, width: 30 }
+    }),
+
+    typed: SC.LabelView.design({
+        valueBinding: ".parentView.content.typed",
+        layout: { top: 0, height: 30, left: 30, right: 60 }
+    }),
+
+    data: SC.LabelView.design({
+        valueBinding: ".parentView.content.start",
+        layout: { top: 0, height: 30, width: 60, right: 0 }
+    }),
+
+    output: SC.LabelView.design({
+        valueBinding: ".parentView.content._hack",
+        layout: { top: 30, bottom: 0, left: 0, right: 0 }
+    }),
+
+    output2: SC.ScrollView.design({
+        layout: { top: 30, bottom: 0, left: 0, right: 0 },
+        hasHorizontalScroller: NO,
+        contentView: SC.CollectionView.design({
+            //contentBinding: ".parentView.parentView.content.contents.[]",
+        })
+    })
+    */
+});
+
 /**
  * A view designed to dock in the bottom of the editor, holding the command
  * line input.
@@ -67,7 +287,7 @@ var maxHeight = 300;
  */
 exports.CliInputView = SC.View.design({
     dock: dock.DOCK_BOTTOM,
-    classNames: [ "command_line" ],
+    classNames: [ "cmd_line" ],
     layout: { height: compactHeight, bottom: 0, left: 0, right: 0 },
     childViews: [ "contentView" ],
     contentHeight: 0,
@@ -95,7 +315,7 @@ exports.CliInputView = SC.View.design({
     },
 
     /**
-     * command.js/cliController.history has changed, so we need to pop-up the
+     * command.js/output.history has changed, so we need to pop-up the
      * display view
      */
     historyUpdated: function(cliController) {
@@ -107,7 +327,7 @@ exports.CliInputView = SC.View.design({
         ele.innerHTML = "";
         ele.appendChild(table);
         this.set("contentHeight", table.clientHeight);
-    }.observes("CommandLine:controller#cliController.history.version"),
+    }.observes("Canon:output#history.invocations.[]"),
 
     /**
      * Called whenever anything happens that could affect the output display
@@ -198,11 +418,21 @@ exports.CliInputView = SC.View.design({
 
         display: SC.View.design({
             layout: { top: 0, bottom: 25, left: 0, right: 0 },
-            childViews: [ "output", "toolbar" ],
+            childViews: [ "output", "output2", "toolbar" ],
 
             output: SC.View.design({
-                classNames: [ "command_view" ],
-                layout: { top: 0, bottom: 0, left: 30, right: 0 }
+                classNames: [ "cmd_view" ],
+                layout: { top: 0, bottom: 0, left: 30, width: 280 }
+            }),
+
+            output2: SC.ScrollView.design({
+                classNames: [ "cmd_view" ],
+                layout: { top: 0, bottom: 0, left: 320, right: 0 },
+                hasHorizontalScroller: NO,
+                contentView: SC.StackedView.design({
+                    contentBinding: "Canon:output#history.invocations.[]",
+                    exampleView: InstructionView
+                })
             }),
 
             toolbar: SC.View.design({
@@ -217,9 +447,9 @@ exports.CliInputView = SC.View.design({
         }),
 
         prompt: BespinButtonView.design({
-            classNames: [ "command_prompt" ],
+            classNames: [ "cmd_prompt" ],
             titleMinWidth: 0,
-            title: "<span class='command_brackets'>{ }</span> &gt;",
+            title: "<span class='cmd_brackets'>{ }</span> &gt;",
             layout: { height: 25, bottom: 0, left: 5, width: 40 }
         }),
 
@@ -244,14 +474,12 @@ exports.CliInputView = SC.View.design({
  */
 exports.outputHistory = function() {
     var table = document.createElement("table");
-    table.className = 'command_table';
+    table.className = "cmd_table";
 
     var count = 1;
-    cliController.history.instructions.forEach(function(instruction) {
-        if (!instruction.historical) {
-            exports.outputInstruction(table, instruction, count);
-        }
-        count ++;
+    output.history.invocations.forEach(function(invocation) {
+        exports.outputInstruction(table, invocation, count);
+        count++;
     });
 
     return table;
@@ -261,70 +489,75 @@ exports.outputHistory = function() {
  * Convert a single Instruction into DOM nodes that can be appended to a table
  * in which other instructions are stored.
  */
-exports.outputInstruction = function(table, instruction, count) {
+exports.outputInstruction = function(table, invocation, count) {
+    var typed = invocation.get("typed");
+    var start = invocation.get("start");
+    var end = invocation.get("end");
+    var hideOutput = invocation.get("hideOutput");
+
     var mode = settings.values.historytimemode;
 
     // The row for the input (i.e. what was typed)
     var rowin = document.createElement("tr");
-    rowin.className = 'command_rowin';
+    rowin.className = 'cmd_rowin';
     rowin.onclick = function() {
-        // A single click on an instruction line in the console
+        // A single click on an invocation line in the console
         // copies the command to the command line
-        cliController.input = instruction.typed;
+        cliController.input = typed;
     };
     rowin.ondblclick = function() {
-        // A double click on an instruction line in the console
+        // A double click on an invocation line in the console
         // executes the command
-        cliController.executeCommand(instruction.typed);
+        cliController.executeCommand(typed);
     };
     table.appendChild(rowin);
 
     // The opening column with time or history number or nothing
-    var rowid = document.createElement("td");
-    rowid.className = "command_open";
-    rowin.appendChild(rowid);
+    var history = document.createElement("td");
+    history.className = "cmd_open";
+    rowin.appendChild(history);
 
     if (mode == "history") {
-        rowid.innerHTML = count;
-        rowid.className = "command_open_history";
+        history.innerHTML = count;
+        history.className = "cmd_open_history";
     }
-    else if (mode == "time" && instruction.start) {
-        rowid.innerHTML = formatTime(instruction.start);
-        rowid.className = "command_open_time";
+    else if (mode == "time" && start) {
+        history.innerHTML = formatTime(start);
+        history.className = "cmd_open_time";
     }
     else {
-        rowid.className = "command_open_blank";
+        history.className = "cmd_open_blank";
     }
 
     // Cell for the typed command and the hover
-    var typed = document.createElement("td");
-    typed.className = "command_main";
-    rowin.appendChild(typed);
+    var input = document.createElement("td");
+    input.className = "cmd_main";
+    rowin.appendChild(input);
 
     // The execution time
     var hover = document.createElement("div");
-    hover.className = "command_hover";
-    typed.appendChild(hover);
+    hover.className = "cmd_hover";
+    input.appendChild(hover);
 
     // The execution time
-    if (instruction.start && instruction.end) {
+    if (start && end) {
         var div = document.createElement("div");
-        div.className = "command_duration";
-        var time = instruction.end.getTime() - instruction.start.getTime();
+        div.className = "cmd_duration";
+        var time = end.getTime() - start.getTime();
         div.innerHTML = "completed in " + (time / 1000) + " sec ";
         hover.appendChild(div);
     }
 
     // Toggle output display
     var img = document.createElement("img");
-    img.src = imagePath + (instruction.hideOutput ? "plus.png" : "minus.png");
+    img.src = imagePath + (hideOutput ? "plus.png" : "minus.png");
     img.style.verticalAlign = "middle";
     img.style.padding = "2px;";
-    img.alt = (instruction.hideOutput ? "Show" : "Hide") + " command output";
+    img.alt = (hideOutput ? "Show" : "Hide") + " command output";
     img.title = img.alt;
     img.onclick = function(ev) {
-        instruction.hideOutput = !instruction.hideOutput;
-        cliController.history.update();
+        invocation.set("hideOutput", !hideOutput);
+        output.history.update();
         util.stopEvent(ev);
     };
     hover.appendChild(img);
@@ -337,47 +570,51 @@ exports.outputInstruction = function(table, instruction, count) {
     img.alt = "Remove this command from the history";
     img.title = img.alt;
     img.onclick = function(ev) {
-        cliController.history.remove(instruction);
-        cliController.history.update();
+        output.history.remove(invocation);
+        output.history.update();
         util.stopEvent(ev);
     };
     hover.appendChild(img);
 
     // What the user actually typed
     var prompt = document.createElement("span");
-    prompt.className = "command_prompt";
+    prompt.className = "cmd_prompt";
     prompt.innerHTML = ">";
-    typed.appendChild(prompt);
+    input.appendChild(prompt);
 
     var span = document.createElement("span");
-    span.innerHTML = instruction.typed;
-    span.className = "command_typed";
-    typed.appendChild(span);
+    span.innerHTML = typed;
+    span.className = "cmd_typed";
+    input.appendChild(span);
 
     // The row for the output (if required)
-    if (!instruction.hideOutput) {
-
+    if (!hideOutput) {
         var rowout = document.createElement("tr");
-        rowout.className = "command_rowout";
+        rowout.className = "cmd_rowout";
         table.appendChild(rowout);
 
         rowout.appendChild(document.createElement("td"));
 
         var td = document.createElement("td");
         td.colSpan = 2;
-        td.className = "command_output";
-        td.className += instruction.error ? " command_error" : "";
+        td.className = "cmd_output";
+        td.className += invocation.get("error") ? " cmd_error" : "";
         rowout.appendChild(td);
 
-        if (instruction.element) {
-            td.appendChild(instruction.element);
-        } else {
-            var contents = instruction.output || "";
-            if (!instruction.completed) {
-                contents += "<img src='" + imagePath + "throbber.gif'/>";
-                contents += " Working ...";
+        invocation.get("outputs").forEach(function(output) {
+            var node;
+            if (typeof output == "string") {
+                node = document.createElement("p");
+                node.innerHTML = output;
+            } else {
+                node = output;
             }
-            td.innerHTML = contents;
+            td.appendChild(node);
+        });
+        if (!invocation.get("completed")) {
+            var throbber = document.createElement("div");
+            throbber.innerHTML = "<img src='" + imagePath + "throbber.gif'/>";
+            td.appendChild(throbber);
         }
     }
 };

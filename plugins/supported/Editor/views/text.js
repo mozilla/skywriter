@@ -852,6 +852,12 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     }
 });
 
-exports.textViewCommand = function(env, args, command) {
-    env.get("view")[command.name]();
+/**
+ * This is a proxy function to allow commands to call methods on a view object.
+ * See plugin.js for usage.
+ */
+exports.textViewCommand = function(env, args, invocation) {
+    var view = env.get("view");
+    var action = view[invocation.commandExt.name];
+    action.apply(view);
 };

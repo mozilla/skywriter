@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var types = require("Types");
+var types = require("types");
 var t = require("PluginDev");
 
 var testType = function(type, method, context, value) {
@@ -44,10 +44,19 @@ var testType = function(type, method, context, value) {
 };
 
 exports.testStringType = function() {
-    t.equal(testType("string", "convert", {}, "Foo"), "Foo",
-        "string conversion does nothing");
+    types.fromString("text", "Foo", function(converted) {
+        t.equal("Foo", converted);
+    });
+    types.toString("text", "Foo", function(converted) {
+        t.equal("Foo", converted);
+    });
+    types.isValid("text", "Foo", function(valid) {
+        t.equal(true, valid);
+    });
 };
 
 exports.testIntegerType = function() {
-    t.equal(testType("integer", "convert", {}, "10"), 10);
+    types.fromString("number", "4", function(converted) {
+        t.equal(4, converted);
+    });
 };

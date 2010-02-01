@@ -36,9 +36,9 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var Instruction = require("instruction").Instruction;
-
-var canon = require("directory").rootCanon;
+var catalog = require("bespin:plugins").catalog;
+var output = require("Canon:output");
+var env = require("Canon:environment");
 
 /**
  * The canon, or the repository of commands, contains functions to process
@@ -46,57 +46,11 @@ var canon = require("directory").rootCanon;
  * @class
  */
 var KeyboardManager = SC.Object.extend({
-    _commandMatches: function(command, symbolicName, flags) {
-        var mappedKeys = command.key;
-        if (!mappedKeys) {
-            return false;
-        }
-        if (typeof(mappedKeys) == "string") {
-            if (mappedKeys != symbolicName) {
-                return false;
-            }
-            return true;
-        }
-        
-        if (!mappedKeys.isArray) {
-            mappedKeys = [mappedKeys];
-            command.key = mappedKeys;
-        }
-        
-        for (var i = 0; i < mappedKeys.length; i++) {
-            var keymap = mappedKeys[i];
-            if (typeof(keymap) == "string") {
-                if (keymap == symbolicName) {
-                    return true;
-                }
-                continue;
-            }
-            
-            if (keymap.key != symbolicName) {
-                continue;
-            }
-            
-            var predicates = keymap.predicates;
-            
-            if (!predicates) {
-                return true;
-            }
-            
-            for (var flagName in predicates) {
-                if (!flags || flags[flagName] != predicates[flagName]) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return false;
-    },
-
     /**
      * Searches through the command canon for an event matching the given flags
      * with a key equivalent matching the given SproutCore event, and, if the
      * command is found, sends a message to the appropriate target.
-     * 
+     *
      * This will get a couple of upgrades in the not-too-distant future:
      * 1. caching in the Canon for fast lookup based on key
      * 2. there will be an extra layer in between to allow remapping via
@@ -106,19 +60,94 @@ var KeyboardManager = SC.Object.extend({
      */
     processKeyEvent: function(evt, sender, flags) {
         var symbolicName = evt.commandCodes()[0];
-        var commands = canon.get("commands");
-        for (var commandName in commands) {
-            var command = commands[commandName];
-            if (this._commandMatches(command, symbolicName, flags)) {
-                command.getArgs([], function(args) {
-                    var instruction = Instruction.create({
-                        command: command,
-                        args: args
-                    });
-                    instruction.exec();
+        var commandExt = this._findCommandExtension(symbolicName, flags);
+        if (commandExt != null) {
+            commandExt.load(function(command) {
+                var invocation = output.Invocation.create({
+                    command: command,
+                    commandExt: commandExt
                 });
+
+                try {
+                    command(env.global, {}, invocation);
+                } catch (ex) {
+                    // TODO: Some UI?
+                    console.group("Error calling command: " + commandExt.name);
+                    console.error(ex);
+                    console.trace();
+                    console.groupEnd();
+                }
+            });
+        }
+    },
+
+    /**
+     * Loop through the commands in the canon, looking for something that
+     * matches according to #_commandMatches, and return that.
+     */
+    _findCommandExtension: function(symbolicName, flags) {
+        var commandExts = catalog.getExtensions('command');
+        var reply = null;
+        commandExts.some(function(commandExt) {
+            if (this._commandMatches(commandExt, symbolicName, flags)) {
+                reply = commandExt;
                 return true;
             }
+            return false;
+        }.bind(this));
+        return reply;
+    },
+
+    /**
+     * Check that the given command fits the given key name and flags.
+     */
+    _commandMatches: function(commandExt, symbolicName, flags) {
+        if (commandExt.key !== symbolicName) {
+            return false;
+        }
+
+        var mappedKeys = commandExt.key;
+        if (!mappedKeys) {
+            return false;
+        }
+
+        if (typeof(mappedKeys) == "string") {
+            if (mappedKeys != symbolicName) {
+                return false;
+            }
+            return true;
+        }
+
+        if (!mappedKeys.isArray) {
+            mappedKeys = [mappedKeys];
+            commandExt.key = mappedKeys;
+        }
+
+        for (var i = 0; i < mappedKeys.length; i++) {
+            var keymap = mappedKeys[i];
+            if (typeof(keymap) == "string") {
+                if (keymap == symbolicName) {
+                    return true;
+                }
+                continue;
+            }
+
+            if (keymap.key != symbolicName) {
+                continue;
+            }
+
+            var predicates = keymap.predicates;
+
+            if (!predicates) {
+                return true;
+            }
+
+            for (var flagName in predicates) {
+                if (!flags || flags[flagName] != predicates[flagName]) {
+                    return false;
+                }
+            }
+            return true;
         }
         return false;
     }
