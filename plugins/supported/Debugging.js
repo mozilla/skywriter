@@ -37,11 +37,19 @@
 
 "define metadata";
 ({
-    "provides": [
+    "provides":
+    [
         {
             "ep": "command",
             "name": "action",
-            "takes": [ "actionname" ],
+            "params":
+            [
+                {
+                    "name": "actionname",
+                    "type": "text",
+                    "description": ""
+                }
+            ],
             "hidden": true,
             "description": "execute any editor action",
             "pointer": "debug#actionCommand"
@@ -49,7 +57,14 @@
         {
             "ep": "command",
             "name": "echo",
-            "takes": [ "message ..." ],
+            "params":
+            [
+                {
+                    "name": "message",
+                    "type": "text",
+                    "description": "???"
+                }
+            ],
             "hidden": true,
             "description": "A test echo command",
             "pointer": "#echoCommand"
@@ -57,7 +72,14 @@
         {
             "ep": "command",
             "name": "insert",
-            "takes": [ "text" ],
+            "params":
+            [
+                {
+                    "name": "text",
+                    "type": "text",
+                    "description": "???"
+                }
+            ],
             "hidden": true,
             "description": "insert the given text at this point.",
             "pointer": "#insertCommand"
@@ -65,7 +87,14 @@
         {
             "ep": "command",
             "name": "readonly",
-            "takes": [ "flag" ],
+            "params":
+            [
+                {
+                    "name": "flag",
+                    "type": "text",
+                    "description": "???"
+                }
+            ],
             "hidden": true,
             "description": "Turn on and off readonly mode",
             "pointer": "#readonlyCommand"
@@ -73,25 +102,44 @@
         {
             "ep": "command",
             "name": "template",
-            "takes": [ "type" ],
+            "params":
+            [
+                {
+                    "name": "type",
+                    "type": "text",
+                    "description": "pass in the template name"
+                }
+            ],
             "hidden": true,
             "description": "insert templates",
-            "completeText": "pass in the template name",
             "pointer": "#templateCommand"
         },
         {
             "ep": "command",
             "name": "use",
-            "takes": [ "type" ],
+            "params":
+            [
+                {
+                    "name": "type",
+                    "type": "text",
+                    "description": "'sound' will add sound support"
+                }
+            ],
             "hidden": true,
             "description": "use patterns to bring in code",
-            "completeText": "'sound' will add sound support",
             "pointer": "#useCommand"
         },
         {
             "ep": "command",
             "name": "slow",
-            "takes": [ "seconds" ],
+            "params":
+            [
+                {
+                    "name": "seconds" ,
+                    "type": "text",
+                    "description": "???"
+                }
+            ],
             "hidden": true,
             "description": "create some output, slowly, after a given time (default 5s)",
             "pointer": "#slowCommand"
@@ -114,29 +162,30 @@ var editor = catalog.get("editor");
 /**
  * The 'action' command
  */
-exports.actionCommand = function(instruction, actionname) {
-    editor.ui.actions[actionname]();
+exports.actionCommand = function(env, args, request) {
+    editor.ui.actions[args.actionname]();
 };
 
 /**
  * The 'echo' command
  */
-exports.echoCommand = function(instruction, args) {
-    instruction.addOutput(args);
+exports.echoCommand = function(env, args, request) {
+    request.done(args);
 };
 
 /**
  * The 'insert' command
  */
-exports.insertCommand = function(instruction, text) {
-    editor.model.insertChunk(editor.getModelPos(), text);
+exports.insertCommand = function(env, args, request) {
+    editor.model.insertChunk(editor.getModelPos(), args.text);
 };
 
 /**
  * The 'readonly' command
  */
-exports.readonlyCommand = function(instruction, flag) {
+exports.readonlyCommand = function(env, args, request) {
     var msg;
+    var flag = args.flag;
     if (flag === undefined || flag === '') {
         flag = !editor.readonly;
         msg = "Toggling read only to " + flag;
@@ -148,7 +197,7 @@ exports.readonlyCommand = function(instruction, flag) {
         msg = "Read only mode turned on.";
     }
     editor.setReadOnly(flag);
-    instruction.addOutput(msg);
+    request.done(msg);
 };
 
 var templates = { 'in': "for (var key in object) {\n\n}" };
@@ -156,7 +205,8 @@ var templates = { 'in': "for (var key in object) {\n\n}" };
 /**
  * The 'template' command
  */
-exports.templateCommand = function(instruction, type) {
+exports.templateCommand = function(env, args, request) {
+    var type = args.type;
     var value = templates[type];
     if (value) {
         editor.model.insertChunk(editor.cursorPosition, value);
@@ -168,7 +218,7 @@ exports.templateCommand = function(instruction, type) {
             }
         }
         var complain = (!type || type === "") ? "" : "Unknown pattern '" + type + "'.<br/>";
-        instruction.addErrorOutput(complain + "Known patterns: " + names.join(", "));
+        request.doneWithError(complain + "Known patterns: " + names.join(", "));
     }
 };
 
@@ -189,10 +239,11 @@ var uses = {
 /**
  * The 'use' command
  */
-exports.useCommand = function(instruction, type) {
+exports.useCommand = function(env, args, request) {
+    var type = args.type;
     if (util.isFunction(this.uses[type])) {
         this.uses[type]();
-        instruction.addOutput("Added code for " + type + ".<br>Please check the results carefully.");
+        request.done("Added code for " + type + ".<br>Please check the results carefully.");
     } else {
         var names = [];
         for (var name in this.uses) {
@@ -201,16 +252,17 @@ exports.useCommand = function(instruction, type) {
             }
         }
         var complain = (!type || type === "") ? "" : "Unknown pattern '" + type + "'.<br/>";
-        instruction.addErrorOutput(complain + "Known patterns: " + names.join(", "));
+        request.doneWithError(complain + "Known patterns: " + names.join(", "));
     }
 };
 
 /**
  * The 'slow' command
  */
-exports.slowCommand = function(instruction, seconds) {
-    seconds = seconds || 5;
+exports.slowCommand = function(env, args, request) {
+    var seconds = args.seconds || 5;
     setTimeout(instruction.link(function() {
-        instruction.addOutput("'slow' command complete");
+        request.done("'slow' command complete");
     }), seconds * 1000);
+    request.async();
 };

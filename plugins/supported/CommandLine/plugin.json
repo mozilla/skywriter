@@ -22,18 +22,37 @@
         {
             "ep": "command",
             "name": "help",
-            "takes": [ "search" ],
-            "description": "Get help on the available commands. Add an optional search string to narrow the output.",
-            "completeText": "optionally, narrow down the search",
+            "params":
+            [
+                {
+                    "name": "search",
+                    "type": "text",
+                    "description": "Search string to narrow the output.",
+                    "defaultValue": null
+                }
+            ],
+            "description": "Get help on the available commands.",
             "pointer": "commands#helpCommand"
         },
         {
             "ep": "command",
             "name": "alias",
-            "takes": [ "alias", "command" ],
+            "params":
+            [
+                {
+                    "name": "alias",
+                    "type": "text",
+                    "description": "optionally, your alias name",
+                    "defaultValue": null
+                },
+                {
+                    "name": "command",
+                    "type": "text",
+                    "description": "optionally, the command name",
+                    "defaultValue": null
+                }
+            ],
             "description": "define and show aliases for commands",
-            "completeText": "optionally, add your alias name, and then the command name",
-            "usage": "",
             "pointer": "commands#aliasCommand"
         },
         {
@@ -52,18 +71,22 @@
         {
             "ep": "command",
             "name": "eval",
-            "takes": [ "js-code" ],
+            "params":
+            [
+                {
+                    "name": "javascript",
+                    "type": "text",
+                    "description": "The JavaScript to evaluate"
+                }
+            ],
             "description": "evals given js code and show the result",
-            "completeText": "evals given js code and show the result",
             "hidden": true,
             "pointer": "basiccommands#evalCommand"
         },
         {
             "ep": "command",
             "name": "version",
-            "takes": [ "command" ],
-            "description": "show the version for Bespin or a command",
-            "completeText": "optionally, a command name",
+            "description": "show the Bespin version",
             "hidden": true,
             "pointer": "basiccommands#versionCommand"
         },

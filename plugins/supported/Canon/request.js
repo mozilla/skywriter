@@ -42,14 +42,14 @@ var SC = require("sproutcore/runtime").SC;
  * created Output objects...
  */
 exports.history = SC.Object.create({
-    invocations: []
+    requests: []
 });
 
 /**
  * To create an invocation, you need to do something like this (all the ctor
  * args are optional):
  * <pre>
- * var invocation = Invocation.create({
+ * var request = Request.create({
  *     command: command,
  *     commandExt: commandExt,
  *     args: args,
@@ -57,7 +57,7 @@ exports.history = SC.Object.create({
  * });
  * </pre>
  */
-exports.Invocation = SC.Object.extend({
+exports.Request = SC.Object.extend({
     // Will be used in the keyboard case and the cli case
     command: null,
     commandExt: null,
@@ -90,7 +90,7 @@ exports.Invocation = SC.Object.extend({
      */
     _init: function() {
         this.set("_inited", true);
-        exports.history.invocations.pushObject(this);
+        exports.history.requests.pushObject(this);
     },
 
     /**
@@ -101,6 +101,14 @@ exports.Invocation = SC.Object.extend({
      */
     doneWithError: function(content) {
         this.set("error", true).done(content);
+    },
+
+    /**
+     * Declares that this function will not be automatically done when
+     * the command exits
+     */
+    async: function() {
+
     },
 
     /**

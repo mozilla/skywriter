@@ -45,7 +45,7 @@ exports.filesCommand = function(env, args) {
     if (!pathUtil.isDir(path)) {
         path += "/";
     }
-    
+
     env.get("files").loadPath(path).then(function(dir) {
         var files = "";
         var contents = dir.get("contents");
@@ -53,7 +53,7 @@ exports.filesCommand = function(env, args) {
             files += contents[x].name + "<br/>";
         }
         env.addOutput(files);
-        
+
     }, function(error) {
         env.addError(error.message);
     });
@@ -86,15 +86,13 @@ exports.mkdirCommand = function(instruction, givenPath) {
         if (path == '') {
             editSession.setProject(project);
         }
-        instruction.addOutput('Successfully created directory \'/' +
+        request.done('Successfully created directory \'/' +
                 project + '/' + path + '\'');
-        instruction.unlink();
     });
 
     var onFailure = instruction.link(function(xhr) {
-        instruction.addErrorOutput('Unable to create directory \'/' +
+        request.doneWithError('Unable to create directory \'/' +
                 project + '/' + path + '\': ' + xhr.responseText);
-        instruction.unlink();
     });
 
     files.makeDirectory(project, path, onSuccess, onFailure);
@@ -114,7 +112,7 @@ exports.saveCommand = function(instruction, filename) {
 exports.openCommand = function(env, args) {
     var files = env.get("files");
     var buffer = env.get("buffer");
-    
+
     // TODO: handle line number in args
     var file = files.getObject(args.path);
     buffer.set("file", file);
@@ -148,7 +146,7 @@ exports.revertCommand = function(instruction, opts) {
  * 'status' command
  */
 exports.statusCommand = function(instruction) {
-    instruction.addOutput(editSession.getStatus());
+    request.done(editSession.getStatus());
 };
 
 /**
@@ -172,15 +170,13 @@ exports.rmCommand = function(instruction, filename) {
             editor.clear(); // only clear if deleting the same file
         }
 
-        instruction.addOutput('Removed file: ' + filename, true);
-        instruction.unlink();
+        request.done('Removed file: ' + filename, true);
     });
 
     var onFailure = instruction.link(function(xhr) {
-        instruction.addErrorOutput("Wasn't able to remove <b>" + filename +
+        request.doneWithError("Wasn't able to remove <b>" + filename +
                 "</b><br/><em>Error</em> (probably doesn't exist): " +
                 xhr.responseText);
-        instruction.unlink();
     });
 
     files.removeFile(project, path, onSuccess, onFailure);
@@ -219,7 +215,7 @@ exports.quotaCommand = function(instruction) {
                  " MB free space to put some great code!<br>" +
                  "Used " + megabytes(editSession.amountUsed) + " MB " +
                  "out of your " + megabytes(editSession.quota) + " MB quota.";
-    instruction.addOutput(output);
+    request.done(output);
 };
 
 /**
@@ -232,12 +228,10 @@ exports.rescanCommand = function(instruction, project) {
 
     server.rescan(project, instruction, {
         onSuccess: instruction.link(function(response) {
-            instruction.addOutput(response);
-            instruction.unlink();
+            request.done(response);
         }),
         onFailure: instruction.link(function(xhr) {
-            instruction.addErrorOutput(xhr.responseText);
-            instruction.unlink();
+            request.doneWithError(xhr.responseText);
         })
     });
 };

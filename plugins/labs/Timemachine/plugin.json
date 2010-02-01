@@ -3,6 +3,12 @@
         {
             "ep": "command",
             "name": "timemachine",
+            "params":
+            [
+                "name": "revision",
+                "type": "text",
+                "description": "The revision to compare with"
+            ],
             "hidden": true,
             "pointer": "experiment#timemachineCommand"
         }

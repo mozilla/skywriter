@@ -41,8 +41,9 @@ var util = require("bespin:util/util");
 /**
  * 'eval' command
  */
-exports.evalCommand = function(instruction, jscode) {
+exports.evalCommand = function(env, args, request) {
     var result;
+    var jscode = args.jscode;
     try {
         result = eval(jscode);
     } catch (e) {
@@ -94,17 +95,17 @@ exports.evalCommand = function(instruction, jscode) {
         type = typeof result;
     }
 
-    instruction.addOutput("Result for eval <b>\"" + jscode + "\"</b>" +
+    request.done("Result for eval <b>\"" + jscode + "\"</b>" +
             " (type: "+ type+"): <br><br>"+ msg);
 };
 
 /**
  * 'version' command
  */
-exports.versionCommand = function(instruction) {
+exports.versionCommand = function(env, args, request) {
     var version = 'Your Bespin is at version ' + bespin.versionNumber +
             ', Code name: "' + bespin.versionCodename + '"';
-    instruction.addOutput(version);
+    request.done(version);
 };
 
 var messages = [
@@ -117,7 +118,7 @@ var messages = [
 /**
  * 'bespin' command
  */
-exports.bespinCommand = function(instruction) {
+exports.bespinCommand = function(env, args, request) {
     var index = Math.floor(Math.random() * messages.length);
-    instruction.addOutput("Bespin " + messages[index]);
+    request.done("Bespin " + messages[index]);
 };

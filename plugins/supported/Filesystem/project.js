@@ -47,7 +47,7 @@ var files = catalog.getObject("files");
  * 'project show' command
  */
 exports.showCommand = function(instruction, projectname) {
-    instruction.addOutput(editSession.getStatus());
+    request.done(editSession.getStatus());
 };
 
 /**
@@ -59,7 +59,7 @@ exports.listCommand = function(instruction, extra) {
         for (var x = 0; x < projectNames.length; x++) {
             projects += projectNames[x].name + "<br/>";
         }
-        instruction.addOutput(projects);
+        request.done(projects);
     });
 };
 
@@ -74,12 +74,12 @@ exports.createCommand = function(instruction, project) {
 
     var onSuccess = instruction.link(function() {
         editSession.setProject(project);
-        instruction.addOutput('Created project \'' + project + '\'.');
+        request.done('Created project \'' + project + '\'.');
         // publish("project:created", { project: project });
     });
 
     var onFailure = instruction.link(function(xhr) {
-        instruction.addErrorOutput('Unable to create project \'' + project +
+        request.doneWithError('Unable to create project \'' + project +
                 ': ' + xhr.responseText);
     });
 
@@ -90,26 +90,19 @@ exports.createCommand = function(instruction, project) {
  * 'project delete' command
  */
 exports.deleteCommand = function(instruction, project) {
-    if (!project) {
-        instruction.addParameterError("project", "Value missing");
-        return;
-    }
-
     if (!project || project == files.userSettingsProject) {
-        instruction.addErrorOutput('You can\'t delete the settings project.');
+        request.doneWithError('You can\'t delete the settings project.');
         return;
     }
 
     var onSuccess = instruction.link(function() {
-        instruction.addOutput('Deleted project ' + project);
-        instruction.unlink();
+        request.done('Deleted project ' + project);
         // publish("project:deleted", { project:project });
     });
 
     var onFailure = instruction.link(function(xhr) {
-        instruction.addErrorOutput('Failed to delete project ' + project + ': '
+        request.doneWithError('Failed to delete project ' + project + ': '
                 + xhr.responseText);
-        instruction.unlink();
     });
 
     files.removeDirectory(project, '', onSuccess, onFailure);
@@ -119,16 +112,6 @@ exports.deleteCommand = function(instruction, project) {
  * 'project rename' command
  */
 exports.renameCommand = function(instruction, args) {
-    if (!args.currentProject) {
-        instruction.addParameterError("currentProject", "Value missing");
-        return;
-    }
-
-    if (!args.newProject) {
-        instruction.addParameterError("newProject", "Value missing");
-        return;
-    }
-
     if (args.currentProject == args.newProject) {
         return;
     }
@@ -136,16 +119,15 @@ exports.renameCommand = function(instruction, args) {
     server.renameProject(args.currentProject, args.newProject, {
         onSuccess: instruction.link(function() {
             editSession.setProject(args.newProject);
-            instruction.unlink();
+            request.done();
             // publish("project:renamed", {
             //     oldName: args.currentProject, newName: args.newProject });
         }),
         onFailure: instruction.link(function(xhr) {
-            instruction.addErrorOutput('Unable to rename project from ' +
+            request.doneWithError('Unable to rename project from ' +
                     args.currentProject + " to " + args.newProject +
                     "<br><br><em>Are you sure that the " + args.currentProject +
                     " project exists?</em>");
-            instruction.unlink();
         })
     });
 };
@@ -167,9 +149,8 @@ exports.exportCommand = function(instruction, args) {
             // try to do it via the iframe
             server.exportProject(project, type);
         } else {
-            instruction.addErrorOutput("Unabled to export project " + project +
+            request.doneWithError("Unabled to export project " + project +
                     " because it doesn't seem to exist.");
-            instruction.unlink();
         }
     });
 };
@@ -315,18 +296,18 @@ exports.importCommand = function(instruction, args) {
         project = args.project;
         url = args.url;
 
-        instruction.addOutput("About to import " + project + " from:<br><br>" +
+        request.done("About to import " + project + " from:<br><br>" +
                 url + "<br><em>It can take awhile to download the project, " +
                 "so be patient!</em>");
 
         server.importProject(project, url, {
             onSuccess: function() {
-                instruction.addOutput("Project " + project +
+                request.done("Project " + project +
                         " imported from:<br><br>" + url);
                 // publish("project:created", { project: project });
             },
             onFailure: function(xhr) {
-                instruction.addErrorOutput("Unable to import " + project +
+                request.doneWithError("Unable to import " + project +
                         " from:<br><br>" + url + ".<br><br>Maybe due to: " +
                         xhr.responseText);
             }

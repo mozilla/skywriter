@@ -1,6 +1,7 @@
 {
     "depends": [],
-    "provides": [
+    "provides":
+    [
         {
             "ep": "extensionhandler",
             "name": "syntax",

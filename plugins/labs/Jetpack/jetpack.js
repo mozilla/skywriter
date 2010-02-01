@@ -42,41 +42,59 @@
         {
             "ep": "canon",
             "name": "jetpack",
-            "description": "play with jetpack features",
-            "completeText": "jetpack subcommands:<br><br> create [name] [type]<br> install [name]<br> list<br> edit [name]"
+            "description": "play with jetpack features"
         },
         {
             "ep": "command",
-            "parent": "jetpack",
-            "name": "create",
-            "takes": [ "feature", "type" ],
+            "name": "jetpack create",
+            "params":
+            [
+                {
+                    "name": "feature",
+                    "type": "text",
+                    "description": "name of your feature"
+                },
+                {
+                    "name": "type",
+                    "type": "text",
+                    "description": "type of JetPack template (sidebar, content, toolbar)"
+                }
+            ],
             "description": "Create a new jetpack feature that you can install into Firefox with the new Jetpack goodness.",
-            "completeText": "name of your feature, type of JetPack template (sidebar, content, toolbar)",
             "pointer": "#createCommand"
         },
         {
             "ep": "command",
-            "parent": "jetpack",
-            "name": "install",
-            "takes": [ "feature" ],
+            "name": "jetpack install",
+            "params":
+            [
+                {
+                    "name": "feature",
+                    "type": "text",
+                    "description": "optionally, the name of the feature to install"
+                }
+            ],
             "description": "Install a Jetpack feature, either the current file, or the named feature",
-            "completeText": "optionally, the name of the feature to install",
             "pointer": "#installCommand"
         },
         {
             "ep": "command",
-            "parent": "jetpack",
-            "name": "list",
+            "name": "jetpack list",
             "description": "List the Jetpacks available in BespinSettings/jetpacks. NOTE: This is not the same as which Jetpacks you have installed in Firefox",
             "pointer": "#listCommand"
         },
         {
             "ep": "command",
-            "parent": "jetpack",
-            "name": "edit",
-            "takes": [ "feature" ],
+            "name": "jetpack edit",
+            "params":
+            [
+                {
+                    "name": "feature",
+                    "type": "text",
+                    "description": "feature name to edit (required)"
+                }
+            ],
             "description": "edit the given Jetpack feature",
-            "completeText": "feature name to edit (required)",
             "pointer": "#editCommand"
         },
     ]
@@ -97,9 +115,9 @@ var path = require("bespin:util/path");
 /**
  * 'jetpack create' command
  */
-exports.createCommand = function(instruction, opts) {
-    var feature = opts.feature || "newjetpack";
-    var type = opts.type || "sidebar";
+exports.createCommand = function(env, args, request) {
+    var feature = args.feature || "newjetpack";
+    var type = args.type || "sidebar";
     var project = exports.projectName;
     var filename = feature + ".js";
 
@@ -118,7 +136,7 @@ exports.createCommand = function(instruction, opts) {
                 bespin.get("editor").openFile(project, filename);
             },
             onFailure: function(xhr) {
-                instruction.addErrorOutput("Unable to create " + filename + ": " + xhr.responseText);
+                request.doneWithError("Unable to create " + filename + ": " + xhr.responseText);
             }
         }
     );
@@ -127,15 +145,15 @@ exports.createCommand = function(instruction, opts) {
 /**
  * 'jetpack install' command
  */
-exports.installCommand = function(instruction, feature) {
+exports.installCommand = function(env, args, request) {
     // For when Aza exposes the Jetpack object :)
     // if (!window["Jetpack"]) {
-    //     instruction.addErrorOutput("To install a Jetpack, you need to have installed the extension.<br><br>For now this lives in Firefox only, and you can <a href='https://wiki.mozilla.org/Labs/Jetpack/API'>check it out, and download the add-on here</a>.");
+    //     request.doneWithError("To install a Jetpack, you need to have installed the extension.<br><br>For now this lives in Firefox only, and you can <a href='https://wiki.mozilla.org/Labs/Jetpack/API'>check it out, and download the add-on here</a>.");
     //     return;
     // }
 
     // Use the given name, or default to the current jetpack
-    feature = feature || (function() {
+    var feature = args.feature || (function() {
         var editSession = bespin.get("editSession");
         if (editSession.project != exports.projectName) {
             // jump out if not in the jetpack project
@@ -146,7 +164,7 @@ exports.installCommand = function(instruction, feature) {
     })();
 
     if (!feature) {
-        instruction.addErrorOutput("Please pass in the name of the Jetpack feature you would like to install");
+        request.doneWithError("Please pass in the name of the Jetpack feature you would like to install");
     } else {
         exports.install(feature);
     }
@@ -155,7 +173,7 @@ exports.installCommand = function(instruction, feature) {
 /**
  * 'jetpack list' command
  */
-exports.listCommand = function(instruction, extra) {
+exports.listCommand = function(env, args, request) {
     bespin.get("server").list(exports.projectName, "", function(jetpacks) {
         var output;
 
@@ -170,27 +188,23 @@ exports.listCommand = function(instruction, extra) {
             }).join("<br>");
         }
 
-        instruction.addOutput(output);
+        request.done(output);
     });
 };
 
 /**
  * 'jetpack edit' command
  */
-exports.editCommand = function(instruction, feature) {
-    if (!feature) {
-        instruction.showUsage(this);
-        return;
-    }
-
+exports.editCommand = function(env, args, request) {
     var path = feature + ".js";
 
     bespin.get("files").whenFileExists(exports.projectName, path, {
         execute: function() {
             bespin.get("editor").openFile(exports.projectName, path);
+            request.done();
         },
         elseFailed: function() {
-            instruction.addErrorOutput("No feature called " + feature + ".<br><br><em>Run 'jetpack list' to see what is available.</em>");
+            request.doneWithError("No feature called " + feature + ".<br><br><em>Run 'jetpack list' to see what is available.</em>");
         }
     });
 };

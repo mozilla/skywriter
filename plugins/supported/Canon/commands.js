@@ -37,7 +37,6 @@
 
 // TODO: How to we mark sub commands?
 
-var rootCanon = require("Canon:canon").rootCanon;
 var util = require("bespin:util/util");
 var catalog = require("plugins").catalog;
 
@@ -49,14 +48,9 @@ var server = catalog.getObject("server");
 /**
  * 'cmd load'
  */
-exports.loadCommand = function(instruction, commandname) {
-    if (!commandname) {
-        instruction.addParameterError("commandname", "Value missing");
-        return;
-    }
-
+exports.loadCommand = function(env, args, request) {
     var project = files.userSettingsProject;
-    var path = "commands/" + commandname + ".js";
+    var path = "commands/" + args.commandname + ".js";
 
     var onSuccess = function(file) {
         try {
@@ -64,9 +58,10 @@ exports.loadCommand = function(instruction, commandname) {
             // Note: This used to allow multiple commands to be stored in
             // a single file, however that meant that the file was a (more)
             // butchered version of JSON - the contents of an array.
-            rootCanon.addCommand(command);
+            // TODO: How do we add a command now?
+            // rootCanon.addCommand(command);
         } catch (e) {
-            instruction.addErrorOutput("Something is wrong about the command:<br><br>" + e);
+            request.doneWithError("Something is wrong about the command:<br><br>" + e);
         }
     };
 
@@ -76,16 +71,11 @@ exports.loadCommand = function(instruction, commandname) {
 /**
  * 'cmd edit'
  */
-exports.editCommand = function(instruction, commandname) {
-    if (!commandname) {
-        instruction.addParameterError("commandname", "Value missing");
-        return;
-    }
-
-    var filename = "commands/" + commandname + ".js";
+exports.editCommand = function(env, args, request) {
+    var filename = "commands/" + args.commandname + ".js";
     var content = "" +
         "{\n" +
-        "    name: '" + commandname + "',\n" +
+        "    name: '" + args.commandname + "',\n" +
         "    takes: [YOUR_ARGUMENTS_HERE],\n" +
         "    preview: 'execute any editor action',\n" +
         "    execute: function(self, args) {\n" +
@@ -102,11 +92,11 @@ exports.editCommand = function(instruction, commandname) {
 /**
  * 'cmd list'
  */
-exports.listCommand = function(instruction) {
+exports.listCommand = function(env, args, request) {
     var project = files.userSettingsProject;
     server.list(project, 'commands/', function(commands) {
         if (!commands || commands.length < 1) {
-            instruction.addOutput("You haven't installed any custom commands." +
+            request.done("You haven't installed any custom commands." +
                     "<br>Want to " +
                     "<a href='https://wiki.mozilla.org/Labs/Bespin/Roadmap/Commands'>" +
                     "learn how?</a>");
@@ -120,7 +110,7 @@ exports.listCommand = function(instruction) {
             output += jsCommands.map(function(jsCommand) {
                 return jsCommand.name.replace(/\.js$/, '');
             }).join("<br>");
-            instruction.addOutput(output);
+            request.done(output);
         }
     });
 };
@@ -128,26 +118,22 @@ exports.listCommand = function(instruction) {
 /**
  * 'cmd rm' command
  */
-exports.deleteCommand = function(instruction, commandname) {
-    if (!commandname) {
-        instruction.addParameterError("commandname", "Value missing");
-        return;
-    }
-
+exports.deleteCommand = function(env, args, request) {
     var project = files.userSettingsProject;
-    var commandpath = "commands/" + commandname + ".js";
+    var commandpath = "commands/" + args.commandname + ".js";
 
-    var onSuccess = instruction.link(function() {
+    var onSuccess = function() {
         if (editSession.checkSameFile(project, commandpath)) {
             // only clear if deleting the same file
             editor.model.clear();
         }
-        instruction.addOutput('Removed command: ' + commandname);
-    });
+        request.done('Removed command: ' + args.commandname);
+    };
 
-    var onFailure = instruction.link(function(xhr) {
-        instruction.addOutput("Wasn't able to remove the command <b>" + commandname + "</b><br/><em>Error</em> (probably doesn't exist): " + xhr.responseText);
-    });
+    var onFailure = function(xhr) {
+        request.done("Wasn't able to remove the command <b>" + args.commandname +
+                "</b><br/><em>Error</em> (probably doesn't exist): " + xhr.responseText);
+    };
 
     files.removeFile(project, commandpath, onSuccess, onFailure);
 };

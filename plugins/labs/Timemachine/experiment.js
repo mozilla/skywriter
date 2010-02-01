@@ -37,6 +37,10 @@
 
 var diff_match_patch = require("Diff");
 
+var editor = bespin.get('editor');
+var session = bespin.get("editSession");
+var server = bespin.get("server");
+
 // delta is something like: [[0,"readme.txt\nreadme.txt\n\n"],[-1,"\n411:39f6f1fe17bf"]]
 // which means keep the first section, remove the latter
 // we need to loop over this creating a list of start-change-offset
@@ -49,30 +53,22 @@ var diff_match_patch = require("Diff");
 /**
  * 'timemachine' command
  */
-exports.timemachineCommand = function(instruction, revision) {
+exports.timemachineCommand = function(env, args, request) {
     var self = this;
-    if (!revision) {
-        revision = "on";
-    }
-
-    var editor = bespin.get('editor');
-    var session = bespin.get("editSession");
 
     var url;
-    if (revision == "on") {
+    if (args.revision == "on") {
         url = path.combine('/history/at', session.project, session.path);
-        bespin.get("server").request('GET', url, null, {
+        server.request('GET', url, null, {
             evalJSON: true,
-            onSuccess: instruction.link(function(history) {
-                instruction.setElement(historyToElement(history));
-                instruction.unlink();
-            }),
-            onFailure: instruction.link(function(xhr) {
-                instruction.addErrorOutput(xhr.responseText);
-                instruction.unlink();
-            })
+            onSuccess: function(history) {
+                request.done(historyToElement(history));
+            },
+            onFailure: function(xhr) {
+                request.doneWithError(xhr.responseText);
+            }
         });
-    } else if (revision == "off") {
+    } else if (args.revision == "off") {
         editor.setReadOnly(self.prevROState);
         self.prevROState = undefined;
 
@@ -81,14 +77,14 @@ exports.timemachineCommand = function(instruction, revision) {
 
         session.continueSession();
         self.inTimeMachine = false;
-        instruction.unlink();
+        request.done();
     } else {
         // This is where we need to do a diff and patch in to the editor
         // display
         url = path.combine('/file/at', session.project, session.path);
-        url += "?revision=" + revision;
-        bespin.get("server").request('GET', url, null, {
-            onSuccess: instruction.link(function(older) {
+        url += "?revision=" + args.revision;
+        server.request('GET', url, null, {
+            onSuccess: function(older) {
 
                 if (!self.inTimeMachine) {
                     self.nowText = editor.model.getDocument();
@@ -139,12 +135,11 @@ exports.timemachineCommand = function(instruction, revision) {
                 editor.ui.setChanges(changes);
 
                 bespin.publish("ui:escape", {});
-                instruction.unlink();
-            }),
-            onFailure: instruction.link(function(xhr) {
-                instruction.addErrorOutput(xhr.responseText);
-                instruction.unlink();
-            })
+                request.done();
+            },
+            onFailure: function(xhr) {
+                request.doneWithError(xhr.responseText);
+            }
         });
     }
 };

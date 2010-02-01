@@ -37,12 +37,14 @@
 
 "define metadata";
 ({
-    "depends": [
+    "depends":
+    [
         "EditSession",
         "BespinTheme", "AppSupport", "CommandLine", "Editor", "UserIdent",
         "Settings", "PluginDev", "Filesystem", "BespinServer"
     ],
-    "provides": [
+    "provides":
+    [
         {
             "ep": "factory",
             "name": "session",
@@ -98,11 +100,11 @@ exports.applicationController = SC.Object.create({
         var editorView = applicationView.get('centerView');
         var textStorage = editorView.getPath('layoutManager.textStorage');
         textStorage.set('value', INITIAL_TEXT);
-        
+
         var buffer = editsession.Buffer.create({
             model: textStorage
         });
-        
+
         exports.session.set("currentView", editorView.get("textView"));
         exports.session.set("currentBuffer", buffer);
     },

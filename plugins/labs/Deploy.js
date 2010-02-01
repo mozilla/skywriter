@@ -28,24 +28,6 @@ var command = require("bespin/command");
 var vcs = require("bespin/vcs");
 var server = require("bespin/client/server");
 
-exports.commands = new command.Store(command.store, {
-    "name": "deploy",
-    "description": "Deploy your project to an external server",
-    "subcommanddefault": "now"
-});
-
-exports.commands.addCommand({
-    "name": "help",
-    "takes": [ "search" ],
-    "description": "show commands for deploy subcommand",
-    "completeText": "optionally, narrow down the search",
-    execute: function(instruction, extra) {
-        var output = this.parent.getHelp(extra, {});
-        instruction.addOutput(output);
-    }
-});
-
-
 exports._createOption = function(select, value, label, currentValue) {
     var opts = {
         value: value,
@@ -60,23 +42,22 @@ exports._createOption = function(select, value, label, currentValue) {
 exports.commands.addCommand({
     "name": "setup",
     "description": "Set deployment options for the project",
-    "takes": [ "project" ],
-    "completeText": "Optionally provide the project to deploy",
-    execute: function(instruction, project) {
-        if (!project) {
-            var session = bespin.get("editSession");
-            if (session) {
-                project = session.project;
-            }
+    "params":
+    [
+        {
+            "name": "project",
+            "type": "text",
+            "description": "The project to setup"
         }
-
+    ],
+    execute: function(request, args) {
+        var project = args.project;
         if (!project) {
-            instruction.addErrorOutput("You need to pass in a project");
+            request.doneWithError("You need to pass in a project");
             return;
         }
 
-        vcs.getInfoFromUser(instruction, function(values) {
-            instruction.addOutput("");
+        vcs.getInfoFromUser(request, function(values) {
             var kcpass = values.kcpass;
 
             getDeploySetup(project, { kcpass:kcpass }, {
@@ -90,11 +71,11 @@ exports.commands.addCommand({
                     var form = dojo.create("form", {
                         onsubmit: function(e) {
                             util.stopEvent(e);
-                            instruction.addOutput("");
+                            request.add("");
                             var data = dojo.formToObject(form);
                             saveDeploySetup(project, data, {
                                 onSuccess: function() {
-                                    instruction.addOutput("Deployment settings applied for " + project);
+                                    request.done("Deployment settings applied for " + project);
                                 }
                             });
                         }
@@ -189,10 +170,10 @@ exports.commands.addCommand({
                     dojo.create("input", {type: "submit", value: "Submit"}, td);
                     dojo.create("input", {type: "button", value: "Cancel",
                         onclick: function() {
-                            instruction.addErrorOutput("Cancelled");
+                            request.doneWithError("Cancelled");
                         }}, td);
 
-                    instruction.setElement(form);
+                    request.setElement(form);
                     connType.focus();
                 }
             });
@@ -200,7 +181,7 @@ exports.commands.addCommand({
     }
 });
 
-exports._deployCommand = function(instruction, project, opts) {
+exports._deployCommand = function(request, project, opts) {
     if (!project) {
         var session = bespin.get("editSession");
         if (session) {
@@ -209,7 +190,7 @@ exports._deployCommand = function(instruction, project, opts) {
     }
 
     if (!project) {
-        instruction.addErrorOutput("You need to pass in a project");
+        request.doneWithError("You need to pass in a project");
         return;
     }
 
@@ -218,21 +199,21 @@ exports._deployCommand = function(instruction, project, opts) {
     var status = dojo.create("span", {innerHTML: "Working..."},
                 outer);
 
-    vcs.getInfoFromUser(instruction, function(values) {
-        instruction.setElement(outer);
+    vcs.getInfoFromUser(request, function(values) {
+        request.setElement(outer);
 
         var kcpass = values.kcpass;
         var data = {
             kcpass: kcpass,
             dryRun: opts.dryRun
         };
-        runDeploy(instruction, project, data, {
+        runDeploy(request, project, data, {
             onSuccess: function(response) {
                 if (response.error) {
-                    instruction.addErrorOutput("<pre>" +
+                    request.doneWithError("<pre>" +
                         response.output + "</pre>");
                 } else {
-                    instruction.addOutput("<pre>" + response.output + "</pre>");
+                    request.done("<pre>" + response.output + "</pre>");
                 }
             },
             onFailure: function(xhr) {
@@ -241,13 +222,13 @@ exports._deployCommand = function(instruction, project, opts) {
                 if (/^application\/json/.exec(contentType)) {
                     var data = JSON.parse(response);
                     if (data.notConfigured) {
-                        instruction.addErrorOutput("<p>Deployment is not configured for this project. Please use the 'deploy setup' command to configure it.");
+                        request.doneWithError("<p>Deployment is not configured for this project. Please use the 'deploy setup' command to configure it.");
                         throw "Should prepopulate CLI with 'deploy setup', however there is no way to do that right now";
                     } else {
-                        instruction.addErrorOutput(xhr.responseText);
+                        request.doneWithError(xhr.responseText);
                     }
                 } else {
-                    instruction.addErrorOutput(xhr.responseText);
+                    request.doneWithError(xhr.responseText);
                 }
             },
             onPartial: function(output) {
@@ -260,10 +241,16 @@ exports._deployCommand = function(instruction, project, opts) {
 exports.commands.addCommand({
     "name": "test",
     "description": "Do a 'dry run' to see what would happen in deployment",
-    "takes": [ "project" ],
-    "completeText": "Optionally provide the project to deploy",
-    execute: function(instruction, project) {
-        exports._deployCommand(instruction, project, {
+    "params":
+    [
+        {
+            "name": "project",
+            "type": "text",
+            "description": "The project to deploy"
+        }
+    ],
+    execute: function(request, args) {
+        exports._deployCommand(request, args.project, {
             dryRun: true
         });
     }
@@ -272,10 +259,16 @@ exports.commands.addCommand({
 exports.commands.addCommand({
     "name": "now",
     "description": "Deploy project to the server now",
-    "takes": [ "project" ],
-    "completeText": "Optionally provide the project to deploy",
-    execute: function(instruction, project) {
-        exports._deployCommand(instruction, project, {
+    "params":
+    [
+        {
+            "name": "project",
+            "type": "text",
+            "description": "The project to deploy"
+        }
+    ],
+    execute: function(request, args) {
+        exports._deployCommand(request, args.project, {
             dryRun: false
         });
     }
@@ -297,10 +290,10 @@ var getDeploySetup = function(project, data, opts) {
     bespin.get("server").request("POST", url, data, opts);
 };
 
-var runDeploy = function(instruction, project, data, opts) {
+var runDeploy = function(request, project, data, opts) {
     opts = opts || {};
     opts.evalJSON = true;
     var url = "/project/deploy/" + encodeURI(project) + "/";
     data = JSON.stringify(data);
-    bespin.get("server").requestDisconnected("POST", url, data, instruction, opts);
+    bespin.get("server").requestDisconnected("POST", url, data, request, opts);
 };

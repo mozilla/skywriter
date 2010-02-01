@@ -2,7 +2,7 @@
 // (not yet ratified as of this writing). This is taken from the Narwhal
 // repository.
 
-// this is based on the CommonJS spec for promises: 
+// this is based on the CommonJS spec for promises:
 // http://wiki.commonjs.org/wiki/Promises
 
 // A typical usage:
@@ -13,7 +13,7 @@
 //    Promise.resolve("succesful result");
 // });
 //    promise -> given to the consumer
-//  
+//
 //    A consumer can use the promise
 //    promise.then(function(result){
 //        ... when the action is complete this is executed ...
@@ -22,7 +22,7 @@
 //        ... executed when the promise fails
 //  });
 //
-// Alternately, a provider can create a deferred and resolve it when it completes an action. 
+// Alternately, a provider can create a deferred and resolve it when it completes an action.
 // The deferred object a promise object that provides a separation of consumer and producer to protect
 // promises from being fulfilled by untrusted code.
 // var defer = require("promise").defer;
@@ -31,7 +31,7 @@
 //    deferred.resolve("succesful result");
 // });
 //    deferred.promise -> given to the consumer
-//  
+//
 //    Another way that a consumer can use the promise (using promise.then is also allowed)
 // var when = require("promise").when;
 // when(promise,function(result){
@@ -45,23 +45,23 @@
 ({});
 "end";
 
-try{
+try {
     var enqueue = require("event-queue").enqueue;
 }
-catch(e){
+catch(e) {
     // squelch the error, and only complain if the queue is needed
 }
-if(!enqueue){
+if (!enqueue) {
 	enqueue = function(func){
 		func();
-	}
-}	
+	};
+}
 
 /**
  * Default constructor that creates a self-resolving Promise. Not all promise implementations
  * need to use this constructor.
  */
-var Promise = function(canceller){
+var Promise = function(canceller) {
 };
 
 /**
@@ -73,8 +73,8 @@ Promise.prototype.then = function(resolvedCallback, errorCallback, progressCallb
 
 /**
  * If an implementation of a promise supports a concurrency model that allows
- * execution to block until the promise is resolved, the wait function may be 
- * added. 
+ * execution to block until the promise is resolved, the wait function may be
+ * added.
  */
 /**
  * If an implementation of a promise can be cancelled, it may add this function
@@ -128,7 +128,7 @@ Deferred.prototype = Promise.prototype;
 exports.Promise = exports.Deferred = exports.defer = defer;
 function defer(){
     return new Deferred();
-} 
+}
 
 var contextHandler = exports.contextHandler = {};
 
@@ -136,10 +136,10 @@ function Deferred(canceller, rejectImmediately){
     var result, finished, isError, waiting = [], handled;
     var promise = this.promise = new Promise();
     var currentContextHandler = contextHandler.getHandler && contextHandler.getHandler();
-    
+
     function notifyAll(value){
         if(finished){
-            throw new Error("This deferred has already been resolved");                
+            throw new Error("This deferred has already been resolved");
         }
         result = value;
         finished = true;
@@ -147,7 +147,7 @@ function Deferred(canceller, rejectImmediately){
         	throw result;
         }
         for(var i = 0; i < waiting.length; i++){
-            notify(waiting[i]);    
+            notify(waiting[i]);
         }
     }
     function notify(listener){
@@ -184,29 +184,29 @@ function Deferred(canceller, rejectImmediately){
     this.resolve = this.callback = this.emitSuccess = function(value){
         notifyAll(value);
     };
-    
+
     var reject = function(error){
         isError = true;
         notifyAll(error);
     };
-    
+
     // calling error will indicate that the promise failed
     this.reject = this.errback = this.emitError = rejectImmediately ? reject : function(error){
     	return enqueue(function(){
     		reject(error);
     	});
-    } 
+    }
     // call progress to provide updates on the progress on the completion of the promise
     this.progress = function(update){
         for(var i = 0; i < waiting.length; i++){
             var progress = waiting[i].progress;
-            progress && progress(update);    
+            progress && progress(update);
         }
     }
     // provide the implementation of the promise
     this.then = promise.then = function(resolvedCallback, errorCallback, progressCallback){
         var returnDeferred = new Deferred(promise.cancel, true);
-        var listener = {resolved: resolvedCallback, error: errorCallback, progress: progressCallback, deferred: returnDeferred}; 
+        var listener = {resolved: resolvedCallback, error: errorCallback, progress: progressCallback, deferred: returnDeferred};
         if(finished){
             notify(listener);
         }
@@ -215,7 +215,7 @@ function Deferred(canceller, rejectImmediately){
         }
         return returnDeferred.promise;
     };
-    
+
     if(canceller){
         this.cancel = promise.cancel = function(){
             var error = canceller();
@@ -246,12 +246,12 @@ function perform(value, async, sync){
         deferred.reject(e);
         return deferred.promise;
     }
-    
+
 }
 /**
  * Promise manager to make it easier to consume promises
  */
- 
+
 /**
  * Registers an observer on a promise.
  * @param value     promise or value to observe
@@ -345,7 +345,7 @@ exports.wait = function(target){
         throw new Error("Can not wait, the event-queue module is not available");
     }
     if(target && typeof target.then === "function"){
-        var isFinished, isError, result;        
+        var isFinished, isError, result;
         target.then(function(value){
             isFinished = true;
             result = value;

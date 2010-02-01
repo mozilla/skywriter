@@ -36,9 +36,16 @@
         {
             "ep": "command",
             "name": "preview",
-            "takes": [ "filename" ],
+            "params":
+            [
+                {
+                    "name": "filename" ,
+                    "type": "text",
+                    "description": "the filename to view or use the current file",
+                    "defaultValue": null
+                }
+            ],
             "description": "view the file in a new browser window",
-            "completeText": "add the filename to view or use the current file",
             "withKey": "CMD B",
             "pointer": "#previewCommand"
         }
@@ -61,8 +68,9 @@ var ESCAPE = -1;
 /**
  * The preview command
  */
-exports.previewCommand = function(instruction, filename) {
-    exports.show(filename);
+exports.previewCommand = function(env, args, request) {
+    exports.show(args.filename);
+    request.done();
 };
 
 /**

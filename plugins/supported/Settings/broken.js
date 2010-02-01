@@ -68,13 +68,15 @@ var editor = catalog.getObject("editor");
 /**
  * 'editconfig' command
  */
-exports.editconfigCommand = function(instruction) {
+exports.editconfigCommand = function(env, args, request) {
     editor.openFile(files.userSettingsProject, "config");
+    request.done();
 };
 
 /**
  * 'runconfig' command
  */
-exports.runconfigCommand = function(instruction) {
+exports.runconfigCommand = function(env, args, request) {
     files.evalFile(files.userSettingsProject, "config");
+    request.done();
 };

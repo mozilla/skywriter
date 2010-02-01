@@ -36,12 +36,12 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
-var canon = require("Canon:canon");
 var env = require("Canon:environment");
 var types = require("Types:types");
-var output = require("Canon:output");
+var Request = require("Canon:request").Request;
+var catalog = require("bespin:plugins").catalog;
 
-var tokenizer = require("bespin:plugins").catalog.getObject("tokenizer");
+var tokenizer = catalog.getObject("tokenizer");
 
 /**
  * Command line controller.
@@ -73,12 +73,12 @@ exports.cliController = SC.Object.create({
         }
 
         var parts = tokenizer(typed);
-        var cmdArgs = canon.splitCommandAndArgs(parts);
+        var cmdArgs = this._splitCommandAndArgs(parts);
 
         this._convertTypes(cmdArgs.commandExt, cmdArgs.remainder, function(args) {
             cmdArgs.commandExt.load(function(command) {
 
-                var invocation = output.Invocation.create({
+                var request = Request.create({
                     command: command,
                     commandExt: cmdArgs.commandExt,
                     typed: typed,
@@ -86,7 +86,7 @@ exports.cliController = SC.Object.create({
                 });
 
                 try {
-                    command(env.global, args, invocation);
+                    command(env.global, args, request);
                 } catch (ex) {
                     // TODO: Some UI?
                     console.group("Error calling command: " + cmdArgs.commandExt.name);
@@ -118,5 +118,19 @@ exports.cliController = SC.Object.create({
                 }
             });
         });
+    },
+
+    /**
+     * Looks in the catalog for a command extension that matches what has been typed
+     * at the command line.
+     */
+    _splitCommandAndArgs: function(parts) {
+        // TODO: Something that doesn't assume no sub-commands:
+        parts = parts.slice();
+        var initial = parts.shift();
+        return {
+            commandExt: catalog.getExtensionByKey("command", initial),
+            remainder: parts
+        };
     }
 });

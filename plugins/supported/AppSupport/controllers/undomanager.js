@@ -101,7 +101,9 @@ exports.undoManager = SC.Object.create({
     }
 });
 
-exports.undoManagerCommand = function(instruction, args, command) {
-    exports.undoManager[command.name]();
+/**
+ *
+ */
+exports.undoManagerCommand = function(env, args, request) {
+    exports.undoManager[request.commandExt.name]();
 };
-

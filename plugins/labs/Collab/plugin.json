@@ -10,19 +10,30 @@
         {
             "ep": "command",
             "name": "follow",
-            "takes": [ "username ..." ],
-            "description": "add to the list of users we are following, or (with no args) list the current set",
-            "completeText": "username(s) of person(s) to follow",
-            "usage": "[username] ...<br><br><em>(username optional. Will list current followed users if not provided)</em>",
+            "params":
+            [
+                {
+                    "name": "usernames",
+                    "type": "[text]",
+                    "description": "username(s) of person(s) to follow",
+                    "defaultValue": null
+                }
+            ],
+            "description": "add to (or list) the users we are following",
             "pointer": "social#followCommand"
         },
         {
             "ep": "command",
             "name": "unfollow",
-            "takes": [ "username ..." ],
+            "params":
+            [
+                {
+                    "name": "usernames",
+                    "type": "[text]",
+                    "description": "username(s) of person(s) to stop following"
+                }
+            ],
             "description": "remove from the list of users we are following",
-            "completeText": "username(s) of person(s) to stop following",
-            "usage": "[username] ...<br><br><em>The username(s) to stop following</em>",
             "pointer": "social#unfollowCommand"
         },
         {
@@ -33,88 +44,125 @@
         },
         {
             "ep": "command",
-            "parent": "group",
-            "name": "help",
-            "takes": [ "search" ],
-            "description": "show subcommands for group command",
-            "completeText": "optionally, narrow down the search",
-            "usage": "The <u>help</u> gives you access to the various subcommands in the group command space.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!",
-            "pointer": ""
+            "name": "group",
+            "description": "Collect the people you follow into groups, and display the existing groups"
         },
         {
             "ep": "command",
-            "parent": "group",
-            "name": "list",
-            "takes": [ "group" ],
-            "description": "List the current group and group members",
-            "completeText": "An optional group name or leave blank to list groups",
-            "usage": "List the current group and group members.",
+            "name": "group list",
+            "params":
+            [
+                {
+                    "name": "group",
+                    "type": "text",
+                    "description": "An optional group name or leave blank to list groups",
+                    "defaultValue": null
+                }
+            ],
+            "description": "List the current groups and group members",
             "pointer": "social#groupListCommand"
         },
         {
             "ep": "command",
-            "parent": "group",
-            "name": "add",
-            "takes": [ "group", "'member ..." ],
+            "name": "group add",
+            "params":
+            [
+                {
+                    "name": "group",
+                    "type": "text",
+                    "description": "The name of the group to add to"
+                },
+                {
+                    "name": "members",
+                    "type": "[text]",
+                    "description": "The usernames of the followers to add"
+                }
+            ],
             "description": "Add members to a new or existing group",
-            "completeText": "A group name followed by a list of members to add",
-            "usage": "Add members to a new or existing group",
             "pointer": "social#groupAddCommand"
         },
         {
             "ep": "command",
-            "parent": "group",
-            "name": "remove",
-            "takes": [ "group", "member ..." ],
+            "name": "group remove",
+            "params":
+            [
+                {
+                    "name": "group",
+                    "type": "text",
+                    "description": "The name of the group to remove from"
+                },
+                {
+                    "name": "members",
+                    "type": "[text]",
+                    "description": "The usernames of the followers to remove"
+                }
+            ],
             "description": "Remove members from an existing group (and remove group if empty)",
-            "completeText": "A group name followed by a list of members to remove",
-            "usage": "Remove members from an existing group (and remove group if empty)",
             "pointer": "social#groupRemoveCommand"
         },
         {
             "ep": "command",
             "name": "share",
-            "description": "Manage the projects that you share to other users",
-            "completeText": "subcommands: add, remove, list, help"
+            "description": "Manage the projects that you share to other users"
         },
         {
             "ep": "command",
-            "parent": "share",
-            "name": "help",
-            "takes": [ "search" ],
-            "description": "show subcommands for share command",
-            "completeText": "optionally, narrow down the search",
-            "usage": "The <u>help</u> gives you access to the various subcommands in the share command space.<br/><br/>You can narrow the search of a command by adding an optional search params.<br/><br/>Finally, pass in the full name of a command and you can get the full description, which you just did to see this!",
-            "pointer": "social#shareHelpCommand"
-        },
-        {
-            "ep": "command",
-            "parent": "share",
-            "name": "list",
-            "takes": [ "project" ],
+            "name": "share list",
+            "params":
+            [
+                {
+                    "name": "project",
+                    "type": "text",
+                    "description": "An optional project name or leave blank to list shared projects",
+                    "defaultValue": null
+                }
+            ],
             "description": "List the current shared projects",
-            "completeText": "An optional project name or leave blank to list shared projects",
-            "usage": "List the current shared projects.",
             "pointer": "social#shareListCommand"
         },
         {
             "ep": "command",
-            "parent": "share",
-            "name": "remove",
-            "takes": [ "project", "member" ],
+            "name": "share remove",
+            "params":
+            [
+                {
+                    "name": "project",
+                    "type": "text",
+                    "description": "The name of an existing project"
+                },
+                {
+                    "name": "member",
+                    "type": "text",
+                    "description": "Optional user or group (or leave blank for all users and groups)",
+                    "defaultValue": null
+                }
+            ],
             "description": "Remove a share from the current shared projects",
-            "completeText": "A project name and a optional user or group (or leave blank for all users and groups)",
-            "usage": "Remove a share from the current shared projects.",
             "pointer": "social#shareRemoveCommand"
         },
         {
             "ep": "command",
-            "parent": "share",
-            "name": "add",
-            "takes": [ "project", "member", "permission" ],
+            "name": "share add",
+            "params":
+            [
+                {
+                    "name": "project",
+                    "type": "text",
+                    "description": "Project name to alter sharing on"
+                },
+                {
+                    "name": "member",
+                    "type": "text",
+                    "description": "username or group name to change"
+                },
+                {
+                    "name": "permission",
+                    "type": "text",
+                    "description": "Permission flags. edit|readonly",
+                    "defaultValue": null
+                }
+            ],
             "description": "Add a share to the current shared projects",
-            "completeText": "A project name or leave blank to list shared projects",
-            "usage": "Add a share to the current shared projects.",
             "pointer": "social#shareAddCommand"
         }
     ]

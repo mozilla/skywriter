@@ -41,10 +41,16 @@
         {
             "ep": "command",
             "name": "wizard",
-            "takes": [ "type" ],
+            "params":
+            [
+                {
+                    "name": "type",
+                    "type": "text",
+                    "description": "The name of the wizard to run. Leave blank to list known wizards"
+                }
+            ],
             "hidden": true,
             "description": "display a named wizard to step through some process",
-            "completeText": "The name of the wizard to run. Leave blank to list known wizards",
             "pointer": "#wizardCommand"
         }
     ]
@@ -86,18 +92,18 @@ exports.wizard = {
     /**
      * Change the session settings when a new file is opened
      */
-    show: function(instruction, type, warnOnFail) {
+    show: function(request, type, warnOnFail) {
         var wizard = wizards[type];
-        if (!wizard && instruction) {
-            instruction.addErrorOutput("Unknown wizard: " + type);
+        if (!wizard && request) {
+            request.doneWithError("Unknown wizard: " + type);
             return;
         }
         var self = this;
 
         // Warn when the HTML fetch fails
         var onFailure = function() {
-            if (warnOnFail && instruction) {
-                instruction.addErrorOutput("Failed to display wizard: " + xhr.responseText);
+            if (warnOnFail && request) {
+                request.doneWithError("Failed to display wizard: " + xhr.responseText);
             }
         };
 
@@ -113,6 +119,7 @@ exports.wizard = {
             if (typeof wizard.onLoad == "function") {
                 wizard.onLoad();
             }
+            request.done();
         };
 
         bespin.get("server").fetchResource(wizard.url, onSuccess, onFailure);
@@ -150,7 +157,7 @@ exports.wizard = {
 /**
  * The 'wizard' command to show a wizard
  */
-exports.wizardCommand = function(instruction, type) {
+exports.wizardCommand = function(env, args, request) {
     if (!type) {
         var list = "";
         for (var name in wizards) {
@@ -158,9 +165,9 @@ exports.wizardCommand = function(instruction, type) {
                 list += ", " + name;
             }
         }
-        instruction.addOutput("Known wizards: " + list.substring(2));
+        request.done("Known wizards: " + list.substring(2));
         return;
     }
 
-    exports.show(instruction, type, true);
+    exports.show(request, type, true);
 };

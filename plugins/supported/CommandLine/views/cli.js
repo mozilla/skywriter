@@ -43,7 +43,7 @@ var PinView = require("views/pin").PinView;
 var catalog = require("bespin:plugins").catalog;
 var dock = require("bespin:views/dock");
 var cliController = require("controller").cliController;
-var output = require("Canon:output");
+var request = require("Canon:request");
 
 var settings = catalog.getObject("settings");
 var imagePath = catalog.getResourceURL("CommandLine") + "images/";
@@ -132,7 +132,7 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
                 alt: "Remove this command from the history",
                 title: "Remove this command from the history",
                 onclick: function() {
-                    output.history.remove(content);
+                    request.history.remove(content);
                 }
             });
             closeEle.css({
@@ -283,14 +283,14 @@ exports.CliInputView = SC.View.design({
     },
 
     /**
-     * command.js/output.history has changed, so we need to pop-up the
+     * Canon:request#history.invocations has changed, so we need to pop-up the
      * display view
      */
     historyUpdated: function(cliController) {
         // Update the output layer just by hacking the DOM
         var ele = this.getPath("contentView.display.output.contentView.layer");
         this.set("contentHeight", ele.clientHeight);
-    }.observes("Canon:output#history.invocations.[]"),
+    }.observes("Canon:request#history.invocations.[]"),
 
     /**
      * Called whenever anything happens that could affect the output display
@@ -388,7 +388,7 @@ exports.CliInputView = SC.View.design({
                 layout: { top: 0, bottom: 0, left: 30, right: 0 },
                 hasHorizontalScroller: NO,
                 contentView: SC.StackedView.design({
-                    contentBinding: "Canon:output#history.invocations.[]",
+                    contentBinding: "Canon:request#history.invocations.[]",
                     exampleView: InstructionView
                 })
             }),

@@ -40,16 +40,16 @@ var cliController = require("controller").cliController;
 
 /**
  * Utility to take an string array of strings, and publish a ul list to the
- * instruction
+ * request
  */
-exports.displayArray = function(instruction, titleNone, titleSome, array) {
+exports.displayArray = function(request, titleNone, titleSome, array) {
     if (!array || array.length === 0) {
-        instruction.addOutput(titleNone);
+        request.add(titleNone);
         return;
     }
     var message = titleSome;
     message += "<ul><li>" + array.join("</li><li>") + "</li></ul>";
-    instruction.addOutput(message);
+    request.add(message);
 };
 
 /**
@@ -78,22 +78,23 @@ function toArgArray(args) {
 /**
  * Add a 'follow' command that gets and adds to out list of our followers
  */
-exports.followCommand = function(instruction, args) {
+exports.followCommand = function(env, args, request) {
     var usernames = toArgArray(args);
     if (usernames.length === 0) {
         follow([], {
             evalJSON: true,
             onSuccess: function(followers) {
                 if (!followers || followers.length === 0) {
-                    instruction.addOutput("You are not following anyone");
+                    request.done("You are not following anyone");
                     return;
                 }
 
                 var parent = exports.displayFollowers(followers);
-                instruction.setElement(parent);
+                request.done(parent);
             },
             onFailure: function(xhr) {
-                instruction.addErrorOutput("Failed to retrieve followers: " + xhr.responseText);
+                request.doneWithError("Failed to retrieve followers: " +
+                        xhr.responseText);
             }
         });
     }
@@ -102,7 +103,7 @@ exports.followCommand = function(instruction, args) {
             evalJSON: true,
             onSuccess: function(followers) {
                 if (!followers || followers.length === 0) {
-                    instruction.addOutput("You are not following anyone");
+                    request.done("You are not following anyone");
                     return;
                 }
 
@@ -110,10 +111,11 @@ exports.followCommand = function(instruction, args) {
                 hub.publish("project:created");
 
                 var parent = exports.displayFollowers(followers);
-                instruction.setElement(parent);
+                request.done(parent);
             },
             onFailure: function(xhr) {
-                instruction.addErrorOutput("Failed to add follower: " + xhr.responseText);
+                request.doneWithError("Failed to add follower: " +
+                        xhr.responseText);
             }
         });
     }
@@ -161,17 +163,17 @@ exports.displayFollowers = function(followers) {
 /**
  * Add an 'unfollow' command that removes from our list of our followers
  */
-exports.unfollowCommand = function(instruction, args) {
+exports.unfollowCommand = function(env, args, request) {
     var usernames = toArgArray(args);
     if (usernames.length === 0) {
-        instruction.addErrorOutput("Please specify the users to cease following");
+        request.doneWithError("Please specify the users to cease following");
     }
     else {
         unfollow(usernames, {
             evalJSON: true,
             onSuccess: function(followers) {
                 if (!followers || followers.length === 0) {
-                    instruction.addOutput("You are not following anyone");
+                    request.done("You are not following anyone");
                     return;
                 }
 
@@ -179,10 +181,11 @@ exports.unfollowCommand = function(instruction, args) {
                 hub.publish("project:created");
 
                 var parent = exports.displayFollowers(followers);
-                instruction.setElement(parent);
+                request.done(parent);
             },
             onFailure: function(xhr) {
-                instruction.addErrorOutput("Failed to remove follower: " + xhr.responseText);
+                request.doneWithError("Failed to remove follower: " +
+                        xhr.responseText);
             }
         });
     }
@@ -198,29 +201,23 @@ function unfollow(users, opts) {
 // =============================================================================
 
 /**
- * Display sub-command help
- */
-exports.groupHelpCommand = function(instruction, extra) {
-    var output = this.parent.getHelp(extra);
-    instruction.addOutput(output);
-};
-
-/**
  * 'group list' subcommand.
  */
-exports.groupListCommand = function(instruction, group) {
-    if (!group) {
+exports.groupListCommand = function(env, args, request) {
+    if (!args.group) {
         // List all groups
         groupListAll({
             evalJSON: true,
             onSuccess: function(groups) {
                 if (!groups || groups.length === 0) {
-                    instruction.addOutput("You have no groups");
+                    request.done("You have no groups");
                     return;
                 }
 
                 var parent = dojo.create("div", {});
-                dojo.create("div", { innerHTML: "You have the following groups:" }, parent);
+                dojo.create("div", {
+                    innerHTML: "You have the following groups:"
+                }, parent);
                 var table = dojo.create("table", { }, parent);
                 groups.forEach(function(group) {
                     var row = dojo.create("tr", { }, table);
@@ -248,24 +245,27 @@ exports.groupListCommand = function(instruction, group) {
                     }, cell);
                 });
 
-                instruction.setElement(parent);
+                request.done(parent);
             },
             onFailure: function(xhr) {
-                instruction.addErrorOutput("Failed to retrieve groups: " + xhr.responseText);
+                request.doneWithError("Failed to retrieve groups: " +
+                        xhr.responseText);
             }
         });
     } else {
         // List members in a group
-        groupList(group, {
+        groupList(args.group, {
             evalJSON: true,
             onSuccess: function(members) {
                 if (!members || members.length === 0) {
-                    instruction.addOutput(group + " has no members.");
+                    request.done(args.group + " has no members.");
                     return;
                 }
 
                 var parent = dojo.create("div", {});
-                dojo.create("div", { innerHTML: "Members of " + group + ":" }, parent);
+                dojo.create("div", {
+                    innerHTML: "Members of " + args.group + ":"
+                }, parent);
                 var table = dojo.create("table", { }, parent);
                 members.forEach(function(member) {
                     var row = dojo.create("tr", { }, table);
@@ -281,15 +281,17 @@ exports.groupListCommand = function(instruction, group) {
                     dojo.create("a", {
                         innerHTML: "<small>(ungroup)</small>",
                         onclick: function() {
-                            cliController.executeCommand("group remove " + group + " " + member);
+                            cliController.executeCommand("group remove " +
+                                    args.group + " " + member);
                         }
                     }, cell);
                 });
 
-                instruction.setElement(parent);
+                request.done(parent);
             },
             onFailure: function(xhr) {
-                instruction.addErrorOutput("Failed to retrieve group members: " + xhr.responseText);
+                request.doneWithError("Failed to retrieve group members: " +
+                        xhr.responseText);
             }
         });
     }
@@ -298,15 +300,16 @@ exports.groupListCommand = function(instruction, group) {
 /**
  * 'group add' subcommand.
  */
-exports.groupAddCommand = function(instruction, args) {
+exports.groupAddCommand = function(env, args, request) {
     var group = args.pieces.shift();
     var members = args.pieces;
     groupAdd(group, members, {
         onSuccess: function(data) {
-            instruction.addOutput("Added to group '" + group + "': " + members.join(", "));
+            request.done("Added to group '" + group + "': " + members.join(", "));
         },
         onFailure: function(xhr) {
-            instruction.addErrorOutput("Failed to add to group members. Maybe due to: " + xhr.responseText);
+            request.doneWithError("Failed to add to group members. Maybe due to: " +
+                    xhr.responseText);
         }
     });
 };
@@ -314,26 +317,28 @@ exports.groupAddCommand = function(instruction, args) {
 /**
  * 'group remove' subcommand.
  */
-export.groupRemoveCommand = function(instruction, args) {
+export.groupRemoveCommand = function(env, args, request) {
     var group = args.pieces.shift();
     var members = args.pieces;
     if (members.length === 1 && members[0] === "all") {
         groupRemoveAll(group, {
             onSuccess: function(data) {
-                instruction.addOutput("Removed group " + group);
+                request.done("Removed group " + group);
             },
             onFailure: function(xhr) {
-                instruction.addErrorOutput("Failed to retrieve group members. Maybe due to: " + xhr.responseText);
+                request.doneWithError("Failed to retrieve group members. Maybe due to: " +
+                        xhr.responseText);
             }
         });
     } else {
         // Remove members from a group
         groupRemove(group, members, {
             onSuccess: function(data) {
-                instruction.addOutput("Removed from group '" + group + "': " + members.join(", "));
+                request.done("Removed from group '" + group + "': " + members.join(", "));
             },
             onFailure: function(xhr) {
-                instruction.addErrorOutput("Failed to remove to group members. Maybe due to: " + xhr.responseText);
+                request.doneWithError("Failed to remove to group members. Maybe due to: " +
+                        xhr.responseText);
             }
         });
     }
@@ -381,17 +386,9 @@ function groupAdd(group, users, opts) {
 // =============================================================================
 
 /**
- * Display sub-command help
- */
-exports.shareHelpCommand = function(instruction, extra) {
-    var output = this.parent.getHelp(extra);
-    instruction.addOutput(output);
-};
-
-/**
  * 'share list' sub-command.
  */
-exports.shareAddCommand = function(instruction, args) {
+exports.shareAddCommand = function(env, args, request) {
     var self = this;
     shareListAll({
         evalJSON: true,
@@ -403,10 +400,11 @@ exports.shareAddCommand = function(instruction, args) {
                 });
             }
 
-            instruction.setElement(createShareDisplayElement(shares));
+            request.add(createShareDisplayElement(shares));
         },
         onFailure: function(xhr) {
-            instruction.addErrorOutput("Failed to list project shares: " + xhr.responseText);
+            request.doneWithError("Failed to list project shares: " +
+                    xhr.responseText);
         }
     });
 };
@@ -422,7 +420,9 @@ var createShareDisplayElement = function(shares) {
     }
 
     var parent = dojo.create("div", { });
-    dojo.create("div", { innerHTML: "You have the following shared projects:" }, parent);
+    dojo.create("div", {
+        innerHTML: "You have the following shared projects:"
+    }, parent);
     var table = dojo.create("table", { }, parent);
 
     var lastProject = "";
@@ -475,27 +475,30 @@ var createShareDisplayElement = function(shares) {
 /**
  * 'share remove' sub-command.
  */
-exports.shareAddCommand = function(instruction, args) {
+exports.shareAddCommand = function(env, args, request) {
     if (!args.project || args.project == "") {
-        instruction.addErrorOutput("Missing project.<br/>Syntax: share remove project [{user}|{group}|everyone]");
+        request.doneWithError("Missing project.<br/>Syntax: share remove project [{user}|{group}|everyone]");
     }
 
     if (!args.member || args.member == "") {
         shareRemoveAll(args.project, {
             onSuccess: function(data) {
-                instruction.addOutput("All sharing removed from " + args.project);
+                request.done("All sharing removed from " + args.project);
             },
             onFailure: function(xhr) {
-                instruction.addErrorOutput("Failed to remove sharing permissions. Maybe due to: " + xhr.responseText);
+                request.doneWithError("Failed to remove sharing permissions. Maybe due to: " +
+                        xhr.responseText);
             }
         });
     } else {
         shareRemove(args.project, args.member, {
             onSuccess: function(data) {
-                instruction.addOutput("Removed sharing permission from " + args.member + " to " + args.project);
+                request.done("Removed sharing permission from " + args.member +
+                        " to " + args.project);
             },
             onFailure: function(xhr) {
-                instruction.addErrorOutput("Failed to remove sharing permission. Maybe due to: " + xhr.responseText);
+                request.doneWithError("Failed to remove sharing permission. Maybe due to: " +
+                        xhr.responseText);
             }
         });
     }
@@ -504,21 +507,23 @@ exports.shareAddCommand = function(instruction, args) {
 /**
  * 'share add' sub-command.
  */
-exports.shareAddCommand = function(instruction, args) {
+exports.shareAddCommand = function(env, args, request) {
     if (!args.project || args.project == "") {
-        instruction.addErrorOutput("Missing project.<br/>Syntax: share add project {user}|{group}|everyone [edit]");
+        request.doneWithError("Missing project.<br/>Syntax: share add project {user}|{group}|everyone [edit]");
     }
 
     if (!args.member || args.member == "") {
-        instruction.addErrorOutput("Missing user/group.<br/>Syntax: share add project {user}|{group}|everyone [edit]");
+        request.doneWithError("Missing user/group.<br/>Syntax: share add project {user}|{group}|everyone [edit]");
     }
 
     shareAdd(args.project, args.member, args.permission || "", {
         onSuccess: function(data) {
-            instruction.addOutput("Adding sharing permission for " + args.member + " to " + args.project);
+            request.done("Adding sharing permission for " + args.member +
+                    " to " + args.project);
         },
         onFailure: function(xhr) {
-            instruction.addErrorOutput("Failed to add sharing permission. Maybe due to: " + xhr.responseText);
+            request.doneWithError("Failed to add sharing permission. Maybe due to: " +
+                    xhr.responseText);
         }
     });
 };
@@ -584,7 +589,7 @@ function shareAdd(project, member, options, opts) {
 /**
  * Add a 'viewme' command to allow people to screencast
  *
-exports.viewmeCommand = function(instruction, args) {
+exports.viewmeCommand = function(env, args, request) {
     args = toArgArray(args);
 
     if (args.length === 0) {
@@ -592,10 +597,11 @@ exports.viewmeCommand = function(instruction, args) {
         // i.e. 'viewme'
         viewmeListAll({
             onSuccess: function(data) {
-                instruction.addOutput("All view settings: " + data);
+                request.done("All view settings: " + data);
             },
             onFailure: function(xhr) {
-                instruction.addErrorOutput("Failed to retrieve view settings. Maybe due to: " + xhr.responseText);
+                request.doneWithError("Failed to retrieve view settings. Maybe due to: " +
+                        xhr.responseText);
             }
         });
     }
@@ -605,10 +611,11 @@ exports.viewmeCommand = function(instruction, args) {
         var member = args[0];
         viewmeList(member, {
             onSuccess: function(data) {
-                instruction.addOutput("View settings for " + member + ": " + data);
+                request.done("View settings for " + member + ": " + data);
             },
             onFailure: function(xhr) {
-                instruction.addErrorOutput("Failed to retrieve view settings. Maybe due to: " + xhr.responseText);
+                request.doneWithError("Failed to retrieve view settings. Maybe due to: " +
+                        xhr.responseText);
             }
         });
     }
@@ -622,10 +629,11 @@ exports.viewmeCommand = function(instruction, args) {
             var value = args[1];
             viewmeSet(member, value, {
                 onSuccess: function(data) {
-                    instruction.addOutput("Changed view settings for " + member);
+                    request.done("Changed view settings for " + member);
                 },
                 onFailure: function(xhr) {
-                    instruction.addErrorOutput("Failed to change view setttings. Maybe due to: " + xhr.responseText);
+                    request.doneWithError("Failed to change view setttings. Maybe due to: " +
+                            xhr.responseText);
                 }
             });
         }
@@ -636,7 +644,7 @@ exports.viewmeCommand = function(instruction, args) {
 };
 
 var _syntaxError: function(message) {
-    instruction.addErrorOutput("Syntax error - viewme ({user}|{group}|everyone) (true|false|default)");
+    request.doneWithError("Syntax error - viewme ({user}|{group}|everyone) (true|false|default)");
 };
 // */
 

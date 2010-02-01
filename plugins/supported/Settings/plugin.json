@@ -38,7 +38,14 @@
         {
             "ep": "command",
             "name": "unset",
-            "params": [ { "name": "key", "type": "text" } ],
+            "params":
+            [
+                {
+                    "name": "key",
+                    "type": "text",
+                    "description": "The name of the choice to return to defaults"
+                }
+            ],
             "description": "unset a setting entirely",
             "pointer": "commands#unsetCommand"
         }

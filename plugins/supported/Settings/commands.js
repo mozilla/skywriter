@@ -42,7 +42,7 @@ var settings = catalog.getObject("settings");
 /**
  * 'set' command
  */
-exports.setCommand = function(env, args, invocation) {
+exports.setCommand = function(env, args, request) {
     var html;
 
     if (!args.choice) {
@@ -85,13 +85,13 @@ exports.setCommand = function(env, args, invocation) {
         }
     }
 
-    invocation.done(html);
+    request.done(html);
 };
 
 /**
  * 'unset' command
  */
-exports.unsetCommand = function(env, args, invocation) {
+exports.unsetCommand = function(env, args, request) {
     var html;
     if (!settings.values[args.key]) {
         html = "No setting for " + args.key + ".";
@@ -100,5 +100,5 @@ exports.unsetCommand = function(env, args, invocation) {
         html = "Unset the setting for " + args.key + ".";
     }
 
-    invocation.done(html);
+    request.done(html);
 };

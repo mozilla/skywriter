@@ -37,7 +37,7 @@
 
 var SC = require('sproutcore/runtime').SC;
 var catalog = require("bespin:plugins").catalog;
-var output = require("Canon:output");
+var Request = require("Canon:request").Request;
 var env = require("Canon:environment");
 
 /**
@@ -63,13 +63,13 @@ var KeyboardManager = SC.Object.extend({
         var commandExt = this._findCommandExtension(symbolicName, flags);
         if (commandExt != null) {
             commandExt.load(function(command) {
-                var invocation = output.Invocation.create({
+                var request = Request.create({
                     command: command,
                     commandExt: commandExt
                 });
 
                 try {
-                    command(env.global, {}, invocation);
+                    command(env.global, {}, request);
                 } catch (ex) {
                     // TODO: Some UI?
                     console.group("Error calling command: " + commandExt.name);

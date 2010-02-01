@@ -41,9 +41,9 @@ var settings = require("bespin:plugins").catalog.getObject("settings");
 /**
  * 'goto' command
  */
-exports.gotoCommand = function(instruction, value) {
-    if (value) {
-        var linenum = parseInt(value, 10);
+exports.gotoCommand = function(env, args, request) {
+    if (args.value) {
+        var linenum = parseInt(args.value, 10);
         editor.moveAndCenter(linenum);
         editor.focus();
     }
@@ -52,17 +52,17 @@ exports.gotoCommand = function(instruction, value) {
 /**
  * 'replace' command
  */
-exports.replaceCommand = function(instruction, args) {
+exports.replaceCommand = function(env, args, request) {
     editor.replace(args);
 };
 
 /**
  * 'sort' command
  */
-exports.sortCommand = function(instruction, direction) {
+exports.sortCommand = function(env, args, request) {
     var buffer = editor.getDocument().split(/\n/);
     buffer.sort();
-    if (direction && /^desc/.test(direction.toLowerCase())) {
+    if (direction && /^desc/.test(args.direction.toLowerCase())) {
         buffer.reverse();
     }
     editor.insertDocument(buffer.join("\n"));
@@ -71,7 +71,8 @@ exports.sortCommand = function(instruction, direction) {
 /**
  * 'entab' command
  */
-exports.entabCommand = function(instruction, tabsize) {
+exports.entabCommand = function(env, args, request) {
+    var tabsize = args.tabsize;
     if (!tabsize) {
         tabsize = settings.values.tabsize;
     }
@@ -85,7 +86,8 @@ exports.entabCommand = function(instruction, tabsize) {
 /**
  * 'detab' command
  */
-exports.detabCommand = function(instruction, tabsize) {
+exports.detabCommand = function(env, args, request) {
+    var tabsize = args.tabsize;
     if (!tabsize) {
         tabsize = settings.values.tabsize;
     }
@@ -99,20 +101,17 @@ exports.detabCommand = function(instruction, tabsize) {
 /**
  * 'trim' command
  */
-exports.trimCommand = function(instruction, side) {
-    if (!side) {
-        side = "right";
-    }
+exports.trimCommand = function(env, args, request) {
     var replaceArgs = {
         replace: ''
     };
 
-    if (util.include(["left", "both"], side)) {
+    if (util.include(["left", "both"], args.side)) {
         replaceArgs.search = "^\\s+";
         editor.replace(replaceArgs);
     }
 
-    if (util.include(["right", "both"], side)) {
+    if (util.include(["right", "both"], args.side)) {
         replaceArgs.search = "\\s+$";
         editor.replace(replaceArgs);
     }
@@ -121,13 +120,13 @@ exports.trimCommand = function(instruction, side) {
 /**
  * 'uc' command
  */
-exports.ucCommand = function(instruction) {
+exports.ucCommand = function(env, args, request) {
     editor.selectionChangeCase({ stringCase: 'u' });
 };
 
 /**
  * 'lc' command
  */
-exports.lcCommand = function(instruction) {
+exports.lcCommand = function(env, args, request) {
     editor.selectionChangeCase({ stringCase: 'l' });
 };
