@@ -69,9 +69,7 @@ var endWithId = function(ele) {
 };
 
 var InstructionView = SC.View.extend(SC.StaticLayout, {
-    //layout: { top:0, bottom: 0, left: 0, right: 0 },
     classNames: [ "instruction_view" ],
-    // childViews: [ "prompt", "typed", "data", "output" ],
     useStaticLayout: true,
 
     link: function(root, path, updater) {
@@ -246,36 +244,6 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
             });
         }
     }
-
-    /*
-    prompt: SC.LabelView.design({
-        value: ">",
-        layout: { top: 0, height: 30, left: 0, width: 30 }
-    }),
-
-    typed: SC.LabelView.design({
-        valueBinding: ".parentView.content.typed",
-        layout: { top: 0, height: 30, left: 30, right: 60 }
-    }),
-
-    data: SC.LabelView.design({
-        valueBinding: ".parentView.content.start",
-        layout: { top: 0, height: 30, width: 60, right: 0 }
-    }),
-
-    output: SC.LabelView.design({
-        valueBinding: ".parentView.content._hack",
-        layout: { top: 30, bottom: 0, left: 0, right: 0 }
-    }),
-
-    output2: SC.ScrollView.design({
-        layout: { top: 30, bottom: 0, left: 0, right: 0 },
-        hasHorizontalScroller: NO,
-        contentView: SC.CollectionView.design({
-            //contentBinding: ".parentView.parentView.content.contents.[]",
-        })
-    })
-    */
 });
 
 /**
@@ -319,14 +287,9 @@ exports.CliInputView = SC.View.design({
      * display view
      */
     historyUpdated: function(cliController) {
-        var table = exports.outputHistory();
-        this.set("table", table);
-
         // Update the output layer just by hacking the DOM
-        var ele = this.getPath("contentView.display.output.layer");
-        ele.innerHTML = "";
-        ele.appendChild(table);
-        this.set("contentHeight", table.clientHeight);
+        var ele = this.getPath("contentView.display.output.contentView.layer");
+        this.set("contentHeight", ele.clientHeight);
     }.observes("Canon:output#history.invocations.[]"),
 
     /**
@@ -355,7 +318,7 @@ exports.CliInputView = SC.View.design({
         //   it's not like we've got the same input at end of output
         //   constraints)
         // - The update comes from an instruction minimize/remove
-        var ele = this.getPath("contentView.display.output.layer");
+        var ele = this.getPath("contentView.display.output.contentView.layer");
         var scrollHeight = Math.max(ele.scrollHeight, ele.clientHeight);
         ele.scrollTop = scrollHeight - ele.clientHeight;
     }.observes(
@@ -418,16 +381,11 @@ exports.CliInputView = SC.View.design({
 
         display: SC.View.design({
             layout: { top: 0, bottom: 25, left: 0, right: 0 },
-            childViews: [ "output", "output2", "toolbar" ],
+            childViews: [ "output", "toolbar" ],
 
-            output: SC.View.design({
+            output: SC.ScrollView.design({
                 classNames: [ "cmd_view" ],
-                layout: { top: 0, bottom: 0, left: 30, width: 280 }
-            }),
-
-            output2: SC.ScrollView.design({
-                classNames: [ "cmd_view" ],
-                layout: { top: 0, bottom: 0, left: 320, right: 0 },
+                layout: { top: 0, bottom: 0, left: 30, right: 0 },
                 hasHorizontalScroller: NO,
                 contentView: SC.StackedView.design({
                     contentBinding: "Canon:output#history.invocations.[]",
@@ -467,157 +425,6 @@ exports.CliInputView = SC.View.design({
         })
     })
 });
-
-/**
- * Convert the history of instructions stored in command.history into a DOM
- * node that can be appended to the document somewhere.
- */
-exports.outputHistory = function() {
-    var table = document.createElement("table");
-    table.className = "cmd_table";
-
-    var count = 1;
-    output.history.invocations.forEach(function(invocation) {
-        exports.outputInstruction(table, invocation, count);
-        count++;
-    });
-
-    return table;
-};
-
-/**
- * Convert a single Instruction into DOM nodes that can be appended to a table
- * in which other instructions are stored.
- */
-exports.outputInstruction = function(table, invocation, count) {
-    var typed = invocation.get("typed");
-    var start = invocation.get("start");
-    var end = invocation.get("end");
-    var hideOutput = invocation.get("hideOutput");
-
-    var mode = settings.values.historytimemode;
-
-    // The row for the input (i.e. what was typed)
-    var rowin = document.createElement("tr");
-    rowin.className = 'cmd_rowin';
-    rowin.onclick = function() {
-        // A single click on an invocation line in the console
-        // copies the command to the command line
-        cliController.input = typed;
-    };
-    rowin.ondblclick = function() {
-        // A double click on an invocation line in the console
-        // executes the command
-        cliController.executeCommand(typed);
-    };
-    table.appendChild(rowin);
-
-    // The opening column with time or history number or nothing
-    var history = document.createElement("td");
-    history.className = "cmd_open";
-    rowin.appendChild(history);
-
-    if (mode == "history") {
-        history.innerHTML = count;
-        history.className = "cmd_open_history";
-    }
-    else if (mode == "time" && start) {
-        history.innerHTML = formatTime(start);
-        history.className = "cmd_open_time";
-    }
-    else {
-        history.className = "cmd_open_blank";
-    }
-
-    // Cell for the typed command and the hover
-    var input = document.createElement("td");
-    input.className = "cmd_main";
-    rowin.appendChild(input);
-
-    // The execution time
-    var hover = document.createElement("div");
-    hover.className = "cmd_hover";
-    input.appendChild(hover);
-
-    // The execution time
-    if (start && end) {
-        var div = document.createElement("div");
-        div.className = "cmd_duration";
-        var time = end.getTime() - start.getTime();
-        div.innerHTML = "completed in " + (time / 1000) + " sec ";
-        hover.appendChild(div);
-    }
-
-    // Toggle output display
-    var img = document.createElement("img");
-    img.src = imagePath + (hideOutput ? "plus.png" : "minus.png");
-    img.style.verticalAlign = "middle";
-    img.style.padding = "2px;";
-    img.alt = (hideOutput ? "Show" : "Hide") + " command output";
-    img.title = img.alt;
-    img.onclick = function(ev) {
-        invocation.set("hideOutput", !hideOutput);
-        output.history.update();
-        util.stopEvent(ev);
-    };
-    hover.appendChild(img);
-
-    // Open/close output
-    img = document.createElement("img");
-    img.src = imagePath + "closer.png";
-    img.style.verticalAlign = "middle";
-    img.style.padding = "2px";
-    img.alt = "Remove this command from the history";
-    img.title = img.alt;
-    img.onclick = function(ev) {
-        output.history.remove(invocation);
-        output.history.update();
-        util.stopEvent(ev);
-    };
-    hover.appendChild(img);
-
-    // What the user actually typed
-    var prompt = document.createElement("span");
-    prompt.className = "cmd_prompt";
-    prompt.innerHTML = ">";
-    input.appendChild(prompt);
-
-    var span = document.createElement("span");
-    span.innerHTML = typed;
-    span.className = "cmd_typed";
-    input.appendChild(span);
-
-    // The row for the output (if required)
-    if (!hideOutput) {
-        var rowout = document.createElement("tr");
-        rowout.className = "cmd_rowout";
-        table.appendChild(rowout);
-
-        rowout.appendChild(document.createElement("td"));
-
-        var td = document.createElement("td");
-        td.colSpan = 2;
-        td.className = "cmd_output";
-        td.className += invocation.get("error") ? " cmd_error" : "";
-        rowout.appendChild(td);
-
-        invocation.get("outputs").forEach(function(output) {
-            var node;
-            if (typeof output == "string") {
-                node = document.createElement("p");
-                node.innerHTML = output;
-            } else {
-                node = output;
-            }
-            td.appendChild(node);
-        });
-        if (!invocation.get("completed")) {
-            var throbber = document.createElement("div");
-            throbber.innerHTML = "<img src='" + imagePath + "throbber.gif'/>";
-            td.appendChild(throbber);
-        }
-    }
-};
 
 /**
  * Quick utility to format the elapsed time for display as hh:mm:ss

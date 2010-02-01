@@ -34,7 +34,6 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
-
 .cmd_line { background:#1e1916; }
 .cmd_line .sc-view.sc-text-field-view { background: inherit; }
 
@@ -48,7 +47,6 @@ defeat sproutcore. This needs to defeat the sproutcore defeating css. */
 body.sc-theme .cmd_line .cmd_prompt { color: #FF8E00; font-weight: bold; }
 body.sc-theme .cmd_line .cmd_prompt .cmd_brackets { color: #FFF; }
 
-
 #command.commandLineError { color: red; }
 
 .cmd_line .sc-view .sc-text-field-view input {
@@ -61,70 +59,50 @@ body.sc-theme .cmd_line .cmd_prompt .cmd_brackets { color: #FFF; }
 .cmd_line .sc-view label.sc-text-field-view.focus {
   outline-width: 0px; outline: 0px;
 }
+div.cmd_line div.sc-view.sc-gray-border { border:0; }
 
 /* Command Output */
-.cmd_view {
-  overflow: auto; color: #999; font-family: Calibri, Arial, sans-serif;
+div.cmd_line div.cmd_view div.sc-collection-view {
+  overflow: auto; color: #aaa; font-family: Calibri, Arial, sans-serif;
 }
-table.cmd_table,
 div.cmd_view { width: 100%; border-collapse: separate; font-size: 120%; }
-table.cmd_table tr.cmd_rowin,
 div.cmd_view div.cmd_rowin {
   background-repeat: repeat-x; /* background-color: #1e1916; */
   font-size: 110%;
 }
 
-table.cmd_table tr.cmd_rowin,
 div.cmd_view div.cmd_rowin { background: #1b1613; }
-table.cmd_table tr.cmd_rowin td:first-child { padding-left: 5px; }
-table.cmd_table tr.cmd_rowin img,
 div.cmd_view div.cmd_rowin img { cursor: pointer; }
 
-div.cmd_view table.cmd_table th, td,
 div.cmd_view div { border: 0; padding: 0 2px; text-align: left; }
-table.cmd_table td,
 div.cmd_view div { vertical-align: top; }
-table.cmd_table .cmd_open_history,
 div.cmd_view .cmd_open_history { width: 20px; }
-table.cmd_table .cmd_open_time,
 div.cmd_view .cmd_open_time { width: 40px; }
-table.cmd_table .cmd_open_blank,
 div.cmd_view .cmd_open_blank { width: 1px; }
-table.cmd_table .cmd_open {
-  padding: 3px 3px 2px 5px; font-size:80%; color:#666;
-}
+div.cmd_view .cmd_open { padding: 3px 3px 2px 5px; font-size:80%; color:#666; }
 .cmd_main { font-weight: bold; color: #fff; }
-table.cmd_table .cmd_typed,
 div.cmd_view .cmd_typed { padding-left: 5px; }
-table.cmd_table .cmd_hover,
 div.cmd_view .cmd_hover {
   float: right; font-size: 80%; font-weight: normal; height: 100%; color: #666;
   text-align: right; display: none;
 }
-table.cmd_table .cmd_hover *,
 div.cmd_view .cmd_hover * {
   vertical-align: middle; padding-left: 3px; padding-right: 3px;
 }
-table.cmd_table .cmd_hover .cmd_duration,
 div.cmd_view .cmd_hover .cmd_duration {
   float: left; padding-top: 2px;
 }
-table.cmd_table tr.cmd_rowin:hover .cmd_hover,
 div.cmd_view div.cmd_rowin:hover .cmd_hover { display: block; }
 
-table.cmd_table tr.cmd_rowout td.cmd_output,
 div.cmd_view div.cmd_rowout div.cmd_output { padding-left: 10px; }
-table.cmd_table tr.cmd_rowout td.cmd_error,
 div.cmd_view div.cmd_rowout div.cmd_error { color: #f99; }
 /* table.cmd_table tr.cmd_rowout th { text-align: left; } */
-table.cmd_table tr.cmd_rowout a,
-div.cmd_view div.cmd_rowout a { font-weight: bold; color: inherit; }
-table.cmd_table tr.cmd_rowout a,
-div.cmd_view div.cmd_rowout a { text-decoration: underline;
+div.cmd_view div.cmd_rowout a { font-weight: bold; color: inherit;
+  text-decoration: none;
+}
+div.cmd_view div.cmd_rowout a:hover { text-decoration: underline;
   cursor: pointer;
 }
-table.cmd_table input[type=password], table.cmd_table input[type=text],
-table.cmd_table textarea,
 div.cmd_view input[type=password], div.cmd_view input[type=text],
 div.cmd_view textarea {
   font-family: Calibri,Arial,sans-serif; background: transparent;
