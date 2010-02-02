@@ -40,7 +40,7 @@ var pathUtil = require("Filesystem:path");
 /**
  * 'files' command
  */
-exports.filesCommand = function(env, args) {
+exports.filesCommand = function(env, args, request) {
     var path = args.path;
     if (!pathUtil.isDir(path)) {
         path += "/";
@@ -52,10 +52,10 @@ exports.filesCommand = function(env, args) {
         for (var x = 0; x < contents.length; x++) {
             files += contents[x].name + "<br/>";
         }
-        env.addOutput(files);
+        request.done(files);
 
     }, function(error) {
-        env.addError(error.message);
+        request.doneWithError(error.message);
     });
 };
 

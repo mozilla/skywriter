@@ -108,16 +108,20 @@ exports.cliController = SC.Object.create({
         var args = {};
         var i = 0; // Which arg are we converting
         var done = 0; // Call onConvert when we're done
-        command.params.forEach(function(param) {
-            var arg = remainder.length > i ? remainder[i] : null;
-            types.fromString(param.type, arg, function(converted) {
-                args[param.name] = converted;
-                done++;
-                if (done == command.params.length) {
-                    onConvert(args);
-                }
+        if (command.params) {
+            command.params.forEach(function(param) {
+                var arg = remainder.length > i ? remainder[i] : null;
+                types.fromString(param.type, arg, function(converted) {
+                    args[param.name] = converted;
+                    done++;
+                    if (done == command.params.length) {
+                        onConvert(args);
+                    }
+                });
             });
-        });
+        } else {
+            onConvert(args);
+        }
     },
 
     /**
