@@ -47,13 +47,23 @@ var catalog = require("bespin:plugins").catalog;
  */
 exports.Environment = SC.Object.extend({
     /**
-     * When we allow multiple views for a model then we're going to change how
-     * this finds the view. In the mean time, you should always use
-     * <code>instruction.get("view")</code> to access the view.
+    * Retrieves the EditSession
+    */
+    session: function() {
+        return catalog.getObject("session");
+    }.property(),
+
+    /**
+    * gets the currentView from the session.
      */
     view: function() {
-        return catalog.getObject("view");
-    }.property().cacheable(),
+        var session = this.get("session");
+        if (!session) {
+            console.error("command attempted to get view but there's no session");
+            return undefined;
+        }
+        return session.get("currentView");
+    }.property(),
 
     /**
      * The current editor model might not always be easy to find so you should
@@ -61,7 +71,32 @@ exports.Environment = SC.Object.extend({
      * possible.
      */
     model: function() {
-        return catalog.getObject("model");
+        var session = this.get("session");
+        if (!session) {
+            console.error("command attempted to get model but there's no session");
+            return undefined;
+        }
+        return session.get("currentBuffer").get("model");
+    }.property(),
+    
+    /*
+    * The current Buffer from the session
+    */
+    buffer: function() {
+        var session = this.get("session");
+        if (!session) {
+            console.error("command attempted to get buffer but there's no session");
+            return undefined;
+        }
+        return session.get("currentBuffer");
+    }.property(),
+    
+    /*
+    * If files are available, this will get them. Perhaps we need some other
+    * mechanism for populating these things from the catalog?
+    */
+    files: function() {
+        return catalog.getObject("files");
     }.property().cacheable()
 });
 

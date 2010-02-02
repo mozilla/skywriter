@@ -37,7 +37,6 @@
 
 var keyboard = require("keyboard");
 var t = require("PluginDev");
-var canon = require("directory").rootCanon;
 
 exports.testKeyMatching = function() {
     var km = keyboard.keyboardManager;
