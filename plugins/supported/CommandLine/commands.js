@@ -41,6 +41,24 @@ var cliController = require("controller").cliController;
 var rootCanon = { aliases:[], commands:[] };
 
 /**
+ * TODO: make this automatic
+ */
+exports.helpCommand = function(instruction, args) {
+    var output = this.parent.getHelp(args.search, {
+        prefix: "<h2>Welcome to Bespin - Code in the Cloud</h2><ul>" +
+            "<li><a href='http://labs.mozilla.com/projects/bespin' target='_blank'>Home Page</a>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin' target='_blank'>Wiki</a>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/UserGuide' target='_blank'>User Guide</a>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/Tips' target='_blank'>Tips and Tricks</a>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/FAQ' target='_blank'>FAQ</a>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/DeveloperGuide' target='_blank'>Developers Guide</a>" +
+            "</ul>",
+         suffix: "For more information, see the <a href='https://wiki.mozilla.org/Labs/Bespin'>Bespin Wiki</a>."
+    });
+    instruction.addOutput(output);
+};
+
+/**
  * 'alias' command
  */
 exports.aliasCommand = function(env, args, request) {

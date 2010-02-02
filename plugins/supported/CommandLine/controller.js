@@ -53,12 +53,31 @@ exports.cliController = SC.Object.create({
     input: "",
 
     /**
+     * A string, DOM node or (hopefully) SproutCore component that acts as a
+     * hint to completing the command line
+     */
+    hint: "",
+
+    /**
+     * Hack so we can see hints
+     */
+    consoleHint: function() {
+        console.log("hint:", this.hint);
+    },//.observes(".hint"),
+
+    /**
+     * We need to re-parse the CLI whenever the input changes
+     */
+    inputChanges: function() {
+        console.log("input:", this.input);
+    },//.observes(".input"),
+
+    /**
      * Called by the UI to execute a command. Assumes that #input is bound to
      * the CLI input text field.
      */
     exec: function() {
         this.executeCommand(this.get("input"));
-        this.set("input", "");
     },
 
     /**
@@ -75,8 +94,22 @@ exports.cliController = SC.Object.create({
         var parts = tokenizer(typed);
         var cmdArgs = this._splitCommandAndArgs(parts);
 
+        // Check that there is valid meta-data for this command
+        if (!cmdArgs.commandExt) {
+            this.set("hint", "Unknown command");
+            console.log("hint", "Unknown command");
+            return;
+        }
+
+        var self = this;
         this._convertTypes(cmdArgs.commandExt, cmdArgs.remainder, function(args) {
             cmdArgs.commandExt.load(function(command) {
+                // Check the function pointed to in the meta-data exists
+                if (!command) {
+                    self.set("hint", "Command action not found.");
+                    console.log("hint", "Command action not found.");
+                    return;
+                }
 
                 var request = Request.create({
                     command: command,
@@ -87,8 +120,11 @@ exports.cliController = SC.Object.create({
 
                 try {
                     command(env.global, args, request);
+
+                    // Only clear the input if the command worked
+                    self.set("input", "");
                 } catch (ex) {
-                    // TODO: Some UI?
+                    // TODO: Some UI
                     console.group("Error calling command: " + cmdArgs.commandExt.name);
                     console.log("- typed: '", typed, "'");
                     console.log("- arguments: ", args);

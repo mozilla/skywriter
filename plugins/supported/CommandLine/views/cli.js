@@ -81,6 +81,10 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
             });
             console.log("initially setting", path, "to", root.getPath(path));
             updater(root.getPath(path));
+
+            // The stacked view gets confused about how tall it should be...
+            var stack = this.getPath("parentView");
+            stack.updateHeight();
         }).invokeLater(this);
     },
 
@@ -103,14 +107,8 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
                 }
             });
 
-            var historyEle = rowin.begin("div").addClass("cmd_open");
-            var historyId = endWithId(historyEle);
-
-            // Cell for the typed command and the hover
-            var input = rowin.begin("div").addClass("cmd_main");
-
             // The execution time
-            var hover = input.begin("div").addClass("cmd_hover");
+            var hover = rowin.begin("div").addClass("cmd_hover");
             var durationEle = hover.begin("span").addClass("cmd_duration");
             var durationId = endWithId(durationEle);
 
@@ -143,16 +141,19 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
 
             hover.end();
 
+            // Place to put a history marker
+            var openEle = rowin.begin("span").addClass("cmd_open");
+            var openId = endWithId(openEle);
+
             // What the user actually typed
-            var prompt = input.begin("span")
+            var prompt = rowin.begin("span")
                     .addClass("cmd_prompt")
                     .html("> ");
             prompt.end();
 
-            var typedEle = input.begin("span").addClass("cmd_typed");
+            var typedEle = rowin.begin("span").addClass("cmd_typed");
             var typedId = endWithId(typedEle);
 
-            input.end();
             rowin.end();
 
             var rowout = context.begin("div").addClass("cmd_rowout");
@@ -170,13 +171,13 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
             this.link(settings, "historytimemode", function(mode) {
                 if (mode == "history") {
                     // TODO: replace # with invocation id
-                    SC.$("#" + historyId).html("#").addClass("cmd_open_history");
+                    SC.$("#" + openId).html("#").addClass("cmd_open_history");
                 }
                 else if (mode == "time" && start) {
-                    SC.$("#" + historyId).html(formatTime(start)).addClass("cmd_open_time");
+                    SC.$("#" + openId).html(formatTime(start)).addClass("cmd_open_time");
                 }
                 else {
-                    SC.$("#" + historyId).addClass("cmd_open_blank");
+                    SC.$("#" + openId).addClass("cmd_open_blank");
                 }
             });
 
@@ -283,14 +284,14 @@ exports.CliInputView = SC.View.design({
     },
 
     /**
-     * Canon:request#history.invocations has changed, so we need to pop-up the
+     * Canon:request#history.requests has changed, so we need to pop-up the
      * display view
      */
     historyUpdated: function(cliController) {
         // Update the output layer just by hacking the DOM
         var ele = this.getPath("contentView.display.output.contentView.layer");
         this.set("contentHeight", ele.clientHeight);
-    }.observes("Canon:request#history.invocations.[]"),
+    }.observes("Canon:request#history.requests.[]"),
 
     /**
      * Called whenever anything happens that could affect the output display
@@ -300,11 +301,18 @@ exports.CliInputView = SC.View.design({
 
         var height = compactHeight;
         if (pinned || this.get("hasFocus")) {
+            /*
+            // This code should trim the size of the output to only what is
+            // needed. It used to work until we sproutcoreized the output.
+            // There isn't an obvious reason why it should be failing now,
+            // however the easy solution is to just not trim...
             var contentHeight = Math.min(maxHeight, this.get("contentHeight"));
             if (contentHeight > 0) {
                 // TODO: Why 10?
                 height = compactHeight + 10 + contentHeight;
             }
+            */
+            height = maxHeight;
         }
 
         if (this.get("layout").height != height) {
@@ -318,9 +326,10 @@ exports.CliInputView = SC.View.design({
         //   it's not like we've got the same input at end of output
         //   constraints)
         // - The update comes from an instruction minimize/remove
-        var ele = this.getPath("contentView.display.output.contentView.layer");
-        var scrollHeight = Math.max(ele.scrollHeight, ele.clientHeight);
-        ele.scrollTop = scrollHeight - ele.clientHeight;
+        var stack = this.getPath("contentView.display.output.contentView");
+        //var ele = stack.get("layer");
+        //var scrollHeight = Math.max(ele.scrollHeight, ele.clientHeight);
+        //ele.scrollTop = scrollHeight - ele.clientHeight;
     }.observes(
         ".hasFocus", // Open whenever we have the focus
         ".contentHeight", // Resize if visible and content changes height
@@ -388,7 +397,7 @@ exports.CliInputView = SC.View.design({
                 layout: { top: 0, bottom: 0, left: 30, right: 0 },
                 hasHorizontalScroller: NO,
                 contentView: SC.StackedView.design({
-                    contentBinding: "Canon:request#history.invocations.[]",
+                    contentBinding: "Canon:request#history.requests.[]",
                     exampleView: InstructionView
                 })
             }),
