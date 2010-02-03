@@ -172,7 +172,9 @@ exports.cliController = SC.Object.create({
         var done = 0; // Call onConvert when we're done
         if (command.params) {
             command.params.forEach(function(param) {
-                var arg = remainder.length > i ? remainder[i] : null;
+                var d = (param.defaultValue !== undefined) 
+                        ? param.defaultValue : null;
+                var arg = remainder.length > i ? remainder[i] : d;
                 types.fromString(param.type, arg, function(converted) {
                     args[param.name] = converted;
                     done++;

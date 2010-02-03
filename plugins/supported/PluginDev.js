@@ -37,7 +37,21 @@
 
 "define metadata";
 ({
-    "depends": ["BespinServer"]
+    "depends": ["BespinServer"],
+    "provides": [
+        {
+            "ep": "command",
+            "name": "reload",
+            "params": [
+                {
+                    "name": "plugin",
+                    "type": "text"
+                }
+            ],
+            "description": "Reload the named plugin.",
+            "pointer": "#reloadCommand"
+        }
+    ]
 });
 "end";
 
@@ -61,6 +75,17 @@ testNames.forEach(function(name) {
 */
 exports.reload = function(pluginName, callback) {
     pluginCatalog.plugins[pluginName].reload(callback);
+};
+
+exports.reloadCommand = function(env, args, request) {
+    if (!args.plugin) {
+        request.doneWithError("You must provide a plugin name");
+        return;
+    }
+    exports.reload(args.plugin, function() {
+        request.done("Plugin " + args.plugin + " reloaded.");
+    });
+    request.async();
 };
 
 /*
