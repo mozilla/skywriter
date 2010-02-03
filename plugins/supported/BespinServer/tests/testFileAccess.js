@@ -108,8 +108,9 @@ exports.testSaveContents = function() {
     
     var f = root.getObject("myfile.txt");
     
-    var pr = source.saveContents(f);
+    var pr = source.saveContents(f, "new file contents here");
     t.ok(typeof(pr.then) == "function", "expected to get Promise back");
     t.equal(server.method, "PUT");
+    t.equal(server.payload, "new file contents here");
     t.equal(server.url, "/file/at/myfile.txt");
 };

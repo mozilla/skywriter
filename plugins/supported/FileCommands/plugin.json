@@ -46,7 +46,7 @@
             ],
             "description": "save the current contents",
             "key": "meta_s",
-            "pointer": "file#saveCommand"
+            "pointer": "#saveCommand"
         },
         {
             "ep": "command",

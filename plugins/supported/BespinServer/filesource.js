@@ -62,10 +62,10 @@ exports.BespinFileSource = SC.Object.extend({
         });
     },
     
-    saveContents: function(file) {
+    saveContents: function(file, contents) {
         var path = file.get("originPath");
         var url = pathUtil.combine("/file/at/", path);
-        var pr = this.server.request('PUT', url, null);
+        var pr = this.server.request('PUT', url, contents);
         return pr.then(function(contents) {
             return {file: file, contents: contents};
         });

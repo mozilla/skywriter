@@ -61,6 +61,7 @@ exports.Buffer = SC.Object.extend({
     file: function(key, newFile) {
         var self = this;
         if (newFile != undefined) {
+            this._file = newFile;
             newFile.loadContents().then(function(result) {
                 var model = self.get("model");
                 model.set("value", result.contents);
@@ -92,15 +93,23 @@ exports.Buffer = SC.Object.extend({
     },
     
     /*
-    * Normally, you would just call set("file", fileObject) on a Buffer.
-    * However, that will replace the contents of the model (reloading the file), 
-    * which is not always what you want. Use this method to change the
-    * file that is tracked by this Buffer without replacing the contents of the
-    * model.
-    */
+     * Normally, you would just call set("file", fileObject) on a Buffer.
+     * However, that will replace the contents of the model (reloading the file), 
+     * which is not always what you want. Use this method to change the
+     * file that is tracked by this Buffer without replacing the contents of the
+     * model.
+     */
     changeFileOnly: function(newFile) {
         this._file = newFile;
         this.propertyDidChange("file");
+    },
+    
+    /*
+     * Save the contents of this buffer. Returns a promise that resolves
+     * once the file is saved.
+     */
+    save: function() {
+        return this._file.saveContents(this.model.get("value"));
     }
 });
 

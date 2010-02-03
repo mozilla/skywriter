@@ -291,9 +291,9 @@ exports.File = SC.Object.extend({
         return source.loadContents(this);
     },
     
-    saveContents: function() {
+    saveContents: function(newcontents) {
         var source = this.get("source");
-        return source.saveContents(this);
+        return source.saveContents(this, newcontents);
     }
 });
 

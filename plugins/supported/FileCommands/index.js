@@ -101,9 +101,12 @@ exports.mkdirCommand = function(instruction, givenPath) {
 /**
  * 'save' command
  */
-exports.saveCommand = function(instruction, filename) {
-    // TODO: use onSuccess/onFail to report to the instruction
-    editor.saveFile(null, filename);
+exports.saveCommand = function(env, args, request) {
+    var buffer = env.get("buffer");
+    buffer.save().then(function() {
+        request.done("File saved");
+    });
+    request.async();
 };
 
 /**
