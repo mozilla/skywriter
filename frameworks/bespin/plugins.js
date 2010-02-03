@@ -41,6 +41,8 @@ require("globals");
 var builtins = require("builtins");
 var r = require;
 
+var tiki = require.loader;
+
 var object_keys = Object.keys;
 if (!object_keys) {
     object_keys = function(obj) {

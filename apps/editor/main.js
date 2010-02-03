@@ -26,6 +26,8 @@
 
 var catalog = require("bespin:plugins").catalog;
 
+var tiki = require.loader;
+
 main = function() {
     baseurl = window.SERVER_BASE_URL == undefined ? '/server' : SERVER_BASE_URL;
     catalog.loadMetadata(baseurl + "/plugin/register/defaults",
