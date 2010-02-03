@@ -134,7 +134,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
             // And finally draw the line.
             var column = startColumn;
-            while (column < endColumn) {
+            while (column !== null && column < endColumn) {
                 var colorRange = colorRanges[colorIndex];
                 var colorRangeEnd = colorRange.end;
                 context.fillStyle = colorRange.color;
@@ -143,8 +143,12 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
                     row:    row,
                     column: column
                 });
-                context.fillText(characters.substring(column, colorRangeEnd),
-                    characterRect.x, characterRect.y + lineAscent);
+
+                var snippet = colorRangeEnd === null ?
+                    characters.substring(column) :
+                    characters.substring(column, colorRangeEnd);
+                context.fillText(snippet, characterRect.x,
+                    characterRect.y + lineAscent);
 
                 column = colorRangeEnd;
                 colorIndex++;

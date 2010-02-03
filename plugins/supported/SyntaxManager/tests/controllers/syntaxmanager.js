@@ -68,6 +68,16 @@ var attributesMatch = function(syntaxManager, expectedAttributes) {
     return true;
 };
 
+var generateAttributeLine = function() {
+    return [
+        { start: 0,     end: 3,     contexts: null },
+        { start: 3,     end: 5,     contexts: null },
+        { start: 5,     end: 7,     contexts: null },
+        { start: 7,     end: 10,    contexts: null },
+        { start: 10,    end: null,  contexts: null }
+    ];
+};
+
 // Likewise for invalid rows.
 var invalidRowsMatch = function(syntaxManager, expectedInvalidRows) {
     var invalidRows = syntaxManager._invalidRows;
@@ -257,17 +267,7 @@ exports.testInsertRange = function() {
         "the invalid rows are correct after adding the range [ 1,30 2,0 ]");
 };
 
-exports.testUpdateAttributesForRows = function() {
-    var generateAttributeLine = function() {
-        return [
-            { start: 0,     end: 3,     contexts: null },
-            { start: 3,     end: 5,     contexts: null },
-            { start: 5,     end: 7,     contexts: null },
-            { start: 7,     end: 10,    contexts: null },
-            { start: 10,    end: null,  contexts: null }
-        ];
-    };
-
+exports.testRecomputeAttributesForRows = function() {
     var invalidPosition, computedRange;
 
     var syntaxManager = SyntaxManager.create({
@@ -285,35 +285,41 @@ exports.testUpdateAttributesForRows = function() {
     invalidPosition = { row: 0, column: 3 };
     computedRange = { start: 3, end: 9, contexts: null };
     syntaxManager._attributes = [ generateAttributeLine() ];
-    t.ok(syntaxManager._updateAttributesForRows(invalidPosition.row, 0),
-        "_updateAttributesForRows() synced successfully with the computed " +
-        "range [3,9]");
+    t.equal(syntaxManager._recomputeAttributesForRows(invalidPosition.row, 0),
+        1,
+        "the first unchanged row after calling " +
+        "_recomputeAttributesForRows() with the computed range [3,9] and 1");
     t.ok(attributesMatch(syntaxManager, [
             [ [ 0, 3 ], [ 3, 9 ], [ 9, 10 ], [ 10, null ] ]
-        ]), "the attributes are correct after calling " +
-        "_updateAttributesForRows() with the computed range [3,9]");
+        ]),
+        "the attributes are correct after calling " +
+        "_recomputeAttributesForRows() with the computed range [3,9]");
 
     invalidPosition = { row: 0, column: 3 };
     computedRange = { start: 3, end: 4, contexts: null };
     syntaxManager._attributes = [ generateAttributeLine() ];
-    t.ok(syntaxManager._updateAttributesForRows(invalidPosition.row, 0),
-        "_updateAttributesForRows() synced successfully with the computed " +
-        "range [3,4]");
+    t.equal(syntaxManager._recomputeAttributesForRows(invalidPosition.row, 0),
+        1,
+        "the first unchanged row after calling " +
+        "_recomputeAttributesForRows() with the computed range [3,4] and 1");
     t.ok(attributesMatch(syntaxManager, [
             [ [ 0, 3 ], [ 3, 4 ], [ 4, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ]
-        ]), "the attributes are correct after calling " +
-        "_updateAttributesForRows() with the computed range [3,4]");
+        ]),
+        "the attributes are correct after calling " +
+        "_recomputeAttributesForRows() with the computed range [3,4]");
 
     invalidPosition = { row: 0, column: 9 };
     computedRange = { start: 7, end: 10, contexts: null };
     syntaxManager._attributes = [ generateAttributeLine() ];
-    t.ok(syntaxManager._updateAttributesForRows(invalidPosition.row, 0),
-        "_updateAttributesForRows() synced successfully with the computed " +
-        "range [7,10]");
+    t.equal(syntaxManager._recomputeAttributesForRows(invalidPosition.row, 0),
+        1,
+        "the first unchanged row after calling " +
+        "_recomputeAttributesForRows() with the computed range [7,10] and 1");
     t.ok(attributesMatch(syntaxManager, [
             [ [ 0, 3 ], [ 3, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ]
-        ]), "the attributes are correct after calling " +
-        "_updateAttributesForRows() with the computed range [7,10]");
+        ]),
+        "the attributes are correct after calling " +
+        "_recomputeAttributesForRows() with the computed range [7,10]");
 
     invalidPosition = { row: 0, column: 3 };
     computedRange = { start: 3, end: null, contexts: [
@@ -321,39 +327,109 @@ exports.testUpdateAttributesForRows = function() {
     ]};
     syntaxManager._attributes =
         [ generateAttributeLine(), generateAttributeLine() ];
-    t.ok(!syntaxManager._updateAttributesForRows(invalidPosition.row, 0),
-        "_updateAttributesForRows() didn't sync successfully with the " +
+    t.equal(syntaxManager._recomputeAttributesForRows(invalidPosition.row, 0),
+        null,
+        "_recomputeAttributesForRows() didn't sync successfully with the " +
         "computed range [3,-] when limited to the first row");
     t.ok(attributesMatch(syntaxManager, [
             [ [ 0, 3 ], [ 3, null ] ],
             [ [ 0, 3 ], [ 3, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ]
-        ]), "the attributes are correct after calling " +
-        "_updateAttributesForRows() with the computed range [3,-] when " +
+        ]),
+        "the attributes are correct after calling " +
+        "_recomputeAttributesForRows() with the computed range [3,-] when " +
         "limited to the first row");
 
     invalidPosition = { row: 0, column: 3 };
     computedRange = { start: 3, end: 8, contexts: null };
     syntaxManager._attributes =
         [ generateAttributeLine(), generateAttributeLine() ];
-    t.ok(syntaxManager._updateAttributesForRows(invalidPosition.row, 1),
-        "_updateAttributesForRows() synced successfully when run over " +
-        "multiple rows with the computed range [3,8]");
+    t.equal(syntaxManager._recomputeAttributesForRows(invalidPosition.row, 1),
+        1,
+        "the first unchanged row after calling " +
+        "_recomputeAttributesForRows() over multiple rows with the computed " +
+        "range [3,8] and 1");
     t.ok(attributesMatch(syntaxManager, [
             [ [ 0, 3 ], [ 3, 8 ], [ 8, 10 ], [ 10, null ] ],
             [ [ 0, 3 ], [ 3, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ]
         ]), "the attributes are correct after calling " +
-        "updateAttributesForRows() over multiple rows with the computed " +
+        "_recomputeAttributesForRows() over multiple rows with the computed " +
         "range [3,8]");
 
     invalidPosition = { row: 0, column: 5 };
     computedRange = { start: 5, end: null, contexts: null };
     syntaxManager._attributes = [ generateAttributeLine() ];
-    t.ok(syntaxManager._updateAttributesForRows(invalidPosition.row, 0),
-        "_updateAttributesForRows() synced successfully with the computed " +
-        "range [5,-]");
+    t.equal(syntaxManager._recomputeAttributesForRows(invalidPosition.row, 0),
+        1,
+        "the first unchanged row after calling " +
+        "_recomputeAttributesForRows() with the computed range [5,-]");
     t.ok(attributesMatch(syntaxManager, [
             [ [ 0, 3 ], [ 3, 5 ], [ 5, null ] ]
         ]), "the attributes are correct after calling " +
-        "_updateAttributesForRows() with the computed range [5,-]");
+        "_recomputeAttributesForRows() with the computed range [5,-]");
+};
+
+exports.testUpdateSyntaxForRows = function() {
+    var attributes = [];
+    for (var i = 0; i < 5; i++) {
+        attributes.push(generateAttributeLine());
+    }
+
+    var syntaxManager = SyntaxManager.create({
+        textStorage: SC.Object.create({
+            lines: "a b c d e".w()
+        })
+    });
+    syntaxManager._attributes = attributes;
+    syntaxManager._invalidRows = [ 2, 3 ];
+
+    var promise = syntaxManager.updateSyntaxForRows(1, 3);
+    t.ok(!SC.none(promise), "a valid promise was returned when updating the " +
+        "row range [1,3)");
+
+    var finished = false, rowRange;
+
+    var callback = function(rr) {
+        finished = true;
+        rowRange = rr;
+    };
+
+    promise.then(callback);
+    t.ok(finished, "the operation completed synchronously when updating the " +
+        "row range [1,3)");
+    t.equal(rowRange.startRow, 1, "the start row returned with the promise " +
+        "when updating the row range [1,3) and 1");
+    t.equal(rowRange.endRow, 3, "the end row returned with the promise when " +
+        "updating the row range [1,3) and 3");
+
+    t.ok(attributesMatch(syntaxManager, [
+            [ [ 0, 3 ], [ 3, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ],
+            [ [ 0, 3 ], [ 3, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ],
+            [ [ 0, null ] ],
+            [ [ 0, 3 ], [ 3, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ],
+            [ [ 0, 3 ], [ 3, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ]
+        ]),
+        "the attributes are correct after updating the row range [1,3)");
+
+    promise = syntaxManager.updateSyntaxForRows(0, 5);
+    t.ok(!SC.none(promise), "a valid promise was returned when updating the " +
+        "entire row range");
+
+    finished = false;
+    promise.then(callback);
+    t.ok(finished, "the operation completed synchronously when updating the " +
+        "entire row range");
+    t.equal(rowRange.startRow, 0, "the start row returned with the promise " +
+        "when updating the entire row range and 0");
+    t.equal(rowRange.endRow, 5, "the end row returned with the promise when " +
+        "updating the entire row range and 5");
+
+    t.ok(attributesMatch(syntaxManager, [
+            [ [ 0, 3 ], [ 3, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ],
+            [ [ 0, 3 ], [ 3, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ],
+            [ [ 0, null ] ],
+            [ [ 0, null ] ],
+            [ [ 0, null ] ]
+        ]),
+        "the attributes are correct after updating the entire row range");
 };
 

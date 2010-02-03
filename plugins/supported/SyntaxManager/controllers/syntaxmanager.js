@@ -37,6 +37,7 @@
 
 var SC = require('sproutcore/runtime').SC;
 var ArrayUtils = require('utils/array');
+var Promise = require('promise').Promise;
 var Range = require('RangeUtils:utils/range');
 
 /**
@@ -300,26 +301,11 @@ exports.SyntaxManager = SC.Object.extend({
         }
     },
 
-    // If the position is in the middle of a range, splits the range in two.
-    _splitAttributesAtPosition: function(position) {
-        var row = position.row, column = position.column;
-        var lineAttributes = this._attributes[row];
-        var index = this._getAttributeIndexForPosition(position);
-        var attributeRange = lineAttributes[index];
-        var start = attributeRange.start, end = attributeRange.end;
-
-        if (column > start && (end === null || column < end)) {
-            lineAttributes.splice(index, 1,
-                { start: start,     end: column,    contexts: null },
-                { start: column,    end: end,       contexts: null });
-            return { row: row, column: start };
-        }
-    },
-
-    // Runs the syntax highlighters. Returns false if the highlighting stopped
-    // due to reaching the end of the range or true if the highlighting was
-    // successfully synchronized within the range.
-    _updateAttributesForRows: function(startRow, endRow) {
+    // Runs the syntax highlighters. Returns the first unchanged row (i.e. the
+    // row immediately following the row where the synchronization happened),
+    // or null if the highlighting failed to synchronize before the end of the
+    // range.
+    _recomputeAttributesForRows: function(startRow, endRow) {
         var attributes = this._attributes;
         var lines = this.getPath('textStorage.lines');
 
@@ -338,7 +324,8 @@ exports.SyntaxManager = SC.Object.extend({
                 if (row !== startRow &&
                     this._attributeRangesEqual(oldAttributeRange,
                     computedAttributeRange)) {
-                    return true;    // successfully synchronized
+                    // Successfully synchronized!
+                    return index === 0 ? row : row + 1;
                 }
 
                 lineAttributes.splice(index, 0, computedAttributeRange);
@@ -367,7 +354,34 @@ exports.SyntaxManager = SC.Object.extend({
             }
         }
 
-        return row === attributes.length;
+        // If we got to the end of the buffer, then that's a successful
+        // synchronization. Otherwise, it's not.
+        return row === attributes.length ? row : null;
+    },
+
+    // If the position is in the middle of a range, splits the range in two.
+    _splitAttributesAtPosition: function(position) {
+        var row = position.row, column = position.column;
+        var lineAttributes = this._attributes[row];
+        var index = this._getAttributeIndexForPosition(position);
+        var attributeRange = lineAttributes[index];
+        var start = attributeRange.start, end = attributeRange.end;
+
+        if (column > start && (end === null || column < end)) {
+            lineAttributes.splice(index, 1,
+                { start: start,     end: column,    contexts: null },
+                { start: column,    end: end,       contexts: null });
+            return { row: row, column: start };
+        }
+    },
+
+    /**
+     * Returns the attributed text currently in the cache for the given range
+     * of rows. To ensure that the text returned by this method is up to date,
+     * updateSyntaxForRows() should be called first.
+     */
+    attributedTextForRows: function(startRow, endRow) {
+        return this._attributes.slice(startRow, endRow);
     },
 
     /**
@@ -390,41 +404,6 @@ exports.SyntaxManager = SC.Object.extend({
      * The character data is read from this text storage instance.
      */
     textStorage: null,
-
-    /**
-     * Returns the attributed text for the given inclusive range of rows.
-     *
-     * @return The attributed lines of text.
-     */
-    attributedTextForRows: function(startRow, endRow) {
-        var invalidRows = this._invalidRows;
-        var index = ArrayUtils.binarySearch(invalidRows,
-            { start: startRow, end: endRow },
-            function(rowRange, invalidRow) {
-                if (rowRange.start < invalidRow) {
-                    return -1;
-                }
-                if (rowRange.end > invalidRow) {
-                    return 1;
-                }
-                return 0;
-            });
-
-        if (index !== null) {
-            var invalidRow = invalidRows[index];
-
-            while (index < invalidRows.length && invalidRows[index] <=
-                    endRow) {
-                invalidRows.splice(index, 1);
-            }
-
-            if (!this._updateAttributesForRows(invalidRow, endRow)) {
-                this._invalidateRow(endRow + 1);
-            }
-        }
-
-        return this._attributes.slice(startRow, endRow + 1);
-    },
 
     init: function() {
         this._attributes = [
@@ -463,6 +442,47 @@ exports.SyntaxManager = SC.Object.extend({
                 }).join());
             }).join(),
             this._invalidRows.join());
+    },
+
+    /**
+     * Runs the syntax highlighters as necessary on the rows within the given
+     * range and returns a promise to return the range of changed rows.
+     */
+    updateSyntaxForRows: function(startRow, endRow) {
+        var invalidRows = this._invalidRows;
+        var invalidRowCount = invalidRows.length;
+        var index;
+        for (index = 0; index < invalidRowCount; index++) {
+            var invalidRow = invalidRows[index];
+            if (invalidRow >= startRow && invalidRow < endRow) {
+                break;
+            }
+        }
+
+        var promise = new Promise();
+        var firstUnchangedRow;
+
+        if (index === invalidRowCount) {
+            firstUnchangedRow = startRow; // nothing to do
+        } else {
+            var invalidRow = invalidRows[index];
+
+            // Remove any invalid rows within the range we're about to update.
+            while (index < invalidRows.length && invalidRows[index] < endRow) {
+                invalidRows.splice(index, 1);
+            }
+
+            // Recompute the attributes for the appropriate rows.
+            firstUnchangedRow = this._recomputeAttributesForRows(invalidRow,
+                endRow - 1);
+            if (firstUnchangedRow === null) {
+                this._invalidateRow(endRow);
+                firstUnchangedRow = endRow;
+            }
+        }
+
+        promise.resolve({ startRow: startRow, endRow: firstUnchangedRow });
+        return promise;
     }
 });
 

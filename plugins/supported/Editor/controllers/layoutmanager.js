@@ -159,37 +159,61 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
 
         var lines = this.getPath('textStorage.lines');
         var theme = this.get('theme');
-
-        var attributedText = this.get('syntaxManager').
-            attributedTextForRows(oldStartRow, newEndRow);
+        var plainColor = theme.editorTextColor_plain;
 
         var newTextLines = [];
         for (var i = 0; i < newRowCount; i++) {
             var line = lines[oldStartRow + i];
             newTextLines[i] = {
                 characters: line,
-                colors: attributedText[i].map(function(range) {
-                    var rangeEnd = range.end;
+                colors: [ { start: 0, end: null, color: plainColor } ]
+            };
+        }
+
+        this.textLines.replace(oldStartRow, oldEndRow - oldStartRow + 1,
+            newTextLines);
+        this._recalculateMaximumWidth();
+
+        var invalidRects = this._computeInvalidRects(oldRange, newRange);
+        this.notifyDelegates('layoutManagerInvalidatedRects', invalidRects);
+
+        var thisLayoutManager = this;
+        this.get('syntaxManager').
+            updateSyntaxForRows(oldStartRow, newEndRow + 1).
+            then(function(startRow, endRow) {
+                thisLayoutManager._syntaxManagerUpdatedSyntaxForRows(startRow,
+                    endRow);
+            });
+    },
+
+    _syntaxManagerUpdatedSyntaxForRows: function(startRow, endRow) {
+        if (startRow === endRow) {
+            return;
+        }
+
+        var textLines = this.get('textLines');
+
+        var attributedText = this.get('syntaxManager').
+            attributedTextForRows(startRow, endRow);
+        for (var i = 0; i < attributedText.length; i++) {
+            textLines[startRow + i].colors =
+                attributedText[i].map(function(range) {
                     var contexts = range.contexts;
                     var tag = contexts === null ? 'plain' :
                         contexts[contexts.length - 1].tag;
                     var color = theme["editorTextColor_" + tag];
                     return {
                         start:  range.start,
-                        end:    rangeEnd !== null ? rangeEnd : line.length,
+                        end:    range.end,
                         color:  color
                     };
-                })
-            };
+                });
         }
 
-        this.textLines.replace(oldStartRow, oldEndRow - oldStartRow + 1,
-            newTextLines);
-
-        this._recalculateMaximumWidth();
-
-        var invalidRects = this._computeInvalidRects(oldRange, newRange);
-        this.notifyDelegates('layoutManagerInvalidatedRects', invalidRects);
+        var start = { row: startRow, column: 0 };
+        var end = { row: endRow, column: 0 };
+        this.notifyDelegates('layoutManagerInvalidatedRects',
+            this.rectsForRange({ start: start, end: end }));
     },
 
     /**
