@@ -485,6 +485,13 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     padding: { bottom: 0, right: 0 },
 
     /**
+     * @property{number}
+     *
+     * The width of a tab.
+     */
+    tabStop: 8,
+
+    /**
      * @property
      *
      * The theme to use.
@@ -843,8 +850,15 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     tab: function() {
-        this._insertText("        ".substring(0,
-                8 - this._selectedRange.start.column % 8));
+        var tabStop = this.get('tabStop');
+        var count = tabStop - this._selectedRange.start.column % tabStop;
+
+        var str = "";
+        for (var i = 0; i < count; i++) {
+            str += " ";
+        }
+
+        this._insertText(str);
     },
 
     textInserted: function(text) {
