@@ -37,7 +37,7 @@
 
 var SC = require("sproutcore/runtime").SC;
 var catalog = require("bespin:plugins").catalog;
-var Promise = require("promise").Promise;
+var Promise = require("Promise:core/promise").Promise;
 
 exports.MockInstruction = SC.Object.extend({
     init: function() {

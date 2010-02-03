@@ -25,7 +25,7 @@
 var t = require("PluginDev");
 var fs = require("Filesystem");
 var SC = require("sproutcore/runtime").SC;
-var Promise = require("promise").Promise;
+var Promise = require("Promise:core/promise").Promise;
 var filesource = require("filesource");
 
 var DummyServer = SC.Object.extend({

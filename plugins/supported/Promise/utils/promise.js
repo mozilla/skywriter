@@ -35,30 +35,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime").SC;
-var Promise = require("Promise:core/promise").Promise;
-var server = require("BespinServer").server;
-var pathUtil = require("Filesystem:path");
+require('sproutcore/runtime');
 
-exports.BespinFileSource = SC.Object.extend({
-    server: server,
-    
-    loadDirectory: function(directory) {
-        var path = directory.get("originPath");
-        var url = pathUtil.combine('/file/list/', path || '/');
-        var opts = {
-            evalJSON: true,
-            log: "Listing files in: " + url
-        };
-        return this.server.request('GET', url, null, opts);
-    },
-    
-    loadContents: function(file) {
-        var path = file.get("originPath");
-        var url = pathUtil.combine("/file/at/", path);
-        var pr = this.server.request('GET', url, null);
-        return pr.then(function(contents) {
-            return {file: file, contents: contents};
-        });
-    }
-});
+exports.valueIfResolved = function(promise) {
+    var value = null;
+    promise.then(function(v) { value = v; });
+    return value;
+};
+

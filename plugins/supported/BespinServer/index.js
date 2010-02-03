@@ -39,7 +39,7 @@ var bespin = require("bespin");
 var util = require("bespin:util/util");
 var cookie = require("bespin:util/cookie");
 var SC = require("sproutcore/runtime").SC;
-var Promise = require("promise").Promise;
+var Promise = require("Promise:core/promise").Promise;
 
 /**
  * The Server object implements the Bespin Server API (See

@@ -37,7 +37,7 @@
 
 var SC = require('sproutcore/runtime').SC;
 var ArrayUtils = require('utils/array');
-var Promise = require('promise').Promise;
+var Promise = require('Promise:core/promise').Promise;
 var Range = require('RangeUtils:utils/range');
 
 /**

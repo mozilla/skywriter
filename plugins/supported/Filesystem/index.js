@@ -25,7 +25,7 @@
 var SC = require("sproutcore/runtime").SC;
 var util = require("bespin:util/util");
 var pathUtil = require("path");
-var Promise = require("promise").Promise;
+var Promise = require("Promise:core/promise").Promise;
 
 var NEW = exports.NEW = {name: "NEW"};
 var LOADING = exports.LOADING = {name: "LOADING"};

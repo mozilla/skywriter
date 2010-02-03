@@ -7,10 +7,10 @@
 
 // A typical usage:
 // A default Promise constructor can be used to create a self-resolving deferred/promise:
-// var Promise = require("promise").Promise;
+// var Promise = require("Promise:core/promise").Promise;
 //    var promise = new Promise();
 // asyncOperation(function(){
-//    Promise.resolve("succesful result");
+//    Promise.resolve("successful result");
 // });
 //    promise -> given to the consumer
 //
@@ -25,25 +25,21 @@
 // Alternately, a provider can create a deferred and resolve it when it completes an action.
 // The deferred object a promise object that provides a separation of consumer and producer to protect
 // promises from being fulfilled by untrusted code.
-// var defer = require("promise").defer;
+// var defer = require("Promise:core/promise").defer;
 //    var deferred = defer();
 // asyncOperation(function(){
-//    deferred.resolve("succesful result");
+//    deferred.resolve("successful result");
 // });
 //    deferred.promise -> given to the consumer
 //
 //    Another way that a consumer can use the promise (using promise.then is also allowed)
-// var when = require("promise").when;
+// var when = require("Promise:core/promise").when;
 // when(promise,function(result){
 //        ... when the action is complete this is executed ...
 //   },
 //   function(error){
 //        ... executed when the promise fails
 //  });
-
-"define metadata";
-({});
-"end";
 
 try {
     var enqueue = require("event-queue").enqueue;

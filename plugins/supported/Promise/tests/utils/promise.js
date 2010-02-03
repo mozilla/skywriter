@@ -35,30 +35,20 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime").SC;
-var Promise = require("Promise:core/promise").Promise;
-var server = require("BespinServer").server;
-var pathUtil = require("Filesystem:path");
+require('sproutcore/runtime');
+var Promise = require('core/promise').Promise;
+var PromiseUtils = require('utils/promise');
+var t = require('PluginDev');
 
-exports.BespinFileSource = SC.Object.extend({
-    server: server,
-    
-    loadDirectory: function(directory) {
-        var path = directory.get("originPath");
-        var url = pathUtil.combine('/file/list/', path || '/');
-        var opts = {
-            evalJSON: true,
-            log: "Listing files in: " + url
-        };
-        return this.server.request('GET', url, null, opts);
-    },
-    
-    loadContents: function(file) {
-        var path = file.get("originPath");
-        var url = pathUtil.combine("/file/at/", path);
-        var pr = this.server.request('GET', url, null);
-        return pr.then(function(contents) {
-            return {file: file, contents: contents};
-        });
-    }
-});
+exports.testValueIfResolved = function() {
+    var promise = new Promise();
+    t.equal(PromiseUtils.valueIfResolved(promise), null,
+        "the result of calling valueIfResolved() on the promise before the " +
+        "promise is resolved and null");
+    promise.resolve('foo');
+    t.equal(PromiseUtils.valueIfResolved(promise), 'foo',
+        "the result of calling valueIfResolved() on the promise after the " +
+        "promise is resolved with a value and the value the promise was " +
+        "resolved with");
+};
+
