@@ -41,7 +41,7 @@ var types = require("Types:types");
 var Request = require("Canon:request").Request;
 var catalog = require("bespin:plugins").catalog;
 
-var tokenizer = catalog.getObject("tokenizer");
+var tokenizer = require("tokenizer").tokenizer;
 
 /**
  * Command line controller.

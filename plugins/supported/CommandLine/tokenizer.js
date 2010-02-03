@@ -36,10 +36,30 @@
  * ***** END LICENSE BLOCK ***** */
 
 /**
- * A function to split a typed string into an array of strings.
- * The initial implementation is string.split, however we expect to add an
- * understanding of escape characters and quoting to this basic implementation.
+ * Split up the input taking into account ' and "
  */
-exports.tokenize = function(string) {
-    return string.split();
+exports.tokenizer = function(incoming) {
+    incoming = incoming.split(" ");
+    var tokens = [];
+
+    var nextToken;
+    while (nextToken = incoming.shift()) {
+        if (nextToken[0] == '"' || nextToken[0] == "'") { // it's quoting time
+            var eaten = [ nextToken.substring(1, nextToken.length) ];
+            var eataway;
+            while (eataway = incoming.shift()) {
+                if (eataway[eataway.length - 1] == '"' || eataway[eataway.length - 1] == "'") { // end quoting time
+                    eaten.push(eataway.substring(0, eataway.length - 1));
+                    break;
+                } else {
+                    eaten.push(eataway);
+                }
+            }
+            tokens.push(eaten.join(' '));
+        } else {
+            tokens.push(nextToken);
+        }
+    }
+
+    return tokens;
 };

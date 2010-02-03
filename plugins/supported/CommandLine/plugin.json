@@ -9,12 +9,6 @@
         },
         {
             "ep": "factory",
-            "name": "tokenizer",
-            "action": "value",
-            "pointer": "tokenizer#tokenize"
-        },
-        {
-            "ep": "factory",
             "name": "history",
             "action": "create",
             "pointer": "history#InMemoryHistory"
