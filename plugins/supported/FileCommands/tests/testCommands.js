@@ -29,6 +29,7 @@ var DummyFileSource = require("Filesystem:tests/fixture").DummyFileSource;
 var Environment = require("Canon:tests/fixture").MockEnvironment;
 var Request = require("Canon:tests/fixture").MockRequest;
 var FileCommands = require("FileCommands");
+var EditSession = require("EditSession");
 
 var source = exports.source = DummyFileSource.create({
     files: [
@@ -60,5 +61,28 @@ exports.testFilesCommand = function() {
     });
     
     FileCommands.filesCommand(env, {path: "/"}, request);
+    t.stop();
+};
+
+exports.testFilesCommandDefaultsToRoot = function() {
+    var root = getNewRoot();
+    var buffer = EditSession.Buffer.create();
+    var session = EditSession.EditSession.create({
+        currentBuffer: buffer
+    });
+    var env = Environment.create({
+        files: root,
+        session: session
+    });
+    request = Request.create();
+    request.promise.then(function() {
+        output = request.outputs.join("");
+        t.ok(output.indexOf("foo/<br/>") > -1, "foo/ should be in output");
+        t.ok(output.indexOf("atTheTop.js<br/>") > -1, 
+            "atTheTop.js should be in output");
+        t.start();
+    });
+    
+    FileCommands.filesCommand(env, {path: null}, request);
     t.stop();
 };

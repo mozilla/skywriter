@@ -116,6 +116,10 @@ exports.trimLeadingSlash = function(path) {
     return path;
 };
 
+exports.hasLeadingSlash = function(path) {
+    return path.indexOf('/') == 0;
+};
+
 /**
  * This function returns a file type based on the extension
  * (foo.html -&gt; html)

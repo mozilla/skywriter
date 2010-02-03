@@ -42,10 +42,17 @@ var pathUtil = require("Filesystem:path");
  */
 exports.filesCommand = function(env, args, request) {
     var path = args.path;
+    
+    // TODO this should actually work relative to the current file,
+    // and revert to / if there is no current file
+    if (path == null) {
+        path = "/";
+    }
+    
     if (!pathUtil.isDir(path)) {
         path += "/";
     }
-
+    
     env.get("files").loadPath(path).then(function(dir) {
         var files = "";
         var contents = dir.get("contents");

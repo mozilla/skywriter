@@ -10,8 +10,7 @@
                 {
                     "name": "path",
                     "type": "text",
-                    "description": "list files relative to current file, or start with /projectname",
-                    "defaultValue": "/"
+                    "description": "list files relative to current file, or start with /projectname"
                 }
             ],
             "aliases": [ "ls", "list" ],
