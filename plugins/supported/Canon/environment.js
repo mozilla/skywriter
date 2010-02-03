@@ -47,14 +47,14 @@ var catalog = require("bespin:plugins").catalog;
  */
 exports.Environment = SC.Object.extend({
     /**
-    * Retrieves the EditSession
-    */
+     * Retrieves the EditSession
+     */
     session: function() {
         return catalog.getObject("session");
     }.property(),
 
     /**
-    * gets the currentView from the session.
+     * Gets the currentView from the session.
      */
     view: function() {
         var session = this.get("session");
@@ -78,10 +78,10 @@ exports.Environment = SC.Object.extend({
         }
         return session.get("currentBuffer").get("model");
     }.property(),
-    
-    /*
-    * The current Buffer from the session
-    */
+
+    /**
+     * The current Buffer from the session
+     */
     buffer: function() {
         var session = this.get("session");
         if (!session) {
@@ -90,11 +90,11 @@ exports.Environment = SC.Object.extend({
         }
         return session.get("currentBuffer");
     }.property(),
-    
-    /*
-    * If files are available, this will get them. Perhaps we need some other
-    * mechanism for populating these things from the catalog?
-    */
+
+    /**
+     * If files are available, this will get them. Perhaps we need some other
+     * mechanism for populating these things from the catalog?
+     */
     files: function() {
         return catalog.getObject("files");
     }.property().cacheable()

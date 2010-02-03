@@ -101,12 +101,10 @@ div.cmd_view .cmd_hover .cmd_duration {
 div.cmd_view div.cmd_rowout div.cmd_output { padding-left: 10px; }
 div.cmd_view div.cmd_rowout div.cmd_error { color: #f99; }
 /* table.cmd_table tr.cmd_rowout th { text-align: left; } */
-div.cmd_view div.cmd_rowout a { font-weight: bold; color: inherit;
-  text-decoration: none;
-}
-div.cmd_view div.cmd_rowout a:hover { text-decoration: underline;
-  cursor: pointer;
-}
+
+div.cmd_line a { font-weight: bold; color: inherit; text-decoration: none; }
+div.cmd_line a:hover { text-decoration: underline; cursor: pointer; }
+
 div.cmd_view input[type=password], div.cmd_view input[type=text],
 div.cmd_view textarea {
   font-family: Calibri,Arial,sans-serif; background: transparent;

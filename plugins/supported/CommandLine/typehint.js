@@ -37,44 +37,39 @@
 
 var catalog = require("bespin:plugins").catalog;
 var Promise = require("Promise:core/promise").Promise;
+var types = require("Types:types");
 
 /**
- * Convert some data from a string to another type as specified by
- * <tt>typeSpec</tt>.
- * TODO: convert to promise
+ * Asynchronously find a UI component to match a typeSpec
  */
-exports.fromString = function(typeSpec, stringVersion, onConvert) {
-    var typeExt = exports.getTypeExt(typeSpec);
+exports.getHint = function(typeData) {
+    var promise = new Promise();
+    var hintEle;
+
+    var typeExt = exports.getTypeExt(typeData.type);
+    if (!typeExt) {
+        hintEle = createDefaultHint(typeData.description);
+        promise.resolve(hintEle);
+        return promise;
+    }
+
     typeExt.load(function(type) {
-        var originalVersion = type.fromString(stringVersion, typeExt);
-        onConvert(originalVersion);
+        if (typeof type.getHint === "function") {
+            hintEle = type.getHint(typeData.description, typeExt);
+        } else {
+            hintEle = createDefaultHint(typeData.description);
+        }
+        promise.resolve(hintEle);
     });
+    return promise;
 };
 
 /**
- * Convert some data from an original type to a string as specified by
- * <tt>typeSpec</tt>.
- * TODO: convert to promise
+ * If there isn't a typehint to define a hint UI component then we just use the
+ * default - a simple text node containing the description.
  */
-exports.toString = function(typeSpec, originalVersion, onConvert) {
-    var typeExt = exports.getTypeExt(typeSpec);
-    typeExt.load(function(type) {
-        var stringVersion = type.toString(originalVersion, typeExt);
-        onConvert(stringVersion);
-    });
-};
-
-/**
- * Convert some data from an original type to a string as specified by
- * <tt>typeSpec</tt>.
- * TODO: convert to promise
- */
-exports.isValid = function(typeSpec, originalVersion, onValidated) {
-    var typeExt = exports.getTypeExt(typeSpec);
-    typeExt.load(function(type) {
-        var valid = type.isValid(originalVersion, typeExt);
-        onValidated(valid);
-    });
+var createDefaultHint = function(description) {
+    return document.createTextNode(description);
 };
 
 /**
@@ -88,14 +83,18 @@ exports.getTypeExt = function(typeSpec) {
     if (typeof typeSpec === "string") {
         var parts = typeSpec.split(":");
         if (parts.length === 1) {
-            typeExt = catalog.getExtensionByKey("type", typeSpec);
+            typeExt = catalog.getExtensionByKey("typehint", typeSpec);
         } else {
-            typeExt = catalog.getExtensionByKey("type", parts.shift());
-            typeExt.data = JSON.parse(parts.join(":"));
+            typeExt = catalog.getExtensionByKey("typehint", parts.shift());
+            if (typeExt) {
+                typeExt.data = JSON.parse(parts.join(":"));
+            }
         }
     } else if (typeof typeSpec === "object") {
-        typeExt = catalog.getExtensionByKey("type", typeSpec.name);
-        typeExt.data = typeSpec.data;
+        typeExt = catalog.getExtensionByKey("typehint", typeSpec.name);
+        if (typeExt) {
+            typeExt.data = typeSpec.data;
+        }
     }
     return typeExt;
 };

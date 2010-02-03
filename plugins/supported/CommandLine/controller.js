@@ -38,6 +38,7 @@
 var SC = require("sproutcore/runtime").SC;
 var env = require("Canon:environment");
 var types = require("Types:types");
+var typehint = require("typehint");
 var Request = require("Canon:request").Request;
 var catalog = require("bespin:plugins").catalog;
 
@@ -80,10 +81,16 @@ exports.cliController = SC.Object.create({
             // search again for aliases, and then again for hidden commands
 
             // The prefix can't be completed into a command, so it's wrong
-            hintPromise = types.getHint("text", "No commands available");
+            hintPromise = typehint.getHint({
+                type: "text",
+                description: "No commands available"
+            });
         }
         else if (cmdExts.length === 1) {
-            hintPromise = types.getHint("text", "Only option: " + cmdExts[0].name);
+            hintPromise = typehint.getHint({
+                type: "text",
+                description: "Only option: " + cmdExts[0].name
+            });
         }
         else {
             var options = [];
@@ -91,8 +98,10 @@ exports.cliController = SC.Object.create({
                 options.push(cmdExt.name);
             }.bind(this));
 
-            var typeSpec = { name: "selection", data: options };
-            hintPromise = types.getHint(typeSpec, "Commands: ");
+            hintPromise = typehint.getHint({
+                type: { name: "selection", data: options },
+                description: "Commands: "
+            });
         }
 
         hintPromise.then(function(hint) {
@@ -223,6 +232,10 @@ exports.cliController = SC.Object.create({
      */
     _commandMatches: function(commandExt, parts) {
         if (!commandExt.description) {
+            return false;
+        }
+
+        if (commandExt.hidden) {
             return false;
         }
 

@@ -1,6 +1,7 @@
 {
-    "depends": [ "Canon" ],
-    "provides": [
+    "depends": [ "Canon", "Promise", "Types" ],
+    "provides":
+    [
         {
             "ep": "factory",
             "name": "commandline",
@@ -90,6 +91,18 @@
             "description": "has",
             "hidden": true,
             "pointer": "basiccommands#bespinCommand"
+        },
+        {
+            "ep": "extensionpoint",
+            "name": "typehint",
+            "description": "A function to allow the command line to show a hint to the user on how they should finish what they're typing",
+            "indexOn": "name"
+        },
+        {
+            "ep": "typehint",
+            "name": "selection",
+            "description": "A string that is constrained to be one of a number of pre-defined values",
+            "pointer": "views/basic#selection"
         }
     ]
 }

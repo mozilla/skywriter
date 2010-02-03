@@ -35,6 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var SC = require("sproutcore/runtime").SC;
+var cliController = require("controller").cliController;
+
 /**
  * These are the basic types that we accept. They are vaguely based on the
  * Jetpack settings system (https://wiki.mozilla.org/Labs/Jetpack/JEP/24)
@@ -57,6 +60,16 @@ exports.text = {
 
     fromString: function(value, typeExt) {
         return value;
+    },
+
+    /**
+     * There isn't a lot we can do to help someone type in a string, so we just
+     * return a text node with the description in it.
+     * TODO: This isn't very MVC. Maybe we should have another level of
+     * indirection.
+     */
+    getHint: function(description, typeExt) {
+        return document.createTextNode(description);
     }
 };
 
@@ -126,5 +139,37 @@ exports.selection = {
 
     fromString: function(value, typeExt) {
         return JSON.parse(value);
+    },
+
+    /**
+     * There isn't a lot we can do to help someone type in a string, so we just
+     * return a text node with the description in it.
+     * TODO: This isn't very MVC. Maybe we should have another level of
+     * indirection.
+     */
+    getHint: function(description, typeExt) {
+        if (typeExt.data == null) {
+            throw "Missing options for selection";
+        }
+        var parent = document.createElement("div");
+        parent.appendChild(document.createTextNode(description));
+        var index = 0;
+        typeExt.data.forEach(function(option) {
+            if (index !== 0) {
+                parent.appendChild(document.createTextNode(", "));
+            }
+            var link = document.createElement("a");
+            link.setAttribute("href", "javascript:;");
+            link.appendChild(document.createTextNode(option));
+            link.addEventListener("click", function(ev) {
+                SC.run(function() {
+                    cliController.set("input", option + " ");
+                });
+            }, false);
+            parent.appendChild(link);
+            index++;
+        }.bind(this));
+
+        return parent;
     }
 };
