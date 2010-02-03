@@ -867,6 +867,10 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         } else {
             this._insertText(text);
         }
+    },
+    
+    focus: function() {
+      this.focusTextInput();
     }
 });
 

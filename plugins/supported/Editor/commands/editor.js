@@ -42,11 +42,15 @@ var settings = require("bespin:plugins").catalog.getObject("settings");
  * 'goto' command
  */
 exports.gotoCommand = function(env, args, request) {
-    if (args.value) {
-        var linenum = parseInt(args.value, 10);
-        editor.moveAndCenter(linenum);
-        editor.focus();
-    }
+  if (args.value) {
+    var textView = env.get("view");
+    textView._moveCursorTo({
+            row: args.value - 1,
+            column: 0
+        });
+    textView.focus();
+  }
+  
 };
 
 /**
