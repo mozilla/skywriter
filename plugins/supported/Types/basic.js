@@ -47,16 +47,26 @@
  * 'text' is the default if no type is given.
  */
 exports.text = {
-    isValid: function(value) {
+    isValid: function(value, typeExt) {
         return typeof value == "string";
     },
 
-    toString: function(value) {
+    toString: function(value, typeExt) {
         return value;
     },
 
-    fromString: function(value) {
+    fromString: function(value, typeExt) {
         return value;
+    },
+
+    /**
+     * There isn't a lot we can do to help someone type in a string, so we just
+     * return a text node with the description in it.
+     * TODO: This isn't very MVC. Maybe we should have another level of
+     * indirection.
+     */
+    getHint: function(description, typeExt) {
+        return document.createTextNode(description);
     }
 };
 
@@ -65,15 +75,15 @@ exports.text = {
  * JavaScript damnit!
  */
 exports.number = {
-    isValid: function(value) {
+    isValid: function(value, typeExt) {
         return typeof value == "number";
     },
 
-    toString: function(value) {
+    toString: function(value, typeExt) {
         return "" + value;
     },
 
-    fromString: function(value) {
+    fromString: function(value, typeExt) {
         return parseInt(value, 10);
     }
 };
@@ -82,15 +92,15 @@ exports.number = {
  * true/false values
  */
 exports.boolean = {
-    isValid: function(value) {
+    isValid: function(value, typeExt) {
         return typeof value == "boolean";
     },
 
-    toString: function(value) {
+    toString: function(value, typeExt) {
         return "" + value;
     },
 
-    fromString: function(value) {
+    fromString: function(value, typeExt) {
         return !!value;
     }
 };
@@ -99,15 +109,45 @@ exports.boolean = {
  * TODO: Check to see how this works out.
  */
 exports.object = {
-    isValid: function(value) {
+    isValid: function(value, typeExt) {
         return typeof value == "object";
     },
 
-    toString: function(value) {
+    toString: function(value, typeExt) {
         return JSON.stringify(value);
     },
 
-    fromString: function(value) {
+    fromString: function(value, typeExt) {
         return JSON.parse(value);
+    }
+};
+
+/**
+ * TODO: Check to see how this works out.
+ */
+exports.selection = {
+    isValid: function(value, typeExt) {
+        return typeof value == "object";
+    },
+
+    toString: function(value, typeExt) {
+        return JSON.stringify(value);
+    },
+
+    fromString: function(value, typeExt) {
+        return JSON.parse(value);
+    },
+
+    /**
+     * There isn't a lot we can do to help someone type in a string, so we just
+     * return a text node with the description in it.
+     * TODO: This isn't very MVC. Maybe we should have another level of
+     * indirection.
+     */
+    getHint: function(description, typeExt) {
+        if (typeExt.data == null) {
+            throw "Missing options for selection";
+        }
+        return document.createTextNode(description + typeExt.data.join(", "));
     }
 };

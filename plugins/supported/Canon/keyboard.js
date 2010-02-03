@@ -86,7 +86,7 @@ var KeyboardManager = SC.Object.extend({
      * matches according to #_commandMatches, and return that.
      */
     _findCommandExtension: function(symbolicName, flags) {
-        var commandExts = catalog.getExtensions('command');
+        var commandExts = catalog.getExtensions("command");
         var reply = null;
         commandExts.some(function(commandExt) {
             if (this._commandMatches(commandExt, symbolicName, flags)) {

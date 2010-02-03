@@ -36,39 +36,86 @@
  * ***** END LICENSE BLOCK ***** */
 
 var catalog = require("bespin:plugins").catalog;
+var Promise = require("Promise:core/promise").Promise;
 
 /**
  * Convert some data from a string to another type as specified by
- * <tt>type</tt>.
+ * <tt>typeSpec</tt>.
+ * TODO: convert to promise
  */
-exports.fromString = function(typeName, stringVersion, onConvert) {
-    var typeExt = catalog.getExtensionByKey("type", typeName);
+exports.fromString = function(typeSpec, stringVersion, onConvert) {
+    var typeExt = getTypeExt(typeSpec);
     typeExt.load(function(type) {
-        var originalVersion = type.fromString(stringVersion);
+        var originalVersion = type.fromString(stringVersion, typeExt);
         onConvert(originalVersion);
     });
 };
 
 /**
  * Convert some data from an original type to a string as specified by
- * <tt>type</tt>.
+ * <tt>typeSpec</tt>.
+ * TODO: convert to promise
  */
-exports.toString = function(typeName, originalVersion, onConvert) {
-    var typeExt = catalog.getExtensionByKey("type", typeName);
+exports.toString = function(typeSpec, originalVersion, onConvert) {
+    var typeExt = getTypeExt(typeSpec);
     typeExt.load(function(type) {
-        var stringVersion = type.toString(originalVersion);
+        var stringVersion = type.toString(originalVersion, typeExt);
         onConvert(stringVersion);
     });
 };
 
 /**
  * Convert some data from an original type to a string as specified by
- * <tt>type</tt>.
+ * <tt>typeSpec</tt>.
+ * TODO: convert to promise
  */
-exports.isValid = function(typeName, originalVersion, onValidated) {
-    var typeExt = catalog.getExtensionByKey("type", typeName);
+exports.isValid = function(typeSpec, originalVersion, onValidated) {
+    var typeExt = getTypeExt(typeSpec);
     typeExt.load(function(type) {
-        var valid = type.isValid(originalVersion);
+        var valid = type.isValid(originalVersion, typeExt);
         onValidated(valid);
     });
+};
+
+/**
+ * Asynchronously find a UI component to match a typeSpec
+ */
+exports.getHint = function(typeSpec, description) {
+    var promise = new Promise();
+    var typeExt = getTypeExt(typeSpec);
+    typeExt.load(function(type) {
+        if (typeof type.getHint === "function") {
+            var hint = type.getHint(description, typeExt);
+            promise.resolve(hint);
+        } else {
+            // If the type doesn't define a hint UI component then we just
+            // use the default - a simple text node containing the description.
+            var node = document.createTextNode(description);
+            promise.resolve(node);
+        }
+    });
+    return promise;
+};
+
+/**
+ * typeSpec one of:
+ * "typename",
+ * "typename:json" e.g. 'selection:["one", "two", "three"]'
+ * { name:"typename", data:... } e.g. { name:"selection", data:["one", "two", "three"] }
+ */
+var getTypeExt = function(typeSpec) {
+    var typeExt;
+    if (typeof typeSpec === "string") {
+        var parts = typeSpec.split(":");
+        if (parts.length === 1) {
+            typeExt = catalog.getExtensionByKey("type", typeSpec);
+        } else {
+            typeExt = catalog.getExtensionByKey("type", parts.shift());
+            typeExt.data = JSON.parse(parts.join(":"));
+        }
+    } else if (typeof typeSpec === "object") {
+        typeExt = catalog.getExtensionByKey("type", typeSpec.name);
+        typeExt.data = typeSpec.data;
+    }
+    return typeExt;
 };

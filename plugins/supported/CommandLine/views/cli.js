@@ -369,7 +369,7 @@ exports.CliInputView = SC.View.design({
     /**
      * We have reason to believe that a blur event shouldn't happen
      * @param {String} reason For debugging we (where we can) declare why we
-     * are cancelling the blur action
+     * are canceling the blur action
      */
     _cancelBlur: function(reason) {
         // console.log("_cancelBlur", arguments);
@@ -378,6 +378,25 @@ exports.CliInputView = SC.View.design({
             this._blurTimeout = null;
         }
     },
+
+    /**
+     * Sync the hint manually so we can also alter the sizes of the hint and
+     * output components to make it fit properly.
+     */
+    hintUpdated: function() {
+        var hint = cliController.get("hint");
+        var hintEle = this.getPath("contentView.display.hint.layer");
+        while(hintEle.firstChild) {
+            hintEle.removeChild(hintEle.firstChild);
+        }
+
+        if (typeof hint === "string") {
+            var hintNode = document.createTextNode(hint);
+            hintEle.appendChild(hintNode);
+        } else {
+            hintEle.appendChild(hint);
+        }
+    }.observes("CommandLine:controller#cliController.hint"),
 
     /**
      * There's no good reason for having this contentView - the childViews could
@@ -390,16 +409,20 @@ exports.CliInputView = SC.View.design({
 
         display: SC.View.design({
             layout: { top: 0, bottom: 25, left: 0, right: 0 },
-            childViews: [ "output", "toolbar" ],
+            childViews: [ "output", "hint", "toolbar" ],
 
             output: SC.ScrollView.design({
                 classNames: [ "cmd_view" ],
-                layout: { top: 0, bottom: 0, left: 30, right: 0 },
+                layout: { top: 0, bottom: 25, left: 30, right: 0 },
                 hasHorizontalScroller: NO,
                 contentView: SC.StackedView.design({
                     contentBinding: "Canon:request#history.requests.[]",
                     exampleView: InstructionView
                 })
+            }),
+
+            hint: SC.View.design({
+                layout: { height: 25, bottom: 0, left: 30, right: 0 }
             }),
 
             toolbar: SC.View.design({

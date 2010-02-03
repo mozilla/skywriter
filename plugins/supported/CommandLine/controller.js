@@ -58,19 +58,47 @@ exports.cliController = SC.Object.create({
      */
     hint: "",
 
-    /**
-     * Hack so we can see hints
-     */
-    consoleHint: function() {
-        console.log("hint:", this.hint);
-    },//.observes(".hint"),
+    hintChanges: function() {
+        console.log("hint", this.hint);
+    }.observes(".hint"),
 
     /**
      * We need to re-parse the CLI whenever the input changes
      */
     inputChanges: function() {
-        console.log("input:", this.input);
-    },//.observes(".input"),
+        if (this.input == "") {
+            this.set("hint", "Type a command, see 'help' for available commands.");
+            return;
+        }
+
+        var parts = tokenizer(this.input);
+        var cmdExts = this._findMatchingCommandExtensions(parts);
+        var hintPromise;
+
+        if (cmdExts.length === 0) {
+            // TODO: Before we assume that this is an error, we ought to
+            // search again for aliases, and then again for hidden commands
+
+            // The prefix can't be completed into a command, so it's wrong
+            hintPromise = types.getHint("text", "No commands available");
+        }
+        else if (cmdExts.length === 1) {
+            hintPromise = types.getHint("text", "Only option: " + cmdExts[0].name);
+        }
+        else {
+            var options = [];
+            cmdExts.forEach(function(cmdExt) {
+                options.push(cmdExt.name);
+            }.bind(this));
+
+            var typeSpec = { name: "selection", data: options };
+            hintPromise = types.getHint(typeSpec, "Commands: ");
+        }
+
+        hintPromise.then(function(hint) {
+            this.set("hint", hint);
+        }.bind(this));
+    }.observes(".input"),
 
     /**
      * Called by the UI to execute a command. Assumes that #input is bound to
@@ -97,7 +125,6 @@ exports.cliController = SC.Object.create({
         // Check that there is valid meta-data for this command
         if (!cmdArgs.commandExt) {
             this.set("hint", "Unknown command");
-            console.log("hint", "Unknown command");
             return;
         }
 
@@ -107,7 +134,6 @@ exports.cliController = SC.Object.create({
                 // Check the function pointed to in the meta-data exists
                 if (!command) {
                     self.set("hint", "Command action not found.");
-                    console.log("hint", "Command action not found.");
                     return;
                 }
 
@@ -172,5 +198,37 @@ exports.cliController = SC.Object.create({
             commandExt: catalog.getExtensionByKey("command", initial),
             remainder: parts
         };
+    },
+
+    /**
+     * Loop through the commands in the canon, looking for something that
+     * matches according to #_commandMatches, and return that.
+     */
+    _findMatchingCommandExtensions: function(parts) {
+        var commandExts = catalog.getExtensions("command");
+        var matches = [];
+        commandExts.some(function(commandExt) {
+            if (this._commandMatches(commandExt, parts)) {
+                matches.push(commandExt);
+            }
+        }.bind(this));
+        return matches;
+    },
+
+    /**
+     * Does the typed command match this command extension.
+     * TODO: upgrade for sub-commands
+     */
+    _commandMatches: function(commandExt, parts) {
+        if (!commandExt.description) {
+            return false;
+        }
+
+        var prefix = commandExt.name.substring(0, parts[0].length);
+        if (prefix !== parts[0]) {
+            return false;
+        }
+
+        return true;
     }
 });
