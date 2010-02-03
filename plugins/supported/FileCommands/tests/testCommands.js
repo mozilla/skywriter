@@ -26,7 +26,8 @@ var t = require("PluginDev");
 
 var fs = require("Filesystem");
 var DummyFileSource = require("Filesystem:tests/fixture").DummyFileSource;
-var Instruction = require("Canon:tests/fixture").MockInstruction;
+var Environment = require("Canon:tests/fixture").MockEnvironment;
+var Request = require("Canon:tests/fixture").MockRequest;
 var FileCommands = require("FileCommands");
 
 var source = exports.source = DummyFileSource.create({
@@ -46,16 +47,18 @@ var getNewRoot = function() {
 
 exports.testFilesCommand = function() {
     var root = getNewRoot();
-    var inst = Instruction.create({
+    var env = Environment.create({
         files: root
     });
-    inst.promise.then(function(output) {
+    request = Request.create();
+    request.promise.then(function() {
+        output = request.outputs.join("");
         t.ok(output.indexOf("foo/<br/>") > -1, "foo/ should be in output");
         t.ok(output.indexOf("atTheTop.js<br/>") > -1, 
             "atTheTop.js should be in output");
         t.start();
     });
     
-    FileCommands.filesCommand(inst, {path: "/"});
+    FileCommands.filesCommand(env, {path: "/"}, request);
     t.stop();
 };

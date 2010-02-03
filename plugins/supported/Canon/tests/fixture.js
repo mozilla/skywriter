@@ -38,17 +38,23 @@
 var SC = require("sproutcore/runtime").SC;
 var catalog = require("bespin:plugins").catalog;
 var Promise = require("Promise:core/promise").Promise;
+var Request = require("request").Request;
 
-exports.MockInstruction = SC.Object.extend({
+exports.MockEnvironment = SC.Object.extend({
+});
+
+exports.MockRequest = Request.extend({
     init: function() {
         this.set("promise", new Promise());
     },
     
-    addOutput: function(output) {
-        this.promise.resolve(output);
+    doneWithError: function(errorMessage) {
+        this.superclass(errorMessage);
+        this.promise.reject(this);
     },
     
-    addError: function(error) {
-        this.promise.reject(error);
+    done: function(content) {
+        this.superclass(content);
+        this.promise.resolve(this);
     }
 });
