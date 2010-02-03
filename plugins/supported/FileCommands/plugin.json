@@ -45,7 +45,7 @@
                 }
             ],
             "description": "save the current contents",
-            "withKey": "CMD S",
+            "key": "meta_s",
             "pointer": "file#saveCommand"
         },
         {

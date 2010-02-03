@@ -288,8 +288,12 @@ exports.File = SC.Object.extend({
         
     loadContents: function() {
         var source = this.get("source");
-        var self = this;
         return source.loadContents(this);
+    },
+    
+    saveContents: function() {
+        var source = this.get("source");
+        return source.saveContents(this);
     }
 });
 

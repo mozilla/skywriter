@@ -94,3 +94,22 @@ exports.testLoadContents = function() {
     });
     t.stop();
 };
+
+exports.testSaveContents = function() {
+    var server = DummyServer.create({
+    });
+    var source = filesource.BespinFileSource.create({
+        server: server
+    });
+    
+    var root = fs.Directory.create({
+        source: source
+    });
+    
+    var f = root.getObject("myfile.txt");
+    
+    var pr = source.saveContents(f);
+    t.ok(typeof(pr.then) == "function", "expected to get Promise back");
+    t.equal(server.method, "PUT");
+    t.equal(server.url, "/file/at/myfile.txt");
+};
