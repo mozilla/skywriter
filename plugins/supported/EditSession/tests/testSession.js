@@ -40,6 +40,7 @@ var DummyFileSource = require("Filesystem:tests/fixture").DummyFileSource;
 var fs = require("Filesystem");
 var TextStorage = require("Editor:models/textstorage").TextStorage;
 var editsession = require("EditSession");
+var Promise = require("Promise").Promise;
 
 var source = DummyFileSource.create({
     files: [
@@ -63,12 +64,13 @@ exports.testBufferFileChange = function() {
     t.equal("", buffer.get("model").get("value"), "Should be empty now");
     buffer.changeFileOnly(null);
     buffer.set("file", f);
+    var pr = new Promise();
     setTimeout(function() {
         var newtext = buffer.get("model").get("value");
         t.equal(newtext, "the top file", "Expected file contents to be loaded");
-        t.start();
+        pr.resolve();
     }, 1);
-    t.stop();
+    return pr;
 };
 
 exports.testBufferFileChangeWithCallback = function() {
@@ -78,10 +80,12 @@ exports.testBufferFileChangeWithCallback = function() {
     var buffer = editsession.Buffer.create();
     f = root.getObject("atTheTop.js");
     var pr = buffer.changeFile(f);
-    pr.then(function(b) {
+    var testpr = pr.then(function(b) {
         t.equal(b, buffer, "should have gotten the buffer object in");
         t.equal(b.get("model").get("value"), "the top file", "contents should be loaded");
-        t.start();
+        if (testpr != undefined) {
+            testpr.resolve();
+        }
     });
-    t.stop();
+    return testpr;
 };

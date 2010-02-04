@@ -322,12 +322,15 @@ def build_docs(options):
 @needs(["hidefiles"])
 def sc_build(options):
     """Create a sproutcore-snapshot from SproutCore source."""
+    builddir = options.builddir
+    
+    (builddir / "production").rmtree()
+    
     try:
         sh("abbot/bin/sc-build -rc editor")
     finally:
         resetfiles()
 
-    builddir = options.builddir
     
     snapshot = path("sproutcore")
     snapshot.rmtree()

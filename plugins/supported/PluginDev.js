@@ -56,7 +56,8 @@
 "end";
 
 var core_test = require("core_test");
-var test = require("core_test:system/test");
+var assert = require("core_test:assert");
+var test = require("core_test:test");
 var server = require("BespinServer").server;
 var pluginCatalog = require("bespin:plugins").catalog;
 
@@ -64,10 +65,10 @@ var pluginCatalog = require("bespin:plugins").catalog;
 // test interface used by plugins.
 
 var testNames = [ "test", "ok", "equal", "notEqual", "deepEqual",
-    "strictEqual", "throws", "start", "stop" ];
+    "strictEqual", "throws", "doesNotThrow" ];
 
 testNames.forEach(function(name) {
-    exports[name] = core_test[name];
+    exports[name] = assert[name];
 });
 
 /*

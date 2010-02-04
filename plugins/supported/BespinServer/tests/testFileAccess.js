@@ -25,7 +25,7 @@
 var t = require("PluginDev");
 var fs = require("Filesystem");
 var SC = require("sproutcore/runtime").SC;
-var Promise = require("Promise:core/promise").Promise;
+var Promise = require("Promise").Promise;
 var filesource = require("filesource");
 
 var DummyServer = SC.Object.extend({
@@ -58,15 +58,16 @@ exports.testLoadDirectory = function() {
     });
     
     var pr = source.loadDirectory(root);
-    console.log(pr);
     t.ok(typeof(pr.then) == "function", "expected to get Promise back");
     t.equal(server.method, "GET");
     t.equal(server.url, "/file/list/");
-    pr.then(function(data) {
+    var testpr = pr.then(function(data) {
         t.equal(data[0].name, "foo.js", "expected dummy data passed through");
-        t.start();
+        if (undefined != testpr) {
+            testpr.resolve();
+        }
     });
-    t.stop();
+    return testpr;
 };
 
 exports.testLoadContents = function() {
@@ -87,12 +88,14 @@ exports.testLoadContents = function() {
     t.ok(typeof(pr.then) == "function", "expected to get Promise back");
     t.equal(server.method, "GET");
     t.equal(server.url, "/file/at/myfile.txt");
-    pr.then(function(data) {
+    var testpr = pr.then(function(data) {
         t.equal(data.file, f, "expected same file back");
         t.equal(data.contents, "This is the exciting data in the file.");
-        t.start();
+        if (testpr != undefined) {
+            testpr.resolve();
+        }
     });
-    t.stop();
+    return testpr;
 };
 
 exports.testSaveContents = function() {
