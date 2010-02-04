@@ -97,10 +97,12 @@ div.cmd_view .cmd_hover .cmd_duration {
 }
 
 
-
 div.cmd_view div.cmd_rowout div.cmd_output { padding-left: 10px; }
 div.cmd_view div.cmd_rowout div.cmd_error { color: #f99; }
-/* table.cmd_table tr.cmd_rowout th { text-align: left; } */
+div.cmd_view div.cmd_rowout th { text-align: right; vertical-align: top; }
+div.cmd_view div.cmd_rowout td,
+div.cmd_view div.cmd_rowout th,
+div.cmd_view div.cmd_rowout table { border: 0; padding: 1px 4px; }
 
 div.cmd_line a { font-weight: bold; color: inherit; text-decoration: none; }
 div.cmd_line a:hover { text-decoration: underline; cursor: pointer; }

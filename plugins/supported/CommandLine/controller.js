@@ -36,12 +36,15 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
-var env = require("Canon:environment");
-var types = require("Types:types");
-var typehint = require("typehint");
-var Request = require("Canon:request").Request;
 var catalog = require("bespin:plugins").catalog;
 
+var Promise = require("Promise:core/promise").Promise;
+var groupPromises = require("Promise:core/promise").group;
+var types = require("Types:types");
+var env = require("Canon:environment");
+var Request = require("Canon:request").Request;
+
+var typehint = require("typehint");
 var tokenizer = require("tokenizer").tokenizer;
 
 /**
@@ -138,7 +141,8 @@ exports.cliController = SC.Object.create({
         }
 
         var self = this;
-        this._convertTypes(cmdArgs.commandExt, cmdArgs.remainder).then(function(args) {
+        var conversion = this._convertTypes(cmdArgs.commandExt, cmdArgs.remainder);
+        conversion.then(function(args) {
             cmdArgs.commandExt.load(function(command) {
                 // Check the function pointed to in the meta-data exists
                 if (!command) {
@@ -200,11 +204,14 @@ exports.cliController = SC.Object.create({
                 argOutputs[param.name] = converted;
             });
             convertPromises.push(convertPromise);
-        });
+        }.bind(this));
 
-        Promise.group(convertPromises).then(function(converted) {
-            onConvert(argOutputs);
+        var reply = new Promise();
+        var group = groupPromises(convertPromises);
+        group.then(function() {
+            reply.resolve(argOutputs);
         });
+        return reply;
     },
 
     /**

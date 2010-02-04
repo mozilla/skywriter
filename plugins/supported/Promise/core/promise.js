@@ -375,7 +375,8 @@ exports.group = function(group){
 	if(!(group instanceof Array)){
 		group = Array.prototype.slice.call(arguments);
 	}
-	var fulfilled, length = group.length;
+	var fulfilled = 0;
+	var length = group.length;
 	var results = [];
 	group.forEach(function(promise, index){
 		exports.when(promise, function(value){
