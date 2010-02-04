@@ -39,6 +39,7 @@ var SC = require('sproutcore/runtime').SC;
 var ArrayUtils = require('utils/array');
 var Promise = require('Promise:core/promise').Promise;
 var Range = require('RangeUtils:utils/range');
+var Yield = require('utils/yield');
 
 /**
  * @class
@@ -119,7 +120,9 @@ exports.SyntaxManager = SC.Object.extend({
     // Calls out to the appropriate syntax highlighter, or the default if the
     // highlighter hasn't been loaded yet.
     _computeAttributeRange: function(line, column, contexts) {
-        return this._defaultAttributeRange(column, contexts);
+        var promise = new Promise();
+        promise.resolve(this._defaultAttributeRange(column, contexts));
+        return promise;
     },
 
     _contextsBeforeRow: function(row) {
@@ -308,55 +311,92 @@ exports.SyntaxManager = SC.Object.extend({
     _recomputeAttributesForRows: function(startRow, endRow) {
         var attributes = this._attributes;
         var lines = this.getPath('textStorage.lines');
-
         var contexts = this._contextsBeforeRow(startRow);
-        for (var row = startRow; row <= endRow; row++) {
-            var lineAttributes = attributes[row];
-            for (var index = 0; index < lineAttributes.length; index++) {
-                var oldAttributeRange = lineAttributes[index];
-
-                var line = lines[row];
-                var computedAttributeRange = this._computeAttributeRange(line,
-                    oldAttributeRange.start, contexts);
-
-                contexts = computedAttributeRange.contexts;
-
-                if (row !== startRow &&
-                    this._attributeRangesEqual(oldAttributeRange,
-                    computedAttributeRange)) {
-                    // Successfully synchronized!
-                    return index === 0 ? row : row + 1;
+        var row = startRow;
+        var self = this;
+        return Yield.loop(function(promise) {           // row cond()
+                if (row <= endRow) {
+                    return true;
                 }
 
-                lineAttributes.splice(index, 0, computedAttributeRange);
+                // We succeeded only if we got to the end of the buffer.
+                promise.resolve(row === attributes.length ? row : false);
+                return false;
+            },
+            function() {                                // row exec()
+                var index = 0;
+                return Yield.loop(function(promise) {   // column cond()
+                        if (index < attributes[row].length) {
+                            return true;
+                        }
 
-                // Delete any overwritten attribute ranges.
-                var computedEnd = computedAttributeRange.end;
-                var deletedEnd = null;
-                while (index + 1 < lineAttributes.length) {
-                    var nextAttributeRange = lineAttributes[index+1];
-                    var nextStart = nextAttributeRange.start;
-                    if (computedEnd !== null &&
-                            nextAttributeRange.start >= computedEnd) {
-                        break;
-                    }
+                        promise.resolve(false);
+                        return false;
+                    },
+                    function() {                        // column exec()
+                        return self._computeAttributeRange(lines[row],
+                            attributes[row][index].start, contexts);
+                    },
+                    function(value, promise) {          // column next()
+                        var computedAttrRange = value;
 
-                    deletedEnd = nextAttributeRange.end;
-                    lineAttributes.splice(index + 1, 1);
+                        // Advance the contexts.
+                        contexts = computedAttrRange.contexts;
+
+                        var oldAttrRange = attributes[row][index];
+                        if (row !== startRow && self.
+                                _attributeRangesEqual(oldAttrRange,
+                                computedAttrRange)) {
+                            // Successfully synchronized!
+                            var lastModifiedRow = index === 0 ? row : row + 1;
+                            promise.resolve(lastModifiedRow);
+                            return false;
+                        }
+
+                        self._replaceAttributeRange(row, index,
+                            computedAttrRange);
+
+                        index++;
+                        return true;
+                    });
+            },
+            function(value, promise) {                  // row next()
+                if (value !== false) {
+                    // Successfully synchronized.
+                    promise.resolve(value);
+                    return false;
                 }
 
-                // Insert blank attributes to fill the space.
-                if (computedEnd !== null && (deletedEnd === null ||
-                        (deletedEnd !== null && computedEnd < deletedEnd))) {
-                    lineAttributes.splice(index + 1, 0, { start: computedEnd,
-                        end: deletedEnd, contexts: null });
-                }
+                row++;
+                return true;
+            });
+    },
+
+    _replaceAttributeRange: function(row, index, newAttributeRange) {
+        var lineAttributes = this._attributes[row];
+        lineAttributes.splice(index, 0, newAttributeRange);
+
+        // Delete any overwritten attribute ranges.
+        var computedEnd = newAttributeRange.end;
+        var deletedEnd = null;
+        while (index + 1 < lineAttributes.length) {
+            var nextAttributeRange = lineAttributes[index+1];
+            var nextStart = nextAttributeRange.start;
+            if (computedEnd !== null &&
+                    nextAttributeRange.start >= computedEnd) {
+                break;
             }
+
+            deletedEnd = nextAttributeRange.end;
+            lineAttributes.splice(index + 1, 1);
         }
 
-        // If we got to the end of the buffer, then that's a successful
-        // synchronization. Otherwise, it's not.
-        return row === attributes.length ? row : null;
+        // Insert blank attributes to fill the space.
+        if (computedEnd !== null && (deletedEnd === null ||
+                (deletedEnd !== null && computedEnd < deletedEnd))) {
+            lineAttributes.splice(index + 1, 0, { start: computedEnd,
+                end: deletedEnd, contexts: null });
+        }
     },
 
     // If the position is in the middle of a range, splits the range in two.
@@ -460,10 +500,10 @@ exports.SyntaxManager = SC.Object.extend({
         }
 
         var promise = new Promise();
-        var firstUnchangedRow;
 
         if (index === invalidRowCount) {
-            firstUnchangedRow = startRow; // nothing to do
+            // Nothing to do.
+            promise.resolve({ startRow: startRow, endRow: startRow });
         } else {
             var invalidRow = invalidRows[index];
 
@@ -473,15 +513,21 @@ exports.SyntaxManager = SC.Object.extend({
             }
 
             // Recompute the attributes for the appropriate rows.
-            firstUnchangedRow = this._recomputeAttributesForRows(invalidRow,
-                endRow - 1);
-            if (firstUnchangedRow === null) {
-                this._invalidateRow(endRow);
-                firstUnchangedRow = endRow;
-            }
+            var self = this;
+            this._recomputeAttributesForRows(invalidRow, endRow - 1).
+                then(function(firstUnchangedRow) {
+                    if (firstUnchangedRow === null) {
+                        self._invalidateRow(endRow);
+                        firstUnchangedRow = endRow;
+                    }
+
+                    promise.resolve({
+                        startRow:   startRow,
+                        endRow:     firstUnchangedRow
+                    });
+                });
         }
 
-        promise.resolve({ startRow: startRow, endRow: firstUnchangedRow });
         return promise;
     }
 });

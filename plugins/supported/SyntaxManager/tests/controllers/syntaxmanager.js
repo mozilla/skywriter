@@ -36,6 +36,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var Promise = require('Promise:core/promise').Promise;
+var PromiseUtils = require('Promise:utils/promise');
 var Range = require('RangeUtils:utils/range');
 var SyntaxManager = require('controllers/syntaxmanager').SyntaxManager;
 var TextStorage = require('Editor:models/textstorage').TextStorage;
@@ -87,6 +89,140 @@ var invalidRowsMatch = function(syntaxManager, expectedInvalidRows) {
         }
     }
     return true;
+};
+
+var testRecomputeAttributesForRows = function(async) {
+    var invalidPosition, computedRange;
+
+    var attributeRangePromise;
+    var syntaxManager = SyntaxManager.create({
+        _computeAttributeRange: function(line, column, state) {
+            attributeRangePromise = new Promise();
+            if (column !== computedRange.start) {
+                var lineAttrs = this._attributes[0];
+                var attrRange = lineAttrs[this._getAttributeIndexForPosition({
+                        row:    0,
+                        column: column
+                    })];
+                attributeRangePromise.resolve(attrRange);
+            } else if (!async) {
+                attributeRangePromise.resolve(computedRange);
+            }
+            return attributeRangePromise;
+        },
+
+        textStorage: TextStorage.create()
+    });
+
+    var testSynchronicity = function(endRow, format) {
+        var promise = syntaxManager._recomputeAttributesForRows(invalidPosition.
+            row, endRow);
+        var firstUnchangedRow = PromiseUtils.valueIfResolved(promise);
+        if (async) {
+            t.ok(firstUnchangedRow === null, format.fmt("didn't complete"));
+            attributeRangePromise.resolve(computedRange);
+
+            firstUnchangedRow = PromiseUtils.valueIfResolved(promise);
+        }
+
+        t.ok(firstUnchangedRow !== null, format.fmt(async ?
+            "completed asynchronously" : "completed synchronously"));
+
+        return firstUnchangedRow;
+    };
+
+    invalidPosition = { row: 0, column: 3 };
+    computedRange = { start: 3, end: 9, contexts: null };
+    syntaxManager._attributes = [ generateAttributeLine() ];
+    var firstUnchangedRow = testSynchronicity(0,
+        "_recomputeAttributesForRows() %@ with the computed range [3,9]");
+    t.equal(firstUnchangedRow, 1,
+        "the first unchanged row after calling " +
+        "_recomputeAttributesForRows() with the computed range [3,9] and 1");
+    t.ok(attributesMatch(syntaxManager, [
+            [ [ 0, 3 ], [ 3, 9 ], [ 9, 10 ], [ 10, null ] ]
+        ]),
+        "the attributes are correct after calling " +
+        "_recomputeAttributesForRows() with the computed range [3,9]");
+
+    invalidPosition = { row: 0, column: 3 };
+    computedRange = { start: 3, end: 4, contexts: null };
+    syntaxManager._attributes = [ generateAttributeLine() ];
+    firstUnchangedRow = testSynchronicity(0,
+        "_recomputeAttributesForRows() %@ with the computed range [3,4]");
+    t.equal(firstUnchangedRow, 1,
+        "the first unchanged row after calling " +
+        "_recomputeAttributesForRows() with the computed range [3,4] and 1");
+    t.ok(attributesMatch(syntaxManager, [
+            [ [ 0, 3 ], [ 3, 4 ], [ 4, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ]
+        ]),
+        "the attributes are correct after calling " +
+        "_recomputeAttributesForRows() with the computed range [3,4]");
+
+    invalidPosition = { row: 0, column: 9 };
+    computedRange = { start: 7, end: 10, contexts: null };
+    syntaxManager._attributes = [ generateAttributeLine() ];
+    firstUnchangedRow = testSynchronicity(0,
+        "_recomputeAttributesForRows() %@ with the computed range [7,10]");
+    t.equal(firstUnchangedRow, 1,
+        "the first unchanged row after calling " +
+        "_recomputeAttributesForRows() with the computed range [7,10] and 1");
+    t.ok(attributesMatch(syntaxManager, [
+            [ [ 0, 3 ], [ 3, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ]
+        ]),
+        "the attributes are correct after calling " +
+        "_recomputeAttributesForRows() with the computed range [7,10]");
+
+    invalidPosition = { row: 0, column: 3 };
+    computedRange = { start: 3, end: null, contexts: [
+        { context: 'foo', state: 'bar', tag: 'baz' }
+    ]};
+    syntaxManager._attributes =
+        [ generateAttributeLine(), generateAttributeLine() ];
+    firstUnchangedRow = testSynchronicity(0,
+        "_recomputeAttributesForRows() %@ with the computed range [7,10] " +
+        "when limited to the first row");
+    t.equal(firstUnchangedRow, false,
+        "_recomputeAttributesForRows() didn't sync successfully with the " +
+        "computed range [3,-] when limited to the first row");
+    t.ok(attributesMatch(syntaxManager, [
+            [ [ 0, 3 ], [ 3, null ] ],
+            [ [ 0, 3 ], [ 3, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ]
+        ]),
+        "the attributes are correct after calling " +
+        "_recomputeAttributesForRows() with the computed range [3,-] when " +
+        "limited to the first row");
+
+    invalidPosition = { row: 0, column: 3 };
+    computedRange = { start: 3, end: 8, contexts: null };
+    syntaxManager._attributes =
+        [ generateAttributeLine(), generateAttributeLine() ];
+    firstUnchangedRow = testSynchronicity(1,
+        "_recomputeAttributesForRows() over multiple rows %@ with the " +
+        "computed range [3,8]");
+    t.equal(firstUnchangedRow, 1,
+        "the first unchanged row after calling " +
+        "_recomputeAttributesForRows() over multiple rows with the computed " +
+        "range [3,8] and 1");
+    t.ok(attributesMatch(syntaxManager, [
+            [ [ 0, 3 ], [ 3, 8 ], [ 8, 10 ], [ 10, null ] ],
+            [ [ 0, 3 ], [ 3, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ]
+        ]), "the attributes are correct after calling " +
+        "_recomputeAttributesForRows() over multiple rows with the computed " +
+        "range [3,8]");
+
+    invalidPosition = { row: 0, column: 5 };
+    computedRange = { start: 5, end: null, contexts: null };
+    syntaxManager._attributes = [ generateAttributeLine() ];
+    firstUnchangedRow = testSynchronicity(0,
+        "_recomputeAttributesForRows() with the computed ranges [5,-]");
+    t.equal(firstUnchangedRow, 1,
+        "the first unchanged row after calling " +
+        "_recomputeAttributesForRows() with the computed range [5,-]");
+    t.ok(attributesMatch(syntaxManager, [
+            [ [ 0, 3 ], [ 3, 5 ], [ 5, null ] ]
+        ]), "the attributes are correct after calling " +
+        "_recomputeAttributesForRows() with the computed range [5,-]");
 };
 
 exports.testDeleteRange = function() {
@@ -267,108 +403,15 @@ exports.testInsertRange = function() {
         "the invalid rows are correct after adding the range [ 1,30 2,0 ]");
 };
 
-exports.testRecomputeAttributesForRows = function() {
-    var invalidPosition, computedRange;
-
-    var syntaxManager = SyntaxManager.create({
-        _computeAttributeRange: function(line, column, state) {
-            if (column === invalidPosition.column) {
-                return computedRange;
-            }
-            return this._attributes[0][this.
-                _getAttributeIndexForPosition({ row: 0, column: column })];
-        },
-
-        textStorage: TextStorage.create()
-    });
-
-    invalidPosition = { row: 0, column: 3 };
-    computedRange = { start: 3, end: 9, contexts: null };
-    syntaxManager._attributes = [ generateAttributeLine() ];
-    t.equal(syntaxManager._recomputeAttributesForRows(invalidPosition.row, 0),
-        1,
-        "the first unchanged row after calling " +
-        "_recomputeAttributesForRows() with the computed range [3,9] and 1");
-    t.ok(attributesMatch(syntaxManager, [
-            [ [ 0, 3 ], [ 3, 9 ], [ 9, 10 ], [ 10, null ] ]
-        ]),
-        "the attributes are correct after calling " +
-        "_recomputeAttributesForRows() with the computed range [3,9]");
-
-    invalidPosition = { row: 0, column: 3 };
-    computedRange = { start: 3, end: 4, contexts: null };
-    syntaxManager._attributes = [ generateAttributeLine() ];
-    t.equal(syntaxManager._recomputeAttributesForRows(invalidPosition.row, 0),
-        1,
-        "the first unchanged row after calling " +
-        "_recomputeAttributesForRows() with the computed range [3,4] and 1");
-    t.ok(attributesMatch(syntaxManager, [
-            [ [ 0, 3 ], [ 3, 4 ], [ 4, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ]
-        ]),
-        "the attributes are correct after calling " +
-        "_recomputeAttributesForRows() with the computed range [3,4]");
-
-    invalidPosition = { row: 0, column: 9 };
-    computedRange = { start: 7, end: 10, contexts: null };
-    syntaxManager._attributes = [ generateAttributeLine() ];
-    t.equal(syntaxManager._recomputeAttributesForRows(invalidPosition.row, 0),
-        1,
-        "the first unchanged row after calling " +
-        "_recomputeAttributesForRows() with the computed range [7,10] and 1");
-    t.ok(attributesMatch(syntaxManager, [
-            [ [ 0, 3 ], [ 3, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ]
-        ]),
-        "the attributes are correct after calling " +
-        "_recomputeAttributesForRows() with the computed range [7,10]");
-
-    invalidPosition = { row: 0, column: 3 };
-    computedRange = { start: 3, end: null, contexts: [
-        { context: 'foo', state: 'bar', tag: 'baz' }
-    ]};
-    syntaxManager._attributes =
-        [ generateAttributeLine(), generateAttributeLine() ];
-    t.equal(syntaxManager._recomputeAttributesForRows(invalidPosition.row, 0),
-        null,
-        "_recomputeAttributesForRows() didn't sync successfully with the " +
-        "computed range [3,-] when limited to the first row");
-    t.ok(attributesMatch(syntaxManager, [
-            [ [ 0, 3 ], [ 3, null ] ],
-            [ [ 0, 3 ], [ 3, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ]
-        ]),
-        "the attributes are correct after calling " +
-        "_recomputeAttributesForRows() with the computed range [3,-] when " +
-        "limited to the first row");
-
-    invalidPosition = { row: 0, column: 3 };
-    computedRange = { start: 3, end: 8, contexts: null };
-    syntaxManager._attributes =
-        [ generateAttributeLine(), generateAttributeLine() ];
-    t.equal(syntaxManager._recomputeAttributesForRows(invalidPosition.row, 1),
-        1,
-        "the first unchanged row after calling " +
-        "_recomputeAttributesForRows() over multiple rows with the computed " +
-        "range [3,8] and 1");
-    t.ok(attributesMatch(syntaxManager, [
-            [ [ 0, 3 ], [ 3, 8 ], [ 8, 10 ], [ 10, null ] ],
-            [ [ 0, 3 ], [ 3, 5 ], [ 5, 7 ], [ 7, 10 ], [ 10, null ] ]
-        ]), "the attributes are correct after calling " +
-        "_recomputeAttributesForRows() over multiple rows with the computed " +
-        "range [3,8]");
-
-    invalidPosition = { row: 0, column: 5 };
-    computedRange = { start: 5, end: null, contexts: null };
-    syntaxManager._attributes = [ generateAttributeLine() ];
-    t.equal(syntaxManager._recomputeAttributesForRows(invalidPosition.row, 0),
-        1,
-        "the first unchanged row after calling " +
-        "_recomputeAttributesForRows() with the computed range [5,-]");
-    t.ok(attributesMatch(syntaxManager, [
-            [ [ 0, 3 ], [ 3, 5 ], [ 5, null ] ]
-        ]), "the attributes are correct after calling " +
-        "_recomputeAttributesForRows() with the computed range [5,-]");
+exports.testRecomputeAttributesForRowsAsynchronous = function() {
+    return testRecomputeAttributesForRows(true);
 };
 
-exports.testUpdateSyntaxForRows = function() {
+exports.testRecomputeAttributesForRowsSynchronous = function() {
+    return testRecomputeAttributesForRows(false);
+};
+
+/* exports.testUpdateSyntaxForRows = function() {
     var attributes = [];
     for (var i = 0; i < 5; i++) {
         attributes.push(generateAttributeLine());
@@ -431,5 +474,5 @@ exports.testUpdateSyntaxForRows = function() {
             [ [ 0, null ] ]
         ]),
         "the attributes are correct after updating the entire row range");
-};
+}; */
 
