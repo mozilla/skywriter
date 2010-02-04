@@ -138,7 +138,7 @@ exports.cliController = SC.Object.create({
         }
 
         var self = this;
-        this._convertTypes(cmdArgs.commandExt, cmdArgs.remainder, function(args) {
+        this._convertTypes(cmdArgs.commandExt, cmdArgs.remainder).then(function(args) {
             cmdArgs.commandExt.load(function(command) {
                 // Check the function pointed to in the meta-data exists
                 if (!command) {
@@ -159,7 +159,9 @@ exports.cliController = SC.Object.create({
                     // Only clear the input if the command worked
                     self.set("input", "");
                 } catch (ex) {
-                    // TODO: Some UI
+                    // TODO: Better UI
+                    this.set("hint", ex);
+
                     console.group("Error calling command: " + cmdArgs.commandExt.name);
                     console.log("- typed: '", typed, "'");
                     console.log("- arguments: ", args);
@@ -175,31 +177,49 @@ exports.cliController = SC.Object.create({
      * Convert the passed string array into an args object as specified by the
      * command.params declaration.
      */
-    _convertTypes: function(command, remainder, onConvert) {
-        var args = {};
-        var i = 0; // Which arg are we converting
-        var done = 0; // Call onConvert when we're done
-        if (command.params) {
-            command.params.forEach(function(param) {
-                var d = (param.defaultValue !== undefined) 
-                        ? param.defaultValue : null;
-                var arg = remainder.length > i ? remainder[i] : d;
-                types.fromString(param.type, arg, function(converted) {
-                    args[param.name] = converted;
-                    done++;
-                    if (done == command.params.length) {
-                        onConvert(args);
-                    }
-                });
-            });
-        } else {
-            onConvert(args);
+    _convertTypes: function(commandExt, argInputs) {
+        // Use {} when there are no params
+        if (!commandExt.params) {
+            var promise = new Promise();
+            promise.resolve({});
+            return promise;
         }
+
+        // The data we pass to the command
+        var argOutputs = {};
+        // Which arg are we converting
+        var index = 0;
+        // Cache of promises, because we're only done when they're done
+        var convertPromises = [];
+
+        commandExt.params.forEach(function(param) {
+            var argInput = this._getValueForParam(param, index, argInputs);
+
+            var convertPromise = types.fromString(argInput, param.type);
+            convertPromise.then(function(converted) {
+                argOutputs[param.name] = converted;
+            });
+            convertPromises.push(convertPromise);
+        });
+
+        Promise.group(convertPromises).then(function(converted) {
+            onConvert(argOutputs);
+        });
     },
 
     /**
-     * Looks in the catalog for a command extension that matches what has been typed
-     * at the command line.
+     * Extract a value from the set of inputs for a given param.
+     */
+    _getValueForParam: function(param, index, argInputs) {
+        var defaultValue = (param.defaultValue !== undefined)
+                ? param.defaultValue : null;
+        var argInput = argInputs.length > index ? argInputs[index] : defaultValue;
+        return argInput;
+    },
+
+    /**
+     * Looks in the catalog for a command extension that matches what has been
+     * typed at the command line.
      */
     _splitCommandAndArgs: function(parts) {
         // TODO: Something that doesn't assume no sub-commands:

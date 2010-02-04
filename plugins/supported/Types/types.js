@@ -41,40 +41,49 @@ var Promise = require("Promise:core/promise").Promise;
 /**
  * Convert some data from a string to another type as specified by
  * <tt>typeSpec</tt>.
- * TODO: convert to promise
  */
-exports.fromString = function(typeSpec, stringVersion, onConvert) {
+exports.fromString = function(stringVersion, typeSpec) {
+    var promise = new Promise();
+
     var typeExt = exports.getTypeExt(typeSpec);
     typeExt.load(function(type) {
-        var originalVersion = type.fromString(stringVersion, typeExt);
-        onConvert(originalVersion);
+        var objectVersion = type.fromString(stringVersion, typeExt);
+        promise.resolve(objectVersion);
     });
+
+    return promise;
 };
 
 /**
  * Convert some data from an original type to a string as specified by
  * <tt>typeSpec</tt>.
- * TODO: convert to promise
  */
-exports.toString = function(typeSpec, originalVersion, onConvert) {
+exports.toString = function(objectVersion, typeSpec) {
+    var promise = new Promise();
+
     var typeExt = exports.getTypeExt(typeSpec);
     typeExt.load(function(type) {
-        var stringVersion = type.toString(originalVersion, typeExt);
-        onConvert(stringVersion);
+        var stringVersion = type.toString(objectVersion, typeExt);
+        promise.resolve(stringVersion);
     });
+
+    return promise;
 };
 
 /**
  * Convert some data from an original type to a string as specified by
  * <tt>typeSpec</tt>.
- * TODO: convert to promise
  */
-exports.isValid = function(typeSpec, originalVersion, onValidated) {
+exports.isValid = function(originalVersion, typeSpec) {
+    var promise = new Promise();
+
     var typeExt = exports.getTypeExt(typeSpec);
     typeExt.load(function(type) {
         var valid = type.isValid(originalVersion, typeExt);
-        onValidated(valid);
+        promise.resolve(valid);
     });
+
+    return promise;
 };
 
 /**

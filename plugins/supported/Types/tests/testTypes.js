@@ -44,19 +44,19 @@ var testType = function(type, method, context, value) {
 };
 
 exports.testStringType = function() {
-    types.fromString("text", "Foo", function(converted) {
+    types.fromString("Foo", "text").then(function(converted) {
         t.equal("Foo", converted);
     });
-    types.toString("text", "Foo", function(converted) {
+    types.toString("Foo", "text").then(function(converted) {
         t.equal("Foo", converted);
     });
-    types.isValid("text", "Foo", function(valid) {
+    types.isValid("Foo", "text").then(function(valid) {
         t.equal(true, valid);
     });
 };
 
 exports.testIntegerType = function() {
-    types.fromString("number", "4", function(converted) {
+    types.fromString("4", "number").then(function(converted) {
         t.equal(4, converted);
     });
 };
