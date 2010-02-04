@@ -55,6 +55,10 @@
 });
 "end";
 
+// this isn't necessary under Abbot, and it's unclear to me why it's
+// necessary otherwise -- kdangoor
+require.loader.async("core_test");
+
 var core_test = require("core_test");
 var assert = require("core_test:assert");
 var test = require("core_test:test");
