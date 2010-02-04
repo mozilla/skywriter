@@ -40,6 +40,7 @@ var ArrayUtils = require('utils/array');
 var Promise = require('Promise:core/promise').Promise;
 var Range = require('RangeUtils:utils/range');
 var Yield = require('utils/yield');
+var syntaxDirectory = require('controllers/syntaxdirectory').syntaxDirectory;
 
 /**
  * @class
@@ -117,11 +118,23 @@ exports.SyntaxManager = SC.Object.extend({
         return true;
     },
 
-    // Calls out to the appropriate syntax highlighter, or the default if the
-    // highlighter hasn't been loaded yet.
+    // Calls out to the appropriate syntax highlighter.
     _computeAttributeRange: function(line, column, contexts) {
         var promise = new Promise();
-        promise.resolve(this._defaultAttributeRange(column, contexts));
+
+        var context = contexts[contexts.length - 1].context;
+        if (context === 'plain') {
+            promise.resolve(this._defaultAttributeRange(column, contexts));
+        } else {
+            syntaxDirectory.loadSyntax(context).then(function(syntax) {
+                var syntaxPromise = syntax.computeAttributeRange(line, column,
+                    contexts);
+                syntaxPromise.then(function(attrRange) {
+                    promise.resolve(attrRange);
+                });
+            });
+        }
+
         return promise;
     },
 

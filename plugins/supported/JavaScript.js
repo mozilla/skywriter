@@ -49,9 +49,11 @@
 "end";
 
 var SC = require('sproutcore/runtime').SC;
-var Syntax = require('SyntaxManager:controllers/syntax').Syntax;
+var Promise = require('Promise:core/promise').Promise;
+var StandardSyntax = require('SyntaxManager:controllers/standardsyntax').
+    StandardSyntax;
 
-exports.JSSyntax = Syntax.create({
+exports.JSSyntax = StandardSyntax.create({
     states: {
         normal: [
             {
@@ -59,6 +61,13 @@ exports.JSSyntax = Syntax.create({
                 regex:      /break|case|catch|continue|default|delete|do|else|false|finally|for|function|if|in|instanceof|let|new|null|return|switch|this|throw|true|try|typeof|var|void|while|with/
             }
         ]
+    },
+
+    // TODO
+    computeAttributeRange: function(line, column, contexts) {
+        var promise = new Promise();
+        promise.resolve({ start: column, end: null, contexts: contexts });
+        return promise;
     }
 });
 

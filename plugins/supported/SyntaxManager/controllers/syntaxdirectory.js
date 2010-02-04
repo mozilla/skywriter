@@ -71,7 +71,7 @@ exports.syntaxDirectory = SC.Object.create({
 
     /**
      * Loads the syntax module with the given identifier and returns a promise
-     * describing the load process.
+     * that the module will be loaded.
      */
     loadSyntax: function(name) {
         var syntaxInfo = this._syntaxInfo[name];
