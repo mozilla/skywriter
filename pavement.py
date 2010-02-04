@@ -319,7 +319,7 @@ def build_docs(options):
     
 
 @task
-@needs(["install_sproutcore", "hidefiles"])
+@needs(["hidefiles"])
 def sc_build(options):
     """Create a sproutcore-snapshot from SproutCore source."""
     try:

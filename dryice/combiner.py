@@ -171,8 +171,8 @@ tiki.main("%s", "main");
 ####
 
 _make_json=re.compile('([\{,])(\w+):')
-_register_line = re.compile(r'tiki.register\(["\']([\w/]+)["\'],\s*(.*)\);')
-_globals_line = re.compile(r'tiki.global\(["\']([\w/]+)["\']\);')
+_register_line = re.compile(r'tiki\.register\(["\']([\w/_]+)["\'],\s*(.*)')
+_globals_line = re.compile(r'tiki\.global\(["\']([\w/]+)["\']\);')
 
 def _quotewrap(m):
     return m.group(1) + '"' + m.group(2) + '":'
@@ -205,6 +205,8 @@ def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
     manual_maps: (regex, name) tuples that map matching files to that package name
                 this is used if the file does not contain a parseable tiki.register
                 line.
+    ignore_dependencies: this is there largely for core_test. We assume that
+            the dependencies will already be included on the page.
     
     Returns: the combined bytes
     """
@@ -226,22 +228,37 @@ def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
         splitname = f.splitall()
         if not "en" in splitname:
             continue
-            
+        
         filehandle = f.open()
         firstline = filehandle.readline()
         if firstline.startswith("/"):
             firstline = filehandle.readline()
-        filehandle.close()
-        
-        firstline = _make_json.sub(_quotewrap, firstline)
         
         # look for a tiki.register line to get package
         # metadata
         m = _register_line.search(firstline)
         if m:
             name = m.group(1)
-            data = loads(m.group(2))
+            data_text = m.group(2)
+            if data_text.endswith(");"):
+                data_text = data_text[:-2]
+            else:
+                data_text = "{"
+                nextline = filehandle.readline()
+                while nextline:
+                    if nextline.startswith("});"):
+                        data_text += "}"
+                        break
+                    else:
+                        data_text += nextline
+                    nextline = filehandle.readline()
+            
+            filehandle.close()
+            
+            data_text = _make_json.sub(_quotewrap, data_text)
+            data = loads(data_text)
         else:
+            filehandle.close()
             # no package metadata found, see if there's
             # a manual mapping to package name
             found = False
@@ -252,7 +269,7 @@ def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
             # no manual mapping. we'll assume it's okay
             # to just add this JavaScript.
             if not found:
-                print ("Module in %s is missing the register call", f)
+                print "Module in %s is missing the register call" % f
                 print firstline
                 newcode += f.bytes()
                 continue
