@@ -226,6 +226,14 @@ exports.SyntaxManager = SC.Object.extend({
         };
     },
 
+    _initialContextChanged: function() {
+        this._reset();
+    }.observes('initialContext'),
+
+    _initialStateChanged: function() {
+        this._reset();
+    }.observes('initialState'),
+
     _insertAttributes: function(newRange) {
         var attributes = this._attributes;
 
@@ -399,6 +407,22 @@ exports.SyntaxManager = SC.Object.extend({
         }
     },
 
+    // Invalidates all the highlighting.
+    _reset: function() {
+        this._attributes = [
+            [
+                {
+                    start:      0,
+                    end:        null,
+                    contexts:   [
+                        SC.mixin(this._getInitialContext(), { tag: 'plain' })
+                    ]
+                }
+            ]
+        ];
+        this._invalidRows = [ 0 ];
+    },
+
     // If the position is in the middle of a range, splits the range in two.
     _splitAttributesAtPosition: function(position) {
         var row = position.row, column = position.column;
@@ -446,17 +470,7 @@ exports.SyntaxManager = SC.Object.extend({
     textStorage: null,
 
     init: function() {
-        this._attributes = [
-            [
-                {
-                    start:      0,
-                    end:        null,
-                    contexts:   [
-                        SC.mixin(this._getInitialContext(), { tag: 'plain' })
-                    ]
-                }
-            ]
-        ];
+        this._reset();
     },
 
     /**

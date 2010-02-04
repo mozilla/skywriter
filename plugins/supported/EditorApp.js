@@ -98,8 +98,13 @@ exports.applicationController = SC.Object.create({
         mainPane.appendChild(applicationView);
 
         var editorView = applicationView.get('centerView');
-        var textStorage = editorView.getPath('layoutManager.textStorage');
+        var layoutManager = editorView.get('layoutManager');
+        var textStorage = layoutManager.get('textStorage');
         textStorage.set('value', INITIAL_TEXT);
+
+        var syntaxManager = layoutManager.get('syntaxManager');
+        syntaxManager.set('initialContext', 'js');
+        syntaxManager.set('initialState', 'normal');
 
         var buffer = editsession.Buffer.create({
             model: textStorage
