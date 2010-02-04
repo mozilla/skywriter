@@ -180,9 +180,9 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         var thisLayoutManager = this;
         this.get('syntaxManager').
             updateSyntaxForRows(oldStartRow, newEndRow + 1).
-            then(function(startRow, endRow) {
-                thisLayoutManager._syntaxManagerUpdatedSyntaxForRows(startRow,
-                    endRow);
+            then(function(result) {
+                thisLayoutManager._syntaxManagerUpdatedSyntaxForRows(result.startRow,
+                    result.endRow);
             });
     },
 
@@ -190,7 +190,8 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         if (startRow === endRow) {
             return;
         }
-
+        
+        var theme = this.get('theme');
         var textLines = this.get('textLines');
 
         var attributedText = this.get('syntaxManager').
