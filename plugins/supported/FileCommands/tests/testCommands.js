@@ -30,7 +30,7 @@ var Environment = require("Canon:tests/fixture").MockEnvironment;
 var Request = require("Canon:tests/fixture").MockRequest;
 var FileCommands = require("FileCommands");
 var EditSession = require("EditSession");
-var Promise = require("Promise").Promise;
+var Promise = require("bespin:promise").Promise;
 
 var source = exports.source = DummyFileSource.create({
     files: [

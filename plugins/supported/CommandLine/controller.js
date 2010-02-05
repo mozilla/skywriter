@@ -38,8 +38,8 @@
 var SC = require("sproutcore/runtime").SC;
 var catalog = require("bespin:plugins").catalog;
 
-var Promise = require("Promise:core/promise").Promise;
-var groupPromises = require("Promise:core/promise").group;
+var Promise = require("bespin:promise").Promise;
+var groupPromises = require("bespin:promise").group;
 var types = require("Types:types");
 var env = require("Canon:environment");
 var Request = require("Canon:request").Request;

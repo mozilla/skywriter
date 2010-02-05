@@ -40,7 +40,7 @@ var DummyFileSource = require("Filesystem:tests/fixture").DummyFileSource;
 var fs = require("Filesystem");
 var TextStorage = require("Editor:models/textstorage").TextStorage;
 var editsession = require("EditSession");
-var Promise = require("Promise").Promise;
+var Promise = require("bespin:promise").Promise;
 
 var source = DummyFileSource.create({
     files: [

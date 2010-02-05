@@ -1,5 +1,5 @@
 {
-    "depends": [ "Canon", "Promise", "Types" ],
+    "depends": [ "Canon", "Types" ],
     "provides":
     [
         {

@@ -225,6 +225,11 @@ function Deferred(canceller, rejectImmediately){
             reject(error);
         }
     }
+
+    // provide a function to optimize synchronous actions
+    this.valueIfResolved = function() {
+        return finished ? result : null;
+    };
 };
 
 function perform(value, async, sync){

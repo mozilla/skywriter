@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
-var Promise = require("Promise:core/promise").Promise;
+var Promise = require("bespin:promise").Promise;
 var server = require("BespinServer").server;
 var pathUtil = require("Filesystem:path");
 

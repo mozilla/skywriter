@@ -37,7 +37,7 @@
 
 var SC = require('sproutcore/runtime').SC;
 var ArrayUtils = require('utils/array');
-var Promise = require('Promise:core/promise').Promise;
+var Promise = require('bespin:promise').Promise;
 var Range = require('RangeUtils:utils/range');
 var Yield = require('utils/yield');
 var syntaxDirectory = require('controllers/syntaxdirectory').syntaxDirectory;

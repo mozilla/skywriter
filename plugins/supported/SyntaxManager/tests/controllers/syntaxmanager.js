@@ -36,8 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var Promise = require('Promise:core/promise').Promise;
-var PromiseUtils = require('Promise:utils/promise');
+var Promise = require('bespin:promise').Promise;
 var Range = require('RangeUtils:utils/range');
 var SyntaxManager = require('controllers/syntaxmanager').SyntaxManager;
 var TextStorage = require('Editor:models/textstorage').TextStorage;
@@ -117,12 +116,12 @@ var testRecomputeAttributesForRows = function(async) {
     var testSynchronicity = function(endRow, format) {
         var promise = syntaxManager._recomputeAttributesForRows(invalidPosition.
             row, endRow);
-        var firstUnchangedRow = PromiseUtils.valueIfResolved(promise);
+        var firstUnchangedRow = promise.valueIfResolved();
         if (async) {
             t.ok(firstUnchangedRow === null, format.fmt("didn't complete"));
             attributeRangePromise.resolve(computedRange);
 
-            firstUnchangedRow = PromiseUtils.valueIfResolved(promise);
+            firstUnchangedRow = promise.valueIfResolved();
         }
 
         t.ok(firstUnchangedRow !== null, format.fmt(async ?

@@ -23,7 +23,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
-var Promise = require("Promise:core/promise").Promise;
+var Promise = require("bespin:promise").Promise;
 var t = require("PluginDev");
 var util = require("bespin:util/util");
 var pathUtil = require("path");

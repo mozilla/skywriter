@@ -36,8 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 require('sproutcore/runtime').SC;
-var Promise = require('Promise:core/promise').Promise;
-var PromiseUtils = require('Promise:utils/promise');
+var Promise = require('bespin:promise').Promise;
 
 /**
  * Implements a "yieldable loop", which allows an asynchronous function to be
@@ -65,7 +64,7 @@ exports.loop = function(cond, exec, next) {
     while (cond(loopPromise)) {
         var execPromise = exec();
 
-        var execValue = PromiseUtils.valueIfResolved(execPromise);
+        var execValue = execPromise.valueIfResolved();
         if (execValue === null) {
             // Asynchronous path
             execPromise.then(function(execValue) {

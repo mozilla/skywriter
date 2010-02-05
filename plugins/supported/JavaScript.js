@@ -49,7 +49,7 @@
 "end";
 
 var SC = require('sproutcore/runtime').SC;
-var Promise = require('Promise:core/promise').Promise;
+var Promise = require('bespin:promise').Promise;
 var StandardSyntax = require('SyntaxManager:controllers/standardsyntax').
     StandardSyntax;
 

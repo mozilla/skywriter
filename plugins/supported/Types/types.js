@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var catalog = require("bespin:plugins").catalog;
-var Promise = require("Promise:core/promise").Promise;
+var Promise = require("bespin:promise").Promise;
 
 var r = require;
 

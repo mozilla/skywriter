@@ -37,7 +37,7 @@
 
 var SC = require("sproutcore/runtime").SC;
 var catalog = require("bespin:plugins").catalog;
-var Promise = require("Promise:core/promise").Promise;
+var Promise = require("bespin:promise").Promise;
 var Request = require("request").Request;
 var Environment = require("environment").Environment;
 

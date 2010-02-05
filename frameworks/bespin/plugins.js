@@ -38,6 +38,7 @@
 var SC = require("sproutcore/runtime").SC;
 require("globals");
 
+var Promise = require("promise").Promise;
 var builtins = require("builtins");
 var r = require;
 
