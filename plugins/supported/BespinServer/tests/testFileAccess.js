@@ -61,11 +61,10 @@ exports.testLoadDirectory = function() {
     t.ok(typeof(pr.then) == "function", "expected to get Promise back");
     t.equal(server.method, "GET");
     t.equal(server.url, "/file/list/");
-    var testpr = pr.then(function(data) {
+    var testpr = new Promise();
+    pr.then(function(data) {
         t.equal(data[0].name, "foo.js", "expected dummy data passed through");
-        if (undefined != testpr) {
-            testpr.resolve();
-        }
+        testpr.resolve();
     });
     return testpr;
 };
@@ -88,12 +87,11 @@ exports.testLoadContents = function() {
     t.ok(typeof(pr.then) == "function", "expected to get Promise back");
     t.equal(server.method, "GET");
     t.equal(server.url, "/file/at/myfile.txt");
-    var testpr = pr.then(function(data) {
+    var testpr = new Promise();
+    pr.then(function(data) {
         t.equal(data.file, f, "expected same file back");
         t.equal(data.contents, "This is the exciting data in the file.");
-        if (testpr != undefined) {
-            testpr.resolve();
-        }
+        testpr.resolve();
     });
     return testpr;
 };

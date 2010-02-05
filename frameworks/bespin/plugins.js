@@ -338,7 +338,12 @@ exports.Plugin = SC.Object.extend({
         
         // make a private Tiki call that clears these
         // modules from the module cache in the sandbox.
-        sandbox.clear.apply(sandbox, fullModList);
+        // the guard below is very important. If it is
+        // omitted and there are no modules that need
+        // clearing, the entire sandbox is cleared.
+        if (fullModList.length > 0) {
+            sandbox.clear.apply(sandbox, fullModList);
+        }
         
         // reload the plugin metadata
         this.catalog.loadMetadata(this.reloadURL,

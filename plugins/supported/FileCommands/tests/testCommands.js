@@ -30,6 +30,7 @@ var Environment = require("Canon:tests/fixture").MockEnvironment;
 var Request = require("Canon:tests/fixture").MockRequest;
 var FileCommands = require("FileCommands");
 var EditSession = require("EditSession");
+var Promise = require("Promise").Promise;
 
 var source = exports.source = DummyFileSource.create({
     files: [
@@ -52,16 +53,18 @@ exports.testFilesCommand = function() {
         files: root
     });
     request = Request.create();
+    var testpr = new Promise();
     request.promise.then(function() {
         output = request.outputs.join("");
         t.ok(output.indexOf("foo/<br/>") > -1, "foo/ should be in output");
         t.ok(output.indexOf("atTheTop.js<br/>") > -1, 
             "atTheTop.js should be in output");
-        t.start();
+        testpr.resolve();
     });
     
     FileCommands.filesCommand(env, {path: "/"}, request);
-    t.stop();
+    
+    return testpr;
 };
 
 exports.testFilesCommandDefaultsToRoot = function() {
@@ -74,15 +77,18 @@ exports.testFilesCommandDefaultsToRoot = function() {
         files: root,
         session: session
     });
+    
+    var testpr = new Promise();
+    
     request = Request.create();
     request.promise.then(function() {
         output = request.outputs.join("");
         t.ok(output.indexOf("foo/<br/>") > -1, "foo/ should be in output");
         t.ok(output.indexOf("atTheTop.js<br/>") > -1, 
             "atTheTop.js should be in output");
-        t.start();
+        testpr.resolve();
     });
     
     FileCommands.filesCommand(env, {path: null}, request);
-    t.stop();
+    return testpr;
 };

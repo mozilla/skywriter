@@ -110,9 +110,10 @@ exports.runTest = function(testmodule) {
         pluginName = testmodule;
     }
     exports.reload(pluginName, function() {
-        core_test.module(testmodule);
         var mod = require(testmodule);
-        // run the tests, logging to the console
+        if (!mod.name) {
+            mod.name = testmodule;
+        }
         test.run(mod);
     });
 };
