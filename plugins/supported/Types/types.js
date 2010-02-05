@@ -38,7 +38,7 @@
 var catalog = require("bespin:plugins").catalog;
 var Promise = require("Promise:core/promise").Promise;
 
-var tiki = require.loader;
+var r = require;
 
 /**
  * Convert some data from a string to another type as specified by
@@ -113,13 +113,15 @@ exports.getTypeExt = function(typeSpec) {
                 promise.resolve(typeExt);
             } else {
                 try {
-                    tiki.async(data).then(function() {
+                    r.loader.async(data).then(function() {
+                        var func = r.loader(data);
                         typeExt.data = func();
                         promise.resolve(typeExt);
                     });
                 }
                 catch (ex) {
                     console.error(ex);
+                    promise.resolve(null);
                 }
             }
         }
