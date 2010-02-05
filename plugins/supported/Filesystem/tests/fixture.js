@@ -87,6 +87,7 @@ exports.DummyFileSource = SC.Object.extend({
     },
     
     _findInDirectory: function(path) {
+        path = path.slice(0, path.length - 1);
         var segments = path.split("/");
         if (path == "") {
             segments = [];
@@ -98,6 +99,15 @@ exports.DummyFileSource = SC.Object.extend({
                 if (segments[i] != fSegments[i]) {
                     return;
                 }
+            }
+            
+            // If the search we're doing is for the directory
+            // itself and the directory is listed in the
+            // file list, we don't want to return the
+            // directory itself (which would actually come back as
+            // undefined).
+            if (!fSegments[i]) {
+                return;
             }
             
             // is this a directory?

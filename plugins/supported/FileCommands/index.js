@@ -43,10 +43,13 @@ var pathUtil = require("Filesystem:path");
 exports.filesCommand = function(env, args, request) {
     var path = args.path;
     
-    // TODO this should actually work relative to the current file,
-    // and revert to / if there is no current file
     if (path == null) {
-        path = "/";
+        var file = env.get("file");
+        if (!file) {
+            path = "/";
+        } else {
+            path = file.get("dirname");
+        }
     }
     
     if (!pathUtil.isDir(path)) {
@@ -57,7 +60,7 @@ exports.filesCommand = function(env, args, request) {
         var files = "";
         var contents = dir.get("contents");
         for (var x = 0; x < contents.length; x++) {
-            files += contents[x].name + "<br/>";
+            files += contents[x].get("name") + "<br/>";
         }
         request.done(files);
 

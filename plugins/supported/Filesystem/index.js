@@ -279,6 +279,14 @@ exports.File = SC.Object.extend({
         return pathUtil.combine(this.get("directory").get("path"), this.get("name"));
     }.property().cacheable(),
     
+    dirname: function() {
+        return this.get("directory").get("path");
+    }.property().cacheable(),
+    
+    ext: function() {
+        return pathUtil.fileType(this.get("name"));
+    }.property(),
+    
     /*
     * See Directory.originPath
     */

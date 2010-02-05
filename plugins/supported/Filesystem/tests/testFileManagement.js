@@ -25,6 +25,7 @@
 var t = require("PluginDev");
 var fs = require("Filesystem");
 var fixture = require("Filesystem:tests/fixture");
+var Promise = require("Promise").Promise;
 
 var source = exports.source = fixture.DummyFileSource.create({
     files: [
@@ -59,6 +60,8 @@ exports.testRootLoading = function() {
     t.equal(0, source.requests.length);
     
     source.set("checkStatus", fs.LOADING);
+    var testpr = new Promise();
+    
     root.load().then(function(dir) {
         t.equal(dir, root, "should have been passed in the root directory");
         t.equal(source.requests.length, 1, "should have made a request to the source");
@@ -78,11 +81,11 @@ exports.testRootLoading = function() {
         root.load().then(function(dir) {
             t.equal(source.requests.length, 1, 
                 "should not have loaded again, because it's already loaded");
-            t.start();
+            testpr.resolve();
         });
     }, genericFailureHandler);
     
-    t.stop();
+    return testpr;
 };
 
 exports.testGetObject = function() {
@@ -98,6 +101,8 @@ exports.testGetObject = function() {
     t.equal(myFile.get("directory"), myDir, 
         "file should be populated with the same directory object");
     t.equal(myFile.get("name"), "file.js");
+    t.equal(myFile.get("dirname"), "/foo/bar/");
+    t.equal(myFile.get("ext"), "js");
     
     var fooDir = root.getObject("foo/");
     t.equal(myDir.get("parent"), fooDir, 
@@ -114,6 +119,7 @@ exports.testGetObject = function() {
 exports.testSubdirLoading = function() {
     source.reset();
     var root = getNewRoot();
+    var testpr = new Promise();
     root.loadPath("deeply/nested/").then(function(dir) {
         t.equal(dir.get("name"), "nested/");
         t.equal(dir.get("status"), fs.READY);
@@ -126,10 +132,10 @@ exports.testSubdirLoading = function() {
         t.equal(dir.get("path"), "/deeply/nested/",
             "can get back our path");
         
-        t.start();
+        testpr.resolve();
     }, genericFailureHandler);
     
-    t.stop(1000);
+    return testpr;
 };
 
 exports.testContentRetrieval = function() {
@@ -137,11 +143,12 @@ exports.testContentRetrieval = function() {
     var root = getNewRoot();
     
     var f = root.getObject("atTheTop.js");
+    var testpr = new Promise();
     f.loadContents().then(function(result) {
         t.equal(result.file, f, "should get the same file in");
         t.equal(result.contents, "the top file", "Content should be as expected");
-        t.start();
+        testpr.resolve();
     });
     
-    t.stop();
+    return testpr;
 };

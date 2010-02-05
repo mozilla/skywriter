@@ -37,6 +37,8 @@ var source = exports.source = DummyFileSource.create({
         {name: "atTheTop.js", contents: "the top file"},
         {name: "anotherAtTheTop.js", contents: "another file"},
         {name: "foo/"},
+        {name: "foo/1.txt", contents: "firsttext"},
+        {name: "foo/2.txt", contents: "secondtext"},
         {name: "deeply/nested/directory/andAFile.txt", contents: "text file"}
     ]
 });
@@ -86,6 +88,34 @@ exports.testFilesCommandDefaultsToRoot = function() {
         t.ok(output.indexOf("foo/<br/>") > -1, "foo/ should be in output");
         t.ok(output.indexOf("atTheTop.js<br/>") > -1, 
             "atTheTop.js should be in output");
+        testpr.resolve();
+    });
+    
+    FileCommands.filesCommand(env, {path: null}, request);
+    return testpr;
+};
+
+exports.testFilesAreRelativeToCurrentOpenFile = function() {
+    var root = getNewRoot();
+    var buffer = EditSession.Buffer.create();
+    buffer.changeFileOnly(root.getObject("foo/1.txt"));
+    
+    var session = EditSession.EditSession.create({
+        currentBuffer: buffer
+    });
+    var env = Environment.create({
+        files: root,
+        session: session
+    });
+    
+    var testpr = new Promise();
+    
+    request = Request.create();
+    request.promise.then(function() {
+        output = request.outputs.join("");
+        t.ok(output.indexOf("1.txt<br/>") > -1, "1.txt should be in the output");
+        t.ok(output.indexOf("2.txt<br/>") > -1, 
+            "2.txt should be in output");
         testpr.resolve();
     });
     

@@ -118,7 +118,7 @@ var _getHelp = function(prefix, options) {
 /**
  * TODO: make this automatic
  */
-exports.helpCommand = function(instruction, args, request) {
+exports.helpCommand = function(env, args, request) {
     var output = _getHelp(args.search, {
         prefix: "<h2>Welcome to Bespin - Code in the Cloud</h2><ul>" +
             "<li><a href='http://labs.mozilla.com/projects/bespin' target='_blank'>Home Page</a>" +

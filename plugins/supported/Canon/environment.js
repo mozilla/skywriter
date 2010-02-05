@@ -76,7 +76,29 @@ exports.Environment = SC.Object.extend({
             console.error("command attempted to get model but there's no session");
             return undefined;
         }
-        return session.get("currentBuffer").get("model");
+        var buffer = session.get("currentBuffer");
+        if (!buffer) {
+            console.error("Session has no current buffer");
+            return undefined;
+        }
+        return buffer.get("model");
+    }.property(),
+    
+    /**
+     * gets the current file from the session
+     */
+    file: function() {
+        var session = this.get("session");
+        if (!session) {
+            console.error("command attempted to get file but there's no session");
+            return undefined;
+        }
+        var buffer = session.get("currentBuffer");
+        if (!buffer) {
+            console.error("Session has no current buffer");
+            return undefined;
+        }
+        return buffer.get("file");
     }.property(),
 
     /**
