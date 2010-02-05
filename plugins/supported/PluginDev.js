@@ -109,7 +109,7 @@ exports.runTest = function(testmodule) {
         core_test.module(testmodule);
         var mod = require(testmodule);
         // run the tests, logging to the console
-        test.run(mod, console);
+        test.run(mod);
     });
 };
 
