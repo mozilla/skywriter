@@ -308,6 +308,7 @@ exports.SyntaxManager = SC.Object.extend({
     // Adds a row to the set of invalid rows.
     _invalidateRow: function(row) {
         var invalidRows = this._invalidRows;
+
         invalidRows.push(row);
         invalidRows.sort(function(a, b) { return a - b; });
         this._invalidRows = invalidRows.uniq();
@@ -333,6 +334,7 @@ exports.SyntaxManager = SC.Object.extend({
         var attributes = this._attributes;
         var lines = this.getPath('textStorage.lines');
         var contexts = this._contextsBeforeRow(startRow);
+
         var row = startRow;
         var self = this;
         return Yield.loop(function(promise) {           // row cond()
@@ -543,7 +545,7 @@ exports.SyntaxManager = SC.Object.extend({
             var self = this;
             this._recomputeAttributesForRows(invalidRow, endRow - 1).
                 then(function(firstUnchangedRow) {
-                    if (firstUnchangedRow === null) {
+                    if (firstUnchangedRow === false) {
                         self._invalidateRow(endRow);
                         firstUnchangedRow = endRow;
                     }

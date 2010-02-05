@@ -176,47 +176,10 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
             newTextLines);
         this._recalculateMaximumWidth();
 
+        this.notifyDelegates('layoutManagerChangedTextAtRow', oldStartRow);
+
         var invalidRects = this._computeInvalidRects(oldRange, newRange);
         this.notifyDelegates('layoutManagerInvalidatedRects', invalidRects);
-
-        var thisLayoutManager = this;
-        this.get('syntaxManager').
-            updateSyntaxForRows(oldStartRow, newEndRow + 1).
-            then(function(result) {
-                thisLayoutManager._syntaxManagerUpdatedSyntaxForRows(result.startRow,
-                    result.endRow);
-            });
-    },
-
-    _syntaxManagerUpdatedSyntaxForRows: function(startRow, endRow) {
-        if (startRow === endRow) {
-            return;
-        }
-        
-        var theme = this.get('theme');
-        var textLines = this.get('textLines');
-
-        var attributedText = this.get('syntaxManager').
-            attributedTextForRows(startRow, endRow);
-        for (var i = 0; i < attributedText.length; i++) {
-            textLines[startRow + i].colors =
-                attributedText[i].map(function(range) {
-                    var contexts = range.contexts;
-                    var tag = contexts === null ? 'plain' :
-                        contexts[contexts.length - 1].tag;
-                    var color = theme["editorTextColor_" + tag];
-                    return {
-                        start:  range.start,
-                        end:    range.end,
-                        color:  color
-                    };
-                });
-        }
-
-        var start = { row: startRow, column: 0 };
-        var end = { row: endRow, column: 0 };
-        this.notifyDelegates('layoutManagerInvalidatedRects',
-            this.rectsForRange({ start: start, end: end }));
     },
 
     /**
@@ -446,6 +409,31 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         this.get('syntaxManager').layoutManagerReplacedText(oldRange,
             newRange);
         this._recomputeLayoutForRanges(oldRange, newRange);
+    },
+
+    /**
+     * Updates the text lines in the given range to correspond to the current
+     * state of the syntax highlighter. Does not actually run the syntax
+     * highlighters.
+     */
+    updateTextRows: function(startRow, endRow) {
+        var theme = this.get('theme');
+        var textLines = this.get('textLines');
+
+        var attributedText = this.get('syntaxManager').
+            attributedTextForRows(startRow, endRow);
+
+        for (var i = 0; i < attributedText.length; i++) {
+            textLines[startRow + i].colors = attributedText[i].
+                map(function(range) {
+                    var tag = range.tag;
+                    return {
+                        start:  range.start,
+                        end:    range.end,
+                        color:  theme["editorTextColor_" + tag ]
+                    };
+                });
+        }
     }
 });
 

@@ -44,6 +44,10 @@ var Rect = require('utils/rect');
 var TextInput = require('bespin:editor/mixins/textinput').TextInput;
 var keyboardManager = require('Canon:keyboard').keyboardManager;
 
+// Set this to true to outline all text ranges with a box. This may be useful
+// when optimizing syntax highlighting engines.
+var DEBUG_TEXT_RANGES = false;
+
 exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     _dragPoint: null,
     _dragTimer: null,
@@ -149,6 +153,14 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
                     characters.substring(column, colorRangeEnd);
                 context.fillText(snippet, characterRect.x,
                     characterRect.y + lineAscent);
+
+                if (DEBUG_TEXT_RANGES) {
+                    context.strokeStyle = colorRange.color;
+                    context.strokeRect(characterRect.x + 0.5,
+                        characterRect.y + 0.5,
+                        characterRect.width * snippet.length - 1,
+                        characterRect.height - 1);
+                }
 
                 column = colorRangeEnd;
                 colorIndex++;
@@ -456,7 +468,54 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             Range.addPositions(position, { row: 0, column: 1 });
     },
 
+    _syntaxManagerUpdatedSyntaxForRows: function(startRow, endRow) {
+        if (startRow === endRow) {
+            return;
+        }
+
+        var layoutManager = this.get('layoutManager');
+        layoutManager.updateTextRows(startRow, endRow);
+
+        layoutManager.rectsForRange({
+                start:  { row: startRow,    column: 0 },
+                end:    { row: endRow,      column: 0 }
+            }).forEach(this.setNeedsDisplayInRect, this);
+    },
+
+    // Instructs the syntax manager to begin highlighting from the given row to
+    // the end of the visible range, or within the entire visible range if the
+    // row is null.
+    _updateSyntax: function(row) {
+        var layoutManager = this.get('layoutManager');
+        var visibleRange = layoutManager.characterRangeForBoundingRect(this.
+            get('clippingFrame'));
+        var startRow = visibleRange.start.row, endRow = visibleRange.end.row;
+
+        if (row !== null) {
+            if (row < startRow || row > endRow) {
+                return; // Outside the visible range; nothing to do.
+            }
+
+            startRow = row;
+        }
+
+        var self = this;
+        var lines = layoutManager.getPath('textStorage.lines');
+        var syntaxManager = layoutManager.get('syntaxManager');
+        var lastRow = Math.min(lines.length, endRow + 1);
+        syntaxManager.updateSyntaxForRows(startRow, lastRow).
+            then(function(result) {
+                self._syntaxManagerUpdatedSyntaxForRows(result.startRow,
+                    result.endRow);
+            });
+    },
+
     acceptsFirstResponder: true,
+
+    clippingFrameChanged: function() {
+        arguments.callee.base.apply(this, arguments);
+        this._updateSyntax(null);
+    },
 
     /**
      * @property{Boolean}
@@ -592,12 +651,19 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     /**
-     * The layout manager calls this method to signal to the view that the text
-     * and/or layout has changed.
+     * Runs the syntax highlighter from the given row to the end of the visible
+     * range, and repositions the selection.
+     */
+    layoutManagerChangedTextAtRow: function(sender, row) {
+        this._updateSyntax(row);
+        this._repositionSelection();
+    },
+
+    /**
+     * Marks the given rectangles as invalid.
      */
     layoutManagerInvalidatedRects: function(sender, rects) {
         rects.forEach(this.setNeedsDisplayInRect, this);
-        this._repositionSelection();
         this._resize();
     },
 
