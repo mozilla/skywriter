@@ -105,6 +105,11 @@ exports.getTypeExt = function(typeSpec) {
         var parts = typeSpec.split(":");
         if (parts.length === 1) {
             typeExt = catalog.getExtensionByKey("type", typeSpec);
+            if (typeExt) {
+                promise.resolve(typeExt);
+            } else {
+                promise.reject("Unknown type: ", typeSpec);
+            }
         } else {
             typeExt = catalog.getExtensionByKey("type", parts.shift());
             var data = parts.join(":");

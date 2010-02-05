@@ -109,7 +109,7 @@ exports.MemorySettings = SC.Object.extend({
             throw "Settings need 'name' members";
         }
 
-        types.getTypeExt(settingExt.type).then(function() {
+        types.getTypeExt(settingExt.type).then(function(typeExt) {
             if (!typeExt) {
                 throw "choice.type should be one of " +
                         "[" + this._getSettingNames().join("|") + "]. " +

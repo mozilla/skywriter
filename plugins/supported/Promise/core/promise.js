@@ -41,6 +41,8 @@
 //        ... executed when the promise fails
 //  });
 
+var printStackTrace = require("bespin:util/stacktrace").printStackTrace;
+
 try {
     var enqueue = require("event-queue").enqueue;
 }
@@ -163,6 +165,8 @@ function Deferred(canceller, rejectImmediately){
         		    listener.deferred.resolve(newResult);
 		        }
 		        catch(e){
+		            console.error("promise caught exception ", e);
+		            console.log(printStackTrace({e: e}));
 		        	listener.deferred.reject(e);
 		        }
 		        finally{
@@ -238,6 +242,8 @@ function perform(value, async, sync){
         deferred.resolve(value);
         return deferred.promise;
     }catch(e){
+        console.error("promise caught exception: ", e);
+        console.log(printStackTrace({e: e}));
         var deferred = new Deferred();
         deferred.reject(e);
         return deferred.promise;
