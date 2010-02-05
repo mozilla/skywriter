@@ -57,11 +57,15 @@ exports.JSSyntax = StandardSyntax.create({
     states: {
         normal: [
             {
-                regex:      /^(?:break|case|catch|continue|default|delete|do|else|false|finally|for|function|if|in|instanceof|let|new|null|return|switch|this|throw|true|try|typeof|var|void|while|with)/,
+                regex:      /^(?:break|case|catch|continue|default|delete|do|else|false|finally|for|function|if|in|instanceof|let|new|null|return|switch|this|throw|true|try|typeof|var|void|while|with)(?![a-zA-Z0-9_])/,
                 tag:        'keyword',
             },
             {
-                regex:      /^[^'"/]+/,
+                regex:      /^[^'"/ \t]+/,
+                tag:        'plain'
+            },
+            {
+                regex:      /^[ \t]+/,
                 tag:        'plain'
             },
             {
@@ -128,13 +132,6 @@ exports.JSSyntax = StandardSyntax.create({
                 tag:        'comment'
             }
         ]
-    },
-
-    // TODO
-    computeAttributeRange: function(line, column, contexts) {
-        var promise = new Promise();
-        promise.resolve({ start: column, end: null, contexts: contexts });
-        return promise;
     }
 });
 
