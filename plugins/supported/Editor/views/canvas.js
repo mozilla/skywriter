@@ -51,42 +51,42 @@ var Rect = require('utils/rect');
  * view is placed in.
  */
 exports.CanvasView = SC.View.extend({
-    _canvasContext: null,
-    _canvasDom: null,
-    _canvasId: null,
-    _invalidRects: null,
-    _lastRedrawTime: null,
-    _previousClippingFrame: null,
-    _redrawTimer: null,
+    _cvCanvasContext: null,
+    _cvCanvasDom: null,
+    _cvCanvasId: null,
+    _cvInvalidRects: null,
+    _cvLastRedrawTime: null,
+    _cvPreviousClippingFrame: null,
+    _cvRedrawTimer: null,
 
-    _clippingFrameChanged: function() {
+    _cvClippingFrameChanged: function() {
         // False positives here are very common, so check to make sure before
         // we take the slow path.
-        var previousClippingFrame = this._previousClippingFrame;
+        var previousClippingFrame = this._cvPreviousClippingFrame;
         var clippingFrame = this.get('clippingFrame');
         if (previousClippingFrame === null ||
                 !SC.rectsEqual(clippingFrame, previousClippingFrame)) {
-            this._previousClippingFrame = clippingFrame;
+            this._cvPreviousClippingFrame = clippingFrame;
             this.setNeedsDisplay();
         }
     }.observes('clippingFrame'),
 
-    _getContext: function() {
-        if (this._canvasContext === null) {
-            this._canvasContext = this._canvasDom.getContext('2d');
+    _cvGetContext: function() {
+        if (this._cvCanvasContext === null) {
+            this._cvCanvasContext = this._cvCanvasDom.getContext('2d');
         }
-        return this._canvasContext;
+        return this._cvCanvasContext;
     },
 
-    _layoutChanged: function() {
-        this._resizeToFit();
+    _cvLayoutChanged: function() {
+        this._cvResizeToFit();
     }.observes('layout'),
 
-    _parentViewFrameChanged: function() {
-        this._resizeToFit();
+    _cvParentViewFrameChanged: function() {
+        this._cvResizeToFit();
     },
 
-    _resizeToFit: function() {
+    _cvResizeToFit: function() {
         var parentFrame = this.getPath('parentView.frame');
         var frame = this.get('frame');
         var frameWidth = frame.width, frameHeight = frame.height;
@@ -115,9 +115,9 @@ exports.CanvasView = SC.View.extend({
 
     init: function() {
         arguments.callee.base.apply(this, arguments);
-        this._invalidRects = [];
+        this._cvInvalidRects = [];
         this.get('parentView').addObserver('frame', this,
-            this._parentViewFrameChanged);
+            this._cvParentViewFrameChanged);
     },
 
     /**
@@ -134,12 +134,12 @@ exports.CanvasView = SC.View.extend({
             this.computeFrameWithParentFrame(null);
         }
 
-        var context = this._getContext();
+        var context = this._cvGetContext();
         context.save();
         context.translate(frame.x, frame.y);
 
         var clippingFrame = this.get('clippingFrame');
-        this._invalidRects.forEach(function(rect) {
+        this._cvInvalidRects.forEach(function(rect) {
             context.save();
 
             rect = SC.intersectRects(rect, clippingFrame);
@@ -162,8 +162,8 @@ exports.CanvasView = SC.View.extend({
 
         context.restore();
 
-        this._invalidRects = [];
-        this._lastRedrawTime = new Date().getTime();
+        this._cvInvalidRects = [];
+        this._cvLastRedrawTime = new Date().getTime();
         return true;
     },
 
@@ -177,7 +177,7 @@ exports.CanvasView = SC.View.extend({
             return;
         }
 
-        var canvas = this._canvasDom;
+        var canvas = this._cvCanvasDom;
         var widthChanged = canvas.width !== parentFrame.width;
         var heightChanged = canvas.height !== parentFrame.height;
         if (widthChanged) {
@@ -205,7 +205,7 @@ exports.CanvasView = SC.View.extend({
 
     didCreateLayer: function() {
         arguments.callee.base.apply(this, arguments);
-        this._canvasDom = this.$("#" + this._canvasId)[0];
+        this._cvCanvasDom = this.$("#" + this._cvCanvasId)[0];
         this.redraw();
     },
 
@@ -215,8 +215,8 @@ exports.CanvasView = SC.View.extend({
         if (firstTime) {
             var parentFrame = this.getPath('parentView.frame');
             var canvasContext = context.begin("canvas");
-            this._canvasId = SC.guidFor(canvasContext);
-            canvasContext.id(this._canvasId);
+            this._cvCanvasId = SC.guidFor(canvasContext);
+            canvasContext.id(this._cvCanvasId);
             canvasContext.attr("width", "" + parentFrame.width);
             canvasContext.attr("height", "" + parentFrame.height);
             canvasContext.push("canvas tag not supported by your browser");
@@ -236,7 +236,7 @@ exports.CanvasView = SC.View.extend({
      */
     setNeedsDisplay: function(rect) {
         var frame = this.get('frame');
-        this._invalidRects = [
+        this._cvInvalidRects = [
             {
                 x:      0,
                 y:      0,
@@ -252,13 +252,13 @@ exports.CanvasView = SC.View.extend({
      * the canvas to be redrawn at the end of the run loop.
      */
     setNeedsDisplayInRect: function(rect) {
-        this._invalidRects = Rect.addRectToSet(this._invalidRects, rect);
+        this._cvInvalidRects = Rect.addRectToSet(this._cvInvalidRects, rect);
         this.set('layerNeedsUpdate', true);
     },
 
     tryRedraw: function(context, firstTime) {
         var now = new Date().getTime();
-        var lastRedrawTime = this._lastRedrawTime;
+        var lastRedrawTime = this._cvLastRedrawTime;
         var minimumRedrawDelay = this.get('minimumRedrawDelay');
 
         if (lastRedrawTime === null ||
@@ -267,12 +267,12 @@ exports.CanvasView = SC.View.extend({
             return;
         }
 
-        var redrawTimer = this._redrawTimer;
+        var redrawTimer = this._cvRedrawTimer;
         if (redrawTimer !== null && redrawTimer.get('isValid')) {
             return; // already scheduled
         }
 
-        this._redrawTimer = SC.Timer.schedule({
+        this._cvRedrawTimer = SC.Timer.schedule({
             target:     this,
             action:     this.redraw,
             interval:   minimumRedrawDelay,
