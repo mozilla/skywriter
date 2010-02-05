@@ -67,7 +67,7 @@ exports.CanvasView = SC.View.extend({
         if (previousClippingFrame === null ||
                 !SC.rectsEqual(clippingFrame, previousClippingFrame)) {
             this._cvPreviousClippingFrame = clippingFrame;
-            this.setNeedsDisplay();
+            this.clippingFrameChanged();
         }
     }.observes('clippingFrame'),
 
@@ -101,6 +101,15 @@ exports.CanvasView = SC.View.extend({
             width:  Math.max(frameWidth, parentWidth),
             height: Math.max(frameHeight, parentHeight)
         });
+    },
+
+    /**
+     * Subclasses can override this method to provide custom behavior whenever
+     * the clipping frame changes. The default implementation simply
+     * invalidates the entire visible area.
+     */
+    clippingFrameChanged: function() {
+        this.setNeedsDisplay();
     },
 
     layoutStyle: { left: "0px", top: "0px" },
