@@ -57,8 +57,75 @@ exports.JSSyntax = StandardSyntax.create({
     states: {
         normal: [
             {
-                classes:    'keyword js-keyword'.w(),
-                regex:      /break|case|catch|continue|default|delete|do|else|false|finally|for|function|if|in|instanceof|let|new|null|return|switch|this|throw|true|try|typeof|var|void|while|with/
+                regex:      /^(?:break|case|catch|continue|default|delete|do|else|false|finally|for|function|if|in|instanceof|let|new|null|return|switch|this|throw|true|try|typeof|var|void|while|with)/,
+                tag:        'keyword',
+            },
+            {
+                regex:      /^[^'"/]+/,
+                tag:        'plain'
+            },
+            {
+                regex:      /^'/,
+                tag:        'string',
+                nextState:  'qstring'
+            },
+            {
+                regex:      /^"/,
+                tag:        'string',
+                nextState:  'qqstring'
+            },
+            {
+                regex:      /^\/\/.*/,
+                tag:        'comment'
+            },
+            {
+                regex:      /^\/\*/,
+                tag:        'comment',
+                nextState:  'comment'
+            },
+            {
+                regex:      /^./,
+                tag:        'plain'
+            }
+        ],
+
+        qstring: [
+            {
+                regex:      /^'/,
+                tag:        'string',
+                nextState:  'normal'
+            },
+            {
+                regex:      /^(?:\\.|[^'\\])+/,
+                tag:        'string'
+            }
+        ],
+
+        qqstring: [
+            {
+                regex:      /^"/,
+                tag:        'string',
+                nextState:  'normal'
+            },
+            {
+                regex:      /^(?:\\.|[^"\\])+/,
+                tag:        'string'
+            }
+        ],
+
+        comment: [
+            {
+                regex:      /^[^*\/]+/,
+                tag:        'comment'
+            },
+            {
+                regex:      /^\*\//,
+                tag:        'comment',
+                nextState:  'normal'
+            },
+            {
+                regex:      /^[*\/]/,
+                tag:        'comment'
             }
         ]
     },
