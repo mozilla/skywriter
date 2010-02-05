@@ -60,10 +60,10 @@ var _splitPointer = function(pluginName, pointer) {
     if (!pointer) {
         return undefined;
     }
-    
+
     var parts = pointer.split("#");
     var modName;
-    
+
     // this allows syntax like #foo
     // which is equivalent to PluginName:index#foo
     if (parts[0]) {
@@ -71,7 +71,7 @@ var _splitPointer = function(pluginName, pointer) {
     } else {
         modName = pluginName;
     }
-    
+
     return {
         modName: modName,
         objName: parts[1]
@@ -91,53 +91,58 @@ exports.Extension = SC.Object.extend({
         property = property || "pointer";
         return _splitPointer(this._pluginName, this.get(property));
     },
-    
+
     init: function() {
         this._observers = [];
     },
-    
+
     load: function(callback, property) {
         var pointer = this._getPointer(property);
-        
+
         if (!pointer) {
-            console.error("Extension cannot be loaded because it has no poitner");
+            console.error("Extension cannot be loaded because it has no 'pointer'");
             console.log(this);
             return;
         }
-        
-        var self = this;
+
+        var promise = new Promise();
 
         tiki.async(this._pluginName).then(function() {
             SC.run(function() {
-                var foo = self;
                 var module = r(pointer.modName);
-                if (callback) {
-                    if (pointer.objName) {
-                        callback(module[pointer.objName]);
-                    } else {
-                        callback(module);
-                    }
+                var data;
+                if (pointer.objName) {
+                    data = module[pointer.objName];
+                } else {
+                    data = module;
                 }
+
+                if (callback) {
+                    callback(data);
+                }
+                promise.resolve(data);
             });
         });
+
+        return promise;
     },
-    
+
     /*
-    * Loads this extension and passes the result to the callback.
-    * Any time this extension changes, the callback is called with
-    * the new value. Note that if this extension goes away, the
-    * callback will be called with undefined.
-    * 
-    * observingPlugin is required, because if that plugin is
-    * torn down, all of its observing callbacks need to be torn down
-    * as well.
-    */ 
+     * Loads this extension and passes the result to the callback.
+     * Any time this extension changes, the callback is called with
+     * the new value. Note that if this extension goes away, the
+     * callback will be called with undefined.
+     *
+     * observingPlugin is required, because if that plugin is
+     * torn down, all of its observing callbacks need to be torn down
+     * as well.
+     */
     observe: function(observingPlugin, callback, property) {
-        this._observers.push({plugin: observingPlugin, 
+        this._observers.push({plugin: observingPlugin,
             callback: callback, property: property});
         this.load(callback, property);
     },
-    
+
     _getLoaded: function(property) {
         var pointer = this._getPointer(property);
         return _retrieveObject(pointer);
@@ -213,7 +218,7 @@ exports.Plugin = SC.Object.extend({
             ep.unregister(extension);
         });
     },
-    
+
     _getObservers: function() {
         var result = {};
         this.provides.forEach(function(extension) {
@@ -223,7 +228,7 @@ exports.Plugin = SC.Object.extend({
         });
         return result;
     },
-    
+
     /*
     * Figure out which plugins depend on a given plugin. This
     * will allow the reload behavior to unregister/reregister
@@ -247,7 +252,7 @@ exports.Plugin = SC.Object.extend({
             }
         });
     },
-    
+
     /*
     * reloads the plugin and reinitializes all
     * dependent plugins
@@ -257,9 +262,9 @@ exports.Plugin = SC.Object.extend({
         if (!this.get("reloadURL")) {
             return;
         }
-        
+
         var pluginName = this.name;
-        
+
         var reloadPointer = this.get("reloadPointer");
         if (reloadPointer) {
             var pointer = _splitPointer(pluginName, reloadPointer);
@@ -271,28 +276,28 @@ exports.Plugin = SC.Object.extend({
                 return;
             }
         }
-        
+
         // find all of the dependents recursively so that
         // they can all be unregisterd
         var dependents = {};
-        
+
         var self = this;
-        
+
         var pluginList = object_keys(this.catalog.plugins);
-        
+
         this._findDependents(pluginList, dependents);
-        
+
         // notify everyone that this plugin is going away
         this.unregister();
-        
+
         for (var dependName in dependents) {
             this.catalog.plugins[dependName].unregister();
         }
-        
+
         // remove all traces of the plugin
-        
+
         var nameMatch = new RegExp("^" + pluginName + ":");
-        
+
         _removeFromList(nameMatch, tiki.scripts);
         _removeFromList(nameMatch, tiki.modules,
             function(module) {
@@ -300,27 +305,27 @@ exports.Plugin = SC.Object.extend({
             });
         _removeFromList(nameMatch, tiki.stylesheets);
         _removeFromList(new RegExp("^" + pluginName + "$"), tiki.packages);
-        
+
         var promises = tiki._promises;
-        
+
         delete promises.catalog[pluginName];
         delete promises.loads[pluginName];
         _removeFromObject(nameMatch, promises.modules);
         _removeFromObject(nameMatch, promises.scripts);
         _removeFromObject(nameMatch, promises.stylesheets);
-        
+
         delete tiki._catalog[pluginName];
-        
+
         // clear the sandbox of modules from all of the dependent plugins
         var fullModList = [];
         var sandbox = tiki.sandbox;
-        
+
         var i = sandbox.modules.length;
         var dependRegexes = [];
         for (dependName in dependents) {
             dependRegexes.push(new RegExp("^" + dependName + ":"));
         }
-        
+
         while (--i >= 0) {
             var item = sandbox.modules[i];
             if (nameMatch.exec(item)) {
@@ -335,7 +340,7 @@ exports.Plugin = SC.Object.extend({
                 }
             }
         }
-        
+
         // make a private Tiki call that clears these
         // modules from the module cache in the sandbox.
         // the guard below is very important. If it is
@@ -344,7 +349,7 @@ exports.Plugin = SC.Object.extend({
         if (fullModList.length > 0) {
             sandbox.clear.apply(sandbox, fullModList);
         }
-        
+
         // reload the plugin metadata
         this.catalog.loadMetadata(this.reloadURL,
             function() {
@@ -355,7 +360,7 @@ exports.Plugin = SC.Object.extend({
                     for (dependName in dependents) {
                         self.catalog.plugins[dependName].register();
                     }
-                    
+
                     if (callback) {
                         // at long last, reloading is done.
                         callback();
@@ -500,7 +505,7 @@ exports.Catalog = SC.Object.extend({
             this.plugins[name] = plugin;
         }
     },
-    
+
     /*
     * Loads the named plugin, calling the provided callback
     * when the plugin is loaded. This function is a convenience
@@ -521,7 +526,7 @@ exports.Catalog = SC.Object.extend({
         SC.Request.create({ address: url }).notify(0, this,
             this._metadataFinishedLoading, { callback: callback }).send("");
     },
-    
+
     /*
     * for the given plugin, get the first part of the URL required to
     * get at that plugin's resources (images, etc.).
