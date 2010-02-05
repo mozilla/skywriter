@@ -75,7 +75,7 @@
  * e.g. Now:
  * <pre>
  * choice.addChoice({ name:"foo", ... });
- * settings.values.foo = "bar";
+ * settings.set("foo", "bar");
  * </pre>
  * <p>Vs the potentially better:
  * <pre>

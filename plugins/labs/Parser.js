@@ -650,7 +650,7 @@ bespin.subscribe("parser:start", function () {
 bespin.register("parser", new exports.CodeInfo());
 
 bespin.fireAfter(["settings:language", "settings:set:syntaxcheck", "parser:engine:initialized"], function () {
-    if (settings.values.syntaxcheck) {
+    if (settings.get("syntaxcheck")) {
         var editor = bespin.get("editor");
         if (editor.language) {
             bespin.publish("parser:start");
@@ -667,7 +667,7 @@ bespin.fireAfter(["settings:language", "settings:set:syntaxcheck", "parser:engin
  * Parser doesn't automatically start without it
  */
 bespin.subscribe("settings:language", function () {
-    if (settings.values.syntaxcheck) {
+    if (settings.get("syntaxcheck")) {
         bespin.publish("parser:start");
     }
 });
@@ -700,7 +700,7 @@ bespin.subscribe("settings:language", function(event) {
     var language = event.language;
     var fromCommand = event.fromCommand;
     var settings = bespin.get('settings');
-    var languageSetting = settings.values.language || "auto";
+    var languageSetting = settings.get("language") || "auto";
     var editor = bespin.get('editor');
     var fromURL = urlbar.URL.create();
 

@@ -107,7 +107,7 @@ var ShareNode = SC.Object.extend({
     getClientText: function(allowUnsynced) {
         if (!allowUnsynced && this.onFirstSync) {
             console.trace();
-            throw new Error("Attempt to getClientText() before onFirstSync() called.");
+            throw "Attempt to getClientText() before onFirstSync() called.";
         }
         return this.session._getDocument();
     },
@@ -540,7 +540,7 @@ exports.EditSession = SC.Object.extend({
             editor.setReadOnly(true);
             var msg = "To edit files in others projects you must have " +
                       "'collaborate' set to on." +
-                      " <a href=\"javascript:settings.values.collaborate = true;\">Turn it on now</a>";
+                      " <a href=\"javascript:settings.set('collaborate', true);\">Turn it on now</a>";
             notifier.showHint(msg, 10000);
         }
     },
@@ -549,7 +549,7 @@ exports.EditSession = SC.Object.extend({
      * Should we attempt to use collaboration features?
      */
     shouldCollaborate: function() {
-        var collab = settings.values.collaborate;
+        var collab = settings.get("collaborate");
 
         if (collab && !window.mobwrite) {
             console.log("Missing mobwrite: Forcing 'collaborate' to off in filesystem.js:isCollaborationOn");
@@ -738,7 +738,7 @@ exports.EditSession = SC.Object.extend({
      *  |      V
      *  `-> paused
      *
-     * Yeay. Ascii Art. Question is Unicode Art as much fun?
+     * Yeay. Ascii Art. I wonder if Unicode Art as much fun?
      * The current state is stored in this.currentState.
      * Executing continueSession() from currentState.paused returns you to
      * either stopped or running depending on where you were when you did

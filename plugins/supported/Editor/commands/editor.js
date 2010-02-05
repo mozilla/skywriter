@@ -78,7 +78,7 @@ exports.sortCommand = function(env, args, request) {
 exports.entabCommand = function(env, args, request) {
     var tabsize = args.tabsize;
     if (!tabsize) {
-        tabsize = settings.values.tabsize;
+        tabsize = settings.get("tabsize");
     }
 
     editor.replace({
@@ -93,7 +93,7 @@ exports.entabCommand = function(env, args, request) {
 exports.detabCommand = function(env, args, request) {
     var tabsize = args.tabsize;
     if (!tabsize) {
-        tabsize = settings.values.tabsize;
+        tabsize = settings.get("tabsize");
     }
 
     editor.replace({

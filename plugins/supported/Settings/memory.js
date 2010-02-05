@@ -36,7 +36,27 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
-var choice = require("choice");
+var catalog = require("bespin:plugins").catalog;
+
+var Promise = require("Promise:core/promise").Promise;
+var groupPromises = require("Promise:core/promise").group;
+
+var types = require("Types:types");
+
+/**
+ * Find and configure the settings object.
+ * @see MemorySettings.addSetting()
+ */
+exports.addSetting = function(settingExt) {
+    catalog.getObject("settings").addSetting(settingExt);
+};
+
+/**
+ *
+ */
+exports.getSettingNames = function() {
+    return catalog.getObject("settings")._getSettingNames();
+};
 
 /**
  * A base class for all the various methods of storing settings.
@@ -44,25 +64,20 @@ var choice = require("choice");
  * <pre>
  * // Create manually, or require 'settings' from the container.
  * // This is the manual version:
- * var choice = require("Settings:choice");
- * // Add a new setting
- * choice.addChoice({ name:"foo", ... });
- * // Display the default value
  * var settings = require("bespin:plugins").catalog.getObject("settings");
- * alert(settings.values.foo);
+ * // Add a new setting
+ * settings.addSetting({ name:"foo", ... });
+ * // Display the default value
+ * alert(settings.get("foo"));
  * // Alter the value, which also publishes the change etc.
- * settings.values.foo = "bar";
+ * settings.set("foo", "bar");
  * // Reset the value to the default
  * settings.resetValue("foo");
  * </pre>
+ * <p>Subclasses should override _changeValue() and _loadInitialValues().
  * @class
  */
 exports.MemorySettings = SC.Object.extend({
-    /**
-     * The current settings.
-     */
-    values: {},
-
     /**
      * Setup the default settings
      * @constructs
@@ -77,15 +92,73 @@ exports.MemorySettings = SC.Object.extend({
     },
 
     /**
+     * Function to add to the list of available choices.
+     * <p>Example usage:
+     * <pre>
+     * var settings = require("bespin:plugins").catalog.getObject("settings");
+     * settings.addSetting({
+     *     name: "tabsize", // For use in settings.get("X")
+     *     type: "number",  // To allow value checking.
+     *     defaultValue: 4  // Default value for use when none is directly set
+     * });
+     * </pre>
+     * @param {object} choice Object containing name/type/defaultValue members.
+     */
+    addSetting: function(settingExt) {
+        if (!settingExt.name) {
+            throw "Settings need 'name' members";
+        }
+
+        types.getTypeExt(settingExt.type).then(function() {
+            if (!typeExt) {
+                throw "choice.type should be one of " +
+                        "[" + this._getSettingNames().join("|") + "]. " +
+                        "Got " + settingExt.type;
+            }
+
+            if (!settingExt.defaultValue === undefined) {
+                throw "Settings need 'defaultValue' members";
+            }
+
+            // Load the type so we can check the validator
+            typeExt.load(function(type) {
+                if (!type.isValid(settingExt.defaultValue)) {
+                    throw "Default value " + settingExt.defaultValue +
+                            " is not a valid " + settingExt.type;
+                }
+
+                // Set the default value up.
+                this.set(settingExt.name, settingExt.defaultValue);
+
+                // Add a setter to this so subclasses can save
+                this.addObserver(settingExt.name, this, function() {
+                    this._changeValue(settingExt.name, this.get(settingExt.name));
+                }.bind(this));
+            }.bind(this));
+        }.bind(this));
+    },
+
+    /**
      * Reset the value of the <code>key</code> setting to it's default
      */
     resetValue: function(key) {
         var setting = choice._settings[key];
         if (setting) {
-            this.values[key] = setting.defaultValue;
+            this.set(key, setting.defaultValue);
         } else {
-            delete this.values[key];
+            delete this.ignored[key];
         }
+    },
+
+    /**
+     * Make a list of the valid type names
+     */
+    _getSettingNames: function() {
+        var typeNames = [];
+        catalog.getExtensions("setting").forEach(function(settingExt) {
+            typeNames.push(settingExt.name);
+        });
+        return typeNames;
     },
 
     /**
@@ -93,11 +166,12 @@ exports.MemorySettings = SC.Object.extend({
      */
     _list: function() {
         var reply = [];
-        for (var prop in this.values) {
-            if (this.values.hasOwnProperty(prop)) {
-                reply.push({ 'key': prop, 'value': this.values[prop] });
-            }
-        }
+        this._getSettingNames().forEach(function(key) {
+            reply.push({
+                'key': prop,
+                'value': this.get(prop)
+            });
+        }.bind(this));
         return reply;
     },
 
@@ -114,53 +188,72 @@ exports.MemorySettings = SC.Object.extend({
      * as part of the process before user values are included.
      */
     _loadInitialValues: function() {
-        this._loadDefaultValues();
+        return this._loadDefaultValues();
     },
 
     /**
      * Prime the local cache with the defaults.
      */
     _loadDefaultValues: function() {
-        this._loadFromObject(this._defaultValues());
+        return this._loadFromObject(this._defaultValues());
     },
 
     /**
      * Utility to load settings from an object
      */
     _loadFromObject: function(data) {
+        var promises = [];
         for (var key in data) {
             if (data.hasOwnProperty(key)) {
                 var value = data[key];
-                // We don't ignore values that are not associated with a setting
-                // so if there is no setting, just use the string value
-                var setting = choice._settings[key];
-                if (setting) {
-                    value = choice._types[setting.type].fromString(value);
+                var settingExt = catalog.getExtensionByKey("type", key);
+                if (settingExt) {
+                    // TODO: We shouldn't just ignore values without a setting
+                    var promise = types.fromString(value, settingExt.type);
+                    promise.then(function(value) {
+                        this.set(key, value);
+                    });
+                    promises.push(promise);
                 }
-                this.values[key] = value;
             }
         }
+
+        // Promise.group (a.k.a groupPromises) gives you a list of all the data
+        // in the grouped promises. We don't want that in case we change how
+        // this works with ignored settings (see above).
+        // So we do this to hide the list of promise resolutions.
+        var replyPromise = new Promise();
+        groupPromises(promises).then(function() {
+            replyPromise.resolve();
+        });
+        return replyPromise;
     },
 
     /**
      * Utility to grab all the settings and export them into an object
      */
     _saveToObject: function() {
+        var promises = [];
         var reply = {};
-        for (var key in this.values) {
-            if (this.values.hasOwnProperty(key)) {
-                var value = this.values[key];
-                // We don't delete values that are not associated with a setting
-                // so if there is no setting, just use value.toString()
-                var setting = choice._settings[key];
-                if (setting) {
-                    reply[key] = choice._types[setting.type].toString(value);
-                } else {
-                    reply[key] = "" + value;
-                }
+
+        this._getSettingNames().forEach(function(key) {
+            var value = this.get(key);
+            var settingExt = catalog.getExtensionByKey("type", key);
+            if (settingExt) {
+                // TODO: We shouldn't just ignore values without a setting
+                var promise = types.toString(value, settingExt.type);
+                promise.then(function(value) {
+                    reply[key] = value;
+                });
+                promises.push(promise);
             }
-        }
-        return reply;
+        }.bind(this));
+
+        var replyPromise = new Promise();
+        groupPromises(promises).then(function() {
+            replyPromise.resolve(reply);
+        });
+        return replyPromise;
     },
 
     /**
@@ -168,12 +261,9 @@ exports.MemorySettings = SC.Object.extend({
      */
     _defaultValues: function() {
         var defaultValues = {};
-        for (var name in choice._settings) {
-            if (choice._settings.hasOwnProperty(name)) {
-                var setting = choice._settings[name];
-                defaultValues[setting.name] = setting.defaultValue;
-            }
-        }
+        catalog.getExtensions("setting").forEach(function(settingExt) {
+            defaultValues[settingExt.name] = settingExt.defaultValue;
+        });
         return defaultValues;
     }
 });

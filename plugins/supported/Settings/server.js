@@ -47,8 +47,6 @@ var files = catalog.getObject("files");
  */
 exports.ServerSettings = MemorySettings.extend({
     _loadInitialValues: function() {
-        this._loadDefaultValues();
-
         var onLoad = function(file) {
             // Strip \n\n from the end of the file and insert into this.settings
             file.content.split(/\n/).forEach(function(setting) {
@@ -57,22 +55,23 @@ exports.ServerSettings = MemorySettings.extend({
                 }
                 if (setting.match(/\S+\s+\S+/)) {
                     var pieces = setting.split(/\s+/);
-                    this.values[pieces[0].trim()] = pieces[1].trim();
+                    this.set([pieces[0].trim()], pieces[1].trim());
                 }
             });
         }.bind(this);
 
-        files.loadContents(files.userSettingsProject, "settings", onLoad);
+        this._loadDefaultValues().then(function() {
+            files.loadContents(files.userSettingsProject, "settings", onLoad);
+        }.bind(this));
     },
 
     _changeValue: function(key, value) {
         // Aggregate the settings into a file
         var content = "";
-        for (var key in this.values) {
-            if (this.values.hasOwnProperty(key)) {
-                content += key + " " + this.values[key] + "\n";
-            }
-        }
+        this._getSettingNames().forEach(function(key) {
+            content += key + " " + this.get(key) + "\n";
+        }.bind(this));
+
         // Send it to the server
         files.saveFile(files.userSettingsProject, {
             name: "settings",

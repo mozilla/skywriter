@@ -12,7 +12,7 @@
             "ep": "extensionpoint",
             "description": "A Choice is something that the application offers as a way to customize how it works",
             "name": "choice",
-            "register": "choice#addChoice"
+            "register": "memory#addSetting"
         },
         {
             "ep": "command",
@@ -21,7 +21,7 @@
             [
                 {
                     "name": "choice",
-                    "type": "text",
+                    "type": "selection:Settings:memory#getSettingNames",
                     "description": "The name of the choice to display or alter",
                     "default": null
                 },

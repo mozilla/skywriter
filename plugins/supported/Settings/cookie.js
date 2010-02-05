@@ -45,13 +45,16 @@ var cookie = require("bespin:util/cookie");
  */
 exports.CookieSettings = MemorySettings.extend({
     _loadInitialValues: function() {
-        this._loadDefaultValues();
-        var data = cookie.get("settings");
-        this._loadFromObject(JSON.parse(data));
+        this._loadDefaultValues().then(function() {
+            var data = cookie.get("settings");
+            this._loadFromObject(JSON.parse(data));
+        }.bind(this));
     },
 
     _changeValue: function(key, value) {
-        var data = JSON.stringify(this._saveToObject());
-        cookie.set("settings", data);
+        this._saveToObject(stringData).then(function() {
+            var data = JSON.stringify(stringData);
+            cookie.set("settings", data);
+        });
     }
 });

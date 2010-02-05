@@ -73,7 +73,7 @@ exports.setCommand = function(env, args, request) {
     } else {
         var key = args.key;
         if (args.value === undefined) { // show it
-            var value = settings.values[key];
+            var value = settings.get("key");
             if (value) {
                 html = "<strong>" + key + "</strong> = " + value;
             } else {
@@ -81,7 +81,7 @@ exports.setCommand = function(env, args, request) {
             }
         } else {
             html = "Saving setting: <strong>" + key + "</strong> = " + args.value;
-            settings.values[key] = args.value;
+            settings.set("key", args.value);
         }
     }
 
@@ -93,7 +93,7 @@ exports.setCommand = function(env, args, request) {
  */
 exports.unsetCommand = function(env, args, request) {
     var html;
-    if (!settings.values[args.key]) {
+    if (!settings.get("args").key) {
         html = "No setting for " + args.key + ".";
     } else {
         settings.resetValue(args.key);

@@ -46,21 +46,23 @@ exports.getHint = function(typeData) {
     var promise = new Promise();
     var hintEle;
 
-    var typeExt = exports.getTypeExt(typeData.type);
-    if (!typeExt) {
-        hintEle = createDefaultHint(typeData.description);
-        promise.resolve(hintEle);
-        return promise;
-    }
-
-    typeExt.load(function(type) {
-        if (typeof type.getHint === "function") {
-            hintEle = type.getHint(typeData.description, typeExt);
-        } else {
+    exports.getTypeExt(typeData.type).then(function(typeExt) {
+        if (!typeExt) {
             hintEle = createDefaultHint(typeData.description);
+            promise.resolve(hintEle);
+            return promise;
         }
-        promise.resolve(hintEle);
+
+        typeExt.load(function(type) {
+            if (typeof type.getHint === "function") {
+                hintEle = type.getHint(typeData.description, typeExt);
+            } else {
+                hintEle = createDefaultHint(typeData.description);
+            }
+            promise.resolve(hintEle);
+        });
     });
+
     return promise;
 };
 
@@ -79,6 +81,8 @@ var createDefaultHint = function(description) {
  * { name:"typename", data:... } e.g. { name:"selection", data:["one", "two", "three"] }
  */
 exports.getTypeExt = function(typeSpec) {
+    var promise = new Promise();
+
     var typeExt;
     if (typeof typeSpec === "string") {
         var parts = typeSpec.split(":");
@@ -86,15 +90,23 @@ exports.getTypeExt = function(typeSpec) {
             typeExt = catalog.getExtensionByKey("typehint", typeSpec);
         } else {
             typeExt = catalog.getExtensionByKey("typehint", parts.shift());
-            if (typeExt) {
-                typeExt.data = JSON.parse(parts.join(":"));
+            var data = parts.join(":");
+            if (data.substring(0, 1) == "[" || data.substring(0, 1) == "{") {
+                typeExt.data = JSON.parse(data);
+                promise.resolve(typeExt);
+            } else {
+                var r = require;
+                r(data).async(function(func) {
+                    typeExt.data = func();
+                    promise.resolve(typeExt);
+                });
             }
         }
     } else if (typeof typeSpec === "object") {
         typeExt = catalog.getExtensionByKey("typehint", typeSpec.name);
-        if (typeExt) {
-            typeExt.data = typeSpec.data;
-        }
+        typeExt.data = typeSpec.data;
+        promise.resolve(typeExt);
     }
-    return typeExt;
+
+    return promise;
 };

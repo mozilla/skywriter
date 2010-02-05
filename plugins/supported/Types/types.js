@@ -38,6 +38,8 @@
 var catalog = require("bespin:plugins").catalog;
 var Promise = require("Promise:core/promise").Promise;
 
+var tiki = require.loader;
+
 /**
  * Convert some data from a string to another type as specified by
  * <tt>typeSpec</tt>.
@@ -45,10 +47,11 @@ var Promise = require("Promise:core/promise").Promise;
 exports.fromString = function(stringVersion, typeSpec) {
     var promise = new Promise();
 
-    var typeExt = exports.getTypeExt(typeSpec);
-    typeExt.load(function(type) {
-        var objectVersion = type.fromString(stringVersion, typeExt);
-        promise.resolve(objectVersion);
+    exports.getTypeExt(typeSpec).then(function(typeExt) {
+        typeExt.load(function(type) {
+            var objectVersion = type.fromString(stringVersion, typeExt);
+            promise.resolve(objectVersion);
+        });
     });
 
     return promise;
@@ -61,10 +64,11 @@ exports.fromString = function(stringVersion, typeSpec) {
 exports.toString = function(objectVersion, typeSpec) {
     var promise = new Promise();
 
-    var typeExt = exports.getTypeExt(typeSpec);
-    typeExt.load(function(type) {
-        var stringVersion = type.toString(objectVersion, typeExt);
-        promise.resolve(stringVersion);
+    exports.getTypeExt(typeSpec).then(function(typeExt) {
+        typeExt.load(function(type) {
+            var stringVersion = type.toString(objectVersion, typeExt);
+            promise.resolve(stringVersion);
+        });
     });
 
     return promise;
@@ -77,10 +81,11 @@ exports.toString = function(objectVersion, typeSpec) {
 exports.isValid = function(originalVersion, typeSpec) {
     var promise = new Promise();
 
-    var typeExt = exports.getTypeExt(typeSpec);
-    typeExt.load(function(type) {
-        var valid = type.isValid(originalVersion, typeExt);
-        promise.resolve(valid);
+    exports.getTypeExt(typeSpec).then(function(typeExt) {
+        typeExt.load(function(type) {
+            var valid = type.isValid(originalVersion, typeExt);
+            promise.resolve(valid);
+        });
     });
 
     return promise;
@@ -93,6 +98,8 @@ exports.isValid = function(originalVersion, typeSpec) {
  * { name:"typename", data:... } e.g. { name:"selection", data:["one", "two", "three"] }
  */
 exports.getTypeExt = function(typeSpec) {
+    var promise = new Promise();
+
     var typeExt;
     if (typeof typeSpec === "string") {
         var parts = typeSpec.split(":");
@@ -100,11 +107,27 @@ exports.getTypeExt = function(typeSpec) {
             typeExt = catalog.getExtensionByKey("type", typeSpec);
         } else {
             typeExt = catalog.getExtensionByKey("type", parts.shift());
-            typeExt.data = JSON.parse(parts.join(":"));
+            var data = parts.join(":");
+            if (data.substring(0, 1) == "[" || data.substring(0, 1) == "{") {
+                typeExt.data = JSON.parse(data);
+                promise.resolve(typeExt);
+            } else {
+                try {
+                    tiki.async(data).then(function() {
+                        typeExt.data = func();
+                        promise.resolve(typeExt);
+                    });
+                }
+                catch (ex) {
+                    console.error(ex);
+                }
+            }
         }
     } else if (typeof typeSpec === "object") {
         typeExt = catalog.getExtensionByKey("type", typeSpec.name);
         typeExt.data = typeSpec.data;
+        promise.resolve(typeExt);
     }
-    return typeExt;
+
+    return promise;
 };

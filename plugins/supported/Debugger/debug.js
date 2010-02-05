@@ -116,8 +116,8 @@ exports.EvalCommandLineInterface = CliInputView.extend({
         this.editor.recalcLayout();
         this.resize();
 
-        if (!this.settings.values.debugmode) {
-            this.settings.values.debugmode = true;
+        if (!this.settings.get("debugmode")) {
+            this.settings.set("debugmode", true);
         }
 
         // TODO: Ug. Seriously?!
