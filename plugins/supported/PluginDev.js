@@ -62,6 +62,10 @@ require.loader.async("core_test");
 var core_test = require("core_test");
 var assert = require("core_test:assert");
 var test = require("core_test:test");
+var DefaultLogger = require('loggers/default', 'core_test');
+
+core_test.logger = new DefaultLogger();
+
 var server = require("BespinServer").server;
 var pluginCatalog = require("bespin:plugins").catalog;
 
