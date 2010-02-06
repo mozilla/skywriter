@@ -157,7 +157,7 @@ exports.SyntaxManager = SC.Object.extend({
         } else {
             newContexts = contexts;
         }
-        return { start: column, end: null, contexts: contexts };
+        return { start: column, end: null, contexts: contexts, tag: 'plain' };
     },
 
     _deleteAttributes: function(range) {
@@ -223,19 +223,22 @@ exports.SyntaxManager = SC.Object.extend({
         return attributeIndex;
     },
 
+    _getBlankAttrRange: function(start, end) {
+        var contexts = [ this._getDefaultContext() ];
+        return { start: start, end: end, contexts: contexts, tag: 'plain' };
+    },
+
     _getDefaultContext: function() {
         return {
             context:    'plain',
-            state:      'normal',
-            tag:        'plain'
+            state:      'normal'
         }
     },
 
     _getInitialContext: function() {
         return {
             context:    this.get('initialContext'),
-            state:      this.get('initialState'),
-            tag:        'plain'
+            state:      this.get('initialState')
         };
     },
 
@@ -262,7 +265,7 @@ exports.SyntaxManager = SC.Object.extend({
         var endIndex;
         if (startRow === endRow) {
             startRowAttributes.splice(startIndex, 0,
-                { start: startColumn, end: endColumn, contexts: null });
+                this._getBlankAttrRange(startColumn, endColumn));
 
             endIndex = startIndex + 1;
         } else {
@@ -270,20 +273,20 @@ exports.SyntaxManager = SC.Object.extend({
             var endRowAttributes = startRowAttributes.slice(startIndex);
             startRowAttributes.splice(startIndex,
                 startRowAttributes.length - startIndex,
-                { start: startColumn, end: null, contexts: null });
+                this._getBlankAttrRange(startColumn, null));
 
             // Add in any empty rows.
             for (var i = startRow + 1; i < endRow; i++) {
                 attributes.splice(startRow + 1, 0,
-                    [ { start: 0, end: null, contexts: null } ]);
+                    [ this._getBlankAttrRange(0, null) ]);
             }
 
             // Add space to the start of the end row, if necessary.
             if (endColumn === 0) {
                 endIndex = 0;
             } else {
-                endRowAttributes.unshift({ start: 0, end: endColumn,
-                    contexts: null });
+                endRowAttributes.unshift(this._getBlankAttrRange(0,
+                    endColumn));
                 endIndex = 1;
             }
 
@@ -417,24 +420,20 @@ exports.SyntaxManager = SC.Object.extend({
         // Insert blank attributes to fill the space.
         if (computedEnd !== null && (deletedEnd === null ||
                 (deletedEnd !== null && computedEnd < deletedEnd))) {
-            lineAttributes.splice(index + 1, 0, { start: computedEnd,
-                end: deletedEnd, contexts: null });
+            lineAttributes.splice(index + 1, 0,
+                this._getBlankAttrRange(computedEnd, deletedEnd));
         }
     },
 
     // Invalidates all the highlighting.
     _reset: function() {
-        this._attributes = [
-            [
-                {
-                    start:      0,
-                    end:        null,
-                    contexts:   [
-                        SC.mixin(this._getInitialContext(), { tag: 'plain' })
-                    ]
-                }
-            ]
-        ];
+        var attributes = [];
+        var lineCount = this.getPath('textStorage.lines').length;
+        for (var i = 0; i < lineCount; i++) {
+            attributes.push([ this._getBlankAttrRange(0, null) ]);
+        }
+
+        this._attributes = attributes;
         this._invalidRows = [ 0 ];
     },
 
@@ -448,8 +447,8 @@ exports.SyntaxManager = SC.Object.extend({
 
         if (column > start && (end === null || column < end)) {
             lineAttributes.splice(index, 1,
-                { start: start,     end: column,    contexts: null },
-                { start: column,    end: end,       contexts: null });
+                this._getBlankAttrRange(start, column),
+                this._getBlankAttrRange(column, end));
             return { row: row, column: start };
         }
     },

@@ -427,10 +427,11 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
             textLines[startRow + i].colors = attributedText[i].
                 map(function(range) {
                     var tag = range.tag;
+                    var color = theme["editorTextColor_" + tag];
                     return {
                         start:  range.start,
                         end:    range.end,
-                        color:  theme["editorTextColor_" + tag ]
+                        color:  color
                     };
                 });
         }
