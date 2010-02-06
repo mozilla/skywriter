@@ -70,6 +70,7 @@ var KeyboardManager = SC.Object.extend({
 
                 try {
                     command(env.global, {}, request);
+                    return true;
                 } catch (ex) {
                     // TODO: Some UI?
                     console.group("Error calling command: " + commandExt.name);
@@ -79,6 +80,7 @@ var KeyboardManager = SC.Object.extend({
                 }
             });
         }
+        return false;
     },
 
     /**
@@ -102,54 +104,32 @@ var KeyboardManager = SC.Object.extend({
      * Check that the given command fits the given key name and flags.
      */
     _commandMatches: function(commandExt, symbolicName, flags) {
-        if (commandExt.key !== symbolicName) {
-            return false;
-        }
-
-        var mappedKeys = commandExt.key;
-        if (!mappedKeys) {
-            return false;
-        }
-
-        if (typeof(mappedKeys) == "string") {
-            if (mappedKeys != symbolicName) {
+        // Check predicates
+        var predicates = commandExt.predicates;
+        if (!SC.none(predicates)) {
+            if (SC.none(flags)) {
                 return false;
-            }
-            return true;
-        }
-
-        if (!mappedKeys.isArray) {
-            mappedKeys = [mappedKeys];
-            commandExt.key = mappedKeys;
-        }
-
-        for (var i = 0; i < mappedKeys.length; i++) {
-            var keymap = mappedKeys[i];
-            if (typeof(keymap) == "string") {
-                if (keymap == symbolicName) {
-                    return true;
-                }
-                continue;
-            }
-
-            if (keymap.key != symbolicName) {
-                continue;
-            }
-
-            var predicates = keymap.predicates;
-
-            if (!predicates) {
-                return true;
             }
 
             for (var flagName in predicates) {
-                if (!flags || flags[flagName] != predicates[flagName]) {
+                if (flags[flagName] !== predicates[flagName]) {
                     return false;
                 }
             }
-            return true;
         }
-        return false;
+
+        // Check keys.
+        //
+        // TODO: Add another layer of indirection. Until we come up for a spec
+        // for how this will work, this will do for now.
+        var mappedKeys = commandExt.key;
+        if (SC.none(mappedKeys)) {
+            return false;
+        }
+        if (typeof(mappedKeys) === 'string') {
+            return mappedKeys === symbolicName;
+        }
+        return mappedKeys.some(function(k) { return k === symbolicName; });
     }
 });
 
