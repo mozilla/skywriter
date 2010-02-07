@@ -52,24 +52,24 @@ exports.testDistanceFromBounds = function() {
         "the distance between 1 and [-5,-2], and 3");
 };
 
-exports.testAddRectToSet = function() {
-    var resultSet = Rect.addRectToSet([
-            { x: 0, y: 0, width: 1, height: 1 },
-            { x: 2, y: 2, width: 1, height: 1 }
-        ],
-        { x: 0.5, y: 0.5, width: 2, height: 2 });
+exports.testMerge = function() {
+    var resultSet = Rect.merge([
+        { x: 0, y: 0, width: 1, height: 1 },
+        { x: 2, y: 2, width: 1, height: 1 },
+        { x: 0.5, y: 0.5, width: 2, height: 2 }
+    ]);
     t.equal(resultSet.length, 1,
-        "the number of rects in [ (0,0) (1,1), (2,2) (1,1) ] union " +
-        "(0,0) (3,3) and 1");
+        "the number of rects in the union of [ (0,0) (1,1), (2,2) (1,1), " +
+        "(0,0) (3,3) ] and 1");
     t.deepEqual(resultSet[0], { x: 0, y: 0, width: 3, height: 3 },
-        "the first rect in [ (0,0) (1,1), (2,2) (1,1) ] union (0,0) (3,3) " +
-        "and (0,0) (3,3)");
+        "the first rect in the union of [ (0,0) (1,1), (2,2) (1,1), " +
+        "(0,0) (3,3) ] and (0,0) (3,3)");
 
-    resultSet = Rect.addRectToSet([
-            { x: 0, y: 0, width: 1, height: 1 },
-            { x: 1, y: 1, width: 1, height: 1 }
-        ],
-        { x: 2, y: 0, width: 1, height: 1 });
+    resultSet = Rect.merge([
+        { x: 0, y: 0, width: 1, height: 1 },
+        { x: 1, y: 1, width: 1, height: 1 },
+        { x: 2, y: 0, width: 1, height: 1 }
+    ]);
     t.equal(resultSet.length, 3,
         "the number of rects in the result of unifying 3 non-overlapping " +
         "rects and 3");
@@ -83,6 +83,7 @@ exports.testAddRectToSet = function() {
         "the third rect in the result of unifying 3 non-overlapping rects " +
         "and the original third rect");
 };
+
 
 exports.testOffsetFromRect = function() {
     var rect = { x: 0, y: 0, width: 1, height: 1 };

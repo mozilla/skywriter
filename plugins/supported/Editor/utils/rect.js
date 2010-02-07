@@ -56,12 +56,10 @@ exports._distanceFromBounds = function(value, low, high) {
 };
 
 /**
- * Merges the given rectangle with the given set and returns the resulting set
- * of non-overlapping rectangles.
+ * Merges the rectangles in a given set and returns the resulting set of non-
+ * overlapping rectanlges.
  */
-exports.addRectToSet = function(set, rect) {
-    set = set.concat(rect);
-
+exports.merge = function(set) {
     var modified;
     do {
         modified = false;
@@ -90,7 +88,7 @@ exports.addRectToSet = function(set, rect) {
     } while (modified);
 
     return set;
-};
+},
 
 /**
  * Returns the vector representing the shortest offset between the given

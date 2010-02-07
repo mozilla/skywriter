@@ -174,7 +174,11 @@ exports.CanvasView = SC.View.extend({
         context.translate(frame.x, frame.y);
 
         var clippingFrame = this.get('clippingFrame');
-        this._cvInvalidRects.forEach(function(rect) {
+
+        var invalidRects = Rect.merge(this._cvInvalidRects);
+        this._cvInvalidRects = [];
+
+        invalidRects.forEach(function(rect) {
             context.save();
 
             rect = SC.intersectRects(rect, clippingFrame);
@@ -197,7 +201,6 @@ exports.CanvasView = SC.View.extend({
 
         context.restore();
 
-        this._cvInvalidRects = [];
         this._cvLastRedrawTime = new Date().getTime();
         return true;
     },
@@ -256,7 +259,7 @@ exports.CanvasView = SC.View.extend({
      * the canvas to be redrawn at the end of the run loop.
      */
     setNeedsDisplayInRect: function(rect) {
-        this._cvInvalidRects = Rect.addRectToSet(this._cvInvalidRects, rect);
+        this._cvInvalidRects.push(rect);
         this.set('layerNeedsUpdate', true);
     },
 
