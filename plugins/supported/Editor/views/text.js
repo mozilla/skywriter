@@ -743,6 +743,9 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         if (evt.charCode === 0) {
             return keyboardManager.processKeyEvent(evt, this,
                 { isTextView: true });
+        } else if (evt.keyCode === 9) {
+            // Stops the tab. Otherwise the editor can lose focus.
+            evt.preventDefault();
         } else {
             // This is a real keyPress event. This should not be handled,
             // otherwise the textInput mixin can't detect the key events.
