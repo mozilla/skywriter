@@ -173,9 +173,9 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
                     // TODO: replace # with invocation id
                     SC.$("#" + openId).html("#").addClass("cmd_open_history");
                 }
-                else if (mode == "time" && start) {
-                    SC.$("#" + openId).html(formatTime(start)).addClass("cmd_open_time");
-                }
+                // else if (mode == "time" && start) {
+                //     SC.$("#" + openId).html(formatTime(start)).addClass("cmd_open_time");
+                // }
                 else {
                     SC.$("#" + openId).addClass("cmd_open_blank");
                 }
