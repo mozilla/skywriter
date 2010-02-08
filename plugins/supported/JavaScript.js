@@ -58,10 +58,14 @@ exports.JSSyntax = StandardSyntax.create({
         normal: [
             {
                 regex:      /^(?:break|case|catch|continue|default|delete|do|else|false|finally|for|function|if|in|instanceof|let|new|null|return|switch|this|throw|true|try|typeof|var|void|while|with)(?![a-zA-Z0-9_])/,
-                tag:        'keyword',
+                tag:        'keyword'
             },
             {
-                regex:      /^[^'"/ \t]+/,
+                regex:      /^[A-Za-z_][A-Za-z0-9_]*/,
+                tag:        'identifier'
+            },
+            {
+                regex:      /^[^'"/ \tA-Za-z0-9_]+/,
                 tag:        'plain'
             },
             {

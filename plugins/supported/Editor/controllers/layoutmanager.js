@@ -99,6 +99,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     theme: {
         editorTextColor:            "rgb(230, 230, 230)",
         editorTextColor_comment:    "rgb(102, 102, 102)",
+        editorTextColor_identifier: "rgb(230, 230, 230)",
         editorTextColor_keyword:    "rgb(66, 168, 237)",
         editorTextColor_plain:      "rgb(230, 230, 230)",
         editorTextColor_string:     "rgb(3, 154, 10)"
