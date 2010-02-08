@@ -77,6 +77,7 @@ var KeyboardManager = SC.Object.extend({
                     console.error(ex);
                     console.trace();
                     console.groupEnd();
+                    return false;
                 }
             });
         }
@@ -117,19 +118,50 @@ var KeyboardManager = SC.Object.extend({
                 }
             }
         }
-
-        // Check keys.
-        //
-        // TODO: Add another layer of indirection. Until we come up for a spec
-        // for how this will work, this will do for now.
+        
         var mappedKeys = commandExt.key;
-        if (SC.none(mappedKeys)) {
+        if (!mappedKeys) {
             return false;
         }
-        if (typeof(mappedKeys) === 'string') {
-            return mappedKeys === symbolicName;
+        if (typeof(mappedKeys) == "string") {
+            if (mappedKeys != symbolicName) {
+                return false;
+            }
+            return true;
         }
-        return mappedKeys.some(function(k) { return k === symbolicName; });
+        
+        if (!mappedKeys.isArray) {
+            mappedKeys = [mappedKeys];
+            commandExt.key = mappedKeys;
+        }
+        
+        for (var i = 0; i < mappedKeys.length; i++) {
+            var keymap = mappedKeys[i];
+            if (typeof(keymap) == "string") {
+                if (keymap == symbolicName) {
+                    return true;
+                }
+                continue;
+            }
+            
+            if (keymap.key != symbolicName) {
+                continue;
+            }
+            
+            predicates = keymap.predicates;
+            
+            if (!predicates) {
+                return true;
+            }
+            
+            for (flagName in predicates) {
+                if (!flags || flags[flagName] != predicates[flagName]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 });
 

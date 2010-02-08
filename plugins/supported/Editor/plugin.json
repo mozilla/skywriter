@@ -11,174 +11,174 @@
             "ep": "command",
             "name": "backspace",
             "key": "backspace",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "deleteSelectionOrNextCharacter",
             "key": "delete",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "moveDown",
             "key": "down",
-            "predicates": [ "isTextView", true ],
+            "predicates": {"isTextView": true},
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "moveLeft",
             "key": "left",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "moveRight",
             "key": "right",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "moveUp",
             "key": "up",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "scrollDocStart",
             "key": "ctrl_home",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "moveDocStart",
             "key": "ctrl_up",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "selectAll",
             "key": [ "ctrl_a", "meta_a" ],
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "selectDocStart",
             "key": "ctrl_shift_up",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "scrollDocEnd",
             "key": "ctrl_end",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "moveDocEnd",
             "key": "ctrl_down",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "selectDocEnd",
             "key": "ctrl_shift_down",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "moveLineStart",
             "key": ["home", "ctrl_left"],
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "selectLineStart",
             "key": ["shift_home", "ctrl_shift_left"],
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "moveLineEnd",
             "key": ["end", "ctrl_right"],
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "selectLineEnd",
             "key": ["shift_end", "ctrl_shift_right"],
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "newline",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "scrollPageDown",
             "key": "pagedown",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "scrollPageUp",
             "key": "pageup",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "selectDown",
             "key": "shift_down",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "selectLeft",
             "key": "shift_left",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "selectRight",
             "key": "shift_right",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "selectUp",
             "key": "shift_up",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",
             "name": "tab",
             "key": "tab",
-            "predicates": [ "isTextView", true ],
+            "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
         {
