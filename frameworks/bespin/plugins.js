@@ -103,7 +103,7 @@ exports.Extension = SC.Object.extend({
         if (!pointer) {
             console.error("Extension cannot be loaded because it has no 'pointer'");
             console.log(this);
-            return;
+            return null;
         }
 
         var promise = new Promise();
@@ -246,7 +246,9 @@ exports.Plugin = SC.Object.extend({
             if (plugin && plugin.depends) {
                 plugin.depends.forEach(function(dependName) {
                     if (dependName == pluginName && !dependents[testPluginName]) {
-                        dependents[testPluginName] = true;
+                        dependents[testPluginName] = {
+                            keepModule: false
+                        };
                         plugin._findDependents(pluginList, dependents);
                     }
                 });
@@ -259,6 +261,8 @@ exports.Plugin = SC.Object.extend({
     * dependent plugins
     */
     reload: function(callback) {
+        var func, dependName;
+        
         // All reloadable plugins will have a reloadURL
         if (!this.get("reloadURL")) {
             return;
@@ -269,7 +273,7 @@ exports.Plugin = SC.Object.extend({
         var reloadPointer = this.get("reloadPointer");
         if (reloadPointer) {
             var pointer = _splitPointer(pluginName, reloadPointer);
-            var func = _retrieveObject(pointer);
+            func = _retrieveObject(pointer);
             if (func) {
                 func();
             } else {
@@ -287,11 +291,31 @@ exports.Plugin = SC.Object.extend({
         var pluginList = object_keys(this.catalog.plugins);
 
         this._findDependents(pluginList, dependents);
+        
+        var reloadDescription = {
+            pluginName: pluginName,
+            dependents: dependents
+        };
+        
+        for (dependName in dependents) {
+            var plugin = this.catalog.plugins[dependName];
+            if (plugin.preRefresh) {
+                var parts = _splitPointer(dependName, plugin.preRefresh);
+                func = _retrieveObject(parts);
+                if (func) {
+                    // the preRefresh call can return an object
+                    // that includes attributes:
+                    // keepModule (true to keep the module object)
+                    // callPointer (pointer to call at the end of reloading)
+                    dependents[dependName] = func(reloadDescription);
+                }
+            }
+        }
 
         // notify everyone that this plugin is going away
         this.unregister();
 
-        for (var dependName in dependents) {
+        for (dependName in dependents) {
             this.catalog.plugins[dependName].unregister();
         }
 
@@ -324,7 +348,11 @@ exports.Plugin = SC.Object.extend({
         var i = sandbox.modules.length;
         var dependRegexes = [];
         for (dependName in dependents) {
-            dependRegexes.push(new RegExp("^" + dependName + ":"));
+            // check to see if the module stated that it shouldn't be
+            // refreshed
+            if (!dependents[dependName].keepModule) {
+                dependRegexes.push(new RegExp("^" + dependName + ":"));
+            }
         }
 
         while (--i >= 0) {
@@ -357,15 +385,28 @@ exports.Plugin = SC.Object.extend({
                 // actually load the plugin, so that it's ready
                 // for any dependent plugins
                 tiki.async(pluginName).then(function() {
-                    // reregister all of the dependent plugins
-                    for (dependName in dependents) {
-                        self.catalog.plugins[dependName].register();
-                    }
+                    SC.run(function() {
+                        // reregister all of the dependent plugins
+                        for (dependName in dependents) {
+                            self.catalog.plugins[dependName].register();
+                        }
 
-                    if (callback) {
-                        // at long last, reloading is done.
-                        callback();
-                    }
+                        for (dependName in dependents) {
+                            if (dependents[dependName].callPointer) {
+                                var parts = _splitPointer(dependName, 
+                                    dependents[dependName].callPointer);
+                                func = _retrieveObject(parts);
+                                if (func) {
+                                    func(reloadDescription);
+                                }
+                            }
+                        }
+
+                        if (callback) {
+                            // at long last, reloading is done.
+                            callback();
+                        }
+                    });
                 });
             }
         );

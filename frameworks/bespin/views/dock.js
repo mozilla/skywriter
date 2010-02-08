@@ -82,6 +82,13 @@ exports.DockView = SC.View.extend({
         dockedViews[index] = dockedView;
         return dockedView;
     },
+    
+    removeDockedView: function(view) {
+        var dockedViews = this.get("dockedViews");
+        dockedViews.removeObject(view);
+        this.removeChild(view);
+        this._updateChildLayout();
+    },
 
     createChildViews: function() {
         var centerView = this.createChildView(this.get('centerView'), {
