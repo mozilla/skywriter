@@ -429,6 +429,9 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
                 map(function(range) {
                     var tag = range.tag;
                     var color = theme["editorTextColor_" + tag];
+                    if (SC.none(color)) {
+                        color = theme.editorTextColor_plain;
+                    }
                     return {
                         start:  range.start,
                         end:    range.end,
