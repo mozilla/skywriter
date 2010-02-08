@@ -38,7 +38,9 @@ main = function() {
             }
 
             tiki.async('EditorApp').then(function() {
-                tiki.require("EditorApp");
+                SC.run(function() {
+                    tiki.require("EditorApp");
+                });
             });
         });
 };
