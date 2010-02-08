@@ -37,20 +37,34 @@
 
 var pathUtil = require("Filesystem:path");
 
+/*
+ * Creates a path based on the current open file, if there is
+ * no leading slash.
+ */
+var getCompletePath = function(env, path) {
+    if (path == null) {
+        path = "";
+    }
+    
+    if (path == null || path.substring(0, 1) != "/") {
+        var file = env.get("file");
+        if (!file) {
+            path = "/" + path;
+        } else {
+            path = file.get("dirname") + path;
+        }
+    }
+    
+    return path;
+};
+
 /**
  * 'files' command
  */
 exports.filesCommand = function(env, args, request) {
     var path = args.path;
     
-    if (path == null) {
-        var file = env.get("file");
-        if (!file) {
-            path = "/";
-        } else {
-            path = file.get("dirname");
-        }
-    }
+    path = getCompletePath(env, path);
     
     if (!pathUtil.isDir(path)) {
         path += "/";
@@ -125,9 +139,12 @@ exports.saveCommand = function(env, args, request) {
 exports.openCommand = function(env, args) {
     var files = env.get("files");
     var buffer = env.get("buffer");
+    
+    var path = args.path;
+    path = getCompletePath(env, path);
 
     // TODO: handle line number in args
-    var file = files.getObject(args.path);
+    var file = files.getObject(path);
     buffer.set("file", file);
 };
 

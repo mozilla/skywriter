@@ -39,6 +39,7 @@ var source = exports.source = DummyFileSource.create({
         {name: "foo/"},
         {name: "foo/1.txt", contents: "firsttext"},
         {name: "foo/2.txt", contents: "secondtext"},
+        {name: "foo/bar/3.txt", contents: "thirdtext"},
         {name: "deeply/nested/directory/andAFile.txt", contents: "text file"}
     ]
 });
@@ -49,11 +50,22 @@ var getNewRoot = function() {
     });
 };
 
-exports.testFilesCommand = function() {
+var getEnv = function() {
     var root = getNewRoot();
-    var env = Environment.create({
-        files: root
+    var buffer = EditSession.Buffer.create();
+    
+    var session = EditSession.EditSession.create({
+        currentBuffer: buffer
     });
+    var env = Environment.create({
+        files: root,
+        session: session
+    });
+    return env;
+};
+
+exports.testFilesCommand = function() {
+    var env  = getEnv();
     request = Request.create();
     var testpr = new Promise();
     request.promise.then(function() {
@@ -70,15 +82,7 @@ exports.testFilesCommand = function() {
 };
 
 exports.testFilesCommandDefaultsToRoot = function() {
-    var root = getNewRoot();
-    var buffer = EditSession.Buffer.create();
-    var session = EditSession.EditSession.create({
-        currentBuffer: buffer
-    });
-    var env = Environment.create({
-        files: root,
-        session: session
-    });
+    var env = getEnv();
     
     var testpr = new Promise();
     
@@ -96,17 +100,9 @@ exports.testFilesCommandDefaultsToRoot = function() {
 };
 
 exports.testFilesAreRelativeToCurrentOpenFile = function() {
-    var root = getNewRoot();
-    var buffer = EditSession.Buffer.create();
-    buffer.changeFileOnly(root.getObject("foo/1.txt"));
-    
-    var session = EditSession.EditSession.create({
-        currentBuffer: buffer
-    });
-    var env = Environment.create({
-        files: root,
-        session: session
-    });
+    var env = getEnv();
+    var buffer = env.get("buffer");
+    buffer.changeFileOnly(env.get("files").getObject("foo/1.txt"));
     
     var testpr = new Promise();
     
@@ -120,5 +116,22 @@ exports.testFilesAreRelativeToCurrentOpenFile = function() {
     });
     
     FileCommands.filesCommand(env, {path: null}, request);
+    return testpr;
+};
+
+exports.testFilesListingInDirectoryRelativeToOpenFile = function() {
+    var env = getEnv();
+    var buffer = env.get("buffer");
+    buffer.changeFileOnly(env.get("files").getObject("foo/1.txt"));
+    var testpr = new Promise();
+    
+    request = Request.create();
+    request.promise.then(function() {
+        output = request.outputs.join("");
+        t.ok(output.indexOf("3.txt<br/>") > -1, "3.txt should be in the output");
+        testpr.resolve();
+    });
+    
+    FileCommands.filesCommand(env, {path: "bar/"}, request);
     return testpr;
 };
