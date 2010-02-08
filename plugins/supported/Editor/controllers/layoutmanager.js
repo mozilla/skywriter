@@ -177,6 +177,9 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
             newTextLines);
         this._recalculateMaximumWidth();
 
+        // Take the cached attributes from the syntax manager.
+        this.updateTextRows(oldStartRow, newEndRow + 1);
+
         this.notifyDelegates('layoutManagerChangedTextAtRow', oldStartRow);
 
         var invalidRects = this._computeInvalidRects(oldRange, newRange);

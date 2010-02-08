@@ -374,7 +374,7 @@ exports.SyntaxManager = SC.Object.extend({
                                 _attributeRangesEqual(oldAttrRange,
                                 computedAttrRange)) {
                             // Successfully synchronized!
-                            var lastModifiedRow = row + 1;
+                            var lastModifiedRow = index === 0 ? row : row + 1;
                             promise.resolve(lastModifiedRow);
                             return false;
                         }
