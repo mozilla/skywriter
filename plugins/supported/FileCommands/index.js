@@ -136,7 +136,7 @@ exports.saveCommand = function(env, args, request) {
 /**
  * 'open' command
  */
-exports.openCommand = function(env, args) {
+exports.openCommand = function(env, args, request) {
     var files = env.get("files");
     var buffer = env.get("buffer");
     
@@ -145,7 +145,16 @@ exports.openCommand = function(env, args) {
 
     // TODO: handle line number in args
     var file = files.getObject(path);
-    buffer.set("file", file);
+    buffer.changeFile(file).then(
+        function() { 
+            request.done();
+        },
+        function(error) {
+            request.doneWithError("Unable to open the file (" +
+                error.message + ")");
+        }
+    );
+    request.async();
 };
 
 /**

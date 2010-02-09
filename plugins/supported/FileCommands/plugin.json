@@ -44,7 +44,7 @@
                 }
             ],
             "description": "save the current contents",
-            "key": "meta_s",
+            "key": "ctrl_s",
             "pointer": "#saveCommand"
         },
         {
