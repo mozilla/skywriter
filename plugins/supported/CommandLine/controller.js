@@ -106,10 +106,9 @@ exports.cliController = SC.Object.create({
                     description: input.commandExt.name + ": " + input.commandExt.description
                 });
             } else {
-                hintPromise = typehint.getHint({
-                    type: "text",
-                    description: "We should be able to get help on " + input.parts.join(":")
-                });
+                this._assign(input);
+                var assignment = this._getAssignmentForLastArg(input);
+                hintPromise = typehint.getHint(assignment.param);
             }
         }
         else if (input.commandExts.length === 0) {
@@ -260,11 +259,32 @@ exports.cliController = SC.Object.create({
     },
 
     /**
+     * Does the typed command match this command extension.
+     * TODO: upgrade for sub-commands
+     */
+    _commandMatches: function(commandExt, parts) {
+        if (!commandExt.description) {
+            return false;
+        }
+
+        if (commandExt.hidden) {
+            return false;
+        }
+
+        var prefix = commandExt.name.substring(0, parts[0].length);
+        if (prefix !== parts[0]) {
+            return false;
+        }
+
+        return true;
+    },
+
+    /**
      * Work out which arguments are applicable to which parameters
      */
     _assign: function(input) {
         // TODO: something smarter than just assuming that they are all in order
-        input.untypedArgs = {};
+        input.assignments = {};
         var index = 0;
 
         input.commandExt.params.forEach(function(param) {
@@ -272,7 +292,9 @@ exports.cliController = SC.Object.create({
 
             // Warning null != undefined. See docs for _getValueForParam()
             if (value !== undefined) {
-                input.untypedArgs[param] = {
+                // This is an assignment - i.e. a value that matches a parameter
+                // See also _getAssignmentForLastArg()
+                input.assignments[param.name] = {
                     value: value,
                     param: param,
                     index: index
@@ -281,6 +303,47 @@ exports.cliController = SC.Object.create({
 
             index++;
         }.bind(this));
+    },
+
+    /**
+     * Extract a value from the set of inputs for a given param.
+     * @param param The param that we are providing a value for. This is taken
+     * from the command meta-data for the commandExt in question.
+     * @param index The number of the param - i.e. the index of <tt>param</tt>
+     * into the original params array.
+     * @param input The data from parsing the command line input
+     * @param defaultValue The value to use if no data has been provided in the
+     * input. This will be either <tt>param.defaultValue</tt> to use the value
+     * specified in the meta-data (useful in actual command execution). Or it
+     * might be <tt>undefined</tt> when we're providing hints as we go along and
+     * are only interested in what the user actually typed. It is common for
+     * params to specify <tt>param.defaultValue = null</tt> to denote that the
+     * parameter is optional.
+     * @return The value for the specified parameter or <tt>defaultValue</tt>
+     * if none could be assigned.
+     */
+    _getValueForParam: function(param, index, input, defaultValue) {
+        // TODO: something to take into account --params.
+        if (input.unparsedArgs.length > index) {
+            return input.unparsedArgs[index];
+        } else {
+            return defaultValue;
+        }
+    },
+
+    /**
+     * Get the parameter, index and value for the last thing the user typed
+     * @see _assign()
+     */
+    _getAssignmentForLastArg: function(input) {
+        var highestAssign;
+        for (var name in input.assignments) {
+            var assign = input.assignments[name];
+            if (!highestAssign || assign.index > highestAssign) {
+                highestAssign = assign;
+            }
+        }
+        return highestAssign;
     },
 
     /**
@@ -324,52 +387,5 @@ exports.cliController = SC.Object.create({
             reply.resolve(argOutputs);
         });
         return reply;
-    },
-
-    /**
-     * Extract a value from the set of inputs for a given param.
-     * @param param The param that we are providing a value for. This is taken
-     * from the command meta-data for the commandExt in question.
-     * @param index The number of the param - i.e. the index of <tt>param</tt>
-     * into the original params array.
-     * @param input The data from parsing the command line input
-     * @param defaultValue The value to use if no data has been provided in the
-     * input. This will be either <tt>param.defaultValue</tt> to use the value
-     * specified in the meta-data (useful in actual command execution). Or it
-     * might be <tt>undefined</tt> when we're providing hints as we go along and
-     * are only interested in what the user actually typed. It is common for
-     * params to specify <tt>param.defaultValue = null</tt> to denote that the
-     * parameter is optional.
-     * @return The value for the specified parameter or <tt>defaultValue</tt>
-     * if none could be assigned.
-     */
-    _getValueForParam: function(param, index, input, defaultValue) {
-        // TODO: something to take into account --params.
-        if (input.unparsedArgs.length > index) {
-            return input.unparsedArgs[index];
-        } else {
-            return defaultValue;
-        }
-    },
-
-    /**
-     * Does the typed command match this command extension.
-     * TODO: upgrade for sub-commands
-     */
-    _commandMatches: function(commandExt, parts) {
-        if (!commandExt.description) {
-            return false;
-        }
-
-        if (commandExt.hidden) {
-            return false;
-        }
-
-        var prefix = commandExt.name.substring(0, parts[0].length);
-        if (prefix !== parts[0]) {
-            return false;
-        }
-
-        return true;
     }
 });

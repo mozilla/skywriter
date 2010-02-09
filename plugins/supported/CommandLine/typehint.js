@@ -39,6 +39,8 @@ var catalog = require("bespin:plugins").catalog;
 var Promise = require("bespin:promise").Promise;
 var types = require("Types:types");
 
+var r = require;
+
 /**
  * Asynchronously find a UI component to match a typeSpec
  */
@@ -96,9 +98,13 @@ exports.getTypeExt = function(typeSpec) {
                 typeExt.data = JSON.parse(data);
                 promise.resolve(typeExt);
             } else {
-                var r = require;
-                r(data).async(function(func) {
-                    typeExt.data = func();
+                var parts = data.split("#");
+                var modName = parts.shift();
+                var objName = parts.join("#");
+
+                r.loader.async(modName).then(function() {
+                    var module = r(modName);
+                    typeExt.data = module[objName]();
                     promise.resolve(typeExt);
                 });
             }
