@@ -64,8 +64,8 @@ exports.EditorUndoController = SC.Object.extend({
     _beginTransaction: function() {
         if (this._inTransaction) {
             console.trace();
-            throw "UndoController._beginTransaction() called with a " +
-                "transaction already in place";
+            throw new Error("UndoController._beginTransaction() called with a " +
+                "transaction already in place");
         }
 
         this._inTransaction = true;
@@ -74,8 +74,8 @@ exports.EditorUndoController = SC.Object.extend({
 
     _endTransaction: function() {
         if (!this._inTransaction) {
-            throw "UndoController._endTransaction() called without a " +
-                "transaction in place";
+            throw new Error("UndoController._endTransaction() called without a " +
+                "transaction in place");
         }
 
         undoManager.registerUndo(this, this._record);
@@ -97,7 +97,7 @@ exports.EditorUndoController = SC.Object.extend({
             // Can't think of any reason why this should be supported, and it's
             // often an indication that someone forgot an endTransaction()
             // call somewhere...
-            throw "UndoController._undoOrRedo() called while in a transaction";
+            throw new Error("UndoController._undoOrRedo() called while in a transaction");
         }
 
         if (!this._tryApplyingPatches(patches)) {
@@ -131,8 +131,8 @@ exports.EditorUndoController = SC.Object.extend({
 
     textViewReplacedCharacters: function(sender, oldRange, characters) {
         if (!this._inTransaction) {
-            throw "UndoController.textViewReplacedCharacters() called " +
-                "outside a transaction";
+            throw new Error("UndoController.textViewReplacedCharacters()" +
+                " called outside a transaction");
         }
 
         this._record.patches.push({
@@ -149,8 +149,8 @@ exports.EditorUndoController = SC.Object.extend({
 
     textViewWillReplaceRange: function(sender, oldRange) {
         if (!this._inTransaction) {
-            throw "UndoController.textViewWillReplaceRange() called outside " +
-                "a transaction";
+            throw new Error("UndoController.textViewWillReplaceRange() called" +
+                " outside a transaction");
         }
 
         this._deletedCharacters = this.getPath('textView.layoutManager.' +

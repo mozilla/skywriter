@@ -60,10 +60,10 @@
 // TODO: re-implement this:
 var webpieces = {
     showCenterPopup: function() {
-        throw "webpieces.showCenterPopup not implemented";
+        throw new Error("webpieces.showCenterPopup not implemented");
     },
     hideCenterPopup: function() {
-        throw "webpieces.showCenterPopup not implemented";
+        throw new Error("webpieces.showCenterPopup not implemented");
     }
 };
 

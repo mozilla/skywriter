@@ -11,8 +11,15 @@
         {
             "ep": "extensionpoint",
             "description": "A Choice is something that the application offers as a way to customize how it works",
-            "name": "choice",
+            "name": "setting",
             "register": "memory#addSetting"
+        },
+        {
+            "ep": "setting",
+            "name": "test",
+            "description": "A test setting",
+            "type": { "name": "selection", "data": [ "aa", "bb", "cc" ] },
+            "defaultValue": "bb"
         },
         {
             "ep": "command",
@@ -20,9 +27,9 @@
             "params":
             [
                 {
-                    "name": "choice",
+                    "name": "setting",
                     "type": "selection:Settings:memory#getSettingNames",
-                    "description": "The name of the choice to display or alter",
+                    "description": "The name of the setting to display or alter",
                     "defaultValue": null
                 },
                 {
@@ -41,9 +48,9 @@
             "params":
             [
                 {
-                    "name": "key",
+                    "name": "setting",
                     "type": "text",
-                    "description": "The name of the choice to return to defaults"
+                    "description": "The name of the setting to return to defaults"
                 }
             ],
             "description": "unset a setting entirely",

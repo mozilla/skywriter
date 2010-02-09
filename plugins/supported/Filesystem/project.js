@@ -180,15 +180,15 @@ var isURL = function(url) {
  */
 var dojo = {
     connect: function() {
-        throw "Find an alternative for dojo.connect()";
+        throw new Error("Find an alternative for dojo.connect()");
     },
     disconnect: function() {
-        throw "Find an alternative for dojo.disconnect()";
+        throw new Error("Find an alternative for dojo.disconnect()");
     },
     io: {
         iframe: {
             send: function() {
-                throw "Find an alternative for dojo.io.iframe.send()";
+                throw new Error("Find an alternative for dojo.io.iframe.send()");
             }
         }
     }

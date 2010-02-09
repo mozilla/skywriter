@@ -456,8 +456,8 @@ exports.Catalog = SC.Object.extend({
         } else if (action == "value") {
             obj = exported;
         } else {
-            throw "Create action must be call|create|new|value. " +
-                    "Found" + action;
+            throw new Error("Create action must be call|create|new|value. " +
+                    "Found" + action);
         }
 
         ext.set("instance", obj);

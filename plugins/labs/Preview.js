@@ -27,7 +27,7 @@
     "depends": [ ],
     "provides": [
         {
-            "ep": "choice",
+            "ep": "setting",
             "name": "preview",
             "description": "Add a setting to alter how previews are displayed",
             "type": "text",
@@ -78,16 +78,16 @@ exports.previewCommand = function(env, args, request) {
  */
 var dojo = {
     connect: function() {
-        throw "Find an alternative for dojo.connect()";
+        throw new Error("Find an alternative for dojo.connect()");
     },
     disconnect: function() {
-        throw "Find an alternative for dojo.disconnect()";
+        throw new Error("Find an alternative for dojo.disconnect()");
     },
     style: function() {
-        throw "Find an alternative for dojo.style()";
+        throw new Error("Find an alternative for dojo.style()");
     },
     create: function() {
-        throw "Find an alternative for dojo.create()";
+        throw new Error("Find an alternative for dojo.create()");
     }
 };
 

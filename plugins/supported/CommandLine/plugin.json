@@ -57,11 +57,11 @@
             "pointer": "commands#historyCommand"
         },
         {
-            "ep": "choice",
+            "ep": "setting",
             "name": "historytimemode",
             "description": "Display number|date|none next to each historical instruction",
-            "type": "text",
-            "defaultValue": "time"
+            "type": { "name": "selection", "data": [ "number", "date", "none" ] },
+            "defaultValue": "none"
         },
         {
             "ep": "command",

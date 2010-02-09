@@ -97,7 +97,7 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
                 { row: row + 1, column: 0           } :
                 { row: row,     column: column + 1  };
         default:
-            throw "TextStorage.displacePosition(): count must be 1 or -1";
+            throw new Error("TextStorage.displacePosition(): count must be 1 or -1");
         }
     },
 

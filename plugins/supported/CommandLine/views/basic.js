@@ -43,15 +43,25 @@ var cliController = require("controller").cliController;
  * selection.
  */
 exports.selection = {
-    getHint: function(description, typeExt) {
-        if (typeExt.data == null) {
-            throw "Missing options for selection";
+    getHint: function(description, typeExt, filter) {
+        var data = typeExt.data;
+        if (!data) {
+            console.error("Missing data for selection type");
+            data = [];
         }
+
         var parent = document.createElement("div");
         parent.appendChild(document.createTextNode(description));
+
         var index = 0;
-        typeExt.data.forEach(function(option) {
-            if (index !== 0) {
+        data.forEach(function(option) {
+            if (filter && option.substring(0, filter.length) != filter) {
+                return;
+            }
+
+            if (index === 0) {
+                parent.appendChild(document.createTextNode(": "));
+            } else {
                 parent.appendChild(document.createTextNode(", "));
             }
             var link = document.createElement("a");

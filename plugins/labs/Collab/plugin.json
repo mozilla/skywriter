@@ -1,7 +1,7 @@
 {
     "provides": [
         {
-            "ep": "choice"
+            "ep": "setting"
             "name": "collaborate",
             "description": "Add a setting to turn collaboration mode on/off",
             "type": "boolean",

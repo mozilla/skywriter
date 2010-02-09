@@ -117,7 +117,8 @@ exports.object = {
  */
 exports.selection = {
     isValid: function(value, typeExt) {
-        return typeof value == "object";
+        // TODO: optimistic sync/async validation??
+        return typeof value == "string";
     },
 
     toString: function(value, typeExt) {

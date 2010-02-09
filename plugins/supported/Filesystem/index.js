@@ -34,39 +34,39 @@ var READY = exports.READY = {name: "READY"};
 exports.Directory = SC.Object.extend({
     // the FileSource that is used for this directory
     source: null,
-    
+
     // the parent of this directory, null if this is a root
     parent: null,
-    
+
     // name of this directory -- does not include the parent segments
     name: null,
-    
+
     // set of subdirectories
     directories: null,
-    
+
     // set of files
     files: null,
-    
+
     // whether or not we have data for this directory
     status: NEW,
-    
+
     contents: function() {
         return this.get("directories").concat(this.get("files"));
     }.property('directories', 'files').cacheable(),
-    
+
     init: function() {
         var source = this.get("source");
         if (typeof(source) == "string") {
             this.set("source", SC.objectForPropertyPath(source));
         }
-        
+
         if (!this.get("source")) {
-            throw "Directory must have a source.";
+            throw new Error("Directory must have a source.");
         }
-        
+
         if (this.get("name") == null) {
             if (this.get("parent") != null) {
-                throw "Directories must have a name, except for the root";
+                throw new Error("Directories must have a name, except for the root");
             }
             this.set("name", "/");
         }
@@ -77,13 +77,13 @@ exports.Directory = SC.Object.extend({
             this.set("files", []);
         }
     },
-    
+
     /*
     * Populates this directory object asynchronously with data.
     * If everything goes well, onSuccess is called with this directory
     * object as the argument. Otherwise, onFailure is called with an
     * error object containing, at the least, "message".
-    * 
+    *
     * Call loadDirectory on the FileSource with the parameters
     * path, directory handler delegate (this), and the onSuccess and onFailure
     * callbacks.
@@ -111,7 +111,7 @@ exports.Directory = SC.Object.extend({
         );
         return pr;
     },
-    
+
     /*
     * Retrieve the object at the path given, and load it (if it's
     * a directory)
@@ -134,7 +134,7 @@ exports.Directory = SC.Object.extend({
             return pr;
         }
     },
-    
+
     _getItem: function(name) {
         var isDir = util.endsWith(name, "/");
         var collection;
@@ -145,7 +145,7 @@ exports.Directory = SC.Object.extend({
         }
         return collection.findProperty("name", name);
     },
-    
+
     /*
     * Retrieves an object (File or Directory) under this Directory
     * at the path given. If necessary, it will create objects along
@@ -177,7 +177,7 @@ exports.Directory = SC.Object.extend({
             }
             curDir = nextDir;
         }
-        
+
         var lastSegment = segments[i];
         if (isDir) {
             lastSegment += "/";
@@ -204,7 +204,7 @@ exports.Directory = SC.Object.extend({
         }
         return retval;
     },
-    
+
     path: function() {
         var parent = this.get("parent");
         if (parent) {
@@ -212,27 +212,27 @@ exports.Directory = SC.Object.extend({
         }
         return this.get("name");
     }.property().cacheable(),
-    
+
     /*
     * The originPath finds the path within the same file source.
     * So, if you have a hierarchy of directories built from different
     * sources, this path is guaranteed to only include the parts of
     * the path from the same source as this directory.
-    * 
+    *
     * If you're looking up a file on a server, for example, you would
     * use this path.
-    * 
+    *
     * At the moment, originPath is not truly implemented (it just returns
     * the path). However, filesources should use this.
     */
     originPath: function() {
         return this.get("path");
     }.property().cacheable(),
-    
+
     toString: function() {
         return "Directory " + this.get("name");
     },
-    
+
     /*
     * Generally by a FileSource to put the data in this Directory.
     * It contains an array of objects. Each one needs to minimally have
@@ -267,38 +267,38 @@ exports.Directory = SC.Object.extend({
 exports.File = SC.Object.extend({
     // the directory this belongs to
     directory: null,
-    
+
     // name of this file, does not include directory
     name: null,
-    
+
     source: function() {
         return this.get("directory").get("source");
     }.property(),
-    
+
     path: function() {
         return pathUtil.combine(this.get("directory").get("path"), this.get("name"));
     }.property().cacheable(),
-    
+
     dirname: function() {
         return this.get("directory").get("path");
     }.property().cacheable(),
-    
+
     ext: function() {
         return pathUtil.fileType(this.get("name"));
     }.property(),
-    
+
     /*
     * See Directory.originPath
     */
     originPath: function() {
         return this.get("path");
     }.property().cacheable(),
-        
+
     loadContents: function() {
         var source = this.get("source");
         return source.loadContents(this);
     },
-    
+
     saveContents: function(newcontents) {
         var source = this.get("source");
         return source.saveContents(this, newcontents);
@@ -347,7 +347,7 @@ exports.FileSystemOld = SC.Object.extend({
                 if (util.isFunction(onFailure)) {
                     onFailure({ responseText:"The file " + path + " already exists my friend." });
                 }
-                throw "The file " + path + " already exists my friend.";
+                throw new Error("The file " + path + " already exists my friend.");
             }
         });
     },
@@ -401,7 +401,7 @@ exports.FileSystemOld = SC.Object.extend({
         scope = scope || defaultScope();
 
         if (!project || !filename) {
-            throw "Please, I need a project and filename to evaulate";
+            throw new Error("Please, I need a project and filename to evaulate");
         }
 
         this.loadContents(project, filename, function(file) {
@@ -410,7 +410,7 @@ exports.FileSystemOld = SC.Object.extend({
                 try {
                     eval(file.content);
                 } catch (e) {
-                    throw "There is a error trying to run " + filename + " in project " + project + ": " + e;
+                    throw new Error("There is a error trying to run " + filename + " in project " + project + ": " + e);
                 }
             }
         }, true);

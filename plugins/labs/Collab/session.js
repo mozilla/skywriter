@@ -107,7 +107,7 @@ var ShareNode = SC.Object.extend({
     getClientText: function(allowUnsynced) {
         if (!allowUnsynced && this.onFirstSync) {
             console.trace();
-            throw "Attempt to getClientText() before onFirstSync() called.";
+            throw new Error("Attempt to getClientText() before onFirstSync() called.");
         }
         return this.session._getDocument();
     },

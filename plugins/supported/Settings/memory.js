@@ -52,7 +52,8 @@ exports.addSetting = function(settingExt) {
 };
 
 /**
- *
+ * Fetch an array of the currently known setting names
+ * @see MemorySettings._getSettingNames()
  */
 exports.getSettingNames = function() {
     return catalog.getObject("settings")._getSettingNames();
@@ -92,7 +93,7 @@ exports.MemorySettings = SC.Object.extend({
     },
 
     /**
-     * Function to add to the list of available choices.
+     * Function to add to the list of available settings.
      * <p>Example usage:
      * <pre>
      * var settings = require("bespin:plugins").catalog.getObject("settings");
@@ -102,29 +103,27 @@ exports.MemorySettings = SC.Object.extend({
      *     defaultValue: 4  // Default value for use when none is directly set
      * });
      * </pre>
-     * @param {object} choice Object containing name/type/defaultValue members.
+     * @param {object} settingExt Object containing name/type/defaultValue members.
      */
     addSetting: function(settingExt) {
         if (!settingExt.name) {
-            throw "Settings need 'name' members";
+            console.error("Setting.name == undefined. Ignoring.", settingExt);
+            return;
+        }
+
+        if (!settingExt.defaultValue === undefined) {
+            console.error("Setting.defaultValue == undefined", settingExt);
         }
 
         types.getTypeExt(settingExt.type).then(function(typeExt) {
             if (!typeExt) {
-                throw "choice.type should be one of " +
-                        "[" + this._getSettingNames().join("|") + "]. " +
-                        "Got " + settingExt.type;
-            }
-
-            if (!settingExt.defaultValue === undefined) {
-                throw "Settings need 'defaultValue' members";
+                console.error("Setting.type is invalid", settingExt);
             }
 
             // Load the type so we can check the validator
-            typeExt.load(function(type) {
+            typeExt.load().then(function(type) {
                 if (!type.isValid(settingExt.defaultValue)) {
-                    throw "Default value " + settingExt.defaultValue +
-                            " is not a valid " + settingExt.type;
+                    console.error("Setting.isValid(Setting.defaultValue) == false", settingExt);
                 }
 
                 // Set the default value up.
@@ -142,11 +141,11 @@ exports.MemorySettings = SC.Object.extend({
      * Reset the value of the <code>key</code> setting to it's default
      */
     resetValue: function(key) {
-        var setting = choice._settings[key];
-        if (setting) {
-            this.set(key, setting.defaultValue);
+        var settingExt = catalog.getExtensionByKey("type", key);
+        if (settingExt) {
+            this.set(key, settingExt.defaultValue);
         } else {
-            delete this.ignored[key];
+            console.log("ignore resetValue on ", key);
         }
     },
 
@@ -166,10 +165,10 @@ exports.MemorySettings = SC.Object.extend({
      */
     _list: function() {
         var reply = [];
-        this._getSettingNames().forEach(function(key) {
+        this._getSettingNames().forEach(function(setting) {
             reply.push({
-                'key': prop,
-                'value': this.get(prop)
+                'key': setting,
+                'value': this.get(setting)
             });
         }.bind(this));
         return reply;

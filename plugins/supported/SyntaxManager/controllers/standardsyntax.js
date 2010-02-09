@@ -87,7 +87,7 @@ exports.StandardSyntax = SC.Object.extend({
         var state = contextInfo.state;
         var states = this.get('states');
         if (states[state] === undefined) {
-            throw "StandardSyntax: no such state '%@'".fmt(state);
+            throw new Error("StandardSyntax: no such state '%@'".fmt(state));
         }
 
         var alternations = states[state];

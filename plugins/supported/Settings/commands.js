@@ -45,7 +45,7 @@ var settings = catalog.getObject("settings");
 exports.setCommand = function(env, args, request) {
     var html;
 
-    if (!args.choice) {
+    if (!args.setting) {
         var settingsList = settings._list();
         html = "";
         // first sort the settingsList based on the key
@@ -71,17 +71,11 @@ exports.setCommand = function(env, args, request) {
                     "<br/>";
         });
     } else {
-        var key = args.key;
-        if (args.value === undefined) { // show it
-            var value = settings.get("key");
-            if (value) {
-                html = "<strong>" + key + "</strong> = " + value;
-            } else {
-                html = "You do not have a setting for '" + key + "'";
-            }
+        if (args.value === undefined) {
+            html = "<strong>" + args.setting + "</strong> = " + settings.get(args.setting);
         } else {
-            html = "Saving setting: <strong>" + key + "</strong> = " + args.value;
-            settings.set("key", args.value);
+            html = "Setting: <strong>" + args.setting + "</strong> = " + args.value;
+            settings.set(args.setting, args.value);
         }
     }
 
@@ -92,13 +86,6 @@ exports.setCommand = function(env, args, request) {
  * 'unset' command
  */
 exports.unsetCommand = function(env, args, request) {
-    var html;
-    if (!settings.get("args").key) {
-        html = "No setting for " + args.key + ".";
-    } else {
-        settings.resetValue(args.key);
-        html = "Unset the setting for " + args.key + ".";
-    }
-
-    request.done(html);
+    settings.resetValue(args.setting);
+    request.done("Reset " + args.setting + " to default: " + settings.get(args.setting));
 };

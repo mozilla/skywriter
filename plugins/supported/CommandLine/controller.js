@@ -95,20 +95,28 @@ exports.cliController = SC.Object.create({
 
         var hintPromise;
 
-        // 4. Move hints into _tokenize, _split, etc
+        // - Move hints into _tokenize, _split, etc
+        // - Remove the commandExts code - the hint can do that now
 
         if (input.commandExt) {
             // We know what the command is.
             if (input.parts.length === 1) {
-                // We've not started on any params yet, help on the command
-                hintPromise = typehint.getHint({
-                    type: "text",
-                    description: input.commandExt.name + ": " + input.commandExt.description
-                });
+                // If we've typed exactly the command, get on with completion
+                // of the first parameter of that command
+                if (input.typed == input.commandExt.name &&
+                        input.commandExt.params.length > 0) {
+                    // We've not started on any params yet, help on the command
+                    hintPromise = typehint.getHint({
+                        type: "text",
+                        description: input.commandExt.name + ": " + input.commandExt.description
+                    });
+                } else {
+                    hintPromise = typehint.getHint(input.commandExt.params[0]);
+                }
             } else {
                 this._assign(input);
                 var assignment = this._getAssignmentForLastArg(input);
-                hintPromise = typehint.getHint(assignment.param);
+                hintPromise = typehint.getHint(assignment.param, assignment.value);
             }
         }
         else if (input.commandExts.length === 0) {
@@ -129,7 +137,7 @@ exports.cliController = SC.Object.create({
 
             hintPromise = typehint.getHint({
                 type: { name: "selection", data: options },
-                description: "Commands: "
+                description: "Commands"
             });
         }
 
@@ -198,7 +206,7 @@ exports.cliController = SC.Object.create({
                     console.trace();
                     console.groupEnd();
                 }
-            });
+            }.bind(this));
         });
     },
 
@@ -339,7 +347,7 @@ exports.cliController = SC.Object.create({
         var highestAssign;
         for (var name in input.assignments) {
             var assign = input.assignments[name];
-            if (!highestAssign || assign.index > highestAssign) {
+            if (!highestAssign || assign.index > highestAssign.index) {
                 highestAssign = assign;
             }
         }

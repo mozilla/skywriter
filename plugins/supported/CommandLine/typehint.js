@@ -44,7 +44,7 @@ var r = require;
 /**
  * Asynchronously find a UI component to match a typeSpec
  */
-exports.getHint = function(typeData) {
+exports.getHint = function(typeData, filter) {
     var promise = new Promise();
     var hintEle;
 
@@ -57,7 +57,7 @@ exports.getHint = function(typeData) {
 
         typeExt.load(function(type) {
             if (typeof type.getHint === "function") {
-                hintEle = type.getHint(typeData.description, typeExt);
+                hintEle = type.getHint(typeData.description, typeExt, filter);
             } else {
                 hintEle = createDefaultHint(typeData.description);
             }

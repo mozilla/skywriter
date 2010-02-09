@@ -27,21 +27,21 @@
     "depends": [ ],
     "provides": [
         {
-            "ep": "choice",
+            "ep": "setting",
             "name": "syntaxmarkers",
             "description": "Unknown",
             "type": "text",
             "defaultValue": "all"
         },
         {
-            "ep": "choice",
+            "ep": "setting",
             "name": "jslint",
             "description": "A setting to turn jslint parsing on or off",
             "type": "text",
             "defaultValue": ""
         },
         {
-            "ep": "choice",
+            "ep": "setting",
             "name": "syntaxcheck",
             "description": "A setting to turn syntax checking of a file on/off",
             "type": "boolean",

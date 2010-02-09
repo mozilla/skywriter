@@ -62,8 +62,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     _beginChangeGroup: function() {
         if (this._inChangeGroup) {
-            throw "TextView._beginChangeGroup() called while already in a " +
-                "change group";
+            throw new Error("TextView._beginChangeGroup() called while" +
+                " already in a change group");
         }
 
         this._inChangeGroup = true;
@@ -200,8 +200,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     _endChangeGroup: function() {
         if (!this._inChangeGroup) {
-            throw "TextView._endChangeGroup() called while not in a change " +
-                "group";
+            throw new Error("TextView._endChangeGroup() called while not" +
+                " in a change group");
         }
 
         this._inChangeGroup = false;
@@ -351,8 +351,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     _replaceCharacters: function(oldRange, characters) {
         if (!this._inChangeGroup) {
-            throw "TextView._replaceCharacters() called without a change " +
-                "group";
+            throw new Error("TextView._replaceCharacters() called without" +
+                " a change group");
         }
         oldRange = Range.normalizeRange(oldRange);
         this.notifyDelegates('textViewWillReplaceRange', oldRange);
@@ -934,7 +934,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             this._insertText(text);
         }
     },
-    
+
     focus: function() {
       this.focusTextInput();
       this.becomeFirstResponder();

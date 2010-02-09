@@ -44,7 +44,7 @@
  * _Choice_. This _Setting_ maybe the default for that _Choice_.
  *
  * <p>It provides an API for controlling the known settings. This allows us to
- * provide better GUI/CLI support. See choice.js
+ * provide better GUI/CLI support. See setting.js
  * <p>It provides 3 implementations of a setting store:<ul>
  * <li>MemorySettings: i.e. temporary, non-persistent. Useful in textarea
  * replacement type scenarios. See memory.js
@@ -74,12 +74,12 @@
  * dependency on settings, and increase it on the system with a setting.
  * e.g. Now:
  * <pre>
- * choice.addChoice({ name:"foo", ... });
+ * setting.addSetting({ name:"foo", ... });
  * settings.set("foo", "bar");
  * </pre>
  * <p>Vs the potentially better:
  * <pre>
- * var foo = choice.addChoice({ name:"foo", ... });
+ * var foo = setting.addSetting({ name:"foo", ... });
  * foo.value = "bar";
  * </pre>
  * <p>Comparison:

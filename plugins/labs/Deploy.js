@@ -223,7 +223,7 @@ exports._deployCommand = function(request, project, opts) {
                     var data = JSON.parse(response);
                     if (data.notConfigured) {
                         request.doneWithError("<p>Deployment is not configured for this project. Please use the 'deploy setup' command to configure it.");
-                        throw "Should prepopulate CLI with 'deploy setup', however there is no way to do that right now";
+                        throw new Error("Should prepopulate CLI with 'deploy setup', however there is no way to do that right now");
                     } else {
                         request.doneWithError(xhr.responseText);
                     }

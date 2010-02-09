@@ -33,8 +33,8 @@ main = function() {
     catalog.loadMetadata(baseurl + "/plugin/register/defaults",
         function(sender, response) {
             if (response.isError) {
-                throw "failed to load plugin metadata: " +
-                    response.errorObject;
+                throw new Error("failed to load plugin metadata: " +
+                    response.errorObject);
             }
 
             tiki.async('EditorApp').then(function() {
