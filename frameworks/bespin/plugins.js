@@ -204,7 +204,7 @@ exports.ExtensionPoint = SC.Object.extend({
 exports.Plugin = SC.Object.extend({
     register: function() {
         var provides = this.provides;
-        self = this;
+        var self = this;
         this.provides.forEach(function(extension) {
             var ep = self.get("catalog").getExtensionPoint(extension.ep);
             ep.register(extension);
@@ -213,7 +213,7 @@ exports.Plugin = SC.Object.extend({
 
     unregister: function() {
         var provides = this.provides;
-        self = this;
+        var self = this;
         this.provides.forEach(function(extension) {
             var ep = self.get("catalog").getExtensionPoint(extension.ep);
             ep.unregister(extension);
