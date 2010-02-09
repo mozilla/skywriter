@@ -258,7 +258,7 @@ exports.Directory = SC.Object.extend({
                 item.directory = this;
                 files.push(exports.File.create(item));
             }
-        });
+        }.bind(this));
         this.set("directories", directories);
         this.set("files", files);
     }
