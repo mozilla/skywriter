@@ -260,7 +260,6 @@ exports.CliInputView = SC.View.design({
     classNames: [ "cmd_line" ],
     layout: { height: compactHeight, bottom: 0, left: 0, right: 0 },
     childViews: [ "contentView" ],
-    contentHeight: 0,
     hasFocus: false,
     table: null,
 
@@ -285,16 +284,6 @@ exports.CliInputView = SC.View.design({
     },
 
     /**
-     * Canon:request#history.requests has changed, so we need to pop-up the
-     * display view
-     */
-    historyUpdated: function(cliController) {
-        // Update the output layer just by hacking the DOM
-        var ele = this.getPath("contentView.display.output.contentView.layer");
-        this.set("contentHeight", ele.clientHeight);
-    }.observes("Canon:request#history.requests.[]"),
-
-    /**
      * Called whenever anything happens that could affect the output display
      */
     checkHeight: function(source, event) {
@@ -302,39 +291,27 @@ exports.CliInputView = SC.View.design({
 
         var height = compactHeight;
         if (pinned || this.get("hasFocus")) {
-            /*
-            // This code should trim the size of the output to only what is
-            // needed. It used to work until we sproutcoreized the output.
-            // There isn't an obvious reason why it should be failing now,
-            // however the easy solution is to just not trim...
-            var contentHeight = Math.min(maxHeight, this.get("contentHeight"));
-            if (contentHeight > 0) {
-                // TODO: Why 10?
-                height = compactHeight + 10 + contentHeight;
-            }
-            */
             height = maxHeight;
         }
 
         if (this.get("layout").height != height) {
             this.adjust("height", height).updateLayout();
         }
-
-        // Scroll to bottom
-        // TODO: Work out a way to skip this in a variety of cases like:
-        // - the updated instruction is not the last one
-        // - the user has asked for no scroll on update (would they do this?
-        //   it's not like we've got the same input at end of output
-        //   constraints)
-        // - The update comes from an instruction minimize/remove
-        var stack = this.getPath("contentView.display.output.contentView");
-        //var ele = stack.get("layer");
-        //var scrollHeight = Math.max(ele.scrollHeight, ele.clientHeight);
-        //ele.scrollTop = scrollHeight - ele.clientHeight;
     }.observes(
         ".hasFocus", // Open whenever we have the focus
         ".contentHeight", // Resize if visible and content changes height
         ".contentView.display.toolbar.pin.isSelected" // Open/close on pin
+    ),
+    
+    /*
+     * Scrolls the command line output area to the bottom of the output.
+     */
+    scrollOutputToBottom: function() {
+        console.log("content height has changed");
+        var scrollview = this.getPath("contentView.display.output");
+        scrollview.scrollBy({x:0, y:1000000});
+    }.observes(
+        ".contentView.display.output.contentView.layout"
     ),
 
     /**
@@ -465,7 +442,7 @@ exports.CliInputView = SC.View.design({
                 } else {
                     // This is a real keyPress event. This should not be handled,
                     // otherwise the textInput mixin can't detect the key events.
-                    this.superclass(evt);
+                    return this.superclass(evt);
                 }
             }
         }),
