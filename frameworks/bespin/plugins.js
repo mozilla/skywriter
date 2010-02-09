@@ -161,11 +161,6 @@ exports.ExtensionPoint = SC.Object.extend({
         this.handlers = [];
     },
 
-    addExtension: function(extension) {
-        this.extensions.push(extension);
-        this.register(extension);
-    },
-
     /**
      * If we are keeping an index (an indexOn property is set on the
      * extension point), you can look up an extension by key.
@@ -186,6 +181,7 @@ exports.ExtensionPoint = SC.Object.extend({
     },
 
     register: function(extension) {
+        this.extensions.push(extension);
         this.handlers.forEach(function(handler) {
             if (handler.register) {
                 handler.load(function(register) {
@@ -196,6 +192,7 @@ exports.ExtensionPoint = SC.Object.extend({
     },
 
     unregister: function(extension) {
+        this.extensions.removeObject(extension);
         this.handlers.forEach(function(handler) {
             if (handler.unregister) {
                 handler.load(function(unregister) {
@@ -541,7 +538,7 @@ exports.Catalog = SC.Object.extend({
                         this._registerExtensionHandler(extension);
                     }
                     var ep = this.getExtensionPoint(extension.ep);
-                    ep.addExtension(extension);
+                    ep.register(extension);
                 }
             } else {
                 md.provides = [];
