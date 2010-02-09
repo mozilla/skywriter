@@ -80,6 +80,7 @@ var KeyboardManager = SC.Object.extend({
                     return false;
                 }
             });
+            return true;
         }
         return false;
     },

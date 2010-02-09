@@ -56,6 +56,12 @@
             "name": "files",
             "pointer": "#files",
             "action": "value"
+        },
+        {
+            "ep": "factory",
+            "name": "cli",
+            "pointer": "#cli",
+            "action": "value"
         }
     ],
     "preRefresh": "#preRefresh"
@@ -93,6 +99,10 @@ exports.applicationController = SC.Object.create({
 
     _showEditor: function() {
         var applicationView = this._applicationView.create();
+        
+        var dockedViews = applicationView.get("dockedViews");
+        exports.cli = dockedViews[0];
+        
         this._applicationView = applicationView;
 
         var mainPane = this._mainPage.get('mainPane');
@@ -110,9 +120,14 @@ exports.applicationController = SC.Object.create({
         var buffer = editsession.Buffer.create({
             model: textStorage
         });
+        
+        var textView = editorView.get("textView");
 
-        exports.session.set("currentView", editorView.get("textView"));
+        exports.session.set("currentView", textView);
         exports.session.set("currentBuffer", buffer);
+        setTimeout(function() {
+            textView.focus();
+        }, 1);
     },
 
     init: function() {
@@ -139,9 +154,7 @@ exports.preRefresh = function(reloadDescription) {
     var dependents = reloadDescription.dependents;
     if (pluginName == "CommandLine" || dependents.CommandLine) {
         var view = exports.applicationController._applicationView;
-        var dockedViews = view.get("dockedViews");
-        var cli = dockedViews[0];
-        view.removeDockedView(cli);
+        view.removeDockedView(exports.cli);
     }
     return {
         keepModule: true,
@@ -155,8 +168,8 @@ exports.postRefresh = function(reloadDescription) {
     if (pluginName == "CommandLine" || dependents.CommandLine) {
         var view = exports.applicationController._applicationView;
         CliInputView = require('CommandLine:views/cli').CliInputView;
-        var cli = view.addDockedView(CliInputView, 0);
-        view.appendChild(cli);
+        exports.cli = view.addDockedView(CliInputView, 0);
+        view.appendChild(exports.cli);
     }
 };
 

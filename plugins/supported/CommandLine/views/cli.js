@@ -44,6 +44,7 @@ var catalog = require("bespin:plugins").catalog;
 var dock = require("bespin:views/dock");
 var cliController = require("controller").cliController;
 var request = require("Canon:request");
+var keyboardManager = require('Canon:keyboard').keyboardManager;
 
 var settings = catalog.getObject("settings");
 var imagePath = catalog.getResourceURL("CommandLine") + "images/";
@@ -345,6 +346,7 @@ exports.CliInputView = SC.View.design({
     checkfocus: function(source, event) {
         // We don't want old blurs to happen whatever
         this._cancelBlur("focus event");
+        var self = this;
 
         var focus = source[event];
         if (focus) {
@@ -358,8 +360,10 @@ exports.CliInputView = SC.View.design({
             // We rely on something canceling this if we're not to lose focus
             this._blurTimeout = window.setTimeout(function() {
                 //console.log("_blurTimeout", arguments);
-                this.set("hasFocus", false);
-            }.bind(this), 200);
+                SC.run(function() {
+                    self.set("hasFocus", false);
+                });
+            }, 1);
         }
 
         // This list of things to observe should include all the views that can
@@ -397,6 +401,10 @@ exports.CliInputView = SC.View.design({
             hintEle.appendChild(hint);
         }
     }.observes("CommandLine:controller#cliController.hint"),
+    
+    focus: function() {
+        this.getPath("contentView.input").becomeFirstResponder();
+    },
 
     /**
      * There's no good reason for having this contentView - the childViews could
@@ -445,7 +453,21 @@ exports.CliInputView = SC.View.design({
 
         input: SC.TextFieldView.design({
             valueBinding: "CommandLine:controller#cliController.input",
-            layout: { height: 25, bottom: 3, left: 40, right: 0 }
+            layout: { height: 25, bottom: 3, left: 40, right: 0 },
+            keyDown: function(evt) {
+                // SC puts keyDown and keyPress event together. Here we only want to
+                // handle the real/browser's keydown event. To do so, we have to check
+                // if the evt.charCode value is set. If this isn't set, we have been
+                // called after a keypress event took place.
+                if (evt.charCode === 0) {
+                    return keyboardManager.processKeyEvent(evt, this,
+                        { isCommandLine: true });
+                } else {
+                    // This is a real keyPress event. This should not be handled,
+                    // otherwise the textInput mixin can't detect the key events.
+                    this.superclass(evt);
+                }
+            }
         }),
 
         submit: BespinButtonView.design({

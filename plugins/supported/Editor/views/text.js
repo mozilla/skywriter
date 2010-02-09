@@ -642,7 +642,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         // called after a keypress event took place.
         if (evt.charCode === 0) {
             return keyboardManager.processKeyEvent(evt, this,
-                { isTextView: true })
+                { isTextView: true });
         } else {
             // This is a real keyPress event. This should not be handled,
             // otherwise the textInput mixin can't detect the key events.
@@ -702,7 +702,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
                     }
                 }
                 return pos + (dir == 1 ? 0 : 1);
-            }
+            };
 
             var columnFrom = searchForDelimiter(pos.column, -1);
             var columnTo   = searchForDelimiter(pos.column, 1);
@@ -731,7 +731,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
                     row: pos.row,
                     column: lines[pos.row].length
                 }
-            })
+            });
             break;
         }
 
@@ -937,6 +937,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     
     focus: function() {
       this.focusTextInput();
+      this.becomeFirstResponder();
     }
 });
 
