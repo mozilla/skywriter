@@ -23,13 +23,13 @@
                     "name": "choice",
                     "type": "selection:Settings:memory#getSettingNames",
                     "description": "The name of the choice to display or alter",
-                    "default": null
+                    "defaultValue": null
                 },
                 {
                     "name": "value",
                     "type": "text",
                     "description": "The new value for the chosen setting",
-                    "default": null
+                    "defaultValue": null
                 }
             ],
             "description": "define and show settings",

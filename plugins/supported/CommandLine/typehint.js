@@ -88,6 +88,7 @@ exports.getTypeExt = function(typeSpec) {
         var parts = typeSpec.split(":");
         if (parts.length === 1) {
             typeExt = catalog.getExtensionByKey("typehint", typeSpec);
+            promise.resolve(typeExt);
         } else {
             typeExt = catalog.getExtensionByKey("typehint", parts.shift());
             var data = parts.join(":");

@@ -121,10 +121,11 @@ exports.selection = {
     },
 
     toString: function(value, typeExt) {
-        return JSON.stringify(value);
+        return value;
     },
 
     fromString: function(value, typeExt) {
-        return JSON.parse(value);
+        // TODO: should we validate and return null if invalid?
+        return value;
     }
 };

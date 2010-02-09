@@ -57,6 +57,11 @@ if (!object_keys) {
     };
 }
 
+/**
+ * Split an extension pointer from module/path#objectName into an object of the
+ * type { modName:"module/path", objName:"objectName" } using a pluginName
+ * as the base to which roots the pointer
+ */
 var _splitPointer = function(pluginName, pointer) {
     if (!pointer) {
         return undefined;
@@ -256,13 +261,13 @@ exports.Plugin = SC.Object.extend({
         });
     },
 
-    /*
-    * reloads the plugin and reinitializes all
-    * dependent plugins
-    */
+    /**
+     * reloads the plugin and reinitializes all
+     * dependent plugins
+     */
     reload: function(callback) {
         var func, dependName;
-        
+
         // All reloadable plugins will have a reloadURL
         if (!this.get("reloadURL")) {
             return;
@@ -291,12 +296,12 @@ exports.Plugin = SC.Object.extend({
         var pluginList = object_keys(this.catalog.plugins);
 
         this._findDependents(pluginList, dependents);
-        
+
         var reloadDescription = {
             pluginName: pluginName,
             dependents: dependents
         };
-        
+
         for (dependName in dependents) {
             var plugin = this.catalog.plugins[dependName];
             if (plugin.preRefresh) {
@@ -324,10 +329,9 @@ exports.Plugin = SC.Object.extend({
         var nameMatch = new RegExp("^" + pluginName + ":");
 
         _removeFromList(nameMatch, tiki.scripts);
-        _removeFromList(nameMatch, tiki.modules,
-            function(module) {
-                delete tiki._factories[module];
-            });
+        _removeFromList(nameMatch, tiki.modules, function(module) {
+            delete tiki._factories[module];
+        });
         _removeFromList(nameMatch, tiki.stylesheets);
         _removeFromList(new RegExp("^" + pluginName + "$"), tiki.packages);
 
@@ -393,7 +397,7 @@ exports.Plugin = SC.Object.extend({
 
                         for (dependName in dependents) {
                             if (dependents[dependName].callPointer) {
-                                var parts = _splitPointer(dependName, 
+                                var parts = _splitPointer(dependName,
                                     dependents[dependName].callPointer);
                                 func = _retrieveObject(parts);
                                 if (func) {

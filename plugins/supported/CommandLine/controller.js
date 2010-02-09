@@ -45,7 +45,6 @@ var env = require("Canon:environment");
 var Request = require("Canon:request").Request;
 
 var typehint = require("typehint");
-var tokenizer = require("tokenizer").tokenizer;
 
 /**
  * Command line controller.
@@ -62,24 +61,58 @@ exports.cliController = SC.Object.create({
      */
     hint: "",
 
-    hintChanges: function() {
+    /**
+     * Called by the UI to execute a command. Assumes that #input is bound to
+     * the CLI input text field.
+     */
+    exec: function() {
+        this.executeCommand(this.get("input"));
+    },
+
+    /**
+     * Logging to debug the hint
+     */
+    _hintChanges: function() {
         console.log("hint", this.hint);
     }.observes(".hint"),
 
     /**
      * We need to re-parse the CLI whenever the input changes
      */
-    inputChanges: function() {
+    _inputChanges: function() {
         if (this.input == "") {
             this.set("hint", "Type a command, see 'help' for available commands.");
             return;
         }
 
-        var parts = tokenizer(this.input);
-        var cmdExts = this._findMatchingCommandExtensions(parts);
+        var input = {
+            typed: this.input,
+            hints: []
+        };
+
+        this._tokenize(input);
+        this._split(input);
+
         var hintPromise;
 
-        if (cmdExts.length === 0) {
+        // 4. Move hints into _tokenize, _split, etc
+
+        if (input.commandExt) {
+            // We know what the command is.
+            if (input.parts.length === 1) {
+                // We've not started on any params yet, help on the command
+                hintPromise = typehint.getHint({
+                    type: "text",
+                    description: input.commandExt.name + ": " + input.commandExt.description
+                });
+            } else {
+                hintPromise = typehint.getHint({
+                    type: "text",
+                    description: "We should be able to get help on " + input.parts.join(":")
+                });
+            }
+        }
+        else if (input.commandExts.length === 0) {
             // TODO: Before we assume that this is an error, we ought to
             // search again for aliases, and then again for hidden commands
 
@@ -89,15 +122,9 @@ exports.cliController = SC.Object.create({
                 description: "No commands available"
             });
         }
-        else if (cmdExts.length === 1) {
-            hintPromise = typehint.getHint({
-                type: "text",
-                description: "Only option: " + cmdExts[0].name
-            });
-        }
         else {
             var options = [];
-            cmdExts.forEach(function(cmdExt) {
+            input.commandExts.forEach(function(cmdExt) {
                 options.push(cmdExt.name);
             }.bind(this));
 
@@ -113,14 +140,6 @@ exports.cliController = SC.Object.create({
     }.observes(".input"),
 
     /**
-     * Called by the UI to execute a command. Assumes that #input is bound to
-     * the CLI input text field.
-     */
-    exec: function() {
-        this.executeCommand(this.get("input"));
-    },
-
-    /**
      * Execute a command manually without using the UI
      * @param typed {String} The command to turn into an Instruction and execute
      */
@@ -131,19 +150,26 @@ exports.cliController = SC.Object.create({
             return;
         }
 
-        var parts = tokenizer(typed);
-        var cmdArgs = this._splitCommandAndArgs(parts);
+        var input = {
+            typed: typed,
+            hints: []
+        };
+
+        this._tokenize(input);
+        this._split(input);
 
         // Check that there is valid meta-data for this command
-        if (!cmdArgs.commandExt) {
+        if (!input.commandExt) {
             this.set("hint", "Unknown command");
             return;
         }
 
+        this._assign(input);
+
         var self = this;
-        var conversion = this._convertTypes(cmdArgs.commandExt, cmdArgs.remainder);
+        var conversion = this._convertTypes(input);
         conversion.then(function(args) {
-            cmdArgs.commandExt.load(function(command) {
+            input.commandExt.load(function(command) {
                 // Check the function pointed to in the meta-data exists
                 if (!command) {
                     self.set("hint", "Command action not found.");
@@ -152,7 +178,7 @@ exports.cliController = SC.Object.create({
 
                 var request = Request.create({
                     command: command,
-                    commandExt: cmdArgs.commandExt,
+                    commandExt: input.commandExt,
                     typed: typed,
                     args: args
                 });
@@ -166,7 +192,7 @@ exports.cliController = SC.Object.create({
                     // TODO: Better UI
                     this.set("hint", ex);
 
-                    console.group("Error calling command: " + cmdArgs.commandExt.name);
+                    console.group("Error calling command: " + input.commandExt.name);
                     console.log("- typed: '", typed, "'");
                     console.log("- arguments: ", args);
                     console.error(ex);
@@ -178,12 +204,92 @@ exports.cliController = SC.Object.create({
     },
 
     /**
+     * Split up the input taking into account ' and "
+     */
+    _tokenize: function(input) {
+        var incoming = input.typed.split(" ");
+        input.parts = [];
+
+        var nextToken;
+        while (nextToken = incoming.shift()) {
+            if (nextToken[0] == '"' || nextToken[0] == "'") {
+                // It's quoting time
+                var eaten = [ nextToken.substring(1, nextToken.length) ];
+                var eataway;
+                while (eataway = incoming.shift()) {
+                    if (eataway[eataway.length - 1] == '"' ||
+                            eataway[eataway.length - 1] == "'") {
+                        // End quoting time
+                        eaten.push(eataway.substring(0, eataway.length - 1));
+                        break;
+                    } else {
+                        eaten.push(eataway);
+                    }
+                }
+                input.parts.push(eaten.join(' '));
+            } else {
+                input.parts.push(nextToken);
+            }
+        }
+    },
+
+    /**
+     * Looks in the catalog for a command extension that matches what has been
+     * typed at the command line.
+     */
+    _split: function(input) {
+        // TODO: Something that doesn't assume no sub-commands:
+        input.unparsedArgs = input.parts.slice(); // clone it
+        var initial = input.unparsedArgs.shift();
+
+        var commandExt = catalog.getExtensionByKey("command", initial);
+
+        if (commandExt) {
+            // We have an exact match
+            input.commandExt = commandExt;
+        } else {
+            // Several matches
+            var allCommandExts = catalog.getExtensions("command");
+            input.commandExts = [];
+            allCommandExts.some(function(commandExt) {
+                if (this._commandMatches(commandExt, input.parts)) {
+                    input.commandExts.push(commandExt);
+                }
+            }.bind(this));
+        }
+    },
+
+    /**
+     * Work out which arguments are applicable to which parameters
+     */
+    _assign: function(input) {
+        // TODO: something smarter than just assuming that they are all in order
+        input.untypedArgs = {};
+        var index = 0;
+
+        input.commandExt.params.forEach(function(param) {
+            var value = this._getValueForParam(param, index, input, undefined);
+
+            // Warning null != undefined. See docs for _getValueForParam()
+            if (value !== undefined) {
+                input.untypedArgs[param] = {
+                    value: value,
+                    param: param,
+                    index: index
+                };
+            }
+
+            index++;
+        }.bind(this));
+    },
+
+    /**
      * Convert the passed string array into an args object as specified by the
      * command.params declaration.
      */
-    _convertTypes: function(commandExt, argInputs) {
+    _convertTypes: function(input) {
         // Use {} when there are no params
-        if (!commandExt.params) {
+        if (!input.commandExt.params) {
             var promise = new Promise();
             promise.resolve({});
             return promise;
@@ -196,14 +302,20 @@ exports.cliController = SC.Object.create({
         // Cache of promises, because we're only done when they're done
         var convertPromises = [];
 
-        commandExt.params.forEach(function(param) {
-            var argInput = this._getValueForParam(param, index, argInputs);
+        input.commandExt.params.forEach(function(param) {
+            var value = this._getValueForParam(param, index, input, param.defaultValue);
 
-            var convertPromise = types.fromString(argInput, param.type);
+            // Warning null != undefined. See docs for _getValueForParam()
+            if (value === undefined) {
+                // Add an error hint
+            }
+            var convertPromise = types.fromString(value, param.type);
             convertPromise.then(function(converted) {
                 argOutputs[param.name] = converted;
             });
             convertPromises.push(convertPromise);
+
+            index++;
         }.bind(this));
 
         var reply = new Promise();
@@ -216,41 +328,28 @@ exports.cliController = SC.Object.create({
 
     /**
      * Extract a value from the set of inputs for a given param.
+     * @param param The param that we are providing a value for. This is taken
+     * from the command meta-data for the commandExt in question.
+     * @param index The number of the param - i.e. the index of <tt>param</tt>
+     * into the original params array.
+     * @param input The data from parsing the command line input
+     * @param defaultValue The value to use if no data has been provided in the
+     * input. This will be either <tt>param.defaultValue</tt> to use the value
+     * specified in the meta-data (useful in actual command execution). Or it
+     * might be <tt>undefined</tt> when we're providing hints as we go along and
+     * are only interested in what the user actually typed. It is common for
+     * params to specify <tt>param.defaultValue = null</tt> to denote that the
+     * parameter is optional.
+     * @return The value for the specified parameter or <tt>defaultValue</tt>
+     * if none could be assigned.
      */
-    _getValueForParam: function(param, index, argInputs) {
-        var defaultValue = (param.defaultValue !== undefined)
-                ? param.defaultValue : null;
-        var argInput = argInputs.length > index ? argInputs[index] : defaultValue;
-        return argInput;
-    },
-
-    /**
-     * Looks in the catalog for a command extension that matches what has been
-     * typed at the command line.
-     */
-    _splitCommandAndArgs: function(parts) {
-        // TODO: Something that doesn't assume no sub-commands:
-        parts = parts.slice();
-        var initial = parts.shift();
-        return {
-            commandExt: catalog.getExtensionByKey("command", initial),
-            remainder: parts
-        };
-    },
-
-    /**
-     * Loop through the commands in the canon, looking for something that
-     * matches according to #_commandMatches, and return that.
-     */
-    _findMatchingCommandExtensions: function(parts) {
-        var commandExts = catalog.getExtensions("command");
-        var matches = [];
-        commandExts.some(function(commandExt) {
-            if (this._commandMatches(commandExt, parts)) {
-                matches.push(commandExt);
-            }
-        }.bind(this));
-        return matches;
+    _getValueForParam: function(param, index, input, defaultValue) {
+        // TODO: something to take into account --params.
+        if (input.unparsedArgs.length > index) {
+            return input.unparsedArgs[index];
+        } else {
+            return defaultValue;
+        }
     },
 
     /**

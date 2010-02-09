@@ -108,7 +108,7 @@ exports.getTypeExt = function(typeSpec) {
             if (typeExt) {
                 promise.resolve(typeExt);
             } else {
-                promise.reject("Unknown type: ", typeSpec);
+                promise.reject("Unknown type: " + typeSpec);
             }
         } else {
             typeExt = catalog.getExtensionByKey("type", parts.shift());
@@ -117,17 +117,15 @@ exports.getTypeExt = function(typeSpec) {
                 typeExt.data = JSON.parse(data);
                 promise.resolve(typeExt);
             } else {
-                try {
-                    r.loader.async(data).then(function() {
-                        var func = r.loader(data);
-                        typeExt.data = func();
-                        promise.resolve(typeExt);
-                    });
-                }
-                catch (ex) {
-                    console.error(ex);
-                    promise.resolve(null);
-                }
+                var parts = data.split("#");
+                var modName = parts.shift();
+                var objName = parts.join("#");
+
+                r.loader.async(modName).then(function() {
+                    var module = r(modName);
+                    typeExt.data = module[objName]();
+                    promise.resolve(typeExt);
+                });
             }
         }
     } else if (typeof typeSpec === "object") {
