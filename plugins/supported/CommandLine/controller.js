@@ -76,6 +76,11 @@ exports.cliController = SC.Object.create({
     completion: "",
 
     /**
+     * Is the input in a state where it could possibly work?
+     */
+    error: false,
+
+    /**
      * Called by the UI to execute a command. Assumes that #input is bound to
      * the CLI input text field.
      */
@@ -84,27 +89,17 @@ exports.cliController = SC.Object.create({
     },
 
     checkInput: function(input) {
-        console.log("checkInput", input);
-        if (input == this.lastInput) {
-            console.log("unchanged");
+        if (false && input == this.lastInput) {
             return;
         }
         this.lastInput = input;
-        this._inputChanges(input);
+        this._inputChanged(input);
     },
-
-    /**
-     * Logging to debug the hint
-     */
-    _hintChanges: function() {
-        console.log("hint", this.hint);
-    }.observes(".hint"),
 
     /**
      * We need to re-parse the CLI whenever the input changes
      */
-    _inputChanges: function(typed) {
-        //var typed = this.get("input");
+    _inputChanged: function(typed) {
         if (typed == "") {
             this.set("hint", "Type a command, see 'help' for available commands.");
             return;
@@ -116,18 +111,18 @@ exports.cliController = SC.Object.create({
         input.split();
 
         var hintPromise;
-        var setCompletion = false;
 
         if (input.commandExt) {
             // We know what the command is.
             if (input.parts.length === 1) {
                 // There are 2 cases for when there is only one option and we've
                 // not started on the parameters.
-                if (input.typed == input.commandExt.name ||
-                        input.commandExt.params.length === 0) {
-                    // Case 1: The input exactly equals the command, we have not
-                    // yet pressed space. Use the command help
-                    var desc = exports.describeCommandExt(input.commandExt);
+                var cmdExt = input.commandExt;
+                if (input.typed == cmdExt.name ||
+                        cmdExt.params == null || cmdExt.params.length === 0) {
+                    // Case 1: The input exactly equals the command, or there
+                    // are no params to dig into. Use the command help
+                    var desc = exports.describeCommandExt(cmdExt);
                     hintPromise = typehint.getHint(input, {
                         param: { type: "text", description: desc },
                         value: input.typed
@@ -136,7 +131,7 @@ exports.cliController = SC.Object.create({
                     // Case 2: We pressed space, start thinking about the first
                     // parameter.
                     hintPromise = typehint.getHint(input, {
-                        param: input.commandExt.params[0],
+                        param: cmdExt.params[0],
                         value: ""
                     });
                 }
@@ -164,19 +159,18 @@ exports.cliController = SC.Object.create({
             });
         }
 
-        if (setCompletion === false) {
-            this.set("completion", null);
-        }
+        this.set("completion", null);
 
         hintPromise.then(function(hint) {
             SC.run(function() {
                 this.set("hint", hint.element);
+                this.set("error", hint.error);
                 if (hint.completion) {
                     this.set("completion", typed + hint.completion);
                 }
             }.bind(this));
         }.bind(this));
-    }/*.observes(".input")*/,
+    },
 
     /**
      * Execute a command manually without using the UI
@@ -229,7 +223,7 @@ exports.cliController = SC.Object.create({
                     self.set("input", "");
                 } catch (ex) {
                     // TODO: Better UI
-                    this.set("hint", ex);
+                    self.set("hint", ex);
 
                     console.group("Error calling command: " + input.commandExt.name);
                     console.log("- typed: '", typed, "'");
@@ -238,7 +232,7 @@ exports.cliController = SC.Object.create({
                     console.trace();
                     console.groupEnd();
                 }
-            }.bind(this));
+            });
         });
     }
 });

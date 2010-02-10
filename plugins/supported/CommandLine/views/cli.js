@@ -334,6 +334,16 @@ exports.CliInputView = SC.View.design({
     }.observes("CommandLine:controller#cliController.completion"),
 
     /**
+     *
+     */
+    error: function(source, event) {
+        var error = cliController.get("error");
+        var color = error ? "#F00" : "#1b1613";
+        var input = this.getPath("contentView.input");
+        input.set("backgroundColor", color);
+    }.observes("CommandLine:controller#cliController.error"),
+
+    /**
      * Scrolls the command line output area to the bottom of the output.
      */
     scrollOutputToBottom: function() {

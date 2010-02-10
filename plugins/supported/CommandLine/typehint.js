@@ -89,7 +89,7 @@ exports.getHint = function(input, assignment) {
  * default - a simple text node containing the description.
  */
 var createDefaultHint = function(description) {
-    return document.createTextNode(description);
+    return { element: document.createTextNode(description) };
 };
 
 /**
