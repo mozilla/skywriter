@@ -59,6 +59,11 @@ exports.cliController = SC.Object.create({
     input: "",
 
     /**
+     *
+     */
+    lastInput: null,
+
+    /**
      * A string, DOM node or (hopefully) SproutCore component that acts as a
      * hint to completing the command line
      */
@@ -78,6 +83,16 @@ exports.cliController = SC.Object.create({
         this.executeCommand(this.get("input"));
     },
 
+    checkInput: function(input) {
+        console.log("checkInput", input);
+        if (input == this.lastInput) {
+            console.log("unchanged");
+            return;
+        }
+        this.lastInput = input;
+        this._inputChanges(input);
+    },
+
     /**
      * Logging to debug the hint
      */
@@ -88,13 +103,14 @@ exports.cliController = SC.Object.create({
     /**
      * We need to re-parse the CLI whenever the input changes
      */
-    _inputChanges: function() {
-        if (this.get("input") == "") {
+    _inputChanges: function(typed) {
+        //var typed = this.get("input");
+        if (typed == "") {
             this.set("hint", "Type a command, see 'help' for available commands.");
             return;
         }
 
-        var input = Input.create({ typed: this.get("input") });
+        var input = Input.create({ typed: typed });
 
         input.tokenize();
         input.split();
@@ -156,11 +172,11 @@ exports.cliController = SC.Object.create({
             SC.run(function() {
                 this.set("hint", hint.element);
                 if (hint.completion) {
-                    this.set("completion", this.get("input") + hint.completion);
+                    this.set("completion", typed + hint.completion);
                 }
             }.bind(this));
         }.bind(this));
-    }.observes(".input"),
+    }/*.observes(".input")*/,
 
     /**
      * Execute a command manually without using the UI

@@ -329,8 +329,8 @@ exports.CliInputView = SC.View.design({
         }
         */
 
-        // input.set("value", completion);
-        // input.$input()[0].setSelectionRange(existing.length, completion.length);
+        input.set("value", completion);
+        input.$input()[0].setSelectionRange(existing.length + 1, completion.length);
     }.observes("CommandLine:controller#cliController.completion"),
 
     /**
@@ -463,19 +463,38 @@ exports.CliInputView = SC.View.design({
         input: SC.TextFieldView.design({
             valueBinding: "CommandLine:controller#cliController.input",
             layout: { height: 25, bottom: 3, left: 40, right: 0 },
-            keyDown: function(evt) {
-                // SC puts keyDown and keyPress event together. Here we only want to
-                // handle the real/browser's keydown event. To do so, we have to check
-                // if the evt.charCode value is set. If this isn't set, we have been
-                // called after a keypress event took place.
-                if (evt.charCode === 0) {
-                    return keyboardManager.processKeyEvent(evt, this,
+            keyDown: function(ev) {
+                // SC puts keyDown and keyPress event together. Here we only
+                // want to handle the real/browser's keydown event. To do so,
+                // we have to check if the evt.charCode value is set.
+                // If this isn't set, we have been called after a keypress
+                // event took place.
+                if (ev.charCode === 0) {
+                    return keyboardManager.processKeyEvent(ev, this,
                         { isCommandLine: true });
                 } else {
-                    // This is a real keyPress event. This should not be handled,
-                    // otherwise the textInput mixin can't detect the key events.
-                    return this.superclass(evt);
+                    // This is a real keyPress event. This should not be
+                    // handled, otherwise the textInput mixin can't detect
+                    // the key events.
+                    return this.superclass(ev);
                 }
+            },
+            keyUp: function(ev) {
+                var node = this.$input().get(0);
+                var value = node.value;
+
+                // If we've got something selected as part of completion then
+                // we don't want the cliController to work on that bit.
+                var completion = cliController.completion;
+                if (completion) {
+                    var start = value.length - completion.length;
+                    if (value.substring(start, value.length) == completion) {
+                        value = value.substring(0, start);
+                    }
+                }
+
+                cliController.checkInput(value);
+                return this.superclass(ev);
             }
         }),
 
