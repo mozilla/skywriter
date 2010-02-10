@@ -45,8 +45,8 @@ var dock = require("bespin:views/dock");
 var cliController = require("controller").cliController;
 var request = require("Canon:request");
 var keyboardManager = require('Canon:keyboard').keyboardManager;
+var settings = require("Settings").settings;
 
-var settings = catalog.getObject("settings");
 var imagePath = catalog.getResourceURL("CommandLine") + "images/";
 
 /**

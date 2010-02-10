@@ -3,12 +3,6 @@
     "provides":
     [
         {
-            "ep": "factory",
-            "name": "settings",
-            "action": "create",
-            "pointer": "memory#MemorySettings"
-        },
-        {
             "ep": "extensionpoint",
             "description": "A Choice is something that the application offers as a way to customize how it works",
             "name": "setting",

@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var util = require("bespin:util/util");
-var settings = require("bespin:plugins").catalog.getObject("settings");
+var settings = require("Settings").settings;
 
 /**
  * 'goto' command

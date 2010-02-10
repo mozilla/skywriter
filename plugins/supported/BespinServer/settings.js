@@ -35,48 +35,57 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var MemorySettings = require("memory").MemorySettings;
 var catalog = require("bespin:plugins").catalog;
-
-var files = catalog.getObject("files");
 
 /**
  * Save the settings using the server.
  * This code has not been tested since reboot
  * @class
  */
-exports.ServerSettings = MemorySettings.extend({
-    _loadInitialValues: function() {
-        var onLoad = function(file) {
-            // Strip \n\n from the end of the file and insert into this.settings
-            file.content.split(/\n/).forEach(function(setting) {
-                if (setting.match(/^\s*#/)) {
-                    return; // if comments are added ignore
-                }
-                if (setting.match(/\S+\s+\S+/)) {
-                    var pieces = setting.split(/\s+/);
-                    this.set([pieces[0].trim()], pieces[1].trim());
-                }
-            });
-        }.bind(this);
-
-        this._loadDefaultValues().then(function() {
-            files.loadContents(files.userSettingsProject, "settings", onLoad);
+exports.ServerPersister = SC.Object.extend({
+    _loading: false,
+    
+    loadInitialValues: function(settings) {
+        var settingsFile = catalog.getObject("files").getObject("BespinSettings/settings");
+        settingsFile.loadContents().then(function(result) {
+            var data;
+            try {
+                data = JSON.parse(result.contents);
+            } catch (e) {
+                console.error("Unable to parse settings file: " + e);
+                data = {};
+            }
+            
+            this._loading = true;
+            for (var setting in data) {
+                settings.set(setting, data[setting]);
+            }
+            this._loading = false;
         }.bind(this));
     },
 
-    _changeValue: function(key, value) {
+    changeValue: function(settings, key, value) {
+        // when we're in the middle of setting the initial values,
+        // we don't care about change messages
+        if (this._loading) {
+            return;
+        }
+        
         // Aggregate the settings into a file
-        var content = "";
-        this._getSettingNames().forEach(function(key) {
-            content += key + " " + this.get(key) + "\n";
-        }.bind(this));
-
-        // Send it to the server
-        files.saveFile(files.userSettingsProject, {
-            name: "settings",
-            content: content,
-            timestamp: new Date().getTime()
+        var data = {};
+        settings._getSettingNames().forEach(function(key) {
+            data[key] = settings.get(key);
         });
+        
+        var settingsFile = catalog.getObject("files").getObject("BespinSettings/settings");
+        
+        try {
+            var settingsString = JSON.stringify(data);
+        } catch (e) {
+            console.error("Unable to JSONify the settings! " + e);
+            return;
+        }
+        // Send it to the server
+        settingsFile.saveContents(settingsString);
     }
 });

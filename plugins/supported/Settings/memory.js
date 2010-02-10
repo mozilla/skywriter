@@ -48,7 +48,7 @@ var types = require("Types:types");
  * @see MemorySettings.addSetting()
  */
 exports.addSetting = function(settingExt) {
-    catalog.getObject("settings").addSetting(settingExt);
+    require("Settings").settings.addSetting(settingExt);
 };
 
 /**
@@ -56,7 +56,7 @@ exports.addSetting = function(settingExt) {
  * @see MemorySettings._getSettingNames()
  */
 exports.getSettingNames = function() {
-    return catalog.getObject("settings")._getSettingNames();
+    return require("Settings").settings._getSettingNames();
 };
 
 /**
@@ -90,6 +90,18 @@ exports.MemorySettings = SC.Object.extend({
         setTimeout(function() {
             this._loadInitialValues();
         }.bind(this), 10);
+    },
+    
+    /**
+     * A Persister is able to store settings. It is an object that defines
+     * two functions:
+     * loadInitialValues(settings) and changeValue(settings, key, value).
+     */
+    setPersister: function(persister) {
+        this._persister = persister;
+        if (persister) {
+            persister.loadInitialValues(this);
+        }
     },
 
     /**
@@ -175,19 +187,26 @@ exports.MemorySettings = SC.Object.extend({
     },
 
     /**
-     * Subclasses should overload this.
-     * Called whenever a value changes, which allows persistent subclasses to
-     * take action to persist the new value
+     * delegates to the persister. no-op if there's no persister.
      */
     _changeValue: function(key, value) {
+        var persister = this._persister;
+        if (persister) {
+            persister.changeValue(this, key, value);
+        }
     },
 
     /**
-     * Subclasses should overload this, probably calling _loadDefaultValues()
-     * as part of the process before user values are included.
+     * Delegates to the persister, otherwise sets up the defaults if no
+     * persister is available.
      */
     _loadInitialValues: function() {
-        return this._loadDefaultValues();
+        var persister = this._persister;
+        if (persister) {
+            persister.loadInitialValues(this);
+        } else {
+            this._loadDefaultValues();
+        }
     },
 
     /**

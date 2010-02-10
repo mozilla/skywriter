@@ -93,3 +93,7 @@
  * probably hard to do this easily. We should move to this in the future.
  * </ul>
  */
+
+var MemorySettings = require("memory").MemorySettings;
+
+exports.settings = MemorySettings.create();

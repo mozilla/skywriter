@@ -75,6 +75,8 @@ var EditorView = require('Editor:views/editor').EditorView;
 var KeyListener = require('AppSupport:views/keylistener').KeyListener;
 var loginController = require('UserIdent').loginController;
 var BespinFileSource = require("BespinServer:filesource").BespinFileSource;
+var ServerPersister = require("BespinServer:settings").ServerPersister;
+var settings = require("Settings").settings;
 var Directory = require("Filesystem").Directory;
 var editsession = require("EditSession");
 
@@ -98,6 +100,8 @@ exports.applicationController = SC.Object.create({
     }),
 
     _showEditor: function() {
+        settings.setPersister(ServerPersister.create());
+
         var applicationView = this._applicationView.create();
         
         var dockedViews = applicationView.get("dockedViews");

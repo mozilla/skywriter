@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var MemorySettings = require("memory").MemorySettings;
 var cookie = require("bespin:util/cookie");
 
 /**
@@ -43,16 +42,16 @@ var cookie = require("bespin:util/cookie");
  * This code has not been tested since reboot
  * @class
  */
-exports.CookieSettings = MemorySettings.extend({
-    _loadInitialValues: function() {
-        this._loadDefaultValues().then(function() {
+exports.CookiePersister = SC.Object.create({
+    loadInitialValues: function(settings) {
+        settings._loadDefaultValues().then(function() {
             var data = cookie.get("settings");
-            this._loadFromObject(JSON.parse(data));
+            settings._loadFromObject(JSON.parse(data));
         }.bind(this));
     },
 
-    _changeValue: function(key, value) {
-        this._saveToObject(stringData).then(function() {
+    changeValue: function(settings, key, value) {
+        settings._saveToObject(stringData).then(function() {
             var data = JSON.stringify(stringData);
             cookie.set("settings", data);
         });

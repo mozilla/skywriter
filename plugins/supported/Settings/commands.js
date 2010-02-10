@@ -37,7 +37,7 @@
 
 var catalog = require("bespin:plugins").catalog;
 
-var settings = catalog.getObject("settings");
+var settings = require("Settings").settings;
 
 /**
  * 'set' command
