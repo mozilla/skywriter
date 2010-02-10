@@ -302,14 +302,44 @@ exports.CliInputView = SC.View.design({
         ".contentHeight", // Resize if visible and content changes height
         ".contentView.display.toolbar.pin.isSelected" // Open/close on pin
     ),
-    
-    /*
+
+    /**
+     *
+     */
+    complete: function(source, event) {
+        var completion = cliController.get("completion");
+        if (completion === undefined || completion === null) {
+            return;
+        }
+
+        // TODO: Don't complete if we're deleting
+        /*
+        if (event.keyCode == "delete" || event.keyCode == "backspace") {
+            return;
+        }
+        */
+
+        var input = this.getPath("contentView.input");
+        var existing = input.get("value");
+
+        // TODO: Don't complete if the cursor is not at the end of the line
+        /*
+        if (input.cursorPos != existing.length) {
+            return;
+        }
+        */
+
+        // input.set("value", completion);
+        // input.$input()[0].setSelectionRange(existing.length, completion.length);
+    }.observes("CommandLine:controller#cliController.completion"),
+
+    /**
      * Scrolls the command line output area to the bottom of the output.
      */
     scrollOutputToBottom: function() {
         console.log("content height has changed");
         var scrollview = this.getPath("contentView.display.output");
-        scrollview.scrollBy({x:0, y:1000000});
+        scrollview.scrollBy({ x: 0, y: 1000000 });
     }.observes(
         ".contentView.display.output.contentView.layout"
     ),
@@ -371,14 +401,16 @@ exports.CliInputView = SC.View.design({
             hintEle.removeChild(hintEle.firstChild);
         }
 
-        if (typeof hint === "string") {
-            var hintNode = document.createTextNode(hint);
-            hintEle.appendChild(hintNode);
-        } else {
-            hintEle.appendChild(hint);
+        if (hint) {
+            if (typeof hint === "string") {
+                var hintNode = document.createTextNode(hint);
+                hintEle.appendChild(hintNode);
+            } else {
+                hintEle.appendChild(hint);
+            }
         }
     }.observes("CommandLine:controller#cliController.hint"),
-    
+
     focus: function() {
         this.getPath("contentView.input").becomeFirstResponder();
     },

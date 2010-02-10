@@ -22,7 +22,7 @@
             [
                 {
                     "name": "setting",
-                    "type": "selection:Settings:memory#getSettingNames",
+                    "type": "selection:Settings:memory#getSettings",
                     "description": "The name of the setting to display or alter",
                     "defaultValue": null
                 },

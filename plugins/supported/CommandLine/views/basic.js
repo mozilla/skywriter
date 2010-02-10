@@ -43,39 +43,66 @@ var cliController = require("controller").cliController;
  * selection.
  */
 exports.selection = {
-    getHint: function(description, typeExt, filter) {
+    /**
+     * @see typehint#getHint()
+     */
+    getHint: function(input, assignment, typeExt) {
+        var filter = assignment.value;
+
         var data = typeExt.data;
         if (!data) {
             console.error("Missing data for selection type");
             data = [];
         }
 
-        var parent = document.createElement("div");
-        parent.appendChild(document.createTextNode(description));
-
-        var index = 0;
+        // How many matches do we have?
+        var matches = [];
         data.forEach(function(option) {
-            if (filter && option.substring(0, filter.length) != filter) {
+            if (filter && option.name.substring(0, filter.length) != filter) {
                 return;
             }
-
-            if (index === 0) {
-                parent.appendChild(document.createTextNode(": "));
-            } else {
-                parent.appendChild(document.createTextNode(", "));
-            }
-            var link = document.createElement("a");
-            link.setAttribute("href", "javascript:;");
-            link.appendChild(document.createTextNode(option));
-            link.addEventListener("click", function(ev) {
-                SC.run(function() {
-                    cliController.set("input", option + " ");
-                });
-            }, false);
-            parent.appendChild(link);
-            index++;
+            matches.push(option);
         }.bind(this));
 
-        return parent;
+        if (matches.length === 0) {
+            // So this is an error - nothing matches
+            // TODO: suggest typo fixes?
+            return {
+                element: "Nothing matches.",
+                error: true
+            };
+        } else if (matches.length === 1) {
+            var match = matches[0];
+            var compl = match.name.substring(filter.length, match.name.length);
+            var desc = match.name + ": " + match.description;
+            return {
+                element: desc + " (\u2192 to accept)",
+                completion: compl + " "
+            };
+        } else {
+            var parent = document.createElement("div");
+            parent.appendChild(document.createTextNode(assignment.param.description));
+
+            var index = 0;
+            matches.forEach(function(option) {
+                if (index === 0) {
+                    parent.appendChild(document.createTextNode(": "));
+                } else {
+                    parent.appendChild(document.createTextNode(", "));
+                }
+                var link = document.createElement("a");
+                link.setAttribute("href", "javascript:;");
+                link.appendChild(document.createTextNode(option.name));
+                link.addEventListener("click", function(ev) {
+                    SC.run(function() {
+                        cliController.set("input", option.name + " ");
+                    });
+                }, false);
+                parent.appendChild(link);
+                index++;
+            }.bind(this));
+
+            return { element: parent };
+        }
     }
 };

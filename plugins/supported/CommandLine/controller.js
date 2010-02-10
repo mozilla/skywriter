@@ -38,16 +38,19 @@
 var SC = require("sproutcore/runtime").SC;
 var catalog = require("bespin:plugins").catalog;
 
-var Promise = require("bespin:promise").Promise;
-var groupPromises = require("bespin:promise").group;
-var types = require("Types:types");
 var env = require("Canon:environment");
 var Request = require("Canon:request").Request;
 
 var typehint = require("typehint");
+var Input = require("input").Input;
 
 /**
  * Command line controller.
+ * <p>Outstanding work
+ * - Move hints into tokenize(), split(), etc
+ * - Sub commands
+ * - Late bound types
+ * - aliases
  */
 exports.cliController = SC.Object.create({
     /**
@@ -60,6 +63,12 @@ exports.cliController = SC.Object.create({
      * hint to completing the command line
      */
     hint: "",
+
+    /**
+     * A string which is set when there is only one thing that logically come
+     * next.
+     */
+    completion: "",
 
     /**
      * Called by the UI to execute a command. Assumes that #input is bound to
@@ -80,69 +89,76 @@ exports.cliController = SC.Object.create({
      * We need to re-parse the CLI whenever the input changes
      */
     _inputChanges: function() {
-        if (this.input == "") {
+        if (this.get("input") == "") {
             this.set("hint", "Type a command, see 'help' for available commands.");
             return;
         }
 
-        var input = {
-            typed: this.input,
-            hints: []
-        };
+        var input = Input.create({ typed: this.get("input") });
 
-        this._tokenize(input);
-        this._split(input);
+        input.tokenize();
+        input.split();
 
         var hintPromise;
-
-        // - Move hints into _tokenize, _split, etc
-        // - Remove the commandExts code - the hint can do that now
+        var setCompletion = false;
 
         if (input.commandExt) {
             // We know what the command is.
             if (input.parts.length === 1) {
-                // If we've typed exactly the command, get on with completion
-                // of the first parameter of that command
-                if (input.typed == input.commandExt.name &&
-                        input.commandExt.params.length > 0) {
-                    // We've not started on any params yet, help on the command
-                    hintPromise = typehint.getHint({
-                        type: "text",
-                        description: input.commandExt.name + ": " + input.commandExt.description
+                // There are 2 cases for when there is only one option and we've
+                // not started on the parameters.
+                if (input.typed == input.commandExt.name ||
+                        input.commandExt.params.length === 0) {
+                    // Case 1: The input exactly equals the command, we have not
+                    // yet pressed space. Use the command help
+                    var desc = exports.describeCommandExt(input.commandExt);
+                    hintPromise = typehint.getHint(input, {
+                        param: { type: "text", description: desc },
+                        value: input.typed
                     });
                 } else {
-                    hintPromise = typehint.getHint(input.commandExt.params[0]);
+                    // Case 2: We pressed space, start thinking about the first
+                    // parameter.
+                    hintPromise = typehint.getHint(input, {
+                        param: input.commandExt.params[0],
+                        value: ""
+                    });
                 }
             } else {
-                this._assign(input);
-                var assignment = this._getAssignmentForLastArg(input);
-                hintPromise = typehint.getHint(assignment.param, assignment.value);
+                input.assign();
+                var assignment = input.getAssignmentForLastArg();
+                hintPromise = typehint.getHint(input, assignment);
             }
-        }
-        else if (input.commandExts.length === 0) {
-            // TODO: Before we assume that this is an error, we ought to
-            // search again for aliases, and then again for hidden commands
-
-            // The prefix can't be completed into a command, so it's wrong
-            hintPromise = typehint.getHint({
-                type: "text",
-                description: "No commands available"
-            });
-        }
-        else {
-            var options = [];
-            input.commandExts.forEach(function(cmdExt) {
-                options.push(cmdExt.name);
+        } else {
+            // We don't know what the command is
+            // TODO: We should probably cache this
+            var commandExts = [];
+            catalog.getExtensions("command").forEach(function(commandExt) {
+                if (commandExt.description) {
+                    commandExts.push(commandExt);
+                }
             }.bind(this));
 
-            hintPromise = typehint.getHint({
-                type: { name: "selection", data: options },
-                description: "Commands"
+            hintPromise = typehint.getHint(input, {
+                param: {
+                    type: { name: "selection", data: commandExts },
+                    description: "Commands"
+                },
+                value: input.typed
             });
+        }
+
+        if (setCompletion === false) {
+            this.set("completion", null);
         }
 
         hintPromise.then(function(hint) {
-            this.set("hint", hint);
+            SC.run(function() {
+                this.set("hint", hint.element);
+                if (hint.completion) {
+                    this.set("completion", this.get("input") + hint.completion);
+                }
+            }.bind(this));
         }.bind(this));
     }.observes(".input"),
 
@@ -162,8 +178,8 @@ exports.cliController = SC.Object.create({
             hints: []
         };
 
-        this._tokenize(input);
-        this._split(input);
+        input.tokenize();
+        input.split();
 
         // Check that there is valid meta-data for this command
         if (!input.commandExt) {
@@ -171,10 +187,10 @@ exports.cliController = SC.Object.create({
             return;
         }
 
-        this._assign(input);
+        input.assign();
 
         var self = this;
-        var conversion = this._convertTypes(input);
+        var conversion = input.convertTypes();
         conversion.then(function(args) {
             input.commandExt.load(function(command) {
                 // Check the function pointed to in the meta-data exists
@@ -208,192 +224,12 @@ exports.cliController = SC.Object.create({
                 }
             }.bind(this));
         });
-    },
-
-    /**
-     * Split up the input taking into account ' and "
-     */
-    _tokenize: function(input) {
-        var incoming = input.typed.split(" ");
-        input.parts = [];
-
-        var nextToken;
-        while (nextToken = incoming.shift()) {
-            if (nextToken[0] == '"' || nextToken[0] == "'") {
-                // It's quoting time
-                var eaten = [ nextToken.substring(1, nextToken.length) ];
-                var eataway;
-                while (eataway = incoming.shift()) {
-                    if (eataway[eataway.length - 1] == '"' ||
-                            eataway[eataway.length - 1] == "'") {
-                        // End quoting time
-                        eaten.push(eataway.substring(0, eataway.length - 1));
-                        break;
-                    } else {
-                        eaten.push(eataway);
-                    }
-                }
-                input.parts.push(eaten.join(' '));
-            } else {
-                input.parts.push(nextToken);
-            }
-        }
-    },
-
-    /**
-     * Looks in the catalog for a command extension that matches what has been
-     * typed at the command line.
-     */
-    _split: function(input) {
-        // TODO: Something that doesn't assume no sub-commands:
-        input.unparsedArgs = input.parts.slice(); // clone it
-        var initial = input.unparsedArgs.shift();
-
-        var commandExt = catalog.getExtensionByKey("command", initial);
-
-        if (commandExt) {
-            // We have an exact match
-            input.commandExt = commandExt;
-        } else {
-            // Several matches
-            var allCommandExts = catalog.getExtensions("command");
-            input.commandExts = [];
-            allCommandExts.some(function(commandExt) {
-                if (this._commandMatches(commandExt, input.parts)) {
-                    input.commandExts.push(commandExt);
-                }
-            }.bind(this));
-        }
-    },
-
-    /**
-     * Does the typed command match this command extension.
-     * TODO: upgrade for sub-commands
-     */
-    _commandMatches: function(commandExt, parts) {
-        if (!commandExt.description) {
-            return false;
-        }
-
-        if (commandExt.hidden) {
-            return false;
-        }
-
-        var prefix = commandExt.name.substring(0, parts[0].length);
-        if (prefix !== parts[0]) {
-            return false;
-        }
-
-        return true;
-    },
-
-    /**
-     * Work out which arguments are applicable to which parameters
-     */
-    _assign: function(input) {
-        // TODO: something smarter than just assuming that they are all in order
-        input.assignments = {};
-        var index = 0;
-
-        input.commandExt.params.forEach(function(param) {
-            var value = this._getValueForParam(param, index, input, undefined);
-
-            // Warning null != undefined. See docs for _getValueForParam()
-            if (value !== undefined) {
-                // This is an assignment - i.e. a value that matches a parameter
-                // See also _getAssignmentForLastArg()
-                input.assignments[param.name] = {
-                    value: value,
-                    param: param,
-                    index: index
-                };
-            }
-
-            index++;
-        }.bind(this));
-    },
-
-    /**
-     * Extract a value from the set of inputs for a given param.
-     * @param param The param that we are providing a value for. This is taken
-     * from the command meta-data for the commandExt in question.
-     * @param index The number of the param - i.e. the index of <tt>param</tt>
-     * into the original params array.
-     * @param input The data from parsing the command line input
-     * @param defaultValue The value to use if no data has been provided in the
-     * input. This will be either <tt>param.defaultValue</tt> to use the value
-     * specified in the meta-data (useful in actual command execution). Or it
-     * might be <tt>undefined</tt> when we're providing hints as we go along and
-     * are only interested in what the user actually typed. It is common for
-     * params to specify <tt>param.defaultValue = null</tt> to denote that the
-     * parameter is optional.
-     * @return The value for the specified parameter or <tt>defaultValue</tt>
-     * if none could be assigned.
-     */
-    _getValueForParam: function(param, index, input, defaultValue) {
-        // TODO: something to take into account --params.
-        if (input.unparsedArgs.length > index) {
-            return input.unparsedArgs[index];
-        } else {
-            return defaultValue;
-        }
-    },
-
-    /**
-     * Get the parameter, index and value for the last thing the user typed
-     * @see _assign()
-     */
-    _getAssignmentForLastArg: function(input) {
-        var highestAssign;
-        for (var name in input.assignments) {
-            var assign = input.assignments[name];
-            if (!highestAssign || assign.index > highestAssign.index) {
-                highestAssign = assign;
-            }
-        }
-        return highestAssign;
-    },
-
-    /**
-     * Convert the passed string array into an args object as specified by the
-     * command.params declaration.
-     */
-    _convertTypes: function(input) {
-        // Use {} when there are no params
-        if (!input.commandExt.params) {
-            var promise = new Promise();
-            promise.resolve({});
-            return promise;
-        }
-
-        // The data we pass to the command
-        var argOutputs = {};
-        // Which arg are we converting
-        var index = 0;
-        // Cache of promises, because we're only done when they're done
-        var convertPromises = [];
-
-        input.commandExt.params.forEach(function(param) {
-            var value = this._getValueForParam(param, index, input, param.defaultValue);
-
-            // Warning null != undefined. See docs for _getValueForParam()
-            if (value === undefined) {
-                // Add an error hint
-            }
-            var convertPromise = types.fromString(value, param.type);
-            convertPromise.then(function(converted) {
-                argOutputs[param.name] = converted;
-            });
-            convertPromises.push(convertPromise);
-
-            index++;
-        }.bind(this));
-
-        var reply = new Promise();
-        var group = groupPromises(convertPromises);
-        group.then(function() {
-            reply.resolve(argOutputs);
-        });
-        return reply;
     }
 });
+
+/**
+ * Quick utility to describe a commandExt
+ */
+exports.describeCommandExt = function(commandExt) {
+    return commandExt.name + ": " + commandExt.description;
+};

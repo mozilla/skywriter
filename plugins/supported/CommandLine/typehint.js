@@ -43,25 +43,41 @@ var r = require;
 
 /**
  * Asynchronously find a UI component to match a typeSpec
+ * @param input i.e. an instance of input#Input
+ * @param assignment The last argument that we are hinting. Specifically it must
+ * be an object with the following shape:
+ * <tt>{ param: { type:.., description:... }, value:... }</tt>
+ * Where:
+ * <ul>
+ * <li>value - Data typed for this parameter so far, by which the hint can be
+ * customized, for example by reducing the options in a selection
+ * <li>param - Structure like a param field from command meta-data:
+ * <li>param.type - The data type for validation
+ * <li>param.description - Description of the field for help purposes
+ * </ul>
+ * @return An object containing hint data { element:.., completion:... }
+ * where <tt>element</tt> is a string / dom node / sc component and
+ * <tt>completion</tt> (if set) is a string containing the only possible
+ * outcome.
+ * @see input#Input.assign() and input#Input.getAssignmentForLastArg()
  */
-exports.getHint = function(typeData, filter) {
+exports.getHint = function(input, assignment) {
     var promise = new Promise();
-    var hintEle;
 
-    exports.getTypeExt(typeData.type).then(function(typeExt) {
+    exports.getTypeExt(assignment.param.type).then(function(typeExt) {
         if (!typeExt) {
-            hintEle = createDefaultHint(typeData.description);
-            promise.resolve(hintEle);
+            promise.resolve(createDefaultHint(assignment.param.description));
             return promise;
         }
 
-        typeExt.load(function(type) {
+        typeExt.load().then(function(type) {
+            var hint;
             if (typeof type.getHint === "function") {
-                hintEle = type.getHint(typeData.description, typeExt, filter);
+                hint = type.getHint(input, assignment, typeExt);
             } else {
-                hintEle = createDefaultHint(typeData.description);
+                hint = createDefaultHint(assignment.param.description);
             }
-            promise.resolve(hintEle);
+            promise.resolve(hint);
         });
     });
 

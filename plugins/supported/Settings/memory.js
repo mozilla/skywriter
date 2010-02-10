@@ -52,11 +52,10 @@ exports.addSetting = function(settingExt) {
 };
 
 /**
- * Fetch an array of the currently known setting names
- * @see MemorySettings._getSettingNames()
+ * Fetch an array of the currently known settings
  */
-exports.getSettingNames = function() {
-    return require("Settings").settings._getSettingNames();
+exports.getSettings = function() {
+    return catalog.getExtensions("setting");
 };
 
 /**
@@ -91,7 +90,7 @@ exports.MemorySettings = SC.Object.extend({
             this._loadInitialValues();
         }.bind(this), 10);
     },
-    
+
     /**
      * A Persister is able to store settings. It is an object that defines
      * two functions:
