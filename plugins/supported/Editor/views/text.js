@@ -618,7 +618,14 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             this.getPath('layoutManager.textStorage').getCharacters(Range.
             normalizeRange(this._selectedRange));
     },
-
+    
+    /*
+     * Returns the currently selected range.
+     */
+    getSelectedRange: function() {
+        return Range.normalizeRange(this._selectedRange);
+    },
+    
     init: function() {
         arguments.callee.base.apply(this, arguments);
 
