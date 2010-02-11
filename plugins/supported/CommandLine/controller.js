@@ -121,7 +121,7 @@ exports.cliController = SC.Object.create({
                 // not started on the parameters.
                 var cmdExt = input.commandExt;
                 if (input.typed == cmdExt.name ||
-                        cmdExt.params == null || cmdExt.params.length === 0) {
+                        !cmdExt.params || cmdExt.params.length === 0) {
                     // Case 1: The input exactly equals the command, or there
                     // are no params to dig into. Use the command help
                     var desc = exports.describeCommandExt(cmdExt);

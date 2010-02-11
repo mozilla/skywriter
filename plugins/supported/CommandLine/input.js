@@ -177,22 +177,24 @@ exports.Input = SC.Object.extend({
         var index = 0;
         this.assignments = {};
 
-        this.commandExt.params.forEach(function(param) {
-            var value = this._getValueForParam(param, index, undefined);
+        if (this.commandExt.params) {
+            this.commandExt.params.forEach(function(param) {
+                var value = this._getValueForParam(param, index, undefined);
 
-            // Warning null != undefined. See docs for _getValueForParam()
-            if (value !== undefined) {
-                // This is an assignment - i.e. a value that matches a parameter
-                // See also _getAssignmentForLastArg()
-                this.assignments[param.name] = {
-                    value: value,
-                    param: param,
-                    index: index
-                };
-            }
+                // Warning null != undefined. See docs for _getValueForParam()
+                if (value !== undefined) {
+                    // This is an assignment - i.e. a value that matches a parameter
+                    // See also _getAssignmentForLastArg()
+                    this.assignments[param.name] = {
+                        value: value,
+                        param: param,
+                        index: index
+                    };
+                }
 
-            index++;
-        }.bind(this));
+                index++;
+            }.bind(this));
+        }
     },
 
     /**
