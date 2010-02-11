@@ -329,12 +329,13 @@ exports.CliInputView = SC.View.design({
         }
         */
 
+console.log("trying to set completion to " + completion);
         input.set("value", completion);
         input.$input()[0].setSelectionRange(existing.length + 1, completion.length);
     }.observes("CommandLine:controller#cliController.completion"),
 
     /**
-     *
+     * Highlight the input field in the case of an error
      */
     error: function(source, event) {
         var error = cliController.get("error");
@@ -342,6 +343,27 @@ exports.CliInputView = SC.View.design({
         var input = this.getPath("contentView.input");
         input.set("backgroundColor", color);
     }.observes("CommandLine:controller#cliController.error"),
+
+    /**
+     * Sync the hint manually so we can also alter the sizes of the hint and
+     * output components to make it fit properly.
+     */
+    hintUpdated: function() {
+        var hint = cliController.get("hint");
+        var hintEle = this.getPath("contentView.display.hint.layer");
+        while(hintEle.firstChild) {
+            hintEle.removeChild(hintEle.firstChild);
+        }
+
+        if (hint) {
+            if (typeof hint === "string") {
+                var hintNode = document.createTextNode(hint);
+                hintEle.appendChild(hintNode);
+            } else {
+                hintEle.appendChild(hint);
+            }
+        }
+    }.observes("CommandLine:controller#cliController.hint"),
 
     /**
      * Scrolls the command line output area to the bottom of the output.
@@ -401,26 +423,8 @@ exports.CliInputView = SC.View.design({
     },
 
     /**
-     * Sync the hint manually so we can also alter the sizes of the hint and
-     * output components to make it fit properly.
+     * Push the focus into the input element
      */
-    hintUpdated: function() {
-        var hint = cliController.get("hint");
-        var hintEle = this.getPath("contentView.display.hint.layer");
-        while(hintEle.firstChild) {
-            hintEle.removeChild(hintEle.firstChild);
-        }
-
-        if (hint) {
-            if (typeof hint === "string") {
-                var hintNode = document.createTextNode(hint);
-                hintEle.appendChild(hintNode);
-            } else {
-                hintEle.appendChild(hint);
-            }
-        }
-    }.observes("CommandLine:controller#cliController.hint"),
-
     focus: function() {
         this.getPath("contentView.input").becomeFirstResponder();
     },

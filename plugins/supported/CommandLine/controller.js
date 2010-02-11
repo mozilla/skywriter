@@ -89,9 +89,11 @@ exports.cliController = SC.Object.create({
     },
 
     checkInput: function(input) {
+        /*
         if (false && input == this.lastInput) {
             return;
         }
+        */
         this.lastInput = input;
         this._inputChanged(input);
     },
@@ -183,10 +185,7 @@ exports.cliController = SC.Object.create({
             return;
         }
 
-        var input = {
-            typed: typed,
-            hints: []
-        };
+        var input = Input.create({ typed: typed });
 
         input.tokenize();
         input.split();
