@@ -262,6 +262,7 @@ exports.CliInputView = SC.View.design({
     childViews: [ "contentView" ],
     hasFocus: false,
     table: null,
+    _contentHeight: -1,
 
     /**
      * We need to know if blur events from the input really matter (i.e. are
@@ -299,10 +300,9 @@ exports.CliInputView = SC.View.design({
         }
     }.observes(
         ".hasFocus", // Open whenever we have the focus
-        ".contentHeight", // Resize if visible and content changes height
         ".contentView.display.toolbar.pin.isSelected" // Open/close on pin
     ),
-
+    
     /**
      *
      */
@@ -369,13 +369,18 @@ console.log("trying to set completion to " + completion);
      * Scrolls the command line output area to the bottom of the output.
      */
     scrollOutputToBottom: function() {
-        console.log("content height has changed");
+        var height = this.getPath("contentView.display.output.contentView.layout").height;
+        if (height == this._contentHeight) {
+            return;
+        }
+        
+        this._contentHeight = height;
         var scrollview = this.getPath("contentView.display.output");
         scrollview.scrollBy({ x: 0, y: 1000000 });
     }.observes(
         ".contentView.display.output.contentView.layout"
     ),
-
+    
     /**
      * We can't know where the focus is going to (willLoseKeyResponderTo only
      * reports when the destination focus is a sproutcore component that will
