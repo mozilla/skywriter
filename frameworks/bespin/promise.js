@@ -388,6 +388,14 @@ exports.group = function(group){
 	}
 	var fulfilled = 0;
 	var length = group.length;
+	
+	// if the original array has nothing in it, we can just
+	// return now.
+	if (!length) {
+	    deferred.resolve([]);
+	    return deferred.promise;
+	}
+	
 	var results = [];
 	group.forEach(function(promise, index){
 		exports.when(promise, function(value){
