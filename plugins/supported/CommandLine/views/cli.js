@@ -312,12 +312,11 @@ exports.CliInputView = SC.View.design({
             return;
         }
 
-        // TODO: Don't complete if we're deleting
-        /*
-        if (event.keyCode == "delete" || event.keyCode == "backspace") {
+        // See contentView.input.keyUp
+        var keyCode = this.get("lastKey");
+        if (keyCode == "delete" || keyCode == "backspace") {
             return;
         }
-        */
 
         var input = this.getPath("contentView.input");
         var existing = input.get("value");
@@ -342,6 +341,7 @@ console.log("trying to set completion to " + completion);
         var color = error ? "#F00" : "#1b1613";
         var input = this.getPath("contentView.input");
         input.set("backgroundColor", color);
+        console.log("change error to " + color);
     }.observes("CommandLine:controller#cliController.error"),
 
     /**
@@ -494,6 +494,10 @@ console.log("trying to set completion to " + completion);
                 }
             },
             keyUp: function(ev) {
+                // Remember this keypress because we don't want to do completion
+                // if we are deleting characters. See complete() above.
+                this.setPath("parentView.parentView.lastKey", ev.commandCodes()[0]);
+
                 var node = this.$input().get(0);
                 var value = node.value;
 
