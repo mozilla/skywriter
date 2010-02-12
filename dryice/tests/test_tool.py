@@ -151,7 +151,6 @@ def test_js_creation_without_core_test():
     output = StringIO()
     manifest.generate_output_files(output, StringIO())
     output = output.getvalue()
-    assert find_with_context(output, "core_test") == None
     assert "var tiki =" in output
     assert "PluginDev" not in output
     
