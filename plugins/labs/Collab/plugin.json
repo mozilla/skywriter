@@ -39,12 +39,6 @@
         {
             "ep": "command",
             "name": "group",
-            "description": "Collect the people you follow into groups, and display the existing groups",
-            "completeText": "subcommands: add, remove, list, help"
-        },
-        {
-            "ep": "command",
-            "name": "group",
             "description": "Collect the people you follow into groups, and display the existing groups"
         },
         {

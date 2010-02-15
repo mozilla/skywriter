@@ -40,69 +40,81 @@ var cliController = require("controller").cliController;
 
 /**
  * A really basic UI hint for when someone is entering something from a
- * selection.
+ * set of options, for example boolean|selection.
  */
+var optionHint = function(input, assignment, typeExt, data) {
+    var filter = assignment.value;
+
+    // How many matches do we have?
+    var matches = [];
+    data.forEach(function(option) {
+        if (filter && option.name.substring(0, filter.length) != filter) {
+            return;
+        }
+        matches.push(option);
+    }.bind(this));
+
+    if (matches.length === 0) {
+        // So this is an error - nothing matches
+        // TODO: suggest typo fixes?
+        return {
+            element: "Nothing matches.",
+            error: true
+        };
+    } else if (matches.length === 1) {
+        var match = matches[0];
+        var compl = match.name.substring(filter.length, match.name.length);
+        var desc = match.name + ": " + match.description;
+        return {
+            element: desc + " (\u2192 to accept)",
+            completion: compl + " "
+        };
+    } else {
+        var parent = document.createElement("div");
+        parent.appendChild(document.createTextNode(assignment.param.description));
+
+        var index = 0;
+        matches.forEach(function(option) {
+            if (index === 0) {
+                parent.appendChild(document.createTextNode(": "));
+            } else {
+                parent.appendChild(document.createTextNode(", "));
+            }
+            var link = document.createElement("a");
+            link.setAttribute("href", "javascript:;");
+            link.appendChild(document.createTextNode(option.name));
+            link.addEventListener("click", function(ev) {
+                SC.run(function() {
+                    cliController.set("input", option.name + " ");
+                });
+            }, false);
+            parent.appendChild(link);
+            index++;
+        }.bind(this));
+
+        return { element: parent };
+    }
+};
+
 exports.selection = {
     /**
      * @see typehint#getHint()
      */
     getHint: function(input, assignment, typeExt) {
-        var filter = assignment.value;
-
         var data = typeExt.data;
         if (!data) {
             console.error("Missing data for selection type");
             data = [];
         }
+        return optionHint(input, assignment, typeExt, data);
+    }
+};
 
-        // How many matches do we have?
-        var matches = [];
-        data.forEach(function(option) {
-            if (filter && option.name.substring(0, filter.length) != filter) {
-                return;
-            }
-            matches.push(option);
-        }.bind(this));
-
-        if (matches.length === 0) {
-            // So this is an error - nothing matches
-            // TODO: suggest typo fixes?
-            return {
-                element: "Nothing matches.",
-                error: true
-            };
-        } else if (matches.length === 1) {
-            var match = matches[0];
-            var compl = match.name.substring(filter.length, match.name.length);
-            var desc = match.name + ": " + match.description;
-            return {
-                element: desc + " (\u2192 to accept)",
-                completion: compl + " "
-            };
-        } else {
-            var parent = document.createElement("div");
-            parent.appendChild(document.createTextNode(assignment.param.description));
-
-            var index = 0;
-            matches.forEach(function(option) {
-                if (index === 0) {
-                    parent.appendChild(document.createTextNode(": "));
-                } else {
-                    parent.appendChild(document.createTextNode(", "));
-                }
-                var link = document.createElement("a");
-                link.setAttribute("href", "javascript:;");
-                link.appendChild(document.createTextNode(option.name));
-                link.addEventListener("click", function(ev) {
-                    SC.run(function() {
-                        cliController.set("input", option.name + " ");
-                    });
-                }, false);
-                parent.appendChild(link);
-                index++;
-            }.bind(this));
-
-            return { element: parent };
-        }
+exports.boolean = {
+    /**
+     * @see typehint#getHint()
+     */
+    getHint: function(input, assignment, typeExt) {
+        return optionHint(input, assignment, typeExt, [ "true", "false" ]);
     }
 };
