@@ -37,6 +37,12 @@
             "name": "selection",
             "description": "A string that is constrained to be one of a number of pre-defined values",
             "pointer": "basic#selection"
+        },
+        {
+            "ep": "type",
+            "name": "deferred",
+            "description": "A type which we don't understand from the outset, but which we hope context can help us with",
+            "pointer": "basic#deferred"
         }
     ]
 }

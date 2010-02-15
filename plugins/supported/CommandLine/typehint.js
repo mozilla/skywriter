@@ -120,8 +120,14 @@ exports.getTypeExt = function(typeSpec) {
 
                 r.loader.async(modName).then(function() {
                     var module = r(modName);
-                    typeExt.data = module[objName]();
-                    promise.resolve(typeExt);
+                    var func = module[objName];
+                    if (!func) {
+                        console.error("Module not found: ", data);
+                        promise.reject("Module not found: " + data);
+                    } else {
+                        typeExt.data = func();
+                        promise.resolve(typeExt);
+                    }
                 });
             }
         }

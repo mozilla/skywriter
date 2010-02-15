@@ -50,12 +50,6 @@ var types = require("Types:types");
  */
 exports.Input = SC.Object.extend({
     /**
-     * Error reporting might involve prioritizing several errors and only
-     * displaying the most significant
-     */
-    hints: null,
-
-    /**
      * The instruction as typed by the user so far
      */
     typed: null,
@@ -89,7 +83,6 @@ exports.Input = SC.Object.extend({
         if (this.typed === null) {
             throw new Error("Input requires something 'typed' to work on");
         }
-        this.hints = [];
     },
 
     /**

@@ -61,8 +61,7 @@ exports.text = {
 };
 
 /**
- * We don't currently plan to distinguish between integers and floats - this is
- * JavaScript damnit!
+ * We don't currently plan to distinguish between integers and floats
  */
 exports.number = {
     isValid: function(value, typeExt) {
@@ -96,6 +95,7 @@ exports.boolean = {
 };
 
 /**
+ * A JSON object
  * TODO: Check to see how this works out.
  */
 exports.object = {
@@ -113,12 +113,27 @@ exports.object = {
 };
 
 /**
- * TODO: Check to see how this works out.
+ * One of a known set of options
  */
 exports.selection = {
     isValid: function(value, typeExt) {
-        // TODO: optimistic sync/async validation??
-        return typeof value == "string";
+        if (typeof value != "string") {
+            return false;
+        }
+
+        if (!typeExt.data) {
+            console.error("Missing data on selection type extension. Skipping");
+            return true;
+        }
+
+        var match = false;
+        typeExt.data.forEach(function(option) {
+            if (value == option) {
+                match = true;
+            }
+        });
+
+        return match;
     },
 
     toString: function(value, typeExt) {
@@ -127,6 +142,24 @@ exports.selection = {
 
     fromString: function(value, typeExt) {
         // TODO: should we validate and return null if invalid?
+        return value;
+    }
+};
+
+/**
+ * A type that we don't have context for just yet
+ */
+exports.deferred = {
+    isValid: function(value, typeExt) {
+        // TODO: optimistic sync/async validation??
+        return typeof value == "string";
+    },
+
+    toString: function(value, typeExt) {
+        return value.toString();
+    },
+
+    fromString: function(value, typeExt) {
         return value;
     }
 };

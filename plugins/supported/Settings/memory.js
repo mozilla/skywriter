@@ -133,7 +133,11 @@ exports.MemorySettings = SC.Object.extend({
 
             // Load the type so we can check the validator
             typeExt.load().then(function(type) {
-                if (!type.isValid(settingExt.defaultValue)) {
+                if (!type) {
+                    console.error("type == null", settingExt);
+                }
+
+                if (!type.isValid(settingExt.defaultValue, typeExt)) {
                     console.error("Setting.isValid(Setting.defaultValue) == false", settingExt);
                 }
 
@@ -145,7 +149,10 @@ exports.MemorySettings = SC.Object.extend({
                     this._changeValue(settingExt.name, this.get(settingExt.name));
                 }.bind(this));
             }.bind(this));
-        }.bind(this));
+        }.bind(this), function() {
+            console.error(arguments);
+            console.trace();
+        });
     },
 
     /**
