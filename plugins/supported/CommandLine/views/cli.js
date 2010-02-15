@@ -328,20 +328,22 @@ exports.CliInputView = SC.View.design({
         }
         */
 
-console.log("trying to set completion to " + completion);
+        /*
+        console.log("trying to set completion to " + completion, input.get("value"));
         input.set("value", completion);
         input.$input()[0].setSelectionRange(existing.length + 1, completion.length);
+        */
     }.observes("CommandLine:controller#cliController.completion"),
 
     /**
      * Highlight the input field in the case of an error
      */
     error: function(source, event) {
-        var error = cliController.get("error");
-        var color = error ? "#F00" : "#1b1613";
-        var input = this.getPath("contentView.input");
-        input.set("backgroundColor", color);
-        console.log("change error to " + color);
+        if (cliController.get("error")) {
+            this.classNames.pushObject("error");
+        } else {
+            this.classNames.removeObject("error");
+        }
     }.observes("CommandLine:controller#cliController.error"),
 
     /**
@@ -351,7 +353,7 @@ console.log("trying to set completion to " + completion);
     hintUpdated: function() {
         var hint = cliController.get("hint");
         var hintEle = this.getPath("contentView.display.hint.layer");
-        while(hintEle.firstChild) {
+        while (hintEle.firstChild) {
             hintEle.removeChild(hintEle.firstChild);
         }
 
