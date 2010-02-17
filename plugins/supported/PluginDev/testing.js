@@ -38,10 +38,37 @@
 var catalog = require("bespin:plugins").catalog;
 var Ct = require("core_test");
 var DefaultLogger = require('loggers/default', 'core_test');
+var BrowserLogger = require("core_test:loggers/browser");
 var group = require("bespin:promise").group;
 var test = require("core_test:test");
+var ctutils = require("core_test:utils");
 
 var lastTest = null;
+
+// default template used for display.  Note we use classes here - not IDs.  
+// This way multiple instances can be on the same page at once.
+var html = ['<div id="testoutput-%@1" class="core-test">',
+  '<div class="useragent">UserAgent</div>',
+  '<div class="testresult">',
+    '<label class="hide-passed">',
+      '<input type="checkbox" checked="" /> Hide passed tests',
+    '</label>',
+    '<span class="final-status">Running...</span>',
+  '</div>',
+  '<ul class="detail">',
+  '</ul>',
+'</div>'].join('');
+
+var TestOutputLogger = ctutils.extend(BrowserLogger, {
+    // The request that this test run is associated with
+    request: null,
+    setupDisplay: function() {
+        var guid = SC.guidFor(this);
+        var outputHTML = ctutils.fmt(html, guid);
+        request.output(outputHTML);
+        this.layer = SC.$("#testoutput-" + guid);
+    }
+});
 
 exports.testrunner = function(env, args, request) {
     var plugin, testModule;
@@ -86,7 +113,13 @@ exports.testrunner = function(env, args, request) {
     console.log("Tests to run: ");
     console.log(testsToRun);
     var plan = new Ct.Plan(testspec);
-    plan.logger(new DefaultLogger());
+    var logger = new TestOutputLogger({
+        request: request
+    });
+    SC.generateGuid(logger);
+    console.log("Logger:");
+    console.log(logger);
+    plan.logger(logger);
     
     var promises = [];
     
@@ -101,18 +134,18 @@ exports.testrunner = function(env, args, request) {
             var mod = require(testmodule);
             console.log("Module to test:");
             console.log(mod);
-            test.run(mod);
-            // var ctmod = plan.module(testmodule);
-            // for (var key in mod) {
-            //     // limit processing to spec...
-            //     if ((key==='test') || (key.indexOf('test')!==0)) continue;
-            // 
-            //     console.log("adding test ", key);
-            //     ctmod.test(key, mod[key]);
-            // }
+            // test.run(mod);
+            var ctmod = plan.module(testmodule);
+            for (var key in mod) {
+                // limit processing to spec...
+                if ((key==='test') || (key.indexOf('test')!==0)) continue;
+            
+                console.log("adding test ", key);
+                ctmod.test(key, mod[key]);
+            }
         });
         console.log("Going to try running the plan");
-        // Ct.run(plan);
+        Ct.run(plan);
         request.done();
     });
     request.async();
