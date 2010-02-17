@@ -35,26 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-"define metadata";
-({
-    "depends": ["BespinServer"],
-    "provides": [
-        {
-            "ep": "command",
-            "name": "reload",
-            "params": [
-                {
-                    "name": "plugin",
-                    "type": "text"
-                }
-            ],
-            "description": "Reload the named plugin.",
-            "pointer": "#reloadCommand"
-        }
-    ]
-});
-"end";
-
 // this isn't necessary under Abbot, and it's unclear to me why it's
 // necessary otherwise -- kdangoor
 require.loader.async("core_test");
@@ -83,7 +63,11 @@ testNames.forEach(function(name) {
 * Reloads the named plugin, calling the callback when it's complete.
 */
 exports.reload = function(pluginName, callback) {
-    pluginCatalog.plugins[pluginName].reload(callback);
+    var plugin = pluginCatalog.plugins[pluginName];
+    if (plugin == undefined) {
+        throw "Plugin undefined";
+    }
+    plugin.reload(callback);
 };
 
 exports.reloadCommand = function(env, args, request) {
@@ -91,9 +75,18 @@ exports.reloadCommand = function(env, args, request) {
         request.doneWithError("You must provide a plugin name");
         return;
     }
-    exports.reload(args.plugin, function() {
-        request.done("Plugin " + args.plugin + " reloaded.");
-    });
+    try
+    {
+        exports.reload(args.plugin, function() {
+            request.done("Plugin " + args.plugin + " reloaded.");
+        });
+    } catch (e) {
+        if (e == "Plugin undefined") {
+            request.doneWithError("Cannot find plugin " + args.plugin);
+            return;
+        }
+        throw e;
+    }
     request.async();
 };
 

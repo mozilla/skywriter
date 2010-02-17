@@ -101,6 +101,19 @@ class Plugin(object):
             return self.load_metadata()
     
     @property
+    def testmodules(self):
+        """Returns a list of test modules in this plugin. Test modules
+        are in directories called 'tests' and start with the word test."""
+        if not self.location.isdir():
+            return []
+            
+        tests = []
+        for d in self.location.walkdirs("tests"):
+            for f in d.walkfiles("test*"):
+                tests.append(self.location.relpathto(f).splitext()[0])
+        return tests
+    
+    @property
     def single_file(self):
         """Returns true if this is a single file plugin
         (ie not a directory with a plugin.json file)."""
@@ -136,6 +149,7 @@ class Plugin(object):
             md = {}
         
         md["resourceURL"] = "resources/%s/" % urlquote(self.name)
+        md["testmodules"] = self.testmodules
         
         if self._errors:
             md['errors'] = self._errors

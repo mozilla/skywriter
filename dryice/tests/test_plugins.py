@@ -103,10 +103,12 @@ def test_plugin_metadata():
     assert p.name == "plugin1"
     assert p.location_name == "testplugins"
     assert p.relative_location == "plugin1"
+    tm = p.testmodules
+    assert "tests/testFoo" in tm
     assert not p.errors
     assert p.depends[0] == "plugin2"
     s = p.scripts
-    assert len(s) == 2
+    assert len(s) == 4
     assert "thecode.js" in s
     assert "subdir/morecode.js" in s
     text = p.get_script_text("thecode.js")

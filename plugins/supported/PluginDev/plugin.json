@@ -1,0 +1,31 @@
+{
+    "depends": ["BespinServer", "core_test"],
+    "provides": [
+        {
+            "ep": "command",
+            "name": "reload",
+            "params": [
+                {
+                    "name": "plugin",
+                    "type": "text"
+                }
+            ],
+            "description": "Reload the named plugin.",
+            "pointer": "#reloadCommand"
+        },
+        {
+            "ep": "command",
+            "name": "test-run",
+            "params": [
+                {
+                    "name": "testmodule",
+                    "type": "text",
+                    "description": "Provide a plugin name to run all tests for a plugin, 'all' to run all known tests, or plugin:module to run the tests in a specific module. If you omit this, the last tests run will be run again.",
+                    "defaultValue": null
+                }
+            ],
+            "description": "Run a collection of tests.",
+            "pointer": "testing#testrunner"
+        }
+    ]
+}
