@@ -401,26 +401,36 @@ exports.SyntaxManager = SC.Object.extend({
     // range.
     _recomputeAttrInfoForRows: function(startRow, endRow) {
         var promise = new Promise();
-        var lineAttrInfos = this._lineAttrInfo;
+        var lineAttrInfo = this._lineAttrInfo;
 
         if (startRow === endRow) {
             // We succeeded only if we got to the end of the buffer.
-            promise.resolve(startRow === lineAttrInfos.length ? startRow :
-                false);
+            var result = startRow === lineAttrInfo.length ? startRow : false;
+            promise.resolve(result);
             return promise;
         }
 
-        var lineAttrInfo = lineAttrInfos[startRow];
+        var thisLineAttrInfo = lineAttrInfo[startRow];
         var line = this.getPath('textStorage.lines')[startRow];
 
-        this._deepSyntaxInfoForLine(lineAttrInfo.snapshot, line).
+        this._deepSyntaxInfoForLine(thisLineAttrInfo.snapshot, line).
             then(function(deepSyntaxInfo) {
-                lineAttrInfo.attrs =
+                thisLineAttrInfo.attrs =
                     deepSyntaxInfo.map(function(dsi) { return dsi.attrs; });
 
-                if (startRow !== lineAttrInfos.length - 1) {
-                    lineAttrInfos[startRow + 1].snapshot =
-                        deepSyntaxInfo.map(function(dsi) { return dsi.next; });
+                if (startRow !== lineAttrInfo.length - 1) {
+                    var nextLineAttrInfo = lineAttrInfo[startRow + 1];
+                    var oldSnapshot = nextLineAttrInfo.snapshot;
+                    var newSnapshot = deepSyntaxInfo.map(function(dsi) {
+                        return dsi.next;
+                    });
+
+                    if (this._snapshotsEqual(oldSnapshot, newSnapshot)) {
+                        promise.resolve(startRow + 1);
+                        return;
+                    }
+
+                    nextLineAttrInfo.snapshot = newSnapshot;
                 }
 
                 this._recomputeAttrInfoForRows(startRow + 1, endRow).
