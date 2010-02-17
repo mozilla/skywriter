@@ -44,6 +44,8 @@ var Request = require("Canon:request").Request;
 var typehint = require("typehint");
 var Input = require("input").Input;
 
+var printStackTrace = require("bespin:util/stacktrace").printStackTrace;
+
 /**
  * Command line controller.
  * <p>Outstanding work
@@ -188,7 +190,7 @@ exports.cliController = SC.Object.create({
                     console.log("- typed: '", typed, "'");
                     console.log("- arguments: ", args);
                     console.error(ex);
-                    console.trace();
+                    console.log(printStackTrace(ex));
                     console.groupEnd();
                 }
             });

@@ -65,8 +65,15 @@ var TestOutputLogger = ctutils.extend(BrowserLogger, {
     setupDisplay: function() {
         var guid = SC.guidFor(this);
         var outputHTML = ctutils.fmt(html, guid);
-        request.output(outputHTML);
-        this.layer = SC.$("#testoutput-" + guid);
+        this.layer = SC.$(outputHTML);
+        this.request.output(outputHTML);
+    },
+    
+    end: function() {
+        console.log("End of test plan");
+        this.emit(this.currentPlan); 
+        this.currentPlan = null;
+        this.request.done();
     }
 });
 
@@ -113,12 +120,13 @@ exports.testrunner = function(env, args, request) {
     console.log("Tests to run: ");
     console.log(testsToRun);
     var plan = new Ct.Plan(testspec);
-    var logger = new TestOutputLogger({
-        request: request
-    });
+    var logger = new TestOutputLogger();
+    logger.request = request;
     SC.generateGuid(logger);
+    logger.setupDisplay();
     console.log("Logger:");
     console.log(logger);
+    // var logger = new DefaultLogger();
     plan.logger(logger);
     
     var promises = [];
@@ -146,7 +154,6 @@ exports.testrunner = function(env, args, request) {
         });
         console.log("Going to try running the plan");
         Ct.run(plan);
-        request.done();
     });
     request.async();
 };
