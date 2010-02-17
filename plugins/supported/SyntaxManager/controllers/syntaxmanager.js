@@ -36,8 +36,9 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var m_promise = require('bespin:promise');
 var ArrayUtils = require('utils/array');
-var Promise = require('bespin:promise').Promise;
+var Promise = m_promise.Promise;
 var Range = require('RangeUtils:utils/range');
 var Yield = require('utils/yield');
 var syntaxDirectory = require('controllers/syntaxdirectory').syntaxDirectory;
@@ -51,165 +52,48 @@ var syntaxDirectory = require('controllers/syntaxdirectory').syntaxDirectory;
  * and provides marked up text as the layout manager requests it.
  */
 exports.SyntaxManager = SC.Object.extend({
-    _attributes: null,
     _invalidRows: [],
+    _lineAttrInfo: null,
 
-    _adjustInvalidRowsForDeletion: function(range) {
-        var rangeStartRow = range.start.row, rangeEndRow = range.end.row;
+    _adjustInvalidRowsForDeletion: function(startRow, endRow) {
         var newInvalidRows = [];
         this._invalidRows.forEach(function(invalidRow) {
             // before the deleted range
-            if (invalidRow <= rangeStartRow) {
+            if (invalidRow <= startRow) {
                 newInvalidRows.push(invalidRow);
                 return;
             }
 
             // inside the deleted range
-            if (invalidRow > rangeStartRow || invalidRow < rangeEndRow) {
+            if (invalidRow > startRow || invalidRow < endRow) {
                 return;
             }
 
             // after the deleted range
-            if (invalidRow >= rangeEndRow) {
-                newInvalidRows.push(invalidRow - (rangeEndRow -
-                    rangeStartRow));
+            if (invalidRow >= endRow) {
+                newInvalidRows.push(invalidRow - (endRow - startRow));
             }
         });
         this._invalidRows = newInvalidRows;
     },
 
-    _adjustInvalidRowsForInsertion: function(range) {
-        var rangeStartRow = range.start.row, rangeEndRow = range.end.row;
+    _adjustInvalidRowsForInsertion: function(startRow, endRow) {
         this._invalidRows = this._invalidRows.map(function(invalidRow) {
-            return invalidRow < rangeStartRow ?
-                invalidRow :                    // before the inserted range
-                invalidRow + rangeEndRow - rangeStartRow;   // after
+            return invalidRow < startRow ? invalidRow :
+                invalidRow + endRow - startRow;
         });
-    },
-
-    //
-    // Determines whether two attribute ranges are equal.
-    //
-    // TODO: Unit tests.
-    //
-    _attributeRangesEqual: function(rangeA, rangeB) {
-        if (rangeA.start !== rangeB.start || rangeA.end !== rangeB.end) {
-            return false;
-        }
-
-        var contextsA = rangeA.contexts, contextsB = rangeB.contexts;
-
-        if (contextsA === null || contextsB === null) {
-            return contextsA === contextsB;
-        }
-
-        if (contextsA.length !== contextsB.length) {
-            return false;
-        }
-        var contextsLength = contextsA.length;
-        for (var i = 0; i < contextsLength; i++) {
-            var contextA = contextsA[i], contextB = contextsB[i];
-            if (contextA.name !== contextB.name ||
-                    contextA.state !== contextB.state) {
-                return false;
-            }
-        }
-
-        return true;
-    },
-
-    // Calls out to the appropriate syntax highlighter.
-    _computeAttributeRange: function(line, column, contexts) {
-        var promise = new Promise();
-
-        var context = contexts[contexts.length - 1].context;
-        if (context === 'plain') {
-            promise.resolve(this._defaultAttributeRange(column, contexts));
-        } else {
-            syntaxDirectory.loadSyntax(context).then(function(syntax) {
-                var syntaxPromise = syntax.computeAttributeRange(line, column,
-                    contexts);
-                syntaxPromise.then(function(attrRange) {
-                    promise.resolve(attrRange);
-                });
-            });
-        }
-
-        return promise;
-    },
-
-    _contextsBeforeRow: function(row) {
-        if (row === 0) {
-            return [ this._getInitialContext() ];
-        }
-
-        var lineAttributes = this._attributes[row - 1];
-        return lineAttributes[lineAttributes.length - 1].contexts;
-    },
-
-    _defaultAttributeRange: function(column, contexts) {
-        var newContext = this._getDefaultContext();
-        var newContexts;
-        if (contexts === null) {
-            newContexts = [ newContext ];       // for unit testing
-        } else if (contexts[contexts.length - 1].context !== 'plain') {
-            newContexts = contexts.concat(newContext);
-        } else {
-            newContexts = contexts;
-        }
-        return { start: column, end: null, contexts: contexts, tag: 'plain' };
-    },
-
-    _deleteAttributes: function(range) {
-        var attributes = this._attributes;
-        var start = range.start, end = range.end;
-        var startRow = start.row, endRow = end.row;
-
-        this._splitAttributesAtPosition(start);
-        var startIndex = this._getAttributeIndexForPosition(start);
-        this._splitAttributesAtPosition(end);
-        var endIndex = this._getAttributeIndexForPosition(end);
-
-        var startRowAttributes = attributes[startRow];
-
-        if (startRow === endRow) {
-            startRowAttributes.splice(startIndex, endIndex - startIndex);
-        } else {
-            // Chop attributes off the end of the first line.
-            startRowAttributes.splice(startIndex, startRowAttributes.length -
-                startIndex);
-            // Join the last line to the first line.
-            startRowAttributes.pushObjects(attributes[endRow].slice(endIndex));
-            // Remove all lines beyond the first.
-            attributes.splice(startRow + 1, endRow - startRow);
-        }
-
-        // Adjust the offsets on the first line.
-        this._offsetAttributeRanges(startRow, startIndex, start.column -
-            end.column);
-    },
-
-    _deleteRange: function(oldRange) {
-        if (Range.isZeroLength(oldRange)) {
-            return;
-        }
-
-        this._deleteAttributes(oldRange);
-        this._adjustInvalidRowsForDeletion(oldRange);
-        this._invalidateRow(oldRange.start.row);
     },
 
     // Searches for the attribute range containing the given row and column and
     // returns its index.
-    _getAttributeIndexForPosition: function(position) {
-        var attributeIndex = ArrayUtils.binarySearch(this.
-            _attributes[position.row], position.column,
-            function(column, attributeRange) {
-                if (column < attributeRange.start) {
+    _attrIndexForColumn: function(attrs, column) {
+        var attrIndex = ArrayUtils.binarySearch(attrs, column,
+            function(column, range) {
+                if (column < range.start) {
                     return -1;
                 }
 
-                var end = attributeRange.end;
+                var end = range.end;
                 if (end !== null && column >= end) {
                     return 1;
                 }
@@ -217,85 +101,241 @@ exports.SyntaxManager = SC.Object.extend({
                 return 0;
             });
 
-        if (attributeIndex === null) {
+        if (attrIndex === null) {
             console.error("position not found", position);
         }
-        return attributeIndex;
+
+        return attrIndex;
     },
 
-    _getBlankAttrRange: function(start, end) {
-        var contexts = [ this._getDefaultContext() ];
-        return { start: start, end: end, contexts: contexts, tag: 'plain' };
+    _attrsToString: function(attrs) {
+        return attrs.map(function(range) {
+            return "%@.%@.%@@%@-%@".fmt(range.context, range.state, range.tag,
+                range.start, range.end);
+        }.bind(this)).join(", ");
     },
 
-    _getDefaultContext: function() {
-        return {
-            context:    'plain',
-            state:      'normal'
+    _clearAttrsAtRow: function(row) {
+        var attrs = [];
+        for (var i = 0; i < 2; i++) {
+            attrs.push(this._defaultAttrs());
         }
+
+        this._lineAttrInfo[row].attrs = attrs;
     },
 
-    _getInitialContext: function() {
-        return {
-            context:    this.get('initialContext'),
-            state:      this.get('initialState')
-        };
+    // Returns an array of context info, each with "attrs" and "next"
+    // properties.
+    _deepSyntaxInfoForLine: function(snapshot, line) {
+        var promise = new Promise();
+
+        var outerContextAndState = snapshot[0];
+        var outerContext    = outerContextAndState.context;
+        var outerState      = outerContextAndState.state;
+
+        // Style the outer part of the line.
+        this._shallowSyntaxInfoForLineFragment(outerContext, outerState, line,
+            0, null).then(function(outerShallowSyntaxInfo) {
+                var outerAttrs = outerShallowSyntaxInfo.attrs;
+                outerAttrs.forEach(function(outerAttrRange) {
+                    // It's simpler if we store the context in each range
+                    // instead of having consumers infer it from the parent
+                    // context.
+                    outerAttrRange.context = outerContext;
+                });
+
+                var deepAttrs = [
+                    { attrs: outerAttrs, next: outerShallowSyntaxInfo.next }
+                ];
+
+                var innerRanges = this._innerRangesFromAttrs(outerAttrs,
+                    snapshot[1]);
+
+                if (innerRanges.length === 0) {
+                    deepAttrs.push({
+                        attrs:  [ { context: null, start: 0, end: null } ],
+                        next:   { context: null }
+                    });
+
+                    promise.resolve(deepAttrs);
+                    return;
+                }
+
+                var promises = innerRanges.map(function(ir) {
+                    return this._shallowSyntaxInfoForLineFragment(ir.context,
+                        ir.state, line, ir.start, ir.end);
+                }.bind(this));
+
+                m_promise.group(promises).
+                    then(function(innerShallowSyntaxInfos) {
+                        var innerAttrGroups = innerShallowSyntaxInfos.
+                            map(function(issi) { return issi.attrs; });
+
+                        // Assign the appropriate context to each attribute
+                        // range.
+                        for (var i = 0; i < innerAttrGroups.length; i++) {
+                            var innerContext = innerRanges[i].context;
+                            innerAttrGroups[i].forEach(function(ir) {
+                                ir.context = innerContext;
+                            });
+                        }
+
+                        var innerAttrs = this.
+                            _flattenAttrGroups(innerAttrGroups);
+
+                        var lastInnerAttrGroup =
+                            innerAttrGroups[innerAttrGroups.length - 1];
+                        var lastInnerAttrRange =
+                            lastInnerAttrGroup[lastInnerAttrGroup.length - 1];
+
+                        var innerNext;
+                        if (lastInnerAttrRange.end === null) {
+                            innerNext = {
+                                context:    lastInnerAttrRange.context,
+                                state:      lastInnerAttrRange.state
+                            };
+                        } else {
+                            innerNext = { context: null };
+                        }
+
+                        deepAttrs.push({ attrs: innerAttrs, next: innerNext });
+                        promise.resolve(deepAttrs);
+                    }.bind(this));
+        }.bind(this));
+
+        return promise;
+    },
+
+    _defaultAttrs: function() {
+        return [ { start: 0, end: null, tag: 'plain', actions: [] } ];
+    },
+
+    _deleteAttrsInRange: function(range) {
+        var startRow = range.start.row, endRow = range.end.row;
+        this._clearAttrsAtRow(startRow);
+        this._lineAttrInfo.splice(startRow + 1, endRow - startRow);
+    },
+
+    _deleteRange: function(oldRange) {
+        if (Range.isZeroLength(oldRange)) {
+            return;
+        }
+
+        this._deleteAttrsInRange(oldRange);
+
+        var oldStartRow = oldRange.start.row, oldEndRow = oldRange.end.row;
+        this._adjustInvalidRowsForDeletion(oldStartRow, oldEndRow);
+        this._invalidateRow(oldStartRow);
+    },
+
+    _flattenAttrGroups: function(attrGroups) {
+        var flattenedAttrs = [];
+        var position = 0;
+
+        attrGroups.forEach(function(attrs) {
+            var start = attrs[0].start;
+            if (position !== start) {
+                flattenedAttrs.push({
+                    start:      position,
+                    end:        start,
+                    context:    null
+                });
+            }
+
+            flattenedAttrs.pushObjects(attrs);
+
+            position = attrs[attrs.length - 1].end;
+        });
+
+        if (position !== null) {
+            flattenedAttrs.push({
+                start:      position,
+                end:        null,
+                context:    null
+            });
+        }
+
+        return flattenedAttrs;
     },
 
     _initialContextChanged: function() {
         this._reset();
     }.observes('initialContext'),
 
-    _initialStateChanged: function() {
-        this._reset();
-    }.observes('initialState'),
+    _innerRangesFromAttrs: function(outerAttrs, innerContextAndState) {
+        var currentContext = innerContextAndState.context;
+        var currentState = innerContextAndState.state;
+        var contextStart = 0;
+        var innerRanges = [];
 
-    _insertAttributes: function(newRange) {
-        var attributes = this._attributes;
+        outerAttrs.forEach(function(outerAttrRange) {
+            outerAttrRange.actions.forEach(function(action) {
+                switch (action[0]) {
+                case 'start':
+                    // TODO: Right now we silently refuse to highlight contexts
+                    // nested more than one level deep.
+                    if (currentContext !== null) {
+                        break;
+                    }
 
-        var start = newRange.start, end = newRange.end;
-        var startRow = start.row, endRow = end.row;
-        var startColumn = start.column, endColumn = end.column;
+                    currentContext  = action[1];
+                    currentState    = 'start';
+                    contextStart    = outerAttrRange.end;
+                    break;
 
-        this._splitAttributesAtPosition(start);
-        var startIndex = this._getAttributeIndexForPosition(start);
+                case 'stop':
+                    if (currentContext !== action[1]) {
+                        break;
+                    }
 
-        var startRowAttributes = attributes[startRow];
+                    var end = outerAttrRange.start;
+                    if (contextStart !== end) {
+                        innerRanges.push({
+                            context:    currentContext,
+                            state:      currentState,
+                            start:      contextStart,
+                            end:        end
+                        });
+                    }
 
-        var endIndex;
-        if (startRow === endRow) {
-            startRowAttributes.splice(startIndex, 0,
-                this._getBlankAttrRange(startColumn, endColumn));
+                    currentContext = null;
+                    break;
+                }
+            });
+        });
 
-            endIndex = startIndex + 1;
-        } else {
-            // Detach the remainder of the first row to form the new end row.
-            var endRowAttributes = startRowAttributes.slice(startIndex);
-            startRowAttributes.splice(startIndex,
-                startRowAttributes.length - startIndex,
-                this._getBlankAttrRange(startColumn, null));
-
-            // Add in any empty rows.
-            for (var i = startRow + 1; i < endRow; i++) {
-                attributes.splice(startRow + 1, 0,
-                    [ this._getBlankAttrRange(0, null) ]);
-            }
-
-            // Add space to the start of the end row, if necessary.
-            if (endColumn === 0) {
-                endIndex = 0;
-            } else {
-                endRowAttributes.unshift(this._getBlankAttrRange(0,
-                    endColumn));
-                endIndex = 1;
-            }
-
-            // Attach the end row.
-            attributes.splice(endRow, 0, endRowAttributes);
+        if (currentContext !== null) {
+            innerRanges.push({
+                context:    currentContext,
+                state:      currentState,
+                start:      contextStart,
+                end:        null
+            });
         }
 
-        // Adjust the offsets on the last line.
-        this._offsetAttributeRanges(endRow, endIndex, endColumn - startColumn);
+        return innerRanges;
+    },
+
+    _insertAttrsIntoRange: function(range) {
+        var start = range.start;
+        var startRow = start.row, endRow = range.end.row;
+
+        // Clear the first line.
+        this._clearAttrsAtRow(startRow);
+
+        // Insert the rest of the lines.
+        var lineAttrInfo = this._lineAttrInfo;
+        var newRowCount = endRow - startRow;
+        for (var i = 0; i < newRowCount; i++) {
+            var snapshot = [], attrs = [];
+            for (var j = 0; j < 2; j++) {
+                snapshot.push({ context: null });
+                attrs.push(this._defaultAttrs());
+            }
+
+            lineAttrInfo.splice(startRow + 1, 0,
+                { snapshot: snapshot, attrs: attrs });
+        }
     },
 
     _insertRange: function(newRange) {
@@ -303,9 +343,11 @@ exports.SyntaxManager = SC.Object.extend({
             return;
         }
 
-        this._insertAttributes(newRange);
-        this._adjustInvalidRowsForInsertion(newRange);
-        this._invalidateRow(newRange.start.row);
+        this._insertAttrsIntoRange(newRange);
+
+        var newStartRow = newRange.start.row, newEndRow = newRange.end.row;
+        this._adjustInvalidRowsForInsertion(newStartRow, newEndRow);
+        this._invalidateRow(newStartRow);
     },
 
     // Adds a row to the set of invalid rows.
@@ -317,140 +359,137 @@ exports.SyntaxManager = SC.Object.extend({
         this._invalidRows = invalidRows.uniq();
     },
 
-    _offsetAttributeRanges: function(row, startIndex, offset) {
-        var lineAttributes = this._attributes[row];
-        var attributeRangeCount = lineAttributes.length;
-        for (var i = startIndex; i < attributeRangeCount; i++) {
-            var attributeRange = lineAttributes[i];
-            attributeRange.start += offset;
-            if (attributeRange.end !== null) {
-                attributeRange.end += offset;
+    _mergeAttrGroups: function(attrGroups) {
+        var mergedGroups = [];
+
+        var outerGroup = attrGroups[0], innerGroup = attrGroups[1];
+        var outerIndex = 0, innerIndex = 0;
+        var pos = 0;
+
+        while (pos !== null) {
+            var outerRange = outerGroup[outerIndex];
+            var innerRange = innerGroup[innerIndex];
+
+            if (innerRange.context !== null) {
+                // Inner ranges override outer ranges.
+                mergedGroups.push(innerRange);
+
+                pos = innerRange.end;
+                innerIndex++;
+
+                if (outerRange.end === pos) {
+                    outerIndex++;
+                }
+            } else {
+                mergedGroups.push(outerRange);
+
+                pos = outerRange.end;
+                outerIndex++;
+
+                if (innerRange.end === pos) {
+                    innerIndex++;
+                }
             }
         }
+
+        return mergedGroups;
     },
 
     // Runs the syntax highlighters. Returns the first unchanged row (i.e. the
     // row immediately following the row where the synchronization happened),
     // or null if the highlighting failed to synchronize before the end of the
     // range.
-    _recomputeAttributesForRows: function(startRow, endRow) {
-        var attributes = this._attributes;
-        var lines = this.getPath('textStorage.lines');
-        var contexts = this._contextsBeforeRow(startRow);
+    _recomputeAttrInfoForRows: function(startRow, endRow) {
+        var promise = new Promise();
+        var lineAttrInfos = this._lineAttrInfo;
 
-        var row = startRow;
-        var self = this;
-        return Yield.loop(function(promise) {           // row cond()
-                if (row <= endRow) {
-                    return true;
+        if (startRow === endRow) {
+            // We succeeded only if we got to the end of the buffer.
+            promise.resolve(startRow === lineAttrInfos.length ? startRow :
+                false);
+            return promise;
+        }
+
+        var lineAttrInfo = lineAttrInfos[startRow];
+        var line = this.getPath('textStorage.lines')[startRow];
+
+        this._deepSyntaxInfoForLine(lineAttrInfo.snapshot, line).
+            then(function(deepSyntaxInfo) {
+                lineAttrInfo.attrs =
+                    deepSyntaxInfo.map(function(dsi) { return dsi.attrs; });
+
+                if (startRow !== lineAttrInfos.length - 1) {
+                    lineAttrInfos[startRow + 1].snapshot =
+                        deepSyntaxInfo.map(function(dsi) { return dsi.next; });
                 }
 
-                // We succeeded only if we got to the end of the buffer.
-                promise.resolve(row === attributes.length ? row : false);
-                return false;
-            },
-            function() {                                // row exec()
-                var index = 0;
-                return Yield.loop(function(promise) {   // column cond()
-                        if (index < attributes[row].length) {
-                            return true;
-                        }
-
-                        promise.resolve(false);
-                        return false;
-                    },
-                    function() {                        // column exec()
-                        return self._computeAttributeRange(lines[row],
-                            attributes[row][index].start, contexts);
-                    },
-                    function(value, promise) {          // column next()
-                        var computedAttrRange = value;
-
-                        // Advance the contexts.
-                        contexts = computedAttrRange.contexts;
-
-                        var oldAttrRange = attributes[row][index];
-                        if (row !== startRow && self.
-                                _attributeRangesEqual(oldAttrRange,
-                                computedAttrRange)) {
-                            // Successfully synchronized!
-                            var lastModifiedRow = index === 0 ? row : row + 1;
-                            promise.resolve(lastModifiedRow);
-                            return false;
-                        }
-
-                        self._replaceAttributeRange(row, index,
-                            computedAttrRange);
-
-                        index++;
-                        return true;
+                this._recomputeAttrInfoForRows(startRow + 1, endRow).
+                    then(function(lastRow) {
+                        promise.resolve(lastRow);
                     });
-            },
-            function(value, promise) {                  // row next()
-                if (value !== false) {
-                    // Successfully synchronized.
-                    promise.resolve(value);
-                    return false;
-                }
+            }.bind(this));
 
-                row++;
-                return true;
-            });
-    },
-
-    _replaceAttributeRange: function(row, index, newAttributeRange) {
-        var lineAttributes = this._attributes[row];
-        lineAttributes.splice(index, 0, newAttributeRange);
-
-        // Delete any overwritten attribute ranges.
-        var computedEnd = newAttributeRange.end;
-        var deletedEnd = null;
-        while (index + 1 < lineAttributes.length) {
-            var nextAttributeRange = lineAttributes[index+1];
-            var nextStart = nextAttributeRange.start;
-            if (computedEnd !== null &&
-                    nextAttributeRange.start >= computedEnd) {
-                break;
-            }
-
-            deletedEnd = nextAttributeRange.end;
-            lineAttributes.splice(index + 1, 1);
-        }
-
-        // Insert blank attributes to fill the space.
-        if (computedEnd !== null && (deletedEnd === null ||
-                (deletedEnd !== null && computedEnd < deletedEnd))) {
-            lineAttributes.splice(index + 1, 0,
-                this._getBlankAttrRange(computedEnd, deletedEnd));
-        }
+        return promise;
     },
 
     // Invalidates all the highlighting.
     _reset: function() {
-        var attributes = [];
+        var lineAttrInfo = [];
         var lineCount = this.getPath('textStorage.lines').length;
+        var initialContext = this.get('initialContext');
+
         for (var i = 0; i < lineCount; i++) {
-            attributes.push([ this._getBlankAttrRange(0, null) ]);
+            lineAttrInfo.push({
+                snapshot: [
+                    { context: initialContext,  state: 'start' },
+                    { context: null }
+                ],
+                attrs: [
+                    this._defaultAttrs(),
+                    [ { context: null, start: 0, end: null } ]
+                ]
+            });
         }
 
-        this._attributes = attributes;
         this._invalidRows = [ 0 ];
+        this._lineAttrInfo = lineAttrInfo;
     },
 
-    // If the position is in the middle of a range, splits the range in two.
-    _splitAttributesAtPosition: function(position) {
-        var row = position.row, column = position.column;
-        var lineAttributes = this._attributes[row];
-        var index = this._getAttributeIndexForPosition(position);
-        var attributeRange = lineAttributes[index];
-        var start = attributeRange.start, end = attributeRange.end;
+    // Calls out to the appropriate syntax highlighter.
+    _shallowSyntaxInfoForLineFragment: function(context, state, line, start,
+            end) {
+        var promise = new Promise();
 
-        if (column > start && (end === null || column < end)) {
-            lineAttributes.splice(index, 1,
-                this._getBlankAttrRange(start, column),
-                this._getBlankAttrRange(column, end));
-            return { row: row, column: start };
+        if (context === 'plain') {
+            promise.resolve({
+                attrs:  this._defaultAttrs(),
+                next:   { context: 'plain', state: 'start' }
+            });
+        } else {
+            syntaxDirectory.loadSyntax(context).then(function(syntax) {
+                syntax.syntaxInfoForLineFragment(context, state, line, start,
+                    end).then(function(result) {
+                        promise.resolve(result);
+                    })
+                });
         }
+
+        return promise;
+    },
+
+    _snapshotsEqual: function(snapshotA, snapshotB) {
+        if (snapshotA.length !== snapshotB.length) {
+            return false;
+        }
+
+        for (var i = 0; i < snapshotA.length; i++) {
+            var casA = snapshotA[i], casB = snapshotB[i];
+            if (casA.context !== casB.context || casA.state !== casB.state) {
+                return false;
+            }
+        }
+
+        return true;
     },
 
     /**
@@ -458,8 +497,10 @@ exports.SyntaxManager = SC.Object.extend({
      * of rows. To ensure that the text returned by this method is up to date,
      * updateSyntaxForRows() should be called first.
      */
-    attributedTextForRows: function(startRow, endRow) {
-        return this._attributes.slice(startRow, endRow);
+    attrsForRows: function(startRow, endRow) {
+        return this._lineAttrInfo.slice(startRow, endRow).map(function(lai) {
+            return this._mergeAttrGroups(lai.attrs);
+        }, this);
     },
 
     /**
@@ -468,13 +509,6 @@ exports.SyntaxManager = SC.Object.extend({
      * The initial context. Defaults to "plain".
      */
     initialContext: 'plain',
-
-    /**
-     * @property{number}
-     *
-     * The initial state to take on within the context.
-     */
-    initialState: 'normal',
 
     /**
      * @property{TextStorage}
@@ -501,15 +535,14 @@ exports.SyntaxManager = SC.Object.extend({
      * manager, for debugging purposes.
      */
     toString: function() {
-        return "{ attributes: [ %@ ], invalidRows: [ %@ ] }".
-            fmt(this._attributes.map(function(attributeLine) {
-                return "[ %@ ]".fmt(attributeLine.
-                    map(function(attributeRange) {
-                        return "%@-%@".fmt(attributeRange.start,
-                            attributeRange.end);
-                }).join());
-            }).join(),
-            this._invalidRows.join());
+        return "{ lineAttrInfo: [ %@ ], invalidRows: [ %@ ] }".
+            fmt(this._lineAttrInfo.map(function(info) {
+                return "{ (%@) -> (%@) }".fmt(info.snapshot.map(function(cas) {
+                    return cas.context + ": " + cas.state;
+                }).join(", "),
+                info.attrs.map(this._attrsToString.bind(this)).join(", "));
+            }.bind(this)).join(", "),
+            this._invalidRows.join(", "));
     },
 
     /**
@@ -541,11 +574,10 @@ exports.SyntaxManager = SC.Object.extend({
             }
 
             // Recompute the attributes for the appropriate rows.
-            var self = this;
-            this._recomputeAttributesForRows(invalidRow, endRow - 1).
+            this._recomputeAttrInfoForRows(invalidRow, endRow).
                 then(function(firstUnchangedRow) {
                     if (firstUnchangedRow === false) {
-                        self._invalidateRow(endRow);
+                        this._invalidateRow(endRow);
                         firstUnchangedRow = endRow;
                     }
 
@@ -553,7 +585,7 @@ exports.SyntaxManager = SC.Object.extend({
                         startRow:   startRow,
                         endRow:     firstUnchangedRow
                     });
-                });
+                }.bind(this));
         }
 
         return promise;

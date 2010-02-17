@@ -46,85 +46,29 @@ var Promise = require('bespin:promise').Promise;
 exports.StandardSyntax = SC.Object.extend({
     _stickySupported: null,
 
-    _transition: function(alternation, contexts) {
-        var nextState   = alternation.nextState;
-        var pushContext = alternation.pushContext;
-        var popContext  = alternation.popContext;
+    _parseActions: function(actions) {
+        if (SC.none(actions)) {
+            return [];
+         }
 
-        var newContexts;
-        if (pushContext !== undefined) {        // push a new context
-            newContexts = contexts.concat({
-                context:    pushContext,
-                state:      nextState
-            });
-        } else if (popContext === true) {       // pop this context
-            newContexts = contexts.concat();
-            newContexts.pop();
-        } else if (nextState !== undefined) {   // state transition
-            var contextInfo = contexts[contexts.length - 1];
-            newContexts = contexts.concat();
-            newContexts[newContexts.length - 1] = {
-                context:    contextInfo.context,
-                state:      nextState
-            };
-        } else {                                // no state transition
-            newContexts = contexts;
-        }
+        return actions.split(" ").map(function(action) {
+            var parts = action.split(":");
+            return parts.length === 1 ? [ 'transition', parts[0] ] : parts;
+        });
+    },
 
-        return newContexts;
+    _transition: function(range, state) {
+        var newState = state;
+        range.actions.forEach(function(action) {
+            if (action[0] === 'transition') {
+                newState = action[1];
+            }
+        });
+
+        return newState;
     },
 
     states: null,
-
-    computeAttributeRange: function(line, column, contexts) {
-        var promise = new Promise();
-
-        var stickySupported = this._stickySupported;
-        var str = stickySupported ? line : line.substring(column);
-        var lineLength = line.length;
-
-        var contextInfo = contexts[contexts.length - 1];
-        var state = contextInfo.state;
-        var states = this.get('states');
-        if (states[state] === undefined) {
-            throw new Error("StandardSyntax: no such state '%@'".fmt(state));
-        }
-
-        var alternations = states[state];
-        var alternationCount = alternations.length;
-        for (var i = 0; i < alternationCount; i++) {
-            var alternation = alternations[i];
-            var regex = alternation.regex;
-
-            if (stickySupported) {
-                regex.lastIndex = column;
-            }
-
-            var result = regex.exec(str);
-            if (result !== null) {
-                var end = column + result[0].length;
-                var attrRange = {
-                    start:      column,
-                    end:        end === lineLength ? null : end,
-                    contexts:   this._transition(alternation, contexts),
-                    tag:        alternation.tag,
-                };
-
-                promise.resolve(attrRange);
-                return promise;
-            }
-        }
-
-        // The (inefficient) default case.
-        promise.resolve({
-            start:      column,
-            end:        column === lineLength ? null : column + 1,
-            contexts:   contexts,
-            tag:        'plain'
-        });
-
-        return promise;
-    },
 
     init: function() {
         var stickySupported = null;
@@ -150,6 +94,90 @@ exports.StandardSyntax = SC.Object.extend({
         }
 
         this._stickySupported = stickySupported;
+    },
+
+    syntaxInfoForLineFragment: function(context, state, line, start, end) {
+        var promise = new Promise();
+
+        var attrs = [];
+        var stickySupported = this._stickySupported;
+        var lineLength = line.length;
+        var states = this.get('states');
+
+        if (end !== null && end < line.length) {
+            line = line.substring(0, end);
+        }
+
+        var endColumn = line.length;
+
+        var column = start;
+        while (column !== endColumn) {
+            var str = stickySupported ? line : line.substring(column);
+
+            if (states[state] === undefined) {
+                throw new Error("StandardSyntax: no such states '%@'".
+                    fmt(state));
+            }
+
+            var range = { start: column, state: state };
+            var newState;
+            var alternations = states[state];
+            var alternationCount = alternations.length;
+
+            for (var i = 0; i < alternationCount; i++) {
+                var alt = alternations[i];
+                var regex = alt.regex;
+
+                if (stickySupported) {
+                    regex.lastIndex = column;
+                }
+
+                var result = regex.exec(str);
+                if (result === null) {
+                    continue;
+                }
+
+                var resultLength = result[0].length;
+                if (resultLength === 0) {
+                    // Emit a helpful diagnostic rather than going into an
+                    // infinite loop, to aid syntax writers...
+                    throw new Error("Syntax regex matches the empty " +
+                        "string: " + regex.toSource());
+                }
+
+                range.end = column + result[0].length;
+                range.tag = alt.tag;
+                range.actions = this._parseActions(alt.then);
+
+                state = this._transition(range, state);
+                break;
+            }
+
+            if (range.tag === undefined) {
+                // The (inefficient) default case.
+                range.end = column + 1;
+                range.tag = 'plain';
+                range.actions = [];
+            }
+
+            attrs.push(range);
+            column = range.end;
+        }
+
+        if (end === null) {
+            // Style the newline.
+            attrs.push({
+                start:      column,
+                end:        null,
+                state:      state,
+                tag:        'plain',
+                actions:    []
+            });
+        }
+
+        var next = { context: context, state: state };
+        promise.resolve({ attrs: attrs, next: next });
+        return promise;
     },
 });
 

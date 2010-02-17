@@ -118,7 +118,7 @@ exports.applicationController = SC.Object.create({
         textStorage.set('value', INITIAL_TEXT);
 
         var syntaxManager = layoutManager.get('syntaxManager');
-        syntaxManager.set('initialContext', 'js');
+        syntaxManager.set('initialContext', 'html');
         syntaxManager.set('initialState', 'normal');
 
         var buffer = editsession.Buffer.create({

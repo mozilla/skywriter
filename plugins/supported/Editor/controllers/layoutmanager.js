@@ -421,26 +421,19 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
      * highlighters.
      */
     updateTextRows: function(startRow, endRow) {
-        var theme = this.get('theme');
         var textLines = this.get('textLines');
+        var attrs = this.get('syntaxManager').attrsForRows(startRow, endRow);
+        var theme = this.get('theme');
 
-        var attributedText = this.get('syntaxManager').
-            attributedTextForRows(startRow, endRow);
+        for (var i = 0; i < attrs.length; i++) {
+            textLines[startRow + i].colors = attrs[i].map(function(range) {
+                var color = theme["editorTextColor_" + range.tag];
+                if (SC.none(color)) {
+                    color = theme.editorTextColor_plain;
+                }
 
-        for (var i = 0; i < attributedText.length; i++) {
-            textLines[startRow + i].colors = attributedText[i].
-                map(function(range) {
-                    var tag = range.tag;
-                    var color = theme["editorTextColor_" + tag];
-                    if (SC.none(color)) {
-                        color = theme.editorTextColor_plain;
-                    }
-                    return {
-                        start:  range.start,
-                        end:    range.end,
-                        color:  color
-                    };
-                });
+                return { start: range.start, end: range.end, color: color };
+            });
         }
     }
 });
