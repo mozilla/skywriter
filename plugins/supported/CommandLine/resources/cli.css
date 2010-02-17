@@ -53,7 +53,7 @@ body.sc-theme .cmd_line .cmd_prompt .cmd_brackets { color: #FFF; }
   font-family: Calibri, Arial, sans-serif; color: #FFF; font-size: 140%;
   font-weight: bold; background: #1b1613;
 }
-.cmd_line .sc-view .sc-text-field-view.error input { color: #F00; }
+.cmd_line.error .sc-view .sc-text-field-view input { color: #F00; }
 .cmd_line .sc-view label.sc-text-field-view .border {
   -moz-appearance: none; -webkit-appearance: none; border: 0;
 }

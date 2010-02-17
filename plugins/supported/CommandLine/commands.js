@@ -43,28 +43,35 @@ var rootCanon = { aliases:[], commands:[] };
 
 /**
  * Generate some help text for all commands in this canon, optionally
- * filtered by a <code>prefix</code>, and with a <code>helpSuffix</code>
- * appended.
+ * filtered by a <code>prefix</code>, and with <code>options</code> which can
+ * specify a prefix and suffix for the generated HTML.
  */
 var _getHelp = function(prefix, options) {
-    var commands = [];
-    var command, name;
-    
-    command = catalog.getExtensionByKey("command", prefix);
+    var output = [];
 
-    if (command) { // caught a real command
-        commands.push(command.description);
+    var command = catalog.getExtensionByKey("command", prefix);
+    if (command && command.pointer) {
+        // caught a real command
+        output.push(command.description);
     } else {
         var showHidden = false;
 
-        if (prefix) {
+        if (!prefix && options && options.prefix) {
+            output.push(options.prefix);
+        }
+
+        if (command) {
+            // We must be looking at sub-commands
+            output.push("<h2>Sub-Commands of " + command.name + "</h2>");
+            output.push("<p>" + command.description + "</p>");
+        } else if (prefix) {
             if (prefix == "hidden") { // sneaky, sneaky.
                 prefix = "";
                 showHidden = true;
             }
-            commands.push("<h2>Commands starting with '" + prefix + "':</h2>");
+            output.push("<h2>Commands starting with '" + prefix + "':</h2>");
         } else {
-            commands.push("<h2>Available Commands:</h2>");
+            output.push("<h2>Available Commands:</h2>");
         }
 
         var toBeSorted = [];
@@ -74,12 +81,11 @@ var _getHelp = function(prefix, options) {
 
         var sorted = toBeSorted.sort();
 
-        commands.push("<table>");
+        output.push("<table>");
         for (var i = 0; i < sorted.length; i++) {
-            name = sorted[i];
-            command = catalog.getExtensionByKey("command", name);
+            command = catalog.getExtensionByKey("command", sorted[i]);
             if (!command) {
-                console.error("Huh? command ", name, " cannot be looked up by name");
+                console.error("Huh? command ", command.name, " cannot be looked up by name");
                 continue;
             }
 
@@ -90,33 +96,38 @@ var _getHelp = function(prefix, options) {
                 // Ignore editor actions
                 continue;
             }
-            if (prefix && name.indexOf(prefix) !== 0) {
+            if (prefix && command.name.indexOf(prefix) !== 0) {
+                // Filtered out by the user
                 continue;
             }
-            
+            if (!command && command.name.indexOf(" ") != -1) {
+                // sub command
+                continue;
+            }
+            if (command && command.name == prefix) {
+                // sub command, and we've already given that help
+                continue;
+            }
+
             // todo add back a column with parameter information, perhaps?
-            
-            commands.push("<tr>");
-            commands.push('<th>' + name + '</th>');
-            commands.push('<td>' + command.description + "</td>");
-            commands.push("</tr>");
+
+            output.push("<tr>");
+            output.push('<th>' + command.name + '</th>');
+            output.push('<td>' + command.description + "</td>");
+            output.push("</tr>");
         }
-        commands.push("</table>");
+        output.push("</table>");
+
+        if (!prefix && options && options.suffix) {
+            output.push(options.suffix);
+        }
     }
 
-    var output = commands.join("");
-    if (options && options.prefix) {
-        output = options.prefix + output;
-    }
-    if (options && options.suffix) {
-        output = output + options.suffix;
-    }
-    return output;
+    return output.join("");
 };
 
-
 /**
- * TODO: make this automatic
+ *
  */
 exports.helpCommand = function(env, args, request) {
     var output = _getHelp(args.search, {

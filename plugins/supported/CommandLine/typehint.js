@@ -39,6 +39,8 @@ var catalog = require("bespin:plugins").catalog;
 var Promise = require("bespin:promise").Promise;
 var types = require("Types:types");
 
+var hint = require("hint");
+
 var r = require;
 
 /**
@@ -89,7 +91,7 @@ exports.getHint = function(input, assignment) {
  * default - a simple text node containing the description.
  */
 var createDefaultHint = function(description) {
-    return { element: document.createTextNode(description) };
+    return hint.Hint.create({ element: document.createTextNode(description) });
 };
 
 /**

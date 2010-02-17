@@ -42,6 +42,9 @@ var groupPromises = require("bespin:promise").group;
 
 var types = require("Types:types");
 
+var hint = require("hint");
+var typehint = require("typehint");
+
 /**
  * An object used during command line parsing to hold the various intermediate
  * data steps.
@@ -130,6 +133,53 @@ exports.Input = SC.Object.extend({
             // We have an exact match
             this.commandExt = commandExt;
         }
+
+        var hintPromise = new Promise();
+
+        if (this.commandExt) {
+            // We know what the command is.
+            if (this.parts.length === 1) {
+                // There are 2 cases for when there is only one option and we've
+                // not started on the parameters.
+                var cmdExt = this.commandExt;
+                if (this.typed == cmdExt.name ||
+                        !cmdExt.params || cmdExt.params.length === 0) {
+                    // Case 1: The input exactly equals the command, or there
+                    // are no params to dig into. Use the command help
+                    var desc = exports.describeCommandExt(cmdExt);
+                    hintPromise = typehint.getHint(this, {
+                        param: { type: "text", description: desc },
+                        value: this.typed
+                    });
+                } else {
+                    // Case 2: We pressed space, start thinking about the first
+                    // parameter.
+                    hintPromise = typehint.getHint(this, {
+                        param: cmdExt.params[0],
+                        value: ""
+                    });
+                }
+            }
+        } else {
+            // We don't know what the command is
+            // TODO: We should probably cache this
+            var commandExts = [];
+            catalog.getExtensions("command").forEach(function(commandExt) {
+                if (commandExt.description) {
+                    commandExts.push(commandExt);
+                }
+            }.bind(this));
+
+            hintPromise = typehint.getHint(this, {
+                param: {
+                    type: { name: "selection", data: commandExts },
+                    description: "Commands"
+                },
+                value: this.typed
+            });
+        }
+
+        return hintPromise;
     },
 
     /**
@@ -167,27 +217,40 @@ exports.Input = SC.Object.extend({
      */
     assign: function() {
         // TODO: something smarter than just assuming that they are all in order
-        var index = 0;
         this.assignments = {};
+        var params = this.commandExt.params;
 
-        if (this.commandExt.params) {
-            this.commandExt.params.forEach(function(param) {
-                var value = this._getValueForParam(param, index, undefined);
-
-                // Warning null != undefined. See docs for _getValueForParam()
-                if (value !== undefined) {
-                    // This is an assignment - i.e. a value that matches a parameter
-                    // See also _getAssignmentForLastArg()
-                    this.assignments[param.name] = {
-                        value: value,
-                        param: param,
-                        index: index
-                    };
-                }
-
-                index++;
-            }.bind(this));
+        if (!params || params.length == 0) {
+            // This command does not take parameters
+            if (this.unparsedArgs.length != 0) {
+                return [hint.Hint.create({
+                    level: hint.Level.Error,
+                    element: this.commandExt.name + " does not take any parameters."
+                })];
+            }
+            return [];
         }
+
+        var hints = [];
+        var index = 0;
+        params.forEach(function(param) {
+            var localHints = this._assignParam(param, index++);
+
+            localHints.forEach(function(hint) {
+                hints.push(hint);
+            });
+        }.bind(this));
+
+        this.unparsedArgs.forEach(function(unparsedArg) {
+            if (!unparsedArg.used) {
+                hints.push(hint.Hint.create({
+                    level: hint.Level.Error,
+                    element: "Parameter '" + unparsedArg + "' makes no sense."
+                }));
+            }
+        });
+
+        return hints;
     },
 
     /**
@@ -196,23 +259,68 @@ exports.Input = SC.Object.extend({
      * from the command meta-data for the commandExt in question.
      * @param index The number of the param - i.e. the index of <tt>param</tt>
      * into the original params array.
-     * @param defaultValue The value to use if no data has been provided in the
-     * input. This will be either <tt>param.defaultValue</tt> to use the value
-     * specified in the meta-data (useful in actual command execution). Or it
-     * might be <tt>undefined</tt> when we're providing hints as we go along and
-     * are only interested in what the user actually typed. It is common for
-     * params to specify <tt>param.defaultValue = null</tt> to denote that the
-     * parameter is optional.
-     * @return The value for the specified parameter or <tt>defaultValue</tt>
-     * if none could be assigned.
      */
-    _getValueForParam: function(param, index, defaultValue) {
-        // TODO: something to take into account --params.
-        if (this.unparsedArgs.length > index) {
-            return this.unparsedArgs[index];
-        } else {
-            return defaultValue;
+    _assignParam: function(param, index) {
+        var params = this.commandExt.params;
+
+        // Special case: there is only 1 parameter, and that's of type text
+        // so we can put all the params into the first param
+        if (index == 0 && params.length == 1 && params[0].type == "text") {
+            // Warning: There is some potential problem here if spaces are
+            // significant. It might be better to chop the command of the
+            // start of this.typed?
+            this.assignments[params[0].name] = {
+                value: this.unparsedArgs.join(" "),
+                param: params[0],
+                index: 0
+            };
+
+            this.unparsedArgs.forEach(function(unparsedArg) {
+                unparsedArg.used = true;
+            });
+
+            return [];
         }
+
+        var hints = [];
+
+        // TODO: something to take into account --params.
+        // 1.  Do we have any --params specifiers for this param?
+        //     If so use it and ignore everything else. Done.
+        // 2a. Remove all --params
+        // 2b. Use the index to get at the param we want
+        // 3.  How do we special case the last param?
+
+        var value;
+        if (this.unparsedArgs.length > index) {
+            value = this.unparsedArgs[index];
+        } else {
+            value = defaultValue;
+        }
+
+        // Warning null != undefined. See docs for _assignParam()
+        if (value !== undefined) {
+            this.assignments[param.name] = {
+                value: value,
+                param: param,
+                index: index
+            };
+        } else {
+            this.assignments[param.name] = {
+                param: param,
+                index: index
+            };
+
+            if (param.defaultValue === undefined) {
+                // There is no default, and we've not supplied one so far
+                hints.push(hint.Hint.create({
+                    level: hint.Level.Incomplete,
+                    element: "Missing parameter: " + param.name
+                }));
+            }
+        }
+
+        return hints;
     },
 
     /**
@@ -249,21 +357,34 @@ exports.Input = SC.Object.extend({
         // Cache of promises, because we're only done when they're done
         var convertPromises = [];
 
-        this.commandExt.params.forEach(function(param) {
-            var value = this._getValueForParam(param, index, param.defaultValue);
+        for (var name in this.assignments) {
+            if (this.assignments.hasOwnProperty(name)) {
+                var assignment = this.assignments[name];
+                var param = assignment.param;
 
-            // Warning null != undefined. See docs for _getValueForParam()
-            if (value === undefined) {
-                // Add an error hint
+                var value = assignment.value;
+                if (value === undefined) {
+                    value = param.defaultValue;
+                }
+
+                if (value !== undefined) {
+                    var convertPromise = types.fromString(value, param.type);
+                    convertPromise.then(function(converted) {
+                        assignment.converted = converted;
+                        argOutputs[param.name] = converted;
+                    }, function(error) {
+                        assignment.hint = hint.Hint.create({
+                            level: hint.Level.Error,
+                            element: "Can't convert '" + value + "' to a " +
+                                param.type + ": " + error
+                        });
+                    });
+                    convertPromises.push(convertPromise);
+
+                    index++;
+                }
             }
-            var convertPromise = types.fromString(value, param.type);
-            convertPromise.then(function(converted) {
-                argOutputs[param.name] = converted;
-            });
-            convertPromises.push(convertPromise);
-
-            index++;
-        }.bind(this));
+        }
 
         var reply = new Promise();
         var group = groupPromises(convertPromises);
@@ -273,3 +394,10 @@ exports.Input = SC.Object.extend({
         return reply;
     }
 });
+
+/**
+ * Quick utility to describe a commandExt
+ */
+exports.describeCommandExt = function(commandExt) {
+    return commandExt.name + ": " + commandExt.description;
+};

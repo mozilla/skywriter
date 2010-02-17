@@ -49,36 +49,29 @@ var Input = require("input").Input;
  * <p>Outstanding work
  * - Move hints into tokenize(), split(), etc
  * - Sub commands
- * - Late bound types
+ * - named parameters
  * - aliases
+ * - Late bound types
  */
 exports.cliController = SC.Object.create({
     /**
      * A string containing the current contents of the command line
      */
-    input: "",
+    input: null,
 
     /**
-     *
+     * A set of hints which could help the user complete their typing
      */
-    lastInput: null,
-
-    /**
-     * A string, DOM node or (hopefully) SproutCore component that acts as a
-     * hint to completing the command line
-     */
-    hint: "",
-
-    /**
-     * A string which is set when there is only one thing that logically come
-     * next.
-     */
-    completion: "",
+    hints: null,
 
     /**
      * Is the input in a state where it could possibly work?
      */
     error: false,
+
+    init: function() {
+        this.hints = [];
+    },
 
     /**
      * Called by the UI to execute a command. Assumes that #input is bound to
@@ -102,6 +95,10 @@ exports.cliController = SC.Object.create({
      * We need to re-parse the CLI whenever the input changes
      */
     _inputChanged: function(typed) {
+        this.hints.propertyWillChange("[]");
+        this.hints.length = 0;
+        this.hints.propertyDidChange("[]");
+
         if (typed == "") {
             this.set("hint", "Type a command, see 'help' for available commands.");
             return;
@@ -110,68 +107,40 @@ exports.cliController = SC.Object.create({
         var input = Input.create({ typed: typed });
 
         input.tokenize();
-        input.split();
 
-        var hintPromise;
+        var hp = input.split();
+        hp.then(this.addHints.bind(this));
 
-        if (input.commandExt) {
-            // We know what the command is.
-            if (input.parts.length === 1) {
-                // There are 2 cases for when there is only one option and we've
-                // not started on the parameters.
-                var cmdExt = input.commandExt;
-                if (input.typed == cmdExt.name ||
-                        !cmdExt.params || cmdExt.params.length === 0) {
-                    // Case 1: The input exactly equals the command, or there
-                    // are no params to dig into. Use the command help
-                    var desc = exports.describeCommandExt(cmdExt);
-                    hintPromise = typehint.getHint(input, {
-                        param: { type: "text", description: desc },
-                        value: input.typed
-                    });
-                } else {
-                    // Case 2: We pressed space, start thinking about the first
-                    // parameter.
-                    hintPromise = typehint.getHint(input, {
-                        param: cmdExt.params[0],
-                        value: ""
-                    });
-                }
-            } else {
-                input.assign();
-                var assignment = input.getAssignmentForLastArg();
-                hintPromise = typehint.getHint(input, assignment);
-            }
-        } else {
-            // We don't know what the command is
-            // TODO: We should probably cache this
-            var commandExts = [];
-            catalog.getExtensions("command").forEach(function(commandExt) {
-                if (commandExt.description) {
-                    commandExts.push(commandExt);
-                }
-            }.bind(this));
-
-            hintPromise = typehint.getHint(input, {
-                param: {
-                    type: { name: "selection", data: commandExts },
-                    description: "Commands"
-                },
-                value: input.typed
-            });
+        if (this.commandExt) {
+            input.assign();
+            var assignment = input.getAssignmentForLastArg();
+            hp = typehint.getHint(input, assignment);
+            hp.then(this.addHints.bind(this));
         }
+    },
 
-        this.set("completion", null);
-
-        hintPromise.then(function(hint) {
-            SC.run(function() {
-                this.set("hint", hint.element);
-                this.set("error", hint.error);
-                if (hint.completion) {
-                    this.set("completion", typed + hint.completion);
+    /**
+     *
+     */
+    addHints: function(hints) {
+        if (!hints) {
+            console.error("Null hint. Ignoring");
+            console.trace();
+            return;
+        }
+        if (Array.isArray(hints)) {
+            hints.forEach(function(hint) {
+                if (hint.isHint) {
+                    this.hints.pushObject(hint);
+                } else {
+                    console.error("Not a hint", hint);
                 }
-            }.bind(this));
-        }.bind(this));
+            });
+        } else if (hints.element) {
+            this.hints.pushObject(hints);
+        } else {
+            console.error("Missing element in hint", hints);
+        }
     },
 
     /**
@@ -235,10 +204,3 @@ exports.cliController = SC.Object.create({
         });
     }
 });
-
-/**
- * Quick utility to describe a commandExt
- */
-exports.describeCommandExt = function(commandExt) {
-    return commandExt.name + ": " + commandExt.description;
-};

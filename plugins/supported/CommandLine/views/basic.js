@@ -37,6 +37,7 @@
 
 var SC = require("sproutcore/runtime").SC;
 var cliController = require("controller").cliController;
+var hint = require("hint");
 
 /**
  * A really basic UI hint for when someone is entering something from a
@@ -57,18 +58,18 @@ var optionHint = function(input, assignment, typeExt, data) {
     if (matches.length === 0) {
         // So this is an error - nothing matches
         // TODO: suggest typo fixes?
-        return {
+        return hint.Hint.create({
             element: "Nothing matches.",
-            error: true
-        };
+            level: hint.Level.Error
+        });
     } else if (matches.length === 1) {
         var match = matches[0];
         var compl = match.name.substring(filter.length, match.name.length);
         var desc = match.name + ": " + match.description;
-        return {
+        return hint.Hint.create({
             element: desc + " (\u2192 to accept)",
             completion: compl + " "
-        };
+        });
     } else {
         var parent = document.createElement("div");
         parent.appendChild(document.createTextNode(assignment.param.description));
@@ -92,7 +93,7 @@ var optionHint = function(input, assignment, typeExt, data) {
             index++;
         }.bind(this));
 
-        return { element: parent };
+        return hint.Hint.create({ element: parent });
     }
 };
 

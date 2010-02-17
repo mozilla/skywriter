@@ -37,15 +37,17 @@
 
 var SC = require("sproutcore/runtime").SC;
 var util = require("bespin:util/util");
-var BespinButtonView = require("views/image_button").BespinButtonView;
-var PinView = require("views/pin").PinView;
-
 var catalog = require("bespin:plugins").catalog;
 var dock = require("bespin:views/dock");
-var cliController = require("controller").cliController;
+
 var request = require("Canon:request");
 var keyboardManager = require('Canon:keyboard').keyboardManager;
 var settings = require("Settings").settings;
+
+var cliController = require("controller").cliController;
+var Level = require("hint").Level;
+var BespinButtonView = require("views/image_button").BespinButtonView;
+var PinView = require("views/pin").PinView;
 
 var imagePath = catalog.getResourceURL("CommandLine") + "images/";
 
@@ -59,9 +61,6 @@ var compactHeight = 30;
  * The maximum size the CLI can grow to
  */
 var maxHeight = 300;
-
-//SC.LOG_BINDINGS = true;
-//SC.LOG_OBSERVERS = true;
 
 var endWithId = function(ele) {
     var id = SC.guidFor(ele);
@@ -80,7 +79,6 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
                 // sender should = root, key should = path
                 updater(root.getPath(path));
             });
-            console.log("initially setting", path, "to", root.getPath(path));
             updater(root.getPath(path));
 
             // The stacked view gets confused about how tall it should be...
@@ -302,7 +300,7 @@ exports.CliInputView = SC.View.design({
         ".hasFocus", // Open whenever we have the focus
         ".contentView.display.toolbar.pin.isSelected" // Open/close on pin
     ),
-    
+
     /**
      *
      */
@@ -333,39 +331,34 @@ exports.CliInputView = SC.View.design({
         input.set("value", completion);
         input.$input()[0].setSelectionRange(existing.length + 1, completion.length);
         */
-    }.observes("CommandLine:controller#cliController.completion"),
-
-    /**
-     * Highlight the input field in the case of an error
-     */
-    error: function(source, event) {
-        if (cliController.get("error")) {
-            this.classNames.pushObject("error");
-        } else {
-            this.classNames.removeObject("error");
-        }
-    }.observes("CommandLine:controller#cliController.error"),
+    }/*.observes("CommandLine:controller#cliController.completion")*/,
 
     /**
      * Sync the hint manually so we can also alter the sizes of the hint and
      * output components to make it fit properly.
      */
     hintUpdated: function() {
-        var hint = cliController.get("hint");
+        var hints = cliController.get("hints");
         var hintEle = this.getPath("contentView.display.hint.layer");
         while (hintEle.firstChild) {
             hintEle.removeChild(hintEle.firstChild);
         }
 
-        if (hint) {
-            if (typeof hint === "string") {
-                var hintNode = document.createTextNode(hint);
+        if (hints.length == 0) {
+            this.$().setClass("error", false);
+        }
+
+        hints.forEach(function(hint) {
+            if (typeof hint.element === "string") {
+                var hintNode = document.createTextNode(hint.element);
                 hintEle.appendChild(hintNode);
             } else {
-                hintEle.appendChild(hint);
+                hintEle.appendChild(hint.element);
             }
-        }
-    }.observes("CommandLine:controller#cliController.hint"),
+
+            this.$().setClass("error", hint.level == Level.Error);
+        }.bind(this));
+    }.observes("CommandLine:controller#cliController.hints.[]"),
 
     /**
      * Scrolls the command line output area to the bottom of the output.
@@ -375,14 +368,14 @@ exports.CliInputView = SC.View.design({
         if (height == this._contentHeight) {
             return;
         }
-        
+
         this._contentHeight = height;
         var scrollview = this.getPath("contentView.display.output");
         scrollview.scrollBy({ x: 0, y: 1000000 });
     }.observes(
         ".contentView.display.output.contentView.layout"
     ),
-    
+
     /**
      * We can't know where the focus is going to (willLoseKeyResponderTo only
      * reports when the destination focus is a sproutcore component that will
