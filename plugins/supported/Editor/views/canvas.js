@@ -78,38 +78,28 @@ exports.CanvasView = SC.View.extend({
         return this._cvCanvasContext;
     },
 
-    _cvLayoutChanged: function() {
-        this._cvResizeToFit();
-    }.observes('layout'),
-
-    _cvParentViewFrameChanged: function() {
-        this._cvResizeToFit();
-    },
-
-    _cvResizeToFit: function() {
+    _cvResizeCanvas: function() {
         var parentFrame = this.getPath('parentView.frame');
-        var frame = this.get('frame');
-        var frameWidth = frame.width, frameHeight = frame.height;
-        var parentWidth = parentFrame.width, parentHeight = parentFrame.height;
-        if (frameWidth >= parentWidth && frameHeight >= parentHeight) {
+
+        var canvas = this._cvCanvasDom;
+        if (SC.none(canvas)) {
             return;
         }
 
-        this.set('layout', {
-            left:   frame.x,
-            top:    frame.y,
-            width:  Math.max(frameWidth, parentWidth),
-            height: Math.max(frameHeight, parentHeight)
-        });
-    },
+        var widthChanged = canvas.width !== parentFrame.width;
+        var heightChanged = canvas.height !== parentFrame.height;
 
-    /**
-     * Subclasses can override this method to provide custom behavior whenever
-     * the clipping frame changes. The default implementation simply
-     * invalidates the entire visible area.
-     */
-    clippingFrameChanged: function() {
-        this.setNeedsDisplay();
+        if (widthChanged) {
+            canvas.width = parentFrame.width;
+        }
+
+        if (heightChanged) {
+            canvas.height = parentFrame.height;
+        }
+
+        if (widthChanged || heightChanged) {
+            this.setNeedsDisplay();
+        }
     },
 
     layoutStyle: { left: "0px", top: "0px" },
@@ -122,11 +112,47 @@ exports.CanvasView = SC.View.extend({
      */
     minimumRedrawDelay: 1000.0 / 30.0,
 
+    /**
+     * Subclasses can override this method to provide custom behavior whenever
+     * the clipping frame changes. The default implementation simply
+     * invalidates the entire visible area.
+     */
+    clippingFrameChanged: function() {
+        this.setNeedsDisplay();
+    },
+
+    didCreateLayer: function() {
+        arguments.callee.base.apply(this, arguments);
+        this._cvCanvasDom = this.$("#" + this._cvCanvasId)[0];
+        this.redraw();
+    },
+
+    /**
+     * Subclasses should override this method to perform any drawing that they
+     * need to.
+     *
+     * @param rect{Rect} The rectangle to draw in.
+     * @param context{CanvasRenderingContext2D} The 2D graphics context, taken
+     *   from the canvas.
+     */
+    drawRect: function(rect, context) {
+        // empty
+    },
+
     init: function() {
         arguments.callee.base.apply(this, arguments);
         this._cvInvalidRects = [];
         this.get('parentView').addObserver('frame', this,
-            this._cvParentViewFrameChanged);
+            this.parentViewFrameChanged);
+    },
+
+    /**
+     * Subclasses that need custom logic when the parent view's frame changes
+     * (to maintain a minimum size, for example) should override this method
+     * and chain up to the parent implementation.
+     */
+    parentViewFrameChanged: function() {
+        this._cvResizeCanvas();
     },
 
     /**
@@ -176,48 +202,6 @@ exports.CanvasView = SC.View.extend({
         return true;
     },
 
-    renderLayout: function(context, firstTime) {
-        arguments.callee.base.apply(this, arguments);
-
-        var parentFrame = this.getPath('parentView.frame');
-        if (firstTime) {
-            context.attr('width', parentFrame.width);
-            context.attr('height', parentFrame.height);
-            return;
-        }
-
-        var canvas = this._cvCanvasDom;
-        var widthChanged = canvas.width !== parentFrame.width;
-        var heightChanged = canvas.height !== parentFrame.height;
-        if (widthChanged) {
-            canvas.width = parentFrame.width;
-        }
-        if (heightChanged) {
-            canvas.height = parentFrame.height;
-        }
-        if (widthChanged || heightChanged) {
-            this.setNeedsDisplay();
-        }
-    },
-
-    /**
-     * Subclasses should override this method to perform any drawing that they
-     * need to.
-     *
-     * @param rect{Rect} The rectangle to draw in.
-     * @param context{CanvasRenderingContext2D} The 2D graphics context, taken
-     *   from the canvas.
-     */
-    drawRect: function(rect, context) {
-        // empty
-    },
-
-    didCreateLayer: function() {
-        arguments.callee.base.apply(this, arguments);
-        this._cvCanvasDom = this.$("#" + this._cvCanvasId)[0];
-        this.redraw();
-    },
-
     render: function(context, firstTime) {
         arguments.callee.base.apply(this, arguments);
 
@@ -238,6 +222,17 @@ exports.CanvasView = SC.View.extend({
         // first render() runs. This workaround forces tryRedraw() to be called
         // only once per run loop.
         SC.RunLoop.currentRunLoop.invokeLast(this, this.tryRedraw);
+    },
+
+    renderLayout: function(context, firstTime) {
+        arguments.callee.base.apply(this, arguments);
+
+        var parentFrame = this.getPath('parentView.frame');
+        if (firstTime) {
+            context.attr('width', parentFrame.width);
+            context.attr('height', parentFrame.height);
+            return;
+        }
     },
 
     /**

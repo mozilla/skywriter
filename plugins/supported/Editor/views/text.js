@@ -543,6 +543,12 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
      */
     padding: { bottom: 0, right: 0 },
 
+    parentViewFrameChanged: function() {
+        arguments.callee.base.apply(this, arguments);
+
+        this._resize();
+    },
+
     /**
      * @property{number}
      *
