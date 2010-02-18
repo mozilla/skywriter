@@ -138,18 +138,21 @@ exports.StandardSyntax = SC.Object.extend({
                 }
 
                 var resultLength = result[0].length;
-                if (resultLength === 0) {
-                    // Emit a helpful diagnostic rather than going into an
-                    // infinite loop, to aid syntax writers...
-                    throw new Error("Syntax regex matches the empty " +
-                        "string: " + regex.toSource());
-                }
-
-                range.end = column + result[0].length;
+                range.end = column + resultLength;
                 range.tag = alt.tag;
                 range.actions = this._parseActions(alt.then);
 
-                state = this._transition(range, state);
+                var newState = this._transition(range, state);
+
+                if (resultLength === 0 && newState === state) {
+                    // Emit a helpful diagnostic rather than going into an
+                    // infinite loop, to aid syntax writers...
+                    throw new Error("Syntax regex matches the empty " +
+                        "string and the state didn't change: " + regex.
+                        toSource());
+                }
+
+                state = newState;
                 break;
             }
 
@@ -160,7 +163,11 @@ exports.StandardSyntax = SC.Object.extend({
                 range.actions = [];
             }
 
-            attrs.push(range);
+            if (column !== range.end) {
+                // Only push the range if it spans at least one character.
+                attrs.push(range);
+            }
+
             column = range.end;
         }
 
