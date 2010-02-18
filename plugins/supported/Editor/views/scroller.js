@@ -49,9 +49,14 @@ var NIB_PADDING                 = 8;    // 15/2
 var ScrollerCanvasView = CanvasView.extend({
     classNames: ['bespin-scroller-view'],
 
+    lineHeight: 20,
+
     _mouseDownScreenPoint: null,
     _mouseDownValue: null,
     _isMouseOver: false,
+    _scrollTimer: null,
+    _mouseEventPosition: null,
+    _mouseOverHandle: false,
 
     // TODO: Make this a real SproutCore theme (i.e. an identifier that gets
     // prepended to CSS properties), perhaps?
@@ -283,6 +288,7 @@ var ScrollerCanvasView = CanvasView.extend({
     _segmentForMouseEvent: function(evt) {
         var point = this.convertFrameFromView({ x: evt.pageX, y: evt.pageY });
         var clientFrame = this._getClientFrame();
+        var padding = this.getPath('parentView.padding');
 
         if (!SC.pointInRect(point, clientFrame)) {
             return null;
@@ -291,14 +297,14 @@ var ScrollerCanvasView = CanvasView.extend({
         var layoutDirection = this.getPath('parentView.layoutDirection');
         switch (layoutDirection) {
         case SC.LAYOUT_HORIZONTAL:
-            if (point.x < NIB_LENGTH) {
+            if ((point.x - padding.left) < NIB_LENGTH) {
                 return 'nib-start';
             } else if (point.x >= clientFrame.width - NIB_LENGTH) {
                 return 'nib-end';
             }
             break;
         case SC.LAYOUT_VERTICAL:
-            if (point.y < NIB_LENGTH) {
+            if ((point.y - padding.top) < NIB_LENGTH) {
                 return 'nib-start';
             } else if (point.y >= clientFrame.height - NIB_LENGTH) {
                 return 'nib-end';
@@ -495,38 +501,97 @@ var ScrollerCanvasView = CanvasView.extend({
             this._getFrameLength(), 0);
     },
 
+    _repeatAction: function(method, interval) {
+        var repeat = method();
+        if (repeat !== false) {
+            this._scrollTimer = SC.Timer.schedule({
+                target: this,
+                action: function() { this._repeatAction(method, 100); },
+                interval: interval
+            });
+        }
+    },
+
+    _scrollByDelta: function(delta) {
+        var parentView = this.get('parentView');
+        var value = parentView.get('value');
+        parentView.set('value', value + delta);
+    },
+
+    _scrollUpOneLine: function() {
+        this._scrollByDelta(-this.get('lineHeight'));
+        return true;
+    },
+
+    _scrollDownOneLine: function() {
+        this._scrollByDelta(this.get('lineHeight'));
+        return true;
+    },
+
+    /**
+     * Scrolls the page depending on the last mouse position. Scrolling is only
+     * performed if the mouse is on the segment gutter-before or -after.
+     */
+    _scrollPage: function() {
+        switch (this._segmentForMouseEvent(this._mouseEventPosition)) {
+            case 'gutter-before':
+                this._scrollByDelta(this._getGutterLength() * -1);
+            break;
+            case 'gutter-after':
+                this._scrollByDelta(this._getGutterLength());
+            break;
+            case null:
+                // The mouse is outside of the scroller. Just wait, until it
+                // comes back in.
+            break;
+            default:
+                // Do not continue repeating this function.
+                return false;
+            break;
+        }
+
+        return true;
+    },
+
     mouseDown: function(evt) {
+        this._mouseEventPosition = evt;
+        this._mouseOverHandle = false;
+
         var parentView = this.get('parentView');
         var value = parentView.get('value');
         var gutterLength = this._getGutterLength();
 
         switch (this._segmentForMouseEvent(evt)) {
         case 'nib-start':
-            parentView.set('value', value - this.get('lineHeight'));
+            this._repeatAction(this._scrollUpOneLine.bind(this), 500);
             break;
         case 'nib-end':
-            parentView.set('value', value + this.get('lineHeight'));
+            this._repeatAction(this._scrollDownOneLine.bind(this), 500);
             break;
         case 'gutter-before':
-            parentView.set('value', value - gutterLength);
+            this._repeatAction(this._scrollPage.bind(this), 500);
             break;
         case 'gutter-after':
-            parentView.set('value', value + gutterLength);
+            this._repeatAction(this._scrollPage.bind(this), 500);
             break;
         case 'handle':
-            switch (parentView.get('layoutDirection')) {
-            case SC.LAYOUT_HORIZONTAL:
-                this._mouseDownScreenPoint = evt.clientX;
-                break;
-            case SC.LAYOUT_VERTICAL:
-                this._mouseDownScreenPoint = evt.clientY;
-                break;
-            default:
-                console.assert(false, "unknown layout direction");
-                break;
-            }
+            break;
         default:
             console.assert("_segmentForMouseEvent returned an unknown value");
+            break;
+        }
+
+        // The _mouseDownScreenPoint value might be needed although the segment
+        // was not the handle at the moment.
+        switch (parentView.get('layoutDirection')) {
+        case SC.LAYOUT_HORIZONTAL:
+            this._mouseDownScreenPoint = evt.clientX;
+            break;
+        case SC.LAYOUT_VERTICAL:
+            this._mouseDownScreenPoint = evt.clientY;
+            break;
+        default:
+            console.assert(false, "unknown layout direction");
             break;
         }
     },
@@ -534,32 +599,43 @@ var ScrollerCanvasView = CanvasView.extend({
     mouseDragged: function(evt) {
         var parentView = this.get('parentView');
 
-        var eventDistance;
-        switch (parentView.get('layoutDirection')) {
-        case SC.LAYOUT_HORIZONTAL:
-            eventDistance = evt.clientX;
-            break;
-        case SC.LAYOUT_VERTICAL:
-            eventDistance = evt.clientY;
-            break;
-        default:
-            console.assert(false, "unknown layout direction");
-            break;
-        }
+        // Handle the segments. If the current segment is the handle or
+        // nothing, then drag the handle around (as null = mouse outside of
+        // scrollbar)
+        var segment = this._segmentForMouseEvent(evt);
+        if (segment == 'handle' || this._mouseOverHandle === true) {
+            this._mouseOverHandle = true;
+            if (this._scrollTimer !== null) {
+                this._scrollTimer.invalidate();
+                this._scrollTimer = null;
+            }
 
-        var eventDelta = eventDistance - this._mouseDownScreenPoint;
+            var eventDistance;
+            switch (parentView.get('layoutDirection')) {
+                case SC.LAYOUT_HORIZONTAL:
+                    eventDistance = evt.clientX;
+                    break;
+                case SC.LAYOUT_VERTICAL:
+                    eventDistance = evt.clientY;
+                    break;
+                default:
+                    console.assert(false, "unknown layout direction");
+                    break;
+            }
 
-        var maximum = parentView.get('maximum');
-        var gutterLength = this._getGutterLength();
+            var eventDelta = eventDistance - this._mouseDownScreenPoint;
 
-        var oldValue = parentView.get('value');
-        parentView.set('value', oldValue + eventDelta * maximum /
-            gutterLength);
+            var maximum = parentView.get('maximum');
+            var gutterLength = this._getGutterLength();
 
-        // If we didn't actually move, don't update the reference point.
-        if (parentView.get('value') !== oldValue) {
+            var oldValue = parentView.get('value');
+            parentView.set('value', oldValue + eventDelta * maximum /
+                gutterLength);
+
             this._mouseDownScreenPoint = eventDistance;
         }
+
+        this._mouseEventPosition = evt;
     },
 
     mouseEntered: function(evt) {
@@ -575,6 +651,10 @@ var ScrollerCanvasView = CanvasView.extend({
     mouseUp: function(evt) {
         this._mouseDownScreenPoint = null;
         this._mouseDownValue = null;
+        if (this._scrollTimer) {
+            this._scrollTimer.invalidate();
+            this._scrollTimer = null;
+        }
         this.setNeedsDisplay();
     },
 
