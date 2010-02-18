@@ -42,6 +42,14 @@ var catalog = require("bespin:plugins").catalog;
 var rootCanon = { aliases:[], commands:[] };
 
 /**
+ * Action to allow the command line to do completion
+ */
+exports.completeCommand = function(env, args, request) {
+    var cliInputView = env.get("commandLineView");
+    cliInputView.complete();
+};
+
+/**
  * Generate some help text for all commands in this canon, optionally
  * filtered by a <code>prefix</code>, and with <code>options</code> which can
  * specify a prefix and suffix for the generated HTML.

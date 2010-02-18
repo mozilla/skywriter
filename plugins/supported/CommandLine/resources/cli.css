@@ -51,7 +51,7 @@ body.sc-theme .cmd_line .cmd_prompt .cmd_brackets { color: #FFF; }
 
 .cmd_line .sc-view .sc-text-field-view input {
   font-family: Calibri, Arial, sans-serif; color: #FFF; font-size: 140%;
-  font-weight: bold; background: #1b1613;
+  font-weight: bold; background: transparent;
 }
 .cmd_line.error .sc-view .sc-text-field-view input { color: #F00; }
 .cmd_line .sc-view label.sc-text-field-view .border {
@@ -60,7 +60,11 @@ body.sc-theme .cmd_line .cmd_prompt .cmd_brackets { color: #FFF; }
 .cmd_line .sc-view label.sc-text-field-view.focus {
   outline-width: 0px; outline: 0px;
 }
-div.cmd_line div.sc-view.sc-gray-border { border:0; }
+div.cmd_line div.sc-view.sc-gray-border { border: 0; }
+
+div.cmd_line div.cmd_completion { color: #331; font-size: 120%; font-weight: bold; }
+div.cmd_line div.cmd_completion span.cmd_existing { color: transparent; }
+div.cmd_line span.cmd_char { letter-spacing: -0.1ex; color: #999; font-weight: bold; }
 
 /* Command Output */
 div.cmd_line div.cmd_view div.sc-collection-view {

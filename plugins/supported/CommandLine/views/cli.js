@@ -42,6 +42,7 @@ var dock = require("bespin:views/dock");
 
 var request = require("Canon:request");
 var keyboardManager = require('Canon:keyboard').keyboardManager;
+var environment = require('Canon:environment').global;
 var settings = require("Settings").settings;
 
 var cliController = require("controller").cliController;
@@ -261,6 +262,7 @@ exports.CliInputView = SC.View.design({
     hasFocus: false,
     table: null,
     _contentHeight: -1,
+    _completion: null,
 
     /**
      * We need to know if blur events from the input really matter (i.e. are
@@ -304,34 +306,15 @@ exports.CliInputView = SC.View.design({
     /**
      *
      */
-    complete: function(source, event) {
-        var completion = cliController.get("completion");
+    complete: function() {
+        var completion = this.get("_completion");
         if (completion === undefined || completion === null) {
             return;
         }
 
-        // See contentView.input.keyUp
-        var keyCode = this.get("lastKey");
-        if (keyCode == "delete" || keyCode == "backspace") {
-            return;
-        }
-
-        var input = this.getPath("contentView.input");
-        var existing = input.get("value");
-
-        // TODO: Don't complete if the cursor is not at the end of the line
-        /*
-        if (input.cursorPos != existing.length) {
-            return;
-        }
-        */
-
-        /*
-        console.log("trying to set completion to " + completion, input.get("value"));
-        input.set("value", completion);
-        input.$input()[0].setSelectionRange(existing.length + 1, completion.length);
-        */
-    }/*.observes("CommandLine:controller#cliController.completion")*/,
+        var current = cliController.get("input");
+        cliController.set("input", current + completion);
+    },
 
     /**
      * Sync the hint manually so we can also alter the sizes of the hint and
@@ -347,15 +330,20 @@ exports.CliInputView = SC.View.design({
         if (hints.length == 0) {
             this.$().setClass("error", false);
         }
+        this.set("_completion", "");
 
         hints.forEach(function(hint) {
             if (typeof hint.element === "string") {
-                var hintNode = document.createTextNode(hint.element);
+                var hintNode = document.createElement("div");
+                hintNode.innerHTML = hint.element;
                 hintEle.appendChild(hintNode);
             } else {
                 hintEle.appendChild(hint.element);
             }
 
+            if (hint.completion) {
+                this.set("_completion", hint.completion);
+            }
             this.$().setClass("error", hint.level == Level.Error);
         }.bind(this));
     }.observes("CommandLine:controller#cliController.hints.[]"),
@@ -436,7 +424,7 @@ exports.CliInputView = SC.View.design({
      * TODO: Work out what the borkage is about and fix
      */
     contentView: SC.View.design({
-        childViews: [ "display", "prompt", "input", "submit" ],
+        childViews: [ "display", "prompt", "completion", "input", "submit" ],
 
         display: SC.View.design({
             layout: { top: 0, bottom: 25, left: 0, right: 0 },
@@ -474,7 +462,20 @@ exports.CliInputView = SC.View.design({
             layout: { height: 25, bottom: 0, left: 5, width: 40 }
         }),
 
+        completion: SC.LabelView.design({
+            classNames: [ "cmd_completion" ],
+            escapeHTML: false,
+            completionChanged: function() {
+                var current = this.getPath("parentView.input.value");
+                var extra = this.getPath("parentView.parentView._completion");
+                this.set("value", "<span class='cmd_existing'>" + current +
+                    "</span>" + extra);
+            }.observes(".parentView.parentView._completion"),
+            layout: { height: 25, bottom: -3, left: 46, right: 0 }
+        }),
+
         input: SC.TextFieldView.design({
+            classNames: [ "cmd_input" ],
             valueBinding: "CommandLine:controller#cliController.input",
             layout: { height: 25, bottom: 3, left: 40, right: 0 },
             keyDown: function(ev) {
@@ -484,35 +485,22 @@ exports.CliInputView = SC.View.design({
                 // If this isn't set, we have been called after a keypress
                 // event took place.
                 if (ev.charCode === 0) {
-                    return keyboardManager.processKeyEvent(ev, this,
-                        { isCommandLine: true });
+                    var opt = { isCommandLine: true };
+                    var cliInputView = this.getPath("parentView.parentView");
+                    environment.set("commandLineView", cliInputView);
+                    var done = keyboardManager.processKeyEvent(ev, this, opt);
+                    if (!done) {
+                        // This is a real keyPress event. This should not be
+                        // handled, otherwise the textInput mixin can't detect
+                        // the key events.
+                        return this.superclass(ev);
+                    }
                 } else {
                     // This is a real keyPress event. This should not be
                     // handled, otherwise the textInput mixin can't detect
                     // the key events.
                     return this.superclass(ev);
                 }
-            },
-            keyUp: function(ev) {
-                // Remember this keypress because we don't want to do completion
-                // if we are deleting characters. See complete() above.
-                this.setPath("parentView.parentView.lastKey", ev.commandCodes()[0]);
-
-                var node = this.$input().get(0);
-                var value = node.value;
-
-                // If we've got something selected as part of completion then
-                // we don't want the cliController to work on that bit.
-                var completion = cliController.completion;
-                if (completion) {
-                    var start = value.length - completion.length;
-                    if (value.substring(start, value.length) == completion) {
-                        value = value.substring(0, start);
-                    }
-                }
-
-                cliController.checkInput(value);
-                return this.superclass(ev);
             }
         }),
 
@@ -521,7 +509,7 @@ exports.CliInputView = SC.View.design({
             title: "Exec",
             target: "CommandLine:controller#cliController",
             action: "exec",
-            layout: { height: 25, bottom: 0, width: 80, right: 0 }
+            layout: { height: 25, bottom: 0, width: 10, right: 0 }
         })
     })
 });

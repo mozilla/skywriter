@@ -81,24 +81,15 @@ exports.cliController = SC.Object.create({
         this.executeCommand(this.get("input"));
     },
 
-    checkInput: function(input) {
-        /*
-        if (false && input == this.lastInput) {
-            return;
-        }
-        */
-        this.lastInput = input;
-        this._inputChanged(input);
-    },
-
     /**
      * We need to re-parse the CLI whenever the input changes
      */
-    _inputChanged: function(typed) {
+    _inputChanged: function() {
         this.hints.propertyWillChange("[]");
         this.hints.length = 0;
         this.hints.propertyDidChange("[]");
 
+        var typed = this.get("input");
         if (typed == "") {
             this.set("hint", "Type a command, see 'help' for available commands.");
             return;
@@ -117,7 +108,7 @@ exports.cliController = SC.Object.create({
             hp = typehint.getHint(input, assignment);
             hp.then(this.addHints.bind(this));
         }
-    },
+    }.observes("input"),
 
     /**
      *

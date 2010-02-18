@@ -65,9 +65,9 @@ var optionHint = function(input, assignment, typeExt, data) {
     } else if (matches.length === 1) {
         var match = matches[0];
         var compl = match.name.substring(filter.length, match.name.length);
-        var desc = match.name + ": " + match.description;
+        var desc = "<strong>" + match.name + "</strong>: " + match.description;
         return hint.Hint.create({
-            element: desc + " (\u2192 to accept)",
+            element: desc + " (<span class='cmd_char'>TAB</span> to accept)", //\u2192
             completion: compl + " "
         });
     } else {

@@ -16,6 +16,14 @@
         },
         {
             "ep": "command",
+            "name": "complete",
+            "description": "Accept the proposed completion",
+            "predicates": { "isCommandLine": true },
+            "key": "tab",
+            "pointer": "commands#completeCommand"
+        },
+        {
+            "ep": "command",
             "name": "help",
             "params":
             [
