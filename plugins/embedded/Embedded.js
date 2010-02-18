@@ -37,18 +37,12 @@
  
 "define metadata";
 ({
-    "depends": [ "AppSupport", "Editor" ],
+    "depends": [ "AppSupport", "EditSession", "Editor" ],
     "provides": [
         {
             "ep": "factory",
-            "name": "view",
-            "pointer": "#view",
-            "action": "value"
-        },
-        {
-            "ep": "factory",
-            "name": "model",
-            "pointer": "#model",
+            "name": "session",
+            "pointer": "#session",
             "action": "value"
         }
     ]
@@ -62,206 +56,253 @@
  */
 
 var SC = require("sproutcore/runtime").SC;
-var bespin = require("bespin:index");
-var util = require("bespin:util/util");
+var DockView = require('bespin:views/dock').DockView;
 var EditorView = require('Editor:views/editor').EditorView;
 var KeyListener = require('AppSupport:views/keylistener').KeyListener;
-
-var attachEmbeddedEvents = function(pane, bespin) {
-    var paneLayer = pane.get('layer');
-
-    var becomeKey = function() { bespin.setFocus(true);     };
-    var resignKey = function() { bespin.setFocus(false);    };
-
-    var addFocusEvents = function(element, isPane) {
-        while (element !== null) {
-            var thisIsPane = isPane || element === paneLayer;
-            element.addEventListener('mousedown',
-                thisIsPane ? becomeKey : resignKey, true);
-            addFocusEvents(element.firstChild, thisIsPane);
-            element = element.nextSibling;
-        }
-    };
-
-    addFocusEvents(document.body, false);
-};
-
-var computeLayout = function(element) {
-    var layout = {
-        top:    0,
-        left:   0,
-        width:  element.clientWidth,
-        height: element.clientHeight
-    };
-    while (!SC.none(element)) {
-        layout.top += element.offsetTop + element.clientTop;
-        layout.left += element.offsetLeft + element.clientLeft;
-        element = element.offsetParent;
-    }
-    return layout;
-};
+var bespin = require("bespin:index");
+var m_editsession = require('EditSession');
+var util = require("bespin:util/util");
 
 exports.EmbeddedEditor = SC.Object.extend({
+    _editorView: null,
+
     _focused: false,
 
-    setContent: function(text) {
-        SC.RunLoop.begin();
-        this.setPath("editorPane.editorView.layoutManager.textStorage.value", text);
-        SC.RunLoop.end();
+    _attachEmbeddedEvents: function() {
+        this.getPath('pane.layer').addEventListener('mousedown',
+            function() { this.setFocus(true); }.bind(this), true);
+        document.body.addEventListener('mousedown',
+            function() { this.setFocus(false); }.bind(this), true);
     },
-    
-    getContent: function() {
-        return this.getPath("editorPane.editorView.layoutManager.textStorage.value");
+
+    _attachPane: function() {
+        if (typeof(this.get('element')) === 'string') {
+            this.set('element', document.getElementById('element'));
+        }
+
+        var element = this.get('element');
+        if (SC.none('element')) {
+            throw new Error("No element was specified to attach Bespin " +
+                "Embedded to");
+        }
+
+        var options = this.get('options');
+        if (SC.none(options.initialContent)) {
+            options.initialContent = element.innerHTML;
+        }
+
+        SC.$(element).css('position', 'relative');
+        element.innerHTML = "";
+
+        this.get('pane').appendTo(element);
     },
-    
+
+    _computeLayout: function() {
+        var element = this.get('element');
+
+        var layout = {
+            top:    0,
+            left:   0,
+            width:  element.clientWidth,
+            height: element.clientHeight
+        };
+
+        while (!SC.none(element)) {
+            layout.top += element.offsetTop + element.clientTop;
+            layout.left += element.offsetLeft + element.clientLeft;
+            element = element.offsetParent;
+        }
+
+        return layout;
+    },
+
+    _createValueProperty: function() {
+        this.__defineGetter__('value', function() {
+            return this._editorView.getPath('layoutManager.textStorage.value');
+        });
+        this.__defineSetter__('value', function(v) {
+            SC.run(function() {
+                this._editorView.setPath('layoutManager.textStorage.value', v);
+            }.bind(this));
+        });
+    },
+
+    _hookWindowResizeEvent: function() {
+        window.addEventListener('resize', this.dimensionsChanged.bind(this),
+            false);
+    },
+
+    _setOptions: function() {
+        var editorView = this._editorView;
+        var layoutManager = editorView.get('layoutManager');
+        var options = this.get('options');
+
+        // initialContent
+        var initialContent = options.initialContent;
+        if (!SC.none(initialContent)) {
+            layoutManager.setPath('textStorage.value', initialContent);
+        }
+
+        // noAutoresize
+        var noAutoresize = options.noAutoresize;
+        if (SC.none(noAutoresize)) {
+            noAutoresize = options.dontHookWindowResizeEvent;   // the old name
+        }
+
+        if (SC.none(noAutoresize) || !noAutoresize) {
+            this._hookWindowResizeEvent();
+        }
+
+        // TODO: settings
+
+        // stealFocus
+        var stealFocus = options.stealFocus;
+        if (!SC.none(stealFocus) && stealFocus) {
+            window.setTimeout(function() { this.setFocus(true); }.bind(this),
+                1);
+        }
+
+        // syntax
+        // TODO: make this a true setting
+        var syntaxManager = layoutManager.get('syntaxManager');
+        var syntax = options.syntax;
+        if (!SC.none(syntax)) {
+            syntaxManager.set('initialContext', syntax);
+        }
+    },
+
+    /**
+     * @property{Node}
+     *
+     * The DOM element to attach to.
+     */
+    element: null,
+
+    /**
+     * @property{object}
+     *
+     * The user-supplied options.
+     */
+    options: null,
+
+    /**
+     * @property{SC.Pane}
+     *
+     * The pane that the editor is part of.
+     */
+    pane: SC.Pane.extend({
+        _layoutChanged: function() {
+            this._recomputeLayoutStyle();
+        }.observes('layout'),
+
+        _recomputeLayoutStyle: function() {
+            var layout = this.get('layout');
+            this.set('layoutStyle', {
+                width:  "%@px".fmt(layout.width),
+                height: "%@px".fmt(layout.height)
+            });
+        },
+
+        applicationView: DockView.extend({
+            centerView: EditorView.extend(),
+            dockedViews: []
+        }),
+
+        childViews: 'applicationView'.w(),
+
+        layoutStyle: {},
+
+        init: function() {
+            arguments.callee.base.apply(this, arguments);
+
+            this.set('defaultResponder', KeyListener.create());
+
+            this._recomputeLayoutStyle();
+        }
+    }),
+
+    /**
+     * Triggers a layout change. Call this method whenever the position or size
+     * of the element containing the Bespin editor might have changed.
+     */
+    dimensionsChanged: function() {
+        SC.run(function() {
+            var pane = this.get('pane');
+            var oldLayout = pane.get('layout');
+            var newLayout = computeLayout(this.get("element"));
+
+            if (!SC.rectsEqual(oldLayout, newLayout)) {
+                pane.adjust(newLayout);
+                pane.updateLayout();    // writes the layoutStyle to the DOM
+            }
+        }.bind(this));
+    },
+
+    init: function() {
+        var session = m_editsession.EditSession.create();
+        exports.session = session;
+
+        var pane = this.get('pane').create({
+            layout: this._computeLayout()
+        });
+
+        this.set('pane', pane);
+
+        this._attachPane();
+
+        var editorView = pane.getPath('applicationView.centerView');
+        this._editorView = editorView;
+
+        var textStorage = editorView.get('textStorage');
+        var textView = editorView.get('textView');
+        exports.model = textStorage;
+        exports.view = textView;
+
+        var buffer = m_editsession.Buffer.create({ model: textStorage });
+        session.set('currentBuffer', buffer);
+        session.set('currentView', textView);
+
+        this._attachEmbeddedEvents();
+        this._createValueProperty();
+        this._setOptions();
+    },
+
     setFocus: function(makeFocused) {
-        var editorPane = this.get("editorPane");
+        var pane = this.get('pane');
         if (this._focused === makeFocused) {
             return;
         }
 
         this._focused = makeFocused;
         if (makeFocused) {
-            editorPane.becomeKeyPane();
+            pane.becomeKeyPane();
         } else {
-            editorPane.resignKeyPane();
+            pane.resignKeyPane();
         }
     },
-    
-    /**
-     * This function must be called whenever the position or size of the
-     * element containing the Bespin editor might have changed. It triggers a
-     * layout change.
-     */
-    dimensionsChanged: function() {
-        SC.RunLoop.begin();
 
-        var pane = this.get("editorPane");
-        var oldLayout = pane.get('layout');
-        var newLayout = computeLayout(this.get("element"));
-
-        if (!SC.rectsEqual(oldLayout, newLayout)) {
-            pane.adjust(newLayout);
-            pane.updateLayout();    // writes the layoutStyle to the DOM
-        }
-
-        SC.RunLoop.end();
-    },
-    
     /**
      * jump to the line number given. This will clear any selected
      * ranges from the view. The line number is 1-based.
      */
     setLineNumber: function(line) {
         SC.RunLoop.begin();
-        var textView = this.getPath("editorPane.editorView.textView");
+        var textView = this.getPath("pane.editorView.textView");
         var point = {row: line-1, column: 0, partialFraction: 0};
         textView.setSelection([{start: point, end: point}]);
         SC.RunLoop.end();
     }
 });
 
+exports.session = null;
+
 /**
  * Initialize a Bespin component on a given element.
  */
 exports.useBespin = function(element, options) {
-    options = options || {};
-    
-    if (util.isString(element)) {
-        element = document.getElementById(element);
-    }
-
-    if (!element) {
-        throw new Error("useBespin requires a element parameter to attach to");
-    }
-
-    // Creating the editor alters the components innerHTML
-    var content = element.innerHTML;
-    
-    var editorPane = SC.Pane.create({
-        childViews: "editorView".w(),
-        defaultResponder: KeyListener.create(),
-        editorView: EditorView.design(),
-        
-        layout: computeLayout(element),
-
-        // Tell SproutCore to keep its paws off the CSS properties 'top'
-        // and 'left'.
-        layoutStyle: function() {
-            var layout = this.get('layout');
-            var style = {
-                width:  '' + layout.width + 'px',
-                height: '' + layout.height + 'px'
-            };
-            return style;
-        }.property('layout')
-        
+    return exports.EmbeddedEditor.create({
+        element: element,
+        options: SC.none(options) ? {} : options
     });
-    
-    var bespin = exports.EmbeddedEditor.create({
-        editorPane: editorPane,
-        element: element
-    });
-    
-    
-    SC.run(function() {
-        SC.$(element).css('position', 'relative');
-        element.innerHTML = "";
-        bespin.get("editorPane").appendTo(element);
-        
-        exports.view = editorPane.getPath("editorView.textView");
-        exports.model = editorPane.getPath('editorView.layoutManager.' +
-            'textStorage');
-        
-        
-        if (options.initialContent) {
-            content = options.initialContent;
-        }
-        
-        bespin.setContent(content);
-        
-        element.bespin = bespin;
-        
-        // XXX need to reengage these settings, since this is now wired
-        // up completely differently.
-
-        // Call editor.setSetting on any settings passed in options.settings
-        // if (options.settings) {
-        //     for (var key in options.settings) {
-        //         if (options.settings.hasOwnProperty(key)) {
-        //             editor.setSetting(key, options.settings[key]);
-        //         }
-        //     }
-        // }
-
-        // stealFocus makes us take focus on startup
-        if (options.stealFocus) {
-            bespin.setFocus(true);
-        }
-
-        // Move to a given line if requested
-        // if (options.lineNumber) {
-        //     editor.setLineNumber(options.lineNumber);
-        // }
-
-        // Hook the window.onresize event; this catches most of the common
-        // scenarios that result in element resizing.
-        if (SC.none(options.dontHookWindowResizeEvent) ||
-                !options.dontHookWindowResizeEvent) {
-            var handler = function() {
-                bespin.dimensionsChanged();
-            };
-
-            if (!SC.none(window.addEventListener)) {
-                window.addEventListener('resize', handler, false);
-            } else if (!SC.none(window.attachEvent)) {
-                window.addEventListener('onresize', handler);
-            }
-        }
-
-        attachEmbeddedEvents(editorPane, bespin);
-    });
-    
-    return bespin;
 };
 
