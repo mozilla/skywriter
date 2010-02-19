@@ -280,7 +280,7 @@ states = {
             regex:  /^</,
             tag:    'operator',
             then:   'tagOpen'
-        },
+        }
     ],
 
     // 10.2.4.8 Tag open state

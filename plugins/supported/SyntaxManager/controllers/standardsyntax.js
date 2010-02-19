@@ -142,7 +142,7 @@ exports.StandardSyntax = SC.Object.extend({
                 range.tag = alt.tag;
                 range.actions = this._parseActions(alt.then);
 
-                var newState = this._transition(range, state);
+                newState = this._transition(range, state);
 
                 if (resultLength === 0 && newState === state) {
                     // Emit a helpful diagnostic rather than going into an
@@ -185,6 +185,6 @@ exports.StandardSyntax = SC.Object.extend({
         var next = { context: context, state: state };
         promise.resolve({ attrs: attrs, next: next });
         return promise;
-    },
+    }
 });
 
