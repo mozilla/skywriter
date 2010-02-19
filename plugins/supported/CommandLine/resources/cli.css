@@ -66,10 +66,10 @@ div.cmd_line div.cmd_completion { color: #553; font-size: 120%; font-weight: bol
 div.cmd_line div.cmd_completion span.cmd_existing { color: transparent; }
 div.cmd_line span.cmd_char { letter-spacing: -0.2ex; font-weight: bold; }
 
-div.cmd_line div.cmd_hints span.cmd_error { font-style: italic; color: #F00; }
-div.cmd_line div.cmd_hints span.cmd_incom { font-style: italic; color: #F0F; }
-div.cmd_line div.cmd_hints span.cmd_warn { font-style: italic; color: #00F; }
-div.cmd_line div.cmd_hints span.cmd_info { font-style: italic; color: #0F0; }
+div.cmd_line div.cmd_hints span.cmd_error { color: #FAA; }
+div.cmd_line div.cmd_hints span.cmd_incom { color: #FAF; }
+div.cmd_line div.cmd_hints span.cmd_warn { color: #AAF; }
+div.cmd_line div.cmd_hints span.cmd_info { color: #AFA; }
 
 /* Command Output */
 div.cmd_line div.cmd_view div.sc-collection-view {
