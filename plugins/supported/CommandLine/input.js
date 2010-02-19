@@ -380,7 +380,7 @@ exports.Input = SC.Object.extend({
         var highestAssign;
         for (var name in this.assignments) {
             var assign = this.assignments[name];
-            if (!highestAssign || assign.index > highestAssign.index) {
+            if (!highestAssign || assign.value) {
                 highestAssign = assign;
             }
         }

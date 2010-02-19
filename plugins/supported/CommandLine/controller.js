@@ -49,7 +49,10 @@ var printStackTrace = require("bespin:util/stacktrace").printStackTrace;
 /**
  * Command line controller.
  * <p>Outstanding work
- * - Move hints into tokenize(), split(), etc
+ * - fix lack of completion on params
+ * - fix double request for hints
+ * - disallow return on error
+ * - hide exec button
  * - Sub commands
  * - named parameters
  * - aliases

@@ -498,13 +498,14 @@ console.log("addHint", hint);
         completion: SC.LabelView.design({
             classNames: [ "cmd_completion" ],
             escapeHTML: false,
+            fontWeight: "bold",
             completionChanged: function() {
                 var current = this.getPath("parentView.input.value");
                 var extra = this.getPath("parentView.parentView._completion");
                 this.set("value", "<span class='cmd_existing'>" + current +
                     "</span>" + extra);
             }.observes(".parentView.parentView._completion"),
-            layout: { height: 25, bottom: -3, left: 46, right: 0 }
+            layout: { height: 25, bottom: -3, left: 45, right: 0 }
         }),
 
         input: SC.TextFieldView.design({

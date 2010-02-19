@@ -50,7 +50,7 @@ body.sc-theme .cmd_line .cmd_prompt .cmd_brackets { color: #FFF; }
 #command.commandLineError { color: red; }
 
 .cmd_line .sc-view .sc-text-field-view input {
-  font-family: Calibri, Arial, sans-serif; color: #FFF; font-size: 140%;
+  font-family: Arial,sans-serif; color: #FFF; font-size: 16px;
   font-weight: bold; background: transparent;
 }
 .cmd_line.error .sc-view .sc-text-field-view input { color: #F00; }
@@ -62,25 +62,27 @@ body.sc-theme .cmd_line .cmd_prompt .cmd_brackets { color: #FFF; }
 }
 div.cmd_line div.sc-view.sc-gray-border { border: 0; }
 
-div.cmd_line div.cmd_completion { color: #553; font-size: 120%; font-weight: bold; }
+div.cmd_line div.cmd_completion { font-family: Arial,sans-serif;
+  color: #443; font-size: 16px; font-weight: bold;
+}
 div.cmd_line div.cmd_completion span.cmd_existing { color: transparent; }
 div.cmd_line span.cmd_char { letter-spacing: -0.2ex; font-weight: bold; }
 
-div.cmd_line div.cmd_hints span.cmd_error { color: #FAA; }
-div.cmd_line div.cmd_hints span.cmd_incom { color: #FAF; }
+div.cmd_line div.cmd_hints span.cmd_error { font-weight: bold; }
+div.cmd_line div.cmd_hints span.cmd_incom { font-style: italic; }
 div.cmd_line div.cmd_hints span.cmd_warn { color: #AAF; }
-div.cmd_line div.cmd_hints span.cmd_info { color: #AFA; }
+div.cmd_line div.cmd_hints span.cmd_info { }
 
 /* Command Output */
 div.cmd_line div.cmd_view div.sc-collection-view {
-  overflow: auto; color: #aaa; font-family: Calibri, Arial, sans-serif;
+  overflow: auto; color: #aaa; font-family: Arial,sans-serif;
 }
-div.cmd_view { font-size: 120%; }
+div.cmd_view { font-size: 14px; }
 
 
 /* cmd_rowin */
 div.cmd_view div.cmd_rowin {
-  font-size: 110%; background-color: #1b1613; font-weight: bold; color: #fff;
+  font-size: 14px; background-color: #1b1613; font-weight: bold; color: #fff;
 }
 div.cmd_view div.cmd_rowin img { cursor: pointer; }
 div.cmd_view div.cmd_rowin:hover .cmd_hover { display: block; }
@@ -88,7 +90,7 @@ div.cmd_view div.cmd_rowin:hover .cmd_hover { display: block; }
 
 div.cmd_view div { border: 0; }
 
-div.cmd_view .cmd_open { padding: 3px 3px 2px 5px; font-size:80%; color:#666; }
+div.cmd_view .cmd_open { padding: 3px 3px 2px 5px; font-size:12px; color:#666; }
 div.cmd_view .cmd_open_history { width: 20px; }
 div.cmd_view .cmd_open_time { width: 40px; }
 div.cmd_view .cmd_open_blank { width: 1px; }
@@ -96,7 +98,7 @@ div.cmd_view .cmd_open_blank { width: 1px; }
 div.cmd_view .cmd_typed { padding-left: 5px; }
 
 div.cmd_view .cmd_hover {
-  float: right; font-size: 80%; font-weight: normal; height: 100%; color: #666;
+  float: right; font-size: 12px; font-weight: normal; height: 100%; color: #666;
   text-align: right; display: none;
 }
 div.cmd_view .cmd_hover * {
@@ -119,7 +121,7 @@ div.cmd_line a:hover { text-decoration: underline; cursor: pointer; }
 
 div.cmd_view input[type=password], div.cmd_view input[type=text],
 div.cmd_view textarea {
-  font-family: Calibri,Arial,sans-serif; background: transparent;
-  border: 1px solid #ff9600; color: #fff; font-size: 100%; border-radius: 5px;
+  font-family: Arial,sans-serif; background: transparent;
+  border: 1px solid #ff9600; color: #fff; font-size: 14px; border-radius: 5px;
   padding: 3px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
 }
