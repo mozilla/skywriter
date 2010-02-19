@@ -283,7 +283,8 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
      */
     createSyntaxManager: function() {
         this.set('syntaxManager', this.get('syntaxManager').create({
-            textStorage: this.get('textStorage')
+            delegates:      [ this ],
+            textStorage:    this.get('textStorage')
         }));
     },
 
@@ -410,6 +411,10 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         });
 
         return rects;
+    },
+
+    syntaxManagerInvalidatedSyntax: function(sender) {
+        this._recomputeEntireLayout();
     },
 
     textStorageEdited: function(sender, oldRange, newRange) {

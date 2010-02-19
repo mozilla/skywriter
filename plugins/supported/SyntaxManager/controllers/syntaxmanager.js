@@ -38,6 +38,7 @@
 var SC = require('sproutcore/runtime').SC;
 var m_promise = require('bespin:promise');
 var ArrayUtils = require('utils/array');
+var MultiDelegateSupport = require('DelegateSupport').MultiDelegateSupport;
 var Promise = m_promise.Promise;
 var Range = require('RangeUtils:utils/range');
 var Yield = require('utils/yield');
@@ -51,7 +52,7 @@ var syntaxDirectory = require('controllers/syntaxdirectory').syntaxDirectory;
  * editing notifications, updates and stores the relevant syntax attributes,
  * and provides marked up text as the layout manager requests it.
  */
-exports.SyntaxManager = SC.Object.extend({
+exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
     _invalidRows: [],
     _lineAttrInfo: null,
 
@@ -260,6 +261,7 @@ exports.SyntaxManager = SC.Object.extend({
 
     _initialContextChanged: function() {
         this._reset();
+        this.notifyDelegates('syntaxManagerInvalidatedSyntax');
     }.observes('initialContext'),
 
     _innerRangesFromAttrs: function(outerAttrs, innerContextAndState) {
@@ -449,11 +451,15 @@ exports.SyntaxManager = SC.Object.extend({
         var initialContext = this.get('initialContext');
 
         for (var i = 0; i < lineCount; i++) {
+            var firstContext;
+            if (i === 0) {
+                firstContext = { context: initialContext, state: 'start' };
+            } else {
+                firstContext = { context: null };
+            }
+
             lineAttrInfo.push({
-                snapshot: [
-                    { context: initialContext,  state: 'start' },
-                    { context: null }
-                ],
+                snapshot: [ firstContext, { context: null } ],
                 attrs: [
                     this._defaultAttrs(),
                     [ { context: null, start: 0, end: null } ]
