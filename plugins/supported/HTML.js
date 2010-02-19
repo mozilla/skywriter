@@ -303,7 +303,7 @@ states = {
         {
             regex:  /^(?=.)/,
             tag:    'plain',
-            then:   'data'
+            then:   'start'
         }
     ],
 
