@@ -18,6 +18,7 @@ Plugin Author Guide
 * [Introduction](pluginguide/index.html)
 * [Built-in Extension Points](pluginguide/extpoints.html)
 * [Distributing Plugins](pluginguide/distributing.html)
+* [Syntax Highlighting](pluginguide/syntax.html)
 * [Automated Testing](devguide/testing.html)
 
 
