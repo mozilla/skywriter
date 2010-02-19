@@ -80,7 +80,7 @@ exports.number = {
 /**
  * true/false values
  */
-exports.boolean = {
+exports.bool = {
     isValid: function(value, typeExt) {
         return typeof value == "boolean";
     },

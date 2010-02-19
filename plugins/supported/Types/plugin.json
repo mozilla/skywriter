@@ -24,7 +24,7 @@
             "ep": "type",
             "name": "boolean",
             "description": "A true/false value",
-            "pointer": "basic#boolean"
+            "pointer": "basic#bool"
         },
         {
             "ep": "type",

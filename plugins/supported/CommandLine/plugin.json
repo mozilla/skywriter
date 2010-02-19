@@ -116,7 +116,7 @@
             "ep": "typehint",
             "name": "boolean",
             "description": "A UI for a boolean",
-            "pointer": "views/basic#boolean"
+            "pointer": "views/basic#bool"
         },
 
         {

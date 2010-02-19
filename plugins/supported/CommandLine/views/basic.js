@@ -116,7 +116,7 @@ exports.selection = {
     }
 };
 
-exports.boolean = {
+exports.bool = {
     /**
      * @see typehint#getHint()
      */
