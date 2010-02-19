@@ -477,11 +477,20 @@ exports.SyntaxManager = SC.Object.extend({
             });
         } else {
             syntaxDirectory.loadSyntax(context).then(function(syntax) {
-                syntax.syntaxInfoForLineFragment(context, state, line, start,
-                    end).then(function(result) {
-                        promise.resolve(result);
-                    })
-                });
+                try {
+                    syntax.syntaxInfoForLineFragment(context, state, line,
+                        start, end).then(function(result) {
+                            promise.resolve(result);
+                        });
+                } catch (e) {
+                    console.log("Syntax highlighter ", context, " caused an " +
+                        "exception:", e);
+                    promise.resolve({
+                        attrs:  this._defaultAttrs(),
+                        next:   { context: 'plain', state: 'start' }
+                    });
+                }
+            }.bind(this));
         }
 
         return promise;
