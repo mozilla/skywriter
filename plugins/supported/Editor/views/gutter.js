@@ -127,19 +127,21 @@ exports.GutterView = SC.View.extend({
         var layoutManager = this.get('layoutManager');
         var padding = this.get('padding');
 
-        var width = 32;
+        var layout = SC.clone(this.get('layout'));
+        layout.width = 32;
         // padding.left + padding.right + m_scratchcanvas.get().getContext().
         // measureStringWidth(this.get('theme').lineNumberFont,
         // "" + (layoutManager.get('textLines').length + 1))
 
-        this.set('layout', SC.mixin(SC.clone(this.get('layout')), {
-            width: width
-        }));
+        this.set('layout', layout);
+
+        var frame = this.get('frame');
         this._interiorView.set('layout', {
             left:   0,
             top:    -this.get('verticalScrollOffset'),
-            width:  this.get('frame').width,
-            height: layoutManager.boundingRect().height + padding.bottom
+            width:  frame.width,
+            height: Math.max(frame.height,
+                    layoutManager.boundingRect().height + padding.bottom)
         });
     },
 
@@ -166,7 +168,5 @@ exports.GutterView = SC.View.extend({
     layoutManagerInvalidatedRects: function(sender, rects) {
         this._recomputeLayout();
     }
-
-
 });
 
