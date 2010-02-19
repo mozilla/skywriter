@@ -50,9 +50,9 @@ catch(e) {
     // squelch the error, and only complain if the queue is needed
 }
 if (!enqueue) {
-	enqueue = function(func){
-		func();
-	};
+    enqueue = function(func){
+        func();
+    };
 }
 
 /**
@@ -142,7 +142,7 @@ function Deferred(canceller, rejectImmediately){
         result = value;
         finished = true;
         if(rejectImmediately && isError && waiting.length === 0){
-        	throw result;
+            throw result;
         }
         for(var i = 0; i < waiting.length; i++){
             notify(waiting[i]);
@@ -152,32 +152,32 @@ function Deferred(canceller, rejectImmediately){
         var func = (isError ? listener.error : listener.resolved);
         if(func){
             handled = true;
-        	enqueue(function(){
-		    	if(currentContextHandler){
-		    		currentContextHandler.resume();
-		    	}
-		        try{
-	                var newResult = func(result);
-		            if(newResult && typeof newResult.then === "function"){
-		                newResult.then(listener.deferred.resolve, listener.deferred.reject);
-		                return;
-        		    }
-        		    listener.deferred.resolve(newResult);
-		        }
-		        catch(e){
-		            console.error("promise caught exception ", e);
-		            console.log(printStackTrace({e: e}));
-		        	listener.deferred.reject(e);
-		        }
-		        finally{
-		        	if(currentContextHandler){
-		        		currentContextHandler.suspend();
-		        	}
-		        }
-        	});
+            enqueue(function(){
+                if(currentContextHandler){
+                    currentContextHandler.resume();
+                }
+                try{
+                    var newResult = func(result);
+                    if(newResult && typeof newResult.then === "function"){
+                        newResult.then(listener.deferred.resolve, listener.deferred.reject);
+                        return;
+                    }
+                    listener.deferred.resolve(newResult);
+                }
+                catch(e){
+                    console.error("promise caught exception ", e);
+                    console.log(printStackTrace({e: e}));
+                    listener.deferred.reject(e);
+                }
+                finally{
+                    if(currentContextHandler){
+                        currentContextHandler.suspend();
+                    }
+                }
+            });
         }
         else{
-        	listener.deferred[isError ? "reject" : "resolve"](result);
+            listener.deferred[isError ? "reject" : "resolve"](result);
         }
     }
     // calling resolve will resolve the promise
@@ -192,17 +192,17 @@ function Deferred(canceller, rejectImmediately){
 
     // calling error will indicate that the promise failed
     this.reject = this.errback = this.emitError = rejectImmediately ? reject : function(error){
-    	return enqueue(function(){
-    		reject(error);
-    	});
-    }
+        return enqueue(function(){
+            reject(error);
+        });
+    };
     // call progress to provide updates on the progress on the completion of the promise
     this.progress = function(update){
         for(var i = 0; i < waiting.length; i++){
             var progress = waiting[i].progress;
             progress && progress(update);
         }
-    }
+    };
     // provide the implementation of the promise
     this.then = promise.then = function(resolvedCallback, errorCallback, progressCallback){
         var returnDeferred = new Deferred(promise.cancel, true);
@@ -223,7 +223,7 @@ function Deferred(canceller, rejectImmediately){
                 error = new Error(error);
             }
             reject(error);
-        }
+        };
     }
 
     // provide a function to optimize synchronous actions
@@ -286,7 +286,7 @@ exports.whenPromise = function(value, resolvedCallback, rejectCallback, progress
  */
 exports.when = function(value, resolvedCallback, rejectCallback, progressCallback){
     if(value && typeof value.then === "function"){
-    	return exports.whenPromise(value, resolvedCallback, rejectCallback, progressCallback);
+        return exports.whenPromise(value, resolvedCallback, rejectCallback, progressCallback);
     }
     return resolvedCallback(value);
 };
@@ -382,30 +382,30 @@ exports.wait = function(target){
  * @return the promise that is fulfilled when all the array is fulfilled
  */
 exports.group = function(group){
-	var deferred = defer();
-	if(!(group instanceof Array)){
-		group = Array.prototype.slice.call(arguments);
-	}
-	var fulfilled = 0;
-	var length = group.length;
-	
-	// if the original array has nothing in it, we can just
-	// return now.
-	if (!length) {
-	    deferred.resolve([]);
-	    return deferred.promise;
-	}
-	
-	var results = [];
-	group.forEach(function(promise, index){
-		exports.when(promise, function(value){
-			results[index] = value;
-			fulfilled++;
-			if(fulfilled === length){
-				deferred.resolve(results);
-			}
-		},
-		deferred.reject);
-	});
-	return deferred.promise;
+    var deferred = defer();
+    if(!(group instanceof Array)){
+        group = Array.prototype.slice.call(arguments);
+    }
+    var fulfilled = 0;
+    var length = group.length;
+
+    // if the original array has nothing in it, we can just
+    // return now.
+    if (!length) {
+        deferred.resolve([]);
+        return deferred.promise;
+    }
+
+    var results = [];
+    group.forEach(function(promise, index){
+        exports.when(promise, function(value){
+            results[index] = value;
+            fulfilled++;
+            if(fulfilled === length){
+                deferred.resolve(results);
+            }
+        },
+        deferred.reject);
+    });
+    return deferred.promise;
 };
