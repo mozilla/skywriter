@@ -229,7 +229,7 @@ exports.EmbeddedEditor = SC.Object.extend({
         SC.run(function() {
             var pane = this.get('pane');
             var oldLayout = pane.get('layout');
-            var newLayout = computeLayout(this.get("element"));
+            var newLayout = this._computeLayout(this.get("element"));
 
             if (!SC.rectsEqual(oldLayout, newLayout)) {
                 pane.adjust(newLayout);
