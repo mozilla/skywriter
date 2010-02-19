@@ -62,9 +62,14 @@ body.sc-theme .cmd_line .cmd_prompt .cmd_brackets { color: #FFF; }
 }
 div.cmd_line div.sc-view.sc-gray-border { border: 0; }
 
-div.cmd_line div.cmd_completion { color: #331; font-size: 120%; font-weight: bold; }
+div.cmd_line div.cmd_completion { color: #553; font-size: 120%; font-weight: bold; }
 div.cmd_line div.cmd_completion span.cmd_existing { color: transparent; }
-div.cmd_line span.cmd_char { letter-spacing: -0.1ex; color: #999; font-weight: bold; }
+div.cmd_line span.cmd_char { letter-spacing: -0.2ex; font-weight: bold; }
+
+div.cmd_line div.cmd_hints span.cmd_error { font-style: italic; color: #F00; }
+div.cmd_line div.cmd_hints span.cmd_incom { font-style: italic; color: #F0F; }
+div.cmd_line div.cmd_hints span.cmd_warn { font-style: italic; color: #00F; }
+div.cmd_line div.cmd_hints span.cmd_info { font-style: italic; color: #0F0; }
 
 /* Command Output */
 div.cmd_line div.cmd_view div.sc-collection-view {

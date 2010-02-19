@@ -91,7 +91,10 @@ exports.getHint = function(input, assignment) {
  * default - a simple text node containing the description.
  */
 var createDefaultHint = function(description) {
-    return hint.Hint.create({ element: document.createTextNode(description) });
+    return hint.Hint.create({
+        element: document.createTextNode(description),
+        level: hint.Level.Info
+    });
 };
 
 /**

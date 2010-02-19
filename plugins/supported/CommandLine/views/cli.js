@@ -247,6 +247,12 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
     }
 });
 
+var hintClass = {};
+hintClass[Level.Error] = "cmd_error";
+hintClass[Level.Incomplete] = "cmd_incom";
+hintClass[Level.Warning] = "cmd_warn";
+hintClass[Level.Info] = "cmd_info";
+
 /**
  * A view designed to dock in the bottom of the editor, holding the command
  * line input.
@@ -327,25 +333,53 @@ exports.CliInputView = SC.View.design({
             hintEle.removeChild(hintEle.firstChild);
         }
 
-        if (hints.length == 0) {
-            this.$().setClass("error", false);
-        }
+        var level = Level.Info;
         this.set("_completion", "");
 
-        hints.forEach(function(hint) {
-            if (typeof hint.element === "string") {
-                var hintNode = document.createElement("div");
-                hintNode.innerHTML = hint.element;
-                hintEle.appendChild(hintNode);
-            } else {
-                hintEle.appendChild(hint.element);
+        /**
+         * Find a way to populate a DOM node with this hint
+         */
+        var addHint = function(hintNode, hint) {
+console.log("addHint", hint);
+            if (!hint) {
+                return;
             }
+
+            // Defer promises
+            if (typeof hint.then == "function") {
+                hint.then(function(hint) {
+                    addHint(hintNode, hint);
+                }.bind(this));
+                return;
+            }
+
+            if (typeof hint.element === "string") {
+                hintNode.innerHTML = hint.element;
+            } else {
+                hintNode.appendChild(hint.element);
+            }
+
+            hintNode.setAttribute("class", "cmd_hint " + hintClass[hint.level]);
 
             if (hint.completion) {
                 this.set("_completion", hint.completion);
             }
-            this.$().setClass("error", hint.level == Level.Error);
+
+            if (hint.level > level) {
+                level = hint.level;
+            }
+
+            this.$().setClass("error", level == Level.Error);
+        }.bind(this);
+
+        hints.forEach(function(hint) {
+            var hintNode = document.createElement("span");
+            hintEle.appendChild(hintNode);
+            hintEle.appendChild(document.createTextNode(" \u00a0 "));
+            addHint(hintNode, hint);
         }.bind(this));
+
+        this.$().setClass("error", level == Level.Error);
     }.observes("CommandLine:controller#cliController.hints.[]"),
 
     /**
@@ -360,9 +394,7 @@ exports.CliInputView = SC.View.design({
         this._contentHeight = height;
         var scrollview = this.getPath("contentView.display.output");
         scrollview.scrollBy({ x: 0, y: 1000000 });
-    }.observes(
-        ".contentView.display.output.contentView.layout"
-    ),
+    }.observes(".contentView.display.output.contentView.layout"),
 
     /**
      * We can't know where the focus is going to (willLoseKeyResponderTo only
@@ -441,6 +473,7 @@ exports.CliInputView = SC.View.design({
             }),
 
             hint: SC.View.design({
+                classNames: [ "cmd_hints" ],
                 layout: { height: 25, bottom: 0, left: 30, right: 0 }
             }),
 

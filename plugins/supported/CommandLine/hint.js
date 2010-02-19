@@ -47,27 +47,27 @@ exports.Level = {
      * to correct it. The input field should indicate the error, and we should
      * prevent the action of Return.
      */
-    Error: 0,
+    Error: 3,
 
     /**
      * The command won't work, and we should prevent the action of Return, but
      * not because of anything the user has done. The problem is that they've
      * not finished yet.
      */
-    Incomplete: 1,
+    Incomplete: 2,
 
     /**
      * The command can be executed, however we want to warn the user of
      * something before they press Return. It is likely that this will result
      * in a visual indicator.
      */
-    Warning: 2,
+    Warning: 1,
 
     /**
      * We think we can help the user by displaying this hint, but it's
      * existence does not imply anything that the user has done wrong.
      */
-    Info: 3
+    Info: 0
 };
 
 /**
@@ -90,14 +90,17 @@ exports.Hint = SC.Object.extend({
     /**
      * @see exports.Level
      */
-    level: exports.Level.Info,
+    level: null,
 
     /**
      *
      */
     init: function() {
         if (!this.element) {
-            throw new Error("Missing element");
+            throw new Error("Missing element", this);
+        }
+        if (typeof this.level !== "number") {
+            throw new Error("Missing level", this);
         }
     }
 });

@@ -49,10 +49,9 @@ var optionHint = function(input, assignment, typeExt, data) {
     // How many matches do we have?
     var matches = [];
     data.forEach(function(option) {
-        if (filter && option.name.substring(0, filter.length) != filter) {
-            return;
+        if (!filter || option.name.substring(0, filter.length) == filter) {
+            matches.push(option);
         }
-        matches.push(option);
     }.bind(this));
 
     if (matches.length === 0) {
@@ -62,39 +61,45 @@ var optionHint = function(input, assignment, typeExt, data) {
             element: "Nothing matches.",
             level: hint.Level.Error
         });
-    } else if (matches.length === 1) {
+    }
+
+    if (matches.length === 1) {
         var match = matches[0];
         var compl = match.name.substring(filter.length, match.name.length);
         var desc = "<strong>" + match.name + "</strong>: " + match.description;
         return hint.Hint.create({
             element: desc + " (<span class='cmd_char'>TAB</span> to accept)", //\u2192
-            completion: compl + " "
+            completion: compl + " ",
+            level: hint.Level.Incomplete
         });
-    } else {
-        var parent = document.createElement("div");
-        parent.appendChild(document.createTextNode(assignment.param.description));
-
-        var index = 0;
-        matches.forEach(function(option) {
-            if (index === 0) {
-                parent.appendChild(document.createTextNode(": "));
-            } else {
-                parent.appendChild(document.createTextNode(", "));
-            }
-            var link = document.createElement("a");
-            link.setAttribute("href", "javascript:;");
-            link.appendChild(document.createTextNode(option.name));
-            link.addEventListener("click", function(ev) {
-                SC.run(function() {
-                    cliController.set("input", option.name + " ");
-                });
-            }, false);
-            parent.appendChild(link);
-            index++;
-        }.bind(this));
-
-        return hint.Hint.create({ element: parent });
     }
+
+    var parent = document.createElement("span");
+    parent.appendChild(document.createTextNode(assignment.param.description));
+
+    var index = 0;
+    matches.forEach(function(option) {
+        if (index === 0) {
+            parent.appendChild(document.createTextNode(": "));
+        } else {
+            parent.appendChild(document.createTextNode(", "));
+        }
+        var link = document.createElement("a");
+        link.setAttribute("href", "javascript:;");
+        link.appendChild(document.createTextNode(option.name));
+        link.addEventListener("click", function(ev) {
+            SC.run(function() {
+                cliController.set("input", option.name + " ");
+            });
+        }, false);
+        parent.appendChild(link);
+        index++;
+    }.bind(this));
+
+    return hint.Hint.create({
+        element: parent,
+        level: hint.Level.Incomplete
+    });
 };
 
 exports.selection = {

@@ -89,52 +89,15 @@ exports.cliController = SC.Object.create({
     _inputChanged: function() {
         this.hints.propertyWillChange("[]");
         this.hints.length = 0;
+
+        var input = Input.create({ typed: this.get("input") });
+        var results = input.parse();
+        results.hints.forEach(function(hint) {
+            this.hints.pushObject(hint);
+        }.bind(this));
+
         this.hints.propertyDidChange("[]");
-
-        var typed = this.get("input");
-        if (typed == "") {
-            this.set("hint", "Type a command, see 'help' for available commands.");
-            return;
-        }
-
-        var input = Input.create({ typed: typed });
-
-        input.tokenize();
-
-        var hp = input.split();
-        hp.then(this.addHints.bind(this));
-
-        if (this.commandExt) {
-            input.assign();
-            var assignment = input.getAssignmentForLastArg();
-            hp = typehint.getHint(input, assignment);
-            hp.then(this.addHints.bind(this));
-        }
     }.observes("input"),
-
-    /**
-     *
-     */
-    addHints: function(hints) {
-        if (!hints) {
-            console.error("Null hint. Ignoring");
-            console.trace();
-            return;
-        }
-        if (Array.isArray(hints)) {
-            hints.forEach(function(hint) {
-                if (hint.isHint) {
-                    this.hints.pushObject(hint);
-                } else {
-                    console.error("Not a hint", hint);
-                }
-            });
-        } else if (hints.element) {
-            this.hints.pushObject(hints);
-        } else {
-            console.error("Missing element in hint", hints);
-        }
-    },
 
     /**
      * Execute a command manually without using the UI
@@ -148,21 +111,10 @@ exports.cliController = SC.Object.create({
         }
 
         var input = Input.create({ typed: typed });
-
-        input.tokenize();
-        input.split();
-
-        // Check that there is valid meta-data for this command
-        if (!input.commandExt) {
-            this.set("hint", "Unknown command");
-            return;
-        }
-
-        input.assign();
+        var results = input.parse();
 
         var self = this;
-        var conversion = input.convertTypes();
-        conversion.then(function(args) {
+        results.argsPromise.then(function(args) {
             input.commandExt.load(function(command) {
                 // Check the function pointed to in the meta-data exists
                 if (!command) {
