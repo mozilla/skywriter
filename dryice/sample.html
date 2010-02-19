@@ -46,22 +46,31 @@
   h1 { border-bottom: 1px solid #ddd; font-size:120%; }
   .bespin { margin: 0; padding: 0; border: 0; height: 300px; border: 10px solid #ddd; -moz-border-radius: 10px; -webkit-border-radius: 10px; }
 </style>
+<script>
+window.onBespinLoad = function() {
+    console.log("this is called when Bespin is loaded");
+    bespin = document.getElementById("editor").bespin;
+};
+
+function showContents() {
+  document.getElementById("copiedcontents").innerHTML = bespin.value;
+};
+</script>
 </head>
 <body>
 
 <h1>Sample Editor as a Component</h1>
-<div id="editor" class="bespin" data-bespinoptions='{ "settings": { "strictlines": true }, "stealFocus": true }'>// The text of this div shows up in the editor.
+<div id="editor" class="bespin" data-bespinoptions='{ "settings": { "strictlines": true }, "syntax": "js", "stealFocus": true }'>// The text of this div shows up in the editor.
 var thisCode = "what shows up in the editor";
 function editMe() {
  alert("and have fun!");
 }
 </div>
 
-<script>
-window.onBespinLoad = function() {
-    console.log("this is called when Bespin is loaded");
-    bespin = document.getElementById("editor").bespin;
-};
-</script>
+<div>
+  <input type="button" value="Show Contents Below" onclick="showContents()">
+</div>
+<pre id="copiedcontents"></pre>
+
 </body>
 </html>
