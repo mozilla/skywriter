@@ -261,10 +261,12 @@ exports.EmbeddedEditor = SC.Object.extend({
         var buffer = m_editsession.Buffer.create({ model: textStorage });
         session.set('currentBuffer', buffer);
         session.set('currentView', textView);
-
-        this._attachEmbeddedEvents();
-        this._createValueProperty();
-        this._setOptions();
+        
+        SC.run(function() {
+            this._attachEmbeddedEvents();
+            this._createValueProperty();
+            this._setOptions();
+        }.bind(this));
     },
 
     setFocus: function(makeFocused) {
