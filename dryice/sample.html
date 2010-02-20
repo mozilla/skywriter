@@ -45,14 +45,16 @@
   body { padding: 20px; font-family: Calibri, Helvetica, Arial; }
   h1 { border-bottom: 1px solid #ddd; font-size:120%; }
   .bespin { margin: 0; padding: 0; border: 0; height: 300px; border: 10px solid #ddd; -moz-border-radius: 10px; -webkit-border-radius: 10px; }
+  .displaybutton { margin-top: 1em; }
 </style>
 <script>
 window.onBespinLoad = function() {
     console.log("this is called when Bespin is loaded");
-    bespin = document.getElementById("editor").bespin;
+    window.bespin = document.getElementById("editor").bespin;
 };
 
 function showContents() {
+  // Just like a textarea, you can get/set value on the bespin object
   document.getElementById("copiedcontents").innerHTML = bespin.value;
 };
 </script>
@@ -67,10 +69,11 @@ function editMe() {
 }
 </div>
 
-<div>
+<div class="displaybutton">
   <input type="button" value="Show Contents Below" onclick="showContents()">
 </div>
 <pre id="copiedcontents"></pre>
 
+<p><a href="https://bespin.mozillalabs.com/docs/">Documentation for the latest Bespin release</a> is on the web and included in Bespin Embedded packages.</p>
 </body>
 </html>
