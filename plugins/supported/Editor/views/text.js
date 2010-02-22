@@ -41,7 +41,7 @@ var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var MultiDelegateSupport = require('DelegateSupport').MultiDelegateSupport;
 var Range = require('RangeUtils:utils/range');
 var Rect = require('utils/rect');
-var TextInput = require('bespin:editor/mixins/textinput').TextInput;
+var TextInput = require('mixins/textinput').TextInput;
 var keyboardManager = require('Canon:keyboard').keyboardManager;
 
 // Set this to true to outline all text ranges with a box. This may be useful
