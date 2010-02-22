@@ -229,7 +229,7 @@ exports.EmbeddedEditor = SC.Object.extend({
         SC.run(function() {
             var pane = this.get('pane');
             var oldLayout = pane.get('layout');
-            var newLayout = computeLayout(this.get("element"));
+            var newLayout = this._computeLayout(this.get("element"));
 
             if (!SC.rectsEqual(oldLayout, newLayout)) {
                 pane.adjust(newLayout);
@@ -261,10 +261,12 @@ exports.EmbeddedEditor = SC.Object.extend({
         var buffer = m_editsession.Buffer.create({ model: textStorage });
         session.set('currentBuffer', buffer);
         session.set('currentView', textView);
-
-        this._attachEmbeddedEvents();
-        this._createValueProperty();
-        this._setOptions();
+        
+        SC.run(function() {
+            this._attachEmbeddedEvents();
+            this._createValueProperty();
+            this._setOptions();
+        }.bind(this));
     },
 
     setFocus: function(makeFocused) {

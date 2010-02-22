@@ -44,25 +44,22 @@ highlighter looks like this:
 
     :::js
     {
+        "depends": [ "SyntaxManager" ],
         "provides": [
             {
-                "ep": "syntax.simple.highlighter",
-                "name": "JavaScript",
-                "extensions": ["js", "json", "javascript", 
-                    "ecmascript", "jsm", "java"],
-                "pointer": "#JavaScript"
+                "ep": "syntax",
+                "name": "js",
+                "pointer": "#JSSyntax"
             }
-        ],
-        "depends": ["SimpleSyntax"]
+        ]
     }
 
 The metadata is an object specified in JSON format. `provides` is a list of
 extensions that are provided by this plugin. Each one of the extensions is
 given as an object with one attribute that is always there: "ep". `ep` is the
 extension point that the extension is for. In the example above, you can see
-that the plugin is providing an extension for the "syntax.simple.highlighter"
-extension point. The other metadata for the extension is specific to the
-extension point.
+that the plugin is providing an extension for the "syntax" extension point. The
+other metadata for the extension is specific to the extension point.
 
 `pointer` is a common piece of metadata. Since this is pure JSON, and we want
 to lazily load the code anyhow, a pointer is a string that tells Bespin where
@@ -70,14 +67,14 @@ to find the object that the extended code is going to need to perform the
 necessary work (in this case, the JavaScript syntax highlighting). A pointer is
 given in this format: `plugin:path/to/module/in/plugin#memberInModule`. The
 example above is about as simple as it gets. It's pointing to an object called
-`JavaScript` in the "package module" of the plugin (see more about the package
+`JSSyntax` in the "package module" of the plugin (see more about the package
 module below). The `name` and `extensions` metadata are specific to the
-`syntax.simple.highlighter` extension point.
+`syntax` extension point.
 
 The `depends` list in the metadata is a list of the names of plugins upon which
 this plugin depends. Bespin will ensure that those plugins are loaded before
 this one. In the example above, the JavaScript highlighter plugin depends on
-the SimpleSyntax engine, which is itself a plugin.
+the SyntaxManager, which is itself a plugin.
 
 ## Plugin File Structure ##
 

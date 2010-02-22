@@ -81,7 +81,7 @@ There are a number of options to customize how Bespin loads. You can request
 Bespin to use these as follows:
 
     :::html
-    <div class="bespin" data-bespinoptions='{ "stealFocus":true }'>
+    <div class="bespin" data-bespinoptions='{ "stealFocus":true, "syntax": "js" }'>
     </div>
 
 data-bespinoptions uses a JSON structure (so make sure you [follow the rules][1]
@@ -112,7 +112,7 @@ won't work, and you'll need to tell Bespin to use an element:
     <script>
     var embed = tiki.require("Embedded");
     var node = document.getElementById("edit");
-    embed.useBespin(node);
+    var bespin = embed.useBespin(node);
     </script>
 
     <textarea id="edit">Initial contents</textarea>
@@ -145,7 +145,7 @@ bespin object which can be manipulated as follows:
 
     :::js
     var bespin = embed.useBespin("edit");
-    bespin.setContent("Initial Content\nWith 2 lines");
+    bespin.value = "Initial Content\nWith 2 lines";
     bespin.setLineNumber(2);
 
 When using element upgrading (with the `class="bespin"` attribute), you don't
@@ -156,7 +156,7 @@ to it fairly easily:
     <div id="edit" class="bespin">Initial contents</div>
     <script>
     var bespin = document.getElementById("edit").bespin;
-    bespin.setContent("Hello, World!");
+    bespin.value = "Hello, World!";
     </script>
 
 The DOM node that contains the editor gets a "bespin" property on it with
@@ -216,7 +216,7 @@ For example:
         bespin = document.getElementById("editor").bespin;
     };
     <input type="button" value="Clear Bespin" 
-        onclick="bespin.setContent('');">
+        onclick="bespin.value='';">
     </script>
 
 If you are using Bespin via a normal script tag, then you don't need to use the
