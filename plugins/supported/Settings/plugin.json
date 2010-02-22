@@ -6,7 +6,8 @@
             "ep": "extensionpoint",
             "description": "A Choice is something that the application offers as a way to customize how it works",
             "name": "setting",
-            "register": "memory#addSetting"
+            "register": "memory#addSetting",
+            "indexOn": "name"
         },
         {
             "ep": "setting",

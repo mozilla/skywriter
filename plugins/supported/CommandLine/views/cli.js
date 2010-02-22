@@ -53,22 +53,22 @@ var PinView = require("views/pin").PinView;
 var imagePath = catalog.getResourceURL("CommandLine") + "images/";
 
 /**
- * The height of the CLI input without and output display. Sort of like the
- * normal vi/emacs default size
+ * The height of the input area that is always visible.
  */
-var compactHeight = 30;
+var inputHeight = 30;
 
 /**
- * The maximum size the CLI can grow to
+ * Utility to create an ID while end()ing RenderContext
  */
-var maxHeight = 300;
-
 var endWithId = function(ele) {
     var id = SC.guidFor(ele);
     ele.id(id).end();
     return id;
 };
 
+/**
+ * Display the results of a command invocation
+ */
 var InstructionView = SC.View.extend(SC.StaticLayout, {
     classNames: [ "instruction_view" ],
     useStaticLayout: true,
@@ -263,7 +263,7 @@ hintClass[Level.Info] = "cmd_info";
 exports.CliInputView = SC.View.design({
     dock: dock.DOCK_BOTTOM,
     classNames: [ "cmd_line" ],
-    layout: { height: compactHeight, bottom: 0, left: 0, right: 0 },
+    layout: { height: 300, bottom: 0, left: 0, right: 0 },
     childViews: [ "contentView" ],
     hasFocus: false,
     table: null,
@@ -296,10 +296,11 @@ exports.CliInputView = SC.View.design({
     checkHeight: function(source, event) {
         var pinned = this.getPath("contentView.display.toolbar.pin.isSelected");
 
-        var height = compactHeight;
+        var height = settings.get("minConsoleHeight");
         if (pinned || this.get("hasFocus")) {
-            height = maxHeight;
+            height = settings.get("maxConsoleHeight");
         }
+        height += inputHeight;
 
         if (this.get("layout").height != height) {
             this.adjust("height", height).updateLayout();
@@ -322,6 +323,21 @@ exports.CliInputView = SC.View.design({
         cliController.set("input", current + completion);
     },
 
+    minConsoleHeightChanged: function() {
+        console.log("settings.minConsoleHeight", settings.get("minConsoleHeight"));
+        this.checkHeight();
+    }.observes("Settings:index#settings.minConsoleHeight"),
+
+    maxConsoleHeightChanged: function() {
+        console.log("settings.maxConsoleHeight", settings.get("maxConsoleHeight"));
+        this.checkHeight();
+    }.observes("Settings:index#settings.maxConsoleHeight"),
+
+    consolePinnedChanged: function() {
+        console.log("settings.consolePinned", settings.get("consolePinned"));
+        this.checkHeight();
+    }.observes("Settings:index#settings.consolePinned"),
+
     /**
      * Sync the hint manually so we can also alter the sizes of the hint and
      * output components to make it fit properly.
@@ -340,7 +356,6 @@ exports.CliInputView = SC.View.design({
          * Find a way to populate a DOM node with this hint
          */
         var addHint = function(hintNode, hint) {
-console.log("addHint", hint);
             if (!hint) {
                 return;
             }

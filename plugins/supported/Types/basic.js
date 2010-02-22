@@ -65,7 +65,7 @@ exports.text = {
  */
 exports.number = {
     isValid: function(value, typeExt) {
-        return typeof value == "number";
+        return typeof value == "number" && !isNaN(value);
     },
 
     toString: function(value, typeExt) {
@@ -73,7 +73,11 @@ exports.number = {
     },
 
     fromString: function(value, typeExt) {
-        return parseInt(value, 10);
+        var reply = parseInt(value, 10);
+        if (isNaN(reply)) {
+            throw new Error("Can't convert '" + value + "' to a number.");
+        }
+        return reply;
     }
 };
 

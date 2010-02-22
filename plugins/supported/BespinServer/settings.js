@@ -44,9 +44,10 @@ var catalog = require("bespin:plugins").catalog;
  */
 exports.ServerPersister = SC.Object.extend({
     _loading: false,
-    
+
     loadInitialValues: function(settings) {
-        var settingsFile = catalog.getObject("files").getObject("BespinSettings/settings");
+        var files = catalog.getObject("files");
+        var settingsFile = files.getObject("BespinSettings/settings");
         settingsFile.loadContents().then(function(result) {
             var data;
             try {
@@ -55,30 +56,35 @@ exports.ServerPersister = SC.Object.extend({
                 console.error("Unable to parse settings file: " + e);
                 data = {};
             }
-            
+
             this._loading = true;
             for (var setting in data) {
-                settings.set(setting, data[setting]);
+                try {
+                    settings.set(setting, data[setting]);
+                } catch (ex) {
+                    console.error("Error setting", setting, data[setting], ex);
+                }
             }
             this._loading = false;
         }.bind(this));
     },
 
-    changeValue: function(settings, key, value) {
+    persistValue: function(settings, key, value) {
         // when we're in the middle of setting the initial values,
         // we don't care about change messages
         if (this._loading) {
             return;
         }
-        
+
         // Aggregate the settings into a file
         var data = {};
         settings._getSettingNames().forEach(function(key) {
             data[key] = settings.get(key);
         });
-        
-        var settingsFile = catalog.getObject("files").getObject("BespinSettings/settings");
-        
+
+        var files = catalog.getObject("files");
+        var settingsFile = files.getObject("BespinSettings/settings");
+
         try {
             var settingsString = JSON.stringify(data);
         } catch (e) {

@@ -74,33 +74,62 @@ exports.getSettings = function() {
  * // Reset the value to the default
  * settings.resetValue("foo");
  * </pre>
- * <p>Subclasses should override _changeValue() and _loadInitialValues().
  * @class
  */
 exports.MemorySettings = SC.Object.extend({
     /**
-     * Setup the default settings
-     * @constructs
-     */
-    init: function() {
-        // We delay this because publishing to a bunch of things can cause lots
-        // of objects to be created, and it's a bad idea to do that while a core
-        // component (i.e. settings) is being created.
-        setTimeout(function() {
-            this._loadInitialValues();
-        }.bind(this), 10);
-    },
-
-    /**
      * A Persister is able to store settings. It is an object that defines
      * two functions:
-     * loadInitialValues(settings) and changeValue(settings, key, value).
+     * loadInitialValues(settings) and persistValue(settings, key, value).
      */
     setPersister: function(persister) {
         this._persister = persister;
         if (persister) {
             persister.loadInitialValues(this);
         }
+    },
+
+    /**
+     * Override observable.set(key, value) to provide type conversion and
+     * validation.
+     */
+    set: function(key, value) {
+        var settingExt = catalog.getExtensionByKey("setting", key);
+        if (!settingExt) {
+            throw new Error("Unknown setting: ", key, value);
+        }
+
+        if (typeof value == "string" && settingExt.type == "string") {
+            // no conversion needed
+            return this.superclass(key, value);
+        } else {
+            // We want to call observer.set, and normally could call
+            // superclass(...) to do this but we're prevented because the
+            // promise changes the callee. So we need to cache it.
+            // Excuse me while a puke.
+            var superSet = arguments.callee.base;
+
+            var inline = false;
+            var ex = null;
+
+            types.fromString(value, settingExt.type).then(function(converted) {
+                inline = true;
+                superSet.apply(this, [ key, converted ]);
+            }.bind(this), function(ex1) {
+                ex = ex1;
+            });
+
+            if (ex) {
+                throw ex;
+            }
+
+            if (!inline) {
+                console.warn("About to set string version of ", key, "delaying typed set.");
+                this.superclass(key, value);
+            }
+        }
+
+        return this;
     },
 
     /**
@@ -146,20 +175,17 @@ exports.MemorySettings = SC.Object.extend({
 
                 // Add a setter to this so subclasses can save
                 this.addObserver(settingExt.name, this, function() {
-                    this._changeValue(settingExt.name, this.get(settingExt.name));
+                    this._persistValue(settingExt.name, this.get(settingExt.name));
                 }.bind(this));
             }.bind(this));
-        }.bind(this), function() {
-            console.error(arguments);
-            console.trace();
-        });
+        }.bind(this));
     },
 
     /**
      * Reset the value of the <code>key</code> setting to it's default
      */
     resetValue: function(key) {
-        var settingExt = catalog.getExtensionByKey("type", key);
+        var settingExt = catalog.getExtensionByKey("setting", key);
         if (settingExt) {
             this.set(key, settingExt.defaultValue);
         } else {
@@ -195,10 +221,10 @@ exports.MemorySettings = SC.Object.extend({
     /**
      * delegates to the persister. no-op if there's no persister.
      */
-    _changeValue: function(key, value) {
+    _persistValue: function(key, value) {
         var persister = this._persister;
         if (persister) {
-            persister.changeValue(this, key, value);
+            persister.persistValue(this, key, value);
         }
     },
 
@@ -230,7 +256,7 @@ exports.MemorySettings = SC.Object.extend({
         for (var key in data) {
             if (data.hasOwnProperty(key)) {
                 var value = data[key];
-                var settingExt = catalog.getExtensionByKey("type", key);
+                var settingExt = catalog.getExtensionByKey("setting", key);
                 if (settingExt) {
                     // TODO: We shouldn't just ignore values without a setting
                     var promise = types.fromString(value, settingExt.type);
@@ -262,7 +288,7 @@ exports.MemorySettings = SC.Object.extend({
 
         this._getSettingNames().forEach(function(key) {
             var value = this.get(key);
-            var settingExt = catalog.getExtensionByKey("type", key);
+            var settingExt = catalog.getExtensionByKey("setting", key);
             if (settingExt) {
                 // TODO: We shouldn't just ignore values without a setting
                 var promise = types.toString(value, settingExt.type);

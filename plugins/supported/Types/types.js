@@ -47,12 +47,18 @@ var r = require;
 exports.fromString = function(stringVersion, typeSpec) {
     var promise = new Promise();
 
-    exports.getTypeExt(typeSpec).then(function(typeExt) {
-        typeExt.load(function(type) {
-            var objectVersion = type.fromString(stringVersion, typeExt);
-            promise.resolve(objectVersion);
+    try {
+        exports.getTypeExt(typeSpec).then(function(typeExt) {
+            typeExt.load(function(type) {
+                var objectVersion = type.fromString(stringVersion, typeExt);
+                promise.resolve(objectVersion);
+            });
+        }, function(ex) {
+            promise.reject(ex);
         });
-    });
+    } catch (ex) {
+        promise.reject(ex);
+    }
 
     return promise;
 };
@@ -64,12 +70,18 @@ exports.fromString = function(stringVersion, typeSpec) {
 exports.toString = function(objectVersion, typeSpec) {
     var promise = new Promise();
 
-    exports.getTypeExt(typeSpec).then(function(typeExt) {
-        typeExt.load(function(type) {
-            var stringVersion = type.toString(objectVersion, typeExt);
-            promise.resolve(stringVersion);
+    try {
+        exports.getTypeExt(typeSpec).then(function(typeExt) {
+            typeExt.load(function(type) {
+                var stringVersion = type.toString(objectVersion, typeExt);
+                promise.resolve(stringVersion);
+            });
+        }, function(ex) {
+            promise.reject(ex);
         });
-    });
+    } catch (ex) {
+        promise.reject(ex);
+    }
 
     return promise;
 };
@@ -81,12 +93,18 @@ exports.toString = function(objectVersion, typeSpec) {
 exports.isValid = function(originalVersion, typeSpec) {
     var promise = new Promise();
 
-    exports.getTypeExt(typeSpec).then(function(typeExt) {
-        typeExt.load(function(type) {
-            var valid = type.isValid(originalVersion, typeExt);
-            promise.resolve(valid);
+    try {
+        exports.getTypeExt(typeSpec).then(function(typeExt) {
+            typeExt.load(function(type) {
+                var valid = type.isValid(originalVersion, typeExt);
+                promise.resolve(valid);
+            });
+        }, function(ex) {
+            promise.reject(ex);
         });
-    });
+    } catch (ex) {
+        promise.reject(ex);
+    }
 
     return promise;
 };
@@ -100,38 +118,44 @@ exports.isValid = function(originalVersion, typeSpec) {
 exports.getTypeExt = function(typeSpec) {
     var promise = new Promise();
 
-    var typeExt;
-    if (typeof typeSpec === "string") {
-        var parts = typeSpec.split(":");
-        if (parts.length === 1) {
-            typeExt = catalog.getExtensionByKey("type", typeSpec);
-            if (typeExt) {
-                promise.resolve(typeExt);
-            } else {
-                promise.reject("Unknown type: " + typeSpec);
-            }
-        } else {
-            typeExt = catalog.getExtensionByKey("type", parts.shift());
-            var data = parts.join(":");
-            if (data.substring(0, 1) == "[" || data.substring(0, 1) == "{") {
-                typeExt.data = JSON.parse(data);
-                promise.resolve(typeExt);
-            } else {
-                var parts = data.split("#");
-                var modName = parts.shift();
-                var objName = parts.join("#");
-
-                r.loader.async(modName).then(function() {
-                    var module = r(modName);
-                    typeExt.data = module[objName]();
+    try {
+        var typeExt;
+        if (typeof typeSpec === "string") {
+            var parts = typeSpec.split(":");
+            if (parts.length === 1) {
+                typeExt = catalog.getExtensionByKey("type", typeSpec);
+                if (typeExt) {
                     promise.resolve(typeExt);
-                });
+                } else {
+                    promise.reject("Unknown type: " + typeSpec);
+                }
+            } else {
+                typeExt = catalog.getExtensionByKey("type", parts.shift());
+                var data = parts.join(":");
+                if (data.substring(0, 1) == "[" || data.substring(0, 1) == "{") {
+                    typeExt.data = JSON.parse(data);
+                    promise.resolve(typeExt);
+                } else {
+                    var parts = data.split("#");
+                    var modName = parts.shift();
+                    var objName = parts.join("#");
+
+                    r.loader.async(modName).then(function() {
+                        var module = r(modName);
+                        typeExt.data = module[objName]();
+                        promise.resolve(typeExt);
+                    }, function(ex) {
+                        promise.reject(ex);
+                    });
+                }
             }
+        } else if (typeof typeSpec === "object") {
+            typeExt = catalog.getExtensionByKey("type", typeSpec.name);
+            typeExt.data = typeSpec.data;
+            promise.resolve(typeExt);
         }
-    } else if (typeof typeSpec === "object") {
-        typeExt = catalog.getExtensionByKey("type", typeSpec.name);
-        typeExt.data = typeSpec.data;
-        promise.resolve(typeExt);
+    } catch (ex) {
+        promise.reject(ex);
     }
 
     return promise;

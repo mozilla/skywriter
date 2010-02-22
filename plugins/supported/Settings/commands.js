@@ -58,7 +58,7 @@ exports.setCommand = function(env, args, request) {
                 return 1;
             }
         });
-        // now add to output unless hidden settings (start with a _)
+
         settingsList.forEach(function(setting) {
             html += "<a class='setting' href='https://wiki.mozilla.org/Labs/Bespin/Settings#" +
                     setting.key +

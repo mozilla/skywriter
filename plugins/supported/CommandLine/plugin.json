@@ -15,6 +15,34 @@
             "pointer": "history#InMemoryHistory"
         },
         {
+            "ep": "setting",
+            "name": "historyTimeMode",
+            "description": "Display number|date|none next to each historical instruction",
+            "type": { "name": "selection", "data": [ "number", "date", "none" ] },
+            "defaultValue": "none"
+        },
+        {
+            "ep": "setting",
+            "name": "minConsoleHeight",
+            "description": "The maximum size (in pixels) for the command line output area",
+            "type": "number",
+            "defaultValue": 300
+        },
+        {
+            "ep": "setting",
+            "name": "maxConsoleHeight",
+            "description": "The minimum size (in pixels) for the command line output area",
+            "type": "number",
+            "defaultValue": 0
+        },
+        {
+            "ep": "setting",
+            "name": "consolePinned",
+            "description": "Is the console area pinned open?",
+            "type": "boolean",
+            "defaultValue": false
+        },
+        {
             "ep": "command",
             "name": "complete",
             "description": "Accept the proposed completion",
@@ -63,13 +91,6 @@
             "name": "history",
             "description": "Show history of the commands",
             "pointer": "commands#historyCommand"
-        },
-        {
-            "ep": "setting",
-            "name": "historytimemode",
-            "description": "Display number|date|none next to each historical instruction",
-            "type": { "name": "selection", "data": [ "number", "date", "none" ] },
-            "defaultValue": "none"
         },
         {
             "ep": "command",

@@ -50,7 +50,7 @@ exports.CookiePersister = SC.Object.create({
         }.bind(this));
     },
 
-    changeValue: function(settings, key, value) {
+    persistValue: function(settings, key, value) {
         settings._saveToObject(stringData).then(function() {
             var data = JSON.stringify(stringData);
             cookie.set("settings", data);
