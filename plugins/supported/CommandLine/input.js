@@ -209,14 +209,6 @@ exports.Input = SC.Object.extend({
                         },
                         value: this.typed
                     };
-
-                } else {
-                    // Case 2: We pressed space, start thinking about the first
-                    // parameter.
-                    hintSpec = {
-                        param: cmdExt.params[0],
-                        value: ""
-                    };
                 }
             }
         } else {

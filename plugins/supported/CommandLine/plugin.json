@@ -36,13 +36,6 @@
             "defaultValue": 0
         },
         {
-            "ep": "setting",
-            "name": "consolePinned",
-            "description": "Is the console area pinned open?",
-            "type": "boolean",
-            "defaultValue": false
-        },
-        {
             "ep": "command",
             "name": "complete",
             "description": "Accept the proposed completion",

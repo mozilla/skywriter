@@ -307,7 +307,9 @@ exports.CliInputView = SC.View.design({
         }
     }.observes(
         ".hasFocus", // Open whenever we have the focus
-        ".contentView.display.toolbar.pin.isSelected" // Open/close on pin
+        ".contentView.display.toolbar.pin.isSelected", // Open/close on pin
+        "Settings:index#settings.maxConsoleHeight",
+        "Settings:index#settings.minConsoleHeight"
     ),
 
     /**
@@ -322,21 +324,6 @@ exports.CliInputView = SC.View.design({
         var current = cliController.get("input");
         cliController.set("input", current + completion);
     },
-
-    minConsoleHeightChanged: function() {
-        console.log("settings.minConsoleHeight", settings.get("minConsoleHeight"));
-        this.checkHeight();
-    }.observes("Settings:index#settings.minConsoleHeight"),
-
-    maxConsoleHeightChanged: function() {
-        console.log("settings.maxConsoleHeight", settings.get("maxConsoleHeight"));
-        this.checkHeight();
-    }.observes("Settings:index#settings.maxConsoleHeight"),
-
-    consolePinnedChanged: function() {
-        console.log("settings.consolePinned", settings.get("consolePinned"));
-        this.checkHeight();
-    }.observes("Settings:index#settings.consolePinned"),
 
     /**
      * Sync the hint manually so we can also alter the sizes of the hint and
