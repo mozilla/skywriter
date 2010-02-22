@@ -165,8 +165,8 @@ function Deferred(canceller, rejectImmediately){
                     listener.deferred.resolve(newResult);
                 }
                 catch(e){
-                    console.error("promise caught exception ", e);
-                    console.log(printStackTrace({e: e}));
+                    // console.error("promise caught exception ", e);
+                    // console.log(printStackTrace({e: e}));
                     listener.deferred.reject(e);
                 }
                 finally{
