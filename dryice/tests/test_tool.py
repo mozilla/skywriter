@@ -173,7 +173,7 @@ def test_full_output():
     manifest.build()
     jsfile = tmppath / "BespinEmbedded.js"
     assert jsfile.exists()
-    samplefile = tmppath / "sample.html"
+    samplefile = tmppath / "samples" / "sample.html"
     assert samplefile.exists()
 
 def test_image_copying():

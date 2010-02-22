@@ -52,7 +52,7 @@ from dryice import plugins, combiner
 class BuildError(Exception):
     pass
 
-sample_file = path(__file__).dirname() / "sample.html"
+sample_dir = path(__file__).dirname() / "samples"
 inline_file = path(__file__).dirname() / "inline.js"
 boot_file = path(__file__).dirname() / "boot.js"
 
@@ -279,7 +279,7 @@ tiki.require("bespin:plugins").catalog.load(%s);
 
 
         if self.include_sample:
-            sample_file.copy(output_dir / "sample.html")
+            sample_dir.copytree(output_dir / "samples")
 
     def compress_js(self, compressor):
         """Compress the output using Closure Compiler."""

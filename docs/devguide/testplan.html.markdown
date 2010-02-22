@@ -39,7 +39,7 @@ Once you're set, you can take a look at the sample.html:
     cd tmp/BespinEmbedded-DropIn-VERSION
     static . localhost:8080
 
-Point your web browser at [http://localhost:8080/sample.html](http://localhost:8080/sample.html) [^1].
+Point your web browser at [http://localhost:8080/samples/sample.html](http://localhost:8080/samples/sample.html) [^1].
 
 Make sure that the **editor displays fine** and that you can **successfully resize 
 the window** without any strange effects.
@@ -55,7 +55,7 @@ Then, try to run and test a build:
     cd tmp
     static . localhost:8080
 
-Point your web browser at [http://localhost:8080/sample.html](http://localhost:8080/sample.html) [^1].
+Point your web browser at [http://localhost:8080/samples/sample.html](http://localhost:8080/samples/sample.html) [^1].
 
 This editor should work as well.
 

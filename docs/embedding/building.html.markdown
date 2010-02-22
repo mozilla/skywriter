@@ -37,8 +37,8 @@ include\_core_test
     This is useful if you're doing Bespin development in Bespin.
 
 include_sample
-:   should the final output directory include a `sample.html` file that shows
-    off the editor?
+:   should the final output directory include a `samples` directory that
+    contains HTML files that show off the editor?
 
 output_dir
 :   directory where the finished files should be placed. Note that this
