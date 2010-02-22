@@ -175,32 +175,35 @@ exports.CanvasView = SC.View.extend({
 
         var clippingFrame = this.get('clippingFrame');
 
-        var invalidRects = Rect.merge(this._cvInvalidRects);
-        this._cvInvalidRects = [];
+        var invalidRects = this._cvInvalidRects;
+        if (invalidRects === 'all') {
+            this.drawRect(clippingFrame, context);
+        } else {
+            Rect.merge(invalidRects).forEach(function(rect) {
+                context.save();
 
-        invalidRects.forEach(function(rect) {
-            context.save();
+                rect = SC.intersectRects(rect, clippingFrame);
+                if (rect.width !== 0 && rect.height !== 0) {
+                    var x = rect.x, y = rect.y;
+                    var width = rect.width, height = rect.height;
+                    context.beginPath();
+                    context.moveTo(x, y);
+                    context.lineTo(x + width, y);
+                    context.lineTo(x + width, y + height);
+                    context.lineTo(x, y + height);
+                    context.closePath();
+                    context.clip();
 
-            rect = SC.intersectRects(rect, clippingFrame);
-            if (rect.width !== 0 && rect.height !== 0) {
-                var x = rect.x, y = rect.y;
-                var width = rect.width, height = rect.height;
-                context.beginPath();
-                context.moveTo(x, y);
-                context.lineTo(x + width, y);
-                context.lineTo(x + width, y + height);
-                context.lineTo(x, y + height);
-                context.closePath();
-                context.clip();
+                    this.drawRect(rect, context);
+                }
 
-                this.drawRect(rect, context);
-            }
-
-            context.restore();
-        }, this);
+                context.restore();
+            }, this);
+        }
 
         context.restore();
 
+        this._cvInvalidRects = [];
         this._cvLastRedrawTime = new Date().getTime();
         return true;
     },
@@ -242,15 +245,7 @@ exports.CanvasView = SC.View.extend({
      * Invalidates the entire visible region of the canvas.
      */
     setNeedsDisplay: function(rect) {
-        var frame = this.get('frame');
-        this._cvInvalidRects = [
-            {
-                x:      0,
-                y:      0,
-                width:  frame.width,
-                height: frame.height
-            }
-        ];
+        this._cvInvalidRects = 'all';
         this.set('layerNeedsUpdate', true);
     },
 
@@ -259,7 +254,11 @@ exports.CanvasView = SC.View.extend({
      * the canvas to be redrawn at the end of the run loop.
      */
     setNeedsDisplayInRect: function(rect) {
-        this._cvInvalidRects.push(rect);
+        var invalidRects = this._cvInvalidRects;
+        if (invalidRects !== 'all') {
+            invalidRects.push(rect);
+        }
+
         this.set('layerNeedsUpdate', true);
     },
 
