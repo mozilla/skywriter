@@ -83,11 +83,11 @@ def test_manifest_errors():
     manifest = tool.Manifest.from_json(sample)
     errors = manifest.errors
     assert errors
-    
+
 def find_with_context(s, substr):
     """Searches for substr in s, if it's not there returns None.
     If it's there, it returns a string with context.
-    
+
     This function is useful for tests where you don't expect
     a string to appear, but it does."""
     index = s.find(substr)
@@ -98,9 +98,9 @@ def find_with_context(s, substr):
     if context_end > len(s):
         context_end = -1
     return s[context_begin:context_end]
-    
+
 def test_js_creation():
-    manifest = tool.Manifest(plugins=["plugin1"], 
+    manifest = tool.Manifest(plugins=["plugin1"],
         search_path=pluginpath, include_core_test=True)
     output = StringIO()
     manifest.generate_output_files(output, StringIO())
@@ -125,7 +125,7 @@ def test_single_file_plugin_handling():
     assert "SingleFilePlugin1:index" in output
     match = find_with_context(output, 'tiki.module("SingleFilePlugin1:../')
     assert match is None
-    
+
 def test_js_creation_with_core_test():
     sample = """
 {
@@ -153,10 +153,10 @@ def test_js_creation_without_core_test():
     output = output.getvalue()
     assert "var tiki =" in output
     assert "PluginDev" not in output
-    
-    
+
+
 def test_css_creation():
-    manifest = tool.Manifest(plugins=["plugin1"], 
+    manifest = tool.Manifest(plugins=["plugin1"],
         search_path=pluginpath, include_core_test=True)
     output_js = StringIO()
     output_css = StringIO()
@@ -165,7 +165,7 @@ def test_css_creation():
     assert "color: white" in output_css
     assert "sc-view.handles" in output_css
     assert "background-image: url(resources/plugin1/images/prompt1.png);" in output_css
-    
+
 def test_full_output():
     tmppath = path.getcwd() / "tmp" / "testoutput"
     manifest = tool.Manifest(plugins=["Editor"],
@@ -175,19 +175,19 @@ def test_full_output():
     assert jsfile.exists()
     samplefile = tmppath / "sample.html"
     assert samplefile.exists()
-    
+
 def test_image_copying():
     tmppath = path.getcwd() / "tmp" / "testoutput"
     manifest = tool.Manifest(plugins=["plugin1"],
-        search_path=pluginpath, include_core_test=True, 
+        search_path=pluginpath, include_core_test=True,
         output_dir=tmppath)
     manifest.build()
     imagedir = tmppath / "images"
     assert imagedir.exists()
     themefile = imagedir / "sc-theme-repeat-x.png"
     assert themefile.exists()
-    
+
     plugin_image_dir = tmppath / "resources" / "plugin1" / "images"
     promptfile = plugin_image_dir / "prompt1.png"
     assert promptfile.exists()
-    
+
