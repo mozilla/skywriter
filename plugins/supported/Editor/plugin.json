@@ -116,6 +116,20 @@
         },
         {
             "ep": "command",
+            "name": "moveNextWord",
+            "key": [ "alt_right" ],
+            "predicates": { "isTextView": true },
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
+            "name": "movePreviousWord",
+            "key": [ "alt_left" ],
+            "predicates": { "isTextView": true },
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
             "name": "moveRight",
             "key": "right",
             "predicates": { "isTextView": true },
@@ -227,6 +241,20 @@
             "ep": "command",
             "name": "selectLineStart",
             "key": ["shift_home", "ctrl_shift_left"],
+            "predicates": { "isTextView": true },
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
+            "name": "selectNextWord",
+            "key": [ "alt_shift_right" ],
+            "predicates": { "isTextView": true },
+            "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
+            "name": "selectPreviousWord",
+            "key": [ "alt_shift_left" ],
             "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
