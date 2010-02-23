@@ -123,6 +123,21 @@ exports.testClampPosition = function() {
         "(4,4) clamped to the text boundaries and (3,0)");
 };
 
+exports.testClampRange = function() {
+    var storage = TextStorage.create({});
+    storage.insertCharacters({ row: 0, column: 0 }, "foo\nbar\nbaz\n");
+
+    var range = { start: { row: 0, column: 0 }, end: { row: 3, column: 0 } };
+
+    t.deepEqual(storage.clampRange(range), range,
+        "(0,0) (3,0) clamped to the text boundaries and (0,0) (3,0)");
+    t.deepEqual(storage.clampRange({
+            start:  { row: -1, column: -1 },
+            end:    { row: 4, column: 4 }
+        }), range,
+        "(-1,-1) (4,4) clamped to the text boundaries and (0,0) (3,0)");
+};
+
 exports.testDisplacePosition = function() {
     var storage = TextStorage.create({});
     storage.insertCharacters({ row: 0, column: 0 }, "foo\nbar\nbaz\n");

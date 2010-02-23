@@ -74,6 +74,17 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
     },
 
     /**
+     * Returns the actual range closest to the given range, according to the
+     * selection rules.
+     */
+    clampRange: function(range) {
+        return {
+            start:  this.clampPosition(range.start),
+            end:    this.clampPosition(range.end)
+        };
+    },
+
+    /**
      * Returns the result of displacing the given position by one character
      * forward (if @count is 1) or backward (if @count is -1).
      */
