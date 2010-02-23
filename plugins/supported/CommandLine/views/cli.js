@@ -313,7 +313,7 @@ exports.CliInputView = SC.View.design({
     ),
 
     /**
-     *
+     * Apply the proposed completion
      */
     complete: function() {
         var completion = this.get("_completion");
@@ -323,6 +323,14 @@ exports.CliInputView = SC.View.design({
 
         var current = cliController.get("input");
         cliController.set("input", current + completion);
+    },
+
+    /**
+     * Adjust the displayed input (but don't execute it)
+     */
+    setInput: function(command) {
+        command = command || "";
+        cliController.set("input", command);
     },
 
     /**
@@ -523,7 +531,7 @@ exports.CliInputView = SC.View.design({
                 if (ev.charCode === 0) {
                     var opt = { isCommandLine: true };
                     var cliInputView = this.getPath("parentView.parentView");
-                    environment.set("commandLineView", cliInputView);
+                    environment.set("commandLine", cliInputView);
                     var done = keyboardManager.processKeyEvent(ev, this, opt);
                     if (!done) {
                         // This is a real keyPress event. This should not be

@@ -45,8 +45,8 @@ var rootCanon = { aliases:[], commands:[] };
  * Action to allow the command line to do completion
  */
 exports.completeCommand = function(env, args, request) {
-    var cliInputView = env.get("commandLineView");
-    cliInputView.complete();
+    var commandLine = env.get("commandLine");
+    commandLine.complete();
 };
 
 /**
@@ -200,22 +200,3 @@ exports.aliasCommand = function(env, args, request) {
     }
 };
 
-/**
- * 'history' command
- */
-exports.historyCommand = function(env, args, request) {
-    var instructions = cliController.history.getInstructions();
-    var output = [];
-    output.push("<table>");
-    var count = 1;
-    instructions.forEach(function(instruction) {
-        output.push("<tr>");
-        output.push('<th>' + count + '</th>');
-        output.push('<td>' + instruction.typed + "</td>");
-        output.push("</tr>");
-        count++;
-    });
-    output.push("</table>");
-
-    request.done(output.join(''));
-};

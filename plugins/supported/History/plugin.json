@@ -1,0 +1,32 @@
+{
+    "depends": [ "Canon", "Types", "Settings" ],
+    "provides":
+    [
+        {
+            "ep": "factory",
+            "name": "history",
+            "action": "create",
+            "pointer": "history#InMemoryHistory"
+        },
+        {
+            "ep": "command",
+            "name": "historyPrevious",
+            "predicates": { "isCommandLine": true },
+            "key": "up",
+            "pointer": "commands#historyPreviousCommand"
+        },
+        {
+            "ep": "command",
+            "name": "historyNext",
+            "predicates": { "isCommandLine": true },
+            "key": "down",
+            "pointer": "commands#historyNextCommand"
+        },
+        {
+            "ep": "command",
+            "name": "history",
+            "description": "Show history of the commands",
+            "pointer": "commands#historyCommand"
+        }
+    ]
+}

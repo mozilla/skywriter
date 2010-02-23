@@ -7,6 +7,13 @@
             "name": "command",
             "decription": "A command is a bit of functionality with optional typed arguments which can do something small like moving the cursor around the screen, or large like cloning a project from VCS.",
             "indexOn": "name"
+        },
+        {
+            "ep": "setting",
+            "name": "historyLength",
+            "description": "How many typed commands do we recall for reference?",
+            "type": "number",
+            "defaultValue": 50
         }
     ]
 }

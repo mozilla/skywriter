@@ -37,7 +37,7 @@
 
 var SC = require("sproutcore/runtime").SC;
 
-var settings = require("Settings").settings;
+var history = require("Canon:request").history;
 
 /**
  * Store command line history, and keep a pointer to the current command so
@@ -48,37 +48,11 @@ exports.InMemoryHistory = SC.Object.extend({
     pointer: 0,
 
     /**
-     * Keep the history to settings.historyLength
-     */
-    trim: function() {
-        var historyLength = settings.get("historyLength");
-        if (this.instructions.length > historyLength) {
-            this.instructions.splice(0, this.instructions.length - historyLength);
-        }
-    },
-
-    /**
      * Add an instruction to our list of things that have been executed
      */
-    add: function(instruction) {
-        // We previously de-duped here, by comparing what was typed, but that
-        // should really be done as a UI sugar on up/down.
-        this.instructions.push(instruction);
-        this.trim();
-        // also make it one past the end so you can go back to it
-        this.pointer = this.instructions.length;
-        this.save(this.instructions);
-    },
-
-    /**
-     * Remove an instruction
-     */
-    remove: function(instruction) {
-        var index = this.instructions.indexOf(instruction);
-        if (index != -1) {
-            this.instructions.splice(index, 1);
-        }
-    },
+    requestsChanged: function(instruction) {
+        this.pointer = history.requests.length;
+    }.observes("Canon:request#history.requests.[]"),
 
     /**
      * Increment the 'current entry' pointer
@@ -101,26 +75,11 @@ exports.InMemoryHistory = SC.Object.extend({
     },
 
     /**
-     * Move the 'current entry' pointer to the end of the list
-     */
-    last: function() {
-        return this.instructions[this.instructions.length - 1];
-    },
-
-    /**
-     * Move the 'current entry' pointer to the start of the list
-     */
-    first: function() {
-        return this.instructions[0];
-    },
-
-    /**
      * Mutator for our list of instructions
      */
     setInstructions: function(instructions) {
         if (instructions) {
             this.instructions = instructions;
-            this.trim();
         } else {
             this.instructions = [];
         }
@@ -148,70 +107,15 @@ exports.InMemoryHistory = SC.Object.extend({
 });
 
 /**
- * Store the history in BespinSettings/command.history
- */
-exports.ServerHistory = exports.InMemoryHistory.extend({
-    requires: {
-        hub: "hub",
-        files: "files"
-    },
-
-    init: function() {
-        this.hub.fireAfter([ "authenticated" ], function() {
-            // load last 50 instructions from history
-            var project = this.files.userSettingsProject;
-            this.files.loadContents(project, "command.history", function(file) {
-                var typings = file.content.split(/\n/);
-                var instructions = [];
-
-                typings.forEach(function(typed) {
-                    if (typed && typed !== "") {
-                        var instruction = Instruction.create({
-                            typed: typed,
-                            historical: true
-                        });
-                        instructions.push(instruction);
-                    }
-                });
-
-                this.setInstructions(instructions);
-            });
-        }.bind(this));
-    },
-
-    save: function(instructions) {
-        var content = "";
-        instructions.forEach(function(instruction) {
-            if (instruction.typed && instruction.typed !== "") {
-                content += instruction.typed + "\n";
-            }
-        });
-        // save instructions back to server asynchronously
-        this.files.saveFile(this.files.userSettingsProject, {
-            name: "command.history",
-            content: content,
-            autosave: true,
-            timestamp: new Date().getTime()
-        });
-    }
-});
-
-/**
  * Store the history using browser globalStorage
  */
 exports.LocalStorageHistory = exports.InMemoryHistory.extend({
-    requires: {
-        hub: "hub"
-    },
-
     init: function() {
-        this.hub.fireAfter([ "authenticated" ], function() {
-            if (window.globalStorage) {
-                var data = globalStorage[location.hostname].history;
-                var instructions = JSON.parse(data);
-                this.setInstructions(instructions);
-            }
-        }.bind(this));
+        if (window.globalStorage) {
+            var data = globalStorage[location.hostname].history;
+            var instructions = JSON.parse(data);
+            this.setInstructions(instructions);
+        }
     },
 
     save: function(instructions) {

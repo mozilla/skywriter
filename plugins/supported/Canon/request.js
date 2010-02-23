@@ -37,12 +37,26 @@
 
 var SC = require("sproutcore/runtime").SC;
 
+var settings = require("Settings").settings;
+
 /**
  * TODO: Consider if this is actually the best way to tell the world about the
  * created Output objects...
  */
 exports.history = SC.Object.create({
-    requests: []
+    requests: [],
+
+    /**
+     * Keep the history to settings.historyLength
+     */
+    trim: function() {
+        var historyLength = settings.get("historyLength");
+        // This could probably be optimized with some maths, but 99.99% of the
+        // time we will only be off by one, so save the maths.
+        while (this.requests.length > historyLength) {
+            this.requests.shiftObject();
+        }
+    }.observes(".requests")
 });
 
 /**
@@ -75,7 +89,7 @@ exports.Request = SC.Object.extend({
     error: false,
 
     /**
-     * Nastiness to get around sproutcore size problem
+     * Nastiness to get around SproutCore size problem
      */
     _hack: "",
 
@@ -86,7 +100,7 @@ exports.Request = SC.Object.extend({
 
     /**
      * Lazy init to register with the history should only be done on output.
-     * Init is expensive, and won't be used in the majority of cases
+     * init() is expensive, and won't be used in the majority of cases
      */
     _init: function() {
         this.set("_inited", true);
@@ -129,7 +143,7 @@ exports.Request = SC.Object.extend({
             this.set("_hack", hack + content.innerHTML + "<br/>");
         }
 
-        this.outputs.push(content);
+        this.outputs.pushObject(content);
         return this;
     },
 

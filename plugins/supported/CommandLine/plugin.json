@@ -9,24 +9,11 @@
             "pointer": "views/cli#cliInputView"
         },
         {
-            "ep": "factory",
-            "name": "history",
-            "action": "create",
-            "pointer": "history#InMemoryHistory"
-        },
-        {
             "ep": "setting",
             "name": "historyTimeMode",
             "description": "Display number|date|none next to each historical instruction",
             "type": { "name": "selection", "data": [ "number", "date", "none" ] },
             "defaultValue": "none"
-        },
-        {
-            "ep": "setting",
-            "name": "historyLength",
-            "description": "How many typed commands do we recall for reference?",
-            "type": "number",
-            "defaultValue": 50
         },
         {
             "ep": "setting",
@@ -45,7 +32,6 @@
         {
             "ep": "command",
             "name": "complete",
-            "description": "Accept the proposed completion",
             "predicates": { "isCommandLine": true },
             "key": "tab",
             "pointer": "commands#completeCommand"
