@@ -99,7 +99,8 @@ var optionHint = function(input, assignment, typeExt, data) {
         link.appendChild(document.createTextNode(option.name));
         link.addEventListener("click", function(ev) {
             SC.run(function() {
-                cliController.set("input", option.name + " ");
+                var prefix = input.typed.substring(0, input.typed.length - filter.length);
+                cliController.set("input", prefix + option.name + " ");
             });
         }, false);
         parent.appendChild(link);
