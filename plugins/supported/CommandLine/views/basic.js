@@ -38,6 +38,9 @@
 var SC = require("sproutcore/runtime").SC;
 var cliController = require("controller").cliController;
 var hint = require("hint");
+var diff_match_patch = require("Diff").diff_match_patch;
+
+var diff = new diff_match_patch();
 
 /**
  * A really basic UI hint for when someone is entering something from a
@@ -74,16 +77,23 @@ var optionHint = function(input, assignment, typeExt, data) {
         });
     }
 
+    // Multiple matches
     var parent = document.createElement("span");
     parent.appendChild(document.createTextNode(assignment.param.description));
 
     var index = 0;
+    var commonPrefix = matches[0].name;
+
     matches.forEach(function(option) {
+        // The 'spacer' is different for the first item
         if (index === 0) {
             parent.appendChild(document.createTextNode(": "));
         } else {
             parent.appendChild(document.createTextNode(", "));
         }
+        index++;
+
+        // Create the clickable link
         var link = document.createElement("a");
         link.setAttribute("href", "javascript:;");
         link.appendChild(document.createTextNode(option.name));
@@ -93,12 +103,26 @@ var optionHint = function(input, assignment, typeExt, data) {
             });
         }, false);
         parent.appendChild(link);
-        index++;
+
+        // Find the longest common prefix for completion
+        if (commonPrefix.length > 0) {
+            var len = diff.diff_commonPrefix(commonPrefix, option.name);
+            if (len < commonPrefix.length) {
+                commonPrefix = commonPrefix.substring(0, len);
+            }
+        }
     }.bind(this));
+
+    if (commonPrefix.length === 0) {
+        commonPrefix = undefined;
+    } else {
+        commonPrefix = commonPrefix.substring(filter.length, commonPrefix.length);
+    }
 
     return hint.Hint.create({
         element: parent,
-        level: hint.Level.Incomplete
+        level: hint.Level.Incomplete,
+        completion: commonPrefix
     });
 };
 

@@ -1,5 +1,5 @@
 {
-    "depends": [ "Canon", "Types", "Settings" ],
+    "depends": [ "Canon", "Types", "Settings", "Diff" ],
     "provides":
     [
         {
