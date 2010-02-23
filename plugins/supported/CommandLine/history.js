@@ -36,7 +36,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
-//var Instruction = require("instruction").Instruction;
+
+var settings = require("Settings").settings;
 
 /**
  * Store command line history, and keep a pointer to the current command so
@@ -45,29 +46,14 @@ var SC = require("sproutcore/runtime").SC;
 exports.InMemoryHistory = SC.Object.extend({
     instructions: [],
     pointer: 0,
-    maxEntries: 50,
 
     /**
-     * It's too complex to observe the internals of this class right now, so
-     * instead you should observe this, and only update it via the udpate()
-     * function.
-     */
-    version: 0,
-
-    /**
-     * When the history has changed in any way, call this to update the views
-     */
-    update: function() {
-        // The Sproutcore way of doing this.version++
-        this.set("version", this.get("version") + 1);
-    },
-
-    /**
-     * Keep the history to settings.maxEntries
+     * Keep the history to settings.historyLength
      */
     trim: function() {
-        if (this.instructions.length > this.maxEntries) {
-            this.instructions.splice(0, this.instructions.length - this.maxEntries);
+        var historyLength = settings.get("historyLength");
+        if (this.instructions.length > historyLength) {
+            this.instructions.splice(0, this.instructions.length - historyLength);
         }
     },
 
