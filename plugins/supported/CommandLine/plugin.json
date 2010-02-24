@@ -74,12 +74,6 @@
         },
         {
             "ep": "command",
-            "name": "history",
-            "description": "Show history of the commands",
-            "pointer": "commands#historyCommand"
-        },
-        {
-            "ep": "command",
             "name": "eval",
             "params":
             [
