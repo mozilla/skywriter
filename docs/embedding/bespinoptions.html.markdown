@@ -12,18 +12,6 @@ options.
 [1]: index.html "Bespin embedding documentation"
 
 
-dontHookWindowResizeEvent
--------------------------
-
-The embedded editor needs to be notified via a call to
-`dimensionsChanged()` whenever its position or size changes. By default, Bespin
-will hook the `window.onresize` event and call that function automatically, so
-you don't need to worry about it unless you're manipulating the DOM in a way
-that will cause the embedded Bespin component to move around. If you don't want
-`dimensionsChanged()` to be called whenever the window resizes, you can supply
-a value of `true` for this setting, and `window.onresize` will be left alone.
-
-
 initialContent
 --------------
 
@@ -33,7 +21,7 @@ custom content. For example:
     :::html
     <textarea id="edit"></textarea>
     <script>
-    require("bespin/embed").useBespin("edit", {
+    tiki.require("Embedded").useBespin("edit", {
         initialContent: "Hello, World!"
     });
     </script>
@@ -43,12 +31,24 @@ This is an alternative to the simpler:
     :::html
     <textarea id="edit">Hello, World!</textarea>
     <script>
-    require("bespin/embed").useBespin("edit");
+    tiki.require("Embedded").useBespin("edit");
     </script>
 
 For use when the initial content is computed in some way. This option is also
 available for use with data-bespinoptions, however there is little benefit over
 placing the content in the element for this case, so that option is preferred.
+
+
+noAutoresize
+------------
+
+The embedded editor needs to be notified via a call to
+`dimensionsChanged()` whenever its position or size changes. By default, Bespin
+will hook the `window.onresize` event and call that function automatically, so
+you don't need to worry about it unless you're manipulating the DOM in a way
+that will cause the embedded Bespin component to move around. If you don't want
+`dimensionsChanged()` to be called whenever the window resizes, you can supply
+a value of `true` for this setting, and `window.onresize` will be left alone.
 
 
 settings
@@ -65,7 +65,7 @@ Or using the manual API:
     :::html
     <textarea id="edit"></textarea>
     <script>
-    require("bespin/embed").useBespin("edit", {
+    tiki.require("Embedded").useBespin("edit", {
         settings: { tabsize:2 }
     });
     </script>
@@ -82,7 +82,7 @@ On startup it's sometimes useful to instruct the browser to begin with some
 specific component having the focus. For example:
 
     :::js
-    require("bespin/embed").useBespin("edit", {
+    tiki.require("Embedded").useBespin("edit", {
         stealFocus: true
     });
 
@@ -101,3 +101,4 @@ You can do this with the `lineNumber` startup option. For example:
 
 This is equivalent to calling `bespin.setLineNumber(1000);` on page load.
 `lineNumber` is also available when using the element upgrade option.
+
