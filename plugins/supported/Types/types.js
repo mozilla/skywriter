@@ -127,7 +127,7 @@ exports.getTypeExt = function(typeSpec) {
                 if (typeExt) {
                     promise.resolve(typeExt);
                 } else {
-                    promise.reject("Unknown type: " + typeSpec);
+                    promise.reject(new Error("Unknown type: " + typeSpec));
                 }
             } else {
                 typeExt = catalog.getExtensionByKey("type", parts.shift());

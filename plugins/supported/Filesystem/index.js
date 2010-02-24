@@ -82,7 +82,7 @@ exports.Directory = SC.Object.extend({
     * Populates this directory object asynchronously with data.
     * If everything goes well, onSuccess is called with this directory
     * object as the argument. Otherwise, onFailure is called with an
-    * error object containing, at the least, "message".
+    * Error object containing a message.
     *
     * Call loadDirectory on the FileSource with the parameters
     * path, directory handler delegate (this), and the onSuccess and onFailure
@@ -102,11 +102,8 @@ exports.Directory = SC.Object.extend({
                 pr.resolve(self);
             },
             function(error) {
-                pr.reject({
-                    message: error.toString(),
-                    error: error,
-                    directory: self
-                });
+                error.directory = self;
+                pr.reject(error);
             }
         );
         return pr;
@@ -121,9 +118,7 @@ exports.Directory = SC.Object.extend({
         var obj = this.getObject(path);
         if (obj == null) {
             pr = new Promise();
-            pr.reject({
-                message: "Cannot find " + path
-            });
+            pr.reject(new Error("Cannot find " + path));
             return pr;
         }
         if (pathUtil.isDir(path)) {

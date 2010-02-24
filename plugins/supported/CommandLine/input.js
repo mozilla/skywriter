@@ -116,7 +116,7 @@ exports.Input = SC.Object.extend({
 
         // Something failed, so the argsPromise wont complete. Kill it
         if (!success) {
-            this._argsPromise.reject();
+            this._argsPromise.reject(new Error("Parse error"));
         }
 
         return {

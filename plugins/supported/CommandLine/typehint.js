@@ -128,7 +128,7 @@ exports.getTypeExt = function(typeSpec) {
                     var func = module[objName];
                     if (!func) {
                         console.error("Module not found: ", data);
-                        promise.reject("Module not found: " + data);
+                        promise.reject(new Error("Module not found: " + data));
                     } else {
                         typeExt.data = func();
                         promise.resolve(typeExt);

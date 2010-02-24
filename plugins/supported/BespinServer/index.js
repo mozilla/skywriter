@@ -135,8 +135,9 @@ exports.server = SC.Object.create({
                     }
                 } else {
                     if (pr) {
-                        pr.reject({message: "Server returned " + xhr.status,
-                        xhr: xhr});
+                        var error = new Error("Server returned " + xhr.status);
+                        error.xhr = xhr;
+                        pr.reject(error);
                     } else {
                         handled = server._callCallback(options, 'on' + xhr.status, [ xhr ]);
                         if (!handled) {
