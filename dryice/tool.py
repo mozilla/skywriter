@@ -219,13 +219,15 @@ will be deleted before the build.""")
         # this comes after the plugins, because some plugins
         # may need to be importable at the time the metadata
         # becomes available.
-        all_md = dict()
+        output_js.write("""
+var catalog = tiki.require("bespin:plugins").catalog;
+""")
         for p in package_list:
             plugin = self.get_plugin(p.name)
-            all_md[plugin.name] = plugin.metadata
-        output_js.write("""
-tiki.require("bespin:plugins").catalog.load(%s);
-""" % (dumps(all_md)))
+            output_js.write("catalog.load(%s);" %
+                (dumps({ plugin.name: plugin.metadata })))
+
+        output_js.write("delete catalog;\n")
 
         output_js.write(boot_file.bytes())
 
