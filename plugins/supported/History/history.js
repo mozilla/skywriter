@@ -44,13 +44,12 @@ var history = require("Canon:request").history;
  * we can use arrow keys to navigate through the history.
  */
 exports.InMemoryHistory = SC.Object.extend({
-    instructions: [],
     pointer: 0,
 
     /**
      * Add an instruction to our list of things that have been executed
      */
-    requestsChanged: function(instruction) {
+    requestsChanged: function() {
         this.pointer = history.requests.length;
     }.observes("Canon:request#history.requests.[]"),
 
@@ -58,9 +57,15 @@ exports.InMemoryHistory = SC.Object.extend({
      * Increment the 'current entry' pointer
      */
     next: function() {
-        if (this.pointer < this.instructions.length - 1) {
+        if (this.pointer < history.requests.length) {
             this.pointer++;
-            return this.instructions[this.pointer];
+        }
+
+        console.log("next pointer", this.pointer);
+        if (this.pointer == history.requests.length) {
+            return "";
+        } else {
+            return history.requests[this.pointer].typed;
         }
     },
 
@@ -70,8 +75,10 @@ exports.InMemoryHistory = SC.Object.extend({
     previous: function() {
         if (this.pointer > 0) {
             this.pointer--;
-            return this.instructions[this.pointer];
         }
+
+        console.log("prev pointer", this.pointer);
+        return history.requests[this.pointer].typed;
     },
 
     /**
@@ -79,21 +86,21 @@ exports.InMemoryHistory = SC.Object.extend({
      */
     setInstructions: function(instructions) {
         if (instructions) {
-            this.instructions = instructions;
+            history.requests = instructions;
         } else {
-            this.instructions = [];
+            history.requests = [];
         }
 
         // Set the pointer to one past the end so you can go back and hit the
         // last one not the one before last
-        this.pointer = this.instructions.length;
+        this.pointer = history.requests.length;
     },
 
     /**
      * Accessor for our store of previous instructions
      */
     getInstructions: function() {
-        return this.instructions;
+        return history.requests;
     },
 
     /**

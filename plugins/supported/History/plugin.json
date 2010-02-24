@@ -11,14 +11,14 @@
         {
             "ep": "command",
             "name": "historyPrevious",
-            "predicates": { "isCommandLine": true },
+            "predicates": { "isCommandLine": true, "isKeyUp": true },
             "key": "up",
             "pointer": "commands#historyPreviousCommand"
         },
         {
             "ep": "command",
             "name": "historyNext",
-            "predicates": { "isCommandLine": true },
+            "predicates": { "isCommandLine": true, "isKeyUp": true },
             "key": "down",
             "pointer": "commands#historyNextCommand"
         },

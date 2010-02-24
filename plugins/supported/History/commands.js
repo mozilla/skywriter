@@ -44,7 +44,7 @@ var history = require("Canon:request").history;
 exports.historyPreviousCommand = function(env, args, request) {
     var commandLine = env.get("commandLine");
     var history = catalog.getObject("history");
-    commandLine.setInput("history.previous()");
+    commandLine.setInput(history.previous());
 };
 
 /**

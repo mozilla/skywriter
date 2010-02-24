@@ -534,15 +534,21 @@ exports.CliInputView = SC.View.design({
                     environment.set("commandLine", cliInputView);
                     var done = keyboardManager.processKeyEvent(ev, this, opt);
                     if (!done) {
-                        // This is a real keyPress event. This should not be
-                        // handled, otherwise the textInput mixin can't detect
-                        // the key events.
                         return this.superclass(ev);
                     }
                 } else {
                     // This is a real keyPress event. This should not be
                     // handled, otherwise the textInput mixin can't detect
                     // the key events.
+                    return this.superclass(ev);
+                }
+            },
+            keyUp: function(ev) {
+                var opt = { isCommandLine: true, isKeyUp: true };
+                var cliInputView = this.getPath("parentView.parentView");
+                environment.set("commandLine", cliInputView);
+                var done = keyboardManager.processKeyEvent(ev, this, opt);
+                if (!done) {
                     return this.superclass(ev);
                 }
             }

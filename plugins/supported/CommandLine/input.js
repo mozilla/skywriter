@@ -137,7 +137,7 @@ exports.Input = SC.Object.extend({
      * Split up the input taking into account ' and "
      */
     _tokenize: function() {
-        if (this.typed == "") {
+        if (!this.typed || this.typed == "") {
             this._hints.push(hint.Hint.create({
                 level: hint.Level.Incomplete,
                 element: "Type a command, see 'help' for available commands."
