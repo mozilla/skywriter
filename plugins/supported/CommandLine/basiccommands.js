@@ -43,9 +43,9 @@ var util = require("bespin:util/util");
  */
 exports.evalCommand = function(env, args, request) {
     var result;
-    var jscode = args.jscode;
+    var javascript = args.javascript;
     try {
-        result = eval(jscode);
+        result = eval(javascript);
     } catch (e) {
         result = '<b>Error: ' + e.message + '</b>';
     }
@@ -95,7 +95,7 @@ exports.evalCommand = function(env, args, request) {
         type = typeof result;
     }
 
-    request.done("Result for eval <b>\"" + jscode + "\"</b>" +
+    request.done("Result for eval <b>\"" + javascript + "\"</b>" +
             " (type: "+ type+"): <br><br>"+ msg);
 };
 
