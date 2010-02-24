@@ -61,7 +61,6 @@ exports.InMemoryHistory = SC.Object.extend({
             this.pointer++;
         }
 
-        console.log("next pointer", this.pointer);
         if (this.pointer == history.requests.length) {
             return "";
         } else {
@@ -77,8 +76,11 @@ exports.InMemoryHistory = SC.Object.extend({
             this.pointer--;
         }
 
-        console.log("prev pointer", this.pointer);
-        return history.requests[this.pointer].typed;
+        if (this.pointer == history.requests.length) {
+            return "";
+        } else {
+            return history.requests[this.pointer].typed;
+        }
     },
 
     /**
