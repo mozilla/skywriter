@@ -35,14 +35,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var history = require("bespin:plugins").catalog.getObject("history");
+var catalog = require("bespin:plugins").catalog;
+var history = require("Canon:request").history;
 
 /**
  * CLI 'up'
  */
 exports.historyPreviousCommand = function(env, args, request) {
     var commandLine = env.get("commandLine");
-    commandLine.setInput(history.previous());
+    var history = catalog.getObject("history");
+    commandLine.setInput("history.previous()");
 };
 
 /**
@@ -50,6 +52,7 @@ exports.historyPreviousCommand = function(env, args, request) {
  */
 exports.historyNextCommand = function(env, args, request) {
     var commandLine = env.get("commandLine");
+    var history = catalog.getObject("history");
     commandLine.setInput(history.next());
 };
 
@@ -57,15 +60,14 @@ exports.historyNextCommand = function(env, args, request) {
  * 'history' command
  */
 exports.historyCommand = function(env, args, request) {
-    var instructions = history.getInstructions();
-
     var output = [];
     output.push("<table>");
     var count = 1;
-    instructions.forEach(function(instruction) {
+
+    history.requests.forEach(function(request) {
         output.push("<tr>");
         output.push('<th>' + count + '</th>');
-        output.push('<td>' + instruction.typed + "</td>");
+        output.push('<td>' + request.typed + "</td>");
         output.push("</tr>");
         count++;
     });
