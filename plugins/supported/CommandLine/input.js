@@ -178,16 +178,29 @@ exports.Input = SC.Object.extend({
      * typed at the command line.
      */
     _split: function() {
-        // TODO: Something that doesn't assume no sub-commands:
-        this.unparsedArgs = this.parts.slice(); // clone it
+        this.unparsedArgs = this.parts.slice(); // aka clone()
         var initial = this.unparsedArgs.shift();
+        var commandExt;
 
-        var commandExt = catalog.getExtensionByKey("command", initial);
+        while (true) {
+            commandExt = catalog.getExtensionByKey("command", initial);
 
-        if (commandExt) {
-            // We have an exact match
-            this.commandExt = commandExt;
+            if (!commandExt) {
+                // Not found. break with commandExt == null
+                break;
+            }
+
+            if (commandExt.pointer) {
+                // Valid command, break with commandExt valid
+                break;
+            }
+
+            // commandExt, but no pointer - this must be a sub-command
+            initial += " " + this.unparsedArgs.shift();
         }
+
+
+        this.commandExt = commandExt;
 
         // Do we know what the command is.
         var hintSpec;
