@@ -189,19 +189,36 @@ exports.Input = SC.Object.extend({
             this.commandExt = commandExt;
         }
 
+        // Do we know what the command is.
         var hintSpec;
-
         if (this.commandExt) {
-            // We know what the command is.
-            if (this.parts.length === 1) {
-                // There are 2 cases for when there is only one option and we've
-                // not started on the parameters.
-                var cmdExt = this.commandExt;
+            // Load the command to check that it will load
+            var loadPromise = new Promise();
+            commandExt.load().then(function(command) {
+                if (command) {
+                    loadPromise.resolve(null);
+                } else {
+                    loadPromise.resolve(hint.Hint.create({
+                        level: hint.Level.Error,
+                        element: "Failed to load command " + commandExt.name +
+                            ": Pointer " + commandExt._pluginName + ":" + commandExt.pointer + " is null."
+                    }));
+                    console.log(commandExt);
+                }
+            }, function(ex) {
+                loadPromise.resolve(hint.Hint.create({
+                    level: hint.Level.Error,
+                    element: "Failed to load command " + commandExt.name +
+                        ": Pointer " + commandExt._pluginName + ":" + commandExt.pointer + " failed to load." + ex
+                }));
+            });
+            this._hints.push(loadPromise);
 
+            // The user hasn't started to type any params
+            if (this.parts.length === 1) {
+                var cmdExt = this.commandExt;
                 if (this.typed == cmdExt.name ||
                         !cmdExt.params || cmdExt.params.length === 0) {
-                    // Case 1: The input exactly equals the command, or there
-                    // are no params to dig into. Use the command help
                     hintSpec = {
                         param: {
                             type: "text",
@@ -386,7 +403,8 @@ exports.Input = SC.Object.extend({
     _convertTypes: function() {
         // Use {} when there are no params
         if (!this.commandExt.params) {
-            return;
+            this._argsPromise.resolve({});
+            return true;
         }
 
         // The data we pass to the command

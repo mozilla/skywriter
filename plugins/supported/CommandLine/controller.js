@@ -149,6 +149,9 @@ exports.cliController = SC.Object.create({
                     console.groupEnd();
                 }
             });
+        }, function(ex) {
+            console.error(ex);
+            console.log(printStackTrace(ex));
         });
     }
 });
