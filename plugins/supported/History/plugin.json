@@ -1,5 +1,5 @@
 {
-    "depends": [ "Canon", "Types", "Settings" ],
+    "depends": [ "Canon" ],
     "provides":
     [
         {
@@ -26,7 +26,8 @@
             "ep": "command",
             "name": "history",
             "description": "Show history of the commands",
-            "pointer": "commands#historyCommand"
+            "pointer": "commands#historyCommand",
+            "params": []
         }
     ]
 }
