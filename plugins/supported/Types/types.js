@@ -151,8 +151,12 @@ exports.getTypeExt = function(typeSpec) {
             }
         } else if (typeof typeSpec === "object") {
             typeExt = catalog.getExtensionByKey("type", typeSpec.name);
-            typeExt.data = typeSpec.data;
-            promise.resolve(typeExt);
+            if (!SC.none(typeExt)) {
+                typeExt.data = typeSpec.data;
+                promise.resolve(typeExt);
+            } else {
+                promise.reject(new Error("Unknown type: " + typeSpec.name));
+            }
         }
     } catch (ex) {
         promise.reject(ex);
