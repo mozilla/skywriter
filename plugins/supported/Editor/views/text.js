@@ -43,6 +43,7 @@ var Range = require('RangeUtils:utils/range');
 var Rect = require('utils/rect');
 var TextInput = require('mixins/textinput').TextInput;
 var keyboardManager = require('Canon:keyboard').keyboardManager;
+var settings = require('Settings').settings;
 
 // Set this to true to outline all text ranges with a box. This may be useful
 // when optimizing syntax highlighting engines.
@@ -614,13 +615,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     /**
-     * @property{number}
-     *
-     * The width of a tab.
-     */
-    tabStop: 8,
-
-    /**
      * @property
      *
      * The theme to use.
@@ -1047,8 +1041,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     tab: function() {
-        var tabStop = this.get('tabStop');
-        var count = tabStop - this._selectedRange.start.column % tabStop;
+        var tabstop = settings.get('tabstop');
+        var count = tabstop - this._selectedRange.start.column % tabstop;
 
         var str = "";
         for (var i = 0; i < count; i++) {

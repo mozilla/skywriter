@@ -4,6 +4,7 @@
         "Canon",
         "DelegateSupport",
         "RangeUtils",
+        "Settings",
         "SyntaxManager"
     ],
     "provides": [
@@ -315,6 +316,13 @@
             "description": "Change all selected text to uppercase",
             "withKey": "CMD SHIFT U",
             "pointer": "commands/editor#ucCommand"
+        },
+        {
+            "ep": "setting",
+            "name": "tabstop",
+            "description": "The distance in characters between each tab",
+            "type": "number",
+            "defaultValue": 8
         }
     ]
 }
