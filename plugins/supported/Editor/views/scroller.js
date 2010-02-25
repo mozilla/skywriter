@@ -585,10 +585,10 @@ var ScrollerCanvasView = CanvasView.extend({
         // was not the handle at the moment.
         switch (parentView.get('layoutDirection')) {
         case SC.LAYOUT_HORIZONTAL:
-            this._mouseDownScreenPoint = evt.clientX;
+            this._mouseDownScreenPoint = evt.pageX;
             break;
         case SC.LAYOUT_VERTICAL:
-            this._mouseDownScreenPoint = evt.clientY;
+            this._mouseDownScreenPoint = evt.pageY;
             break;
         default:
             console.assert(false, "unknown layout direction");
@@ -613,10 +613,10 @@ var ScrollerCanvasView = CanvasView.extend({
             var eventDistance;
             switch (parentView.get('layoutDirection')) {
                 case SC.LAYOUT_HORIZONTAL:
-                    eventDistance = evt.clientX;
+                    eventDistance = evt.pageX;
                     break;
                 case SC.LAYOUT_VERTICAL:
-                    eventDistance = evt.clientY;
+                    eventDistance = evt.pageY;
                     break;
                 default:
                     console.assert(false, "unknown layout direction");

@@ -748,20 +748,19 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     mouseDown: function(evt) {
+        var point = { x: evt.pageX, y: evt.pageY };
+
         switch (evt.clickCount) {
         case 1:
             var pos = this._selectionPositionForPoint(this.
-                convertFrameFromView({
-                    x:  evt.clientX,
-                    y:  evt.clientY
-                }));
+                convertFrameFromView(point));
             this.moveCursorTo(pos, evt.shiftKey);
             break;
 
         // Select the word under the cursor.
         case 2:
             var pos = this._selectionPositionForPoint(this.
-                convertFrameFromView({ x: evt.clientX, y: evt.clientY }));
+                convertFrameFromView(point));
             var line = this.getPath('layoutManager.textStorage').
                                                         lines[pos.row];
 
@@ -795,7 +794,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         case 3:
             var lines = this.getPath('layoutManager.textStorage').lines;
             var pos = this._selectionPositionForPoint(this.
-                convertFrameFromView({ x: evt.clientX, y: evt.clientY }));
+                convertFrameFromView(point));
             this.setSelection({
                 start: {
                     row: pos.row,
@@ -809,7 +808,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             break;
         }
 
-        this._dragPoint = { x: evt.clientX, y: evt.clientY };
+        this._dragPoint = point;
         this._dragTimer = SC.Timer.schedule({
             target:     this,
             action:     '_scrollWhileDragging',
@@ -821,7 +820,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     mouseDragged: function(evt) {
-        this._dragPoint = { x: evt.clientX, y: evt.clientY };
+        this._dragPoint = { x: evt.pageX, y: evt.pageY };
         this._drag();
     },
 

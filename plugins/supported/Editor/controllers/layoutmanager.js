@@ -222,20 +222,20 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
      */
     characterAtPoint: function(point) {
         var margin = this.get('margin');
-        var clientX = point.x - margin.left, clientY = point.y - margin.top;
+        var x = point.x - margin.left, y = point.y - margin.top;
 
         var characterWidth = this._characterWidth;
         var textStorage = this.get('textStorage');
         var clampedPosition = textStorage.clampPosition({
-            row:    Math.floor(clientY / this._lineHeight),
-            column: Math.floor(clientX / characterWidth)
+            row:    Math.floor(y / this._lineHeight),
+            column: Math.floor(x / characterWidth)
         });
 
         var lineLength = textStorage.get('lines')[clampedPosition.row].length;
         return SC.mixin(clampedPosition, {
             partialFraction:
-                clientX < 0 || clampedPosition.column === lineLength ? 0.0 :
-                clientX % characterWidth / characterWidth
+                x < 0 || clampedPosition.column === lineLength ? 0.0 :
+                x % characterWidth / characterWidth
         });
     },
 
