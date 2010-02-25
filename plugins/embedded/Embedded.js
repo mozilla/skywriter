@@ -37,7 +37,7 @@
  
 "define metadata";
 ({
-    "depends": [ "AppSupport", "EditSession", "Editor" ],
+    "depends": [ "AppSupport", "EditSession", "Editor", "Settings" ],
     "provides": [
         {
             "ep": "factory",
@@ -61,6 +61,7 @@ var EditorView = require('Editor:views/editor').EditorView;
 var KeyListener = require('AppSupport:views/keylistener').KeyListener;
 var bespin = require("bespin:index");
 var m_editsession = require('EditSession');
+var settings = require('Settings').settings;
 var util = require("bespin:util/util");
 
 exports.EmbeddedEditor = SC.Object.extend({
@@ -153,7 +154,13 @@ exports.EmbeddedEditor = SC.Object.extend({
             this._hookWindowResizeEvent();
         }
 
-        // TODO: settings
+        // settings
+        var userSettings = options.settings;
+        if (!SC.none(userSettings)) {
+            for (key in userSettings) {
+                settings.set(key, userSettings[key]);
+            }
+        }
 
         // stealFocus
         var stealFocus = options.stealFocus;
