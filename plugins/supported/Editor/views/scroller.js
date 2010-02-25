@@ -254,23 +254,34 @@ var ScrollerCanvasView = CanvasView.extend({
         var gutterFrame = this._getGutterFrame();
         var clientThickness = this._getClientThickness();
 
+        var gutterLength = this._getGutterLength();
+        var frameLength = this._getFrameLength();
+
+        var size = Math.min(frameLength, maximum) * gutterLength / maximum;
+        var minSize = MINIMUM_HANDLE_SIZE + NIB_LENGTH * 2;
+
+        // Adjust appropriately if the handle is getting too small.
+        if (size < minSize) {
+            size = minSize;
+            gutterLength -= minSize;
+            value *= maximum / (maximum - frameLength);
+        }
+
         switch (parentView.get('layoutDirection')) {
         case SC.LAYOUT_VERTICAL:
             return {
                 x:      clientFrame.x,
                 y:      clientFrame.y + NIB_LENGTH +
-                        value * gutterFrame.height / maximum,
+                        value * gutterLength / maximum,
                 width:  clientThickness,
-                height: Math.min(frame.height, maximum) * gutterFrame.height /
-                        maximum
+                height: size
             };
         case SC.LAYOUT_HORIZONTAL:
             return {
                 x:      clientFrame.x + NIB_LENGTH +
-                        value * gutterFrame.width / maximum,
+                        value * gutterLength / maximum,
                 y:      clientFrame.y,
-                width:  Math.min(frame.width, maximum) * gutterFrame.width /
-                        maximum,
+                width:  size,
                 height: clientThickness
             };
         default:
@@ -626,11 +637,20 @@ var ScrollerCanvasView = CanvasView.extend({
             var eventDelta = eventDistance - this._mouseDownScreenPoint;
 
             var maximum = parentView.get('maximum');
+            var oldValue = parentView.get('value');
             var gutterLength = this._getGutterLength();
 
-            var oldValue = parentView.get('value');
+            // If the handle's size is clamped to the minimum size, adjust
+            // appropriately.
+            var frameLength = this._getFrameLength();
+            var size = Math.min(frameLength, maximum) * gutterLength / maximum;
+            var minSize = MINIMUM_HANDLE_SIZE + NIB_LENGTH * 2;
+            if (size < minSize) {
+                eventDelta *= maximum / (maximum - frameLength);
+            }
+
             parentView.set('value', oldValue + eventDelta * maximum /
-                gutterLength);
+                                gutterLength);
 
             this._mouseDownScreenPoint = eventDistance;
         }
