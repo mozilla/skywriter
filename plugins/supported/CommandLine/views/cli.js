@@ -280,6 +280,7 @@ exports.CliInputView = SC.View.design({
         this._boundCancelBlur = this._cancelBlur.bind(this);
         var layer = this.get("layer");
         layer.addEventListener("click", this._boundCancelBlur, true);
+        this.checkHeight();
     },
 
     /**
