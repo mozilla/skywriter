@@ -78,16 +78,16 @@ exports.Directory = SC.Object.extend({
         }
     },
 
-    /*
-    * Populates this directory object asynchronously with data.
-    * If everything goes well, onSuccess is called with this directory
-    * object as the argument. Otherwise, onFailure is called with an
-    * Error object containing a message.
-    *
-    * Call loadDirectory on the FileSource with the parameters
-    * path, directory handler delegate (this), and the onSuccess and onFailure
-    * callbacks.
-    */
+    /**
+     * Populates this directory object asynchronously with data.
+     * If everything goes well, onSuccess is called with this directory
+     * object as the argument. Otherwise, onFailure is called with an
+     * Error object containing a message.
+     *
+     * Call loadDirectory on the FileSource with the parameters
+     * path, directory handler delegate (this), and the onSuccess and onFailure
+     * callbacks.
+     */
     load: function() {
         var pr = new Promise();
         if (this.get("status") == READY) {
@@ -109,10 +109,10 @@ exports.Directory = SC.Object.extend({
         return pr;
     },
 
-    /*
-    * Retrieve the object at the path given, and load it (if it's
-    * a directory)
-    */
+    /**
+     * Retrieve the object at the path given, and load it (if it's
+     * a directory)
+     */
     loadPath: function(path) {
         var pr;
         var obj = this.getObject(path);
@@ -141,11 +141,11 @@ exports.Directory = SC.Object.extend({
         return collection.findProperty("name", name);
     },
 
-    /*
-    * Retrieves an object (File or Directory) under this Directory
-    * at the path given. If necessary, it will create objects along
-    * the way.
-    */
+    /**
+     * Retrieves an object (File or Directory) under this Directory
+     * at the path given. If necessary, it will create objects along
+     * the way.
+     */
     getObject: function(path) {
         var segments = path.split("/");
         var isDir = pathUtil.isDir(path);
@@ -208,18 +208,18 @@ exports.Directory = SC.Object.extend({
         return this.get("name");
     }.property().cacheable(),
 
-    /*
-    * The originPath finds the path within the same file source.
-    * So, if you have a hierarchy of directories built from different
-    * sources, this path is guaranteed to only include the parts of
-    * the path from the same source as this directory.
-    *
-    * If you're looking up a file on a server, for example, you would
-    * use this path.
-    *
-    * At the moment, originPath is not truly implemented (it just returns
-    * the path). However, filesources should use this.
-    */
+    /**
+     * The originPath finds the path within the same file source.
+     * So, if you have a hierarchy of directories built from different
+     * sources, this path is guaranteed to only include the parts of
+     * the path from the same source as this directory.
+     *
+     * If you're looking up a file on a server, for example, you would
+     * use this path.
+     *
+     * At the moment, originPath is not truly implemented (it just returns
+     * the path). However, filesources should use this.
+     */
     originPath: function() {
         return this.get("path");
     }.property().cacheable(),
@@ -228,13 +228,13 @@ exports.Directory = SC.Object.extend({
         return "Directory " + this.get("name");
     },
 
-    /*
-    * Generally by a FileSource to put the data in this Directory.
-    * It contains an array of objects. Each one needs to minimally have
-    * a name. If the name ends with "/" it is assumed to be a directory.
-    * Object references will be properly filled in (parent and source
-    * on directories, directory on files).
-    */
+    /**
+     * Generally by a FileSource to put the data in this Directory.
+     * It contains an array of objects. Each one needs to minimally have
+     * a name. If the name ends with "/" it is assumed to be a directory.
+     * Object references will be properly filled in (parent and source
+     * on directories, directory on files).
+     */
     populateDirectory: function(data) {
         this.set("status", READY);
         var files = [];
