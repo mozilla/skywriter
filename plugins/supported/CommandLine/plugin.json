@@ -20,14 +20,14 @@
             "name": "minConsoleHeight",
             "description": "The maximum size (in pixels) for the command line output area",
             "type": "number",
-            "defaultValue": 300
+            "defaultValue": 0
         },
         {
             "ep": "setting",
             "name": "maxConsoleHeight",
             "description": "The minimum size (in pixels) for the command line output area",
             "type": "number",
-            "defaultValue": 0
+            "defaultValue": 300
         },
         {
             "ep": "command",
