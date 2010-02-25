@@ -521,8 +521,34 @@ exports.Catalog = SC.Object.extend({
 
     },
 
+    // Topological sort algorithm from Wikipedia, credited to Tarjan 1976.
+    //     http://en.wikipedia.org/wiki/Topological_sort
+    _toposort: function(metadata) {
+        var sorted = [];
+        var visited = {};
+        var visit = function(key) {
+            if (key in visited || !(key in metadata)) {
+                return;
+            }
+
+            visited[key] = true;
+            var depends = metadata[key].depends;
+            if (!SC.none(depends)) {
+                depends.forEach(visit);
+            }
+
+            sorted.push(key);
+        }
+
+        for (var key in metadata) {
+            visit(key);
+        }
+
+        return sorted;
+    },
+
     load: function(metadata) {
-        for (var name in metadata) {
+        this._toposort(metadata).forEach(function(name) {
             var md = metadata[name];
             md.catalog = this;
             if (md.provides) {
@@ -546,7 +572,7 @@ exports.Catalog = SC.Object.extend({
             md.name = name;
             var plugin = exports.Plugin.create(md);
             this.plugins[name] = plugin;
-        }
+        }, this);
     },
 
     /*
