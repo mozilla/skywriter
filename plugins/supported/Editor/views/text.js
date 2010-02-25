@@ -53,6 +53,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     _dragPoint: null,
     _dragTimer: null,
     _inChangeGroup: false,
+    _insertionPointBlinkTimer: null,
+    _insertionPointVisible: true,
 
     // TODO: calculate from the size or let the user override via themes if
     // desired
@@ -85,6 +87,10 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     // Draws a single insertion point.
     _drawInsertionPoint: function(rect, context) {
+        if (!this._insertionPointVisible) {
+            return;
+        }
+
         var range = this._selectedRange;
         var characterRect = this.get('layoutManager').
             characterRectForPosition(range.start);
@@ -221,6 +227,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     // boundaries appropriately.
     _insertText: function(text) {
         this._beginChangeGroup();
+
+        this._rearmInsertionPointBlinkTimer();
 
         var textStorage = this.getPath('layoutManager.textStorage');
         var range = Range.normalizeRange(this._selectedRange);
@@ -380,6 +388,24 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     _rangeIsInsertionPoint: function(range) {
         return Range.isZeroLength(range);
+    },
+
+    _rearmInsertionPointBlinkTimer: function() {
+        if (!this._insertionPointVisible) {
+            // Make sure it ends up visible.
+            this.blinkInsertionPoint();
+        }
+
+        if (this._insertionPointBlinkTimer !== null) {
+            this._insertionPointBlinkTimer.invalidate();
+        }
+
+        this._insertionPointBlinkTimer = SC.Timer.schedule({
+            target:     this,
+            action:     'blinkInsertionPoint',
+            interval:   750,
+            repeats:    true
+        });
     },
 
     _replaceCharacters: function(oldRange, characters) {
@@ -577,6 +603,11 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     acceptsFirstResponder: true,
 
+    blinkInsertionPoint: function() {
+        this._insertionPointVisible = !this._insertionPointVisible;
+        this._invalidateInsertionPointIfNecessary(this._selectedRange);
+    },
+
     clippingFrameChanged: function() {
         arguments.callee.base.apply(this, arguments);
         this._updateSyntax(null);
@@ -700,10 +731,10 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         // Allow the user to change the fields of the padding object without
         // screwing up the prototype.
         this.set('padding', SC.clone(this.get('padding')));
-
         this.get('layoutManager').addDelegate(this);
 
         this._resize();
+        this._rearmInsertionPointBlinkTimer();
     },
 
     keyDown: function(evt) {
