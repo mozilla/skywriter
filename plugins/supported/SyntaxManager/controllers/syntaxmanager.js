@@ -580,7 +580,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
         var index;
         for (index = 0; index < invalidRowCount; index++) {
             var invalidRow = invalidRows[index];
-            if (invalidRow >= startRow && invalidRow < endRow) {
+            if (invalidRow < endRow) {
                 break;
             }
         }
