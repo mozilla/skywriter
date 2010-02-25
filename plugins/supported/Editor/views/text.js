@@ -137,7 +137,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             }
 
             // And finally draw the line.
-            var column = startColumn;
+            var column = colorRanges[colorIndex].start;
             while (column !== null && column < endColumn) {
                 var colorRange = colorRanges[colorIndex];
                 var colorRangeEnd = colorRange.end;
