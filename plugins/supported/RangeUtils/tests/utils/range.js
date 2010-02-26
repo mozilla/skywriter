@@ -121,7 +121,7 @@ exports.testNormalizeRange = function() {
 exports.testUnionRanges = function() {
     t.deepEqual(Range.unionRanges({
             start:  { row: 1, column: 2 },
-            end:    { row: 3, column: 4 },
+            end:    { row: 3, column: 4 }
         }, {
             start:  { row: 5, column: 6 },
             end:    { row: 7, column: 8 }

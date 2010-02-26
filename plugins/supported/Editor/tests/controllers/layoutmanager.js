@@ -72,7 +72,7 @@ exports.testCharacterRectForPosition = function() {
 
 exports.testDimensionsCalculation = function() {
     var layoutManager = LayoutManager.create({
-        margin: { left: 0, bottom: 0, top: 0, right: 0 },
+        margin: { left: 0, bottom: 0, top: 0, right: 0 }
     });
 
     var textStorage = layoutManager.get('textStorage');
