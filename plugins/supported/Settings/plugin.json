@@ -23,13 +23,19 @@
             [
                 {
                     "name": "setting",
-                    "type": "selection:Settings:memory#getSettings",
+                    "type": {
+                        "name": "selection",
+                        "pointer": "Settings:memory#getSettings"
+                    },
                     "description": "The name of the setting to display or alter",
                     "defaultValue": null
                 },
                 {
                     "name": "value",
-                    "type": "text",
+                    "type": {
+                        "name": "deferred",
+                        "pointer": "Settings:memory#getTypeExtFromAssignment"
+                    },
                     "description": "The new value for the chosen setting",
                     "defaultValue": null
                 }

@@ -441,6 +441,10 @@ exports.Input = SC.Object.extend({
                 this._hints.push(hintPromise);
 
                 if (value !== undefined) {
+                    // HACK! deferred types need to have some parameters
+                    // by which to determine which type they should defer to
+                    // so we hack in the assignments so the deferrer can work
+                    param.type.assignments = this.assignments;
                     var convertPromise = types.fromString(value, param.type);
                     convertPromise.then(function(converted) {
                         assignment.converted = converted;

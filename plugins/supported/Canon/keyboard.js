@@ -36,9 +36,13 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+
 var catalog = require("bespin:plugins").catalog;
+
 var Request = require("Canon:request").Request;
 var env = require("Canon:environment");
+
+var printStackTrace = require("bespin:util/stacktrace").printStackTrace;
 
 /**
  * The canon, or the repository of commands, contains functions to process
@@ -75,7 +79,7 @@ var KeyboardManager = SC.Object.extend({
                     // TODO: Some UI?
                     console.group("Error calling command: " + commandExt.name);
                     console.error(ex);
-                    console.trace();
+                    console.log(printStackTrace(ex));
                     console.groupEnd();
                     return false;
                 }
@@ -119,7 +123,7 @@ var KeyboardManager = SC.Object.extend({
                 }
             }
         }
-        
+
         var mappedKeys = commandExt.key;
         if (!mappedKeys) {
             return false;
@@ -130,12 +134,12 @@ var KeyboardManager = SC.Object.extend({
             }
             return true;
         }
-        
+
         if (!mappedKeys.isArray) {
             mappedKeys = [mappedKeys];
             commandExt.key = mappedKeys;
         }
-        
+
         for (var i = 0; i < mappedKeys.length; i++) {
             var keymap = mappedKeys[i];
             if (typeof(keymap) == "string") {
@@ -144,17 +148,17 @@ var KeyboardManager = SC.Object.extend({
                 }
                 continue;
             }
-            
+
             if (keymap.key != symbolicName) {
                 continue;
             }
-            
+
             predicates = keymap.predicates;
-            
+
             if (!predicates) {
                 return true;
             }
-            
+
             for (flagName in predicates) {
                 if (!flags || flags[flagName] != predicates[flagName]) {
                     return false;

@@ -59,6 +59,27 @@ exports.getSettings = function() {
 };
 
 /**
+ * Something of a hack to allow the set command to give a clearer definition
+ * of the type to the command line.
+ */
+exports.getTypeExtFromAssignment = function(typeSpec) {
+    var typeSpec = "text";
+
+    try {
+        var settingName = typeSpec.assignments.setting.value;
+        if (settingName && settingName !== "") {
+            var settingExt = catalog.getExtensionByKey("setting", settingName);
+            typeSpec = settingExt.type;
+        }
+    } catch (ex) {
+        // Ignore, particularly digging into the assignments could fail
+    }
+
+console.log("getType", typeSpec, "=", typeSpec);
+    return types.getTypeExtNow(typeSpec);
+};
+
+/**
  * A base class for all the various methods of storing settings.
  * <p>Usage:
  * <pre>

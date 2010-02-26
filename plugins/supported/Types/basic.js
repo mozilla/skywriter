@@ -149,21 +149,3 @@ exports.selection = {
         return value;
     }
 };
-
-/**
- * A type that we don't have context for just yet
- */
-exports.deferred = {
-    isValid: function(value, typeExt) {
-        // TODO: optimistic sync/async validation??
-        return typeof value == "string";
-    },
-
-    toString: function(value, typeExt) {
-        return value.toString();
-    },
-
-    fromString: function(value, typeExt) {
-        return value;
-    }
-};
