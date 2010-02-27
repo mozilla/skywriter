@@ -97,6 +97,45 @@ var InteriorGutterView = CanvasView.extend({
 exports.GutterView = SC.View.extend({
     _interiorView: null,
 
+    _computeWidth: function() {
+        var padding = this.get('padding');
+        var paddingWidth = padding.left + padding.right;
+
+        var lineNumberFont = this.get('theme').lineNumberFont;
+
+        var lineCount = this.getPath('layoutManager.textLines').length;
+        var lineCountStr = "" + lineCount;
+
+        var canvas = m_scratchcanvas.get();
+        var strWidth = canvas.measureStringWidth(lineNumberFont, lineCountStr);
+
+        return strWidth + paddingWidth;
+    },
+
+    _recomputeLayout: function() {
+        var layoutManager = this.get('layoutManager');
+        var padding = this.get('padding');
+
+        var width = this._computeWidth();
+
+        var layout = SC.clone(this.get('layout'));
+        layout.width = width;
+        this.set('layout', layout);
+
+        var frame = this.get('frame');
+        this._interiorView.set('layout', {
+            left:   0,
+            top:    -this.get('verticalScrollOffset'),
+            width:  width,
+            height: Math.max(frame.height,
+                    layoutManager.boundingRect().height + padding.bottom)
+        });
+    },
+
+    _verticalScrollOffsetChanged: function() {
+        this._recomputeLayout();
+    }.observes('verticalScrollOffset'),
+
     layout: { left: 0, top: 0, bottom: 0, width: 32 },
 
     /**
@@ -116,38 +155,23 @@ exports.GutterView = SC.View.extend({
     padding: { bottom: 30, left: 5, right: 10 },
 
     /**
+     * @property{object}
+     *
+     * The properties of the theme in use.
+     *
+     * TODO: Convert to a SproutCore theme or plugin.
+     */
+    theme: {
+        lineNumberFont: "10pt Monaco, Lucida Console, monospace"
+    },
+
+    /**
      * @property{number}
      *
      * The amount by which the user has scrolled the neighboring editor in
      * pixels.
      */
     verticalScrollOffset: 0,
-
-    _recomputeLayout: function() {
-        var layoutManager = this.get('layoutManager');
-        var padding = this.get('padding');
-
-        var layout = SC.clone(this.get('layout'));
-        layout.width = 32;
-        // padding.left + padding.right + m_scratchcanvas.get().getContext().
-        // measureStringWidth(this.get('theme').lineNumberFont,
-        // "" + (layoutManager.get('textLines').length + 1))
-
-        this.set('layout', layout);
-
-        var frame = this.get('frame');
-        this._interiorView.set('layout', {
-            left:   0,
-            top:    -this.get('verticalScrollOffset'),
-            width:  frame.width,
-            height: Math.max(frame.height,
-                    layoutManager.boundingRect().height + padding.bottom)
-        });
-    },
-
-    _verticalScrollOffsetChanged: function() {
-        this._recomputeLayout();
-    }.observes('verticalScrollOffset'),
 
     createChildViews: function() {
         var interiorView = this.createChildView(InteriorGutterView);
