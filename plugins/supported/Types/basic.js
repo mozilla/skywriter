@@ -65,14 +65,24 @@ exports.text = {
  */
 exports.number = {
     isValid: function(value, typeExt) {
-        return typeof value == "number" && !isNaN(value);
+        if (isNaN(value)) return false;
+        if (value === null) return false;
+        if (value === undefined) return false;
+        if (value === Infinity) return false;
+        return typeof value == "number";// && !isNaN(value);
     },
 
     toString: function(value, typeExt) {
+        if (!value) {
+            return null;
+        }
         return "" + value;
     },
 
     fromString: function(value, typeExt) {
+        if (!value) {
+            return null;
+        }
         var reply = parseInt(value, 10);
         if (isNaN(reply)) {
             throw new Error("Can't convert '" + value + "' to a number.");

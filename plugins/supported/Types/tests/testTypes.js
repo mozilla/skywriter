@@ -35,28 +35,156 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var types = require("types");
+var types = require("Types:types");
 var t = require("PluginDev");
 
-var testType = function(type, method, context, value) {
-    var typeObj = types[type];
-    return typeObj[method].call(context, value);
-};
 
-exports.testStringType = function() {
+exports.testTextFromString = function() {
     types.fromString("Foo", "text").then(function(converted) {
         t.equal("Foo", converted);
     });
+};
+
+exports.testTextToString = function() {
     types.toString("Foo", "text").then(function(converted) {
         t.equal("Foo", converted);
     });
-    types.isValid("Foo", "text").then(function(valid) {
-        t.equal(true, valid);
+    types.toString("4", "text").then(function(converted) {
+        t.equal("4", converted);
     });
 };
 
-exports.testIntegerType = function() {
+exports.testTextIsValid = function() {
+    types.isValid("Foo", "text").then(function(valid) {
+        t.equal(true, valid);
+    });
+    types.isValid("", "text").then(function(valid) {
+        t.equal(true, valid);
+    });
+    types.isValid("null", "text").then(function(valid) {
+        t.equal(true, valid);
+    });
+    types.isValid(4, "text").then(function(valid) {
+        t.equal(false, valid);
+    });
+    types.isValid(null, "text").then(function(valid) {
+        t.equal(false, valid);
+    });
+};
+
+exports.testNumberFromString = function() {
     types.fromString("4", "number").then(function(converted) {
         t.equal(4, converted);
     });
+    types.fromString(null, "number").then(function(converted) {
+        t.equal(null, converted);
+    });
+    // There isn't a spec for stuff like this, but at least we should know
+    // if we're changing stuff
+    types.fromString("010", "number").then(function(converted) {
+        t.equal(10, converted);
+    });
+    types.fromString("0x10", "number").then(function(converted) {
+        t.equal(0, converted);
+    });
 };
+
+exports.testNumberToString = function() {
+    types.toString("Foo", "number").then(function(converted) {
+        t.equal("Foo", converted);
+    });
+    types.toString(4, "number").then(function(converted) {
+        t.equal("4", converted);
+    });
+};
+
+exports.testNumberIsValid = function() {
+    types.isValid(0, "number").then(function(valid) {
+        t.equal(true, valid, "Zero");
+    });
+    types.isValid(-1, "number").then(function(valid) {
+        t.equal(true, valid, "-1");
+    });
+    types.isValid(Infinity, "number").then(function(valid) {
+        t.equal(false, valid, "Infinity");
+    });
+    types.isValid(NaN, "number").then(function(valid) {
+        t.equal(false, valid, "NaN");
+    });
+    types.isValid(null, "number").then(function(valid) {
+        t.equal(false, valid, "null");
+    });
+    types.isValid("0", "number").then(function(valid) {
+        t.equal(false, valid, "string 0");
+    });
+    types.isValid("-1", "number").then(function(valid) {
+        t.equal(false, valid, "string -1");
+    });
+    types.isValid("null", "number").then(function(valid) {
+        t.equal(false, valid, "string null");
+    });
+    types.isValid({}, "number").then(function(valid) {
+        t.equal(false, valid, "object");
+    });
+};
+
+exports.testBooleanFromString = function() {
+    types.fromString("true", "boolean").then(function(converted) {
+        t.equal(true, converted);
+    });
+    types.fromString("false", "boolean").then(function(converted) {
+        t.equal(false, converted);
+    });
+    types.fromString("TRUE", "boolean").then(function(converted) {
+        t.equal(true, converted);
+    });
+    types.fromString("FALSE", "boolean").then(function(converted) {
+        t.equal(false, converted);
+    });
+    types.fromString(null, "boolean").then(function(converted) {
+        t.equal(null, converted);
+    });
+};
+
+exports.testBooleanToString = function() {
+    types.toString("Foo", "boolean").then(function(converted) {
+        t.equal("Foo", converted);
+    });
+    types.toString(4, "boolean").then(function(converted) {
+        t.equal("4", converted);
+    });
+};
+
+exports.testBooleanIsValid = function() {
+    types.isValid(0, "boolean").then(function(valid) {
+        t.equal(true, valid);
+    });
+    types.isValid(-1, "boolean").then(function(valid) {
+        t.equal(true, valid);
+    });
+    types.isValid(Infinity, "boolean").then(function(valid) {
+        t.equal(false, valid, "Infinity");
+    });
+    types.isValid(NaN, "boolean").then(function(valid) {
+        t.equal(false, valid);
+    });
+    types.isValid(null, "boolean").then(function(valid) {
+        t.equal(false, valid);
+    });
+    types.isValid("0", "boolean").then(function(valid) {
+        t.equal(false, valid);
+    });
+    types.isValid("-1", "boolean").then(function(valid) {
+        t.equal(false, valid);
+    });
+    types.isValid("null", "boolean").then(function(valid) {
+        t.equal(false, valid);
+    });
+    types.isValid({}, "boolean").then(function(valid) {
+        t.equal(false, valid);
+    });
+    types.isValid(1/0, "boolean").then(function(valid) {
+        t.equal(false, valid);
+    });
+};
+
