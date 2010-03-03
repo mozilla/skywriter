@@ -94,16 +94,25 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         var range = this._selectedRange;
         var characterRect = this.get('layoutManager').
             characterRectForPosition(range.start);
+        var x = characterRect.x, y = characterRect.y;
+        var width = characterRect.width, height = characterRect.height;
 
         context.save();
 
-        context.strokeStyle = this.get('theme').cursorStyle;
-        context.beginPath();
-        context.moveTo(characterRect.x + 0.5, characterRect.y);
-        context.lineTo(characterRect.x + 0.5,
-            characterRect.y + characterRect.height);
-        context.closePath();
-        context.stroke();
+        var theme = this.get('theme');
+        if (this.get('isFirstResponder')) {
+            context.strokeStyle = theme.cursorStyle;
+            context.beginPath();
+            context.moveTo(x + 0.5, y);
+            context.lineTo(x + 0.5, y + height);
+            context.closePath();
+            context.stroke();
+        } else {
+            context.fillStyle = theme.unfocusedCursorFillStyle;
+            context.fillRect(x + 0.5, y, width, height);
+            context.strokeStyle = theme.unfocusedCursorStrokeStyle;
+            context.strokeRect(x + 0.5, y + 0.5, width - 1, height - 1);
+        }
 
         context.restore();
     },
@@ -1094,6 +1103,16 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     focus: function() {
       this.focusTextInput();
       this.becomeFirstResponder();
+    },
+
+    willBecomeKeyResponderFrom: function() {
+        arguments.callee.base.apply(this, arguments);
+        this._invalidateInsertionPointIfNecessary(this._selectedRange);
+    },
+
+    willLoseKeyResponderTo: function() {
+        arguments.callee.base.apply(this, arguments);
+        this._invalidateInsertionPointIfNecessary(this._selectedRange);
     }
 });
 
