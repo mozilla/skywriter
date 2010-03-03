@@ -52,7 +52,11 @@
             [
                 {
                     "name": "setting",
-                    "type": "text",
+                    "type":
+                    {
+                        "name": "selection",
+                        "pointer": "Settings:memory#getSettings"
+                    },
                     "description": "The name of the setting to return to defaults"
                 }
             ],
