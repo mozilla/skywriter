@@ -237,8 +237,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     _insertText: function(text) {
         this._beginChangeGroup();
 
-        this._rearmInsertionPointBlinkTimer();
-
         var textStorage = this.getPath('layoutManager.textStorage');
         var range = Range.normalizeRange(this._selectedRange);
 
