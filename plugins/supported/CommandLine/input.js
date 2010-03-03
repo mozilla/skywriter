@@ -278,15 +278,17 @@ exports.Input = SC.Object.extend({
      * <li>value - The matching input
      * </ul>
      * The resulting #assignments member created by this function is a map of
-     * assignment.param.name to assignment
+     * assignment.param.name to assignment.
+     * TODO: unparsedArgs should be a list of objects that contain the following
+     * values: name, param (when assigned) and maybe hints?
      */
     _assign: function() {
         // TODO: something smarter than just assuming that they are all in order
         this.assignments = {};
         var params = this.commandExt.params;
 
+        // If this command does not take parameters
         if (!params || params.length == 0) {
-            // This command does not take parameters
             if (this.unparsedArgs.length != 0) {
                 this._hints.push(hint.Hint.create({
                     level: hint.Level.Error,
@@ -294,9 +296,25 @@ exports.Input = SC.Object.extend({
                 }));
                 return false;
             }
-            params = [];
+            return true;
         }
 
+        // Special case: if there is only 1 parameter, and that's of type text
+        // we put all the params into the first param
+        if (params.length == 1 && params[0].type == "text") {
+            // Warning: There is some potential problem here if spaces are
+            // significant. It might be better to chop the command of the
+            // start of this.typed? But that's not easy because there could be
+            // multiple spaces in the command if we're doing sub-commands
+            this.assignments[params[0].name] = {
+                value: this.unparsedArgs.join(" "),
+                param: params[0],
+                index: 0
+            };
+            return true;
+        }
+
+        // The normal case where we have to assign params individually
         var index = 0;
         var used = [];
         params.forEach(function(param) {
@@ -335,33 +353,33 @@ exports.Input = SC.Object.extend({
      * into the original params array.
      */
     _assignParam: function(param, index, used) {
-        var params = this.commandExt.params;
+        // Look for '--param X' style inputs
+        for (var i = 0; i < this.unparsedArgs.length; i++) {
+            var unparsedArg = this.unparsedArgs[i];
 
-        // Special case: there is only 1 parameter, and that's of type text
-        // so we can put all the params into the first param
-        if (index == 0 && params.length == 1 && params[0].type == "text") {
-            // Warning: There is some potential problem here if spaces are
-            // significant. It might be better to chop the command of the
-            // start of this.typed?
-            this.assignments[params[0].name] = {
-                value: this.unparsedArgs.join(" "),
-                param: params[0],
-                index: 0
-            };
-
-            this.unparsedArgs.forEach(function(unparsedArg) {
+            if ("--" + param.name == unparsedArg) {
                 used.push(unparsedArg);
-            });
-
-            return true;
+                // boolean parameters don't have values, they default to false
+                if (types.equals(param.type, "boolean")) {
+                    this.assignments[param.name] = {
+                        value: true,
+                        param: param,
+                        index: index
+                    };
+                } else {
+                    if (i + 1 < this.unparsedArgs.length) {
+                        // Missing value for this param
+                        this._hints.push(hint.Hint.create({
+                            level: hint.Level.Incomplete,
+                            element: "Missing parameter: " + param.name
+                        }));
+                    } else {
+                        used.push(this.unparsedArgs[i + 1]);
+                    }
+                }
+                return;
+            }
         }
-
-        // TODO: something to take into account --params.
-        // 1.  Do we have any --params specifiers for this param?
-        //     If so use it and ignore everything else. Done.
-        // 2a. Remove all --params
-        // 2b. Use the index to get at the param we want
-        // 3.  How do we special case the last param?
 
         var value;
         if (this.unparsedArgs.length > index) {
@@ -369,7 +387,9 @@ exports.Input = SC.Object.extend({
             used.push(this.unparsedArgs[index]);
         }
 
-        // Warning null != undefined. See docs for _assignParam()
+        // null is a valid default value, and common because it identifies an
+        // parameter that is optional. undefined means there is no value from
+        // the command line
         if (value !== undefined) {
             this.assignments[param.name] = {
                 value: value,
