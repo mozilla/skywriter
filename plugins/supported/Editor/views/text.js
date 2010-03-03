@@ -782,6 +782,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     mouseDown: function(evt) {
+        arguments.callee.base.apply(this, arguments);
+
         var point = { x: evt.pageX, y: evt.pageY };
 
         switch (evt.clickCount) {
@@ -849,8 +851,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             interval:   100,
             repeats:    true
         });
-
-        this.becomeFirstResponder();
     },
 
     mouseDragged: function(evt) {
@@ -1101,8 +1101,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     focus: function() {
-      this.focusTextInput();
-      this.becomeFirstResponder();
+        this.focusTextInput();
     },
 
     willBecomeKeyResponderFrom: function() {
