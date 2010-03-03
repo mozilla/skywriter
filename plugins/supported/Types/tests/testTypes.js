@@ -147,44 +147,47 @@ exports.testBooleanFromString = function() {
 };
 
 exports.testBooleanToString = function() {
-    types.toString("Foo", "boolean").then(function(converted) {
-        t.equal("Foo", converted);
+    types.toString(true, "boolean").then(function(converted) {
+        t.equal("true", converted);
     });
-    types.toString(4, "boolean").then(function(converted) {
-        t.equal("4", converted);
+    types.toString(false, "boolean").then(function(converted) {
+        t.equal("false", converted);
     });
 };
 
 exports.testBooleanIsValid = function() {
     types.isValid(0, "boolean").then(function(valid) {
-        t.equal(true, valid);
+        t.equal(false, valid, "zero");
     });
     types.isValid(-1, "boolean").then(function(valid) {
-        t.equal(true, valid);
+        t.equal(false, valid, "minus 1");
     });
     types.isValid(Infinity, "boolean").then(function(valid) {
         t.equal(false, valid, "Infinity");
     });
     types.isValid(NaN, "boolean").then(function(valid) {
-        t.equal(false, valid);
+        t.equal(false, valid, "NaN");
     });
     types.isValid(null, "boolean").then(function(valid) {
-        t.equal(false, valid);
+        t.equal(false, valid, "null");
     });
     types.isValid("0", "boolean").then(function(valid) {
-        t.equal(false, valid);
+        t.equal(false, valid, "string zero");
     });
     types.isValid("-1", "boolean").then(function(valid) {
-        t.equal(false, valid);
+        t.equal(false, valid, "string -1");
     });
     types.isValid("null", "boolean").then(function(valid) {
-        t.equal(false, valid);
+        t.equal(false, valid, "string null");
     });
     types.isValid({}, "boolean").then(function(valid) {
-        t.equal(false, valid);
+        t.equal(false, valid, "object");
     });
-    types.isValid(1/0, "boolean").then(function(valid) {
-        t.equal(false, valid);
+    types.isValid(true, "boolean").then(function(valid) {
+        t.equal(true, valid, "true");
+    });
+    types.isValid(false, "boolean").then(function(valid) {
+        t.equal(true, valid, "false");
     });
 };
 
