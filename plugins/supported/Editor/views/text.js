@@ -1085,6 +1085,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         // character regions.
         this._invalidateInsertionPointIfNecessary(oldRangeOrdered);
         this._invalidateInsertionPointIfNecessary(newRangeOrdered);
+
+        this._rearmInsertionPointBlinkTimer();
     },
 
     tab: function() {
