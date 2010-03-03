@@ -1,0 +1,62 @@
+.cmd_output .plugindev_module {
+    margin-left: 10px;
+}
+
+.cmd_output .plugindev_test {
+    margin-left: 20px;
+}
+
+.cmd_output .plugindev_test .status span {
+    margin: 0px 5px;
+    padding: 0px 3px;
+}
+
+.cmd_output .plugindev_summary span {
+    margin: 0px 5px;
+    padding: 0px 3px;
+}
+
+.cmd_output .plugindev_assertion {
+    margin-left: 30px;
+}
+
+.cmd_output .plugindev_assertion.passed {
+	color: #888;
+}
+
+.cmd_output .plugindev_assertion.passed .status {
+	background: #bbe9b5;
+	color: black;
+}
+
+.cmd_output .plugindev_assertion .status {
+    margin-left: 10px;
+    padding: 0px 3px;
+}
+
+.cmd_output .plugindev_test > .status .passed,
+.cmd_output .plugindev_summary > .passed {
+	background: #80D175;
+	color: black;
+}
+
+.cmd_output .plugindev_test > .status .failed,
+.cmd_output .plugindev_assertion.failed .status,
+.cmd_output .plugindev_summary > .failed {
+  background: #ea4d44;
+  color: white;
+}
+
+.cmd_output .plugindev_test > .status .errors,
+.cmd_output .plugindev_assertion.errors .status,
+.cmd_output .plugindev_summary > .errors {
+  background: red;
+  color: #fff;
+}
+
+.cmd_output .plugindev_test > .status .warnings,
+.cmd_output .plugindev_assertion.warnings .status,
+.cmd_output .plugindev_summary > .warnings {
+  background: #E49723;
+  color: black;
+}
