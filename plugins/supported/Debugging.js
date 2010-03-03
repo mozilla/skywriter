@@ -261,9 +261,28 @@ exports.useCommand = function(env, args, request) {
  */
 exports.slowCommand = function(env, args, request) {
     var seconds = args.seconds || 5;
+    var start = new Date().getTime();
+
+    var parent = document.createElement("div");
+    var prefix = document.createTextNode("Working (");
+    parent.appendChild(prefix);
+    var counter = document.createElement("span");
+    parent.appendChild(counter);
+    var suffix = document.createTextNode("%) ...");
+    parent.appendChild(suffix);
+
+    var interval = setInterval(function() {
+        var interval = (new Date().getTime() - start) / 1000;
+        var percent = interval * 100 / seconds;
+        counter.innerHTML = "" + Math.round(percent);
+    }, 100);
+
     setTimeout(function() {
+        clearInterval(interval);
+        counter.innerHTML = "100";
         request.done("Completed");
     }, seconds * 1000);
-    request.output("Working ...");
+
+    request.output(parent);
     request.async();
 };

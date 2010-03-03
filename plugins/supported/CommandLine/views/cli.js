@@ -214,7 +214,7 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
             });
 
             this.link(content, "outputs.[]", function(outputs) {
-                SC.$("#" + outputId + " > *").remove();
+                SC.$("#" + outputId).get(0).innerHTML = "";
                 outputs.forEach(function(output) {
                     var node;
                     if (typeof output == "string") {
