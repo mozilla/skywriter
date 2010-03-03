@@ -137,7 +137,7 @@
                 {
                     "name": "seconds" ,
                     "type": "text",
-                    "description": "???"
+                    "description": "How long do we wait before creating output"
                 }
             ],
             "hidden": true,
@@ -261,8 +261,9 @@ exports.useCommand = function(env, args, request) {
  */
 exports.slowCommand = function(env, args, request) {
     var seconds = args.seconds || 5;
-    setTimeout(instruction.link(function() {
-        request.done("'slow' command complete");
-    }), seconds * 1000);
+    setTimeout(function() {
+        request.done("Completed");
+    }, seconds * 1000);
+    request.output("Working ...");
     request.async();
 };
