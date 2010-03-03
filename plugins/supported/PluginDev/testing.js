@@ -423,13 +423,8 @@ exports.testrunner = function(env, args, request) {
     }
     
     // TODO make it ensure that the modules are all loaded
-    console.log("Tests to run: ");
-    console.log(testsToRun);
     var plan = new Ct.Plan(testspec);
     var logger = TestOutputLogger.create({request: request});
-    console.log("Logger:");
-    console.log(logger);
-    // var logger = new DefaultLogger();
     plan.logger(logger);
     
     var promises = [];
@@ -443,19 +438,15 @@ exports.testrunner = function(env, args, request) {
     pr.then(function() {
         testsToRun.forEach(function(testmodule) {
             var mod = require(testmodule);
-            console.log("Module to test:");
-            console.log(mod);
             // test.run(mod);
             var ctmod = plan.module(testmodule);
             for (var key in mod) {
                 // limit processing to spec...
                 if ((key==='test') || (key.indexOf('test')!==0)) continue;
             
-                console.log("adding test ", key);
                 ctmod.test(key, mod[key]);
             }
         });
-        console.log("Going to try running the plan");
         Ct.run(plan);
     });
     request.async();
