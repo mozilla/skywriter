@@ -211,11 +211,6 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
                 SC.$("#" + typedId).html(typed);
             });
 
-            this.link(content, "_hack", function(hack) {
-                SC.$("#" + outputId).html(hack);
-            });
-
-            /*
             this.link(content, "outputs.[]", function(outputs) {
                 outputs.forEach(function(output) {
                     var node;
@@ -225,10 +220,9 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
                     } else {
                         node = output;
                     }
-                    outputEle.element().appendChild(node);
+                    SC.$("#" + outputId).get(0).appendChild(node);
                 });
             });
-            */
 
             this.link(content, "error", function(error) {
                 if (error) {

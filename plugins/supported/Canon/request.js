@@ -73,25 +73,20 @@ exports.history = SC.Object.create({
  */
 exports.Request = SC.Object.extend({
     // Will be used in the keyboard case and the cli case
-    command: null,
-    commandExt: null,
+    command: undefined,
+    commandExt: undefined,
 
     // Will be used only in the cli case
-    args: {},
-    typed: null,
+    args: undefined,
+    typed: undefined,
 
     // Stuff we keep track of
-    outputs: [],
-    start: new Date(),
-    end: null,
-    duration: null,
-    completed: false,
-    error: false,
-
-    /**
-     * Nastiness to get around SproutCore size problem
-     */
-    _hack: "",
+    outputs: undefined,
+    start: undefined,
+    end: undefined,
+    duration: undefined,
+    completed: undefined,
+    error: undefined,
 
     /**
      * Have we been initialized?
@@ -104,6 +99,10 @@ exports.Request = SC.Object.extend({
      */
     _init: function() {
         this.set("_inited", true);
+        this.outputs = [];
+        this.start = new Date();
+        this.completed = false;
+        this.error = false;
         exports.history.requests.pushObject(this);
     },
 
@@ -133,14 +132,6 @@ exports.Request = SC.Object.extend({
     output: function(content) {
         if (!this.get("_inited")) {
             this._init();
-        }
-
-        // Nasty hack that we'll get rid of as soon as we understand SC
-        var hack = this.get("_hack");
-        if (typeof content == "string") {
-            this.set("_hack", hack + content + "<br/>");
-        } else {
-            this.set("_hack", hack + content.innerHTML + "<br/>");
         }
 
         this.outputs.pushObject(content);
