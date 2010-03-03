@@ -75,16 +75,18 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
 
     link: function(root, path, updater) {
         (function() {
-            root.addObserver(path, this, function(sender, key) {
-                console.log("updating", path, "to", root.getPath(path));
-                // sender should = root, key should = path
+            var doUpdate = function() {
+                // console.log("updating", path, "to", root.getPath(path));
                 updater(root.getPath(path));
-            });
-            updater(root.getPath(path));
+                // The stacked view gets confused about how tall it should be...
+                var stack = this.getPath("parentView");
+                stack.updateHeight();
+            }.bind(this);
 
-            // The stacked view gets confused about how tall it should be...
-            var stack = this.getPath("parentView");
-            stack.updateHeight();
+            root.addObserver(path, this, function() {
+                doUpdate();
+            });
+            doUpdate();
         }).invokeLater(this);
     },
 
@@ -212,6 +214,7 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
             });
 
             this.link(content, "outputs.[]", function(outputs) {
+                SC.$("#" + outputId + " > *").remove();
                 outputs.forEach(function(output) {
                     var node;
                     if (typeof output == "string") {
@@ -220,7 +223,7 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
                     } else {
                         node = output;
                     }
-                    SC.$("#" + outputId).get(0).appendChild(node);
+                    SC.$("#" + outputId).append(node);
                 });
             });
 
