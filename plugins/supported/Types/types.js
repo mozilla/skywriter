@@ -110,6 +110,36 @@ exports.isValid = function(originalVersion, typeSpec) {
 };
 
 /**
+ * 2 typeSpecs are considered equal if their simple names are the same.
+ */
+exports.equals = function(typeSpec1, typeSpec2) {
+    return exports.getSimpleName(typeSpec1) == exports.getSimpleName(typeSpec2);
+};
+
+/**
+ * Get the simple text-only, no-param version of a typeSpec.
+ */
+exports.getSimpleName = function(typeSpec) {
+    if (!typeSpec) {
+        throw new Error("null|undefined is not a valid typeSpec");
+    }
+
+    if (typeof typeSpec == "string") {
+        return typeSpec;
+    }
+
+    if (typeof typeSpec == "object") {
+        if (!typeSpec.name) {
+            throw new Error("Missing name member to typeSpec");
+        }
+
+        return typeSpec.name;
+    }
+
+    throw new Error("Not a typeSpec: " + typeSpec);
+};
+
+/**
  * typeSpec one of:
  * "typename",
  * "typename:json" e.g. 'selection:["one", "two", "three"]'
