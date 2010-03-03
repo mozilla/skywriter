@@ -268,12 +268,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
         var rect = this.get('layoutManager').
             characterRectForPosition(range.start);
-        this.setNeedsDisplayInRect({
-            x:      rect.x,
-            y:      rect.y,
-            width:  1,
-            height: rect.height
-        });
+        this.setNeedsDisplayInRect(rect);
     },
 
     _invalidateSelection: function() {
