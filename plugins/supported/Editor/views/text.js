@@ -1114,11 +1114,14 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     willBecomeKeyResponderFrom: function() {
         arguments.callee.base.apply(this, arguments);
         this._invalidateSelection();
+        this._rearmInsertionPointBlinkTimer();
     },
 
     willLoseKeyResponderTo: function() {
         arguments.callee.base.apply(this, arguments);
         this._invalidateSelection();
+        this._insertionPointBlinkTimer.invalidate();
+        this._insertionPointVisible = true;
     }
 });
 
