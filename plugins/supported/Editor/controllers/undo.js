@@ -116,7 +116,9 @@ exports.EditorUndoController = SC.Object.extend({
     },
 
     redo: function(record) {
-        return this._undoOrRedo(record.patches, record.selectionAfter);
+        var patches = record.patches.concat();
+        patches.reverse();
+        return this._undoOrRedo(patches, record.selectionAfter);
     },
 
     textViewBeganChangeGroup: function(sender, selection) {
