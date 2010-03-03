@@ -278,6 +278,13 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         });
     },
 
+    _invalidateSelection: function() {
+        var layoutManager = this.get('layoutManager');
+        var range = Range.normalizeRange(this._selectedRange);
+        var rects = layoutManager.rectsForRange(range);
+        rects.forEach(this.setNeedsDisplayInRect, this);
+    },
+
     _isDelimiter: function(character) {
         return [
             "'", ";", "!", "~", "@", "#", "$", "%", "^", "&", "*", "?", "[",
@@ -1106,12 +1113,12 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     willBecomeKeyResponderFrom: function() {
         arguments.callee.base.apply(this, arguments);
-        this._invalidateInsertionPointIfNecessary(this._selectedRange);
+        this._invalidateSelection();
     },
 
     willLoseKeyResponderTo: function() {
         arguments.callee.base.apply(this, arguments);
-        this._invalidateInsertionPointIfNecessary(this._selectedRange);
+        this._invalidateSelection();
     }
 });
 
