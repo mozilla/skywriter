@@ -42,20 +42,8 @@ var pathUtil = require("Filesystem:path");
  * no leading slash.
  */
 var getCompletePath = function(env, path) {
-    if (path == null) {
-        path = "";
-    }
-    
-    if (path == null || path.substring(0, 1) != "/") {
-        var file = env.get("file");
-        if (!file) {
-            path = "/" + path;
-        } else {
-            path = file.get("dirname") + path;
-        }
-    }
-    
-    return path;
+    var session = env.get("session");
+    return session.getCompletePath(path);
 };
 
 /**

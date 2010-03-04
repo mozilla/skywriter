@@ -139,3 +139,32 @@ exports.fileType = function(path) {
 exports.isDir = function(path) {
     return util.endsWith(path, "/");
 };
+
+/*
+ * compute the basename of a path:
+ * /foo/bar/ -> ''
+ * /foo/bar/baz.js -> 'baz.js'
+ */
+exports.basename = function(path) {
+    var lastSlash = path.lastIndexOf("/");
+    if (lastSlash == -1) {
+        return "";
+    }
+    var afterSlash = path.substring(lastSlash+1);
+    return afterSlash;
+};
+
+/*
+ * splits the path from the extension, returning a 2 element array
+ * "/foo/bar/" -> ["/foo/bar", ""]
+ * "/foo/bar/baz.js" -> ["/foo/bar/baz", "js"]
+ */
+exports.splitext = function(path) {
+    var lastDot = path.lastIndexOf(".");
+    if (lastDot == -1) {
+        return [path, ""];
+    }
+    var before = path.substring(0, lastDot);
+    var after = path.substring(lastDot+1);
+    return [before, after];
+};

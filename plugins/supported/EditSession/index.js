@@ -115,13 +115,38 @@ exports.Buffer = SC.Object.extend({
 
 exports.EditSession = SC.Object.extend({
     /*
-    * The "current" view is the editor component that most recently had
-    * the focus.
-    */
+     * The "current" view is the editor component that most recently had
+     * the focus.
+     */
     currentView: null,
     
     /*
-    * The "current" Buffer is the one that backs the currentView.
-    */
-    currentBuffer: null
+     * The "current" Buffer is the one that backs the currentView.
+     */
+    currentBuffer: null,
+    
+    /*
+     * figures out the full path, taking into account the current file
+     * being edited.
+     */
+    getCompletePath: function(path) {
+        if (path == null) {
+            path = "";
+        }
+
+        if (path == null || path.substring(0, 1) != "/") {
+            var buffer = this.get("currentBuffer");
+            var file;
+            if (buffer) {
+                file = buffer.get("file");
+            }
+            if (!file) {
+                path = "/" + path;
+            } else {
+                path = file.get("dirname") + path;
+            }
+        }
+
+        return path;
+    }
 });

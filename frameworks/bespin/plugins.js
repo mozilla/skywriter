@@ -381,7 +381,7 @@ exports.Plugin = SC.Object.extend({
         }
 
         // reload the plugin metadata
-        this.catalog.loadMetadata(this.reloadURL,
+        this.catalog.loadMetadata(this.reloadURL).then(
             function() {
                 // actually load the plugin, so that it's ready
                 // for any dependent plugins
@@ -538,7 +538,7 @@ exports.Catalog = SC.Object.extend({
             }
 
             sorted.push(key);
-        }
+        };
 
         for (var key in metadata) {
             visit(key);
@@ -592,8 +592,12 @@ exports.Catalog = SC.Object.extend({
     },
 
     loadMetadata: function(url, callback) {
+        var pr = new Promise();
         SC.Request.create({ address: url }).notify(0, this,
-            this._metadataFinishedLoading, { callback: callback }).send("");
+            this._metadataFinishedLoading, { callback: function(catalog, response) {
+                pr.resolve({catalog: catalog, response: response});
+            }}).send("");
+        return pr;
     },
 
     /*

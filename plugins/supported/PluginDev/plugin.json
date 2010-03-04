@@ -15,7 +15,7 @@
         },
         {
             "ep": "command",
-            "name": "test-run",
+            "name": "test",
             "params": [
                 {
                     "name": "testmodule",
@@ -26,6 +26,23 @@
             ],
             "description": "Run a collection of tests.",
             "pointer": "testing#testrunner"
+        },
+        {
+            "ep": "command",
+            "name": "plugin",
+            "description": "Plugin management"
+        },
+        {
+            "ep": "command",
+            "name": "plugin add",
+            "description": "Add a file or directory in your Bespin files as a plugin.",
+            "params": [
+                {
+                    "name": "path",
+                    "type": "text"
+                }
+            ],
+            "pointer": "commands#add"
         }
     ]
 }
