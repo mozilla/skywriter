@@ -44,9 +44,11 @@ from path import path
 
 from dryice import plugins
 
-plugindir = (path(__file__).dirname() / "plugindir").abspath()
+thisdir = path(__file__).dirname()
+plugindir = (thisdir / "plugindir").abspath()
 pluginpath = [dict(name="testplugins", path=plugindir, 
                   chop=len(plugindir))]
+
 
 def test_plugin_metadata_parsing():
     tests = [
@@ -164,3 +166,22 @@ def test_resource_url():
     md = plugin.metadata
     assert md["resourceURL"] == "resources/plugin1/"
     
+def test_single_plugin_in_path():
+    temppath = pluginpath[:]
+    temppath.append(dict(name="user", plugin=thisdir / "SinglePlugin.js",
+        chop=len(thisdir)))
+    plugin = plugins.lookup_plugin("SinglePlugin", temppath)
+    errors = plugin.errors
+    assert not errors
+    
+    plugin_list = plugins.find_plugins(temppath)
+    assert len(plugin_list) == 6
+    p = plugin_list[5]
+    assert p.name == "SinglePlugin"
+    
+def test_nonexistent_plugin():
+    temppath = pluginpath[:]
+    temppath.append(dict(name="user", plugin=thisdir / "NotThere.js",
+        chop=len(thisdir)))
+    plugin = plugins.lookup_plugin("NotThere", temppath)
+    assert plugin is None

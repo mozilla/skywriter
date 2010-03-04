@@ -192,6 +192,9 @@ class Plugin(object):
             return None
         
         return script_path.text()
+    
+    def __repr__(self):
+        return "Plugin %s (%s)" % (self.name, self.location)
         
                 
 
@@ -202,6 +205,16 @@ def find_plugins(search_path, cls=Plugin):
         
     result = []
     for path_entry in search_path:
+        if "plugin" in path_entry:
+            name = path_entry["plugin"].basename()
+            if name.endswith(".js"):
+                name = name[:-3]
+            plugin = _get_plugin(name, path_entry, cls)
+            if plugin is None:
+                continue
+            result.append(plugin)
+            continue
+                
         path = path_entry['path']
         for item in path.glob("*"):
             # plugins are directories with a plugin.json file or 
@@ -220,9 +233,32 @@ def find_plugins(search_path, cls=Plugin):
             result.append(plugin)
     return result
     
+def _get_plugin(name, path_entry, cls):
+    path = path_entry["plugin"]
+    if not path.exists():
+        return None
+        
+    if path.endswith(name) or path.endswith(name + ".js"):
+        if path.isdir():
+            mdfile = path / "plugin.json"
+            if not mdfile.exists():
+                return None
+                
+        plugin = cls(name, path, path_entry)
+        return plugin
+    else:
+        return None
+    
+
 def lookup_plugin(name, search_path, cls=Plugin):
     """Return the plugin descriptor for the plugin given."""
     for path_entry in search_path:
+        if "plugin" in path_entry:
+            plugin = _get_plugin(name, path_entry, cls)
+            if plugin is None:
+                continue
+            return plugin
+                
         path = path_entry['path']
         location = path / name
         if not location.exists():
