@@ -121,7 +121,9 @@ exports.Request = SC.Object.extend({
      * the command exits
      */
     async: function() {
-
+        if (!this.get("_inited")) {
+            this._init();
+        }
     },
 
     /**
