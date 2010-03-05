@@ -514,7 +514,7 @@ exports.CliInputView = SC.View.design({
                 this.set("value", "<span class='cmd_existing'>" + current +
                     "</span>" + extra);
             }.observes(".parentView.parentView._completion"),
-            layout: { height: 25, bottom: -3, left: 45, right: 0 }
+            layout: { height: 25, bottom: 0, left: 45, right: 0 }
         }),
 
         input: SC.TextFieldView.design({
