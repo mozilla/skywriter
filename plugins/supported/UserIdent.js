@@ -87,9 +87,15 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
     show: function() {
         var username;
         var password;
-        if (window.localStorage) {
-            username = localStorage.getItem("username");
-            password = localStorage.getItem("password");
+
+        try {
+            if (window.localStorage) {
+                username = localStorage.getItem("username");
+                password = localStorage.getItem("password");
+            }
+        }
+        catch (ex) {
+            console.error("localStorage blew up. ignoring auto-login. Do you have cookies disabled?", ex);
         }
 
         var onFailure = function() {
