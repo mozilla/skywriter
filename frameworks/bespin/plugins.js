@@ -257,7 +257,35 @@ exports.Plugin = SC.Object.extend({
             }
         });
     },
+    
+    /*
+     * removes the plugin from Tiki's registries.
+     */
+    _cleanup: function() {
+        var pluginName = this.get("name");
+        
+        // remove all traces of the plugin
 
+        var nameMatch = new RegExp("^" + pluginName + ":");
+
+        _removeFromList(nameMatch, tiki.scripts);
+        _removeFromList(nameMatch, tiki.modules, function(module) {
+            delete tiki._factories[module];
+        });
+        _removeFromList(nameMatch, tiki.stylesheets);
+        _removeFromList(new RegExp("^" + pluginName + "$"), tiki.packages);
+
+        var promises = tiki._promises;
+
+        delete promises.catalog[pluginName];
+        delete promises.loads[pluginName];
+        _removeFromObject(nameMatch, promises.modules);
+        _removeFromObject(nameMatch, promises.scripts);
+        _removeFromObject(nameMatch, promises.stylesheets);
+
+        delete tiki._catalog[pluginName];
+    },
+    
     /**
      * reloads the plugin and reinitializes all
      * dependent plugins
@@ -321,27 +349,8 @@ exports.Plugin = SC.Object.extend({
             this.catalog.plugins[dependName].unregister();
         }
 
-        // remove all traces of the plugin
-
-        var nameMatch = new RegExp("^" + pluginName + ":");
-
-        _removeFromList(nameMatch, tiki.scripts);
-        _removeFromList(nameMatch, tiki.modules, function(module) {
-            delete tiki._factories[module];
-        });
-        _removeFromList(nameMatch, tiki.stylesheets);
-        _removeFromList(new RegExp("^" + pluginName + "$"), tiki.packages);
-
-        var promises = tiki._promises;
-
-        delete promises.catalog[pluginName];
-        delete promises.loads[pluginName];
-        _removeFromObject(nameMatch, promises.modules);
-        _removeFromObject(nameMatch, promises.scripts);
-        _removeFromObject(nameMatch, promises.stylesheets);
-
-        delete tiki._catalog[pluginName];
-
+        this._cleanup(pluginName);
+        
         // clear the sandbox of modules from all of the dependent plugins
         var fullModList = [];
         var sandbox = tiki.sandbox;
@@ -590,14 +599,33 @@ exports.Catalog = SC.Object.extend({
             });
         }
     },
-
-    loadMetadata: function(url, callback) {
+    
+    /*
+     * Retrieve metadata from the server. Returns a promise that is
+     * resolved when the metadata has been loaded.
+     */
+    loadMetadata: function(url) {
         var pr = new Promise();
         SC.Request.create({ address: url }).notify(0, this,
             this._metadataFinishedLoading, { callback: function(catalog, response) {
                 pr.resolve({catalog: catalog, response: response});
             }}).send("");
         return pr;
+    },
+    
+    /*
+     * Removes a plugin, unregistering it and cleaning up.
+     */
+    removePlugin: function(pluginName) {
+        var plugins = this.get("plugins");
+        var plugin = plugins[pluginName];
+        if (plugin == undefined) {
+            throw new Error("Attempted to remove plugin " + pluginName + " which does not exist.");
+        }
+        
+        plugin.unregister();
+        plugin._cleanup();
+        delete plugins[pluginName];
     },
 
     /*

@@ -6,7 +6,7 @@
         {
             "ep": "extensionpoint",
             "name": "command",
-            "decription": "A command is a bit of functionality with optional typed arguments which can do something small like moving the cursor around the screen, or large like cloning a project from VCS.",
+            "description": "A command is a bit of functionality with optional typed arguments which can do something small like moving the cursor around the screen, or large like cloning a project from VCS.",
             "indexOn": "name"
         },
         {

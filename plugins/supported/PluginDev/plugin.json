@@ -50,6 +50,18 @@
             "name": "plugin list",
             "description": "List the installed plugins",
             "pointer": "commands#list"
+        },
+        {
+            "ep": "command",
+            "name": "plugin remove",
+            "description": "Remove a plugin (deletes installed plugins, just removes the reference to 'add'ed plugins).",
+            "params": [
+                {
+                    "name": "plugin",
+                    "type": "text"
+                }
+            ],
+            "pointer": "commands#remove"
         }
     ]
 }

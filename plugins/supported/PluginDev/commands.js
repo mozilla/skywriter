@@ -141,3 +141,57 @@ exports.list = function(env, args, request) {
     output.push('</div>');
     request.done(output.join(""));
 };
+
+/*
+ * the plugin remove command
+ */
+exports.remove = function(env, args, request) {
+    var pluginName = args.plugin;
+    var plugin = catalog.get("plugins")[pluginName];
+    if (!plugin) {
+        request.doneWithError("Plugin " + pluginName + " not found.");
+        return;
+    }
+    if (plugin.type != "user") {
+        request.doneWithError("Plugin " + pluginName + " is a " + plugin.type
+            + " plugin. Only user installed/added plugins can be removed");
+        return;
+    }
+    catalog.removePlugin(pluginName);
+    
+    var files = catalog.getObject("files");
+    var pluginConfigFile = files.getObject("BespinSettings/pluginInfo.json");
+    
+    pluginConfigFile.loadContents().then(function(result) {
+        var pluginConfig = JSON.parse(result.contents);
+        var paths = pluginConfig.plugins;
+        var found = false;
+        for (var i = 0; i < paths.length; i++) {
+            var pathPluginName = getPluginName(paths[i]);
+            if (pathPluginName == pluginName) {
+                found = true;
+                paths.splice(i, 1);
+                break;
+            }
+        }
+        if (found) {
+            var newConfig = JSON.stringify(pluginConfig);
+            pluginConfigFile.saveContents(newConfig).then(function() {
+                request.done("Plugin " + pluginName + " removed (but the files have been saved)");
+            }, function(error) {
+                request.doneWithError("Unable to save plugin config file: " + error.message);
+            });
+        } else {
+            _removeFromBespinSettings(pluginName, request);
+        }
+    }, function(error) {
+        // file not found from the server is okay, we just need
+        // to create the file.
+        if (error.xhr && error.xhr.status == 404) {
+            _removeFromBespinSettings(pluginName, request);
+        } else {
+            request.doneWithError("Unable to load your plugin config: " + error.message);
+        }
+    });
+    request.async();
+};
