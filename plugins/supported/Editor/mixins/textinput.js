@@ -189,6 +189,7 @@ exports.TextInput = {
             textField.addEventListener('paste', function(evt) {
                 thisTextInput._TextInput_textInserted(evt.clipboardData.
                     getData('text/plain'));
+                evt.preventDefault();
             }, false);
         } else {
             var textFieldChangedFn = function(evt) {
