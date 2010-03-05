@@ -1,4 +1,5 @@
 {
+    "description": "Provides syntax highlighting services for the editor",
     "depends": [ "DelegateSupport" ],
     "provides":
     [

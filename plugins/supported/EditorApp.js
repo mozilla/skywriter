@@ -37,6 +37,7 @@
 
 "define metadata";
 ({
+    "description": "Constructs what you see on a hosted Bespin server",
     "depends":
     [
         "EditSession",

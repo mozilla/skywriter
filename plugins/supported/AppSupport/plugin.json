@@ -1,4 +1,5 @@
 {
+    "description": "Common services used in the editor application",
     "depends": [],
     "provides": [
         {

@@ -1,4 +1,5 @@
 {
+    "description": "Manages commands and their keyboard shortcuts",
     "depends": [ "Settings", "Types" ],
     "provides":
     [

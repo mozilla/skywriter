@@ -37,6 +37,7 @@
 
 "define metadata";
 ({
+    "description": "Identifies the user via a Bespin server",
     "depends": [ "BespinServer", "DelegateSupport" ]
 });
 "end";

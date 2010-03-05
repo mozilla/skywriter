@@ -19,7 +19,9 @@
 
 // Mozilla: Plugin-metadata
 "define metadata";
-({});
+({
+    "description": "Diff/Match/Patch module (support code, no UI)"
+});
 "end";
 
 // TODO: I suspect this Diff module will become important to Bespin, and likely

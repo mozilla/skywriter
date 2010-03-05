@@ -37,6 +37,7 @@
 
 "define metadata";
 ({
+    "description": "HTML syntax highlighter",
     "depends": [ "SyntaxManager" ],
     "provides": [
         {

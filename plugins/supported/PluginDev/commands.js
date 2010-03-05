@@ -104,3 +104,40 @@ exports.add = function(env, args, request) {
     });
     request.async();
 };
+
+/*
+ * the plugin list command
+ */
+exports.list = function(env, args, request) {
+    var plugins = catalog.getPlugins({
+        sortBy: ["type", "name"]
+    });
+    var output = ['<div class="plugin_list">'];
+    var lastPluginType = null;
+    plugins.forEach(function(plugin) {
+        if (plugin.type != lastPluginType) {
+            if (lastPluginType) {
+                output.push('</table></div>');
+            }
+            output.push('<div class="plugin_group">');
+            output.push('<h2>');
+            output.push(plugin.type);
+            output.push(' plugins</h2><table>');
+            lastPluginType = plugin.type;
+        }
+        output.push('<tr><th>');
+        output.push(plugin.name);
+        output.push('</th><td>');
+        if (plugin.description) {
+            output.push(plugin.description);
+        } else {
+            output.push('&nbsp;');
+        }
+        output.push('</td></tr>');
+    });
+    if (lastPluginType) {
+        output.push('</table></div>');
+    }
+    output.push('</div>');
+    request.done(output.join(""));
+};

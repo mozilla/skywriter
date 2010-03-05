@@ -37,6 +37,7 @@
 
 "define metadata";
 ({
+    "description": "JavaScript syntax highlighter",
     "depends": [ "SyntaxManager" ],
     "provides": [
         {
@@ -65,7 +66,7 @@ exports.JSSyntax = StandardSyntax.create({
                 tag:    'identifier'
             },
             {
-                regex:  /^[^'"/ \tA-Za-z0-9_]+/,
+                regex:  /^[^'"\/ \tA-Za-z0-9_]+/,
                 tag:    'plain'
             },
             {

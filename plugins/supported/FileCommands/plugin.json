@@ -1,4 +1,5 @@
 {
+    "description": "File management commands",
     "depends": ["Filesystem"],
     "provides":
     [

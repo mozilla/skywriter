@@ -37,6 +37,7 @@
 
 "define metadata";
 ({
+    "description": "Commands that may be useful in working on Bespin",
     "provides":
     [
         {

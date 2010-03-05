@@ -150,6 +150,7 @@ class Plugin(object):
         
         md["resourceURL"] = "resources/%s/" % urlquote(self.name)
         md["testmodules"] = self.testmodules
+        md["type"] = self.location_name
         
         if self._errors:
             md['errors'] = self._errors

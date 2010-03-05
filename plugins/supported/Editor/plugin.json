@@ -1,4 +1,5 @@
 {
+    "description": "Canvas-based text editor component and many common editing commands",
     "depends": [
         "AppSupport",
         "Canon",

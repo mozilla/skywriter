@@ -1,4 +1,5 @@
 {
+    "description": "Tools for testing and managing plugins.",
     "depends": ["BespinServer", "core_test"],
     "provides": [
         {
@@ -43,6 +44,12 @@
                 }
             ],
             "pointer": "commands#add"
+        },
+        {
+            "ep": "command",
+            "name": "plugin list",
+            "description": "List the installed plugins",
+            "pointer": "commands#list"
         }
     ]
 }

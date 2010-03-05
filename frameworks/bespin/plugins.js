@@ -632,6 +632,50 @@ exports.Catalog = SC.Object.extend({
         if (params.callback) {
             params.callback(this, response);
         }
+    },
+    
+    /*
+     * Retrieve an array of the plugin objects.
+     * The opts object can include the following options:
+     * onlyType (string): only include plugins of this type
+     * sortBy (array): list of keys to sort by (the primary sort is first).
+     *                 default is sorted alphabetically by name.
+     */
+    getPlugins: function(opts) {
+        var result = [];
+        var onlyType = opts.onlyType;
+        var plugins = this.get("plugins");
+        for (var key in plugins) {
+            var plugin = plugins[key];
+            
+            // apply the filter
+            if ((onlyType && plugin.type && plugin.type != onlyType) 
+                || plugin.name == "bespin") {
+                continue;
+            }
+            
+            result.push(plugin);
+        }
+        
+        var sortBy = opts.sortBy;
+        if (!sortBy) {
+            sortBy = ["name"];
+        }
+        
+        var sortfunc = function(a, b) {
+            for (var i = 0; i < sortBy.length; i++) {
+                var key = sortBy[i];
+                if (a[key] < b[key]) {
+                    return -1;
+                } else if (b[key] < a[key]) {
+                    return 1;
+                }
+            }
+            return 0;
+        };
+        
+        result.sort(sortfunc);
+        return result;
     }
 });
 

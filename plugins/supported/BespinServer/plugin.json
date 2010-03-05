@@ -1,3 +1,4 @@
 {
+    "description": "Provides communication with the Bespin Server",
     "depends": [ "Filesystem", "History", "Settings" ]
 }

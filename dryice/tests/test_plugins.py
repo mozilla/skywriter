@@ -105,6 +105,10 @@ def test_plugin_metadata():
     assert p.name == "plugin1"
     assert p.location_name == "testplugins"
     assert p.relative_location == "plugin1"
+    
+    plugin_type = p.metadata['type']
+    assert plugin_type == "testplugins"
+    
     tm = p.testmodules
     assert "tests/testFoo" in tm
     assert not p.errors
@@ -178,6 +182,8 @@ def test_single_plugin_in_path():
     assert len(plugin_list) == 6
     p = plugin_list[5]
     assert p.name == "SinglePlugin"
+    plugin_type = p.metadata['type']
+    assert plugin_type == "user"
     
 def test_nonexistent_plugin():
     temppath = pluginpath[:]

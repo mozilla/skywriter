@@ -37,6 +37,7 @@
 
 "define metadata";
 ({
+    "description": "Commands for working with the Bespin user interface beyond the editor",
     "provides": [
         {
             "ep": "command",

@@ -1,4 +1,5 @@
 {
+    "description": "Provides the command line user interface",
     "depends": [ "Canon", "Types", "Settings", "Diff" ],
     "provides":
     [

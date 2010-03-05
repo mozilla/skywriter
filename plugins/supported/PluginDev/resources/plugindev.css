@@ -60,3 +60,11 @@
   background: #E49723;
   color: black;
 }
+
+.plugin_list table {
+    margin-left: 15px;
+}
+
+.plugin_list table th {
+    font-weight: bold;
+}
