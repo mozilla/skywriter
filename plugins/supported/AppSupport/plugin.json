@@ -4,15 +4,13 @@
         {
             "ep":           "command",
             "name":         "redo",
-            "key":          [ "ctrl_shift_z", "meta_shift_z" ],
-            "predicates":   [ "isApplication", true ],
+            "key":          [ "ctrl_shift_z" ],
             "pointer":      "controllers/undomanager#undoManagerCommand"
         },
         {
             "ep":           "command",
             "name":         "undo",
-            "key":          [ "ctrl_z", "meta_z" ],
-            "predicates":   [ "isApplication", true ],
+            "key":          [ "ctrl_z" ],
             "pointer":      "controllers/undomanager#undoManagerCommand"
         }
     ]
