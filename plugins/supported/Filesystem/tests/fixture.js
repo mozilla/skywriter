@@ -48,7 +48,7 @@ exports.DummyFileSource = SC.Object.extend({
         this.requests = [];
     },
     
-    loadDirectory: function(directory) {
+    loadDirectory: function(directory, deep) {
         this.requests.push(["loadDirectory", arguments]);
         
         var checkStatus = this.get("checkStatus");
@@ -59,7 +59,7 @@ exports.DummyFileSource = SC.Object.extend({
         }
         
         var pr = new Promise();
-        var matches = this._findMatching(directory.get("path"));
+        var matches = this._findMatching(directory.get("path"), deep);
         pr.resolve(matches);
         return pr;
     },
@@ -72,10 +72,10 @@ exports.DummyFileSource = SC.Object.extend({
         return pr;
     },
     
-    _findMatching: function(path) {
+    _findMatching: function(path, deep) {
         path = pathUtil.trimLeadingSlash(path);
         if (path == "" || pathUtil.isDir(path)) {
-            return this._findInDirectory(path);
+            return this._findInDirectory(path, deep);
         } else {
             return this._findFile(path);
         }
@@ -86,7 +86,7 @@ exports.DummyFileSource = SC.Object.extend({
         return f;
     },
     
-    _findInDirectory: function(path) {
+    _findInDirectory: function(path, deep) {
         path = path.slice(0, path.length - 1);
         var segments = path.split("/");
         if (path == "") {
@@ -109,13 +109,18 @@ exports.DummyFileSource = SC.Object.extend({
             if (!fSegments[i]) {
                 return;
             }
-            
-            // is this a directory?
-            if (fSegments.length > segments.length + 1) {
-                matches.push({name: fSegments[i] + "/"});
+
+            var name;
+            if (deep) {
+                name = fSegments.slice(i).join("/");
+            } else if (fSegments.length > segments.length + 1) {
+                // it's a directory
+                name = fSegments[i] + "/";
             } else {
-                matches.push({name: fSegments[i]});
+                name = fSegments[i];
             }
+
+            matches.push({ name: name });
         });
         return matches;
     }

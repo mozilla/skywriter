@@ -138,6 +138,35 @@ exports.testSubdirLoading = function() {
     return testpr;
 };
 
+exports.testDeepLoading = function() {
+    source.reset();
+    var root = getNewRoot();
+    var testPromise = new Promise();
+    root.load(true).then(function(dir) {
+        t.equal(dir.get("status"), fs.READY, "directory should be ready");
+        t.equal(dir.get("files").length, 2, "should have two files");
+        t.equal(dir.get("directories").length, 2,
+            "should have two directories");
+
+        var subdir = dir.get("directories")[1];
+        t.equal(subdir.name, "deeply/", "second should be deeply");
+        t.equal(subdir.get("status"), fs.READY,
+            "subdirectory should be ready");
+        t.equal(subdir.get("directories").length, 1,
+            "subdirectory should have one subdirectory pre-populated");
+
+        var subsubdir = subdir.get("directories")[0];
+        t.equal(subsubdir.name, "nested/",
+            "subsubdirectory should be nested");
+        t.equal(subsubdir.get("status"), fs.READY,
+            "subsubdirectory should be ready");
+        t.equal(subsubdir.get("directories").length, 1,
+            "subsubdirectory should have one subdirectory");
+    });
+
+    return testPromise;
+};
+
 exports.testContentRetrieval = function() {
     source.reset();
     var root = getNewRoot();

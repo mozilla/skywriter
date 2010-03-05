@@ -87,8 +87,11 @@ exports.Directory = SC.Object.extend({
      * Call loadDirectory on the FileSource with the parameters
      * path, directory handler delegate (this), and the onSuccess and onFailure
      * callbacks.
+     *
+     * @param deep{bool} If "deep" is set, then the entire directory tree
+     *        rooted at this location is returned.
      */
-    load: function() {
+    load: function(deep) {
         var pr = new Promise();
         if (this.get("status") == READY) {
             pr.resolve(this);
@@ -96,7 +99,7 @@ exports.Directory = SC.Object.extend({
         }
         this.set("status", LOADING);
         var self = this;
-        this.get("source").loadDirectory(this).then(
+        this.get("source").loadDirectory(this, deep).then(
             function(data) {
                 self.populateDirectory(data);
                 pr.resolve(self);
@@ -237,23 +240,44 @@ exports.Directory = SC.Object.extend({
      */
     populateDirectory: function(data) {
         this.set("status", READY);
-        var files = [];
-        var directories = [];
+
+        var files = [], dirSpecs = {};
         var source = this.get("source");
         data.forEach(function(item) {
-            if (!item.name) {
+            var name = item.name;
+            if (!name) {
                 console.error("Bad data, no directory/file name: ", item);
                 return;
             }
-            if (util.endsWith(item.name, "/")) {
-                item.parent = this;
-                item.source = source;
-                directories.push(exports.Directory.create(item));
-            } else {
+
+            var match = /^([^\/]+\/)(.*)/.exec(name);
+            if (match === null) {
                 item.directory = this;
                 files.push(exports.File.create(item));
+                return;
+            }
+
+            var dirName = match[1], subpath = match[2];
+            if (!(dirName in dirSpecs)) {
+                item.name = dirName;
+                item.parent = this;
+                item.source = source;
+                dirSpecs[dirName] = { item: item, subpaths: [] };
+            }
+
+            if (subpath.length > 0) {
+                dirSpecs[dirName].subpaths.push({ name: subpath });
             }
         }.bind(this));
+
+        var directories = [];
+        for (dirName in dirSpecs) {
+            var dirSpec = dirSpecs[dirName];
+            var dir = exports.Directory.create(dirSpec.item);
+            dir.populateDirectory(dirSpec.subpaths);
+            directories.push(dir);
+        }
+
         this.set("directories", directories);
         this.set("files", files);
     }

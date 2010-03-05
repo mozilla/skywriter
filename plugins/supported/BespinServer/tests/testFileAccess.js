@@ -57,10 +57,10 @@ exports.testLoadDirectory = function() {
         source: source
     });
     
-    var pr = source.loadDirectory(root);
+    var pr = source.loadDirectory(root, true);
     t.ok(typeof(pr.then) == "function", "expected to get Promise back");
     t.equal(server.method, "GET");
-    t.equal(server.url, "/file/list/");
+    t.equal(server.url, "/file/list_all/");
     var testpr = new Promise();
     pr.then(function(data) {
         t.equal(data[0].name, "foo.js", "expected dummy data passed through");

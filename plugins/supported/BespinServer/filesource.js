@@ -43,9 +43,10 @@ var pathUtil = require("Filesystem:path");
 exports.BespinFileSource = SC.Object.extend({
     server: server,
     
-    loadDirectory: function(directory) {
+    loadDirectory: function(directory, deep) {
         var path = directory.get("originPath");
-        var url = pathUtil.combine('/file/list/', path || '/');
+        var prefix = deep ? "/file/list_all/" : "/file/list/";
+        var url = pathUtil.combine(prefix, path || '/');
         var opts = {
             evalJSON: true,
             log: "Listing files in: " + url
