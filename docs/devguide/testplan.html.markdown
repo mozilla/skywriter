@@ -64,18 +64,17 @@ This editor should work as well.
 As we use Bespin to edit itself more, there will be less need for this test.
 Until that time, we should test common editor behavior:
 
-* ARROW KEYS to move around
-* HOME to move to the beginning of the line
-* END to move to the end of the line
-* PAGE UP to move up a screenful
-* PAGE DOWN to move down a screenful
-* CMD C to copy
-* CMD X to cut
-* CMD V to paste
-* SHIFT ARROW KEYS to change the selection
-* Mouse to change the selection
-* Mouse past the bottom and top of the screen to confirm scrolling
-* BACKSPACE or DELETE to remove the selected text
+* Arrows move the insertion point around
+* Shift+arrows change the selection
+* Alt+arrows move a word at a time
+* Home and End move to the beginning and end of the line
+* Page Up and Page Down scroll one screenful at a time
+* Cmd+X, Cmd+C, Cmd+V perform the appropriate clipboard operations, both into
+  and out of the editor
+* Basic selection works
+* Moving to the edge of the screen while selecting scrolls the editor
+* Backspace and delete work appropriately
+* HTML and JavaScript inside script tags are correctly highlighted
 
 ## Documentation ##
 

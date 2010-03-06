@@ -10,7 +10,8 @@ Bespin end users will likely find more useful documentation on the [Bespin Wiki]
 
 [The Glossary](glossary.html) will clear up any questions you have about terminology used on the project.
 
-Find out what's new, in the [Bespin 0.6.1 Release Notes](releases/notes061.html).
+Find out what's new, in the
+[Bespin 0.6.2 Release Notes](releases/notes062.html).
 
 Plugin Author Guide
 -------------------
