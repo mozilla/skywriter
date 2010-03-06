@@ -279,10 +279,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     _isDelimiter: function(character) {
-        return [
-            "'", ";", "!", "~", "@", "#", "$", "%", "^", "&", "*", "?", "[",
-            "]", ":", "/", "\\", "-", "+"
-        ].indexOf(character) > -1;
+        return "\"',;.!~@#$%^&*?[]<>:/\\-+ \t".indexOf(character) !== -1;
     },
 
     _moveOrSelectEnd: function(shift, inLine) {
