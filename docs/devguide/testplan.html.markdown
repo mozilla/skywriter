@@ -74,7 +74,8 @@ Until that time, we should test common editor behavior:
 * Basic selection works
 * Moving to the edge of the screen while selecting scrolls the editor
 * Backspace and delete work appropriately
-* HTML and JavaScript inside script tags are correctly highlighted
+* HTML and JavaScript are correctly highlighted (for the former, use
+  [samples/html.html](http://localhost:8080/samples/html.html)).
 
 ## Documentation ##
 
