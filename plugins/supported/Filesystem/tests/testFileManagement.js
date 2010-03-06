@@ -183,3 +183,37 @@ exports.testContentRetrieval = function() {
     
     return testpr;
 };
+
+exports.testSendToMatcher = function() {
+    var strings = [];
+    var mockMatcher = SC.Object.create({
+        addStrings: function(newStrings) {
+            strings.push.apply(strings, newStrings);
+        }
+    });
+
+    var testPromise = new Promise();
+
+    source.reset();
+    getNewRoot().load(true).then(function(dir) {
+        dir.sendToMatcher(mockMatcher).then(function() {
+            var expected = [
+                "/atTheTop.js",
+                "/anotherAtTheTop.js",
+                "/foo/",
+                "/deeply/",
+                "/deeply/nested/",
+                "/deeply/nested/directory/",
+                "/deeply/nested/directory/andAFile.txt"
+            ];
+
+            t.deepEqual(strings, expected, "the strings sent to the " +
+                "matcher and the deep hierarchy of files");
+
+            testPromise.resolve();
+        });
+    });
+
+    return testPromise;
+};
+

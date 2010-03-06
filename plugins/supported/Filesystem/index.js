@@ -25,7 +25,8 @@
 var SC = require("sproutcore/runtime").SC;
 var util = require("bespin:util/util");
 var pathUtil = require("path");
-var Promise = require("bespin:promise").Promise;
+var m_promise = require("bespin:promise");
+var Promise = m_promise.Promise;
 
 var NEW = exports.NEW = {name: "NEW"};
 var LOADING = exports.LOADING = {name: "LOADING"};
@@ -280,6 +281,47 @@ exports.Directory = SC.Object.extend({
 
         this.set("directories", directories);
         this.set("files", files);
+    },
+
+    /**
+     * Recursively delivers the paths rooted at this directory to a matcher
+     * object.
+     *
+     * @return A promise to load all the subdirectories and deliver them to the
+     *         matcher.
+     */
+    sendToMatcher: function(matcher, prefix) {
+        if (this.get('status') !== READY) {
+            throw new Error("Attempt to send a directory to a matcher " +
+                "before the directory was ready");
+        }
+
+        if (SC.none(prefix)) {
+            prefix = this.get('name');
+        }
+
+        var subdirs = this.get('directories');
+        var paths = this.get('files').concat(subdirs).map(function(obj) {
+            return prefix + obj.get('name');
+        });
+
+        matcher.addStrings(paths);
+
+        var promise = new Promise();
+        if (subdirs.length === 0) {
+            promise.resolve();
+            return promise;
+        }
+
+        var promises = subdirs.map(function(dir) {
+            return dir.sendToMatcher(matcher, prefix + dir.get('name'));
+        });
+
+        m_promise.group(promises).then(function() {
+            promise.resolve();
+        });
+
+        return promise;
     }
 });
 
