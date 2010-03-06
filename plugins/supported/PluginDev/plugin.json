@@ -1,6 +1,6 @@
 {
     "description": "Tools for testing and managing plugins.",
-    "depends": ["BespinServer", "core_test"],
+    "depends": ["Types", "BespinServer", "core_test"],
     "provides": [
         {
             "ep": "command",
@@ -58,7 +58,11 @@
             "params": [
                 {
                     "name": "plugin",
-                    "type": "text"
+                    "type":
+                    {
+                        "name": "selection",
+                        "pointer": "bespin:plugins#getUserPlugins"
+                    }
                 }
             ],
             "pointer": "commands#remove"

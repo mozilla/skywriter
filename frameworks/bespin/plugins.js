@@ -730,7 +730,6 @@ var _removeFromObject = function(regex, obj) {
         }
     }
 };
-// reregister all of the dependent plugins
 
 exports.catalog = exports.Catalog.create();
 
@@ -738,4 +737,8 @@ exports.startupHandler = function(ep) {
     ep.load(function(func) {
         func();
     });
+};
+
+exports.getUserPlugins = function() {
+    return exports.catalog.getPlugins({onlyType: "user"});
 };
