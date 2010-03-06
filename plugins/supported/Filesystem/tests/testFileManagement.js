@@ -162,6 +162,8 @@ exports.testDeepLoading = function() {
             "subsubdirectory should be ready");
         t.equal(subsubdir.get("directories").length, 1,
             "subsubdirectory should have one subdirectory");
+
+        testPromise.resolve();
     });
 
     return testPromise;
