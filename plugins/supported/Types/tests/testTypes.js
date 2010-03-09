@@ -130,19 +130,19 @@ exports.testNumberIsValid = function() {
 
 exports.testBooleanFromString = function() {
     types.fromString("true", "boolean").then(function(converted) {
-        t.equal(true, converted);
+        t.equal(converted, true, "'true' should be true");
     });
     types.fromString("false", "boolean").then(function(converted) {
-        t.equal(false, converted);
+        t.equal(converted, false, "'false' should be false");
     });
     types.fromString("TRUE", "boolean").then(function(converted) {
-        t.equal(true, converted);
+        t.equal(converted, true, "'TRUE' should be true");
     });
     types.fromString("FALSE", "boolean").then(function(converted) {
-        t.equal(false, converted);
+        t.equal(converted, false, "'FALSE' should be false");
     });
     types.fromString(null, "boolean").then(function(converted) {
-        t.equal(null, converted);
+        t.equal(converted, null, "null should be null");
     });
 };
 

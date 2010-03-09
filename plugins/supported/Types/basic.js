@@ -104,6 +104,17 @@ exports.bool = {
     },
 
     fromString: function(value, typeExt) {
+        if (value === null) {
+            return null;
+        }
+        
+        var lower = value.toLowerCase();
+        if (lower == "true") {
+            return true;
+        } else if (lower == "false") {
+            return false;
+        }
+        
         return !!value;
     }
 };
