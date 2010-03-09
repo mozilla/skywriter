@@ -364,7 +364,9 @@ exports.Plugin = SC.Object.extend({
                 dependRegexes.push(new RegExp("^" + dependName + ":"));
             }
         }
-
+        
+        var nameMatch = new RegExp("^" + pluginName + ":");
+        
         while (--i >= 0) {
             var item = sandbox.modules[i];
             if (nameMatch.exec(item)) {
