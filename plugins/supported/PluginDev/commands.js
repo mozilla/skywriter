@@ -195,3 +195,49 @@ exports.remove = function(env, args, request) {
     });
     request.async();
 };
+
+var locationValidator = /^(http|https):\/\//;
+
+/*
+ * validates plugin installation locations
+ */
+exports.pluginURL = {
+    isValid: function(value, typeExt) {
+        var result = locationValidator.exec(value);
+        console.log("Validation result for ", value, " ", result);
+        return result;
+    },
+    
+    toString: function(value, typeExt) {
+        return value;
+    },
+    
+    fromString: function(value, typeExt) {
+        return value;
+    }
+};
+
+/*
+ * the plugin install command
+ */
+exports.install = function(env, args, request) {
+    var body = {url: args.url};
+    
+    var pluginName = args.pluginName;
+    if (pluginName) {
+        body.pluginName = pluginName;
+    }
+    
+    var pr = server.request("POST", "/plugin/install/", 
+        util.objectToQuery(body), {
+            evalJSON: true
+    });
+    
+    pr.then(function(metadata) {
+        catalog.load(metadata);
+        request.done("Plugin installed");
+    }, function(error) {
+        request.doneWithError(error.message);
+    });
+    request.async();
+};

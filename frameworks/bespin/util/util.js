@@ -92,7 +92,7 @@ exports.objectToQuery = function(map) {
         var value = map[name];
         if (value != backstop[name]) {
             var assign = enc(name) + "=";
-            if (_d.isArray(value)) {
+            if (value.isArray) {
                 for (var i = 0; i < value.length; i++) {
                     pairs.push(assign + enc(value[i]));
                 }

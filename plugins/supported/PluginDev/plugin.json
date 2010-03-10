@@ -66,6 +66,31 @@
                 }
             ],
             "pointer": "commands#remove"
+        },
+        {
+            "ep": "command",
+            "name": "plugin install",
+            "description": "Install a plugin from a given URL",
+            "params": [
+                {
+                    "name": "url",
+                    "type": "pluginURL",
+                    "description": "URL where the plugin can be found"
+                },
+                {
+                    "name": "pluginName",
+                    "type": "text",
+                    "description": "optional name to give the plugin locally",
+                    "defaultValue": null
+                }
+            ],
+            "pointer": "commands#install"
+        },
+        {
+            "ep": "type",
+            "name": "pluginURL",
+            "description": "a valid URL (http/https) from which to install a plugin",
+            "pointer": "commands#pluginURL"
         }
     ]
 }
