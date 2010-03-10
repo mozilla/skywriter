@@ -387,7 +387,7 @@ exports.testrunner = function(env, args, request) {
     var plugin, testModule;
     
     var testspec = args.testmodule;
-    if (testspec == null) {
+    if (!testspec) {
         if (lastTest == null) {
             testspec = "all";
         } else {
@@ -395,7 +395,6 @@ exports.testrunner = function(env, args, request) {
         }
     }
     lastTest = testspec;
-    // request.output("Running tests: " + testspec);
     
     var testsToRun = [];
     if (testspec == "all") {

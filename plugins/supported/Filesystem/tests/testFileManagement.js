@@ -218,3 +218,42 @@ exports.testSendToMatcher = function() {
     return testPromise;
 };
 
+exports.testDirectoryRemoval = function() {
+    source.reset();
+    var root = getNewRoot();
+    var fobject = root.getObject("deeply/nested/directory/andAFile.txt");
+    var dir = root.getObject("deeply/");
+    var testPromise = new Promise();
+    dir.remove().then(function() {
+        var directories = root.get("directories");
+        var req = source.requests[0];
+        t.equal(req[0], "remove");
+        t.equal(req[1][0], dir);
+        t.equal(directories.length, 0);
+        testPromise.resolve();
+    }, function(error) {
+        t.ok(false, "Unexpected error: " + error.message);
+        testPromise.reject();
+    });
+    return testPromise;
+};
+
+exports.testFileRemoval = function() {
+    source.reset();
+    var root = getNewRoot();
+    var fobject = root.getObject("deeply/nested/directory/andAFile.txt");
+    var dir = root.getObject("deeply/nested/directory/");
+    var testPromise = new Promise();
+    fobject.remove().then(function() {
+        var files = dir.get("files");
+        var req = source.requests[0];
+        t.equal(req[0], "remove");
+        t.equal(req[1][0], fobject);
+        t.equal(files.length, 0);
+        testPromise.resolve();
+    }, function(error) {
+        t.ok(false, "Unexpected error: " + error.message);
+        testPromise.reject();
+    });
+    return testPromise;
+};

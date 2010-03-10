@@ -323,6 +323,22 @@ exports.Directory = SC.Object.extend({
         });
 
         return promise;
+    },
+    
+    /*
+     * Removes this directory and everything underneath it.
+     * @return a promise resolved when the deletion is done.
+     */
+    remove: function() {
+        var pr = new Promise();
+        this.get("source").remove(this).then(function() {
+            var dirlist = this.get("parent").get("directories");
+            dirlist.removeObject(this);
+            pr.resolve();
+        }.bind(this), function(error) {
+            pr.reject(error);
+        });
+        return pr;
     }
 });
 
@@ -350,8 +366,8 @@ exports.File = SC.Object.extend({
     }.property(),
 
     /*
-    * See Directory.originPath
-    */
+     * See Directory.originPath
+     */
     originPath: function() {
         return this.get("path");
     }.property().cacheable(),
@@ -364,6 +380,23 @@ exports.File = SC.Object.extend({
     saveContents: function(newcontents) {
         var source = this.get("source");
         return source.saveContents(this, newcontents);
+    },
+    
+    /*
+     * remove this file.
+     * 
+     * @return a promise resolved when the file is removed
+     */
+    remove: function() {
+        var pr = new Promise();
+        this.get("source").remove(this).then(function() {
+            var filelist = this.get("directory").get("files");
+            filelist.removeObject(this);
+            pr.resolve();
+        }.bind(this), function(error) {
+            pr.reject(error);
+        });
+        return pr;
     }
 });
 

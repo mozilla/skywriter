@@ -72,6 +72,13 @@ exports.DummyFileSource = SC.Object.extend({
         return pr;
     },
     
+    remove: function(pathObj) {
+        this.requests.push(["remove", arguments]);
+        var pr = new Promise();
+        pr.resolve();
+        return pr;
+    },
+    
     _findMatching: function(path, deep) {
         path = pathUtil.trimLeadingSlash(path);
         if (path == "" || pathUtil.isDir(path)) {

@@ -70,5 +70,12 @@ exports.BespinFileSource = SC.Object.extend({
         return pr.then(function(contents) {
             return {file: file, contents: contents};
         });
+    },
+    
+    remove: function(pathObject) {
+        var path = pathObject.get("originPath");
+        var url = pathUtil.combine("/file/at/", path);
+        var pr = this.server.request('DELETE', url);
+        return pr;
     }
 });

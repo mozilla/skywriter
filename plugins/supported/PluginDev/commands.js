@@ -182,13 +182,26 @@ exports.remove = function(env, args, request) {
                 request.doneWithError("Unable to save plugin config file: " + error.message);
             });
         } else {
-            _removeFromBespinSettings(pluginName, request);
+            var obj = files.getObject(plugin.userLocation);
+            obj.remove().then(function() {
+                request.done("Plugin removed.");
+            }, function(error) {
+                request.doneWithError("Unable to delete plugin files at " 
+                    + plugin.userLocation + " (" + error.message + ")");
+            });
         }
     }, function(error) {
         // file not found from the server is okay, we just need
-        // to create the file.
+        // to remove the plugin. If there's no pluginConfig, then
+        // we know this is not a user edited plugin.
         if (error.xhr && error.xhr.status == 404) {
-            _removeFromBespinSettings(pluginName, request);
+            var obj = files.getObject(plugin.userLocation);
+            obj.remove().then(function() {
+                request.done("Plugin removed.");
+            }, function(error) {
+                request.doneWithError("Unable to delete plugin files at " 
+                    + plugin.userLocation + " (" + error.message + ")");
+            });
         } else {
             request.doneWithError("Unable to load your plugin config: " + error.message);
         }
