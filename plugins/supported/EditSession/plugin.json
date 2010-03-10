@@ -1,4 +1,4 @@
 {
     "description": "Ties together the files being edited with the views on screen",
-    "depends": ["Editor", "Filesystem"]
+    "depends": ["DelegateSupport", "Editor", "Filesystem"]
 }

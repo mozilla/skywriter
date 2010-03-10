@@ -37,13 +37,19 @@
 
 var SC = require("sproutcore/runtime").SC;
 var History = require('EditSession:history').History;
+var MultiDelegateSupport = require('DelegateSupport').MultiDelegateSupport;
 var TextStorage = require("Editor:models/textstorage").TextStorage;
+var catalog = require('bespin:plugins').catalog;
 
 /*
 * A Buffer connects a model and file together.
 */
-exports.Buffer = SC.Object.extend({
+exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
     _file: null,
+
+    _fileChanged: function() {
+        this.notifyDelegates('bufferFileChanged', this._file);
+    }.observes('file'),
 
     /*
     * The text model that is holding the content of the file.
@@ -115,9 +121,9 @@ exports.Buffer = SC.Object.extend({
 });
 
 exports.EditSession = SC.Object.extend({
-    _fileChanged: function() {
-        this.get('history').addPath(this.getPath('currentBuffer.file.path'));
-    }.observes('currentBuffer.file'),
+    _currentBufferChanged: function() {
+        this.get('currentBuffer').addDelegate(this);
+    }.observes('currentBuffer'),
 
     /*
      * The "current" view is the editor component that most recently had
@@ -135,6 +141,10 @@ exports.EditSession = SC.Object.extend({
      */
     history: null,
     
+    bufferFileChanged: function(sender, file) {
+        this.get('history').addPath(file.get('path'));
+    },
+
     /*
      * figures out the full path, taking into account the current file
      * being edited.
@@ -158,6 +168,16 @@ exports.EditSession = SC.Object.extend({
         }
 
         return path;
+    },
+
+    loadMostRecentOrNew: function() {
+        var recent = this.get('history').getRecent(1);
+        if (recent.length === 0) {
+            return;
+        }
+
+        var files = catalog.getObject('files');
+        this.get('currentBuffer').changeFile(files.getObject(recent[0]));
     },
 
     init: function() {
