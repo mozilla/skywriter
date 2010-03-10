@@ -36,18 +36,19 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
+var History = require('EditSession:history').History;
 var TextStorage = require("Editor:models/textstorage").TextStorage;
 
 /*
 * A Buffer connects a model and file together.
 */
 exports.Buffer = SC.Object.extend({
+    _file: null,
+
     /*
     * The text model that is holding the content of the file.
     */ 
     model: null,
-    
-    _file: null,
     
     /*
     * The Filesystem.File object that is associated with this Buffer.
@@ -69,7 +70,7 @@ exports.Buffer = SC.Object.extend({
         }
         return this._file;
     }.property(),
-    
+
     init: function() {
         var model = this.get("model");
         if (model == null) {
@@ -114,6 +115,10 @@ exports.Buffer = SC.Object.extend({
 });
 
 exports.EditSession = SC.Object.extend({
+    _fileChanged: function() {
+        this.get('history').addPath(this.getPath('currentBuffer.file.path'));
+    }.observes('currentBuffer.file'),
+
     /*
      * The "current" view is the editor component that most recently had
      * the focus.
@@ -124,6 +129,11 @@ exports.EditSession = SC.Object.extend({
      * The "current" Buffer is the one that backs the currentView.
      */
     currentBuffer: null,
+
+    /**
+     * The history object to store file history in.
+     */
+    history: null,
     
     /*
      * figures out the full path, taking into account the current file
@@ -148,5 +158,9 @@ exports.EditSession = SC.Object.extend({
         }
 
         return path;
+    },
+
+    init: function() {
+        this.set('history', History.create());
     }
 });
