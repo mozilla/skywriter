@@ -355,17 +355,30 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         var textStorage = this.getPath('layoutManager.textStorage');
         var lines = textStorage.get('lines');
 
-        // If the selection is an insertion point...
         var range = Range.normalizeRange(this._selectedRange);
         if (this._rangeIsInsertionPoint(range)) {
             if (isBackspace) {
-                // ... extend it backward by one character.
-                range = {
-                    start:  textStorage.displacePosition(range.start, -1),
-                    end:    range.end
-                };
+                var start = range.start;
+                var tabstop = settings.get('tabstop');
+                var row = start.row, column = start.column;
+                var line = lines[row];
+
+                if (column > 0 && column % tabstop === 0 &&
+                        new RegExp("^\\s{" + column + "}").test(line)) {
+                    // "Smart tab" behavior: delete a tab worth of whitespace.
+                    range = {
+                        start:  { row: row, column: column - tabstop },
+                        end:    range.end
+                    };
+                } else {
+                    // Just one character.
+                    range = {
+                        start:  textStorage.displacePosition(range.start, -1),
+                        end:    range.end
+                    };
+                }
             } else {
-                // ... otherwise, extend it forward by one character.
+                // Extend the selection forward by one character.
                 range = {
                     start:  range.start,
                     end:    textStorage.displacePosition(range.end, 1)
