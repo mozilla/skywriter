@@ -261,21 +261,17 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         this._endChangeGroup();
     },
 
-    _invalidateInsertionPointIfNecessary: function(range) {
-        if (!this._rangeIsInsertionPoint(range)) {
-            return;
-        }
-
-        var rect = this.get('layoutManager').
-            characterRectForPosition(range.start);
-        this.setNeedsDisplayInRect(rect);
-    },
-
     _invalidateSelection: function() {
         var layoutManager = this.get('layoutManager');
         var range = Range.normalizeRange(this._selectedRange);
-        var rects = layoutManager.rectsForRange(range);
-        rects.forEach(this.setNeedsDisplayInRect, this);
+        if (!this._rangeIsInsertionPoint(range)) {
+            var rects = layoutManager.rectsForRange(range);
+            rects.forEach(this.setNeedsDisplayInRect, this);
+        } else {
+            var rect = this.get('layoutManager').
+            characterRectForPosition(range.start);
+            this.setNeedsDisplayInRect(rect);
+        }
     },
 
     _isDelimiter: function(character) {
@@ -624,7 +620,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     blinkInsertionPoint: function() {
         this._insertionPointVisible = !this._insertionPointVisible;
-        this._invalidateInsertionPointIfNecessary(this._selectedRange);
+        this._invalidateSelection();
     },
 
     clippingFrameChanged: function() {
@@ -1094,23 +1090,12 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     setSelection: function(newRange) {
         var textStorage = this.getPath('layoutManager.textStorage');
 
-        var oldRangeOrdered = Range.normalizeRange(this._selectedRange);
+        // Invalidate the old selection.
+        this._invalidateSelection();
 
-        var newRangeClamped = textStorage.clampRange(newRange);
-        var newRangeOrdered = Range.normalizeRange(newRangeClamped);
-        this._selectedRange = newRangeClamped;
-
-        var layoutManager = this.get('layoutManager');
-        layoutManager.rectsForRange(oldRangeOrdered).
-                forEach(this.setNeedsDisplayInRect, this);
-        layoutManager.rectsForRange(newRangeOrdered).
-                forEach(this.setNeedsDisplayInRect, this);
-
-        // Also invalidate any insertion points. These have to be handled
-        // separately, because they're drawn outside of their associated
-        // character regions.
-        this._invalidateInsertionPointIfNecessary(oldRangeOrdered);
-        this._invalidateInsertionPointIfNecessary(newRangeOrdered);
+        // Set the new selection and invalidate it.
+        this._selectedRange = textStorage.clampRange(newRange);
+        this._invalidateSelection();
 
         this._rearmInsertionPointBlinkTimer();
     },
