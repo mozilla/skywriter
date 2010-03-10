@@ -278,6 +278,11 @@ exports.CliInputView = SC.View.design({
         this._boundCancelBlur = this._cancelBlur.bind(this);
         var layer = this.get("layer");
         layer.addEventListener("click", this._boundCancelBlur, true);
+
+        var hint = this.getPath("contentView.display.hint.layer");
+        hint.innerHTML = "<div class='cmd_ex'></div>";
+        this._ex = hint.firstChild;
+
         this.checkHeight();
     },
 
@@ -303,6 +308,7 @@ exports.CliInputView = SC.View.design({
 
         if (this.get("layout").height != height) {
             this.adjust("height", height).updateLayout();
+            //this.getPath("contentView.display.hint").updateLayout();
         }
     }.observes(
         ".hasFocus", // Open whenever we have the focus
@@ -339,8 +345,8 @@ exports.CliInputView = SC.View.design({
     hintUpdated: function() {
         var hints = cliController.get("hints");
         var hintEle = this.getPath("contentView.display.hint.layer");
-        while (hintEle.firstChild) {
-            hintEle.removeChild(hintEle.firstChild);
+        while (this._ex.firstChild) {
+            this._ex.removeChild(this._ex.firstChild);
         }
 
         var level = Level.Info;
@@ -363,12 +369,14 @@ exports.CliInputView = SC.View.design({
             }
 
             if (typeof hint.element === "string") {
-                hintNode.innerHTML = hint.element;
+                var parent = document.createElement("article");
+                parent.appendChild(document.createTextNode(hint.element));
+                hintNode.appendChild(parent);
             } else {
                 hintNode.appendChild(hint.element);
             }
 
-            hintNode.setAttribute("class", "cmd_hint " + hintClass[hint.level]);
+            // hintNode.setAttribute("class", "cmd_hint " + hintClass[hint.level]);
 
             if (hint.completion) {
                 this.set("_completion", hint.completion);
@@ -382,10 +390,13 @@ exports.CliInputView = SC.View.design({
         }.bind(this);
 
         hints.forEach(function(hint) {
+            /*
             var hintNode = document.createElement("span");
-            hintEle.appendChild(hintNode);
-            hintEle.appendChild(document.createTextNode(" \u00a0 "));
+            this._ex.appendChild(hintNode);
+            this._ex.appendChild(document.createTextNode(" \u00a0 "));
             addHint(hintNode, hint);
+            */
+            addHint(this._ex, hint);
         }.bind(this));
 
         this.$().setClass("error", level == Level.Error);
@@ -465,7 +476,9 @@ exports.CliInputView = SC.View.design({
      * TODO: Work out what the borkage is about and fix
      */
     contentView: SC.View.design({
+        childViews: [ "display", "prompt", "completion", "input", "submit" ],
         childViews: [ "display", "prompt", "completion", "input" ],
+        childViews: [ "kbd", "display", "prompt", "completion", "input", "submit" ],
 
         display: SC.View.design({
             layout: { top: 0, bottom: 25, left: 0, right: 0 },
@@ -473,7 +486,7 @@ exports.CliInputView = SC.View.design({
 
             output: SC.ScrollView.design({
                 classNames: [ "cmd_view" ],
-                layout: { top: 0, bottom: 25, left: 30, right: 0 },
+                layout: { top: 0, bottom: 0, left: 30, right: 0 },
                 hasHorizontalScroller: NO,
                 contentView: SC.StackedView.design({
                     contentBinding: "Canon:request#history.requests.[]",
@@ -483,7 +496,7 @@ exports.CliInputView = SC.View.design({
 
             hint: SC.View.design({
                 classNames: [ "cmd_hints" ],
-                layout: { height: 25, bottom: 0, left: 30, right: 0 }
+                layout: { top: 0, bottom: 0, left: 30, right: 0 }
             }),
 
             toolbar: SC.View.design({
@@ -515,6 +528,11 @@ exports.CliInputView = SC.View.design({
                     "</span>" + extra);
             }.observes(".parentView.parentView._completion"),
             layout: { height: 25, bottom: 0, left: 45, right: 0 }
+        }),
+
+        kbd: SC.View.design({
+            layout: { height: 25, bottom: 0, left: 0, right: 0 },
+            tagName: "kbd"
         }),
 
         input: SC.TextFieldView.design({

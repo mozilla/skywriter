@@ -139,10 +139,16 @@ exports.Input = SC.Object.extend({
      */
     _tokenize: function() {
         if (!this.typed || this.typed == "") {
+            /*
+            // We would like to put some initial help here, but for anyone but
+            // a complete novice a "type help" message is very annoying, so we
+            // need to find a way to only display this message once, or for
+            // until the user click a "close" button or similar
             this._hints.push(hint.Hint.create({
                 level: hint.Level.Incomplete,
                 element: "Type a command, see 'help' for available commands."
             }));
+            */
             return false;
         }
 
@@ -233,13 +239,7 @@ exports.Input = SC.Object.extend({
                 var cmdExt = this.commandExt;
                 if (this.typed == cmdExt.name ||
                         !cmdExt.params || cmdExt.params.length === 0) {
-                    hintSpec = {
-                        param: {
-                            type: "text",
-                            description: exports.describeCommandExt(cmdExt)
-                        },
-                        value: this.typed
-                    };
+                    hintSpec = exports.documentCommand(cmdExt, this.typed);
                 }
             }
         } else {
@@ -333,14 +333,25 @@ exports.Input = SC.Object.extend({
                 unparsed = true;
             }
         }.bind(this));
+
         if (unparsed) {
             return false;
         }
 
-        var assignment = this._getAssignmentForLastArg();
-        if (assignment) {
-            var hintPromise = typehint.getHint(this, assignment);
+        if (this.typed.charAt(this.typed.length - 1) == " ") {
+            // If the last thing was a space, return to command documentation
+            var hintSpec = exports.documentCommand(this.commandExt, this.typed);
+            var hintPromise = typehint.getHint(this, hintSpec);
             this._hints.push(hintPromise);
+        } else {
+            // Otherwise show a hint for the last parameter
+            if (this.parts.length > 1) {
+                var assignment = this._getAssignmentForLastArg();
+                if (assignment) {
+                    var hintPromise = typehint.getHint(this, assignment);
+                    this._hints.push(hintPromise);
+                }
+            }
         }
 
         return true;
@@ -494,8 +505,14 @@ exports.Input = SC.Object.extend({
 });
 
 /**
- * Quick utility to describe a commandExt
+ * Provide some documentation for a command
  */
-exports.describeCommandExt = function(commandExt) {
-    return commandExt.name + ": " + commandExt.description;
+exports.documentCommand = function(cmdExt, typed) {
+    return {
+        param: {
+            type: "text",
+            description: "Man page - " + cmdExt.name + ": " + cmdExt.description
+        },
+        value: typed
+    };
 };

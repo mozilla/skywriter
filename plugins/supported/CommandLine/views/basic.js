@@ -67,36 +67,20 @@ var optionHint = function(input, assignment, typeExt, data) {
         });
     }
 
-    if (matches.length === 1) {
-        var match = matches[0];
-        var compl = match.name.substring(filter.length, match.name.length);
-        var desc = "<strong>" + match.name + "</strong>: " + match.description;
-        return hint.Hint.create({
-            element: desc + " (<span class='cmd_char'>TAB</span> to accept)", //\u2192
-            completion: compl + " ",
-            level: hint.Level.Incomplete
-        });
-    }
-
     // Multiple matches
-    var parent = document.createElement("span");
-    parent.appendChild(document.createTextNode(assignment.param.description));
+    var parent = document.createElement("div");
+    parent.setAttribute("class", "cmd_menu");
+    // parent.appendChild(document.createTextNode(assignment.param.description));
+
+    var list = document.createElement("ul");
+    parent.appendChild(list);
 
     var index = 0;
     var commonPrefix = matches[0].name;
 
     matches.forEach(function(option) {
-        // The 'spacer' is different for the first item
-        if (index === 0) {
-            parent.appendChild(document.createTextNode(": "));
-        } else {
-            parent.appendChild(document.createTextNode(", "));
-        }
-        index++;
-
         // Create the clickable link
-        var link = document.createElement("a");
-        link.setAttribute("href", "javascript:;");
+        var link = document.createElement("li");
         link.appendChild(document.createTextNode(option.name));
         link.addEventListener("click", function(ev) {
             SC.run(function() {
@@ -104,7 +88,12 @@ var optionHint = function(input, assignment, typeExt, data) {
                 cliController.set("input", prefix + option.name + " ");
             });
         }, false);
-        parent.appendChild(link);
+        list.appendChild(link);
+        if (option.description) {
+            var dfn = document.createElement("dfn");
+            dfn.appendChild(document.createTextNode(option.description));
+            link.appendChild(dfn);
+        }
 
         // Find the longest common prefix for completion
         if (commonPrefix.length > 0) {
@@ -119,6 +108,12 @@ var optionHint = function(input, assignment, typeExt, data) {
         commonPrefix = undefined;
     } else {
         commonPrefix = commonPrefix.substring(filter.length, commonPrefix.length);
+    }
+
+    // If there is only one match, then the completion must complete to that
+    // so it's safe to add a " " to the end.
+    if (matches.length == 1) {
+        commonPrefix = commonPrefix + " ";
     }
 
     return hint.Hint.create({
