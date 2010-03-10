@@ -42,6 +42,7 @@ var MultiDelegateSupport = require('DelegateSupport').MultiDelegateSupport;
 var Promise = m_promise.Promise;
 var Range = require('RangeUtils:utils/range');
 var Yield = require('utils/yield');
+var console = require('bespin:console').console;
 var syntaxDirectory = require('controllers/syntaxdirectory').syntaxDirectory;
 
 /**

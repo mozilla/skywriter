@@ -47,6 +47,7 @@ var MultiDelegateSupport = require('DelegateSupport').MultiDelegateSupport;
 var util = require("bespin:util/util");
 var server = require("BespinServer").server;
 var catalog = require("bespin:plugins").catalog;
+var console = require('bespin:console').console;
 
 /**
  * Controller for the sign-in process

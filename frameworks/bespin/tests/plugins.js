@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var console = require('console').console;
 var plugins = require("plugins");
 var t = require("core_test");
 var test = require("core_test:system/test");

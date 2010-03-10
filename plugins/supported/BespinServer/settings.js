@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var catalog = require("bespin:plugins").catalog;
+var console = require('bespin:console').console;
 
 /**
  * Save the settings using the server.

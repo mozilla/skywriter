@@ -37,6 +37,7 @@
 
 var SC = require('sproutcore/runtime').SC;
 var CanvasView = require('views/canvas').CanvasView;
+var console = require('bespin:console').console;
 
 var LINE_HEIGHT                 = 15;
 var MINIMUM_HANDLE_SIZE         = 20;

@@ -41,6 +41,7 @@
 //        ... executed when the promise fails
 //  });
 
+var console = require('console').console;
 var printStackTrace = require("bespin:util/stacktrace").printStackTrace;
 
 try {

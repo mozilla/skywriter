@@ -35,6 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var console = require('bespin:console').console;
 var util = require("bespin:util/util");
 var keys = require("bespin:util/keys");
 var Instruction = require("CommandLine:instruction").Instruction;

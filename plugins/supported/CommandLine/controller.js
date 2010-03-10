@@ -37,6 +37,7 @@
 
 var SC = require("sproutcore/runtime").SC;
 var catalog = require("bespin:plugins").catalog;
+var console = require('bespin:console').console;
 
 var env = require("Canon:environment");
 var Request = require("Canon:request").Request;

@@ -35,6 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var console = require('bespin:console').console;
+
 /**
  * These are the basic types that we accept. They are vaguely based on the
  * Jetpack settings system (https://wiki.mozilla.org/Labs/Jetpack/JEP/24)

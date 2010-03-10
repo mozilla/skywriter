@@ -37,6 +37,7 @@
 
 var SC = require("sproutcore/runtime").SC;
 var catalog = require("bespin:plugins").catalog;
+var console = require('bespin:console').console;
 
 /**
  * The environment plays a similar role to the environment under unix.

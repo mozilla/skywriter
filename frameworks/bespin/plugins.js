@@ -40,6 +40,7 @@ require("globals");
 
 var Promise = require("promise").Promise;
 var builtins = require("builtins");
+var console = require("console").console;
 var r = require;
 
 var tiki = require.loader;

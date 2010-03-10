@@ -37,6 +37,7 @@
 
 var SC = require("sproutcore/runtime").SC;
 var catalog = require("bespin:plugins").catalog;
+var console = require('bespin:console').console;
 var Promise = require("bespin:promise").Promise;
 var groupPromises = require("bespin:promise").group;
 

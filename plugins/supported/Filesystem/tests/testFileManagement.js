@@ -25,6 +25,7 @@
 var t = require("PluginDev");
 var fs = require("Filesystem");
 var fixture = require("Filesystem:tests/fixture");
+var console = require('bespin:console').console;
 var Promise = require("bespin:promise").Promise;
 
 var source = exports.source = fixture.DummyFileSource.create({

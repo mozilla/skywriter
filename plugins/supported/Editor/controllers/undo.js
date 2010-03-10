@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var console = require('bespin:console').console;
 var undoManager = require('AppSupport:controllers/undomanager').undoManager;
 
 /**

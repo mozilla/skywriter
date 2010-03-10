@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
+var console = require('bespin:console').console;
 var cliController = require("controller").cliController;
 var hint = require("hint");
 var diff_match_patch = require("Diff").diff_match_patch;
