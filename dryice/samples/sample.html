@@ -55,7 +55,7 @@ window.onBespinLoad = function() {
 
 function showContents() {
   // Just like a textarea, you can get/set value on the bespin object
-  document.getElementById("copiedcontents").innerHTML = bespin.value;
+  document.getElementById("copiedcontents").innerHTML = window.bespin.value.replace("<", "&lt;");
 };
 </script>
 </head>
