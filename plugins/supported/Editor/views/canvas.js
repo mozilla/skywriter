@@ -86,8 +86,8 @@ exports.CanvasView = SC.View.extend({
             return;
         }
 
-        var widthChanged = canvas.width !== parentFrame.width;
-        var heightChanged = canvas.height !== parentFrame.height;
+        var widthChanged = canvas.width < parentFrame.width;
+        var heightChanged = canvas.height < parentFrame.height;
 
         if (widthChanged) {
             canvas.width = parentFrame.width;
