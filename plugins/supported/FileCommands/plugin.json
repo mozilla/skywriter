@@ -105,8 +105,7 @@
                 {
                     "name": "path",
                     "type": "text",
-                    "description": "add the filename to remove, give a full path starting with '/' to delete from a different project. To delete a directory end the path in a '/'",
-                    "defaultValue": null
+                    "description": "add the filename to remove, give a full path starting with '/' to delete from a different project. To delete a directory end the path in a '/'"
                 }
             ],
             "aliases": [ "remove", "del" ],
