@@ -707,6 +707,21 @@ exports.Catalog = SC.Object.extend({
         
         result.sort(sortfunc);
         return result;
+    },
+
+    /**
+     * Returns a promise to retrieve the object at the given property path,
+     * loading the plugin if necessary.
+     */
+    loadObjectForPropertyPath: function(path) {
+        var promise = new Promise();
+        var parts = /^([^#]*)#(.*)$/.exec(path);
+        var modName = parts[0], objName = parts[1];
+        tiki.async(modName).then(function() {
+            promise.resolve(SC.objectForPropertyPath(path));
+        });
+
+        return promise;
     }
 });
 

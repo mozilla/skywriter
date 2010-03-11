@@ -211,18 +211,14 @@ exports.getTypeExt = function(typeSpec) {
                     return;
                 }
 
-                var parts = typeSpec.pointer.split("#");
-                var modName = parts.shift();
-                var objName = parts.join("#");
-
-                r.loader.async(modName).then(function() {
-                    var module = r(modName);
-                    typeExt = module[objName](typeSpec);
-console.log("getTypeExt typeExt", typeExt);
-                    promise.resolve(typeExt);
-                }, function(ex) {
-                    promise.reject(ex);
-                });
+                catalog.loadObjectForPropertyPath(typeSpec.pointer).
+                    then(function(obj) {
+                        var typeExt = module[objName](typeSpec);
+                        console.log("getTypeExt typeExt", typeExt);
+                        promise.resolve(typeExt);
+                    }, function(ex) {
+                        promise.reject(ex);
+                    });
             } else {
                 // A type specified in an object, there is likely to be
                 // some accompanying data (e.g. for selection) either directly
