@@ -41,6 +41,11 @@
     "depends": [ "SyntaxManager" ],
     "provides": [
         {
+            "ep": "fileextension",
+            "name": "js",
+            "syntax": "js"
+        },
+        {
             "ep": "syntax",
             "name": "js",
             "pointer": "#JSSyntax"
