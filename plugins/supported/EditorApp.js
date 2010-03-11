@@ -132,7 +132,7 @@ exports.applicationController = SC.Object.create({
 
         setTimeout(function() {
             textView.focus();
-        }, 1);
+        }, 25);
     },
 
     init: function() {
