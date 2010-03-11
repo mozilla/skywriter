@@ -42,6 +42,7 @@ var MultiDelegateSupport = require('DelegateSupport').MultiDelegateSupport;
 var Promise = m_promise.Promise;
 var Range = require('RangeUtils:utils/range');
 var Yield = require('utils/yield');
+var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var syntaxDirectory = require('controllers/syntaxdirectory').syntaxDirectory;
 
@@ -554,6 +555,25 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
     layoutManagerReplacedText: function(oldRange, newRange) {
         this._deleteRange(oldRange);
         this._insertRange(newRange);
+    },
+
+    /**
+     * Sets the initial context to the syntax highlighter appropriately for
+     * the given file extension, or to "plain" if the extension doesn't have an
+     * associated syntax highlighter.
+     */
+    setInitialContextFromExt: function(fileExt) {
+        fileExt = fileExt.toLowerCase();
+        var extension = catalog.getExtensionByKey('fileextension', fileExt);
+
+        var syntax;
+        if (SC.none(extension) || SC.none(extension.syntax)) {
+            syntax = 'plain';
+        } else {
+            syntax = extension.syntax;
+        }
+
+        this.set('initialContext', syntax);
     },
 
     /**

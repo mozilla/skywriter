@@ -121,14 +121,13 @@ exports.applicationController = SC.Object.create({
         syntaxManager.set('initialContext', 'html');
 
         var buffer = editsession.Buffer.create({
-            model: textStorage
+            model:          textStorage,
+            syntaxManager:  syntaxManager
         });
-        
-        var textView = editorView.get("textView");
 
+        var textView = editorView.get("textView");
         exports.session.set('currentView', textView);
-        exports.session.set('currentBuffer',
-            editsession.Buffer.create({ model: textStorage }));
+        exports.session.set('currentBuffer', buffer);
         exports.session.loadMostRecentOrNew();
 
         setTimeout(function() {

@@ -48,13 +48,35 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
     _file: null,
 
     _fileChanged: function() {
+        this._refreshSyntaxManager();
         this.notifyDelegates('bufferFileChanged', this._file);
     }.observes('file'),
+
+    _refreshSyntaxManager: function() {
+        var syntaxManager = this.get('syntaxManager');
+        if (SC.none(syntaxManager)) {
+            return;
+        }
+
+        var file = this._file;
+        if (SC.none(file)) {
+            return;
+        }
+
+        var match = /\.([^.]+)$/.exec(file.get('name'));
+        var ext = match === null ? '' : match[1];
+        syntaxManager.setInitialContextFromExt(ext);
+    },
 
     /*
     * The text model that is holding the content of the file.
     */ 
     model: null,
+
+    /**
+     * The syntax manager associated with this file.
+     */
+    syntaxManager: null,
     
     /*
     * The Filesystem.File object that is associated with this Buffer.
@@ -82,6 +104,8 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
         if (model == null) {
             this.set("model", TextStorage.create());
         }
+
+        this._refreshSyntaxManager();
     },
     
     /*
