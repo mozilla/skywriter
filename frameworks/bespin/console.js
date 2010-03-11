@@ -41,16 +41,52 @@ var SC = require('sproutcore/runtime').SC;
  * This object represents a "safe console" object that forwards debugging
  * messages appropriately without creating a dependency on Firebug in Firefox.
  */
-exports.console = SC.Object.extend({
+exports.console = SC.Object.create({
+    log: function() {
+        if (!SC.none(window.console)) {
+            window.console.log(arguments);
+        }
+    },
+
+    debug: function() {
+        if (!SC.none(window.console)) {
+            window.console.debug(arguments);
+        }
+    },
+
+    info: function() {
+        if (!SC.none(window.console)) {
+            window.console.info(arguments);
+        }
+    },
+
+    warn: function() {
+        if (!SC.none(window.console)) {
+            window.console.warn(arguments);
+        }
+    },
+
     error: function() {
         if (!SC.none(window.console)) {
             window.console.error(arguments);
         }
     },
 
-    log: function() {
+    assert: function() {
         if (!SC.none(window.console)) {
-            window.console.log(arguments);
+            window.console.assert(arguments);
+        }
+    },
+
+    dir: function() {
+        if (!SC.none(window.console)) {
+            window.console.dir(arguments);
+        }
+    },
+
+    dirxml: function() {
+        if (!SC.none(window.console)) {
+            window.console.dirxml(arguments);
         }
     },
 
@@ -60,9 +96,51 @@ exports.console = SC.Object.extend({
         }
     },
 
-    warn: function() {
+    group: function() {
         if (!SC.none(window.console)) {
-            window.console.warn(arguments);
+            window.console.group(arguments);
+        }
+    },
+
+    groupCollapsed: function() {
+        if (!SC.none(window.console)) {
+            window.console.groupCollapsed(arguments);
+        }
+    },
+
+    groupEnd: function() {
+        if (!SC.none(window.console)) {
+            window.console.groupEnd(arguments);
+        }
+    },
+
+    time: function() {
+        if (!SC.none(window.console)) {
+            window.console.time(arguments);
+        }
+    },
+
+    timeEnd: function() {
+        if (!SC.none(window.console)) {
+            window.console.timeEnd(arguments);
+        }
+    },
+
+    profile: function() {
+        if (!SC.none(window.console)) {
+            window.console.profile(arguments);
+        }
+    },
+
+    profileEnd: function() {
+        if (!SC.none(window.console)) {
+            window.console.profileEnd(arguments);
+        }
+    },
+
+    count: function() {
+        if (!SC.none(window.console)) {
+            window.console.count(arguments);
         }
     }
 });
