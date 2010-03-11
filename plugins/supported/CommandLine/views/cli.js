@@ -465,7 +465,7 @@ exports.CliInputView = SC.View.design({
      * TODO: Work out what the borkage is about and fix
      */
     contentView: SC.View.design({
-        childViews: [ "display", "prompt", "completion", "input", "submit" ],
+        childViews: [ "display", "prompt", "completion", "input" ],
 
         display: SC.View.design({
             layout: { top: 0, bottom: 25, left: 0, right: 0 },
@@ -551,14 +551,6 @@ exports.CliInputView = SC.View.design({
                     return this.superclass(ev);
                 }
             }
-        }),
-
-        submit: BespinButtonView.design({
-            isDefault: true,
-            title: "Exec",
-            target: "CommandLine:controller#cliController",
-            action: "exec",
-            layout: { height: 25, bottom: 0, width: 10, right: 0 }
         })
     })
 });

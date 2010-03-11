@@ -39,6 +39,13 @@
         },
         {
             "ep": "command",
+            "name": "exec",
+            "predicates": { "isCommandLine": true },
+            "key": "return",
+            "pointer": "commands#execCommand"
+        },
+        {
+            "ep": "command",
             "name": "help",
             "params":
             [
