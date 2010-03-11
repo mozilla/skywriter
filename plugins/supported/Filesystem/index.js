@@ -145,7 +145,7 @@ exports.Directory = SC.Object.extend({
         }
         return collection.findProperty("name", name);
     },
-
+    
     /**
      * Retrieves an object (File or Directory) under this Directory
      * at the path given. If necessary, it will create objects along
@@ -203,6 +203,68 @@ exports.Directory = SC.Object.extend({
             }
         }
         return retval;
+    },
+    
+    /*
+     * Retrieves an object (file or directory), loading intermediate
+     * directories along the way and ensuring that the end object
+     * actually exists on the server.
+     *
+     * @param path{string}
+     */
+    loadObject: function(path) {
+        var pr = new Promise();
+        var segments = path.split("/");
+        var isDir = pathUtil.isDir(path);
+        if (isDir) {
+            segments.pop();
+        }
+        
+        var curDir = this;
+        
+        // loop over the segments and get each object synchronously,
+        // if we can
+        for (var i = 0; i < segments.length; i++) {
+            var status = curDir.get("status");
+            if (status != READY) {
+                break;
+            }
+            var item = this._getItem(segments[i]);
+            if (!item) {
+                pr.reject({message: 
+                    segments[i] + " not found in " + curDir.get("path")});
+                return pr;
+            }
+            
+            // is this a directory?
+            if (item.loadObject) {
+                curDir = item;
+            } else {
+                if (i+1 != segments.length) {
+                    pr.reject(segments[i] + 
+                        " is a file found where a directory was expected in " +
+                        "path " + path);
+                    return pr;
+                } else {
+                    pr.resolve(item);
+                    return pr;
+                }
+            }
+        }
+        
+        // we've gotten as far as we can synchronously.
+        // now we'll aggressively load everything underneath
+        curDir.load(true).then(function() {
+            segments.splice(0, i);
+            var subPath = segments.join("/");
+            if (isDir) {
+                subPath += "/";
+            }
+            pr.resolve(curDir.getObject(subPath));
+        }, function(error) {
+            pr.reject(error);
+        });
+        return pr;
     },
 
     path: function() {
@@ -391,6 +453,7 @@ exports.File = SC.Object.extend({
         var pr = new Promise();
         this.get("source").remove(this).then(function() {
             var filelist = this.get("directory").get("files");
+            console.log("Remove from directory: ", this);
             filelist.removeObject(this);
             pr.resolve();
         }.bind(this), function(error) {

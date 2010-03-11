@@ -117,6 +117,25 @@ exports.testGetObject = function() {
         "should have one file now");
 };
 
+exports.testLoadObjectSuccess = function() {
+    source.reset();
+    var root = getNewRoot();
+    var testPromise = new Promise();
+    root.loadObject("deeply/nested/directory/andAFile.txt").then(
+    function(fileobj) {
+        t.equal(fileobj.get("path"), "/deeply/nested/directory/andAFile.txt");
+        t.equal(source.requests.length, 1);
+        var dir = root.getObject("deeply/nested/directory/");
+        t.equal(dir.get("status"), fs.READY, 
+            "Directory should now be ready");
+        testPromise.resolve();
+    }, function(error) {
+        t.ok(false, "Unexpected error: " + error.message);
+        testPromise.resolve();
+    });
+    return testPromise;
+};
+
 exports.testSubdirLoading = function() {
     source.reset();
     var root = getNewRoot();

@@ -103,7 +103,7 @@
             "params":
             [
                 {
-                    "name": "filename",
+                    "name": "path",
                     "type": "text",
                     "description": "add the filename to remove, give a full path starting with '/' to delete from a different project. To delete a directory end the path in a '/'",
                     "defaultValue": null
@@ -111,8 +111,7 @@
             ],
             "aliases": [ "remove", "del" ],
             "description": "remove the file",
-            "pointer": "file#rmCommand",
-            "findCompletionsPointer": "file#rmFindCompletions"
+            "pointer": "#rmCommand"
         },
         {
             "ep": "command",

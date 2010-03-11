@@ -69,6 +69,7 @@ exports.filesCommand = function(env, args, request) {
     }, function(error) {
         request.doneWithError(error.message);
     });
+    request.async();
 };
 
 /**
@@ -146,16 +147,6 @@ exports.openCommand = function(env, args, request) {
 };
 
 /**
- * 'open' completions helper
- */
-exports.openFindCompletions = function(query, callback) {
-    findCompletionsHelper(query, callback, {
-        matchFiles: true,
-        matchDirectories: true
-    });
-};
-
-/**
  * 'revert' command
  */
 exports.revertCommand = function(instruction, opts) {
@@ -187,36 +178,23 @@ exports.newfileCommand = function(instruction, filename) {
 /**
  * 'rm' command
  */
-exports.rmCommand = function(instruction, filename) {
-    var info = parseArguments(filename);
-    var path = info.path;
-    var project = info.project;
-
-    var onSuccess = instruction.link(function() {
-        if (editSession.checkSameFile(project, path)) {
-            editor.clear(); // only clear if deleting the same file
-        }
-
-        request.done('Removed file: ' + filename, true);
+exports.rmCommand = function(env, args, request) {
+    var files = env.get("files");
+    var buffer = env.get("buffer");
+    
+    var path = args.path;
+    path = getCompletePath(env, path);
+    
+    console.log("Removing: ", path);
+    console.log("File object: ", files);
+    var pathObject = files.getObject(path);
+    pathObject.remove().then(function() {
+        request.done(path + " deleted.");
+    }, function(error) {
+        console.log("Error on remove: ", error);
+        request.doneWithError("Unable to delete (" + error.message + ")");
     });
-
-    var onFailure = instruction.link(function(xhr) {
-        request.doneWithError("Wasn't able to remove <b>" + filename +
-                "</b><br/><em>Error</em> (probably doesn't exist): " +
-                xhr.responseText);
-    });
-
-    files.removeFile(project, path, onSuccess, onFailure);
-};
-
-/**
- * 'open' completions helper
- */
-exports.rmFindCompletions = function(query, callback) {
-    findCompletionsHelper(query, callback, {
-        matchFiles: true,
-        matchDirectories: true
-    });
+    request.async();
 };
 
 /**
