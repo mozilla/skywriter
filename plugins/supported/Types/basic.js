@@ -36,6 +36,9 @@
  * ***** END LICENSE BLOCK ***** */
 
 var console = require('bespin:console').console;
+var Promise = require("bespin:promise").Promise;
+
+var r = require;
 
 /**
  * These are the basic types that we accept. They are vaguely based on the
@@ -109,14 +112,14 @@ exports.bool = {
         if (value === null) {
             return null;
         }
-        
+
         var lower = value.toLowerCase();
         if (lower == "true") {
             return true;
         } else if (lower == "false") {
             return false;
         }
-        
+
         return !!value;
     }
 };
@@ -170,5 +173,34 @@ exports.selection = {
     fromString: function(value, typeExt) {
         // TODO: should we validate and return null if invalid?
         return value;
+    },
+
+    resolveTypeSpec: function(extension, typeSpec) {
+        var promise = new Promise();
+
+        if (typeSpec.data) {
+            // If we've got the data already - just use it
+            extension.data = typeSpec.data;
+            promise.resolve();
+        } else if (typeSpec.pointer) {
+            // There is a pointer to how to get the data
+            var parts = typeSpec.pointer.split("#");
+            var modName = parts.shift();
+            var objName = parts.join("#");
+
+            r.loader.async(modName).then(function() {
+                var module = r(modName);
+                extension.data = module[objName]();
+                promise.resolve();
+            }, function(ex) {
+                promise.reject(ex);
+            });
+        } else {
+            // No extra data available
+            console.warn("Missing data/pointer for selection", typeSpec);
+            promise.resolve();
+        }
+
+        return promise;
     }
 };

@@ -35,33 +35,20 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var menu = require("views/menu");
-var console = require('bespin:console').console;
-var basic = require("Types:basic");
-
 /**
- * A choice between a known set of options
- * @see typehint#getHint()
+ * One of a known set of options
  */
-exports.selection = {
-    getHint: function(input, assignment, typeExt) {
-        var data = typeExt.data;
-        if (!data) {
-            console.error("Missing data for selection type");
-            data = [];
-        }
-        return menu.optionHint(input, assignment, typeExt, data);
+exports.existingFile = {
+    isValid: function(value, typeExt) {
+        return true;
     },
 
-    resolveTypeSpec: basic.selection.resolveTypeSpec
-};
+    toString: function(value, typeExt) {
+        return value;
+    },
 
-/**
- * We can treat a boolean as a selection between true and false
- * @see typehint#getHint()
- */
-exports.bool = {
-    getHint: function(input, assignment, typeExt) {
-        return menu.optionHint(input, assignment, typeExt, [ "true", "false" ]);
+    fromString: function(value, typeExt) {
+        // TODO: should we validate and return null if invalid?
+        return value;
     }
 };

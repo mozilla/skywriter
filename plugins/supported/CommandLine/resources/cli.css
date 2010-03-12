@@ -132,7 +132,6 @@ div.cmd_view textarea {
   padding: 3px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
 }
 
-
 div.cmd_line div.cmd_hints { position:relative; width:100%; height:100%; }
 div.cmd_line div.cmd_ex { font-size:120%; position:absolute; bottom:0px; z-index:1; }
 
@@ -148,15 +147,20 @@ div.cmd_line div.cmd_ex article { margin-left:25px; padding:4px 8px; z-index:1;
   background:-moz-linear-gradient(top, #181310, #1b1613);
   background:-webkit-gradient(linear, left top, left bottom, from(#181310), to(#1b1613));
 }
-div.cmd_line div.cmd_ex article h1 { font-size:100%; color:#FFF; }
-div.cmd_line div.cmd_ex article h2 { font-size:95%; color:#FFF; }
-div.cmd_line div.cmd_ex article h3 { font-size:90%; color:#FFF; }
+div.cmd_line div.cmd_ex article h1 { font-size:110%; text-align:center; }
+div.cmd_line div.cmd_ex article h2 { font-size:95%; }
+div.cmd_line div.cmd_ex article h3 { font-size:90%; }
 div.cmd_line div.cmd_ex article.cmd_small { font-size:90%; }
 div.cmd_line div.cmd_ex article table th, div.cmd_line div.cmd_ex article label { color:#FFF; }
-div.cmd_line div.cmd_ex article h1, div.cmd_line div.cmd_ex article h2, div.cmd_line div.cmd_ex article h2, div.cmd_line div.cmd_ex article p { margin:3px 0; }
+div.cmd_line div.cmd_ex article h1,
+div.cmd_line div.cmd_ex article h2,
+div.cmd_line div.cmd_ex article h3 { margin:2px 0 1px 0; color:#FFF; }
+div.cmd_line div.cmd_ex article p,
+div.cmd_line div.cmd_ex article pre,
+div.cmd_line div.cmd_ex article .cmd_body { margin:2px 0 1px 10px; }
 
 div.cmd_line div.cmd_ex div.cmd_menu { display:inline-block;
-  margin-bottom:-2px;
+  margin-bottom:-2px; padding:8px 8px 0 8px;
   border:2px #000 solid; border-bottom:0;
   -moz-border-radius-topleft:10px; -moz-border-radius-topright:10px;
   border-top-left-radius:10px; border-top-right-radius:10px;
@@ -167,9 +171,12 @@ div.cmd_line div.cmd_ex div.cmd_menu { display:inline-block;
   -moz-border-left-colors: #000 #3e3936;
   -moz-border-right-colors: #000 #1e1916;
 }
-div.cmd_line div.cmd_ex div.cmd_menu ul { margin:0; padding:8px 0 0 0; }
-
-div.cmd_line div.cmd_ex div.cmd_menu li { padding:0 8px; list-style:none; }
+div.cmd_line div.cmd_ex div.cmd_menu .cmd_title { margin-bottom:2px;
+  border-bottom:2px #000 solid; -moz-border-bottom-colors:#3e3936 #000;
+}
+div.cmd_line div.cmd_ex div.cmd_menu .cmd_error { color:#F00; }
+div.cmd_line div.cmd_ex div.cmd_menu ul { margin:0; padding:0; }
+div.cmd_line div.cmd_ex div.cmd_menu li { padding:0; list-style:none; }
 div.cmd_line div.cmd_ex div.cmd_menu li:hover, .cmd_hi { color:#000;
   background:#FF8E00 -moz-linear-gradient(top, #FF8E00, #DD6E00);
   cursor:pointer;

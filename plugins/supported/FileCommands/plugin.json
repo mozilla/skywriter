@@ -55,7 +55,7 @@
             [
                 {
                     "name": "path",
-                    "type": "text",
+                    "type": "existingFile",
                     "description": "the filename to open"
                 },
                 {

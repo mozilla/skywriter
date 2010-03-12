@@ -76,7 +76,6 @@ exports.getTypeExtFromAssignment = function(typeSpec) {
         // Ignore, particularly digging into the assignments could fail
     }
 
-console.log("getType", typeSpec, "=", typeSpec);
     return types.getTypeExtNow(typeSpec);
 };
 
@@ -177,30 +176,22 @@ exports.MemorySettings = SC.Object.extend({
             console.error("Setting.defaultValue == undefined", settingExt);
         }
 
-        types.getTypeExt(settingExt.type).then(function(typeExt) {
-            if (!typeExt) {
-                console.error("Setting.type is invalid", settingExt);
+        types.isValid(settingExt.defaultValue, settingExt.type).then(function(valid) {
+            if (!valid) {
+                console.warn("!Setting.isValid(Setting.defaultValue)", settingExt);
             }
 
-            // Load the type so we can check the validator
-            typeExt.load().then(function(type) {
-                if (!type) {
-                    console.error("type == null", settingExt);
-                }
+            // Set the default value up.
+            this.set(settingExt.name, settingExt.defaultValue);
 
-                if (!type.isValid(settingExt.defaultValue, typeExt)) {
-                    console.error("Setting.isValid(Setting.defaultValue) == false", settingExt);
-                }
-
-                // Set the default value up.
-                this.set(settingExt.name, settingExt.defaultValue);
-
-                // Add a setter to this so subclasses can save
-                this.addObserver(settingExt.name, this, function() {
-                    this._persistValue(settingExt.name, this.get(settingExt.name));
-                }.bind(this));
+            // Add a setter to this so subclasses can save
+            this.addObserver(settingExt.name, this, function() {
+                this._persistValue(settingExt.name, this.get(settingExt.name));
             }.bind(this));
-        }.bind(this));
+
+        }.bind(this), function(ex) {
+            console.error("Type error ", ex, " ignoring setting ", settingExt);
+        });
     },
 
     /**

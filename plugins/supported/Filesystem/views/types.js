@@ -35,15 +35,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var menu = require("views/menu");
-var console = require('bespin:console').console;
-var basic = require("Types:basic");
-
-/**
- * A choice between a known set of options
- * @see typehint#getHint()
- */
-exports.selection = {
+exports.existingFileHint = {
+    /**
+     * @see typehint#getHint()
+     */
     getHint: function(input, assignment, typeExt) {
         var data = typeExt.data;
         if (!data) {
@@ -51,17 +46,5 @@ exports.selection = {
             data = [];
         }
         return menu.optionHint(input, assignment, typeExt, data);
-    },
-
-    resolveTypeSpec: basic.selection.resolveTypeSpec
-};
-
-/**
- * We can treat a boolean as a selection between true and false
- * @see typehint#getHint()
- */
-exports.bool = {
-    getHint: function(input, assignment, typeExt) {
-        return menu.optionHint(input, assignment, typeExt, [ "true", "false" ]);
     }
 };

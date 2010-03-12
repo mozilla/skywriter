@@ -508,11 +508,64 @@ exports.Input = SC.Object.extend({
  * Provide some documentation for a command
  */
 exports.documentCommand = function(cmdExt, typed) {
+    var docs = [];
+    docs.push("<h1>" + cmdExt.name + "</h1>");
+    docs.push("<h2>Summary</h2>");
+    docs.push("<p>" + cmdExt.description + "</p>");
+
+    if (cmdExt.manual) {
+        docs.push("<h2>Description</h2>");
+        docs.push("<p>" + cmdExt.description + "</p>");
+    }
+
+    if (cmdExt.params && cmdExt.params.length > 0) {
+        docs.push("<h2>Synopsis</h2>");
+        docs.push("<pre>");
+        docs.push(cmdExt.name);
+        var optionalParamCount = 0;
+        cmdExt.params.forEach(function(param) {
+            if (param.defaultValue === undefined) {
+                docs.push(" <i>");
+                docs.push(param.name);
+                docs.push("</i>");
+            } else if (param.defaultValue === null) {
+                docs.push(" <i>[");
+                docs.push(param.name);
+                docs.push("]</i>");
+            } else {
+                optionalParamCount++;
+            }
+        });
+        if (optionalParamCount > 3) {
+            docs.push(" [options]");
+        } else if (optionalParamCount > 0) {
+            cmdExt.params.forEach(function(param) {
+                if (param.defaultValue) {
+                    docs.push(" [--<i>");
+                    docs.push(param.name);
+                    if (types.equals(param.type, "boolean")) {
+                        docs.push("</i>");
+                    } else {
+                        docs.push("</i> " + types.getSimpleName(param.type));
+                    }
+                    docs.push("]");
+                }
+            });
+        }
+        docs.push("</pre>");
+
+        docs.push("<h2>Parameters</h2>");
+        cmdExt.params.forEach(function(param) {
+            docs.push("<h3 class='cmd_body'><i>" + param.name + "</i></h3>");
+            docs.push("<p>" + param.description + "</p>");
+            if (types.defaultValue) {
+                docs.push("<p>Default: " + types.defaultValue + "</p>");
+            }
+        });
+    }
+
     return {
-        param: {
-            type: "text",
-            description: "Man page - " + cmdExt.name + ": " + cmdExt.description
-        },
+        param: { type: "text", description: docs.join("") },
         value: typed
     };
 };

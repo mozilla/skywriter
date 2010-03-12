@@ -66,21 +66,38 @@ var r = require;
  */
 exports.getHint = function(input, assignment) {
     var promise = new Promise();
+    var typeSpec = assignment.param.type;
 
-    exports.getTypeHintExt(assignment.param.type).then(function(typeHintExt) {
+    exports.getTypeHintExt(typeSpec).then(function(typeHintExt) {
         if (!typeHintExt) {
             promise.resolve(createDefaultHint(assignment.param.description));
             return promise;
         }
 
         typeHintExt.load().then(function(typeHint) {
-            var hint;
-            if (typeof typeHint.getHint === "function") {
-                hint = typeHint.getHint(input, assignment, typeHintExt);
+            // We might need to resolve the typeSpec in a custom way
+            if (typeHint.resolveTypeSpec) {
+                typeHint.resolveTypeSpec(typeHintExt, typeSpec).then(function() {
+                    var hint;
+                    if (typeof typeHint.getHint === "function") {
+                        hint = typeHint.getHint(input, assignment, typeHintExt);
+                    } else {
+                        hint = createDefaultHint(assignment.param.description);
+                    }
+                    promise.resolve(hint);
+                }, function(ex) {
+                    promise.reject(ex);
+                });
             } else {
-                hint = createDefaultHint(assignment.param.description);
+                // Nothing to resolve - just go
+                var hint;
+                if (typeof typeHint.getHint === "function") {
+                    hint = typeHint.getHint(input, assignment, typeHintExt);
+                } else {
+                    hint = createDefaultHint(assignment.param.description);
+                }
+                promise.resolve(hint);
             }
-            promise.resolve(hint);
         }, function(ex) {
             hint = createDefaultHint(assignment.param.description);
         });
@@ -94,11 +111,24 @@ exports.getHint = function(input, assignment) {
  * default - a simple text node containing the description.
  */
 var createDefaultHint = function(description) {
+    var parent = document.createElement("article");
+    parent.innerHTML = description;
+
     return hint.Hint.create({
-        element: document.createTextNode(description),
+        element: parent,
         level: hint.Level.Info
     });
 };
+
+// Warning: This code is virtually cut and paste from Types:types.js
+// It you change this, there are probably parallel changes to be made there
+// There are 2 differences between the functions:
+// - We lookup type|typehint in the catalog
+// - There is a concept of a default typehint, where there is no similar
+//   thing for types. This is sensible, because hints are optional nice
+//   to have things. Not so for types.
+// Whilst we could abstract out the changes, I'm not sure this simplifies
+// already complex code
 
 /**
  * typeSpec one of:
@@ -107,116 +137,48 @@ var createDefaultHint = function(description) {
  * { name:"typename", data:... } e.g. { name:"selection", data:["one", "two", "three"] }
  */
 exports.getTypeHintExt = function(typeSpec) {
-    // Warning: This code is virtually cut and paste from Types:types.js
-    // It you change this, there are probably parallel changes to be made there
-    // There are 2 differences between the functions:
-    // - We lookup type|typehint in the catalog
-    // - There is a concept of a default typehint, where there is no similar
-    //   thing for types. This is sensible, because hints are optional nice
-    //   to have things. Not so for types.
-    // Whilst we could abstract out the changes, I'm not sure this simplifies
-    // already complex code
-    var promise = new Promise();
-
-    try {
-        var typeHintExt;
-        if (typeof typeSpec === "string") {
-            var parts = typeSpec.split(":");
-            if (parts.length === 1) {
-                // The type is just a simple type name
-                typeHintExt = catalog.getExtensionByKey("typehint", typeSpec);
-                // It's not an error if the type isn't found. See above
-                promise.resolve(typeHintExt);
-            } else {
-                var name = parts.shift();
-                var data = parts.join(":");
-
-                if (data.substring(0, 1) == "[" || data.substring(0, 1) == "{") {
-                    // JSON data is specified in the string. Yuck
-                    typeHintExt = catalog.getExtensionByKey("typehint", name);
-                    typeHintExt.data = JSON.parse(data);
-                    promise.resolve(typeHintExt);
-                } else {
-                    // If we don't have embedded JSON, we should have a pointer
-                    var parts = data.split("#");
-                    var modName = parts.shift();
-                    var objName = parts.join("#");
-
-                    // A pointer to something to fetch the data element
-                    r.loader.async(modName).then(function() {
-                        var module = r(modName);
-                        var func = module[objName];
-                        if (!func) {
-                            console.error("Module not found: ", data);
-                            promise.resolve(null);
-                        } else {
-                            typeHintExt = catalog.getExtensionByKey("typehint", name);
-                            typeHintExt.data = func();
-                            promise.resolve(typeHintExt);
-                        }
-                    }, function(ex) {
-                        console.error("Error resolving typeSpec (1):", typeSpec, ex);
-                        promise.resolve(null);
-                    });
-                }
-            }
-        } else if (typeof typeSpec === "object") {
-             if (typeSpec.name == "deferred") {
-                // Deferred types are specified by the return from the pointer
-                // function.
-                if (!typeSpec.pointer) {
-                    promise.reject(new Error("Missing deferred pointer"));
-                    return;
-                }
-
-                var parts = typeSpec.pointer.split("#");
-                var modName = parts.shift();
-                var objName = parts.join("#");
-
-                r.loader.async(modName).then(function() {
-                    var module = r(modName);
-                    typeHintExt = module[objName](typeSpec);
-                    promise.resolve(typeHintExt);
-                }, function(ex) {
-                    promise.reject(ex);
-                });
-            } else {
-                // A type specified in an object, there is likely to be
-                // some accompanying data (e.g. for selection) either directly
-                // in typeSpec.data or to be fetched from a function pointed
-                // at by typeSpec.pointer
-                typeHintExt = catalog.getExtensionByKey("typehint", typeSpec.name);
-                if (!typeHintExt) {
-                    promise.resolve(null);
-                    return;
-                }
-
-                if (typeSpec.pointer) {
-                    var parts = typeSpec.pointer.split("#");
-                    var modName = parts.shift();
-                    var objName = parts.join("#");
-
-                    r.loader.async(modName).then(function() {
-                        var module = r(modName);
-                        typeHintExt.data = module[objName]();
-                        promise.resolve(typeHintExt);
-                    }, function(ex) {
-                        console.error("Error resolving typeSpec (2):", typeSpec, ex);
-                        promise.resolve(null);
-                    });
-                } else {
-                    if (typeSpec.data) {
-                        typeHintExt.data = typeSpec.data;
-                    }
-
-                    promise.resolve(typeHintExt);
-                }
-            }
-        }
-    } catch (ex) {
-        console.error("Error resolving typeSpec (3):", typeSpec, ex);
-        promise.resolve(null);
+    if (typeof typeSpec === "string") {
+        return resolveSimpleType(typeSpec);
     }
 
+    if (typeof typeSpec === "object") {
+        if (typeSpec.name === "deferred") {
+             return resolveDeferred(typeSpec);
+        } else {
+            return resolveSimpleType(typeSpec.name);
+        }
+    }
+
+    throw new Error("Unknown typeSpec type: " + typeof typeSpec);
+};
+
+var resolveSimpleType = function(name) {
+    var promise = new Promise();
+    typeHintExt = catalog.getExtensionByKey("typehint", name);
+    // It's not an error if the type isn't found. See above
+    promise.resolve(typeHintExt);
+    return promise;
+};
+
+var resolveDeferred = function() {
+    // Deferred types are specified by the return from the pointer
+    // function.
+    var promise = new Promise();
+    if (!typeSpec.pointer) {
+        promise.reject(new Error("Missing deferred pointer"));
+        return;
+    }
+
+    var parts = typeSpec.pointer.split("#");
+    var modName = parts.shift();
+    var objName = parts.join("#");
+
+    r.loader.async(modName).then(function() {
+        var module = r(modName);
+        typeHintExt = module[objName](typeSpec);
+        promise.resolve(typeHintExt);
+    }, function(ex) {
+        promise.reject(ex);
+    });
     return promise;
 };
