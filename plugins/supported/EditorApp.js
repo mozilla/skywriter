@@ -73,7 +73,9 @@ var CliInputView = require('CommandLine:views/cli').CliInputView;
 var DockView = require('bespin:views/dock').DockView;
 var EditorView = require('Editor:views/editor').EditorView;
 var KeyListener = require('AppSupport:views/keylistener').KeyListener;
-var loginController = require('UserIdent').loginController;
+var m_userident = require('UserIdent');
+var loginController = m_userident.loginController;
+var userIdentPage = m_userident.userIdentPage;
 var BespinFileSource = require("BespinServer:filesource").BespinFileSource;
 var ServerPersister = require("BespinServer:settings").ServerPersister;
 var ThemeManager = require('ThemeManager').ThemeManager;
@@ -115,8 +117,6 @@ exports.applicationController = SC.Object.create({
         var mainPane = this._mainPage.get('mainPane');
         mainPane.appendChild(applicationView);
 
-        this._themeManager.addPane(mainPane);
-
         var editorView = applicationView.get('centerView');
         var layoutManager = editorView.get('layoutManager');
         var textStorage = layoutManager.get('textStorage');
@@ -153,6 +153,7 @@ exports.applicationController = SC.Object.create({
         var themeManager = ThemeManager.create({ theme: "Screen" });
         this._themeManager = themeManager;
         themeManager.addPane(mainPane);
+        themeManager.addPane(userIdentPage.get('mainPane'));
 
         loginController.addDelegate(this);
         loginController.show();
