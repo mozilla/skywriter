@@ -1,0 +1,11 @@
+{
+    "depends": [],
+    "provides": [
+        {
+            "ep": "extensionpoint",
+            "name": "theme",
+            "indexOn": "name"
+        }
+    ]
+}
+
