@@ -264,11 +264,10 @@ exports.signupController = SC.Object.create({
 exports.userIdentPage = SC.Page.design({
 
     mainPane: SC.PanelPane.design({
-        classNames: [ "bespin-theme" ],
         layout: { centerX: 0, width: 400, centerY: 0, height: 270 },
 
         contentView: SC.View.design({
-            backgroundColor: '#D1CFC1',
+            classNames: [ 'bespin-color-field' ],
             childViews: [ "action", "container" ],
             action: SC.RadioView.design({
                 itemValueKey: 'value',
