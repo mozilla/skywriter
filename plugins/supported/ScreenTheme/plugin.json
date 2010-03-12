@@ -1,0 +1,11 @@
+{
+    "depends": [ "ThemeManager" ],
+    "provides": [
+        {
+            "ep": "theme",
+            "name": "Screen",
+            "pointer": "ScreenTheme:index#ScreenTheme"
+        }
+    ]
+}
+

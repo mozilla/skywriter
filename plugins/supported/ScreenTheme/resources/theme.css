@@ -1,0 +1,172 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is Bespin.
+ *
+ * The Initial Developer of the Original Code is
+ * Mozilla.
+ * Portions created by the Initial Developer are Copyright (C) 2009
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Bespin Team (bespin@mozilla.com)
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+
+.bespin-screen {
+    font-family: arial, lucida, helvetica, sans-serif;
+    background: #4f4e45;
+    padding: 0px;
+    color: rgba(218,212,186,1);
+    font-size:14px;
+    margin: 0 auto;
+}
+
+.bespin-screen .commentButton {
+    font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial,
+        Helvetica, sans-serif;
+    font-size: 14px;
+    text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+.bespin-screen #commentform {
+    margin-top: 36px;
+    font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial,
+        Helvetica, sans-serif;
+    font-size: 14px;
+    line-height: 1.8em;
+}
+
+.bespin-screen #commentform p {
+    margin-bottom: 12px;
+    margin-top: 12px;
+    text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+.bespin-screen #commentform h3 {
+    font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial,
+        Helvetica, sans-serif;
+    margin-bottom: 32px;
+    margin-top: 32px;
+}
+
+.bespin-screen .colorField {
+    padding: 40px 40px;
+    -moz-border-radius: .5em;
+    -webkit-border-radius: .5em;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    border-left: 1px solid rgba(0, 0, 0, 0.1);
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+    background-color: rgba(69,68,60,1);
+    -moz-box-shadow:
+        rgba(0, 0, 0, 0.1) 0px 1px 2px;
+    margin: 20px auto;
+    max-width: 500px;
+    text-align: center;
+}
+
+.bespin-screen .title {
+    font-family: 'DroidSans';
+    text-transform:uppercase;
+    color: rgba(218,212,186,1);
+    text-align: center;
+    margin: 0px auto;
+    max-width: 500px;
+    margin-top: -10px;
+    margin-bottom: 40px;
+}
+
+.bespin-screen .arrow {
+    vertical-align: middle;
+    margin-top: -2px;
+}
+
+.bespin-screen input {
+    border: 0px;
+    padding: 4px;
+    width: 500px;
+    margin-right: 10px;
+    color: rgba(225,180,31,1);
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(0,0,0,0.2);
+    -moz-border-radius: 0.25em;
+    -moz-box-shadow:
+        rgba(255,255,255,0.3) 0px 0px 2px,
+        inset rgba(0,0,0,0.3) 0px 0px 4px;
+}
+
+.bespin-screen input:focus {
+    color: rgba(255,150,0,1);
+     border: 1px solid rgba(225,180,31,1);
+     -moz-box-shadow:
+        rgba(255,150,0,0.6) 0px 0px 2px,
+        inset rgba(255,150,0,0.3) 0px 0px 6px;
+}
+
+.bespin-screen textarea {
+    border: 0px;
+    padding: 4px;
+    width: 500px;
+    height: 80px;
+    color: rgba(225,180,31,1);
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(0,0,0,0.2);
+    -moz-border-radius: 0.25em;
+    -moz-box-shadow:
+        rgba(255,255,255,0.3) 0px 0px 2px,
+        inset rgba(0,0,0,0.3) 0px 0px 4px;
+}
+
+.bespin-screen textarea:focus {
+    color: rgba(255,150,0,1);
+     border: 1px solid rgba(225,180,31,1);
+    -moz-box-shadow:
+        rgba(255,150,0,0.6) 0px 0px 2px,
+        inset rgba(255,150,0,0.3) 0px 0px 6px;
+}
+
+.bespin-screen .commentButton {
+    padding: 8px 12px;
+        margin-top: 30px;
+    margin-bottom: 30px;
+    color: rgba(255,255,255,1);
+    -moz-border-radius: .25em;
+    border: 1px solid rgba(37,34,91,1);
+    -moz-box-shadow:
+        inset rgba(255, 255, 255, 0.2) 0 1px 0px,
+        inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
+        rgba(0, 0, 0, 0.1) 0px 1px 2px;
+    background: transparent -moz-linear-gradient(top, rgba(62,108,185,1), rgba(56,50,146,1));
+}
+
+.bespin-screen .button {
+    width: 200px;
+}
+
+.bespin-screen #commentform {
+    text-align: left;
+}
+
