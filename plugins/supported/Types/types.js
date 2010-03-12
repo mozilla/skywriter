@@ -213,7 +213,7 @@ exports.getTypeExt = function(typeSpec) {
 
                 catalog.loadObjectForPropertyPath(typeSpec.pointer).
                     then(function(obj) {
-                        var typeExt = module[objName](typeSpec);
+                        var typeExt = obj(typeSpec);
                         console.log("getTypeExt typeExt", typeExt);
                         promise.resolve(typeExt);
                     }, function(ex) {

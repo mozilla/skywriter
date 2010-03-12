@@ -713,11 +713,25 @@ exports.Catalog = SC.Object.extend({
      * Returns a promise to retrieve the object at the given property path,
      * loading the plugin if necessary.
      */
-    loadObjectForPropertyPath: function(path) {
+    loadObjectForPropertyPath: function(path, context) {
         var promise = new Promise();
-        var parts = /^([^#]*)#(.*)$/.exec(path);
-        var modName = parts[0], objName = parts[1];
-        tiki.async(modName).then(function() {
+        var parts = /^([^:]+):([^#]+)#(.*)$/.exec(path);
+        if (parts === null) {
+            throw new Error("loadObjectForPropertyPath: malformed path: '" +
+                path + "'");
+        }
+
+        var pluginName = parts[1];
+        if (pluginName === "") {
+            if (SC.none(context)) {
+                throw new Error("loadObjectForPropertyPath: no plugin name " +
+                    "supplied and no context is present");
+            }
+
+            pluginName = context;
+        }
+
+        tiki.async(pluginName).then(function() {
             promise.resolve(SC.objectForPropertyPath(path));
         });
 
