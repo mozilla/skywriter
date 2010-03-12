@@ -36,46 +36,43 @@
  * ***** END LICENSE BLOCK ***** */
 
 .bespin-screen {
-    font-family: arial, lucida, helvetica, sans-serif;
+    font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial,
+        Helvetica, sans-serif;
     background: #4f4e45;
     padding: 0px;
     color: rgba(218,212,186,1);
     font-size:14px;
     margin: 0 auto;
-}
-
-.bespin-screen .commentButton {
-    font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial,
-        Helvetica, sans-serif;
-    font-size: 14px;
-    text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
-}
-
-.bespin-screen #commentform {
-    margin-top: 36px;
-    font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial,
-        Helvetica, sans-serif;
-    font-size: 14px;
     line-height: 1.8em;
 }
 
-.bespin-screen #commentform p {
-    margin-bottom: 12px;
-    margin-top: 12px;
+.bespin-screen.sc-pane * {
+    color: rgba(255,255,255,1);
+}
+
+.bespin-screen .sc-button-view {
+    position: absolute;
+    font-size: 14px;
     text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+    padding: 8px 12px;
+    -moz-border-radius: .25em;
+    border: 1px solid rgba(37,34,91,1);
+    -moz-box-shadow:
+        inset rgba(255, 255, 255, 0.2) 0 1px 0px,
+        inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
+        rgba(0, 0, 0, 0.1) 0px 1px 2px;
+    background: transparent -moz-linear-gradient(top, rgba(62,108,185,1), rgba(56,50,146,1));
 }
 
 .bespin-screen #commentform h3 {
     font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial,
         Helvetica, sans-serif;
-    margin-bottom: 32px;
-    margin-top: 32px;
 }
 
-.bespin-screen .colorField {
-    padding: 40px 40px;
+.bespin-screen .bespin-color-field {
     -moz-border-radius: .5em;
     -webkit-border-radius: .5em;
+    background: url(images/lines.png),
     border-top: 1px solid rgba(255,255,255,0.1);
     border-left: 1px solid rgba(0, 0, 0, 0.1);
     border-right: 1px solid rgba(0, 0, 0, 0.1);
@@ -83,9 +80,7 @@
     background-color: rgba(69,68,60,1);
     -moz-box-shadow:
         rgba(0, 0, 0, 0.1) 0px 1px 2px;
-    margin: 20px auto;
     max-width: 500px;
-    text-align: center;
 }
 
 .bespin-screen .title {
@@ -104,11 +99,9 @@
     margin-top: -2px;
 }
 
-.bespin-screen input {
+.bespin-screen .sc-text-field-view input {
     border: 0px;
     padding: 4px;
-    width: 500px;
-    margin-right: 10px;
     color: rgba(225,180,31,1);
     background: rgba(0,0,0,0.2);
     border: 1px solid rgba(0,0,0,0.2);
@@ -118,11 +111,11 @@
         inset rgba(0,0,0,0.3) 0px 0px 4px;
 }
 
-.bespin-screen input:focus {
+.bespin-screen .sc-text-field-view input:focus,
+.bespin-screen .sc-button-view.active {
     color: rgba(255,150,0,1);
-     border: 1px solid rgba(225,180,31,1);
-     -moz-box-shadow:
-        rgba(255,150,0,0.6) 0px 0px 2px,
+    border: 1px solid rgba(225,180,31,1);
+    -moz-box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
         inset rgba(255,150,0,0.3) 0px 0px 6px;
 }
 
@@ -148,25 +141,36 @@
         inset rgba(255,150,0,0.3) 0px 0px 6px;
 }
 
-.bespin-screen .commentButton {
-    padding: 8px 12px;
-        margin-top: 30px;
-    margin-bottom: 30px;
-    color: rgba(255,255,255,1);
-    -moz-border-radius: .25em;
-    border: 1px solid rgba(37,34,91,1);
-    -moz-box-shadow:
-        inset rgba(255, 255, 255, 0.2) 0 1px 0px,
-        inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
-        rgba(0, 0, 0, 0.1) 0px 1px 2px;
-    background: transparent -moz-linear-gradient(top, rgba(62,108,185,1), rgba(56,50,146,1));
-}
-
 .bespin-screen .button {
     width: 200px;
 }
 
 .bespin-screen #commentform {
     text-align: left;
+}
+
+.bespin-screen .sc-radio-button {
+    position: relative;
+}
+
+.bespin-screen .sc-radio-button input {
+    height: 1px;
+    width: 1px;
+    opacity: 0;
+}
+
+.bespin-screen .sc-radio-button .button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 24px;
+    height: 24px;
+    background-image: url(images/radio-unselected.png);
+    background-repeat: no-repeat;
+}
+
+.bespin-screen .sc-radio-button.sel .button,
+.bespin-screen .sc-radio-button.active .button {
+    background-image: url(images/radio-selected.png)
 }
 
