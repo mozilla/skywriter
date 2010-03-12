@@ -137,6 +137,9 @@ def combine_files(jsfile, cssfile, name, p, add_main=False,
             modname = "index"
         else:
             modname = p.relpathto(f.splitext()[0])
+            # for the sake of Windows users, ensure that we are
+            # only using slashes
+            modname = modname.replace("\\", "/")
             
         if modname == "index":
             has_index = True
