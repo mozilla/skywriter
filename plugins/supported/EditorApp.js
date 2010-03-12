@@ -40,9 +40,8 @@
     "description": "Constructs what you see on a hosted Bespin server",
     "depends":
     [
-        "EditSession",
-        "BespinTheme", "AppSupport", "CommandLine", "Editor", "UserIdent",
-        "Settings", "PluginDev", "Filesystem", "BespinServer"
+        "AppSupport", "BespinServer", "CommandLine", "EditSession", "Editor",
+        "Filesystem", "PluginDev", "Settings", "ThemeManager", "UserIdent"
     ],
     "provides":
     [
@@ -77,6 +76,7 @@ var KeyListener = require('AppSupport:views/keylistener').KeyListener;
 var loginController = require('UserIdent').loginController;
 var BespinFileSource = require("BespinServer:filesource").BespinFileSource;
 var ServerPersister = require("BespinServer:settings").ServerPersister;
+var ThemeManager = require('ThemeManager').ThemeManager;
 var settings = require("Settings").settings;
 var Directory = require("Filesystem").Directory;
 var editsession = require("EditSession");
@@ -87,6 +87,8 @@ var INITIAL_TEXT;   // defined at the end of the file to reduce ugliness
 
 exports.applicationController = SC.Object.create({
     _application: SC.Application.extend(),
+
+    _themeManager: null,
 
     _applicationView: DockView.extend({
         centerView: EditorView.extend(),
@@ -112,6 +114,8 @@ exports.applicationController = SC.Object.create({
 
         var mainPane = this._mainPage.get('mainPane');
         mainPane.appendChild(applicationView);
+
+        this._themeManager.addPane(mainPane);
 
         var editorView = applicationView.get('centerView');
         var layoutManager = editorView.get('layoutManager');
@@ -142,7 +146,13 @@ exports.applicationController = SC.Object.create({
 
         var mainPage = this._mainPage.create();
         this._mainPage = mainPage;
-        mainPage.get('mainPane').append();
+
+        var mainPane = mainPage.get('mainPane');
+        mainPane.append();
+
+        var themeManager = ThemeManager.create({ theme: "Screen" });
+        this._themeManager = themeManager;
+        themeManager.addPane(mainPane);
 
         loginController.addDelegate(this);
         loginController.show();
