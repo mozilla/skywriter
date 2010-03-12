@@ -14,7 +14,8 @@ config :editor,
   :test_debug => [],
   :use_modules => true,
   :use_loader => true,
-  :factory_format => :function
+  :factory_format => :function,
+  :theme => nil
 
 proxy '/server/', :to => 'localhost:8080', :url => "/"
 
