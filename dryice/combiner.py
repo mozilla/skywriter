@@ -58,6 +58,9 @@ class NullOutput(object):
     def write(self, s):
         pass
 
+class CombinerError(Exception):
+    pass
+
 def toposort(unsorted, package_factory=None, reset_first=False):
     """Topologically sorts Packages. This algorithm is the
     depth-first version from Wikipedia:
@@ -74,12 +77,19 @@ def toposort(unsorted, package_factory=None, reset_first=False):
         if not p.visited:
             p.visited = True
             for dependency in p.depends:
+                # core_test is a special case... that's not a true
+                # Bespin plugin, but rather a SproutCore package.
+                if dependency == "core_test":
+                    continue
                 try:
                     visit(mapping[dependency])
                 except KeyError:
                     if not package_factory:
-                        raise ValueError("Dependency %s for package %s not found, not package factory available (mapping: %r)" % (dependency, p.name, mapping))
-                    new_package = package_factory(dependency)
+                        raise CombinerError("Dependency %s for package %s not found, no package factory available (mapping: %r)" % (dependency, p.name, mapping))
+                    try:
+                        new_package = package_factory(dependency)
+                    except KeyError, e:
+                        raise CombinerError("Dependency %s for package %s not found (mapping: %r)" % (dependency, p.name, mapping))
                     mapping[new_package.name] = new_package
                     visit(new_package)
             l.append(p)

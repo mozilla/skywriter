@@ -49,7 +49,7 @@ except ImportError:
 
 setup(
     name="dryice",
-    version="0.6.2",
+    version="0.7",
     packages=["dryice"],
     entry_points="""
 [console_scripts]
@@ -59,8 +59,8 @@ dryice=dryice.tool:main
 
 options(
     version=Bunch(
-        number="0.6.2",
-        name="Ash",
+        number="0.7",
+        name="Ped Xing",
         api="4"
     ),
     virtualenv=Bunch(
@@ -305,6 +305,83 @@ def _update_static():
     combine_files(bespin_file, None, "bespin", path("frameworks") / "bespin")
     
     return static
+
+def update_python_version():
+    version_file = options.server.directory / "bespin" / "__init__.py"
+    in_version_block = False
+    lines = version_file.lines()
+    replaced_lines = []
+    for i in range(0, len(lines)):
+        line = lines[i]
+        if "BEGIN VERSION BLOCK" in line:
+            in_version_block = True
+            continue
+        if "END VERSION BLOCK" in line:
+            break
+        if not in_version_block:
+            continue
+        if line.startswith("VERSION ="):
+            lines[i] = "VERSION = '%s'\n" % (options.version.number)
+        elif line.startswith("VERSION_NAME ="):
+            lines[i] = 'VERSION_NAME = "%s"\n' % (options.version.name)
+        elif line.startswith('API_VERSION'):
+            lines[i] = "API_VERSION = '%s'\n" % (options.version.api)
+        else:
+            raise BuildFailure("Invalid Python version number line: %s" % line)
+        replaced_lines.append(line)
+    version_file.write_lines(lines)
+    return replaced_lines
+    
+def restore_python_version(replaced_lines):
+    version_file = options.server.directory / "bespin" / "__init__.py"
+    lines = version_file.lines()
+    version_block_start = None
+    version_block_end = None
+    for i in range(0, len(lines)):
+        line = lines[i]
+        if "BEGIN VERSION BLOCK" in line:
+            version_block_start = i
+        if "END VERSION BLOCK" in line:
+            version_block_end = i
+            break
+    lines[version_block_start+1:version_block_end] = replaced_lines
+    version_file.write_lines(lines)
+
+
+@task
+@needs(['build_docs', 'fetch_compiler', 'sdist', 'release_embed'])
+def dist(options):
+    """Build the server package.
+    
+    Creates the BespinServer.tar.gz file with all of the pieces for production
+    deployment."""
+    output_dir = path("tmp/BespinServer")
+    output_dir.rmtree()
+    
+    replaced_lines = update_python_version()
+    try:
+        call_pavement(options.server_pavement, "production")
+    finally:
+        restore_python_version(replaced_lines)
+        
+    production_dir = options.server.directory / "production"
+    production_dir.copytree("tmp/BespinServer")
+    
+    sdist = path("dist") / ("dryice-%s.tar.gz" % (options.version.number))
+    sdist.copy(output_dir / "libs")
+    
+    yui_compressor = path("abbot/vendor/yui-compressor/yuicompressor-2.4.2.jar")
+    closure_compiler = options.fetch_compiler.dest_dir / "compiler.jar"
+
+    info(sh('dryice -j%s -c%s production.json' % 
+        (closure_compiler, yui_compressor), 
+        capture=True))
+        
+    built_dropin = path("tmp") / ("BespinEmbedded-DropIn-%s" % (options.version.number))
+    built_dropin.copytree(output_dir / "static" / "embedded")
+    
+    built_docs = path("tmp") / "docs"
+    built_docs.copytree(output_dir / "static" / "docs")
     
     
 @task
