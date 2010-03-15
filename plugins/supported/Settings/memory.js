@@ -136,18 +136,13 @@ exports.MemorySettings = SC.Object.extend({
             var superSet = arguments.callee.base;
 
             var inline = false;
-            var ex = null;
 
             types.fromString(value, settingExt.type).then(function(converted) {
                 inline = true;
                 superSet.apply(this, [ key, converted ]);
-            }.bind(this), function(ex1) {
-                ex = ex1;
+            }.bind(this), function(ex) {
+                console.error("Error setting", key, ": ", ex);
             });
-
-            if (ex) {
-                throw ex;
-            }
 
             if (!inline) {
                 console.warn("About to set string version of ", key, "delaying typed set.");
