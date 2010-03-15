@@ -23,3 +23,5 @@
 ^sproutcore
 ^dryice.egg-info
 ^dist
+^setup\.py
+

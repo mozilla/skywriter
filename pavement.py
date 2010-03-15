@@ -36,6 +36,11 @@ import webbrowser
 import re
 import zipfile
 
+try:
+    from json import loads, dumps
+except ImportError:
+    from simplejson import loads, dumps
+
 from paver.easy import *
 from paver.setuputils import setup
 import paver.virtual
@@ -349,12 +354,13 @@ def restore_python_version(replaced_lines):
 
 
 @task
-@needs(['build_docs', 'fetch_compiler', 'sdist', 'release_embed'])
+@needs(['generate_setup', 'build_docs', 'fetch_compiler', 'sdist', 'release_embed'])
 def dist(options):
     """Build the server package.
     
     Creates the BespinServer.tar.gz file with all of the pieces for production
     deployment."""
+    _update_static()
     output_dir = path("tmp/BespinServer")
     output_dir.rmtree()
     
@@ -388,6 +394,7 @@ def dist(options):
     
     plugins_dir = path("plugins")
     plugins_dir.copytree(output_dir / "plugins")
+    
     sh("tar czf BespinServer.tgz BespinServer", cwd="tmp")
     
     

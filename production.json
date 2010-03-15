@@ -1,5 +1,6 @@
 {
     "plugins": ["EditorApp", "PluginDev", "UICommands"],
     "output_dir": "tmp/BespinServer/static",
-    "include_core_test": true
+    "include_core_test": true,
+    "boot_file": "tmp/static/editor/editor.js"
 }

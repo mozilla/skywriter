@@ -54,7 +54,6 @@ class BuildError(Exception):
 
 sample_dir = path(__file__).dirname() / "samples"
 inline_file = path(__file__).dirname() / "inline.js"
-boot_file = path(__file__).dirname() / "boot.js"
 
 def ignore_css(src, names):
     return [name for name in names if name.endswith(".css")]
@@ -63,7 +62,8 @@ class Manifest(object):
     """A manifest describes what should be built."""
     def __init__(self, include_core_test=False, plugins=None,
         search_path=None, sproutcore=None, bespin=None,
-        output_dir="build", include_sample=False):
+        output_dir="build", include_sample=False,
+        boot_file=None):
 
         self.include_core_test = include_core_test
         self.plugins = plugins
@@ -107,6 +107,11 @@ class Manifest(object):
         if not bespin or not bespin.exists():
             raise BuildError("Cannot find Bespin core code (looked in %s)"
                 % bespin.abspath())
+        
+        if not boot_file:
+            self.boot_file = path(__file__).dirname() / "boot.js"
+        else:
+            self.boot_file = path(boot_file).abspath()
 
         self.bespin = bespin
 
@@ -227,7 +232,7 @@ will be deleted before the build.""")
 tiki.require("bespin:plugins").catalog.load(%s);
 """ % (dumps(all_md)))
 
-        output_js.write(boot_file.bytes())
+        output_js.write(self.boot_file.bytes())
 
         # close off our closure
         # commented out because this doesn't work yet
