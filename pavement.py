@@ -392,8 +392,8 @@ def dist(options):
     index_file = path("dryice") / "prodindex.html"
     index_file.copy(output_dir / "static" / "index.html")
     
-    plugins_dir = path("plugins")
-    plugins_dir.copytree(output_dir / "plugins")
+    # plugins_dir = path("plugins")
+    # plugins_dir.copytree(output_dir / "plugins")
     
     sh("tar czf BespinServer.tgz BespinServer", cwd="tmp")
     

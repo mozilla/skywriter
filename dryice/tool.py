@@ -60,10 +60,13 @@ def ignore_css(src, names):
 
 class Manifest(object):
     """A manifest describes what should be built."""
+    
+    unbundled_plugins = None
+    
     def __init__(self, include_core_test=False, plugins=None,
         search_path=None, sproutcore=None, bespin=None,
         output_dir="build", include_sample=False,
-        boot_file=None):
+        boot_file=None, unbundled_plugins=None):
 
         self.include_core_test = include_core_test
         self.plugins = plugins
@@ -122,6 +125,9 @@ will be deleted before the build.""")
         self.output_dir = path(output_dir)
 
         self.include_sample = include_sample
+        
+        if unbundled_plugins:
+            self.unbundled_plugins = path(unbundled_plugins).abspath()
 
     @classmethod
     def from_json(cls, json_string, overrides=None):
@@ -225,9 +231,12 @@ will be deleted before the build.""")
         # may need to be importable at the time the metadata
         # becomes available.
         all_md = dict()
+        bundled_plugins = self.bundled_plugins = set()
         for p in package_list:
             plugin = self.get_plugin(p.name)
             all_md[plugin.name] = plugin.metadata
+            bundled_plugins.add(plugin.name)
+            
         output_js.write("""
 tiki.require("bespin:plugins").catalog.load(%s);
 """ % (dumps(all_md)))
@@ -249,6 +258,25 @@ tiki.require("bespin:plugins").catalog.load(%s);
         package_list = combiner.toposort(package_list,
             package_factory=self.get_package)
         return package_list
+        
+    def _output_unbundled_plugins(self, output_dir):
+        if not output_dir.exists():
+            output_dir.makedirs()
+        else:
+            if not output_dir.isdir():
+                raise BuildError("Unbundled plugins can't go in %s because it's not a directory" % output_dir)
+
+        bundled_plugins = self.bundled_plugins
+        for name, plugin in self._plugin_catalog.items():
+            if name in bundled_plugins:
+                continue
+            location = plugin.location
+            if location.isdir():
+                location.copytree(output_dir / location.basename())
+            else:
+                location.copy(output_dir / location.basename())
+        print "Unbundled plugins placed in: %s" % output_dir
+                
 
     def build(self):
         """Run the build according to the instructions in the manifest.
@@ -272,6 +300,9 @@ tiki.require("bespin:plugins").catalog.load(%s);
         self.generate_output_files(jsfile, cssfile, package_list)
         jsfile.close()
         cssfile.close()
+        
+        if self.unbundled_plugins:
+            self._output_unbundled_plugins(self.unbundled_plugins)
 
         combiner.copy_sproutcore_files(self.sproutcore, output_dir)
 
