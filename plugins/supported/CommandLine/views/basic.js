@@ -36,11 +36,13 @@
  * ***** END LICENSE BLOCK ***** */
 
 var console = require('bespin:console').console;
+var Promise = require("bespin:promise").Promise;
 
 var basic = require("Types:basic");
+var PrefixMatcher = require('Matcher:prefix').PrefixMatcher;
 
+var MatcherMenu = require("CommandLine:views/menu").MatcherMenu;
 var Menu = require("CommandLine:views/menu").Menu;
-var filter = require("CommandLine:views/menu").filter;
 
 /**
  * A choice between a known set of options
@@ -55,14 +57,15 @@ exports.selection = {
             data = [];
         }
 
-        var matches = filter(assignment.value, data);
-        var menu = Menu.create({
+        var matcher = PrefixMatcher.create({ query: assignment.value });
+
+        var menu = MatcherMenu.create({
             input: input,
             assignment: assignment,
-            typeExt: typeExt
+            typeExt: typeExt,
+            matcher: matcher
         });
 
-        menu.addItems(matches);
         return menu.get("hint");
     },
 

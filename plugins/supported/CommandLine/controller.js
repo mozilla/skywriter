@@ -42,8 +42,8 @@ var console = require('bespin:console').console;
 var env = require("Canon:environment");
 var Request = require("Canon:request").Request;
 
-var typehint = require("typehint");
-var Input = require("input").Input;
+var typehint = require("CommandLine:typehint");
+var Input = require("CommandLine:input").Input;
 
 var printStackTrace = require("bespin:util/stacktrace").printStackTrace;
 

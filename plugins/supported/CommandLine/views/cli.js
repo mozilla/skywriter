@@ -46,10 +46,10 @@ var keyboardManager = require('Canon:keyboard').keyboardManager;
 var environment = require('Canon:environment').global;
 var settings = require("Settings").settings;
 
-var cliController = require("controller").cliController;
-var Level = require("hint").Level;
-var BespinButtonView = require("views/image_button").BespinButtonView;
-var PinView = require("views/pin").PinView;
+var cliController = require("CommandLine:controller").cliController;
+var Level = require("CommandLine:hint").Level;
+var BespinButtonView = require("CommandLine:views/image_button").BespinButtonView;
+var PinView = require("CommandLine:views/pin").PinView;
 
 var imagePath = catalog.getResourceURL("CommandLine") + "images/";
 

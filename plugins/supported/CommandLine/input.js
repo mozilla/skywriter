@@ -43,8 +43,8 @@ var groupPromises = require("bespin:promise").group;
 
 var types = require("Types:types");
 
-var hint = require("hint");
-var typehint = require("typehint");
+var hint = require("CommandLine:hint");
+var typehint = require("CommandLine:typehint");
 
 /**
  * An object used during command line parsing to hold the various intermediate
@@ -144,7 +144,7 @@ exports.Input = SC.Object.extend({
      * Split up the input taking into account ' and "
      */
     _tokenize: function() {
-        if (!this.typed || this.typed == "") {
+        if (!this.typed || this.typed === "") {
             /*
             // We would like to put some initial help here, but for anyone but
             // a complete novice a "type help" message is very annoying, so we
@@ -162,12 +162,20 @@ exports.Input = SC.Object.extend({
         this.parts = [];
 
         var nextToken;
-        while (nextToken = incoming.shift()) {
+        while (true) {
+            nextToken = incoming.shift();
+            if (!nextToken) {
+                break;
+            }
             if (nextToken[0] == '"' || nextToken[0] == "'") {
                 // It's quoting time
                 var eaten = [ nextToken.substring(1, nextToken.length) ];
                 var eataway;
-                while (eataway = incoming.shift()) {
+                while (true) {
+                    eataway = incoming.shift();
+                    if (!eataway) {
+                        break;
+                    }
                     if (eataway[eataway.length - 1] == '"' ||
                             eataway[eataway.length - 1] == "'") {
                         // End quoting time
@@ -295,8 +303,8 @@ exports.Input = SC.Object.extend({
         var params = this.commandExt.params;
 
         // If this command does not take parameters
-        if (!params || params.length == 0) {
-            if (this.unparsedArgs.length != 0) {
+        if (!params || params.length === 0) {
+            if (this.unparsedArgs.length !== 0) {
                 this._hints.push(hint.Hint.create({
                     level: hint.Level.Error,
                     element: this.commandExt.name + " does not take any parameters."
@@ -347,15 +355,13 @@ exports.Input = SC.Object.extend({
         if (this.typed.charAt(this.typed.length - 1) == " ") {
             // If the last thing was a space, return to command documentation
             var hintSpec = exports.documentCommand(this.commandExt, this.typed);
-            var hintPromise = typehint.getHint(this, hintSpec);
-            this._hints.push(hintPromise);
+            this._hints.push(typehint.getHint(this, hintSpec));
         } else {
             // Otherwise show a hint for the last parameter
             if (this.parts.length > 1) {
                 var assignment = this._getAssignmentForLastArg();
                 if (assignment) {
-                    var hintPromise = typehint.getHint(this, assignment);
-                    this._hints.push(hintPromise);
+                    this._hints.push(typehint.getHint(this, assignment));
                 }
             }
         }

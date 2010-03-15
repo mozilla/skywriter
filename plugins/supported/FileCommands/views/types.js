@@ -35,9 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Matcher = require('Matcher').Matcher;
-var Menu = require('CommandLine:views/menu').Menu;
-var filter = require('CommandLine:views/menu').filter;
+var QuickMatcher = require('Matcher:quick').QuickMatcher;
+var MatcherMenu = require('CommandLine:views/menu').MatcherMenu;
 
 /**
  * @see typehint#getHint()
@@ -45,33 +44,19 @@ var filter = require('CommandLine:views/menu').filter;
 exports.existingFileHint = {
     getHint: function(input, assignment, typeExt) {
 
-        var matcher = PrefixMatcher.create({ query: assignment.value });
-        matcher.addDelegate({
-            matcherUpdatedItems: function() {
-
-            }
-        });
+        var matcher = QuickMatcher.create({ query: assignment.value });
 
         var files = input.env.get('files');
         var promise = files.sendToMatcher(matcher);
 
-        promise.then(function() {
-
-        });
-
-        var data = [];
-        matcher.getMatches().forEach(function(match) {
-            data.push({ name: match });
-        });
-
-        var matches = filter(assignment.value, data);
-        var menu = Menu.create({
+        var menu = MatcherMenu.create({
             input: input,
             assignment: assignment,
-            typeExt: typeExt
+            typeExt: typeExt,
+            matcher: matcher,
+            loaded: promise
         });
 
-        menu.addItems(matches);
         return menu.get("hint");
     }
 };

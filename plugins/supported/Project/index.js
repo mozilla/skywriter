@@ -38,6 +38,5 @@
 var SC = require('sproutcore/runtime').SC;
 
 exports.Project = SC.Object.extend({
-    directory: null,
+    directory: null
 });
-

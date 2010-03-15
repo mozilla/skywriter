@@ -8,12 +8,6 @@
             "name": "existingFile",
             "description": "A pointer to a file which we believe to already exist",
             "pointer": "types#existingFile"
-        },
-        {
-            "ep": "typehint",
-            "name": "existingFile",
-            "description": "A method of selecting an existing file",
-            "pointer": "views/types#existingFileHint"
         }
     ]
 }

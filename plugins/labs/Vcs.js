@@ -250,7 +250,7 @@ exports.commands.addCommand({
         cell = dojo.create("td", {innerHTML: "VCS Type:"}, row);
         cell = dojo.create("td", {}, row);
         // vcs
-        var vcsField = select = dojo.create("select", {
+        var select = dojo.create("select", {
             name: "vcs",
             onchange: function(e) {
                 if (this.value == "svn") {
@@ -260,13 +260,15 @@ exports.commands.addCommand({
                 }
             }
         }, cell);
+        var vcsField = select;
         dojo.create("option", {value: "svn", innerHTML: "Subversion (svn)"}, select);
         dojo.create("option", {value: "hg", innerHTML: "Mercurial (hg)"}, select);
 
         // VCS User
-        var vcsUserRow = row = dojo.create("tr", {
+        row = dojo.create("tr", {
             style: "display: none"
         }, tbody);
+        var vcsUserRow = row;
         cell = dojo.create("td", {innerHTML: "VCS User:"}, row);
         cell = dojo.create("td", {}, row);
         var vcsUser = dojo.create("input", {

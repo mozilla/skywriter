@@ -42,36 +42,6 @@ var Promise = require("bespin:promise").Promise;
 var r = require;
 
 /**
- * Convert some data from a string to another type as specified by
- * <tt>typeSpec</tt>.
- */
-exports.fromString = function(stringVersion, typeSpec) {
-    return resolve(typeSpec, function(type, typeExt) {
-        return type.fromString(stringVersion, typeExt);
-    });
-};
-
-/**
- * Convert some data from an original type to a string as specified by
- * <tt>typeSpec</tt>.
- */
-exports.toString = function(objectVersion, typeSpec) {
-    return resolve(typeSpec, function(type, typeExt) {
-        return type.toString(objectVersion, typeExt);
-    });
-};
-
-/**
- * Convert some data from an original type to a string as specified by
- * <tt>typeSpec</tt>.
- */
-exports.isValid = function(originalVersion, typeSpec) {
-    return resolve(typeSpec, function(type, typeExt) {
-        return type.isValid(originalVersion, typeExt);
-    });
-};
-
-/**
  * Do all the nastiness of: converting the typeSpec to a typeExt, then
  * asynchronously loading the typeExt to a type and then doing whatever the
  * onResolve thing wanted to do
@@ -100,6 +70,36 @@ var resolve = function(typeSpec, onResolve) {
     });
 
     return promise;
+};
+
+/**
+ * Convert some data from a string to another type as specified by
+ * <tt>typeSpec</tt>.
+ */
+exports.fromString = function(stringVersion, typeSpec) {
+    return resolve(typeSpec, function(type, typeExt) {
+        return type.fromString(stringVersion, typeExt);
+    });
+};
+
+/**
+ * Convert some data from an original type to a string as specified by
+ * <tt>typeSpec</tt>.
+ */
+exports.toString = function(objectVersion, typeSpec) {
+    return resolve(typeSpec, function(type, typeExt) {
+        return type.toString(objectVersion, typeExt);
+    });
+};
+
+/**
+ * Convert some data from an original type to a string as specified by
+ * <tt>typeSpec</tt>.
+ */
+exports.isValid = function(originalVersion, typeSpec) {
+    return resolve(typeSpec, function(type, typeExt) {
+        return type.isValid(originalVersion, typeExt);
+    });
 };
 
 /**
@@ -143,31 +143,9 @@ exports.getSimpleName = function(typeSpec) {
 // already complex code
 
 /**
- * typeSpec one of:
- * "typename",
- * "typename:json" e.g. 'selection:["one", "two", "three"]'
- * { name:"typename", data:... } e.g. { name:"selection", data:["one", "two", "three"] }
- */
-exports.getTypeExt = function(typeSpec) {
-    if (typeof typeSpec === "string") {
-        return resolveSimpleType(typeSpec);
-    }
-
-    if (typeof typeSpec === "object") {
-        if (typeSpec.name == "deferred") {
-            return resolveDeferred(typeSpec);
-        } else {
-            return resolveSimpleType(typeSpec.name);
-        }
-    }
-
-    throw new Error("Unknown typeSpec type: " + typeof typeSpec);
-};
-
-/**
  *
  */
-var resolveSimpleType = function(name, promise) {
+var resolveSimpleType = function(name) {
     var promise = new Promise();
     var typeExt = catalog.getExtensionByKey("type", name);
     if (typeExt) {
@@ -183,7 +161,7 @@ var resolveSimpleType = function(name, promise) {
  * in time to use it. For example the 'set' command where the type of the 2nd
  * param is defined by the 1st param.
  */
-var resolveDeferred = function(typeSpec, promise) {
+var resolveDeferred = function(typeSpec) {
     var promise = new Promise();
     // Deferred types are specified by the return from the pointer
     // function.
@@ -208,6 +186,28 @@ var resolveDeferred = function(typeSpec, promise) {
     });
 
     return promise;
+};
+
+/**
+ * typeSpec one of:
+ * "typename",
+ * "typename:json" e.g. 'selection:["one", "two", "three"]'
+ * { name:"typename", data:... } e.g. { name:"selection", data:["one", "two", "three"] }
+ */
+exports.getTypeExt = function(typeSpec) {
+    if (typeof typeSpec === "string") {
+        return resolveSimpleType(typeSpec);
+    }
+
+    if (typeof typeSpec === "object") {
+        if (typeSpec.name == "deferred") {
+            return resolveDeferred(typeSpec);
+        } else {
+            return resolveSimpleType(typeSpec.name);
+        }
+    }
+
+    throw new Error("Unknown typeSpec type: " + typeof typeSpec);
 };
 
 /**

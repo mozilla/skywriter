@@ -40,9 +40,46 @@ var console = require('bespin:console').console;
 var Promise = require("bespin:promise").Promise;
 var types = require("Types:types");
 
-var hint = require("hint");
+var hint = require("CommandLine:hint");
 
 var r = require;
+
+/**
+ * If there isn't a typehint to define a hint UI component then we just use the
+ * default - a simple text node containing the description.
+ */
+var createDefaultHint = function(description) {
+    var parent = document.createElement("article");
+    parent.innerHTML = description;
+
+    return hint.Hint.create({
+        element: parent,
+        level: hint.Level.Info
+    });
+};
+
+/**
+ * resolve the passed promise by calling
+ */
+var getHintOrDefault = function(promise, input, assignment, typeHintExt, typeHint) {
+    var hint;
+
+    try {
+        if (typeHintExt && typeof typeHint.getHint === "function") {
+            hint = typeHint.getHint(input, assignment, typeHintExt);
+        }
+    }
+    catch (ex) {
+        console.error("Failed to get hint for ", typeHintExt, " reason: ", ex);
+    }
+
+    if (!hint) {
+        hint = createDefaultHint(assignment.param.description);
+    }
+
+    promise.resolve(hint);
+    return promise;
+};
 
 /**
  * Asynchronously find a UI component to match a typeSpec
@@ -94,43 +131,6 @@ exports.getHint = function(input, assignment) {
     return promise;
 };
 
-/**
- * resolve the passed promise by calling
- */
-var getHintOrDefault = function(promise, input, assignment, typeHintExt, typeHint) {
-    var hint;
-
-    try {
-        if (typeHintExt && typeof typeHint.getHint === "function") {
-            hint = typeHint.getHint(input, assignment, typeHintExt);
-        }
-    }
-    catch (ex) {
-        console.error("Failed to get hint for ", typeHintExt, " reason: ", ex);
-    }
-
-    if (!hint) {
-        hint = createDefaultHint(assignment.param.description);
-    }
-
-    promise.resolve(hint);
-    return promise;
-};
-
-/**
- * If there isn't a typehint to define a hint UI component then we just use the
- * default - a simple text node containing the description.
- */
-var createDefaultHint = function(description) {
-    var parent = document.createElement("article");
-    parent.innerHTML = description;
-
-    return hint.Hint.create({
-        element: parent,
-        level: hint.Level.Info
-    });
-};
-
 // Warning: This code is virtually cut and paste from Types:types.js
 // It you change this, there are probably parallel changes to be made there
 // There are 2 differences between the functions:
@@ -140,28 +140,6 @@ var createDefaultHint = function(description) {
 //   to have things. Not so for types.
 // Whilst we could abstract out the changes, I'm not sure this simplifies
 // already complex code
-
-/**
- * typeSpec one of:
- * "typename",
- * "typename:json" e.g. 'selection:["one", "two", "three"]'
- * { name:"typename", data:... } e.g. { name:"selection", data:["one", "two", "three"] }
- */
-exports.getTypeHintExt = function(typeSpec) {
-    if (typeof typeSpec === "string") {
-        return resolveSimpleType(typeSpec);
-    }
-
-    if (typeof typeSpec === "object") {
-        if (typeSpec.name === "deferred") {
-             return resolveDeferred(typeSpec);
-        } else {
-            return resolveSimpleType(typeSpec.name);
-        }
-    }
-
-    throw new Error("Unknown typeSpec type: " + typeof typeSpec);
-};
 
 var resolveSimpleType = function(name) {
     var promise = new Promise();
@@ -192,4 +170,26 @@ var resolveDeferred = function() {
         promise.reject(ex);
     });
     return promise;
+};
+
+/**
+ * typeSpec one of:
+ * "typename",
+ * "typename:json" e.g. 'selection:["one", "two", "three"]'
+ * { name:"typename", data:... } e.g. { name:"selection", data:["one", "two", "three"] }
+ */
+exports.getTypeHintExt = function(typeSpec) {
+    if (typeof typeSpec === "string") {
+        return resolveSimpleType(typeSpec);
+    }
+
+    if (typeof typeSpec === "object") {
+        if (typeSpec.name === "deferred") {
+             return resolveDeferred(typeSpec);
+        } else {
+            return resolveSimpleType(typeSpec.name);
+        }
+    }
+
+    throw new Error("Unknown typeSpec type: " + typeof typeSpec);
 };

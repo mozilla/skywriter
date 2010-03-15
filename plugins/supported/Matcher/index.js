@@ -52,7 +52,7 @@ exports.Matcher = SC.Object.extend(MultiDelegateSupport, {
     _queryChanged: function() {
         var query = this.get('query'), items = this.get('items');
         items.forEach(function(item) {
-            item.score = this.match(query, item.str);
+            item.score = this.match(query, this._itemToString(item.str));
         }, this);
 
         this.notifyPropertyChange('items', items);
@@ -69,7 +69,10 @@ exports.Matcher = SC.Object.extend(MultiDelegateSupport, {
     addStrings: function(strings) {
         var query = this.get('query'), items = this.get('items');
         strings.map(function(str) {
-            items.push({ score: this.match(query, str), str: str });
+            items.push({
+                score: this.match(query, this._itemToString(str)),
+                str: str
+            });
         }, this);
 
         this.notifyPropertyChange('items', items);
@@ -92,6 +95,17 @@ exports.Matcher = SC.Object.extend(MultiDelegateSupport, {
 
     init: function() {
         this.set('items', []);
+    },
+
+    _itemToString: function(item) {
+        if (typeof item === 'string') {
+            return item;
+        }
+
+        if (typeof item === 'object' && item.name) {
+            return item.name;
+        }
+
+        return item.toString();
     }
 });
-

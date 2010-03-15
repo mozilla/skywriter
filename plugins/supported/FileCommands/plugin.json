@@ -1,6 +1,6 @@
 {
     "description": "File management commands",
-    "depends": ["Filesystem"],
+    "depends": [ "Filesystem", "Matcher", "CommandLine" ],
     "provides":
     [
         {
@@ -262,6 +262,12 @@
                 ],
             "description": "If a URL is given, import that URL (e.g. <code>project import http://foo.com/bar.zip MyProject</code>).<br><br>If only a project is given, then a file upload dialog will ask to upload a local file (e.g. <code>project import MyProject</code>).",
             "pointer": "project#importCommand"
+        },
+        {
+            "ep": "typehint",
+            "name": "existingFile",
+            "description": "A method of selecting an existing file",
+            "pointer": "views/types#existingFileHint"
         }
     ]
 }

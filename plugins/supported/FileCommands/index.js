@@ -51,13 +51,13 @@ var getCompletePath = function(env, path) {
  */
 exports.filesCommand = function(env, args, request) {
     var path = args.path;
-    
+
     path = getCompletePath(env, path);
-    
+
     if (!pathUtil.isDir(path)) {
         path += "/";
     }
-    
+
     env.get("files").loadPath(path).then(function(dir) {
         var files = "";
         var contents = dir.get("contents");
@@ -96,7 +96,7 @@ exports.mkdirCommand = function(instruction, givenPath) {
     var project = info.project || editSession.project;
 
     var onSuccess = instruction.link(function() {
-        if (path == '') {
+        if (path === '') {
             editSession.setProject(project);
         }
         request.done('Successfully created directory \'/' +
@@ -128,14 +128,14 @@ exports.saveCommand = function(env, args, request) {
 exports.openCommand = function(env, args, request) {
     var files = env.get("files");
     var buffer = env.get("buffer");
-    
+
     var path = args.path;
     path = getCompletePath(env, path);
 
     // TODO: handle line number in args
     var file = files.getObject(path);
     buffer.changeFile(file).then(
-        function() { 
+        function() {
             request.done();
         },
         function(error) {

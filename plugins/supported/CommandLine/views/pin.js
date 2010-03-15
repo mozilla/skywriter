@@ -35,6 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var SC = require("sproutcore/runtime").SC;
+
 /**
  * Push Pin button.
  * @class

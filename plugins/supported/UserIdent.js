@@ -179,7 +179,7 @@ exports.signupController = SC.Object.create({
         // The value of this.isValid will be set at the end of this function.
         var isValid = true;
 
-        if (this.changed.username || this.get('username') != '') {
+        if (this.changed.username || this.get('username') !== '') {
             var usernameError = '';
             if (this.get('username').length < 4) {
                 usernameError = "At least 4 chars";
@@ -188,7 +188,7 @@ exports.signupController = SC.Object.create({
             this.set("usernameError", usernameError);
         }
 
-        if (this.changed.password1  || this.get('password1') != '') {
+        if (this.changed.password1  || this.get('password1') !== '') {
             var password1Error = '';
             var l= this.get('password1').length;
             if (l < 6) {
@@ -201,7 +201,8 @@ exports.signupController = SC.Object.create({
             this.set("password1Error", password1Error);
         }
 
-        if ((this.changed.password1  || this.get('username') != '') && (this.changed.password2  || this.get('password2') != '')) {
+        if ((this.changed.password1  || this.get('username') !== '') &&
+                (this.changed.password2  || this.get('password2') !== '')) {
             var password2Error = '';
             if (this.get('password1') != this.get('password2')) {
                 password2Error = "Have to match";
@@ -210,7 +211,7 @@ exports.signupController = SC.Object.create({
             this.set("password2Error", password2Error);
         }
 
-        if (this.changed.email || this.get('email' != '')) {
+        if (this.changed.email || this.get('email' !== '')) {
             if (!this.get('email').match(/.+@.+\...+/)) {
                 this.set("emailHint", "When email is given, it has to be a valid format");
                 isValid = false;

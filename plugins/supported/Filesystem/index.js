@@ -25,13 +25,15 @@
 var SC = require("sproutcore/runtime").SC;
 var console = require('bespin:console').console;
 var util = require("bespin:util/util");
-var pathUtil = require("path");
 var m_promise = require("bespin:promise");
+
+var pathUtil = require("Filesystem:path");
+
 var Promise = m_promise.Promise;
 
-var NEW = exports.NEW = {name: "NEW"};
-var LOADING = exports.LOADING = {name: "LOADING"};
-var READY = exports.READY = {name: "READY"};
+exports.NEW = { name: "NEW" };
+exports.LOADING = { name: "LOADING" };
+exports.READY = { name: "READY" };
 
 exports.Directory = SC.Object.extend({
     // the FileSource that is used for this directory
@@ -50,7 +52,7 @@ exports.Directory = SC.Object.extend({
     files: null,
 
     // whether or not we have data for this directory
-    status: NEW,
+    status: exports.NEW,
 
     contents: function() {
         return this.get("directories").concat(this.get("files"));
@@ -66,16 +68,16 @@ exports.Directory = SC.Object.extend({
             throw new Error("Directory must have a source.");
         }
 
-        if (this.get("name") == null) {
-            if (this.get("parent") != null) {
+        if (!this.get("name")) {
+            if (this.get("parent")) {
                 throw new Error("Directories must have a name, except for the root");
             }
             this.set("name", "/");
         }
-        if (this.get("directories") == null) {
+        if (!this.get("directories")) {
             this.set("directories", []);
         }
-        if (this.get("files") == null) {
+        if (!this.get("files")) {
             this.set("files", []);
         }
     },
@@ -95,11 +97,11 @@ exports.Directory = SC.Object.extend({
      */
     load: function(deep) {
         var pr = new Promise();
-        if (this.get("status") == READY) {
+        if (this.get("status") == exports.READY) {
             pr.resolve(this);
             return pr;
         }
-        this.set("status", LOADING);
+        this.set("status", exports.LOADING);
         var self = this;
         this.get("source").loadDirectory(this, deep).then(
             function(data) {
@@ -121,7 +123,7 @@ exports.Directory = SC.Object.extend({
     loadPath: function(path) {
         var pr;
         var obj = this.getObject(path);
-        if (obj == null) {
+        if (!obj) {
             pr = new Promise();
             pr.reject(new Error("Cannot find " + path));
             return pr;
@@ -161,11 +163,11 @@ exports.Directory = SC.Object.extend({
         for (var i = 0; i < segments.length - 1; i++) {
             var segment = segments[i] + "/";
             var nextDir = curDir._getItem(segment);
-            if (nextDir == null) {
+            if (!nextDir) {
                 // When the directory has been loaded, if
                 // we don't know about the given name,
                 // we're not going to create it.
-                if (curDir.get("status") == READY) {
+                if (curDir.get("status") == exports.READY) {
                     return null;
                 }
                 nextDir = exports.Directory.create({
@@ -184,7 +186,7 @@ exports.Directory = SC.Object.extend({
         }
         var retval = curDir._getItem(lastSegment);
         if (!retval) {
-            if (curDir.get("status") == READY) {
+            if (curDir.get("status") == exports.READY) {
                 return null;
             }
             if (isDir) {
@@ -303,7 +305,7 @@ exports.Directory = SC.Object.extend({
      * on directories, directory on files).
      */
     populateDirectory: function(data) {
-        this.set("status", READY);
+        this.set("status", exports.READY);
 
         var files = [], dirSpecs = {};
         var source = this.get("source");
@@ -354,7 +356,7 @@ exports.Directory = SC.Object.extend({
      *         matcher.
      */
     sendToMatcher: function(matcher, prefix) {
-        if (this.get('status') !== READY) {
+        if (this.get('status') !== exports.READY) {
             throw new Error("Attempt to send a directory to a matcher " +
                 "before the directory was ready");
         }

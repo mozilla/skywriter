@@ -136,7 +136,7 @@ exports.Menu = SC.Object.extend({
 
             // Work out if there is a common prefix between all the matches
             // (not just the ones that we are displaying)
-            if (this._items.length == 0) {
+            if (this._items.length === 0) {
                 this._commonPrefix = item.name;
             }
             // Find the longest common prefix for completion
@@ -174,8 +174,27 @@ exports.Menu = SC.Object.extend({
  */
 exports.MatcherMenu = exports.Menu.extend({
     matcher: undefined,
+    loaded: undefined,
+
+    _isLoaded: undefined,
 
     init: function() {
+        this.matcher.addDelegate({
+            matcherUpdatedItems: function() {
+                console.log("matcherUpdatedItems");
+            }
+        });
 
+        if (this.loaded) {
+            this.loaded.then(function() {
+                this._isLoaded = true;
+            }.bind(this));
+            this._isLoaded = false;
+        } else {
+            this._isLoaded = true;
+        }
+
+        this.matcher.addStrings(data);
+        this.addItems(this.matcher.getMatches());
     }
 });
