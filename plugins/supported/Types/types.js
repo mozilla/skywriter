@@ -170,17 +170,9 @@ var resolveDeferred = function(typeSpec) {
         return promise;
     }
 
-    var parts = typeSpec.pointer.split("#");
-    var modName = parts.shift();
-    var objName = parts.join("#");
-
-    r.loader.async(modName).then(function() {
-        var module = r(modName);
-        module[objName](typeSpec).then(function(typeExt) {
-            promise.resolve(typeExt);
-        }, function(ex) {
-            promise.reject(ex);
-        });
+    catalog.loadObjectForPropertyPath(typeSpec.pointer).then(function(obj) {
+        var typeExt = obj(typeSpec);
+        promise.resolve(typeExt);
     }, function(ex) {
         promise.reject(ex);
     });

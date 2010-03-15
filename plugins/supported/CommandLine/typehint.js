@@ -158,17 +158,13 @@ var resolveDeferred = function() {
         return;
     }
 
-    var parts = typeSpec.pointer.split("#");
-    var modName = parts.shift();
-    var objName = parts.join("#");
-
-    r.loader.async(modName).then(function() {
-        var module = r(modName);
-        typeHintExt = module[objName](typeSpec);
-        promise.resolve(typeHintExt);
+    catalog.loadObjectForPropertyPath(typeSpec.pointer).then(function(obj) {
+        var typeExt = obj(typeSpec);
+        promise.resolve(typeExt);
     }, function(ex) {
         promise.reject(ex);
     });
+
     return promise;
 };
 
