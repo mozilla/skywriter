@@ -383,6 +383,13 @@ def dist(options):
     built_docs = path("tmp") / "docs"
     built_docs.copytree(output_dir / "static" / "docs")
     
+    index_file = path("dryice") / "prodindex.html"
+    index_file.copy(output_dir / "static" / "index.html")
+    
+    plugins_dir = path("plugins")
+    plugins_dir.copytree(output_dir / "plugins")
+    sh("tar czf BespinServer.tgz BespinServer", cwd="tmp")
+    
     
 @task
 def build_docs(options):
