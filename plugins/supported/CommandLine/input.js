@@ -56,29 +56,35 @@ exports.Input = SC.Object.extend({
     /**
      * The instruction as typed by the user so far
      */
-    typed: null,
+    typed: undefined,
 
     /**
      * Once tokenize() has been called, we have the #typed string cut up into
      * #parts
      */
-    parts: null,
+    parts: undefined,
 
     /**
      * Once split has been called we have #parts split into #unparsedArgs and
      * #commandExt (if there is a matching command).
      */
-    unparsedArgs: null,
+    unparsedArgs: undefined,
 
     /**
      * If #typed specifies a command to execute, this is that commands metadata
      */
-    commandExt: null,
+    commandExt: undefined,
 
     /**
      * Assign matches #unparsedArgs to the params declared by the #commandExt
      */
-    assignments: null,
+    assignments: undefined,
+
+    /**
+     * The global environment (as passed to the commands) to be passed to the
+     * various completion systems.
+     */
+    env: undefined,
 
     /**
      * Check 'typed' input. Possibly overkill.

@@ -94,7 +94,7 @@ exports.cliController = SC.Object.create({
         this.hints.propertyWillChange("[]");
         this.hints.length = 0;
 
-        var input = Input.create({ typed: this.get("input") });
+        var input = Input.create({ typed: this.get("input"), env: env.global });
         var results = input.parse();
         results.hints.forEach(function(hint) {
             this.hints.pushObject(hint);
@@ -114,7 +114,7 @@ exports.cliController = SC.Object.create({
             return;
         }
 
-        var input = Input.create({ typed: typed });
+        var input = Input.create({ typed: typed, env: env.global });
         var results = input.parse();
 
         var self = this;

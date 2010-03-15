@@ -70,39 +70,50 @@ exports.getHint = function(input, assignment) {
 
     exports.getTypeHintExt(typeSpec).then(function(typeHintExt) {
         if (!typeHintExt) {
-            promise.resolve(createDefaultHint(assignment.param.description));
-            return promise;
+            return getHintOrDefault(promise, input, assignment);
         }
 
         typeHintExt.load().then(function(typeHint) {
             // We might need to resolve the typeSpec in a custom way
             if (typeHint.resolveTypeSpec) {
                 typeHint.resolveTypeSpec(typeHintExt, typeSpec).then(function() {
-                    var hint;
-                    if (typeof typeHint.getHint === "function") {
-                        hint = typeHint.getHint(input, assignment, typeHintExt);
-                    } else {
-                        hint = createDefaultHint(assignment.param.description);
-                    }
-                    promise.resolve(hint);
+                    getHintOrDefault(promise, input, assignment, typeHintExt, typeHint);
                 }, function(ex) {
                     promise.reject(ex);
                 });
             } else {
                 // Nothing to resolve - just go
-                var hint;
-                if (typeof typeHint.getHint === "function") {
-                    hint = typeHint.getHint(input, assignment, typeHintExt);
-                } else {
-                    hint = createDefaultHint(assignment.param.description);
-                }
-                promise.resolve(hint);
+                getHintOrDefault(promise, input, assignment, typeHintExt, typeHint);
             }
         }, function(ex) {
             hint = createDefaultHint(assignment.param.description);
+            promise.resolve(hint);
         });
     });
 
+    return promise;
+};
+
+/**
+ * resolve the passed promise by calling
+ */
+var getHintOrDefault = function(promise, input, assignment, typeHintExt, typeHint) {
+    var hint;
+
+    try {
+        if (typeHintExt && typeof typeHint.getHint === "function") {
+            hint = typeHint.getHint(input, assignment, typeHintExt);
+        }
+    }
+    catch (ex) {
+        console.error("Failed to get hint for ", typeHintExt, " reason: ", ex);
+    }
+
+    if (!hint) {
+        hint = createDefaultHint(assignment.param.description);
+    }
+
+    promise.resolve(hint);
     return promise;
 };
 

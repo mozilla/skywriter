@@ -35,9 +35,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var menu = require("views/menu");
 var console = require('bespin:console').console;
+
 var basic = require("Types:basic");
+
+var Menu = require("CommandLine:views/menu").Menu;
+var filter = require("CommandLine:views/menu").filter;
 
 /**
  * A choice between a known set of options
@@ -46,11 +49,21 @@ var basic = require("Types:basic");
 exports.selection = {
     getHint: function(input, assignment, typeExt) {
         var data = typeExt.data;
+
         if (!data) {
             console.error("Missing data for selection type");
             data = [];
         }
-        return menu.optionHint(input, assignment, typeExt, data);
+
+        var matches = filter(assignment.value, data);
+        var menu = Menu.create({
+            input: input,
+            assignment: assignment,
+            typeExt: typeExt
+        });
+
+        menu.addItems(matches);
+        return menu.get("hint");
     },
 
     resolveTypeSpec: basic.selection.resolveTypeSpec
@@ -62,6 +75,13 @@ exports.selection = {
  */
 exports.bool = {
     getHint: function(input, assignment, typeExt) {
-        return menu.optionHint(input, assignment, typeExt, [ "true", "false" ]);
+        var menu = Menu.create({
+            input: input,
+            assignment: assignment,
+            typeExt: typeExt
+        });
+
+        menu.addItems([ "true", "false" ]);
+        return menu.get("hint");
     }
 };

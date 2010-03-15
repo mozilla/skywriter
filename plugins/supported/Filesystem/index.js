@@ -427,7 +427,7 @@ exports.File = SC.Object.extend({
         return pathUtil.fileType(this.get("name"));
     }.property(),
 
-    /*
+    /**
      * See Directory.originPath
      */
     originPath: function() {

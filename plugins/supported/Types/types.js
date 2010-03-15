@@ -198,8 +198,11 @@ var resolveDeferred = function(typeSpec, promise) {
 
     r.loader.async(modName).then(function() {
         var module = r(modName);
-        typeExt = module[objName](typeSpec);
-        promise.resolve(typeExt);
+        module[objName](typeSpec).then(function(typeExt) {
+            promise.resolve(typeExt);
+        }, function(ex) {
+            promise.reject(ex);
+        });
     }, function(ex) {
         promise.reject(ex);
     });
@@ -237,7 +240,10 @@ exports.getTypeExtNow = function(typeSpec) {
 
     if (typeof typeSpec === "object") {
         if (typeSpec.name == "deferred") {
-            throw new Error("deferred types not supported");
+            typeExt = catalog.getExtensionByKey("type", "text");
+            console.error("getTypeExtNow on deferred. Falling back to text");
+            console.trace();
+            return typeExt;
         }
 
         typeExt = catalog.getExtensionByKey("type", typeSpec.name);

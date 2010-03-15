@@ -38,118 +38,144 @@
 var SC = require("sproutcore/runtime").SC;
 var diff_match_patch = require("Diff").diff_match_patch;
 
-var cliController = require("controller").cliController;
-var hint = require("hint");
+var cliController = require("CommandLine:controller").cliController;
+var Hint = require("CommandLine:hint").Hint;
+var Level = require("CommandLine:hint").Level;
 
 var diff = new diff_match_patch();
 
 /**
- * A really basic UI hint for when someone is entering something from a
- * set of options, for example boolean|selection.
+ *
  */
-exports.optionHint = function(input, assignment, typeExt, data) {
-    var filter = assignment.value;
-
+exports.filter = function(filter, items) {
     // How many matches do we have?
     var matches = [];
-    data.forEach(function(option) {
-        if (!filter || option.name.substring(0, filter.length) == filter) {
-            matches.push(option);
+    items.forEach(function(item) {
+        if (!filter || item.name.substring(0, filter.length) == filter) {
+            matches.push(item);
         }
     }.bind(this));
-
-    // We create a list of options in all cases
-    var parent = document.createElement("div");
-    parent.setAttribute("class", "cmd_menu");
-    var list = document.createElement("ul");
-    parent.appendChild(list);
-
-    // When someone clicks on a link, this is what we prefix onto what they
-    // clicked on to get the full input they were expecting
-    var prefix = input.typed.substring(0, input.typed.length - filter.length);
 
     if (matches.length === 0) {
-
-        if (data.length > 10) {
-            // Too many options to display menu right now
-            var warn = document.createElement("article");
-            warn.innerHTML = "No matches for '" + filter + "'";
-            return hint.Hint.create({
-                element: warn,
-                level: hint.Level.Error
-            });
-        }
-
-        var warn = document.createElement("div");
-        warn.innerHTML = "No matches for '" + filter + "'";
-        warn.className = "cmd_title cmd_error";
-
-        parent.insertBefore(warn, list);
-        data.forEach(function(option) {
-            var link = createListOption(prefix, option);
-            list.appendChild(link);
-        });
-
-        // So this is an error - nothing matches
-        // TODO: suggest typo fixes?
-        return hint.Hint.create({
-            element: parent,
-            level: hint.Level.Error
-        });
+        matches = items;
     }
 
-    var commonPrefix = matches[0].name;
-
-    matches.forEach(function(option) {
-        var link = createListOption(prefix, option);
-        list.appendChild(link);
-
-        // Find the longest common prefix for completion
-        if (commonPrefix.length > 0) {
-            var len = diff.diff_commonPrefix(commonPrefix, option.name);
-            if (len < commonPrefix.length) {
-                commonPrefix = commonPrefix.substring(0, len);
-            }
-        }
-    }.bind(this));
-
-    if (commonPrefix.length === 0) {
-        commonPrefix = undefined;
-    } else {
-        commonPrefix = commonPrefix.substring(filter.length, commonPrefix.length);
-    }
-
-    // If there is only one match, then the completion must complete to that
-    // so it's safe to add a " " to the end.
-    if (matches.length == 1) {
-        commonPrefix = commonPrefix + " ";
-    }
-
-    return hint.Hint.create({
-        element: parent,
-        level: hint.Level.Incomplete,
-        completion: commonPrefix
-    });
+    return matches;
 };
 
 /**
- * Create the clickable link
+ * Hacky way to prevent menu overload
  */
-var createListOption = function(prefix, option) {
-    var link = document.createElement("li");
-    link.appendChild(document.createTextNode(option.name));
+var MAX_ITEMS = 10;
 
-    link.addEventListener("click", function(ev) {
-        SC.run(function() {
-            cliController.set("input", prefix + option.name + " ");
+/**
+ * A really basic UI hint for when someone is entering something from a
+ * set of items, for example boolean|selection.
+ */
+exports.Menu = SC.Object.extend({
+    input: undefined,
+    assignment: undefined,
+    typeExt: undefined,
+
+    hint: undefined,
+
+    _items: undefined,
+    _parent: undefined,
+    _list: undefined,
+    _prefix: undefined,
+    _commonPrefix: undefined,
+
+    /**
+     *
+     */
+    init: function() {
+        // The list of items
+        this._parent = document.createElement("div");
+        this._parent.setAttribute("class", "cmd_menu");
+        this._list = document.createElement("ul");
+        this._parent.appendChild(this._list);
+
+        this._items = [];
+
+        // When someone clicks on a link, this is what we prefix onto what they
+        // clicked on to get the full input they were expecting
+        var baseLen = this.input.typed.length - this.assignment.value.length;
+        this._prefix = this.input.typed.substring(0, baseLen);
+
+        this.hint = Hint.create({
+            element: this._parent,
+            level: Level.Incomplete,
+            completion: undefined
         });
-    }, false);
+    },
 
-    if (option.description) {
-        var dfn = document.createElement("dfn");
-        dfn.appendChild(document.createTextNode(option.description));
-        link.appendChild(dfn);
+    /**
+     * Create the clickable link
+     */
+    addItems: function(items) {
+        items.forEach(function(item) {
+            // Create the UI component
+            if (this._items.length < MAX_ITEMS) {
+                var link = document.createElement("li");
+                link.appendChild(document.createTextNode(item.name));
+
+                link.addEventListener("click", function(ev) {
+                    SC.run(function() {
+                        cliController.set("input", this._prefix + item.name + " ");
+                    }.bind(this));
+                }.bind(this), false);
+
+                if (item.description) {
+                    var dfn = document.createElement("dfn");
+                    dfn.appendChild(document.createTextNode(item.description));
+                    link.appendChild(dfn);
+                }
+
+                this._list.appendChild(link);
+            }
+
+            // Work out if there is a common prefix between all the matches
+            // (not just the ones that we are displaying)
+            if (this._items.length == 0) {
+                this._commonPrefix = item.name;
+            }
+            // Find the longest common prefix for completion
+            if (this._commonPrefix.length > 0) {
+                var len = diff.diff_commonPrefix(this._commonPrefix, item.name);
+                if (len < this._commonPrefix.length) {
+                    this._commonPrefix = this._commonPrefix.substring(0, len);
+                }
+            }
+
+            this._items.push(item);
+
+        }.bind(this));
+
+        var completion = this._commonPrefix;
+        if (this._commonPrefix.length === 0) {
+            completion = undefined;
+        } else {
+            completion = completion.substring(this.assignment.value.length, completion.length);
+        }
+
+        // If there is only one match, then the completion must complete to that
+        // so it's safe to add a " " to the end.
+        if (this._items.length == 1) {
+            completion = completion + " ";
+        }
+
+        this.hint.completion = completion;
     }
+});
 
-    return link;
-};
+/**
+ * A special menu that understands a Matcher and will add items from the matcher
+ * into itself.
+ */
+exports.MatcherMenu = exports.Menu.extend({
+    matcher: undefined,
+
+    init: function() {
+
+    }
+});

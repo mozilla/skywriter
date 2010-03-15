@@ -35,16 +35,43 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var Matcher = require('Matcher').Matcher;
+var Menu = require('CommandLine:views/menu').Menu;
+var filter = require('CommandLine:views/menu').filter;
+
+/**
+ * @see typehint#getHint()
+ */
 exports.existingFileHint = {
-    /**
-     * @see typehint#getHint()
-     */
     getHint: function(input, assignment, typeExt) {
-        var data = typeExt.data;
-        if (!data) {
-            console.error("Missing data for selection type");
-            data = [];
-        }
-        return menu.optionHint(input, assignment, typeExt, data);
+
+        var matcher = PrefixMatcher.create({ query: assignment.value });
+        matcher.addDelegate({
+            matcherUpdatedItems: function() {
+
+            }
+        });
+
+        var files = input.env.get('files');
+        var promise = files.sendToMatcher(matcher);
+
+        promise.then(function() {
+
+        });
+
+        var data = [];
+        matcher.getMatches().forEach(function(match) {
+            data.push({ name: match });
+        });
+
+        var matches = filter(assignment.value, data);
+        var menu = Menu.create({
+            input: input,
+            assignment: assignment,
+            typeExt: typeExt
+        });
+
+        menu.addItems(matches);
+        return menu.get("hint");
     }
 };
