@@ -152,7 +152,7 @@ exports.Menu = SC.Object.extend({
         }.bind(this));
 
         var completion = this._commonPrefix;
-        if (this._commonPrefix.length === 0) {
+        if (!completion || completion.length === 0) {
             completion = undefined;
         } else {
             completion = completion.substring(this.assignment.value.length, completion.length);
@@ -179,6 +179,7 @@ exports.MatcherMenu = exports.Menu.extend({
     _isLoaded: undefined,
 
     init: function() {
+        this.superclass();
         this.matcher.addDelegate({
             matcherUpdatedItems: function() {
                 console.log("matcherUpdatedItems");
@@ -194,7 +195,6 @@ exports.MatcherMenu = exports.Menu.extend({
             this._isLoaded = true;
         }
 
-        this.matcher.addStrings(data);
         this.addItems(this.matcher.getMatches());
     }
 });
