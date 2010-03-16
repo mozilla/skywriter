@@ -466,8 +466,6 @@ exports.Input = SC.Object.extend({
 
         // The data we pass to the command
         var argOutputs = {};
-        // Which arg are we converting
-        var index = 0;
         // Cache of promises, because we're only done when they're done
         var convertPromises = [];
 
@@ -481,9 +479,6 @@ exports.Input = SC.Object.extend({
                     value = param.defaultValue;
                 }
 
-                var hintPromise = new Promise();
-                this._hints.push(hintPromise);
-
                 if (value !== undefined) {
                     // HACK! deferred types need to have some parameters
                     // by which to determine which type they should defer to
@@ -493,17 +488,14 @@ exports.Input = SC.Object.extend({
                     convertPromise.then(function(converted) {
                         assignment.converted = converted;
                         argOutputs[param.name] = converted;
-                        hintPromise.resolve(null);
-                    }, function(error) {
-                        hintPromise.resolve(hint.Hint.create({
+                    }, function(ex) {
+                        this._hints.push(hint.Hint.create({
                             level: hint.Level.Error,
                             element: "Can't convert '" + value + "' to a " +
-                                param.type + ": " + error
+                                param.type + ": " + ex
                         }));
                     });
                     convertPromises.push(convertPromise);
-
-                    index++;
                 }
             }
         }
