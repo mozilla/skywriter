@@ -44,103 +44,103 @@ var SC = require('sproutcore/runtime').SC;
 exports.console = SC.Object.create({
     log: function() {
         if (!SC.none(window.console)) {
-            window.console.log(arguments);
+            window.console.log.apply(window.console, arguments);
         }
     },
 
     debug: function() {
         if (!SC.none(window.console)) {
-            window.console.debug(arguments);
+            window.console.debug.apply(window.console, arguments);
         }
     },
 
     info: function() {
         if (!SC.none(window.console)) {
-            window.console.info(arguments);
+            window.console.info.apply(window.console, arguments);
         }
     },
 
     warn: function() {
         if (!SC.none(window.console)) {
-            window.console.warn(arguments);
+            window.console.warn.apply(window.console, arguments);
         }
     },
 
     error: function() {
         if (!SC.none(window.console)) {
-            window.console.error(arguments);
+            window.console.error.apply(window.console, arguments);
         }
     },
 
     assert: function() {
         if (!SC.none(window.console)) {
-            window.console.assert(arguments);
+            window.console.assert.apply(window.console, arguments);
         }
     },
 
     dir: function() {
         if (!SC.none(window.console)) {
-            window.console.dir(arguments);
+            window.console.dir.apply(window.console, arguments);
         }
     },
 
     dirxml: function() {
         if (!SC.none(window.console)) {
-            window.console.dirxml(arguments);
+            window.console.dirxml.apply(window.console, arguments);
         }
     },
 
     trace: function() {
         if (!SC.none(window.console)) {
-            window.console.trace(arguments);
+            window.console.trace.apply(window.console, arguments);
         }
     },
 
     group: function() {
         if (!SC.none(window.console)) {
-            window.console.group(arguments);
+            window.console.group.apply(window.console, arguments);
         }
     },
 
     groupCollapsed: function() {
         if (!SC.none(window.console)) {
-            window.console.groupCollapsed(arguments);
+            window.console.groupCollapsed.apply(window.console, arguments);
         }
     },
 
     groupEnd: function() {
         if (!SC.none(window.console)) {
-            window.console.groupEnd(arguments);
+            window.console.groupEnd.apply(window.console, arguments);
         }
     },
 
     time: function() {
         if (!SC.none(window.console)) {
-            window.console.time(arguments);
+            window.console.time.apply(window.console, arguments);
         }
     },
 
     timeEnd: function() {
         if (!SC.none(window.console)) {
-            window.console.timeEnd(arguments);
+            window.console.timeEnd.apply(window.console, arguments);
         }
     },
 
     profile: function() {
         if (!SC.none(window.console)) {
-            window.console.profile(arguments);
+            window.console.profile.apply(window.console, arguments);
         }
     },
 
     profileEnd: function() {
         if (!SC.none(window.console)) {
-            window.console.profileEnd(arguments);
+            window.console.profileEnd.apply(window.console, arguments);
         }
     },
 
     count: function() {
         if (!SC.none(window.console)) {
-            window.console.count(arguments);
+            window.console.count.apply(window.console, arguments);
         }
     }
 });
