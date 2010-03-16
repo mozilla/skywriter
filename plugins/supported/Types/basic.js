@@ -35,8 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
-var Promise = require("bespin:promise").Promise;
+var Promise = require('bespin:promise').Promise;
 
 var r = require;
 
@@ -191,14 +192,8 @@ exports.selection = {
             extension.data = typeSpec.data;
             promise.resolve();
         } else if (typeSpec.pointer) {
-            // There is a pointer to how to get the data
-            var parts = typeSpec.pointer.split("#");
-            var modName = parts.shift();
-            var objName = parts.join("#");
-
-            r.loader.async(modName).then(function() {
-                var module = r(modName);
-                extension.data = module[objName]();
+            catalog.loadObjectForPropertyPath(typeSpec.pointer).then(function(obj) {
+                extension.data = obj();
                 promise.resolve();
             }, function(ex) {
                 promise.reject(ex);
