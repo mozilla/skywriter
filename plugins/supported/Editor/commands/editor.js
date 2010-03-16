@@ -42,15 +42,14 @@ var settings = require("Settings").settings;
  * 'goto' command
  */
 exports.gotoCommand = function(env, args, request) {
-  if (args.value) {
-    var textView = env.get("view");
-    textView._moveCursorTo({
-            row: args.value - 1,
-            column: 0
-        });
-    textView.focus();
-  }
-  
+    if (args.value) {
+        var textView = env.get("view");
+        textView.moveCursorTo({
+                row: args.value - 1,
+                column: 0
+            });
+        textView.focus();
+    }
 };
 
 /**
