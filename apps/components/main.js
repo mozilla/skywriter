@@ -50,6 +50,9 @@ var run = function() {
                         this.setNeedsDisplay();
                     }.observes('_actionText', '_writtenText'),
 
+                    /*
+                    TODO: These 2 functions duplicated the ones below. We should
+                    make sure that these are the correct 2 to delete
                     copy: function() {
                         this._write("copy");
                     },
@@ -57,6 +60,7 @@ var run = function() {
                     cut: function() {
                         this._write("cut");
                     },
+                    */
 
                     drawRect: function(context) {
                         context.fillStyle = "#0000ff";
@@ -107,7 +111,7 @@ var run = function() {
                         var _writtenTextTemp = this.get('_writtenText');
                         this.set('_actionText', "cut: '" +
                             this.get('_writtenText') + "'");
-                        this.set('_writtenText', '')
+                        this.set('_writtenText', '');
                         return _writtenTextTemp;
                     },
 
@@ -123,16 +127,20 @@ var run = function() {
 };
 
 main = function() {
+    // TODO: var? should this be global?
     baseurl = window.SERVER_BASE_URL === undefined ? "/server" :
         SERVER_BASE_URL;
-    catalog.loadMetadata(baseurl + "/plugin/register/defaults",
-        function(sender, response) {
-            if (response.isError) {
-                throw new Error("failed to load plugin metadata: " +
-                    response.errorObject);
-            }
 
-            tiki.async('Editor').then(run);
-        });
+    // TODO: I can only assume that we should delete this (maybe the whole file
+    // because loadMetadata uses a promise, not a callback now) ???
+    var metadataUrl = baseurl + "/plugin/register/defaults";
+    catalog.loadMetadata(metadataUrl).then(function(sender, response) {
+        if (response.isError) {
+            throw new Error("failed to load plugin metadata: " +
+                response.errorObject);
+        }
+
+        tiki.async('Editor').then(run);
+    });
 };
 
