@@ -220,7 +220,6 @@ exports.Input = SC.Object.extend({
             initial += " " + this.unparsedArgs.shift();
         }
 
-
         this.commandExt = commandExt;
 
         // Do we know what the command is.
@@ -352,17 +351,11 @@ exports.Input = SC.Object.extend({
             return false;
         }
 
-        if (this.typed.charAt(this.typed.length - 1) == " ") {
-            // If the last thing was a space, return to command documentation
-            var hintSpec = exports.documentCommand(this.commandExt, this.typed);
-            this._hints.push(typehint.getHint(this, hintSpec));
-        } else {
-            // Otherwise show a hint for the last parameter
-            if (this.parts.length > 1) {
-                var assignment = this._getAssignmentForLastArg();
-                if (assignment) {
-                    this._hints.push(typehint.getHint(this, assignment));
-                }
+        // Show a hint for the last parameter
+        if (this.typed.charAt(this.typed.length - 1) == " " || this.parts.length > 1) {
+            var assignment = this._getAssignmentForLastArg();
+            if (assignment) {
+                this._hints.push(typehint.getHint(this, assignment));
             }
         }
 
