@@ -58,6 +58,7 @@ exports.selection = {
         }
 
         var matcher = PrefixMatcher.create({ query: assignment.value });
+        matcher.addStrings(data);
 
         var menu = MatcherMenu.create({
             input: input,

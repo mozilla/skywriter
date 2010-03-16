@@ -87,7 +87,7 @@ exports.Matcher = SC.Object.extend(MultiDelegateSupport, {
                 break;
             }
 
-            matches.push(item);
+            matches.push(item.str);
         }
 
         return matches;

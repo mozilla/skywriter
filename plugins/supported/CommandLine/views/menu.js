@@ -77,12 +77,33 @@ exports.Menu = SC.Object.extend({
     assignment: undefined,
     typeExt: undefined,
 
+    /**
+     * Generated CommandLine:hint.Hint
+     */
     hint: undefined,
 
-    _items: undefined,
+    /**
+     * DOM nodes
+     */
     _parent: undefined,
     _list: undefined,
+
+    /**
+     * When someone clicks on a link, this is what we prefix onto what they
+     * clicked on to get the full input they were expecting
+     */
     _prefix: undefined,
+
+    /**
+     * The items that we should be displaying
+     */
+    _items: undefined,
+
+    /**
+     * The longest string which is a prefix to all the _items.name. A value
+     * of null means we have not setup a prefix (probably _items is empty).
+     * A value of '' means there is no common prefix.
+     */
     _commonPrefix: undefined,
 
     /**
@@ -96,9 +117,8 @@ exports.Menu = SC.Object.extend({
         this._parent.appendChild(this._list);
 
         this._items = [];
+        this._commonPrefix = null;
 
-        // When someone clicks on a link, this is what we prefix onto what they
-        // clicked on to get the full input they were expecting
         var baseLen = this.input.typed.length - this.assignment.value.length;
         this._prefix = this.input.typed.substring(0, baseLen);
 
@@ -136,9 +156,10 @@ exports.Menu = SC.Object.extend({
 
             // Work out if there is a common prefix between all the matches
             // (not just the ones that we are displaying)
-            if (this._items.length === 0) {
+            if (!this._commonPrefix) {
                 this._commonPrefix = item.name;
             }
+
             // Find the longest common prefix for completion
             if (this._commonPrefix.length > 0) {
                 var len = diff.diff_commonPrefix(this._commonPrefix, item.name);
