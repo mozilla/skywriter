@@ -42,16 +42,15 @@
     padding: 0px;
     color: rgba(218,212,186,1);
     font-size:14px;
-    margin: 0 auto;
     line-height: 1.8em;
 }
 
 .bespin-screen.sc-pane * {
     color: rgba(255,255,255,1);
+    text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
 }
 
 .bespin-screen .sc-button-view {
-    position: absolute;
     font-size: 14px;
     text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
     padding: 8px 12px;
@@ -61,26 +60,20 @@
         inset rgba(255, 255, 255, 0.2) 0 1px 0px,
         inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
         rgba(0, 0, 0, 0.1) 0px 1px 2px;
-    background: transparent -moz-linear-gradient(top, rgba(62,108,185,1), rgba(56,50,146,1));
-}
-
-.bespin-screen #commentform h3 {
-    font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial,
-        Helvetica, sans-serif;
+    background: transparent -moz-linear-gradient(top, rgba(62,108,185,1),
+        rgba(56,50,146,1));
 }
 
 .bespin-screen .bespin-color-field {
     -moz-border-radius: .5em;
     -webkit-border-radius: .5em;
-    background: url(images/lines.png),
+	background: transparent url(images/lines.png) no-repeat top right;
     border-top: 1px solid rgba(255,255,255,0.1);
     border-left: 1px solid rgba(0, 0, 0, 0.1);
     border-right: 1px solid rgba(0, 0, 0, 0.1);
     border-bottom: 2px solid rgba(0, 0, 0, 0.1);
     background-color: rgba(69,68,60,1);
-    -moz-box-shadow:
-        rgba(0, 0, 0, 0.1) 0px 1px 2px;
-    max-width: 500px;
+    -moz-box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px;
 }
 
 .bespin-screen .title {
@@ -88,23 +81,39 @@
     text-transform:uppercase;
     color: rgba(218,212,186,1);
     text-align: center;
-    margin: 0px auto;
-    max-width: 500px;
-    margin-top: -10px;
-    margin-bottom: 40px;
 }
 
 .bespin-screen .arrow {
     vertical-align: middle;
-    margin-top: -2px;
+}
+
+.bespin-screen .sc-text-field-view {
+    overflow: visible;  /* so that the glow shows through */
+}
+
+.bespin-screen .sc-text-field-view .padding {
+    display: block;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
+    overflow: visible;
 }
 
 .bespin-screen .sc-text-field-view input {
+    display: block;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 190px;
+    height: 14px;
     border: 0px;
     padding: 4px;
     color: rgba(225,180,31,1);
     background: rgba(0,0,0,0.2);
     border: 1px solid rgba(0,0,0,0.2);
+    font-size: 8pt;
     -moz-border-radius: 0.25em;
     -moz-box-shadow:
         rgba(255,255,255,0.3) 0px 0px 2px,
@@ -145,12 +154,8 @@
     width: 200px;
 }
 
-.bespin-screen #commentform {
-    text-align: left;
-}
-
-.bespin-screen .sc-radio-button {
-    position: relative;
+.bespin-screen .sc-radio-view {
+    line-height: 24px;
 }
 
 .bespin-screen .sc-radio-button input {
@@ -159,7 +164,13 @@
     opacity: 0;
 }
 
+.bespin-screen label.sc-radio-button {
+    position: relative;
+    margin: 6px 0px 6px 0px;
+}
+
 .bespin-screen .sc-radio-button .button {
+    display: block;
     position: absolute;
     top: 0;
     left: 0;
@@ -169,8 +180,51 @@
     background-repeat: no-repeat;
 }
 
+.bespin-screen .sc-radio-button .sc-button-label {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 27px;
+}
+
 .bespin-screen .sc-radio-button.sel .button,
 .bespin-screen .sc-radio-button.active .button {
     background-image: url(images/radio-selected.png)
+}
+
+.bespin-screen .bespin-form {
+	width: 220px;
+	padding: 15px 10px;
+	background: transparent url(images/lines.png) no-repeat top right;
+	color: rgba(255,255,255,1);
+	-moz-border-radius: .5em;
+	border-top: 2px solid #ccc;
+	border-left: 2px solid #ccc;
+	border-right: 2px solid #ccc;
+	border-bottom: 2px solid #aaa;
+	-moz-border-top-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
+	-moz-border-right-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
+	-moz-border-left-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
+	-moz-border-bottom-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
+}
+
+.bespin-screen .sc-huge-size {
+    font-family: MuseoSans, Helvetica;
+    font-size: 2.8em;
+    letter-spacing: -1.25px;
+    line-height: 1;
+    text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+.bespin-screen .bespin-informational.sc-regular-size {
+    font-family: Arial, Lucida, Helvetica, sans-serif;
+    font-size: 14px;
+    color: #dad4ba;
+    line-height: 24px;
+    text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+.bespin-logo {
+    background-image: url(images/bespin-s.png);
 }
 

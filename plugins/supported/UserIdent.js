@@ -262,114 +262,199 @@ exports.signupController = SC.Object.create({
  *
  */
 exports.userIdentPage = SC.Page.design({
-
     mainPane: SC.PanelPane.design({
-        layout: { centerX: 0, width: 400, centerY: 0, height: 270 },
+        layout: { centerX: 0, width: 560 + 20, centerY: 0, height: 291 + 30 },
 
         contentView: SC.View.design({
-            classNames: [ 'bespin-color-field' ],
-            childViews: [ "action", "container" ],
-            action: SC.RadioView.design({
-                itemValueKey: 'value',
-                itemTitleKey: 'title',
-                items: [
-                    { title: "I have a Bespin account", value: "loginView" },
-                    { title: "I'm new", value: "signupView" }
-                ],
-                value: "loginView",
-                layout: { top: 20, left: 140 }
+            layout: { left: 0, top: 0, bottom: 0, right: 0 },
+            classNames: "bespin-color-field".w(),
+            childViews: "welcome form logo".w(),
+
+            welcome: SC.View.design({
+                childViews: "h1 p".w(),
+
+                layout: {
+                    left:   11,
+                    top:    16,
+                    width:  300,
+                    height: 263
+                },
+
+                h1: SC.LabelView.design({
+                    layout: {
+                        left:   10,
+                        top:    10,
+                        width:  290,
+                        height: 78
+                    },
+
+                    value: "Welcome to Bespin",
+                    controlSize: SC.HUGE_CONTROL_SIZE,
+                    fontWeight: 'bold'
+                }),
+
+                p: SC.LabelView.design({
+                    layout: {
+                        left:   10,
+                        top:    113,
+                        width:  290,
+                        height: 144
+                    },
+
+                    value:  "The Bespin project is building a web-based " +
+                            "code editor using the emerging HTML 5 " +
+                            "standard. The editor is easily extensible with " +
+                            "JavaScript and can be used in your own " +
+                            "applications or on our experimental hosted " +
+                            "service.",
+
+                    classNames: "bespin-informational".w()
+                })
             }),
 
-            container: SC.ContainerView.design({
-                nowShowingBinding: "UserIdent#userIdentPage.mainPane.contentView.action.value",
-                contentViewDidChange: function() {
-                    arguments.callee.base.apply(this, arguments);
-                    setTimeout(function() {
-                        this.mainPane.makeFirstResponder(this.getPath(this.mainPane.contentView.action.value + ".usernameField"));
-                    }.bind(exports.userIdentPage), 0);
-                    /**
-                     * TODO: The mainPane's height should be different for the loginView or the signupView.
-                     * How to do this?
-                     */
+            form: SC.View.design({
+                childViews: "action container".w(),
+                layout: {
+                    left:   310 + 2 + 10,
+                    top:    15 + 2,
+                    width:  220,
+                    height: 257
                 },
-                layout: { left: 0, top: 75, right: 0, bottom: 0 }
+
+                classNames: "bespin-form".w(),
+
+                action: SC.RadioView.design({
+                    layout: {
+                        left:   10 + 10,
+                        top:    15 + 6,
+                        width:  210,
+                        height: 61
+                    },
+
+                    itemValueKey: 'value',
+                    itemTitleKey: 'title',
+                    items: [
+                        {
+                            title: "I have a Bespin account",
+                            value: 'loginView'
+                        },
+                        {
+                            title: "I'm new",
+                            value: 'signupView'
+                        }
+                    ],
+                    value: "loginView"
+                }),
+
+                container: SC.ContainerView.design({
+                    layout: {
+                        left:   10,
+                        top:    191 - 76,
+                        width:  220,
+                        height: 299 + 37 - 76
+                    },
+
+                    nowShowingBinding: "UserIdent#userIdentPage.mainPane." +
+                        "contentView.form.action.value",
+
+                    contentViewDidChange: function() {
+                        arguments.callee.base.apply(this, arguments);
+                        setTimeout(function() {
+                            this.mainPane.makeFirstResponder(this.getPath(this.
+                                mainPane.contentView.form.action.value +
+                                ".usernameField"));
+                        }.bind(exports.userIdentPage), 0);
+                    }
+                }),
+            }),
+
+            logo: SC.ImageView.design({
+                layout: {
+                    left:   251 + 11,
+                    top:    18 + 16,
+                    width:  73,
+                    height: 70
+                },
+
+                value:  'bespin-logo'
             })
         })
     }),
 
     loginView: SC.View.design({
         layout: { left: 0, top: 0, right: 0, bottom: 0 },
-        childViews: [
-            "usernameLabel", "usernameField",
-            "passwordLabel", "passwordField",
-            "submit"
-        ],
-
-        usernameLabel: SC.LabelView.design({
-            value: "Username:",
-            textAlign: "right",
-            layout: { right: 400-150, top: 5 }
-        }),
+        childViews: ("usernameField usernameLabel passwordField " +
+            "passwordLabel submit").w(),
 
         usernameField: SC.TextFieldView.design({
             valueBinding: "UserIdent#loginController.username",
-            hint: "Your username",
-            layout: { left: 155, top: 5, height: 20, width: 100 }
+            controlSize: SC.SMALL_CONTROL_SIZE,
+            layout: { left: 10, top: 1, right: 10, height: 24 }
         }),
 
-        passwordLabel: SC.LabelView.design({
-            value: "Password:",
-            textAlign: "right",
-            layout: { right: 400-150, top: 35 }
+        usernameLabel: SC.LabelView.design({
+            value: "Username",
+            controlSize: SC.SMALL_CONTROL_SIZE,
+            layout: { left: 10, top: 1 + 24 + 3, right: 10, height: 14 }
         }),
 
         passwordField: SC.TextFieldView.design({
             valueBinding: "UserIdent#loginController.password",
-            hint: "Your password",
             isPassword: true,
-            layout: { left: 155, top: 35, height: 20, width: 100 }
+            controlSize: SC.SMALL_CONTROL_SIZE,
+            layout: { left: 10, top: 1 + 48, right: 10, height: 24 }
+        }),
+
+        passwordLabel: SC.LabelView.design({
+            value: "Password",
+            controlSize: SC.SMALL_CONTROL_SIZE,
+            layout: { left: 10, top: 1 + 48 + 24 + 3, right: 10, height: 14 }
         }),
 
         submit: SC.ButtonView.design({
+            layout: {
+                left:   10,
+                top:    1 + 48*2 + 1,
+                right:  10,
+                height: 19
+            },
+
             title: "Log in",
             isDefault: true,
             target: "UserIdent#loginController",
             action: "login",
-            layout: { left: 155, top: 65, width: 100 }
         })
     }),
 
     signupView: SC.View.design({
         layout: { left: 0, top: 0, right: 0, bottom: 0 },
-        childViews: [
-            "usernameLabel", "usernameField", "usernameError",
-            "password1Label", "password1Field", "password1Error",
-            "password2Label", "password2Field", "password2Error",
-            "emailLabel", "emailField", "emailHint",
-            "submit"
-        ],
 
-        usernameLabel: SC.LabelView.design({
-            value: "Username:",
-            textAlign: "right",
-            layout: { right: 400-150, top: 5 }
-        }),
+        childViews: ("usernameField usernameLabel usernameError " +
+            "password1Field password1Label password1Error " +
+            "password2Field password2Label password2Error " +
+            "emailField emailLabel emailHint submit").w(),
 
         usernameField: SC.TextFieldView.design({
             valueBinding: "UserIdent#signupController.username",
-            hint: "At least 4 chars",
             commitEditing: function() {
                 arguments.callee.base.apply(this, arguments);
                 exports.signupController.validate("username");
                 return true;
             },
-            layout: { left: 155, top: 5, height: 20, width: 105 }
+            layout: { left: 10, top: 1, width: 210, height: 48 }
+        }),
+
+        usernameLabel: SC.LabelView.design({
+            value: "Username:",
+            controlSize: SC.SMALL_CONTROL_SIZE,
+            layout: { left: 10, top: 26 + 3 + 1, width: 53, height: 14 }
         }),
 
         usernameError: SC.LabelView.design({
             classNames: [ "signupValidationError" ],
             valueBinding: "UserIdent#signupController.usernameError",
-            layout: { left: 265, top: 0, height: 30, width: 120 }
+            controlSize: SC.SMALL_CONTROL_SIZE,
+            layout: { right: 10, top: 26 + 3 + 1, width: 200, height: 14 }
         }),
 
         password1Label: SC.LabelView.design({
@@ -381,7 +466,6 @@ exports.userIdentPage = SC.Page.design({
         password1Field: SC.TextFieldView.design({
             isPassword: true,
             valueBinding: "UserIdent#signupController.password1",
-            hint: "At least 6 chars",
             commitEditing: function() {
                 arguments.callee.base.apply(this, arguments);
                 exports.signupController.validate("password1");
@@ -405,7 +489,6 @@ exports.userIdentPage = SC.Page.design({
         password2Field: SC.TextFieldView.design({
             isPassword: true,
             valueBinding: "UserIdent#signupController.password2",
-            hint: "Repeat it",
             commitEditing: function() {
                 arguments.callee.base.apply(this, arguments);
                 exports.signupController.validate("password2");
@@ -428,7 +511,6 @@ exports.userIdentPage = SC.Page.design({
 
         emailField: SC.TextFieldView.design({
             valueBinding: "UserIdent#signupController.email",
-            hint: "email@example.com",
             commitEditing: function() {
                 arguments.callee.base.apply(this, arguments);
                 exports.signupController.validate("email");
@@ -453,3 +535,4 @@ exports.userIdentPage = SC.Page.design({
         })
     })
 });
+
