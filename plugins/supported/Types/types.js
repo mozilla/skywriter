@@ -171,8 +171,11 @@ var resolveDeferred = function(typeSpec) {
     }
 
     catalog.loadObjectForPropertyPath(typeSpec.pointer).then(function(obj) {
-        var typeExt = obj(typeSpec);
-        promise.resolve(typeExt);
+        obj(typeSpec).then(function(typeExt) {
+            promise.resolve(typeExt);
+        }, function(ex) {
+            promise.reject(ex);
+        });
     }, function(ex) {
         promise.reject(ex);
     });

@@ -73,7 +73,9 @@ exports.getTypeExtFromAssignment = function(typeSpec) {
             var settingName = typeSpec.assignments.setting.value;
             if (settingName && settingName !== "") {
                 var settingExt = catalog.getExtensionByKey("setting", settingName);
-                typeSpec = settingExt == null ? "text" : settingExt.type;
+                typeSpec = !settingExt ? "text" : settingExt.type;
+            } else {
+                typeSpec = "text";
             }
         }
     } catch (ex) {
