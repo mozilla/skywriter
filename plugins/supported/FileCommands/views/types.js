@@ -46,15 +46,16 @@ exports.existingFileHint = {
 
         var matcher = QuickMatcher.create({ query: assignment.value });
 
-        var files = input.env.get('files');
-        var promise = files.sendToMatcher(matcher);
-
         var menu = MatcherMenu.create({
             input: input,
             assignment: assignment,
             typeExt: typeExt,
-            matcher: matcher,
-            loaded: promise
+            matcher: matcher
+        });
+
+        var files = input.env.get('files');
+        files.load(true).then(function() {
+            files.sendToMatcher(matcher);
         });
 
         return menu.get("hint");
