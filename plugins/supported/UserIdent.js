@@ -372,7 +372,7 @@ exports.userIdentPage = SC.Page.design({
                                 ".usernameField"));
                         }.bind(exports.userIdentPage), 0);
                     }
-                }),
+                })
             }),
 
             logo: SC.ImageView.design({
@@ -429,7 +429,7 @@ exports.userIdentPage = SC.Page.design({
             title: "Log in",
             isDefault: true,
             target: "UserIdent#loginController",
-            action: "login",
+            action: "login"
         })
     }),
 
