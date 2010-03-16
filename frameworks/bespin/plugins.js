@@ -258,13 +258,13 @@ exports.Plugin = SC.Object.extend({
             }
         });
     },
-    
+
     /*
      * removes the plugin from Tiki's registries.
      */
     _cleanup: function() {
         var pluginName = this.get("name");
-        
+
         // remove all traces of the plugin
 
         var nameMatch = new RegExp("^" + pluginName + ":");
@@ -286,7 +286,7 @@ exports.Plugin = SC.Object.extend({
 
         delete tiki._catalog[pluginName];
     },
-    
+
     /**
      * reloads the plugin and reinitializes all
      * dependent plugins
@@ -351,7 +351,7 @@ exports.Plugin = SC.Object.extend({
         }
 
         this._cleanup(pluginName);
-        
+
         // clear the sandbox of modules from all of the dependent plugins
         var fullModList = [];
         var sandbox = tiki.sandbox;
@@ -365,9 +365,9 @@ exports.Plugin = SC.Object.extend({
                 dependRegexes.push(new RegExp("^" + dependName + ":"));
             }
         }
-        
+
         var nameMatch = new RegExp("^" + pluginName + ":");
-        
+
         while (--i >= 0) {
             var item = sandbox.modules[i];
             if (nameMatch.exec(item)) {
@@ -587,13 +587,13 @@ exports.Catalog = SC.Object.extend({
         }, this);
     },
 
-    /*
-    * Loads the named plugin, calling the provided callback
-    * when the plugin is loaded. This function is a convenience
-    * for unusual situations and debugging only. Generally,
-    * you should load plugins by calling load() on an Extesnion
-    * object.
-    */
+    /**
+     * Loads the named plugin, calling the provided callback
+     * when the plugin is loaded. This function is a convenience
+     * for unusual situations and debugging only. Generally,
+     * you should load plugins by calling load() on an Extesnion
+     * object.
+     */
     loadPlugin: function(pluginName, callback) {
         var p = tiki.async(pluginName);
         if (callback) {
@@ -602,8 +602,8 @@ exports.Catalog = SC.Object.extend({
             });
         }
     },
-    
-    /*
+
+    /**
      * Retrieve metadata from the server. Returns a promise that is
      * resolved when the metadata has been loaded.
      */
@@ -615,8 +615,8 @@ exports.Catalog = SC.Object.extend({
             }}).send("");
         return pr;
     },
-    
-    /*
+
+    /**
      * Removes a plugin, unregistering it and cleaning up.
      */
     removePlugin: function(pluginName) {
@@ -625,16 +625,16 @@ exports.Catalog = SC.Object.extend({
         if (plugin == undefined) {
             throw new Error("Attempted to remove plugin " + pluginName + " which does not exist.");
         }
-        
+
         plugin.unregister();
         plugin._cleanup();
         delete plugins[pluginName];
     },
 
-    /*
-    * for the given plugin, get the first part of the URL required to
-    * get at that plugin's resources (images, etc.).
-    */
+    /**
+     * for the given plugin, get the first part of the URL required to
+     * get at that plugin's resources (images, etc.).
+     */
     getResourceURL: function(pluginName) {
         var plugin = this.plugins[pluginName];
         if (plugin == undefined) {
@@ -657,6 +657,7 @@ exports.Catalog = SC.Object.extend({
                     continue;
                 }
                 tiki.register(pluginName, data[pluginName]);
+                this._checkLoops(pluginName, data, []);
             }
             this.load(data);
         }
@@ -664,8 +665,35 @@ exports.Catalog = SC.Object.extend({
             params.callback(this, response);
         }
     },
-    
-    /*
+
+    /**
+     * Check the dependency graph to ensure we don't have cycles.
+     */
+    _checkLoops: function(pluginName, data, trail) {
+        var circular = false;
+        trail.forEach(function(node) {
+            if (pluginName === node) {
+                console.error("Circular dependency", pluginName, trail);
+                circular = true;
+            }
+        });
+        if (circular) {
+            return;
+        }
+        trail.push(pluginName);
+        if (!data[pluginName]) {
+            console.error("Missing metadata for ", pluginName);
+        } else {
+            if (data[pluginName].depends) {
+                data[pluginName].depends.forEach(function(dependency) {
+                    var trailClone = trail.slice();
+                    this._checkLoops(dependency, data, trailClone);
+                }.bind(this));
+            }
+        }
+    },
+
+    /**
      * Retrieve an array of the plugin objects.
      * The opts object can include the following options:
      * onlyType (string): only include plugins of this type
@@ -678,21 +706,21 @@ exports.Catalog = SC.Object.extend({
         var plugins = this.get("plugins");
         for (var key in plugins) {
             var plugin = plugins[key];
-            
+
             // apply the filter
-            if ((onlyType && plugin.type && plugin.type != onlyType) 
+            if ((onlyType && plugin.type && plugin.type != onlyType)
                 || plugin.name == "bespin") {
                 continue;
             }
-            
+
             result.push(plugin);
         }
-        
+
         var sortBy = opts.sortBy;
         if (!sortBy) {
             sortBy = ["name"];
         }
-        
+
         var sortfunc = function(a, b) {
             for (var i = 0; i < sortBy.length; i++) {
                 var key = sortBy[i];
@@ -704,7 +732,7 @@ exports.Catalog = SC.Object.extend({
             }
             return 0;
         };
-        
+
         result.sort(sortfunc);
         return result;
     },
