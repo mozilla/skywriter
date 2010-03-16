@@ -43,8 +43,8 @@ var MatcherMenu = require('CommandLine:views/menu').MatcherMenu;
  */
 exports.existingFileHint = {
     getHint: function(input, assignment, typeExt) {
-
-        var matcher = QuickMatcher.create({ query: assignment.value });
+        var query = assignment.value || "";
+        var matcher = QuickMatcher.create({ query: query });
 
         var menu = MatcherMenu.create({
             input: input,

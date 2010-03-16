@@ -147,7 +147,7 @@ exports.Directory = SC.Object.extend({
         }
         return collection.findProperty("name", name);
     },
-    
+
     /**
      * Retrieves an object (File or Directory) under this Directory
      * at the path given. If necessary, it will create objects along
@@ -206,7 +206,7 @@ exports.Directory = SC.Object.extend({
         }
         return retval;
     },
-    
+
     /*
      * Retrieves an object (file or directory), loading intermediate
      * directories along the way and ensuring that the end object
@@ -221,9 +221,9 @@ exports.Directory = SC.Object.extend({
         if (isDir) {
             segments.pop();
         }
-        
+
         var curDir = this;
-        
+
         // loop over the segments and get each object synchronously,
         // if we can
         for (var i = 0; i < segments.length; i++) {
@@ -233,17 +233,17 @@ exports.Directory = SC.Object.extend({
             }
             var item = this._getItem(segments[i]);
             if (!item) {
-                pr.reject({message: 
+                pr.reject({message:
                     segments[i] + " not found in " + curDir.get("path")});
                 return pr;
             }
-            
+
             // is this a directory?
             if (item.loadObject) {
                 curDir = item;
             } else {
                 if (i+1 != segments.length) {
-                    pr.reject(segments[i] + 
+                    pr.reject(segments[i] +
                         " is a file found where a directory was expected in " +
                         "path " + path);
                     return pr;
@@ -253,7 +253,7 @@ exports.Directory = SC.Object.extend({
                 }
             }
         }
-        
+
         // we've gotten as far as we can synchronously.
         // now we'll aggressively load everything underneath
         curDir.load(true).then(function() {
@@ -388,7 +388,7 @@ exports.Directory = SC.Object.extend({
 
         return promise;
     },
-    
+
     /*
      * Removes this directory and everything underneath it.
      * @return a promise resolved when the deletion is done.
@@ -445,10 +445,10 @@ exports.File = SC.Object.extend({
         var source = this.get("source");
         return source.saveContents(this, newcontents);
     },
-    
+
     /*
      * remove this file.
-     * 
+     *
      * @return a promise resolved when the file is removed
      */
     remove: function() {

@@ -57,7 +57,8 @@ exports.selection = {
             data = [];
         }
 
-        var matcher = PrefixMatcher.create({ query: assignment.value });
+        var query = assignment.value || "";
+        var matcher = PrefixMatcher.create({ query: query });
         matcher.addStrings(data);
 
         var menu = MatcherMenu.create({

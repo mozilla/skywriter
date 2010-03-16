@@ -119,7 +119,8 @@ exports.Menu = SC.Object.extend({
         this._items = [];
         this._commonPrefix = null;
 
-        var baseLen = this.input.typed.length - this.assignment.value.length;
+        var argLen = this.assignment.value ? this.assignment.value.length : 0;
+        var baseLen = this.input.typed.length - argLen;
         this._prefix = this.input.typed.substring(0, baseLen);
 
         this.hint = Hint.create({
@@ -156,7 +157,7 @@ exports.Menu = SC.Object.extend({
 
             // Work out if there is a common prefix between all the matches
             // (not just the ones that we are displaying)
-            if (!this._commonPrefix) {
+            if (this._commonPrefix === null) {
                 this._commonPrefix = item.name;
             }
 
@@ -176,7 +177,8 @@ exports.Menu = SC.Object.extend({
         if (!completion || completion.length === 0) {
             completion = undefined;
         } else {
-            completion = completion.substring(this.assignment.value.length, completion.length);
+            var argLen = this.assignment.value ? this.assignment.value.length : 0;
+            completion = completion.substring(argLen, completion.length);
         }
 
         // If there is only one match, then the completion must complete to that
