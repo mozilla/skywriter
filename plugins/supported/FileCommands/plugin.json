@@ -60,7 +60,7 @@
                 },
                 {
                     "name": "line",
-                    "type": "text",
+                    "type": "number",
                     "description": "optional line to jump to",
                     "defaultValue": null
                 }
