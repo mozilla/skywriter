@@ -49,25 +49,29 @@ var r = require;
 var resolve = function(typeSpec, onResolve) {
     var promise = new Promise();
 
-    exports.getTypeExt(typeSpec).then(function(ext) {
-        ext.load(function(type) {
-            // We might need to resolve the typeSpec in a custom way
-            if (type.resolveTypeSpec) {
-                type.resolveTypeSpec(ext, typeSpec).then(function() {
+    try {
+        exports.getTypeExt(typeSpec).then(function(ext) {
+            ext.load(function(type) {
+                // We might need to resolve the typeSpec in a custom way
+                if (type.resolveTypeSpec) {
+                    type.resolveTypeSpec(ext, typeSpec).then(function() {
+                        var reply = onResolve(type, ext);
+                        promise.resolve(reply);
+                    }, function(ex) {
+                        promise.reject(ex);
+                    });
+                } else {
+                    // Nothing to resolve - just go
                     var reply = onResolve(type, ext);
                     promise.resolve(reply);
-                }, function(ex) {
-                    promise.reject(ex);
-                });
-            } else {
-                // Nothing to resolve - just go
-                var reply = onResolve(type, ext);
-                promise.resolve(reply);
-            }
+                }
+            });
+        }, function(ex) {
+            promise.reject(ex);
         });
-    }, function(ex) {
+    } catch (ex) {
         promise.reject(ex);
-    });
+    }
 
     return promise;
 };

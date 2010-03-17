@@ -66,7 +66,7 @@ var KeyboardManager = SC.Object.extend({
     processKeyEvent: function(evt, sender, flags) {
         var symbolicName = evt.commandCodes()[0];
         var commandExt = this._findCommandExtension(symbolicName, flags);
-        if (commandExt != null) {
+        if (commandExt) {
             commandExt.load(function(command) {
                 var request = Request.create({
                     command: command,
