@@ -64,6 +64,8 @@ var m_editsession = require('EditSession');
 var settings = require('Settings').settings;
 var util = require("bespin:util/util");
 
+var embeddedEditorInstantiated = false;
+
 exports.EmbeddedEditor = SC.Object.extend({
     _editorView: null,
 
@@ -246,6 +248,13 @@ exports.EmbeddedEditor = SC.Object.extend({
     },
 
     init: function() {
+        if (embeddedEditorInstantiated === true) {
+            throw new Error("Attempt to instantiate multiple instances of " +
+                "Bespin");
+        }
+
+        embeddedEditorInstantiated = true;
+
         var session = m_editsession.EditSession.create();
         exports.session = session;
 
