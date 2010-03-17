@@ -326,65 +326,6 @@ exports.server = SC.Object.create({
     },
 
     /**
-     * Try to login to the backend system.
-     * @param user is the username
-     * @param pass is the password
-     * @param onSuccess fires when the user is logged in
-     * @param onFailure fires when the user failed to login
-     */
-    login: function(user, pass, onSuccess, onFailure) {
-        var url = "/register/login/" + user;
-        this.request('POST', url, "password=" + encodeURI(pass), {
-            onSuccess: onSuccess,
-            on401: onFailure,
-            log: 'Login complete.'
-        });
-    },
-
-    /**
-     * Signup / Register the user to the backend system
-     * @param user is the username
-     * @param pass is the password
-     * @param email is the email
-     * @param onSuccess fires when the user is logged in
-     * @param notloggedin fires when not logged in
-     * @param userconflict fires when the username exists
-     */
-    signup: function(user, pass, email, opts) {
-        opts = opts || {};
-        var url = "/register/new/" + user;
-        var data = "password=" + encodeURI(pass) + "&email=" + encodeURI(email);
-        this.request('POST', url, data, opts);
-    },
-
-    /**
-     * Logout from the backend
-     * @param onSuccess fires after the logout attempt
-     */
-    logout: function(onSuccess) {
-        var url = "/register/logout/";
-        this.request('POST', url, null, {
-            log: 'Logout complete.',
-            onSuccess: onSuccess
-        });
-    },
-
-    /**
-     * Return info on the current logged in user
-     * @param onSuccess fires after the user attempt
-     * @param notloggedin fires if the user isn't logged in
-     */
-    currentuser: function(whenLoggedIn, whenNotloggedin, otherFailure) {
-        var url = "/register/userinfo/";
-        return this.request('GET', url, null, {
-            onSuccess: whenLoggedIn,
-            on401: whenNotloggedin,
-            evalJSON: true,
-            onFailure: otherFailure
-        });
-    },
-
-    /**
      * List the path in the given project
      * @param project is the project to list
      * @param path is the path to list out

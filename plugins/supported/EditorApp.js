@@ -88,6 +88,8 @@ exports.session = editsession.EditSession.create();
 var INITIAL_TEXT;   // defined at the end of the file to reduce ugliness
 
 exports.applicationController = SC.Object.create({
+    _editorHasBeenSetup: false,
+    
     _application: SC.Application.extend(),
 
     _themeManager: null,
@@ -105,6 +107,12 @@ exports.applicationController = SC.Object.create({
     }),
 
     _showEditor: function() {
+        if (this._editorHasBeenSetup) {
+            this._setupSession();
+            return;
+        }
+        this._editorHasBeenSetup = true;
+        
         settings.setPersister(ServerPersister.create());
 
         var applicationView = this._applicationView.create();
@@ -117,13 +125,17 @@ exports.applicationController = SC.Object.create({
         var mainPane = this._mainPage.get('mainPane');
         mainPane.appendChild(applicationView);
 
-        var editorView = applicationView.get('centerView');
+        this._setupSession();
+    },
+    
+    _setupSession: function() {
+        var editorView = this._applicationView.get('centerView');
         var layoutManager = editorView.get('layoutManager');
         var textStorage = layoutManager.get('textStorage');
 
         var syntaxManager = layoutManager.get('syntaxManager');
         syntaxManager.set('initialContext', 'html');
-
+        
         var buffer = editsession.Buffer.create({
             model:          textStorage,
             syntaxManager:  syntaxManager
@@ -133,7 +145,6 @@ exports.applicationController = SC.Object.create({
         exports.session.set('currentView', textView);
         exports.session.set('currentBuffer', buffer);
         exports.session.loadMostRecentOrNew();
-
         setTimeout(function() {
             textView.focus();
         }, 25);
@@ -149,19 +160,29 @@ exports.applicationController = SC.Object.create({
 
         var mainPane = mainPage.get('mainPane');
         mainPane.append();
-
         var themeManager = ThemeManager.create({ theme: "Screen" });
         this._themeManager = themeManager;
         themeManager.addPane(mainPane);
-        themeManager.addPane(userIdentPage.get('mainPane'));
-
         loginController.addDelegate(this);
+        
+        m_userident.currentuser().then(this.loginControllerAcceptedLogin.bind(this),
+            this._displayLogin.bind(this));
+
+    },
+    
+    _displayLogin: function() {
+        this._themeManager.addPane(userIdentPage.get('mainPane'));
+
         loginController.show();
     },
 
     loginControllerAcceptedLogin: function(sender) {
         exports.files = Directory.create({source: BespinFileSource.create()});
         this._showEditor();
+    },
+    
+    loginControllerLoggedOut: function(sender) {
+        this._displayLogin();
     }
 });
 

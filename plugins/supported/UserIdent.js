@@ -38,7 +38,15 @@
 "define metadata";
 ({
     "description": "Identifies the user via a Bespin server",
-    "depends": [ "BespinServer", "DelegateSupport" ]
+    "depends": [ "BespinServer", "DelegateSupport" ],
+    "provides": [
+        {
+            "ep": "command",
+            "name": "logout",
+            "description": "Logout of Bespin",
+            "pointer": "#logout"
+        }
+    ]
 });
 "end";
 
@@ -58,8 +66,10 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
     password: "",
 
     login: function() {
-        server.login(this.get("username"), this.get("password"),
-            this.onSuccess.bind(this), this.onFailure.bind(this));
+        var password = this.get("password");
+        this.set("password", "");
+        return exports.login(this.get("username"), password).
+            then(this.onSuccess.bind(this), this.onFailure.bind(this));
     },
 
     /**
@@ -108,7 +118,7 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
         }.bind(this);
 
         if (username && password) {
-            server.login(username, password,
+            exports.login(username, password).then(
                 this.onSuccess.bind(this), onFailure);
         } else {
             var pane = exports.userIdentPage.get('mainPane');
@@ -618,3 +628,57 @@ exports.userIdentPage = SC.Page.design({
     })
 });
 
+/**
+ * Try to login to the backend system.
+ * @param user is the username
+ * @param pass is the password
+ */
+exports.login = function(user, pass) {
+    var url = "/register/login/" + user;
+    return server.request('POST', url, "password=" + encodeURI(pass), {
+        log: 'Login complete.'
+    });
+};
+
+/**
+ * Signup / Register the user to the backend system
+ * @param user is the username
+ * @param pass is the password
+ * @param email is the email
+ */
+exports.signup = function(user, pass, email, opts) {
+    opts = opts || {};
+    var url = "/register/new/" + user;
+    var data = "password=" + encodeURI(pass) + "&email=" + encodeURI(email);
+    return server.request('POST', url, data, opts);
+};
+
+/**
+ * Logout from the backend
+ * @param onSuccess fires after the logout attempt
+ */
+exports.logout = function() {
+    var url = "/register/logout/";
+    return server.request('POST', url, null, {
+        log: 'Logout complete.'
+    }).then(function() {
+        exports.loginController.set("username", "");
+        exports.loginController.set("password", "");
+        exports.loginController.notifyDelegates("loginControllerLoggedOut");
+    }, function(error) {
+        var pane = SC.AlertPane.error("Unable to log out",
+            "There was a problem logging out: " + error.message);
+        pane.append();
+        pane.becomeKeyPane();
+    });
+};
+
+/**
+ * Return info on the current logged in user
+ */
+exports.currentuser = function() {
+    var url = "/register/userinfo/";
+    return server.request('GET', url, null, {
+        evalJSON: true
+    });
+};
