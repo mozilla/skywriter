@@ -279,7 +279,7 @@ exports.Input = SC.Object.extend({
             this._hints.push(hintPromise);
         }
 
-        return this.commandExt != null;
+        return !SC.none(this.commandExt);
     },
 
     /**
@@ -465,30 +465,9 @@ exports.Input = SC.Object.extend({
         for (var name in this.assignments) {
             if (this.assignments.hasOwnProperty(name)) {
                 var assignment = this.assignments[name];
-                var param = assignment.param;
-
-                var value = assignment.value;
-                if (value === undefined) {
-                    value = param.defaultValue;
-                }
-
-                if (value !== undefined) {
-                    // HACK! deferred types need to have some parameters
-                    // by which to determine which type they should defer to
-                    // so we hack in the assignments so the deferrer can work
-                    param.type.assignments = this.assignments;
-                    var convertPromise = types.fromString(value, param.type);
-                    convertPromise.then(function(converted) {
-                        assignment.converted = converted;
-                        argOutputs[param.name] = converted;
-                    }, function(ex) {
-                        this._hints.push(hint.Hint.create({
-                            level: hint.Level.Error,
-                            element: "Can't convert '" + value + "' to a " +
-                                param.type + ": " + ex
-                        }));
-                    });
-                    convertPromises.push(convertPromise);
+                var promise = this._convertType(assignment);
+                if (promise) {
+                    convertPromises.push(promise, argOutputs);
                 }
             }
         }
@@ -498,6 +477,39 @@ exports.Input = SC.Object.extend({
         }.bind(this));
 
         return true;
+    },
+
+    /**
+     * Return a promise which will be resolved on type conversion of the given
+     * assignment. The argOutputs object will be filled out with the converted
+     * type so the promise is only needed to indicate completion of a group of
+     * type conversions.
+     */
+    _convertType: function(assignment, argOutputs) {
+        var param = assignment.param;
+        var value = assignment.value || param.defaultValue;
+        if (value === undefined) {
+            return null;
+        }
+
+        // HACK! deferred types need to have some parameters
+        // by which to determine which type they should defer to
+        // so we hack in the assignments so the deferrer can work
+        param.type.assignments = this.assignments;
+
+        var convertPromise = types.fromString(value, param.type);
+        convertPromise.then(function(converted) {
+            assignment.converted = converted;
+            argOutputs[param.name] = converted;
+        }, function(ex) {
+            this._hints.push(hint.Hint.create({
+                level: hint.Level.Error,
+                element: "Can't convert '" + value + "' to a " +
+                    param.type + ": " + ex
+            }));
+        });
+
+        return convertPromise;
     }
 });
 
