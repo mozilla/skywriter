@@ -95,57 +95,11 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
     },
 
     show: function() {
-        var username;
-        var password;
-
-        try {
-            if (window.localStorage) {
-                username = localStorage.getItem("username");
-                password = localStorage.getItem("password");
-            }
-        }
-        catch (ex) {
-            console.error("localStorage blew up. ignoring auto-login. Do you have cookies disabled?", ex);
-        }
-
-        var onFailure = function() {
-            console.error("Login failed for ", username);
-            var pane = exports.userIdentPage.get('mainPane');
-            pane.append();
-            pane.becomeKeyPane();
-
-            this.onFailure();
-        }.bind(this);
-
-        if (username && password) {
-            exports.login(username, password).then(
-                this.onSuccess.bind(this), onFailure);
-        } else {
-            var pane = exports.userIdentPage.get('mainPane');
-            pane.append();
-            pane.becomeKeyPane();
-        }
+        var pane = exports.userIdentPage.get('mainPane');
+        pane.append();
+        pane.becomeKeyPane();
     }
 });
-
-/**
- * Setup auto-login shortcut
- */
-exports.autoLogin = function(username, password) {
-    if (window.localStorage) {
-        if (!username) {
-            localStorage.removeItem("username");
-            localStorage.removeItem("password");
-            console.log("Removed auto-login info");
-        } else {
-            localStorage.setItem("username", username);
-            localStorage.setItem("password", password);
-            console.log("Added auto-login info for " + username);
-        }
-    } else {
-        console.error("window.localStorage is not supported");
-    }
-};
 
 /**
  * Controller for the registration process
