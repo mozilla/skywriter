@@ -96,24 +96,33 @@ exports.Directory = SC.Object.extend({
      *        rooted at this location is returned.
      */
     load: function(deep) {
-        var pr = new Promise();
+        // TODO: There is a bug here because we assume that this directory
+        // is deeply loaded, which may not be the case ...
         if (this.get("status") == exports.READY) {
+            var pr = new Promise();
             pr.resolve(this);
             return pr;
         }
+
+        if (this.get("status") == exports.LOADING) {
+            return this._loadPromise;
+        }
+
+        this._loadPromise = new Promise();
         this.set("status", exports.LOADING);
-        var self = this;
+
         this.get("source").loadDirectory(this, deep).then(
             function(data) {
-                self.populateDirectory(data);
-                pr.resolve(self);
-            },
+                this.populateDirectory(data);
+                this._loadPromise.resolve(this);
+            }.bind(this),
             function(error) {
-                error.directory = self;
-                pr.reject(error);
-            }
+                error.directory = this;
+                this._loadPromise.reject(error);
+            }.bind(this)
         );
-        return pr;
+
+        return this._loadPromise;
     },
 
     /**
@@ -367,7 +376,7 @@ exports.Directory = SC.Object.extend({
 
         var subdirs = this.get('directories');
         var paths = this.get('files').concat(subdirs).map(function(obj) {
-            return prefix + obj.get('name');
+            return { name: prefix + obj.get('name') };
         });
 
         matcher.addStrings(paths);
