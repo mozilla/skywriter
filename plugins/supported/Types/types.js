@@ -42,26 +42,26 @@ var Promise = require("bespin:promise").Promise;
 var r = require;
 
 /**
- * Do all the nastiness of: converting the typeSpec to a typeExt, then
- * asynchronously loading the typeExt to a type and then doing whatever the
+ * Do all the nastiness of: converting the typeSpec to an extension, then
+ * asynchronously loading the extension to a type and then doing whatever the
  * onResolve thing wanted to do
  */
 var resolve = function(typeSpec, onResolve) {
     var promise = new Promise();
 
-    exports.getTypeExt(typeSpec).then(function(typeExt) {
-        typeExt.load(function(type) {
+    exports.getTypeExt(typeSpec).then(function(ext) {
+        ext.load(function(type) {
             // We might need to resolve the typeSpec in a custom way
             if (type.resolveTypeSpec) {
-                type.resolveTypeSpec(typeExt, typeSpec).then(function() {
-                    var reply = onResolve(type, typeExt);
+                type.resolveTypeSpec(ext, typeSpec).then(function() {
+                    var reply = onResolve(type, ext);
                     promise.resolve(reply);
                 }, function(ex) {
                     promise.reject(ex);
                 });
             } else {
                 // Nothing to resolve - just go
-                var reply = onResolve(type, typeExt);
+                var reply = onResolve(type, ext);
                 promise.resolve(reply);
             }
         });
@@ -77,8 +77,8 @@ var resolve = function(typeSpec, onResolve) {
  * <tt>typeSpec</tt>.
  */
 exports.fromString = function(stringVersion, typeSpec) {
-    return resolve(typeSpec, function(type, typeExt) {
-        return type.fromString(stringVersion, typeExt);
+    return resolve(typeSpec, function(type, ext) {
+        return type.fromString(stringVersion, ext);
     });
 };
 
@@ -87,8 +87,8 @@ exports.fromString = function(stringVersion, typeSpec) {
  * <tt>typeSpec</tt>.
  */
 exports.toString = function(objectVersion, typeSpec) {
-    return resolve(typeSpec, function(type, typeExt) {
-        return type.toString(objectVersion, typeExt);
+    return resolve(typeSpec, function(type, ext) {
+        return type.toString(objectVersion, ext);
     });
 };
 
@@ -97,8 +97,8 @@ exports.toString = function(objectVersion, typeSpec) {
  * <tt>typeSpec</tt>.
  */
 exports.isValid = function(originalVersion, typeSpec) {
-    return resolve(typeSpec, function(type, typeExt) {
-        return type.isValid(originalVersion, typeExt);
+    return resolve(typeSpec, function(type, ext) {
+        return type.isValid(originalVersion, ext);
     });
 };
 
@@ -143,13 +143,13 @@ exports.getSimpleName = function(typeSpec) {
 // already complex code
 
 /**
- *
+ * @see CommandLine:typehint.resolveSimpleType
  */
 var resolveSimpleType = function(name) {
     var promise = new Promise();
-    var typeExt = catalog.getExtensionByKey("type", name);
-    if (typeExt) {
-        promise.resolve(typeExt);
+    var ext = catalog.getExtensionByKey("type", name);
+    if (ext) {
+        promise.resolve(ext);
     } else {
         promise.reject(new Error("Unknown type: " + name));
     }
@@ -162,17 +162,17 @@ var resolveSimpleType = function(name) {
  * param is defined by the 1st param.
  */
 var resolveDeferred = function(typeSpec) {
-    var promise = new Promise();
     // Deferred types are specified by the return from the pointer
     // function.
+    var promise = new Promise();
     if (!typeSpec.pointer) {
         promise.reject(new Error("Missing deferred pointer"));
         return promise;
     }
 
     catalog.loadObjectForPropertyPath(typeSpec.pointer).then(function(obj) {
-        obj(typeSpec).then(function(typeExt) {
-            promise.resolve(typeExt);
+        obj(typeSpec).then(function(ext) {
+            promise.resolve(ext);
         }, function(ex) {
             promise.reject(ex);
         });
@@ -195,7 +195,7 @@ exports.getTypeExt = function(typeSpec) {
     }
 
     if (typeof typeSpec === "object") {
-        if (typeSpec.name == "deferred") {
+        if (typeSpec.name === "deferred") {
             return resolveDeferred(typeSpec);
         } else {
             return resolveSimpleType(typeSpec.name);
@@ -224,9 +224,9 @@ exports.getTypeExtNow = function(typeSpec) {
 
             if (data.substring(0, 1) == "[" || data.substring(0, 1) == "{") {
                 // JSON data is specified in the string. Yuck
-                var typeExt = catalog.getExtensionByKey("type", name);
-                typeExt.data = JSON.parse(data);
-                return typeExt;
+                var ext = catalog.getExtensionByKey("type", name);
+                ext.data = JSON.parse(data);
+                return ext;
             }
 
             throw new Error("Non array/object data unsupported.");
@@ -235,17 +235,17 @@ exports.getTypeExtNow = function(typeSpec) {
 
     if (typeof typeSpec === "object") {
         if (typeSpec.name == "deferred") {
-            typeExt = catalog.getExtensionByKey("type", "text");
+            ext = catalog.getExtensionByKey("type", "text");
             console.error("getTypeExtNow on deferred. Falling back to text");
             console.trace();
-            return typeExt;
+            return ext;
         }
 
-        typeExt = catalog.getExtensionByKey("type", typeSpec.name);
-        if (typeExt && typeSpec.data) {
-            typeExt.data = typeSpec.data;
+        ext = catalog.getExtensionByKey("type", typeSpec.name);
+        if (ext && typeSpec.data) {
+            ext.data = typeSpec.data;
         }
 
-        return typeExt;
+        return ext;
     }
 };

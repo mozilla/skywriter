@@ -61,16 +61,16 @@ var createDefaultHint = function(description) {
 /**
  * resolve the passed promise by calling
  */
-var getHintOrDefault = function(promise, input, assignment, typeHintExt, typeHint) {
+var getHintOrDefault = function(promise, input, assignment, ext, typeHint) {
     var hint;
 
     try {
-        if (typeHintExt && typeof typeHint.getHint === "function") {
-            hint = typeHint.getHint(input, assignment, typeHintExt);
+        if (ext && typeof typeHint.getHint === "function") {
+            hint = typeHint.getHint(input, assignment, ext);
         }
     }
     catch (ex) {
-        console.error("Failed to get hint for ", typeHintExt, " reason: ", ex);
+        console.error("Failed to get hint for ", ext, " reason: ", ex);
     }
 
     if (!hint) {
@@ -105,22 +105,22 @@ exports.getHint = function(input, assignment) {
     var promise = new Promise();
     var typeSpec = assignment.param.type;
 
-    exports.getTypeHintExt(typeSpec).then(function(typeHintExt) {
-        if (!typeHintExt) {
+    exports.getTypeHintExt(typeSpec).then(function(ext) {
+        if (!ext) {
             return getHintOrDefault(promise, input, assignment);
         }
 
-        typeHintExt.load().then(function(typeHint) {
+        ext.load().then(function(typeHint) {
             // We might need to resolve the typeSpec in a custom way
             if (typeHint.resolveTypeSpec) {
-                typeHint.resolveTypeSpec(typeHintExt, typeSpec).then(function() {
-                    getHintOrDefault(promise, input, assignment, typeHintExt, typeHint);
+                typeHint.resolveTypeSpec(ext, typeSpec).then(function() {
+                    getHintOrDefault(promise, input, assignment, ext, typeHint);
                 }, function(ex) {
                     promise.reject(ex);
                 });
             } else {
                 // Nothing to resolve - just go
-                getHintOrDefault(promise, input, assignment, typeHintExt, typeHint);
+                getHintOrDefault(promise, input, assignment, ext, typeHint);
             }
         }, function(ex) {
             hint = createDefaultHint(assignment.param.description);
@@ -141,26 +141,37 @@ exports.getHint = function(input, assignment) {
 // Whilst we could abstract out the changes, I'm not sure this simplifies
 // already complex code
 
+/**
+ * @see Types:types.resolveSimpleType
+ */
 var resolveSimpleType = function(name) {
     var promise = new Promise();
-    typeHintExt = catalog.getExtensionByKey("typehint", name);
+    ext = catalog.getExtensionByKey("typehint", name);
     // It's not an error if the type isn't found. See above
-    promise.resolve(typeHintExt);
+    promise.resolve(ext);
     return promise;
 };
 
-var resolveDeferred = function() {
+/**
+ * A deferred type is one where we hope to find out what the type is just
+ * in time to use it. For example the 'set' command where the type of the 2nd
+ * param is defined by the 1st param.
+ */
+var resolveDeferred = function(typeSpec) {
     // Deferred types are specified by the return from the pointer
     // function.
     var promise = new Promise();
     if (!typeSpec.pointer) {
         promise.reject(new Error("Missing deferred pointer"));
-        return;
+        return promise;
     }
 
     catalog.loadObjectForPropertyPath(typeSpec.pointer).then(function(obj) {
-        var typeExt = obj(typeSpec);
-        promise.resolve(typeExt);
+        obj(typeSpec).then(function(ext) {
+            promise.resolve(ext);
+        }, function(ex) {
+            promise.reject(ex);
+        });
     }, function(ex) {
         promise.reject(ex);
     });
