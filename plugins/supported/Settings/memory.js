@@ -268,16 +268,22 @@ exports.MemorySettings = SC.Object.extend({
      */
     _loadFromObject: function(data) {
         var promises = [];
+        // take the promise action out of the loop to avoid closure problems
+        var setterFactory = function(keyName) {
+            return function(value) {
+                this.set(keyName, value);
+            };
+        };
+
         for (var key in data) {
             if (data.hasOwnProperty(key)) {
-                var value = data[key];
+                var valueStr = data[key];
                 var settingExt = catalog.getExtensionByKey("setting", key);
                 if (settingExt) {
                     // TODO: We shouldn't just ignore values without a setting
-                    var promise = types.fromString(value, settingExt.type);
-                    promise.then(function(value) {
-                        this.set(key, value);
-                    });
+                    var promise = types.fromString(valueStr, settingExt.type);
+                    var setter = setterFactory(key);
+                    promise.then(setter);
                     promises.push(promise);
                 }
             }
