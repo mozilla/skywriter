@@ -64,26 +64,30 @@ exports.getSettings = function() {
  * of the type to the command line.
  */
 exports.getTypeExtFromAssignment = function(typeSpec) {
-    typeSpec = typeSpec || "text";
+    var assignments = typeSpec.assignments;
+    var replacement = "text";
 
-    try {
-        // Firebug is very annoying at not silently catching NPEs from accessing
-        // typeSpec.assignments.setting.value, so we check first
-        if (typeSpec.assignments && typeSpec.assignments.setting) {
-            var settingName = typeSpec.assignments.setting.value;
+    if (assignments) {
+        // Find the assignment for "setting" so we can get it's value
+        var settingAssignment;
+        assignments.forEach(function(assignment) {
+            if (assignment.param.name === "setting") {
+                settingAssignment = assignment;
+            }
+        });
+
+        if (settingAssignment) {
+            var settingName = settingAssignment.value;
             if (settingName && settingName !== "") {
                 var settingExt = catalog.getExtensionByKey("setting", settingName);
-                typeSpec = !settingExt ? "text" : settingExt.type;
-            } else {
-                typeSpec = "text";
+                if (settingExt) {
+                    replacement = settingExt.type;
+                }
             }
         }
-    } catch (ex) {
-        // Ignore, particularly digging into the assignments could fail
-        typeSpec = "text";
     }
 
-    return types.getTypeExt(typeSpec);
+    return types.getTypeExt(replacement);
 };
 
 /**

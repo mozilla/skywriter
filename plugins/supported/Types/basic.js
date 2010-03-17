@@ -193,8 +193,16 @@ exports.selection = {
             promise.resolve();
         } else if (typeSpec.pointer) {
             catalog.loadObjectForPropertyPath(typeSpec.pointer).then(function(obj) {
-                extension.data = obj();
-                promise.resolve();
+                var reply = obj(typeSpec);
+                if (typeof reply.then === "function") {
+                    reply.then(function(data) {
+                        extension.data = data;
+                        promise.resolve();
+                    });
+                } else {
+                    extension.data = reply;
+                    promise.resolve();
+                }
             }, function(ex) {
                 promise.reject(ex);
             });
