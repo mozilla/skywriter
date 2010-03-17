@@ -302,7 +302,7 @@ def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
             
         p = Package(name, data.get('depends', []))
         packages.append(p)
-        p.content = f.text()
+        p.content = f.text('utf_8')
     
     # commented out for the moment. this is not necessary (and may actually
     # even be a problem)
