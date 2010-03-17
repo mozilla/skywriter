@@ -203,11 +203,7 @@ exports.MatcherMenu = exports.Menu.extend({
 
     init: function() {
         this.superclass();
-        this.matcher.addDelegate({
-            matcherUpdatedItems: function() {
-                console.log("matcherUpdatedItems");
-            }
-        });
+        this.matcher.addDelegate(this);
 
         if (this.loaded) {
             this.loaded.then(function() {
@@ -218,6 +214,11 @@ exports.MatcherMenu = exports.Menu.extend({
             this._isLoaded = true;
         }
 
+        this.addItems(this.matcher.getMatches());
+    },
+
+    matcherUpdatedItems: function() {
+        console.log("matcherUpdatedItems");
         this.addItems(this.matcher.getMatches());
     }
 });
