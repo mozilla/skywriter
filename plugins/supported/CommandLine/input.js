@@ -465,9 +465,9 @@ exports.Input = SC.Object.extend({
         for (var name in this.assignments) {
             if (this.assignments.hasOwnProperty(name)) {
                 var assignment = this.assignments[name];
-                var promise = this._convertType(assignment);
+                var promise = this._convertType(assignment, argOutputs);
                 if (promise) {
-                    convertPromises.push(promise, argOutputs);
+                    convertPromises.push(promise);
                 }
             }
         }
