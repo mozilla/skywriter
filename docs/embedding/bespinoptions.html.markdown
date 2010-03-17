@@ -58,7 +58,7 @@ It's possible to insert any settings (as in those defined by the 'set' command
 where the command line is available) using the settings option. For example:
 
     :::html
-    <div class="bespin" data-bespinoptions='{"settings":{"tabsize":2}}'/>
+    <div class="bespin" data-bespinoptions='{"settings":{"tabstop":2}}'/>
 
 Or using the manual API:
 
@@ -66,13 +66,13 @@ Or using the manual API:
     <textarea id="edit"></textarea>
     <script>
     tiki.require("Embedded").useBespin("edit", {
-        settings: { tabsize:2 }
+        settings: { tabstop:2 }
     });
     </script>
 
 Any of the standard settings are available.
 
-This is equivalent to calling `bespin.set("tabsize", 2);` on page load.
+This is equivalent to calling `bespin.set("tabstop", 2);` on page load.
 
 
 stealFocus
