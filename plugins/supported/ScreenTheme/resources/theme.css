@@ -62,16 +62,26 @@ body.sc-theme {
 }
 
 .bespin-screen .sc-button-view {
+    background: transparent -moz-linear-gradient(top, rgba(62,108,185,1),
+        rgba(56,50,146,1));
+    background: transparent -webkit-gradient(linear, 50% 0%, 50% 100%, from(rgba(62, 108, 185, 1)), to(rgba(56, 50, 146, 1)));
     font-size: 14px;
     text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
-    -moz-border-radius: .25em;
     border: 1px solid rgba(37,34,91,1);
+    -moz-border-radius: .25em;
+    -webkit-border-radius: .25em;
     -moz-box-shadow:
         inset rgba(255, 255, 255, 0.2) 0 1px 0px,
         inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
         rgba(0, 0, 0, 0.1) 0px 1px 2px;
-    background: transparent -moz-linear-gradient(top, rgba(62,108,185,1),
-        rgba(56,50,146,1));
+    -webkit-box-shadow:
+        inset rgba(255, 255, 255, 0.2) 0 1px 0px,
+        inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
+        rgba(0, 0, 0, 0.1) 0px 1px 2px;
+    box-shadow:
+        inset rgba(255, 255, 255, 0.2) 0 1px 0px,
+        inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
+        rgba(0, 0, 0, 0.1) 0px 1px 2px;
 }
 
 .bespin-screen .sc-button-inner {
@@ -79,16 +89,17 @@ body.sc-theme {
 }
 
 .bespin-screen .bespin-color-field {
-    -moz-border-radius: .5em;
-    -webkit-border-radius: .5em;
 	background: transparent url(images/lines.png) no-repeat top right #45443c;
     border-top: 1px solid rgba(255,255,255,0.1);
     border-left: 1px solid rgba(0, 0, 0, 0.1);
     border-right: 1px solid rgba(0, 0, 0, 0.1);
     border-bottom: 2px solid rgba(0, 0, 0, 0.1);
     background-color: rgba(69,68,60,1);
-    -moz-box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px;
     overflow: visible;
+    -moz-border-radius: .5em;
+    -webkit-border-radius: .5em;
+    -moz-box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px;
+    -webkit-box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px;
 }
 
 .bespin-screen .title {
@@ -130,7 +141,14 @@ body.sc-theme {
     border: 1px solid rgba(0,0,0,0.2);
     font-size: 8pt;
     -moz-border-radius: 0.25em;
+    -webkit-border-radius: 0.25em;
+    box-shadow:
+        rgba(255,255,255,0.3) 0px 0px 2px,
+        inset rgba(0,0,0,0.3) 0px 0px 4px;
     -moz-box-shadow:
+        rgba(255,255,255,0.3) 0px 0px 2px,
+        inset rgba(0,0,0,0.3) 0px 0px 4px;
+    -webkit-box-shadow:
         rgba(255,255,255,0.3) 0px 0px 2px,
         inset rgba(0,0,0,0.3) 0px 0px 4px;
 }
@@ -139,7 +157,12 @@ body.sc-theme {
 .bespin-screen .sc-button-view.active {
     color: rgba(255,150,0,1);
     border: 1px solid rgba(225,180,31,1);
+    outline: none;
+    box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
+        inset rgba(255,150,0,0.3) 0px 0px 6px;
     -moz-box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
+        inset rgba(255,150,0,0.3) 0px 0px 6px;
+    -webkit-box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
         inset rgba(255,150,0,0.3) 0px 0px 6px;
 }
 
@@ -152,15 +175,22 @@ body.sc-theme {
     background: rgba(0,0,0,0.2);
     border: 1px solid rgba(0,0,0,0.2);
     -moz-border-radius: 0.25em;
+    -webkit-border-radius: 0.25em;
     -moz-box-shadow:
+        rgba(255,255,255,0.3) 0px 0px 2px,
+        inset rgba(0,0,0,0.3) 0px 0px 4px;
+    -webkit-box-shadow:
         rgba(255,255,255,0.3) 0px 0px 2px,
         inset rgba(0,0,0,0.3) 0px 0px 4px;
 }
 
 .bespin-screen textarea:focus {
     color: rgba(255,150,0,1);
-     border: 1px solid rgba(225,180,31,1);
+    border: 1px solid rgba(225,180,31,1);
     -moz-box-shadow:
+        rgba(255,150,0,0.6) 0px 0px 2px,
+        inset rgba(255,150,0,0.3) 0px 0px 6px;
+    -webkit-box-shadow:
         rgba(255,150,0,0.6) 0px 0px 2px,
         inset rgba(255,150,0,0.3) 0px 0px 6px;
 }
@@ -211,11 +241,9 @@ body.sc-theme {
     position: absolute;
 	background: transparent url(images/lines.png) no-repeat top right;
 	color: rgba(255,255,255,1);
+    border: solid 2px rgba(255,255,255,0.1);
 	-moz-border-radius: .5em;
-	border-top: 2px solid #ccc;
-	border-left: 2px solid #ccc;
-	border-right: 2px solid #ccc;
-	border-bottom: 2px solid #aaa;
+	-webkit-border-radius: .5em;
 	-moz-border-top-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
 	-moz-border-right-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
 	-moz-border-left-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
