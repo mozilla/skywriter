@@ -209,7 +209,7 @@ exports.signupController = SC.Object.create({
                 onSuccess: this.onSuccess.bind(this),
                 onFailure: this.onFailure.bind(this)
             };
-            server.signup(this.username, this.password1, this.email, opts);
+            exports.signup(this.username, this.password1, this.email, opts);
         }
     },
 
@@ -218,7 +218,11 @@ exports.signupController = SC.Object.create({
      */
     onSuccess: function() {
         exports.userIdentPage.get("mainPane").remove();
-        console.log("signup succeeded");
+
+        // Load the plugin metadata for the user's plugins
+        catalog.loadMetadata(server.SERVER_BASE_URL + "/plugin/register/user");
+
+        this.notifyDelegates('loginControllerAcceptedLogin');
     },
 
     /**
@@ -227,7 +231,7 @@ exports.signupController = SC.Object.create({
     onFailure: function(xhr) {
         var pane = SC.AlertPane.error("Signup Failed", xhr.responseText);
         pane.append();
-        console.log("signup failed");
+        pane.becomeKeyPane();
     }
 });
 
