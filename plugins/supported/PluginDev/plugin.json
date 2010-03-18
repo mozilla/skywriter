@@ -1,6 +1,6 @@
 {
     "description": "Tools for testing and managing plugins.",
-    "depends": ["Types", "BespinServer", "core_test"],
+    "depends": ["Types", "BespinServer"],
     "provides": [
         {
             "ep": "command",
