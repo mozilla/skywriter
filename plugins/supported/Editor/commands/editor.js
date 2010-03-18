@@ -35,54 +35,47 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require("bespin:util/util");
-var settings = require("Settings").settings;
+var settings = require('Settings').settings;
 
 /**
  * 'goto' command
  */
 exports.gotoCommand = function(env, args, request) {
-    if (args.value) {
-        var textView = env.get("view");
-        textView.moveCursorTo({
-                row: args.value - 1,
-                column: 0
-            });
-        textView.focus();
-    }
+    var position = { row: args.line, column: 0 };
+    view.moveCursorTo(position);
+};
+
+/**
+ * Utility to allow us to alter the current selection
+ * TODO: If the selection is empty, broaden the scope to the whole file?
+ */
+var withSelection = function(env, action) {
+    var view = env.get('view');
+    var selection = view.getSelectedCharacters();
+
+    var lower = action(selection);
+
+    var range = view.getSelectedRange();
+    var model = env.get('model');
+    model.replaceCharacters(range, lower);
 };
 
 /**
  * 'replace' command
  */
 exports.replaceCommand = function(env, args, request) {
-    editor.replace(args);
-};
-
-/**
- * 'sort' command
- */
-exports.sortCommand = function(env, args, request) {
-    var buffer = editor.getDocument().split(/\n/);
-    buffer.sort();
-    if (direction && /^desc/.test(args.direction.toLowerCase())) {
-        buffer.reverse();
-    }
-    editor.insertDocument(buffer.join("\n"));
+    withSelection(env, function(selected) {
+        return selected.replace(args.search + "/g", args.replace);
+    });
 };
 
 /**
  * 'entab' command
  */
 exports.entabCommand = function(env, args, request) {
-    var tabsize = args.tabsize;
-    if (!tabsize) {
-        tabsize = settings.get("tabsize");
-    }
-
-    editor.replace({
-        search: ' {' + tabsize + '}',
-        replace: '\t'
+    tabstop = settings.get('tabstop');
+    withSelection(env, function(selected) {
+        return selected.replace(' {' + tabstop + '}', '\t');
     });
 };
 
@@ -90,14 +83,9 @@ exports.entabCommand = function(env, args, request) {
  * 'detab' command
  */
 exports.detabCommand = function(env, args, request) {
-    var tabsize = args.tabsize;
-    if (!tabsize) {
-        tabsize = settings.get("tabsize");
-    }
-
-    editor.replace({
-        search: '\t',
-        replace: util.repeatString(' ', tabsize)
+    tabstop = settings.get('tabstop');
+    withSelection(env, function(selected) {
+        return selected.replace('\t', new Array(tabstop + 1).join(' '));
     });
 };
 
@@ -105,31 +93,35 @@ exports.detabCommand = function(env, args, request) {
  * 'trim' command
  */
 exports.trimCommand = function(env, args, request) {
-    var replaceArgs = {
-        replace: ''
-    };
-
-    if (util.include(["left", "both"], args.side)) {
-        replaceArgs.search = "^\\s+";
-        editor.replace(replaceArgs);
-    }
-
-    if (util.include(["right", "both"], args.side)) {
-        replaceArgs.search = "\\s+$";
-        editor.replace(replaceArgs);
-    }
+    withSelection(env, function(selected) {
+        var lines = selected.split('\n');
+        lines = lines.map(function(line) {
+            if (args.side === 'left' || args.side === 'both') {
+                line = line.replace(/^\s+/, '');
+            }
+            if (args.side === 'right' || args.side === 'both') {
+                line = line.replace(/\s+$/, '');
+            }
+            return line;
+        });
+        return lines.join('\n');
+    });
 };
 
 /**
  * 'uc' command
  */
 exports.ucCommand = function(env, args, request) {
-    editor.selectionChangeCase({ stringCase: 'u' });
+    withSelection(env, function(selected) {
+        return selected.toUpperCase();
+    });
 };
 
 /**
  * 'lc' command
  */
 exports.lcCommand = function(env, args, request) {
-    editor.selectionChangeCase({ stringCase: 'l' });
+    withSelection(env, function(selected) {
+        return selected.toLowerCase();
+    });
 };

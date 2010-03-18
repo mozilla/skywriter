@@ -1,6 +1,7 @@
 {
     "description": "Canvas-based text editor component and many common editing commands",
-    "depends": [
+    "depends":
+    [
         "AppSupport",
         "Canon",
         "DelegateSupport",
@@ -8,7 +9,8 @@
         "Settings",
         "SyntaxManager"
     ],
-    "provides": [
+    "provides":
+    [
         {
             "ep": "command",
             "name": "backspace",
@@ -22,36 +24,6 @@
             "key": "delete",
             "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
-        },
-        {
-            "ep": "command",
-            "name": "detab",
-            "params":
-            [
-                {
-                    "name": "tabsize",
-                    "type": "text",
-                    "description": "Optionally, specify a tab size. (Defaults to setting.)",
-                    "defaultValue": null
-                }
-            ],
-            "description": "Convert tabs to spaces.",
-            "pointer": "commands/editor#detabCommand"
-        },
-        {
-            "ep": "command",
-            "name": "entab",
-            "params":
-            [
-                {
-                    "name": "tabsize",
-                    "type": "text",
-                    "description": "Optionally, specify a tab size. (Defaults to setting.)",
-                    "defaultValue": null
-                }
-            ],
-            "description": "Convert spaces to tabs.",
-            "pointer": "commands/editor#entabCommand"
         },
         {
             "ep": "command",
@@ -73,20 +45,6 @@
             "key": "down",
             "predicates": {"isTextView": true},
             "pointer": "views/text#textViewCommand"
-        },
-        {
-            "ep": "command",
-            "name": "goto",
-            "params":
-            [
-                {
-                    "name": "value",
-                    "type": "text",
-                    "description": "add the line number to move to in the file"
-                }
-            ],
-            "description": "move it! make the editor head to a line number.",
-            "pointer": "commands/editor#gotoCommand"
         },
         {
             "ep": "command",
@@ -170,25 +128,6 @@
             "key": "pageup",
             "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
-        },
-        {
-            "ep": "command",
-            "name": "replace",
-            "params":
-            [
-                {
-                    "name": "search",
-                    "type": "text",
-                    "description": "the search regex"
-                },
-                {
-                    "name": "replace",
-                    "type": "text",
-                    "description": "the replacement text"
-                }
-            ],
-            "description": "s/foo/bar/g",
-            "pointer": "commands/editor#replaceCommand"
         },
         {
             "ep": "command",
@@ -276,25 +215,73 @@
         },
         {
             "ep": "command",
-            "name": "sort",
-            "params":
-            [
-                {
-                    "name": "direction",
-                    "type": "text",
-                    "description": "optionally, sort descending",
-                    "defaultValue": null
-                }
-            ],
-            "description": "sort the current buffer",
-            "pointer": "commands/editor#sortCommand"
-        },
-        {
-            "ep": "command",
             "name": "tab",
             "key": "tab",
             "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
+        },
+        {
+            "ep": "command",
+            "name": "detab",
+            "params":
+            [
+                {
+                    "name": "tabsize",
+                    "type": "text",
+                    "description": "Optionally, specify a tab size. (Defaults to setting.)",
+                    "defaultValue": null
+                }
+            ],
+            "description": "Convert tabs to spaces.",
+            "pointer": "commands/editor#detabCommand"
+        },
+        {
+            "ep": "command",
+            "name": "entab",
+            "params":
+            [
+                {
+                    "name": "tabsize",
+                    "type": "text",
+                    "description": "Optionally, specify a tab size. (Defaults to setting.)",
+                    "defaultValue": null
+                }
+            ],
+            "description": "Convert spaces to tabs.",
+            "pointer": "commands/editor#entabCommand"
+        },
+        {
+            "ep": "command",
+            "name": "goto",
+            "params":
+            [
+                {
+                    "name": "value",
+                    "type": "text",
+                    "description": "add the line number to move to in the file"
+                }
+            ],
+            "description": "move it! make the editor head to a line number.",
+            "pointer": "commands/editor#gotoCommand"
+        },
+        {
+            "ep": "command",
+            "name": "replace",
+            "params":
+            [
+                {
+                    "name": "search",
+                    "type": "text",
+                    "description": "the search regex"
+                },
+                {
+                    "name": "replace",
+                    "type": "text",
+                    "description": "the replacement text"
+                }
+            ],
+            "description": "s/foo/bar/g",
+            "pointer": "commands/editor#replaceCommand"
         },
         {
             "ep": "command",
@@ -303,12 +290,16 @@
             [
                 {
                     "name": "side" ,
-                    "type": "text",
-                    "description": "optionally, give a side of left, right, or both (defaults to right)",
-                    "defaultValue": null
+                    "type":
+                    {
+                        "name": "selection",
+                        "data": [ "left", "right", "both" ]
+                    },
+                    "description": "Do we trim from the left, right or both",
+                    "defaultValue": "both"
                 }
             ],
-            "description": "trim trailing or leading whitespace",
+            "description": "trim trailing or leading whitespace from each line in selection",
             "pointer": "commands/editor#trimCommand"
         },
         {
