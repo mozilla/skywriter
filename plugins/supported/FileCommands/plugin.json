@@ -252,15 +252,16 @@
                     {
                         "name": "url",
                         "type": "text",
-                        "description": "import from a URL: <code>project import http://foo.com/yourarchive.zip [projectname]</code><br><br>upload from your machine: <code>project import YourProjectName</code><br><br><em>If only a URL is given, the projectname will be implied<br><br>If only a project name is given, a file upload window will be shown to upload.</em>"
+                        "description": "A URL of a .zip or .tar.gz file to upload from into a new project called by the file name."
                     },
                     {
                         "name": "project",
                         "type": "text",
-                        "description": "import from a URL: <code>project import http://foo.com/yourarchive.zip [projectname]</code><br><br>upload from your machine: <code>project import YourProjectName</code><br><br><em>If only a URL is given, the projectname will be implied<br><br>If only a project name is given, a file upload window will be shown to upload.</em>"
+                        "description": "Project into which to upload the files",
+                        "defaultValue": null
                     }
                 ],
-            "description": "If a URL is given, import that URL (e.g. <code>project import http://foo.com/bar.zip MyProject</code>).<br><br>If only a project is given, then a file upload dialog will ask to upload a local file (e.g. <code>project import MyProject</code>).",
+            "description": "import a zip or archive file from a URL",
             "pointer": "project#importCommand"
         },
         {
