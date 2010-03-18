@@ -452,21 +452,21 @@ def sc_build(options):
 """)
     
     output = snapshot / "sproutcore.js"
-    output.write_bytes(combined)
+    output.write_text(combined, 'utf_8')
     
     combined = combine_sproutcore_stylesheets(sproutcore_built / "sproutcore", filters=sproutcore_filters)
     output = snapshot / "sproutcore.css"
-    output.write_bytes(combined)
+    output.write_text(combined, 'utf_8')
     
     copy_sproutcore_files(sproutcore_built / "sproutcore", snapshot, filters=sproutcore_filters)
     
     combined = combine_sproutcore_stylesheets(sproutcore_built / "core_test")
     output = snapshot / "core_test.css"
-    output.write_bytes(combined)
+    output.write_text(combined, 'utf_8')
     
     combined = combine_sproutcore_files([sproutcore_built / "core_test"], ignore_dependencies=True)
     output = snapshot / "core_test.js"
-    output.write_bytes(combined)
+    output.write_text(combined, 'utf_8')
     
 BUILD_POSTAMBLE="""tiki.require("bespin:boot");"""
 

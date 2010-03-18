@@ -328,7 +328,7 @@ def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
         packages = toposort(packages)
         
     for p in packages:
-        newcode += p.content.encode("utf-8")
+        newcode += p.content
         if found_tiki and p.name == "tiki":
             newcode += "".join('tiki.stylesheet("%s");' % 
                     s.encode("utf-8") for s in stylesheets)
@@ -343,7 +343,7 @@ def _url_replacer(m):
 def combine_sproutcore_stylesheets(p, combined="", filters=None):
     flist = _get_file_list([p], "stylesheet.css", filters)
     for f in flist:
-        content = f.bytes()
+        content = f.text('utf_8')
         content = _images_url.sub(_url_replacer, content)
         combined += content
     return combined
