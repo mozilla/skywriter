@@ -35,10 +35,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+body.sc-theme {
+    background: #706f63;
+}
+
 .bespin-screen {
     font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial,
         Helvetica, sans-serif;
-    background: #4f4e45;
+    background: transparent;
     padding: 0px;
     color: rgba(218,212,186,1);
     font-size:14px;
@@ -70,13 +74,14 @@
 .bespin-screen .bespin-color-field {
     -moz-border-radius: .5em;
     -webkit-border-radius: .5em;
-	background: transparent url(images/lines.png) no-repeat top right;
+	background: transparent url(images/lines.png) no-repeat top right #45443c;
     border-top: 1px solid rgba(255,255,255,0.1);
     border-left: 1px solid rgba(0, 0, 0, 0.1);
     border-right: 1px solid rgba(0, 0, 0, 0.1);
     border-bottom: 2px solid rgba(0, 0, 0, 0.1);
     background-color: rgba(69,68,60,1);
     -moz-box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px;
+    overflow: visible;
 }
 
 .bespin-screen .title {
@@ -196,8 +201,7 @@
 }
 
 .bespin-screen .bespin-form {
-	width: 220px;
-	padding: 15px 10px;
+    position: absolute;
 	background: transparent url(images/lines.png) no-repeat top right;
 	color: rgba(255,255,255,1);
 	-moz-border-radius: .5em;

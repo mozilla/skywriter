@@ -294,7 +294,7 @@ exports.userIdentPage = SC.Page.design({
                 layout: {
                     left:   310 + 2 + 10,
                     top:    15 + 2,
-                    width:  220,
+                    width:  240,
                     height: 395
                 },
 
@@ -366,12 +366,12 @@ exports.userIdentPage = SC.Page.design({
         usernameField: SC.TextFieldView.design({
             valueBinding: "UserIdent#loginController.username",
             controlSize: SC.SMALL_CONTROL_SIZE,
-            layout: { left: 10 + 1, top: 92 - 91 + 1, width: 198, height: 22 }
+            layout: { left: 10, top: 92 - 91, width: 200, height: 24 }
         }),
 
         usernameLabel: SC.LabelView.design({
             layout: {
-                left:   10 + 1,
+                left:   10,
                 top:    92 - 91 + 26 + 3,
                 width:  200,
                 height: 14
@@ -383,10 +383,10 @@ exports.userIdentPage = SC.Page.design({
 
         passwordField: SC.TextFieldView.design({
             layout: {
-                left:   10 + 1,
-                top:    146 - 91 + 1,
-                width:  198,
-                height: 22
+                left:   10,
+                top:    146 - 91,
+                width:  200,
+                height: 24
             },
 
             controlSize: SC.SMALL_CONTROL_SIZE,
@@ -396,7 +396,7 @@ exports.userIdentPage = SC.Page.design({
 
         passwordLabel: SC.LabelView.design({
             layout: {
-                left:   10 + 1,
+                left:   10,
                 top:    146 - 91 + 26 + 3,
                 width:  200,
                 height: 14
@@ -408,10 +408,10 @@ exports.userIdentPage = SC.Page.design({
 
         submit: SC.ButtonView.design({
             layout: {
-                left:   10 + 1,
-                top:    200 - 91 + 1,
-                width:  198,
-                height: 35
+                left:   10,
+                top:    200 - 91,
+                width:  200,
+                height: 37
             },
 
             title: "Log in",
