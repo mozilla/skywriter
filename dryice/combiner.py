@@ -186,6 +186,7 @@ tiki.main("%s", "main");
 _make_json=re.compile('([\{,])(\w+):')
 _register_line = re.compile(r'tiki\.register\(["\']([\w/_]+)["\'],\s*(.*)')
 _globals_line = re.compile(r'tiki\.global\(["\']([\w/]+)["\']\);')
+_package_info_line = "/* >>>>>>>>>> BEGIN package_info.js */\n"
 
 def _quotewrap(m):
     return m.group(1) + '"' + m.group(2) + '":'
@@ -244,9 +245,13 @@ def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
         
         filehandle = f.open()
         firstline = filehandle.readline()
-        if firstline.startswith("/"):
+        while firstline != "" and firstline != _package_info_line:
             firstline = filehandle.readline()
-        
+
+        # Go to the next one.
+        if firstline == _package_info_line:
+            firstline = filehandle.readline()
+
         # look for a tiki.register line to get package
         # metadata
         m = _register_line.search(firstline)
