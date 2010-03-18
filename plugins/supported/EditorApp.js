@@ -165,6 +165,8 @@ exports.applicationController = SC.Object.create({
         themeManager.addPane(mainPane);
         loginController.addDelegate(this);
         
+        var self = this;
+        
         m_userident.currentuser().then(this.loginControllerAcceptedLogin.bind(this),
             this._displayLogin.bind(this));
 
@@ -172,8 +174,8 @@ exports.applicationController = SC.Object.create({
     
     _displayLogin: function() {
         this._themeManager.addPane(userIdentPage.get('mainPane'));
-
-        loginController.show();
+        
+        SC.run(loginController.show);
     },
 
     loginControllerAcceptedLogin: function(sender) {
