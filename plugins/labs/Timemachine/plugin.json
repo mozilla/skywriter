@@ -1,3 +1,4 @@
+
 {
     "provides": [
         {
@@ -7,9 +8,10 @@
             [
                 "name": "revision",
                 "type": "text",
-                "description": "The revision to compare with"
+                "description": "No-arguments: display list of older versions, add revision to compare with a specific version",
             ],
             "hidden": true,
+            "description": "look at older versions of the current file",
             "pointer": "experiment#timemachineCommand"
         }
     ]

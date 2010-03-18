@@ -84,14 +84,24 @@ exports.fileFindCompletions = function(query, callback) {
 
 /**
  * 'mkdir' command
+ * TODO: Delete or correct
+        {
+            "ep": "command",
+            "name": "mkdir",
+            "params":
+            [
+                {
+                    "name": "path",
+                    "type": "text",
+                    "description": "???"
+                }
+            ],
+            "description": "create a new directory, use a leading / to create a directory in a different project",
+            "pointer": "file#mkdirCommand"
+        },
  */
-exports.mkdirCommand = function(instruction, givenPath) {
-    if (!givenPath) {
-        instruction.addParameterError("givenPath", "Value missing");
-        return;
-    }
-
-    var info = parseArguments(givenPath);
+exports.mkdirCommand = function(env, args, request) {
+    var info = parseArguments(args.givenPath);
     var path = info.path;
     var project = info.project || editSession.project;
 
@@ -148,8 +158,15 @@ exports.openCommand = function(env, args, request) {
 
 /**
  * 'revert' command
+ * TODO: Delete or correct
+        {
+            "ep": "command",
+            "name": "revert",
+            "description": "revert the file to the last saved version",
+            "pointer": "#revertCommand"
+        },
  */
-exports.revertCommand = function(instruction, opts) {
+exports.revertCommand = function(env, args, request) {
     files.loadContents(editSession.project, editSession.path, function(file) {
         editor.insertDocument(file.content);
         // TODO: Something better than dumping us back at the top. We could
@@ -162,16 +179,40 @@ exports.revertCommand = function(instruction, opts) {
 
 /**
  * 'status' command
+ * TODO: Delete or correct
+        {
+            "ep": "command",
+            "name": "status",
+            "description": "get info on the current project and file",
+            "pointer": "#statusCommand"
+        },
  */
-exports.statusCommand = function(instruction) {
+exports.statusCommand = function(env, args, request) {
     request.done(editSession.getStatus());
 };
 
 /**
  * 'newfile' command
+ * TODO: Delete or correct
+        {
+            "ep": "command",
+            "name": "newfile",
+            "params":
+            [
+                {
+                    "name": "filename",
+                    "type": "text",
+                    "description": "optionally, you can specify a full path including project by starting the filename with '/'",
+                    "defaultValue": null
+                }
+            ],
+            "description": "create a new buffer for file",
+            "withKey": "CTRL SHIFT N",
+            "pointer": "#newfileCommand"
+        },
  */
-exports.newfileCommand = function(instruction, filename) {
-    var info = parseArguments(filename);
+exports.newfileCommand = function(env, args, request) {
+    var info = parseArguments(args.filename);
     editor.newFile(info.project, info.path);
 };
 
@@ -181,10 +222,10 @@ exports.newfileCommand = function(instruction, filename) {
 exports.rmCommand = function(env, args, request) {
     var files = env.get("files");
     var buffer = env.get("buffer");
-    
+
     var path = args.path;
     path = getCompletePath(env, path);
-    
+
     console.log("Removing: ", path);
     console.log("File object: ", files);
     var pathObject = files.getObject(path);
@@ -199,6 +240,13 @@ exports.rmCommand = function(env, args, request) {
 
 /**
  * 'clear' command
+ * TODO: Delete or correct
+        {
+            "ep": "command",
+            "name": "clear",
+            "description": "clear the file",
+            "pointer": "#clearCommand"
+        },
  */
 exports.clearCommand = function(instruction) {
     editor.clear();
@@ -213,6 +261,13 @@ var megabytes = function(bytes) {
 
 /**
  * 'quota' command
+ * TODO: Delete or correct
+        {
+            "ep": "command",
+            "name": "quota",
+            "description": "show your quota info",
+            "pointer": "#quotaCommand"
+        },
  */
 exports.quotaCommand = function(instruction) {
     var free = megabytes(editSession.quota - editSession.amountUsed);
@@ -225,13 +280,28 @@ exports.quotaCommand = function(instruction) {
 
 /**
  * 'rescan' command
+ * TODO: Delete or correct
+        {
+            "ep": "command",
+            "name": "rescan",
+            "params":
+            [
+                {
+                    "name": "project",
+                    "type": "text",
+                    "description": "???"
+                }
+            ],
+            "description": "update the project catalog of files used by quick open",
+            "pointer": "#rescanCommand"
+        },
  */
-exports.rescanCommand = function(instruction, project) {
-    if (!project) {
-        project = editSession.project;
+exports.rescanCommand = function(env, args, request) {
+    if (!args.project) {
+        args.project = editSession.project;
     }
 
-    server.rescan(project, instruction, {
+    server.rescan(args.project, instruction, {
         onSuccess: instruction.link(function(response) {
             request.done(response);
         }),

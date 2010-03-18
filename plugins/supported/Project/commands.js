@@ -43,8 +43,24 @@ var server = catalog.getObject("server");
 var editSession = catalog.getObject("editSession");
 var files = catalog.getObject("files");
 
+/*
+ * These are all currently dead, when we resurrect the first we will need this
+        {
+            "ep": "canon",
+            "name": "project",
+            "description": "Various commands to manage projects"
+        },
+ */
+
 /**
  * 'project show' command
+ * TODO: Fix
+        {
+            "ep": "command",
+            "name": "project show",
+            "description": "show the current project",
+            "pointer": "commands#showCommand"
+        },
  */
 exports.showCommand = function(instruction, projectname) {
     request.done(editSession.getStatus());
@@ -52,6 +68,13 @@ exports.showCommand = function(instruction, projectname) {
 
 /**
  * 'project list' command
+ * TODO: Fix
+        {
+            "ep": "command",
+            "name": "project list",
+            "description": "show projects",
+            "pointer": "commands#listCommand"
+        },
  */
 exports.listCommand = function(instruction, extra) {
     files.projects(function(projectNames) {
@@ -65,6 +88,21 @@ exports.listCommand = function(instruction, extra) {
 
 /**
  * 'project create' command
+ * TODO: Fix
+        {
+            "ep": "command",
+            "name": "project create",
+            "params":
+            [
+                {
+                    "name": "projectname",
+                    "type": "text",
+                    "description": "???"
+                }
+            ],
+            "description": "create a new project",
+            "pointer": "commands#createCommand"
+        },
  */
 exports.createCommand = function(instruction, project) {
     if (!project) {
@@ -88,6 +126,21 @@ exports.createCommand = function(instruction, project) {
 
 /**
  * 'project delete' command
+ * TODO: Fix
+        {
+            "ep": "command",
+            "name": "project delete",
+            "params":
+            [
+                {
+                    "name": "projectname",
+                    "type": "text",
+                    "description": "???"
+                }
+            ],
+            "description": "delete a project",
+            "pointer": "commands#deleteCommand"
+        },
  */
 exports.deleteCommand = function(instruction, project) {
     if (!project || project == files.userSettingsProject) {
@@ -110,6 +163,26 @@ exports.deleteCommand = function(instruction, project) {
 
 /**
  * 'project rename' command
+ * TODO: Fix
+        {
+            "ep": "command",
+            "name": "project rename",
+            "params":
+            [
+                {
+                    "name": "currentProject",
+                    "type": "text",
+                    "description": "???"
+                },
+                {
+                    "name": "newProject",
+                    "type": "text",
+                    "description": "???"
+                }
+            ],
+            "description": "rename a project",
+            "pointer": "commands#renameCommand"
+        },
  */
 exports.renameCommand = function(instruction, args) {
     if (args.currentProject == args.newProject) {
@@ -134,6 +207,27 @@ exports.renameCommand = function(instruction, args) {
 
 /**
  * 'project export' command
+ * TODO: Fix
+        {
+            "ep": "command",
+            "name": "project export",
+            "params":
+            [
+                {
+                    "name": "project",
+                    "type": "text",
+                    "description": "project name"
+                },
+                {
+                    "name": "archivetype",
+                    "type": "text",
+                    "description": "archivetype (zip | tgz, defaults to zip)",
+                    "defaultValue": "zip"
+                }
+            ],
+            "description": "export the given project with an archivetype of zip or tgz<br><code>project export myproject</code>",
+            "pointer": "commands#exportCommand"
+        },
  */
 exports.exportCommand = function(instruction, args) {
     var project = args.project || editSession.project;
@@ -269,6 +363,27 @@ var upload = function(project) {
  * <li>import http://foo.com/path/to/archive.zip projectName
  * <li>import projectName http://foo.com/path/to/archive.zip
  * </ul>
+ * TODO: Fix
+        {
+            "ep": "command",
+            "name": "project import",
+            "params":
+                [
+                    {
+                        "name": "url",
+                        "type": "text",
+                        "description": "A URL of a .zip or .tar.gz file to upload from into a new project called by the file name."
+                    },
+                    {
+                        "name": "project",
+                        "type": "text",
+                        "description": "Project into which to upload the files",
+                        "defaultValue": null
+                    }
+                ],
+            "description": "import a zip or archive file from a URL",
+            "pointer": "commands#importCommand"
+        },
  */
 exports.importCommand = function(instruction, args) {
     var project, url;

@@ -1,5 +1,7 @@
 {
     "description": "Provides a 'project' abstraction that sits atop the file system",
-    "depends": [ "Filesystem" ]
+    "depends": [ "Filesystem" ],
+    "provides":
+    [
+    ]
 }
-
