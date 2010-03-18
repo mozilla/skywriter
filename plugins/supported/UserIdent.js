@@ -57,6 +57,13 @@ var server = require("BespinServer").server;
 var catalog = require("bespin:plugins").catalog;
 var console = require('bespin:console').console;
 
+var LOGIN_PANE_HEIGHT = 321;
+var LOGIN_FORM_HEIGHT = 287;
+var LOGIN_CONTAINER_HEIGHT = 237 + 37 - 76;
+var SIGNUP_PANE_HEIGHT = 429;
+var SIGNUP_FORM_HEIGHT = 395;
+var SIGNUP_CONTAINER_HEIGHT = 299 + 37 - 76;
+
 /**
  * Controller for the sign-in process
  */
@@ -240,7 +247,12 @@ exports.signupController = SC.Object.create({
  */
 exports.userIdentPage = SC.Page.design({
     mainPane: SC.PanelPane.design({
-        layout: { centerX: 0, width: 580, centerY: 0, height: 429 },
+        layout: {
+            centerX:    0,
+            width:      580,
+            centerY:    0,
+            height:     LOGIN_PANE_HEIGHT
+        },
 
         contentView: SC.View.design({
             layout: { left: 0, top: 0, bottom: 0, right: 0 },
@@ -295,7 +307,7 @@ exports.userIdentPage = SC.Page.design({
                     left:   310 + 2 + 10,
                     top:    15 + 2,
                     width:  240,
-                    height: 395
+                    height: LOGIN_FORM_HEIGHT
                 },
 
                 classNames: "bespin-form".w(),
@@ -328,7 +340,7 @@ exports.userIdentPage = SC.Page.design({
                         left:   10,
                         top:    91 + 21,
                         width:  220,
-                        height: 299 + 37 - 76
+                        height: LOGIN_CONTAINER_HEIGHT
                     },
 
                     nowShowingBinding: "UserIdent#userIdentPage.mainPane." +
@@ -336,11 +348,34 @@ exports.userIdentPage = SC.Page.design({
 
                     contentViewDidChange: function() {
                         arguments.callee.base.apply(this, arguments);
+
+                        var page = exports.userIdentPage;
+                        var pane = page.get('mainPane');
+                        var form = pane.getPath('contentView.form');
+                        var value = form.getPath('action.value');
+
+                        var paneHeight, formHeight, containerHeight;
+                        switch (value) {
+                        case 'loginView':
+                            paneHeight = LOGIN_PANE_HEIGHT;
+                            formHeight = LOGIN_FORM_HEIGHT;
+                            containerHeight = LOGIN_CONTAINER_HEIGHT;
+                            break;
+                        case 'signupView':
+                            paneHeight = SIGNUP_PANE_HEIGHT;
+                            formHeight = SIGNUP_FORM_HEIGHT;
+                            containerHeight = SIGNUP_CONTAINER_HEIGHT;
+                            break;
+                        }
+
+                        pane.adjust('height', paneHeight);
+                        form.adjust('height', formHeight);
+                        this.adjust('height', containerHeight);
+
                         setTimeout(function() {
-                            this.mainPane.makeFirstResponder(this.getPath(this.
-                                mainPane.contentView.form.action.value +
-                                ".usernameField"));
-                        }.bind(exports.userIdentPage), 0);
+                            var view = page.getPath(value + ".usernameField");
+                            pane.makeFirstResponder(view);
+                        }, 0);
                     }
                 })
             }),
