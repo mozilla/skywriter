@@ -290,14 +290,17 @@ exports.userIdentPage = SC.Page.design({
                         height: 144
                     },
 
-                    value:  "The Bespin project is building a web-based " +
-                            "code editor using the emerging HTML 5 " +
-                            "standard. The editor is easily extensible with " +
-                            "JavaScript and can be used in your own " +
-                            "applications or on our experimental hosted " +
-                            "service.",
+                    classNames: "bespin-informational".w(),
 
-                    classNames: "bespin-informational".w()
+                    value:  "The <a href=\"http://mozillalabs.com/bespin/\" " +
+                            "target=\"_blank\">Bespin project</a> is " +
+                            "building a web-based code editor using the " +
+                            "emerging HTML 5 standard. The editor is easily " +
+                            "extensible with JavaScript and can be used in " +
+                            "your own applications or on our experimental " +
+                            "hosted service.",
+
+                    escapeHTML: false
                 })
             }),
 
