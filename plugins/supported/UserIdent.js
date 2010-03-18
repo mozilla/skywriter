@@ -274,7 +274,7 @@ exports.userIdentPage = SC.Page.design({
                         left:   10,
                         top:    10,
                         width:  290,
-                        height: 78
+                        height: 85
                     },
 
                     value: "Welcome to Bespin",

@@ -209,9 +209,11 @@ body.sc-theme {
     opacity: 0;
 }
 
-.bespin-screen label.sc-radio-button {
+.bespin-screen .sc-radio-button {
     position: relative;
     margin: 0px 0px 6px 0px;
+    height: 24px;
+    font-size: 11pt;
 }
 
 .bespin-screen .sc-radio-button .button {
@@ -256,7 +258,7 @@ body.sc-theme {
 
 .bespin-screen .sc-huge-size {
     font-family: MuseoSans, Helvetica;
-    font-size: 2.8em;
+    font-size: 29pt;
     letter-spacing: -1.25px;
     line-height: 1;
     text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
