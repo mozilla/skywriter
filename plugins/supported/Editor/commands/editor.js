@@ -41,8 +41,7 @@ var settings = require('Settings').settings;
  * 'goto' command
  */
 exports.gotoCommand = function(env, args, request) {
-    var position = { row: args.line, column: 0 };
-    view.moveCursorTo(position);
+    env.get('view').moveCursorTo({ row: args.line, column: 0 });
 };
 
 /**
