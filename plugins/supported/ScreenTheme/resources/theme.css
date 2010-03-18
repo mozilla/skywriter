@@ -49,6 +49,13 @@ body.sc-theme {
     line-height: 1.8em;
 }
 
+.bespin-screen.sc-pane {
+    -moz-transition-property: all;
+    -moz-transition-duration: 0.5s;
+    -webkit-transition-property: all;
+    -webkit-transition-duration: 0.5s;
+}
+
 .bespin-screen.sc-pane * {
     color: rgba(255,255,255,1);
     text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
@@ -213,6 +220,10 @@ body.sc-theme {
 	-moz-border-right-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
 	-moz-border-left-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
 	-moz-border-bottom-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
+    -moz-transition-property: height;
+    -moz-transition-duration: 0.5s;
+    -webkit-transition-property: height;
+    -webkit-transition-duration: 0.5s;
 }
 
 .bespin-screen .sc-huge-size {
