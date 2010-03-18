@@ -231,3 +231,31 @@
     background-image: url(images/bespin-s.png);
 }
 
+.bespin-screen .sc-text-field-view.cmd_input {
+    border: none;
+    background: transparent;
+}
+
+.bespin-screen .sc-text-field-view.cmd_input input {
+    border: none;
+    margin-top: 3px;
+    margin-left: 4px;
+    height: 18px;
+    padding: 0px;
+    -moz-box-shadow: none;
+}
+
+.bespin-screen .sc-button-view.cmd_prompt,
+.bespin-screen .sc-button-view.sc-pin-view {
+    border: none;
+    background: transparent;
+    -moz-box-shadow: none;
+}
+
+.bespin-screen .sc-button-view.cmd_prompt .sc-button-inner,
+.bespin-screen .sc-button-view.sc-pin-view .sc-button-inner {
+    border: none;
+    background: transparent;
+    margin: 0px;
+}
+

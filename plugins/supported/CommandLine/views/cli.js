@@ -56,7 +56,7 @@ var imagePath = catalog.getResourceURL("CommandLine") + "images/";
 /**
  * The height of the input area that is always visible.
  */
-var inputHeight = 30;
+var inputHeight = 27;
 
 /**
  * Utility to create an ID while end()ing RenderContext

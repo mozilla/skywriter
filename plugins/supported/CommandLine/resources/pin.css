@@ -36,7 +36,8 @@
 
 
 .sc-theme .sc-button-view.sc-pin-view img.button {
-  top: 0px; height: 16px; left: 0px; width: 16px;
+  height: 16px; width: 16px;
+  margin-top: -8px;
   background: transparent url(images/pins.png);
   background-repeat: no-repeat;
   background-position: 0px 0px;

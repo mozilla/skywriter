@@ -34,18 +34,16 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
-.cmd_line { background:#1e1916; }
-.cmd_line .sc-view.sc-text-field-view { background: inherit; }
+.sc-view .cmd_line { background:#1e1916; }
+.sc-view .cmd_line .sc-view.sc-text-field-view { background: inherit; }
 
 /* ::-moz-selection appears to only work on divs etc, and not input elements so
 this rule doesn't work, but might in the future */
-.cmd_line input::selection { color: #44A; background: #AA4; }
-.cmd_line input::-moz-selection { color: #44A; background: #AA4; }
+.sc-view .cmd_line input::selection { color: #44A; background: #AA4; }
+.sc-view .cmd_line input::-moz-selection { color: #44A; background: #AA4; }
 
-/* We're in this weird specificity battle with sproutcore, and our our CSS to
-defeat sproutcore. This needs to defeat the sproutcore defeating css. */
-body.sc-theme .cmd_line .cmd_prompt { color: #FF8E00; font-weight: bold; }
-body.sc-theme .cmd_line .cmd_prompt .cmd_brackets { color: #FFF; }
+.sc-view .cmd_line .cmd_prompt { color: #FF8E00; font-weight: bold; }
+.sc-view .cmd_line .cmd_prompt .cmd_brackets { color: #FFF; }
 
 #command.commandLineError { color: red; }
 
@@ -83,87 +81,124 @@ div.cmd_line div.cmd_hints span.cmd_info { }
 div.cmd_line div.cmd_view div.sc-collection-view {
   overflow: auto; color: #aaa; font-family: Arial,sans-serif;
 }
-div.cmd_view { font-size: 14px; }
+.sc-view div.cmd_view { font-size: 14px; }
 
 
 /* cmd_rowin */
-div.cmd_view div.cmd_rowin {
+.sc-view div.cmd_view div.cmd_rowin {
   font-size: 14px; background-color: #1b1613; font-weight: bold; color: #fff;
 }
-div.cmd_view div.cmd_rowin img { cursor: pointer; }
-div.cmd_view div.cmd_rowin:hover .cmd_hover { display: block; }
+.sc-view div.cmd_view div.cmd_rowin img { cursor: pointer; }
+.sc-view div.cmd_view div.cmd_rowin:hover .cmd_hover { display: block; }
 
 
-div.cmd_view div { border: 0; }
+.sc-view div.cmd_view div { border: 0; }
 
-div.cmd_view .cmd_open { padding: 3px 3px 2px 5px; font-size:12px; color:#666; }
-div.cmd_view .cmd_open_history { width: 20px; }
-div.cmd_view .cmd_open_time { width: 40px; }
-div.cmd_view .cmd_open_blank { width: 1px; }
+.sc-view div.cmd_view .cmd_open {
+    padding: 3px 3px 2px 5px;
+    font-size: 12px;
+    color :#666;
+}
+.sc-view div.cmd_view .cmd_open_history { width: 20px; }
+.sc-view div.cmd_view .cmd_open_time { width: 40px; }
+.sc-view div.cmd_view .cmd_open_blank { width: 1px; }
 
-div.cmd_view .cmd_typed { padding-left: 5px; }
+.sc-view div.cmd_view .cmd_typed { padding-left: 5px; }
 
-div.cmd_view .cmd_hover {
+.sc-view div.cmd_view .cmd_hover {
   float: right; font-size: 12px; font-weight: normal; height: 100%; color: #666;
   text-align: right; display: none;
 }
-div.cmd_view .cmd_hover * {
+.sc-view div.cmd_view .cmd_hover * {
   vertical-align: middle; padding-left: 3px; padding-right: 3px;
 }
-div.cmd_view .cmd_hover .cmd_duration {
+.sc-view div.cmd_view .cmd_hover .cmd_duration {
   float: left; padding-top: 2px;
 }
 
 
-div.cmd_view div.cmd_rowout div.cmd_output { padding-left: 10px; }
-div.cmd_view div.cmd_rowout div.cmd_error { color: #f99; }
-div.cmd_view div.cmd_rowout th { text-align: right; vertical-align: top; }
-div.cmd_view div.cmd_rowout td,
-div.cmd_view div.cmd_rowout th,
-div.cmd_view div.cmd_rowout table { border: 0; padding: 1px 4px; }
+.sc-view div.cmd_view div.cmd_rowout div.cmd_output { padding-left: 10px; }
+.sc-view div.cmd_view div.cmd_rowout div.cmd_error { color: #f99; }
+.sc-view div.cmd_view div.cmd_rowout th {
+    text-align: right;
+    vertical-align: top;
+}
+.sc-view div.cmd_view div.cmd_rowout td,
+.sc-view div.cmd_view div.cmd_rowout th,
+.sc-view div.cmd_view div.cmd_rowout table { border: 0; padding: 1px 4px; }
 
-div.cmd_line a { font-weight: bold; color: inherit; text-decoration: none; }
-div.cmd_line a:hover { text-decoration: underline; cursor: pointer; }
+.sc-view div.cmd_line a {
+    font-weight: bold;
+    color: inherit;
+    text-decoration: none;
+}
+.sc-view div.cmd_line a:hover { text-decoration: underline; cursor: pointer; }
 
-div.cmd_view input[type=password], div.cmd_view input[type=text],
-div.cmd_view textarea {
+.sc-view div.cmd_view input[type=password], div.cmd_view input[type=text],
+.sc-view div.cmd_view textarea {
   font-family: Arial,sans-serif; background: transparent;
   border: 1px solid #ff9600; color: #fff; font-size: 14px; border-radius: 5px;
   padding: 3px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
 }
 
-div.cmd_line div.cmd_hints { position:relative; width:100%; height:100%; }
-div.cmd_line div.cmd_ex { font-size:120%; position:absolute; bottom:0px; z-index:1; }
-
-div.cmd_line div.cmd_ex article { margin-left:25px; padding:4px 8px; z-index:1;
-  color:#AAA; margin-bottom:2px; display:block;
-  border:2px #000 solid; border-bottom:0; font-size:90%;
-  -moz-border-top-colors:#000 #1e1916;
-  -moz-border-left-colors:#000 #1e1916;
-  -moz-border-right-colors:#000 #1b1613;
-  -moz-border-radius-topleft:10px; -moz-border-radius-topright:10px;
-  border-top-left-radius:10px; border-top-right-radius:10px;
-  background:#1b1613;
-  background:-moz-linear-gradient(top, #181310, #1b1613);
-  background:-webkit-gradient(linear, left top, left bottom, from(#181310), to(#1b1613));
+.sc-view div.cmd_line div.cmd_hints {
+    position: relative;
+    width: 100%;
+    height: 100%;
 }
-div.cmd_line div.cmd_ex article h1 { font-size:110%; text-align:center; }
-div.cmd_line div.cmd_ex article h2 { font-size:95%; }
-div.cmd_line div.cmd_ex article h3 { font-size:90%; }
-div.cmd_line div.cmd_ex article.cmd_small { font-size:90%; }
-div.cmd_line div.cmd_ex article table th, div.cmd_line div.cmd_ex article label { color:#FFF; }
-div.cmd_line div.cmd_ex article h1,
-div.cmd_line div.cmd_ex article h2,
-div.cmd_line div.cmd_ex article h3 { margin:2px 0 1px 0; color:#FFF; }
-div.cmd_line div.cmd_ex article p,
-div.cmd_line div.cmd_ex article pre,
-div.cmd_line div.cmd_ex article .cmd_body { margin:2px 0 1px 10px; }
+.sc-view div.cmd_line div.cmd_ex {
+    font-size: 120%;
+    position: absolute;
+    bottom: 0px;
+    z-index: 1;
+}
 
-div.cmd_line div.cmd_ex div.cmd_menu { display:inline-block;
-  margin-bottom:-2px; padding:8px 8px 0 8px;
-  border:2px #000 solid; border-bottom:0;
-  -moz-border-radius-topleft:10px; -moz-border-radius-topright:10px;
-  border-top-left-radius:10px; border-top-right-radius:10px;
+.sc-view div.cmd_line div.cmd_ex article {
+    margin-left: 25px;
+    padding: 4px 8px;
+    z-index: 1;
+    color:#AAA;
+    margin-bottom:2px;
+    display:block;
+    border:2px #000 solid;
+    border-bottom:0;
+    font-size:90%;
+    -moz-border-top-colors:#000 #1e1916;
+    -moz-border-left-colors:#000 #1e1916;
+    -moz-border-right-colors:#000 #1b1613;
+    -moz-border-radius-topleft:10px;
+    -moz-border-radius-topright:10px;
+    border-top-left-radius:10px; border-top-right-radius:10px;
+    background:#1b1613;
+    background:-moz-linear-gradient(top, #181310, #1b1613);
+    background:-webkit-gradient(linear, left top, left bottom, from(#181310), to(#1b1613));
+}
+.sc-view div.cmd_line div.cmd_ex article h1 {
+    font-size: 110%;
+    text-align: center;
+}
+.sc-view div.cmd_line div.cmd_ex article h2 { font-size:95%; }
+.sc-view div.cmd_line div.cmd_ex article h3 { font-size:90%; }
+.sc-view div.cmd_line div.cmd_ex article.cmd_small { font-size:90%; }
+.sc-view div.cmd_line div.cmd_ex article table th,
+.sc-view div.cmd_line div.cmd_ex article label { color:#FFF; }
+.sc-view div.cmd_line div.cmd_ex article h1,
+.sc-view div.cmd_line div.cmd_ex article h2,
+.sc-view div.cmd_line div.cmd_ex article h3 { margin:2px 0 1px 0; color:#FFF; }
+.sc-view div.cmd_line div.cmd_ex article p,
+.sc-view div.cmd_line div.cmd_ex article pre,
+.sc-view div.cmd_line div.cmd_ex article .cmd_body { margin:2px 0 1px 10px; }
+
+.sc-view div.cmd_line div.cmd_ex div.cmd_menu {
+  display:inline-block;
+  margin-bottom:-2px;
+  padding:8px 8px 0 8px;
+  border:2px #000 solid;
+  border-bottom:0;
+  -moz-border-radius-topleft:10px;
+  -moz-border-radius-topright:10px;
+  border-top-left-radius:10px;
+  border-top-right-radius:10px;
   background:#191410;
   background:-moz-linear-gradient(top, #27211d, #1b1613);
   background:-webkit-gradient(linear, left top, left bottom, from(#27211d), to(#1b1613));
@@ -171,37 +206,64 @@ div.cmd_line div.cmd_ex div.cmd_menu { display:inline-block;
   -moz-border-left-colors: #000 #3e3936;
   -moz-border-right-colors: #000 #1e1916;
 }
-div.cmd_line div.cmd_ex div.cmd_menu .cmd_title { margin-bottom:2px;
+.sc-view div.cmd_line div.cmd_ex div.cmd_menu .cmd_title { margin-bottom:2px;
   border-bottom:2px #000 solid; -moz-border-bottom-colors:#3e3936 #000;
 }
-div.cmd_line div.cmd_ex div.cmd_menu .cmd_error { color:#F00; }
-div.cmd_line div.cmd_ex div.cmd_menu ul { margin:0; padding:0; }
-div.cmd_line div.cmd_ex div.cmd_menu li { padding:0; list-style:none; }
-div.cmd_line div.cmd_ex div.cmd_menu li:hover, .cmd_hi { color:#000;
-  background:#FF8E00 -moz-linear-gradient(top, #FF8E00, #DD6E00);
-  cursor:pointer;
+.sc-view div.cmd_line div.cmd_ex div.cmd_menu .cmd_error { color:#F00; }
+.sc-view div.cmd_line div.cmd_ex div.cmd_menu ul { margin:0; padding:0; }
+.sc-view div.cmd_line div.cmd_ex div.cmd_menu li {
+    padding:0;
+    list-style:none;
+}
+.sc-view div.cmd_line div.cmd_ex div.cmd_menu li:hover, .cmd_hi {
+    color:#000;
+    background:#FF8E00
+    -moz-linear-gradient(top, #FF8E00, #DD6E00);
+    cursor:pointer;
 }
 
-div.cmd_line div.cmd_ex dfn { font-size:80%; color:#888; padding:0 5px; font-style:inherit; }
-div.cmd_line div.cmd_ex em { color:#FF8E00; font-style:inherit; }
-div.cmd_line div.cmd_ex div.cmd_menu li:hover em,
-div.cmd_line div.cmd_ex div.cmd_menu li:hover dfn { color:#000; }
-div.cmd_line div.cmd_ex div.cmd_menu .cmd_sub:after { padding-left:5px;
-  content:"\u27a4"; float:right; color:#0e0906; font-size:80%;
+.sc-view div.cmd_line div.cmd_ex dfn {
+    font-size:80%;
+    color:#888;
+    padding:0 5px;
+    font-style:inherit;
 }
-div.cmd_line div.cmd_ex div.cmd_menu li:hover.cmd_sub:after { color:#FFCE00; }
-div.cmd_line div.cmd_ex div.cmd_menu .cmd_sep { margin-top:2px;
-  border-top:2px #000 solid; -moz-border-top-colors: #000 #3e3936;
+.sc-view div.cmd_line div.cmd_ex em { color:#FF8E00; font-style:inherit; }
+.sc-view div.cmd_line div.cmd_ex div.cmd_menu li:hover em,
+.sc-view div.cmd_line div.cmd_ex div.cmd_menu li:hover dfn { color:#000; }
+.sc-view div.cmd_line div.cmd_ex div.cmd_menu .cmd_sub:after {
+    padding-left:5px;
+    content:"\u27a4";
+    float:right;
+    color:#0e0906;
+    font-size:80%;
 }
-div.cmd_line div.cmd_ex samp { color:#666; z-index:10; font-family:Arial, sans-serif;
-  position:absolute; bottom:0; left:0; right:0; display:block; padding-bottom:6px;
+.sc-view div.cmd_line div.cmd_ex div.cmd_menu li:hover.cmd_sub:after {
+    color:#FFCE00;
+}
+.sc-view div.cmd_line div.cmd_ex div.cmd_menu .cmd_sep {
+    margin-top:2px;
+    border-top:2px #000 solid;
+    -moz-border-top-colors: #000 #3e3936;
+}
+.sc-view div.cmd_line div.cmd_ex samp {
+    color:#666;
+    z-index:10;
+    font-family:Arial, sans-serif;
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    display:block;
+    padding-bottom:6px;
 }
 
-div.cmd_line kbd { border-top:2px solid #000;
-  -moz-border-top-colors:#000 #1e1916;
-  background:#1b1613; 
-  background:-moz-linear-gradient(top, #1b1613, #191410);
-  background:-webkit-gradient(linear, left top, left bottom, from(#1b1613), to(#191410));
+.sc-view div.cmd_line kbd {
+    border-top:2px solid #000;
+    -moz-border-top-colors:#000 #1e1916;
+    background:#1b1613;
+    background:-moz-linear-gradient(top, #1b1613, #191410);
+    background:-webkit-gradient(linear, left top, left bottom, from(#1b1613), to(#191410));
 }
 
 /*
