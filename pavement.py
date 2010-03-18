@@ -239,6 +239,11 @@ def create_db(options):
     call_pavement(options.server_pavement, "create_db")
 
 @task
+def upgrade():
+    """Upgrade your database."""
+    call_pavement(options.server_pavement, "upgrade")
+
+@task
 def start(options):
     """Starts the BespinServer on localhost port 4020 for development.
     
