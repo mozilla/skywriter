@@ -414,27 +414,26 @@ def build_docs(options):
 def sc_build(options):
     """Create a sproutcore-snapshot from SproutCore source."""
     builddir = options.builddir
-    
+
     (builddir / "production").rmtree()
-    
+
     try:
-        sh("abbot/bin/sc-build -rc editor")
+        sh("abbot/bin/sc-build editor --project . --include-required")
     finally:
         resetfiles()
 
-    
     snapshot = path("sproutcore")
     snapshot.rmtree()
     snapshot.mkdir()
-    
+
     sproutcore_built = builddir / "production" / "build" / "static"
-    
+
     sproutcore_filters=["welcome", "tests", "docs", "bootstrap", "mobile", "iphone_theme"]
-    
+
     combined = combine_sproutcore_files([sproutcore_built / "tiki", sproutcore_built / "sproutcore"], 
         filters=sproutcore_filters,
         manual_maps=[(re.compile(r'tiki/en/\w+/javascript\.js'), "tiki")])
-    
+
     # this is a temporary hack. Once SproutCore has become fully Tiki, this can go away.
     # until then, we need to do this to avoid the creation of two unrelated SC objects
     combined = combined.replace("SC = SproutCore = {} ;", """
