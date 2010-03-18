@@ -42,106 +42,75 @@ var SC = require('sproutcore/runtime').SC;
  * messages appropriately without creating a dependency on Firebug in Firefox.
  */
 exports.console = SC.Object.create({
-    log: function() {
-        if (!SC.none(window.console)) {
-            window.console.log.apply(window.console, arguments);
-        }
-    },
+    log: window.console ?
+        window.console.log :
+        function() { this._error(arguments); },
 
-    debug: function() {
-        if (!SC.none(window.console)) {
-            window.console.debug.apply(window.console, arguments);
-        }
-    },
+    debug: window.console ?
+        window.console.log :
+        function() { this._error(arguments); },
 
-    info: function() {
-        if (!SC.none(window.console)) {
-            window.console.info.apply(window.console, arguments);
-        }
-    },
+    info: window.console ?
+        window.console.info :
+        function() { this._error(arguments); },
 
-    warn: function() {
-        if (!SC.none(window.console)) {
-            window.console.warn.apply(window.console, arguments);
-        }
-    },
+    warn: window.console ?
+        window.console.warn :
+        function() { this._error(arguments); },
 
-    error: function() {
-        if (!SC.none(window.console)) {
-            window.console.error.apply(window.console, arguments);
-        }
-    },
+    error: window.console ?
+        window.console.error :
+        function() { this._error(arguments); },
 
-    assert: function() {
-        if (!SC.none(window.console)) {
-            window.console.assert.apply(window.console, arguments);
-        }
-    },
+    assert: window.console ?
+        window.console.assert :
+        function() { this._error(arguments); },
 
-    dir: function() {
-        if (!SC.none(window.console)) {
-            window.console.dir.apply(window.console, arguments);
-        }
-    },
+    dir: window.console ?
+        window.console.dir :
+        function() { this._error(arguments); },
 
-    dirxml: function() {
-        if (!SC.none(window.console)) {
-            window.console.dirxml.apply(window.console, arguments);
-        }
-    },
+    dirxml: window.console ?
+        window.console.dirxml :
+        function() { this._error(arguments); },
 
-    trace: function() {
-        if (!SC.none(window.console)) {
-            window.console.trace.apply(window.console, arguments);
-        }
-    },
+    trace: window.console ?
+        window.console.trace :
+        function() { this._error(arguments); },
 
-    group: function() {
-        if (!SC.none(window.console)) {
-            window.console.group.apply(window.console, arguments);
-        }
-    },
+    group: window.console ?
+        window.console.group :
+        function() { this._error(arguments); },
 
-    groupCollapsed: function() {
-        if (!SC.none(window.console)) {
-            window.console.groupCollapsed.apply(window.console, arguments);
-        }
-    },
+    groupCollapsed: window.console ?
+        window.console.groupCollapsed :
+        function() { this._error(arguments); },
 
-    groupEnd: function() {
-        if (!SC.none(window.console)) {
-            window.console.groupEnd.apply(window.console, arguments);
-        }
-    },
+    groupEnd: window.console ?
+        window.console.groupEnd :
+        function() { this._error(arguments); },
 
-    time: function() {
-        if (!SC.none(window.console)) {
-            window.console.time.apply(window.console, arguments);
-        }
-    },
+    time: window.console ?
+        window.console.time :
+        function() { this._error(arguments); },
 
-    timeEnd: function() {
-        if (!SC.none(window.console)) {
-            window.console.timeEnd.apply(window.console, arguments);
-        }
-    },
+    timeEnd: window.console ?
+        window.console.timeEnd :
+        function() { this._error(arguments); },
 
-    profile: function() {
-        if (!SC.none(window.console)) {
-            window.console.profile.apply(window.console, arguments);
-        }
-    },
+    profile: window.console ?
+        window.console.profile :
+        function() { this._error(arguments); },
 
-    profileEnd: function() {
-        if (!SC.none(window.console)) {
-            window.console.profileEnd.apply(window.console, arguments);
-        }
-    },
+    profileEnd: window.console ?
+        window.console.profileEnd :
+        function() { this._error(arguments); },
 
-    count: function() {
-        if (!SC.none(window.console)) {
-            window.console.count.apply(window.console, arguments);
-        }
+    count: window.console ?
+        window.console.count :
+        function() { this._error(arguments); },
+
+    _error: function() {
     }
 });
 
