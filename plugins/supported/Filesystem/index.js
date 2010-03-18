@@ -237,7 +237,7 @@ exports.Directory = SC.Object.extend({
         // if we can
         for (var i = 0; i < segments.length; i++) {
             var status = curDir.get("status");
-            if (status != READY) {
+            if (status != exports.READY) {
                 break;
             }
             var item = this._getItem(segments[i]);
