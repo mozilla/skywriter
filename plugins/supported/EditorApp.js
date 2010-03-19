@@ -75,6 +75,7 @@ var EditorView = require('Editor:views/editor').EditorView;
 var KeyListener = require('AppSupport:views/keylistener').KeyListener;
 var m_userident = require('UserIdent');
 var loginController = m_userident.loginController;
+var signupController = m_userident.signupController;
 var userIdentPage = m_userident.userIdentPage;
 var BespinFileSource = require("BespinServer:filesource").BespinFileSource;
 var ServerPersister = require("BespinServer:settings").ServerPersister;
@@ -163,6 +164,7 @@ exports.applicationController = SC.Object.create({
         this._themeManager = themeManager;
         themeManager.addPane(mainPane);
         loginController.addDelegate(this);
+        signupController.addDelegate(this);
         
         var self = this;
         

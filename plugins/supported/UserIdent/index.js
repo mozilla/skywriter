@@ -96,7 +96,7 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
 /**
  * Controller for the registration process
  */
-exports.signupController = SC.Object.create({
+exports.signupController = SC.Object.create(MultiDelegateSupport, {
     isValid: true,
 
     username: "",
