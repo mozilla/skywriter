@@ -280,8 +280,9 @@ exports.CliInputView = SC.View.design({
         layer.addEventListener("click", this._boundCancelBlur, true);
 
         var hint = this.getPath("contentView.display.hint.layer");
-        hint.innerHTML = "<div class='cmd_ex'></div>";
-        this._ex = hint.firstChild;
+        this._ex = document.createElement("div");
+        cmdEx.className = 'cmd_ex';
+        hint.appendChild(this._ex);
 
         this.checkHeight();
     },
