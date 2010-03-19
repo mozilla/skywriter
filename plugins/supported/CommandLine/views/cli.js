@@ -279,9 +279,9 @@ exports.CliInputView = SC.View.design({
         var layer = this.get("layer");
         layer.addEventListener("click", this._boundCancelBlur, true);
 
-        var hint = this.getPath("contentView.display.hint.layer");
+        var hint = this.getPath("contentView.display.output.layer");
         this._ex = document.createElement("div");
-        cmdEx.className = 'cmd_ex';
+        this._ex.className = 'cmd_ex';
         hint.appendChild(this._ex);
 
         this.checkHeight();
@@ -481,7 +481,7 @@ exports.CliInputView = SC.View.design({
 
         display: SC.View.design({
             layout: { top: 0, bottom: 25, left: 0, right: 0 },
-            childViews: [ "output", "hint", "toolbar" ],
+            childViews: [ "output", "toolbar" ],
 
             output: SC.ScrollView.design({
                 classNames: [ "cmd_view" ],
@@ -491,11 +491,6 @@ exports.CliInputView = SC.View.design({
                     contentBinding: "Canon:request#history.requests.[]",
                     exampleView: InstructionView
                 })
-            }),
-
-            hint: SC.View.design({
-                classNames: [ "cmd_hints" ],
-                layout: { top: 0, bottom: 0, left: 30, right: 0 }
             }),
 
             toolbar: SC.View.design({

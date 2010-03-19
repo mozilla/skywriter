@@ -66,17 +66,6 @@ div.cmd_line div.cmd_completion { font-family: Arial,sans-serif;
 div.cmd_line div.cmd_completion span.cmd_existing { color: transparent; }
 div.cmd_line span.cmd_char { letter-spacing: -0.2ex; font-weight: bold; }
 
-/*
-div.cmd_line div.cmd_hints {
-  height:400px; vertical-align:bottom; display:table-cell;
-}
-
-div.cmd_line div.cmd_hints span.cmd_error { color: #FAA; }
-div.cmd_line div.cmd_hints span.cmd_incom { }
-div.cmd_line div.cmd_hints span.cmd_warn { color: #AAF; }
-div.cmd_line div.cmd_hints span.cmd_info { }
-*/
-
 /* Command Output */
 div.cmd_line div.cmd_view div.sc-collection-view {
   overflow: auto; color: #aaa; font-family: Arial,sans-serif;
@@ -143,11 +132,14 @@ div.cmd_line div.cmd_view div.sc-collection-view {
   padding: 3px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
 }
 
+/*
 .sc-view div.cmd_line div.cmd_hints {
     position: relative;
     width: 100%;
     height: 100%;
 }
+*/
+
 .sc-view div.cmd_line div.cmd_ex {
     font-size: 120%;
     position: absolute;
