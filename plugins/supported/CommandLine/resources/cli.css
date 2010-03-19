@@ -117,7 +117,9 @@ div.cmd_line div.cmd_view div.sc-collection-view {
 }
 
 
-.sc-view div.cmd_view div.cmd_rowout div.cmd_output { padding-left: 10px; }
+.sc-view div.cmd_view div.cmd_rowout div.cmd_output { padding-left: 10px;
+  line-height: 1.2em;
+}
 .sc-view div.cmd_view div.cmd_rowout div.cmd_error { color: #f99; }
 .sc-view div.cmd_view div.cmd_rowout th {
     text-align: right;
