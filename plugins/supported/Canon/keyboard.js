@@ -79,7 +79,8 @@ var KeyboardManager = SC.Object.extend({
                 } catch (ex) {
                     // TODO: Some UI?
                     var trace = new Trace(ex, true);
-                    console.group("Error calling command: " + commandExt.name);
+                    console.group("Error calling command");
+                    console.log("command=", commandExt);
                     console.error(ex);
                     trace.log(3);
                     console.groupEnd();

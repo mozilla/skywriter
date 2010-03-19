@@ -524,6 +524,9 @@ exports.CliInputView = SC.View.design({
             layout: { height: 25, bottom: 0, left: 45, right: 0 }
         }),
 
+        /**
+         * Used as something to hang styles off for input area
+         */
         kbd: SC.View.design({
             layout: { height: 25, bottom: 0, left: 0, right: 0 },
             tagName: "kbd"
