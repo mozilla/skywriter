@@ -1,4 +1,3 @@
-
 {
     "provides": [
         {
@@ -6,9 +5,11 @@
             "name": "timemachine",
             "params":
             [
-                "name": "revision",
-                "type": "text",
-                "description": "No-arguments: display list of older versions, add revision to compare with a specific version",
+                {
+                    "name": "revision",
+                    "type": "text",
+                    "description": "No-arguments: display list of older versions, add revision to compare with a specific version"
+                }
             ],
             "hidden": true,
             "description": "look at older versions of the current file",

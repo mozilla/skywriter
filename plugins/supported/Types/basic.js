@@ -121,7 +121,11 @@ exports.bool = {
         if (value === null) {
             return null;
         }
-
+        
+        if (!value.toLowerCase) {
+            return !!value;
+        }
+        
         var lower = value.toLowerCase();
         if (lower == "true") {
             return true;

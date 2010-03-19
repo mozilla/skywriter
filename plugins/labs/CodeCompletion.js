@@ -22,6 +22,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+"define metadata";
+({});
+"end";
+
 var bespin = require("bespin");
 var util = require("bespin/util/util");
 var worker = require("bespin/util/worker");

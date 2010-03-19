@@ -21,6 +21,10 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * ***** END LICENSE BLOCK ***** */
+ 
+"define metadata";
+({});
+"end";
 
 var bespin = require("bespin");
 var util = require("bespin/util/util");

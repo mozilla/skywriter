@@ -26,6 +26,10 @@
  * Web Workers / Gears WorkerPool Abstraction
  */
 
+"define metadata";
+({});
+"end";
+
 var WORKER_COUNT = 1;
 var WORKER_INDEX = 0;
 var CALL_INDEX = 0;
