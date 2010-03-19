@@ -1,4 +1,15 @@
 {
     "provides": [
+        {
+            "ep": "command",
+            "name": "vcs",
+            "description": "commands for working with version control systems"
+        },
+        {
+            "ep": "command",
+            "name": "vcs clone",
+            "description": "clone/checkout a remote repository into a Bespin project",
+            "pointer": "clone#cloneCommand"
+        }
     ]
 }
