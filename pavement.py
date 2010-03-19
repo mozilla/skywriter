@@ -150,7 +150,7 @@ def install_sproutcore(options):
             sh("git checkout --track origin/%s" % branch, cwd=os.path.join(dest_path, dest_name))
 
     get_component("sproutcore-abbot", "abbot", branch="tiki")
-    get_component("sproutcore", "sproutcore", dest_path="frameworks", branch="tiki", account="pcwalton")
+    get_component("sproutcore", "sproutcore", dest_path="frameworks", account="pcwalton")
     get_component("tiki", "tiki", dest_path="frameworks")
     get_component("core_test", "core_test", dest_path="frameworks")
 
