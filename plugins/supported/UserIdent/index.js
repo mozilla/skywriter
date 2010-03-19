@@ -35,21 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-"define metadata";
-({
-    "description": "Identifies the user via a Bespin server",
-    "depends": [ "BespinServer", "DelegateSupport" ],
-    "provides": [
-        {
-            "ep": "command",
-            "name": "logout",
-            "description": "Logout of Bespin",
-            "pointer": "#logout"
-        }
-    ]
-});
-"end";
-
 var SC = require("sproutcore/runtime").SC;
 var MultiDelegateSupport = require('DelegateSupport').MultiDelegateSupport;
 var util = require("bespin:util/util");

@@ -1,0 +1,12 @@
+{
+    "description": "Identifies the user via a Bespin server",
+    "depends": [ "BespinServer", "DelegateSupport" ],
+    "provides": [
+        {
+            "ep": "command",
+            "name": "logout",
+            "description": "Logout of Bespin",
+            "pointer": "#logout"
+        }
+    ]
+}
