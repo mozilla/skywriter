@@ -38,83 +38,61 @@
 var SC = require('sproutcore/runtime').SC;
 
 /**
- * This object represents a "safe console" object that forwards debugging
- * messages appropriately without creating a dependency on Firebug in Firefox.
+ * Everyone's console is different, and behaves to manipulation in different
+ * ways...
  */
-exports.console = SC.Object.create({
-    log: window.console ?
-        window.console.log :
-        function() { this._error(arguments); },
+if (!window || !window.console) {
+    // There is no console - probably Firefox without Firebug
+    exports.console = {
+        log: function() { this._error(arguments); },
+        debug: function() { this._error(arguments); },
+        info: function() { this._error(arguments); },
+        warn: function() { this._error(arguments); },
+        error: function() { this._error(arguments); },
+        assert: function() { this._error(arguments); },
+        dir: function() { this._error(arguments); },
+        dirxml: function() { this._error(arguments); },
+        trace: function() { this._error(arguments); },
+        group: function() { this._error(arguments); },
+        groupCollapsed: function() { this._error(arguments); },
+        groupEnd: function() { this._error(arguments); },
+        time: function() { this._error(arguments); },
+        timeEnd: function() { this._error(arguments); },
+        profile: function() { this._error(arguments); },
+        profileEnd: function() { this._error(arguments); },
+        count: function() { this._error(arguments); },
 
-    debug: window.console ?
-        window.console.log :
-        function() { this._error(arguments); },
+        _error: function() { /* Is there anything sane we can do here? */ }
+    };
+}
+else if (window.console.profiles || window.console.markTimeline) {
+    // Webkit's output functions are borked because they get confused if 'this'
+    // is not window.console
+    exports.console = window.console;
+} else {
+    // But we don't do the Webkit case for everyone because not everyone
+    // supports the same set of functions. This is the safe set, and this works
+    // well in Firefox
+    exports.console = {
+        log: window.console.log,
+        debug: window.console.log,
+        info: window.console.info,
+        warn: window.console.warn,
+        error: window.console.error,
+        dir: window.console.dir,
+        dirxml: window.console.dirxml,
+        trace: window.console.trace,
+        group: window.console.group,
+        groupEnd: window.console.groupEnd,
+        time: window.console.time,
+        timeEnd: window.console.timeEnd,
+        profile: window.console.profile,
+        profileEnd: window.console.profileEnd,
+        count: window.console.count
 
-    info: window.console ?
-        window.console.info :
-        function() { this._error(arguments); },
-
-    warn: window.console ?
-        window.console.warn :
-        function() { this._error(arguments); },
-
-    error: window.console ?
-        window.console.error :
-        function() { this._error(arguments); },
-
-    /* Not in Chrome 5.0.307.11
-    assert: window.console ?
-        window.console.assert :
-        function() { this._error(arguments); },
-    */
-
-    dir: window.console ?
-        window.console.dir :
-        function() { this._error(arguments); },
-
-    dirxml: window.console ?
-        window.console.dirxml :
-        function() { this._error(arguments); },
-
-    trace: window.console ?
-        window.console.trace :
-        function() { this._error(arguments); },
-
-    group: window.console ?
-        window.console.group :
-        function() { this._error(arguments); },
-
-    /* Not in Chrome 5.0.307.11
-    groupCollapsed: window.console ?
-        window.console.groupCollapsed :
-        function() { this._error(arguments); },
-    */
-
-    groupEnd: window.console ?
-        window.console.groupEnd :
-        function() { this._error(arguments); },
-
-    time: window.console ?
-        window.console.time :
-        function() { this._error(arguments); },
-
-    timeEnd: window.console ?
-        window.console.timeEnd :
-        function() { this._error(arguments); },
-
-    profile: window.console ?
-        window.console.profile :
-        function() { this._error(arguments); },
-
-    profileEnd: window.console ?
-        window.console.profileEnd :
-        function() { this._error(arguments); },
-
-    count: window.console ?
-        window.console.count :
-        function() { this._error(arguments); },
-
-    _error: function() {
-    }
-});
-
+        /* Not in Chrome 5.0.307.11
+        assert: window.console.assert,
+        groupCollapsed: window.console.groupCollapsed,
+        */
+    };
+}
