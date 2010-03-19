@@ -62,9 +62,11 @@ exports.console = SC.Object.create({
         window.console.error :
         function() { this._error(arguments); },
 
+    /* Not in Chrome 5.0.307.11
     assert: window.console ?
         window.console.assert :
         function() { this._error(arguments); },
+    */
 
     dir: window.console ?
         window.console.dir :
@@ -82,9 +84,11 @@ exports.console = SC.Object.create({
         window.console.group :
         function() { this._error(arguments); },
 
+    /* Not in Chrome 5.0.307.11
     groupCollapsed: window.console ?
         window.console.groupCollapsed :
         function() { this._error(arguments); },
+    */
 
     groupEnd: window.console ?
         window.console.groupEnd :
