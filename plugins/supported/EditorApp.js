@@ -78,7 +78,7 @@ var loginController = m_userident.loginController;
 var userIdentPage = m_userident.userIdentPage;
 var BespinFileSource = require("BespinServer:filesource").BespinFileSource;
 var ServerPersister = require("BespinServer:settings").ServerPersister;
-var ThemeManager = require('ThemeManager').ThemeManager;
+var themeManager = require('ThemeManager').themeManager;
 var settings = require("Settings").settings;
 var Directory = require("Filesystem").Directory;
 var editsession = require("EditSession");
@@ -160,7 +160,6 @@ exports.applicationController = SC.Object.create({
 
         var mainPane = mainPage.get('mainPane');
         mainPane.append();
-        var themeManager = ThemeManager.create({ theme: "Screen" });
         this._themeManager = themeManager;
         themeManager.addPane(mainPane);
         loginController.addDelegate(this);

@@ -156,3 +156,4 @@ exports.ThemeManager = SC.Object.extend({
     }
 });
 
+exports.themeManager = exports.ThemeManager.create({theme: "Screen"});
