@@ -267,3 +267,5 @@ div.cmd_line div.cmd_ex input { background-color:transparent; margin-bottom:3px;
   height:18px; width:90%
 }
 */
+
+div.cmd_line label.sc-text-field-view input { width: 100%; }
