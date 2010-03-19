@@ -45,7 +45,7 @@ var Request = require("Canon:request").Request;
 var typehint = require("CommandLine:typehint");
 var Input = require("CommandLine:input").Input;
 
-var printStackTrace = require("bespin:util/stacktrace").printStackTrace;
+var Trace = require("bespin:util/stacktrace").Trace;
 
 /**
  * Command line controller.
@@ -142,17 +142,19 @@ exports.cliController = SC.Object.create({
                     // TODO: Better UI
                     self.set("hint", ex);
 
+                    var trace = new Trace(ex, true);
                     console.group("Error calling command: " + input.commandExt.name);
                     console.log("- typed: '", typed, "'");
                     console.log("- arguments: ", args);
                     console.error(ex);
-                    console.log(printStackTrace(ex));
+                    trace.log(3);
                     console.groupEnd();
                 }
             });
         }, function(ex) {
+            var trace = new Trace(ex, true);
             console.error(ex);
-            console.log(printStackTrace(ex));
+            trace.log(3);
         });
     }
 });

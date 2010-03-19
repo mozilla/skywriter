@@ -37,6 +37,7 @@
 
 var catalog = require("bespin:plugins").catalog;
 var console = require('bespin:console').console;
+var Trace = require('bespin:util/stacktrace').Trace;
 
 /**
  * Save the settings using the server.
@@ -63,7 +64,12 @@ exports.ServerPersister = SC.Object.extend({
                 try {
                     settings.set(setting, data[setting]);
                 } catch (ex) {
-                    console.error("Error setting", setting, data[setting], ex);
+                    var trace = new Trace(ex, true);
+                    console.group("Error loading settings");
+                    console.error("Attempting ", setting, "=", data[setting]);
+                    console.error(ex);
+                    trace.log(3);
+                    console.groupEnd();
                 }
             }
             this._loading = false;

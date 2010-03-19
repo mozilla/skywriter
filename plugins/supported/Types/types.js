@@ -49,7 +49,6 @@ var r = require;
 var resolve = function(typeSpec, onResolve) {
     var promise = new Promise();
 
-    try {
         exports.getTypeExt(typeSpec).then(function(ext) {
             ext.load(function(type) {
                 // We might need to resolve the typeSpec in a custom way
@@ -69,9 +68,6 @@ var resolve = function(typeSpec, onResolve) {
         }, function(ex) {
             promise.reject(ex);
         });
-    } catch (ex) {
-        promise.reject(ex);
-    }
 
     return promise;
 };

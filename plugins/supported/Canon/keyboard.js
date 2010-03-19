@@ -43,7 +43,7 @@ var console = require('bespin:console').console;
 var Request = require("Canon:request").Request;
 var env = require("Canon:environment");
 
-var printStackTrace = require("bespin:util/stacktrace").printStackTrace;
+var Trace = require("bespin:util/stacktrace").Trace;
 
 /**
  * The canon, or the repository of commands, contains functions to process
@@ -78,9 +78,10 @@ var KeyboardManager = SC.Object.extend({
                     return true;
                 } catch (ex) {
                     // TODO: Some UI?
+                    var trace = new Trace(ex, true);
                     console.group("Error calling command: " + commandExt.name);
                     console.error(ex);
-                    console.log(printStackTrace(ex));
+                    trace.log(3);
                     console.groupEnd();
                     return false;
                 }

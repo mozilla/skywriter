@@ -47,58 +47,47 @@
 // OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
- *
- * @cfg {Error} e The error to create a stacktrace from (optional)
- * @cfg {Boolean} guess If we should try to resolve the names of anonymous functions
+ * Different browsers create stack traces in different ways.
+ * Feature detection baby.
  */
-var printStackTrace = exports.printStackTrace = function(options) {
-    var ex = (options && options.e) ? options.e : null;
-    var guess = (options && options.guess) ? options.guess : false;
-    
-    var p = new printStackTrace.implementation();
-    var result = p.run(ex);
-    return (guess) ? p.guessFunctions(result) : result;
+var mode = (function() {
+    try {
+        (0)();
+    } catch (e) {
+        if (e.arguments) {
+            return 'chrome';
+        }
+        if (e.stack) {
+            return 'firefox';
+        }
+        if (window.opera && !('stacktrace' in e)) { //Opera 9-
+            return 'opera';
+        }
+    }
+    return 'other';
+})();
+
+/**
+ *
+ */
+function stringifyArguments(args) {
+    for (var i = 0; i < args.length; ++i) {
+        var argument = args[i];
+        if (typeof argument == 'object') {
+            args[i] = '#object';
+        } else if (typeof argument == 'function') {
+            args[i] = '#function';
+        } else if (typeof argument == 'string') {
+            args[i] = '"' + argument + '"';
+        }
+    }
+    return args.join(',');
 }
 
-printStackTrace.implementation = function() {};
-
-printStackTrace.implementation.prototype = {
-    run: function(ex) {
-        // Use either the stored mode, or resolve it
-        var mode = this._mode || this.mode();
-        if (mode === 'other') {
-            return this.other(arguments.callee);
-        }
-        else {
-            ex = ex ||
-                (function() {
-                    try {
-                        (0)();
-                    } catch (e) {
-                        return e;
-                    }
-                })();
-            return this[mode](ex);
-        }
-    },
-    
-    mode: function() {
-        try {
-            (0)();
-        } catch (e) {
-            if (e.arguments) {
-                return (this._mode = 'chrome');
-            }
-            if (e.stack) {
-                return (this._mode = 'firefox');
-            }
-            if (window.opera && !('stacktrace' in e)) { //Opera 9-
-                return (this._mode = 'opera');
-            }
-        }
-        return (this._mode = 'other');
-    },
-    
+/**
+ * Extract a stack trace from the format emitted by each browser.
+ */
+var decoders = {
     chrome: function(e) {
         return e.stack.replace(/^.*?\n/, '').
                 replace(/^.*?\n/, '').
@@ -108,19 +97,20 @@ printStackTrace.implementation.prototype = {
                 replace(/^Object.<anonymous>\s*\(/gm, '{anonymous}()@').
                 split("\n");
     },
-    
+
     firefox: function(e) {
-        return e.stack.replace(/^.*?\n/, '').
-                replace(/(?:\n@:0)?\s+$/m, '').
-                replace(/^\(/gm, '{anonymous}(').
-                split("\n");
+        var stack = e.stack;
+        // stack = stack.replace(/^.*?\n/, '');
+        stack = stack.replace(/(?:\n@:0)?\s+$/m, '');
+        stack = stack.replace(/^\(/gm, '{anonymous}(');
+        return stack.split("\n");
     },
-    
+
     // Opera 7.x and 8.x only!
     opera: function(e) {
-        var lines = e.message.split("\n"), ANON = '{anonymous}', 
+        var lines = e.message.split("\n"), ANON = '{anonymous}',
             lineRE = /Line\s+(\d+).*?script\s+(http\S+)(?:.*?in\s+function\s+(\S+))?/i, i, j, len;
-        
+
         for (i = 4, j = 0, len = lines.length; i < len; i += 2) {
             if (lineRE.test(lines[i])) {
                 lines[j++] = (RegExp.$3 ? RegExp.$3 + '()@' + RegExp.$2 + RegExp.$1 : ANON + '()@' + RegExp.$2 + ':' + RegExp.$1) +
@@ -128,47 +118,42 @@ printStackTrace.implementation.prototype = {
                 lines[i + 1].replace(/^\s+/, '');
             }
         }
-        
+
         lines.splice(j, lines.length - j);
         return lines;
     },
-    
+
     // Safari, Opera 9+, IE, and others
     other: function(curr) {
         var ANON = "{anonymous}", fnRE = /function\s*([\w\-$]+)?\s*\(/i, stack = [], j = 0, fn, args;
-        
+
         var maxStackSize = 10;
         while (curr && stack.length < maxStackSize) {
             fn = fnRE.test(curr.toString()) ? RegExp.$1 || ANON : ANON;
             args = Array.prototype.slice.call(curr['arguments']);
-            stack[j++] = fn + '(' + printStackTrace.implementation.prototype.stringifyArguments(args) + ')';
-            
+            stack[j++] = fn + '(' + stringifyArguments(args) + ')';
+
             //Opera bug: if curr.caller does not exist, Opera returns curr (WTF)
             if (curr === curr.caller && window.opera) {
-	            //TODO: check for same arguments if possible
+                //TODO: check for same arguments if possible
                 break;
             }
             curr = curr.caller;
         }
         return stack;
-    },
-    
-    stringifyArguments: function(args) {
-        for (var i = 0; i < args.length; ++i) {
-            var argument = args[i];
-            if (typeof argument == 'object') {
-                args[i] = '#object';
-            } else if (typeof argument == 'function') {
-                args[i] = '#function';
-            } else if (typeof argument == 'string') {
-                args[i] = '"' + argument + '"';
-            }
-        }
-        return args.join(',');
-    },
-    
+    }
+};
+
+/**
+ *
+ */
+function NameGuesser() {
+}
+
+NameGuesser.prototype = {
+
     sourceCache: {},
-    
+
     ajax: function(url) {
         var req = this.createXMLHTTPObject();
         if (!req) {
@@ -179,7 +164,7 @@ printStackTrace.implementation.prototype = {
         req.send('');
         return req.responseText;
     },
-    
+
     createXMLHTTPObject: function() {
 	    // Try XHR methods in order and store XHR factory
         var xmlhttp, XMLHttpFactories = [
@@ -202,14 +187,14 @@ printStackTrace.implementation.prototype = {
             } catch (e) {}
         }
     },
-    
+
     getSource: function(url) {
         if (!(url in this.sourceCache)) {
             this.sourceCache[url] = this.ajax(url).split("\n");
         }
         return this.sourceCache[url];
     },
-    
+
     guessFunctions: function(stack) {
         for (var i = 0; i < stack.length; ++i) {
             var reStack = /{anonymous}\(.*\)@(\w+:\/\/([-\w\.]+)+(:\d+)?[^:]+):(\d+):?(\d+)?/;
@@ -224,7 +209,7 @@ printStackTrace.implementation.prototype = {
         }
         return stack;
     },
-    
+
     guessFunctionName: function(url, lineNo) {
         try {
             return this.guessFunctionNameFromLines(lineNo, this.getSource(url));
@@ -232,7 +217,7 @@ printStackTrace.implementation.prototype = {
             return 'getSource failed with url: ' + url + ', exception: ' + e.toString();
         }
     },
-    
+
     guessFunctionNameFromLines: function(lineNo, source) {
         var reFunctionArgNames = /function ([^(]*)\(([^)]*)\)/;
         var reGuessFunction = /['"]?([0-9A-Za-z_]+)['"]?\s*[:=]\s*(function|eval|new Function)/;
@@ -255,5 +240,36 @@ printStackTrace.implementation.prototype = {
             }
         }
         return "(?)";
+    }
+};
+
+var guesser = new NameGuesser();
+
+/**
+ * Create a stack trace from an exception
+ * @param ex {Error} The error to create a stacktrace from (optional)
+ * @param guess {Boolean} If we should try to resolve the names of anonymous functions
+ */
+exports.Trace = function Trace(ex, guess) {
+    this._ex = ex;
+    this._stack = decoders[mode](ex);
+
+    if (guess) {
+        this._stack = guesser.guessFunctions(this._stack);
+    }
+};
+
+/**
+ * Log to the console a number of lines (default all of them)
+ * @param lines {number} Maximum number of lines to wrote to console
+ */
+exports.Trace.prototype.log = function(lines) {
+    if (lines <= 0) {
+        // You aren't going to have more lines in your stack trace than this
+        // and it still fits in a 32bit integer
+        lines = 999999999;
+    }
+    for (var i = 0; i < this._stack.length && i < lines; i++) {
+        console.debug(this._stack[i]);
     }
 };
