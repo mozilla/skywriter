@@ -38,5 +38,33 @@
 var SC = require('sproutcore/runtime').SC;
 
 exports.Project = SC.Object.extend({
-    directory: null
+    directory: null,
+    name: null
 });
+
+/*
+ * Given a full path in the bespin file system, figure out which
+ * project it belongs to and return a two element array with
+ * the Project object and the remaining path within that project.
+ */
+exports.getProjectAndPath = function(path) {
+    // The implementation is simple at this point. The project
+    // is just the directory at the top level.
+    var slash = path.indexOf("/");
+    if (slash == -1) {
+        return [null, path];
+    }
+    if (slash == 0) {
+        path = path.substring(1);
+        slash = path.indexOf("/");
+    }
+    
+    var projectName = path.substring(0, slash);
+    
+    // todo: also need to include the directory when setting up the
+    // project
+    var project = exports.Project.create({
+        name: projectName
+    });
+    return [project, path.substring(slash+1)];
+};

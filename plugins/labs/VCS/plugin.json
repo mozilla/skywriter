@@ -1,4 +1,6 @@
 {
+    "depends": ["BespinServer", "UserIdent", "Project"],
+    
     "provides": [
         {
             "ep": "command",
@@ -7,9 +9,15 @@
         },
         {
             "ep": "command",
-            "name": "vcs clone",
-            "description": "clone/checkout a remote repository into a Bespin project",
-            "pointer": "clone#cloneCommand"
+            "name": "vcs getkey",
+            "description": "retrieve your SSH public key used for remote server auth",
+            "pointer": "#getkey"
+        },
+        {
+            "ep": "command",
+            "name": "vcs log",
+            "description": "Display the changes to the current file.",
+            "pointer": "#log"
         }
     ]
 }

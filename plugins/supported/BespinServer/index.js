@@ -194,33 +194,40 @@ exports.server = SC.Object.create({
      * As request() except that the response is fetched without a connection,
      * instead using the /messages URL
      */
-    requestDisconnected: function(method, url, payload, instruction, options) {
+    requestDisconnected: function(method, url, payload, options) {
+        options = options || {};
         options.evalJSON = true;
         // The response that we get from the server isn't a 'done it' response
         // any more - it's just a 'working on it' response.
         options.originalOnSuccess = options.onSuccess;
-
+        
+        var pr = new Promise();
+        options.promise = pr;
+        
         var self = this;
-        options.onSuccess = function(response, xhr) {
+        
+        this.request(method, url, payload, options).then(function(response, xhr) {
             if (response.jobid == null) {
                 console.error("Missing jobid", response);
-                options.onFailure(xhr);
+                var error = new Error("Server returned " + xhr.status);
+                error.xhr = xhr;
+                pr.reject(error);
                 return;
             }
-
+            
             if (response.taskname) {
                 console.log("Server is running : " + response.taskname);
             }
-
+            
             self._jobs[response.jobid] = {
                 jobid: response.jobid,
                 options: options
             };
             self._jobsCount++;
             self._checkPolling();
-        };
-
-        this.request(method, url, payload, options);
+        });
+        
+        return pr;
     },
 
     /**
@@ -259,11 +266,11 @@ exports.server = SC.Object.create({
                 // that we need to pass on. We aggregate the
                 // messages and call originalOnSuccess
                 job.partials.push(message.output);
-                job.options.originalOnSuccess(job.partials.join("<br/>"));
+                job.options.promise.resolve(job.partials.join("<br/>"));
             } else {
                 // We're done, and all we have is what we've just
                 // been sent, so just call originalOnSuccess
-                job.options.originalOnSuccess(message.output);
+                job.options.promise.resolve(message.output);
             }
         }
         else {
