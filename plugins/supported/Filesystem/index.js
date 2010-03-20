@@ -281,7 +281,26 @@ exports.Directory = SC.Object.extend({
             if (isDir) {
                 subPath += "/";
             }
-            pr.resolve(curDir.getObject(subPath));
+
+            var obj = curDir.getObject(subPath);
+            if (SC.none(obj)) {
+                pr.reject(new Error(path + " not found"));
+                return;
+            }
+
+            if (isDir) {
+                if (obj.loadObject) {
+                    pr.reject(new Error(path + " is a directory found where " +
+                        "a file was expected in " + path));
+                    return;
+                }
+            } else if (!obj.loadObject) {
+                pr.reject(new Error(path + " is a file where a directory " +
+                    "was expected in " + path));
+                return;
+            }
+
+            pr.resolve(obj);
         }, function(error) {
             pr.reject(error);
         });
