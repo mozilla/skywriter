@@ -240,7 +240,7 @@ exports.Directory = SC.Object.extend({
             if (status != exports.READY) {
                 break;
             }
-            var item = this._getItem(segments[i]);
+            var item = this._getItem(segments[i] + (isDir ? "/" : ""));
             if (!item) {
                 pr.reject({message:
                     segments[i] + " not found in " + curDir.get("path")});
@@ -249,12 +249,22 @@ exports.Directory = SC.Object.extend({
 
             // is this a directory?
             if (item.loadObject) {
+                if (i+1 === segments.length) {
+                    if (isDir) {
+                        pr.resolve(item);
+                    } else {
+                        pr.reject(new Error(segments[i] + " is a file found " +
+                            "where a directory was expected in path " + path));
+                    }
+
+                    return pr;
+                }
+
                 curDir = item;
             } else {
-                if (i+1 != segments.length) {
-                    pr.reject(segments[i] +
-                        " is a file found where a directory was expected in " +
-                        "path " + path);
+                if (i+1 != segments.length || isDir) {
+                    pr.reject(new Error(segments[i] + " is a file found " +
+                        "where a directory was expected in path " + path));
                     return pr;
                 } else {
                     pr.resolve(item);
