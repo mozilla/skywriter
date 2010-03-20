@@ -276,3 +276,67 @@ exports.testFileRemoval = function() {
     });
     return testPromise;
 };
+
+exports.testFileWriting = function() {
+    source.reset();
+
+    var root = getNewRoot();
+
+    var dir = null;
+    root.loadObject("deeply/nested/").then(function(d) { dir = d; });
+    t.ok(dir !== null, "the directory '/deeply/nested/' was successfully " +
+        "loaded");
+
+    var file1 = fs.File.create({ directory: dir, name: "bar.txt" });
+
+    var written = false;
+    dir.writeFile(file1, "foobar").then(function() { written = true; });
+    t.ok(written, "the file '/deeply/nested/bar.txt' was successfully " +
+        "written");
+
+    var loadContentsResult = null;
+    file1.loadContents().then(function(result) {
+        loadContentsResult = result;
+    });
+
+    t.ok(loadContentsResult !== null, "the contents of the newly created " +
+        "file were successfully loaded");
+    t.equal(loadContentsResult.contents, "foobar", "the contents read from " +
+        "the newly created file and the string that was written into it");
+
+    var files = dir.get('files');
+    t.equal(files.length, 1, "the number of files in the directory and 1");
+    t.equal(files[0], file1, "the first file in the directory and the file " +
+        "that was written originally");
+
+    var file2 = fs.File.create({ directory: dir, name: "bar.txt" });
+
+    var newFile2 = null;
+    dir.writeFile(file2, "baz").then(function(f) { newFile2 = f; });
+    t.ok(newFile2 !== null, "the file was successfully overwritten");
+
+    loadContentsResult = null;
+    newFile2.loadContents().then(function(result) {
+        loadContentsResult = result;
+    });
+
+    t.ok(loadContentsResult !== null, "the contents of the newly " +
+        "overwritten file were successfully loaded");
+    t.equal(loadContentsResult.contents, "baz", "the contents read from the " +
+        "newly overwritten file and the string that was just written into it");
+
+    files = dir.get('files');
+    t.equal(files.length, 1, "the number of files in the directory after " +
+        "overwriting the first file and 1");
+    t.equal(files[0], newFile2, "the first file in the directory and the " +
+        "overwritten file");
+
+    var file3 = fs.File.create({ directory: dir, name: "directory" });
+
+    var succeeded = null;
+    dir.writeFile(file3, "boo").then(function() { succeeded = true; },
+        function() { succeeded = false; });
+    t.equal(succeeded, false, "whether the attempt to write a file with the " +
+        "same name as a directory succeeded and false");
+};
+

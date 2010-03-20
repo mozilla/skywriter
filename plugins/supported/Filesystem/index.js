@@ -441,6 +441,51 @@ exports.Directory = SC.Object.extend({
             pr.reject(error);
         });
         return pr;
+    },
+
+    /**
+     * Writes a new file to this directory with the given contents, possibly
+     * overwriting an existing file with the same name.
+     *
+     * @param newFile{File} The file object to write.
+     * @param contents{string} The contents of the file.
+     *
+     * @return A promise to return the new file that was written, which may be
+     *     a different object from @newFile if a file already existed with the
+     *     supplied name.
+     */
+    writeFile: function(newFile, contents) {
+        var promise = new Promise();
+
+        var filename = newFile.get('name');
+        this.loadObject(filename + "/").then(function() {
+                promise.reject(new Error("Attempt to write a file named '" +
+                    filename + "', but a directory exists named '" + filename +
+                    "/'"));
+            }, function() { // rejected; i.e. the directory didn't exist
+                var files = this.get('files');
+                var fileCount = files.length;
+                for (var i = 0; i < fileCount; i++) {
+                    var existingFile = files[i];
+                    if (existingFile.get('name') !== filename) {
+                        continue;
+                    }
+
+                    existingFile.saveContents(contents).then(function() {
+                        promise.resolve(existingFile);
+                    });
+
+                    return;
+                }
+
+                newFile.set('directory', this);
+                this.get('files').push(newFile);
+                newFile.saveContents(contents).then(function() {
+                    promise.resolve(newFile);
+                });
+            }.bind(this));
+
+        return promise;
     }
 });
 

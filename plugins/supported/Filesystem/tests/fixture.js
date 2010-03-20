@@ -71,7 +71,16 @@ exports.DummyFileSource = SC.Object.extend({
         pr.resolve({file: file, contents: matches.contents});
         return pr;
     },
-    
+
+    saveContents: function(file, contents) {
+        this.requests.push(["saveContents", arguments]);
+        var pr = new Promise();
+        var entry = this._findOrCreateFile(file.get("path"));
+        entry.contents = contents;
+        pr.resolve({file: file, contents: contents});
+        return pr;
+    },
+
     remove: function(pathObj) {
         this.requests.push(["remove", arguments]);
         var pr = new Promise();
@@ -90,6 +99,18 @@ exports.DummyFileSource = SC.Object.extend({
     
     _findFile: function(path) {
         var f = this.files.findProperty("name", path);
+        return f;
+    },
+
+    _findOrCreateFile: function(path) {
+        path = pathUtil.trimLeadingSlash(path);
+
+        var f = this._findFile(path);
+        if (SC.none(f)) {
+            f = {name: path, contents: ""};
+            this.files.push(f);
+        }
+
         return f;
     },
     
