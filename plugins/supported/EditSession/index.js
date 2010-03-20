@@ -36,10 +36,12 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
+var File = require('Filesystem:index').File;
 var History = require('EditSession:history').History;
 var MultiDelegateSupport = require('DelegateSupport').MultiDelegateSupport;
 var TextStorage = require("Editor:models/textstorage").TextStorage;
 var catalog = require('bespin:plugins').catalog;
+var m_path = require('Filesystem:path');
 
 /*
 * A Buffer connects a model and file together.
@@ -140,7 +142,26 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
      * once the file is saved.
      */
     save: function() {
-        return this._file.saveContents(this.model.get("value"));
+        return this._file.saveContents(this.getPath('model.value'));
+    },
+
+    /**
+     * Saves the contents of this buffer to a new file, and updates the file
+     * field of this buffer to point to the result.
+     *
+     * @param dir{Directory} The directory to save in.
+     * @param filename{string} The name of the file in the directory.
+     * @return A promise to return the newly-saved file.
+     */
+    saveAs: function(dir, filename) {
+        var promise = new Promise();
+        var newFile = File.create({ name: filename, directory: dir });
+        dir.writeFile(newFile, this.getPath('model.value')).then(function(f) {
+            this.changeFileOnly(f);
+            promise.resolve(f);
+        }.bind(this));
+
+        return promise;
     }
 });
 

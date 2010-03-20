@@ -89,3 +89,23 @@ exports.testBufferFileChangeWithCallback = function() {
     });
     return testpr;
 };
+
+exports.testBufferSaving = function() {
+    var root = fs.Directory.create({ source: source });
+    var buffer = editsession.Buffer.create();
+    buffer.setPath('model.value', "foobar");
+    t.equal(buffer.getPath('model.value'), "foobar", "the value stored in " +
+        "the model and the string that was just written to it");
+
+    var file1 = null;
+    buffer.saveAs(root, "bar.txt").then(function(f) { file1 = f; });
+    t.ok(file1 !== null, "the buffer was successfully saved");
+
+    var file2 = null;
+    root.loadObject("bar.txt").then(function(f) { file2 = f; });
+    t.ok(file2 !== null, "the resulting file could be loaded from the " +
+        "filesystem");
+    t.equal(file1, file2, "the file returned by saveAs() and the file " +
+        "loaded from the directory");
+};
+
