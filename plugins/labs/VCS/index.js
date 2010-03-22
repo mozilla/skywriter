@@ -482,41 +482,6 @@ exports.getInfoFromUser = function(request, callback, opts) {
 //     }
 // });
 
-/**
- * Retrieve an SSH public key for authentication use
- */
-exports.getkey = function(env, args, request) {
-    if (args.password == "") {
-        args.password = undefined;
-    }
-    
-    var pr = kc.getKeychainPassword().then(function(kcpass) {
-        var pr;
-        
-        var url = "/vcs/getkey/";
-        if (kcpass == null) {
-            pr = server.request("POST", url, null);
-        } else {
-            var params = "kcpass=" + escape(kcpass);
-            pr = server.request("POST", url, params);
-        }
-        
-        pr.then(function(key) {
-            request.done("Your SSH public key that Bespin can use for remote repository authentication:<br/>" + key);
-        }, function(error) {
-            if (error.status == "401") {
-                kc.clearPassword();
-                request.doneWithError("Incorrect keychain password!");
-            } else {
-                request.doneWithError("Error from server: " + error.message);
-            }
-        });
-        
-    }, function() {
-        request.done("Canceled");
-    });
-};
-
 
 /**
  * Push command.
@@ -929,12 +894,6 @@ var vcs = function(project, command, request, opts) {
 var setauth = function(project, form, opts) {
     var url = "/vcs/setauth/" + project + "/";
     bespin.get("server").request("POST", url, dojo.formToQuery(form), opts);
-};
-
-/**
- * Retrieves the user's SSH public key that can be used for VCS functions
- */
-var getkey = function(kcpass, opts) {
 };
 
 /**

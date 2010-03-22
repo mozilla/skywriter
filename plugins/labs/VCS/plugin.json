@@ -9,12 +9,6 @@
         },
         {
             "ep": "command",
-            "name": "vcs getkey",
-            "description": "retrieve your SSH public key used for remote server auth",
-            "pointer": "#getkey"
-        },
-        {
-            "ep": "command",
             "name": "vcs log",
             "description": "Display the changes to the current file.",
             "pointer": "#log"
