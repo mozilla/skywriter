@@ -122,7 +122,7 @@ exports.cliController = SC.Object.create({
             input.commandExt.load(function(command) {
                 // Check the function pointed to in the meta-data exists
                 if (!command) {
-                    self.set("hint", "Command action not found.");
+                    self.hints.pushObject("Command action not found.");
                     return;
                 }
 
@@ -137,10 +137,14 @@ exports.cliController = SC.Object.create({
                     command(env.global, args, request);
 
                     // Only clear the input if the command worked
-                    self.set("input", "");
+                    SC.run(function() {
+                        self.set("input", "");
+                    });
                 } catch (ex) {
                     // TODO: Better UI
-                    self.set("hint", ex);
+                    SC.run(function() {
+                        self.hints.pushObject(ex);
+                    });
 
                     var trace = new Trace(ex, true);
                     console.group("Error calling command: " + input.commandExt.name);
