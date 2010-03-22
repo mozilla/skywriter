@@ -1,3 +1,5 @@
+// Changed to suit the specific needs of running within Bespin
+
 // Domain Public by Eric Wendelin http://eriwen.com/ (2008)
 //                  Luke Smith http://lucassmith.name/ (2008)
 //                  Loic Dachary <loic@dachary.org> (2008)
@@ -46,11 +48,30 @@
 // IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 // OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+var SC = require('sproutcore/runtime').SC;
+
 /**
  * Different browsers create stack traces in different ways.
- * Feature detection baby.
+ * <strike>Feature</strike> Browser detection baby ;).
  */
 var mode = (function() {
+    
+    // We use SC's browser detection here to avoid the "break on error"
+    // functionality provided by Firebug. Firebug tries to do the right
+    // thing here and break, but it happens every time you load the page.
+    // bug 554105
+    if (SC.browser.isMozilla) {
+        return 'firefox;'
+    } else if (SC.browser.isOpera) {
+        return "opera";
+    } else if (SC.browser.isSafari) {
+        return "other";
+    }
+    
+    // SC doesn't do any detection of Chrome at this time.
+    
+    // this is the original feature detection code that is used as a
+    // fallback.
     try {
         (0)();
     } catch (e) {
