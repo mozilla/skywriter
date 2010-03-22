@@ -467,30 +467,24 @@ var project_m = require("Project");
  * Status command.
  * Show changed files under the working directory
  */
-// exports.commands.addCommand({
-//     "name": "status",
-//     "aliases": [ "st" ],
-//     "description": "Display the status of the repository files.",
-//     "manual": "Shows the current state of the files in the repository<br>M for modified, ? for unknown (you may need to add), R for removed, ! for files that are deleted but not removed",
-//     execute: function(env, args, request) {
-//         var project;
-// 
-//         var session = bespin.get("editSession");
-//         if (session) {
-//             project = session.project;
-//         }
-// 
-//         if (!project) {
-//             request.doneWithError("You need to pass in a project");
-//             return;
-//         }
-// 
-//         vcs(project,
-//             { command: ["status"] },
-//             request,
-//             exports._createStandardHandler(request));
-//     }
-// });
+exports.status = function(env, args, request) {
+    var file = env.get("file");
+    if (!file) {
+        request.doneWithError("There is no currently opened file.");
+        return;
+    }
+    var parts = project_m.getProjectAndPath(file.get("path"));
+    var project = parts[0];
+    
+    if (!project) {
+        request.doneWithError("There is no active project.");
+        return;
+    }
+    
+    var pr = vcs(project, { command: [ "status" ] });
+    pr = exports._createStandardHandler(pr, request);
+    request.async();
+};
 
 /**
  * Log command.
@@ -749,17 +743,22 @@ exports._createStandardHandler = function(requestpr, request, options) {
             if (response.output === undefined) {
                 response = { output: response, success: false };
             }
-
-            request.doneWithError("<pre>" + response.output + "</pre>");
-            pr.reject(response);
+            
+            SC.run(function() {
+                request.doneWithError("<pre>" + response.output + "</pre>");
+                pr.reject(response);
+            });
         } else {
             var output = response.output;
             if (options.escape) {
                 output = output.replace(/</g, "&lt;");
             }
-            request.done("<pre>" + output + "</pre>");
+            
+            SC.run(function() {
+                request.done("<pre>" + output + "</pre>");
 
-            pr.resolve(response);
+                pr.resolve(response);
+            });
         }
     }, function(error) {
         request.doneWithError(error.xhr.response);

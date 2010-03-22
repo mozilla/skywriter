@@ -16,9 +16,17 @@
         {
             "ep": "command",
             "name": "vcs update",
-            "aliases": [ "up", "co" ],
+            "aliases": [ "vcs up", "vcs co" ],
             "description": "Update your working copy from the remote repository",
             "pointer": "#update"
+        },
+        {
+            "ep": "command",
+            "name": "vcs status",
+            "aliases": [ "vcs st" ],
+            "description": "Display the status of the repository files.",
+            "manual": "Shows the current state of the files in the repository<br>M for modified, ? for unknown (you may need to add), R for removed, ! for files that are deleted but not removed",
+            "pointer": "#status"
         }
     ]
 }
