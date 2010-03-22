@@ -321,10 +321,11 @@ exports.Input = SC.Object.extend({
             // significant. It might be better to chop the command of the
             // start of this.typed? But that's not easy because there could be
             // multiple spaces in the command if we're doing sub-commands
-            this.assignments[0] = {
-                value: this.unparsedArgs.join(" "),
-                param: params[0]
-            };
+            var value = this.unparsedArgs.length === 0 ?
+                    null :
+                    this.unparsedArgs.join(" ");
+
+            this.assignments[0] = { value: value, param: params[0] };
             return true;
         }
 
