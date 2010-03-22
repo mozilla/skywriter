@@ -41,7 +41,7 @@ var SC = require('sproutcore/runtime').SC;
  * Everyone's console is different, and behaves to manipulation in different
  * ways...
  */
-if (!window || !window.console) {
+if (!window.console) {
     // There is no console - probably Firefox without Firebug
     exports.console = {
         log: function() { this._error(arguments); },
@@ -49,12 +49,10 @@ if (!window || !window.console) {
         info: function() { this._error(arguments); },
         warn: function() { this._error(arguments); },
         error: function() { this._error(arguments); },
-        assert: function() { this._error(arguments); },
         dir: function() { this._error(arguments); },
         dirxml: function() { this._error(arguments); },
         trace: function() { this._error(arguments); },
         group: function() { this._error(arguments); },
-        groupCollapsed: function() { this._error(arguments); },
         groupEnd: function() { this._error(arguments); },
         time: function() { this._error(arguments); },
         timeEnd: function() { this._error(arguments); },
@@ -64,6 +62,9 @@ if (!window || !window.console) {
 
         _error: function() { /* Is there anything sane we can do here? */ }
     };
+
+    // HACK! SproutCore uses console. Copy it across. We should remove this.
+    window.console = exports.console;
 }
 else if (window.console.profiles || window.console.markTimeline) {
     // Webkit's output functions are borked because they get confused if 'this'
