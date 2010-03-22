@@ -12,6 +12,13 @@
             "name": "vcs log",
             "description": "Display the changes to the current file.",
             "pointer": "#log"
+        },
+        {
+            "ep": "command",
+            "name": "vcs update",
+            "aliases": [ "up", "co" ],
+            "description": "Update your working copy from the remote repository",
+            "pointer": "#update"
         }
     ]
 }

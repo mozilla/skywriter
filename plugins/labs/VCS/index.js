@@ -30,100 +30,6 @@ var util = require("bespin:util/util");
 var project_m = require("Project");
 
 /**
- * Presents the user with a dialog requesting their keychain password.
- * If they click the submit button, the password is sent to the callback.
- * If they do not, the callback is not called.
- */
-exports.getInfoFromUser = function(request, callback, opts) {
-    var kcpass;
-    opts = opts || {};
-
-    // If the password is cached and the caller doesn't
-    // need a message entered, then we can return right away.
-    if (exports._keychainpw && !opts.getMessage) {
-        callback({kcpass: exports._keychainpw});
-        return;
-    }
-
-    var saveform = function(e) {
-        var values = {};
-        if (opts.getKeychain) {
-            values.kcpass = kcpass.value;
-            exports._justSetKeychainpw = true;
-            exports._keychainpw = kcpass.value;
-        }
-
-        if (opts.getMessage) {
-            values.message = messagefield.value;
-        }
-
-        callback(values);
-        util.stopEvent(e);
-        return false;
-    };
-
-    var vcsauth = dojo.create("form", { onsubmit: saveform });
-    var table = dojo.create("table", { }, vcsauth);
-
-    var tr, td;
-
-    var focus = null;
-
-    if (opts.getKeychain) {
-        // if we already have the password, we don't need to prompt
-        // for it!
-        if (exports._keychainpw) {
-            kcpass = {value: exports._keychainpw};
-        } else {
-            tr = dojo.create("tr", { }, table);
-            dojo.create("td", { innerHTML: "Keychain password: " }, tr);
-            td = dojo.create("td", { }, tr);
-            kcpass = dojo.create("input", { type: "password" }, td);
-            dojo.create("span", {
-                style: "padding-left:5px; color:#f88;",
-                innerHTML: opts.errmsg || ""
-            }, td);
-
-            focus = kcpass;
-        }
-    }
-
-    if (opts.getMessage) {
-        tr = dojo.create("tr", {}, table);
-        td = dojo.create("td", {colspan: "2",
-            innerHTML: "Commit message:"}, tr);
-
-        tr = dojo.create("tr", {}, table);
-        td = dojo.create("td", {colspan: "2"}, tr);
-        var messagefield = dojo.create("textarea", {rows: 5, cols: 65}, td);
-
-        if (!focus) { focus = messagefield; }
-    }
-
-    tr = dojo.create("tr", { }, table);
-    dojo.create("td", { innerHTML: "&nbsp;" }, tr);
-    td = dojo.create("td", { }, tr);
-
-    dojo.create("input", {
-        type: "button",
-        value: "Submit",
-        onclick: saveform
-    }, td);
-
-    dojo.create("input", {
-        type: "button",
-        value: "Cancel",
-        onclick: exports._createCancelHandler()
-    }, td);
-
-    request.add(vcsauth);
-
-    if (focus) {
-        focus.focus();
-    }
-};
-
-/**
  * Add command.
  * Add the specified files on the next commit
  */
@@ -597,7 +503,14 @@ exports.log = function(env, args, request) {
         return;
     }
     var parts = project_m.getProjectAndPath(file.get("path"));
-    var pr = vcs(parts[0], { command: [ "log", parts[1] ] });
+    var project = parts[0];
+    
+    if (!project) {
+        request.doneWithError("There is no active project.");
+        return;
+    }
+    
+    var pr = vcs(project, { command: [ "log", parts[1] ] });
     pr = exports._createStandardHandler(pr, request);
     request.async();
 };
@@ -606,50 +519,44 @@ exports.log = function(env, args, request) {
  * Update command.
  * Pull updates from the repository into the current working directory
  */
-// exports.commands.addCommand({
-//     "name": "update",
-//     "aliases": [ "up", "co" ],
-//     "description": "Update your working copy from the remote repository",
-//     execute: function(env, args, request) {
-//         var project;
-// 
-//         var session = bespin.get("editSession");
-//         if (session) {
-//             project = session.project;
-//         }
-// 
-//         if (!project) {
-//             request.doneWithError("You need to pass in a project");
-//             return;
-//         }
-// 
-//         var sendRequest = function(values) {
-//             var command = {
-//                 command: ["update", "_BESPIN_REMOTE_URL"]
-//             };
-// 
-//             if (values !== undefined) {
-//                 command.kcpass = values.kcpass;
-//             }
-// 
-//             vcs(project,
-//                 command,
-//                 request,
-//                 exports._createStandardHandler(request));
-//         };
-// 
-//         exports._getRemoteauth(project, function(remoteauth) {
-//             console.log("remote auth is: " + remoteauth);
-//             if (remoteauth == "both") {
-//                 exports.getInfoFromUser(request, sendRequest,
-//                         {getKeychain: true});
-//             } else {
-//                 sendRequest(undefined);
-//             }
-//         });
-// 
-//     }
-// });
+exports.update = function(env, args, request) {
+    var file = env.get("file");
+    if (!file) {
+        request.doneWithError("There is no currently opened file.");
+        return;
+    }
+    var parts = project_m.getProjectAndPath(file.get("path"));
+
+    var project = parts[0];
+    
+    if (!project) {
+        request.doneWithError("There is no active project.");
+        return;
+    }
+
+    var sendRequest = function(kcpass) {
+        var command = {
+            command: ["update", "_BESPIN_REMOTE_URL"]
+        };
+
+        if (kcpass) {
+            command.kcpass = kcpass;
+        }
+
+        var pr = vcs(project,command);
+        exports._createStandardHandler(pr, request);
+    };
+
+    exports._getRemoteauth(project).then(function(remoteauth) {
+        if (remoteauth == "both") {
+            kc.getKeychainPassword().then(sendRequest);
+        } else {
+            sendRequest(undefined);
+        }
+    });
+    
+    request.async();
+};
 
 /**
  * Initialize an HG repository
@@ -786,19 +693,38 @@ exports._performVCSCommandWithFiles = function(vcsCommand, request, args, option
  */
 exports._remoteauthCache = {};
 
+
+/**
+ * Finds out if the given project requires remote authentication the values
+ * returned are "", "both" (for read and write), "write" when only writes
+ * require authentication the result is published as an object with project,
+ * remoteauth values to vcs:remoteauthUpdate and sent to the callback.
+ */
+var remoteauth = function(project) {
+    var pr = new Promise();
+    var url = "/vcs/remoteauth/" + escape(project.name) + "/";
+    server.request("GET", url, null).then(
+        function(result) {
+            exports._remoteauthCache[project.name] = result;
+            pr.resolve(result);
+        }
+    );
+    return pr;
+};
+
 /**
  * Looks in the cache or calls to the server to find out if the given project
  * requires remote authentication.
- * The result is published at vcs:remoteauth:project
  */
-exports._getRemoteauth = function(project, callback) {
+exports._getRemoteauth = function(project) {
     var cached = exports._remoteauthCache[project];
     if (cached === undefined) {
-        remoteauth(project, callback);
-        return;
+        return remoteauth(project);
     }
     // work from cache
-    callback(cached);
+    var pr = new Promise();
+    pr.resolve(cached);
+    return pr;
 };
 
 /**
@@ -852,29 +778,6 @@ exports._createCancelHandler = function() {
     };
 };
 
-/**
- * Extension to bespin.client.Server
- */
-
-/**
- * Finds out if the given project requires remote authentication the values
- * returned are "", "both" (for read and write), "write" when only writes
- * require authentication the result is published as an object with project,
- * remoteauth values to vcs:remoteauthUpdate and sent to the callback.
- */
-var remoteauth = function(project, callback) {
-    var url = "/vcs/remoteauth/" + escape(project) + "/";
-    bespin.get("server").request("GET", url, null, {
-        onSuccess: function(result) {
-            var event = {
-                project: project,
-                remoteauth: result
-            };
-            bespin.publish("vcs:remoteauthUpdate", event);
-            callback(result);
-        }
-    });
-};
 
 /**
  * Run a Version Control System (VCS) command.
