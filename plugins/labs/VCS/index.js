@@ -344,22 +344,9 @@ var project_m = require("Project");
  * Diff command.
  * Report on the changes between the working files and the repository
  */
-// exports.commands.addCommand({
-//     "name": "vcs diff",
-//     "description": "Display the differences in the checkout out files",
-//     "params":
-//     [
-//         {
-//             "name": "files",
-//             "type": "[text]",
-//             "description": "Use the current file, add -a for all files or add filenames"
-//         }
-//     ],
-//     "manual": "Without any options, the vcs diff command will diff the currently selected file against the repository copy. If you pass in -a, the command will diff <em>all</em> files. Finally, you can list files to diff individually.",
-//     execute: function(env, args, request) {
-//         exports._performVCSCommandWithFiles("diff", request, args);
-//     }
-// });
+exports.diff = function(env, args, request) {
+    exports._performVCSCommandWithFiles("diff", env, args, request);
+};
 
 /**
  * Revert command.
@@ -637,24 +624,29 @@ exports.update = function(env, args, request) {
 /**
  * Generic vcs remote command handler
  */
-exports._performVCSCommandWithFiles = function(vcsCommand, request, args, options) {
+exports._performVCSCommandWithFiles = function(vcsCommand, env, args, request, 
+                                               options) {
     options = options || { acceptAll: true };
     var project;
     var path;
     var command;
-
-    var session = bespin.get("editSession");
-    if (session) {
-        project = session.project;
-        path = session.path;
+    
+    var file = env.get("file");
+    if (!file) {
+        request.doneWithError("There is no currently opened file.");
+        return;
     }
+    var parts = project_m.getProjectAndPath(file.get("path"));
+    
+    project = parts[0];
+    path = parts[1];
 
     if (!project) {
-        request.doneWithError("You need to pass in a project");
+        request.doneWithError("You need to be in a project to use this command");
         return;
     }
 
-    if (args.varargs.length == 0) {
+    if (args.files.length == 0) {
         if (!path) {
             var dasha = "";
             if (options.acceptAll) {
@@ -664,21 +656,17 @@ exports._performVCSCommandWithFiles = function(vcsCommand, request, args, option
             return;
         }
         command = [vcsCommand, path];
-    } else if (args.varargs[0] == "-a" && options.acceptAll) {
+    } else if (args.files == "-a" && options.acceptAll) {
         command = [vcsCommand];
     } else {
-        command = [vcsCommand].concat(args.varargs);
+        command = [vcsCommand, args.files];
     }
-
-    var handlerOptions = {};
-    if (options.onSuccess) {
-        handlerOptions.onSuccess = options.onSuccess;
-    }
-
-    vcs(project,
-        { command: command },
-        request,
-        exports._createStandardHandler(request, handlerOptions));
+    
+    
+    var pr = vcs(project, { command: command });
+    exports._createStandardHandler(pr, request);
+    
+    request.async();
 };
 
 /**

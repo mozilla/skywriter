@@ -27,6 +27,22 @@
             "description": "Display the status of the repository files.",
             "manual": "Shows the current state of the files in the repository<br>M for modified, ? for unknown (you may need to add), R for removed, ! for files that are deleted but not removed",
             "pointer": "#status"
+        },
+        {
+            "ep": "command",
+            "name": "vcs diff",
+            "description": "Display the differences in the checkout out files",
+            "params":
+            [
+                {
+                    "name": "files",
+                    "type": "text",
+                    "description": "Use the current file, add -a for all files or add filenames",
+                    "defaultValue": ""
+                }
+            ],
+            "manual": "Without any options, the vcs diff command will diff the currently selected file against the repository copy. If you pass in -a, the command will diff <em>all</em> files. Finally, you can list files to diff individually.",
+            "pointer": "#diff"
         }
     ]
 }
