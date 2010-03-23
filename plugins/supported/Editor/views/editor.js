@@ -43,6 +43,7 @@ var SyntaxManager = require('SyntaxManager:controllers/syntaxmanager').
     SyntaxManager;
 var TextView = require('views/text').TextView;
 var EditorUndoController = require('controllers/undo').EditorUndoController;
+var EditorSearchController = require('controllers/search').EditorSearchController;
 
 /**
  * @class
@@ -101,6 +102,8 @@ exports.EditorView = SC.View.extend(SC.Border, {
      */
     undoController: EditorUndoController,
 
+    searchController: EditorSearchController,
+
     _gutterViewFrameChanged: function() {
         this.get('scrollView').adjust({
             left: this.getPath('gutterView.frame').width
@@ -128,7 +131,7 @@ exports.EditorView = SC.View.extend(SC.Border, {
         var scrollView = this.createChildView(scrollViewClass, {
             contentView: textViewClass.extend({
                 layoutManager: layoutManager,
-                undoController: this.get('undoController')
+                searchController: this.get('searchController')
             }),
             layout: {
                 left:   gutterView.get('frame').width,
@@ -148,11 +151,14 @@ exports.EditorView = SC.View.extend(SC.Border, {
             textView: textView
         }));
 
+        this.get('searchController').set('textView', textView);
+
         this.set('childViews', [ gutterView, scrollView ]);
     },
 
     init: function() {
         this.set('layoutManager', this.get('layoutManager').create());
+        this.set('searchController', this.get('searchController').create());
         return arguments.callee.base.apply(this, arguments);
     }
 });
