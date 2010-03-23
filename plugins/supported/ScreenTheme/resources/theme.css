@@ -50,15 +50,16 @@ body.sc-theme {
 }
 
 .bespin-screen.sc-pane {
+    color: rgba(255,255,255,1);
+    text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
     -moz-transition-property: all;
     -moz-transition-duration: 0.5s;
     -webkit-transition-property: all;
     -webkit-transition-duration: 0.5s;
 }
 
-.bespin-screen.sc-pane * {
+.bespin-screen.sc-pane a {
     color: rgba(255,255,255,1);
-    text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
 }
 
 .bespin-screen .sc-button-view {
