@@ -170,7 +170,7 @@ exports.TextInput = {
 
         var textField = this.$("#" + this._TextInput_textFieldId)[0];
         this._TextInput_textFieldDom = textField;
-        var thisTextInput = this;
+        var self = this;
 
         // No way that I can see around this ugly browser sniffing, without
         // more complicated hacks. No browsers have a complete enough
@@ -180,30 +180,30 @@ exports.TextInput = {
             // textInput event, but only one of them has to be handled.
             if (!this._isChrome) {
                 textField.addEventListener('compositionend', function(evt) {
-                    thisTextInput._TextInput_textInserted(evt.data);
+                    self._TextInput_textInserted(evt.data);
                 }, false);
             }
             textField.addEventListener('textInput', function(evt) {
-                thisTextInput._TextInput_textInserted(evt.data);
+                self._TextInput_textInserted(evt.data);
             }, false);
             textField.addEventListener('paste', function(evt) {
-                thisTextInput._TextInput_textInserted(evt.clipboardData.
+                self._TextInput_textInserted(evt.clipboardData.
                     getData('text/plain'));
                 evt.preventDefault();
             }, false);
         } else {
             var textFieldChangedFn = function(evt) {
-                thisTextInput._TextInput_textFieldChanged();
+                self._TextInput_textFieldChanged();
             };
             textField.addEventListener('keypress', textFieldChangedFn, false);
             textField.addEventListener('keyup', textFieldChangedFn, false);
 
             textField.addEventListener('compositionstart', function(evt) {
-                thisTextInput._TextInput_composing = true;
+                self._TextInput_composing = true;
             }, false);
             textField.addEventListener('compositionend', function(evt) {
-                thisTextInput._TextInput_composing = false;
-                thisTextInput._TextInput_textFieldChanged();
+                self._TextInput_composing = false;
+                self._TextInput_textFieldChanged();
             }, false);
 
             textField.addEventListener('paste', function(evt) {
@@ -217,9 +217,9 @@ exports.TextInput = {
                 // Sometimes a delay of 0 is too short for Fx. In such a case
                 // the keyUp events occur a little bit later and the pasted
                 // content is detected there.
-                thisTextInput._TextInput_setValueAndSelect('');
+                self._TextInput_setValueAndSelect('');
                 window.setTimeout(function() {
-                    thisTextInput._TextInput_textFieldChanged();
+                    self._TextInput_textFieldChanged();
                 }, 0);
             }, false);
         }
@@ -243,13 +243,13 @@ exports.TextInput = {
         var copyCutBaseFn = function(evt) {
             // Get the data that should be copied/cutted.
             var copyCutData = evt.type.indexOf('copy') != -1 ?
-                            thisTextInput._TextInput_copy() :
-                            thisTextInput._TextInput_cut();
+                            self._TextInput_copy() :
+                            self._TextInput_cut();
             // Set the textField's value equal to the copyCutData.
             // After this function is called, the real copy or cut
             // event takes place and the selected text in the
             // textField is pushed to the OS's clipboard.
-            thisTextInput._TextInput_setValueAndSelect(copyCutData);
+            self._TextInput_setValueAndSelect(copyCutData);
         };
 
         // For all browsers that are not Safari running on Mac.
@@ -266,10 +266,10 @@ exports.TextInput = {
                     // until it's copied / cutted. Otherwise the value of the
                     // textarea is inserted again.
                     if (SC.browser.isMozilla) {
-                        thisTextInput._TextInput_ignore = true;
+                        self._TextInput_ignore = true;
                         window.setTimeout(function() {
-                            thisTextInput._TextInput_setValueAndSelect('');
-                            thisTextInput._TextInput_ignore = false;
+                            self._TextInput_setValueAndSelect('');
+                            self._TextInput_ignore = false;
                         }, 0);
                     }
                 };
@@ -310,14 +310,14 @@ exports.TextInput = {
         // Clicking the address bar causes a blur, but SproutCore won't notice
         // unless we tell it explicitly.
         textField.addEventListener('blur', function(evt) {
-            thisTextInput.resignFirstResponder();
+            self.resignFirstResponder();
         }, false);
 
         // If the textinput gets the focus from a non SproutCore view, the
         // willBecomeKeyResponderFrom() will not be called. For this reason,
         // the textInput has to listen to the focus event itself.
         textField.addEventListener('focus', function(evt) {
-            thisTextInput.becomeFirstResponder();
+            self.becomeFirstResponder();
         }, false);
     },
 
