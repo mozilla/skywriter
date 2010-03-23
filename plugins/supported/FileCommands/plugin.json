@@ -36,6 +36,21 @@
         },
         {
             "ep": "command",
+            "name": "saveas",
+            "params": [
+                {
+                    "name": "path",
+                    "type": "text",
+                    "description": "the filename to save to",
+                    "defaultValue": ""
+                }
+            ],
+            "description": "save the current contents under a new name",
+            "key": "ctrl_shift_s",
+            "pointer": "#saveAsCommand"
+        },
+        {
+            "ep": "command",
             "name": "open",
             "params":
             [

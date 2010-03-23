@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var pathUtil = require("Filesystem:path");
+var cliController = require("CommandLine:controller").cliController;
 
 /*
  * Creates a path based on the current open file, if there is
@@ -126,9 +127,43 @@ exports.mkdirCommand = function(env, args, request) {
  */
 exports.saveCommand = function(env, args, request) {
     var buffer = env.get("buffer");
-    buffer.save().then(function() {
-        request.done("File saved");
-    });
+    if (buffer.untitled()) {
+        cliController.prompt("saveas ");
+        request.done("The current buffer is untitled. Please enter a name.");
+        return;
+    }
+
+    buffer.save().then(function() { request.done("Saved"); });
+    request.async();
+};
+
+/**
+ * 'save as' command
+ */
+exports.saveAsCommand = function(env, args, request) {
+    var path = getCompletePath(env, args.path).substring(1);
+    var dirPath = pathUtil.directory(path), filename = pathUtil.basename(path);
+
+    var saveToDirectory = function(dir) {
+        env.get("buffer").saveAs(dir, filename).then(function() {
+                request.done("Saved to '" + path + "'");
+            }, function(err) {
+                request.doneWithError("Save failed (" + err.message + ")");
+            });
+    };
+
+    var files = env.get('files');
+    if (dirPath === "") {
+        // TODO: revisit this?
+        request.doneWithError("Files cannot be saved at the root directory: " +
+            "create a subdirectory for them first");
+    } else {
+        files.loadObject(dirPath).then(saveToDirectory, function(err) {
+            request.doneWithError("Couldn't load target directory '" +
+                dirPath + "' (" + err.message + ")");
+        });
+    }
+
     request.async();
 };
 
