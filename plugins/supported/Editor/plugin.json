@@ -256,7 +256,7 @@
             "params":
             [
                 {
-                    "name": "value",
+                    "name": "line",
                     "type": "text",
                     "description": "add the line number to move to in the file"
                 }
