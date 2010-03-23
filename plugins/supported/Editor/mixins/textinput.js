@@ -66,6 +66,7 @@ exports.TextInput = {
     _TextInput_ignore: false,
     _TextInput_textFieldId: undefined,
     _TextInput_textFieldDom: undefined,
+    _TextInput_ignoreBlur: false,
 
     // Keyevents and copy/cut/paste are not the same on Safari and Chrome.
     _isChrome: !!parseFloat(navigator.userAgent.split("Chrome/")[1]),
@@ -310,14 +311,18 @@ exports.TextInput = {
         // Clicking the address bar causes a blur, but SproutCore won't notice
         // unless we tell it explicitly.
         textField.addEventListener('blur', function(evt) {
-            self.resignFirstResponder();
+            SC.run(function() {
+                self._TextInput_ignoreBlur = true;
+                self.resignFirstResponder();
+                self._TextInput_ignoreBlur = false;
+            });
         }, false);
 
         // If the textinput gets the focus from a non SproutCore view, the
         // willBecomeKeyResponderFrom() will not be called. For this reason,
         // the textInput has to listen to the focus event itself.
         textField.addEventListener('focus', function(evt) {
-            self.becomeFirstResponder();
+            SC.run(function() { self.becomeFirstResponder(); });
         }, false);
     },
 
@@ -345,7 +350,9 @@ exports.TextInput = {
      */
     willLoseKeyResponderTo: function(responder) {
         arguments.callee.base.apply(this, arguments);
-        this.unfocusTextInput();
+        if (!this._TextInput_ignoreBlur) {
+            this.unfocusTextInput();
+        }
     }
 };
 
