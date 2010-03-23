@@ -223,11 +223,11 @@ exports.CanvasView = SC.View.extend({
             return;
         }
 
-        // The render() method can actually get called multiple times during a
-        // run loop, because other calls to render() can be queued after the
-        // first render() runs. This workaround forces tryRedraw() to be called
-        // only once per run loop.
-        SC.RunLoop.currentRunLoop.invokeLast(this, this.tryRedraw);
+        // The render() method can actually get called multiple times during an
+        // event handler, because other calls to render() can be queued after
+        // the first render() runs. This workaround forces tryRedraw() to be
+        // called only once per event handler.
+        this.invokeLater(this.tryRedraw, 0);
     },
 
     renderLayout: function(context, firstTime) {
