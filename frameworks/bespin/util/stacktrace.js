@@ -266,6 +266,14 @@ NameGuesser.prototype = {
 
 var guesser = new NameGuesser();
 
+var frameIgnorePatterns = [
+    /http:\/\/localhost:4020\/sproutcore.js:/
+];
+
+exports.ignoreFramesMatching = function(regex) {
+    frameIgnorePatterns.push(regex);
+};
+
 /**
  * Create a stack trace from an exception
  * @param ex {Error} The error to create a stacktrace from (optional)
@@ -290,7 +298,19 @@ exports.Trace.prototype.log = function(lines) {
         // and it still fits in a 32bit integer
         lines = 999999999;
     }
-    for (var i = 0; i < this._stack.length && i < lines; i++) {
-        console.debug(this._stack[i]);
+
+    var printed = 0;
+    for (var i = 0; i < this._stack.length && printed < lines; i++) {
+        var frame = this._stack[i];
+        var display = true;
+        frameIgnorePatterns.forEach(function(regex) {
+            if (regex.test(frame)) {
+                display = false;
+            }
+        });
+        if (display) {
+            console.debug(frame);
+            printed++;
+        }
     }
 };
