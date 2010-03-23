@@ -91,12 +91,18 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
     */
     file: function(key, newFile) {
         var self = this;
-        if (newFile != undefined) {
+        if (newFile !== undefined) {
             this._file = newFile;
-            newFile.loadContents().then(function(result) {
+            
+            if (SC.none(newFile)) {
                 var model = self.get("model");
-                model.set("value", result.contents);
-            });
+                model.set("value", "");
+            } else {
+                newFile.loadContents().then(function(result) {
+                    var model = self.get("model");
+                    model.set("value", result.contents);
+                });
+            }
         }
         return this._file;
     }.property(),
@@ -118,6 +124,16 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
     changeFile: function(newFile) {
         var self = this;
         this.changeFileOnly(newFile);
+        
+        // are we changing to a new file?
+        if (SC.none(newFile)) {
+            var model = self.get("model");
+            model.set("value", "");
+            var pr = new Promise();
+            pr.resolve(this);
+            return pr;
+        }
+        
         return newFile.loadContents().then(function(result) {
             var model = self.get("model");
             model.set("value", result.contents);
@@ -195,7 +211,9 @@ exports.EditSession = SC.Object.extend({
     history: null,
     
     bufferFileChanged: function(sender, file) {
-        this.get('history').addPath(file.get('path'));
+        if (!SC.none(file)) {
+            this.get('history').addPath(file.get('path'));
+        }
     },
 
     /*

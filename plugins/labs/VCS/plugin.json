@@ -52,8 +52,9 @@
             [
                 {
                     "name": "files",
-                    "type": "[text]",
-                    "description": "Use the current file, add -a for all files or add filenames"
+                    "type": "text",
+                    "description": "Use the current file, add -a for all files or add filenames",
+                    "defaultValue": ""
                 }
             ],
             "manual": "Without any options, the vcs add command will add the currently selected file. If you pass in -a, the command will add <em>all</em> files. Finally, you can list files individually.",

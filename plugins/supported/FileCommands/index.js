@@ -226,29 +226,9 @@ exports.statusCommand = function(env, args, request) {
     request.done(editSession.getStatus());
 };
 
-/**
- * 'newfile' command
- * TODO: Delete or correct
-        {
-            "ep": "command",
-            "name": "newfile",
-            "params":
-            [
-                {
-                    "name": "filename",
-                    "type": "text",
-                    "description": "optionally, you can specify a full path including project by starting the filename with '/'",
-                    "defaultValue": null
-                }
-            ],
-            "description": "create a new buffer for file",
-            "withKey": "CTRL SHIFT N",
-            "pointer": "#newfileCommand"
-        },
- */
 exports.newfileCommand = function(env, args, request) {
-    var info = parseArguments(args.filename);
-    editor.newFile(info.project, info.path);
+    var buffer = env.get("buffer");
+    buffer.set("file", null);
 };
 
 /**

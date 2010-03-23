@@ -90,6 +90,12 @@
             "name": "existingFile",
             "description": "A method of selecting an existing file",
             "pointer": "views/types#existingFileHint"
+        },
+        {
+            "ep": "command",
+            "name": "newfile",
+            "description": "Creates an empty buffer for editing a new file.",
+            "pointer": "#newfileCommand"
         }
     ]
 }

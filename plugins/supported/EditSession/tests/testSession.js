@@ -71,6 +71,12 @@ exports.testBufferFileChange = function() {
     setTimeout(function() {
         var newtext = buffer.get("model").get("value");
         t.equal(newtext, "the top file", "Expected file contents to be loaded");
+        
+        // now we want to reset the buffer.
+        buffer.changeFile(null);
+        t.ok(buffer.untitled(), "Buffer should be untitled again");
+        newtext = buffer.get("model").get("value");
+        t.equal(newtext, "", "editor text should be empty");
         pr.resolve();
     }, 1);
     return pr;
@@ -111,4 +117,3 @@ exports.testBufferSaving = function() {
     t.equal(file1, file2, "the file returned by saveAs() and the file " +
         "loaded from the directory");
 };
-

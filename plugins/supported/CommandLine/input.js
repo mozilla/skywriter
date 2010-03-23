@@ -507,7 +507,7 @@ exports.Input = SC.Object.extend({
                 element: "Can't convert '" + value + "' to a " +
                     param.type + ": " + ex
             }));
-        });
+        }.bind(this));
 
         return convertPromise;
     }
