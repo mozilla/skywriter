@@ -288,7 +288,7 @@ exports.Directory = SC.Object.extend({
                 return;
             }
 
-            if (isDir) {
+            if (!isDir) {
                 if (obj.loadObject) {
                     pr.reject(new Error(path + " is a directory found where " +
                         "a file was expected in " + path));
