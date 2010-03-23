@@ -48,28 +48,28 @@
 // IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 // OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-var SC = require('sproutcore/runtime').SC;
+var util = require('bespin:util/util');
 
 /**
  * Different browsers create stack traces in different ways.
  * <strike>Feature</strike> Browser detection baby ;).
  */
 var mode = (function() {
-    
+
     // We use SC's browser detection here to avoid the "break on error"
     // functionality provided by Firebug. Firebug tries to do the right
     // thing here and break, but it happens every time you load the page.
     // bug 554105
-    if (SC.browser.isMozilla) {
-        return 'firefox;'
-    } else if (SC.browser.isOpera) {
-        return "opera";
-    } else if (SC.browser.isSafari) {
-        return "other";
+    if (util.isMozilla) {
+        return 'firefox';
+    } else if (util.isOpera) {
+        return 'opera';
+    } else if (util.isSafari) {
+        return 'other';
     }
-    
+
     // SC doesn't do any detection of Chrome at this time.
-    
+
     // this is the original feature detection code that is used as a
     // fallback.
     try {
@@ -116,20 +116,24 @@ var decoders = {
                 replace(/^[^\(]+?[\n$]/gm, '').
                 replace(/^\s+at\s+/gm, '').
                 replace(/^Object.<anonymous>\s*\(/gm, '{anonymous}()@').
-                split("\n");
+                split('\n');
     },
 
     firefox: function(e) {
         var stack = e.stack;
+        if (!stack) {
+            console.log(e);
+            return [];
+        }
         // stack = stack.replace(/^.*?\n/, '');
         stack = stack.replace(/(?:\n@:0)?\s+$/m, '');
         stack = stack.replace(/^\(/gm, '{anonymous}(');
-        return stack.split("\n");
+        return stack.split('\n');
     },
 
     // Opera 7.x and 8.x only!
     opera: function(e) {
-        var lines = e.message.split("\n"), ANON = '{anonymous}',
+        var lines = e.message.split('\n'), ANON = '{anonymous}',
             lineRE = /Line\s+(\d+).*?script\s+(http\S+)(?:.*?in\s+function\s+(\S+))?/i, i, j, len;
 
         for (i = 4, j = 0, len = lines.length; i < len; i += 2) {
@@ -146,7 +150,7 @@ var decoders = {
 
     // Safari, Opera 9+, IE, and others
     other: function(curr) {
-        var ANON = "{anonymous}", fnRE = /function\s*([\w\-$]+)?\s*\(/i, stack = [], j = 0, fn, args;
+        var ANON = '{anonymous}', fnRE = /function\s*([\w\-$]+)?\s*\(/i, stack = [], j = 0, fn, args;
 
         var maxStackSize = 10;
         while (curr && stack.length < maxStackSize) {
@@ -181,7 +185,7 @@ NameGuesser.prototype = {
             return;
         }
         req.open('GET', url, false);
-        req.setRequestHeader("User-Agent", "XMLHTTP/1.0");
+        req.setRequestHeader('User-Agent', 'XMLHTTP/1.0');
         req.send('');
         return req.responseText;
     },
@@ -192,11 +196,11 @@ NameGuesser.prototype = {
             function() {
                 return new XMLHttpRequest();
             }, function() {
-                return new ActiveXObject("Msxml2.XMLHTTP");
+                return new ActiveXObject('Msxml2.XMLHTTP');
             }, function() {
-                return new ActiveXObject("Msxml3.XMLHTTP");
+                return new ActiveXObject('Msxml3.XMLHTTP');
             }, function() {
-                return new ActiveXObject("Microsoft.XMLHTTP");
+                return new ActiveXObject('Microsoft.XMLHTTP');
             }
         ];
         for (var i = 0; i < XMLHttpFactories.length; i++) {
@@ -211,7 +215,7 @@ NameGuesser.prototype = {
 
     getSource: function(url) {
         if (!(url in this.sourceCache)) {
-            this.sourceCache[url] = this.ajax(url).split("\n");
+            this.sourceCache[url] = this.ajax(url).split('\n');
         }
         return this.sourceCache[url];
     },
@@ -244,7 +248,7 @@ NameGuesser.prototype = {
         var reGuessFunction = /['"]?([0-9A-Za-z_]+)['"]?\s*[:=]\s*(function|eval|new Function)/;
         // Walk backwards from the first line in the function until we find the line which
         // matches the pattern above, which is the function definition
-        var line = "", maxLines = 10;
+        var line = '', maxLines = 10;
         for (var i = 0; i < maxLines; ++i) {
             line = source[lineNo - i] + line;
             if (line !== undefined) {
@@ -260,7 +264,7 @@ NameGuesser.prototype = {
                 }
             }
         }
-        return "(?)";
+        return '(?)';
     }
 };
 
