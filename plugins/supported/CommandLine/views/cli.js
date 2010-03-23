@@ -470,6 +470,12 @@ exports.CliInputView = SC.View.design({
         this.getPath("contentView.input").becomeFirstResponder();
     },
 
+    init: function() {
+        arguments.callee.base.apply(this, arguments);
+
+        cliController.set('view', this);
+    },
+
     /**
      * There's no good reason for having this contentView - the childViews could
      * be directly on CliInputView, except that the observes() on focusChanged

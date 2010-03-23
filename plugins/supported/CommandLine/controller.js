@@ -61,6 +61,13 @@ var Trace = require("bespin:util/stacktrace").Trace;
  */
 exports.cliController = SC.Object.create({
     /**
+     * @property{CliInputView}
+     *
+     * The current command line view.
+     */
+    view: null,
+
+    /**
      * A string containing the current contents of the command line
      */
     input: null,
