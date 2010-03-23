@@ -196,6 +196,17 @@ exports.TextInput = {
             var textFieldChangedFn = function(evt) {
                 self._TextInput_textFieldChanged();
             };
+
+            // Same as above, but executes after all pending events. This
+            // ensures that content gets added to the text field before the
+            // value field is read.
+            var textFieldChangedLater = function() {
+                window.setTimeout(function() { SC.run(textFieldChangedFn); },
+                    0);
+            };
+
+            textField.addEventListener('keydown', textFieldChangedLater,
+                false);
             textField.addEventListener('keypress', textFieldChangedFn, false);
             textField.addEventListener('keyup', textFieldChangedFn, false);
 
