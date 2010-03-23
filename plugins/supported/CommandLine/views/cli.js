@@ -56,7 +56,7 @@ var imagePath = catalog.getResourceURL("CommandLine") + "images/";
 /**
  * The height of the input area that is always visible.
  */
-var inputHeight = 27;
+var inputHeight = 25;
 
 /**
  * Utility to create an ID while end()ing RenderContext
@@ -498,7 +498,7 @@ exports.CliInputView = SC.View.design({
         childViews: [ "kbd", "display", "prompt", "completion", "input", "submit" ],
 
         display: SC.View.design({
-            layout: { top: 0, bottom: 25, left: 0, right: 0 },
+            layout: { top: 0, bottom: 27, left: 0, right: 0 },
             childViews: [ "output", "toolbar" ],
 
             output: SC.ScrollView.design({
@@ -539,7 +539,8 @@ exports.CliInputView = SC.View.design({
                 this.set("value", "<span class='cmd_existing'>" + current +
                     "</span>" + extra);
             }.observes(".parentView.parentView._completion"),
-            layout: { height: 25, bottom: 0, left: 45, right: 0 }
+            // This is height:25, bottom:0 plus offsets added by SC, and <input>
+            layout: { height: 18, bottom: 4, left: 45, right: 0 }
         }),
 
         /**
@@ -553,7 +554,7 @@ exports.CliInputView = SC.View.design({
         input: SC.TextFieldView.design({
             classNames: [ "cmd_input" ],
             valueBinding: "CommandLine:controller#cliController.input",
-            layout: { height: 25, bottom: 3, left: 40, right: 0 },
+            layout: { height: 25, bottom: 0, left: 40, right: 0 },
             keyDown: function(ev) {
                 // SC puts keyDown and keyPress event together. Here we only
                 // want to handle the real/browser's keydown event. To do so,

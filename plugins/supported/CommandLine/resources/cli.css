@@ -42,7 +42,7 @@ this rule doesn't work, but might in the future */
 .sc-view .cmd_line input::selection { color: #44A; background: #AA4; }
 .sc-view .cmd_line input::-moz-selection { color: #44A; background: #AA4; }
 
-.sc-view .cmd_line .cmd_prompt { color: #FF8E00; font-weight: bold; }
+.sc-view .cmd_line .cmd_prompt label { color: #FF8E00; font-weight: bold; }
 .sc-view .cmd_line .cmd_prompt .cmd_brackets { color: #FFF; }
 
 #command.commandLineError { color: red; }
@@ -51,6 +51,7 @@ this rule doesn't work, but might in the future */
   font-family: Arial,sans-serif; color: #FFF; font-size: 16px;
   font-weight: bold; background: transparent;
 }
+.cmd_line .sc-view .sc-text-field-view input:focus { color: #FFF; }
 .cmd_line.error .sc-view .sc-text-field-view input { color: #F00; }
 .cmd_line .sc-view label.sc-text-field-view .border {
   -moz-appearance: none; -webkit-appearance: none; border: 0;
@@ -60,10 +61,12 @@ this rule doesn't work, but might in the future */
 }
 div.cmd_line div.sc-view.sc-gray-border { border: 0; }
 
-div.cmd_line div.cmd_completion { font-family: Arial,sans-serif;
-  color: #443; font-size: 16px; font-weight: bold;
+div.cmd_line div.cmd_completion { font-family: Arial,sans-serif; color: #443;
+  font-size: 16px; font-weight: bold;
 }
-div.cmd_line div.cmd_completion span.cmd_existing { color: transparent; }
+div.cmd_line div.cmd_completion span.cmd_existing { color: #1b1613;
+  text-shadow: none;
+}
 div.cmd_line span.cmd_char { letter-spacing: -0.2ex; font-weight: bold; }
 
 /* Command Output */
@@ -141,10 +144,10 @@ div.cmd_line div.cmd_view div.sc-collection-view {
 */
 
 .sc-view div.cmd_line div.cmd_ex {
-    font-size: 120%;
     position: absolute;
     bottom: 0px;
     z-index: 1;
+    line-height:1.2em;
 }
 
 .sc-view div.cmd_line div.cmd_ex article {
@@ -167,8 +170,6 @@ div.cmd_line div.cmd_view div.sc-collection-view {
     background:-moz-linear-gradient(top, #181310, #1b1613);
     background:-webkit-gradient(linear, left top, left bottom, from(#181310), to(#1b1613));
     max-width:500px;
-    line-height:1.2em;
-    font-size:80%;
 }
 .sc-view div.cmd_line div.cmd_ex article * {
     color:#AAA;
@@ -192,7 +193,7 @@ div.cmd_line div.cmd_view div.sc-collection-view {
 .sc-view div.cmd_line div.cmd_ex div.cmd_menu {
   display:inline-block;
   margin-bottom:-2px;
-  padding:8px 8px 0 8px;
+  padding:8px;
   border:2px #000 solid;
   border-bottom:0;
   -moz-border-radius-topleft:10px;
