@@ -41,11 +41,24 @@ exports.DummyFileSource = SC.Object.extend({
     checkStatus: null,
     
     init: function() {
+        // keep a shallow copy of the files list
+        var originalFiles = [];
+        this.files.forEach(function(f) {
+            originalFiles.push(f);
+        });
+        this._originalFiles = originalFiles;
         this.reset();
     },
     
     reset: function() {
         this.requests = [];
+        
+        // restore the files list
+        var files = [];
+        this._originalFiles.forEach(function(f) {
+            files.push(f);
+        });
+        this.files = files;
     },
     
     loadDirectory: function(directory, deep) {

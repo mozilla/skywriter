@@ -217,6 +217,11 @@ exports.testSendToMatcher = function() {
     source.reset();
     getNewRoot().load(true).then(function(dir) {
         dir.sendToMatcher(mockMatcher).then(function() {
+            var stringForm = [];
+            strings.forEach(function(o) {
+                stringForm.push(o.name);
+            });
+            
             var expected = [
                 "/atTheTop.js",
                 "/anotherAtTheTop.js",
@@ -227,7 +232,7 @@ exports.testSendToMatcher = function() {
                 "/deeply/nested/directory/andAFile.txt"
             ];
 
-            t.deepEqual(strings, expected, "the strings sent to the " +
+            t.deepEqual(stringForm, expected, "the strings sent to the " +
                 "matcher and the deep hierarchy of files");
 
             testPromise.resolve();
@@ -306,6 +311,7 @@ exports.testFileWriting = function() {
 
     var files = dir.get('files');
     t.equal(files.length, 1, "the number of files in the directory and 1");
+    t.equal(files[0].name, file1.name, "Filenames should match");
     t.equal(files[0], file1, "the first file in the directory and the file " +
         "that was written originally");
 
