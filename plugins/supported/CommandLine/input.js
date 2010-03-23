@@ -40,6 +40,7 @@ var catalog = require("bespin:plugins").catalog;
 var console = require('bespin:console').console;
 var Promise = require("bespin:promise").Promise;
 var groupPromises = require("bespin:promise").group;
+var Trace = require('bespin:util/stacktrace').Trace;
 
 var types = require("Types:types");
 
@@ -108,23 +109,32 @@ exports.Input = SC.Object.extend({
     parse: function() {
         var success = false;
 
-        // Cut up the input into parts
-        if (this._tokenize()) {
-            // Split the command from the args
-            if (this._split()) {
-                // Assign input to declared parameters
-                if (this._assign()) {
-                    // Convert input into declared types
-                    if (this._convertTypes()) {
-                        success = true;
+        try {
+            // Cut up the input into parts
+            if (this._tokenize()) {
+                // Split the command from the args
+                if (this._split()) {
+                    // Assign input to declared parameters
+                    if (this._assign()) {
+                        // Convert input into declared types
+                        if (this._convertTypes()) {
+                            success = true;
+                        }
                     }
                 }
             }
-        }
 
-        // Something failed, so the argsPromise wont complete. Kill it
-        if (!success) {
-            this._argsPromise.reject(new Error("Parse error"));
+            // Something failed, so the argsPromise wont complete. Kill it
+            if (!success) {
+                this._argsPromise.reject(new Error("Parse error"));
+            }
+        } catch (ex) {
+            var trace = new Trace(ex, true);
+            console.group('Error calling command: ' + this.typed);
+            console.error(ex);
+            trace.log(3);
+            console.groupEnd();
+            this._argsPromise.reject(ex);
         }
 
         return {

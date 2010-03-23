@@ -38,14 +38,14 @@
 var SC = require('sproutcore/runtime').SC;
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
+var Trace = require('bespin:util/stacktrace').Trace;
 
 var env = require('Canon:environment');
 var Request = require('Canon:request').Request;
 
+var hint = require('CommandLine:hint');
 var typehint = require('CommandLine:typehint');
 var Input = require('CommandLine:input').Input;
-
-var Trace = require('bespin:util/stacktrace').Trace;
 
 /**
  * Command line controller.
@@ -114,49 +114,62 @@ exports.cliController = SC.Object.create({
         var input = Input.create({ typed: typed, env: env.global });
         var results = input.parse();
 
-        var self = this;
-        results.argsPromise.then(function(args) {
-            input.commandExt.load(function(command) {
-                // Check the function pointed to in the meta-data exists
-                if (!command) {
-                    self.hints.pushObject('Command action not found.');
-                    return;
-                }
-
-                var request = Request.create({
-                    command: command,
-                    commandExt: input.commandExt,
-                    typed: typed,
-                    args: args
-                });
-
-                try {
-                    command(env.global, args, request);
-
-                    // Only clear the input if the command worked
-                    SC.run(function() {
-                        self.set('input', '');
-                    });
-                } catch (ex) {
-                    // TODO: Better UI
-                    SC.run(function() {
-                        self.hints.pushObject(ex);
-                    });
-
-                    var trace = new Trace(ex, true);
-                    console.group('Error calling command: ' + input.commandExt.name);
-                    console.log('- typed: "', typed, '"');
-                    console.log('- arguments: ', args);
-                    console.error(ex);
-                    trace.log(3);
-                    console.groupEnd();
-                }
-            });
-        }, function(ex) {
+        /**
+         *
+         */
+        var onError = function(ex) {
             var trace = new Trace(ex, true);
+            console.group('Error calling command: ' + input.commandExt.name);
+            console.log('- typed: "', typed, '"');
+            // console.log('- arguments: ', args);
             console.error(ex);
             trace.log(3);
-        });
+            console.groupEnd();
+
+            // TODO: Better UI
+            SC.run(function() {
+                this.hints.pushObject(hint.Hint.create({
+                    level: hint.Level.Error,
+                    element: ex
+                }));
+            }.bind(this));
+        }.bind(this);
+
+        var exec = function(command, args) {
+            // Check the function pointed to in the meta-data exists
+            if (!command) {
+                this.hints.pushObject(hint.Hint.create({
+                    level: hint.Level.Error,
+                    element: "Command not found."
+                }));
+                this.set('input', '');
+                return;
+            }
+
+            var request = Request.create({
+                command: command,
+                commandExt: input.commandExt,
+                typed: typed,
+                args: args
+            });
+
+            try {
+                command(env.global, args, request);
+
+                // Only clear the input if the command worked
+                this.set('input', '');
+            } catch (ex) {
+                onError(ex);
+            }
+        }.bind(this);
+
+        results.argsPromise.then(function(args) {
+            input.commandExt.load().then(function(command) {
+                SC.run(function() {
+                    exec(command, args);
+                });
+            });
+        }, onError);
     },
 
     /**
