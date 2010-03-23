@@ -35,34 +35,24 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime").SC;
-var catalog = require("bespin:plugins").catalog;
+var SC = require('sproutcore/runtime').SC;
+var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 
-var env = require("Canon:environment");
-var Request = require("Canon:request").Request;
+var env = require('Canon:environment');
+var Request = require('Canon:request').Request;
 
-var typehint = require("CommandLine:typehint");
-var Input = require("CommandLine:input").Input;
+var typehint = require('CommandLine:typehint');
+var Input = require('CommandLine:input').Input;
 
-var Trace = require("bespin:util/stacktrace").Trace;
+var Trace = require('bespin:util/stacktrace').Trace;
 
 /**
  * Command line controller.
- * <p>Outstanding work
- * - fix lack of completion on params
- * - fix double request for hints
- * - disallow return on error
- * - hide exec button
- * - Sub commands
- * - named parameters
- * - aliases
- * - Late bound types
  */
 exports.cliController = SC.Object.create({
     /**
      * @property{CliInputView}
-     *
      * The current command line view.
      */
     view: null,
@@ -91,33 +81,33 @@ exports.cliController = SC.Object.create({
      * the CLI input text field.
      */
     exec: function() {
-        this.executeCommand(this.get("input"));
+        this.executeCommand(this.get('input'));
     },
 
     /**
      * We need to re-parse the CLI whenever the input changes
      */
     _inputChanged: function() {
-        this.hints.propertyWillChange("[]");
+        this.hints.propertyWillChange('[]');
         this.hints.length = 0;
 
-        var input = Input.create({ typed: this.get("input"), env: env.global });
+        var input = Input.create({ typed: this.get('input'), env: env.global });
         var results = input.parse();
         results.hints.forEach(function(hint) {
             this.hints.pushObject(hint);
         }.bind(this));
 
-        this.hints.propertyDidChange("[]");
-    }.observes("input"),
+        this.hints.propertyDidChange('[]');
+    }.observes('input'),
 
     /**
      * Execute a command manually without using the UI
      * @param typed {String} The command to turn into an Instruction and execute
      */
     executeCommand: function(typed) {
-        console.log("executeCommand '" + typed + "'");
+        console.log('executeCommand "' + typed + '"');
 
-        if (!typed || typed === "") {
+        if (!typed || typed === '') {
             return;
         }
 
@@ -129,7 +119,7 @@ exports.cliController = SC.Object.create({
             input.commandExt.load(function(command) {
                 // Check the function pointed to in the meta-data exists
                 if (!command) {
-                    self.hints.pushObject("Command action not found.");
+                    self.hints.pushObject('Command action not found.');
                     return;
                 }
 
@@ -145,7 +135,7 @@ exports.cliController = SC.Object.create({
 
                     // Only clear the input if the command worked
                     SC.run(function() {
-                        self.set("input", "");
+                        self.set('input', '');
                     });
                 } catch (ex) {
                     // TODO: Better UI
@@ -154,9 +144,9 @@ exports.cliController = SC.Object.create({
                     });
 
                     var trace = new Trace(ex, true);
-                    console.group("Error calling command: " + input.commandExt.name);
-                    console.log("- typed: '", typed, "'");
-                    console.log("- arguments: ", args);
+                    console.group('Error calling command: ' + input.commandExt.name);
+                    console.log('- typed: "', typed, '"');
+                    console.log('- arguments: ', args);
                     console.error(ex);
                     trace.log(3);
                     console.groupEnd();
