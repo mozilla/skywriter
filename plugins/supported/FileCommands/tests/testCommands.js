@@ -65,8 +65,8 @@ var getEnv = function() {
 };
 
 exports.testFilesCommand = function() {
-    var env  = getEnv();
-    request = Request.create();
+    var env = getEnv();
+    var request = Request.create();
     var testpr = new Promise();
     request.promise.then(function() {
         output = request.outputs.join("");
@@ -81,12 +81,26 @@ exports.testFilesCommand = function() {
     return testpr;
 };
 
+exports.testOpenFileWithNoOpenFile = function() {
+    var env = getEnv();
+    var request = Request.create();
+    var testpr = new Promise();
+    request.promise.then(function() {
+        var f = env.get("file");
+        t.ok(!request.error, "Should not be in error state");
+        t.equal(f.get("path"), "/foo/bar/3.txt", "File should have been set");
+        testpr.resolve();
+    });
+    
+    FileCommands.openCommand(env, {path: "/foo/bar/3.txt"}, request);
+};
+
 exports.testFilesCommandDefaultsToRoot = function() {
     var env = getEnv();
     
     var testpr = new Promise();
     
-    request = Request.create();
+    var request = Request.create();
     request.promise.then(function() {
         output = request.outputs.join("");
         t.ok(output.indexOf("foo/<br/>") > -1, "foo/ should be in output");
@@ -106,7 +120,7 @@ exports.testFilesAreRelativeToCurrentOpenFile = function() {
     
     var testpr = new Promise();
     
-    request = Request.create();
+    var request = Request.create();
     request.promise.then(function() {
         output = request.outputs.join("");
         t.ok(output.indexOf("1.txt<br/>") > -1, "1.txt should be in the output");
@@ -125,7 +139,7 @@ exports.testFilesListingInDirectoryRelativeToOpenFile = function() {
     buffer.changeFileOnly(env.get("files").getObject("foo/1.txt"));
     var testpr = new Promise();
     
-    request = Request.create();
+    var request = Request.create();
     request.promise.then(function() {
         output = request.outputs.join("");
         t.ok(output.indexOf("3.txt<br/>") > -1, "3.txt should be in the output");

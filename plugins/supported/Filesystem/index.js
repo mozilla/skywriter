@@ -163,6 +163,7 @@ exports.Directory = SC.Object.extend({
      * the way.
      */
     getObject: function(path) {
+        path = pathUtil.trimLeadingSlash(path);
         var segments = path.split("/");
         var isDir = pathUtil.isDir(path);
         if (isDir) {

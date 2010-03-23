@@ -179,6 +179,7 @@ exports.openCommand = function(env, args, request) {
 
     // TODO: handle line number in args
     var file = files.getObject(path);
+    request.async();
     buffer.changeFile(file).then(
         function() {
             request.done();
@@ -188,7 +189,6 @@ exports.openCommand = function(env, args, request) {
                 error.message + ")");
         }
     );
-    request.async();
 };
 
 /**
