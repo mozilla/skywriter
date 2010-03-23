@@ -42,6 +42,7 @@ this rule doesn't work, but might in the future */
 .sc-view .cmd_line input::selection { color: #44A; background: #AA4; }
 .sc-view .cmd_line input::-moz-selection { color: #44A; background: #AA4; }
 
+.sc-view .cmd_line .cmd_prompt,
 .sc-view .cmd_line .cmd_prompt label { color: #FF8E00; font-weight: bold; }
 .sc-view .cmd_line .cmd_prompt .cmd_brackets { color: #FFF; }
 
