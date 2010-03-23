@@ -592,7 +592,7 @@ exports.CliInputView = SC.View.design({
             title: "Exec",
             target: "CommandLine:controller#cliController",
             action: "exec",
-            layout: { height: 25, bottom: 0, width: 0, right: 0 }
+            layout: { height: 25, bottom: 0, width: 0, right: -10 }
         })
     })
 });

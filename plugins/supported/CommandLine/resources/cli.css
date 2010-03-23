@@ -153,10 +153,9 @@ div.cmd_line div.cmd_view div.sc-collection-view {
 
 .sc-view div.cmd_line div.cmd_ex article {
     margin-left: 25px;
-    padding: 4px 8px;
+    padding: 8px;
     z-index: 1;
     color:#AAA;
-    margin-bottom:2px;
     display:block;
     border:2px #000 solid;
     border-bottom:0;
