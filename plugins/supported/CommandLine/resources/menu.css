@@ -112,3 +112,7 @@ div.cmd_menu .cmd_sep {
   border-top:2px #000 solid;
   -moz-border-top-colors: #000 #3e3936;
 }
+
+div.cmd_menu .cmd_error {
+  color: #F00;
+}
