@@ -49,15 +49,21 @@ this rule doesn't work, but might in the future */
 #command.commandLineError { color: red; }
 
 .cmd_line .sc-view .sc-text-field-view input {
-  font-family: Arial,sans-serif; color: #FFF; font-size: 16px;
-  font-weight: bold; background: transparent;
+  font-family: Arial,sans-serif;
+  color: #FFF;
+  font-size: 16px;
+  font-weight: bold;
+  background: transparent;
+  -webkit-box-shadow: none;
+  outline: none;
 }
+
 .cmd_line .sc-view .sc-text-field-view input:focus { color: #FFF; }
 .cmd_line.error .sc-view .sc-text-field-view input { color: #F00; }
 .cmd_line .sc-view label.sc-text-field-view .border {
   -moz-appearance: none; -webkit-appearance: none; border: 0;
 }
-.cmd_line .sc-view label.sc-text-field-view.focus {
+.cmd_line .sc-view .sc-text-field-view.focus {
   outline-width: 0px; outline: 0px;
 }
 div.cmd_line div.sc-view.sc-gray-border { border: 0; }
