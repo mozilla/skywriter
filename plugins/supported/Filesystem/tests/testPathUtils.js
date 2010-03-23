@@ -41,6 +41,8 @@ var t = require("PluginDev");
 exports.testBasename = function() {
     var basename = path.basename;
     t.equal(basename(""), "", "Empty string yields empty response");
+    t.equal(basename("foo/bar.js"), "bar.js", "\"foo/bar.js\" yields " +
+        "\"bar.js\"");
     t.equal(basename("/"), "", "Root alone yields empty response");
     t.equal(basename("/foo/"), "", "Directory references yields empty response");
     t.equal(basename("/foo"), "foo");

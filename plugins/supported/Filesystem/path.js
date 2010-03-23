@@ -140,7 +140,7 @@ exports.isDir = function(path) {
 exports.basename = function(path) {
     var lastSlash = path.lastIndexOf("/");
     if (lastSlash == -1) {
-        return "";
+        return path;
     }
     var afterSlash = path.substring(lastSlash+1);
     return afterSlash;
