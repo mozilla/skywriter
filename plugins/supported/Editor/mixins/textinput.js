@@ -64,9 +64,10 @@ var SC = require('sproutcore/runtime').SC;
 exports.TextInput = {
     _TextInput_composing: false,
     _TextInput_ignore: false,
+    _TextInput_ignoreBlur: false,
     _TextInput_textFieldId: undefined,
     _TextInput_textFieldDom: undefined,
-    _TextInput_ignoreBlur: false,
+    _TextInput_wantsFocus: false,
 
     // Keyevents and copy/cut/paste are not the same on Safari and Chrome.
     _isChrome: !!parseFloat(navigator.userAgent.split("Chrome/")[1]),
@@ -129,7 +130,13 @@ exports.TextInput = {
      * you should call this function in your implementation.
      */
     focusTextInput: function() {
-        this._TextInput_textFieldDom.focus();
+        if (SC.none(this._TextInput_textFieldDom)) {
+            // Avoid accessing the nonexistent DOM element, and simply set an
+            // internal flag that didCreateLayer() will check later.
+            this._TextInput_wantsFocus = true;
+        } else {
+            this._TextInput_textFieldDom.focus();
+        }
     },
 
     /**
@@ -172,6 +179,11 @@ exports.TextInput = {
         var textField = this.$("#" + this._TextInput_textFieldId)[0];
         this._TextInput_textFieldDom = textField;
         var self = this;
+
+        // If the focusTextInput() function has been called, set the focus now.
+        if (this._TextInput_wantsFocus) {
+            this.becomeFirstResponder();
+        }
 
         // No way that I can see around this ugly browser sniffing, without
         // more complicated hacks. No browsers have a complete enough
