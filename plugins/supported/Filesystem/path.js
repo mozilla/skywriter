@@ -61,16 +61,8 @@ exports.combine = function() {
  * <li>directory("foo.txt") -&gt; ""
  */
 exports.directory = function(path) {
-    var dirs = path.split('/');
-    if (dirs.length == 1) {
-        // no directory so return blank
-        return "";
-    } else if ((dirs.length == 2) && dirs[dirs.length -1] == "") {
-        // a complete directory so return it
-        return path;
-    } else {
-        return dirs.slice(0, dirs.length - 1).join('/');
-    }
+    var match = /^(.*?\/)[^\/]*$/.exec(path);
+    return match === null ? "" : match[1];
 };
 
 /**

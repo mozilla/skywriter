@@ -47,6 +47,18 @@ exports.testBasename = function() {
     t.equal(basename("/foo/bar.js"), "bar.js");
 };
 
+exports.testDirectory = function() {
+    var dir = path.directory;
+    t.equal(dir(""), "", "the directory part of \"\" and \"\"");
+    t.equal(dir("foo.txt"), "", "the directory part of \"foo.txt\" and \"\"");
+    t.equal(dir("foo/bar/baz.txt"), "foo/bar/", "the directory part of " +
+        "\"foo/bar/baz.txt\" and \"foo/bar/\"");
+    t.equal(dir("/foo.txt"), "/", "the directory part of \"/foo.txt\" and " +
+        "\"/\"");
+    t.equal(dir("/foo/bar/baz.txt"), "/foo/bar/", "the directory part of " +
+        "\"/foo/bar/baz.txt\" and \"/foo/bar/\"");
+};
+
 exports.testSplitext = function() {
     var splitext = path.splitext;
     t.deepEqual(splitext(""), ["", ""]);
