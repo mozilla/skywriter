@@ -470,6 +470,18 @@ exports.CliInputView = SC.View.design({
         this.getPath("contentView.input").becomeFirstResponder();
     },
 
+    /**
+     * Positions the insertion point at the end of the input element.
+     */
+    replaceSelection: function(text) {
+        var element = this.getPath('contentView.input').$("input").get(0);
+        var length = text.length;
+        element.value = text;
+        window.setTimeout(function() {
+            element.setSelectionRange(length, length);
+        }, 0);
+    },
+
     init: function() {
         arguments.callee.base.apply(this, arguments);
 

@@ -167,5 +167,16 @@ exports.cliController = SC.Object.create({
             console.error(ex);
             trace.log(3);
         });
+    },
+
+    /**
+     * Replaces the contents of the command line with the given text as a
+     * prompt, positions the insertion point at the end, and focuses the
+     * command line.
+     */
+    prompt: function(text) {
+        var view = this.get('view');
+        view.focus();
+        view.replaceSelection(text);
     }
 });
