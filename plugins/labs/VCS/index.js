@@ -33,22 +33,9 @@ var project_m = require("Project");
  * Add command.
  * Add the specified files on the next commit
  */
-// exports.commands.addCommand({
-//     "name": "vcs add",
-//     "description": "Adds missing files to the project",
-//     "params":
-//     [
-//         {
-//             "name": "files",
-//             "type": "[text]",
-//             "description": "Use the current file, add -a for all files or add filenames"
-//         }
-//     ],
-//     "manual": "Without any options, the vcs add command will add the currently selected file. If you pass in -a, the command will add <em>all</em> files. Finally, you can list files individually.",
-//     execute: function(env, args, request) {
-//         exports._performVCSCommandWithFiles("add", request, args);
-//     }
-// });
+exports.add = function(env, args, request) {
+    exports._performVCSCommandWithFiles("add", env, args, request);
+};
 
 /**
  * Clone command.

@@ -43,6 +43,21 @@
             ],
             "manual": "Without any options, the vcs diff command will diff the currently selected file against the repository copy. If you pass in -a, the command will diff <em>all</em> files. Finally, you can list files to diff individually.",
             "pointer": "#diff"
+        },
+        {
+            "ep": "command",
+            "name": "vcs add",
+            "description": "Adds missing files to the project",
+            "params":
+            [
+                {
+                    "name": "files",
+                    "type": "[text]",
+                    "description": "Use the current file, add -a for all files or add filenames"
+                }
+            ],
+            "manual": "Without any options, the vcs add command will add the currently selected file. If you pass in -a, the command will add <em>all</em> files. Finally, you can list files individually.",
+            "pointer": "#add"
         }
     ]
 }
