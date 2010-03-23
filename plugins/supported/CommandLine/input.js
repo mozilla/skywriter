@@ -301,17 +301,23 @@ exports.Input = SC.Object.extend({
         // TODO: something smarter than just assuming that they are all in order
         this.assignments = [];
         var params = this.commandExt.params;
+        var unparsedArgs = this.unparsedArgs;
 
         // If this command does not take parameters
         if (!params || params.length === 0) {
-            if (this.unparsedArgs.length !== 0) {
-                this._hints.push(hint.Hint.create({
-                    level: hint.Level.Error,
-                    element: this.commandExt.name + " does not take any parameters."
-                }));
-                return false;
+            if (unparsedArgs.length === 0) {
+                return true;
             }
-            return true;
+            // Also no problem if there is a blank parameter
+            if (unparsedArgs.length === 1 && unparsedArgs[0].trim() === '') {
+                return true;
+            }
+
+            this._hints.push(hint.Hint.create({
+                level: hint.Level.Error,
+                element: this.commandExt.name + " does not take any parameters."
+            }));
+            return false;
         }
 
         // Special case: if there is only 1 parameter, and that's of type text
@@ -321,11 +327,10 @@ exports.Input = SC.Object.extend({
             // significant. It might be better to chop the command of the
             // start of this.typed? But that's not easy because there could be
             // multiple spaces in the command if we're doing sub-commands
-            var value = this.unparsedArgs.length === 0 ?
-                    null :
-                    this.unparsedArgs.join(" ");
-
-            this.assignments[0] = { value: value, param: params[0] };
+            this.assignments[0] = {
+                value: unparsedArgs.length === 0 ? null : unparsedArgs.join(" "),
+                param: params[0]
+            };
             return true;
         }
 
@@ -338,7 +343,7 @@ exports.Input = SC.Object.extend({
 
         // Check there are no params that don't fit
         var unparsed = false;
-        this.unparsedArgs.forEach(function(unparsedArg) {
+        unparsedArgs.forEach(function(unparsedArg) {
             if (used.indexOf(unparsedArg) == -1) {
                 this._hints.push(hint.Hint.create({
                     level: hint.Level.Error,
