@@ -58,11 +58,14 @@ exports.testBufferFileChange = function() {
     var buffer = editsession.Buffer.create();
     t.ok(buffer.get("model") != null, 
         "Model should be set to a TextStorage by default");
+    t.ok(buffer.untitled(), "Buffer should initially be untitled");
     f = root.getObject("atTheTop.js");
     t.ok(SC.instanceOf(f, fs.File), "Should have gotten a file object");
     buffer.changeFileOnly(f);
+    t.ok(!buffer.untitled(), "Buffer should no longer be untitled");
     t.equal("", buffer.get("model").get("value"), "Should be empty now");
     buffer.changeFileOnly(null);
+    t.ok(buffer.untitled(), "Buffer should be untitled again");
     buffer.set("file", f);
     var pr = new Promise();
     setTimeout(function() {

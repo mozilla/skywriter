@@ -162,6 +162,14 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
         }.bind(this));
 
         return promise;
+    },
+
+    /**
+     * Returns true if the file is untitled (i.e. it is new and has not yet
+     * been saved with @saveAs) or false otherwise.
+     */
+    untitled: function() {
+        return SC.none(this._file);
     }
 });
 
