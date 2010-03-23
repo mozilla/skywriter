@@ -753,29 +753,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     keyDown: function(evt) {
-        //
-        // Workaround for a SproutCore bug: On Firefox, typing Cmd+Z or
-        // Cmd+Shift+Z on Windows or Mac causes two events to be fired: one
-        // with the symbolic name "ctrl_z" or "ctrl_shift_z" and one with the
-        // the symbolic name "meta_z" or "meta_shift_z".
-        //
-        // TODO: Fix in SproutCore.
-        //
-        if (SC.browser.mozilla) {
-            var symbolicName = evt.commandCodes()[0];
-
-            // handle the undo/redo keys only if they are fired by the keypress
-            // event!
-            if (symbolicName === 'ctrl_z' || symbolicName === 'ctrl_shift_z') {
-                return true;
-            }
-
-            if (symbolicName === 'meta_z') {
-                evt.keyCode = 90;
-                evt.charCode = 0;
-            }
-        }
-
         // SC puts keyDown and keyPress event together. Here we only want to
         // handle the real/browser's keydown event. To do so, we have to check
         // if the evt.charCode value is set. If this isn't set, we have been
