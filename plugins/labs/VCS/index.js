@@ -529,21 +529,16 @@ exports._createStandardHandler = function(requestpr, request, options) {
                 response = { output: response, success: false };
             }
             
-            SC.run(function() {
-                request.doneWithError("<pre>" + response.output + "</pre>");
-                pr.reject(response);
-            });
+            request.doneWithError("<pre>" + response.output + "</pre>");
+            pr.reject(response);
         } else {
             var output = response.output;
             if (options.escape) {
                 output = output.replace(/</g, "&lt;");
             }
             
-            SC.run(function() {
-                request.done("<pre>" + output + "</pre>");
-
-                pr.resolve(response);
-            });
+            request.done("<pre>" + output + "</pre>");
+            pr.resolve(response);
         }
     }, function(error) {
         request.doneWithError(error.xhr.response);
