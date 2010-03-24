@@ -52,7 +52,7 @@ exports.kcController = SC.Object.create({
     doCancel: function() {
         pane.remove();
         pane = null;
-        pr.reject();
+        pr.reject({message: "Canceled"});
     },
     
     savePassword: function() {
@@ -98,7 +98,6 @@ var kcPage = SC.Page.design({
                         height: 24
                     },
                     valueBinding: ".password",
-                    hint: "password",
                     isPassword: true
                 }),
                 
@@ -155,7 +154,7 @@ exports.getKeychainPassword = function() {
     themeManager.addPane(pane);
     pane.append();
     pane.becomeKeyPane();
-    pane.becomeFirstResponder();
+    pane.getPath("contentView.form.passwordField").becomeFirstResponder();
     return pr;
 };
 

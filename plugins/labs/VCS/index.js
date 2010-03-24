@@ -22,8 +22,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var SC = require("sproutcore/runtime").SC;
+
 var server = require("BespinServer").server;
 var Promise = require("bespin:promise").Promise;
+
+var themeManager = require("ThemeManager").themeManager;
 
 var kc = require("UserIdent:kc");
 var util = require("bespin:util/util");
@@ -37,53 +41,128 @@ exports.add = function(env, args, request) {
     exports._performVCSCommandWithFiles("add", env, args, request);
 };
 
+exports.commitController = SC.Object.create({
+    project: null,
+    request: null,
+    pane: null,
+    message: "",
+    
+    doCancel: function() {
+        var request = this.get("request");
+        var pane = this.get("pane");
+        pane.remove();
+        request.done("Commit canceled");
+    },
+    
+    doCommit: function() {
+        var message = this.get("message");
+        var project = this.get("project");
+        var request = this.get("request");
+        var pane = this.get("pane");
+        pane.remove();
+        
+        var pr = vcs(project, { command: [ "commit", "-m", message ] });
+        exports._createStandardHandler(pr, request);
+    },
+    
+    show: function(project, request, message) {
+        this.set("project", project);
+        this.set("request", request);
+        if (message) {
+            this.set("message", message);
+            this.doCommit();
+        } else {
+            this.set("message", "");
+            var pane = commitPage.get("mainPane");
+            themeManager.addPane(pane);
+            pane.append();
+            pane.becomeKeyPane();
+            pane.getPath("contentView.form.messageField").becomeFirstResponder();
+            this.set("pane", pane);
+        }
+    }
+});
+
+var commitPage = SC.Page.design({
+    mainPane: SC.PanelPane.design({
+        layout: { centerX: 0, centerY: 0, width: 300, height: 200 },
+        
+        contentView: SC.View.design({
+            classNames: "bespin-color-field".w(),
+            childViews: "form".w(),
+            form: SC.View.design({
+                classNames: "bespin-form".w(),
+                
+                childViews: ("title messageField cancel ok").w(),
+
+                title: SC.LabelView.design({
+                    classNames: "title".w(),
+
+                    layout: {
+                        left: 10,
+                        top: 10,
+                        width: 290,
+                        height: 24
+                    },
+                    value: "Commit Message",
+                    controlSize: SC.LARGE_CONTROL_SIZE,
+                    fontWeight: 'bold'
+                }),
+                
+                messageField: SC.TextFieldView.design({
+                    layout: {
+                        left: 10,
+                        top: 50,
+                        width: 265,
+                        height: 75
+                    },
+                    valueBinding: "VCS#commitController.message",
+                    isTextArea: true
+                }),
+                
+                cancel: SC.ButtonView.design({
+                    layout: { left: 10, top: 150, width: 100, height: 37 },
+                    isCancel: true,
+                    title: "Cancel",
+                    target: "VCS#commitController",
+                    action: "doCancel"
+                }),
+                
+                ok: SC.ButtonView.design({
+                    layout: { left: 175, top: 150, width: 100, height: 37 },
+                    isDefault: true,
+                    title: "Commit",
+                    target: "VCS#commitController",
+                    action: "doCommit"
+                })
+                
+            })
+        })
+    })
+});
+
 /**
  * Commit command.
  * Commit all outstanding changes
  */
-// exports.commands.addCommand({
-//     "name": "vcs commit",
-//     "params":
-//     [
-//         {
-//             "name": "message",
-//             "type": "text",
-//             "description": "???"
-//         }
-//     ],
-//     "aliases": [ "ci" ],
-//     "description": "Commit to the local (in-bespin) repository",
-//     execute: function(env, args, request) {
-//         var doCommit = function(values) {
-//             var project;
-// 
-//             var session = bespin.get("editSession");
-//             if (session) {
-//                 project = session.project;
-//             }
-// 
-//             if (!project) {
-//                 request.doneWithError("You need to pass in a project");
-//                 return;
-//             }
-//             vcs(project,
-//                 { command: [ "commit", "-m", values.message ] },
-//                 request,
-//                 exports._createStandardHandler(request));
-//         };
-// 
-//         // for now, be a nagger and ask to save first using an ugly confirm()
-//         if (bespin.get("editor").dirty) {
-//             if (confirm("The file that is currently open has unsaved content. Save the file first, and then rerun the command?")) {
-//                 bespin.get("editor").saveFile();
-//             }
-//         } else if (!args.message) {
-//             exports.getInfoFromUser(request, doCommit, {getMessage: true});
-//         } else {
-//             doCommit(args.message);
-//         }
-//     }
-// });
+exports.commit = function(env, args, request) {
+    var file = env.get("file");
+    if (!file) {
+        request.doneWithError("There is no currently opened file.");
+        return;
+    }
+    var parts = project_m.getProjectAndPath(file.get("path"));
+    var project = parts[0];
+    
+    if (!project) {
+        request.doneWithError("There is no active project.");
+        return;
+    }
+    
+    var message = args.message;
+    request.async();
+    exports.commitController.show(project, request, message);
+};
 
 /**
  * Diff command.
@@ -139,7 +218,9 @@ exports.push = function(env, args, request) {
         exports._createStandardHandler(pr, request);
     };
 
-    kc.getKeychainPassword().then(sendRequest);
+    kc.getKeychainPassword().then(sendRequest, function() {
+        request.done("Canceled");
+    });
 
     request.async();
 };
@@ -241,7 +322,9 @@ exports.update = function(env, args, request) {
 
     exports._getRemoteauth(project).then(function(remoteauth) {
         if (remoteauth == "both") {
-            kc.getKeychainPassword().then(sendRequest);
+            kc.getKeychainPassword().then(sendRequest, function() {
+                request.done("Canceled");
+            });
         } else {
             sendRequest(undefined);
         }

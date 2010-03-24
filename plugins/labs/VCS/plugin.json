@@ -121,6 +121,21 @@
             "description": "initialize a new hg repository",
             "manual": "This will create a new repository in this project.",
             "pointer": "#hginit"
+        },
+        {
+            "ep": "command",
+            "name": "vcs commit",
+            "params":
+            [
+                {
+                    "name": "message",
+                    "type": "text",
+                    "description": "commit log message"
+                }
+            ],
+            "aliases": [ "ci" ],
+            "description": "Commit to the local (in-bespin) repository",
+            "pointer": "#commit"
         }
     ]
 }
