@@ -657,9 +657,14 @@ exports.Catalog = SC.Object.extend({
                     continue;
                 }
                 tiki.register(pluginName, data[pluginName]);
-                this._checkLoops(pluginName, this.plugins, []);
             }
+
             this.load(data);
+
+            var plugins = this.plugins;
+            for (var pluginName in data) {
+                this._checkLoops(pluginName, plugins, []);
+            }
         }
         if (params.callback) {
             params.callback(this, response);
