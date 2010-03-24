@@ -109,7 +109,7 @@ var _getHelp = function(prefix, options) {
                 // Filtered out by the user
                 continue;
             }
-            if (!command && command.name.indexOf(" ") != -1) {
+            if (!prefix && command.name.indexOf(" ") != -1) {
                 // sub command
                 continue;
             }
