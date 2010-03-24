@@ -266,25 +266,6 @@
         },
         {
             "ep": "command",
-            "name": "replace",
-            "params":
-            [
-                {
-                    "name": "search",
-                    "type": "text",
-                    "description": "the search regex"
-                },
-                {
-                    "name": "replace",
-                    "type": "text",
-                    "description": "the replacement text"
-                }
-            ],
-            "description": "s/foo/bar/g",
-            "pointer": "commands/editor#replaceCommand"
-        },
-        {
-            "ep": "command",
             "name": "trim",
             "params":
             [
@@ -293,7 +274,7 @@
                     "type":
                     {
                         "name": "selection",
-                        "data": [ "left", "right", "both" ]
+                        "data": [ {"name": "left"}, {"name":"right"}, {"name": "both"} ]
                     },
                     "description": "Do we trim from the left, right or both",
                     "defaultValue": "both"
