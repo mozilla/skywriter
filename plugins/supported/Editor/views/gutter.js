@@ -112,6 +112,10 @@ exports.GutterView = SC.View.extend({
         return strWidth + paddingWidth;
     },
 
+    _frameChanged: function() {
+        this._recomputeLayout();
+    }.observes('frame'),
+
     _recomputeLayout: function() {
         var layoutManager = this.get('layoutManager');
         var padding = this.get('padding');
@@ -119,8 +123,11 @@ exports.GutterView = SC.View.extend({
         var width = this._computeWidth();
 
         var layout = SC.clone(this.get('layout'));
-        layout.width = width;
-        this.set('layout', layout);
+        if (layout.width !== width) {
+            layout.width = width;
+            this.set('layout', layout); // triggers a restart of this function
+            return;
+        }
 
         var frame = this.get('frame');
         this._interiorView.set('layout', {
