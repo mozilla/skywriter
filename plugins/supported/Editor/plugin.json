@@ -315,34 +315,6 @@
             "description": "The distance in characters between each tab",
             "type": "number",
             "defaultValue": 8
-        },
-        {
-            "ep": "command",
-            "name": "search",
-            "params":
-            [
-                {
-                    "name": "value",
-                    "type": "text",
-                    "description": "string to search for"
-                }
-            ],
-            "description": "search for a text within the current opened file.",
-            "pointer": "commands/editor#searchCommand"
-        },
-        {
-            "ep": "command",
-            "name": "findNext",
-            "key": "ctrl_g",
-            "description": "find the next search text",
-            "pointer": "commands/editor#findNextCommand"
-        },
-        {
-            "ep": "command",
-            "name": "findPrev",
-            "key": "ctrl_shift_g",
-            "description": "find the next search text",
-            "pointer": "commands/editor#findPrevCommand"
         }
     ]
 }
