@@ -76,13 +76,15 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
 
     link: function(root, path, updater) {
         (function() {
+            var stack = this.getPath("parentView");
             var doUpdate = function() {
-                // console.log("updating", path, "to", root.getPath(path));
-                updater(root.getPath(path));
-                // The stacked view gets confused about how tall it should be...
-                var stack = this.getPath("parentView");
-                stack.updateHeight();
-            }.bind(this);
+                SC.run(function() {
+                    // console.log("updating", path, "to", root.getPath(path));
+                    updater(root.getPath(path));
+                    // The stacked view gets confused about how tall it should be...
+                    stack.updateHeight();
+                });
+            };
 
             root.addObserver(path, this, function() {
                 doUpdate();

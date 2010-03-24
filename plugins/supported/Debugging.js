@@ -272,6 +272,9 @@ exports.slowCommand = function(env, args, request) {
     var suffix = document.createTextNode("%) ...");
     parent.appendChild(suffix);
 
+    var tick = document.createElement("img");
+    tick.setAttribute("src", "https://bespin.mozillalabs.com/images/splash_icn_register.png");
+
     var interval = setInterval(function() {
         var interval = (new Date().getTime() - start) / 1000;
         var percent = interval * 100 / seconds;
@@ -281,6 +284,7 @@ exports.slowCommand = function(env, args, request) {
     setTimeout(function() {
         clearInterval(interval);
         counter.innerHTML = "100";
+        request.output(tick);
         request.done("Completed");
     }, seconds * 1000);
 
