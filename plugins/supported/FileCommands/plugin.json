@@ -96,6 +96,20 @@
             "name": "newfile",
             "description": "Creates an empty buffer for editing a new file.",
             "pointer": "#newfileCommand"
+        },
+        {
+            "ep": "command",
+            "name": "mkdir",
+            "params":
+            [
+                {
+                    "name": "path",
+                    "type": "text",
+                    "description": "Directory to create"
+                }
+            ],
+            "description": "create a new directory, use a leading / to create a directory in a different project",
+            "pointer": "#mkdirCommand"
         }
     ]
 }

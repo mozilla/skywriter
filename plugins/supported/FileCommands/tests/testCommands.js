@@ -149,3 +149,25 @@ exports.testFilesListingInDirectoryRelativeToOpenFile = function() {
     FileCommands.filesCommand(env, {path: "bar/"}, request);
     return testpr;
 };
+
+exports.testMakeDirectoryForNewDirectory = function() {
+    var env = getEnv();
+    var request = Request.create();
+    var testpr = new Promise();
+    
+    request.promise.then(function() {
+        var files = env.get("files");
+        var parentdir = files.getObject("dir/number/");
+        var directories = parentdir.get("directories");
+        t.equal(directories.length, 1, "Expected one directory");
+        t.equal(directories[0].name, "one/", "Expected it to be the directory we created");
+        var newdir = files.getObject("dir/number/one/");
+        t.equal(newdir.get("status"), fs.READY, "Directory should be marked as ready, since it was just created");
+        testpr.resolve();
+    }, function(error) {
+        testpr.reject(error.message);
+    });
+    
+    FileCommands.mkdirCommand(env, {path: "/dir/number/one/"}, request);
+    return testpr;
+};

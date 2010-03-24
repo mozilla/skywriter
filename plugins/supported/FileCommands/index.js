@@ -74,52 +74,21 @@ exports.filesCommand = function(env, args, request) {
 };
 
 /**
- * 'files' completions helper
- */
-exports.fileFindCompletions = function(query, callback) {
-    findCompletionsHelper(query, callback, {
-        matchFiles: false,
-        matchDirectories: true
-    });
-};
-
-/**
  * 'mkdir' command
- * TODO: Delete or correct
-        {
-            "ep": "command",
-            "name": "mkdir",
-            "params":
-            [
-                {
-                    "name": "path",
-                    "type": "text",
-                    "description": "???"
-                }
-            ],
-            "description": "create a new directory, use a leading / to create a directory in a different project",
-            "pointer": "file#mkdirCommand"
-        },
  */
 exports.mkdirCommand = function(env, args, request) {
-    var info = parseArguments(args.givenPath);
-    var path = info.path;
-    var project = info.project || editSession.project;
-
-    var onSuccess = instruction.link(function() {
-        if (path === '') {
-            editSession.setProject(project);
-        }
-        request.done('Successfully created directory \'/' +
-                project + '/' + path + '\'');
+    var path = args.path;
+    
+    path = getCompletePath(env, path);
+    request.async();
+    
+    var files = env.get("files");
+    files.makeDirectory(path).then(function() {
+        request.done("Directory " + path + " created.");
+    }, function(error) {
+        request.doneWithError("Unable to make directory " + path + ": " 
+                              + error.message);
     });
-
-    var onFailure = instruction.link(function(xhr) {
-        request.doneWithError('Unable to create directory \'/' +
-                project + '/' + path + '\': ' + xhr.responseText);
-    });
-
-    files.makeDirectory(project, path, onSuccess, onFailure);
 };
 
 /**
@@ -133,7 +102,11 @@ exports.saveCommand = function(env, args, request) {
         return;
     }
 
-    buffer.save().then(function() { request.done("Saved"); });
+    buffer.save().then(function() { request.done("Saved"); },
+        function(error) {
+            request.doneWithError("Unable to save: " + error.message);
+        }
+    );
     request.async();
 };
 

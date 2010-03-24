@@ -101,6 +101,13 @@ exports.DummyFileSource = SC.Object.extend({
         return pr;
     },
     
+    makeDirectory: function(pathObj) {
+        this.requests.push(["makeDirectory", arguments]);
+        var pr = new Promise();
+        pr.resolve(pathObj);
+        return pr;
+    },
+    
     _findMatching: function(path, deep) {
         path = pathUtil.trimLeadingSlash(path);
         if (path == "" || pathUtil.isDir(path)) {

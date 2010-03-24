@@ -77,5 +77,14 @@ exports.BespinFileSource = SC.Object.extend({
         var url = pathUtil.combine("/file/at/", path);
         var pr = this.server.request('DELETE', url);
         return pr;
+    },
+    
+    makeDirectory: function(pathObject) {
+        var path = pathObject.get("originPath");
+        var url = pathUtil.combine("/file/at/", path);
+        var pr = this.server.request("PUT", url, null);
+        return pr.then(function() {
+            return pathObject;
+        });
     }
 });
