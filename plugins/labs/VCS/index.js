@@ -139,14 +139,8 @@ exports.push = function(env, args, request) {
         exports._createStandardHandler(pr, request);
     };
 
-    exports._getRemoteauth(project).then(function(remoteauth) {
-        if (remoteauth == "both") {
-            kc.getKeychainPassword().then(sendRequest);
-        } else {
-            sendRequest(undefined);
-        }
-    });
-    
+    kc.getKeychainPassword().then(sendRequest);
+
     request.async();
 };
 
@@ -154,46 +148,18 @@ exports.push = function(env, args, request) {
  * Remove command.
  * Remove the specified files on the next commit
  */
-// exports.commands.addCommand({
-//     "name": "vcs remove",
-//     "aliases": [ "rm" ],
-//     "description": "Remove a file from version control (also deletes it)",
-//     "params":
-//     [
-//         {
-//             "name": "*" ,
-//             "type": "text",
-//             "description": ""
-//         }
-//     ],
-//     "manual": "The files presented will be deleted and removed from version control.",
-//     execute: function(env, args, request) {
-//         exports._performVCSCommandWithFiles("remove", request, args,
-//                 { acceptAll: false });
-//     }
-// });
+exports.remove = function(env, args, request) {
+    exports._performVCSCommandWithFiles("remove", env, args, request, 
+            { acceptAll: false });
+};
 
 /**
  * Resolved command.
  * Retry file merges from a merge or update
  */
-// exports.commands.addCommand({
-//     "name": "vcs resolved",
-//     "params":
-//     [
-//         {
-//             "name": "files" ,
-//             "type": "[text]",
-//             "description": "Use the current file, add -a for all files or add filenames"
-//         }
-//     ],
-//     "aliases": [ "resolve" ],
-//     "description": "Mark files as resolved",
-//     "manual": "Without any options, the vcs resolved command will mark the currently selected file as resolved. If you pass in -a, the command will resolve <em>all</em> files. Finally, you can list files individually.",
-//     execute: function(env, args, request) {
-//         exports._performVCSCommandWithFiles("resolved", request, args);
-//     }
-// });
+exports.resolved = function(env, args, request) {
+    exports._performVCSCommandWithFiles("resolved", env, args, request);
+};
 
 /**
  * Status command.
@@ -287,29 +253,24 @@ exports.update = function(env, args, request) {
 /**
  * Initialize an HG repository
  */
-// exports.hgCommands.addCommand({
-//     "name": "hg init",
-//     "description": "initialize a new hg repository",
-//     "manual": "This will create a new repository in this project.",
-//     execute: function(env, args, request) {
-//         var project;
-// 
-//         var session = bespin.get("editSession");
-//         if (session) {
-//             project = session.project;
-//         }
-// 
-//         if (!project) {
-//             request.doneWithError("You need to pass in a project");
-//             return;
-//         }
-// 
-//         vcs(project,
-//             { command: ["hg", "init"] },
-//             request,
-//             exports._createStandardHandler(request));
-//     }
-// });
+exports.hginit = function(env, args, request) {
+    var file = env.get("file");
+    if (!file) {
+        request.doneWithError("There is no currently opened file.");
+        return;
+    }
+    var parts = project_m.getProjectAndPath(file.get("path"));
+    var project = parts[0];
+    
+    if (!project) {
+        request.doneWithError("There is no active project.");
+        return;
+    }
+    
+    var pr = vcs(project, { command: [ "hg", "init" ] });
+    pr = exports._createStandardHandler(pr, request);
+    request.async();
+};
 
 /**
  * Command store for the Subversion commands

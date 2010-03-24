@@ -81,6 +81,46 @@
             "name": "vcs push",
             "description": "push to the remote repository",
             "pointer": "#push"
+        },
+        {
+            "ep": "command",
+            "name": "vcs remove",
+            "aliases": [ "rm" ],
+            "description": "Remove a file from version control (also deletes it)",
+            "params":
+            [
+                {
+                    "name": "files" ,
+                    "type": "text",
+                    "description": "",
+                    "defaultValue": ""
+                }
+            ],
+            "manual": "The files presented will be deleted and removed from version control.",
+            "pointer": "#remove"
+        },
+        {
+            "ep": "command",
+            "name": "vcs resolved",
+            "params":
+            [
+                {
+                    "name": "files" ,
+                    "type": "[text]",
+                    "description": "Use the current file, add -a for all files or add filenames"
+                }
+            ],
+            "aliases": [ "resolve" ],
+            "description": "Mark files as resolved",
+            "manual": "Without any options, the vcs resolved command will mark the currently selected file as resolved. If you pass in -a, the command will resolve <em>all</em> files. Finally, you can list files individually.",
+            "pointer": "#resolved"
+        },
+        {
+            "ep": "command",
+            "name": "hg init",
+            "description": "initialize a new hg repository",
+            "manual": "This will create a new repository in this project.",
+            "pointer": "#hginit"
         }
     ]
 }
