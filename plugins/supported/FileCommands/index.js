@@ -59,6 +59,7 @@ exports.filesCommand = function(env, args, request) {
         path += "/";
     }
 
+    request.async();
     env.get("files").loadPath(path).then(function(dir) {
         var files = "";
         var contents = dir.get("contents");
@@ -70,7 +71,6 @@ exports.filesCommand = function(env, args, request) {
     }, function(error) {
         request.doneWithError(error.message);
     });
-    request.async();
 };
 
 /**
