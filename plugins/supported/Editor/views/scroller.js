@@ -162,7 +162,7 @@ var ScrollerCanvasView = CanvasView.extend({
         case SC.LAYOUT_VERTICAL:
             return clientFrame.height;
         default:
-            console.assert(false, "unknown layout direction");
+            console.error("unknown layout direction");
             return null;
         }
     },
@@ -179,7 +179,7 @@ var ScrollerCanvasView = CanvasView.extend({
         case SC.LAYOUT_HORIZONTAL:
             return scrollerThickness - (padding.top + padding.bottom);
         default:
-            console.assert(false, "unknown layout direction");
+            console.error("unknown layout direction");
             return null;
         }
     }.property(),
@@ -195,7 +195,7 @@ var ScrollerCanvasView = CanvasView.extend({
         case SC.LAYOUT_VERTICAL:
             return frame.height;
         default:
-            console.assert(false, "unknown layout direction");
+            console.error("unknown layout direction");
             return null;
         }
     },
@@ -221,7 +221,7 @@ var ScrollerCanvasView = CanvasView.extend({
                 height: thickness
             };
         default:
-            console.assert(false, "unknown layout direction");
+            console.error("unknown layout direction");
             return null;
         }
     },
@@ -239,7 +239,7 @@ var ScrollerCanvasView = CanvasView.extend({
             gutterLength = gutterFrame.height;
             break;
         default:
-            console.assert(false, "unknown layout direction");
+            console.error("unknown layout direction");
             break;
         }
         return gutterLength;
@@ -286,7 +286,7 @@ var ScrollerCanvasView = CanvasView.extend({
                 height: clientThickness
             };
         default:
-            console.assert(false, "unknown layout direction");
+            console.error("unknown layout direction");
             return null;
         }
     },
@@ -323,7 +323,7 @@ var ScrollerCanvasView = CanvasView.extend({
             }
             break;
         default:
-            console.assert(false, "unknown layout direction");
+            console.error("unknown layout direction");
             break;
         }
 
@@ -348,11 +348,11 @@ var ScrollerCanvasView = CanvasView.extend({
             }
             break;
         default:
-            console.assert(false, "unknown layout direction");
+            console.error("unknown layout direction");
             break;
         }
 
-        console.assert(false, "_segmentForMouseEvent: point ", point,
+        console.error("_segmentForMouseEvent: point ", point,
             " outside view with handle frame ", handleFrame,
             " and client frame ", clientFrame);
         return null;
@@ -412,7 +412,7 @@ var ScrollerCanvasView = CanvasView.extend({
             break;
 
         default:
-            console.assert(false, "unknown layout direction");
+            console.error("unknown layout direction");
             break;
         }
 
@@ -589,7 +589,7 @@ var ScrollerCanvasView = CanvasView.extend({
         case 'handle':
             break;
         default:
-            console.assert("_segmentForMouseEvent returned an unknown value");
+            console.error("_segmentForMouseEvent returned an unknown value");
             break;
         }
 
@@ -603,7 +603,7 @@ var ScrollerCanvasView = CanvasView.extend({
             this._mouseDownScreenPoint = evt.pageY;
             break;
         default:
-            console.assert(false, "unknown layout direction");
+            console.error("unknown layout direction");
             break;
         }
     },
@@ -631,7 +631,7 @@ var ScrollerCanvasView = CanvasView.extend({
                     eventDistance = evt.pageY;
                     break;
                 default:
-                    console.assert(false, "unknown layout direction");
+                    console.error("unknown layout direction");
                     break;
             }
 
@@ -691,7 +691,7 @@ var ScrollerCanvasView = CanvasView.extend({
             delta = evt.wheelDeltaY;
             break;
         default:
-            console.assert(false, "unknown layout direction");
+            console.error("unknown layout direction");
             return;
         }
 
