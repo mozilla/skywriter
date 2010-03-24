@@ -154,6 +154,17 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
     },
     
     /*
+     * reload the existing file contents from the server.
+     */
+    reload: function() {
+        var file = this.get("file");
+        return file.loadContents().then(function(result) {
+            var model = self.get("model");
+            model.set("value", result.contents);
+        }.bind(this));
+    },
+    
+    /*
      * Save the contents of this buffer. Returns a promise that resolves
      * once the file is saved.
      */

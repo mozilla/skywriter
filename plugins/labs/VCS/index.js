@@ -38,248 +38,6 @@ exports.add = function(env, args, request) {
 };
 
 /**
- * Clone command.
- * Create a copy of an existing repository in a new directory
- */
-// exports.commands.addCommand({
-//     "name": "vcs clone",
-//     "params":
-//     [
-//         {
-//             "name": "url",
-//             "type": "text",
-//             "description": "???"
-//         }
-//     ],
-//     "aliases": [ "checkout" ],
-//     "description": "checkout or clone the project into a new Bespin project",
-//     /**
-//      * Display the clone dialog to allow the user to fill out additional details
-//      * to the clone process
-//      */
-//     execute: function(env, args, request) {
-//         var url = args.url || "";
-// 
-//         var form = dojo.create("form", {
-//             onsubmit: function(e) {
-//                 util.stopEvent(e);
-//                 var data = dojo.formToObject(form);
-// 
-//                 var newProjectName = data.dest;
-// 
-//                 if (data.vcs == "svn") {
-//                     delete data.vcsuser;
-//                 } else {
-//                     var currentVcsUser = bespin.get("settings").get("vcsuser");
-//                     if (!data.vcsuser || data.vcsuser == currentVcsUser) {
-//                         delete data.vcsuser;
-//                     }
-//                 }
-// 
-//                 // prune out unnecessary values
-//                 if (data.remoteauth == "") {
-//                     delete data.push;
-//                     delete data.authtype;
-//                     delete data.username;
-//                     delete data.password;
-//                 } else {
-//                     if (data.authtype == "ssh") {
-//                         delete data.password;
-//                     }
-//                 }
-//                 data = util.objectToQuery(data);
-//                 var outer = dojo.create("div", {});
-//                 var throbber = dojo.create("img",
-//                     {src: "/images/throbber.gif"}, outer);
-//                 var status = dojo.create("span", {innerHTML: "Working..."},
-//                             outer);
-//                 request.add(outer);
-//                 clone(data, request, exports._createStandardHandler(request, {
-//                     onSuccess: function() {
-//                         bespin.publish("project:created", { project: newProjectName });
-//                     },
-//                     onPartial: function(output) {
-//                         status.innerHTML = output;
-//                     }
-//                 }));
-//             },
-//             method: "POST"
-//         });
-// 
-//         var setUserfields = function() {
-//             var newval = authtypeField.value;
-//             if (newval == "ssh") {
-//                 dojo.query("tr.userfields").style("display", "none");
-//             } else {
-//                 dojo.query("tr.userfields").style("display", "table-row");
-//             }
-//         };
-// 
-//         var table = dojo.create("table", {}, form);
-//         var tbody = dojo.create("tbody", {}, table);
-//         var row = dojo.create("tr", {}, tbody);
-//         var cell = dojo.create("th", {colspan: "2",
-//             innerHTML: "Add Project from Source Control?"}, row);
-// 
-//         row = dojo.create("tr", {}, tbody);
-//         cell = dojo.create("td", {innerHTML: "URL:"}, row);
-//         cell = dojo.create("td", {}, row);
-// 
-//         // vcs_source
-//         var sourceField = dojo.create("input", {type: "text", name: "source", value: url,
-//             style: "width: 85%"}, cell);
-// 
-//         row = dojo.create("tr", {}, tbody);
-//         cell = dojo.create("td", {innerHTML: "Project name:"}, row);
-//         cell = dojo.create("td", {}, row);
-//         cell.innerHTML = "<input type='text' name='dest' value=''> (defaults to last part of URL path)";
-// 
-//         row = dojo.create("tr", {}, tbody);
-//         cell = dojo.create("td", {innerHTML: "VCS Type:"}, row);
-//         cell = dojo.create("td", {}, row);
-//         // vcs
-//         var select = dojo.create("select", {
-//             name: "vcs",
-//             onchange: function(e) {
-//                 if (this.value == "svn") {
-//                     dojo.style(vcsUserRow, "display", "none");
-//                 } else {
-//                     dojo.style(vcsUserRow, "display", "table-row");
-//                 }
-//             }
-//         }, cell);
-//         var vcsField = select;
-//         dojo.create("option", {value: "svn", innerHTML: "Subversion (svn)"}, select);
-//         dojo.create("option", {value: "hg", innerHTML: "Mercurial (hg)"}, select);
-// 
-//         // VCS User
-//         row = dojo.create("tr", {
-//             style: "display: none"
-//         }, tbody);
-//         var vcsUserRow = row;
-//         cell = dojo.create("td", {innerHTML: "VCS User:"}, row);
-//         cell = dojo.create("td", {}, row);
-//         var vcsUser = dojo.create("input", {
-//             name: "vcsuser",
-//             value: bespin.get("settings").get("vcsuser") || ""
-//         }, cell);
-// 
-//         row = dojo.create("tr", {}, tbody);
-//         cell = dojo.create("td", {innerHTML: "Authentication:"}, row);
-//         cell = dojo.create("td", {}, row);
-// 
-//         // remoteauth
-//         select = dojo.create("select", {
-//             name: "remoteauth",
-//             onchange: function(e) {
-//                 var newval = this.value;
-//                 if (newval == "") {
-//                     dojo.query("tr.authfields").style("display", "none");
-//                 } else {
-//                     dojo.query("tr.authfields").style("display", "table-row");
-//                     if (authtypeField.value == "ssh") {
-//                         dojo.query("tr.userfields").style("display", "none");
-//                     }
-//                 }
-//                 if (vcsField.value == "svn") {
-//                     dojo.style(pushRow, "display", "none");
-//                     authtypeField.value = "password";
-//                     setUserfields();
-//                     dojo.style(authtypeRow, "display", "none");
-//                 } else {
-//                     dojo.style(authtypeRow, "display", "table-row");
-//                 }
-//                 setTimeout(function() { kcpassField.focus(); }, 10);
-//             }}, cell);
-//         dojo.create("option", {value: "",
-//             innerHTML: "None (read-only access to the remote repo)"}, select);
-//         dojo.create("option", {value: "write",
-//             innerHTML: "Only for writing"}, select);
-//         dojo.create("option", {value: "both",
-//             innerHTML: "For reading and writing"}, select);
-// 
-//         row = dojo.create("tr", {style: "display: none",
-//             className: "authfields"}, tbody);
-//         cell = dojo.create("td", {innerHTML: "Keychain password:"}, row);
-//         cell = dojo.create("td", {}, row);
-// 
-//         // kcpass
-//         var kcpassField = dojo.create("input", {
-//             type: "password",
-//             name: "kcpass"
-//         }, cell);
-// 
-//         // push_row
-//         var pushRow = row = dojo.create("tr", {style: "display:none", className: "authfields"}, tbody);
-//         dojo.create("td", {innerHTML: "Push to URL"}, row);
-//         cell = dojo.create("td", {}, row);
-//         // pushfield
-//         var pushField = dojo.create("input", {
-//             type: "text",
-//             name: "push",
-//             style: "width:85%",
-//             value: url
-//         }, cell);
-// 
-//         // authtype_row
-//         var authtypeRow = row = dojo.create("tr", {
-//             style: "display: none",
-//             className: "authfields"
-//         }, tbody);
-//         cell = dojo.create("td", {innerHTML: "Authentication type"}, row);
-//         cell = dojo.create("td", {}, row);
-// 
-//         // authtype
-//         var authtypeField = select = dojo.create("select", {
-//             name: "authtype",
-//             onchange: setUserfields
-//         }, cell);
-//         dojo.create("option", {value: "ssh", innerHTML: "SSH"}, select);
-//         dojo.create("option", {
-//             value: "password",
-//             innerHTML: "Username/Password"
-//         }, select);
-// 
-//         // username_row
-//         row = dojo.create("tr", {style: "display:none",
-//             className: "authfields"}, tbody);
-//         dojo.create("td", {innerHTML: "Username"}, row);
-//         cell = dojo.create("td", {}, row);
-// 
-//         // usernamefield
-//         var usernameField = dojo.create("input", {
-//             type: "text",
-//             name: "username"
-//         }, cell);
-// 
-//         // password_row
-//         row = dojo.create("tr", {
-//             style: "display:none",
-//             className: "authfields userfields"
-//         }, tbody);
-//         dojo.create("td", { innerHTML: "Password" }, row);
-//         cell = dojo.create("td", {}, row);
-//         dojo.create("input", { type: "password", name: "password" }, cell);
-//         row = dojo.create("tr", {}, tbody);
-//         dojo.create("td", { innerHTML: "&nbsp;" }, row);
-//         cell = dojo.create("td", {}, row);
-//         // vcsauthsubmit
-//         dojo.create("input", { type: "submit", value: "Ok" }, cell);
-// 
-//         // vcsauthcancel
-//         dojo.create("input", {
-//             type: "button",
-//             value: "Cancel",
-//             onclick: exports._createCancelHandler()
-//         }, cell);
-// 
-//         request.add(form);
-// 
-//         sourceField.focus();
-//     }
-// });
-
-/**
  * Commit command.
  * Commit all outstanding changes
  */
@@ -339,58 +97,58 @@ exports.diff = function(env, args, request) {
  * Revert command.
  * Report on the changes between the working files and the repository
  */
-// exports.commands.addCommand({
-//     "name": "vcs revert",
-//     "description": "Revert files back to their checked-in state",
-//     "params":
-//     [
-//         {
-//             "name": "files",
-//             "type": "[text]",
-//             "description": "Use the current file, add -a for all files or add filenames"
-//         }
-//     ],
-//     "manual": "Without any options, the vcs revert command will revert the currently selected file against the repository copy. If you pass in -a, the command will revert <em>all</em> files. Finally, you can list files to revert individually. No backups are kept!",
-//     execute: function(env, args, request) {
-//         exports._performVCSCommandWithFiles("revert", request, args, {
-//             acceptAll: true,
-//             onSuccess: function() {
-//                 // null means leave the same
-//                 editor.openFile(null, null, { reload:true });
-//             }
-//         });
-//     }
-// });
+exports.revert = function(env, args, request) {
+    exports._performVCSCommandWithFiles("revert", env, args, request, {
+        acceptAll: true
+    }).then(function() {
+        var buffer = env.get("buffer");
+        buffer.reload();
+    });
+};
 
 
 /**
  * Push command.
  * Push changes to the specified destination
  */
-// exports.commands.addCommand({
-//     "name": "vcs push",
-//     "description": "push to the remote repository",
-//     execute: function(env, args, request) {
-//         var project;
-// 
-//         var session = bespin.get("editSession");
-//         if (session) {
-//             project = session.project;
-//         }
-// 
-//         if (!project) {
-//             request.doneWithError("You need to pass in a project");
-//             return;
-//         }
-// 
-//         exports.getInfoFromUser(request, function(values) {
-//             vcs(project,
-//                 { command: ["push", "_BESPIN_PUSH"], kcpass: values.kcpass },
-//                 request,
-//                 exports._createStandardHandler(request));
-//         }, {getKeychain: true});
-//     }
-// });
+exports.push = function(env, args, request) {
+    var file = env.get("file");
+    if (!file) {
+        request.doneWithError("There is no currently opened file.");
+        return;
+    }
+    var parts = project_m.getProjectAndPath(file.get("path"));
+
+    var project = parts[0];
+    
+    if (!project) {
+        request.doneWithError("There is no active project.");
+        return;
+    }
+
+    var sendRequest = function(kcpass) {
+        var command = {
+            command: ["push", "_BESPIN_PUSH"]
+        };
+
+        if (kcpass) {
+            command.kcpass = kcpass;
+        }
+
+        var pr = vcs(project,command);
+        exports._createStandardHandler(pr, request);
+    };
+
+    exports._getRemoteauth(project).then(function(remoteauth) {
+        if (remoteauth == "both") {
+            kc.getKeychainPassword().then(sendRequest);
+        } else {
+            sendRequest(undefined);
+        }
+    });
+    
+    request.async();
+};
 
 /**
  * Remove command.
@@ -614,14 +372,15 @@ exports.update = function(env, args, request) {
 exports._performVCSCommandWithFiles = function(vcsCommand, env, args, request, 
                                                options) {
     options = options || { acceptAll: true };
-    var project;
-    var path;
-    var command;
+    var project, path, command, pr, message;
     
     var file = env.get("file");
     if (!file) {
-        request.doneWithError("There is no currently opened file.");
-        return;
+        message = "There is no currently opened file.";
+        request.doneWithError();
+        pr = new Promise();
+        pr.reject({message: message});
+        return pr;
     }
     var parts = project_m.getProjectAndPath(file.get("path"));
     
@@ -629,8 +388,11 @@ exports._performVCSCommandWithFiles = function(vcsCommand, env, args, request,
     path = parts[1];
 
     if (!project) {
-        request.doneWithError("You need to be in a project to use this command");
-        return;
+        message = "You need to be in a project to use this command";
+        request.doneWithError(message);
+        pr = new Promise();
+        pr.reject({message: message});
+        return pr;
     }
 
     if (args.files.length == 0) {
@@ -639,8 +401,11 @@ exports._performVCSCommandWithFiles = function(vcsCommand, env, args, request,
             if (options.acceptAll) {
                 dasha = ", or use -a for all files.";
             }
-            request.doneWithError("You must select a file to " + vcsCommand + dasha);
-            return;
+            message = "You must select a file to " + vcsCommand + dasha;
+            pr = new Promise();
+            pr.reject({message: message});
+            request.doneWithError();
+            return pr;
         }
         command = [vcsCommand, path];
     } else if (args.files == "-a" && options.acceptAll) {
@@ -650,10 +415,11 @@ exports._performVCSCommandWithFiles = function(vcsCommand, env, args, request,
     }
     
     
-    var pr = vcs(project, { command: command });
-    exports._createStandardHandler(pr, request);
+    pr = vcs(project, { command: command });
+    pr = exports._createStandardHandler(pr, request);
     
     request.async();
+    return pr;
 };
 
 /**
