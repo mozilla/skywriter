@@ -56,7 +56,7 @@ exports.testAddingStrings = function() {
     }));
 
     notified = false;
-    matcher.addString("foo");
+    matcher.addItem("foo");
     t.ok(notified, "the matcher notified its delegates upon adding \"foo\"");
     var items = matcher.get('items');
     t.equal(items.length, 1, "the length of the matcher's list of items " +
@@ -67,7 +67,7 @@ exports.testAddingStrings = function() {
         "adding \"foo\" and 1");
 
     notified = false;
-    matcher.addStrings("bar baz".w());
+    matcher.addItems("bar baz".w());
     t.ok(notified, "the matcher notified its delegates upon adding \"bar\" " +
         "and \"baz\"");
     items = matcher.get('items');
@@ -90,12 +90,16 @@ exports.testAddingStrings = function() {
 exports.testGettingMatches = function() {
     var matcher = MockMatcher.create({ scores: { foo: 1, bar: 0 } });
 
-    matcher.addStrings("foo bar".w());
-    var matches = matcher.getMatches();
-    t.equal(matches.length, 1, "the length of the list of matches and 1");
-    t.equal(matches[0].str, "foo", "the text of the first matched item and " +
-        "\"foo\"");
-    t.equal(matches[0].score, 1, "the score of the first matched item and 1");
+    matcher.addItems("foo bar".w());
+
+    matcher.addListener({
+        itemsAdded: function(matches) {
+            t.equal(matches.length, 1, "the length of the list of matches and 1");
+            t.equal(matches[0].str, "foo", "the text of the first matched item and " +
+                "\"foo\"");
+            t.equal(matches[0].score, 1, "the score of the first matched item and 1");
+        }
+    });
 };
 
 exports.testQueryUpdating = function() {
@@ -111,7 +115,7 @@ exports.testQueryUpdating = function() {
         matcherUpdatedItems: function() { notified = true; }
     }));
 
-    matcher.addStrings("foo bar baz".w());
+    matcher.addItems("foo bar baz".w());
     var matches = matcher.getMatches();
     t.equal(matches.length, 0, "the length of the list of matches with the " +
         "query \"boo\" and 0");

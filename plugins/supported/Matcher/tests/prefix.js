@@ -41,7 +41,7 @@ var t = require('PluginDev');
 
 exports.testPrefixMatching = function() {
     var matcher = PrefixMatcher.create({ query: "b" });
-    matcher.addStrings("foo foobar bar".w());
+    matcher.addItems("foo foobar bar".w());
 
     var matches = matcher.getMatches();
     t.equal(matches.length, 1, "the length of the list of matches when " +

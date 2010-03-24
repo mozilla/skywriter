@@ -59,7 +59,7 @@ exports.selection = {
 
         var query = assignment.value || "";
         var matcher = PrefixMatcher.create({ query: query });
-        matcher.addStrings(data);
+        matcher.addItems(data);
 
         var menu = MatcherMenu.create({
             input: input,
@@ -86,7 +86,7 @@ exports.bool = {
             typeExt: typeExt
         });
 
-        menu.addItems([ "true", "false" ]);
+        menu.addItems([ { name: "true" }, { name: "false" } ]);
         return menu.get("hint");
     }
 };

@@ -41,7 +41,7 @@ var t = require('PluginDev');
 
 exports.testQuickMatcher = function() {
     var matcher = QuickMatcher.create({ query: "foo" });
-    matcher.addStrings("foo foobar bar baz baAaz".w());
+    matcher.addItems("foo foobar bar baz baAaz".w());
 
     var matches = matcher.getMatches();
     t.equal(matches.length, 2, "the number of matches when searching for " +

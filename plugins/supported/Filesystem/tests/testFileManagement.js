@@ -59,33 +59,33 @@ exports.testRootLoading = function() {
     t.deepEqual([], root.get("directories", "No directories yet"));
     t.equal(fs.NEW, root.get("status"), "status should be new now");
     t.equal(0, source.requests.length);
-    
+
     source.set("checkStatus", fs.LOADING);
     var testpr = new Promise();
-    
+
     root.load().then(function(dir) {
         t.equal(dir, root, "should have been passed in the root directory");
         t.equal(source.requests.length, 1, "should have made a request to the source");
         t.equal(dir.get("status"), fs.READY, "Directory should be ready");
         t.equal(dir.get("files").length, 2, "Should have two files");
-        t.equal(dir.get("files")[0].name, "atTheTop.js", 
+        t.equal(dir.get("files")[0].name, "atTheTop.js",
             "expected specific name");
-        t.equal(dir.get("directories").length, 2, 
+        t.equal(dir.get("directories").length, 2,
             "should have two directories");
-        t.equal(dir.get("directories")[0].name, "foo/", 
+        t.equal(dir.get("directories")[0].name, "foo/",
             "first should be foo/");
-        t.equal(dir.get("directories")[1].name, "deeply/", 
+        t.equal(dir.get("directories")[1].name, "deeply/",
             "second should be deeply");
         t.equal(dir.get("contents").length, 4,
             "2 files + 2 directories = 4 items");
-        
+
         root.load().then(function(dir) {
-            t.equal(source.requests.length, 1, 
+            t.equal(source.requests.length, 1,
                 "should not have loaded again, because it's already loaded");
             testpr.resolve();
         });
     }, genericFailureHandler);
-    
+
     return testpr;
 };
 
@@ -96,24 +96,24 @@ exports.testGetObject = function() {
     t.equal(myDir.name, "bar/", "final object should be created correctly");
     t.equal(root.get("directories")[0].name, "foo/",
         "new directory should be created under root");
-    t.equal(myDir.parent, root.get("directories")[0], 
+    t.equal(myDir.parent, root.get("directories")[0],
         "same directory object in both places");
     var myFile = root.getObject("foo/bar/file.js");
-    t.equal(myFile.get("directory"), myDir, 
+    t.equal(myFile.get("directory"), myDir,
         "file should be populated with the same directory object");
     t.equal(myFile.get("name"), "file.js");
     t.equal(myFile.get("dirname"), "/foo/bar/");
     t.equal(myFile.get("ext"), "js");
-    
+
     var fooDir = root.getObject("foo/");
-    t.equal(myDir.get("parent"), fooDir, 
+    t.equal(myDir.get("parent"), fooDir,
         "should be able to retrieve the same directory");
-    
+
     myDir = root.getObject("newtop/");
     t.equal(root.get("directories").length, 2,
         "should have two directories now");
     myFile = root.getObject("newone.txt");
-    t.equal(root.get("files").length, 1, 
+    t.equal(root.get("files").length, 1,
         "should have one file now");
 };
 
@@ -126,7 +126,7 @@ exports.testLoadObjectSuccess = function() {
         t.equal(fileobj.get("path"), "/deeply/nested/directory/andAFile.txt");
         t.equal(source.requests.length, 1);
         var dir = root.getObject("deeply/nested/directory/");
-        t.equal(dir.get("status"), fs.READY, 
+        t.equal(dir.get("status"), fs.READY,
             "Directory should now be ready");
         testPromise.resolve();
     }, function(error) {
@@ -144,17 +144,17 @@ exports.testSubdirLoading = function() {
         t.equal(dir.get("name"), "nested/");
         t.equal(dir.get("status"), fs.READY);
         t.equal(root.get("status"), fs.NEW);
-        
+
         var obj = root.getObject("deeply/nested/notthere/");
-        t.equal(obj, null, 
+        t.equal(obj, null,
             "directory is loaded, so non-existent name should not be created");
-        
+
         t.equal(dir.get("path"), "/deeply/nested/",
             "can get back our path");
-        
+
         testpr.resolve();
     }, genericFailureHandler);
-    
+
     return testpr;
 };
 
@@ -192,7 +192,7 @@ exports.testDeepLoading = function() {
 exports.testContentRetrieval = function() {
     source.reset();
     var root = getNewRoot();
-    
+
     var f = root.getObject("atTheTop.js");
     var testpr = new Promise();
     f.loadContents().then(function(result) {
@@ -200,14 +200,14 @@ exports.testContentRetrieval = function() {
         t.equal(result.contents, "the top file", "Content should be as expected");
         testpr.resolve();
     });
-    
+
     return testpr;
 };
 
 exports.testSendToMatcher = function() {
     var strings = [];
     var mockMatcher = SC.Object.create({
-        addStrings: function(newStrings) {
+        Items: function(newStrings) {
             strings.push.apply(strings, newStrings);
         }
     });
@@ -221,7 +221,7 @@ exports.testSendToMatcher = function() {
             strings.forEach(function(o) {
                 stringForm.push(o.name);
             });
-            
+
             var expected = [
                 "/atTheTop.js",
                 "/anotherAtTheTop.js",

@@ -36,76 +36,107 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var MultiDelegateSupport = require('DelegateSupport').MultiDelegateSupport;
 
 /**
  * @class
- *
  * Base class for matching strategies.
  */
-exports.Matcher = SC.Object.extend(MultiDelegateSupport, {
-    _itemsChanged: function() {
-        this.get('items').sort(function(a, b) { return b.score - a.score; });
-        this.notifyDelegates('matcherUpdatedItems');
-    }.observes('items'),
-
-    _queryChanged: function() {
-        var query = this.get('query'), items = this.get('items');
-        items.forEach(function(item) {
-            item.score = this.match(query, this._itemToString(item.str));
-        }, this);
-
-        this.notifyPropertyChange('items', items);
-    }.observes('query'),
-
-    items: null,
-
+exports.Matcher = SC.Object.extend({
+    /**
+     * The string that we match against.
+     * This is the only member of a matcher that should be observed.
+     */
     query: null,
 
-    addString: function(str) {
-        this.addStrings([ str ]);
-    },
+    /**
+     * @private
+     * List of objects to be notified of changes.
+     */
+    _listeners: null,
 
-    addStrings: function(strings) {
-        var query = this.get('query'), items = this.get('items');
-        strings.map(function(str) {
-            items.push({
-                score: this.match(query, this._itemToString(str)),
-                str: str
-            });
-        }, this);
-
-        this.notifyPropertyChange('items', items);
-    },
-
-    getMatches: function() {
-        var matches = [];
-        var items = this.get('items');
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
-            if (item.score === 0) {
-                break;
-            }
-
-            matches.push(item.str);
-        }
-
-        return matches;
-    },
+    /**
+     * @private
+     * Looks something like [ { item:{ name:'...' }, score:N }, ... ]
+     */
+    _scoredItems: null,
 
     init: function() {
-        this.set('items', []);
+        this._scoredItems = [];
+        this._listeners = [];
     },
 
-    _itemToString: function(item) {
-        if (typeof item === 'string') {
-            return item;
-        }
+    addItem: function(item) {
+        this.addItems([ item ]);
+    },
 
-        if (typeof item === 'object' && item.name) {
-            return item.name;
-        }
+    /**
+     * All additions should go through this method
+     */
+    addItems: function(items) {
+        var query = this.get('query');
+        var addedScoredItems = [];
 
-        return item.toString();
+        items.forEach(function(item) {
+            var scoredItem = {
+                score: this.match(query, item.name),
+                item: item
+            };
+            if (scoredItem.score > 0) {
+                addedScoredItems.push(scoredItem);
+            }
+            this._scoredItems.push(scoredItem);
+        }, this);
+
+        var sorter = function(a, b) {
+            return b.score - a.score;
+        };
+        this._scoredItems.sort(sorter);
+        addedScoredItems.sort(sorter);
+
+        var addedItems = addedScoredItems.map(function(addedScoredItem) {
+            return addedScoredItem.item;
+        });
+
+        this._callListeners("itemsAdded", addedItems);
+    },
+
+    addListener: function(listener) {
+        this._listeners.push(listener);
+
+        var items = [];
+        this._scoredItems.forEach(function(scoredItem) {
+            if (scoredItem.score > 0) {
+                items.push(scoredItem.item);
+            }
+        }, this);
+
+        if (typeof listener.itemsAdded === "function") {
+            listener.itemsAdded(items);
+        }
+    },
+
+    _queryChanged: function() {
+        var query = this.get('query');
+
+        var addedItems = [];
+        this._scoredItems.forEach(function(scoredItem) {
+            scoredItem.score = this.match(query, scoredItem.item.name);
+            if (scoredItem.score > 0) {
+                addedItems.push(scoredItem.item);
+            }
+        }, this);
+
+        this._callListeners("itemsCleared");
+        this._callListeners("itemsAdded", addedItems);
+    }.observes('query'),
+
+    _callListeners: function() {
+        var args = Array.prototype.slice.call(arguments);
+        var method = args.shift();
+        this._listeners.forEach(function(listener) {
+            if (typeof listener[method] === "function") {
+                listener[method].apply(null, args);
+            }
+        });
     }
 });

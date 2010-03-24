@@ -413,7 +413,7 @@ exports.Directory = SC.Object.extend({
             return { name: prefix + obj.get('name') };
         });
 
-        matcher.addStrings(paths);
+        matcher.addItems(paths);
 
         var promise = new Promise();
         if (subdirs.length === 0) {

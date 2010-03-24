@@ -215,7 +215,17 @@ exports.MatcherMenu = exports.Menu.extend({
 
     init: function() {
         this.superclass();
-        this.matcher.addDelegate(this);
+        this.matcher.addListener({
+            itemsAdded: function(addedItems) {
+                console.log("matcherUpdatedItems", addedItems);
+                this.addItems(addedItems);
+            }.bind(this),
+
+            itemsCleared: function() {
+                console.log("itemsCleared");
+                this.clearItems();
+            }.bind(this)
+        });
 
         if (this.loaded) {
             this.loaded.then(function() {
@@ -225,12 +235,5 @@ exports.MatcherMenu = exports.Menu.extend({
         } else {
             this._isLoaded = true;
         }
-
-        this.addItems(this.matcher.getMatches());
-    },
-
-    matcherUpdatedItems: function() {
-        console.log("matcherUpdatedItems");
-        this.addItems(this.matcher.getMatches());
     }
 });
