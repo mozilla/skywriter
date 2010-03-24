@@ -217,12 +217,10 @@ exports.MatcherMenu = exports.Menu.extend({
         this.superclass();
         this.matcher.addListener({
             itemsAdded: function(addedItems) {
-                console.log("matcherUpdatedItems", addedItems);
                 this.addItems(addedItems);
             }.bind(this),
 
             itemsCleared: function() {
-                console.log("itemsCleared");
                 this.clearItems();
             }.bind(this)
         });
