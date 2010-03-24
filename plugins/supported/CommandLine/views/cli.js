@@ -552,38 +552,33 @@ exports.CliInputView = SC.View.design({
         }),
 
         input: SC.TextFieldView.design({
+            _processKeyEvent: function(ev, isKeyUp) {
+                var opt = { isCommandLine: true, isKeyUp: isKeyUp };
+                var cliInputView = this.getPath('parentView.parentView');
+                environment.set('commandLine', cliInputView);
+                return keyboardManager.processKeyEvent(ev, this, opt);
+            },
+
             classNames: [ "cmd_input" ],
             valueBinding: "CommandLine:controller#cliController.input",
             layout: { height: 25, bottom: 0, left: 40, right: 0 },
+
             keyDown: function(ev) {
-                // SC puts keyDown and keyPress event together. Here we only
-                // want to handle the real/browser's keydown event. To do so,
-                // we have to check if the evt.charCode value is set.
-                // If this isn't set, we have been called after a keypress
-                // event took place.
-                if (ev.charCode === 0) {
-                    var opt = { isCommandLine: true };
-                    var cliInputView = this.getPath("parentView.parentView");
-                    environment.set("commandLine", cliInputView);
-                    var done = keyboardManager.processKeyEvent(ev, this, opt);
-                    if (!done) {
-                        return this.superclass(ev);
-                    }
-                } else {
-                    // This is a real keyPress event. This should not be
-                    // handled, otherwise the textInput mixin can't detect
-                    // the key events.
-                    return this.superclass(ev);
+                var handled = this._processKeyEvent(ev, false);
+                if (!handled) {
+                    handled = arguments.callee.base.apply(this, arguments);
                 }
+
+                return handled;
             },
+
             keyUp: function(ev) {
-                var opt = { isCommandLine: true, isKeyUp: true };
-                var cliInputView = this.getPath("parentView.parentView");
-                environment.set("commandLine", cliInputView);
-                var done = keyboardManager.processKeyEvent(ev, this, opt);
-                if (!done) {
-                    return this.superclass(ev);
+                var handled = this._processKeyEvent(ev, true);
+                if (!handled) {
+                    handled = arguments.callee.base.apply(this, arguments);
                 }
+
+                return handled;
             }
         }),
 
