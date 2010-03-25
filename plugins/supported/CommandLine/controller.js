@@ -120,11 +120,13 @@ exports.cliController = SC.Object.create({
          *
          */
         var onError = function(ex) {
+            /*
             var trace = new Trace(ex, true);
             console.group('Error executing: ' + typed);
             console.error(ex);
             trace.log(3);
             console.groupEnd();
+            */
 
             // TODO: Better UI
             hints.pushObject(hint.Hint.create({
