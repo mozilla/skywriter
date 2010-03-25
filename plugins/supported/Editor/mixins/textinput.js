@@ -182,7 +182,7 @@ exports.TextInput = {
 
         // If the focusTextInput() function has been called, set the focus now.
         if (this._TextInput_wantsFocus) {
-            this.becomeFirstResponder();
+            window.setTimeout(this.becomeFirstResponder.bind(this), 0);
         }
 
         // No way that I can see around this ugly browser sniffing, without
