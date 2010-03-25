@@ -252,11 +252,9 @@ exports.TextInput = {
         // this one is forwarded via textInserted("\n"), as well as keep it
         // from being handled by other SC components that listen to the ENTER
         // event, such as the default button.
-        textField.addEventListener('keydown', function(evt) {
-            switch (evt.keyCode) {
-                case 13: // ENTER
-                    evt.stopPropagation();
-                break;
+        textField.addEventListener('keypress', function(evt) {
+            if (evt.keyCode === SC.Event.KEY_RETURN) {
+                evt.hasCustomEventHandling = true;
             }
         }, false);
 
