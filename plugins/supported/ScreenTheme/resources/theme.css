@@ -305,3 +305,13 @@ body.sc-theme {
     margin: 0px;
 }
 
+.bespin-screen .sc-scroller-view .thumb {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    background-color: white;
+    opacity: 0.3;
+    -moz-border-radius: 12px;
+    -webkit-border-radius: 12px;
+}
+
