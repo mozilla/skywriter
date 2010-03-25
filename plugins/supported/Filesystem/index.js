@@ -56,7 +56,7 @@ exports.Directory = SC.Object.extend({
 
     contents: function() {
         return this.get("directories").concat(this.get("files"));
-    }.property('directories', 'files').cacheable(),
+    }.property('directories', 'files'),
 
     init: function() {
         var source = this.get("source");
@@ -439,7 +439,8 @@ exports.Directory = SC.Object.extend({
     remove: function() {
         var pr = new Promise();
         this.get("source").remove(this).then(function() {
-            var dirlist = this.get("parent").get("directories");
+            var parent = this.get("parent");
+            var dirlist = parent.get("directories");
             dirlist.removeObject(this);
             pr.resolve();
         }.bind(this), function(error) {
@@ -504,11 +505,50 @@ exports.Directory = SC.Object.extend({
      */
     makeDirectory: function(path) {
         var promise = new Promise();
-        var source = this.get("source");
         
-        var dirobj = this.getObject(path);
+        if (!pathUtil.isDir(path)) {
+            path = path + "/";
+        }
+        var parentpath = pathUtil.parentdir(path);
+        var parentdir = this.getObject(parentpath);
+        
+        if (!parentdir) {
+            promise.reject(new Error("Parent directory " + parentpath + " does not exist"));
+            return promise;
+        }
+        
+        var dirname = path.substring(parentpath.length);
+        
+        var dirobj;
+        
+        if (parentdir.get("status") === exports.READY) {
+            dirobj = parentdir.getObject(dirname);
+            if (dirobj) {
+                promise.reject(new Error("Directory " + path + " already exists"));
+                return promise;
+            }
+        }
+        
+        var source = parentdir.get("source");
+        
+        dirobj = exports.Directory.create({
+            name: dirname,
+            parent: parentdir,
+            source: source
+        });
+        
         source.makeDirectory(dirobj).then(function(addedDirectory) {
+            var directories = parentdir.get("directories");
             addedDirectory.set("status", exports.READY);
+            directories.pushObject(addedDirectory);
+            // this should probably be a binary search insertion
+            directories.sort(function(a, b) {
+                var nameA = a.name;
+                var nameB = b.name;
+                if (nameA < nameB) { return -1; }
+                if (nameA > nameB) { return 1; }
+                return 0;
+            });
             promise.resolve(addedDirectory);
         }, function(error) {
             promise.reject(error);

@@ -160,3 +160,23 @@ exports.splitext = function(path) {
     var after = path.substring(lastDot+1);
     return [before, after];
 };
+
+/*
+ * figures out the parent directory
+ * "" -&gt; ""
+ * "/" -&gt; ""
+ * "/foo/bar/" -&gt; "/foo/"
+ * "/foo/bar/baz.txt" -&gt; "/foo/bar/"
+ */
+exports.parentdir = function(path) {
+    if (path == "" || path == "/") {
+        return "";
+    }
+    
+    if (exports.isDir(path)) {
+        path = path.substring(0, path.length-1);
+    }
+    slash = path.lastIndexOf("/");
+    path = path.substring(0, slash+1);
+    return path;
+};

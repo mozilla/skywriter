@@ -154,20 +154,25 @@ exports.testMakeDirectoryForNewDirectory = function() {
     var env = getEnv();
     var request = Request.create();
     var testpr = new Promise();
+    var files = env.get("files");
     
-    request.promise.then(function() {
-        var files = env.get("files");
-        var parentdir = files.getObject("dir/number/");
-        var directories = parentdir.get("directories");
-        t.equal(directories.length, 1, "Expected one directory");
-        t.equal(directories[0].name, "one/", "Expected it to be the directory we created");
-        var newdir = files.getObject("dir/number/one/");
-        t.equal(newdir.get("status"), fs.READY, "Directory should be marked as ready, since it was just created");
-        testpr.resolve();
-    }, function(error) {
-        testpr.reject(error.message);
+    // we want the parent directory to be marked READY first
+    // to pull out a possible bug situation.
+    files.loadObject("foo/").then(function() {
+        request.promise.then(function() {
+            var parentdir = files.getObject("foo/");
+            var directories = parentdir.get("directories");
+            t.equal(directories.length, 2, "Expected two directories");
+            t.equal(directories[1].name, "one/", "Expected it to be the directory we created");
+            var newdir = files.getObject("foo/one/");
+            t.equal(newdir.get("status"), fs.READY, "Directory should be marked as ready, since it was just created");
+            testpr.resolve();
+        }, function(error) {
+            testpr.reject(error.message);
+        });
+
+        FileCommands.mkdirCommand(env, {path: "/foo/one/"}, request);
     });
     
-    FileCommands.mkdirCommand(env, {path: "/dir/number/one/"}, request);
     return testpr;
 };
