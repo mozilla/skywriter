@@ -96,11 +96,13 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
             
             if (SC.none(newFile)) {
                 var model = self.get("model");
-                model.set("value", "");
+                model.replaceCharacters(model.range(), "");
             } else {
                 newFile.loadContents().then(function(result) {
-                    var model = self.get("model");
-                    model.set("value", result.contents);
+                    SC.run(function() {
+                        var model = self.get("model");
+                        model.replaceCharacters(model.range(), result.contents);
+                    });
                 });
             }
         }
@@ -128,15 +130,17 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
         // are we changing to a new file?
         if (SC.none(newFile)) {
             var model = self.get("model");
-            model.set("value", "");
+            model.replaceCharacters(model.range(), "");
             var pr = new Promise();
             pr.resolve(this);
             return pr;
         }
         
         return newFile.loadContents().then(function(result) {
-            var model = self.get("model");
-            model.set("value", result.contents);
+            SC.run(function() {
+                var model = self.get("model");
+                model.replaceCharacters(model.range(), result.contents);
+            });
             return self;
         });
     },
@@ -158,10 +162,15 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
      */
     reload: function() {
         var file = this.get("file");
+        var self = this;
+        
         return file.loadContents().then(function(result) {
             var model = self.get("model");
-            model.set("value", result.contents);
-        }.bind(this));
+            model.replaceCharacters(model.range(), result.contents);
+            // the following should theoretically work...
+            // but does not seem to.
+            // model.set("value", result.contents);
+        });
     },
     
     /*

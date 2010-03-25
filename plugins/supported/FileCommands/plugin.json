@@ -110,6 +110,12 @@
             ],
             "description": "create a new directory, use a leading / to create a directory in a different project",
             "pointer": "#mkdirCommand"
+        },
+        {
+            "ep": "command",
+            "name": "revert",
+            "description": "revert the current buffer to the last saved version",
+            "pointer": "#revertCommand"
         }
     ]
 }

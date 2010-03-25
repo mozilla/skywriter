@@ -166,22 +166,14 @@ exports.openCommand = function(env, args, request) {
 
 /**
  * 'revert' command
- * TODO: Delete or correct
-        {
-            "ep": "command",
-            "name": "revert",
-            "description": "revert the file to the last saved version",
-            "pointer": "#revertCommand"
-        },
  */
 exports.revertCommand = function(env, args, request) {
-    files.loadContents(editSession.project, editSession.path, function(file) {
-        editor.insertDocument(file.content);
-        // TODO: Something better than dumping us back at the top. We could
-        // simply check that the old cursor position is valid for the new
-        // file or we could do a fancy diff thing to guess the new position
-        editor.moveCursor({ row: 0, col: 0 });
-        editor.setSelection(null);
+    request.async();
+    var buffer = env.get("buffer");
+    buffer.reload().then(function() {
+        request.done("File reverted");
+    }, function(error) {
+        request.doneWithError(error.message);
     });
 };
 
