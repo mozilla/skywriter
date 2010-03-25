@@ -148,12 +148,6 @@ exports.Menu = SC.Object.extend({
                 var link = document.createElement("li");
                 link.appendChild(document.createTextNode(item.name));
 
-                link.addEventListener("click", function(ev) {
-                    SC.run(function() {
-                        cliController.set("input", this._prefix + item.name + " ");
-                    }.bind(this));
-                }.bind(this), false);
-
                 if (item.description) {
                     var dfn = document.createElement("dfn");
                     dfn.appendChild(document.createTextNode(item.description));
@@ -161,6 +155,13 @@ exports.Menu = SC.Object.extend({
                 }
 
                 this._list.appendChild(link);
+
+                link.addEventListener("mousedown", function(ev) {
+                    SC.run(function() {
+                        cliController.set("input", this._prefix + item.name + " ");
+                    }.bind(this));
+                }.bind(this), false);
+
             }
 
             // Work out if there is a common prefix between all the matches
