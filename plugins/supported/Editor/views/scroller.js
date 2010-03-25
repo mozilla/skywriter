@@ -114,7 +114,9 @@ var ScrollerCanvasView = CanvasView.extend({
 
     _drawNibs: function(ctx) {
         var thickness = this._getClientThickness();
-        var value = this.getPath('parentView.value');
+        var parentView = this.get('parentView');
+        var value = parentView.get('value');
+        var maximum = parentView.get('maximum');
         var highlighted = this._isHighlighted();
 
         // Starting nib
@@ -128,7 +130,7 @@ var ScrollerCanvasView = CanvasView.extend({
         }
 
         // Ending nib
-        if (highlighted || value !== this.getMaximumValue()) {
+        if (highlighted || value !== maximum) {
             ctx.save();
             ctx.translate(this._getClientLength() - NIB_PADDING,
                 thickness / 2);
@@ -247,48 +249,49 @@ var ScrollerCanvasView = CanvasView.extend({
 
     // Returns the dimensions of the handle or knob.
     _getHandleFrame: function() {
-        var parentView = this.get('parentView');
-        var value = parentView.get('value');
-        var maximum = parentView.get('maximum');
-        var frame = this.get('frame');
-        var clientFrame = this._getClientFrame();
         var gutterFrame = this._getGutterFrame();
-        var clientThickness = this._getClientThickness();
-
-        var gutterLength = this._getGutterLength();
-        var frameLength = this._getFrameLength();
-
-        var size = Math.min(frameLength, maximum) * gutterLength / maximum;
-        var minSize = MINIMUM_HANDLE_SIZE + NIB_LENGTH * 2;
-
-        // Adjust appropriately if the handle is getting too small.
-        if (size < minSize) {
-            size = minSize;
-            gutterLength -= minSize;
-            value *= maximum / (maximum - frameLength);
-        }
-
-        switch (parentView.get('layoutDirection')) {
+        var handleOffset = this._getHandleOffset();
+        var handleLength = this._getHandleLength();
+        switch (this.getPath('parentView.layoutDirection')) {
         case SC.LAYOUT_VERTICAL:
             return {
-                x:      clientFrame.x,
-                y:      clientFrame.y + NIB_LENGTH +
-                        value * gutterLength / maximum,
-                width:  clientThickness,
-                height: size
+                x:      gutterFrame.x,
+                y:      gutterFrame.y + handleOffset,
+                width:  gutterFrame.width,
+                height: handleLength
             };
         case SC.LAYOUT_HORIZONTAL:
             return {
-                x:      clientFrame.x + NIB_LENGTH +
-                        value * gutterLength / maximum,
-                y:      clientFrame.y,
-                width:  size,
-                height: clientThickness
+                x:      gutterFrame.x + handleOffset,
+                y:      gutterFrame.y,
+                width:  handleLength,
+                height: gutterFrame.height
             };
-        default:
-            console.error("unknown layout direction");
-            return null;
         }
+    },
+
+    // Returns the length of the handle or knob.
+    _getHandleLength: function() {
+        var gutterLength = this._getGutterLength();
+        var proportion = this.getPath('parentView.proportion');
+        return Math.max(gutterLength * proportion, MINIMUM_HANDLE_SIZE);
+    },
+
+    // Returns the starting offset of the handle or knob.
+    _getHandleOffset: function() {
+        var parentView = this.get('parentView');
+        var maximum = parentView.get('maximum');
+        if (maximum === 0) {
+            return 0;
+        }
+
+        var gutterLength = this._getGutterLength();
+        var handleLength = this._getHandleLength();
+        var emptyGutterLength = gutterLength - handleLength;
+
+        var value = parentView.get('value');
+
+        return emptyGutterLength * value / maximum;
     },
 
     // Determines whether the scroll bar is highlighted.
@@ -393,27 +396,15 @@ var ScrollerCanvasView = CanvasView.extend({
         var halfThickness = thickness / 2;
 
         var layoutDirection = parentView.get('layoutDirection');
-        var handleDistance, handleLength;
-        switch (layoutDirection) {
-        case SC.LAYOUT_VERTICAL:
-            handleDistance = handleFrame.y - padding.top;
-            handleLength = handleFrame.height;
+        var handleOffset = this._getHandleOffset() + NIB_LENGTH;
+        var handleLength = this._getHandleLength();
 
+        if (layoutDirection === SC.LAYOUT_VERTICAL) {
             // The rest of the drawing code assumes the scroll bar is
             // horizontal. Create that fiction by installing a 90 degree
             // rotation.
             ctx.translate(thickness + 1, 0);
             ctx.rotate(Math.PI * 0.5);
-            break;
-
-        case SC.LAYOUT_HORIZONTAL:
-            handleDistance = handleFrame.x - padding.left;
-            handleLength = handleFrame.width;
-            break;
-
-        default:
-            console.error("unknown layout direction");
-            break;
         }
 
         if (gutterLength <= handleLength) {
@@ -435,20 +426,20 @@ var ScrollerCanvasView = CanvasView.extend({
 
         var buildHandlePath = function() {
             ctx.beginPath();
-            ctx.arc(handleDistance + halfThickness + 0.5,                // x
-                halfThickness,                                     // y
+            ctx.arc(handleOffset + halfThickness + 0.5,                 // x
+                halfThickness,                                          // y
                 halfThickness - 0.5, Math.PI / 2, 3 * Math.PI / 2, false);
-            ctx.arc(handleDistance + handleLength - halfThickness - 0.5, // x
-                halfThickness,                                     // y
+            ctx.arc(handleOffset + handleLength - halfThickness - 0.5,  // x
+                halfThickness,                                          // y
                 halfThickness - 0.5, 3 * Math.PI / 2, Math.PI / 2, false);
-            ctx.lineTo(handleDistance + halfThickness + 0.5, thickness - 0.5);
+            ctx.lineTo(handleOffset + halfThickness + 0.5, thickness - 0.5);
             ctx.closePath();
         };
         buildHandlePath();
 
         // Paint the interior of the handle path.
-        var gradient = ctx.createLinearGradient(handleDistance, 0,
-            handleDistance, thickness);
+        var gradient = ctx.createLinearGradient(handleOffset, 0, handleOffset,
+            thickness);
         gradient.addColorStop(0,
             theme.scrollBarFillGradientTopStart.replace(/%a/, alpha));
         gradient.addColorStop(0.4,
@@ -469,17 +460,17 @@ var ScrollerCanvasView = CanvasView.extend({
         // Draw the little shines in the handle.
         ctx.fillStyle = theme.scrollBarFillStyle.replace(/%a/, alpha);
         ctx.beginPath();
-        ctx.moveTo(handleDistance + halfThickness * 0.4, halfThickness * 0.6);
-        ctx.lineTo(handleDistance + halfThickness * 0.9, thickness * 0.4);
-        ctx.lineTo(handleDistance, thickness * 0.4);
+        ctx.moveTo(handleOffset + halfThickness * 0.4, halfThickness * 0.6);
+        ctx.lineTo(handleOffset + halfThickness * 0.9, thickness * 0.4);
+        ctx.lineTo(handleOffset, thickness * 0.4);
         ctx.closePath();
         ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(handleDistance + handleLength - (halfThickness * 0.4),
+        ctx.moveTo(handleOffset + handleLength - (halfThickness * 0.4),
             0 + (halfThickness * 0.6));
-        ctx.lineTo(handleDistance + handleLength - (halfThickness * 0.9),
+        ctx.lineTo(handleOffset + handleLength - (halfThickness * 0.9),
             0 + (thickness * 0.4));
-        ctx.lineTo(handleDistance + handleLength, 0 + (thickness * 0.4));
+        ctx.lineTo(handleOffset + handleLength, 0 + (thickness * 0.4));
         ctx.closePath();
         ctx.fill();
 
@@ -502,15 +493,6 @@ var ScrollerCanvasView = CanvasView.extend({
 
         ctx.restore();
         // End master drawing context
-    },
-
-    /**
-     * Returns the actual maximum value, which will be less than the maximum
-     * due to accounting for the frame length.
-     */
-    getMaximumValue: function() {
-        return Math.max(this.getPath('parentView.maximum') -
-            this._getFrameLength(), 0);
     },
 
     _repeatAction: function(method, interval) {
@@ -640,18 +622,10 @@ var ScrollerCanvasView = CanvasView.extend({
             var maximum = parentView.get('maximum');
             var oldValue = parentView.get('value');
             var gutterLength = this._getGutterLength();
-
-            // If the handle's size is clamped to the minimum size, adjust
-            // appropriately.
-            var frameLength = this._getFrameLength();
-            var size = Math.min(frameLength, maximum) * gutterLength / maximum;
-            var minSize = MINIMUM_HANDLE_SIZE + NIB_LENGTH * 2;
-            if (size < minSize) {
-                eventDelta *= maximum / (maximum - frameLength);
-            }
-
-            parentView.set('value', oldValue + eventDelta * maximum /
-                                gutterLength);
+            var handleLength = this._getHandleLength();
+            var emptyGutterLength = gutterLength - handleLength;
+            var valueDelta = maximum * eventDelta / emptyGutterLength;
+            parentView.set('value', oldValue + valueDelta);
 
             this._mouseDownScreenPoint = eventDistance;
         }
@@ -717,7 +691,7 @@ exports.BespinScrollerView = SC.View.extend({
 
     _valueChanged: function() {
         var scrollerCanvasView = this._scrollerCanvasView;
-        var maximumValue = scrollerCanvasView.getMaximumValue();
+        var maximumValue = this.get('maximum');
 
         var value = this.get('value');
         if (value < 0) {
