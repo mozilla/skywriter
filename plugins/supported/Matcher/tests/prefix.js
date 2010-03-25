@@ -41,21 +41,28 @@ var t = require('PluginDev');
 
 exports.testPrefixMatching = function() {
     var matcher = PrefixMatcher.create({ query: "b" });
-    matcher.addItems("foo foobar bar".w());
+    matcher.addItems([
+        { name:"foo" },
+        { name:"foobar" },
+        { name:"bar" }
+    ]);
 
-    var matches = matcher.getMatches();
-    t.equal(matches.length, 1, "the length of the list of matches when " +
+    var items;
+    matcher.addListener({
+        itemsAdded: function(addedItems) { items = addedItems; }
+    });
+
+    t.equal(items.length, 1, "the length of the list of matches when " +
         "searching for \"b\" and 1");
-    t.equal(matches[0].str, "bar", "the text of the first matched item when " +
+    t.equal(items[0].item, "bar", "the text of the first matched item when " +
         "searching for \"b\" and \"foo\"");
 
-    matcher.set('query', "FOO");
-    matches = matcher.getMatches();
-    t.equal(matches.length, 2, "the length of the list of matches when " +
+    matcher.set('query', 'FOO');
+    t.equal(items.length, 2, "the length of the list of matches when " +
         "searching for \"FOO\" and 2");
-    t.equal(matches[0].str, "foo", "the text of the first matched item when " +
+    t.equal(items[0].item, "foo", "the text of the first matched item when " +
         "searching for \"FOO\" and \"foo\"");
-    t.equal(matches[1].str, "foobar", "the text of the second matched item " +
+    t.equal(items[1].item, "foobar", "the text of the second matched item " +
         "when searching for \"FOO\" and \"foobar\"");
 };
 

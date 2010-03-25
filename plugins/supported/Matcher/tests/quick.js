@@ -41,32 +41,39 @@ var t = require('PluginDev');
 
 exports.testQuickMatcher = function() {
     var matcher = QuickMatcher.create({ query: "foo" });
-    matcher.addItems("foo foobar bar baz baAaz".w());
+    matcher.addItems([
+        { name:"foo" },
+        { name:"foobar" },
+        { name:"bar" },
+        { name:"baz" },
+        { name:"baAaz" }
+    ]);
 
-    var matches = matcher.getMatches();
-    t.equal(matches.length, 2, "the number of matches when searching for " +
+    var items;
+    matcher.addListener({
+        itemsAdded: function(addedItems) { items = addedItems; }
+    });
+
+    t.equal(items.length, 2, "the number of matches when searching for " +
         "\"foo\" and 2");
-    t.equal(matches[0].str, "foo", "the first match when searching for " +
+    t.equal(items[0], "foo", "the first match when searching for " +
         "\"foo\" and \"foo\"");
-    t.equal(matches[1].str, "foobar", "the second match when searching for " +
+    t.equal(items[1], "foobar", "the second match when searching for " +
         "\"foo\" and \"foobar\"");
 
-    matcher.set('query', "ar");
-    matches = matcher.getMatches();
-    t.equal(matches.length, 2, "the number of matches when searching for " +
+    matcher.set('query', 'ar');
+    t.equal(items.length, 2, "the number of matches when searching for " +
         "\"ar\" and 2");
-    t.equal(matches[0].str, "bar", "the first match when searching for " +
+    t.equal(items[0], "bar", "the first match when searching for " +
         "\"ar\" and \"bar\"");
-    t.equal(matches[1].str, "foobar", "the second match when searching for " +
+    t.equal(items[1], "foobar", "the second match when searching for " +
         "\"ar\" and \"foobar\"");
 
-    matcher.set('query', "bZ");
-    matches = matcher.getMatches();
-    t.equal(matches.length, 2, "the number of matches when searching for " +
+    matcher.set('query', 'bZ');
+    t.equal(items.length, 2, "the number of matches when searching for " +
         "\"bZ\" and 2");
-    t.equal(matches[0].str, "baz", "the first match when searching for " +
+    t.equal(items[0], "baz", "the first match when searching for " +
         "\"bZ\" and \"baz\"");
-    t.equal(matches[1].str, "baAaz", "the second match when searching for " +
+    t.equal(items[1], "baAaz", "the second match when searching for " +
         "\"bZ\" and \"baAaz\"");
 };
-

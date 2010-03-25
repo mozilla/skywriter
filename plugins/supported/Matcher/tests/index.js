@@ -50,86 +50,76 @@ var MockMatcher = Matcher.extend({
 exports.testAddingStrings = function() {
     var matcher = MockMatcher.create({ scores: { foo: 1, bar: 2, baz: 3 } });
 
-    var notified;
-    matcher.addDelegate(SC.Object.create({
-        matcherUpdatedItems: function() { notified = true; }
-    }));
-
-    notified = false;
-    matcher.addItem("foo");
-    t.ok(notified, "the matcher notified its delegates upon adding \"foo\"");
-    var items = matcher.get('items');
-    t.equal(items.length, 1, "the length of the matcher's list of items " +
-        "after adding \"foo\" and 1");
-    t.equal(items[0].str, "foo", "the text of the matcher's first item " +
-        "after adding \"foo\" and \"foo\"");
-    t.equal(items[0].score, 1, "the score of the matcher's first item after " +
-        "adding \"foo\" and 1");
-
-    notified = false;
-    matcher.addItems("bar baz".w());
-    t.ok(notified, "the matcher notified its delegates upon adding \"bar\" " +
-        "and \"baz\"");
-    items = matcher.get('items');
-    t.equal(items.length, 3, "the length of the matcher's list of items " +
-        "after adding \"bar\" and \"baz\"; and 3");
-    t.equal(items[0].str, "baz", "the text of the matcher's first item " +
-        "after adding \"bar\" and \"baz\"; and \"baz\"");
-    t.equal(items[0].score, 3, "the score of the matcher's first item after " +
-        "adding \"bar\" and \"baz\"; and 3");
-    t.equal(items[1].str, "bar", "the text of the matcher's second item " +
-        "after adding \"bar\" and \"baz\"; and \"bar\"");
-    t.equal(items[1].score, 2, "the score of the matcher's second item " +
-        "after adding \"bar\" and \"baz\"; and 2");
-    t.equal(items[2].str, "foo", "the text of the matcher's third item " +
-        "after adding \"bar\" and \"baz\"; and \"foo\"");
-    t.equal(items[2].score, 1, "the score of the matcher's third item after " +
-        "adding \"bar\" and \"baz\"; and 1");
-};
-
-exports.testGettingMatches = function() {
-    var matcher = MockMatcher.create({ scores: { foo: 1, bar: 0 } });
-
-    matcher.addItems("foo bar".w());
-
+    var items;
+    var cleared1 = 0;
     matcher.addListener({
-        itemsAdded: function(matches) {
-            t.equal(matches.length, 1, "the length of the list of matches and 1");
-            t.equal(matches[0].str, "foo", "the text of the first matched item and " +
-                "\"foo\"");
-            t.equal(matches[0].score, 1, "the score of the first matched item and 1");
-        }
-    });
-};
-
-exports.testQueryUpdating = function() {
-    var matcher = Matcher.create({
-        query: "boo",
-        match: function(query, str) {
-            return query === str ? 1 : 0;
+        itemsAdded: function(addedItems) {
+            items = addedItems;
+        },
+        itemsCleared: function() {
+            cleared1++;
         }
     });
 
-    var notified;
-    matcher.addDelegate(SC.Object.create({
-        matcherUpdatedItems: function() { notified = true; }
-    }));
+    matcher.addItem({ name: 'foo' });
+    t.equal(items.length, 1, 'the length of the matcher\'s list of items ' +
+        'after adding \"foo\"; and 1');
+    t.equal(items[0], 'foo', 'the text of the matcher\'s first item ' +
+        'after adding \"foo\" and \"foo\"');
 
-    matcher.addItems("foo bar baz".w());
-    var matches = matcher.getMatches();
-    t.equal(matches.length, 0, "the length of the list of matches with the " +
-        "query \"boo\" and 0");
+    matcher.addItems([ { name: 'bar' }, { name: 'baz' } ]);
 
-    notified = false;
-    matcher.set('query', "baz");
-    t.ok(notified, "the matcher notified its delegates upon changing the " +
-        "query");
-    matches = matcher.getMatches();
-    t.equal(matches.length, 1, "the length of the list of matches with the " +
-        "query \"baz\" and 1");
-    t.equal(matches[0].str, "baz", "the text of the matched item with the " +
-        "query \"baz\" and \"baz\"");
-    t.equal(matches[0].score, 1, "the score of the matched item with the " +
-        "query \"baz\" and 1");
+    t.equal(items.length, 2, 'the length of the matcher\'s list of items ' +
+        'after adding \"bar\" and \"baz\"; and 2');
+    t.equal(items[0], 'baz', 'the text of the matcher\'s first item ' +
+        'after adding \"bar\" and \"baz\"; and \"baz\"');
+    t.equal(items[1], 'bar', 'the text of the matcher\'s second item ' +
+        'after adding \"bar\" and \"baz\"; and \"bar\"');
+
+    // Matchers added after the date get the whole list
+    var items2;
+    var cleared2 = 0;
+    matcher.addListener({
+        itemsAdded: function(addedItems) {
+            items2 = addedItems;
+        },
+        itemsCleared: function() {
+            cleared2++;
+        }
+    });
+
+    t.equal(items2.length, 3, 'the length of the matcher\'s list of ' +
+        'items after adding \"foo\"; and 3');
+    t.equal(items2[0], 'baz', 'the text of the matcher\'s first item ' +
+        'after adding \"bar\" and \"baz\"; and \"baz\"');
+    t.equal(items2[1], 'bar', 'the text of the matcher\'s second item ' +
+        'after adding \"bar\" and \"baz\"; and \"bar\"');
+    t.equal(items2[2], 'foo', 'the text of the matcher\'s first item ' +
+        'after adding \"foo\" and \"foo\"');
+
+    t.equal(cleared1, 0, "itemsCleared (1) called too early");
+    t.equal(cleared2, 0, "itemsCleared (2) called too early");
+
+    matcher.set('query', 'wibble');
+
+    t.equal(cleared1, 1, "itemsCleared (1) not called properly");
+    t.equal(cleared2, 1, "itemsCleared (2) not called properly");
+
+    t.equal(items1.length, 3, 'the length of the matcher\'s list of ' +
+        'items after adding \"foo\"; and 3');
+    t.equal(items1[0], 'baz', 'the text of the matcher\'s first item ' +
+        'after adding \"bar\" and \"baz\"; and \"baz\"');
+    t.equal(items1[1], 'bar', 'the text of the matcher\'s second item ' +
+        'after adding \"bar\" and \"baz\"; and \"bar\"');
+    t.equal(items1[2], 'foo', 'the text of the matcher\'s first item ' +
+        'after adding \"foo\" and \"foo\"');
+
+    t.equal(items2.length, 3, 'the length of the matcher\'s list of ' +
+        'items after adding \"foo\"; and 3');
+    t.equal(items2[0], 'baz', 'the text of the matcher\'s first item ' +
+        'after adding \"bar\" and \"baz\"; and \"baz\"');
+    t.equal(items2[1], 'bar', 'the text of the matcher\'s second item ' +
+        'after adding \"bar\" and \"baz\"; and \"bar\"');
+    t.equal(items2[2], 'foo', 'the text of the matcher\'s first item ' +
+        'after adding \"foo\" and \"foo\"');
 };
-

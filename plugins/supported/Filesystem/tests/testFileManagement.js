@@ -207,7 +207,7 @@ exports.testContentRetrieval = function() {
 exports.testSendToMatcher = function() {
     var strings = [];
     var mockMatcher = SC.Object.create({
-        Items: function(newStrings) {
+        addItems: function(newStrings) {
             strings.push.apply(strings, newStrings);
         }
     });
