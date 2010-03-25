@@ -88,16 +88,17 @@ exports.cliController = SC.Object.create({
      * We need to re-parse the CLI whenever the input changes
      */
     _inputChanged: function() {
-        this.hints.propertyWillChange('[]');
-        this.hints.length = 0;
+        var hints = this.get('hints');
+        hints.propertyWillChange('[]');
+        hints.length = 0;
 
         var input = Input.create({ typed: this.get('input'), env: env.global });
         var results = input.parse();
         results.hints.forEach(function(hint) {
-            this.hints.pushObject(hint);
+            hints.pushObject(hint);
         }.bind(this));
 
-        this.hints.propertyDidChange('[]');
+        hints.propertyDidChange('[]');
     }.observes('input'),
 
     /**
@@ -106,6 +107,7 @@ exports.cliController = SC.Object.create({
      */
     executeCommand: function(typed) {
         console.log('executeCommand "' + typed + '"');
+        var hints = this.get('hints');
 
         if (!typed || typed === '') {
             return;
@@ -119,26 +121,24 @@ exports.cliController = SC.Object.create({
          */
         var onError = function(ex) {
             var trace = new Trace(ex, true);
-            console.group('Error calling command: ' + input.commandExt.name);
-            console.log('- typed: "', typed, '"');
-            // console.log('- arguments: ', args);
+            console.group('Error executing: ' + typed);
             console.error(ex);
             trace.log(3);
             console.groupEnd();
 
             // TODO: Better UI
-            SC.run(function() {
-                this.hints.pushObject(hint.Hint.create({
-                    level: hint.Level.Error,
-                    element: ex
-                }));
-            }.bind(this));
+            hints.pushObject(hint.Hint.create({
+                level: hint.Level.Error,
+                element: "ex"
+            }));
+
+            this.set('input', '');
         }.bind(this);
 
         var exec = function(command, args) {
             // Check the function pointed to in the meta-data exists
             if (!command) {
-                this.hints.pushObject(hint.Hint.create({
+                hints.pushObject(hint.Hint.create({
                     level: hint.Level.Error,
                     element: "Command not found."
                 }));

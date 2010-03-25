@@ -371,12 +371,14 @@ exports.CliInputView = SC.View.design({
                 return;
             }
 
-            if (typeof hint.element === "string") {
-                var parent = document.createElement("article");
-                parent.appendChild(document.createTextNode(hint.element));
-                hintNode.appendChild(parent);
-            } else {
+            if (hint.element && hint.element.addEventListener) {
                 hintNode.appendChild(hint.element);
+            } else {
+                // Maybe we should do something clever with exceptions?
+                // For now we just toString and call it done.
+                var parent = document.createElement("article");
+                parent.appendChild(document.createTextNode(hint.element.toString()));
+                hintNode.appendChild(parent);
             }
 
             // hintNode.setAttribute("class", "cmd_hint " + hintClass[hint.level]);
