@@ -87,6 +87,17 @@
             "pointer": "commands#install"
         },
         {
+            "ep": "command",
+            "name": "debug",
+            "description": "Commands useful for debugging"
+        },
+        {
+            "ep": "command",
+            "name": "debug whosonfirst",
+            "description": "Displays the first responder and key pane after 3 seconds",
+            "pointer": "debug#whosOnFirst"
+        },
+        {
             "ep": "type",
             "name": "pluginURL",
             "description": "a valid URL (http/https) from which to install a plugin",
