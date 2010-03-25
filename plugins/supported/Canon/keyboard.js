@@ -64,6 +64,10 @@ var KeyboardManager = SC.Object.extend({
      * @return True if a matching command was found, false otherwise.
      */
     processKeyEvent: function(evt, sender, flags) {
+        if (evt.type === "keyup") {
+            return false;   // only keydown and keypress!
+        }
+
         var symbolicName = evt.commandCodes()[0];
         var commandExt = this._findCommandExtension(symbolicName, flags);
         if (commandExt) {
