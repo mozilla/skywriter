@@ -353,7 +353,8 @@ exports.TextInput = {
      */
     mouseDown: function(evt) {
         arguments.callee.base.apply(this, arguments);
-        this.becomeFirstResponder();
+        window.setTimeout(this.becomeFirstResponder.bind(this), 0);
+        return true;
     },
 
     /**

@@ -808,7 +808,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
             // If there is nothing to select in this line, then skip.
             if (line.length === 0) {
-                return;
+                return true;
             }
 
             pos.column -= (pos.column == line.length ? 1 : 0);
@@ -857,11 +857,14 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             interval:   100,
             repeats:    true
         });
+
+        return true;
     },
 
     mouseDragged: function(evt) {
         this._dragPoint = { x: evt.pageX, y: evt.pageY };
         this._drag();
+        return true;
     },
 
     mouseUp: function(evt) {
