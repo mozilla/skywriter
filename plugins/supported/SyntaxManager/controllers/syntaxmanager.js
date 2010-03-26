@@ -520,17 +520,6 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
     },
 
     /**
-     * Returns the attributed text currently in the cache for the given range
-     * of rows. To ensure that the text returned by this method is up to date,
-     * updateSyntaxForRows() should be called first.
-     */
-    attrsForRows: function(startRow, endRow) {
-        return this._lineAttrInfo.slice(startRow, endRow).map(function(lai) {
-            return this._mergeAttrGroups(lai.attrs);
-        }, this);
-    },
-
-    /**
      * @property{string}
      *
      * The initial context. Defaults to "plain".
@@ -543,6 +532,34 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
      * The character data is read from this text storage instance.
      */
     textStorage: null,
+
+    /**
+     * Returns the attributed text currently in the cache for the given range
+     * of rows. To ensure that the text returned by this method is up to date,
+     * updateSyntaxForRows() should be called first.
+     */
+    attrsForRows: function(startRow, endRow) {
+        return this._lineAttrInfo.slice(startRow, endRow).map(function(lai) {
+            return this._mergeAttrGroups(lai.attrs);
+        }, this);
+    },
+
+    /**
+     * Returns the contexts active at the given row and column.
+     */
+    contextsAtPosition: function(pos) {
+        var attrGroups = this._lineAttrInfo[pos.row].attrs;
+        var contexts = [];
+        attrGroups.forEach(function(attrs) {
+            var index = this._attrIndexForColumn(attrs, pos.column);
+            var context = attrs[index].context;
+            if (context !== null) {
+                contexts.push(context);
+            }
+        }, this);
+
+        return contexts;
+    },
 
     init: function() {
         this._reset();

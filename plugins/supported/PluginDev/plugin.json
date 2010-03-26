@@ -93,6 +93,12 @@
         },
         {
             "ep": "command",
+            "name": "debug syntaxcontexts",
+            "description": "Displays the active contexts at the insertion point",
+            "pointer": "debug#syntaxContexts"
+        },
+        {
+            "ep": "command",
             "name": "debug whosonfirst",
             "description": "Displays the first responder and key pane after 3 seconds",
             "pointer": "debug#whosOnFirst"
