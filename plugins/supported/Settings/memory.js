@@ -35,12 +35,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime").SC;
 var catalog = require("bespin:plugins").catalog;
 var console = require('bespin:console').console;
-
 var Promise = require("bespin:promise").Promise;
 var groupPromises = require("bespin:promise").group;
+
+var SC = require("sproutcore/runtime").SC;
 
 var types = require("Types:types");
 
@@ -69,7 +69,7 @@ exports.getTypeExtFromAssignment = function(typeSpec) {
 
     if (assignments) {
         // Find the assignment for "setting" so we can get it's value
-        var settingAssignment;
+        var settingAssignment = null;
         assignments.forEach(function(assignment) {
             if (assignment.param.name === "setting") {
                 settingAssignment = assignment;

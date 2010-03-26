@@ -43,6 +43,7 @@ var cookie = require("bespin:util/cookie");
  * @class
  */
 exports.CookiePersister = SC.Object.create({
+
     loadInitialValues: function(settings) {
         settings._loadDefaultValues().then(function() {
             var data = cookie.get("settings");
@@ -51,9 +52,18 @@ exports.CookiePersister = SC.Object.create({
     },
 
     persistValue: function(settings, key, value) {
-        settings._saveToObject(stringData).then(function() {
-            var data = JSON.stringify(stringData);
-            cookie.set("settings", data);
-        });
+        try {
+            // Aggregate the settings into a file
+            var data = {};
+            settings._getSettingNames().forEach(function(key) {
+                data[key] = settings.get(key);
+            });
+
+            var stringData = JSON.stringify(data);
+            cookie.set("settings", stringData);
+        } catch (ex) {
+            console.error("Unable to JSONify the settings! " + ex);
+            return;
+        }
     }
 });
