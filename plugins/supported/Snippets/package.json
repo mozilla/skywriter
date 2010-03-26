@@ -1,7 +1,7 @@
 {
     "description": "Infrastructure and commands for inserting custom snippets",
     "dependencies": {
-        "Types": "0.0"
+        "Canon": "0.0"
     },
     "provides":
     [
@@ -21,6 +21,7 @@
         {
             "ep": "command",
             "name": "snippet",
+            "predicates": { "context": "javascript" },
             "params":
             [
                 {

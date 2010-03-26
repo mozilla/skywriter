@@ -39,16 +39,30 @@ var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var Promise = require('bespin:promise').Promise;
 
+var environment = require('Canon:environment');
+var keyboard = require('Canon:keyboard');
+
 /**
  * Find and configure a snippet object.
  * We think it likely that we'll need to register keyboard support one day???
  */
 exports.addSnippet = function(snippetExt) {
-    console.log('addSnippet', snippetExt);
+    // console.log('addSnippet', snippetExt);
 };
 
+/**
+ *
+ */
 exports.getSnippets = function(snippetExt) {
-    return catalog.getExtensions('snippet');
+    var flags = keyboard.buildFlags(environment.global, { });
+    var snippets = catalog.getExtensions('snippet');
+    var matches = [];
+    snippets.forEach(function(snippet) {
+        if (snippetExt.context === flags.context) {
+            matches.push(snippetExt);
+        }
+    });
+    return matches;
 };
 
 /**
