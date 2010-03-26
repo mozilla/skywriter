@@ -43,6 +43,7 @@ var groupPromises = require("bespin:promise").group;
 var Trace = require('bespin:util/stacktrace').Trace;
 
 var types = require("Types:types");
+var keyboard = require('Canon:keyboard');
 
 var hint = require("CommandLine:hint");
 var typehint = require("CommandLine:typehint");
@@ -58,6 +59,17 @@ exports.Input = SC.Object.extend({
      * The instruction as typed by the user so far
      */
     typed: undefined,
+
+    /**
+     * The global environment (as passed to the commands) to be passed to the
+     * various completion systems.
+     */
+    env: undefined,
+
+    /**
+     * Flags for us to check against the predicates specified with the commands
+     */
+    flags: undefined,
 
     /**
      * Once tokenize() has been called, we have the #typed string cut up into
@@ -81,12 +93,6 @@ exports.Input = SC.Object.extend({
      * A list of arguments in commandExt.params order
      */
     assignments: undefined,
-
-    /**
-     * The global environment (as passed to the commands) to be passed to the
-     * various completion systems.
-     */
-    env: undefined,
 
     /**
      * Check 'typed' input. Possibly overkill.
@@ -222,6 +228,12 @@ exports.Input = SC.Object.extend({
                 break;
             }
 
+            if (!keyboard.flagsMatch(commandExt.predicates, this.flags)) {
+                // If the predicates say 'no match' then go LA LA LA
+                commandExt = null;
+                break;
+            }
+
             if (commandExt.pointer) {
                 // Valid command, break with commandExt valid
                 break;
@@ -234,7 +246,7 @@ exports.Input = SC.Object.extend({
         this.commandExt = commandExt;
 
         // Do we know what the command is.
-        var hintSpec;
+        var hintSpec = null;
         if (this.commandExt) {
             // Load the command to check that it will load
             var loadPromise = new Promise();
@@ -271,7 +283,8 @@ exports.Input = SC.Object.extend({
             // TODO: We should probably cache this
             var commandExts = [];
             catalog.getExtensions("command").forEach(function(commandExt) {
-                if (commandExt.description) {
+                if (keyboard.flagsMatch(commandExt.predicates, this.flags) &&
+                        commandExt.description) {
                     commandExts.push(commandExt);
                 }
             }.bind(this));
@@ -415,11 +428,11 @@ exports.Input = SC.Object.extend({
                         used.push(this.unparsedArgs[i + 1]);
                     }
                 }
-                return;
+                return true;
             }
         }
 
-        var value;
+        var value = null;
         if (this.unparsedArgs.length > index) {
             value = this.unparsedArgs[index];
             used.push(this.unparsedArgs[index]);
@@ -450,7 +463,7 @@ exports.Input = SC.Object.extend({
      * @see _assign()
      */
     _getAssignmentForLastArg: function() {
-        var highestAssign;
+        var highestAssign = null;
         this.assignments.forEach(function(assignment) {
             if (!highestAssign || !SC.none(assignment.value)) {
                 highestAssign = assignment;

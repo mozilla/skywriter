@@ -41,9 +41,20 @@ var catalog = require("bespin:plugins").catalog;
 var console = require('bespin:console').console;
 
 var Request = require("Canon:request").Request;
-var env = require("Canon:environment");
+var environment = require("Canon:environment");
 
 var Trace = require("bespin:util/stacktrace").Trace;
+
+/**
+ *
+ */
+exports.buildFlags = function(env, flags) {
+    // TODO: This is just a demo - context is what we really want
+    var context = environment.global.get('view').getSelectedCharacters();
+    //view.layoutManager.syntaxManager.
+    flags.context = context;
+    return flags;
+};
 
 /**
  * The canon, or the repository of commands, contains functions to process
@@ -68,6 +79,9 @@ var KeyboardManager = SC.Object.extend({
             return false;   // only keydown and keypress!
         }
 
+        // TODO: Maybe it should be the job of our caller to do this?
+        exports.buildFlags(environment.global, flags);
+
         var symbolicName = evt.commandCodes()[0];
         var commandExt = this._findCommandExtension(symbolicName, flags);
         if (commandExt) {
@@ -78,7 +92,7 @@ var KeyboardManager = SC.Object.extend({
                 });
 
                 try {
-                    command(env.global, {}, request);
+                    command(environment.global, {}, request);
                     return true;
                 } catch (ex) {
                     // TODO: Some UI?
@@ -118,24 +132,15 @@ var KeyboardManager = SC.Object.extend({
      */
     _commandMatches: function(commandExt, symbolicName, flags) {
         // Check predicates
-        var predicates = commandExt.predicates;
-        if (!SC.none(predicates)) {
-            if (SC.none(flags)) {
-                return false;
-            }
-
-            for (var flagName in predicates) {
-                if (flags[flagName] !== predicates[flagName]) {
-                    return false;
-                }
-            }
+        if (!exports.flagsMatch(commandExt.predicates, flags)) {
+            return false;
         }
 
         var mappedKeys = commandExt.key;
         if (!mappedKeys) {
             return false;
         }
-        if (typeof(mappedKeys) == "string") {
+        if (typeof(mappedKeys) === 'string') {
             if (mappedKeys != symbolicName) {
                 return false;
             }
@@ -149,7 +154,7 @@ var KeyboardManager = SC.Object.extend({
 
         for (var i = 0; i < mappedKeys.length; i++) {
             var keymap = mappedKeys[i];
-            if (typeof(keymap) == "string") {
+            if (typeof(keymap) === 'string') {
                 if (keymap == symbolicName) {
                     return true;
                 }
@@ -160,22 +165,32 @@ var KeyboardManager = SC.Object.extend({
                 continue;
             }
 
-            predicates = keymap.predicates;
-
-            if (!predicates) {
-                return true;
-            }
-
-            for (flagName in predicates) {
-                if (!flags || flags[flagName] != predicates[flagName]) {
-                    return false;
-                }
-            }
-            return true;
+            return exports.flagsMatch(keymap.predicates, flags);
         }
         return false;
     }
 });
+
+/**
+ *
+ */
+exports.flagsMatch = function(predicates, flags) {
+    if (SC.none(predicates)) {
+        return true;
+    }
+
+    if (!flags) {
+        return false;
+    }
+
+    for (var flagName in predicates) {
+        if (flags[flagName] !== predicates[flagName]) {
+            return false;
+        }
+    }
+
+    return true;
+};
 
 /**
  * The global exported KeyboardManager

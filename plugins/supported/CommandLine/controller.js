@@ -40,7 +40,8 @@ var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var Trace = require('bespin:util/stacktrace').Trace;
 
-var env = require('Canon:environment');
+var environment = require('Canon:environment');
+var keyboard = require('Canon:keyboard');
 var Request = require('Canon:request').Request;
 
 var hint = require('CommandLine:hint');
@@ -92,7 +93,11 @@ exports.cliController = SC.Object.create({
         hints.propertyWillChange('[]');
         hints.length = 0;
 
-        var input = Input.create({ typed: this.get('input'), env: env.global });
+        var input = Input.create({
+            typed: this.get('input'),
+            env: environment.global,
+            flags: keyboard.buildFlags(environment.global, { })
+        });
         var results = input.parse();
         results.hints.forEach(function(hint) {
             hints.pushObject(hint);
@@ -113,7 +118,11 @@ exports.cliController = SC.Object.create({
             return;
         }
 
-        var input = Input.create({ typed: typed, env: env.global });
+        var input = Input.create({
+            typed: typed,
+            env: environment.global,
+            flags: keyboard.buildFlags(environment.global, { })
+        });
         var results = input.parse();
 
         /**
@@ -156,7 +165,7 @@ exports.cliController = SC.Object.create({
             });
 
             try {
-                command(env.global, args, request);
+                command(environment.global, args, request);
 
                 // Only clear the input if the command worked
                 this.set('input', '');
