@@ -94,7 +94,7 @@ options(
         download_location=path("external") / "jsdoc_toolkit-2.3.0.zip",
         dest_dir=path("external") / "jsdoc-toolkit"
     ),
-    sproutcore_snapshot_url="http://ftp.mozilla.org/pub/mozilla.org/labs/bespin/dev/sproutcore-20100324.tgz",
+    sproutcore_snapshot_url="http://ftp.mozilla.org/pub/mozilla.org/labs/bespin/dev/sproutcore-20100325.tgz",
     fetch_compiler=Bunch(
         dest_dir=path("external") / "compiler",
         download_url="http://closure-compiler.googlecode.com/files/compiler-latest.zip",
