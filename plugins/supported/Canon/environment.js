@@ -84,6 +84,16 @@ exports.Environment = SC.Object.extend({
         }
         return buffer.get("model");
     }.property(),
+
+    /**
+     * Returns the currently-active syntax contexts.
+     */
+    contexts: function() {
+        var textView = this.get('view');
+        var syntaxManager = textView.getPath('layoutManager.syntaxManager');
+        var pos = textView.getSelectedRange().start;
+        return syntaxManager.contextsAtPosition(pos);
+    }.property(),
     
     /**
      * gets the current file from the session

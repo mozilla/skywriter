@@ -39,10 +39,7 @@ var SC = require('sproutcore/runtime').SC;
 var console = require('bespin:console').console;
 
 exports.syntaxContexts = function(env, args, request) {
-    var textView = env.get('view');
-    var syntaxManager = textView.getPath('layoutManager.syntaxManager');
-    var pos = textView.getSelectedRange().start;
-    var contexts = syntaxManager.contextsAtPosition(pos);
+    var contexts = env.get('contexts');
     request.done("Contexts = [ " + contexts.join(", ") + " ]");
 };
 
