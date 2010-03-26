@@ -3,7 +3,7 @@ layout: default
 title: Bespin 0.7 ("Ped Xing") Release Notes
 ---
 
-[Up](index.html) - Next Release - [Previous Release](notes062.html)
+[Up](index.html) - Next Release - [Previous Release](notes063.html)
 
 Known Issues
 ------------
