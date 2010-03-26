@@ -58,6 +58,9 @@ class NullOutput(object):
     def write(self, s):
         pass
 
+class CombinerError(Exception):
+    pass
+
 def toposort(unsorted, package_factory=None, reset_first=False):
     """Topologically sorts Packages. This algorithm is the
     depth-first version from Wikipedia:
@@ -74,12 +77,19 @@ def toposort(unsorted, package_factory=None, reset_first=False):
         if not p.visited:
             p.visited = True
             for dependency in p.depends:
+                # core_test is a special case... that's not a true
+                # Bespin plugin, but rather a SproutCore package.
+                if dependency == "core_test":
+                    continue
                 try:
                     visit(mapping[dependency])
                 except KeyError:
                     if not package_factory:
-                        raise ValueError("Dependency %s for package %s not found, not package factory available (mapping: %r)" % (dependency, p.name, mapping))
-                    new_package = package_factory(dependency)
+                        raise CombinerError("Dependency %s for package %s not found, no package factory available (mapping: %r)" % (dependency, p.name, mapping))
+                    try:
+                        new_package = package_factory(dependency)
+                    except KeyError, e:
+                        raise CombinerError("Dependency %s for package %s not found (mapping: %r)" % (dependency, p.name, mapping))
                     mapping[new_package.name] = new_package
                     visit(new_package)
             l.append(p)
@@ -137,6 +147,9 @@ def combine_files(jsfile, cssfile, name, p, add_main=False,
             modname = "index"
         else:
             modname = p.relpathto(f.splitext()[0])
+            # for the sake of Windows users, ensure that we are
+            # only using slashes
+            modname = modname.replace("\\", "/")
             
         if modname == "index":
             has_index = True
@@ -173,6 +186,7 @@ tiki.main("%s", "main");
 _make_json=re.compile('([\{,])(\w+):')
 _register_line = re.compile(r'tiki\.register\(["\']([\w/_]+)["\'],\s*(.*)')
 _globals_line = re.compile(r'tiki\.global\(["\']([\w/]+)["\']\);')
+_package_info_line = "/* >>>>>>>>>> BEGIN package_info.js */\n"
 
 def _quotewrap(m):
     return m.group(1) + '"' + m.group(2) + '":'
@@ -231,9 +245,13 @@ def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
         
         filehandle = f.open()
         firstline = filehandle.readline()
-        if firstline.startswith("/"):
+        while firstline != "" and firstline != _package_info_line:
             firstline = filehandle.readline()
-        
+
+        # Go to the next one.
+        if firstline == _package_info_line:
+            firstline = filehandle.readline()
+
         # look for a tiki.register line to get package
         # metadata
         m = _register_line.search(firstline)
@@ -289,7 +307,7 @@ def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
             
         p = Package(name, data.get('depends', []))
         packages.append(p)
-        p.content = f.text()
+        p.content = f.text('utf_8')
     
     # commented out for the moment. this is not necessary (and may actually
     # even be a problem)
@@ -310,7 +328,7 @@ def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
         packages = toposort(packages)
         
     for p in packages:
-        newcode += p.content.encode("utf-8")
+        newcode += p.content
         if found_tiki and p.name == "tiki":
             newcode += "".join('tiki.stylesheet("%s");' % 
                     s.encode("utf-8") for s in stylesheets)
@@ -325,7 +343,7 @@ def _url_replacer(m):
 def combine_sproutcore_stylesheets(p, combined="", filters=None):
     flist = _get_file_list([p], "stylesheet.css", filters)
     for f in flist:
-        content = f.bytes()
+        content = f.text('utf_8')
         content = _images_url.sub(_url_replacer, content)
         combined += content
     return combined
