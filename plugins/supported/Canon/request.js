@@ -91,7 +91,7 @@ exports.Request = SC.Object.extend({
     /**
      * Have we been initialized?
      */
-    _inited: false,
+    _inited: undefined,
 
     /**
      * Lazy init to register with the history should only be done on output.
