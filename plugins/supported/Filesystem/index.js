@@ -31,6 +31,121 @@ var pathUtil = require("Filesystem:path");
 
 var Promise = m_promise.Promise;
 
+// Does a binary search on a sorted array, returning
+// the *first* index in the array with the prefix
+exports._prefixSearch = function(arr, find) {
+    var low = 0;
+    var high = arr.length - 1;
+    var findlength = find.length;
+    var i;
+    var lowmark = null;
+    var sub;
+    
+    while (low <= high) {
+        i = parseInt((low + high) / 2, 10);
+        sub = arr[i].substring(0, findlength);
+        if (i == lowmark) {
+            return i;
+        }
+        
+        if (sub == find) {
+            lowmark = i;
+            high = i - 1;
+        } else {
+            if (sub < find) {
+                low = i + 1;
+            } else {
+                high = i - 1;
+            }
+        }
+    }
+    return lowmark;
+};
+
+exports.Filesystem = SC.Object.extend({
+    // FileSource for this filesytem
+    source: null,
+    
+    // list of filenames
+    _files: null,
+    
+    status: exports.NEW,
+    _loadingPromises: null,
+    
+    init: function() {
+        var source = this.get("source");
+        if (typeof(source) == "string") {
+            this.set("source", SC.objectForPropertyPath(source));
+        }
+
+        if (!this.get("source")) {
+            throw new Error("Directory must have a source.");
+        }
+        
+        this._loadingPromises = [];
+    },
+    
+    _load: function() {
+        var pr = new Promise();
+        if (this.status === exports.READY) {
+            pr.resolve();
+        } else if (this.status === exports.LOADING) {
+            this._loadingPromises.push(pr);
+        } else {
+            this.set("status", exports.LOADING);
+            this._loadingPromises.push(pr);
+            this.get("source").loadAll().then(this._fileListReceived.bind(this));
+        }
+        return pr;
+    },
+    
+    _fileListReceived: function(filelist) {
+        filelist.sort();
+        this._files = filelist;
+        this.set("status", exports.READY);
+        var lp = this._loadingPromises;
+        while (lp.length > 0) {
+            var pr = lp.pop();
+            pr.resolve();
+        }
+    },
+    
+    // Lists the contents of a single directory
+    listDirectory: function(path) {
+        path = pathUtil.trimLeadingSlash(path);
+        var pr = new Promise();
+        this._load().then(function() {
+            var files = this._files;
+            var index = exports._prefixSearch(files, path);
+            if (index === null) {
+                pr.reject(new Error('Path ' + path + ' not found.'));
+                return;
+            }
+            var result = [];
+            var numfiles = files.length;
+            var pathlength = path.length;
+            var lastSegment = null;
+            for (var i = index; i < numfiles; i++) {
+                var file = files[i];
+                if (file.substring(0, pathlength) != path) {
+                    break;
+                }
+                var segmentEnd = file.indexOf("/", pathlength) + 1;
+                if (segmentEnd == 0) {
+                    segmentEnd = file.length;
+                }
+                var segment = file.substring(pathlength, segmentEnd);
+                if (segment != lastSegment) {
+                    lastSegment = segment;
+                    result.push(segment);
+                }
+            }
+            pr.resolve(result);
+        }.bind(this));
+        return pr;
+    }
+});
+
 exports.NEW = { name: "NEW" };
 exports.LOADING = { name: "LOADING" };
 exports.READY = { name: "READY" };

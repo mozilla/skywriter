@@ -38,7 +38,7 @@ var source = exports.source = fixture.DummyFileSource.create({
 });
 
 var getNewRoot = function() {
-    return fs.Directory.create({
+    return fs.Filesystem.create({
         source: "Filesystem:tests/testFileManagement#source"
     });
 };
@@ -49,300 +49,52 @@ var genericFailureHandler = function(error) {
     t.start();
 };
 
-exports.testRootLoading = function() {
-    source.reset();
-    var root = getNewRoot();
-    t.equal(null, root.get("parent"), "Parent should not be set on root");
-    t.equal("/", root.get("name"), "Root's name is /");
-    t.equal("/", root.get("path"), "Root's path is /");
-    t.deepEqual([], root.get("files"), "No files now");
-    t.deepEqual([], root.get("directories", "No directories yet"));
-    t.equal(fs.NEW, root.get("status"), "status should be new now");
-    t.equal(0, source.requests.length);
-
-    source.set("checkStatus", fs.LOADING);
-    var testpr = new Promise();
-
-    root.load().then(function(dir) {
-        t.equal(dir, root, "should have been passed in the root directory");
-        t.equal(source.requests.length, 1, "should have made a request to the source");
-        t.equal(dir.get("status"), fs.READY, "Directory should be ready");
-        t.equal(dir.get("files").length, 2, "Should have two files");
-        t.equal(dir.get("files")[0].name, "atTheTop.js",
-            "expected specific name");
-        t.equal(dir.get("directories").length, 2,
-            "should have two directories");
-        t.equal(dir.get("directories")[0].name, "foo/",
-            "first should be foo/");
-        t.equal(dir.get("directories")[1].name, "deeply/",
-            "second should be deeply");
-        t.equal(dir.get("contents").length, 4,
-            "2 files + 2 directories = 4 items");
-
-        root.load().then(function(dir) {
-            t.equal(source.requests.length, 1,
-                "should not have loaded again, because it's already loaded");
-            testpr.resolve();
-        });
-    }, genericFailureHandler);
-
-    return testpr;
+exports.testPrefixSearch = function() {
+    var i;
+    var ps = fs._prefixSearch;
+    var arr = [];
+    t.equal(ps(arr, "hello"), null, "Expected null for empty array");
+    arr = ["hello"];
+    t.equal(ps(arr, "hello"), 0, "Simple case: one matching element");
+    arr = ["hello/there"];
+    t.equal(ps(arr, "hello"), 0, "Prefix case: one element");
+    arr = [];
+    for (i = 0; i < 10; i++) {
+        arr.push("hello/" + i);
+    }
+    t.equal(ps(arr, "hello"), 0, "all match");
+    
+    arr = [];
+    for (i = 0; i < 9; i++) {
+        arr.push("abracadabra/" + i);
+    }
+    arr.push("hello/10");
+    t.equal(ps(arr, "hello"), 9, "last match");
+    
+    arr = [];
+    for (i = 0; i < 99; i++) {
+        arr.push("abracadabra/" + i);
+    }
+    arr.splice(49, 0, "hello/49");
+    t.equal(ps(arr, "hello"), 49, "middle match");
+    
+    arr.splice(45, 4, "hello/45", "hello/46", "hello/47", "hello/48");
+    t.equal(ps(arr, "hello"), 45, "middle match with more");
 };
 
-exports.testGetObject = function() {
-    source.reset();
-    var root = getNewRoot();
-    var myDir = root.getObject("foo/bar/");
-    t.equal(myDir.name, "bar/", "final object should be created correctly");
-    t.equal(root.get("directories")[0].name, "foo/",
-        "new directory should be created under root");
-    t.equal(myDir.parent, root.get("directories")[0],
-        "same directory object in both places");
-    var myFile = root.getObject("foo/bar/file.js");
-    t.equal(myFile.get("directory"), myDir,
-        "file should be populated with the same directory object");
-    t.equal(myFile.get("name"), "file.js");
-    t.equal(myFile.get("dirname"), "/foo/bar/");
-    t.equal(myFile.get("ext"), "js");
-
-    var fooDir = root.getObject("foo/");
-    t.equal(myDir.get("parent"), fooDir,
-        "should be able to retrieve the same directory");
-
-    myDir = root.getObject("newtop/");
-    t.equal(root.get("directories").length, 2,
-        "should have two directories now");
-    myFile = root.getObject("newone.txt");
-    t.equal(root.get("files").length, 1,
-        "should have one file now");
-};
-
-exports.testLoadObjectSuccess = function() {
-    source.reset();
-    var root = getNewRoot();
-    var testPromise = new Promise();
-    root.loadObject("deeply/nested/directory/andAFile.txt").then(
-    function(fileobj) {
-        t.equal(fileobj.get("path"), "/deeply/nested/directory/andAFile.txt");
-        t.equal(source.requests.length, 1);
-        var dir = root.getObject("deeply/nested/directory/");
-        t.equal(dir.get("status"), fs.READY,
-            "Directory should now be ready");
-        testPromise.resolve();
-    }, function(error) {
-        t.ok(false, "Unexpected error: " + error.message);
-        testPromise.resolve();
-    });
-    return testPromise;
-};
-
-exports.testSubdirLoading = function() {
+exports.testLoading = function() {
     source.reset();
     var root = getNewRoot();
     var testpr = new Promise();
-    root.loadPath("deeply/nested/").then(function(dir) {
-        t.equal(dir.get("name"), "nested/");
-        t.equal(dir.get("status"), fs.READY);
-        t.equal(root.get("status"), fs.NEW);
-
-        var obj = root.getObject("deeply/nested/notthere/");
-        t.equal(obj, null,
-            "directory is loaded, so non-existent name should not be created");
-
-        t.equal(dir.get("path"), "/deeply/nested/",
-            "can get back our path");
-
-        testpr.resolve();
-    }, genericFailureHandler);
-
-    return testpr;
-};
-
-exports.testDeepLoading = function() {
-    source.reset();
-    var root = getNewRoot();
-    var testPromise = new Promise();
-    root.load(true).then(function(dir) {
-        t.equal(dir.get("status"), fs.READY, "directory should be ready");
-        t.equal(dir.get("files").length, 2, "should have two files");
-        t.equal(dir.get("directories").length, 2,
-            "should have two directories");
-
-        var subdir = dir.get("directories")[1];
-        t.equal(subdir.name, "deeply/", "second should be deeply");
-        t.equal(subdir.get("status"), fs.READY,
-            "subdirectory should be ready");
-        t.equal(subdir.get("directories").length, 1,
-            "subdirectory should have one subdirectory pre-populated");
-
-        var subsubdir = subdir.get("directories")[0];
-        t.equal(subsubdir.name, "nested/",
-            "subsubdirectory should be nested");
-        t.equal(subsubdir.get("status"), fs.READY,
-            "subsubdirectory should be ready");
-        t.equal(subsubdir.get("directories").length, 1,
-            "subsubdirectory should have one subdirectory");
-
-        testPromise.resolve();
-    });
-
-    return testPromise;
-};
-
-exports.testContentRetrieval = function() {
-    source.reset();
-    var root = getNewRoot();
-
-    var f = root.getObject("atTheTop.js");
-    var testpr = new Promise();
-    f.loadContents().then(function(result) {
-        t.equal(result.file, f, "should get the same file in");
-        t.equal(result.contents, "the top file", "Content should be as expected");
+    
+    root.listDirectory("/").then(function(results) {
+        t.equal(results.length, 4, "Expected 4 items");
+        t.deepEqual(results, ["anotherAtTheTop.js", "atTheTop.js", "deeply/", 
+                             "foo/"]);
         testpr.resolve();
     });
-
+    
+    t.deepEqual(source.requests[0], ["loadAll"]);
+    
     return testpr;
 };
-
-exports.testSendToMatcher = function() {
-    var strings = [];
-    var mockMatcher = SC.Object.create({
-        addItems: function(newStrings) {
-            strings.push.apply(strings, newStrings);
-        }
-    });
-
-    var testPromise = new Promise();
-
-    source.reset();
-    getNewRoot().load(true).then(function(dir) {
-        dir.sendToMatcher(mockMatcher).then(function() {
-            var stringForm = [];
-            strings.forEach(function(o) {
-                stringForm.push(o.name);
-            });
-
-            var expected = [
-                "/atTheTop.js",
-                "/anotherAtTheTop.js",
-                "/foo/",
-                "/deeply/",
-                "/deeply/nested/",
-                "/deeply/nested/directory/",
-                "/deeply/nested/directory/andAFile.txt"
-            ];
-
-            t.deepEqual(stringForm, expected, "the strings sent to the " +
-                "matcher and the deep hierarchy of files");
-
-            testPromise.resolve();
-        });
-    });
-
-    return testPromise;
-};
-
-exports.testDirectoryRemoval = function() {
-    source.reset();
-    var root = getNewRoot();
-    var fobject = root.getObject("deeply/nested/directory/andAFile.txt");
-    var dir = root.getObject("deeply/");
-    var testPromise = new Promise();
-    dir.remove().then(function() {
-        var directories = root.get("directories");
-        var req = source.requests[0];
-        t.equal(req[0], "remove");
-        t.equal(req[1][0], dir);
-        t.equal(directories.length, 0);
-        testPromise.resolve();
-    }, function(error) {
-        t.ok(false, "Unexpected error: " + error.message);
-        testPromise.reject();
-    });
-    return testPromise;
-};
-
-exports.testFileRemoval = function() {
-    source.reset();
-    var root = getNewRoot();
-    var fobject = root.getObject("deeply/nested/directory/andAFile.txt");
-    var dir = root.getObject("deeply/nested/directory/");
-    var testPromise = new Promise();
-    fobject.remove().then(function() {
-        var files = dir.get("files");
-        var req = source.requests[0];
-        t.equal(req[0], "remove");
-        t.equal(req[1][0], fobject);
-        t.equal(files.length, 0);
-        testPromise.resolve();
-    }, function(error) {
-        t.ok(false, "Unexpected error: " + error.message);
-        testPromise.reject();
-    });
-    return testPromise;
-};
-
-exports.testFileWriting = function() {
-    source.reset();
-
-    var root = getNewRoot();
-
-    var dir = null;
-    root.loadObject("deeply/nested/").then(function(d) { dir = d; });
-    t.ok(dir !== null, "the directory '/deeply/nested/' was successfully " +
-        "loaded");
-
-    var file1 = fs.File.create({ directory: dir, name: "bar.txt" });
-
-    var written = false;
-    dir.writeFile(file1, "foobar").then(function() { written = true; });
-    t.ok(written, "the file '/deeply/nested/bar.txt' was successfully " +
-        "written");
-
-    var loadContentsResult = null;
-    file1.loadContents().then(function(result) {
-        loadContentsResult = result;
-    });
-
-    t.ok(loadContentsResult !== null, "the contents of the newly created " +
-        "file were successfully loaded");
-    t.equal(loadContentsResult.contents, "foobar", "the contents read from " +
-        "the newly created file and the string that was written into it");
-
-    var files = dir.get('files');
-    t.equal(files.length, 1, "the number of files in the directory and 1");
-    t.equal(files[0].name, file1.name, "Filenames should match");
-    t.equal(files[0], file1, "the first file in the directory and the file " +
-        "that was written originally");
-
-    var file2 = fs.File.create({ directory: dir, name: "bar.txt" });
-
-    var newFile2 = null;
-    dir.writeFile(file2, "baz").then(function(f) { newFile2 = f; });
-    t.ok(newFile2 !== null, "the file was successfully overwritten");
-
-    loadContentsResult = null;
-    newFile2.loadContents().then(function(result) {
-        loadContentsResult = result;
-    });
-
-    t.ok(loadContentsResult !== null, "the contents of the newly " +
-        "overwritten file were successfully loaded");
-    t.equal(loadContentsResult.contents, "baz", "the contents read from the " +
-        "newly overwritten file and the string that was just written into it");
-
-    files = dir.get('files');
-    t.equal(files.length, 1, "the number of files in the directory after " +
-        "overwriting the first file and 1");
-    t.equal(files[0], newFile2, "the first file in the directory and the " +
-        "overwritten file");
-
-    var file3 = fs.File.create({ directory: dir, name: "directory" });
-
-    var succeeded = null;
-    dir.writeFile(file3, "boo").then(function() { succeeded = true; },
-        function() { succeeded = false; });
-    t.equal(succeeded, false, "whether the attempt to write a file with the " +
-        "same name as a directory succeeded and false");
-};
-

@@ -237,7 +237,16 @@ exports.applicationController = SC.Object.create({
     },
 
     postRefresh: function(reloadDescription) {
-        this._createDockedViews();
+        var pluginName = reloadDescription.pluginName;
+        var dependents = reloadDescription.dependents;
+        // TODO make this better. Basically, there is an issue
+        // with running the "reload" command because the command line
+        // is still expecting some things to be around. So,
+        // as a workaround, unless we're reloading the CommandLine
+        // plugin, we don't recreate the docked views.
+        if (pluginName == "CommandLine" || dependents.CommandLine) {
+            this._createDockedViews();
+        }
     },
 
     preRefresh: function(reloadDescription) {

@@ -61,6 +61,21 @@ exports.DummyFileSource = SC.Object.extend({
         this.files = files;
     },
     
+    // Loads the complete file list
+    loadAll: function() {
+        this.requests.push(["loadAll"]);
+        console.log("loadAll called");
+        
+        var pr = new Promise();
+        var result = [];
+        this.get("files").forEach(function(f) {
+            result.push(f.name);
+        });
+        pr.resolve(result);
+        console.log("returning from loadAll");
+        return pr;
+    },
+    
     loadDirectory: function(directory, deep) {
         this.requests.push(["loadDirectory", arguments]);
         

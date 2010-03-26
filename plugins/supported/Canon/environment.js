@@ -90,6 +90,12 @@ exports.Environment = SC.Object.extend({
      */
     contexts: function() {
         var textView = this.get('view');
+        
+        // when EditorApp is being refreshed, the textView is not available.
+        if (!textView) {
+            return [];
+        }
+        
         var syntaxManager = textView.getPath('layoutManager.syntaxManager');
         var pos = textView.getSelectedRange().start;
         return syntaxManager.contextsAtPosition(pos);
