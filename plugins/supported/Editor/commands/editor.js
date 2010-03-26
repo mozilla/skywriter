@@ -54,11 +54,11 @@ var withSelection = function(env, action) {
     var view = env.get('view');
     var selection = view.getSelectedCharacters();
 
-    var lower = action(selection);
+    var replacement = action(selection);
 
     var range = view.getSelectedRange();
     var model = env.get('model');
-    model.replaceCharacters(range, lower);
+    model.replaceCharacters(range, replacement);
 };
 
 /**
