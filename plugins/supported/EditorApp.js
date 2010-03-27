@@ -38,13 +38,20 @@
 "define metadata";
 ({
     "description": "Constructs what you see on a hosted Bespin server",
-    "depends":
-    [
-        "AppSupport", "BespinServer", "CommandLine", "EditSession", "Editor",
-        "Filesystem", "PluginDev", "Settings", "ThemeManager", "UserIdent"
+    "depends": [
+        "AppSupport",
+		"BespinServer",
+		"CommandLine",
+		"DockView",
+		"EditSession",
+		"Editor",
+        "Filesystem",
+		"PluginDev",
+		"Settings",
+		"ThemeManager",
+		"UserIdent"
     ],
-    "provides":
-    [
+    "provides": [
         {
             "ep": "factory",
             "name": "session",
@@ -70,7 +77,7 @@
 
 var SC = require('sproutcore/runtime').SC;
 var CliInputView = require('CommandLine:views/cli').CliInputView;
-var DockView = require('bespin:views/dock').DockView;
+var DockView = require('DockView').DockView;
 var EditorView = require('Editor:views/editor').EditorView;
 var KeyListener = require('AppSupport:views/keylistener').KeyListener;
 var m_userident = require('UserIdent');

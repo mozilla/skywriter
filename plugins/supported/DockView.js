@@ -35,6 +35,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+"define metadata";
+({
+	"description": "A view that supports docked panels on the sides",
+	"depends": []
+});
+"end";
+
 var SC = require('sproutcore/runtime').SC;
 
 exports.DOCK_BOTTOM = 'bottom';

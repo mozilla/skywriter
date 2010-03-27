@@ -39,7 +39,7 @@ var SC = require("sproutcore/runtime").SC;
 var util = require("bespin:util/util");
 var catalog = require("bespin:plugins").catalog;
 var console = require('bespin:console').console;
-var dock = require("bespin:views/dock");
+var dock = require("DockView");
 
 var request = require("Canon:request");
 var keyboardManager = require('Canon:keyboard').keyboardManager;

@@ -37,7 +37,13 @@
  
 "define metadata";
 ({
-    "depends": [ "AppSupport", "EditSession", "Editor", "Settings" ],
+    "depends": [
+		"AppSupport",
+		"DockView",
+		"EditSession",
+		"Editor",
+		"Settings"
+	],
     "provides": [
         {
             "ep": "factory",
@@ -56,7 +62,7 @@
  */
 
 var SC = require("sproutcore/runtime").SC;
-var DockView = require('bespin:views/dock').DockView;
+var DockView = require('DockView').DockView;
 var EditorView = require('Editor:views/editor').EditorView;
 var KeyListener = require('AppSupport:views/keylistener').KeyListener;
 var bespin = require("bespin:index");
