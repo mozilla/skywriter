@@ -116,7 +116,7 @@ class Plugin(object):
     @property
     def single_file(self):
         """Returns true if this is a single file plugin
-        (ie not a directory with a plugin.json file)."""
+        (ie not a directory with a package.json file)."""
         return not self.location.isdir()
     
     def load_metadata(self):
@@ -126,10 +126,10 @@ class Plugin(object):
         A Plugin subclass can override this to add additional information
         to the metadata."""
         if self.location.isdir():
-            md_path = self.location / "plugin.json"
+            md_path = self.location / "package.json"
             if not md_path.exists():
                 md = {}
-                self._errors = ["Plugin metadata file (plugin.json) file is missing"]
+                self._errors = ["Plugin metadata file (package.json) file is missing"]
                 md_text = '""'
             else:
                 md_text = md_path.text()
@@ -218,10 +218,10 @@ def find_plugins(search_path, cls=Plugin):
                 
         path = path_entry['path']
         for item in path.glob("*"):
-            # plugins are directories with a plugin.json file or 
+            # plugins are directories with a package.json file or 
             # individual .js files.
             if item.isdir():
-                mdfile = item / "plugin.json"
+                mdfile = item / "package.json"
                 if not mdfile.exists():
                     continue
                 name = item.basename()
@@ -241,7 +241,7 @@ def _get_plugin(name, path_entry, cls):
         
     if path.endswith(name) or path.endswith(name + ".js"):
         if path.isdir():
-            mdfile = path / "plugin.json"
+            mdfile = path / "package.json"
             if not mdfile.exists():
                 return None
                 
@@ -266,7 +266,7 @@ def lookup_plugin(name, search_path, cls=Plugin):
             location = path / (name + ".js")
         if location.exists():
             if location.isdir():
-                mdfile = location / "plugin.json"
+                mdfile = location / "package.json"
                 if not mdfile.exists():
                     continue
             plugin = cls(name, location, path_entry)

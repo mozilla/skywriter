@@ -51,7 +51,8 @@ def test_manifest_creation():
 """
     manifest = tool.Manifest.from_json(sample)
     assert manifest.include_core_test
-    assert manifest.errors == []
+    errors = manifest.errors
+    assert errors == []
 
 def test_manifest_overrides():
     sample = """
@@ -163,7 +164,7 @@ def test_css_creation():
     manifest.generate_output_files(output_js, output_css)
     output_css = output_css.getvalue()
     assert "color: white" in output_css
-    assert "sc-view.handles" in output_css
+    assert ".sc-alert" in output_css
     assert "background-image: url(resources/plugin1/images/prompt1.png);" in output_css
 
 def test_full_output():
@@ -184,7 +185,7 @@ def test_image_copying():
     manifest.build()
     imagedir = tmppath / "images"
     assert imagedir.exists()
-    themefile = imagedir / "sc-theme-repeat-x.png"
+    themefile = imagedir / "sproutcore-logo.png"
     assert themefile.exists()
 
     plugin_image_dir = tmppath / "resources" / "plugin1" / "images"
