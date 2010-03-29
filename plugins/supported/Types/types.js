@@ -212,25 +212,26 @@ exports.getTypeExt = function(typeSpec) {
  * type was illegally specified.
  */
 exports.getTypeExtNow = function(typeSpec) {
+    var ext;
 
     if (typeof typeSpec === "string") {
         var parts = typeSpec.split(":");
         if (parts.length === 1) {
             // The type is just a simple type name
             return catalog.getExtensionByKey("type", typeSpec);
-        } else {
-            var name = parts.shift();
-            var data = parts.join(":");
-
-            if (data.substring(0, 1) == "[" || data.substring(0, 1) == "{") {
-                // JSON data is specified in the string. Yuck
-                var ext = catalog.getExtensionByKey("type", name);
-                ext.data = JSON.parse(data);
-                return ext;
-            }
-
-            throw new Error("Non array/object data unsupported.");
         }
+
+        var name = parts.shift();
+        var data = parts.join(":");
+
+        if (data.substring(0, 1) == "[" || data.substring(0, 1) == "{") {
+            // JSON data is specified in the string. Yuck
+            ext = catalog.getExtensionByKey("type", name);
+            ext.data = JSON.parse(data);
+            return ext;
+        }
+
+        throw new Error("Non array/object data unsupported.");
     }
 
     if (typeof typeSpec === "object") {
@@ -238,12 +239,11 @@ exports.getTypeExtNow = function(typeSpec) {
             ext = catalog.getExtensionByKey("type", "text");
             console.error("getTypeExtNow on deferred. Falling back to text");
             console.trace();
-            return ext;
-        }
-
-        ext = catalog.getExtensionByKey("type", typeSpec.name);
-        if (ext && typeSpec.data) {
-            ext.data = typeSpec.data;
+        } else {
+            ext = catalog.getExtensionByKey("type", typeSpec.name);
+            if (ext && typeSpec.data) {
+                ext.data = typeSpec.data;
+            }
         }
 
         return ext;

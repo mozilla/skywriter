@@ -347,7 +347,6 @@ exports.CliInputView = SC.View.design({
      */
     hintUpdated: function() {
         var hints = cliController.get("hints");
-        var hintEle = this.getPath("contentView.display.hint.layer");
         while (this._ex.firstChild) {
             this._ex.removeChild(this._ex.firstChild);
         }
@@ -395,12 +394,6 @@ exports.CliInputView = SC.View.design({
         }.bind(this);
 
         hints.forEach(function(hint) {
-            /*
-            var hintNode = document.createElement("span");
-            this._ex.appendChild(hintNode);
-            this._ex.appendChild(document.createTextNode(" \u00a0 "));
-            addHint(hintNode, hint);
-            */
             addHint(this._ex, hint);
         }.bind(this));
 

@@ -1,6 +1,7 @@
 {
     "description": "Infrastructure and commands for inserting custom snippets",
-    "dependencies": {
+    "dependencies":
+    {
         "Canon": "0.0"
     },
     "provides":

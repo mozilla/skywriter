@@ -196,9 +196,11 @@ exports.Menu = SC.Object.extend({
 
         // If there is only one match, then the completion must complete to that
         // so it's safe to add a " " to the end.
+        /*
         if (this._items.length == 1) {
             completion = completion + " ";
         }
+        */
 
         this.hint.completion = completion;
     }
