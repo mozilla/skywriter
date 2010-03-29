@@ -49,10 +49,8 @@ var Trace = require("bespin:util/stacktrace").Trace;
  *
  */
 exports.buildFlags = function(env, flags) {
-    // TODO: This is just a demo - context is what we really want
-    var context = environment.global.get('view').getSelectedCharacters();
-    //view.layoutManager.syntaxManager.
-    flags.context = context;
+    flags.context = env.get('contexts')[0];
+    console.log("flags.context", flags.context);
     return flags;
 };
 
