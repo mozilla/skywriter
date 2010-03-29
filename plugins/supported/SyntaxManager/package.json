@@ -1,6 +1,9 @@
 {
     "description": "Provides syntax highlighting services for the editor",
-    "depends": [ "DelegateSupport", "RangeUtils" ],
+    "dependencies": {
+        "DelegateSupport": "0.0",
+        "RangeUtils": "0.0"
+    },
     "provides":
     [
         {

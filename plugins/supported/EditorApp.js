@@ -38,19 +38,19 @@
 "define metadata";
 ({
     "description": "Constructs what you see on a hosted Bespin server",
-    "depends": [
-        "AppSupport",
-		"BespinServer",
-		"CommandLine",
-		"DockView",
-		"EditSession",
-		"Editor",
-        "Filesystem",
-		"PluginDev",
-		"Settings",
-		"ThemeManager",
-		"UserIdent"
-    ],
+    "dependencies": {
+        "AppSupport": "0.0",
+		"BespinServer": "0.0",
+		"CommandLine": "0.0",
+		"DockView": "0.0",
+		"EditSession": "0.0",
+		"Editor": "0.0",
+        "Filesystem": "0.0",
+		"PluginDev": "0.0",
+		"Settings": "0.0",
+		"ThemeManager": "0.0",
+		"UserIdent": "0.0"
+    },
     "provides": [
         {
             "ep": "factory",

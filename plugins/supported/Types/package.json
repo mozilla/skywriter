@@ -1,6 +1,5 @@
 {
     "description": "Defines parameter types for commands",
-    "depends": [],
     "provides":
     [
         {

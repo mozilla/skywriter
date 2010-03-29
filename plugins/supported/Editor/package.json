@@ -1,14 +1,14 @@
 {
     "description": "Canvas-based text editor component and many common editing commands",
-    "depends":
-    [
-        "AppSupport",
-        "Canon",
-        "DelegateSupport",
-        "RangeUtils",
-        "Settings",
-        "SyntaxManager"
-    ],
+    "dependencies":
+    {
+        "AppSupport": "0.0",
+        "Canon": "0.0",
+        "DelegateSupport": "0.0",
+        "RangeUtils": "0.0",
+        "Settings": "0.0",
+        "SyntaxManager" : "0.0"
+    },
     "provides":
     [
         {

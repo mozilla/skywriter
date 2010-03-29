@@ -1,6 +1,13 @@
 {
     "description": "Provides the command line user interface",
-    "depends": [ "Canon", "DockView", "Types", "Settings", "Diff", "Matcher" ],
+    "dependencies": {
+        "Canon": "0.0",
+        "DockView": "0.0",
+        "Types": "0.0",
+        "Settings": "0.0",
+        "Diff": "0.0",
+        "Matcher": "0.0"   
+    },
     "provides":
     [
         {

@@ -38,7 +38,9 @@
 "define metadata";
 ({
     "description": "HTML syntax highlighter",
-    "depends": [ "SyntaxManager" ],
+    "dependencies": {
+        "SyntaxManager": "0.0"
+    },
     "provides": [
         {
             "ep": "fileextension",

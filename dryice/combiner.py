@@ -47,9 +47,9 @@ except ImportError:
 class Package(object):
     visited = False
     
-    def __init__(self, name, depends):
+    def __init__(self, name, dependencies):
         self.name = name
-        self.depends = depends
+        self.dependencies = dependencies
     
     def __repr__(self):
         return "Package(%s)" % (self.name)
@@ -76,7 +76,7 @@ def toposort(unsorted, package_factory=None, reset_first=False):
     def visit(p):
         if not p.visited:
             p.visited = True
-            for dependency in p.depends:
+            for dependency in p.dependencies:
                 # core_test is a special case... that's not a true
                 # Bespin plugin, but rather a SproutCore package.
                 if dependency == "core_test":

@@ -87,10 +87,10 @@ class Plugin(object):
         return self._errors
     
     @property
-    def depends(self):
+    def dependencies(self):
         md = self.metadata
         if md:
-            return md.get('depends', [])
+            return md.get('dependencies', {})
         return []
         
     @property

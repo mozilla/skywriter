@@ -112,7 +112,7 @@ def test_js_creation():
     assert """tiki.module("plugin2:mycode",""" in output
     assert """exports.plugin2func = function""" in output
     assert "exports.Plugin = SC.Object.extend" in output
-    assert '"depends": ["plugin2"]' in output
+    assert '"dependencies": {"plugin2": "0.0"}' in output
     assert "SC.browser=" in output
     assert 'tiki.require("Embedded")' in output
 

@@ -1,6 +1,9 @@
 {
     "description": "Identifies the user via a Bespin server",
-    "depends": [ "BespinServer", "DelegateSupport" ],
+    "dependencies": {
+        "BespinServer": "0.0",
+        "DelegateSupport": "0.0"
+    },
     "provides": [
         {
             "ep": "command",

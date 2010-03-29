@@ -1,6 +1,8 @@
 {
     "description": "Provides the file and directory model used within Bespin",
-    "depends": [ "Types" ],
+    "dependencies": {
+        "Types": "0.0"
+    },
     "provides":
     [
         {

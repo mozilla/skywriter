@@ -37,8 +37,7 @@
 
 "define metadata";
 ({
-    "description": "Simple support for multiple delegates on an object",
-    "depends": []
+    "description": "Simple support for multiple delegates on an object"
 });
 "end";
 

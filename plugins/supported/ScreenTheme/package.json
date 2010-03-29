@@ -1,5 +1,7 @@
 {
-    "depends": [ "ThemeManager" ],
+    "dependencies": {
+        "ThemeManager": "0.0"
+    },
     "provides": [
         {
             "ep": "theme",

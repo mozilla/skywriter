@@ -1,6 +1,9 @@
 {
     "description": "Manages commands and their keyboard shortcuts",
-    "depends": [ "Settings", "Types" ],
+    "dependencies": {
+        "Settings": "0.0",
+        "Types": "0.0"
+    },
     "provides":
     [
         {

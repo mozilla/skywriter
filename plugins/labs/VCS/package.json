@@ -1,5 +1,9 @@
 {
-    "depends": ["BespinServer", "UserIdent", "Project"],
+    "dependencies": {
+        "BespinServer": "0.0",
+        "UserIdent": "0.0",
+        "Project": "0.0"
+    },
     
     "provides": [
         {

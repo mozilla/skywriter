@@ -37,8 +37,7 @@
 
 "define metadata";
 ({
-	"description": "A view that supports docked panels on the sides",
-	"depends": []
+	"description": "A view that supports docked panels on the sides"
 });
 "end";
 

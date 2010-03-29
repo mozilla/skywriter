@@ -1,6 +1,10 @@
 {
     "description": "File management commands",
-    "depends": [ "Filesystem", "Matcher", "CommandLine" ],
+    "dependencies": {
+        "Filesystem": "0.0",
+        "Matcher": "0.0",
+        "CommandLine": "0.0"
+    },
     "provides":
     [
         {

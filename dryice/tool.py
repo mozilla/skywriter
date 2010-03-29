@@ -170,7 +170,7 @@ will be deleted before the build.""")
     def get_package(self, name):
         """Retrieve a combiner.Package by name."""
         plugin = self.get_plugin(name)
-        return combiner.Package(plugin.name, plugin.depends)
+        return combiner.Package(plugin.name, plugin.dependencies)
 
     def _write_sproutcore_file(self, f, filename):
         """Writes one of the sproutcore files to the file

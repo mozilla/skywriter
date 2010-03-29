@@ -1,5 +1,4 @@
 {
-    "depends": [],
     "provides": [
         {
             "ep": "extensionpoint",

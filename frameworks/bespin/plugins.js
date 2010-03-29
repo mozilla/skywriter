@@ -246,15 +246,15 @@ exports.Plugin = SC.Object.extend({
                 return;
             }
             var plugin = self.catalog.plugins[testPluginName];
-            if (plugin && plugin.depends) {
-                plugin.depends.forEach(function(dependName) {
+            if (plugin && plugin.dependencies) {
+                for (dependName in plugin.dependencies) {
                     if (dependName == pluginName && !dependents[testPluginName]) {
                         dependents[testPluginName] = {
                             keepModule: false
                         };
                         plugin._findDependents(pluginList, dependents);
                     }
-                });
+                }
             }
         });
     },
@@ -544,9 +544,11 @@ exports.Catalog = SC.Object.extend({
             }
 
             visited[key] = true;
-            var depends = metadata[key].depends;
+            var depends = metadata[key].dependencies;
             if (!SC.none(depends)) {
-                depends.forEach(visit);
+                for (var dependName in depends) {
+                    visit(dependName);
+                }
             }
 
             sorted.push(key);
@@ -644,25 +646,32 @@ exports.Catalog = SC.Object.extend({
     },
 
     _metadataFinishedLoading: function(response, params) {
+        var pluginName;
+        
         if (!response.isError) {
             var body = response.body();
             var data = JSON.parse(body);
-            for (var pluginName in data) {
-                if (data[pluginName].errors) {
+            for (pluginName in data) {
+                var md = data[pluginName];
+                if (md.errors) {
                     console.error("Plugin ", pluginName, " has errors:");
-                    data[pluginName].errors.forEach(function(error) {
+                    md.errors.forEach(function(error) {
                         console.error(error);
                     });
                     delete data[pluginName];
                     continue;
                 }
-                tiki.register(pluginName, data[pluginName]);
+                
+                if (md.dependencies) {
+                    md.depends = object_keys(md.dependencies);
+                }
+                tiki.register(pluginName, md);
             }
 
             this.load(data);
 
             var plugins = this.plugins;
-            for (var pluginName in data) {
+            for (pluginName in data) {
                 this._checkLoops(pluginName, plugins, []);
             }
         }
@@ -689,11 +698,11 @@ exports.Catalog = SC.Object.extend({
         if (!data[pluginName]) {
             console.error("Missing metadata for ", pluginName);
         } else {
-            if (data[pluginName].depends) {
-                data[pluginName].depends.forEach(function(dependency) {
+            if (data[pluginName].dependencies) {
+                for (var dependency in data[pluginName].dependencies) {
                     var trailClone = trail.slice();
                     this._checkLoops(dependency, data, trailClone);
-                }.bind(this));
+                }
             }
         }
     },

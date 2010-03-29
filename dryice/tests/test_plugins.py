@@ -112,7 +112,7 @@ def test_plugin_metadata():
     tm = p.testmodules
     assert "tests/testFoo" in tm
     assert not p.errors
-    assert p.depends[0] == "plugin2"
+    assert p.dependencies["plugin2"] == "0.0"
     s = p.scripts
     assert len(s) == 4
     assert "thecode.js" in s
@@ -123,7 +123,7 @@ def test_plugin_metadata():
     p = plugin_list[1]
     assert p.name == "plugin2"
     assert not p.errors
-    assert not p.depends
+    assert not p.dependencies
     s = p.scripts
     assert len(s) == 1
     assert s == ["mycode.js"]

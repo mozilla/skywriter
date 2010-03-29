@@ -1,6 +1,8 @@
 {
     "description": "Infrastructure and commands for managing user preferences",
-    "depends": [ "Types" ],
+    "dependencies": {
+        "Types": "0.0"
+    },
     "provides":
     [
         {

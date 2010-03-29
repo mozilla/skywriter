@@ -1,6 +1,8 @@
 {
     "description": "Common services used in the editor application",
-    "depends": [ "Canon" ],
+    "dependencies": {
+        "Canon": "0.0"
+    },
     "provides":
     [
         {
