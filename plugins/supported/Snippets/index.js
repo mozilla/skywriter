@@ -53,11 +53,11 @@ exports.addSnippet = function(snippetExt) {
 /**
  *
  */
-exports.getSnippets = function(snippetExt) {
+exports.getSnippets = function() {
     var flags = keyboard.buildFlags(environment.global, { });
-    var snippets = catalog.getExtensions('snippet');
+    var snippetExts = catalog.getExtensions('snippet');
     var matches = [];
-    snippets.forEach(function(snippet) {
+    snippetExts.forEach(function(snippetExt) {
         if (snippetExt.context === flags.context) {
             matches.push(snippetExt);
         }
