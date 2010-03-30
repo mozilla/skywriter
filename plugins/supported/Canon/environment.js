@@ -60,8 +60,7 @@ exports.Environment = SC.Object.extend({
     view: function() {
         var session = this.get("session");
         if (!session) {
-            // This can happen if the session is being reloaded (as it is
-            // immediately after a "reload" command occurs is executed).
+            // This can happen if the session is being reloaded.
             return null;
         }
         return session.get("currentView");
