@@ -105,6 +105,7 @@
         {
             "ep": "command",
             "name": "newline",
+            "key": "return",
             "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },

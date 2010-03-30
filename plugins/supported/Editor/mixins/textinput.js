@@ -248,16 +248,6 @@ exports.TextInput = {
             }, false);
         }
 
-        // Handle a few keyDown events. For example, stop the ENTER event, as
-        // this one is forwarded via textInserted("\n"), as well as keep it
-        // from being handled by other SC components that listen to the ENTER
-        // event, such as the default button.
-        textField.addEventListener('keypress', function(evt) {
-            if (evt.keyCode === SC.Event.KEY_RETURN) {
-                evt.hasCustomEventHandling = true;
-            }
-        }, false);
-
         // Here comes the code for copy and cut...
 
         // This is the basic copy and cut function. Depending on the
