@@ -63,7 +63,7 @@ exports.getSettings = function() {
  * Something of a hack to allow the set command to give a clearer definition
  * of the type to the command line.
  */
-exports.getTypeExtFromAssignment = function(typeSpec) {
+exports.getTypeSpecFromAssignment = function(typeSpec) {
     var assignments = typeSpec.assignments;
     var replacement = "text";
 
@@ -87,7 +87,7 @@ exports.getTypeExtFromAssignment = function(typeSpec) {
         }
     }
 
-    return types.getTypeExt(replacement);
+    return replacement;
 };
 
 /**

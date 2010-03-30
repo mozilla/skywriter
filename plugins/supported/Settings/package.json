@@ -39,7 +39,7 @@
                     "type":
                     {
                         "name": "deferred",
-                        "pointer": "Settings:memory#getTypeExtFromAssignment"
+                        "pointer": "Settings:memory#getTypeSpecFromAssignment"
                     },
                     "description": "The new value for the chosen setting",
                     "defaultValue": null
