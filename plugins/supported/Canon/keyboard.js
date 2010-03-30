@@ -50,7 +50,6 @@ var Trace = require("bespin:util/stacktrace").Trace;
  */
 exports.buildFlags = function(env, flags) {
     flags.context = env.get('contexts')[0];
-    console.log("flags.context", flags.context);
     return flags;
 };
 
