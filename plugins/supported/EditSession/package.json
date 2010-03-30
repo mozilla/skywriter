@@ -4,5 +4,12 @@
         "DelegateSupport": "0.0",
         "Editor": "0.0",
         "Filesystem": "0.0"
-    }
+    },
+    "provides": [
+        {
+            "ep": "extensionpoint",
+            "description": "Notifies that the current file is changed.",
+            "name": "bufferFileChanged"
+        }
+    ]
 }

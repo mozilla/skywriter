@@ -226,6 +226,7 @@ exports.applicationController = SC.Object.create({
     },
 
     loginControllerAcceptedLogin: function(sender) {
+        exports.session.set("currentUser", sender);
         exports.files = Directory.create({source: BespinFileSource.create()});
         registerUserPlugins();
         this._showEditor();

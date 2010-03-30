@@ -41,6 +41,8 @@ var util = require("bespin:util/util");
 var server = require("BespinServer").server;
 var catalog = require("bespin:plugins").catalog;
 var console = require('bespin:console').console;
+var env = require('Canon:environment').global;
+
 
 var LOGIN_PANE_HEIGHT = 321;
 var LOGIN_FORM_HEIGHT = 287;
@@ -637,6 +639,7 @@ exports.logout = function() {
     return server.request('POST', url, null, {
         log: 'Logout complete.'
     }).then(function() {
+        env.get("session").set("currentUser", null);
         exports.loginController.set("username", "");
         exports.loginController.set("password", "");
         exports.loginController.notifyDelegates("loginControllerLoggedOut");

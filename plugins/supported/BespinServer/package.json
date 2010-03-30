@@ -4,5 +4,13 @@
         "Filesystem": "0.0",
         "History": "0.0",
         "Settings": "0.0"
-    }
+    },
+	"provides": [
+        {
+            "ep": "extensionpoint",
+            "description": "Message target id to dispatch messages from the server",
+            "name": "msgtargetid",
+            "indexOn": "name"
+        }
+    ]
 }

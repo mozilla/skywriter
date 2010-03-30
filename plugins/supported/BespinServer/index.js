@@ -41,6 +41,7 @@ var util = require("bespin:util/util");
 var cookie = require("bespin:util/cookie");
 var SC = require("sproutcore/runtime").SC;
 var Promise = require("bespin:promise").Promise;
+var catalog = require("bespin:plugins").catalog;
 
 /**
  * The Server object implements the Bespin Server API (See
@@ -54,6 +55,15 @@ exports.server = SC.Object.create({
     _jobs: {},
 
     _jobsCount: 0,
+    
+    // interval parameters
+    _interval: {
+        lo:   200,  // the lowest interval in ms
+        hi:   5000, // the highest interval in ms
+        step: 100,  // the change step in ms
+        threshold: 3,   // number of response items
+        current:   5000 // the current interval in ms
+    },
 
     /**
      * This is a nasty hack to call callback like onSuccess and if there is some
@@ -224,7 +234,7 @@ exports.server = SC.Object.create({
                 options: options
             };
             self._jobsCount++;
-            self._checkPolling();
+            //self._checkPolling();
         });
         
         return pr;
@@ -233,6 +243,7 @@ exports.server = SC.Object.create({
     /**
      * Do we need to set off another poll?
      */
+    /*
     _checkPolling: function() {
         if (this._jobsCount == 0) {
             return;
@@ -243,10 +254,29 @@ exports.server = SC.Object.create({
 
         this._poll();
     },
+    */
 
     _processResponse: function(message) {
-        if (message.jobid === undefined) {
-            console.warn("Missing jobid in message", message);
+        if (!("jobid" in message)) {
+            if ("msgtargetid" in message) {
+                console.log(message.from + " (" + message.msgtargetid + "): " + message.text);
+                catalog.getExtensionByKey("msgtargetid", message.msgtargetid).load(function (f) {
+                    f(message);
+                });
+                /*
+                catalog.getExtensions("msgtargetid").some(function (ext) {
+                    if (ext.get("name") == message.msgtargetid) {
+                        ext.load(function (f) {
+                            f(message);
+                        });
+                        return true;
+                    }
+                    return false;
+                });
+                */
+            } else {
+                console.warn("Missing jobid in message", message);
+            }
             return;
         }
 
@@ -294,12 +324,12 @@ exports.server = SC.Object.create({
     },
 
     /**
-     * Starts up message retrieve for this user. Call this only once.
+     * Starts up message retrieve for this user.
      */
-    _poll: function() {
+    _poll: function(mobwritePayload) {
         var self = this;
 
-        this.request('POST', '/messages/', null, {
+        this.request('POST', '/messages/', mobwritePayload || null, {
             evalJSON: true,
             onSuccess: function(messages) {
 
@@ -307,18 +337,49 @@ exports.server = SC.Object.create({
                     self._processResponse(messages[i]);
                 }
 
+                /*
                 setTimeout(function() {
                     self._checkPolling();
                 }, 1000);
+                */
+                //self._schedulePoll(messages.length);
             },
             onFailure: function(message) {
                 self._processResponse(message);
 
+                /*
                 setTimeout(function() {
                     self._checkPolling();
                 }, 1000);
+                */
+                //self._schedulePoll(0);
             }
         });
+    },
+    
+    /**
+     * Schedules the next poll.
+     */
+    _schedulePoll: function(n) {
+        var self = this;
+        var interval = this._interval;
+        var current  = interval.current;
+        // do we need to update the polling interval?
+        if (n == 0) {
+            // we got nothing: poll less frequently
+            current += interval.step;
+        } else if (n >= interval.threshold) {
+            // we got a lot: poll more frequently
+            current = current / n * interval.threshold;
+        }
+        // clip new interval, and make sure that number of ms is whole
+        current = Math.min(interval.hi, Math.max(interval.lo, Math.ceil(current)));
+        // save new polling interval
+        interval.current = current;
+        // schedule the next poll
+        setTimeout(function() {
+            self._poll();
+        }, current);
     },
 
     /**
@@ -725,3 +786,7 @@ exports.server = SC.Object.create({
         this.requestDisconnected('POST', url, {}, instruction, opts);
     }
 });
+
+// start polling
+
+//exports.server._poll();

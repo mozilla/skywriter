@@ -600,7 +600,7 @@ exports.Catalog = SC.Object.extend({
      * Loads the named plugin, calling the provided callback
      * when the plugin is loaded. This function is a convenience
      * for unusual situations and debugging only. Generally,
-     * you should load plugins by calling load() on an Extesnion
+     * you should load plugins by calling load() on an Extension
      * object.
      */
     loadPlugin: function(pluginName, callback) {

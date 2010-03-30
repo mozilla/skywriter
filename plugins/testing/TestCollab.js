@@ -35,51 +35,32 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
-
-var names = [
-    "log", "debug", "info", "warn", "error", "assert", "dir", "dirxml",
-    "trace", "group", "groupCollapsed", "groupEnd", "time", "timeEnd",
-    "profile", "profileEnd", "count"
-];
-
-var dict = {
-    _error: function() { /* Is there anything sane we can do here? */ }
-};
-
-function stub () {
-    this._error(arguments);
-}
-
-function redirect (name) {
-    return function () {
-        window.console[name].apply(window.console, arguments);
-    };
-}
-
-if (window.console) {
-    // there is a native window console
-    names.forEach(function (name) {
-        if (window.console[name]) {
-            dict[name] = redirect(name);
+"define metadata";
+({
+    "description": "Quick-and-dirty test of social features.",
+    "provides": [
+        {
+            "ep": "command",
+            "name": "poll",
+            "description": "test command to poll messages manually",
+            "pointer": "#pollCommand"
         }
-    });
-}
-
-// stub the rest
-names.forEach(function (name) {
-    if (!dict[name]) {
-        dict[name] = stub;
-    }
+    ]
 });
+"end";
 
-if (!window.console) {
-    // HACK! SproutCore uses console. Copy it across. We should remove this.
-    window.console = exports.console;
-}
+var console = require('bespin:console').console;
+var server = require("BespinServer").server;
+var mobwrite = require("Collab:mobwrite/core").mobwrite;
+
+
+// =============================================================================
 
 /**
- * This object represents a "safe console" object that forwards debugging
- * messages appropriately without creating a dependency on Firebug in Firefox.
+ * Add a 'poll' command that polls messages for the current user, used for testing.
  */
-exports.console = SC.Object.create(dict);
+exports.pollCommand = function(env, args, request) {
+	var msg = mobwrite.collect();
+	console.log("FROM mobwrite:", msg);
+	server._poll(msg);
+};

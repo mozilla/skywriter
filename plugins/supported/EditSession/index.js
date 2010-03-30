@@ -224,6 +224,11 @@ exports.EditSession = SC.Object.extend({
      * The "current" Buffer is the one that backs the currentView.
      */
     currentBuffer: null,
+    
+    /*
+     * The "current" user.
+     */
+    currentUser: null,
 
     /**
      * The history object to store file history in.
@@ -234,6 +239,11 @@ exports.EditSession = SC.Object.extend({
         if (!SC.none(file)) {
             this.get('history').addPath(file.get('path'));
         }
+        catalog.getExtensions("bufferFileChanged").forEach(function (ext) {
+            ext.load(function (f) {
+                f(file);
+            });
+        });
     },
 
     /*
