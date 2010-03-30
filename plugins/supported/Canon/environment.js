@@ -60,8 +60,9 @@ exports.Environment = SC.Object.extend({
     view: function() {
         var session = this.get("session");
         if (!session) {
-            console.error("command attempted to get view but there's no session");
-            return undefined;
+            // This can happen if the session is being reloaded (as it is
+            // immediately after a "reload" command occurs is executed).
+            return null;
         }
         return session.get("currentView");
     }.property(),
