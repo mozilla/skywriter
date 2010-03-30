@@ -361,8 +361,8 @@ function createMemberListDisplay (members, env, args, request) {
  * 'group add' subcommand.
  */
 exports.groupAddCommand = function(env, args, request) {
-    var group = args.pieces.shift();
-    var members = args.pieces;
+    var group = args.group;
+    var members = toArgArray(args.members);
     groupAdd(group, members, {
         onSuccess: function(data) {
             request.done("Added to group '" + group + "': " + members.join(", "));
@@ -378,8 +378,8 @@ exports.groupAddCommand = function(env, args, request) {
  * 'group remove' subcommand.
  */
 exports.groupRemoveCommand = function(env, args, request) {
-    var group = args.pieces.shift();
-    var members = args.pieces;
+    var group = args.group;
+    var members = toArgArray(args.members);
     if (members.length === 1 && members[0] === "all") {
         groupRemoveAll(group, {
             onSuccess: function(data) {

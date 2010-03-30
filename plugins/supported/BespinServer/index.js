@@ -259,21 +259,16 @@ exports.server = SC.Object.create({
     _processResponse: function(message) {
         if (!("jobid" in message)) {
             if ("msgtargetid" in message) {
-                console.log(message.from + " (" + message.msgtargetid + "): " + message.text);
-                catalog.getExtensionByKey("msgtargetid", message.msgtargetid).load(function (f) {
-                    f(message);
-                });
-                /*
-                catalog.getExtensions("msgtargetid").some(function (ext) {
-                    if (ext.get("name") == message.msgtargetid) {
-                        ext.load(function (f) {
-                            f(message);
-                        });
-                        return true;
-                    }
-                    return false;
-                });
-                */
+                var target = catalog.getExtensionByKey(
+                                "msgtargetid", message.msgtargetid);
+                if (target) {
+                    target.load(function (f) {
+                        f(message);
+                    });
+                } else {
+                    console.log("UNPROCESSED MSG FROM " + message.from +
+                        " FOR " + message.msgtargetid + ": " + message.text);
+                }
             } else {
                 console.warn("Missing jobid in message", message);
             }

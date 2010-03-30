@@ -5,7 +5,8 @@
 		"Canon": "0.0",
 		"Diff": "0.0",
 		"Editor": "0.0",
-		"CommandLine": "0.0"
+		"CommandLine": "0.0",
+		"Project": "0.0"
 	},
     "provides": [
         {
@@ -100,7 +101,7 @@
                 },
                 {
                     "name": "members",
-                    "type": "[text]",
+                    "type": "text",
                     "description": "The usernames of the followers to add"
                 }
             ],
@@ -119,7 +120,7 @@
                 },
                 {
                     "name": "members",
-                    "type": "[text]",
+                    "type": "text",
                     "description": "The usernames of the followers to remove"
                 }
             ],

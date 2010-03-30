@@ -43,6 +43,7 @@
 var SC = require('sproutcore/runtime').SC;
 var console = require('bespin:console').console;
 var env = require('Canon:environment').global;
+var project = require('Project');
 
 var mobwrite = require("Collab:mobwrite/core").mobwrite;
 var diff_match_patch = require("Diff");
@@ -61,8 +62,14 @@ var ShareNode = SC.Object.extend({
     pausedText: "",
 
     init: function() {
-		mobwrite.shareObj.call(this, env.get("file").get("path"));
-        this.username = "[none]";	// TODO: figure out user's name
+        this.username = env.get("session").get("currentUser").username;
+		this.project = project.getProjectAndPath(env.get("file").get("path"));
+		var projectname = this.project[0].name;
+		if (projectname.indexOf("+") < 0) {
+			// add username
+			projectname = this.username + "+" + projectname;
+		}
+		mobwrite.shareObj.call(this, projectname + "/" + this.project[1]);
     },
 
     /**
@@ -521,15 +528,15 @@ mobwrite.shareHandlers.push(shareHandler);
 var shareNode;
 
 exports.mobwriteFileChanged = function (file) {
+	var newShareNode = ShareNode.create({});
 	if (shareNode) {
-		var newFile = env.get("file").get("path");
-		if (shareNode.get("file") == newFile) {
+		if (shareNode.get("file") == newShareNode.get("file")) {
 			return;
 		} else {
 			mobwrite.unshare([shareNode]);
 		}
 	}
-	shareNode = ShareNode.create({});
+	shareNode = newShareNode;
 	mobwrite.share(shareNode);
 };
 
