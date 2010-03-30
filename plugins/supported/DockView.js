@@ -43,15 +43,17 @@
 
 var SC = require('sproutcore/runtime').SC;
 
+exports.DOCK_LEFT = 'left';
 exports.DOCK_BOTTOM = 'bottom';
+exports.DOCK_TOP = 'top';
+exports.DOCK_RIGHT = 'right';
 
 /**
  * @class
  *
  * A dock view contains and maintains layout for a center view that fills its
- * boundaries and, optionally, a docked view along the bottom.
+ * boundaries and, optionally, docked views along the sides.
  *
- * TODO: Allow views on the left, right, and top.
  * TODO: Allow more than one view on each side.
  */
 exports.DockView = SC.View.extend({
@@ -118,8 +120,17 @@ exports.DockView = SC.View.extend({
             var frame = item.get('frame');
             var dock = item.get('dock');
             switch (dock) {
+            case exports.DOCK_LEFT:
+                layout.left += frame.width;
+                break;
             case exports.DOCK_BOTTOM:
                 layout.bottom += frame.height;
+                break;
+            case exports.DOCK_TOP:
+                layout.top += frame.height;
+                break;
+            case exports.DOCK_RIGHT:
+                layout.right += frame.width;
                 break;
             default:
                 throw new Error("invalid 'dock' property: " + dock);
