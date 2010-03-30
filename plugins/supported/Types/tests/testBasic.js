@@ -38,7 +38,6 @@
 var types = require("Types:types");
 var t = require("PluginDev");
 
-
 exports.testTextFromString = function() {
     types.fromString("Foo", "text").then(function(converted) {
         t.equal("Foo", converted);
@@ -190,4 +189,3 @@ exports.testBooleanIsValid = function() {
         t.equal(true, valid, "false");
     });
 };
-
