@@ -80,22 +80,6 @@ exports.equals = function(typeSpec1, typeSpec2) {
 // already complex code
 
 /**
- * Like resolveTypeExt() except that we don't support any asynchronous actions
- * ('deferred' types, and other types with data specified with a pointer).
- * @return The Type Extension, null the type was not found, or throw if the
- * type was illegally specified.
- */
-function getTypeExtNow(typeSpec) {
-    var name = exports.getSimpleName(typeSpec);
-    if (typeSpec.name == 'deferred') {
-        console.error('getTypeExtNow on deferred. Falling back to text');
-        console.trace();
-        return catalog.getExtensionByKey('type', 'text');
-    }
-    return catalog.getExtensionByKey('type', name);
-};
-
-/**
  * Given a string, look up the type extension in the catalog
  * @param name The type name. Object type specs are not allowed
  * @returns A promise that resolves to a type extension
