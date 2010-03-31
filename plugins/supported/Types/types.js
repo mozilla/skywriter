@@ -39,15 +39,6 @@ var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var Promise = require('bespin:promise').Promise;
 
-var r = require;
-
-/**
- * 2 typeSpecs are considered equal if their simple names are the same.
- */
-exports.equals = function(typeSpec1, typeSpec2) {
-    return exports.getSimpleName(typeSpec1) == exports.getSimpleName(typeSpec2);
-};
-
 /**
  * Get the simple text-only, no-param version of a typeSpec.
  */
@@ -71,6 +62,13 @@ exports.getSimpleName = function(typeSpec) {
     throw new Error('Not a typeSpec: ' + typeSpec);
 };
 
+/**
+ * 2 typeSpecs are considered equal if their simple names are the same.
+ */
+exports.equals = function(typeSpec1, typeSpec2) {
+    return exports.getSimpleName(typeSpec1) == exports.getSimpleName(typeSpec2);
+};
+
 // Warning: This code is virtually cut and paste from CommandLine:typehint.js
 // It you change this, there are probably parallel changes to be made there
 // There are 2 differences between the functions:
@@ -87,43 +85,14 @@ exports.getSimpleName = function(typeSpec) {
  * @return The Type Extension, null the type was not found, or throw if the
  * type was illegally specified.
  */
-exports.getTypeExtNow = function(typeSpec) {
-    var ext = null;
-
-    if (typeof typeSpec === 'string') {
-        var parts = typeSpec.split(':');
-        if (parts.length === 1) {
-            // The type is just a simple type name
-            return catalog.getExtensionByKey('type', typeSpec);
-        }
-
-        var name = parts.shift();
-        var data = parts.join(':');
-
-        if (data.substring(0, 1) == '[' || data.substring(0, 1) == '{') {
-            // JSON data is specified in the string. Yuck
-            ext = catalog.getExtensionByKey('type', name);
-            ext.data = JSON.parse(data);
-            return ext;
-        }
-
-        throw new Error('Non array/object data unsupported.');
+function getTypeExtNow(typeSpec) {
+    var name = exports.getSimpleName(typeSpec);
+    if (typeSpec.name == 'deferred') {
+        console.error('getTypeExtNow on deferred. Falling back to text');
+        console.trace();
+        return catalog.getExtensionByKey('type', 'text');
     }
-
-    if (typeof typeSpec === 'object') {
-        if (typeSpec.name == 'deferred') {
-            ext = catalog.getExtensionByKey('type', 'text');
-            console.error('getTypeExtNow on deferred. Falling back to text');
-            console.trace();
-        } else {
-            ext = catalog.getExtensionByKey('type', typeSpec.name);
-            if (typeSpec.data && ext) {
-                ext.data = typeSpec.data;
-            }
-        }
-
-        return ext;
-    }
+    return catalog.getExtensionByKey('type', name);
 };
 
 /**
@@ -131,7 +100,7 @@ exports.getTypeExtNow = function(typeSpec) {
  * @param name The type name. Object type specs are not allowed
  * @returns A promise that resolves to a type extension
  */
-var resolveObjectType = function(typeSpec) {
+function resolveObjectType(typeSpec) {
     var promise = new Promise();
     var ext = catalog.getExtensionByKey('type', typeSpec.name);
     if (ext) {
@@ -190,7 +159,7 @@ function dereferenceDeferredTypeSpec(typeSpec) {
  * from the passed typeSpec if this was deferred). The object will be in the
  * form { ext:... typeSpec:... }
  */
-exports.resolveTypeExt = function(typeSpec) {
+function resolveTypeExt(typeSpec) {
     if (typeof typeSpec === 'string') {
         return resolveObjectType({ name: typeSpec });
     }
@@ -200,7 +169,7 @@ exports.resolveTypeExt = function(typeSpec) {
             var promise = new Promise();
             dereferenceDeferredTypeSpec(typeSpec).then(function(newTypeSpec) {
 
-                exports.resolveTypeExt(newTypeSpec).then(function(reply) {
+                resolveTypeExt(newTypeSpec).then(function(reply) {
                     promise.resolve(reply);
                 }, function(ex) {
                     promise.reject(ex);
@@ -228,7 +197,7 @@ exports.resolveTypeExt = function(typeSpec) {
 exports.resolveType = function(typeSpec) {
     var promise = new Promise();
 
-    exports.resolveTypeExt(typeSpec).then(function(data) {
+    resolveTypeExt(typeSpec).then(function(data) {
         data.ext.load(function(type) {
             // We might need to resolve the typeSpec in a custom way
             if (typeof type.resolveTypeSpec === 'function') {
