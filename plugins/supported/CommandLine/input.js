@@ -73,26 +73,26 @@ exports.Input = SC.Object.extend({
 
     /**
      * Once tokenize() has been called, we have the #typed string cut up into
-     * #parts
+     * #_parts
      */
-    parts: undefined,
+    _parts: undefined,
 
     /**
-     * Once split has been called we have #parts split into #unparsedArgs and
+     * Once split has been called we have #_parts split into #_unparsedArgs and
      * #commandExt (if there is a matching command).
      */
-    unparsedArgs: undefined,
+    _unparsedArgs: undefined,
 
     /**
      * If #typed specifies a command to execute, this is that commands metadata
      */
-    commandExt: undefined,
+    _commandExt: undefined,
 
     /**
-     * Assign matches #unparsedArgs to the params declared by the #commandExt
+     * Assign matches #_unparsedArgs to the params declared by the #_commandExt
      * A list of arguments in commandExt.params order
      */
-    assignments: undefined,
+    _assignments: undefined,
 
     /**
      * Check 'typed' input. Possibly overkill.
@@ -176,7 +176,7 @@ exports.Input = SC.Object.extend({
         }
 
         var incoming = this.typed.trimLeft().split(/\s+/);
-        this.parts = [];
+        this._parts = [];
 
         var nextToken;
         while (true) {
@@ -202,9 +202,9 @@ exports.Input = SC.Object.extend({
                         eaten.push(eataway);
                     }
                 }
-                this.parts.push(eaten.join(' '));
+                this._parts.push(eaten.join(' '));
             } else {
-                this.parts.push(nextToken);
+                this._parts.push(nextToken);
             }
         }
 
@@ -216,8 +216,8 @@ exports.Input = SC.Object.extend({
      * typed at the command line.
      */
     _split: function() {
-        this.unparsedArgs = this.parts.slice(); // aka clone()
-        var initial = this.unparsedArgs.shift();
+        this._unparsedArgs = this._parts.slice(); // aka clone()
+        var initial = this._unparsedArgs.shift();
         var commandExt;
 
         while (true) {
@@ -240,14 +240,14 @@ exports.Input = SC.Object.extend({
             }
 
             // commandExt, but no pointer - this must be a sub-command
-            initial += " " + this.unparsedArgs.shift();
+            initial += " " + this._unparsedArgs.shift();
         }
 
-        this.commandExt = commandExt;
+        this._commandExt = commandExt;
 
         // Do we know what the command is.
         var hintSpec = null;
-        if (this.commandExt) {
+        if (this._commandExt) {
             // Load the command to check that it will load
             var loadPromise = new Promise();
             commandExt.load().then(function(command) {
@@ -271,8 +271,8 @@ exports.Input = SC.Object.extend({
             this._hints.push(loadPromise);
 
             // The user hasn't started to type any params
-            if (this.parts.length === 1) {
-                var cmdExt = this.commandExt;
+            if (this._parts.length === 1) {
+                var cmdExt = this._commandExt;
                 if (this.typed == cmdExt.name ||
                         !cmdExt.params || cmdExt.params.length === 0) {
                     hintSpec = exports.documentCommand(cmdExt, this.typed);
@@ -303,28 +303,28 @@ exports.Input = SC.Object.extend({
             this._hints.push(hintPromise);
         }
 
-        return !SC.none(this.commandExt);
+        return !SC.none(this._commandExt);
     },
 
     /**
      * Work out which arguments are applicable to which parameters.
-     * <p>This takes #commandExt.params and #unparsedArgs and creates a map of
+     * <p>This takes #_commandExt.params and #_unparsedArgs and creates a map of
      * param names to 'assignment' objects, which have the following properties:
      * <ul>
      * <li>param - The matching parameter.
      * <li>index - Zero based index into where the match came from on the input
      * <li>value - The matching input
      * </ul>
-     * The resulting #assignments member created by this function is a list of
+     * The resulting #_assignments member created by this function is a list of
      * assignments of arguments in commandExt.params order.
-     * TODO: unparsedArgs should be a list of objects that contain the following
+     * TODO: _unparsedArgs should be a list of objects that contain the following
      * values: name, param (when assigned) and maybe hints?
      */
     _assign: function() {
         // TODO: something smarter than just assuming that they are all in order
-        this.assignments = [];
-        var params = this.commandExt.params;
-        var unparsedArgs = this.unparsedArgs;
+        this._assignments = [];
+        var params = this._commandExt.params;
+        var unparsedArgs = this._unparsedArgs;
 
         // If this command does not take parameters
         if (!params || params.length === 0) {
@@ -338,7 +338,7 @@ exports.Input = SC.Object.extend({
 
             this._hints.push(hint.Hint.create({
                 level: hint.Level.Error,
-                element: this.commandExt.name + " does not take any parameters."
+                element: this._commandExt.name + " does not take any parameters"
             }));
             return false;
         }
@@ -350,7 +350,7 @@ exports.Input = SC.Object.extend({
             // significant. It might be better to chop the command of the
             // start of this.typed? But that's not easy because there could be
             // multiple spaces in the command if we're doing sub-commands
-            this.assignments[0] = {
+            this._assignments[0] = {
                 value: unparsedArgs.length === 0 ? null : unparsedArgs.join(" "),
                 param: params[0]
             };
@@ -381,13 +381,13 @@ exports.Input = SC.Object.extend({
         }
 
         // Show a hint for the last parameter
-        if (this.parts.length > 1) {
+        if (this._parts.length > 1) {
             var assignment = this._getAssignmentForLastArg();
 
             // HACK! deferred types need to have some parameters
             // by which to determine which type they should defer to
             // so we hack in the assignments so the deferrer can work
-            assignment.param.type.assignments = this.assignments;
+            assignment.param.type.assignments = this._assignments;
 
             if (assignment) {
                 this._hints.push(typehint.getHint(this, assignment));
@@ -406,26 +406,26 @@ exports.Input = SC.Object.extend({
      */
     _assignParam: function(param, index, used) {
         // Look for '--param X' style inputs
-        for (var i = 0; i < this.unparsedArgs.length; i++) {
-            var unparsedArg = this.unparsedArgs[i];
+        for (var i = 0; i < this._unparsedArgs.length; i++) {
+            var unparsedArg = this._unparsedArgs[i];
 
             if ("--" + param.name == unparsedArg) {
                 used.push(unparsedArg);
                 // boolean parameters don't have values, they default to false
                 if (types.equals(param.type, "boolean")) {
-                    this.assignments[index] = {
+                    this._assignments[index] = {
                         value: true,
                         param: param
                     };
                 } else {
-                    if (i + 1 < this.unparsedArgs.length) {
+                    if (i + 1 < this._unparsedArgs.length) {
                         // Missing value for this param
                         this._hints.push(hint.Hint.create({
                             level: hint.Level.Incomplete,
                             element: "Missing parameter: " + param.name
                         }));
                     } else {
-                        used.push(this.unparsedArgs[i + 1]);
+                        used.push(this._unparsedArgs[i + 1]);
                     }
                 }
                 return true;
@@ -433,18 +433,18 @@ exports.Input = SC.Object.extend({
         }
 
         var value = null;
-        if (this.unparsedArgs.length > index) {
-            value = this.unparsedArgs[index];
-            used.push(this.unparsedArgs[index]);
+        if (this._unparsedArgs.length > index) {
+            value = this._unparsedArgs[index];
+            used.push(this._unparsedArgs[index]);
         }
 
         // null is a valid default value, and common because it identifies an
         // parameter that is optional. undefined means there is no value from
         // the command line
         if (value !== undefined) {
-            this.assignments[index] = { value: value, param: param };
+            this._assignments[index] = { value: value, param: param };
         } else {
-            this.assignments[index] = { param: param };
+            this._assignments[index] = { param: param };
 
             if (param.defaultValue === undefined) {
                 // There is no default, and we've not supplied one so far
@@ -464,7 +464,7 @@ exports.Input = SC.Object.extend({
      */
     _getAssignmentForLastArg: function() {
         var highestAssign = null;
-        this.assignments.forEach(function(assignment) {
+        this._assignments.forEach(function(assignment) {
             if (!highestAssign || !SC.none(assignment.value)) {
                 highestAssign = assignment;
             }
@@ -478,7 +478,7 @@ exports.Input = SC.Object.extend({
      */
     _convertTypes: function() {
         // Use {} when there are no params
-        if (!this.commandExt.params) {
+        if (!this._commandExt.params) {
             this._argsPromise.resolve({});
             return true;
         }
@@ -488,7 +488,7 @@ exports.Input = SC.Object.extend({
         // Cache of promises, because we're only done when they're done
         var convertPromises = [];
 
-        this.assignments.forEach(function(assignment) {
+        this._assignments.forEach(function(assignment) {
             var promise = this._convertType(assignment, argOutputs);
             if (promise) {
                 convertPromises.push(promise);
@@ -518,7 +518,7 @@ exports.Input = SC.Object.extend({
         // HACK! deferred types need to have some parameters
         // by which to determine which type they should defer to
         // so we hack in the assignments so the deferrer can work
-        param.type.assignments = this.assignments;
+        param.type.assignments = this._assignments;
 
         var convertPromise = types.fromString(value, param.type);
         convertPromise.then(function(converted) {
