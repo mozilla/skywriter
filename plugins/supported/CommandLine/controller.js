@@ -159,7 +159,7 @@ exports.cliController = SC.Object.create({
 
             var request = Request.create({
                 command: command,
-                commandExt: input.commandExt,
+                commandExt: input._commandExt,
                 typed: typed,
                 args: args
             });
@@ -175,7 +175,7 @@ exports.cliController = SC.Object.create({
         }.bind(this);
 
         results.argsPromise.then(function(args) {
-            input.commandExt.load().then(function(command) {
+            input._commandExt.load().then(function(command) {
                 SC.run(function() {
                     exec(command, args);
                 });
