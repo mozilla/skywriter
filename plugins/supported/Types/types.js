@@ -69,8 +69,46 @@ exports.equals = function(typeSpec1, typeSpec2) {
     return exports.getSimpleName(typeSpec1) == exports.getSimpleName(typeSpec2);
 };
 
-// Warning: This code is virtually cut and paste from CommandLine:typehint.js
-// It you change this, there are probably parallel changes to be made there
+/**
+ * A deferred type is one where we hope to find out what the type is just
+ * in time to use it. For example the 'set' command where the type of the 2nd
+ * param is defined by the 1st param.
+ * @param typeSpec An object type spec with name = 'deferred' and a pointer
+ * which to call through catalog.loadObjectForPropertyPath (passing in the
+ * original typeSpec as a parameter). This function is expected to return either
+ * a new typeSpec, or a promise of a typeSpec.
+ * @returns A promise which resolves to the new type spec from the pointer.
+ */
+exports.undeferTypeSpec = function(typeSpec) {
+    // Deferred types are specified by the return from the pointer
+    // function.
+    var promise = new Promise();
+    if (!typeSpec.pointer) {
+        promise.reject(new Error('Missing deferred pointer'));
+        return promise;
+    }
+
+    catalog.loadObjectForPropertyPath(typeSpec.pointer).then(function(obj) {
+        var reply = obj(typeSpec);
+        if (typeof reply.then === 'function') {
+            reply.then(function(newTypeSpec) {
+                promise.resolve(newTypeSpec);
+            }, function(ex) {
+                promise.reject(ex);
+            });
+        } else {
+            promise.resolve(reply);
+        }
+    }, function(ex) {
+        promise.reject(ex);
+    });
+
+    return promise;
+};
+
+// Warning: These next 2 functions are virtually cut and paste from
+// CommandLine:typehint.js
+// If you change this, there are probably parallel changes to be made there
 // There are 2 differences between the functions:
 // - We lookup type|typehint in the catalog
 // - There is a concept of a default typehint, where there is no similar
@@ -96,46 +134,9 @@ function resolveObjectType(typeSpec) {
 };
 
 /**
- * A deferred type is one where we hope to find out what the type is just
- * in time to use it. For example the 'set' command where the type of the 2nd
- * param is defined by the 1st param.
- * @param typeSpec An object type spec with name = 'deferred' and a pointer
- * which to call through catalog.loadObjectForPropertyPath (passing in the
- * original typeSpec as a parameter). This function is expected to return either
- * a new typeSpec, or a promise of a typeSpec.
- * @returns A promise which resolves to the new type spec from the pointer.
- */
-function dereferenceDeferredTypeSpec(typeSpec) {
-    // Deferred types are specified by the return from the pointer
-    // function.
-    var promise = new Promise();
-    if (!typeSpec.pointer) {
-        promise.reject(new Error('Missing deferred pointer'));
-        return promise;
-    }
-
-    catalog.loadObjectForPropertyPath(typeSpec.pointer).then(function(obj) {
-        var reply = obj(typeSpec);
-        if (typeof reply.then === 'function') {
-            reply.then(function(newTypeSpec) {
-                promise.resolve(newTypeSpec);
-            }, function(ex) {
-                promise.reject(ex);
-            });
-        } else {
-            promise.resolve(reply);
-        }
-    }, function(ex) {
-        promise.reject(ex);
-    });
-
-    return promise;
-}
-
-/**
  * Look-up a typeSpec and find a corresponding type extension. This function
- * does not attempt to load the type or go through the resolution process, for
- * that you probably want #resolveType()
+ * does not attempt to load the type or go through the resolution process,
+ * for that you probably want #resolveType()
  * @param typeSpec A string containing the type name or an object with a name
  * and other type parameters e.g. { name: 'selection', data: [ 'one', 'two' ] }
  * @return a promise that resolves to an object containing the resolved type
@@ -151,14 +152,12 @@ function resolveTypeExt(typeSpec) {
     if (typeof typeSpec === 'object') {
         if (typeSpec.name === 'deferred') {
             var promise = new Promise();
-            dereferenceDeferredTypeSpec(typeSpec).then(function(newTypeSpec) {
-
+            exports.undeferTypeSpec(typeSpec).then(function(newTypeSpec) {
                 resolveTypeExt(newTypeSpec).then(function(reply) {
                     promise.resolve(reply);
                 }, function(ex) {
                     promise.reject(ex);
                 });
-
             });
             return promise;
         } else {

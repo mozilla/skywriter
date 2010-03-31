@@ -35,21 +35,19 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require("bespin:plugins").catalog;
+var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
-var Promise = require("bespin:promise").Promise;
-var types = require("Types:types");
+var Promise = require('bespin:promise').Promise;
+var types = require('Types:types');
 
-var hint = require("CommandLine:hint");
-
-var r = require;
+var hint = require('CommandLine:hint');
 
 /**
  * If there isn't a typehint to define a hint UI component then we just use the
  * default - a simple text node containing the description.
  */
-var createDefaultHint = function(description) {
-    var parent = document.createElement("article");
+function createDefaultHint(description) {
+    var parent = document.createElement('article');
     parent.innerHTML = description;
 
     return hint.Hint.create({
@@ -61,16 +59,16 @@ var createDefaultHint = function(description) {
 /**
  * resolve the passed promise by calling
  */
-var getHintOrDefault = function(promise, input, assignment, ext, typeHint) {
+function getHintOrDefault(promise, input, assignment, ext, typeHint) {
     var hint;
 
     try {
-        if (ext && typeof typeHint.getHint === "function") {
+        if (ext && typeof typeHint.getHint === 'function') {
             hint = typeHint.getHint(input, assignment, ext);
         }
     }
     catch (ex) {
-        console.error("Failed to get hint for ", ext, " reason: ", ex);
+        console.error('Failed to get hint for ', ext, ' reason: ', ex);
     }
 
     if (!hint) {
@@ -79,6 +77,64 @@ var getHintOrDefault = function(promise, input, assignment, ext, typeHint) {
 
     promise.resolve(hint);
     return promise;
+};
+
+// Warning: These next 2 functions are virtually cut and paste from
+// Types:type.js
+// If you change this, there are probably parallel changes to be made there
+// There are 2 differences between the functions:
+// - We lookup type|typehint in the catalog
+// - There is a concept of a default typehint, where there is no similar
+//   thing for types. This is sensible, because hints are optional nice
+//   to have things. Not so for types.
+// Whilst we could abstract out the changes, I'm not sure this simplifies
+// already complex code
+
+/**
+ * Given a string, look up the type extension in the catalog
+ * @param name The type name. Object type specs are not allowed
+ * @returns A promise that resolves to a type extension
+ */
+function resolveObjectTypeHint(typeSpec) {
+    var promise = new Promise();
+    var ext = catalog.getExtensionByKey('typehint', typeSpec.name);
+    promise.resolve({ ext: ext, typeSpec: typeSpec });
+    return promise;
+};
+
+/**
+ * Look-up a typeSpec and find a corresponding typehint extension. This function
+ * does not attempt to load the typehint or go through the resolution process,
+ * for that you probably want #resolveType()
+ * @param typeSpec A string containing the type name or an object with a name
+ * and other type parameters e.g. { name: 'selection', data: [ 'one', 'two' ] }
+ * @return a promise that resolves to an object containing the resolved typehint
+ * extension and the typeSpec used to resolve the type (which could be different
+ * from the passed typeSpec if this was deferred). The object will be in the
+ * form { ext:... typeSpec:... }
+ */
+function resolveTypeHintExt(typeSpec) {
+    if (typeof typeSpec === 'string') {
+        return resolveObjectTypeHint({ name: typeSpec });
+    }
+
+    if (typeof typeSpec === 'object') {
+        if (typeSpec.name === 'deferred') {
+            var promise = new Promise();
+            types.undeferTypeSpec(typeSpec).then(function(newTypeSpec) {
+                resolveTypeHintExt(newTypeSpec).then(function(reply) {
+                    promise.resolve(reply);
+                }, function(ex) {
+                    promise.reject(ex);
+                });
+            });
+            return promise;
+        } else {
+            return resolveObjectTypeHint(typeSpec);
+        }
+    }
+
+    throw new Error('Unknown typeSpec type: ' + typeof typeSpec);
 };
 
 /**
@@ -105,22 +161,22 @@ exports.getHint = function(input, assignment) {
     var promise = new Promise();
     var typeSpec = assignment.param.type;
 
-    exports.getTypeHintExt(typeSpec).then(function(ext) {
-        if (!ext) {
+    resolveTypeHintExt(typeSpec).then(function(data) {
+        if (!data.ext) {
             return getHintOrDefault(promise, input, assignment);
         }
 
-        ext.load().then(function(typeHint) {
+        data.ext.load().then(function(typeHint) {
             // We might need to resolve the typeSpec in a custom way
-            if (typeHint.resolveTypeSpec) {
-                typeHint.resolveTypeSpec(ext, typeSpec).then(function() {
-                    getHintOrDefault(promise, input, assignment, ext, typeHint);
+            if (typeof typeHint.resolveTypeSpec === 'function') {
+                typeHint.resolveTypeSpec(data.ext, data.typeSpec).then(function() {
+                    getHintOrDefault(promise, input, assignment, data.ext, typeHint);
                 }, function(ex) {
                     promise.reject(ex);
                 });
             } else {
                 // Nothing to resolve - just go
-                getHintOrDefault(promise, input, assignment, ext, typeHint);
+                getHintOrDefault(promise, input, assignment, data.ext, typeHint);
             }
         }, function(ex) {
             hint = createDefaultHint(assignment.param.description);
@@ -129,74 +185,4 @@ exports.getHint = function(input, assignment) {
     });
 
     return promise;
-};
-
-// Warning: This code is virtually cut and paste from Types:types.js
-// It you change this, there are probably parallel changes to be made there
-// There are 2 differences between the functions:
-// - We lookup type|typehint in the catalog
-// - There is a concept of a default typehint, where there is no similar
-//   thing for types. This is sensible, because hints are optional nice
-//   to have things. Not so for types.
-// Whilst we could abstract out the changes, I'm not sure this simplifies
-// already complex code
-
-/**
- * @see Types:types.resolveSimpleType
- */
-var resolveSimpleType = function(name) {
-    var promise = new Promise();
-    ext = catalog.getExtensionByKey("typehint", name);
-    // It's not an error if the type isn't found. See above
-    promise.resolve(ext);
-    return promise;
-};
-
-/**
- * A deferred type is one where we hope to find out what the type is just
- * in time to use it. For example the 'set' command where the type of the 2nd
- * param is defined by the 1st param.
- */
-var resolveDeferred = function(typeSpec) {
-    // Deferred types are specified by the return from the pointer
-    // function.
-    var promise = new Promise();
-    if (!typeSpec.pointer) {
-        promise.reject(new Error("Missing deferred pointer"));
-        return promise;
-    }
-
-    catalog.loadObjectForPropertyPath(typeSpec.pointer).then(function(obj) {
-        obj(typeSpec).then(function(ext) {
-            promise.resolve(ext);
-        }, function(ex) {
-            promise.reject(ex);
-        });
-    }, function(ex) {
-        promise.reject(ex);
-    });
-
-    return promise;
-};
-
-/**
- * typeSpec one of:
- * "typename",
- * "typename:json" e.g. 'selection:["one", "two", "three"]'
- * { name:"typename", data:... } e.g. { name:"selection", data:["one", "two", "three"] }
- */
-exports.getTypeHintExt = function(typeSpec) {
-    if (typeof typeSpec === "string") {
-        return resolveSimpleType(typeSpec);
-    }
-
-    if (typeof typeSpec === "object") {
-        if (typeSpec.name === "deferred") {
-             return resolveDeferred(typeSpec);
-        } else {
-            return resolveSimpleType(typeSpec.name);
-        }
-    }
-
-    throw new Error("Unknown typeSpec type: " + typeof typeSpec);
 };
