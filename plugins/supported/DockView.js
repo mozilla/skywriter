@@ -115,28 +115,43 @@ exports.DockView = SC.View.extend({
     },
 
     _updateChildLayout: function() {
-        var layout = { left: 0, bottom: 0, top: 0, right: 0 };
+        var left = 0, bottom = 0, top = 0, right = 0;
         this.get('dockedViews').forEach(function(item) {
             var frame = item.get('frame');
             var dock = item.get('dock');
+
             switch (dock) {
             case exports.DOCK_LEFT:
-                layout.left += frame.width;
+                left += frame.width;
+                item.adjust('top', top);
+                item.adjust('bottom', bottom);
                 break;
+
             case exports.DOCK_BOTTOM:
-                layout.bottom += frame.height;
+                bottom += frame.height;
+                item.adjust('left', left);
+                item.adjust('right', right);
                 break;
+
             case exports.DOCK_TOP:
-                layout.top += frame.height;
+                top += frame.height;
+                item.adjust('left', left);
+                item.adjust('right', right);
                 break;
+
             case exports.DOCK_RIGHT:
-                layout.right += frame.width;
+                right += frame.width;
+                item.adjust('top', top);
+                item.adjust('bottom', bottom);
                 break;
+
             default:
                 throw new Error("invalid 'dock' property: " + dock);
                 break;  // silence jslint
             }
         });
+
+        var layout = { left: left, bottom: bottom, top: top, right: right };
         this.get('centerView').adjust(layout);
     },
 
