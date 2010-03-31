@@ -75,7 +75,6 @@ var MAX_ITEMS = 10;
 exports.Menu = SC.Object.extend({
     input: undefined,
     assignment: undefined,
-    typeExt: undefined,
 
     /**
      * Generated CommandLine:hint.Hint

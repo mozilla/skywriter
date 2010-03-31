@@ -49,22 +49,27 @@ var Menu = require("CommandLine:views/menu").Menu;
  * @see typehint#getHint()
  */
 exports.selection = {
-    getHint: function(input, assignment, typeExt) {
-        var data = typeExt.data;
-
-        if (!data) {
+    getHint: function(input, assignment, ext) {
+        if (!ext.data) {
             console.error("Missing data for selection type");
-            data = [];
+            ext.data = [];
         }
 
         var query = assignment.value || "";
         var matcher = PrefixMatcher.create({ query: query });
-        matcher.addItems(data);
+
+        var items = ext.data.map(function(name) {
+            if (typeof name === 'string') {
+                return { name: name };
+            }
+            return name;
+        });
+
+        matcher.addItems(items);
 
         var menu = MatcherMenu.create({
             input: input,
             assignment: assignment,
-            typeExt: typeExt,
             matcher: matcher
         });
 
@@ -79,11 +84,10 @@ exports.selection = {
  * @see typehint#getHint()
  */
 exports.bool = {
-    getHint: function(input, assignment, typeExt) {
+    getHint: function(input, assignment, ext) {
         var menu = Menu.create({
             input: input,
-            assignment: assignment,
-            typeExt: typeExt
+            assignment: assignment
         });
 
         menu.addItems([ { name: "true" }, { name: "false" } ]);
