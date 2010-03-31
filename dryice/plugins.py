@@ -72,6 +72,33 @@ def _parse_md_text(lines):
     md_text = _trailing_paren.sub("", md_text)
     return md_text
     
+def get_metadata(location):
+    errors = []
+    
+    if location.isdir():
+        md_path = location / "package.json"
+        if not md_path.exists():
+            md = {}
+            errors = ["Plugin metadata file (package.json) file is missing"]
+            md_text = '""'
+        else:
+            md_text = md_path.text()
+    else:
+        lines = location.lines()
+        md_text = _parse_md_text(lines)
+        
+        if not md_text:
+            errors = ["Plugin metadata is missing or badly formatted."]
+            md = {}
+            return md, errors
+            
+    try:
+        md = loads(md_text)
+    except Exception, e:
+        errors = ["Problem with metadata JSON: %s" % (e)]
+        md = {}
+    
+    return md, errors
 
 class Plugin(object):
     def __init__(self, name, location, path_entry):
@@ -125,28 +152,9 @@ class Plugin(object):
         
         A Plugin subclass can override this to add additional information
         to the metadata."""
-        if self.location.isdir():
-            md_path = self.location / "package.json"
-            if not md_path.exists():
-                md = {}
-                self._errors = ["Plugin metadata file (package.json) file is missing"]
-                md_text = '""'
-            else:
-                md_text = md_path.text()
-        else:
-            lines = self.location.lines()
-            md_text = _parse_md_text(lines)
-            
-            if not md_text:
-                self._errors = ["Plugin metadata is missing or badly formatted."]
-                self._metadata = {"errors": self._errors}
-                return self._metadata
-                
-        try:
-            md = loads(md_text)
-        except Exception, e:
-            self._errors = ["Problem with metadata JSON: %s" % (e)]
-            md = {}
+        md, errors = get_metadata(self.location)
+        
+        self._errors = errors
         
         md["resourceURL"] = "resources/%s/" % urlquote(self.name)
         md["testmodules"] = self.testmodules
