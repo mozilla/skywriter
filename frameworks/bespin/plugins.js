@@ -150,6 +150,13 @@ exports.Extension = SC.Object.extend({
         this.load(callback, property);
     },
 
+    /**
+     * Returns the name of the plugin that provides this extension.
+     */
+    getPluginName: function() {
+        return this._pluginName;
+    },
+
     _getLoaded: function(property) {
         var pointer = this._getPointer(property);
         return _retrieveObject(pointer);

@@ -256,9 +256,6 @@ hintClass[Level.Info] = "cmd_info";
 /**
  * A view designed to dock in the bottom of the editor, holding the command
  * line input.
- * <p>
- * TODO: We need to generalize the way views attach to the editor, but now isn't
- * the right time to work on this. We're locked to the bottom.
  */
 exports.CliInputView = SC.View.design({
     dock: dock.DOCK_BOTTOM,

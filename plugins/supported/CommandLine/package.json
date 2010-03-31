@@ -11,12 +11,6 @@
     "provides":
     [
         {
-            "ep": "factory",
-            "name": "commandline",
-            "action": "value",
-            "pointer": "views/cli#cliInputView"
-        },
-        {
             "ep": "setting",
             "name": "historyTimeMode",
             "description": "Display number|date|none next to each historical instruction",
@@ -126,6 +120,12 @@
             "name": "boolean",
             "description": "A UI for a boolean",
             "pointer": "views/basic#bool"
+        },
+        {
+            "ep": "dockedview",
+            "name": "cliinputview",
+            "description": "The command line view, docked on the bottom of the screen",
+            "pointer": "views/cli#CliInputView"
         }
     ]
 }

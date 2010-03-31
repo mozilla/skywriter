@@ -69,6 +69,11 @@
             "name": "cli",
             "pointer": "#cli",
             "action": "value"
+        },
+        {
+            "ep": "extensionpoint",
+            "name": "dockedview",
+            "description": "Views docked to the sides of the editor window"
         }
     ],
     "preRefresh": "#preRefresh"
@@ -80,7 +85,9 @@ var CliInputView = require('CommandLine:views/cli').CliInputView;
 var DockView = require('DockView').DockView;
 var EditorView = require('Editor:views/editor').EditorView;
 var KeyListener = require('AppSupport:views/keylistener').KeyListener;
+var m_promise = require('bespin:promise');
 var m_userident = require('UserIdent');
+var catalog = require('bespin:plugins').catalog;
 var loginController = m_userident.loginController;
 var signupController = m_userident.signupController;
 var userIdentPage = m_userident.userIdentPage;
@@ -100,11 +107,13 @@ exports.applicationController = SC.Object.create({
     
     _application: SC.Application.extend(),
 
+    _dockedViews: {},
+
     _themeManager: null,
 
     _applicationView: DockView.extend({
         centerView: EditorView.extend(),
-        dockedViews: [ CliInputView.extend() ]
+        dockedViews: []
     }),
 
     _mainPage: SC.Page.extend({
@@ -113,6 +122,34 @@ exports.applicationController = SC.Object.create({
             layout: { top: 0, left: 0, bottom: 0, right: 0 }
         })
     }),
+
+    _createDockedViews: function() {
+        var applicationView = this._applicationView;
+
+        // Remove any docked views already present.
+        var dockedViews = this._dockedViews;
+        for (name in dockedViews) {
+            console.log("removing", name);
+            var view = dockedViews[name];
+            applicationView.removeDockedView(view);
+        }
+
+        var extensions = catalog.getExtensions('dockedview');
+        var extensionCount = extensions.length;
+        var names = extensions.map(function(ext) { return ext.get('name'); });
+        var promises = extensions.map(function(ext) { return ext.load(); });
+        m_promise.group(promises).then(function(viewClasses) {
+                var dockedViews = {};
+                for (var i = 0; i < extensionCount; i++) {
+                    var name = names[i], viewClass = viewClasses[i];
+                    var view = applicationView.addDockedView(viewClass);
+                    applicationView.appendChild(view);
+                    dockedViews[name] = view;
+                }
+
+                this._dockedViews = dockedViews;
+            }.bind(this));
+    },
 
     _showEditor: function() {
         if (this._editorHasBeenSetup) {
@@ -124,11 +161,12 @@ exports.applicationController = SC.Object.create({
         settings.setPersister(ServerPersister.create());
 
         var applicationView = this._applicationView.create();
+        this._applicationView = applicationView;
+
+        this._createDockedViews();
         
         var dockedViews = applicationView.get("dockedViews");
-        exports.cli = dockedViews[0];
-        
-        this._applicationView = applicationView;
+        exports.cli = dockedViews.cliinputview;
 
         var mainPane = this._mainPage.get('mainPane');
         mainPane.appendChild(applicationView);
@@ -193,30 +231,22 @@ exports.applicationController = SC.Object.create({
     
     loginControllerLoggedOut: function(sender) {
         this._displayLogin();
+    },
+
+    postRefresh: function(reloadDescription) {
+        this._createDockedViews();
+    },
+
+    preRefresh: function(reloadDescription) {
+        console.log("preRefresh");
+        return {
+            keepModule: true,
+            callPointer: "#postRefresh"
+        };
     }
 });
 
-exports.preRefresh = function(reloadDescription) {
-    var pluginName = reloadDescription.pluginName;
-    var dependents = reloadDescription.dependents;
-    if (pluginName == "CommandLine" || dependents.CommandLine) {
-        var view = exports.applicationController._applicationView;
-        view.removeDockedView(exports.cli);
-    }
-    return {
-        keepModule: true,
-        callPointer: "#postRefresh"
-    };
-};
-
-exports.postRefresh = function(reloadDescription) {
-    var pluginName = reloadDescription.pluginName;
-    var dependents = reloadDescription.dependents;
-    if (pluginName == "CommandLine" || dependents.CommandLine) {
-        var view = exports.applicationController._applicationView;
-        CliInputView = require('CommandLine:views/cli').CliInputView;
-        exports.cli = view.addDockedView(CliInputView, 0);
-        view.appendChild(exports.cli);
-    }
-};
+var app = exports.applicationController;
+exports.preRefresh = app.preRefresh.bind(app);
+exports.postRefresh = app.postRefresh.bind(app);
 
