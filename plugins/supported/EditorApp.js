@@ -90,6 +90,7 @@ var m_userident = require('UserIdent');
 var catalog = require('bespin:plugins').catalog;
 var loginController = m_userident.loginController;
 var signupController = m_userident.signupController;
+var registerUserPlugins = m_userident.registerUserPlugins;
 var userIdentPage = m_userident.userIdentPage;
 var BespinFileSource = require("BespinServer:filesource").BespinFileSource;
 var ServerPersister = require("BespinServer:settings").ServerPersister;
@@ -226,6 +227,7 @@ exports.applicationController = SC.Object.create({
 
     loginControllerAcceptedLogin: function(sender) {
         exports.files = Directory.create({source: BespinFileSource.create()});
+        registerUserPlugins();
         this._showEditor();
     },
     

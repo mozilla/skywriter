@@ -76,15 +76,9 @@
             "description": "Install a plugin from a given URL",
             "params": [
                 {
-                    "name": "url",
-                    "type": "pluginURL",
-                    "description": "URL where the plugin can be found"
-                },
-                {
-                    "name": "pluginName",
+                    "name": "plugin",
                     "type": "text",
-                    "description": "optional name to give the plugin locally",
-                    "defaultValue": null
+                    "description": "name (if in Gallery) or URL where the plugin can be found"
                 }
             ],
             "pointer": "commands#install"

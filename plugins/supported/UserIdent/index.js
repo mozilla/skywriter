@@ -80,9 +80,6 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
     onSuccess: function() {
         exports.userIdentPage.get("mainPane").remove();
 
-        // Load the plugin metadata for the user's plugins
-        catalog.loadMetadata(server.SERVER_BASE_URL + "/plugin/register/user");
-
         this.notifyDelegates('loginControllerAcceptedLogin');
     },
 
@@ -210,9 +207,6 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
      */
     onSuccess: function() {
         exports.userIdentPage.get("mainPane").remove();
-
-        // Load the plugin metadata for the user's plugins
-        catalog.loadMetadata(server.SERVER_BASE_URL + "/plugin/register/user");
 
         this.notifyDelegates('loginControllerAcceptedLogin');
     },
@@ -662,4 +656,13 @@ exports.currentuser = function() {
     return server.request('GET', url, null, {
         evalJSON: true
     });
+};
+
+/*
+ * after the user is logged in, we need to look at their collection
+ * of installed plugins.
+ */
+exports.registerUserPlugins = function() {
+    // Load the plugin metadata for the user's plugins
+    catalog.loadMetadata(server.SERVER_BASE_URL + "/plugin/register/user");
 };
