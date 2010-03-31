@@ -254,3 +254,48 @@ exports.install = function(env, args, request) {
     });
     request.async();
 };
+
+/*
+ * the plugin upload command - uploads a plugin to the
+ * plugin gallery.
+ */
+exports.upload = function(env, args, request) {
+    if (!args.pluginName) {
+        request.doneWithError("You must provide the name of the plugin to install.");
+    }
+    var pr = server.request("POST", "/plugin/upload/" 
+        + escape(args.pluginName));
+    pr.then(function() {
+        request.done("Plugin successfully uploaded.");
+    }, function(error) {
+        request.doneWithError(error.xhr.responseText);
+    });
+    
+    request.async();
+};
+
+/*
+ * the plugin gallery command - lists the plugins in the
+ * plugin gallery
+ */
+exports.gallery = function(env, args, request) {
+    var pr = server.request("GET", "/plugin/gallery/",
+        null, {
+            evalJSON: true
+    });
+    pr.then(function(data) {
+        output = "<h2>Bespin Plugin Gallery</h2><p>These plugins can be installed " +
+            "by typing 'plugin install NAME'</p><table><thead><tr><th>Name</th>" +
+            "<th>Description</th></tr></thead><tbody>";
+        data.forEach(function(p) {
+            output += "<tr><td>" + p.name + "</td><td>" + p.description + 
+                "</td></tr>";
+        });
+        output += "</tbody></table>";
+        request.done(output);
+    }, function(error) {
+        request.doneWithError("Error from server (" + error.message + 
+            ") " + error.xhr.responseText);
+    });
+    request.async();
+};

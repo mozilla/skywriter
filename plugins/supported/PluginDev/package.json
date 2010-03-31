@@ -91,6 +91,25 @@
         },
         {
             "ep": "command",
+            "name": "plugin upload",
+            "description": "Upload a plugin you've created to the plugin gallery.",
+            "params": [
+                {
+                    "name": "pluginName",
+                    "type": "text",
+                    "description": "name of the plugin to upload"
+                }
+            ],
+            "pointer": "commands#upload"
+        },
+        {
+            "ep": "command",
+            "name": "plugin gallery",
+            "description": "List the plugins in the Plugin Gallery",
+            "pointer": "commands#gallery"
+        },
+        {
+            "ep": "command",
             "name": "debug",
             "description": "Commands useful for debugging"
         },
