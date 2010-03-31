@@ -76,6 +76,10 @@ def get_metadata(location):
     errors = []
     
     if location.isdir():
+        plugin_name = location.basename()
+        if plugin_name == "":
+            plugin_name = location.dirname().basename()
+            
         md_path = location / "package.json"
         if not md_path.exists():
             md = {}
@@ -84,6 +88,7 @@ def get_metadata(location):
         else:
             md_text = md_path.text()
     else:
+        plugin_name = location.splitext()[0].basename()
         lines = location.lines()
         md_text = _parse_md_text(lines)
         
@@ -98,6 +103,7 @@ def get_metadata(location):
         errors = ["Problem with metadata JSON: %s" % (e)]
         md = {}
     
+    md['name'] = plugin_name
     return md, errors
 
 class Plugin(object):
