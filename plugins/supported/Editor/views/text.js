@@ -225,73 +225,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }
     },
 
-    _moveOrSelectEnd: function(shift, inLine) {
-        var lines = this.getPath('layoutManager.textStorage.lines');
-        var row = inLine ? this._selectedRange.end.row : lines.length - 1;
-        this.moveCursorTo({ row: row, column: lines[row].length }, shift);
-    },
-
-    _moveOrSelectNextWord: function(shiftDown) {
-        var lines = this.getPath('layoutManager.textStorage.lines');
-        var end = this._selectedRange.end;
-        var row = end.row, column = end.column;
-
-        var currentLine = lines[row];
-        var changedRow = false;
-
-        if (column >= currentLine.length) {
-            row++;
-            changedRow = true;
-            if (row < lines.length) {
-                column = 0;
-                currentLine = lines[row];
-            } else {
-                currentLine = '';
-            }
-        }
-
-        column = this._seekNextStop(currentLine, column, 1, changedRow);
-
-        this.moveCursorTo({ row: row, column: column }, shiftDown);
-    },
-
-    _moveOrSelectPreviousWord: function(shiftDown) {
-        var lines = this.getPath('layoutManager.textStorage.lines');
-        var end = this._selectedRange.end;
-        var row = end.row, column = end.column;
-
-        var currentLine = lines[row];
-        var changedRow = false;
-
-        if (column > currentLine.length) {
-            column = currentLine.length;
-        } else if (column == 0) {
-            row--;
-            changedRow = true;
-            if (row > -1) {
-                currentLine = lines[row];
-                column = currentLine.length;
-            } else {
-                currentLine = '';
-            }
-        }
-
-        column = this._seekNextStop(currentLine, column, -1, changedRow);
-
-        this.moveCursorTo({ row: row, column: column }, shiftDown);
-    },
-
-    _moveOrSelectStart: function(shift, inLine) {
-        var range = this._selectedRange;
-        var row = inLine ? range.end.row : 0;
-        var position = {
-            row: row,
-            column: 0
-        };
-
-        this.moveCursorTo(position, shift);
-    },
-
     _performVerticalKeyboardSelection: function(offset) {
         var textStorage = this.getPath('layoutManager.textStorage');
         var oldPosition = this._selectedRangeEndVirtual !== null ?
@@ -420,38 +353,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
         scrollView.scrollBy(offset.x, offset.y);
         this._drag();
-    },
-
-    _seekNextStop: function(text, column, dir, rowChanged) {
-        var isDelim;
-        var countDelim = 0;
-        var wasOverNonDelim = false;
-
-        if (dir < 0) {
-            column--;
-            if (rowChanged) {
-                countDelim = 1;
-            }
-        }
-
-        while (column < text.length && column > -1) {
-            isDelim = this.isDelimiter(text[column]);
-            if (isDelim) {
-                countDelim++;
-            } else {
-                wasOverNonDelim = true;
-            }
-            if ((isDelim || countDelim > 1) && wasOverNonDelim) {
-                break;
-            }
-            column += dir;
-        }
-
-        if (dir < 0) {
-            column++;
-        }
-
-        return column;
     },
 
     // Returns the character closest to the given point, obeying the selection
@@ -862,14 +763,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         this._scrollToPosition(this._selectedRange.end);
     },
 
-    moveDocEnd: function() {
-        this._moveOrSelectEnd(false, false);
-    },
-
-    moveDocStart: function() {
-        this._moveOrSelectStart(false, false);
-    },
-
     moveDown: function() {
         var selection = this._getVirtualSelection();
         var range = Range.normalizeRange(selection);
@@ -895,14 +788,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }
     },
 
-    moveLineEnd: function() {
-        this._moveOrSelectEnd(false, true);
-    },
-
-    moveLineStart: function () {
-        this._moveOrSelectStart(false, true);
-    },
-
     moveRight: function() {
         var range = Range.normalizeRange(this._selectedRange);
         if (this._rangeIsInsertionPoint(range)) {
@@ -921,14 +806,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }, { row: -1, column: 0 });
 
         this.moveCursorTo(position, false, true);
-    },
-
-    moveNextWord: function() {
-        this._moveOrSelectNextWord(false);
-    },
-
-    movePreviousWord: function() {
-        this._moveOrSelectPreviousWord(false);
     },
 
     parentViewFrameChanged: function() {
@@ -969,6 +846,9 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         this._scrollPage(true);
     },
 
+    /**
+     * Selects all characters in the buffer.
+     */
     selectAll: function() {
         var lines = this.getPath('layoutManager.textStorage.lines');
         var lastRow = lines.length - 1;
@@ -978,14 +858,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         });
     },
 
-    selectDocEnd: function() {
-        this._moveOrSelectEnd(true, false);
-    },
-
-    selectDocStart: function() {
-        this._moveOrSelectStart(true, false);
-    },
-
     selectDown: function() {
         this._performVerticalKeyboardSelection(1);
     },
@@ -993,22 +865,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     selectLeft: function() {
         this.moveCursorTo((this.getPath('layoutManager.textStorage').
             displacePosition(this._selectedRange.end, -1)), true);
-    },
-
-    selectLineEnd: function() {
-        this._moveOrSelectEnd(true, true);
-    },
-
-    selectLineStart: function() {
-        this._moveOrSelectStart(true, true);
-    },
-
-    selectNextWord: function() {
-        this._moveOrSelectNextWord(true);
-    },
-
-    selectPreviousWord: function() {
-        this._moveOrSelectPreviousWord(true);
     },
 
     selectRight: function() {
