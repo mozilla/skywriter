@@ -63,16 +63,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     _selectedRange: null,
     _selectedRangeEndVirtual: null,
 
-    _beginChangeGroup: function() {
-        if (this._inChangeGroup) {
-            throw new Error("TextView._beginChangeGroup() called while" +
-                " already in a change group");
-        }
-
-        this._inChangeGroup = true;
-        this.notifyDelegates('textViewBeganChangeGroup', this._selectedRange);
-    },
-
     _drag: function() {
         var point = this.convertFrameFromView(this._dragPoint);
         var offset = Rect.offsetFromRect(this.get('clippingFrame'), point);
@@ -214,16 +204,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }
     },
 
-    _endChangeGroup: function() {
-        if (!this._inChangeGroup) {
-            throw new Error("TextView._endChangeGroup() called while not" +
-                " in a change group");
-        }
-
-        this._inChangeGroup = false;
-        this.notifyDelegates('textViewEndedChangeGroup', this._selectedRange);
-    },
-
     _getVirtualSelection: function(startPropertyAsWell) {
         return {
             start:  startPropertyAsWell && this._selectedRangeEndVirtual ?
@@ -235,30 +215,29 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     // Replaces the selection with the given text and updates the selection
     // boundaries appropriately.
     _insertText: function(text) {
-        this._beginChangeGroup();
+        this.groupChanges(function() {
+            var textStorage = this.getPath('layoutManager.textStorage');
+            var range = Range.normalizeRange(this._selectedRange);
 
-        var textStorage = this.getPath('layoutManager.textStorage');
-        var range = Range.normalizeRange(this._selectedRange);
+            this._replaceCharacters(range, text);
 
-        this._replaceCharacters(range, text);
+            // Update the selection to point immediately after the inserted
+            // text.
+            var lines = text.split("\n");
 
-        // Update the selection to point immediately after the inserted text.
-        var lines = text.split("\n");
+            var destPosition;
+            if (lines.length > 1) {
+                destPosition = {
+                    row:    range.start.row + lines.length - 1,
+                    column: lines[lines.length - 1].length
+                };
+            } else {
+                destPosition = Range.addPositions(range.start,
+                    { row: 0, column: text.length });
+            }
 
-        var destPosition;
-        if (lines.length > 1) {
-            destPosition = {
-                row:    range.start.row + lines.length - 1,
-                column: lines[lines.length - 1].length
-            };
-        } else {
-            destPosition = Range.addPositions(range.start,
-                { row: 0, column: text.length });
-        }
-
-        this.moveCursorTo(destPosition);
-
-        this._endChangeGroup();
+            this.moveCursorTo(destPosition);
+        }.bind(this));
     },
 
     _invalidateSelection: function() {
@@ -346,49 +325,48 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     _performBackspaceOrDelete: function(isBackspace) {
-        this._beginChangeGroup();
+        this.groupChanges(function() {
+            var textStorage = this.getPath('layoutManager.textStorage');
+            var lines = textStorage.get('lines');
 
-        var textStorage = this.getPath('layoutManager.textStorage');
-        var lines = textStorage.get('lines');
+            var range = Range.normalizeRange(this._selectedRange);
+            if (this._rangeIsInsertionPoint(range)) {
+                if (isBackspace) {
+                    var start = range.start;
+                    var tabstop = settings.get('tabstop');
+                    var row = start.row, column = start.column;
+                    var line = lines[row];
 
-        var range = Range.normalizeRange(this._selectedRange);
-        if (this._rangeIsInsertionPoint(range)) {
-            if (isBackspace) {
-                var start = range.start;
-                var tabstop = settings.get('tabstop');
-                var row = start.row, column = start.column;
-                var line = lines[row];
-
-                if (column > 0 && column % tabstop === 0 &&
-                        new RegExp("^\\s{" + column + "}").test(line)) {
-                    // "Smart tab" behavior: delete a tab worth of whitespace.
-                    range = {
-                        start:  { row: row, column: column - tabstop },
-                        end:    range.end
-                    };
+                    if (column > 0 && column % tabstop === 0 &&
+                            new RegExp("^\\s{" + column + "}").test(line)) {
+                        // "Smart tab" behavior: delete a tab worth of
+                        // whitespace.
+                        range = {
+                            start:  { row: row, column: column - tabstop },
+                            end:    range.end
+                        };
+                    } else {
+                        // Just one character.
+                        range = {
+                            start:  textStorage.displacePosition(start, -1),
+                            end:    range.end
+                        };
+                    }
                 } else {
-                    // Just one character.
+                    // Extend the selection forward by one character.
                     range = {
-                        start:  textStorage.displacePosition(range.start, -1),
-                        end:    range.end
+                        start:  range.start,
+                        end:    textStorage.displacePosition(range.end, 1)
                     };
                 }
-            } else {
-                // Extend the selection forward by one character.
-                range = {
-                    start:  range.start,
-                    end:    textStorage.displacePosition(range.end, 1)
-                };
             }
-        }
 
-        this._replaceCharacters(range, "");
+            this._replaceCharacters(range, "");
 
-        // Position the insertion point at the start of all the ranges that
-        // were just deleted.
-        this.moveCursorTo(range.start);
-
-        this._endChangeGroup();
+            // Position the insertion point at the start of all the ranges that
+            // were just deleted.
+            this.moveCursorTo(range.start);
+        }.bind(this));
     },
 
     _performVerticalKeyboardSelection: function(offset) {
@@ -734,6 +712,29 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
      */
     getSelectedRange: function() {
         return Range.normalizeRange(this._selectedRange);
+    },
+
+    /**
+     * Groups all the changes in the callback into a single undoable action.
+     * Nested change groups are supported; one undoable action is created for
+     * the entire group of changes.
+     */
+    groupChanges: function(performChanges) {
+        if (this._inChangeGroup) {
+            performChanges();
+            return;
+        }
+
+        this._inChangeGroup = true;
+        this.notifyDelegates('textViewBeganChangeGroup', this._selectedRange);
+
+        try {
+            performChanges();
+        } finally {
+            this._inChangeGroup = false;
+            this.notifyDelegates('textViewEndedChangeGroup',
+                this._selectedRange);
+        }
     },
 
     init: function() {
