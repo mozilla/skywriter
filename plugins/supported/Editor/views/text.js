@@ -225,10 +225,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }
     },
 
-    _isDelimiter: function(character) {
-        return "\"',;.!~@#$%^&*?[]<>:/\\-+ \t".indexOf(character) !== -1;
-    },
-
     _moveOrSelectEnd: function(shift, inLine) {
         var lines = this.getPath('layoutManager.textStorage.lines');
         var row = inLine ? this._selectedRange.end.row : lines.length - 1;
@@ -439,7 +435,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }
 
         while (column < text.length && column > -1) {
-            isDelim = this._isDelimiter(text[column]);
+            isDelim = this.isDelimiter(text[column]);
             if (isDelim) {
                 countDelim++;
             } else {
@@ -695,6 +691,15 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }.bind(this));
     },
 
+    /**
+     * Returns true if the given character is a word separator.
+     *
+     * TODO: Should this be moved out of the text view?
+     */
+    isDelimiter: function(character) {
+        return "\"',;.!~@#$%^&*?[]<>:/\\-+ \t".indexOf(character) !== -1;
+    },
+
     keyDown: function(evt) {
         // SC puts keyDown and keyPress event together. Here we only want to
         // handle the real/browser's keydown event. To do so, we have to check
@@ -755,12 +760,12 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             }
 
             pos.column -= (pos.column == line.length ? 1 : 0);
-            var skipOnDelimiter = !this._isDelimiter(line[pos.column]);
+            var skipOnDelimiter = !this.isDelimiter(line[pos.column]);
 
             var thisTextView = this;
             var searchForDelimiter = function(pos, dir) {
                 for (pos; pos > -1 && pos < line.length; pos += dir) {
-                    if (thisTextView._isDelimiter(line[pos]) ===
+                    if (thisTextView.isDelimiter(line[pos]) ===
                             skipOnDelimiter) {
                         break;
                     }
