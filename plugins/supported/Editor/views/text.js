@@ -300,32 +300,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             (visibleFrame.height + this._lineAscent) * (scrollUp ? -1 : 1));
     },
 
-    _scrollToPosition: function(position) {
-        var scrollable = this._scrollView();
-        if (SC.none(scrollable)) {
-            return;
-        }
-
-        var rect = this.get('layoutManager').
-            characterRectForPosition(position);
-        var rectX = rect.x, rectY = rect.y;
-        var rectWidth = rect.width, rectHeight = rect.height;
-
-        var frame = this.get('clippingFrame');
-        var frameX = frame.x, frameY = frame.y;
-
-        var padding = this.get('padding');
-        var width = frame.width - padding.right;
-        var height = frame.height - padding.bottom;
-
-        scrollable.scrollTo(rectX >= frameX &&
-            rectX + rectWidth < frameX + width ?
-            frameX : rectX - width / 2 + rectWidth / 2,
-            rectY >= frameY &&
-            rectY + rectHeight < frameY + height ?
-            frameY : rectY - height / 2 + rectHeight / 2);
-    },
-
     /**
      * @private
      *
@@ -760,7 +734,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             this._selectedRangeEndVirtual = null;
         }
 
-        this._scrollToPosition(this._selectedRange.end);
+        this.scrollToPosition(this._selectedRange.end);
     },
 
     moveDown: function() {
@@ -830,11 +804,11 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     scrollDocStart: function() {
-        this._scrollToPosition({ column: 0, row: 0 });
+        this.scrollToPosition({ column: 0, row: 0 });
     },
 
     scrollDocEnd: function() {
-        this._scrollToPosition(this.getPath('layoutManager.textStorage').
+        this.scrollToPosition(this.getPath('layoutManager.textStorage').
             range().end);
     },
 
@@ -844,6 +818,36 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     scrollPageUp: function() {
         this._scrollPage(true);
+    },
+
+    /**
+     * If this view is in a scrollable container, scrolls to the given
+     * character position.
+     */
+    scrollToPosition: function(position) {
+        var scrollable = this._scrollView();
+        if (SC.none(scrollable)) {
+            return;
+        }
+
+        var rect = this.get('layoutManager').
+            characterRectForPosition(position);
+        var rectX = rect.x, rectY = rect.y;
+        var rectWidth = rect.width, rectHeight = rect.height;
+
+        var frame = this.get('clippingFrame');
+        var frameX = frame.x, frameY = frame.y;
+
+        var padding = this.get('padding');
+        var width = frame.width - padding.right;
+        var height = frame.height - padding.bottom;
+
+        scrollable.scrollTo(rectX >= frameX &&
+            rectX + rectWidth < frameX + width ?
+            frameX : rectX - width / 2 + rectWidth / 2,
+            rectY >= frameY &&
+            rectY + rectHeight < frameY + height ?
+            frameY : rectY - height / 2 + rectHeight / 2);
     },
 
     /**
@@ -892,7 +896,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         this._rearmInsertionPointBlinkTimer();
 
         if (ensureVisible) {
-            this._scrollToPosition(this._selectedRange.end);
+            this.scrollToPosition(this._selectedRange.end);
         }
     },
 
