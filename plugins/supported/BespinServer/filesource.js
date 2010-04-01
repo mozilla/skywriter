@@ -43,33 +43,21 @@ var pathUtil = require("Filesystem:path");
 exports.BespinFileSource = SC.Object.extend({
     server: server,
     
-    loadDirectory: function(directory, deep) {
-        var path = directory.get("originPath");
-        var prefix = deep ? "/file/list_all/" : "/file/list/";
-        var url = pathUtil.combine(prefix, path || '/');
+    loadAll: function() {
         var opts = {
-            evalJSON: true,
-            log: "Listing files in: " + url
+            evalJSON: true
         };
-        return this.server.request('GET', url, null, opts);
+        return this.server.request('GET', "/file/list_all/", null, opts);
     },
     
-    loadContents: function(file) {
-        var path = file.get("originPath");
+    loadContents: function(path) {
         var url = pathUtil.combine("/file/at/", path);
-        var pr = this.server.request('GET', url, null);
-        return pr.then(function(contents) {
-            return {file: file, contents: contents};
-        });
+        return this.server.request('GET', url, null);
     },
     
-    saveContents: function(file, contents) {
-        var path = file.get("originPath");
+    saveContents: function(path, contents) {
         var url = pathUtil.combine("/file/at/", path);
-        var pr = this.server.request('PUT', url, contents);
-        return pr.then(function(contents) {
-            return {file: file, contents: contents};
-        });
+        return this.server.request('PUT', url, contents);
     },
     
     remove: function(pathObject) {
@@ -79,12 +67,8 @@ exports.BespinFileSource = SC.Object.extend({
         return pr;
     },
     
-    makeDirectory: function(pathObject) {
-        var path = pathObject.get("originPath");
+    makeDirectory: function(path) {
         var url = pathUtil.combine("/file/at/", path);
-        var pr = this.server.request("PUT", url, null);
-        return pr.then(function() {
-            return pathObject;
-        });
+        return this.server.request("PUT", url, null);
     }
 });

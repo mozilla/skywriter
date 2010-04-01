@@ -46,24 +46,20 @@ var DummyServer = SC.Object.extend({
 exports.testLoadDirectory = function() {
     var server = DummyServer.create({
         responseData: [
-            {name: "foo.js"}
+            "foo.js"
         ]
     });
     var source = filesource.BespinFileSource.create({
         server: server
     });
     
-    var root = fs.Directory.create({
-        source: source
-    });
-    
-    var pr = source.loadDirectory(root, true);
+    var pr = source.loadAll();
     t.ok(typeof(pr.then) == "function", "expected to get Promise back");
     t.equal(server.method, "GET");
     t.equal(server.url, "/file/list_all/");
     var testpr = new Promise();
     pr.then(function(data) {
-        t.equal(data[0].name, "foo.js", "expected dummy data passed through");
+        t.equal(data[0], "foo.js", "expected dummy data passed through");
         testpr.resolve();
     });
     return testpr;
@@ -77,20 +73,13 @@ exports.testLoadContents = function() {
         server: server
     });
     
-    var root = fs.Directory.create({
-        source: source
-    });
-    
-    var f = root.getObject("myfile.txt");
-    
-    var pr = source.loadContents(f);
+    var pr = source.loadContents("myfile.txt");
     t.ok(typeof(pr.then) == "function", "expected to get Promise back");
     t.equal(server.method, "GET");
     t.equal(server.url, "/file/at/myfile.txt");
     var testpr = new Promise();
-    pr.then(function(data) {
-        t.equal(data.file, f, "expected same file back");
-        t.equal(data.contents, "This is the exciting data in the file.");
+    pr.then(function(contents) {
+        t.equal(contents, "This is the exciting data in the file.");
         testpr.resolve();
     });
     return testpr;
@@ -103,13 +92,7 @@ exports.testSaveContents = function() {
         server: server
     });
     
-    var root = fs.Directory.create({
-        source: source
-    });
-    
-    var f = root.getObject("myfile.txt");
-    
-    var pr = source.saveContents(f, "new file contents here");
+    var pr = source.saveContents("myfile.txt", "new file contents here");
     t.ok(typeof(pr.then) == "function", "expected to get Promise back");
     t.equal(server.method, "PUT");
     t.equal(server.payload, "new file contents here");

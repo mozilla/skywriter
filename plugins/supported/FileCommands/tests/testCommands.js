@@ -45,7 +45,7 @@ var source = exports.source = DummyFileSource.create({
 });
 
 var getNewRoot = function() {
-    return fs.Directory.create({
+    return fs.Filesystem.create({
         source: source
     });
 };
@@ -88,7 +88,7 @@ exports.testOpenFileWithNoOpenFile = function() {
     request.promise.then(function() {
         var f = env.get("file");
         t.ok(!request.error, "Should not be in error state");
-        t.equal(f.get("path"), "/foo/bar/3.txt", "File should have been set");
+        t.equal(f, "/foo/bar/3.txt", "File should have been set");
         testpr.resolve();
     });
     
@@ -116,7 +116,7 @@ exports.testFilesCommandDefaultsToRoot = function() {
 exports.testFilesAreRelativeToCurrentOpenFile = function() {
     var env = getEnv();
     var buffer = env.get("buffer");
-    buffer.changeFileOnly(env.get("files").getObject("foo/1.txt"));
+    buffer.changeFileOnly("foo/1.txt");
     
     var testpr = new Promise();
     
@@ -136,7 +136,7 @@ exports.testFilesAreRelativeToCurrentOpenFile = function() {
 exports.testFilesListingInDirectoryRelativeToOpenFile = function() {
     var env = getEnv();
     var buffer = env.get("buffer");
-    buffer.changeFileOnly(env.get("files").getObject("foo/1.txt"));
+    buffer.changeFileOnly("foo/1.txt");
     var testpr = new Promise();
     
     var request = Request.create();
@@ -156,23 +156,17 @@ exports.testMakeDirectoryForNewDirectory = function() {
     var testpr = new Promise();
     var files = env.get("files");
     
-    // we want the parent directory to be marked READY first
-    // to pull out a possible bug situation.
-    files.loadObject("foo/").then(function() {
-        request.promise.then(function() {
-            var parentdir = files.getObject("foo/");
-            var directories = parentdir.get("directories");
-            t.equal(directories.length, 2, "Expected two directories");
-            t.equal(directories[1].name, "one/", "Expected it to be the directory we created");
-            var newdir = files.getObject("foo/one/");
-            t.equal(newdir.get("status"), fs.READY, "Directory should be marked as ready, since it was just created");
+    request.promise.then(function() {
+        files.listDirectory("/foo/").then(function(contents) {
+            t.equal(contents.length, 4, "should have four items in directory");
+            t.equal(contents[3], "one/", "new directory should be last item");
             testpr.resolve();
-        }, function(error) {
-            testpr.reject(error.message);
         });
-
-        FileCommands.mkdirCommand(env, {path: "/foo/one/"}, request);
+    }, function(error) {
+        testpr.reject(error.message);
     });
+
+    FileCommands.mkdirCommand(env, {path: "/foo/one/"}, request);
     
     return testpr;
 };

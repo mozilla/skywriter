@@ -96,7 +96,7 @@ var BespinFileSource = require("BespinServer:filesource").BespinFileSource;
 var ServerPersister = require("BespinServer:settings").ServerPersister;
 var themeManager = require('ThemeManager').themeManager;
 var settings = require("Settings").settings;
-var Directory = require("Filesystem").Directory;
+var Filesystem = require("Filesystem").Filesystem;
 var editsession = require("EditSession");
 
 exports.session = editsession.EditSession.create();
@@ -227,7 +227,7 @@ exports.applicationController = SC.Object.create({
 
     loginControllerAcceptedLogin: function(sender) {
         exports.session.set("currentUser", sender);
-        exports.files = Directory.create({source: BespinFileSource.create()});
+        exports.files = Filesystem.create({source: BespinFileSource.create()});
         registerUserPlugins();
         this._showEditor();
     },

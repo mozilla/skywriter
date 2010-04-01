@@ -49,11 +49,10 @@ exports.ServerPersister = SC.Object.extend({
 
     loadInitialValues: function(settings) {
         var files = catalog.getObject("files");
-        var settingsFile = files.getObject("BespinSettings/settings");
-        settingsFile.loadContents().then(function(result) {
+        files.loadContents("BespinSettings/settings").then(function(contents) {
             var data;
             try {
-                data = JSON.parse(result.contents);
+                data = JSON.parse(contents);
             } catch (e) {
                 console.error("Unable to parse settings file: " + e);
                 data = {};

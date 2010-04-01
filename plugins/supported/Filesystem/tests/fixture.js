@@ -76,27 +76,11 @@ exports.DummyFileSource = SC.Object.extend({
         return pr;
     },
     
-    loadDirectory: function(directory, deep) {
-        this.requests.push(["loadDirectory", arguments]);
-        
-        var checkStatus = this.get("checkStatus");
-        if (checkStatus != null) {
-            t.equal(directory.get("status"), checkStatus, 
-                "loadDirectory: directory status not as expected");
-            this.set("checkStatus", null);
-        }
-        
-        var pr = new Promise();
-        var matches = this._findMatching(directory.get("path"), deep);
-        pr.resolve(matches);
-        return pr;
-    },
-    
-    loadContents: function(file) {
+    loadContents: function(path) {
         this.requests.push(["loadContents", arguments]);
         var pr = new Promise();
-        var matches = this._findMatching(file.get("path"));
-        pr.resolve({file: file, contents: matches.contents});
+        var matches = this._findMatching(path);
+        pr.resolve(matches.contents);
         return pr;
     },
 
@@ -116,10 +100,11 @@ exports.DummyFileSource = SC.Object.extend({
         return pr;
     },
     
-    makeDirectory: function(pathObj) {
+    makeDirectory: function(path) {
         this.requests.push(["makeDirectory", arguments]);
         var pr = new Promise();
-        pr.resolve(pathObj);
+        this.files.push({name: path});
+        pr.resolve(path);
         return pr;
     },
     

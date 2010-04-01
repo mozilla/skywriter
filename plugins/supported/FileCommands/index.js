@@ -60,11 +60,10 @@ exports.filesCommand = function(env, args, request) {
     }
 
     request.async();
-    env.get("files").loadPath(path).then(function(dir) {
+    env.get("files").listDirectory(path).then(function(contents) {
         var files = "";
-        var contents = dir.get("contents");
         for (var x = 0; x < contents.length; x++) {
-            files += contents[x].get("name") + "<br/>";
+            files += contents[x] + "<br/>";
         }
         request.done(files);
 
@@ -151,9 +150,8 @@ exports.openCommand = function(env, args, request) {
     path = getCompletePath(env, path);
 
     // TODO: handle line number in args
-    var file = files.getObject(path);
     request.async();
-    buffer.changeFile(file).then(
+    buffer.changeFile(path).then(
         function() {
             request.done();
         },

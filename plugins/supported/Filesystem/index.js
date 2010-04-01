@@ -135,6 +135,10 @@ exports.Filesystem = SC.Object.extend({
                     segmentEnd = file.length;
                 }
                 var segment = file.substring(pathlength, segmentEnd);
+                if (segment == "") {
+                    continue;
+                }
+                
                 if (segment != lastSegment) {
                     lastSegment = segment;
                     result.push(segment);
@@ -142,6 +146,34 @@ exports.Filesystem = SC.Object.extend({
             }
             pr.resolve(result);
         }.bind(this));
+        return pr;
+    },
+    
+    // Loads the contents of a file
+    loadContents: function(path) {
+        path = pathUtil.trimLeadingSlash(path);
+        var source = this.get("source");
+        return source.loadContents(path);
+    },
+    
+    makeDirectory: function(path) {
+        path = pathUtil.trimLeadingSlash(path);
+        if (!pathUtil.isDir(path)) {
+            path += "/";
+        }
+        
+        var self = this;
+        var pr = new Promise();
+        this._load().then(function() {
+            var source = self.get("source");
+            source.makeDirectory(path).then(function() {
+                self._files.push(path);
+                // O(n log n), eh? but all in C so it's possible
+                // that this may be quicker than binary search + splice
+                self._files.sort();
+                pr.resolve();
+            });
+        });
         return pr;
     }
 });

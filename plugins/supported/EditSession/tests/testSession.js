@@ -52,21 +52,19 @@ var source = DummyFileSource.create({
 });
 
 exports.testBufferFileChange = function() {
-    var root = fs.Directory.create({
+    var root = fs.Filesystem.create({
         source: source
     });
     var buffer = editsession.Buffer.create();
     t.ok(buffer.get("model") != null, 
         "Model should be set to a TextStorage by default");
     t.ok(buffer.untitled(), "Buffer should initially be untitled");
-    f = root.getObject("atTheTop.js");
-    t.ok(SC.instanceOf(f, fs.File), "Should have gotten a file object");
-    buffer.changeFileOnly(f);
+    buffer.changeFileOnly("atTheTop.js");
     t.ok(!buffer.untitled(), "Buffer should no longer be untitled");
     t.equal("", buffer.get("model").get("value"), "Should be empty now");
     buffer.changeFileOnly(null);
     t.ok(buffer.untitled(), "Buffer should be untitled again");
-    buffer.set("file", f);
+    buffer.set("file", "atTheTop.js");
     var pr = new Promise();
     setTimeout(function() {
         var newtext = buffer.get("model").get("value");
@@ -83,12 +81,11 @@ exports.testBufferFileChange = function() {
 };
 
 exports.testBufferFileChangeWithCallback = function() {
-    var root = fs.Directory.create({
+    var root = fs.Filesystem.create({
         source: source
     });
     var buffer = editsession.Buffer.create();
-    f = root.getObject("atTheTop.js");
-    var pr = buffer.changeFile(f);
+    var pr = buffer.changeFile("atTheTop.js");
     var testpr = pr.then(function(b) {
         t.equal(b, buffer, "should have gotten the buffer object in");
         t.equal(b.get("model").get("value"), "the top file", "contents should be loaded");

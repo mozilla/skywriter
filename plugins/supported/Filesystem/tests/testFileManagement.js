@@ -82,7 +82,7 @@ exports.testPrefixSearch = function() {
     t.equal(ps(arr, "hello"), 45, "middle match with more");
 };
 
-exports.testLoading = function() {
+exports.testDirectoryListing = function() {
     source.reset();
     var root = getNewRoot();
     var testpr = new Promise();
@@ -96,5 +96,28 @@ exports.testLoading = function() {
     
     t.deepEqual(source.requests[0], ["loadAll"]);
     
+    return testpr;
+};
+
+exports.testFileContents = function() {
+    source.reset();
+    var root = getNewRoot();
+    var testpr = new Promise();
+    
+    root.loadContents("atTheTop.js").then(function(contents) {
+        t.equal(contents, "the top file");
+        testpr.resolve();
+    });
+    return testpr;
+};
+
+exports.testDirectoryCreation = function() {
+    source.reset();
+    var root = getNewRoot();
+    var testpr = new Promise();
+    root.makeDirectory("acme/insurance").then(function() {
+        t.equal(root._files[0], "acme/insurance/");
+        testpr.resolve();
+    });
     return testpr;
 };

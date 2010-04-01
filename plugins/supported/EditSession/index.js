@@ -65,7 +65,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
             return;
         }
 
-        var match = /\.([^.]+)$/.exec(file.get('name'));
+        var match = /\.([^.]+)$/.exec(file);
         var ext = match === null ? '' : match[1];
         syntaxManager.setInitialContextFromExt(ext);
     },
@@ -98,10 +98,12 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
                 var model = self.get("model");
                 model.replaceCharacters(model.range(), "");
             } else {
-                newFile.loadContents().then(function(result) {
+                var files = catalog.getObject("files");
+                files.loadContents(newFile).then(function(contents) {
+                    console.log("SET FILE CONTENTS: ", contents);
                     SC.run(function() {
                         var model = self.get("model");
-                        model.replaceCharacters(model.range(), result.contents);
+                        model.replaceCharacters(model.range(), contents);
                     });
                 });
             }
@@ -136,10 +138,12 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
             return pr;
         }
         
-        return newFile.loadContents().then(function(result) {
+        var files = catalog.getObject("files");
+        
+        return files.loadContents(newFile).then(function(contents) {
             SC.run(function() {
                 var model = self.get("model");
-                model.replaceCharacters(model.range(), result.contents);
+                model.replaceCharacters(model.range(), contents);
             });
             return self;
         });
@@ -237,7 +241,7 @@ exports.EditSession = SC.Object.extend({
     
     bufferFileChanged: function(sender, file) {
         if (!SC.none(file)) {
-            this.get('history').addPath(file.get('path'));
+            this.get('history').addPath(file);
         }
         catalog.getExtensions("bufferFileChanged").forEach(function (ext) {
             ext.load(function (f) {
@@ -264,7 +268,7 @@ exports.EditSession = SC.Object.extend({
             if (!file) {
                 path = "/" + path;
             } else {
-                path = file.get("dirname") + path;
+                path = m_path.parentdir(file) + path;
             }
         }
 
@@ -277,8 +281,7 @@ exports.EditSession = SC.Object.extend({
             return;
         }
 
-        var files = catalog.getObject('files');
-        this.get('currentBuffer').changeFile(files.getObject(recent[0]));
+        this.get('currentBuffer').changeFile(recent[0]);
     },
 
     init: function() {
