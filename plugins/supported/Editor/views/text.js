@@ -970,7 +970,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     selectAll: function() {
-        var range = this._selectedRange;
         var lines = this.getPath('layoutManager.textStorage.lines');
         var lastRow = lines.length - 1;
         this.setSelection({
