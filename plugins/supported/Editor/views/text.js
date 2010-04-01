@@ -333,7 +333,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
                 }
             }
 
-            this._replaceCharacters(range, "");
+            this.replaceCharacters(range, "");
 
             // Position the insertion point at the start of all the ranges that
             // were just deleted.
@@ -371,19 +371,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             interval:   750,
             repeats:    true
         });
-    },
-
-    _replaceCharacters: function(oldRange, characters) {
-        if (!this._inChangeGroup) {
-            throw new Error("TextView._replaceCharacters() called without" +
-                " a change group");
-        }
-        oldRange = Range.normalizeRange(oldRange);
-        this.notifyDelegates('textViewWillReplaceRange', oldRange);
-        this.getPath('layoutManager.textStorage').replaceCharacters(oldRange,
-            characters);
-        this.notifyDelegates('textViewReplacedCharacters', oldRange,
-            characters);
     },
 
     // Moves the selection, if necessary, to keep all the positions pointing to
@@ -748,7 +735,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             var textStorage = this.getPath('layoutManager.textStorage');
             var range = Range.normalizeRange(this._selectedRange);
 
-            this._replaceCharacters(range, text);
+            this.replaceCharacters(range, text);
 
             // Update the selection to point immediately after the inserted
             // text.
@@ -1015,6 +1002,22 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     parentViewFrameChanged: function() {
         arguments.callee.base.apply(this, arguments);
         this._resize();
+    },
+
+    /**
+     * As an undoable action, replaces the characters within the old range with
+     * the supplied characters.
+     */
+    replaceCharacters: function(oldRange, characters) {
+        this.groupChanges(function() {
+            oldRange = Range.normalizeRange(oldRange);
+            this.notifyDelegates('textViewWillReplaceRange', oldRange);
+
+            var textStorage = this.getPath('layoutManager.textStorage');
+            textStorage.replaceCharacters(oldRange, characters);
+            this.notifyDelegates('textViewReplacedCharacters', oldRange,
+                characters);
+        }.bind(this));
     },
 
     scrollDocStart: function() {
