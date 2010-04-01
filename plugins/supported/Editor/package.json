@@ -16,14 +16,28 @@
             "name": "backspace",
             "key": "backspace",
             "predicates": { "isTextView": true },
-            "pointer": "views/text#textViewCommand"
+            "pointer": "commands/editing#backspace"
         },
         {
             "ep": "command",
-            "name": "deleteSelectionOrNextCharacter",
+            "name": "delete",
             "key": "delete",
             "predicates": { "isTextView": true },
-            "pointer": "views/text#textViewCommand"
+            "pointer": "commands/editing#deleet"
+        },
+        {
+            "ep": "command",
+            "name": "newline",
+            "key": "return",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/editing#newline"
+        },
+        {
+            "ep": "command",
+            "name": "tab",
+            "key": "tab",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/editing#tab"
         },
         {
             "ep": "command",
@@ -99,13 +113,6 @@
             "ep": "command",
             "name": "moveUp",
             "key": "up",
-            "predicates": { "isTextView": true },
-            "pointer": "views/text#textViewCommand"
-        },
-        {
-            "ep": "command",
-            "name": "newline",
-            "key": "return",
             "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },
@@ -211,13 +218,6 @@
             "ep": "command",
             "name": "selectUp",
             "key": "shift_up",
-            "predicates": { "isTextView": true },
-            "pointer": "views/text#textViewCommand"
-        },
-        {
-            "ep": "command",
-            "name": "tab",
-            "key": "tab",
             "predicates": { "isTextView": true },
             "pointer": "views/text#textViewCommand"
         },

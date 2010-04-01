@@ -296,51 +296,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         this.moveCursorTo(position, shift);
     },
 
-    _performBackspaceOrDelete: function(isBackspace) {
-        this.groupChanges(function() {
-            var textStorage = this.getPath('layoutManager.textStorage');
-            var lines = textStorage.get('lines');
-
-            var range = Range.normalizeRange(this._selectedRange);
-            if (this._rangeIsInsertionPoint(range)) {
-                if (isBackspace) {
-                    var start = range.start;
-                    var tabstop = settings.get('tabstop');
-                    var row = start.row, column = start.column;
-                    var line = lines[row];
-
-                    if (column > 0 && column % tabstop === 0 &&
-                            new RegExp("^\\s{" + column + "}").test(line)) {
-                        // "Smart tab" behavior: delete a tab worth of
-                        // whitespace.
-                        range = {
-                            start:  { row: row, column: column - tabstop },
-                            end:    range.end
-                        };
-                    } else {
-                        // Just one character.
-                        range = {
-                            start:  textStorage.displacePosition(start, -1),
-                            end:    range.end
-                        };
-                    }
-                } else {
-                    // Extend the selection forward by one character.
-                    range = {
-                        start:  range.start,
-                        end:    textStorage.displacePosition(range.end, 1)
-                    };
-                }
-            }
-
-            this.replaceCharacters(range, "");
-
-            // Position the insertion point at the start of all the ranges that
-            // were just deleted.
-            this.moveCursorTo(range.start);
-        }.bind(this));
-    },
-
     _performVerticalKeyboardSelection: function(offset) {
         var textStorage = this.getPath('layoutManager.textStorage');
         var oldPosition = this._selectedRangeEndVirtual !== null ?
@@ -599,14 +554,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     /**
-     * Deletes the selection or the previous character, if the selection is an
-     * insertion point.
-     */
-    backspace: function() {
-        this._performBackspaceOrDelete(true);
-    },
-
-    /**
      * Toggles the visible state of the insertion point.
      */
     blinkInsertionPoint: function() {
@@ -641,14 +588,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }
 
         return cutData;
-    },
-
-    /**
-     * Deletes the selection or the next character, if the selection is an
-     * insertion point.
-     */
-    deleteSelectionOrNextCharacter: function() {
-        this._performBackspaceOrDelete(false);
     },
 
     /**
@@ -987,18 +926,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         this._moveOrSelectPreviousWord(false);
     },
 
-    /**
-     * Inserts a newline at the insertion point.
-     */
-    newline: function() {
-        // Insert a newline, and copy the spaces at the beginning of the
-        // current row to autoindent.
-        var position = this._selectedRange.start;
-        this.insertText("\n" + /^\s*/.exec(this.
-            getPath('layoutManager.textStorage.lines')[position.row].
-            substring(0, position.column))[0]);
-    },
-
     parentViewFrameChanged: function() {
         arguments.callee.base.apply(this, arguments);
         this._resize();
@@ -1107,18 +1034,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         if (ensureVisible) {
             this._scrollToPosition(this._selectedRange.end);
         }
-    },
-
-    tab: function() {
-        var tabstop = settings.get('tabstop');
-        var count = tabstop - this._selectedRange.start.column % tabstop;
-
-        var str = "";
-        for (var i = 0; i < count; i++) {
-            str += " ";
-        }
-
-        this.insertText(str);
     },
 
     textInserted: function(text) {
