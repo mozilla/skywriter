@@ -46,7 +46,7 @@ var env = require('Canon:environment').global;
 var project = require('Project');
 var server = require("BespinServer").server;
 
-var mobwrite = require("Collab:mobwrite/core").mobwrite;
+var mobwrite = require("collab:mobwrite/core").mobwrite;
 var diff_match_patch = require("Diff");
 
 /**
