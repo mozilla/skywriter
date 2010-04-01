@@ -44,6 +44,7 @@ var SC = require('sproutcore/runtime').SC;
 var console = require('bespin:console').console;
 var env = require('Canon:environment').global;
 var project = require('Project');
+var server = require("BespinServer").server;
 
 var mobwrite = require("Collab:mobwrite/core").mobwrite;
 var diff_match_patch = require("Diff");
@@ -534,6 +535,7 @@ exports.mobwriteFileChanged = function (file) {
 };
 
 exports.mobwriteMsg = function (msg) {
-	console.log("TO mobwrite:", msg.text);
+	console.log("TO mobwrite:\n", msg.text);
 	mobwrite.reflect(msg.text);
+	server.schedulePoll(mobwrite.syncInterval);
 };

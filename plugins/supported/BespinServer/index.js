@@ -61,8 +61,9 @@ exports.server = SC.Object.create({
         lo:   200,  // the lowest interval in ms
         hi:   5000, // the highest interval in ms
         step: 100,  // the change step in ms
-        threshold: 3,   // number of response items
-        current:   5000 // the current interval in ms
+        threshold: 3,    // number of response items
+        current:   5000, // the current interval in ms
+        handle:    null
     },
 
     /**
@@ -321,37 +322,54 @@ exports.server = SC.Object.create({
     /**
      * Starts up message retrieve for this user.
      */
-    _poll: function(mobwritePayload) {
+    _poll: function() {
+        var mobwriteInstance = catalog.getExtensions("mobwriteinstance");
         var self = this;
-
-        this.request('POST', '/messages/', mobwritePayload || null, {
+        if (mobwriteInstance && mobwriteInstance.length) {
+            // always use the first instance
+            mobwriteInstance[0].load(function (mobwrite) {
+                self._doPoll(mobwrite.collect());
+            });
+        } else {
+            self._doPoll(null);
+        }
+    },
+    
+    /**
+     * Starts I/O for the message retrieval.
+     */
+    _doPoll: function(mobwritePayload) {
+        if (mobwritePayload) {
+            console.log("FROM mobwrite:\n" + mobwritePayload);
+        }
+        var self = this;
+        this.request('POST', '/messages/', mobwritePayload, {
             evalJSON: true,
             onSuccess: function(messages) {
+                var interval = self._interval;
+                // kill the current timeout
+                if (interval.handle) {
+                    clearTimeout(interval.handle);
+                    interval.handle = null;
+                }
 
+                // process all messages
                 for (var i = 0; i < messages.length; i++) {
                     self._processResponse(messages[i]);
                 }
 
-                /*
-                setTimeout(function() {
-                    self._checkPolling();
-                }, 1000);
-                */
-                //self._schedulePoll(messages.length);
+                // schedule next poll, if not scheduled yet
+                if (!self._interval) {
+                    self._schedulePoll(messages.length);
+                }
             },
             onFailure: function(message) {
                 self._processResponse(message);
-
-                /*
-                setTimeout(function() {
-                    self._checkPolling();
-                }, 1000);
-                */
-                //self._schedulePoll(0);
+                self._schedulePoll(0);
             }
         });
     },
-    
+
     /**
      * Schedules the next poll.
      */
@@ -359,8 +377,13 @@ exports.server = SC.Object.create({
         var self = this;
         var interval = this._interval;
         var current  = interval.current;
+        // kill the current timeout
+        if (interval.handle) {
+            clearTimeout(interval.handle);
+            interval.handle = null;
+        }
         // do we need to update the polling interval?
-        if (n == 0) {
+        if (n <= 1) {
             // we got nothing: poll less frequently
             current += interval.step;
         } else if (n >= interval.threshold) {
@@ -372,9 +395,35 @@ exports.server = SC.Object.create({
         // save new polling interval
         interval.current = current;
         // schedule the next poll
-        setTimeout(function() {
+        interval.handle = setTimeout(function() {
             self._poll();
         }, current);
+    },
+    
+    /**
+     * Schedule the next poll.
+     */
+    schedulePoll: function (ms) {
+        var self = this;
+        var interval = this._interval;
+        if (typeof ms == "number" && (!interval.handle || ms < interval.current)) {
+            // kill the current timeout
+            if (interval.handle) {
+                clearTimeout(interval.handle);
+                interval.handle = null;
+            }
+            if (ms <= 0) {
+                // poll now
+                this._poll();
+            } else {
+                // save new polling interval
+                interval.current = ms;
+                // schedule the next poll
+                interval.handle = setTimeout(function() {
+                    self._poll();
+                }, ms);
+            }
+        }
     },
 
     /**
@@ -784,4 +833,4 @@ exports.server = SC.Object.create({
 
 // start polling
 
-//exports.server._poll();
+exports.server._poll();

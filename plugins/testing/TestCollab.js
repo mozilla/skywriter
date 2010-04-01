@@ -51,7 +51,6 @@
 
 var console = require('bespin:console').console;
 var server = require("BespinServer").server;
-var mobwrite = require("Collab:mobwrite/core").mobwrite;
 
 
 // =============================================================================
@@ -60,7 +59,5 @@ var mobwrite = require("Collab:mobwrite/core").mobwrite;
  * Add a 'poll' command that polls messages for the current user, used for testing.
  */
 exports.pollCommand = function(env, args, request) {
-	var msg = mobwrite.collect();
-	console.log("FROM mobwrite:", msg);
-	server._poll(msg);
+	server._poll();
 };

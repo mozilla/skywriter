@@ -1504,6 +1504,8 @@ mobwrite.reflect = function(text) {
       }
     }
   }
+
+  mobwrite.computeSyncInterval_();
 };
 
 // Module exports

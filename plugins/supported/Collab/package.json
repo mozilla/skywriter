@@ -25,6 +25,10 @@
 			"name": "mobwrite",
 			"pointer": "#mobwriteMsg"
 		},
+		{
+			"ep": "mobwriteinstance",
+			"pointer": "mobwrite/core#mobwrite"
+		},
         {
             "ep": "command",
             "name": "follow",
