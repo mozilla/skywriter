@@ -212,34 +212,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         };
     },
 
-    // Replaces the selection with the given text and updates the selection
-    // boundaries appropriately.
-    _insertText: function(text) {
-        this.groupChanges(function() {
-            var textStorage = this.getPath('layoutManager.textStorage');
-            var range = Range.normalizeRange(this._selectedRange);
-
-            this._replaceCharacters(range, text);
-
-            // Update the selection to point immediately after the inserted
-            // text.
-            var lines = text.split("\n");
-
-            var destPosition;
-            if (lines.length > 1) {
-                destPosition = {
-                    row:    range.start.row + lines.length - 1,
-                    column: lines[lines.length - 1].length
-                };
-            } else {
-                destPosition = Range.addPositions(range.start,
-                    { row: 0, column: text.length });
-            }
-
-            this.moveCursorTo(destPosition);
-        }.bind(this));
-    },
-
     _invalidateSelection: function() {
         var layoutManager = this.get('layoutManager');
         var range = Range.normalizeRange(this._selectedRange);
@@ -596,16 +568,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     acceptsFirstResponder: true,
 
-    blinkInsertionPoint: function() {
-        this._insertionPointVisible = !this._insertionPointVisible;
-        this._invalidateSelection();
-    },
-
-    clippingFrameChanged: function() {
-        arguments.callee.base.apply(this, arguments);
-        this._updateSyntax(null);
-    },
-
     /**
      * @property{Boolean}
      *
@@ -632,12 +594,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
      */
     padding: { bottom: 0, right: 0 },
 
-    parentViewFrameChanged: function() {
-        arguments.callee.base.apply(this, arguments);
-
-        this._resize();
-    },
-
     /**
      * @property
      *
@@ -663,10 +619,33 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         this._performBackspaceOrDelete(true);
     },
 
+    /**
+     * Toggles the visible state of the insertion point.
+     */
+    blinkInsertionPoint: function() {
+        this._insertionPointVisible = !this._insertionPointVisible;
+        this._invalidateSelection();
+    },
+
+    /**
+     * Updates the syntax information. Automatically called when the clipping
+     * frame of the text view changes.
+     */
+    clippingFrameChanged: function() {
+        arguments.callee.base.apply(this, arguments);
+        this._updateSyntax(null);
+    },
+
+    /**
+     * Returns the selected characters.
+     */
     copy: function() {
         return this.getSelectedCharacters();
     },
 
+    /**
+     * Removes the selected characters from the text buffer and returns them.
+     */
     cut: function() {
         var cutData = this.getSelectedCharacters();
 
@@ -695,6 +674,13 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
         this._drawSelection(rect, context);
         this._drawLines(rect, context);
+    },
+
+    /**
+     * Directs keyboard input to this text view.
+     */
+    focus: function() {
+        this.focusTextInput();
     },
 
     /**
@@ -751,6 +737,36 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
         this._resize();
         this._rearmInsertionPointBlinkTimer();
+    },
+
+    /**
+     * Replaces the selection with the given text and updates the selection
+     * boundaries appropriately.
+     */
+    insertText: function(text) {
+        this.groupChanges(function() {
+            var textStorage = this.getPath('layoutManager.textStorage');
+            var range = Range.normalizeRange(this._selectedRange);
+
+            this._replaceCharacters(range, text);
+
+            // Update the selection to point immediately after the inserted
+            // text.
+            var lines = text.split("\n");
+
+            var destPosition;
+            if (lines.length > 1) {
+                destPosition = {
+                    row:    range.start.row + lines.length - 1,
+                    column: lines[lines.length - 1].length
+                };
+            } else {
+                destPosition = Range.addPositions(range.start,
+                    { row: 0, column: text.length });
+            }
+
+            this.moveCursorTo(destPosition);
+        }.bind(this));
     },
 
     keyDown: function(evt) {
@@ -991,9 +1007,14 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         // Insert a newline, and copy the spaces at the beginning of the
         // current row to autoindent.
         var position = this._selectedRange.start;
-        this._insertText("\n" + /^\s*/.exec(this.
+        this.insertText("\n" + /^\s*/.exec(this.
             getPath('layoutManager.textStorage.lines')[position.row].
             substring(0, position.column))[0]);
+    },
+
+    parentViewFrameChanged: function() {
+        arguments.callee.base.apply(this, arguments);
+        this._resize();
     },
 
     scrollDocStart: function() {
@@ -1094,15 +1115,11 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             str += " ";
         }
 
-        this._insertText(str);
+        this.insertText(str);
     },
 
     textInserted: function(text) {
-        this._insertText(text);
-    },
-
-    focus: function() {
-        this.focusTextInput();
+        this.insertText(text);
     },
 
     willBecomeKeyResponderFrom: function() {
