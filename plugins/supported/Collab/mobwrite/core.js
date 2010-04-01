@@ -1260,7 +1260,7 @@ mobwrite.reflect = function(text) {
     window.console.info('FROM server:\n' + text);
   }
   // Opera doesn't know how to decode char 0. (fixed in Opera 9.63)
-  text = text.replace(/%00/g, '\0');
+  //text = text.replace(/%00/g, '\0');
   // There must be a linefeed followed by a blank line.
   if (text.length < 2 || text.substring(text.length - 2) != '\n\n') {
     text = '';

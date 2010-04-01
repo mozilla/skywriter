@@ -274,7 +274,7 @@ function createGroupListDisplay (groups, env, args, request) {
 	table.appendChild(tbody);
 	groups.forEach(function(group) {
 		var row = document.createElement("tr");
-		tbody.appendChild(tr);
+		tbody.appendChild(row);
 		var cell = document.createElement("td");
 		row.appendChild(cell);
 		var img = document.createElement("img");
@@ -330,7 +330,7 @@ function createMemberListDisplay (members, env, args, request) {
 
 	members.forEach(function(member) {
 		var row = document.createElement("tr");
-		tbody.appendChild(tr);
+		tbody.appendChild(row);
 		var cell = document.createElement("td");
 		row.appendChild(cell);
 		var img = document.createElement("img");
@@ -489,7 +489,7 @@ function createShareDisplayElement (shares, env, args, request) {
     var lastProject = "";
     shares.forEach(function(share) {
 		var row = document.createElement("tr"), cell;
-		tbody.appendChild(tr);
+		tbody.appendChild(row);
 
         if (share.project !== lastProject) {
 			cell = document.createElement("th");
@@ -531,7 +531,6 @@ function createShareDisplayElement (shares, env, args, request) {
 
         // TODO: loadany needs adding here when we add the feature in
 
-        cell = dojo.create("td", { }, row);
 		cell = document.createElement("td");
 		row.appendChild(cell);
 		var a = document.createElement("a");

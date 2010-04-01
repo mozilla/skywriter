@@ -57,7 +57,7 @@ var diff_match_patch = require("Diff");
  */
 var ShareNode = SC.Object.extend({
 
-    onFirstSync: function() { },
+    onFirstSync: null,
     errorRaised: false,
     pausedText: "",
 
@@ -70,14 +70,7 @@ var ShareNode = SC.Object.extend({
 			projectname = this.username + "+" + projectname;
 		}
 		mobwrite.shareObj.call(this, projectname + "/" + this.project[1]);
-    },
-
-    /**
-     * When mobwrite/integrate.js/shareObj is assigned to us it lets us know
-     * so that we can share the dmp object.
-     */
-    setShareObj: function(shareObj) {
-        this.shareObj = shareObj;
+	    this.onFirstSync = function() { };
     },
 
     /**
@@ -171,9 +164,9 @@ var ShareNode = SC.Object.extend({
     patchClientText: function(patches) {
         // Set some constants which tweak the matching behavior.
         // Maximum distance to search from expected location.
-        this.shareObj.dmp.Match_Distance = 1000;
+        this.dmp.Match_Distance = 1000;
         // At what point is no match declared (0.0 = perfection, 1.0 = very loose)
-        this.shareObj.dmp.Match_Threshold = 0.6;
+        this.dmp.Match_Threshold = 0.6;
 
         var oldClientText = this.getClientText(true);
         var cursor = this.captureCursor();
@@ -225,11 +218,11 @@ var ShareNode = SC.Object.extend({
         }
 
         // Deep copy the patches so that no changes are made to originals.
-        patches = this.shareObj.dmp.patch_deepCopy(patches);
-        var nullPadding = this.shareObj.dmp.patch_addPadding(patches);
+        patches = this.dmp.patch_deepCopy(patches);
+        var nullPadding = this.dmp.patch_addPadding(patches);
         text = nullPadding + text + nullPadding;
 
-        this.shareObj.dmp.patch_splitMax(patches);
+        this.dmp.patch_splitMax(patches);
 
         // delta keeps track of the offset between the expected and actual
         // location of the previous patch.  If there are patches expected at
@@ -238,8 +231,8 @@ var ShareNode = SC.Object.extend({
         var delta = 0;
         for (var x = 0; x < patches.length; x++) {
             var expected_loc = patches[x].start2 + delta;
-            var text1 = this.shareObj.dmp.diff_text1(patches[x].diffs);
-            var start_loc = this.shareObj.dmp.match_main(text, text1, expected_loc);
+            var text1 = this.dmp.diff_text1(patches[x].diffs);
+            var start_loc = this.dmp.match_main(text, text1, expected_loc);
             if (start_loc == -1) {
                 // No match found.  :(
                 if (mobwrite.debug) {
@@ -251,14 +244,14 @@ var ShareNode = SC.Object.extend({
                 var text2 = text.substring(start_loc, start_loc + text1.length);
 
                 // Run a diff to get a framework of equivalent indices.
-                var diffs = this.shareObj.dmp.diff_main(text1, text2, false);
+                var diffs = this.dmp.diff_main(text1, text2, false);
                 var index1 = 0;
                 var index2;
                 var i;
                 for (var y = 0; y < patches[x].diffs.length; y++) {
                     var mod = patches[x].diffs[y];
                     if (mod[0] !== diff_match_patch.DIFF_EQUAL) {
-                        index2 = this.shareObj.dmp.diff_xIndex(diffs, index1);
+                        index2 = this.dmp.diff_xIndex(diffs, index1);
                     }
                     if (mod[0] === diff_match_patch.DIFF_INSERT) {
                         text = text.substring(0, start_loc + index2) + mod[1] +
@@ -270,7 +263,7 @@ var ShareNode = SC.Object.extend({
                         }
                     } else if (mod[0] === diff_match_patch.DIFF_DELETE) {
                         var del_start = start_loc + index2;
-                        var del_end = start_loc + this.shareObj.dmp.diff_xIndex(diffs,
+                        var del_end = start_loc + this.dmp.diff_xIndex(diffs,
                                 index1 + mod[1].length);
                         text = text.substring(0, del_start) + text.substring(del_end);
                         for (i = 0; i < offsets.length; i++) {
@@ -323,8 +316,8 @@ var ShareNode = SC.Object.extend({
      * @private
      */
     captureCursor: function() {
-        var padLength = this.shareObj.dmp.Match_MaxBits / 2;  // Normally 16.
-        var text = this.session._getDocument();
+        var padLength = this.dmp.Match_MaxBits / 2;  // Normally 16.
+        var text = env.get("model").get("value");
 
         var cursor = this.captureSimpleCursor();
 
@@ -363,7 +356,7 @@ var ShareNode = SC.Object.extend({
         // OR we could make the restore use row/col positioning rather than
         // offset from start. The latter could be lots of work
 
-        var dmp = this.shareObj.dmp;
+        var dmp = this.dmp;
         // Set some constants which tweak the matching behavior.
         // Maximum distance to search from expected location.
         dmp.Match_Distance = 1000;
@@ -438,7 +431,7 @@ var ShareNode = SC.Object.extend({
 	
     /**
      * Convert range (two row-col pairs) to offsets.
-     * @param {Object} range Normalized Range object {start: {row, col}, end: {row, col}}
+     * @param {Object} range Normalized Range object {start: {row, column}, end: {row, column}}
      * @return {Object} Offsets object {startOffset, endOffset}
      * @private
      */
@@ -447,20 +440,20 @@ var ShareNode = SC.Object.extend({
 		var startOffset = 0;
 		var endOffset = 0;
 		
-		if (lines.length == 0) {
+		if (lines.length) {
 			var offset = 0;
 			var i = 0;
 			var l = Math.min(range.start.row, lines.length);
 			for (; i < l; ++i) {
 				offset += lines[i].length + 1; // +1 for LF
 			}
-			startOffset = offset + Math.min(range.start.col, i < lines.length ? lines[i].length : 0);
+			startOffset = offset + Math.min(range.start.column, i < lines.length ? lines[i].length : 0);
 			
 			l = Math.min(range.end.row, lines.length);
 			for (; i < l; ++i) {
 				offset += lines[i].length + 1; // +1 for LF
 			}
-			endOffset = offset + Math.min(range.end.col, i < lines.length ? lines[i].length : 0);
+			endOffset = offset + Math.min(range.end.column, i < lines.length ? lines[i].length : 0);
 		}
 		
 		return {startOffset: startOffset, endOffset: endOffset};
@@ -470,7 +463,7 @@ var ShareNode = SC.Object.extend({
      * Convert offsets to a normalized range.
      * @param {Number} startOffset Start offset
      * @param {Number?} endOffset End offset
-     * @return {Object} Normalized Range object {start: {row, col}, end: {row, col}}
+     * @return {Object} Normalized Range object {start: {row, column}, end: {row, column}}
      * @private
      */
 	_convertOffsetsToRange: function(startOffset, endOffset){
@@ -506,7 +499,7 @@ var ShareNode = SC.Object.extend({
 		var endRow = i;
 		var endCol = i < l ? endOffset - offset : 0;
 
-		return {start: {row: startRow, col: startCol}, end: {row: endRow, col: endCol}};
+		return {start: {row: startRow, column: startCol}, end: {row: endRow, column: endCol}};
 	}
 });
 
