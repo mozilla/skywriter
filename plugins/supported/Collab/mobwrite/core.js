@@ -1316,7 +1316,7 @@ mobwrite.reflect = function(text) {
       if (colonpos) {
         var filename = value.substring(0, colonpos);
         var message = value.substring(colonpos + 1);
-        console.error("Collab fail for ", filename, message);
+        //console.error("Collab fail for ", filename, message);
         var handle = function(filename, message) {
           if (mobwrite.shared.hasOwnProperty(filename)) {
             readonly.push(filename);
@@ -1335,8 +1335,9 @@ mobwrite.reflect = function(text) {
       }
     }
     if (name == 'O') {
-        console.error("Read only for ", value);
+        //console.error("Read only for ", value);
         readonly.push(value);
+        continue;
     }
     if (name == 'F' || name == 'f') {
       // File indicates which shared object following delta/raw applies to.
