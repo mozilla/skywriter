@@ -339,9 +339,11 @@ exports.server = SC.Object.create({
      * Starts I/O for the message retrieval.
      */
     _doPoll: function(mobwritePayload) {
+        /*
         if (mobwritePayload) {
             console.log("FROM mobwrite:\n" + mobwritePayload);
         }
+        */
         var self = this;
         this.request('POST', '/messages/', mobwritePayload, {
             evalJSON: true,

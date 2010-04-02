@@ -535,7 +535,7 @@ exports.mobwriteFileChanged = function (file) {
 };
 
 exports.mobwriteMsg = function (msg) {
-	console.log("TO mobwrite:\n", msg.text);
+	//console.log("TO mobwrite:\n", msg.text);
 	mobwrite.reflect(msg.text);
 	server.schedulePoll(mobwrite.syncInterval);
 };
