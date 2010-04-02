@@ -183,9 +183,20 @@ exports.Filesystem = SC.Object.extend({
     
     // Save the contents of a file back to the file
     saveContents: function(path, contents) {
+        var pr = new Promise();
         path = pathUtil.trimLeadingSlash(path);
         var source = this.get("source");
-        return source.saveContents(path, contents);
+        var self = this;
+        source.saveContents(path, contents).then(function() {
+            self.exists(path).then(function(exists) {
+                if (!exists) {
+                    self._files.push(path);
+                    self._files.sort();
+                }
+                pr.resolve();
+            });
+        });
+        return pr;
     },
     
     // get a File object that provides convenient path
@@ -199,6 +210,7 @@ exports.Filesystem = SC.Object.extend({
         var pr = new Promise();
         this._load().then(function() {
             var result = exports._binarySearch(this._files, path);
+            console.log("Binary search for: ", path, " in ", this._files);
             pr.resolve(result !== null);
         }.bind(this));
         return pr;

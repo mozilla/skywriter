@@ -132,7 +132,8 @@ exports.testFileAbstraction = function() {
         t.equal(contents, "text file");
         
         file.saveContents("New data").then(function() {
-            var request = source.requests[source.requests.length-1];
+            // there will be a loadAll at the end, so we do -2
+            var request = source.requests[source.requests.length-2];
             t.equal(request[0], "saveContents");
             t.equal(request[1][0], "deeply/nested/directory/andAFile.txt");
             t.equal(request[1][1], "New data");

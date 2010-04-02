@@ -100,6 +100,7 @@ exports.testBufferFileChangeWithCallback = function() {
 
 exports.testBufferSaving = function() {
     source.reset();
+    var testpr = new Promise();
     var root = fs.Filesystem.create({ source: source });
     var buffer = editsession.Buffer.create();
     buffer.setPath('model.value', "foobar");
@@ -107,12 +108,20 @@ exports.testBufferSaving = function() {
         "the model and the string that was just written to it");
 
     var file1 = root.getFile("bar.txt");
-    buffer.saveAs(file1).then(function() { 
-        // not really async with our test infrastructure
-        var request = source.requests.pop();
-        t.equal(request[0], "saveContents");
-        t.equal(request[1][0], "bar.txt");
-        t.equal(request[1][1], "foobar");
-    });
+    file1.exists().then(function(exists) {
+        t.ok(!exists, "file should not be there now");
+        buffer.saveAs(file1).then(function() { 
+            var request = source.requests.pop();
+            t.equal(request[0], "saveContents");
+            t.equal(request[1][0], "bar.txt");
+            t.equal(request[1][1], "foobar");
 
+            file1.exists().then(function(exists) {
+                t.ok(exists, "file should now exist");
+                testpr.resolve();
+            });
+        });
+    });
+    
+    return testpr;
 };
