@@ -55,7 +55,7 @@ exports.filesCommand = function(env, args, request) {
 
     path = getCompletePath(env, path);
 
-    if (!pathUtil.isDir(path)) {
+    if (path && !pathUtil.isDir(path)) {
         path += "/";
     }
 

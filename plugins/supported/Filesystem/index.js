@@ -192,7 +192,6 @@ exports.Filesystem = SC.Object.extend({
         var pr = new Promise();
         this._load().then(function() {
             var result = exports._binarySearch(this._files, path);
-            console.log("Binary search for: ", path, " in ", this._files);
             pr.resolve(result !== null);
         }.bind(this));
         return pr;
@@ -202,6 +201,7 @@ exports.Filesystem = SC.Object.extend({
      * Deletes the file or directory at a path.
      */
     remove: function(path) {
+        path = pathUtil.trimLeadingSlash(path);
         var pr = new Promise();
         var self = this;
         var source = this.get("source");

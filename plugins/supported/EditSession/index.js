@@ -198,7 +198,9 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
         newFile.saveContents(this.getPath('model.value')).then(function() {
             this.changeFileOnly(newFile);
             promise.resolve();
-        }.bind(this));
+        }.bind(this), function(error) {
+            promise.reject(error);
+        });
 
         return promise;
     },
