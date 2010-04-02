@@ -4,9 +4,9 @@
 		"bespin_server": "0.0",
 		"canon": "0.0",
 		"diff": "0.0",
-		"editor": "0.0",
 		"command_line": "0.0",
-		"project": "0.0"
+		"project": "0.0",
+		"text_editor": "0.0"
 	},
     "provides": [
         {
