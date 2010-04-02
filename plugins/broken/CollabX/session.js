@@ -48,9 +48,9 @@ var editor = require("plugins").getObject("editor");
 var serverCapabilities = require("plugins").getObject("serverCapabilities");
 
 var util = require("bespin:util/util");
-var notifier = require("Notifier").notifier;
+var notifier = require("notifier").notifier;
 var mobwrite = require("Collab:mobwrite/core");
-var diff_match_patch = require("Diff");
+var diff_match_patch = require("diff");
 
 /**
  * Mobwrite has a set of shareObjs which are designed to wrap DOM nodes.

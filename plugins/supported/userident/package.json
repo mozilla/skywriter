@@ -1,0 +1,33 @@
+{
+    "description": "Identifies the user via a Bespin server",
+    "dependencies": {
+        "bespin_server": "0.0",
+        "delegate_support": "0.0",
+		"canon": "0.0"
+    },
+    "provides": [
+        {
+            "ep": "command",
+            "name": "logout",
+            "description": "Logout of Bespin",
+            "pointer": "#logout"
+        },
+        {
+            "ep": "command",
+            "name": "keychain",
+            "description": "Manages your Bespin keychain, which stores remote authentication information."
+        },
+        {
+            "ep": "command",
+            "name": "keychain getkey",
+            "description": "retrieve your SSH public key used for remote server auth",
+            "pointer": "kc#getkey"
+        },
+        {
+            "ep": "command",
+            "name": "keychain forget",
+            "description": "forget the keychain password that is temporarily saved in your browser",
+            "pointer": "kc#forget"
+        }
+    ]
+}

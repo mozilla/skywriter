@@ -42,12 +42,12 @@
 
 var SC = require('sproutcore/runtime').SC;
 var console = require('bespin:console').console;
-var env = require('Canon:environment').global;
-var project = require('Project');
-var server = require("BespinServer").server;
+var env = require('canon:environment').global;
+var project = require('project');
+var server = require("bespin_server").server;
 
 var mobwrite = require("collab:mobwrite/core").mobwrite;
-var diff_match_patch = require("Diff");
+var diff_match_patch = require("diff");
 
 /**
  * Mobwrite has a set of shareObjs which are designed to wrap DOM nodes.
@@ -64,7 +64,7 @@ var ShareNode = SC.Object.extend({
 
     init: function() {
         this.username = env.get("session").get("currentUser").username;
-		this.project = project.getProjectAndPath(env.get("file").get("path"));
+		this.project = project.getProjectAndPath(env.get("file").path);
 		var projectname = this.project[0].name;
 		if (projectname.indexOf("+") < 0) {
 			// add username

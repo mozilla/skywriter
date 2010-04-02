@@ -1,0 +1,22 @@
+{
+    "description": "Common services used in the editor application",
+    "dependencies": {
+        "canon": "0.0"
+    },
+    "provides":
+    [
+        {
+            "ep": "command",
+            "name": "redo",
+            "key": [ "ctrl_shift_z" ],
+            "pointer": "controllers/undomanager#undoManagerCommand"
+        },
+        {
+            "ep": "command",
+            "name": "undo",
+            "key": [ "ctrl_z" ],
+            "pointer": "controllers/undomanager#undoManagerCommand"
+        }
+    ]
+}
+

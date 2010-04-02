@@ -1,0 +1,21 @@
+{
+    "description": "Provides communication with the Bespin Server",
+    "dependencies":  {
+        "filesystem": "0.0",
+        "history": "0.0",
+        "settings": "0.0"
+    },
+	"provides": [
+        {
+            "ep": "extensionpoint",
+            "description": "Message target id to dispatch messages from the server",
+            "name": "msgtargetid",
+            "indexOn": "name"
+        },
+        {
+            "ep": "extensionpoint",
+            "description": "Optional mobwrite instance",
+            "name": "mobwriteinstance"
+        }
+    ]
+}

@@ -22,9 +22,9 @@
  * @author fraser@google.com (Neil Fraser)
  */
 
-var server = require("BespinServer").server;
+var server = require("bespin_server").server;
 
-var diff_match_patch = require("Diff");
+var diff_match_patch = require("diff");
 
 var DIFF_EQUAL = diff_match_patch.DIFF_EQUAL;
 var DIFF_DELETE = diff_match_patch.DIFF_DELETE;

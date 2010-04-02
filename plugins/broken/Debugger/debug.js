@@ -38,8 +38,8 @@
 var console = require('bespin:console').console;
 var util = require("bespin:util/util");
 var keys = require("bespin:util/keys");
-var Instruction = require("CommandLine:instruction").Instruction;
-var CliInputView = require("CommandLine:views/cli").CliInputView;
+var Instruction = require("command_line:instruction").Instruction;
+var CliInputView = require("command_line:views/cli").CliInputView;
 var plugins = require("bespin:plugins");
 
 /*

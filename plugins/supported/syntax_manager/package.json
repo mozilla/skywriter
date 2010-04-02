@@ -1,0 +1,21 @@
+{
+    "description": "Provides syntax highlighting services for the editor",
+    "dependencies": {
+        "delegate_support": "0.0",
+        "rangeutils": "0.0"
+    },
+    "provides":
+    [
+        {
+            "ep": "extensionhandler",
+            "name": "syntax",
+            "register": "controllers/syntaxdirectory#discoveredNewSyntax"
+        },
+        {
+            "ep": "extensionpoint",
+            "name": "fileextension",
+            "indexOn": "name"
+        }
+    ]
+}
+

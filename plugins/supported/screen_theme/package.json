@@ -1,0 +1,13 @@
+{
+    "dependencies": {
+        "theme_manager": "0.0"
+    },
+    "provides": [
+        {
+            "ep": "theme",
+            "name": "Screen",
+            "pointer": "screen_theme:index#ScreenTheme"
+        }
+    ]
+}
+

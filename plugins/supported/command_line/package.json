@@ -1,0 +1,131 @@
+{
+    "description": "Provides the command line user interface",
+    "dependencies": {
+        "canon": "0.0",
+        "dock_view": "0.0",
+        "types": "0.0",
+        "settings": "0.0",
+        "diff": "0.0",
+        "matcher": "0.0"   
+    },
+    "provides":
+    [
+        {
+            "ep": "setting",
+            "name": "historyTimeMode",
+            "description": "Display number|date|none next to each historical instruction",
+            "type": { "name": "selection", "data": [ "number", "date", "none" ] },
+            "defaultValue": "none"
+        },
+        {
+            "ep": "setting",
+            "name": "minConsoleHeight",
+            "description": "The maximum size (in pixels) for the command line output area",
+            "type": "number",
+            "defaultValue": 0
+        },
+        {
+            "ep": "setting",
+            "name": "maxConsoleHeight",
+            "description": "The minimum size (in pixels) for the command line output area",
+            "type": "number",
+            "defaultValue": 300
+        },
+        {
+            "ep": "command",
+            "name": "complete",
+            "predicates": { "isCommandLine": true },
+            "key": "tab",
+            "pointer": "commands#completeCommand"
+        },
+        {
+            "ep": "command",
+            "name": "help",
+            "params":
+            [
+                {
+                    "name": "search",
+                    "type": "text",
+                    "description": "Search string to narrow the output.",
+                    "defaultValue": null
+                }
+            ],
+            "description": "Get help on the available commands.",
+            "pointer": "commands#helpCommand"
+        },
+        {
+            "ep": "command",
+            "name": "alias",
+            "params":
+            [
+                {
+                    "name": "alias",
+                    "type": "text",
+                    "description": "optionally, your alias name",
+                    "defaultValue": null
+                },
+                {
+                    "name": "command",
+                    "type": "text",
+                    "description": "optionally, the command name",
+                    "defaultValue": null
+                }
+            ],
+            "description": "define and show aliases for commands",
+            "pointer": "commands#aliasCommand"
+        },
+        {
+            "ep": "command",
+            "name": "eval",
+            "params":
+            [
+                {
+                    "name": "javascript",
+                    "type": "text",
+                    "description": "The JavaScript to evaluate"
+                }
+            ],
+            "description": "evals given js code and show the result",
+            "hidden": true,
+            "pointer": "basiccommands#evalCommand"
+        },
+        {
+            "ep": "command",
+            "name": "version",
+            "description": "show the Bespin version",
+            "hidden": true,
+            "pointer": "basiccommands#versionCommand"
+        },
+        {
+            "ep": "command",
+            "name": "bespin",
+            "description": "has",
+            "hidden": true,
+            "pointer": "basiccommands#bespinCommand"
+        },
+        {
+            "ep": "extensionpoint",
+            "name": "typehint",
+            "description": "A function to allow the command line to show a hint to the user on how they should finish what they're typing",
+            "indexOn": "name"
+        },
+        {
+            "ep": "typehint",
+            "name": "selection",
+            "description": "A UI for string that is constrained to be one of a number of pre-defined values",
+            "pointer": "views/basic#selection"
+        },
+        {
+            "ep": "typehint",
+            "name": "boolean",
+            "description": "A UI for a boolean",
+            "pointer": "views/basic#bool"
+        },
+        {
+            "ep": "dockedview",
+            "name": "cliinputview",
+            "description": "The command line view, docked on the bottom of the screen",
+            "pointer": "views/cli#CliInputView"
+        }
+    ]
+}

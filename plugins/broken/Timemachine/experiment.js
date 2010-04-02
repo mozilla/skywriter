@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var diff_match_patch = require("Diff");
+var diff_match_patch = require("diff");
 
 var editor = bespin.get('editor');
 var session = bespin.get("editSession");

@@ -24,7 +24,7 @@
 
 var server = require("plugins").getObject("server");
 
-var diff_match_patch = require("Diff");
+var diff_match_patch = require("diff");
 
 var DIFF_EQUAL = diff_match_patch.DIFF_EQUAL;
 var DIFF_DELETE = diff_match_patch.DIFF_DELETE;

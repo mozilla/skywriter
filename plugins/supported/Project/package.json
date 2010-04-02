@@ -1,6 +1,0 @@
-{
-    "description": "Provides a 'project' abstraction that sits atop the file system",
-    "dependencies": {
-        "Filesystem": "0.0"
-    }
-}

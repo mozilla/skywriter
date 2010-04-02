@@ -36,8 +36,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 //var console = require('bespin:console').console;
-var server = require("BespinServer").server;
-var cliController = require("CommandLine:controller").cliController;
+var server = require("bespin_server").server;
+var cliController = require("command_line:controller").cliController;
 
 
 /**
