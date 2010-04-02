@@ -174,6 +174,12 @@ exports.Filesystem = SC.Object.extend({
         return pr;
     },
     
+    listAll: function() {
+        return this._load().then(function() {
+            return this._files;
+        }.bind(this));
+    },
+    
     // Loads the contents of a file
     loadContents: function(path) {
         path = pathUtil.trimLeadingSlash(path);

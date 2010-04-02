@@ -54,8 +54,10 @@ exports.existingFileHint = {
         });
 
         var files = input.env.get('files');
-        files.load(true).then(function() {
-            files.sendToMatcher(matcher);
+        files.listAll().then(function(fileList) {
+            matcher.addItems(fileList.map(function(item) {
+                return {name: item};
+            }));
         });
 
         return menu.get('hint');
