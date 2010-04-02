@@ -9,7 +9,7 @@
     [
         {
             "ep": "command",
-            "name": "files",
+            "name": "ls",
             "params":
             [
                 {
@@ -18,7 +18,7 @@
                     "description": "list files relative to current file, or start with /projectname"
                 }
             ],
-            "aliases": [ "ls", "list" ],
+            "aliases": [ "dir", "list", "files" ],
             "description": "show files",
             "pointer": "#filesCommand"
         },
