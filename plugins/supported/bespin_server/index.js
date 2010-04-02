@@ -359,7 +359,7 @@ exports.server = SC.Object.create({
                 }
 
                 // schedule next poll, if not scheduled yet
-                if (!self._interval) {
+                if (!interval.handle) {
                     self._schedulePoll(messages.length);
                 }
             },
