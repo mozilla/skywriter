@@ -85,31 +85,40 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
     },
 
     /**
-     * Returns the result of displacing the given position by one character
-     * forward (if @count is 1) or backward (if @count is -1).
+     * Returns the result of displacing the given position by @count characters
+     * forward (if @count > 0) or backward (if @count < 0).
      */
-    displacePosition: function(position, count) {
-        var row = position.row, column = position.column;
-        switch (count) {
-        case -1:
-            if (row === 0 && column == 0) {
-                return position;
+    displacePosition: function(pos, count) {
+        var forward = count > 0;
+        var lines = this.get('lines');
+        var lineCount = lines.length;
+
+        for (var i = Math.abs(count); i !== 0; i--) {
+            if (forward) {
+                var rowLength = lines[pos.row].length;
+                if (pos.row === lineCount - 1 && pos.column === rowLength) {
+                    return pos;
+                }
+                pos = pos.column === rowLength ?
+                    { row: pos.row + 1, column: 0               } :
+                    { row: pos.row,     column: pos.column + 1  };
+            } else {
+                if (pos.row === 0 && pos.column == 0) {
+                    return pos;
+                }
+
+                if (pos.column === 0) {
+                    var lines = this.get('lines');
+                    pos = {
+                        row:    pos.row - 1,
+                        column: lines[pos.row - 1].length
+                    };
+                } else {
+                    pos = { row: pos.row, column: pos.column - 1 };
+                }
             }
-            return column === 0 ?
-                { row: row - 1, column: this.get('lines')[row - 1].length   } :
-                { row: row,     column: column - 1                          };
-        case 1:
-            var lines = this.get('lines');
-            var lineCount = lines.length, rowLength = lines[row].length;
-            if (row === lineCount - 1 && column === rowLength) {
-                return position;
-            }
-            return column === rowLength ?
-                { row: row + 1, column: 0           } :
-                { row: row,     column: column + 1  };
-        default:
-            throw new Error("TextStorage.displacePosition(): count must be 1 or -1");
         }
+        return pos;
     },
 
     /**
