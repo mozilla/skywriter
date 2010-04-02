@@ -60,8 +60,7 @@ exports.BespinFileSource = SC.Object.extend({
         return this.server.request('PUT', url, contents);
     },
     
-    remove: function(pathObject) {
-        var path = pathObject.get("originPath");
+    remove: function(path) {
         var url = pathUtil.combine("/file/at/", path);
         var pr = this.server.request('DELETE', url);
         return pr;

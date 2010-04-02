@@ -123,6 +123,7 @@ exports.fileType = function(path) {
             return split[split.length - 1];
         }
     }
+    return null;
 };
 
 /*

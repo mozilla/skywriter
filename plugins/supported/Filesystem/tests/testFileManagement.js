@@ -122,11 +122,25 @@ exports.testDirectoryCreation = function() {
     return testpr;
 };
 
+exports.testPathRemoval = function() {
+    source.reset();
+    var root = getNewRoot();
+    var testpr = new Promise();
+    root.remove("atTheTop.js").then(function() {
+        t.equal(root._files.length, 3, "file should be removed from filesystem");
+        t.equal(root._files[1], "deeply/nested/directory/andAFile.txt");
+        t.equal(source.requests[0][0], "remove");
+        testpr.resolve();
+    });
+    return testpr;
+};
+
 exports.testFileAbstraction = function() {
     source.reset();
     var root = getNewRoot();
     var testpr = new Promise();
     var file = root.getFile("deeply/nested/directory/andAFile.txt");
+    t.equal(file.extension(), "txt");
     t.equal(file.parentdir(), "deeply/nested/directory/", "parentdir is the root for this file");
     file.loadContents().then(function(contents) {
         t.equal(contents, "text file");

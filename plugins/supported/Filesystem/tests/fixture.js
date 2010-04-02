@@ -93,7 +93,7 @@ exports.DummyFileSource = SC.Object.extend({
         return pr;
     },
 
-    remove: function(pathObj) {
+    remove: function(path) {
         this.requests.push(["remove", arguments]);
         var pr = new Promise();
         pr.resolve();

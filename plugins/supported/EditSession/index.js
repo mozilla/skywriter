@@ -64,9 +64,11 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
         if (SC.none(file)) {
             return;
         }
-
-        var match = /\.([^.]+)$/.exec(file);
-        var ext = match === null ? '' : match[1];
+        
+        var ext = file.extension();
+        if (ext === null) {
+            ext = '';
+        }
         syntaxManager.setInitialContextFromExt(ext);
     },
 
@@ -165,12 +167,12 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
         var file = this.get("file");
         var self = this;
         
-        return file.loadContents().then(function(result) {
+        return file.loadContents().then(function(contents) {
             var model = self.get("model");
-            model.replaceCharacters(model.range(), result.contents);
+            model.replaceCharacters(model.range(), contents);
             // the following should theoretically work...
             // but does not seem to.
-            // model.set("value", result.contents);
+            // model.set("value", contents);
         });
     },
     

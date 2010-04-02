@@ -113,28 +113,15 @@ exports.saveCommand = function(env, args, request) {
  * 'save as' command
  */
 exports.saveAsCommand = function(env, args, request) {
+    var files = env.get("files");
     var path = getCompletePath(env, args.path).substring(1);
-    var dirPath = pathUtil.directory(path), filename = pathUtil.basename(path);
-
-    var saveToDirectory = function(dir) {
-        env.get("buffer").saveAs(dir, filename).then(function() {
-                request.done("Saved to '" + path + "'");
-            }, function(err) {
-                request.doneWithError("Save failed (" + err.message + ")");
-            });
-    };
-
-    var files = env.get('files');
-    if (dirPath === "") {
-        // TODO: revisit this?
-        request.doneWithError("Files cannot be saved at the root directory: " +
-            "create a subdirectory for them first");
-    } else {
-        files.loadObject(dirPath).then(saveToDirectory, function(err) {
-            request.doneWithError("Couldn't load target directory '" +
-                dirPath + "' (" + err.message + ")");
-        });
-    }
+    
+    var newFile = files.getFile(path);
+    env.get("buffer").saveAs(newFile).then(function() {
+        request.done("Saved to '" + path + "'");
+    }, function(err) {
+        request.doneWithError("Save failed (" + err.message + ")");
+    });
 
     request.async();
 };
@@ -191,8 +178,7 @@ exports.rmCommand = function(env, args, request) {
     var path = args.path;
     path = getCompletePath(env, path);
 
-    var pathObject = files.getObject(path);
-    pathObject.remove().then(function() {
+    files.remove(path).then(function() {
         request.done(path + " deleted.");
     }, function(error) {
         request.doneWithError("Unable to delete (" + error.message + ")");

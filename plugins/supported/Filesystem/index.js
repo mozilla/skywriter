@@ -135,7 +135,96 @@ exports.Filesystem = SC.Object.extend({
         }
     },
     
-    // Lists the contents of a single directory
+    /*
+     * Get a list of all files in the filesystem.
+     */
+    listAll: function() {
+        return this._load().then(function() {
+            return this._files;
+        }.bind(this));
+    },
+    
+    /*
+     * Loads the contents of the file at path. When the promise is
+     * resolved, the contents are passed in.
+     */
+    loadContents: function(path) {
+        path = pathUtil.trimLeadingSlash(path);
+        var source = this.get("source");
+        return source.loadContents(path);
+    },
+    
+    /*
+     * Save a contents to the path provided. If the file does not
+     * exist, it will be created.
+     */
+    saveContents: function(path, contents) {
+        var pr = new Promise();
+        path = pathUtil.trimLeadingSlash(path);
+        var source = this.get("source");
+        var self = this;
+        source.saveContents(path, contents).then(function() {
+            self.exists(path).then(function(exists) {
+                if (!exists) {
+                    self._files.push(path);
+                    self._files.sort();
+                }
+                pr.resolve();
+            });
+        });
+        return pr;
+    },
+    
+    /*
+     * get a File object that provides convenient path
+     * manipulation and access to the file data.
+     */
+    getFile: function(path) {
+        return new exports.File(this, path);
+    },
+    
+    /*
+     * Returns a promise that will resolve to true if the given path
+     * exists.
+     */
+    exists: function(path) {
+        path = pathUtil.trimLeadingSlash(path);
+        var pr = new Promise();
+        this._load().then(function() {
+            var result = exports._binarySearch(this._files, path);
+            console.log("Binary search for: ", path, " in ", this._files);
+            pr.resolve(result !== null);
+        }.bind(this));
+        return pr;
+    },
+    
+    /*
+     * Deletes the file or directory at a path.
+     */
+    remove: function(path) {
+        var pr = new Promise();
+        var self = this;
+        var source = this.get("source");
+        source.remove(path).then(function() {
+            self._load().then(function() {
+                var position = exports._binarySearch(self._files, path);
+                if (position === null) {
+                    pr.reject(new Error("Cannot find path " + path + " to remove"));
+                    return;
+                }
+                self._files.splice(position, 1);
+                pr.resolve();
+            });
+        });
+        return pr;
+    },
+    
+    /*
+     * Lists the contents of the directory at the path provided.
+     * Returns a promise that will be given a list of file 
+     * and directory names for the contents of the directory.
+     * Directories are distinguished by a trailing slash.
+     */
     listDirectory: function(path) {
         path = pathUtil.trimLeadingSlash(path);
         var pr = new Promise();
@@ -174,54 +263,10 @@ exports.Filesystem = SC.Object.extend({
         return pr;
     },
     
-    listAll: function() {
-        return this._load().then(function() {
-            return this._files;
-        }.bind(this));
-    },
-    
-    // Loads the contents of a file
-    loadContents: function(path) {
-        path = pathUtil.trimLeadingSlash(path);
-        var source = this.get("source");
-        return source.loadContents(path);
-    },
-    
-    // Save the contents of a file back to the file
-    saveContents: function(path, contents) {
-        var pr = new Promise();
-        path = pathUtil.trimLeadingSlash(path);
-        var source = this.get("source");
-        var self = this;
-        source.saveContents(path, contents).then(function() {
-            self.exists(path).then(function(exists) {
-                if (!exists) {
-                    self._files.push(path);
-                    self._files.sort();
-                }
-                pr.resolve();
-            });
-        });
-        return pr;
-    },
-    
-    // get a File object that provides convenient path
-    // manipulation and access to the file data.
-    getFile: function(path) {
-        return new exports.File(this, path);
-    },
-    
-    exists: function(path) {
-        path = pathUtil.trimLeadingSlash(path);
-        var pr = new Promise();
-        this._load().then(function() {
-            var result = exports._binarySearch(this._files, path);
-            console.log("Binary search for: ", path, " in ", this._files);
-            pr.resolve(result !== null);
-        }.bind(this));
-        return pr;
-    },
-    
+    /*
+     * Creates a directory at the path provided. Nothing is
+     * passed into the promise callback.
+     */
     makeDirectory: function(path) {
         path = pathUtil.trimLeadingSlash(path);
         if (!pathUtil.isDir(path)) {
@@ -264,6 +309,14 @@ exports.File.prototype = {
     
     exists: function() {
         return this.fs.exists(this.path);
+    },
+    
+    remove: function() {
+        return this.fs.remove(this.path);
+    },
+    
+    extension: function() {
+        return pathUtil.fileType(this.path);
     }
 };
 
