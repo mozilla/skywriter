@@ -98,8 +98,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
                 var model = self.get("model");
                 model.replaceCharacters(model.range(), "");
             } else {
-                var files = catalog.getObject("files");
-                files.loadContents(newFile).then(function(contents) {
+                newFile.loadContents().then(function(contents) {
                     console.log("SET FILE CONTENTS: ", contents);
                     SC.run(function() {
                         var model = self.get("model");
@@ -138,9 +137,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
             return pr;
         }
         
-        var files = catalog.getObject("files");
-        
-        return files.loadContents(newFile).then(function(contents) {
+        return newFile.loadContents().then(function(contents) {
             SC.run(function() {
                 var model = self.get("model");
                 model.replaceCharacters(model.range(), contents);
@@ -193,12 +190,12 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
      * @param filename{string} The name of the file in the directory.
      * @return A promise to return the newly-saved file.
      */
-    saveAs: function(dir, filename) {
+    saveAs: function(newFile) {
         var promise = new Promise();
-        var newFile = File.create({ name: filename, directory: dir });
-        dir.writeFile(newFile, this.getPath('model.value')).then(function(f) {
-            this.changeFileOnly(f);
-            promise.resolve(f);
+        
+        newFile.saveContents(this.getPath('model.value')).then(function() {
+            this.changeFileOnly(newFile);
+            promise.resolve();
         }.bind(this));
 
         return promise;
@@ -241,7 +238,7 @@ exports.EditSession = SC.Object.extend({
     
     bufferFileChanged: function(sender, file) {
         if (!SC.none(file)) {
-            this.get('history').addPath(file);
+            this.get('history').addPath(file.path);
         }
         catalog.getExtensions("bufferFileChanged").forEach(function (ext) {
             ext.load(function (f) {
@@ -280,8 +277,9 @@ exports.EditSession = SC.Object.extend({
         if (recent.length === 0) {
             return;
         }
-
-        this.get('currentBuffer').changeFile(recent[0]);
+        var files = catalog.getObject("files");
+        var file = files.getFile(recent[0]);
+        this.get('currentBuffer').changeFile(file);
     },
 
     init: function() {

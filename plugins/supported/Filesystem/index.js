@@ -62,6 +62,31 @@ exports._prefixSearch = function(arr, find) {
     return lowmark;
 };
 
+// Standard binary search
+exports._binarySearch = function(arr, find) {
+    var low = 0;
+    var high = arr.length - 1;
+    var i;
+    var current;
+    
+    while (low <= high) {
+        i = parseInt((low + high) / 2, 10);
+        current = arr[i];
+        if (current < find) {
+            low = i + 1;
+        } else if (current > find) {
+            high = i - 1;
+        } else {
+            return i;
+        }
+    }
+    return null;
+};
+
+exports.NEW = { name: "NEW" };
+exports.LOADING = { name: "LOADING" };
+exports.READY = { name: "READY" };
+
 exports.Filesystem = SC.Object.extend({
     // FileSource for this filesytem
     source: null,
@@ -156,6 +181,29 @@ exports.Filesystem = SC.Object.extend({
         return source.loadContents(path);
     },
     
+    // Save the contents of a file back to the file
+    saveContents: function(path, contents) {
+        path = pathUtil.trimLeadingSlash(path);
+        var source = this.get("source");
+        return source.saveContents(path, contents);
+    },
+    
+    // get a File object that provides convenient path
+    // manipulation and access to the file data.
+    getFile: function(path) {
+        return new exports.File(this, path);
+    },
+    
+    exists: function(path) {
+        path = pathUtil.trimLeadingSlash(path);
+        var pr = new Promise();
+        this._load().then(function() {
+            var result = exports._binarySearch(this._files, path);
+            pr.resolve(result !== null);
+        }.bind(this));
+        return pr;
+    },
+    
     makeDirectory: function(path) {
         path = pathUtil.trimLeadingSlash(path);
         if (!pathUtil.isDir(path)) {
@@ -178,11 +226,30 @@ exports.Filesystem = SC.Object.extend({
     }
 });
 
-exports.NEW = { name: "NEW" };
-exports.LOADING = { name: "LOADING" };
-exports.READY = { name: "READY" };
+exports.File = function(fs, path) {
+    this.fs = fs;
+    this.path = path;
+};
 
-exports.Directory = SC.Object.extend({
+exports.File.prototype = {
+    parentdir: function() {
+        return pathUtil.parentdir(this.path);
+    },
+    
+    loadContents: function() {
+        return this.fs.loadContents(this.path);
+    },
+    
+    saveContents: function(contents) {
+        return this.fs.saveContents(this.path, contents);
+    },
+    
+    exists: function() {
+        return this.fs.exists(this.path);
+    }
+};
+
+exports.DirectoryOld = SC.Object.extend({
     // the FileSource that is used for this directory
     source: null,
 
@@ -704,7 +771,7 @@ exports.Directory = SC.Object.extend({
     }
 });
 
-exports.File = SC.Object.extend({
+exports.FileOld = SC.Object.extend({
     // the directory this belongs to
     directory: null,
 

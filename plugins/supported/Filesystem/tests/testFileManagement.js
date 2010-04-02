@@ -121,3 +121,30 @@ exports.testDirectoryCreation = function() {
     });
     return testpr;
 };
+
+exports.testFileAbstraction = function() {
+    source.reset();
+    var root = getNewRoot();
+    var testpr = new Promise();
+    var file = root.getFile("deeply/nested/directory/andAFile.txt");
+    t.equal(file.parentdir(), "deeply/nested/directory/", "parentdir is the root for this file");
+    file.loadContents().then(function(contents) {
+        t.equal(contents, "text file");
+        
+        file.saveContents("New data").then(function() {
+            var request = source.requests[source.requests.length-1];
+            t.equal(request[0], "saveContents");
+            t.equal(request[1][0], "deeply/nested/directory/andAFile.txt");
+            t.equal(request[1][1], "New data");
+            file.exists().then(function(exists) {
+                t.ok(exists, "File should exist");
+                var badfile = root.getFile("no/such/file.txt");
+                badfile.exists().then(function(exists) {
+                    t.ok(!exists, "badfile should not exist");
+                    testpr.resolve();
+                });
+            });
+        });
+    });
+    return testpr;
+};

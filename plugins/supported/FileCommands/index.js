@@ -151,7 +151,8 @@ exports.openCommand = function(env, args, request) {
 
     // TODO: handle line number in args
     request.async();
-    buffer.changeFile(path).then(
+    var file = files.getFile(path);
+    buffer.changeFile(file).then(
         function() {
             request.done();
         },

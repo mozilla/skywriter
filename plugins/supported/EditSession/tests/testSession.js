@@ -59,12 +59,13 @@ exports.testBufferFileChange = function() {
     t.ok(buffer.get("model") != null, 
         "Model should be set to a TextStorage by default");
     t.ok(buffer.untitled(), "Buffer should initially be untitled");
-    buffer.changeFileOnly("atTheTop.js");
+    var f = root.getFile("atTheTop.js");
+    buffer.changeFileOnly(f);
     t.ok(!buffer.untitled(), "Buffer should no longer be untitled");
     t.equal("", buffer.get("model").get("value"), "Should be empty now");
     buffer.changeFileOnly(null);
     t.ok(buffer.untitled(), "Buffer should be untitled again");
-    buffer.set("file", "atTheTop.js");
+    buffer.set("file", f);
     var pr = new Promise();
     setTimeout(function() {
         var newtext = buffer.get("model").get("value");
@@ -85,7 +86,8 @@ exports.testBufferFileChangeWithCallback = function() {
         source: source
     });
     var buffer = editsession.Buffer.create();
-    var pr = buffer.changeFile("atTheTop.js");
+    var f = root.getFile("atTheTop.js");
+    var pr = buffer.changeFile(f);
     var testpr = pr.then(function(b) {
         t.equal(b, buffer, "should have gotten the buffer object in");
         t.equal(b.get("model").get("value"), "the top file", "contents should be loaded");
@@ -97,20 +99,20 @@ exports.testBufferFileChangeWithCallback = function() {
 };
 
 exports.testBufferSaving = function() {
-    var root = fs.Directory.create({ source: source });
+    source.reset();
+    var root = fs.Filesystem.create({ source: source });
     var buffer = editsession.Buffer.create();
     buffer.setPath('model.value', "foobar");
     t.equal(buffer.getPath('model.value'), "foobar", "the value stored in " +
         "the model and the string that was just written to it");
 
-    var file1 = null;
-    buffer.saveAs(root, "bar.txt").then(function(f) { file1 = f; });
-    t.ok(file1 !== null, "the buffer was successfully saved");
+    var file1 = root.getFile("bar.txt");
+    buffer.saveAs(file1).then(function() { 
+        // not really async with our test infrastructure
+        var request = source.requests.pop();
+        t.equal(request[0], "saveContents");
+        t.equal(request[1][0], "bar.txt");
+        t.equal(request[1][1], "foobar");
+    });
 
-    var file2 = null;
-    root.loadObject("bar.txt").then(function(f) { file2 = f; });
-    t.ok(file2 !== null, "the resulting file could be loaded from the " +
-        "filesystem");
-    t.equal(file1, file2, "the file returned by saveAs() and the file " +
-        "loaded from the directory");
 };

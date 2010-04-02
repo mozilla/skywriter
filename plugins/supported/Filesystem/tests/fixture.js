@@ -44,7 +44,7 @@ exports.DummyFileSource = SC.Object.extend({
         // keep a shallow copy of the files list
         var originalFiles = [];
         this.files.forEach(function(f) {
-            originalFiles.push(f);
+            originalFiles.push({name: f.name, contents: f.contents});
         });
         this._originalFiles = originalFiles;
         this.reset();
@@ -56,7 +56,7 @@ exports.DummyFileSource = SC.Object.extend({
         // restore the files list
         var files = [];
         this._originalFiles.forEach(function(f) {
-            files.push(f);
+            files.push({name: f.name, contents: f.contents});
         });
         this.files = files;
     },
@@ -84,12 +84,12 @@ exports.DummyFileSource = SC.Object.extend({
         return pr;
     },
 
-    saveContents: function(file, contents) {
+    saveContents: function(path, contents) {
         this.requests.push(["saveContents", arguments]);
         var pr = new Promise();
-        var entry = this._findOrCreateFile(file.get("path"));
+        var entry = this._findOrCreateFile(path);
         entry.contents = contents;
-        pr.resolve({file: file, contents: contents});
+        pr.resolve();
         return pr;
     },
 

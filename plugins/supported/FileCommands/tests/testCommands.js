@@ -88,7 +88,7 @@ exports.testOpenFileWithNoOpenFile = function() {
     request.promise.then(function() {
         var f = env.get("file");
         t.ok(!request.error, "Should not be in error state");
-        t.equal(f, "/foo/bar/3.txt", "File should have been set");
+        t.equal(f.path, "/foo/bar/3.txt", "File should have been set");
         testpr.resolve();
     });
     
