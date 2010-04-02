@@ -71,15 +71,17 @@ exports.DockView = SC.View.extend({
      * This method does not call appendChild(), so you will probably want to
      * call that after calling this.
      */
-    addDockedView: function(view, index) {
+    addDockedView: function(viewClass, position) {
         var dockedViews = this.get('dockedViews');
-
-        if (SC.none(index)) {
-            index = dockedViews.length;
+        var index = dockedViews.length;
+        
+        if (SC.none(position)) {
+            position = exports.DOCK_BOTTOM;
         }
 
         var thisDockView = this;
-        var dockedView = this.createChildView(view, {
+        var dockedView = this.createChildView(viewClass, {
+            dock: position,
             layoutView: this,
             rootElementPath: [ index ],
             _bespin_dockView_frameDidChange: function() {

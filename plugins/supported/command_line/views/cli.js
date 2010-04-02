@@ -39,7 +39,6 @@ var SC = require("sproutcore/runtime").SC;
 var util = require("bespin:util/util");
 var catalog = require("bespin:plugins").catalog;
 var console = require('bespin:console').console;
-var dock = require("dock_view");
 
 var request = require("canon:request");
 var keyboardManager = require('canon:keyboard').keyboardManager;
@@ -258,7 +257,6 @@ hintClass[Level.Info] = "cmd_info";
  * line input.
  */
 exports.CliInputView = SC.View.design({
-    dock: dock.DOCK_BOTTOM,
     classNames: [ "cmd_line" ],
     layout: { height: 300, bottom: 0, left: 0, right: 0 },
     childViews: [ "contentView" ],

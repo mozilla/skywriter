@@ -81,7 +81,6 @@
 "end";
 
 var SC = require('sproutcore/runtime').SC;
-var CliInputView = require('command_line:views/cli').CliInputView;
 var DockView = require('dock_view').DockView;
 var EditorView = require('text_editor:views/editor').EditorView;
 var KeyListener = require('appsupport:views/keylistener').KeyListener;
@@ -100,6 +99,7 @@ var Filesystem = require("filesystem").Filesystem;
 var editsession = require("edit_session");
 
 exports.session = editsession.EditSession.create();
+exports.cli = {hello: "there"};
 
 var INITIAL_TEXT;   // defined at the end of the file to reduce ugliness
 
@@ -125,31 +125,25 @@ exports.applicationController = SC.Object.create({
     }),
 
     _createDockedViews: function() {
+        var view;
         var applicationView = this._applicationView;
 
         // Remove any docked views already present.
         var dockedViews = this._dockedViews;
         for (name in dockedViews) {
-            console.log("removing", name);
-            var view = dockedViews[name];
+            view = dockedViews[name];
             applicationView.removeDockedView(view);
         }
+        
+        // the require happens here so that reloading happens correctly.
+        CliInputView = require('command_line:views/cli').CliInputView;
+        dockedViews = {};
+        view = applicationView.addDockedView(CliInputView);
+        exports.cli = view;
+        applicationView.appendChild(view);
+        dockedViews["cli"] = view;
 
-        var extensions = catalog.getExtensions('dockedview');
-        var extensionCount = extensions.length;
-        var names = extensions.map(function(ext) { return ext.get('name'); });
-        var promises = extensions.map(function(ext) { return ext.load(); });
-        m_promise.group(promises).then(function(viewClasses) {
-                var dockedViews = {};
-                for (var i = 0; i < extensionCount; i++) {
-                    var name = names[i], viewClass = viewClasses[i];
-                    var view = applicationView.addDockedView(viewClass);
-                    applicationView.appendChild(view);
-                    dockedViews[name] = view;
-                }
-
-                this._dockedViews = dockedViews;
-            }.bind(this));
+        this._dockedViews = dockedViews;
     },
 
     _showEditor: function() {
@@ -166,9 +160,6 @@ exports.applicationController = SC.Object.create({
 
         this._createDockedViews();
         
-        var dockedViews = applicationView.get("dockedViews");
-        exports.cli = dockedViews.cliinputview;
-
         var mainPane = this._mainPage.get('mainPane');
         mainPane.appendChild(applicationView);
 
