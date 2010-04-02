@@ -269,7 +269,7 @@ exports.EditSession = SC.Object.extend({
             if (!file) {
                 path = "/" + path;
             } else {
-                path = m_path.parentdir(file) + path;
+                path = file.parentdir() + path;
             }
         }
 

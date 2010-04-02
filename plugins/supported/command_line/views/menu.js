@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
-var diff_match_patch = require("Diff").diff_match_patch;
+var diff_match_patch = require("diff").diff_match_patch;
 
 var cliController = require("command_line:controller").cliController;
 var Hint = require("command_line:hint").Hint;

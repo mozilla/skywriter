@@ -56,7 +56,7 @@ exports.existingFileHint = {
         var files = input.env.get('files');
         files.listAll().then(function(fileList) {
             matcher.addItems(fileList.map(function(item) {
-                return {name: item};
+                return {name: "/" + item};
             }));
         });
 
