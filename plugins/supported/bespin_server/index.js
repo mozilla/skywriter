@@ -322,17 +322,23 @@ exports.server = SC.Object.create({
     /**
      * Starts up message retrieve for this user.
      */
-    _poll: function() {
+    _poll: function(payload) {
+        if (payload) {
+            this._doPoll(payload);
+            return;
+        }
+        // ask mobwrite
         var mobwriteInstance = catalog.getExtensions("mobwriteinstance");
-        var self = this;
         if (mobwriteInstance && mobwriteInstance.length) {
             // always use the first instance
+            var self = this;
             mobwriteInstance[0].load(function (mobwrite) {
                 self._doPoll(mobwrite.collect());
             });
-        } else {
-            self._doPoll(null);
+            return;
         }
+        // the default
+        this._doPoll(null);
     },
     
     /**
@@ -405,7 +411,7 @@ exports.server = SC.Object.create({
     /**
      * Schedule the next poll.
      */
-    schedulePoll: function (ms) {
+    schedulePoll: function (ms, payload) {
         var self = this;
         var interval = this._interval;
         if (typeof ms == "number" && (!interval.handle || ms < interval.current)) {
@@ -414,17 +420,12 @@ exports.server = SC.Object.create({
                 clearTimeout(interval.handle);
                 interval.handle = null;
             }
-            if (ms <= 0) {
-                // poll now
-                this._poll();
-            } else {
-                // save new polling interval
-                interval.current = ms;
-                // schedule the next poll
-                interval.handle = setTimeout(function() {
-                    self._poll();
-                }, ms);
-            }
+            // save new polling interval
+            interval.current = Math.max(ms, 0);
+            // schedule the next poll
+            interval.handle = setTimeout(function() {
+                self._poll(payload);
+            }, ms);
         }
     },
 

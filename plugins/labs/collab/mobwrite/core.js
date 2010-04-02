@@ -1058,13 +1058,16 @@ mobwrite.syncCheckAjax_ = function() {
  * @private
  */
 mobwrite.unload_ = function() {
-  if (!mobwrite.syncKillPid_) {
+  mobwrite.debug = false;
+  var data = mobwrite.collect(true);
+  mobwrite.forceSyncNow(data);
+  //if (!mobwrite.syncKillPid_) {
     // Turn off debug mode since the console disappears on page unload before
     // this code does.
-    mobwrite.debug = false;
+    //mobwrite.debug = false;
 	// remove all I/O
     //mobwrite.syncRun1_(true);
-  }
+  //}
   // By the time the callback runs mobwrite.syncRun2_, this page will probably
   // be gone.  But that's ok, we are just sending our last changes out, we
   // don't care what the server says.
@@ -1101,21 +1104,7 @@ mobwrite.share = function(var_args) {
         continue;
       }
       mobwrite.shared[result.file] = result;
-
-      // remove all I/O
-/*
-      if (mobwrite.syncRunPid_ === null) {
-        // Startup the main task if it doesn't already exist.
-        mobwrite.syncRunPid_ = window.setTimeout(mobwrite.syncRun1_, 10);
-        if (mobwrite.debug) {
-          window.console.info('MobWrite task started.');
-        }
-      } else {
-        // Bring sync forward in time.
-        window.clearTimeout(mobwrite.syncRunPid_);
-      }
-      mobwrite.syncRunPid_ = window.setTimeout(mobwrite.syncRun1_, 10);
-*/
+      mobwrite.forceSyncNow();
     } else {
       if (mobwrite.debug) {
         window.console.warn('Share: Unknown widget type: ' + el + '.');
@@ -1172,8 +1161,7 @@ mobwrite.unshare = function(ids, onUnshare) {
       }
     }
   }
-  // remove all I/O
-  //mobwrite.syncUnload_(toUnshare, onUnshare);
+  mobwrite.syncUnload_(toUnshare, onUnshare);
 };
 
 /**
@@ -1191,9 +1179,10 @@ mobwrite.syncUnload_ = function(shareHandlers, onUnshare) {
     window.console.info('TO server (unshare):\n' + data);
   }
 
+  mobwrite.forceSyncNow(data);
   // Issue Ajax post of client-side changes and request server-side changes.
-  data = 'q=' + encodeURIComponent(data);
-  mobwrite.syncLoadAjax_(mobwrite.syncGateway, data, onUnshare);
+  //data = 'q=' + encodeURIComponent(data);
+  //mobwrite.syncLoadAjax_(mobwrite.syncGateway, data, onUnshare);
 };
 
 /**
@@ -1507,6 +1496,14 @@ mobwrite.reflect = function(text) {
 
   mobwrite.computeSyncInterval_();
 };
+
+/**
+ * Force a sync with a server now.
+ */
+mobwrite.forceSyncNow = function(data){
+  server.schedulePoll(10, data);
+}
+
 
 // Module exports
 exports.mobwrite = mobwrite;
