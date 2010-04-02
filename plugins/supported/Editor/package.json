@@ -198,38 +198,43 @@
         },
         {
             "ep": "command",
+            "name": "scroll",
+            "predicates": { "isTextView": true }
+        },
+        {
+            "ep": "command",
+            "name": "scroll start",
+            "key": "ctrl_home",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/scrolling#scrollDocStart"
+        },
+        {
+            "ep": "command",
+            "name": "scroll end",
+            "key": "ctrl_end",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/scrolling#scrollDocEnd"
+        },
+        {
+            "ep": "command",
+            "name": "scroll down",
+            "key": "pagedown",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/scrolling#scrollPageDown"
+        },
+        {
+            "ep": "command",
+            "name": "scroll up",
+            "key": "pageup",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/scrolling#scrollPageUp"
+        },
+        {
+            "ep": "command",
             "name": "lc",
             "description": "Change all selected text to lowercase",
             "withKey": "CMD SHIFT L",
             "pointer": "commands/editor#lcCommand"
-        },
-        {
-            "ep": "command",
-            "name": "scrollDocStart",
-            "key": "ctrl_home",
-            "predicates": { "isTextView": true },
-            "pointer": "views/text#textViewCommand"
-        },
-        {
-            "ep": "command",
-            "name": "scrollPageDown",
-            "key": "pagedown",
-            "predicates": { "isTextView": true },
-            "pointer": "views/text#textViewCommand"
-        },
-        {
-            "ep": "command",
-            "name": "scrollPageUp",
-            "key": "pageup",
-            "predicates": { "isTextView": true },
-            "pointer": "views/text#textViewCommand"
-        },
-        {
-            "ep": "command",
-            "name": "scrollDocEnd",
-            "key": "ctrl_end",
-            "predicates": { "isTextView": true },
-            "pointer": "views/text#textViewCommand"
         },
         {
             "ep": "command",

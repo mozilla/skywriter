@@ -803,19 +803,16 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }.bind(this));
     },
 
-    scrollDocStart: function() {
-        this.scrollToPosition({ column: 0, row: 0 });
-    },
-
-    scrollDocEnd: function() {
-        this.scrollToPosition(this.getPath('layoutManager.textStorage').
-            range().end);
-    },
-
+    /**
+     * If the text view is inside a scrollable view, scrolls down by one page.
+     */
     scrollPageDown: function() {
         this._scrollPage(false);
     },
 
+    /**
+     * If the text view is inside a scrollable view, scrolls up by one page.
+     */
     scrollPageUp: function() {
         this._scrollPage(true);
     },
