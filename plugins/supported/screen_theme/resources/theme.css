@@ -315,3 +315,6 @@ body.sc-theme {
     -webkit-border-radius: 12px;
 }
 
+.bespin-screen .disabled {
+    opacity: 0.3;
+}
