@@ -88,9 +88,6 @@ exports.ServerPersister = SC.Object.extend({
             data[key] = settings.get(key);
         });
 
-        var files = catalog.getObject("files");
-        var settingsFile = files.getObject("BespinSettings/settings");
-
         try {
             var settingsString = JSON.stringify(data);
         } catch (e) {
@@ -98,6 +95,7 @@ exports.ServerPersister = SC.Object.extend({
             return;
         }
         // Send it to the server
-        settingsFile.saveContents(settingsString);
+        var files = catalog.getObject("files");
+        files.saveContents("BespinSettings/settings", settingsString);
     }
 });
