@@ -56,6 +56,11 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     _insertionPointBlinkTimer: null,
     _insertionPointVisible: true,
 
+    // FIXME: These should be public, not private.
+    _keyBuffer: '',
+    _keyMetaBuffer: '',
+    _keyState: 'start',
+
     // TODO: calculate from the size or let the user override via themes if
     // desired
     _lineAscent: 16,
@@ -223,6 +228,11 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             characterRectForPosition(range.start);
             this.setNeedsDisplayInRect(rect);
         }
+    },
+
+    _keymappingChanged: function() {
+        this._keyBuffer = '';
+        this._keyState = 'start';
     },
 
     _performVerticalKeyboardSelection: function(offset) {
@@ -803,6 +813,12 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }.bind(this));
     },
 
+    /** Removes all buffered keys. */
+    resetKeyBuffers: function() {
+        this._keyBuffer = '';
+        this._keyMetaBuffer = '';
+    },
+
     /**
      * If the text view is inside a scrollable view, scrolls down by one page.
      */
@@ -898,7 +914,11 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     textInserted: function(text) {
-        this.insertText(text);
+        if(!keyboardManager.processKeyInput(text, this,
+                { isTextView: true, isCommandKey: false })) {
+            this.insertText(text);
+            this.resetKeyBuffers();
+        }
     },
 
     willBecomeKeyResponderFrom: function() {

@@ -312,6 +312,20 @@
             "description": "The distance in characters between each tab",
             "type": "number",
             "defaultValue": 8
+        },
+        {
+            "ep": "setting",
+            "name": "customKeymapping",
+            "description": "Customize the keymapping",
+            "type": "text",
+            "defaultValue": "{}"
+        },
+        {
+            "ep": "setting",
+            "name": "keymapping",
+            "description": "The keymapping to use",
+            "type": "text",
+            "defaultValue": "standard"
         }
     ]
 }
