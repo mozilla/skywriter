@@ -116,7 +116,7 @@ var commitPage = SC.Page.design({
                         width: 265,
                         height: 75
                     },
-                    valueBinding: "VCS#commitController.message",
+                    valueBinding: "vcs#commitController.message",
                     isTextArea: true
                 }),
                 
@@ -124,7 +124,7 @@ var commitPage = SC.Page.design({
                     layout: { left: 10, top: 150, width: 100, height: 37 },
                     isCancel: true,
                     title: "Cancel",
-                    target: "VCS#commitController",
+                    target: "vcs#commitController",
                     action: "doCancel"
                 }),
                 
@@ -132,7 +132,7 @@ var commitPage = SC.Page.design({
                     layout: { left: 175, top: 150, width: 100, height: 37 },
                     isDefault: true,
                     title: "Commit",
-                    target: "VCS#commitController",
+                    target: "vcs#commitController",
                     action: "doCommit"
                 })
                 
