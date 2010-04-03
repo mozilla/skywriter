@@ -35,6 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var project_m = require("project");
+var server = require("bespin_server:index").server;
+
 /**
  * Utility to convert bytes to megabytes
  */
@@ -63,33 +66,29 @@ exports.quotaCommand = function(instruction) {
 
 /**
  * 'rescan' command
- * TODO: Delete or correct
-        {
-            "ep": "command",
-            "name": "rescan",
-            "params":
-            [
-                {
-                    "name": "project",
-                    "type": "text",
-                    "description": "???"
-                }
-            ],
-            "description": "update the project catalog of files used by quick open",
-            "pointer": "#rescanCommand"
-        },
  */
 exports.rescanCommand = function(env, args, request) {
+    var project;
     if (!args.project) {
-        args.project = editSession.project;
+        var file = env.get("file");
+        project = project_m.getProjectAndPath(file.path)[0];
+        if (project) {
+            project = project.name;
+        }
+    } else {
+        project = args.project;
+    }
+    
+    if (!project) {
+        request.doneWithError("You need to supply a project name, if you don't have an open file.");
+        return;
     }
 
-    server.rescan(args.project, instruction, {
-        onSuccess: instruction.link(function(response) {
-            request.done(response);
-        }),
-        onFailure: instruction.link(function(xhr) {
-            request.doneWithError(xhr.responseText);
-        })
+    var url = '/project/rescan/' + encodeURI(project);
+    server.requestDisconnected('POST', url, {}).then(function() {
+        request.done("Rescan of " + project + " complete.");
+    }, function(error) {
+        request.doneWithError("Error during rescan: " + error.message);
     });
+    request.async();
 };
