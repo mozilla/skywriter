@@ -42,58 +42,13 @@ var m_range = require('rangeutils:utils/range');
  * Commands that delete text.
  */
 
-var _performBackspaceOrDelete = function(env, isBackspace) {
-    var view = env.get('view');
-    var model = env.get('model');
-
-    var lines = model.get('lines');
-    var range = view.getSelectedRange();
-
-    if (m_range.isZeroLength(range)) {
-        if (isBackspace) {
-            var start = range.start;
-            var tabstop = settings.get('tabstop');
-            var row = start.row, column = start.column;
-            var line = lines[row];
-
-            if (column > 0 && column % tabstop === 0 &&
-                    new RegExp("^\\s{" + column + "}").test(line)) {
-                // "Smart tab" behavior: delete a tab worth of whitespace.
-                range = {
-                    start:  { row: row, column: column - tabstop },
-                    end:    range.end
-                };
-            } else {
-                // Just one character.
-                range = {
-                    start:  model.displacePosition(range.start, -1),
-                    end:    range.end
-                };
-            }
-        } else {
-            // Extend the selection forward by one character.
-            range = {
-                start:  range.start,
-                end:    model.displacePosition(range.end, 1)
-            };
-        }
-    }
-
-    view.groupChanges(function() {
-        view.replaceCharacters(range, "");
-
-        // Position the insertion point at the start of all the ranges that
-        // were just deleted.
-        view.moveCursorTo(range.start);
-    });
-};
-
 /**
  * Deletes the selection or the previous character, if the selection is an
  * insertion point.
  */
 exports.backspace = function(env, args, request) {
-    _performBackspaceOrDelete(env, true);
+    var view = env.get('view');
+    view.performBackspaceOrDelete(true);
 };
 
 /**
@@ -101,7 +56,8 @@ exports.backspace = function(env, args, request) {
  * insertion point.
  */
 exports.deleteCommand = function(env, args, request) {
-    _performBackspaceOrDelete(env, false);
+    var view = env.get('view');
+    view.performBackspaceOrDelete(false);
 };
 
 /**

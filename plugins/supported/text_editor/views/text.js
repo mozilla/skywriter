@@ -477,7 +477,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         var cutData = this.getSelectedCharacters();
 
         if (cutData != '') {
-            this.deleteSelectionOrNextCharacter();
+            this.performBackspaceOrDelete(false);
         }
 
         return cutData;
@@ -829,6 +829,58 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             textStorage.replaceCharacters(oldRange, characters);
             this.notifyDelegates('textViewReplacedCharacters', oldRange,
                 characters);
+        }.bind(this));
+    },
+
+    /**
+     * Performs a delete-backward or delete-forward operation.
+     *
+     * @param isBackspace If true, the deletion proceeds backward (as if the
+     *                    backspace key were pressed); otherwise, deletion
+     *                    proceeds forward.
+     */
+    performBackspaceOrDelete: function(isBackspace) {
+        var model = this.getPath('layoutManager.textStorage');
+
+        var lines = model.get('lines');
+        var range = this.getSelectedRange();
+
+        if (Range.isZeroLength(range)) {
+            if (isBackspace) {
+                var start = range.start;
+                var tabstop = settings.get('tabstop');
+                var row = start.row, column = start.column;
+                var line = lines[row];
+
+                if (column > 0 && column % tabstop === 0 &&
+                        new RegExp("^\\s{" + column + "}").test(line)) {
+                    // "Smart tab" behavior: delete a tab worth of whitespace.
+                    range = {
+                        start:  { row: row, column: column - tabstop },
+                        end:    range.end
+                    };
+                } else {
+                    // Just one character.
+                    range = {
+                        start:  model.displacePosition(range.start, -1),
+                        end:    range.end
+                    };
+                }
+            } else {
+                // Extend the selection forward by one character.
+                range = {
+                    start:  range.start,
+                    end:    model.displacePosition(range.end, 1)
+                };
+            }
+        }
+
+        this.groupChanges(function() {
+            this.replaceCharacters(range, "");
+
+            // Position the insertion point at the start of all the ranges that
+            // were just deleted.
+            this.moveCursorTo(range.start);
         }.bind(this));
     },
 
