@@ -262,6 +262,6 @@ exports.selectPreviousWord = function(env, args, request) {
  * Selects all characters in the buffer.
  */
 exports.selectAll = function(env, args, request) {
+    var view = env.get('view');
     view.selectAll();
 };
-
