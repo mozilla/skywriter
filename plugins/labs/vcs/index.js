@@ -565,23 +565,8 @@ exports._createCancelHandler = function() {
  * Commands that require authentication should also have kcpass, which is a
  * string containing the user's keychain password.
  */
-var vcs = function(project, command, request, opts) {
+var vcs = function(project, command) {
     var url = "/vcs/command/" + project.name + "/";
-    return server.requestDisconnected("POST", url, JSON.stringify(command), opts);
-};
-
-/**
- * Sets authentication for a project
- */
-var setauth = function(project, form, opts) {
-    var url = "/vcs/setauth/" + project + "/";
-    bespin.get("server").request("POST", url, dojo.formToQuery(form), opts);
-};
-
-/**
- * Clone a remote repository
- */
-var clone = function(data, request, opts) {
-    bespin.get("server").requestDisconnected("POST", "/vcs/clone/", data, request, opts);
+    return server.requestDisconnected("POST", url, JSON.stringify(command));
 };
 
