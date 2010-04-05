@@ -181,11 +181,16 @@ exports.EditorView = SC.View.extend(SC.Border, {
 
         var textViewClass = this.get('textView');
         var scrollView = this.createChildView(scrollViewClass, {
+            containerView: SC.ContainerView.extend({
+                hasCustomScrolling: true
+            }),
+
             contentView: textViewClass.extend({
                 editor: this,
                 layoutManager: layoutManager,
                 searchController: this.get('searchController')
             }),
+
             layout: {
                 left:   gutterView.get('frame').width,
                 bottom: 0,
@@ -193,6 +198,7 @@ exports.EditorView = SC.View.extend(SC.Border, {
                 right:  0
             }
         });
+
         this.set('scrollView', scrollView);
         scrollView.addObserver('verticalScrollOffset', this,
             this._scrollViewVerticalScrollOffsetChanged);
