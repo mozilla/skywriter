@@ -127,6 +127,20 @@ exports.deleteLines = function(env, args, request) {
  * Commands that insert text.
  */
 
+// Inserts a newline, and copies the spaces at the beginning of the current row
+// to autoindent.
+var newline = function(model, view) {
+    var selection = view.getSelectedRange();
+    var position = selection.start;
+    var row = position.row, col = position.column;
+
+    var lines = model.get('lines');
+    var prefix = lines[row].substring(0, col);
+
+    var spaces = /^\s*/.exec(prefix);
+    view.insertText("\n" + spaces);
+};
+
 /**
  * Replaces the selection with the given text and updates the selection
  * boundaries appropriately.
@@ -141,19 +155,23 @@ exports.insertText = function(env, args, request) {
  * Inserts a newline at the insertion point.
  */
 exports.newline = function(env, args, request) {
-    // Insert a newline, and copy the spaces at the beginning of the
-    // current row to autoindent.
+    var model = env.get('model'), view = env.get('view');
+    newline(model, view);
+};
+
+/**
+ * Creates a new, empty line below the current one, and places the insertion
+ * point there.
+ */
+exports.openLine = function(env, args, request) {
     var model = env.get('model'), view = env.get('view');
 
     var selection = view.getSelectedRange();
-    var position = selection.start;
-    var row = position.row, col = position.column;
-
+    var row = selection.end.row;
     var lines = model.get('lines');
-    var prefix = lines[row].substring(0, col);
+    view.moveCursorTo({ row: row, column: lines[row].length });
 
-    var spaces = /^\s*/.exec(prefix);
-    view.insertText("\n" + spaces);
+    newline(model, view);
 };
 
 exports.tab = function(env, args, request) {

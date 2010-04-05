@@ -35,6 +35,14 @@
         },
         {
             "ep": "command",
+            "name": "openline",
+            "description": "Create a new, empty line below the current one",
+            "key": "ctrl_return",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/editing#openLine"
+        },
+        {
+            "ep": "command",
             "name": "insertText",
             "pointer": "commands/editing#insertText",
             "params": [
