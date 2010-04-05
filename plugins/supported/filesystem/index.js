@@ -214,7 +214,11 @@ exports.Filesystem = SC.Object.extend({
                 }
                 self._files.splice(position, 1);
                 pr.resolve();
+            }, function(error) {
+                pr.reject(error);
             });
+        }, function(error) {
+            pr.reject(error);
         });
         return pr;
     },

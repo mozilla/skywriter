@@ -95,13 +95,17 @@ var BespinFileSource = require("bespin_server:filesource").BespinFileSource;
 var ServerPersister = require("bespin_server:settings").ServerPersister;
 var themeManager = require('theme_manager').themeManager;
 var settings = require("settings").settings;
-var Filesystem = require("filesystem").Filesystem;
 var editsession = require("edit_session");
 
 exports.session = editsession.EditSession.create();
 exports.cli = {hello: "there"};
 
 var INITIAL_TEXT;   // defined at the end of the file to reduce ugliness
+
+var createFilesystem = function() {
+    var Filesystem = require("filesystem").Filesystem;
+    exports.files = Filesystem.create({source: BespinFileSource.create()});
+};
 
 exports.applicationController = SC.Object.create({
     _editorHasBeenSetup: false,
@@ -218,7 +222,7 @@ exports.applicationController = SC.Object.create({
 
     loginControllerAcceptedLogin: function(sender) {
         exports.session.set("currentUser", sender);
-        exports.files = Filesystem.create({source: BespinFileSource.create()});
+        createFilesystem();
         registerUserPlugins();
         this._showEditor();
     },
@@ -230,6 +234,11 @@ exports.applicationController = SC.Object.create({
     postRefresh: function(reloadDescription) {
         var pluginName = reloadDescription.pluginName;
         var dependents = reloadDescription.dependents;
+        
+        if (pluginName == "filesystem" || dependents.filesystem) {
+            createFilesystem();
+        }
+        
         // TODO make this better. Basically, there is an issue
         // with running the "reload" command because the command line
         // is still expecting some things to be around. So,

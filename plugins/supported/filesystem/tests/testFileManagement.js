@@ -39,7 +39,7 @@ var source = exports.source = fixture.DummyFileSource.create({
 
 var getNewRoot = function() {
     return fs.Filesystem.create({
-        source: "Filesystem:tests/testFileManagement#source"
+        source: "filesystem:tests/testFileManagement#source"
     });
 };
 

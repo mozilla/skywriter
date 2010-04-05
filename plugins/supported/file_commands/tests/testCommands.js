@@ -116,7 +116,8 @@ exports.testFilesCommandDefaultsToRoot = function() {
 exports.testFilesAreRelativeToCurrentOpenFile = function() {
     var env = getEnv();
     var buffer = env.get("buffer");
-    buffer.changeFileOnly("foo/1.txt");
+    var files = env.get("files");
+    buffer.changeFileOnly(files.getFile("foo/1.txt"));
     
     var testpr = new Promise();
     
@@ -136,7 +137,8 @@ exports.testFilesAreRelativeToCurrentOpenFile = function() {
 exports.testFilesListingInDirectoryRelativeToOpenFile = function() {
     var env = getEnv();
     var buffer = env.get("buffer");
-    buffer.changeFileOnly("foo/1.txt");
+    var files = env.get("files");
+    buffer.changeFileOnly(files.getFile("foo/1.txt"));
     var testpr = new Promise();
     
     var request = Request.create();
