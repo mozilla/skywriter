@@ -219,22 +219,28 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     _invalidateSelection: function() {
+        var adjustRect = function(rect) {
+            return {
+                x:      rect.x - 1,
+                y:      rect.y,
+                width:  rect.width + 2,
+                height: rect.height
+            };
+        };
+
         var layoutManager = this.get('layoutManager');
         var range = Range.normalizeRange(this._selectedRange);
         if (!this._rangeIsInsertionPoint(range)) {
             var rects = layoutManager.rectsForRange(range);
             rects.forEach(function(rect) {
-                rect.x -= 1;
-                rect.width += 2;
-                this.setNeedsDisplayInRect(rect);
+                this.setNeedsDisplayInRect(adjustRect(rect));
             }, this);
-        } else {
-            var rect = this.get('layoutManager').
-                        characterRectForPosition(range.start);
-            rect.x -= 1;
-            rect.width += 2;
-            this.setNeedsDisplayInRect(rect);
+
+            return;
         }
+
+        var rect = layoutManager.characterRectForPosition(range.start);
+        this.setNeedsDisplayInRect(adjustRect(rect));
     },
 
     _keymappingChanged: function() {

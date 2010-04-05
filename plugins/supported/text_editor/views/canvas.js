@@ -175,8 +175,10 @@ exports.CanvasView = SC.View.extend({
 
         var clippingFrame = this.get('clippingFrame');
         clippingFrame = {
-            x:  Math.round(clippingFrame.x),
-            y:  Math.round(clippingFrame.y)
+            x:      Math.round(clippingFrame.x),
+            y:      Math.round(clippingFrame.y),
+            width:  clippingFrame.width,
+            height: clippingFrame.height
         };
 
         var invalidRects = this._cvInvalidRects;
