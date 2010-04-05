@@ -10,6 +10,13 @@
     "provides":
     [
         {
+            "ep": "factory",
+            "name": "clicontroller",
+            "description": "The controller for the command line",
+            "pointer": "controller#cliController",
+            "action": "value"
+        },
+        {
             "ep": "setting",
             "name": "historyTimeMode",
             "description": "Display number|date|none next to each historical instruction",
