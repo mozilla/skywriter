@@ -135,12 +135,9 @@ var Range = require('rangeutils:utils/range');
                         }
                     },
                     {
-                        "regex": [ "meta_([0-9]*)", "(meta_[0-9]|[0-9])" ],
-                        "comment": "This binding is to stop any furtur execution if the regex meta_number matches. This way, the buffer is not reset."
-                    },
-                    {
                         "comment": "This binding matches numbers as long as there is no meta_number in the buffer.",
-                        "key":  "[0-9]+",
+                        "regex":  [ "(meta_[0-9]*)*", "[0-9]+" ],
+                        "disallowMatches":  [ 1 ],
                         "exec": "editor insertText",
                         "params": [
                             {
@@ -152,6 +149,10 @@ var Range = require('rangeutils:utils/range');
                         "predicates": {
                             "isCommandKey": false
                         }
+                    },
+                    {
+                        "regex": [ "meta_([0-9]*)", "(meta_[0-9]|[0-9])" ],
+                        "comment": "Stops execution if the regex /meta_[0-9]+/ matches to avoid resetting the buffer."
                     }
                 ],
                 "c-x": [

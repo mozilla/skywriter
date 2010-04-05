@@ -347,6 +347,15 @@ var KeyboardManager = SC.Object.extend({
                 return false;
             }
 
+            // Check for disallowed matches.
+            if (binding.disallowMatches) {
+                for (var i = 0; i < binding.disallowMatches.length; i++) {
+                    if (!!match[binding.disallowMatches[i]]) {
+                        return true;
+                    }
+                }
+            }
+
             // Check predicates.
             if (!exports.flagsMatch(binding.predicates, flags)) {
                 return false;
