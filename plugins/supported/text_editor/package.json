@@ -27,6 +27,19 @@
         },
         {
             "ep": "command",
+            "name": "insertText",
+            "pointer": "commands/editing#insertText",
+            "params": [
+                {
+                    "name": "text",
+                    "type": "text",
+                    "description": "The text to insert",
+                    "defaultValue": ""
+                }
+            ]
+        },
+        {
+            "ep": "command",
             "name": "newline",
             "key": "return",
             "predicates": { "isTextView": true },

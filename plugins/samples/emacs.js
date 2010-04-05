@@ -64,7 +64,7 @@ var Range = require('rangeutils:utils/range');
                     },
                     {
                         "regex": [ "(?:meta_([0-9]*))*", "(down|ctrl_n)" ],
-                        "exec": "editor moveDown",
+                        "exec": "move down",
                         "params": [
                             {
                                 "name": "n",
@@ -76,7 +76,7 @@ var Range = require('rangeutils:utils/range');
                     },
                     {
                         "regex": [ "(?:meta_([0-9]*))*", "(right|ctrl_f)" ],
-                        "exec": "editor moveRight",
+                        "exec": "move right",
                         "params": [
                             {
                                 "name": "n",
@@ -88,7 +88,7 @@ var Range = require('rangeutils:utils/range');
                     },
                     {
                         "regex": [ "(?:meta_([0-9]*))*", "(up|ctrl_p)" ],
-                        "exec": "editor moveUp",
+                        "exec": "move up",
                         "params": [
                             {
                                 "name": "n",
@@ -100,7 +100,7 @@ var Range = require('rangeutils:utils/range');
                     },
                     {
                         "regex": [ "(?:meta_([0-9]*))*", "(left|ctrl_b)" ],
-                        "exec": "editor moveLeft",
+                        "exec": "move left",
                         "params": [
                             {
                                 "name": "n",
@@ -127,7 +127,7 @@ var Range = require('rangeutils:utils/range');
                             },
                             {
                                 "name": "cmd",
-                                "defaultValue": "editor insertText"
+                                "defaultValue": "insertText"
                             }
                         ],
                         "predicates": {
@@ -138,7 +138,7 @@ var Range = require('rangeutils:utils/range');
                         "comment": "This binding matches numbers as long as there is no meta_number in the buffer.",
                         "regex":  [ "(meta_[0-9]*)*", "[0-9]+" ],
                         "disallowMatches":  [ 1 ],
-                        "exec": "editor insertText",
+                        "exec": "insertText",
                         "params": [
                             {
                                 "name": "text",

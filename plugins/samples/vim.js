@@ -68,7 +68,7 @@ var Range = require('rangeutils:utils/range');
                     },
                     {
                         "regex":    [ "([0-9]*)", "(k|up)" ],
-                        "exec":     "editor moveUp",
+                        "exec":     "move up",
                         "params": [
                             {
                                 "name":     "n",
@@ -80,7 +80,7 @@ var Range = require('rangeutils:utils/range');
                     },
                     {
                         "regex":    [ "([0-9]*)", "(j|down|return)" ],
-                        "exec":     "editor moveDown",
+                        "exec":     "move down",
                         "params": [
                             {
                                 "name":     "n",
@@ -125,8 +125,8 @@ var Range = require('rangeutils:utils/range');
                         "then":     "start"
                     },
                     {
-                        "regex":    [ "([0-9]*)", "up" ],
-                        "exec":     "editor moveUp",
+                        "key":      "up",
+                        "exec":     "move up",
                         "params": [
                             {
                                 "name":     "n",
@@ -137,8 +137,32 @@ var Range = require('rangeutils:utils/range');
                         ]
                     },
                     {
-                        "regex":    [ "([0-9]*)", "down" ],
-                        "exec":     "editor moveDown",
+                        "key":      "move down",
+                        "exec":     "move down",
+                        "params": [
+                            {
+                                "name":     "n",
+                                "match":    1,
+                                "type":     "number",
+                                "defaultValue":     1
+                            }
+                        ]
+                    },
+                    {
+                        "key":      "right",
+                        "exec":     "vim moveRight",
+                        "params": [
+                            {
+                                "name":     "n",
+                                "match":    1,
+                                "type":     "number",
+                                "defaultValue":     1
+                            }
+                        ]
+                    },
+                    {
+                        "key":      "left",
+                        "exec":     "vim moveLeft",
                         "params": [
                             {
                                 "name":     "n",

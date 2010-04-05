@@ -371,7 +371,7 @@ var KeyboardManager = SC.Object.extend({
             if (binding.exec) {
                 // Get the command.
                 commandExt = catalog.getExtensionByKey("command", binding.exec);
-                if (commandExt === null) {
+                if (SC.none(commandExt)) {
                     throw new Error("Can't find command " + binding.exec +
                         " in state=" + sender._keyState +
                         ", symbolicName=" + symbolicName);
