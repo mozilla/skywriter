@@ -68,7 +68,7 @@ var Range = require('rangeutils:utils/range');
                         "params": [
                             {
                                 "name": "n",
-                                "match": 0,
+                                "match": 1,
                                 "type": "number",
                                 "defaultValue": 1
                             }
@@ -80,7 +80,7 @@ var Range = require('rangeutils:utils/range');
                         "params": [
                             {
                                 "name": "n",
-                                "match": 0,
+                                "match": 1,
                                 "type": "number",
                                 "defaultValue": 1
                             }
@@ -92,7 +92,7 @@ var Range = require('rangeutils:utils/range');
                         "params": [
                             {
                                 "name": "n",
-                                "match": 0,
+                                "match": 1,
                                 "type": "number",
                                 "defaultValue": 1
                             }
@@ -104,7 +104,7 @@ var Range = require('rangeutils:utils/range');
                         "params": [
                             {
                                 "name": "n",
-                                "match": 0,
+                                "match": 1,
                                 "type": "number",
                                 "defaultValue": 1
                             }
@@ -117,7 +117,7 @@ var Range = require('rangeutils:utils/range');
                         "params": [
                             {
                                 "name": "n",
-                                "match": 0,
+                                "match": 1,
                                 "type": "number",
                                 "defaultValue": "1"
                             },

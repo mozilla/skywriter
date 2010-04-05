@@ -379,7 +379,7 @@ var KeyboardManager = SC.Object.extend({
                         if (param.match === "KEY_VALUE") {
                             value = symbolicName;
                         } else if (!SC.none(param.match)) {
-                            value = match[1 + param.match] ||
+                            value = match[param.match] ||
                                 param.defaultValue;
                         } else {
                             value = param.defaultValue;

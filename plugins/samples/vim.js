@@ -58,11 +58,6 @@ var Range = require('rangeutils:utils/range');
             "pointer": "#moveRight"
         },
         {
-            "ep": "command",
-            "name": "vim nothing",
-            "pointer": "#emptyFn"
-        },
-        {
             "ep": "keymapping",
             "name": "vim",
             "states": {
@@ -77,7 +72,7 @@ var Range = require('rangeutils:utils/range');
                         "params": [
                             {
                                 "name":     "n",
-                                "match":    0,
+                                "match":    1,
                                 "type":     "number",
                                 "defaultValue":     1
                             }
@@ -89,7 +84,7 @@ var Range = require('rangeutils:utils/range');
                         "params": [
                             {
                                 "name":     "n",
-                                "match":    0,
+                                "match":    1,
                                 "type":     "number",
                                 "defaultValue":     1
                             }
@@ -101,7 +96,7 @@ var Range = require('rangeutils:utils/range');
                         "params": [
                             {
                                 "name":     "n",
-                                "match":    0,
+                                "match":    1,
                                 "type":     "number",
                                 "defaultValue":     1
                             }
@@ -113,7 +108,7 @@ var Range = require('rangeutils:utils/range');
                         "params": [
                             {
                                 "name":     "n",
-                                "match":    0,
+                                "match":    1,
                                 "type":     "number",
                                 "defaultValue":     1
                             }
@@ -135,7 +130,7 @@ var Range = require('rangeutils:utils/range');
                         "params": [
                             {
                                 "name":     "n",
-                                "match":    0,
+                                "match":    1,
                                 "type":     "number",
                                 "defaultValue":     1
                             }
@@ -147,7 +142,7 @@ var Range = require('rangeutils:utils/range');
                         "params": [
                             {
                                 "name":     "n",
-                                "match":    0,
+                                "match":    1,
                                 "type":     "number",
                                 "defaultValue":     1
                             }
@@ -181,6 +176,3 @@ exports.moveRight = function(env, args) {
         row: range.start.row
     });
 };
-
-exports.emptyFn = function() {};
-
