@@ -186,7 +186,7 @@ var moveOrSelectNextWord = function(env, shiftDown) {
     var view = env.get('view'), model = env.get('model');
     var lines = model.get('lines');
 
-    var selectedRange = view.getSelectedRange();
+    var selectedRange = view.getSelectedRange(true);
     var end = selectedRange.end;
     var row = end.row, column = end.column;
 
@@ -213,7 +213,7 @@ var moveOrSelectPreviousWord = function(env, shiftDown) {
     var view = env.get('view'), model = env.get('model');
 
     var lines = model.get('lines');
-    var selectedRange = view.getSelectedRange();
+    var selectedRange = view.getSelectedRange(true);
     var end = selectedRange.end;
     var row = end.row, column = end.column;
 

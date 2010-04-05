@@ -514,9 +514,17 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     /*
      * Returns the currently selected range.
+     *
+     * @param raw If true, the direction of the selection is preserved: the
+     *            "start" field will be the selection origin, and the "end"
+     *            field will always be the selection tail.
      */
-    getSelectedRange: function() {
-        return Range.normalizeRange(this._selectedRange);
+    getSelectedRange: function(raw) {
+        if (!raw) {
+            return Range.normalizeRange(this._selectedRange);
+        } else {
+            return this._selectedRange;
+        }
     },
 
     /**
