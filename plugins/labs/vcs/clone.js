@@ -25,7 +25,9 @@
 var SC = require("sproutcore/runtime").SC;
 var console = require("bespin:console").console;
 var themeManager = require("theme_manager").themeManager;
-
+var objectToQuery = require('bespin:util/util').objectToQuery;
+var getKeychainPassword = require("userident:kc").getKeychainPassword;
+var createStandardHandler = require('vcs')._createStandardHandler;
 var server = require("bespin_server").server;
 
 /**
@@ -35,13 +37,13 @@ exports.cloneController = SC.Object.create({
     _pane: null,
     _request: null,
     
-    url: "",
-    projectName: "",
-    vcsType: "svn",
-    vcsUser: "",
+    source: "",
+    dest: "",
+    vcs: "svn",
+    vcsuser: "",
     remoteauth: "",
     push: "",
-    authType: "ssh",
+    authtype: "ssh",
     username: "",
     password: "",
     
@@ -50,7 +52,7 @@ exports.cloneController = SC.Object.create({
         themeManager.addPane(pane);
         pane.append();
         pane.becomeKeyPane();
-        pane.getPath("contentView.form.urlField").becomeFirstResponder();
+        pane.getPath("contentView.form.sourceField").becomeFirstResponder();
         this._pane = pane;
         this._request = request;
     },
@@ -72,30 +74,40 @@ exports.cloneController = SC.Object.create({
     
     clone: function() {
         this.hide();
+        
         var data = {
-            url: this.get("url"),
-            projectName: this.get("projectName"),
-            vcsType: this.get("vcsType"),
+            source: this.get("source"),
+            dest: this.get("dest"),
+            vcs: this.get("vcs"),
             push: this.get("push"),
             remoteauth: this.get("remoteauth")
         };
-        if (data.vcsType !== "svn") {
-            data.vcsUser = this.get("vcsUser");
+        
+        if (data.vcs !== "svn") {
+            data.vcsuser = this.get("vcsuser");
         }
+        
         if (data.remoteauth) {
-            data.authType = this.get("authType");
+            data.authtype = this.get("authtype");
             data.username = this.get("username");
-            if (data.authType === "password") {
+            if (data.authtype === "password") {
                 data.password = this.get("password");
             }
+            
+            getKeychainPassword().then(function(kcpass) {
+                data.kcpass = kcpass;
+                this._performClone(data);
+            }.bind(this), function() {
+                var request = this.get("request");
+                request.doneWithError("Clone canceled");
+            }.bind(this));
         }
+    },
+    
+    _performClone: function(data) {
+        var request = this._request;
         var pr = exports.cloneNewProject(data);
-        pr.then(function(output) {
-            request.done(output);
-        }, function(error) {
-            request.doneWithError("Problem while cloning: " + error.message + " " +
-                error.xhr.responseText);
-        });
+        createStandardHandler(pr, request);
     },
     
     hasAuth: function() {
@@ -103,12 +115,12 @@ exports.cloneController = SC.Object.create({
     }.property("remoteauth").cacheable(),
     
     isUserPass: function() {
-        return this.get("remoteauth") !== "" && this.get("authType") !== "ssh";
-    }.property("authType", "remoteauth").cacheable(),
+        return this.get("remoteauth") !== "" && this.get("authtype") !== "ssh";
+    }.property("authtype", "remoteauth").cacheable(),
     
     allowsUser: function() {
-        return this.get("vcsType") !== "svn";
-    }.property("vcsType").cacheable()
+        return this.get("vcs") !== "svn";
+    }.property("vcs").cacheable()
 });
 
 exports.clonePage = SC.Page.design({
@@ -121,10 +133,10 @@ exports.clonePage = SC.Page.design({
             form: SC.View.design({
                 classNames: "bespin-form".w(),
                 
-                childViews: ("title urlLabel urlField projectNameField " +
-                    "projectNameLabel vcsTypeLabel vcsTypeField vcsUserField " +
-                    "vcsUserLabel remoteauthField remoteauthLabel " +
-                    "pushField pushLabel authTypeField authTypeLabel " +
+                childViews: ("title sourceLabel sourceField destField " +
+                    "destLabel vcsLabel vcsField vcsuserField " +
+                    "vcsuserLabel remoteauthField remoteauthLabel " +
+                    "pushField pushLabel authtypeField authtypeLabel " +
                     "usernameField usernameLabel passwordField " + 
                     "passwordLabel cancel ok").w(),
 
@@ -142,12 +154,12 @@ exports.clonePage = SC.Page.design({
                     fontWeight: 'bold'
                 }),
 
-                urlField: SC.TextFieldView.design({
-                    valueBinding: "vcs:clone#cloneController.url",
+                sourceField: SC.TextFieldView.design({
+                    valueBinding: "vcs:clone#cloneController.source",
                     layout: { left: 10, top: 39, width: 225, height: 24 }
                 }),
 
-                urlLabel: SC.LabelView.design({
+                sourceLabel: SC.LabelView.design({
                     layout: {
                         left: 10,
                         top: 63,
@@ -157,17 +169,17 @@ exports.clonePage = SC.Page.design({
                     value: "URL"
                 }),
 
-                projectNameField: SC.TextFieldView.design({
+                destField: SC.TextFieldView.design({
                     layout: {
                         left: 10,
                         top: 82,
                         width: 225,
                         height: 24
                     },
-                    valueBinding: "vcs:clone#cloneController.projectName"
+                    valueBinding: "vcs:clone#cloneController.dest"
                 }),
 
-                projectNameLabel: SC.LabelView.design({
+                destLabel: SC.LabelView.design({
                     layout: {
                         left: 10,
                         top: 106,
@@ -177,7 +189,7 @@ exports.clonePage = SC.Page.design({
                     value: "Project Name (defaults to the last part of the URL)"
                 }),
                 
-                vcsTypeLabel: SC.LabelView.design({
+                vcsLabel: SC.LabelView.design({
                     layout: {
                         left: 10,
                         top: 168,
@@ -187,7 +199,7 @@ exports.clonePage = SC.Page.design({
                     value: "Version control system:"
                 }),
                 
-                vcsTypeField: SC.RadioView.design({
+                vcsField: SC.RadioView.design({
                     layout: {
                         left: 10,
                         top: 188,
@@ -206,21 +218,21 @@ exports.clonePage = SC.Page.design({
                             value: "hg"
                         }
                     ],
-                    valueBinding: "vcs:clone#cloneController.vcsType"
+                    valueBinding: "vcs:clone#cloneController.vcs"
                 }),
                 
-                vcsUserField: SC.TextFieldView.design({
+                vcsuserField: SC.TextFieldView.design({
                     layout: {
                         left: 10,
                         top: 264,
                         width: 225,
                         height: 24
                     },
-                    valueBinding: "vcs:clone#cloneController.vcsUser",
+                    valueBinding: "vcs:clone#cloneController.vcsuser",
                     isEnabledBinding: "vcs:clone#cloneController.allowsUser"
                 }),
                 
-                vcsUserLabel: SC.LabelView.design({
+                vcsuserLabel: SC.LabelView.design({
                     layout: {
                         left: 10,
                         top: 288,
@@ -287,7 +299,7 @@ exports.clonePage = SC.Page.design({
                     valueBinding: "vcs:clone#cloneController.remoteauth"
                 }),
                 
-                authTypeLabel: SC.LabelView.design({
+                authtypeLabel: SC.LabelView.design({
                     layout: {
                         left: 310,
                         top: 168,
@@ -297,7 +309,7 @@ exports.clonePage = SC.Page.design({
                     value: "Type of authentication:"
                 }),
                 
-                authTypeField: SC.RadioView.design({
+                authtypeField: SC.RadioView.design({
                     layout: {
                         left: 310,
                         top: 189,
@@ -316,7 +328,7 @@ exports.clonePage = SC.Page.design({
                             value: "password"
                         }
                     ],
-                    valueBinding: "vcs:clone#cloneController.authType",
+                    valueBinding: "vcs:clone#cloneController.authtype",
                     isEnabledBinding: "vcs:clone#cloneController.hasAuth"
                 }),
                 
@@ -350,6 +362,7 @@ exports.clonePage = SC.Page.design({
                         height: 24
                     },
                     valueBinding: "vcs:clone#cloneController.password",
+                    isPassword: true,
                     isEnabledBinding: "vcs:clone#cloneController.isUserPass"
                 }),
                 
@@ -394,6 +407,7 @@ exports.cloneCommand = function(env, args, request) {
  * Clone a remote repository
  */
 exports.cloneNewProject = function(data) {
+    data = objectToQuery(data);
     return server.requestDisconnected("POST", "/vcs/clone/", data);
 };
 

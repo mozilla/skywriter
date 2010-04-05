@@ -305,6 +305,10 @@ exports.server = SC.Object.create({
                 // messages that we've just been sent
                 job.options.onPartial(message.output);
             } else {
+                if (SC.none(job.partials)) {
+                    job.partials = [];
+                }
+                
                 // In progress, and no-where to send the messages,
                 // so we store them for onSuccess when we're done
                 job.partials.push(message.output);
@@ -361,7 +365,7 @@ exports.server = SC.Object.create({
                     interval.handle = null;
                 }
 
-                // process all messages
+                // process all messagesf
                 for (var i = 0; i < messages.length; i++) {
                     self._processResponse(messages[i]);
                 }
