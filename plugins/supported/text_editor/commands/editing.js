@@ -100,7 +100,7 @@ exports.backspace = function(env, args, request) {
  * Deletes the selection or the next character, if the selection is an
  * insertion point.
  */
-exports.deleet = function(env, args, request) {
+exports.deleteCommand = function(env, args, request) {
     _performBackspaceOrDelete(env, false);
 };
 

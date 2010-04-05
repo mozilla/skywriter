@@ -23,7 +23,7 @@
             "name": "delete",
             "key": "delete",
             "predicates": { "isTextView": true },
-            "pointer": "commands/editing#deleet"
+            "pointer": "commands/editing#deleteCommand"
         },
         {
             "ep": "command",
