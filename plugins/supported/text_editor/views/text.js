@@ -555,7 +555,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         this.get('layoutManager').addDelegate(this);
 
         this._resize();
-        this._rearmInsertionPointBlinkTimer();
     },
 
     /**
