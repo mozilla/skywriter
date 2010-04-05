@@ -43,15 +43,17 @@ div.cmd_ex article {
    border:2px #000 solid;
    border-bottom:0;
    font-size:90%;
-   -moz-border-top-colors:#000 rgb(30,25,22);
-   -moz-border-left-colors:#000 rgb(30,25,22);
-   -moz-border-right-colors:#000 rgb(27,22,19);
+   -moz-border-top-colors: #000 #3e3936;
+   -moz-border-left-colors: #000 #3e3936;
+   -moz-border-right-colors: #000 #1e1916;
    -moz-border-radius-topleft:10px;
    -moz-border-radius-topright:10px;
    border-top-left-radius:10px; border-top-right-radius:10px;
-   background:rgb(27,22,19);
-   background:-moz-linear-gradient(top, rgba(24,19,16,0.99), rgba(27,22,19,0.99));
-   background:-webkit-gradient(linear, left top, left bottom, from(rgba(24,19,16,0.2)), to(rgba(27,22,19,0.2)));
+   background:#191410;
+   background:-moz-linear-gradient(top, #27211d, #1b1613);
+   background:-webkit-gradient(linear, left top, left bottom, from(#27211d), to(#1b1613));
+   -webkit-box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 10px 3px;
+   -moz-box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 10px 3px;
    max-width:500px;
 }
 

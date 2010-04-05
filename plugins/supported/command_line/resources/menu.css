@@ -45,11 +45,13 @@ div.cmd_menu {
   border-top-left-radius:10px;
   border-top-right-radius:10px;
   background:#191410;
-  background:-moz-linear-gradient(top, #27211d, #1b1613);
-  background:-webkit-gradient(linear, left top, left bottom, from(#27211d), to(#1b1613));
+  background: -moz-linear-gradient(top, #27211d, #1b1613);
+  background: -webkit-gradient(linear, left top, left bottom, from(#27211d), to(#1b1613));
   -moz-border-top-colors: #000 #3e3936;
   -moz-border-left-colors: #000 #3e3936;
   -moz-border-right-colors: #000 #1e1916;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 10px 3px;
+  -moz-box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 10px 3px;
 }
 
 div.cmd_menu .cmd_title {
@@ -74,7 +76,8 @@ div.cmd_menu li {
 
 div.cmd_menu li:hover, .cmd_hi {
   color:#000;
-  background:#FF8E00 -moz-linear-gradient(top, #FF8E00, #DD6E00);
+  background: #FF8E00 -moz-linear-gradient(top, #FF8E00, #DD6E00);
+  background: -webkit-gradient(linear, left top, left bottom, from(#FF8E00), to(#DD6E00));
   cursor:pointer;
 }
 
