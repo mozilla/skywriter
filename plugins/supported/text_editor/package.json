@@ -27,6 +27,14 @@
         },
         {
             "ep": "command",
+            "name": "deletelines",
+            "description": "Delete all lines currently selected",
+            "key": "ctrl_d",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/editing#deleteLines"
+        },
+        {
+            "ep": "command",
             "name": "insertText",
             "pointer": "commands/editing#insertText",
             "params": [

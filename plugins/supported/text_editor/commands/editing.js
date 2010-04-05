@@ -104,6 +104,25 @@ exports.deleteCommand = function(env, args, request) {
     _performBackspaceOrDelete(env, false);
 };
 
+/**
+ * Deletes all lines that are partially or fully selected, and position the
+ * insertion point at the end of the deleted range.
+ */
+exports.deleteLines = function(env, args, request) {
+    var view = env.get('view');
+    var range = view.getSelectedRange();
+
+    view.groupChanges(function() {
+        var startPos = { column: 0, row: range.start.row };
+        view.replaceCharacters({
+            start: startPos,
+            end: { column: 0, row: range.end.row + 1 }
+        }, "");
+
+        view.moveCursorTo(startPos);
+    });
+};
+
 /*
  * Commands that insert text.
  */
