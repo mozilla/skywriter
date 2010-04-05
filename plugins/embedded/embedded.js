@@ -41,7 +41,7 @@
 		"appsupport": "0.0",
 		"dock_view": "0.0",
 		"edit_session": "0.0",
-		"editor": "0.0",
+		"text_editor": "0.0",
 		"settings": "0.0"
 	},
     "provides": [
