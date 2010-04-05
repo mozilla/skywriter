@@ -105,7 +105,7 @@ exports.EditorUndoController = SC.Object.extend({
             return false;
         }
 
-        this.get('textView').setSelection(selection);
+        this.get('textView').setSelection(selection, true);
         return true;
     },
 
