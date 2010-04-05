@@ -89,8 +89,9 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         var range = this._selectedRange;
         var characterRect = this.get('layoutManager').
             characterRectForPosition(range.start);
-        var x = characterRect.x, y = characterRect.y;
-        var width = characterRect.width, height = characterRect.height;
+        var x = Math.floor(characterRect.x), y = characterRect.y;
+        var width = Math.ceil(characterRect.width);
+        var height = characterRect.height;
 
         context.save();
 
@@ -115,11 +116,11 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     _drawLines: function(rect, context) {
         var layoutManager = this.get('layoutManager');
         var textLines = layoutManager.get('textLines');
+        var lineAscent = layoutManager.get('lineAscent');
         var theme = this.get('theme');
-        var lineAscent = this._lineAscent;
 
         context.save();
-        context.font = theme.editorTextFont;
+        context.font = this.getPath('editor.font');
 
         var range = layoutManager.characterRangeForBoundingRect(rect);
         var rangeStart = range.start, rangeEnd = range.end;
@@ -427,7 +428,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     theme: {
         backgroundStyle: "#2a211c",
         cursorStyle: "#879aff",
-        editorTextFont: "10pt Monaco, Lucida Console, monospace",
         editorSelectedTextColor: "rgb(240, 240, 240)",
         editorSelectedTextBackground: "#526da5",
         unfocusedCursorStrokeStyle: "#ff0033",

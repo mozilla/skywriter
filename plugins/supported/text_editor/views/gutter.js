@@ -40,10 +40,6 @@ var CanvasView = require('views/canvas').CanvasView;
 var m_scratchcanvas = require('bespin:util/scratchcanvas');
 
 var InteriorGutterView = CanvasView.extend({
-    // TODO: calculate from the size or let the user override via themes if
-    // desired
-    _lineAscent: 16,
-
     /**
      * @property
      * Theme information for the gutter. Currently exposed properties are
@@ -76,14 +72,15 @@ var InteriorGutterView = CanvasView.extend({
         var padding = parentView.get('padding');
         context.translate(padding.left, 0);
 
-        context.fillStyle = theme.lineNumberColor;
-        context.font = theme.lineNumberFont;
-
         var layoutManager = parentView.get('layoutManager');
         var range = layoutManager.characterRangeForBoundingRect(rect);
         var endRow = Math.min(range.end.row,
             layoutManager.get('textLines').length - 1);
-        var lineAscent = this._lineAscent;
+        var lineAscent = layoutManager.get('lineAscent');
+
+        context.fillStyle = theme.lineNumberColor;
+        context.font = parentView.get('editor').font;
+
         for (var row = range.start.row; row <= endRow; row++) {
             // TODO: breakpoints
             context.fillText("" + (row + 1), -0.5,
@@ -103,11 +100,12 @@ exports.GutterView = SC.View.extend({
 
         var lineNumberFont = this.get('theme').lineNumberFont;
 
-        var lineCount = this.getPath('layoutManager.textLines').length;
+        var layoutManager = this.get('layoutManager');
+        var lineCount = layoutManager.get('textLines').length;
         var lineCountStr = "" + lineCount;
 
-        var canvas = m_scratchcanvas.get();
-        var strWidth = canvas.measureStringWidth(lineNumberFont, lineCountStr);
+        var characterWidth = layoutManager.get('characterWidth');
+        var strWidth = characterWidth * lineCountStr.length;
 
         return strWidth + paddingWidth;
     },

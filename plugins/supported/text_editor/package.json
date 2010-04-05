@@ -339,6 +339,20 @@
             "description": "The keymapping to use",
             "type": "text",
             "defaultValue": "standard"
+        },
+        {
+            "ep": "setting",
+            "name": "fontsize",
+            "description": "The editor font size in pixels",
+            "type": "number",
+            "defaultValue": 10
+        },
+        {
+            "ep": "setting",
+            "name": "fontface",
+            "description": "The editor font face",
+            "type": "text",
+            "defaultValue": "Monaco, Lucida Console, monospace"
         }
     ]
 }

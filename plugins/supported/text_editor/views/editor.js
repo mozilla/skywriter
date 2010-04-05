@@ -44,6 +44,8 @@ var SyntaxManager = require('syntax_manager:controllers/syntaxmanager').
 var TextView = require('views/text').TextView;
 var EditorUndoController = require('controllers/undo').EditorUndoController;
 var EditorSearchController = require('controllers/search').EditorSearchController;
+var settings = require('settings').settings;
+var m_scratchcanvas = require('bespin:util/scratchcanvas');
 
 /**
  * @class
@@ -52,7 +54,50 @@ var EditorSearchController = require('controllers/search').EditorSearchControlle
  * gutter view, as well as maintaining a layout manager.
  */
 exports.EditorView = SC.View.extend(SC.Border, {
+    _fontChanged: function() {
+        var fontSize = settings.get('fontsize');
+        var canvas = m_scratchcanvas.get();
+        var layoutManager = this.layoutManager;
+
+        // Measure a large string to work around the fact that width and height
+        // are truncated to the nearest integer in the canvas API.
+        var str = "";
+        for (var i = 0; i < 100; i++) {
+            str += "M";
+        }
+
+        var width = canvas.measureStringWidth(this.font, str) / 100;
+
+        layoutManager.set('characterWidth', width);
+
+        layoutManager.set('lineHeight', Math.floor(fontSize * 1.6));
+        layoutManager.set('lineAscent', Math.floor(fontSize * 1.3));
+
+        // Recompute the layouts.
+        this.layoutManager._recomputeEntireLayout();
+        this.gutterView._recomputeLayout();
+        this.textView.setNeedsDisplay();
+    }.observes('font'),
+
+    _fontSizeChanged: function() {
+        var fontSize = settings.get('fontsize');
+        var fontFace = settings.get('fontname');
+        var font = fontSize + "px " + fontFace;
+        this.set('font', font);
+    }.observes(
+        'settings:index#settings.fontsize',
+        'settings:index#settings.fontface'
+    ),
+
     borderStyle: SC.BORDER_GRAY,
+
+    /**
+     * @property{string}
+     *
+     * The font to use for the text view and the gutter view. Typically, this
+     * value is set via the font settings.
+     */
+    font: "10pt Monaco, Lucida Console, monospace",
 
     /**
      * @property
@@ -79,6 +124,14 @@ exports.EditorView = SC.View.extend(SC.Border, {
     scrollView: ScrollView,
 
     /**
+     * @property{EditorSearchController}
+     *
+     * The search controller class to use. This field will be instantiated when
+     * the child views are created.
+     */
+    searchController: EditorSearchController,
+
+    /**
      * @property
      *
      * The syntax manager class to use. This field will be instantiated when
@@ -102,8 +155,6 @@ exports.EditorView = SC.View.extend(SC.Border, {
      */
     undoController: EditorUndoController,
 
-    searchController: EditorSearchController,
-
     _gutterViewFrameChanged: function() {
         this.get('scrollView').adjust({
             left: this.getPath('gutterView.frame').width
@@ -122,6 +173,7 @@ exports.EditorView = SC.View.extend(SC.Border, {
         var scrollViewClass = this.get('scrollView');
 
         var gutterView = this.createChildView(this.get('gutterView'), {
+            editor: this,
             layoutManager: layoutManager
         });
         this.set('gutterView', gutterView);
@@ -130,6 +182,7 @@ exports.EditorView = SC.View.extend(SC.Border, {
         var textViewClass = this.get('textView');
         var scrollView = this.createChildView(scrollViewClass, {
             contentView: textViewClass.extend({
+                editor: this,
                 layoutManager: layoutManager,
                 searchController: this.get('searchController')
             }),

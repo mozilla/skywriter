@@ -44,9 +44,28 @@ var TextStorage = require('models/textstorage').TextStorage;
 var catalog = require('bespin:plugins').catalog;
 
 exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
-    _characterWidth: 8,
-    _lineHeight: 20,
     _maximumWidth: 0,
+
+    /**
+     * @property{number}
+     *
+     * The width of one character.
+     */
+    characterWidth: 8,
+
+    /**
+     * @property{number}
+     *
+     * The ascent of one line. This is used for painting text.
+     */
+    lineAscent: 16,
+
+    /**
+     * @property{number}
+     *
+     * The height of one line.
+     */
+    lineHeight: 20,
 
     /**
      * @property
@@ -124,7 +143,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
                 lineRect,
                 {
                     x:      0,
-                    y:      startRect.y + this._lineHeight,
+                    y:      startRect.y + this.get('lineHeight'),
                     width:  Number.MAX_VALUE,
                     height: Number.MAX_VALUE
                 }
@@ -224,10 +243,10 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         var margin = this.get('margin');
         var x = point.x - margin.left, y = point.y - margin.top;
 
-        var characterWidth = this._characterWidth;
+        var characterWidth = this.get('characterWidth');
         var textStorage = this.get('textStorage');
         var clampedPosition = textStorage.clampPosition({
-            row:    Math.floor(y / this._lineHeight),
+            row:    Math.floor(y / this.get('lineHeight')),
             column: Math.floor(x / characterWidth)
         });
 
@@ -248,8 +267,8 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     characterRangeForBoundingRect: function(rect) {
         // TODO: variable line heights, needed for word wrap and perhaps
         // extensions as well
-        var lineHeight = this._lineHeight;
-        var characterWidth = this._characterWidth;
+        var lineHeight = this.get('lineHeight');
+        var characterWidth = this.get('characterWidth');
         var margin = this.get('margin');
         var x = rect.x - margin.left, y = rect.y - margin.top;
         return {
@@ -335,8 +354,8 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
 
     rectForPosition: function(position) {
         var margin = this.get('margin');
-        var characterWidth = this._characterWidth;
-        var lineHeight = this._lineHeight;
+        var characterWidth = this.get('characterWidth');
+        var lineHeight = this.get('lineHeight');
         return {
             x:      margin.left + characterWidth * position.column,
             y:      margin.top + lineHeight * position.row,
@@ -349,8 +368,8 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
      * Returns the 1, 2, or 3 rectangles that make up the given range.
      */
     rectsForRange: function(range) {
-        var characterWidth = this._characterWidth;
-        var lineHeight = this._lineHeight;
+        var characterWidth = this.get('characterWidth');
+        var lineHeight = this.get('lineHeight');
         var maximumWidth = this._maximumWidth;
         var margin = this.get('margin');
 
