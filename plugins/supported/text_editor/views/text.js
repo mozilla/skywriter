@@ -223,10 +223,16 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         var range = Range.normalizeRange(this._selectedRange);
         if (!this._rangeIsInsertionPoint(range)) {
             var rects = layoutManager.rectsForRange(range);
-            rects.forEach(this.setNeedsDisplayInRect, this);
+            rects.forEach(function(rect) {
+                rect.x -= 1;
+                rect.width += 2;
+                this.setNeedsDisplayInRect(rect);
+            }, this);
         } else {
             var rect = this.get('layoutManager').
-            characterRectForPosition(range.start);
+                        characterRectForPosition(range.start);
+            rect.x -= 1;
+            rect.width += 2;
             this.setNeedsDisplayInRect(rect);
         }
     },
