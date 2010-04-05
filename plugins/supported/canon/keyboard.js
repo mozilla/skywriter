@@ -91,7 +91,12 @@ var KeyboardManager = SC.Object.extend({
             ret = SC.FUNCTION_KEYS[code] ;
             if (!ret && (orgEvt.altKey || orgEvt.ctrlKey || orgEvt.metaKey)) {
                 ret = SC.PRINTABLE_KEYS[code];
-                allowShift = orgEvt.altKey;
+                // Don't handle the shift key if the combo is
+                //    (meta_|ctrl_)<number>
+                // This is necessary for the French keyboard. On that keyboard,
+                // you have to hold down the shift key to access the number
+                // characters.
+                if (code > 47 && code < 58) allowShift = orgEvt.altKey;
             }
 
             if (ret) {
