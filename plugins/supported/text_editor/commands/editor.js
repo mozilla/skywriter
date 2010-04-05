@@ -35,12 +35,22 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var catalog = require('bespin:plugins').catalog;
 var settings = require('settings').settings;
 
 /**
- * 'goto' command
+ * Moves the cursor to the specified line.
  */
 exports.gotoCommand = function(env, args, request) {
+    if (!('line' in args)) {
+        var cliController = catalog.getObject('clicontroller');
+        if (!SC.none(cliController)) {
+            cliController.prompt('goto ');
+        }
+
+        return;
+    }
+
     var view = env.get('view');
     view.moveCursorTo({ row: args.line - 1, column: 0 });
     view.focus();

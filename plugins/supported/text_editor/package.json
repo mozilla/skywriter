@@ -282,6 +282,7 @@
         {
             "ep": "command",
             "name": "goto",
+            "key": "ctrl_l",
             "params":
             [
                 {
