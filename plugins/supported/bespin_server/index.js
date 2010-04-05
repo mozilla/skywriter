@@ -356,8 +356,8 @@ exports.server = SC.Object.create({
         */
         var self = this;
         this.request('POST', '/messages/', mobwritePayload, {
-            evalJSON: true,
-            onSuccess: function(messages) {
+            evalJSON: true
+        }).then(function(messages) {
                 var interval = self._interval;
                 // kill the current timeout
                 if (interval.handle) {
@@ -375,11 +375,11 @@ exports.server = SC.Object.create({
                     self._schedulePoll(messages.length);
                 }
             },
-            onFailure: function(message) {
+            function(message) {
                 self._processResponse(message);
                 self._schedulePoll(0);
             }
-        });
+        );
     },
 
     /**

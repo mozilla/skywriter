@@ -136,6 +136,15 @@ exports.Filesystem = SC.Object.extend({
     },
     
     /*
+     * Call this if you make a big change to the files in the filesystem. This will cause the entire cache
+     * to be reloaded on the next call that requires it.
+     */
+    invalidate: function() {
+        this._files = [];
+        this.set("status", exports.NEW);
+    },
+    
+    /*
      * Get a list of all files in the filesystem.
      */
     listAll: function() {

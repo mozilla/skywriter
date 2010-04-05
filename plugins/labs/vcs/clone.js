@@ -24,6 +24,7 @@
 
 var SC = require("sproutcore/runtime").SC;
 var console = require("bespin:console").console;
+var catalog = require('bespin:plugins').catalog;
 var themeManager = require("theme_manager").themeManager;
 var objectToQuery = require('bespin:util/util').objectToQuery;
 var getKeychainPassword = require("userident:kc").getKeychainPassword;
@@ -101,13 +102,18 @@ exports.cloneController = SC.Object.create({
                 var request = this.get("request");
                 request.doneWithError("Clone canceled");
             }.bind(this));
+        } else {
+            this._performClone(data);
         }
     },
     
     _performClone: function(data) {
         var request = this._request;
         var pr = exports.cloneNewProject(data);
-        createStandardHandler(pr, request);
+        createStandardHandler(pr, request).then(function() {
+            var files = catalog.getObject('files');
+            files.invalidate();
+        });
     },
     
     hasAuth: function() {
@@ -408,6 +414,10 @@ exports.cloneCommand = function(env, args, request) {
  */
 exports.cloneNewProject = function(data) {
     data = objectToQuery(data);
-    return server.requestDisconnected("POST", "/vcs/clone/", data);
+    return server.requestDisconnected("POST", "/vcs/clone/", data, {
+        onPartial: function(output) {
+            // temporarily just squelch the partial output
+        }
+    });
 };
 
