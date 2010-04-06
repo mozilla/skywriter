@@ -39,6 +39,57 @@ var catalog = require('bespin:plugins').catalog;
 var settings = require('settings').settings;
 
 /**
+ * 'find' command
+ */
+exports.findCommand = function(env, args, request) {
+    if (!('value' in args)) {
+        var cliController = catalog.getObject('clicontroller');
+        if (!SC.none(cliController)) {
+            cliController.prompt('find ');
+        }
+
+        return;
+    }
+
+    var view = env.get('view'), search = view.get('searchController');
+    var sel = view.getSelectedRange();
+    var output = '';
+
+    search.setSearchText(args.value, false);
+
+    var match = search.findNext(sel.end, true);
+    if (match) {
+        view.setSelection(match, true);
+        view.focus();
+    } else {
+        output += '<i>No matches found</i><br>';
+    }
+
+    output += 'Searching for "' + args.value + '"';
+    request.done(output);
+};
+
+exports.findNextCommand = function(env, args, request) {
+    var view = env.get('view'), search = view.get('searchController');
+    var sel = view.getSelectedRange();
+    var match = search.findNext(sel.end, true);
+    if (match) {
+        view.setSelection(match, true);
+        view.focus();
+    }
+};
+
+exports.findPrevCommand = function(env, args, request) {
+    var view = env.get('view'), search = view.get('searchController');
+    var sel = view.getSelectedRange();
+    var match = search.findPrevious(sel.start, true);
+    if (match) {
+        view.setSelection(match, true);
+        view.focus();
+    }
+};
+
+/**
  * Moves the cursor to the specified line.
  */
 exports.gotoCommand = function(env, args, request) {

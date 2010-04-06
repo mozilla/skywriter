@@ -75,6 +75,35 @@
         },
         {
             "ep": "command",
+            "name": "find",
+            "key": "ctrl_f",
+            "params":
+            [
+                {
+                    "name": "value",
+                    "type": "text",
+                    "description": "string to search for"
+                }
+            ],
+            "description": "Search for text within this buffer",
+            "pointer": "commands/editor#findCommand"
+        },
+        {
+            "ep": "command",
+            "name": "findnext",
+            "key": "ctrl_g",
+            "description": "Repeat the last search (forward)",
+            "pointer": "commands/editor#findNextCommand"
+        },
+        {
+            "ep": "command",
+            "name": "findprev",
+            "key": "ctrl_shift_g",
+            "description": "Repeat the last search (backward)",
+            "pointer": "commands/editor#findPrevCommand"
+        },
+        {
+            "ep": "command",
             "name": "move down",
             "key": "down",
             "predicates": {"isTextView": true},
