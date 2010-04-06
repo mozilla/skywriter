@@ -42,17 +42,62 @@ var console = require('bespin:console').console;
 /**
  * @class
  *
+ * Manages the Find functionality.
  */
 exports.EditorSearchController = SC.Object.extend({
+    /**
+     * This is based on the idea from:
+     *      http://simonwillison.net/2006/Jan/20/escape/.
+     */
+    _escapeString: /(\/|\.|\*|\+|\?|\||\(|\)|\[|\]|\{|\}|\\)/g,
+
+    _findMatchesInString: function(str) {
+        var result = [];
+        var searchRegExp = this.get('searchRegExp');
+        var searchResult;
+        var endIndex;
+
+        searchRegExp.lastIndex = 0;
+
+        while (true) {
+            searchResult = searchRegExp.exec(str);
+            if (searchResult === null) {
+                break;
+            }
+
+            result.push(searchResult);
+
+            var index = searchResult.index;
+            searchRegExp.lastIndex = index + searchResult[0].length;
+        }
+
+        return result;
+    },
+
+    _makeRange: function(searchResult, row) {
+        return {
+            start: { row: row, column: searchResult.index },
+            end: {
+                row: row,
+                column: searchResult.index + searchResult[0].length
+            }
+        };
+    },
 
     /**
-     * @property{TextView}
+     * @property{boolean}
      *
-     * The view object to search in.
+     * True if the search query is a regular expression, false if it's a
+     * literal string.
      */
-    textView: null,
-
     isRegExp: null,
+
+    /**
+     * @property{RegExp}
+     *
+     * The current search query as a regular expression.
+     */
+    searchRegExp: null,
 
     /**
      * @property{String}
@@ -62,16 +107,20 @@ exports.EditorSearchController = SC.Object.extend({
     searchText: null,
 
     /**
+     * @property{TextView}
      *
+     * The view object to search in.
      */
-    searchRegExp: null,
+    textView: null,
 
     /**
-     * This is based on the idea from http://simonwillison.net/2006/Jan/20/escape/.
+     * Sets the search query.
+     *
+     * @param text     The search query to set.
+     * @param isRegExp True if the text is a regex, false if it's a literal
+     *                 string.
      */
-    _escapeString: /(\/|\.|\*|\+|\?|\||\(|\)|\[|\]|\{|\}|\\)/g,
-
-    setSeachText: function(text, isRegExp) {
+    setSearchText: function(text, isRegExp) {
         var regExp;
         // If the search string is not a RegExp make sure to escape the
         if (!isRegExp) {
@@ -84,54 +133,28 @@ exports.EditorSearchController = SC.Object.extend({
         this.set('searchText', text);
     },
 
-    _makeRange: function(searchResult, row) {
-        return {
-            start: {
-                row: row,
-                column: searchResult.index
-            },
-            end: {
-                row: row,
-                column: searchResult.index + searchResult[0].length
-            }
-        };
-    },
-
-    _findMatchesInString: function(str) {
-        var result = [];
+    /**
+     * Finds the next occurrence of the search query.
+     *
+     * @param startPos       The position at which to restart the search.
+     * @param allowFromStart True if the search is allowed to wrap.
+     */
+    findNext: function(startPos, allowFromStart) {
         var searchRegExp = this.get('searchRegExp');
-        var searchResult;
-        var endIndex;
-
-        searchRegExp.lastIndex  = 0;
-
-        while (true){
-            searchResult = searchRegExp.exec(str);
-            if (searchResult === null) {
-                break;
-            }
-            result.push(searchResult);
-            searchRegExp.lastIndex = searchResult.index + searchResult[0].length;
-        }
-
-        return result;
-    },
-
-    findNext: function(allowFromStart, startPos) {
-        if (SC.none(this.searchRegExp)) {
+        if (SC.none(searchRegExp)) {
             return null;
         }
 
-        startPos = startPos || Range.normalizeRange(
-                                this.getPath('textView._selectedRange')).end;
+        var textView = this.get('textView');
+        startPos = startPos || textView.getSelectedRange().end;
 
-        var lines = this.getPath('textView.layoutManager.textStorage.lines');
-        var searchRegExp = this.get('searchRegExp');
+        var lines = textView.getPath('layoutManager.textStorage.lines');
         var searchResult;
 
         searchRegExp.lastIndex = startPos.column;
 
-        for (var row = startPos.row; row < lines.length; row++) {
+        var row;
+        for (row = startPos.row; row < lines.length; row++) {
             searchResult = searchRegExp.exec(lines[row]);
             if (!SC.none(searchResult)) {
                 return this._makeRange(searchResult, row);
@@ -142,7 +165,8 @@ exports.EditorSearchController = SC.Object.extend({
             return null;
         }
 
-        for (var row = 0; row <= startPos.row; row++) {
+        // Wrap around.
+        for (row = 0; row <= startPos.row; row++) {
             searchResult = searchRegExp.exec(lines[row]);
             if (!SC.none(searchResult)) {
                 return this._makeRange(searchResult, row);
@@ -152,30 +176,38 @@ exports.EditorSearchController = SC.Object.extend({
         return null;
     },
 
-    findPrevious: function(allowFromEnd, startPos) {
-        if (SC.none(this.searchRegExp)) {
+    /**
+     * Finds the previous occurrence of the search query.
+     *
+     * @param startPos       The position at which to restart the search.
+     * @param allowFromStart True if the search is allowed to wrap.
+     */
+    findPrevious: function(startPos, allowFromEnd) {
+        var searchRegExp = this.get('searchRegExp');
+        if (SC.none(searchRegExp)) {
             return null;
         }
 
-        startPos = startPos || Range.normalizeRange(
-                                this.getPath('textView._selectedRange')).start;
+        var textView = this.get('textView');
+        startPos = startPos || textView.getSelectedRange().start;
 
-        var lines = this.getPath('textView.layoutManager.textStorage.lines');
+        var lines = textView.getPath('layoutManager.textStorage.lines');
         var searchResults;
 
-        // Treat first line different.
+        // Treat the first line specially.
         var firstLine = lines[startPos.row].substring(0, startPos.column);
         searchResults = this._findMatchesInString(firstLine);
 
-        if (searchResults.length != 0) {
+        if (searchResults.length !== 0) {
             return this._makeRange(searchResults[searchResults.length - 1],
                                                                 startPos.row);
         }
 
-        // Loop over all other lines
-        for (var row = startPos.row - 1; row != -1; row--) {
+        // Loop over all other lines.
+        var row;
+        for (row = startPos.row - 1; row !== -1; row--) {
             searchResults = this._findMatchesInString(lines[row]);
-            if (searchResults.length != 0) {
+            if (searchResults.length !== 0) {
                 return this._makeRange(searchResults[searchResults.length - 1],
                                                                         row);
             }
@@ -185,10 +217,10 @@ exports.EditorSearchController = SC.Object.extend({
             return null;
         }
 
-        // Loop over all other lines
-        for (var row = lines.length - 1; row >= startPos.row; row--) {
+        // Wrap around.
+        for (row = lines.length - 1; row >= startPos.row; row--) {
             searchResults = this._findMatchesInString(lines[row]);
-            if (searchResults.length != 0) {
+            if (searchResults.length !== 0) {
                 return this._makeRange(searchResults[searchResults.length - 1],
                                                                         row);
             }
