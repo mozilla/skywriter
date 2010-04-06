@@ -123,11 +123,7 @@ var Range = require('rangeutils:utils/range');
                             },
                             {
                                 "name": "text",
-                                "match": "KEY_VALUE"
-                            },
-                            {
-                                "name": "cmd",
-                                "defaultValue": "insertText"
+                                "match": 2
                             }
                         ],
                         "predicates": {
@@ -136,13 +132,13 @@ var Range = require('rangeutils:utils/range');
                     },
                     {
                         "comment": "This binding matches numbers as long as there is no meta_number in the buffer.",
-                        "regex":  [ "(meta_[0-9]*)*", "[0-9]+" ],
+                        "regex":  [ "(meta_[0-9]*)*", "([0-9]+)" ],
                         "disallowMatches":  [ 1 ],
                         "exec": "insertText",
                         "params": [
                             {
                                 "name": "text",
-                                "match": "KEY_VALUE",
+                                "match": 2,
                                 "type": "text"
                             }
                         ],
