@@ -71,6 +71,25 @@ exports.reload = function(pluginName, callback) {
     plugin.reload(callback);
 };
 
+/**
+ *
+ */
+exports.getPlugins = function() {
+    var reply = [];
+    for (var name in pluginCatalog.plugins) {
+        if (pluginCatalog.plugins.hasOwnProperty(name)) {
+            if (pluginCatalog.plugins[name].description) {
+                reply.push(pluginCatalog.plugins[name]);
+            }
+        }
+    }
+    reply.sort(function(a, b) {
+        return a.name.localeCompare(b.name);
+    });
+    reply.unshift({ name:'all', description:'Runs all the available tests' });
+    return reply;
+};
+
 exports.reloadCommand = function(env, args, request) {
     if (!args.plugin) {
         request.doneWithError("You must provide a plugin name");

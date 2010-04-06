@@ -23,7 +23,10 @@
             "params": [
                 {
                     "name": "testmodule",
-                    "type": "text",
+                    "type": {
+                        "name": "selection",
+                        "pointer": "plugindev:index#getPlugins"
+                    },
                     "description": "Provide a plugin name to run all tests for a plugin, 'all' to run all known tests, or plugin:module to run the tests in a specific module. If you omit this, the last tests run will be run again.",
                     "defaultValue": null
                 }
