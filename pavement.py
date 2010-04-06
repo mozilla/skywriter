@@ -370,6 +370,10 @@ def dist(options):
     output_dir.rmtree()
     
     replaced_lines = update_python_version()
+    
+    sh("bin/pip freeze -r %s > %s" % (options.server.directory / "requirements.txt",
+                                      options.server.directory / "production" / "requirements.txt"))
+    
     try:
         call_pavement(options.server_pavement, "production")
     finally:
