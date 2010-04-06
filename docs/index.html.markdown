@@ -20,6 +20,7 @@ Plugin Author Guide
 * [Built-in Extension Points](pluginguide/extpoints.html)
 * [Distributing Plugins](pluginguide/distributing.html)
 * [Syntax Highlighting](pluginguide/syntax.html)
+* [Keymapping](pluginguide/keymapping.html)
 * [Automated Testing](devguide/testing.html)
 
 
