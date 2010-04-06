@@ -88,10 +88,10 @@ exports.add = function(env, args, request) {
         return;
     }
     
-    var pluginConfigFile = files.getObject("BespinSettings/pluginInfo.json");
+    var pluginConfigFile = files.getFile("BespinSettings/pluginInfo.json");
     
-    pluginConfigFile.loadContents().then(function(result) {
-        var pluginConfig = JSON.parse(result.contents);
+    pluginConfigFile.loadContents().then(function(contents) {
+        var pluginConfig = JSON.parse(contents);
         finishAdd(request, pluginConfigFile, pluginConfig, path);
     }, function(error) {
         // file not found from the server is okay, we just need
@@ -160,10 +160,10 @@ exports.remove = function(env, args, request) {
     catalog.removePlugin(pluginName);
     
     var files = catalog.getObject("files");
-    var pluginConfigFile = files.getObject("BespinSettings/pluginInfo.json");
+    var pluginConfigFile = files.getFile("BespinSettings/pluginInfo.json");
     
-    pluginConfigFile.loadContents().then(function(result) {
-        var pluginConfig = JSON.parse(result.contents);
+    pluginConfigFile.loadContents().then(function(contents) {
+        var pluginConfig = JSON.parse(contents);
         var paths = pluginConfig.plugins;
         var found = false;
         for (var i = 0; i < paths.length; i++) {
@@ -182,8 +182,7 @@ exports.remove = function(env, args, request) {
                 request.doneWithError("Unable to save plugin config file: " + error.message);
             });
         } else {
-            var obj = files.getObject(plugin.userLocation);
-            obj.remove().then(function() {
+            var obj = files.remove(plugin.userLocation).then(function() {
                 request.done("Plugin removed.");
             }, function(error) {
                 request.doneWithError("Unable to delete plugin files at " 
@@ -195,8 +194,7 @@ exports.remove = function(env, args, request) {
         // to remove the plugin. If there's no pluginConfig, then
         // we know this is not a user edited plugin.
         if (error.xhr && error.xhr.status == 404) {
-            var obj = files.getObject(plugin.userLocation);
-            obj.remove().then(function() {
+            var obj = files.remove(plugin.userLocation).remove().then(function() {
                 request.done("Plugin removed.");
             }, function(error) {
                 request.doneWithError("Unable to delete plugin files at " 

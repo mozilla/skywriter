@@ -7,7 +7,7 @@
     "provides": [
         {
             "ep": "command",
-            "name": "reload",
+            "name": "plugin reload",
             "params": [
                 {
                     "name": "plugin",
