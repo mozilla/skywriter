@@ -81,7 +81,7 @@ exports.EditorView = SC.View.extend(SC.Border, {
 
     _fontSizeChanged: function() {
         var fontSize = settings.get('fontsize');
-        var fontFace = settings.get('fontname');
+        var fontFace = settings.get('fontface');
         var font = fontSize + "px " + fontFace;
         this.set('font', font);
     }.observes(
