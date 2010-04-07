@@ -275,7 +275,7 @@ exports.EmbeddedEditor = SC.Object.extend({
         var editorView = pane.getPath('applicationView.centerView');
         this._editorView = editorView;
 
-        var textStorage = editorView.get('textStorage');
+        var textStorage = editorView.getPath('layoutManager.textStorage');
         var textView = editorView.get('textView');
         exports.model = textStorage;
         exports.view = textView;
