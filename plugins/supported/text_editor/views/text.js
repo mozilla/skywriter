@@ -970,6 +970,11 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     setSelection: function(newRange, ensureVisible) {
         var textStorage = this.getPath('layoutManager.textStorage');
 
+        newRange = textStorage.clampRange(newRange);
+        if (Range.equal(newRange, this._selectedRange)) {
+            return;
+        }
+
         // Invalidate the old selection.
         this._invalidateSelection();
 

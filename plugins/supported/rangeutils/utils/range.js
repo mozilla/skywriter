@@ -53,6 +53,14 @@ exports.comparePositions = function(positionA, positionB) {
     return rowDiff === 0 ? positionA.column - positionB.column : rowDiff;
 };
 
+/**
+ * Returns true if the two ranges are equal and false otherwise.
+ */
+exports.equal = function(rangeA, rangeB) {
+    return (exports.comparePositions(rangeA.start, rangeB.start) === 0 &&
+                exports.comparePositions(rangeA.end, rangeB.end) === 0);
+};
+
 exports.extendRange = function(range, delta) {
     var end = range.end;
     return {
