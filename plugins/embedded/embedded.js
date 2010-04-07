@@ -77,13 +77,6 @@ exports.EmbeddedEditor = SC.Object.extend({
 
     _focused: false,
 
-    _attachEmbeddedEvents: function() {
-        this.getPath('pane.layer').addEventListener('mousedown',
-            function() { this.setFocus(true); }.bind(this), true);
-        document.body.addEventListener('mousedown',
-            function() { this.setFocus(false); }.bind(this), true);
-    },
-
     _attachPane: function() {
         if (typeof(this.get('element')) === 'string') {
             this.set('element', document.getElementById('element'));
@@ -285,7 +278,6 @@ exports.EmbeddedEditor = SC.Object.extend({
         session.set('currentView', textView);
         
         SC.run(function() {
-            this._attachEmbeddedEvents();
             this._createValueProperty();
             this._setOptions();
         }.bind(this));
