@@ -403,7 +403,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
     // row immediately following the row where the synchronization happened),
     // or null if the highlighting failed to synchronize before the end of the
     // range.
-    _recomputeAttrInfoForRows: function(startRow, endRow) {
+    _recomputeAttrInfoForRows: function(startRow, endRow, depth) {
         var promise = new Promise();
         var lineAttrInfo = this._lineAttrInfo;
 
@@ -412,6 +412,10 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
             var result = startRow === lineAttrInfo.length ? startRow : false;
             promise.resolve(result);
             return promise;
+        }
+
+        if (SC.none(depth)) {
+            depth = 0;
         }
 
         var thisLineAttrInfo = lineAttrInfo[startRow];
@@ -437,10 +441,23 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
                     nextLineAttrInfo.snapshot = newSnapshot;
                 }
 
-                this._recomputeAttrInfoForRows(startRow + 1, endRow).
-                    then(function(lastRow) {
-                        promise.resolve(lastRow);
-                    });
+                if (depth === 50) {
+                    // Do a "manual tail call" so that we don't overflow the
+                    // call stack. See bug 556151.
+                    window.setTimeout(function() {
+                        SC.run(function() {
+                            this._recomputeAttrInfoForRows(startRow + 1,
+                                endRow, 0).then(function(lastRow) {
+                                    promise.resolve(lastRow);
+                                });
+                        }.bind(this));
+                    }.bind(this), 0);
+                } else {
+                    this._recomputeAttrInfoForRows(startRow + 1, endRow,
+                        depth + 1).then(function(lastRow) {
+                            promise.resolve(lastRow);
+                        });
+                }
             }.bind(this));
 
         return promise;
