@@ -182,10 +182,10 @@ exports.group = function(promiseList) {
 
     // If the original array has nothing in it, return now to avoid waiting
     if (promiseList.length === 0) {
-        return new Promise().resolve([]);
+        return new exports.Promise().resolve([]);
     }
 
-    var promise = new Promise();
+    var promise = new exports.Promise();
     var results = [];
     var fulfilled = 0;
 
