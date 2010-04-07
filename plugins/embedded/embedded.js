@@ -315,6 +315,34 @@ exports.EmbeddedEditor = SC.Object.extend({
         var point = {row: line-1, column: 0, partialFraction: 0};
         textView.setSelection([{start: point, end: point}]);
         SC.RunLoop.end();
+    },
+
+    /**
+     * Changes a setting.
+     */
+    setSetting: function(key, value) {
+        if (SC.none(key)) {
+            throw new Error("setSetting: key must be supplied");
+        }
+        if (SC.none(value)) {
+            throw new Error("setSetting: value must be supplied");
+        }
+
+        SC.run(function() { settings.set(key, value); });
+    },
+
+    /**
+     * Sets the initial syntax highlighting context (i.e. the language).
+     */
+     setSyntax: function(syntax) {
+        if (SC.none(syntax)) {
+            throw new Error("setSyntax: syntax must be supplied");
+        }
+
+        SC.run(function() {
+            this._editorView.setPath('layoutManager.syntaxManager.' +
+                                                'initialContext', syntax);
+        }.bind(this));
     }
 });
 
