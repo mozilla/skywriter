@@ -63,7 +63,7 @@
 
 var SC = require("sproutcore/runtime").SC;
 var DockView = require('dock_view').DockView;
-var EditorView = require('editor:views/editor').EditorView;
+var EditorView = require('text_editor:views/editor').EditorView;
 var KeyListener = require('appsupport:views/keylistener').KeyListener;
 var bespin = require("bespin:index");
 var edit_session = require('edit_session');
