@@ -136,7 +136,7 @@
             "params":
             [
                 {
-                    "name": "seconds" ,
+                    "name": "seconds",
                     "type": "text",
                     "description": "How long do we wait before creating output"
                 }
@@ -144,6 +144,25 @@
             "hidden": true,
             "description": "create some output, slowly, after a given time (default 5s)",
             "pointer": "#slowCommand"
+        },
+        {
+            "ep": "command",
+            "name": "promise",
+            "params":
+            [
+                {
+                    "name": "which",
+                    "type":
+                    {
+                        "name": "selection",
+                        "data": [ "outstanding", "recent" ]
+                    },
+                    "description": "Do we display <tt>outstanding</tt> or <tt>recent</tt> promises?"
+                }
+            ],
+            "hidden": true,
+            "description": "Display a list of outstanding or recently completed promises",
+            "pointer": "#promiseCommand"
         }
     ]
 });
@@ -157,6 +176,7 @@
 
 var util = require("bespin:util/util");
 var catalog = require("bespin:plugins").catalog;
+var promiseMod = require("bespin:promise");
 
 var editor = catalog.get("editor");
 
@@ -290,4 +310,20 @@ exports.slowCommand = function(env, args, request) {
 
     request.output(parent);
     request.async();
+};
+
+/**
+ * The 'promise' command
+ */
+exports.promiseCommand = function(env, args, request) {
+    var dig = (args.which === 'outstanding') ?
+        promiseMod._outstanding :
+        promiseMod._recent;
+
+    var count = 0;
+    dig.forEach(function(promise) {
+        count++;
+        console.log("- Promise " + count + ": ", promise);
+    });
+    request.done(count + " " + args.which + " promises. Details logged to console.");
 };

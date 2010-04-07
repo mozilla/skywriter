@@ -48,6 +48,33 @@ var PENDING = 0;
 var SUCCESS = 1;
 
 /**
+ * We give promises and ID so we can track which are outstanding
+ */
+var _nextId = 0;
+
+/**
+ * Outstanding promises. Handy list for debugging only.
+ */
+exports._outstanding = [];
+
+/**
+ * Recently resolved promises. Also for debugging only.
+ */
+exports._recent = [];
+
+/**
+ * Remove the given {promise} from the _outstanding list, and add it to the
+ * _recent list, pruning more than 20 recent promises from that list.
+ */
+function complete(promise) {
+    delete exports._outstanding[promise._id];
+    exports._recent.push(promise);
+    while (exports._recent.length > 20) {
+        exports._recent.shift();
+    }
+}
+
+/**
  * Create an unfulfilled promise
  */
 exports.Promise = function () {
@@ -55,6 +82,11 @@ exports.Promise = function () {
     this._value = undefined;
     this._onSuccessHandlers = [];
     this._onErrorHandlers = [];
+
+    // Debugging help
+    this._id = _nextId++;
+    this._createTrace = new Trace(new Error());
+    exports._outstanding[this._id] = this;
 };
 
 /**
@@ -90,6 +122,9 @@ exports.Promise.prototype.resolve = function(data) {
     this._status = SUCCESS;
     this._value = data;
     this._callHandlers();
+
+    this._completeTrace = new Trace(new Error());
+    complete(this);
     return this;
 };
 
@@ -107,6 +142,9 @@ exports.Promise.prototype.reject = function(error) {
     this._status = ERROR;
     this._value = error;
     this._callHandlers();
+
+    this._completeTrace = new Trace(new Error());
+    complete(this);
     return this;
 };
 
@@ -130,22 +168,6 @@ exports.Promise.prototype._callHandlers = function() {
     this._onErrorHandlers.length = 0;
 };
 
-/**
- * Demand that a promise be fulfilled within a certain timespan.
- * TODO: There is a change that the promise will be rejected/resolved after this
- * has fired. It's not clear what we should do in this case. It depends on how
- * this method is being used.
- */
-exports.Promise.prototype.timeout = function(millis) {
-    if (this._status === PENDING) {
-        return;
-    }
-    setTimeout(function() {
-        if (this._status === PENDING) {
-            this.reject(new Error("Timeout after " + millis + "ms"));
-        }
-    }.bind(this), millis);
-};
 
 /**
  * Takes an array of promises and returns a promise that that is fulfilled once
