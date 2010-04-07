@@ -495,11 +495,15 @@ exports.testrunner = function(env, args, request) {
     plan.logger(logger);
 
     var promises = [];
-
     testsToRun.forEach(function(testmodule) {
         var pluginName = testmodule.split(":")[0];
         promises.push(tiki.async(pluginName));
     });
+
+    if (promises.length === 0) {
+        request.done("No tests found.");
+        return;
+    }
 
     var pr = group(promises);
     pr.then(function() {
