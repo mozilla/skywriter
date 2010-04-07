@@ -391,7 +391,7 @@
             "name": "fontsize",
             "description": "The editor font size in pixels",
             "type": "number",
-            "defaultValue": 10
+            "defaultValue": 14
         },
         {
             "ep": "setting",
