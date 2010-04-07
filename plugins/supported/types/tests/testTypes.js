@@ -129,10 +129,10 @@ exports.testResolveSimpleTypes = function() {
     typeSpec = { name: 'selection' };
     types.resolveType(typeSpec).then(createTypeDataTester('selection'));
 
-    t['throws'](function() {
+    try {
         typeSpec = { name: 'wrong' };
         types.resolveType(typeSpec).then(never('should die before here'));
-    });
+    } catch (ex) {}
 };
 
 /*
