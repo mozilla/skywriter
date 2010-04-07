@@ -292,6 +292,7 @@ exports.EmbeddedEditor = SC.Object.extend({
         this._focused = makeFocused;
         if (makeFocused) {
             pane.becomeKeyPane();
+            this._editorView.get('textView').focus();
         } else {
             pane.resignKeyPane();
         }
