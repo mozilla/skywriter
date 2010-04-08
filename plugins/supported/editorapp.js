@@ -98,7 +98,7 @@ var settings = require("settings").settings;
 var editsession = require("edit_session");
 
 exports.session = editsession.EditSession.create();
-exports.cli = {hello: "there"};
+exports.cli = null;
 
 var INITIAL_TEXT;   // defined at the end of the file to reduce ugliness
 
