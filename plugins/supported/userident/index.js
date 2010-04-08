@@ -612,7 +612,7 @@ exports.userIdentPage = SC.Page.design({
  */
 exports.login = function(user, pass) {
     var url = "/register/login/" + user;
-    return server.request('POST', url, "password=" + encodeURI(pass), {
+    return server.request('POST', url, "password=" + escape(pass), {
         log: 'Login complete.'
     });
 };
