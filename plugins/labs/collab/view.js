@@ -38,6 +38,8 @@
 var SC = require('sproutcore/runtime').SC;
 var DOCK_RIGHT = require('dock_view').DOCK_RIGHT;
 
+var editorapp_m = require('editorapp');
+
 var ChatLineView = SC.View.extend(SC.StaticLayout, {
     content: null,
     useStaticLayout: true,
@@ -120,8 +122,16 @@ exports.SocialView = SC.SplitView.design({
     })
 });
 
+
+// TODO: this is a hack to add the social view
+var view = editorapp_m.applicationController._applicationView.addDockedView(exports.SocialView, DOCK_RIGHT);
+editorapp_m.social = view;
+editorapp_m.applicationController._applicationView.appendChild(view);
+editorapp_m.applicationController._dockedViews.social = view;
+
+
 exports.broadcastMsg = function (msg) {
-    var social = require(editorapp).social;
+    var social = editorapp_m.social;
     if (social) {
         var chat = social.getPath('bottomRightView.chat.contentView');
         

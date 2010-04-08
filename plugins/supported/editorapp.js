@@ -148,6 +148,7 @@ exports.applicationController = SC.Object.create({
         applicationView.appendChild(view);
         dockedViews.cli = view;
 		
+		/* TODO: the code below doesn't work --- promise never calls callbacks
 		// check for collab
 		if (catalog.plugins.collab) {
 			require.loader.async('collab:view').then(function () {
@@ -160,6 +161,7 @@ exports.applicationController = SC.Object.create({
 				console.log('ERROR: ' + err);
 			});
 		}
+		*/
 
         this._dockedViews = dockedViews;
     },

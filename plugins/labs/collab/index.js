@@ -49,6 +49,9 @@ var server = require('bespin_server').server;
 var mobwrite = require('collab:mobwrite/core').mobwrite;
 var diff_match_patch = require('diff');
 
+// TODO: this is a hack to add the social view
+var social_view = require('collab:view');
+
 /**
  * Mobwrite has a set of shareObjs which are designed to wrap DOM nodes.
  * This creates a fake DOM node to be wrapped in a Mobwrite ShareObj.
