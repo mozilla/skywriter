@@ -37,13 +37,13 @@
 
 var Promise = require('bespin:promise').Promise;
 
-var environment = require('Canon:environment');
-var keyboard = require('Canon:keyboard');
+var environment = require('canon:environment');
+var keyboard = require('canon:keyboard');
 
-var Input = require('CommandLine:input').Input;
-var t = require('PluginDev');
+var Input = require('command_line:input').Input;
+var t = require('plugindev');
 
-function exec(command) {
+function parse(command) {
     var promise = new Promise();
 
     var input = new Input({
@@ -64,7 +64,8 @@ function exec(command) {
 }
 
 exports.testInput = function() {
-    exec('set maxConsoleHeight 300').then(function(data) {
+    parse('set maxConsoleHeight 300').then(function(data) {
+        console.log('data', data);
         t.deepEquals(data.args, {}, '');
     });
 };
