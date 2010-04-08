@@ -305,16 +305,112 @@ body.sc-theme {
     margin: 0px;
 }
 
-.bespin-screen .sc-scroller-view .thumb {
+.bespin-screen .sc-scroller-view.controls-hidden {
+    display: none;
+}
+
+.bespin-screen .sc-scroller-view .track,
+.bespin-screen .sc-scroller-view .thumb,
+.bespin-screen .sc-scroller-view .button-bottom,
+.bespin-screen .sc-scroller-view .button-top {
     position: absolute;
-    left: 0px;
-    right: 0px;
-    background-color: white;
-    opacity: 0.3;
+}
+
+.bespin-screen .sc-scroller-view:hover .track {
+    background-color: rgba(50, 50, 50, 0.8);
+    border: solid rgb(150, 150, 150) 1px;
+}
+
+.bespin-screen .sc-scroller-view .thumb,
+.bespin-screen .sc-scroller-view .button-bottom,
+.bespin-screen .sc-scroller-view .button-top {
+    border: solid rgb(150, 150, 150) 1px;
     -moz-border-radius: 12px;
     -webkit-border-radius: 12px;
+    opacity: 0.3;
+}
+
+.bespin-screen .sc-scroller-view:hover .thumb,
+.bespin-screen .sc-scroller-view:hover .button-bottom,
+.bespin-screen .sc-scroller-view:hover .button-top {
+    opacity: 1.0;
+}
+
+.bespin-screen .sc-scroller-view .thumb {
+    background-color: black;
+    -moz-border-radius: 12px;
+    -webkit-border-radius: 12px;
+}
+
+.bespin-screen .sc-scroller-view .button-bottom,
+.bespin-screen .sc-scroller-view .button-top {
+    background-color: rgb(100, 100, 100);
+    opacity: 0.3;
+}
+
+.bespin-screen .sc-scroller-view.sc-vertical .track {
+    left: 0px;
+    right: 0px;
+    top: 15px;
+    bottom: 15px;
+}
+
+.bespin-screen .sc-scroller-view.sc-horizontal .track {
+    left: 15px;
+    right: 15px;
+    top: 0px;
+    bottom: 0px;
+}
+
+.bespin-screen .sc-scroller-view.sc-vertical .thumb {
+    left: 0px;
+    right: 0px;
+}
+
+.bespin-screen .sc-scroller-view.sc-horizontal .thumb {
+    top: 0px;
+    bottom: 0px;
+}
+
+.bespin-screen .sc-scroller-view.sc-vertical .button-bottom,
+.bespin-screen .sc-scroller-view.sc-vertical .button-top {
+    left: 1px;
+    right: 1px;
+    height: 13px;
+}
+
+.bespin-screen .sc-scroller-view.sc-horizontal .button-bottom,
+.bespin-screen .sc-scroller-view.sc-horizontal .button-top {
+    top: 1px;
+    bottom: 1px;
+    width: 13px;
+}
+
+.bespin-screen .sc-scroller-view.sc-vertical .button-bottom {
+    bottom: 7px;
+    background: url(images/scroll-down.png) no-repeat center center
+        rgb(100, 100, 100);
+}
+
+.bespin-screen .sc-scroller-view.sc-horizontal .button-bottom {
+    right: 7px;
+    background: url(images/scroll-right.png) no-repeat center center
+        rgb(100, 100, 100);
+}
+
+.bespin-screen .sc-scroller-view.sc-vertical .button-top {
+    top: 7px;
+    background: url(images/scroll-up.png) no-repeat center center
+        rgb(100, 100, 100);
+}
+
+.bespin-screen .sc-scroller-view.sc-horizontal .button-top {
+    left: 7px;
+    background: url(images/scroll-left.png) no-repeat center center
+        rgb(100, 100, 100);
 }
 
 .bespin-screen .disabled {
     opacity: 0.3;
 }
+

@@ -41,3 +41,14 @@ exports.ScreenTheme = SC.Object.extend({
     cssClass: "bespin-screen"
 });
 
+// Change the themable properties of the SproutCore scroll bars. This is an
+// officially supported method of changing the scroller properties (see
+// sproutcore/frameworks/desktop/views/scroller.js).
+SC.mixin(SC.ScrollerView.prototype, {
+    scrollbarThickness: 17,
+    capLength: 15 + 6,
+    capOverlap: 0,
+    buttonLength: 15 + 6,
+    buttonOverlap: 0
+});
+

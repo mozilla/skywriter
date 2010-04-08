@@ -36,7 +36,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var BespinScrollerView = require('views/scroller').BespinScrollerView;
 
 exports.ScrollView = SC.ScrollView.extend({
     _containerViewLaidOut: false,
@@ -46,10 +45,10 @@ exports.ScrollView = SC.ScrollView.extend({
     borderStyle: SC.BORDER_NONE,
     hasHorizontalScroller: true,
     hasVerticalScroller: true,
-    horizontalScrollerThickness: 24,
-    horizontalScrollerView: BespinScrollerView,
-    verticalScrollerThickness: 24,
-    verticalScrollerView: BespinScrollerView,
+    horizontalScrollerThickness: 17,
+    horizontalScrollerView: SC.ScrollerView,
+    verticalScrollerThickness: 17,
+    verticalScrollerView: SC.ScrollerView,
 
     tile: function() {
         if (!this._containerViewLaidOut) {
@@ -68,33 +67,21 @@ exports.ScrollView = SC.ScrollView.extend({
         var vScrollerThickness = this.get('verticalScrollerThickness');
         if (hScrollerVisible) {
             hScroller = this.get('horizontalScrollerView');
-            hScroller.set('scrollerThickness', hScrollerThickness);
-            hScroller.set('padding', {
-                top:    0,
-                bottom: 6,
-                left:   6,
-                right:  6 + vScrollerThickness
-            });
+            hScroller.set('scrollbarThickness', hScrollerThickness);
             hScroller.set('layout', {
                 left:   0,
-                bottom: 0,
-                right:  0,
+                bottom: 6,
+                right:  6 + vScrollerThickness,
                 height: hScrollerThickness
             });
         }
         if (vScrollerVisible) {
             vScroller = this.get('verticalScrollerView');
-            vScroller.set('scrollerThickness', vScrollerThickness);
-            vScroller.set('padding', {
-                left:   0,
-                right:  6,
-                top:    6,
-                bottom: 6 + hScrollerThickness
-            });
+            vScroller.set('scrollbarThickness', vScrollerThickness);
             vScroller.set('layout', {
                 top:    0,
-                right:  0,
-                bottom: 0,
+                right:  6,
+                bottom: 6 + hScrollerThickness,
                 width:  vScrollerThickness
             });
         }
