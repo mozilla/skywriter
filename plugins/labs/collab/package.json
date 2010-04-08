@@ -26,6 +26,16 @@
 			"pointer": "view#broadcastMsg"
 		},
 		{
+			"ep": "msgtargetid",
+			"name": "tell",
+			"pointer": "view#tellMsg"
+		},
+		{
+			"ep": "msgtargetid",
+			"name": "share_tell",
+			"pointer": "view#shareTellMsg"
+		},
+		{
 			"ep": "mobwriteinstance",
 			"pointer": "mobwrite/core#mobwrite"
 		},
@@ -72,6 +82,26 @@
             ],
             "description": "send a message to all followers",
             "pointer": "social#broadcastCommand"
+        },
+        {
+            "ep": "command",
+            "name": "tell",
+            "params":
+            [
+                {
+                    "name": "username",
+                    "type": "text",
+                    "description": "username of follower to send a message to"
+                },
+                {
+                    "name": "message",
+                    "type": "text",
+                    "description": "text message to send to your follower",
+                    "defaultValue": null
+                }
+            ],
+            "description": "send a message to all followers",
+            "pointer": "social#tellCommand"
         },
         {
             "ep": "command",

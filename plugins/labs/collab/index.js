@@ -49,6 +49,8 @@ var server = require('bespin_server').server;
 var mobwrite = require('collab:mobwrite/core').mobwrite;
 var diff_match_patch = require('diff');
 
+var editorapp_m = require('editorapp');
+
 // TODO: this is a hack to add the social view
 var social_view = require('collab:view');
 
@@ -141,8 +143,21 @@ var ShareNode = SC.Object.extend({
      * The session handles the collaborators side-bar
      */
     reportCollaborators: function(userEntries) {
-		// not done yet
-        //this.session.reportCollaborators(userEntries);
+		var social = editorapp_m.social;
+		if (social) {
+			var list = social.getPath('topLeftView.contentView');
+			var content = [];
+			// we can have many "dead" sessions, which leads to duplication of users.
+			var seen = {};
+			userEntries.forEach(function (user) {
+				if (!seen.hasOwnProperty(user.handle)) {
+					seen[user.handle] = true;
+					content.push(user.handle);
+				}
+			});
+			content.sort();
+			list.set('content', content);
+		}
     },
 
     /**

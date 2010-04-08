@@ -38,7 +38,11 @@
 var SC = require('sproutcore/runtime').SC;
 var DOCK_RIGHT = require('dock_view').DOCK_RIGHT;
 
+var server = require('bespin_server').server;
+var env = require('canon:environment').global;
 var editorapp_m = require('editorapp');
+var project_m = require('project');
+
 
 var ChatLineView = SC.View.extend(SC.StaticLayout, {
     content: null,
@@ -48,8 +52,21 @@ var ChatLineView = SC.View.extend(SC.StaticLayout, {
         if (!firstTime) {
             return;
         }
+        
+        var msg = this.get('content');
 
-        ctx.begin('p').text(this.get('content')).end('p');
+        ctx.begin().
+            addClass('social_msg_type_' + msg.msgtargetid).
+            begin('span').
+                addClass('social_msg_from').
+                text(msg.from).
+                push(':&nbsp;').
+            end().
+            begin('span').
+                addClass('social_msg_text').
+                text(msg.text).
+            end().
+        end();
     }
 });
 
@@ -64,7 +81,7 @@ exports.SocialView = SC.SplitView.design({
         contentView: SC.ListView.design({
             layout: { top: 0, left: 0, right: 0, bottom: 0 },
             hasContentIcon: false,
-            content: [ 'Spock', 'Picard', 'Kirk' ],
+            content: [],
             canEditContent: false,
             canDeleteContent: false,
             canReorderContent: false
@@ -108,11 +125,30 @@ exports.SocialView = SC.SplitView.design({
                         // this.getFieldValue() must be used instead.
                         //
 
+                        var text = this.getFieldValue();
+                        this.setFieldValue('');
+
+                        if (/^\s*$/.test(text)) {
+                            return;
+                        }
+
                         var content = chat.get('content');
-                        content = content.concat(this.getFieldValue());
+                        var username = env.get('session').get('currentUser').username;
+                        content = content.concat({
+                            msgtargetid: 'myself',
+                            from: username,
+                            text: text
+                        });
                         chat.set('content', content);
 
-                        this.setFieldValue('');
+                        // get the list of users
+                        var list = editorapp_m.social.getPath('topLeftView.contentView');
+                        // remove ourselves
+                        var recipients = list.get('content').filter(function (recipient) {
+                            return recipient != username;
+                        });
+                        // send the message
+                        share_tell(recipients, text);
                     }.bind(this));
                 }.bind(this), 0);
 
@@ -138,7 +174,52 @@ exports.broadcastMsg = function (msg) {
         // as Patrick explained above it is not easy to add changes
     
         var content = chat.get('content');
-        content = content.concat(msg.from + ': ' + msg.text);
+        content = content.concat(msg);
         chat.set('content', content);
     }
 }
+
+
+exports.tellMsg = function (msg) {
+    var social = editorapp_m.social;
+    if (social) {
+        var chat = social.getPath('bottomRightView.chat.contentView');
+        
+        // as Patrick explained above it is not easy to add changes
+    
+        var content = chat.get('content');
+        content = content.concat(msg);
+        chat.set('content', content);
+    }
+}
+
+
+exports.shareTellMsg = function (msg) {
+    var social = editorapp_m.social;
+    if (social) {
+        var chat = social.getPath('bottomRightView.chat.contentView');
+        
+        // as Patrick explained above it is not easy to add changes
+    
+        var content = chat.get('content');
+        content = content.concat(msg);
+        chat.set('content', content);
+    }
+}
+
+
+/**
+ * share-tell method
+ */
+function share_tell (recipients, text, opts) {
+    if (recipients.length && text) {
+        var file = env.get('file');
+        if (file) {
+            var project = project_m.getProjectAndPath(file.path);
+            if (project[0]) {
+                server.request('POST', '/share/tell/' + project[0].name + '/',
+                    JSON.stringify({text: text, recipients: recipients}), opts || {});
+            }
+        }
+    }
+};

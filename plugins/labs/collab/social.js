@@ -118,10 +118,10 @@ function follow(usernames, opts) {
  * Utility to take an string array of follower names, and publish a
  * "Following: ..." message as a command line response.
  */
-exports.displayFollowers = function(followers) {
+exports.displayFollowers = function(followers, title) {
     var parent = document.createElement('div');
 	var child  = document.createElement('div');
-	child.innerHTML = 'You are following these users:';
+	child.innerHTML = title || 'You are following these users:';
 	parent.appendChild(child);
 	var table = document.createElement('table');
 	parent.appendChild(table);
@@ -196,16 +196,17 @@ function unfollow(users, opts) {
 /**
  * Add an 'broadcast' command that sends a message to our followers
  */
-exports.broadcastCommand = function(env, args, request) {
+exports.broadcastCommand = function (env, args, request) {
 	broadcast(args.message || '', {
 		evalJSON: true,
 		onSuccess: function(followers) {
 			if (!followers || followers.length === 0) {
-				request.done('You are not following anyone');
+				request.done('You have no followers');
 				return;
 			}
 
-			var parent = exports.displayFollowers(followers);
+			var parent = exports.displayFollowers(followers,
+					'Your message was sent to your followers:');
 			request.done(parent);
 		},
 		onFailure: function(xhr) {
@@ -218,8 +219,42 @@ exports.broadcastCommand = function(env, args, request) {
 /**
  * broadcast method
  */
-function broadcast(text, opts) {
-    server.request('POST', '/network/broadcast/', JSON.stringify({text: text}), opts);
+function broadcast (text, opts) {
+    server.request('POST', '/network/followers/tell/',
+		JSON.stringify({text: text}), opts);
+};
+
+// =============================================================================
+
+/**
+ * Add a 'say' command that sends a message to a follower
+ */
+exports.tellCommand = function (env, args, request) {
+	tell(args.username || '*****', args.message || '', {
+		evalJSON: true,
+		onSuccess: function(followers) {
+			if (!followers || followers.length === 0) {
+				request.done('You don\'t have a follower with such name.');
+				return;
+			}
+
+			var parent = exports.displayFollowers(followers,
+					'Your message was sent to your follower:');
+			request.done(parent);
+		},
+		onFailure: function(xhr) {
+			request.doneWithError('Failed to broadcast to followers: ' +
+					xhr.responseText);
+		}
+	});
+};
+
+/**
+ * broadcast method
+ */
+function tell (username, text, opts) {
+    server.request('POST', '/network/followers/tell/',
+		JSON.stringify({text: text, username: username}), opts);
 };
 
 // =============================================================================
