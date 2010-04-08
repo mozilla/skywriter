@@ -6,16 +6,11 @@
 		"diff": "0.0",
 		"command_line": "0.0",
 		"project": "0.0",
-		"text_editor": "0.0"
+		"text_editor": "0.0",
+        "dock_view": "0.0",
+        "editorapp": "0.0"
 	},
     "provides": [
-        {
-            "ep": "setting",
-            "name": "collaborate",
-            "description": "Add a setting to turn collaboration mode on/off",
-            "type": "boolean",
-            "defaultValue": false
-        },
 		{
 			"ep": "bufferFileChanged",
 			"pointer": "#mobwriteFileChanged"
@@ -24,6 +19,11 @@
 			"ep": "msgtargetid",
 			"name": "mobwrite",
 			"pointer": "#mobwriteMsg"
+		},
+		{
+			"ep": "msgtargetid",
+			"name": "broadcast",
+			"pointer": "view#broadcastMsg"
 		},
 		{
 			"ep": "mobwriteinstance",

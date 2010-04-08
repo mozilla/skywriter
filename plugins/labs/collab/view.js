@@ -62,7 +62,7 @@ exports.SocialView = SC.SplitView.design({
         contentView: SC.ListView.design({
             layout: { top: 0, left: 0, right: 0, bottom: 0 },
             hasContentIcon: false,
-            content: [ "Spock", "Picard", "Kirk" ],
+            content: [ 'Spock', 'Picard', 'Kirk' ],
             canEditContent: false,
             canDeleteContent: false,
             canReorderContent: false
@@ -71,7 +71,7 @@ exports.SocialView = SC.SplitView.design({
 
     bottomRightView: SC.View.design({
         layout: { top: 0, left: 0, right: 0, bottom: 0 },
-        childViews: "chat input".w(),
+        childViews: 'chat input'.w(),
 
         chat: SC.ScrollView.design({
             layout: { top: 0, left: 0, right: 0, bottom: 24 },
@@ -79,10 +79,7 @@ exports.SocialView = SC.SplitView.design({
             contentView: SC.StackedView.design({
                 layout: { top: 0, left: 0, right: 0, bottom: 0 },
                 exampleView: ChatLineView,
-                content: [
-                    "<Kirk> Engage!",
-                    "<Picard> Make it so."
-                ]
+                content: []
             })
         }),
 
@@ -113,7 +110,7 @@ exports.SocialView = SC.SplitView.design({
                         content = content.concat(this.getFieldValue());
                         chat.set('content', content);
 
-                        this.setFieldValue("");
+                        this.setFieldValue('');
                     }.bind(this));
                 }.bind(this), 0);
 
@@ -123,3 +120,15 @@ exports.SocialView = SC.SplitView.design({
     })
 });
 
+exports.broadcastMsg = function (msg) {
+    var social = require(editorapp).social;
+    if (social) {
+        var chat = social.getPath('bottomRightView.chat.contentView');
+        
+        // as Patrick explained above it is not easy to add changes
+    
+        var content = chat.get('content');
+        content = content.concat(msg.from + ': ' + msg.text);
+        chat.set('content', content);
+    }
+}

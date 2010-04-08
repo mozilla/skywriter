@@ -44,10 +44,10 @@ var SC = require('sproutcore/runtime').SC;
 var console = require('bespin:console').console;
 var env = require('canon:environment').global;
 var project = require('project');
-var server = require("bespin_server").server;
+var server = require('bespin_server').server;
 
-var mobwrite = require("collab:mobwrite/core").mobwrite;
-var diff_match_patch = require("diff");
+var mobwrite = require('collab:mobwrite/core').mobwrite;
+var diff_match_patch = require('diff');
 
 /**
  * Mobwrite has a set of shareObjs which are designed to wrap DOM nodes.
@@ -60,17 +60,17 @@ var ShareNode = SC.Object.extend({
 
     onFirstSync: null,
     errorRaised: false,
-    pausedText: "",
+    pausedText: '',
 
     init: function() {
-        this.username = env.get("session").get("currentUser").username;
-		this.project = project.getProjectAndPath(env.get("file").path);
+		this.username = env.get('session').get('currentUser').username;
+		this.project = project.getProjectAndPath(env.get('file').path);
 		var projectname = this.project[0].name;
-		if (projectname.indexOf("+") < 0) {
+		if (projectname.indexOf('+') < 0) {
 			// add username
-			projectname = this.username + "+" + projectname;
+			projectname = this.username + '+' + projectname;
 		}
-		mobwrite.shareObj.call(this, projectname + "/" + this.project[1]);
+		mobwrite.shareObj.call(this, projectname + '/' + this.project[1]);
 	    this.onFirstSync = function() { };
     },
 
@@ -80,9 +80,9 @@ var ShareNode = SC.Object.extend({
     getClientText: function(allowUnsynced) {
         if (!allowUnsynced && this.onFirstSync) {
             console.trace();
-            throw new Error("Attempt to getClientText() before onFirstSync() called.");
+            throw new Error('Attempt to getClientText() before onFirstSync() called.');
         }
-		return env.get("model").get("value");
+		return env.get('model').get('value');
     },
 
     /**
@@ -120,7 +120,7 @@ var ShareNode = SC.Object.extend({
      */
     setClientText: function(text) {
         var cursor = this.captureCursor();
-		env.get("model").set("value", text);
+		env.get('model').set('value', text);
         this.restoreCursor(cursor);
 
         this.syncDone();
@@ -147,9 +147,9 @@ var ShareNode = SC.Object.extend({
      * read-only mode if it's fatally broken
      */
     raiseError: function(text, recoverable) {
-        text = text || "";
-        var prefix = "<strong>" + (recoverable ? "" : "Fatal ") + "Collaboration Error</strong>: ";
-        var suffix = "<br/><strong>Warning</strong>: Changes since the last sync could be lost";
+        text = text || '';
+        var prefix = '<strong>' + (recoverable ? '' : 'Fatal ') + 'Collaboration Error</strong>: ';
+        var suffix = '<br/><strong>Warning</strong>: Changes since the last sync could be lost';
 
         if (!this.errorRaised) {
 			// TODO: how to replace it?
@@ -176,7 +176,7 @@ var ShareNode = SC.Object.extend({
         var offsets = [];
         if (cursor) {
             offsets[0] = cursor.startOffset;
-            if ("endOffset" in cursor) {
+            if ('endOffset' in cursor) {
                 offsets[1] = cursor.endOffset;
             }
         }
@@ -184,7 +184,7 @@ var ShareNode = SC.Object.extend({
         var newClientText = this._patchApply(patches, oldClientText, offsets);
         // Set the new text only if there is a change to be made.
         if (oldClientText != newClientText) {
-			env.get("model").set("value", newClientText);
+			env.get('model').set('value', newClientText);
             if (cursor) {
                 // Unpack the offset array.
                 cursor.startOffset = offsets[0];
@@ -237,7 +237,7 @@ var ShareNode = SC.Object.extend({
             if (start_loc == -1) {
                 // No match found.  :(
                 if (mobwrite.debug) {
-                    window.console.warn("Patch failed: " + patches[x]);
+                    window.console.warn('Patch failed: ' + patches[x]);
                 }
             } else {
                 // Found a match.  :)
@@ -305,7 +305,7 @@ var ShareNode = SC.Object.extend({
      * @private
      */
     captureSimpleCursor: function() {
-		var selection = env.get("view").getSelectedRange();
+		var selection = env.get('view').getSelectedRange();
 		return this._convertRangeToOffsets(selection);
     },
 
@@ -318,7 +318,7 @@ var ShareNode = SC.Object.extend({
      */
     captureCursor: function() {
         var padLength = this.dmp.Match_MaxBits / 2;  // Normally 16.
-        var text = env.get("model").get("value");
+        var text = env.get('model').get('value');
 
         var cursor = this.captureSimpleCursor();
 
@@ -365,7 +365,7 @@ var ShareNode = SC.Object.extend({
         dmp.Match_Threshold = 0.9;
 
         var padLength = dmp.Match_MaxBits / 2; // Normally 16.
-        var newText = env.get("model").get("value");
+        var newText = env.get('model').get('value');
 
         // Find the start of the selection in the new text.
         var pattern1 = cursor.startPrefix + cursor.startSuffix;
@@ -415,7 +415,7 @@ var ShareNode = SC.Object.extend({
 
         // Cursor position
         var range = this._convertOffsetsToRange(cursorStartPoint, cursorEndPoint);
-		var view = env.get("view");
+		var view = env.get('view');
 		view.moveCursorTo(range.start);
 
         // Selection
@@ -437,7 +437,7 @@ var ShareNode = SC.Object.extend({
      * @private
      */
 	_convertRangeToOffsets: function(range){
-		var lines = env.get("model").get("lines");
+		var lines = env.get('model').get('lines');
 		var startOffset = 0;
 		var endOffset = 0;
 		
@@ -468,9 +468,9 @@ var ShareNode = SC.Object.extend({
      * @private
      */
 	_convertOffsetsToRange: function(startOffset, endOffset){
-		var lines = env.get("model").get("lines");
+		var lines = env.get('model').get('lines');
 
-		if (typeof endOffset != "number") {
+		if (typeof endOffset != 'number') {
 			endOffset = startOffset;
 		} else if (endOffset < startOffset) {
 			var temp = startOffset;
@@ -522,20 +522,22 @@ mobwrite.shareHandlers.push(shareHandler);
 var shareNode;
 
 exports.mobwriteFileChanged = function (file) {
-	var newShareNode = ShareNode.create({});
-	if (shareNode) {
-		if (shareNode.get("file") == newShareNode.get("file")) {
-			return;
-		} else {
-			mobwrite.unshare([shareNode]);
+	if (file) {
+		var newShareNode = ShareNode.create({});
+		if (shareNode) {
+			if (shareNode.get('file') == newShareNode.get('file')) {
+				return;
+			} else {
+				mobwrite.unshare([shareNode]);
+			}
 		}
+		shareNode = newShareNode;
+		mobwrite.share(shareNode);
 	}
-	shareNode = newShareNode;
-	mobwrite.share(shareNode);
 };
 
 exports.mobwriteMsg = function (msg) {
-	//console.log("TO mobwrite:\n", msg.text);
+	//console.log('TO mobwrite:\n', msg.text);
 	mobwrite.reflect(msg.text);
 	server.schedulePoll(mobwrite.syncInterval);
 };
