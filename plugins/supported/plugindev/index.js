@@ -52,15 +52,44 @@ var pluginCatalog = require("bespin:plugins").catalog;
 // test interface used by plugins.
 
 var testNames = [ "test", "ok", "equal", "notEqual", "deepEqual",
-    "strictEqual", "throws", "doesNotThrow" ];
+    "strictEqual", "throws" ];
 
 testNames.forEach(function(name) {
     exports[name] = assert[name];
 });
 
-/*
-* Reloads the named plugin, calling the callback when it's complete.
+// These belong in core_test. When they are accepted there, we should
+// remove these.
+
+/**
+  Automatically fail.
+
+  @param {String} message
+    optional message
+
+  @returns {void}
 */
+exports.fail = function(msg) {
+  assert.ok(false, msg);
+};
+
+/**
+  Return a function, which automatically fails any test under
+
+  @param {String} message
+    optional message
+
+  @returns {void}
+*/
+exports.never = function(msg) {
+  return function() {
+    exports.fail(msg);
+  };
+};
+
+/**
+ * Reloads the named plugin, calling the callback when it's complete.
+ */
 exports.reload = function(pluginName, callback) {
     var plugin = pluginCatalog.plugins[pluginName];
     if (plugin == undefined) {

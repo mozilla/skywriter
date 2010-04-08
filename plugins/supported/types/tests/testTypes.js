@@ -39,25 +39,6 @@ var Promise = require('bespin:promise').Promise;
 var types = require('types:types');
 var t = require('plugindev');
 
-/*
- * Various utilities that should live elsewhere
- */
-function fail(msg) {
-    t.ok(false, msg);
-}
-
-function never(msg) {
-    return function() {
-        t.ok(false, msg);
-    };
-}
-
-function resolvedPromise(data) {
-    var promise = new Promise();
-    promise.resolve(data);
-    return promise;
-}
-
 exports.testGetSimpleName = function() {
     t.equal(types.getSimpleName('text'), 'text', 'text is simple');
     t.equal(types.getSimpleName('selection'), 'selection', 'selection simple');
@@ -131,7 +112,7 @@ exports.testResolveSimpleTypes = function() {
 
     try {
         typeSpec = { name: 'wrong' };
-        types.resolveType(typeSpec).then(never('should die before here'));
+        types.resolveType(typeSpec).then(t.never('should die before here'));
     } catch (ex) {}
 };
 
@@ -139,7 +120,7 @@ exports.testResolveSimpleTypes = function() {
  * For #testSelection
  */
 exports.resolver = function() { return [ 4, 3 ]; };
-exports.lateResolver = function() { return resolvedPromise([ 'a' ]); };
+exports.lateResolver = function() { return new Promise().resolve([ 'a' ]); };
 
 exports.testSelection = function() {
     var typeSpec = { name: 'selection', data: [ 1, 2 ] };
@@ -168,16 +149,16 @@ exports.testSelection = function() {
 };
 
 exports.deferText = function() { return 'text'; };
-exports.lateDeferText = function() { return resolvedPromise('text'); };
+exports.lateDeferText = function() { return new Promise().resolve('text'); };
 exports.deferComplexText = function() { return { name: 'text' }; };
 exports.lateDeferComplexText = function() {
-    return resolvedPromise({ name: 'text' });
+    return new Promise().resolve({ name: 'text' });
 };
 exports.lateDeferComplexSelection = function() {
-    return resolvedPromise({ name: 'selection', data: [ 42, 43 ] });
+    return new Promise().resolve({ name: 'selection', data: [ 42, 43 ] });
 };
 exports.lateDoubleDeferText = function() {
-    return resolvedPromise({
+    return new Promise().resolve({
         name: 'deferred',
         pointer: 'types:tests/testTypes#lateDeferText'
     });
