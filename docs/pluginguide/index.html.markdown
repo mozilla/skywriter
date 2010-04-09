@@ -93,7 +93,7 @@ parentheses (as above) or set it to a variable. Bespin can handle either of
 those formats.
 
 Often, a single file is not going to be enough. When you move beyond a single
-file, a plugin is defined as a directory with a `plugin.json` file in it. In a
+file, a plugin is defined as a directory with a `package.json` file in it. In a
 single file plugin, the "package module" is the plugin .js file. In a plugin
 directory, the "package module" is a file called "index.js".
 
