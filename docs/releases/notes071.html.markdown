@@ -1,14 +1,14 @@
 ---
 layout: default
-title: Bespin 0.7 ("Ped Xing") Release Notes
+title: Bespin 0.7.1 ("Bryce") Release Notes
 ---
 
-[Up](index.html) - [Next Release](notes071.html) - [Previous Release](notes063.html)
+[Up](index.html) - [Next Release](notes072.html) - [Previous Release](notes07.html)
 
 Known Issues
 ------------
 
-Bespin 0.7 is *alpha* software. It is still under active development
+Bespin 0.7.1 is *alpha* software. It is still under active development
 and APIs are subject to change. Bespin 0.7 marks the first server release
 since the Bespin project Reboot. There is still a bit of work required
 before the server reaches feature and polish parity with 0.4.4. However, Bespin
@@ -45,26 +45,32 @@ For *Bespin Server*:
 Features
 --------
 
-* The Bespin server is back! This is the first release to provide the
-  full Bespin project experience. A lot has changed since the 0.4.4
-  release (almost too much to enumerate here!)
-* The command line supports "typed" (in the programming sense) arguments.
-  An argument type can help out with completion and verify that the
-  argument is valid before the command is run.
-* The "open" command now features quick searching through your files to
-  allow you to select the file you want to open
-* A whole bunch of commands and features have been upgraded from their
-  pre-Reboot state
-* The login/signup form appears over the editor, not on a separate page
-  as it was pre-Reboot
-* Plugins can be installed from the web
-* Directories and files can be added as plugins (making it very easy to
-  create and edit plugins with Bespin)
-* Bespin's CSS has been heavily redone, which makes theming easier. Dialogs
-  in Bespin now look consistent with the rest of Bespin.
+* The keyboard is now remappable via plugins and configuration. We've tried
+  to make it powerful enough to support vi and emacs style key commands.
+  (bug 542492)
+* Added built-in plugin gallery (plugin gallery and plugin upload commands)
+  for sharing plugins.
+* New "feedback" command opens your browser to the Bespin forum at
+  feedback.mozillalabs.com, making it very easy to let us know if you
+  have any suggestions. (bug 550287)
+* The "vcs clone" command is back for checking out Subversion and Mercurial
+  repositories (bug 554624)
+* New editing command to create a new line and move the cursor to the next
+  line, like "opening a line" in vi (bug 557191)
 
-Bug Fixes
----------
+Fixes
+-----
 
-* dryice build tool was producing bad builds on Windows due to the \ file
-  separator. (bug 550896)
+* The Python server build did not include all of the installation requirements
+  (bug 552670)
+* Syntax highlighting could overflow the call stack (bug 556151)
+* Numerous fixes to SproutCore (bug 553497)
+* cmd-J now properly moves between the editor and the command line
+  (bug 554652)
+* The tab order in the login dialog is now correct (this was a SproutCore
+  bug in the end). (bug 554892)
+* "tab" in the editor was causing a jump to the command line (bug 555598)
+* The mini manpage for commands was not painting with a background in Chrome
+  (bug 556527)
+* VCS commands weren't working because of a polling problem (bug 556823)
+* The select word left command would not go past a period (bug 557186)

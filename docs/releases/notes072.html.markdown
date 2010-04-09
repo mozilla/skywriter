@@ -1,14 +1,14 @@
 ---
 layout: default
-title: Bespin 0.7 ("Ped Xing") Release Notes
+title: Bespin 0.7.2 ("Ashwell") Release Notes
 ---
 
-[Up](index.html) - [Next Release](notes071.html) - [Previous Release](notes063.html)
+[Up](index.html) - Next Release - [Previous Release](notes071.html)
 
 Known Issues
 ------------
 
-Bespin 0.7 is *alpha* software. It is still under active development
+Bespin 0.7.2 is *alpha* software. It is still under active development
 and APIs are subject to change. Bespin 0.7 marks the first server release
 since the Bespin project Reboot. There is still a bit of work required
 before the server reaches feature and polish parity with 0.4.4. However, Bespin
@@ -45,26 +45,13 @@ For *Bespin Server*:
 Features
 --------
 
-* The Bespin server is back! This is the first release to provide the
-  full Bespin project experience. A lot has changed since the 0.4.4
-  release (almost too much to enumerate here!)
-* The command line supports "typed" (in the programming sense) arguments.
-  An argument type can help out with completion and verify that the
-  argument is valid before the command is run.
-* The "open" command now features quick searching through your files to
-  allow you to select the file you want to open
-* A whole bunch of commands and features have been upgraded from their
-  pre-Reboot state
-* The login/signup form appears over the editor, not on a separate page
-  as it was pre-Reboot
-* Plugins can be installed from the web
-* Directories and files can be added as plugins (making it very easy to
-  create and edit plugins with Bespin)
-* Bespin's CSS has been heavily redone, which makes theming easier. Dialogs
-  in Bespin now look consistent with the rest of Bespin.
+* The server now supports logging errors to ErrorStack (bug 558311)
 
-Bug Fixes
----------
+Fixes
+-----
 
-* dryice build tool was producing bad builds on Windows due to the \ file
-  separator. (bug 550896)
+* Users with & in their passwords were unable to login (bug 558051)
+* The command line was not scrolling the output consistently (bug 556327)
+* The Bespin server was serving up uncompressed JS and CSS (bug 558329)
+* The in-development collaboration plugin had broken the newfile command
+  (bug 557505)
