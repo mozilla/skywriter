@@ -34,6 +34,14 @@ Start by creating a new release:
 
     paver release_embed
 
+Note: when trying things out in Embedded, it's often *much* faster to avoid the
+compression step. You can do this by running
+
+    dryice dropin.json
+
+This is normally run as part of release\_embed.
+
+
 You'll find the release in `tmp/BespinEmbedded-DropIn-VERSION/` and
 `tmp/BespinEmbedded-Customizable-VERSION/`. Next, you'll want 
 to make sure the release works. Make sure that you're in the virtualenv (you 
