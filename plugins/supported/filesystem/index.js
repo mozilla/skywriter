@@ -40,14 +40,14 @@ exports._prefixSearch = function(arr, find) {
     var i;
     var lowmark = null;
     var sub;
-    
+
     while (low <= high) {
         i = parseInt((low + high) / 2, 10);
         sub = arr[i].substring(0, findlength);
         if (i == lowmark) {
             return i;
         }
-        
+
         if (sub == find) {
             lowmark = i;
             high = i - 1;
@@ -68,7 +68,7 @@ exports._binarySearch = function(arr, find) {
     var high = arr.length - 1;
     var i;
     var current;
-    
+
     while (low <= high) {
         i = parseInt((low + high) / 2, 10);
         current = arr[i];
@@ -90,13 +90,13 @@ exports.READY = { name: "READY" };
 exports.Filesystem = SC.Object.extend({
     // FileSource for this filesytem
     source: null,
-    
+
     // list of filenames
     _files: null,
-    
+
     status: exports.NEW,
     _loadingPromises: null,
-    
+
     init: function() {
         var source = this.get("source");
         if (typeof(source) == "string") {
@@ -106,10 +106,10 @@ exports.Filesystem = SC.Object.extend({
         if (!this.get("source")) {
             throw new Error("Directory must have a source.");
         }
-        
+
         this._loadingPromises = [];
     },
-    
+
     _load: function() {
         var pr = new Promise();
         if (this.status === exports.READY) {
@@ -123,7 +123,7 @@ exports.Filesystem = SC.Object.extend({
         }
         return pr;
     },
-    
+
     _fileListReceived: function(filelist) {
         filelist.sort();
         this._files = filelist;
@@ -134,7 +134,7 @@ exports.Filesystem = SC.Object.extend({
             pr.resolve();
         }
     },
-    
+
     /*
      * Call this if you make a big change to the files in the filesystem. This will cause the entire cache
      * to be reloaded on the next call that requires it.
@@ -143,23 +143,16 @@ exports.Filesystem = SC.Object.extend({
         this._files = [];
         this.set("status", exports.NEW);
     },
-    
+
     /*
      * Get a list of all files in the filesystem.
      */
     listAll: function() {
-        var promise = new Promise();
-        this._load().then(function() {
-            promise.resolve(this._files);
-        }.bind(this));
-        return promise;
-        /*
         return this._load().chainPromise(function() {
             return this._files;
         }.bind(this));
-        */
     },
-    
+
     /*
      * Loads the contents of the file at path. When the promise is
      * resolved, the contents are passed in.
@@ -169,7 +162,7 @@ exports.Filesystem = SC.Object.extend({
         var source = this.get("source");
         return source.loadContents(path);
     },
-    
+
     /*
      * Save a contents to the path provided. If the file does not
      * exist, it will be created.
@@ -190,7 +183,7 @@ exports.Filesystem = SC.Object.extend({
         });
         return pr;
     },
-    
+
     /*
      * get a File object that provides convenient path
      * manipulation and access to the file data.
@@ -198,7 +191,7 @@ exports.Filesystem = SC.Object.extend({
     getFile: function(path) {
         return new exports.File(this, path);
     },
-    
+
     /*
      * Returns a promise that will resolve to true if the given path
      * exists.
@@ -212,7 +205,7 @@ exports.Filesystem = SC.Object.extend({
         }.bind(this));
         return pr;
     },
-    
+
     /*
      * Deletes the file or directory at a path.
      */
@@ -238,10 +231,10 @@ exports.Filesystem = SC.Object.extend({
         });
         return pr;
     },
-    
+
     /*
      * Lists the contents of the directory at the path provided.
-     * Returns a promise that will be given a list of file 
+     * Returns a promise that will be given a list of file
      * and directory names for the contents of the directory.
      * Directories are distinguished by a trailing slash.
      */
@@ -272,7 +265,7 @@ exports.Filesystem = SC.Object.extend({
                 if (segment == "") {
                     continue;
                 }
-                
+
                 if (segment != lastSegment) {
                     lastSegment = segment;
                     result.push(segment);
@@ -282,7 +275,7 @@ exports.Filesystem = SC.Object.extend({
         }.bind(this));
         return pr;
     },
-    
+
     /*
      * Creates a directory at the path provided. Nothing is
      * passed into the promise callback.
@@ -292,7 +285,7 @@ exports.Filesystem = SC.Object.extend({
         if (!pathUtil.isDir(path)) {
             path += "/";
         }
-        
+
         var self = this;
         var pr = new Promise();
         this._load().then(function() {
@@ -318,23 +311,23 @@ exports.File.prototype = {
     parentdir: function() {
         return pathUtil.parentdir(this.path);
     },
-    
+
     loadContents: function() {
         return this.fs.loadContents(this.path);
     },
-    
+
     saveContents: function(contents) {
         return this.fs.saveContents(this.path, contents);
     },
-    
+
     exists: function() {
         return this.fs.exists(this.path);
     },
-    
+
     remove: function() {
         return this.fs.remove(this.path);
     },
-    
+
     extension: function() {
         return pathUtil.fileType(this.path);
     }
