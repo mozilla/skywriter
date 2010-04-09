@@ -99,6 +99,7 @@ var editsession = require("edit_session");
 
 exports.session = editsession.EditSession.create();
 exports.cli = null;
+exports.social = null;
 
 var INITIAL_TEXT;   // defined at the end of the file to reduce ugliness
 
@@ -145,7 +146,22 @@ exports.applicationController = SC.Object.create({
         view = applicationView.addDockedView(CliInputView);
         exports.cli = view;
         applicationView.appendChild(view);
-        dockedViews["cli"] = view;
+        dockedViews.cli = view;
+		
+		/* TODO: the code below doesn't work --- promise never calls callbacks
+		// check for collab
+		if (catalog.plugins.collab) {
+			require.loader.async('collab:view').then(function () {
+				var SocialView = require('collab:view').SocialView;
+				var view = applicationView.addDockedView(SocialView);
+				exports.social = view;
+				applicationView.appendChild(view);
+				dockedViews.social = view;
+			}, function (err) {
+				console.log('ERROR: ' + err);
+			});
+		}
+		*/
 
         this._dockedViews = dockedViews;
     },
