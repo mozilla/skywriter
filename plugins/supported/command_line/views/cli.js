@@ -399,14 +399,16 @@ exports.CliInputView = SC.View.design({
      * Scrolls the command line output area to the bottom of the output.
      */
     scrollOutputToBottom: function() {
-        var height = this.getPath("contentView.display.output.contentView.layout").height;
-        if (height == this._contentHeight) {
-            return;
-        }
-
-        this._contentHeight = height;
-        var scrollview = this.getPath("contentView.display.output");
-        scrollview.scrollBy({ x: 0, y: 1000000 });
+        window.setTimeout(function() {
+            var height = this.getPath("contentView.display.output.contentView.layout").height;
+            if (height == this._contentHeight) {
+                return;
+            }
+    
+            this._contentHeight = height;
+            var scrollview = this.getPath("contentView.display.output");
+            scrollview.scrollBy({ x: 0, y: 1000000 });
+        }.bind(this), 25);
     }.observes(".contentView.display.output.contentView.layout"),
 
     /**
