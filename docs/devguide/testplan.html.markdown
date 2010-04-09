@@ -20,6 +20,14 @@ the server and go to:
 
 http://localhost:4020/static/bespin/en/current/tests/plugins.html
 
+## Browsers To Test In ##
+
+We should test Embedded and server-based code in:
+
+1. Firefox *without Firebug*
+2. Chrome
+3. Safari
+
 ## Bespin Embedded ##
 
 Start by creating a new release:
