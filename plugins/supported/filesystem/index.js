@@ -135,7 +135,7 @@ exports.Filesystem = SC.Object.extend({
         }
     },
 
-    /*
+    /**
      * Call this if you make a big change to the files in the filesystem. This will cause the entire cache
      * to be reloaded on the next call that requires it.
      */
@@ -144,7 +144,7 @@ exports.Filesystem = SC.Object.extend({
         this.set("status", exports.NEW);
     },
 
-    /*
+    /**
      * Get a list of all files in the filesystem.
      */
     listAll: function() {
@@ -153,7 +153,7 @@ exports.Filesystem = SC.Object.extend({
         }.bind(this));
     },
 
-    /*
+    /**
      * Loads the contents of the file at path. When the promise is
      * resolved, the contents are passed in.
      */
@@ -163,7 +163,7 @@ exports.Filesystem = SC.Object.extend({
         return source.loadContents(path);
     },
 
-    /*
+    /**
      * Save a contents to the path provided. If the file does not
      * exist, it will be created.
      */
@@ -184,7 +184,7 @@ exports.Filesystem = SC.Object.extend({
         return pr;
     },
 
-    /*
+    /**
      * get a File object that provides convenient path
      * manipulation and access to the file data.
      */
@@ -192,7 +192,7 @@ exports.Filesystem = SC.Object.extend({
         return new exports.File(this, path);
     },
 
-    /*
+    /**
      * Returns a promise that will resolve to true if the given path
      * exists.
      */
@@ -206,7 +206,7 @@ exports.Filesystem = SC.Object.extend({
         return pr;
     },
 
-    /*
+    /**
      * Deletes the file or directory at a path.
      */
     remove: function(path) {
@@ -276,7 +276,7 @@ exports.Filesystem = SC.Object.extend({
         return pr;
     },
 
-    /*
+    /**
      * Creates a directory at the path provided. Nothing is
      * passed into the promise callback.
      */
