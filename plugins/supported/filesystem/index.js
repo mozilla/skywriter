@@ -148,9 +148,16 @@ exports.Filesystem = SC.Object.extend({
      * Get a list of all files in the filesystem.
      */
     listAll: function() {
-        return this._load().then(function() {
+        var promise = new Promise();
+        this._load().then(function() {
+            promise.resolve(this._files);
+        }.bind(this));
+        return promise;
+        /*
+        return this._load().chainPromise(function() {
             return this._files;
         }.bind(this));
+        */
     },
     
     /*
