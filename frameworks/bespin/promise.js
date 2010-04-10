@@ -90,6 +90,11 @@ exports.Promise = function () {
 };
 
 /**
+ * Yeay for RTTI.
+ */
+exports.Promise.prototype.isPromise = true;
+
+/**
  * Take the specified action of fulfillment of a promise, and (optionally)
  * a different action on promise rejection.
  */
@@ -113,7 +118,7 @@ exports.Promise.prototype.then = function(onSuccess, onError) {
  * a promise which
  */
 exports.Promise.prototype.chainPromise = function(onSuccess) {
-    var chain = new Promise();
+    var chain = new exports.Promise();
     chain._chainedFrom = this;
     this.then(function(data) {
         try {
