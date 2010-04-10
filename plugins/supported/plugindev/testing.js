@@ -81,6 +81,8 @@ var AssertionEntry = SC.Object.extend({
     }
 });
 
+var testEntryCounter = 0;
+
 /**
  * knows how to emit a single test (along with its assertions)
  */
@@ -122,14 +124,20 @@ var TestEntry = SC.Object.extend({
      */
     template: [
         '<div class="plugindev_test %@1">',
-            '<span class="name">%@2</span>',
-            '<span class="status">',
-                '<span class="passed">%@4</span>',
-                '<span class="warnings">%@7</span>',
-                '<span class="failed">%@5</span>',
-                '<span class="errors">%@6</span>',
-            '</span>',
-            '%@3',
+            '<div class="header">',
+                '<span class="name">',
+                    '<a onclick="document.getElementById(\'_testEntryAssertions_%@8\').style.display = \'block\'"">%@2</a>',
+                '</span>',
+                '<span class="status">',
+                    '<span class="passed">%@4</span>',
+                    '<span class="warnings">%@7</span>',
+                    '<span class="failed">%@5</span>',
+                    '<span class="errors">%@6</span>',
+                '</span>',
+            '</div>',
+            '<div class="entryAssertions" id="_testEntryAssertions_%@8">',
+                '%@3',
+            '</div>',
         '</div>'
     ].join(''),
 
@@ -152,7 +160,8 @@ var TestEntry = SC.Object.extend({
         }
         assertions = assertions.join('');
 
-        return utils.fmt(this.template, statsum, _text(this.name), assertions, status.passed, status.failed, status.errors, status.warnings);
+        testEntryCounter += 1;
+        return utils.fmt(this.template, statsum, _text(this.name), assertions, status.passed, status.failed, status.errors, status.warnings, testEntryCounter);
     }
 });
 

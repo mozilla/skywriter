@@ -2,13 +2,21 @@
     margin-left: 10px;
 }
 
-.cmd_output .plugindev_test {
-    margin-left: 20px;
+.cmd_output .plugindev_test > .header {
+    margin-left: 15px;
+    padding-left: 5px;
+}
+
+.cmd_output .plugindev_test:hover > .header {
+    background-color: #929292;
 }
 
 .cmd_output .plugindev_test .status span {
     margin: 0px 5px;
     padding: 0px 3px;
+    width: 20px;
+    display: inline-block;
+    text-align: center;
 }
 
 .cmd_output .plugindev_summary span {
@@ -34,27 +42,36 @@
     padding: 0px 3px;
 }
 
-.cmd_output .plugindev_test > .status .passed,
+.cmd_output .plugindev_test .header > .name {
+    width:   300px;
+    display: inline-block;
+}
+
+.cmd_output .plugindev_test .header > .status .passed,
 .cmd_output .plugindev_summary > .passed {
 	background: #80D175;
 	color: black;
 }
 
-.cmd_output .plugindev_test > .status .failed,
+.cmd_output .plugindev_test > .entryAssertions {
+    display: none;
+}
+
+.cmd_output .plugindev_test .header > .status .failed,
 .cmd_output .plugindev_assertion.failed .status,
 .cmd_output .plugindev_summary > .failed {
   background: #ea4d44;
   color: white;
 }
 
-.cmd_output .plugindev_test > .status .errors,
+.cmd_output .plugindev_test  .header > .status .errors,
 .cmd_output .plugindev_assertion.errors .status,
 .cmd_output .plugindev_summary > .errors {
   background: red;
   color: #fff;
 }
 
-.cmd_output .plugindev_test > .status .warnings,
+.cmd_output .plugindev_test .header > .status .warnings,
 .cmd_output .plugindev_assertion.warnings .status,
 .cmd_output .plugindev_summary > .warnings {
   background: #E49723;
