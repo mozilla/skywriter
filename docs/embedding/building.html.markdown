@@ -86,7 +86,7 @@ in the MyPlugins directory that you just created.
             {
                 "ep": "command",
                 "name": "alert",
-                "key": "meta_a",
+                "key": "ctrl_a",
                 "pointer": "#showMessage"
             }
         ]

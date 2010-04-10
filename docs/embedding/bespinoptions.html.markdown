@@ -54,13 +54,15 @@ a value of `true` for this setting, and `window.onresize` will be left alone.
 settings
 --------
 
-It's possible to insert any settings (as in those defined by the 'set' command
-where the command line is available) using the settings option. For example:
+You can customize any of the editor's settings declaratively or
+programmatically. These are the same settings that are set using the "set"
+command in the full Bespin. These can be specified using the
+`data-bespinoptions` attribute on the HTML like so:
 
     :::html
     <div class="bespin" data-bespinoptions='{"settings":{"tabstop":2}}'/>
 
-Or using the manual API:
+Programmatically:
 
     :::html
     <textarea id="edit"></textarea>
@@ -70,9 +72,8 @@ Or using the manual API:
     });
     </script>
 
-Any of the standard settings are available.
-
-This is equivalent to calling `bespin.set("tabstop", 2);` on page load.
+Both of these examples are equivalent to calling
+`bespin.setSetting("tabstop", 2);` on page load.
 
 
 stealFocus

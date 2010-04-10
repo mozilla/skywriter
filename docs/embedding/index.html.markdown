@@ -110,7 +110,7 @@ won't work, and you'll need to tell Bespin to use an element:
     :::html
     <script src="/path/to/BespinEmbedded.js"><script>
     <script>
-    var embed = tiki.require("Embedded");
+    var embed = tiki.require("embedded");
     var node = document.getElementById("edit");
     var bespin = embed.useBespin(node);
     </script>
@@ -121,12 +121,12 @@ Rather than passing in a node, you can also simply pass in an string identifier
 as follows:
 
     :::js
-    tiki.require("Embedded").useBespin("edit");
+    tiki.require("embedded").useBespin("edit");
 
 And as with level 1 above, you can also use options to customize the display:
 
     :::js
-    tiki.require("Embedded").useBespin("edit", {
+    tiki.require("embedded").useBespin("edit", {
         stealFocus: true
     });
 
@@ -148,6 +148,21 @@ bespin object which can be manipulated as follows:
     bespin.value = "Initial Content\nWith 2 lines";
     bespin.setLineNumber(2);
 
+
+It's possible to change any settings (as in those defined by the 'set' command
+where the command line is available). Note that the same settings apply to
+all editors on the page. To change a setting use:
+
+    :::js
+    bespin.setSetting("fontsize", 10);
+
+
+To change the initial context for the syntax highlighter run:
+
+    :::js
+    bespin.setSyntax("html");
+
+
 When using element upgrading (with the `class="bespin"` attribute), you don't
 instantly have access to the Bespin Component. Fortunately, you can get access
 to it fairly easily:
@@ -155,8 +170,8 @@ to it fairly easily:
     :::html
     <div id="edit" class="bespin">Initial contents</div>
     <script>
-    var bespin = document.getElementById("edit").bespin;
-    bespin.value = "Hello, World!";
+        var bespin = document.getElementById("edit").bespin;
+        bespin.value = "Hello, World!";
     </script>
 
 The DOM node that contains the editor gets a "bespin" property on it with
