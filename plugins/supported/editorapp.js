@@ -223,9 +223,8 @@ exports.applicationController = SC.Object.create({
         loginController.addDelegate(this);
         signupController.addDelegate(this);
 
-        var self = this;
-
-        m_userident.currentuser().then(this.loginControllerAcceptedLogin.bind(this),
+        var promise = m_userident.currentuser();
+        promise.then(this.loginControllerAcceptedLogin.bind(this),
             this._displayLogin.bind(this));
 
     },
