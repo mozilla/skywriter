@@ -219,18 +219,35 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
 });
 
 exports.EditSession = SC.Object.extend({
+    _currentBuffer: null,
+    _currentView: null,
+
     _currentBufferChanged: function() {
-        this.get('currentBuffer').addDelegate(this);
+        var oldBuffer = this._currentBuffer;
+        if (!SC.none(oldBuffer)) {
+            oldBuffer.removeDelegate(this);
+        }
+
+        var newBuffer = this.get('currentBuffer');
+        this._currentBuffer = newBuffer;
+        newBuffer.addDelegate(this);
     }.observes('currentBuffer'),
 
-    /*
-     * The 'current' view is the editor component that most recently had
-     * the focus.
-     */
-    currentView: null,
+    _currentViewChanged: function() {
+        var oldView = this._currentView;
+        if (!SC.none(oldView)) {
+            oldView.removeDelegate(this);
+        }
 
-    /*
-     * The 'current' Buffer is the one that backs the currentView.
+        var newView = this.get('currentView');
+        this._currentView = newView;
+        newView.addDelegate(this);
+    }.observes('currentView'),
+
+    /**
+     * @property
+     *
+     * The 'current' buffer is the one that backs the current view.
      */
     currentBuffer: null,
 
@@ -238,6 +255,14 @@ exports.EditSession = SC.Object.extend({
      * The 'current' user.
      */
     currentUser: null,
+
+    /**
+     * @property{TextView}
+     *
+     * The 'current' view is the editor component that most recently had
+     * the focus.
+     */
+    currentView: null,
 
     /**
      * The history object to store file history in.
@@ -265,7 +290,7 @@ exports.EditSession = SC.Object.extend({
         }
 
         if (path == null || path.substring(0, 1) != '/') {
-            var buffer = this.get('currentBuffer');
+            var buffer = this._currentBuffer;
             var file;
             if (buffer) {
                 file = buffer.get('file');
@@ -287,7 +312,7 @@ exports.EditSession = SC.Object.extend({
         }
         var files = catalog.getObject('files');
         var file = files.getFile(recent[0]);
-        this.get('currentBuffer').changeFile(file);
+        this._currentBuffer.changeFile(file);
     },
 
     init: function() {
