@@ -982,7 +982,9 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         this._invalidateSelection();
         this.notifyDelegates('textViewSelectionChanged', this._selectedRange);
 
-        this._rearmInsertionPointBlinkTimer();
+        if (this.get('isFirstResponder')) {
+            this._rearmInsertionPointBlinkTimer();
+        }
 
         if (ensureVisible) {
             this.scrollToPosition(this._selectedRange.end);
