@@ -49,9 +49,7 @@ var InteriorGutterView = CanvasView.extend({
      */
     theme: {
         gutterStyle: '#4c4a41',
-        lineNumberColor: '#e5c138',
-        lineNumberFont: '10pt Monaco, Lucida Console, monospace',
-        editorTextFont: '10pt Monaco, Lucida Console, monospace'
+        lineNumberColor: '#e5c138'
     },
 
     _frameChanged: function() {
