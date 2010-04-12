@@ -98,7 +98,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
             
             if (SC.none(newFile)) {
                 var model = self.get('model');
-                model.replaceCharacters(model.range(), "");
+                model.replaceCharacters(model.range(), '');
             } else {
                 newFile.loadContents().then(function(contents) {
                     console.log('SET FILE CONTENTS: ', contents);
@@ -133,7 +133,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
         // are we changing to a new file?
         if (SC.none(newFile)) {
             var model = self.get('model');
-            model.replaceCharacters(model.range(), "");
+            model.replaceCharacters(model.range(), '');
             var pr = new Promise();
             pr.resolve(this);
             return pr;
@@ -257,7 +257,7 @@ exports.EditSession = SC.Object.extend({
      */
     getCompletePath: function(path) {
         if (path == null) {
-            path = "";
+            path = '';
         }
 
         if (path == null || path.substring(0, 1) != '/') {

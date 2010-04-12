@@ -189,7 +189,7 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
                 if (duration) {
                     SC.$("#" + durationId).html('completed in ' + (duration / 1000) + ' sec ');
                 } else {
-                    SC.$("#" + durationId).html("");
+                    SC.$("#" + durationId).html('');
                 }
             });
 
@@ -216,7 +216,7 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
             });
 
             this.link(content, "outputs.[]", function(outputs) {
-                SC.$("#" + outputId).get(0).innerHTML = "";
+                SC.$("#" + outputId).get(0).innerHTML = '';
                 outputs.forEach(function(output) {
                     var node;
                     if (typeof output == 'string') {
@@ -332,7 +332,7 @@ exports.CliInputView = SC.View.design({
      * Adjust the displayed input (but don't execute it)
      */
     setInput: function(command) {
-        command = command || "";
+        command = command || '';
         cliController.set('input', command);
     },
 
@@ -347,7 +347,7 @@ exports.CliInputView = SC.View.design({
         }
 
         var level = Level.Info;
-        this.set('_completion', "");
+        this.set('_completion', '');
 
         /**
          * Find a way to populate a DOM node with this hint

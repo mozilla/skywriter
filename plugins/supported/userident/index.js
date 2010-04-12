@@ -55,13 +55,13 @@ var SIGNUP_CONTAINER_HEIGHT = 299 + 37 - 76;
  * Controller for the sign-in process
  */
 exports.loginController = SC.Object.create(MultiDelegateSupport, {
-    username: "",
+    username: '',
 
-    password: "",
+    password: '',
 
     login: function() {
         var password = this.get('password');
-        this.set('password', "");
+        this.set('password', '');
         return exports.login(this.get('username'), password).
             then(this.onSuccess.bind(this), this.onFailure.bind(this));
     },
@@ -98,17 +98,17 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
 exports.signupController = SC.Object.create(MultiDelegateSupport, {
     isValid: true,
 
-    username: "",
-    usernameError: "",
+    username: '',
+    usernameError: '',
 
-    password1: "",
-    password1Error: "",
+    password1: '',
+    password1Error: '',
 
-    password2: "",
-    password2Error: "",
+    password2: '',
+    password2Error: '',
 
-    email: "",
-    emailHint: "",
+    email: '',
+    emailHint: '',
 
     dump: '',
 
@@ -123,7 +123,7 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
     validate: function(field) {
         if (field !== undefined) {
             // We do nothing if the field is empty.
-            if (this.get(field) === "") {
+            if (this.get(field) === '') {
                 return;
             }
 
@@ -171,7 +171,7 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
                 this.set('emailHint', "When email is given, it has to be a valid format");
                 isValid = false;
             } else {
-                this.set('emailHint', "");
+                this.set('emailHint', '');
             }
         }
 
@@ -640,8 +640,8 @@ exports.logout = function() {
         log: 'Logout complete.'
     }).then(function() {
         env.get('session').set('currentUser', null);
-        exports.loginController.set('username', "");
-        exports.loginController.set('password', "");
+        exports.loginController.set('username', '');
+        exports.loginController.set('password', '');
         exports.loginController.notifyDelegates('loginControllerLoggedOut');
     }, function(error) {
         var pane = SC.AlertPane.error('Unable to log out',

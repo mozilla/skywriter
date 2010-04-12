@@ -62,7 +62,7 @@ exports.testBufferFileChange = function() {
     var f = root.getFile("atTheTop.js");
     buffer.changeFileOnly(f);
     t.ok(!buffer.untitled(), 'Buffer should no longer be untitled');
-    t.equal("", buffer.get('model').get('value'), 'Should be empty now');
+    t.equal('', buffer.get('model').get('value'), 'Should be empty now');
     buffer.changeFileOnly(null);
     t.ok(buffer.untitled(), 'Buffer should be untitled again');
     buffer.set('file', f);
@@ -75,7 +75,7 @@ exports.testBufferFileChange = function() {
         buffer.changeFile(null);
         t.ok(buffer.untitled(), 'Buffer should be untitled again');
         newtext = buffer.get('model').get('value');
-        t.equal(newtext, "", 'editor text should be empty');
+        t.equal(newtext, '', 'editor text should be empty');
         pr.resolve();
     }, 1);
     return pr;

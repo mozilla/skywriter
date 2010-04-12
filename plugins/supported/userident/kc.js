@@ -57,7 +57,7 @@ exports.kcController = SC.Object.create({
     
     savePassword: function() {
         kcpass = pane.getPath(pwpath);
-        pane.setPath(pwpath, "");
+        pane.setPath(pwpath, '');
         pane.remove();
         pane = null;
         pr.resolve(kcpass);
@@ -167,7 +167,7 @@ exports.clearPassword = function() {
  * Retrieve an SSH public key for authentication use
  */
 exports.getkey = function(env, args, request) {
-    if (args.password == "") {
+    if (args.password == '') {
         args.password = undefined;
     }
     

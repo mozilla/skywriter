@@ -321,7 +321,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     init: function() {
         this.set('textLines', [
             {
-                characters: "",
+                characters: '',
                 colors:     [
                     {
                         start:  0,

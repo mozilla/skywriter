@@ -262,7 +262,7 @@ exports.Filesystem = SC.Object.extend({
                     segmentEnd = file.length;
                 }
                 var segment = file.substring(pathlength, segmentEnd);
-                if (segment == "") {
+                if (segment == '') {
                     continue;
                 }
 

@@ -55,7 +55,7 @@ exports.selection = {
             ext.data = [];
         }
 
-        var query = assignment.value || "";
+        var query = assignment.value || '';
         var matcher = PrefixMatcher.create({ query: query });
 
         var items = ext.data.map(function(name) {

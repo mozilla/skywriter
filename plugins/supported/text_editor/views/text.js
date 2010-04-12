@@ -507,7 +507,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
      * empty string if none are selected.
      */
     getSelectedCharacters: function() {
-        return this._rangeIsInsertionPoint(this._selectedRange) ? "" :
+        return this._rangeIsInsertionPoint(this._selectedRange) ? '' :
             this.getPath('layoutManager.textStorage').getCharacters(Range.
             normalizeRange(this._selectedRange));
     },
@@ -876,7 +876,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }
 
         this.groupChanges(function() {
-            this.replaceCharacters(range, "");
+            this.replaceCharacters(range, '');
 
             // Position the insertion point at the start of all the ranges that
             // were just deleted.

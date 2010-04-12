@@ -78,7 +78,7 @@ exports.showCommand = function(instruction, projectname) {
  */
 exports.listCommand = function(instruction, extra) {
     files.projects(function(projectNames) {
-        var projects = "";
+        var projects = '';
         for (var x = 0; x < projectNames.length; x++) {
             projects += projectNames[x].name + "<br/>";
         }

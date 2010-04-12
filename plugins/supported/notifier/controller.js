@@ -119,7 +119,7 @@ exports.Notification = SC.Object.extend({
      *
      */
     init: function() {
-        this._id = "" + (nextId++);
+        this._id = '' + (nextId++);
     },
 
     /**

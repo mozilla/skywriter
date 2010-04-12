@@ -90,7 +90,7 @@ exports.number = {
         if (!value) {
             return null;
         }
-        return "" + value;
+        return '' + value;
     },
 
     fromString: function(value, typeExt) {
@@ -114,7 +114,7 @@ exports.bool = {
     },
 
     toString: function(value, typeExt) {
-        return "" + value;
+        return '' + value;
     },
 
     fromString: function(value, typeExt) {

@@ -49,7 +49,7 @@ exports.TextBuffer = {
      * Deletes all characters in the range.
      */
     deleteCharacters: function(range) {
-        this.replaceCharacters(range, "");
+        this.replaceCharacters(range, '');
     },
 
     /**

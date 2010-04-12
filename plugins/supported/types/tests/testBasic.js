@@ -57,7 +57,7 @@ exports.testTextIsValid = function() {
     types.isValid('Foo', 'text').then(function(valid) {
         t.equal(true, valid);
     });
-    types.isValid("", 'text').then(function(valid) {
+    types.isValid('', 'text').then(function(valid) {
         t.equal(true, valid);
     });
     types.isValid('null', 'text').then(function(valid) {

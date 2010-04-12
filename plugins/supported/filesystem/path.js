@@ -58,11 +58,11 @@ exports.combine = function() {
  * Given a <code>path</code> return the directory
  * <li>directory("/path/to/directory/file.txt") -&gt; /path/to/directory/
  * <li>directory('/path/to/directory/') -&gt; /path/to/directory/
- * <li>directory("foo.txt") -&gt; ""
+ * <li>directory("foo.txt") -&gt; ''
  */
 exports.directory = function(path) {
     var match = /^(.*?\/)[^\/]*$/.exec(path);
-    return match === null ? "" : match[1];
+    return match === null ? '' : match[1];
 };
 
 /**
@@ -149,13 +149,13 @@ exports.basename = function(path) {
 
 /*
  * splits the path from the extension, returning a 2 element array
- * '/foo/bar/' -> ['/foo/bar', ""]
+ * '/foo/bar/' -> ['/foo/bar', '']
  * "/foo/bar/baz.js" -> ['/foo/bar/baz', 'js']
  */
 exports.splitext = function(path) {
     var lastDot = path.lastIndexOf(".");
     if (lastDot == -1) {
-        return [path, ""];
+        return [path, ''];
     }
     var before = path.substring(0, lastDot);
     var after = path.substring(lastDot+1);
@@ -164,14 +164,14 @@ exports.splitext = function(path) {
 
 /*
  * figures out the parent directory
- * "" -&gt; ""
- * '/' -&gt; ""
+ * '' -&gt; ''
+ * '/' -&gt; ''
  * '/foo/bar/' -&gt; '/foo/'
  * "/foo/bar/baz.txt" -&gt; '/foo/bar/'
  */
 exports.parentdir = function(path) {
-    if (path == "" || path == '/') {
-        return "";
+    if (path == '' || path == '/') {
+        return '';
     }
     
     if (exports.isDir(path)) {

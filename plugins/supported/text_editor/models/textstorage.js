@@ -141,7 +141,7 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
         this.superclass();
 
         this.set('delegates', []);
-        this.set('lines', [ "" ]);
+        this.set('lines', [ '' ]);
     },
 
     /**

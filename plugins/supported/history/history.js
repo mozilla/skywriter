@@ -62,7 +62,7 @@ exports.InMemoryHistory = SC.Object.extend({
         }
 
         if (this.pointer == history.requests.length) {
-            return "";
+            return '';
         } else {
             return history.requests[this.pointer].typed;
         }
@@ -77,7 +77,7 @@ exports.InMemoryHistory = SC.Object.extend({
         }
 
         if (this.pointer == history.requests.length) {
-            return "";
+            return '';
         } else {
             return history.requests[this.pointer].typed;
         }

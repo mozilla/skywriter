@@ -78,7 +78,7 @@ exports.getTypeSpecFromAssignment = function(typeSpec) {
 
         if (settingAssignment) {
             var settingName = settingAssignment.value;
-            if (settingName && settingName !== "") {
+            if (settingName && settingName !== '') {
                 var settingExt = catalog.getExtensionByKey('setting', settingName);
                 if (settingExt) {
                     replacement = settingExt.type;

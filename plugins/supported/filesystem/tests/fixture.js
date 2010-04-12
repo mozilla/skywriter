@@ -110,7 +110,7 @@ exports.DummyFileSource = SC.Object.extend({
     
     _findMatching: function(path, deep) {
         path = pathUtil.trimLeadingSlash(path);
-        if (path == "" || pathUtil.isDir(path)) {
+        if (path == '' || pathUtil.isDir(path)) {
             return this._findInDirectory(path, deep);
         } else {
             return this._findFile(path);
@@ -127,7 +127,7 @@ exports.DummyFileSource = SC.Object.extend({
 
         var f = this._findFile(path);
         if (SC.none(f)) {
-            f = {name: path, contents: ""};
+            f = {name: path, contents: ''};
             this.files.push(f);
         }
 
@@ -137,7 +137,7 @@ exports.DummyFileSource = SC.Object.extend({
     _findInDirectory: function(path, deep) {
         path = path.slice(0, path.length - 1);
         var segments = path.split('/');
-        if (path == "") {
+        if (path == '') {
             segments = [];
         }
         var matches = [];

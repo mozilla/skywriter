@@ -47,7 +47,7 @@ exports.setCommand = function(env, args, request) {
 
     if (!args.setting) {
         var settingsList = settings._list();
-        html = "";
+        html = '';
         // first sort the settingsList based on the key
         settingsList.sort(function(a, b) {
             if (a.key < b.key) {

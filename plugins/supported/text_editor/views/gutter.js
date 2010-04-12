@@ -83,7 +83,7 @@ var InteriorGutterView = CanvasView.extend({
 
         for (var row = range.start.row; row <= endRow; row++) {
             // TODO: breakpoints
-            context.fillText("" + (row + 1), -0.5,
+            context.fillText('' + (row + 1), -0.5,
                 layoutManager.lineRectForRow(row).y + lineAscent - 0.5);
         }
 
@@ -102,7 +102,7 @@ exports.GutterView = SC.View.extend({
 
         var layoutManager = this.get('layoutManager');
         var lineCount = layoutManager.get('textLines').length;
-        var lineCountStr = "" + lineCount;
+        var lineCountStr = '' + lineCount;
 
         var characterWidth = layoutManager.get('characterWidth');
         var strWidth = characterWidth * lineCountStr.length;

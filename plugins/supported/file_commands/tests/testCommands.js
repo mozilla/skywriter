@@ -69,7 +69,7 @@ exports.testFilesCommand = function() {
     var request = Request.create();
     var testpr = new Promise();
     request.promise.then(function() {
-        output = request.outputs.join("");
+        output = request.outputs.join('');
         t.ok(output.indexOf("foo/<br/>") > -1, 'foo/ should be in output');
         t.ok(output.indexOf("atTheTop.js<br/>") > -1, 
             "atTheTop.js should be in output");
@@ -102,7 +102,7 @@ exports.testFilesCommandDefaultsToRoot = function() {
     
     var request = Request.create();
     request.promise.then(function() {
-        output = request.outputs.join("");
+        output = request.outputs.join('');
         t.ok(output.indexOf("foo/<br/>") > -1, 'foo/ should be in output');
         t.ok(output.indexOf("atTheTop.js<br/>") > -1, 
             "atTheTop.js should be in output");
@@ -123,7 +123,7 @@ exports.testFilesAreRelativeToCurrentOpenFile = function() {
     
     var request = Request.create();
     request.promise.then(function() {
-        output = request.outputs.join("");
+        output = request.outputs.join('');
         t.ok(output.indexOf("1.txt<br/>") > -1, "1.txt should be in the output");
         t.ok(output.indexOf("2.txt<br/>") > -1, 
             "2.txt should be in output");
@@ -143,7 +143,7 @@ exports.testFilesListingInDirectoryRelativeToOpenFile = function() {
     
     var request = Request.create();
     request.promise.then(function() {
-        output = request.outputs.join("");
+        output = request.outputs.join('');
         t.ok(output.indexOf("3.txt<br/>") > -1, "3.txt should be in the output");
         testpr.resolve();
     });

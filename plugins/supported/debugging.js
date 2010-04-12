@@ -238,7 +238,7 @@ exports.templateCommand = function(env, args, request) {
                 names.push(name);
             }
         }
-        var complain = (!type || type === "") ? "' : 'Unknown pattern '" + type + "'.<br/>";
+        var complain = (!type || type === '') ? "' : 'Unknown pattern '" + type + "'.<br/>";
         request.doneWithError(complain + 'Known patterns: ' + names.join(", "));
     }
 };
@@ -272,7 +272,7 @@ exports.useCommand = function(env, args, request) {
                 names.push(name);
             }
         }
-        var complain = (!type || type === "") ? "" : "Unknown pattern '" + type + "'.<br/>";
+        var complain = (!type || type === '') ? '' : "Unknown pattern '" + type + "'.<br/>";
         request.doneWithError(complain + 'Known patterns: ' + names.join(", "));
     }
 };
@@ -298,7 +298,7 @@ exports.slowCommand = function(env, args, request) {
     var interval = setInterval(function() {
         var interval = (new Date().getTime() - start) / 1000;
         var percent = interval * 100 / seconds;
-        counter.innerHTML = "" + Math.round(percent);
+        counter.innerHTML = '' + Math.round(percent);
     }, 100);
 
     setTimeout(function() {

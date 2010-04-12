@@ -816,7 +816,7 @@ exports.server = SC.Object.create({
      * in to the template.
      */
     projectTemplate: function(project, templateOptions, opts) {
-        var url = util.path.combine('/project/template/', project, "");
+        var url = util.path.combine('/project/template/', project, '');
         this.request('POST', url, JSON.stringify(templateOptions), opts || {});
     },
 

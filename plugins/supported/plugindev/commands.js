@@ -44,7 +44,7 @@ var util = require('bespin:util/util');
 
 var getPluginName = function(path) {
     if (util.endsWith(path, '/')) {
-        var trimmedPath = path.replace(/\/$/, "");
+        var trimmedPath = path.replace(/\/$/, '');
         return pathutils.basename(trimmedPath);
     }
     
@@ -139,7 +139,7 @@ exports.list = function(env, args, request) {
         output.push('</table></div>');
     }
     output.push('</div>');
-    request.done(output.join(""));
+    request.done(output.join(''));
 };
 
 /*

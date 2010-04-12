@@ -73,7 +73,7 @@ exports.deleteLines = function(env, args, request) {
         view.replaceCharacters({
             start: startPos,
             end: { column: 0, row: range.end.row + 1 }
-        }, "");
+        }, '');
 
         view.moveCursorTo(startPos);
     });
@@ -136,7 +136,7 @@ exports.tab = function(env, args, request) {
     var selection = view.getSelectedRange();
     var count = tabstop - selection.start.column % tabstop;
 
-    var str = "";
+    var str = '';
     for (var i = 0; i < count; i++) {
         str += ' ';
     }

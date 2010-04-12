@@ -61,7 +61,7 @@ exports.EditorView = SC.View.extend(SC.Border, {
 
         // Measure a large string to work around the fact that width and height
         // are truncated to the nearest integer in the canvas API.
-        var str = "";
+        var str = '';
         for (var i = 0; i < 100; i++) {
             str += 'M';
         }

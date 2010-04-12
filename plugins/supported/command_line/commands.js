@@ -75,7 +75,7 @@ var _getHelp = function(prefix, options) {
             output.push("<p>" + command.description + "</p>");
         } else if (prefix) {
             if (prefix == 'hidden') { // sneaky, sneaky.
-                prefix = "";
+                prefix = '';
                 showHidden = true;
             }
             output.push("<h2>Commands starting with '" + prefix + "':</h2>");
@@ -132,7 +132,7 @@ var _getHelp = function(prefix, options) {
         }
     }
 
-    return output.join("");
+    return output.join('');
 };
 
 /**

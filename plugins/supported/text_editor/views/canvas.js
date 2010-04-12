@@ -222,8 +222,8 @@ exports.CanvasView = SC.View.extend({
             var canvasContext = context.begin('canvas');
             this._cvCanvasId = SC.guidFor(canvasContext);
             canvasContext.id(this._cvCanvasId);
-            canvasContext.attr('width', "" + parentFrame.width);
-            canvasContext.attr('height', "" + parentFrame.height);
+            canvasContext.attr('width', '' + parentFrame.width);
+            canvasContext.attr('height', '' + parentFrame.height);
             canvasContext.push('canvas tag not supported by your browser');
             canvasContext.end();
             return;

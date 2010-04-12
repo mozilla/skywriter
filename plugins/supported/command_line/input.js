@@ -161,7 +161,7 @@ exports.Input = SC.Object.extend({
      * Split up the input taking into account ' and "
      */
     _tokenize: function() {
-        if (!this.typed || this.typed === "") {
+        if (!this.typed || this.typed === '') {
             /*
             // We would like to put some initial help here, but for anyone but
             // a complete novice a 'type help' message is very annoying, so we
@@ -597,7 +597,7 @@ exports.documentCommand = function(cmdExt, typed) {
     }
 
     return {
-        param: { type: 'text', description: docs.join("") },
+        param: { type: 'text', description: docs.join('') },
         value: typed
     };
 };

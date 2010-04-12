@@ -85,7 +85,7 @@ exports.TextInput = {
         if (text == '') {
             return;
         }
-        textField.value = "";
+        textField.value = '';
 
         this._TextInput_textInserted(text);
     },

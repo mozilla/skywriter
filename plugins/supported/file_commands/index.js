@@ -61,7 +61,7 @@ exports.filesCommand = function(env, args, request) {
 
     request.async();
     env.get('files').listDirectory(path).then(function(contents) {
-        var files = "";
+        var files = '';
         for (var x = 0; x < contents.length; x++) {
             files += contents[x] + "<br/>";
         }
