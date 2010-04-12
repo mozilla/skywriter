@@ -162,7 +162,7 @@ exports.TextInput = {
             this._TextInput_textFieldId = SC.guidFor(textFieldContext);
             textFieldContext.id(this._TextInput_textFieldId);
             textFieldContext.attr('style', 'position: absolute; ' +
-                'z-index: -99999; top: 0px; left: 0px; width: 0px; ' +
+                'z-index: -99999; top: -999px; left: -999px; width: 0px; ' +
                 'height: 0px');
             textFieldContext.end();
         }
