@@ -36,11 +36,6 @@ import webbrowser
 import re
 import zipfile
 
-try:
-    from json import loads, dumps
-except ImportError:
-    from simplejson import loads, dumps
-
 from paver.easy import *
 from paver.setuputils import setup
 import paver.virtual
