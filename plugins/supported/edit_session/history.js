@@ -37,44 +37,87 @@
 
 var SC = require('sproutcore/runtime').SC;
 
+var MAX_HISTORY_SIZE = 30;
+
 /**
  * @class
  *
  * A list of recently opened files.
  */
 exports.History = SC.Object.extend({
-    storage: window.localStorage,
-
-    addPath: function(path) {
+    _getHistory: function() {
         var storage = this.get('storage');
-        var historyStr = storage.history;
-        var history = SC.none(historyStr) ? [] : JSON.parse(historyStr);
+        if ('history2' in storage) {
+            return JSON.parse(storage.history2);
+        }
 
-        history.push(path);
-        storage.history = JSON.stringify(history);
+        return [];
     },
 
-    getRecent: function(max) {
-        var historyStr = this.get('storage').history;
-        var history = SC.none(historyStr) ? [] : JSON.parse(historyStr);
+    _setHistory: function(newHistory) {
+        var storage = this.get('storage');
+        storage.history2 = JSON.stringify(newHistory);
+    },
 
-        var historyLength = history.length;
-        var seen = {}, result = [], count = 0;
+    /**
+     * @property{LocalStorage}
+     *
+     * The backing store to use. Defaults to HTML 5 local storage.
+     */
+    storage: window.localStorage,
 
-        for (var i = historyLength - 1; i >= 0; i--) {
-            var path = history[i];
-            if (!(path in seen)) {
-                seen[path] = true;
-                result.push(path);
+    /**
+     * Adds the supplied path to the history.
+     */
+    addPath: function(path) {
+        var history = this._getHistory();
 
-                count++;
-                if (count === max) {
-                    break;
-                }
+        var obj = null;
+        for (var i = history.length - 1; i >= 0; i--) {
+            var historyObj = history[i];
+            if (historyObj.path === path) {
+                obj = historyObj;
+                history.splice(i, 1);
+                break;
             }
         }
 
-        return result;
+        if (obj === null) {
+            obj = { path: path };
+        }
+
+        if (history.length >= MAX_HISTORY_SIZE) {
+            history.splice(0, history.length - MAX_HISTORY_SIZE + 1);
+        }
+
+        history.push(obj);
+
+        this._setHistory(history);
+    },
+
+    getRecent: function(max) {
+        var history = this._getHistory();
+        return history.slice(max >= history.length ? -max : 0);
+    },
+
+    /**
+     * Updates metadata (the selection boundaries or the scroll position) for a
+     * path in the history (if the path is at the top).
+     *
+     * @param path  The path to update.
+     * @param key   The key to update ('selection' or 'scroll').
+     * @param value The value to set.
+     */
+    update: function(path, key, value) {
+        var history = this._getHistory();
+        var lastObject = history[history.length - 1];
+        if (lastObject.path !== path) {
+            return;
+        }
+
+        lastObject[key] = value;
+
+        this._setHistory(history);
     }
 });
 

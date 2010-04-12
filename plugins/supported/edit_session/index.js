@@ -244,6 +244,13 @@ exports.EditSession = SC.Object.extend({
         newView.addDelegate(this);
     }.observes('currentView'),
 
+    _updateHistoryProperty: function(key, value) {
+        var file = this._currentBuffer.get('file');
+        if (!SC.none(file)) {
+            this.get('history').update(file.path, key, value);
+        }
+    },
+
     /**
      * @property
      *
@@ -306,13 +313,45 @@ exports.EditSession = SC.Object.extend({
     },
 
     loadMostRecentOrNew: function() {
-        var recent = this.get('history').getRecent(1);
-        if (recent.length === 0) {
+        var recents = this.get('history').getRecent(1);
+        if (recents.length === 0) {
             return;
         }
+
+        var recent = recents[0];
+
+        // We have to save these values here, because they're going to get
+        // clobbered when the new file is loaded and the editor readjusts the
+        // selection to the beginning. (Not much we can do about this: the
+        // text view is rightfully paranoid about the model shifting underneath
+        // it...)
+        var scroll = recent.scroll, selection = recent.selection;
+
         var files = catalog.getObject('files');
-        var file = files.getFile(recent[0]);
-        this._currentBuffer.changeFile(file);
+        var file = files.getFile(recent.path);
+        this._currentBuffer.changeFile(file).then(function() {
+            var view = this._currentView;
+            if (!SC.none(scroll)) {
+                view.scrollTo(scroll);
+            }
+            if (!SC.none(selection)) {
+                view.setSelection(selection);
+            }
+        }.bind(this));
+    },
+
+    /**
+     * Called by the text view whenever the current selection changes.
+     */
+    textViewChangedSelection: function(sender, newSelection) {
+        this._updateHistoryProperty('selection', newSelection);
+    },
+
+    /**
+     * Called by the text view whenever it scrolls.
+     */
+    textViewWasScrolled: function(sender, point) {
+        this._updateHistoryProperty('scroll', point);
     },
 
     init: function() {
