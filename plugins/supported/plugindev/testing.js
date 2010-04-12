@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,14 +35,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require("bespin:plugins").catalog;
-var SC = require("sproutcore/runtime").SC;
+var catalog = require('bespin:plugins').catalog;
+var SC = require('sproutcore/runtime').SC;
 var Ct = require('core_test');
 var DefaultLogger = require('loggers/default', 'core_test');
-var BrowserLogger = require("core_test:loggers/browser");
-var group = require("bespin:promise").group;
-var test = require("core_test:test");
-var utils = require("core_test:utils");
+var BrowserLogger = require('core_test:loggers/browser');
+var group = require('bespin:promise').group;
+var test = require('core_test:test');
+var utils = require('core_test:utils');
 
 var lastTest = null;
 
@@ -368,7 +368,7 @@ var TestOutputLogger = SC.Object.extend({
     add: function(status, testInfo, message) {
         var plan = this.currentPlan;
         if (!plan) {
-            throw "add called outside of plan";
+            throw 'add called outside of plan';
         }
 
         var moduleNames = testInfo.moduleNames;
@@ -479,21 +479,21 @@ exports.testrunner = function(env, args, request) {
             plugin = catalog.plugins[pluginName];
             if (plugin.testmodules) {
                 plugin.testmodules.forEach(function(testModule) {
-                    testsToRun.push(pluginName + ":" + testModule);
+                    testsToRun.push(pluginName + ':' + testModule);
                 });
             }
         }
-    } else if (testspec.indexOf(":") > 0) {
+    } else if (testspec.indexOf(':') > 0) {
         testsToRun.push(testspec);
     } else {
         plugin = catalog.plugins[testspec];
         if (!plugin) {
-            request.doneWithError("Unknown plugin: " + testspec);
+            request.doneWithError('Unknown plugin: ' + testspec);
             return;
         }
         if (plugin.testmodules) {
             plugin.testmodules.forEach(function(testModule) {
-                testsToRun.push(testspec + ":" + testModule);
+                testsToRun.push(testspec + ':' + testModule);
             });
         }
     }
@@ -505,7 +505,7 @@ exports.testrunner = function(env, args, request) {
 
     var promises = [];
     testsToRun.forEach(function(testmodule) {
-        var pluginName = testmodule.split(":")[0];
+        var pluginName = testmodule.split(':')[0];
         promises.push(tiki.async(pluginName));
     });
 

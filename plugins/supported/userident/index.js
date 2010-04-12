@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,11 +35,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime").SC;
+var SC = require('sproutcore/runtime').SC;
 var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
-var util = require("bespin:util/util");
+var util = require('bespin:util/util');
 var server = require('bespin_server').server;
-var catalog = require("bespin:plugins").catalog;
+var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var env = require('canon:environment').global;
 
@@ -70,8 +70,8 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
      * The login failed.
      */
     onFailure: function() {
-        var pane = SC.AlertPane.error("Login Failed",
-                "Your Username or Password was not recognized");
+        var pane = SC.AlertPane.error('Login Failed',
+                'Your Username or Password was not recognized');
         pane.append();
         pane.becomeKeyPane();
     },
@@ -137,7 +137,7 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
         if (this.changed.username || this.get('username') !== '') {
             var usernameError = '';
             if (this.get('username').length < 4) {
-                usernameError = "At least 4 chars";
+                usernameError = 'At least 4 chars';
                 isValid = false;
             }
             this.set('usernameError', usernameError);
@@ -147,10 +147,10 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
             var password1Error = '';
             var l= this.get('password1').length;
             if (l < 6) {
-                password1Error = "At least 6 chars";
+                password1Error = 'At least 6 chars';
                 isValid = false;
             } else if (l > 20) {
-                password1Error = "Maximum 20 chars";
+                password1Error = 'Maximum 20 chars';
                 isValid = false;
             }
             this.set('password1Error', password1Error);
@@ -160,7 +160,7 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
                 (this.changed.password2  || this.get('password2') !== '')) {
             var password2Error = '';
             if (this.get('password1') != this.get('password2')) {
-                password2Error = "Have to match";
+                password2Error = 'Have to match';
                 isValid = false;
             }
             this.set('password2Error', password2Error);
@@ -188,11 +188,11 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
         this.validate();
 
         if (!this.get('isValid')) {
-            pane = SC.AlertPane.error("Correct your signup", "Please correct your signup information.");
+            pane = SC.AlertPane.error('Correct your signup', "Please correct your signup information.");
             pane.append();
         } else if (this.get('username') === '' ||
                 this.get('password1') === '') {
-            pane = SC.AlertPane.error("Correct your signup", "Please fill " +
+            pane = SC.AlertPane.error('Correct your signup', 'Please fill ' +
                 "all required fields (username + password).");
             pane.append();
         } else {
@@ -217,7 +217,7 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
      * The sign up failed.
      */
     onFailure: function(xhr) {
-        var pane = SC.AlertPane.error("Signup Failed", xhr.responseText);
+        var pane = SC.AlertPane.error('Signup Failed', xhr.responseText);
         pane.append();
         pane.becomeKeyPane();
     }
@@ -238,10 +238,10 @@ exports.userIdentPage = SC.Page.design({
         contentView: SC.View.design({
             layout: { left: 0, top: 0, bottom: 0, right: 0 },
             classNames: "bespin-color-field".w(),
-            childViews: "welcome form logo".w(),
+            childViews: 'welcome form logo'.w(),
 
             welcome: SC.View.design({
-                childViews: "h1 p".w(),
+                childViews: 'h1 p'.w(),
 
                 layout: {
                     left:   10,
@@ -258,7 +258,7 @@ exports.userIdentPage = SC.Page.design({
                         height: 85
                     },
 
-                    value: "Welcome to Bespin",
+                    value: 'Welcome to Bespin',
                     controlSize: SC.HUGE_CONTROL_SIZE,
                     fontWeight: 'bold'
                 }),
@@ -273,12 +273,12 @@ exports.userIdentPage = SC.Page.design({
 
                     classNames: "bespin-informational".w(),
 
-                    value:  "The <a href=\"http://mozillalabs.com/bespin/\" " +
+                    value:  "The <a href=\"http://mozillalabs.com/bespin/\' ' +
                             "target=\"_blank\">Bespin project</a> is " +
                             "building a web-based code editor using the " +
                             "emerging HTML 5 standard. The editor is easily " +
-                            "extensible with JavaScript and can be used in " +
-                            "your own applications or on our experimental " +
+                            'extensible with JavaScript and can be used in ' +
+                            'your own applications or on our experimental ' +
                             "hosted service.",
 
                     escapeHTML: false
@@ -286,7 +286,7 @@ exports.userIdentPage = SC.Page.design({
             }),
 
             form: SC.View.design({
-                childViews: "action container".w(),
+                childViews: 'action container'.w(),
                 layout: {
                     left:   310 + 2 + 10,
                     top:    15 + 2,
@@ -308,7 +308,7 @@ exports.userIdentPage = SC.Page.design({
                     itemTitleKey: 'title',
                     items: [
                         {
-                            title: "I have a Bespin account",
+                            title: 'I have a Bespin account',
                             value: 'loginView'
                         },
                         {
@@ -379,8 +379,8 @@ exports.userIdentPage = SC.Page.design({
 
     loginView: SC.View.design({
         layout: { left: 0, top: 0, right: 0, height: 291 },
-        childViews: ("usernameField usernameLabel passwordField " +
-            "passwordLabel submit").w(),
+        childViews: ('usernameField usernameLabel passwordField ' +
+            'passwordLabel submit').w(),
 
         usernameField: SC.TextFieldView.design({
             valueBinding: "userident#loginController.username",
@@ -433,7 +433,7 @@ exports.userIdentPage = SC.Page.design({
                 height: 37
             },
 
-            title: "Log in",
+            title: 'Log in',
             isDefault: true,
             target: "userident#loginController",
             action: 'login'
@@ -443,10 +443,10 @@ exports.userIdentPage = SC.Page.design({
     signupView: SC.View.design({
         layout: { left: 0, top: 0, right: 0, height: 399 },
 
-        childViews: ("usernameField usernameLabel usernameError " +
-            "password1Field password1Label password1Error " +
-            "password2Field password2Label password2Error " +
-            "emailField emailLabel emailHint submit").w(),
+        childViews: ('usernameField usernameLabel usernameError ' +
+            'password1Field password1Label password1Error ' +
+            'password2Field password2Label password2Error ' +
+            'emailField emailLabel emailHint submit').w(),
 
         usernameField: SC.TextFieldView.design({
             layout: { left: 10, top: 92 - 91, width: 200, height: 24 },
@@ -598,7 +598,7 @@ exports.userIdentPage = SC.Page.design({
         submit: SC.ButtonView.design({
             layout: { left: 10, top: 308 - 91, width: 200, height: 37 },
             isDefault: true,
-            title: "Sign up",
+            title: 'Sign up',
             target: "userident#signupController",
             action: 'signup'
         })
@@ -611,7 +611,7 @@ exports.userIdentPage = SC.Page.design({
  * @param pass is the password
  */
 exports.login = function(user, pass) {
-    var url = "/register/login/" + user;
+    var url = '/register/login/' + user;
     return server.request('POST', url, "password=" + escape(pass), {
         log: 'Login complete.'
     });
@@ -625,7 +625,7 @@ exports.login = function(user, pass) {
  */
 exports.signup = function(user, pass, email, opts) {
     opts = opts || {};
-    var url = "/register/new/" + user;
+    var url = '/register/new/' + user;
     var data = "password=" + encodeURI(pass) + "&email=" + encodeURI(email);
     return server.request('POST', url, data, opts);
 };
@@ -635,7 +635,7 @@ exports.signup = function(user, pass, email, opts) {
  * @param onSuccess fires after the logout attempt
  */
 exports.logout = function() {
-    var url = "/register/logout/";
+    var url = '/register/logout/';
     return server.request('POST', url, null, {
         log: 'Logout complete.'
     }).then(function() {
@@ -644,8 +644,8 @@ exports.logout = function() {
         exports.loginController.set('password', "");
         exports.loginController.notifyDelegates('loginControllerLoggedOut');
     }, function(error) {
-        var pane = SC.AlertPane.error("Unable to log out",
-            "There was a problem logging out: " + error.message);
+        var pane = SC.AlertPane.error('Unable to log out',
+            'There was a problem logging out: ' + error.message);
         pane.append();
         pane.becomeKeyPane();
     });
@@ -655,7 +655,7 @@ exports.logout = function() {
  * Return info on the current logged in user
  */
 exports.currentuser = function() {
-    var url = "/register/userinfo/";
+    var url = '/register/userinfo/';
     return server.request('GET', url, null, {
         evalJSON: true
     });
@@ -667,5 +667,5 @@ exports.currentuser = function() {
  */
 exports.registerUserPlugins = function() {
     // Load the plugin metadata for the user's plugins
-    catalog.loadMetadata(server.SERVER_BASE_URL + "/plugin/register/user");
+    catalog.loadMetadata(server.SERVER_BASE_URL + '/plugin/register/user');
 };

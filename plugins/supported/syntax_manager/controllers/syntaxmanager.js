@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -105,7 +105,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
             });
 
         if (attrIndex === null) {
-            console.error("position not found", position);
+            console.error('position not found', position);
         }
 
         return attrIndex;
@@ -442,7 +442,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
                 }
 
                 if (depth === 50) {
-                    // Do a "manual tail call" so that we don't overflow the
+                    // Do a 'manual tail call' so that we don't overflow the
                     // call stack. See bug 556151.
                     window.setTimeout(function() {
                         SC.run(function() {
@@ -508,8 +508,8 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
                             promise.resolve(result);
                         });
                 } catch (e) {
-                    console.log("Syntax highlighter ", context, " caused an " +
-                        "exception:", e);
+                    console.log('Syntax highlighter ', context, ' caused an ' +
+                        'exception:', e);
                     promise.resolve({
                         attrs:  this._defaultAttrs(),
                         next:   { context: 'plain', state: 'start' }
@@ -618,7 +618,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
         return "{ lineAttrInfo: [ %@ ], invalidRows: [ %@ ] }".
             fmt(this._lineAttrInfo.map(function(info) {
                 return "{ (%@) -> (%@) }".fmt(info.snapshot.map(function(cas) {
-                    return cas.context + ": " + cas.state;
+                    return cas.context + ': ' + cas.state;
                 }).join(", "),
                 info.attrs.map(this._attrsToString.bind(this)).join(", "));
             }.bind(this)).join(", "),

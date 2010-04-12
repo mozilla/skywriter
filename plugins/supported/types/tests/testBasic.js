@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var types = require("types:types");
+var types = require('types:types');
 var t = require('plugindev');
 
 exports.testTextFromString = function() {
@@ -114,13 +114,13 @@ exports.testNumberIsValid = function() {
         t.equal(false, valid, 'null');
     });
     types.isValid('0', 'number').then(function(valid) {
-        t.equal(false, valid, "string 0");
+        t.equal(false, valid, 'string 0');
     });
     types.isValid("-1", 'number').then(function(valid) {
         t.equal(false, valid, "string -1");
     });
     types.isValid('null', 'number').then(function(valid) {
-        t.equal(false, valid, "string null");
+        t.equal(false, valid, 'string null');
     });
     types.isValid({}, 'number').then(function(valid) {
         t.equal(false, valid, 'object');
@@ -141,7 +141,7 @@ exports.testBooleanFromString = function() {
         t.equal(converted, false, "'FALSE' should be false");
     });
     types.fromString(null, 'boolean').then(function(converted) {
-        t.equal(converted, null, "null should be null");
+        t.equal(converted, null, 'null should be null');
     });
 };
 
@@ -159,7 +159,7 @@ exports.testBooleanIsValid = function() {
         t.equal(false, valid, 'zero');
     });
     types.isValid(-1, 'boolean').then(function(valid) {
-        t.equal(false, valid, "minus 1");
+        t.equal(false, valid, 'minus 1');
     });
     types.isValid(Infinity, 'boolean').then(function(valid) {
         t.equal(false, valid, 'Infinity');
@@ -171,13 +171,13 @@ exports.testBooleanIsValid = function() {
         t.equal(false, valid, 'null');
     });
     types.isValid('0', 'boolean').then(function(valid) {
-        t.equal(false, valid, "string zero");
+        t.equal(false, valid, 'string zero');
     });
     types.isValid("-1", 'boolean').then(function(valid) {
         t.equal(false, valid, "string -1");
     });
     types.isValid('null', 'boolean').then(function(valid) {
-        t.equal(false, valid, "string null");
+        t.equal(false, valid, 'string null');
     });
     types.isValid({}, 'boolean').then(function(valid) {
         t.equal(false, valid, 'object');

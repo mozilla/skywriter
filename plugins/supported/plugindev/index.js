@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -41,12 +41,12 @@ require.loader.async('core_test');
 
 var console = require('bespin:console').console;
 var core_test = require('core_test');
-var assert = require("core_test:assert");
-var test = require("core_test:test");
+var assert = require('core_test:assert');
+var test = require('core_test:test');
 var DefaultLogger = require('loggers/default', 'core_test');
 
 var server = require('bespin_server').server;
-var pluginCatalog = require("bespin:plugins").catalog;
+var pluginCatalog = require('bespin:plugins').catalog;
 
 // Transfer names from core_test so that this is the
 // test interface used by plugins.
@@ -93,7 +93,7 @@ exports.never = function(msg) {
 exports.reload = function(pluginName, callback) {
     var plugin = pluginCatalog.plugins[pluginName];
     if (plugin == undefined) {
-        throw "Plugin undefined";
+        throw 'Plugin undefined';
     }
     plugin.reload(callback);
 };
@@ -119,17 +119,17 @@ exports.getPlugins = function() {
 
 exports.reloadCommand = function(env, args, request) {
     if (!args.plugin) {
-        request.doneWithError("You must provide a plugin name");
+        request.doneWithError('You must provide a plugin name');
         return;
     }
     try
     {
         exports.reload(args.plugin, function() {
-            request.done("Plugin " + args.plugin + " reloaded.");
+            request.done('Plugin ' + args.plugin + " reloaded.");
         });
     } catch (e) {
-        if (e == "Plugin undefined") {
-            request.doneWithError("Cannot find plugin " + args.plugin);
+        if (e == 'Plugin undefined') {
+            request.doneWithError('Cannot find plugin ' + args.plugin);
             return;
         }
         throw e;
@@ -140,12 +140,12 @@ exports.reloadCommand = function(env, args, request) {
 /*
 * runs the test in the fully qualified named testmodule.
 * For example, to run the test in tests/myTestModule in the Foo plugin,
-* you would run runTest("Foo:tests/myTestModule")
+* you would run runTest('Foo:tests/myTestModule')
 *
 * The test module's plugin is reloaded before running.
 */
 exports.runTest = function(testmodule) {
-    var pluginName = testmodule.split(":", 1)[0];
+    var pluginName = testmodule.split(':', 1)[0];
     if (!pluginName) {
         pluginName = testmodule;
     }
@@ -159,7 +159,7 @@ exports.runTest = function(testmodule) {
 };
 
 exports.tempTest = function(testmodule) {
-    var pluginName = testmodule.split(":", 1)[0];
+    var pluginName = testmodule.split(':', 1)[0];
     if (!pluginName) {
         pluginName = testmodule;
     }

@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -48,9 +48,9 @@ var SC = require('sproutcore/runtime').SC;
  * available.
  *
  * To use this mixin, derive from it and implement the functions (don't have to)
- *   - copy: function() { return "text for clipboard" }
- *   - cut: function() { "Cut some text"; return "text for clipboard"}
- *   - textInserted: function(newInsertedText) { "handle new inserted text"; }
+ *   - copy: function() { return 'text for clipboard' }
+ *   - cut: function() { 'Cut some text'; return 'text for clipboard'}
+ *   - textInserted: function(newInsertedText) { 'handle new inserted text'; }
  * Note: Pasted text is provied through the textInserted(pastedText) function.
  *
  * Make sure to call the superclass implementation if you override any of the
@@ -70,7 +70,7 @@ exports.TextInput = {
     _TextInput_wantsFocus: false,
 
     // Keyevents and copy/cut/paste are not the same on Safari and Chrome.
-    _isChrome: !!parseFloat(navigator.userAgent.split("Chrome/")[1]),
+    _isChrome: !!parseFloat(navigator.userAgent.split('Chrome/')[1]),
 
     // This function doesn't work on WebKit! The textContent comes out empty...
     _TextInput_textFieldChanged: function() {
@@ -163,7 +163,7 @@ exports.TextInput = {
             textFieldContext.id(this._TextInput_textFieldId);
             textFieldContext.attr('style', "position: absolute; " +
                 "z-index: -99999; top: 0px; left: 0px; width: 0px; " +
-                "height: 0px");
+                'height: 0px');
             textFieldContext.end();
         }
     },

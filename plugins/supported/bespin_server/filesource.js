@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,10 +35,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime").SC;
-var Promise = require("bespin:promise").Promise;
+var SC = require('sproutcore/runtime').SC;
+var Promise = require('bespin:promise').Promise;
 var server = require('bespin_server').server;
-var pathUtil = require("filesystem:path");
+var pathUtil = require('filesystem:path');
 
 exports.BespinFileSource = SC.Object.extend({
     server: server,
@@ -47,27 +47,27 @@ exports.BespinFileSource = SC.Object.extend({
         var opts = {
             evalJSON: true
         };
-        return this.server.request('GET', "/file/list_all/", null, opts);
+        return this.server.request('GET', '/file/list_all/', null, opts);
     },
     
     loadContents: function(path) {
-        var url = pathUtil.combine("/file/at/", path);
+        var url = pathUtil.combine('/file/at/', path);
         return this.server.request('GET', url, null);
     },
     
     saveContents: function(path, contents) {
-        var url = pathUtil.combine("/file/at/", path);
+        var url = pathUtil.combine('/file/at/', path);
         return this.server.request('PUT', url, contents);
     },
     
     remove: function(path) {
-        var url = pathUtil.combine("/file/at/", path);
+        var url = pathUtil.combine('/file/at/', path);
         var pr = this.server.request('DELETE', url);
         return pr;
     },
     
     makeDirectory: function(path) {
-        var url = pathUtil.combine("/file/at/", path);
+        var url = pathUtil.combine('/file/at/', path);
         return this.server.request('PUT', url, null);
     }
 });

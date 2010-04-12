@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -37,11 +37,11 @@
 
 var bespin = require('bespin');
 var console = require('bespin:console').console;
-var util = require("bespin:util/util");
-var cookie = require("bespin:util/cookie");
-var SC = require("sproutcore/runtime").SC;
-var Promise = require("bespin:promise").Promise;
-var catalog = require("bespin:plugins").catalog;
+var util = require('bespin:util/util');
+var cookie = require('bespin:util/cookie');
+var SC = require('sproutcore/runtime').SC;
+var Promise = require('bespin:promise').Promise;
+var catalog = require('bespin:plugins').catalog;
 
 /**
  * The Server object implements the Bespin Server API (See
@@ -147,7 +147,7 @@ exports.server = SC.Object.create({
                     }
                 } else {
                     if (pr) {
-                        var error = new Error("Server returned " + xhr.status);
+                        var error = new Error('Server returned ' + xhr.status);
                         error.xhr = xhr;
                         pr.reject(error);
                     } else {
@@ -219,15 +219,15 @@ exports.server = SC.Object.create({
         
         this.request(method, url, payload, options).then(function(response, xhr) {
             if (response.jobid == null) {
-                console.error("Missing jobid", response);
-                var error = new Error("Server returned " + xhr.status);
+                console.error('Missing jobid', response);
+                var error = new Error('Server returned ' + xhr.status);
                 error.xhr = xhr;
                 pr.reject(error);
                 return;
             }
             
             if (response.taskname) {
-                console.log("Server is running : " + response.taskname);
+                console.log('Server is running : ' + response.taskname);
             }
             
             self._jobs[response.jobid] = {
@@ -267,11 +267,11 @@ exports.server = SC.Object.create({
                         f(message);
                     });
                 } else {
-                    console.log("UNPROCESSED MSG FROM " + message.from +
-                        " FOR " + message.msgtargetid + ": " + message.text);
+                    console.log('UNPROCESSED MSG FROM ' + message.from +
+                        ' FOR ' + message.msgtargetid + ': ' + message.text);
                 }
             } else {
-                console.warn("Missing jobid in message", message);
+                console.warn('Missing jobid in message', message);
             }
             return;
         }
@@ -457,7 +457,7 @@ exports.server = SC.Object.create({
         var opts = {
             onSuccess: onSuccess,
             evalJSON: true,
-            log: "Listing files in: " + url
+            log: 'Listing files in: ' + url
         };
         if (util.isFunction(onFailure)) {
             opts.onFailure = onFailure;
@@ -479,7 +479,7 @@ exports.server = SC.Object.create({
         var opts = {
             onSuccess: onSuccess,
             evalJSON: true,
-            log: "Listing all files in: " + url
+            log: 'Listing all files in: ' + url
         };
         if (util.isFunction(onFailure)) {
             opts.onFailure = onFailure;
@@ -653,7 +653,7 @@ exports.server = SC.Object.create({
         var opts = {
             onSuccess: onSuccess,
             evalJSON: true,
-            log: "Listing searchfiles for: " + project + ", searchkey: " + searchkey
+            log: 'Listing searchfiles for: ' + project + ", searchkey: " + searchkey
         };
         this.request('GET', url, null, opts);
     },
@@ -734,7 +734,7 @@ exports.server = SC.Object.create({
             var userCall = opts.onSuccess;
             opts.onSuccess = function(text, xhr) {
                 userCall(text, xhr);
-                bespin.publish("project:imported", {
+                bespin.publish('project:imported', {
                     project: project,
                     url: url
                 });
@@ -752,12 +752,12 @@ exports.server = SC.Object.create({
     renameProject: function(currentProject, newProject, opts) {
         if (!opts) {
             opts = {
-                log: "Renaming project from " + currentProject + " to " + newProject
+                log: 'Renaming project from ' + currentProject + ' to ' + newProject
             };
         }
 
         if (currentProject && newProject) {
-            this.request('POST', '/project/rename/' + currentProject + "/", newProject, opts);
+            this.request('POST', '/project/rename/' + currentProject + '/', newProject, opts);
         }
     },
 
@@ -827,7 +827,7 @@ exports.server = SC.Object.create({
     },
 
     changePassword: function(username, newPassword, verifyCode, opts) {
-        var url = "/register/password/" + username;
+        var url = '/register/password/' + username;
         var query = { newPassword: newPassword, code: verifyCode };
         this.request('POST', url, util.objectToQuery(query), opts || {});
     },

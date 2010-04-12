@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,13 +35,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require("bespin:util/util");
+var util = require('bespin:util/util');
 
 /**
  * Take the given arguments and combine them with one path separator:
  * <pre>
  * combine('foo', 'bar') -&gt; foo/bar
- * combine(" foo/", "/bar  ") -&gt; foo/bar
+ * combine(' foo/', '/bar  ') -&gt; foo/bar
  * </pre>
  */
 exports.combine = function() {
@@ -57,7 +57,7 @@ exports.combine = function() {
 /**
  * Given a <code>path</code> return the directory
  * <li>directory("/path/to/directory/file.txt") -&gt; /path/to/directory/
- * <li>directory("/path/to/directory/") -&gt; /path/to/directory/
+ * <li>directory('/path/to/directory/') -&gt; /path/to/directory/
  * <li>directory("foo.txt") -&gt; ""
  */
 exports.directory = function(path) {
@@ -69,8 +69,8 @@ exports.directory = function(path) {
  * Given a <code>path</code> make sure that it returns as a directory
  * (As in, ends with a '/')
  * <pre>
- * makeDirectory("/path/to/directory") -&gt; /path/to/directory/
- * makeDirectory("/path/to/directory/") -&gt; /path/to/directory/
+ * makeDirectory('/path/to/directory') -&gt; /path/to/directory/
+ * makeDirectory('/path/to/directory/') -&gt; /path/to/directory/
  * </pre>
  */
 exports.makeDirectory = function(path) {
@@ -83,7 +83,7 @@ exports.makeDirectory = function(path) {
  * then make sure that you end up with a directory
  * <pre>
  * combine('foo', 'bar') -&gt; foo/bar/
- * combine(" foo/", "/bar  ") -&gt; foo/bar/
+ * combine(' foo/', '/bar  ') -&gt; foo/bar/
  * </pre>
  */
 exports.combineAsDirectory = function() {
@@ -130,7 +130,7 @@ exports.fileType = function(path) {
 * Returns true if the path points to a directory (ends with a /).
 */
 exports.isDir = function(path) {
-    return util.endsWith(path, "/");
+    return util.endsWith(path, '/');
 };
 
 /*
@@ -139,7 +139,7 @@ exports.isDir = function(path) {
  * /foo/bar/baz.js -> 'baz.js'
  */
 exports.basename = function(path) {
-    var lastSlash = path.lastIndexOf("/");
+    var lastSlash = path.lastIndexOf('/');
     if (lastSlash == -1) {
         return path;
     }
@@ -149,8 +149,8 @@ exports.basename = function(path) {
 
 /*
  * splits the path from the extension, returning a 2 element array
- * "/foo/bar/" -> ["/foo/bar", ""]
- * "/foo/bar/baz.js" -> ["/foo/bar/baz", 'js']
+ * '/foo/bar/' -> ['/foo/bar', ""]
+ * "/foo/bar/baz.js" -> ['/foo/bar/baz', 'js']
  */
 exports.splitext = function(path) {
     var lastDot = path.lastIndexOf(".");
@@ -165,19 +165,19 @@ exports.splitext = function(path) {
 /*
  * figures out the parent directory
  * "" -&gt; ""
- * "/" -&gt; ""
- * "/foo/bar/" -&gt; "/foo/"
- * "/foo/bar/baz.txt" -&gt; "/foo/bar/"
+ * '/' -&gt; ""
+ * '/foo/bar/' -&gt; '/foo/'
+ * "/foo/bar/baz.txt" -&gt; '/foo/bar/'
  */
 exports.parentdir = function(path) {
-    if (path == "" || path == "/") {
+    if (path == "" || path == '/') {
         return "";
     }
     
     if (exports.isDir(path)) {
         path = path.substring(0, path.length-1);
     }
-    slash = path.lastIndexOf("/");
+    slash = path.lastIndexOf('/');
     path = path.substring(0, slash+1);
     return path;
 };

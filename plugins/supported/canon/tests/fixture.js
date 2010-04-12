@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime").SC;
-var catalog = require("bespin:plugins").catalog;
-var Promise = require("bespin:promise").Promise;
+var SC = require('sproutcore/runtime').SC;
+var catalog = require('bespin:plugins').catalog;
+var Promise = require('bespin:promise').Promise;
 var Request = require('request').Request;
 var Environment = require('environment').Environment;
 

@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,18 +35,18 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime").SC;
-var catalog = require("bespin:plugins").catalog;
+var SC = require('sproutcore/runtime').SC;
+var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
-var Promise = require("bespin:promise").Promise;
-var groupPromises = require("bespin:promise").group;
+var Promise = require('bespin:promise').Promise;
+var groupPromises = require('bespin:promise').group;
 var Trace = require('bespin:util/stacktrace').Trace;
 
-var types = require("types:types");
+var types = require('types:types');
 var keyboard = require('canon:keyboard');
 
-var hint = require("command_line:hint");
-var typehint = require("command_line:typehint");
+var hint = require('command_line:hint');
+var typehint = require('command_line:typehint');
 
 /**
  * An object used during command line parsing to hold the various intermediate
@@ -132,7 +132,7 @@ exports.Input = SC.Object.extend({
 
             // Something failed, so the argsPromise wont complete. Kill it
             if (!success) {
-                this._argsPromise.reject(new Error("Parse error"));
+                this._argsPromise.reject(new Error('Parse error'));
             }
         } catch (ex) {
             var trace = new Trace(ex, true);
@@ -164,7 +164,7 @@ exports.Input = SC.Object.extend({
         if (!this.typed || this.typed === "") {
             /*
             // We would like to put some initial help here, but for anyone but
-            // a complete novice a "type help" message is very annoying, so we
+            // a complete novice a 'type help' message is very annoying, so we
             // need to find a way to only display this message once, or for
             // until the user click a 'close' button or similar
             this._hints.push(hint.Hint.create({
@@ -240,7 +240,7 @@ exports.Input = SC.Object.extend({
             }
 
             // commandExt, but no pointer - this must be a sub-command
-            initial += " " + this._unparsedArgs.shift();
+            initial += ' ' + this._unparsedArgs.shift();
         }
 
         this._commandExt = commandExt;
@@ -256,16 +256,16 @@ exports.Input = SC.Object.extend({
                 } else {
                     loadPromise.resolve(hint.Hint.create({
                         level: hint.Level.Error,
-                        element: "Failed to load command " + commandExt.name +
-                            ": Pointer " + commandExt._pluginName + ":" + commandExt.pointer + " is null."
+                        element: 'Failed to load command ' + commandExt.name +
+                            ': Pointer ' + commandExt._pluginName + ':' + commandExt.pointer + " is null."
                     }));
                     console.log(commandExt);
                 }
             }, function(ex) {
                 loadPromise.resolve(hint.Hint.create({
                     level: hint.Level.Error,
-                    element: "Failed to load command " + commandExt.name +
-                        ": Pointer " + commandExt._pluginName + ":" + commandExt.pointer + " failed to load." + ex
+                    element: 'Failed to load command ' + commandExt.name +
+                        ': Pointer ' + commandExt._pluginName + ':' + commandExt.pointer + " failed to load." + ex
                 }));
             });
             this._hints.push(loadPromise);
@@ -338,7 +338,7 @@ exports.Input = SC.Object.extend({
 
             this._hints.push(hint.Hint.create({
                 level: hint.Level.Error,
-                element: this._commandExt.name + " does not take any parameters"
+                element: this._commandExt.name + ' does not take any parameters'
             }));
             return false;
         }
@@ -351,7 +351,7 @@ exports.Input = SC.Object.extend({
             // start of this.typed? But that's not easy because there could be
             // multiple spaces in the command if we're doing sub-commands
             this._assignments[0] = {
-                value: unparsedArgs.length === 0 ? null : unparsedArgs.join(" "),
+                value: unparsedArgs.length === 0 ? null : unparsedArgs.join(' '),
                 param: params[0]
             };
             return true;
@@ -422,7 +422,7 @@ exports.Input = SC.Object.extend({
                         // Missing value for this param
                         this._hints.push(hint.Hint.create({
                             level: hint.Level.Incomplete,
-                            element: "Missing parameter: " + param.name
+                            element: 'Missing parameter: ' + param.name
                         }));
                     } else {
                         used.push(this._unparsedArgs[i + 1]);
@@ -450,7 +450,7 @@ exports.Input = SC.Object.extend({
                 // There is no default, and we've not supplied one so far
                 this._hints.push(hint.Hint.create({
                     level: hint.Level.Incomplete,
-                    element: "Missing parameter: " + param.name
+                    element: 'Missing parameter: ' + param.name
                 }));
             }
         }
@@ -528,7 +528,7 @@ exports.Input = SC.Object.extend({
             this._hints.push(hint.Hint.create({
                 level: hint.Level.Error,
                 element: "Can't convert '" + value + "' to a " +
-                    param.type + ": " + ex
+                    param.type + ': ' + ex
             }));
         }.bind(this));
 

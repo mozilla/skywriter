@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -854,7 +854,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
                 if (column > 0 && column % tabstop === 0 &&
                         new RegExp("^\\s{" + column + "}").test(line)) {
-                    // "Smart tab" behavior: delete a tab worth of whitespace.
+                    // 'Smart tab' behavior: delete a tab worth of whitespace.
                     range = {
                         start:  { row: row, column: column - tabstop },
                         end:    range.end

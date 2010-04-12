@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -66,7 +66,7 @@ exports.testCharacterRectForPosition = function() {
             y:      3 * lineHeight,
             width:  characterWidth,
             height: lineHeight
-        }, "the character rect and the expected rect for the character at " +
+        }, 'the character rect and the expected rect for the character at ' +
         "position (3,3)");
 };
 
@@ -84,22 +84,22 @@ exports.testDimensionsCalculation = function() {
 
     var rect = layoutManager.boundingRect();
     t.equal(rect.height, layoutManager._lineHeight * 5,
-        "the total height and the line height times the number of lines");
+        'the total height and the line height times the number of lines');
     t.equal(rect.width, layoutManager._characterWidth *
-        "Santa Claus Conquers the Martians".length, "the width and the " +
-        "character width times the length of the longest line");
+        'Santa Claus Conquers the Martians'.length, 'the width and the ' +
+        'character width times the length of the longest line');
 
     textStorage.replaceCharacters({
         start:  { row: 2, column: 0 },
-        end:    { row: 3, column: "Santa Claus Conquers the Martians".length }
-    }, "SuperBabies: Baby Geniuses 2");
+        end:    { row: 3, column: 'Santa Claus Conquers the Martians'.length }
+    }, 'SuperBabies: Baby Geniuses 2');
 
     rect = layoutManager.boundingRect();
     t.equal(rect.height, layoutManager._lineHeight * 4,
-        "the total and the line height times the new number of lines");
+        'the total and the line height times the new number of lines');
     t.equal(rect.width, layoutManager._characterWidth *
-        "The Star Wars Holiday Special".length, "the width and the " +
-        "character width times the length of what is now the longest line");
+        'The Star Wars Holiday Special'.length, 'the width and the ' +
+        'character width times the length of what is now the longest line');
 };
 
 exports.testInvalidRects = function() {
@@ -126,7 +126,7 @@ exports.testInvalidRects = function() {
             y:      lineHeight,
             width:  Number.MAX_VALUE,
             height: lineHeight
-        }, "the returned rect and the expected rect after no lines changed");
+        }, 'the returned rect and the expected rect after no lines changed');
 
     textStorage.deleteCharacters({
         start:  { row: 1, column: 0 },
@@ -137,14 +137,14 @@ exports.testInvalidRects = function() {
         y:      lineHeight,
         width:  Number.MAX_VALUE,
         height: lineHeight
-    }, "the first returned rect and the expected rect after one line was " +
+    }, 'the first returned rect and the expected rect after one line was ' +
         'deleted');
     t.deepEqual(returnedRects[1], {
         x:      0,
         y:      2 * lineHeight,
         width:  Number.MAX_VALUE,
         height: Number.MAX_VALUE
-    }, "the second returned rect and the expected rect after one line was " +
+    }, 'the second returned rect and the expected rect after one line was ' +
         'deleted');
 
     textStorage.insertCharacters({ row: 1, column: 1 }, "bar\n");
@@ -153,14 +153,14 @@ exports.testInvalidRects = function() {
         y:      lineHeight,
         width:  Number.MAX_VALUE,
         height: lineHeight
-    }, "the first returned rect and the expected rect after one line was " +
+    }, 'the first returned rect and the expected rect after one line was ' +
         'added');
     t.deepEqual(returnedRects[1], {
         x:      0,
         y:      2 * lineHeight,
         width:  Number.MAX_VALUE,
         height: Number.MAX_VALUE
-    }, "the second returned rect and the expected rect after one line was " +
+    }, 'the second returned rect and the expected rect after one line was ' +
         'added');
 };
 
@@ -178,16 +178,16 @@ exports.testPointToCharacterMapping = function() {
         x: leftMargin + 5 * characterWidth,
         y: topMargin + 2 * lineHeight
     });
-    t.deepEqual(pos, { column: 5, row: 2, partialFraction: 0.0 }, "the " +
-        "reported character position and the expected character position");
+    t.deepEqual(pos, { column: 5, row: 2, partialFraction: 0.0 }, 'the ' +
+        'reported character position and the expected character position');
 
     pos = layoutManager.characterAtPoint({
         x: 100000,
         y: topMargin + 4 * lineHeight
     });
-    t.deepEqual(pos, { column: 32, row: 4, partialFraction: 0.0 }, "the " +
-        "reported character position and the expected character " +
-        "position for a character off the right side of the text area");
+    t.deepEqual(pos, { column: 32, row: 4, partialFraction: 0.0 }, 'the ' +
+        'reported character position and the expected character ' +
+        'position for a character off the right side of the text area');
 };
 
 exports.testRectsForRange = function() {
@@ -204,35 +204,35 @@ exports.testRectsForRange = function() {
         start:  { row: 2, column: 2 },
         end:    { row: 5, column: 2 }
     });
-    t.equal(rects.length, 3, "the length of the rects returned for a " +
-        "complex range and 3");
+    t.equal(rects.length, 3, 'the length of the rects returned for a ' +
+        'complex range and 3');
     t.deepEqual(rects[0], {
             x:      2 * characterWidth,
             y:      2 * lineHeight,
             width:  characterWidth * (maximumWidth - 2),
             height: lineHeight
-        }, "the first rect returned for a complex range and the expected " +
+        }, 'the first rect returned for a complex range and the expected ' +
             'rect');
     t.deepEqual(rects[1], {
             x:      0,
             y:      5 * lineHeight,
             width:  characterWidth * 2,
             height: lineHeight
-        }, "the second rect returned for a complex range and the expected " +
+        }, 'the second rect returned for a complex range and the expected ' +
             'rect');
     t.deepEqual(rects[2], {
             x:      0,
             y:      3 * lineHeight,
             width:  characterWidth * maximumWidth,
             height: 2 * lineHeight
-        }, "the third rect returned for a complex range and the expected " +
+        }, 'the third rect returned for a complex range and the expected ' +
             'rect');
 
     rects = layoutManager.rectsForRange({
         start:  { row: 2, column: 0 },
         end:    { row: 5, column: 0 }
     });
-    t.equal(rects.length, 1, "the length of the rects returned for a " +
+    t.equal(rects.length, 1, 'the length of the rects returned for a ' +
         "line-spanning range and 1");
     t.deepEqual(rects[0], {
             x:      0,
@@ -246,7 +246,7 @@ exports.testRectsForRange = function() {
         start:  { row: 2, column: 3 },
         end:    { row: 2, column: 10 }
     });
-    t.equal(rects.length, 1, "the length of the rects returned for a " +
+    t.equal(rects.length, 1, 'the length of the rects returned for a ' +
         "single-line range and 1");
     t.deepEqual(rects[0], {
             x:      3 * characterWidth,

@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,11 +35,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime").SC;
+var SC = require('sproutcore/runtime').SC;
 var File = require('filesystem:index').File;
 var History = require('edit_session:history').History;
 var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
-var TextStorage = require("text_editor:models/textstorage").TextStorage;
+var TextStorage = require('text_editor:models/textstorage').TextStorage;
 var catalog = require('bespin:plugins').catalog;
 var m_path = require('filesystem:path');
 
@@ -101,7 +101,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
                 model.replaceCharacters(model.range(), "");
             } else {
                 newFile.loadContents().then(function(contents) {
-                    console.log("SET FILE CONTENTS: ", contents);
+                    console.log('SET FILE CONTENTS: ', contents);
                     SC.run(function() {
                         var model = self.get('model');
                         model.replaceCharacters(model.range(), contents);
@@ -260,14 +260,14 @@ exports.EditSession = SC.Object.extend({
             path = "";
         }
 
-        if (path == null || path.substring(0, 1) != "/") {
+        if (path == null || path.substring(0, 1) != '/') {
             var buffer = this.get('currentBuffer');
             var file;
             if (buffer) {
                 file = buffer.get('file');
             }
             if (!file) {
-                path = "/" + path;
+                path = '/' + path;
             } else {
                 path = file.parentdir() + path;
             }

@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -37,14 +37,14 @@
 
 var SC = require('sproutcore/runtime').SC;
 
-var catalog = require("bespin:plugins").catalog;
+var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var settings = require('settings').settings;
 
-var Request = require("canon:request").Request;
-var environment = require("canon:environment");
+var Request = require('canon:request').Request;
+var environment = require('canon:environment');
 
-var Trace = require("bespin:util/stacktrace").Trace;
+var Trace = require('bespin:util/stacktrace').Trace;
 
 /**
  *
@@ -183,7 +183,7 @@ var KeyboardManager = SC.Object.extend({
                 } catch (ex) {
                     // TODO: Some UI?
                     var trace = new Trace(ex, true);
-                    console.group("Error calling command");
+                    console.group('Error calling command');
                     console.log("command=", commandExt);
                     console.log("args=", match.args);
                     console.error(ex);
@@ -195,9 +195,9 @@ var KeyboardManager = SC.Object.extend({
             return true;
         }
 
-        // "no command" is returned if a keyevent is handled but there is no
+        // 'no command' is returned if a keyevent is handled but there is no
         // command executed (for example when switchting the keyboard state).
-        if (match && match.commandExt === "no command") {
+        if (match && match.commandExt === 'no command') {
             return true;
         } else {
             return false;
@@ -259,7 +259,7 @@ var KeyboardManager = SC.Object.extend({
                     return false;
                 }.bind(this));
                 if (SC.none(keymapping)) {
-                    throw new Error("There is no keymapping named " +
+                    throw new Error('There is no keymapping named ' +
                                                             keymappingName);
                 }
             }
@@ -406,7 +406,7 @@ var KeyboardManager = SC.Object.extend({
             // If there is no command matched now, then return a 'false'
             // command to stop matching.
             if (SC.none(commandExt)) {
-                commandExt = "no command";
+                commandExt = 'no command';
             }
 
             return true;

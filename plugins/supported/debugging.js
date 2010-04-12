@@ -2,11 +2,11 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -174,11 +174,11 @@
  * debugging.
  */
 
-var util = require("bespin:util/util");
-var catalog = require("bespin:plugins").catalog;
-var promiseMod = require("bespin:promise");
+var util = require('bespin:util/util');
+var catalog = require('bespin:plugins').catalog;
+var promiseMod = require('bespin:promise');
 
-var editor = catalog.get("editor");
+var editor = catalog.get('editor');
 
 /**
  * The 'action' command
@@ -209,7 +209,7 @@ exports.readonlyCommand = function(env, args, request) {
     var flag = args.flag;
     if (flag === undefined || flag === '') {
         flag = !editor.readonly;
-        msg = "Toggling read only to " + flag;
+        msg = 'Toggling read only to ' + flag;
     } else if (flag == 'off' || flag == 'false') {
         flag = false;
         msg = "No more read-only!";
@@ -238,21 +238,21 @@ exports.templateCommand = function(env, args, request) {
                 names.push(name);
             }
         }
-        var complain = (!type || type === "") ? "" : "Unknown pattern '" + type + "'.<br/>";
-        request.doneWithError(complain + "Known patterns: " + names.join(", "));
+        var complain = (!type || type === "") ? "' : 'Unknown pattern '" + type + "'.<br/>";
+        request.doneWithError(complain + 'Known patterns: ' + names.join(", "));
     }
 };
 
 var uses = {
     sound: function() {
         this.editor.model.insertChunk({ row: 3, col: 0 },
-            '  <script type="text/javascript" src="soundmanager2.js"></script>\n');
+            '  <script type='text/javascript' src="soundmanager2.js"></script>\n');
         this.editor.model.insertChunk({ row: 4, col: 0 },
             "  <script>\n  var sound; \n  soundManager.onload = function() {\n    sound =  soundManager.createSound('mySound','/path/to/mysoundfile.mp3');\n  }\n  </script>\n");
     },
     jquery: function() {
         var jslib = 'http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.min.js';
-        var script = '<script type="text/javascript" src="' + jslib + '"></script>\n';
+        var script = '<script type='text/javascript' src="' + jslib + '"></script>\n';
         this.editor.model.insertChunk({ row: 3, col: 0 }, script);
     }
 };
@@ -264,7 +264,7 @@ exports.useCommand = function(env, args, request) {
     var type = args.type;
     if (util.isFunction(this.uses[type])) {
         this.uses[type]();
-        request.done("Added code for " + type + ".<br>Please check the results carefully.");
+        request.done('Added code for ' + type + ".<br>Please check the results carefully.");
     } else {
         var names = [];
         for (var name in this.uses) {
@@ -273,7 +273,7 @@ exports.useCommand = function(env, args, request) {
             }
         }
         var complain = (!type || type === "") ? "" : "Unknown pattern '" + type + "'.<br/>";
-        request.doneWithError(complain + "Known patterns: " + names.join(", "));
+        request.doneWithError(complain + 'Known patterns: ' + names.join(", "));
     }
 };
 
@@ -284,16 +284,16 @@ exports.slowCommand = function(env, args, request) {
     var seconds = args.seconds || 5;
     var start = new Date().getTime();
 
-    var parent = document.createElement("div");
+    var parent = document.createElement('div');
     var prefix = document.createTextNode("Working (");
     parent.appendChild(prefix);
-    var counter = document.createElement("span");
+    var counter = document.createElement('span');
     parent.appendChild(counter);
     var suffix = document.createTextNode("%) ...");
     parent.appendChild(suffix);
 
-    var tick = document.createElement("img");
-    tick.setAttribute("src", "https://bespin.mozillalabs.com/images/splash_icn_register.png");
+    var tick = document.createElement('img');
+    tick.setAttribute('src', "https://bespin.mozillalabs.com/images/splash_icn_register.png");
 
     var interval = setInterval(function() {
         var interval = (new Date().getTime() - start) / 1000;
@@ -303,9 +303,9 @@ exports.slowCommand = function(env, args, request) {
 
     setTimeout(function() {
         clearInterval(interval);
-        counter.innerHTML = "100";
+        counter.innerHTML = '100';
         request.output(tick);
-        request.done("Completed");
+        request.done('Completed');
     }, seconds * 1000);
 
     request.output(parent);
@@ -323,7 +323,7 @@ exports.promiseCommand = function(env, args, request) {
     var count = 0;
     dig.forEach(function(promise) {
         count++;
-        console.log("- Promise " + count + ": ", promise);
+        console.log("- Promise " + count + ': ', promise);
     });
-    request.done(count + " " + args.which + " promises. Details logged to console.");
+    request.done(count + ' ' + args.which + " promises. Details logged to console.");
 };

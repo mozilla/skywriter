@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -56,45 +56,45 @@ exports.testUndoAndRedo = function() {
     });
 
     undoManager.registerUndo(receiver, 'foo');
-    t.equal(undoManager._undoStack.length, 1, "the size of the undo stack " +
-        "after one action and 1");
-    t.equal(undoManager._redoStack.length, 0, "the size of the redo stack " +
-        "after one action and 0");
+    t.equal(undoManager._undoStack.length, 1, 'the size of the undo stack ' +
+        'after one action and 1');
+    t.equal(undoManager._redoStack.length, 0, 'the size of the redo stack ' +
+        'after one action and 0');
 
     undoManager.registerUndo(receiver, 'bar');
-    t.equal(undoManager._undoStack.length, 2, "the size of the undo stack " +
-        "after two actions and 2");
-    t.equal(undoManager._redoStack.length, 0, "the size of the redo stack " +
-        "after two actions and 0");
+    t.equal(undoManager._undoStack.length, 2, 'the size of the undo stack ' +
+        'after two actions and 2');
+    t.equal(undoManager._redoStack.length, 0, 'the size of the redo stack ' +
+        'after two actions and 0');
 
     undoManager.undo();
     t.equal(undoReceived, 'bar', "the context received after undoing 'bar' " +
         "and 'bar'");
-    t.equal(undoManager._undoStack.length, 1, "the size of the undo stack " +
-        "after two actions and one undo and 1");
-    t.equal(undoManager._redoStack.length, 1, "the size of the redo stack " +
-        "after two actions and one undo and 1");
+    t.equal(undoManager._undoStack.length, 1, 'the size of the undo stack ' +
+        'after two actions and one undo and 1');
+    t.equal(undoManager._redoStack.length, 1, 'the size of the redo stack ' +
+        'after two actions and one undo and 1');
 
     undoManager.undo();
     t.equal(undoReceived, 'foo', "the context received after undoing 'foo' " +
         "and 'foo'");
-    t.equal(undoManager._undoStack.length, 0, "the size of the undo stack " +
-        "after undoing two actions and 0");
-    t.equal(undoManager._redoStack.length, 2, "the size of the redo stack " +
-        "after undoing two actions and 2");
+    t.equal(undoManager._undoStack.length, 0, 'the size of the undo stack ' +
+        'after undoing two actions and 0');
+    t.equal(undoManager._redoStack.length, 2, 'the size of the redo stack ' +
+        'after undoing two actions and 2');
 
     undoManager.redo();
     t.equal(redoReceived, 'foo', "the context received after redoing 'foo' " +
         "and 'foo'");
-    t.equal(undoManager._undoStack.length, 1, "the size of the undo stack " +
+    t.equal(undoManager._undoStack.length, 1, 'the size of the undo stack ' +
         "after redoing 'foo' and 1");
-    t.equal(undoManager._redoStack.length, 1, "the size of the redo stack " +
+    t.equal(undoManager._redoStack.length, 1, 'the size of the redo stack ' +
         "after redoing 'foo' and 1");
 
     undoManager.registerUndo(receiver, 'baz');
-    t.equal(undoManager._undoStack.length, 2, "the size of the undo stack " +
+    t.equal(undoManager._undoStack.length, 2, 'the size of the undo stack ' +
         "after undoing twice, redoing once, and performing an action; and 2");
-    t.equal(undoManager._redoStack.length, 0, "the size of the redo stack " +
+    t.equal(undoManager._redoStack.length, 0, 'the size of the redo stack ' +
         "after undoing twice, redoing once, and performing an action; and 0");
 };
 

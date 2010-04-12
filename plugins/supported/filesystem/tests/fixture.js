@@ -6,7 +6,7 @@
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS"
+ * Software distributed under the License is distributed on an 'AS IS'
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.
  * See the License for the specific language governing rights and
  * limitations under the License.
@@ -22,10 +22,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime").SC;
-var Promise = require("bespin:promise").Promise;
+var SC = require('sproutcore/runtime').SC;
+var Promise = require('bespin:promise').Promise;
 var t = require('plugindev');
-var util = require("bespin:util/util");
+var util = require('bespin:util/util');
 var pathUtil = require('path');
 
 exports.DummyFileSource = SC.Object.extend({
@@ -64,7 +64,7 @@ exports.DummyFileSource = SC.Object.extend({
     // Loads the complete file list
     loadAll: function() {
         this.requests.push(['loadAll']);
-        console.log("loadAll called");
+        console.log('loadAll called');
         
         var pr = new Promise();
         var result = [];
@@ -72,7 +72,7 @@ exports.DummyFileSource = SC.Object.extend({
             result.push(f.name);
         });
         pr.resolve(result);
-        console.log("returning from loadAll");
+        console.log('returning from loadAll');
         return pr;
     },
     
@@ -136,13 +136,13 @@ exports.DummyFileSource = SC.Object.extend({
     
     _findInDirectory: function(path, deep) {
         path = path.slice(0, path.length - 1);
-        var segments = path.split("/");
+        var segments = path.split('/');
         if (path == "") {
             segments = [];
         }
         var matches = [];
         this.files.forEach(function(f) {
-            var fSegments = f.name.split("/");
+            var fSegments = f.name.split('/');
             for (var i = 0; i < segments.length; i++) {
                 if (segments[i] != fSegments[i]) {
                     return;
@@ -160,10 +160,10 @@ exports.DummyFileSource = SC.Object.extend({
 
             var name;
             if (deep) {
-                name = fSegments.slice(i).join("/");
+                name = fSegments.slice(i).join('/');
             } else if (fSegments.length > segments.length + 1) {
                 // it's a directory
-                name = fSegments[i] + "/";
+                name = fSegments[i] + '/';
             } else {
                 name = fSegments[i];
             }

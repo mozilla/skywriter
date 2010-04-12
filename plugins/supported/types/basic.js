@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -212,7 +212,7 @@ exports.selection = {
             });
         } else {
             // No extra data available
-            console.warn("Missing data/pointer for selection", typeSpec);
+            console.warn('Missing data/pointer for selection', typeSpec);
             promise.resolve();
         }
 

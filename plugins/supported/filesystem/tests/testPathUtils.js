@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -40,12 +40,12 @@ var t = require('plugindev');
 
 exports.testBasename = function() {
     var basename = path.basename;
-    t.equal(basename(""), "", "Empty string yields empty response");
-    t.equal(basename("foo/bar.js"), "bar.js", "\"foo/bar.js\" yields " +
+    t.equal(basename(""), "", 'Empty string yields empty response');
+    t.equal(basename("foo/bar.js"), "bar.js", "\"foo/bar.js\' yields ' +
         "\"bar.js\"");
-    t.equal(basename("/"), "", "Root alone yields empty response");
-    t.equal(basename("/foo/"), "", "Directory references yields empty response");
-    t.equal(basename("/foo"), 'foo');
+    t.equal(basename('/'), "", 'Root alone yields empty response');
+    t.equal(basename('/foo/'), "", 'Directory references yields empty response');
+    t.equal(basename('/foo'), 'foo');
     t.equal(basename("/foo/bar.js"), "bar.js");
 };
 
@@ -53,28 +53,28 @@ exports.testDirectory = function() {
     var dir = path.directory;
     t.equal(dir(""), "", "the directory part of \"\" and \"\"");
     t.equal(dir("foo.txt"), "", "the directory part of \"foo.txt\" and \"\"");
-    t.equal(dir("foo/bar/baz.txt"), "foo/bar/", "the directory part of " +
+    t.equal(dir("foo/bar/baz.txt"), 'foo/bar/', 'the directory part of ' +
         "\"foo/bar/baz.txt\" and \"foo/bar/\"");
-    t.equal(dir("/foo.txt"), "/", "the directory part of \"/foo.txt\" and " +
+    t.equal(dir("/foo.txt"), '/', "the directory part of \"/foo.txt\' and ' +
         "\"/\"");
-    t.equal(dir("/foo/bar/baz.txt"), "/foo/bar/", "the directory part of " +
+    t.equal(dir("/foo/bar/baz.txt"), '/foo/bar/', 'the directory part of ' +
         "\"/foo/bar/baz.txt\" and \"/foo/bar/\"");
 };
 
 exports.testSplitext = function() {
     var splitext = path.splitext;
     t.deepEqual(splitext(""), ["", ""]);
-    t.deepEqual(splitext("/"), ["/", ""]);
-    t.deepEqual(splitext("/foo/bar"), ["/foo/bar", ""]);
-    t.deepEqual(splitext("/foo/bar.js"), ["/foo/bar", 'js']);
+    t.deepEqual(splitext('/'), ['/', ""]);
+    t.deepEqual(splitext('/foo/bar'), ['/foo/bar', ""]);
+    t.deepEqual(splitext("/foo/bar.js"), ['/foo/bar', 'js']);
 };
 
 exports.testParentdir = function() {
     var parentdir = path.parentdir;
-    t.equal(parentdir(""), "", "Empty string is empty");
-    t.equal(parentdir("/"), "", "Root directory is empty (no parent)");
-    t.equal(parentdir("/foo/"), "/", "Directory under root has root as parent");
-    t.equal(parentdir("/foo.txt"), "/", "File under root has root as parent");
-    t.equal(parentdir("/foo/bar/"), "/foo/", "directory gets proper parent");
-    t.equal(parentdir("/foo/bar/baz.txt"), "/foo/bar/", "file gets proper parent");
+    t.equal(parentdir(""), "", 'Empty string is empty');
+    t.equal(parentdir('/'), "", "Root directory is empty (no parent)");
+    t.equal(parentdir('/foo/'), '/', 'Directory under root has root as parent');
+    t.equal(parentdir("/foo.txt"), '/', 'File under root has root as parent');
+    t.equal(parentdir('/foo/bar/'), '/foo/', 'directory gets proper parent');
+    t.equal(parentdir("/foo/bar/baz.txt"), '/foo/bar/', 'file gets proper parent');
 };

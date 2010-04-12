@@ -2,11 +2,11 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var project_m = require('project');
-var server = require("bespin_server:index").server;
+var server = require('bespin_server:index').server;
 
 /**
  * Utility to convert bytes to megabytes
@@ -49,18 +49,18 @@ var megabytes = function(bytes) {
  * 'quota' command
  * TODO: Delete or correct
         {
-            "ep": "command",
-            "name": "quota",
-            "description": "show your quota info",
-            "pointer": "#quotaCommand"
+            'ep': 'command',
+            'name': 'quota',
+            'description': 'show your quota info',
+            'pointer': "#quotaCommand"
         },
  */
 exports.quotaCommand = function(instruction) {
     var free = megabytes(editSession.quota - editSession.amountUsed);
-    var output = "You have " + free +
+    var output = 'You have ' + free +
                  " MB free space to put some great code!<br>" +
-                 "Used " + megabytes(editSession.amountUsed) + " MB " +
-                 "out of your " + megabytes(editSession.quota) + " MB quota.";
+                 'Used ' + megabytes(editSession.amountUsed) + ' MB ' +
+                 'out of your ' + megabytes(editSession.quota) + " MB quota.";
     request.done(output);
 };
 
@@ -86,9 +86,9 @@ exports.rescanCommand = function(env, args, request) {
 
     var url = '/project/rescan/' + encodeURI(project);
     server.requestDisconnected('POST', url, {}).then(function() {
-        request.done("Rescan of " + project + " complete.");
+        request.done('Rescan of ' + project + " complete.");
     }, function(error) {
-        request.doneWithError("Error during rescan: " + error.message);
+        request.doneWithError('Error during rescan: ' + error.message);
     });
     request.async();
 };

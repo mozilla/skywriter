@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -39,7 +39,7 @@ require('sproutcore/runtime').SC;
 var Promise = require('bespin:promise').Promise;
 
 /**
- * Implements a "yieldable loop", which allows an asynchronous function to be
+ * Implements a 'yieldable loop', which allows an asynchronous function to be
  * called repeatedly without having to create a new stack frame for every
  * synchronous iteration.
  *

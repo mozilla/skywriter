@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -36,13 +36,13 @@
  * ***** END LICENSE BLOCK ***** */
 
 var console = require('bespin:console').console;
-var Promise = require("bespin:promise").Promise;
+var Promise = require('bespin:promise').Promise;
 
-var basic = require("types:basic");
+var basic = require('types:basic');
 var PrefixMatcher = require('matcher:prefix').PrefixMatcher;
 
-var MatcherMenu = require("command_line:views/menu").MatcherMenu;
-var Menu = require("command_line:views/menu").Menu;
+var MatcherMenu = require('command_line:views/menu').MatcherMenu;
+var Menu = require('command_line:views/menu').Menu;
 
 /**
  * A choice between a known set of options
@@ -51,7 +51,7 @@ var Menu = require("command_line:views/menu").Menu;
 exports.selection = {
     getHint: function(input, assignment, ext) {
         if (!ext.data) {
-            console.error("Missing data for selection type");
+            console.error('Missing data for selection type');
             ext.data = [];
         }
 

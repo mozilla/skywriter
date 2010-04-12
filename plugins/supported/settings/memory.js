@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,14 +35,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require("bespin:plugins").catalog;
+var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
-var Promise = require("bespin:promise").Promise;
-var groupPromises = require("bespin:promise").group;
+var Promise = require('bespin:promise').Promise;
+var groupPromises = require('bespin:promise').group;
 
-var SC = require("sproutcore/runtime").SC;
+var SC = require('sproutcore/runtime').SC;
 
-var types = require("types:types");
+var types = require('types:types');
 
 /**
  * Find and configure the settings object.
@@ -96,7 +96,7 @@ exports.getTypeSpecFromAssignment = function(typeSpec) {
  * <pre>
  * // Create manually, or require 'settings' from the container.
  * // This is the manual version:
- * var settings = require("bespin:plugins").catalog.getObject('settings');
+ * var settings = require('bespin:plugins').catalog.getObject('settings');
  * // Add a new setting
  * settings.addSetting({ name:'foo', ... });
  * // Display the default value
@@ -128,7 +128,7 @@ exports.MemorySettings = SC.Object.extend({
     set: function(key, value) {
         var settingExt = catalog.getExtensionByKey('setting', key);
         if (!settingExt) {
-            throw new Error("Unknown setting: ", key, value);
+            throw new Error('Unknown setting: ', key, value);
         }
 
         if (typeof value == 'string' && settingExt.type == 'string') {
@@ -147,11 +147,11 @@ exports.MemorySettings = SC.Object.extend({
                 inline = true;
                 superSet.apply(this, [ key, converted ]);
             }.bind(this), function(ex) {
-                console.error("Error setting", key, ": ", ex);
+                console.error('Error setting', key, ': ', ex);
             });
 
             if (!inline) {
-                console.warn("About to set string version of ", key, "delaying typed set.");
+                console.warn('About to set string version of ', key, "delaying typed set.");
                 this.superclass(key, value);
             }
         }
@@ -163,7 +163,7 @@ exports.MemorySettings = SC.Object.extend({
      * Function to add to the list of available settings.
      * <p>Example usage:
      * <pre>
-     * var settings = require("bespin:plugins").catalog.getObject('settings');
+     * var settings = require('bespin:plugins').catalog.getObject('settings');
      * settings.addSetting({
      *     name: 'tabsize', // For use in settings.get('X')
      *     type: 'number',  // To allow value checking.
@@ -196,7 +196,7 @@ exports.MemorySettings = SC.Object.extend({
             }.bind(this));
 
         }.bind(this), function(ex) {
-            console.error("Type error ", ex, " ignoring setting ", settingExt);
+            console.error('Type error ', ex, ' ignoring setting ', settingExt);
         });
     },
 
@@ -208,7 +208,7 @@ exports.MemorySettings = SC.Object.extend({
         if (settingExt) {
             this.set(key, settingExt.defaultValue);
         } else {
-            console.log("ignore resetValue on ", key);
+            console.log('ignore resetValue on ', key);
         }
     },
 

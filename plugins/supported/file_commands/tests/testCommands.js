@@ -6,7 +6,7 @@
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS"
+ * Software distributed under the License is distributed on an 'AS IS'
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.
  * See the License for the specific language governing rights and
  * limitations under the License.
@@ -25,22 +25,22 @@
 var t = require('plugindev');
 
 var fs = require('filesystem');
-var DummyFileSource = require("filesystem:tests/fixture").DummyFileSource;
-var Environment = require("canon:tests/fixture").MockEnvironment;
-var Request = require("canon:tests/fixture").MockRequest;
+var DummyFileSource = require('filesystem:tests/fixture').DummyFileSource;
+var Environment = require('canon:tests/fixture').MockEnvironment;
+var Request = require('canon:tests/fixture').MockRequest;
 var file_commands = require('file_commands');
 var edit_session = require('edit_session');
-var Promise = require("bespin:promise").Promise;
+var Promise = require('bespin:promise').Promise;
 
 var source = exports.source = DummyFileSource.create({
     files: [
-        {name: "atTheTop.js", contents: "the top file"},
-        {name: "anotherAtTheTop.js", contents: "another file"},
-        {name: "foo/"},
+        {name: "atTheTop.js", contents: 'the top file'},
+        {name: "anotherAtTheTop.js", contents: 'another file'},
+        {name: 'foo/'},
         {name: "foo/1.txt", contents: 'firsttext'},
         {name: "foo/2.txt", contents: 'secondtext'},
         {name: "foo/bar/3.txt", contents: 'thirdtext'},
-        {name: "deeply/nested/directory/andAFile.txt", contents: "text file"}
+        {name: "deeply/nested/directory/andAFile.txt", contents: 'text file'}
     ]
 });
 
@@ -70,13 +70,13 @@ exports.testFilesCommand = function() {
     var testpr = new Promise();
     request.promise.then(function() {
         output = request.outputs.join("");
-        t.ok(output.indexOf("foo/<br/>") > -1, "foo/ should be in output");
+        t.ok(output.indexOf("foo/<br/>") > -1, 'foo/ should be in output');
         t.ok(output.indexOf("atTheTop.js<br/>") > -1, 
             "atTheTop.js should be in output");
         testpr.resolve();
     });
     
-    file_commands.filesCommand(env, {path: "/"}, request);
+    file_commands.filesCommand(env, {path: '/'}, request);
     
     return testpr;
 };
@@ -87,8 +87,8 @@ exports.testOpenFileWithNoOpenFile = function() {
     var testpr = new Promise();
     request.promise.then(function() {
         var f = env.get('file');
-        t.ok(!request.error, "Should not be in error state");
-        t.equal(f.path, "/foo/bar/3.txt", "File should have been set");
+        t.ok(!request.error, 'Should not be in error state');
+        t.equal(f.path, "/foo/bar/3.txt", 'File should have been set');
         testpr.resolve();
     });
     
@@ -103,7 +103,7 @@ exports.testFilesCommandDefaultsToRoot = function() {
     var request = Request.create();
     request.promise.then(function() {
         output = request.outputs.join("");
-        t.ok(output.indexOf("foo/<br/>") > -1, "foo/ should be in output");
+        t.ok(output.indexOf("foo/<br/>") > -1, 'foo/ should be in output');
         t.ok(output.indexOf("atTheTop.js<br/>") > -1, 
             "atTheTop.js should be in output");
         testpr.resolve();
@@ -148,7 +148,7 @@ exports.testFilesListingInDirectoryRelativeToOpenFile = function() {
         testpr.resolve();
     });
     
-    file_commands.filesCommand(env, {path: "bar/"}, request);
+    file_commands.filesCommand(env, {path: 'bar/'}, request);
     return testpr;
 };
 
@@ -159,16 +159,16 @@ exports.testMakeDirectoryForNewDirectory = function() {
     var files = env.get('files');
     
     request.promise.then(function() {
-        files.listDirectory("/foo/").then(function(contents) {
-            t.equal(contents.length, 4, "should have four items in directory");
-            t.equal(contents[3], "one/", "new directory should be last item");
+        files.listDirectory('/foo/').then(function(contents) {
+            t.equal(contents.length, 4, 'should have four items in directory');
+            t.equal(contents[3], 'one/', 'new directory should be last item');
             testpr.resolve();
         });
     }, function(error) {
         testpr.reject(error.message);
     });
 
-    file_commands.mkdirCommand(env, {path: "/foo/one/"}, request);
+    file_commands.mkdirCommand(env, {path: '/foo/one/'}, request);
     
     return testpr;
 };

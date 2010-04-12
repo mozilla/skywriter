@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var cliController = require('controller').cliController;
-var catalog = require("bespin:plugins").catalog;
+var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 
 // TODO: fix
@@ -94,7 +94,7 @@ var _getHelp = function(prefix, options) {
         for (var i = 0; i < sorted.length; i++) {
             command = catalog.getExtensionByKey('command', sorted[i]);
             if (!command) {
-                console.error("Huh? command ", command.name, " cannot be looked up by name");
+                console.error("Huh? command ", command.name, ' cannot be looked up by name');
                 continue;
             }
 
@@ -109,7 +109,7 @@ var _getHelp = function(prefix, options) {
                 // Filtered out by the user
                 continue;
             }
-            if (!prefix && command.name.indexOf(" ") != -1) {
+            if (!prefix && command.name.indexOf(' ') != -1) {
                 // sub command
                 continue;
             }
@@ -186,14 +186,14 @@ exports.aliasCommand = function(env, args, request) {
             var aliascmd = value.split(' ')[0];
 
             if (rootCanon.commands[key]) {
-                request.done("There is already a command with the name: " + key);
+                request.done('There is already a command with the name: ' + key);
             } else if (rootCanon.commands[aliascmd]) {
                 aliases[key] = value;
-                request.done("Saving alias: " + key + " &#x2192; " + value);
+                request.done('Saving alias: ' + key + " &#x2192; " + value);
             } else if (aliases[aliascmd]) {
                 // TODO: have the symlink to the alias not the end point
                 aliases[key] = value;
-                request.done("Saving alias: " + key + " &#x2192; " + aliases[value] + " (" + value + " was an alias itself)");
+                request.done('Saving alias: ' + key + " &#x2192; " + aliases[value] + " (" + value + " was an alias itself)");
             } else {
                 request.done("No command or alias with that name.");
             }

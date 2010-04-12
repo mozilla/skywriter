@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require("bespin:plugins").catalog;
+var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var Trace = require('bespin:util/stacktrace').Trace;
 
@@ -49,12 +49,12 @@ exports.ServerPersister = SC.Object.extend({
 
     loadInitialValues: function(settings) {
         var files = catalog.getObject('files');
-        files.loadContents("BespinSettings/settings").then(function(contents) {
+        files.loadContents('BespinSettings/settings').then(function(contents) {
             var data;
             try {
                 data = JSON.parse(contents);
             } catch (e) {
-                console.error("Unable to parse settings file: " + e);
+                console.error('Unable to parse settings file: ' + e);
                 data = {};
             }
 
@@ -64,8 +64,8 @@ exports.ServerPersister = SC.Object.extend({
                     settings.set(setting, data[setting]);
                 } catch (ex) {
                     var trace = new Trace(ex, true);
-                    console.group("Error loading settings");
-                    console.error("Attempting ", setting, "=", data[setting]);
+                    console.group('Error loading settings');
+                    console.error('Attempting ', setting, "=", data[setting]);
                     console.error(ex);
                     trace.log(3);
                     console.groupEnd();
@@ -96,6 +96,6 @@ exports.ServerPersister = SC.Object.extend({
         }
         // Send it to the server
         var files = catalog.getObject('files');
-        files.saveContents("BespinSettings/settings", settingsString);
+        files.saveContents('BespinSettings/settings', settingsString);
     }
 });

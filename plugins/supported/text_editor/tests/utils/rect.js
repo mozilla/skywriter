@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -72,16 +72,16 @@ exports.testMerge = function() {
     ]);
     t.equal(resultSet.length, 3,
         "the number of rects in the result of unifying 3 non-overlapping " +
-        "rects and 3");
+        'rects and 3');
     t.deepEqual(resultSet[0], { x: 0, y: 0, width: 1, height: 1 },
         "the first rect in the result of unifying 3 non-overlapping rects " +
-        "and the original first rect");
+        'and the original first rect');
     t.deepEqual(resultSet[1], { x: 1, y: 1, width: 1, height: 1 },
         "the second rect in the result of unifying 3 non-overlapping rects " +
-        "and the original second rect");
+        'and the original second rect');
     t.deepEqual(resultSet[2], { x: 2, y: 0, width: 1, height: 1 },
         "the third rect in the result of unifying 3 non-overlapping rects " +
-        "and the original third rect");
+        'and the original third rect');
 };
 
 

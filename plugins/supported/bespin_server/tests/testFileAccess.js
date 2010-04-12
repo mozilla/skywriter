@@ -6,7 +6,7 @@
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS"
+ * Software distributed under the License is distributed on an 'AS IS'
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.
  * See the License for the specific language governing rights and
  * limitations under the License.
@@ -24,8 +24,8 @@
 
 var t = require('plugindev');
 var fs = require('filesystem');
-var SC = require("sproutcore/runtime").SC;
-var Promise = require("bespin:promise").Promise;
+var SC = require('sproutcore/runtime').SC;
+var Promise = require('bespin:promise').Promise;
 var filesource = require('filesource');
 
 var DummyServer = SC.Object.extend({
@@ -54,12 +54,12 @@ exports.testLoadDirectory = function() {
     });
     
     var pr = source.loadAll();
-    t.ok(typeof(pr.then) == 'function', "expected to get Promise back");
+    t.ok(typeof(pr.then) == 'function', 'expected to get Promise back');
     t.equal(server.method, 'GET');
-    t.equal(server.url, "/file/list_all/");
+    t.equal(server.url, '/file/list_all/');
     var testpr = new Promise();
     pr.then(function(data) {
-        t.equal(data[0], "foo.js", "expected dummy data passed through");
+        t.equal(data[0], "foo.js", 'expected dummy data passed through');
         testpr.resolve();
     });
     return testpr;
@@ -74,7 +74,7 @@ exports.testLoadContents = function() {
     });
     
     var pr = source.loadContents("myfile.txt");
-    t.ok(typeof(pr.then) == 'function', "expected to get Promise back");
+    t.ok(typeof(pr.then) == 'function', 'expected to get Promise back');
     t.equal(server.method, 'GET');
     t.equal(server.url, "/file/at/myfile.txt");
     var testpr = new Promise();
@@ -92,9 +92,9 @@ exports.testSaveContents = function() {
         server: server
     });
     
-    var pr = source.saveContents("myfile.txt", "new file contents here");
-    t.ok(typeof(pr.then) == 'function', "expected to get Promise back");
+    var pr = source.saveContents("myfile.txt", 'new file contents here');
+    t.ok(typeof(pr.then) == 'function', 'expected to get Promise back');
     t.equal(server.method, 'PUT');
-    t.equal(server.payload, "new file contents here");
+    t.equal(server.payload, 'new file contents here');
     t.equal(server.url, "/file/at/myfile.txt");
 };

@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -66,7 +66,7 @@ exports.EditorUndoController = SC.Object.extend({
         if (this._inTransaction) {
             console.trace();
             throw new Error("UndoController._beginTransaction() called with a " +
-                "transaction already in place");
+                'transaction already in place');
         }
 
         this._inTransaction = true;
@@ -76,7 +76,7 @@ exports.EditorUndoController = SC.Object.extend({
     _endTransaction: function() {
         if (!this._inTransaction) {
             throw new Error("UndoController._endTransaction() called without a " +
-                "transaction in place");
+                'transaction in place');
         }
 
         undoManager.registerUndo(this, this._record);
@@ -135,7 +135,7 @@ exports.EditorUndoController = SC.Object.extend({
     textViewReplacedCharacters: function(sender, oldRange, characters) {
         if (!this._inTransaction) {
             throw new Error("UndoController.textViewReplacedCharacters()" +
-                " called outside a transaction");
+                ' called outside a transaction');
         }
 
         this._record.patches.push({
@@ -153,7 +153,7 @@ exports.EditorUndoController = SC.Object.extend({
     textViewWillReplaceRange: function(sender, oldRange) {
         if (!this._inTransaction) {
             throw new Error("UndoController.textViewWillReplaceRange() called" +
-                " outside a transaction");
+                ' outside a transaction');
         }
 
         this._deletedCharacters = this.getPath('textView.layoutManager.' +

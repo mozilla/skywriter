@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,15 +35,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require("bespin:plugins").catalog;
-var SC = require("sproutcore/runtime").SC;
+var catalog = require('bespin:plugins').catalog;
+var SC = require('sproutcore/runtime').SC;
 
 var server = require('bespin_server').server;
-var pathutils = require("filesystem:path");
-var util = require("bespin:util/util");
+var pathutils = require('filesystem:path');
+var util = require('bespin:util/util');
 
 var getPluginName = function(path) {
-    if (util.endsWith(path, "/")) {
+    if (util.endsWith(path, '/')) {
         var trimmedPath = path.replace(/\/$/, "");
         return pathutils.basename(trimmedPath);
     }
@@ -61,13 +61,13 @@ var finishAdd = function(request, pluginConfigFile, pluginConfig, path) {
     
     pluginConfigFile.saveContents(JSON.stringify(pluginConfig)).then(
         function() {
-            catalog.loadMetadata(server.SERVER_BASE_URL + "/plugin/reload/" + pluginName).then(function() {
-                request.done("Plugin " + pluginName + " added.");
+            catalog.loadMetadata(server.SERVER_BASE_URL + '/plugin/reload/' + pluginName).then(function() {
+                request.done('Plugin ' + pluginName + " added.");
             });
             
         },
         function(error) {
-            request.doneWithError("Unable to save plugin configuration: " +
+            request.doneWithError('Unable to save plugin configuration: ' +
                 error.message);
         }
     );
@@ -84,7 +84,7 @@ exports.add = function(env, args, request) {
     
     var pluginName = getPluginName(path);
     if (catalog.plugins[pluginName]) {
-        request.done("Plugin " + pluginName + " already exists.");
+        request.done('Plugin ' + pluginName + " already exists.");
         return;
     }
     
@@ -99,7 +99,7 @@ exports.add = function(env, args, request) {
         if (error.xhr && error.xhr.status == 404) {
             finishAdd(request, pluginConfigFile, {}, path);
         } else {
-            request.doneWithError("Unable to load your plugin config: " + error.message);
+            request.doneWithError('Unable to load your plugin config: ' + error.message);
         }
     });
     request.async();
@@ -149,11 +149,11 @@ exports.remove = function(env, args, request) {
     var pluginName = args.plugin;
     var plugin = catalog.get('plugins')[pluginName];
     if (!plugin) {
-        request.doneWithError("Plugin " + pluginName + " not found.");
+        request.doneWithError('Plugin ' + pluginName + " not found.");
         return;
     }
     if (plugin.type != 'user') {
-        request.doneWithError("Plugin " + pluginName + " is a " + plugin.type
+        request.doneWithError('Plugin ' + pluginName + ' is a ' + plugin.type
             + " plugin. Only user installed/added plugins can be removed");
         return;
     }
@@ -177,15 +177,15 @@ exports.remove = function(env, args, request) {
         if (found) {
             var newConfig = JSON.stringify(pluginConfig);
             pluginConfigFile.saveContents(newConfig).then(function() {
-                request.done("Plugin " + pluginName + " removed (but the files have been saved)");
+                request.done('Plugin ' + pluginName + " removed (but the files have been saved)");
             }, function(error) {
-                request.doneWithError("Unable to save plugin config file: " + error.message);
+                request.doneWithError('Unable to save plugin config file: ' + error.message);
             });
         } else {
             var obj = files.remove(plugin.userLocation).then(function() {
                 request.done("Plugin removed.");
             }, function(error) {
-                request.doneWithError("Unable to delete plugin files at " 
+                request.doneWithError('Unable to delete plugin files at ' 
                     + plugin.userLocation + " (" + error.message + ")");
             });
         }
@@ -197,11 +197,11 @@ exports.remove = function(env, args, request) {
             var obj = files.remove(plugin.userLocation).remove().then(function() {
                 request.done("Plugin removed.");
             }, function(error) {
-                request.doneWithError("Unable to delete plugin files at " 
+                request.doneWithError('Unable to delete plugin files at ' 
                     + plugin.userLocation + " (" + error.message + ")");
             });
         } else {
-            request.doneWithError("Unable to load your plugin config: " + error.message);
+            request.doneWithError('Unable to load your plugin config: ' + error.message);
         }
     });
     request.async();
@@ -218,10 +218,10 @@ exports.install = function(env, args, request) {
     var plugin = args.plugin;
     if (locationValidator.exec(plugin)) {
         body = util.objectToQuery({url: plugin});
-        url = "/plugin/install/";
+        url = '/plugin/install/';
     } else {
         body = null;
-        url = "/plugin/install/" + escape(plugin);
+        url = '/plugin/install/' + escape(plugin);
     }
     
     var pr = server.request('POST', url, 
@@ -231,9 +231,9 @@ exports.install = function(env, args, request) {
     
     pr.then(function(metadata) {
         catalog.load(metadata);
-        request.done("Plugin installed");
+        request.done('Plugin installed');
     }, function(error) {
-        request.doneWithError("Plugin installation failed: " + error.message + " " + error.xhr.responseText);
+        request.doneWithError('Plugin installation failed: ' + error.message + ' ' + error.xhr.responseText);
     });
     request.async();
 };
@@ -246,7 +246,7 @@ exports.upload = function(env, args, request) {
     if (!args.pluginName) {
         request.doneWithError("You must provide the name of the plugin to install.");
     }
-    var pr = server.request('POST', "/plugin/upload/" 
+    var pr = server.request('POST', '/plugin/upload/' 
         + escape(args.pluginName));
     pr.then(function() {
         request.done("Plugin successfully uploaded.");
@@ -262,7 +262,7 @@ exports.upload = function(env, args, request) {
  * plugin gallery
  */
 exports.gallery = function(env, args, request) {
-    var pr = server.request('GET', "/plugin/gallery/",
+    var pr = server.request('GET', '/plugin/gallery/',
         null, {
             evalJSON: true
     });

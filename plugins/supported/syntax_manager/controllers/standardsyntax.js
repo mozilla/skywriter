@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -51,8 +51,8 @@ exports.StandardSyntax = SC.Object.extend({
             return [];
          }
 
-        return actions.split(" ").map(function(action) {
-            var parts = action.split(":");
+        return actions.split(' ').map(function(action) {
+            var parts = action.split(':');
             return parts.length === 1 ? [ 'transition', parts[0] ] : parts;
         });
     },
@@ -147,7 +147,7 @@ exports.StandardSyntax = SC.Object.extend({
                 if (resultLength === 0 && newState === state) {
                     // Emit a helpful diagnostic rather than going into an
                     // infinite loop, to aid syntax writers...
-                    throw new Error("Syntax regex matches the empty " +
+                    throw new Error('Syntax regex matches the empty ' +
                         "string and the state didn't change: " + regex.
                         toSource());
                 }

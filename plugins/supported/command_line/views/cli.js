@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,22 +35,22 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime").SC;
-var util = require("bespin:util/util");
-var catalog = require("bespin:plugins").catalog;
+var SC = require('sproutcore/runtime').SC;
+var util = require('bespin:util/util');
+var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 
-var request = require("canon:request");
+var request = require('canon:request');
 var keyboardManager = require('canon:keyboard').keyboardManager;
 var environment = require('canon:environment').global;
 var settings = require('settings').settings;
 
-var cliController = require("command_line:controller").cliController;
-var Level = require("command_line:hint").Level;
-var BespinButtonView = require("command_line:views/image_button").BespinButtonView;
-var PinView = require("command_line:views/pin").PinView;
+var cliController = require('command_line:controller').cliController;
+var Level = require('command_line:hint').Level;
+var BespinButtonView = require('command_line:views/image_button').BespinButtonView;
+var PinView = require('command_line:views/pin').PinView;
 
-var imagePath = catalog.getResourceURL('command_line') + "images/";
+var imagePath = catalog.getResourceURL('command_line') + 'images/';
 
 /**
  * The height of the input area that is always visible.
@@ -131,8 +131,8 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
             var closeEle = hover.begin('img');
             closeEle.attr({
                 src: imagePath + "closer.png",
-                alt: "Remove this command from the history",
-                title: "Remove this command from the history",
+                alt: 'Remove this command from the history',
+                title: 'Remove this command from the history',
                 onclick: function() {
                     request.history.remove(content);
                 }
@@ -187,7 +187,7 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
 
             this.link(content, 'duration', function(duration) {
                 if (duration) {
-                    SC.$("#" + durationId).html("completed in " + (duration / 1000) + " sec ");
+                    SC.$("#" + durationId).html('completed in ' + (duration / 1000) + ' sec ');
                 } else {
                     SC.$("#" + durationId).html("");
                 }
@@ -197,15 +197,15 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
                 if (hideOutput) {
                     SC.$("#" + hideOutputId).attr({
                         src: imagePath + "plus.png",
-                        alt: "Show command output",
-                        title: "Show command output"
+                        alt: 'Show command output',
+                        title: 'Show command output'
                     });
                     SC.$("#" + hideOutputId).attr('display', 'none');
                 } else {
                     SC.$("#" + hideOutputId).attr({
                         src: imagePath + "minus.png",
-                        alt: "Hide command output",
-                        title: "Hide command output"
+                        alt: 'Hide command output',
+                        title: 'Hide command output'
                     });
                     SC.$("#" + outputId).attr('display', 'block');
                 }
@@ -375,7 +375,7 @@ exports.CliInputView = SC.View.design({
                 hintNode.appendChild(parent);
             }
 
-            // hintNode.setAttribute('class', "cmd_hint " + hintClass[hint.level]);
+            // hintNode.setAttribute('class', 'cmd_hint ' + hintClass[hint.level]);
 
             if (hint.completion) {
                 this.set('_completion', hint.completion);
@@ -419,7 +419,7 @@ exports.CliInputView = SC.View.design({
      */
     checkfocus: function(source, event) {
         // We don't want old blurs to happen whatever
-        this._cancelBlur("focus event");
+        this._cancelBlur('focus event');
         var self = this;
 
         var focus = source[event];
@@ -510,7 +510,7 @@ exports.CliInputView = SC.View.design({
                 childViews: [ 'pin' ],
 
                 pin: PinView.design({
-                    alt: "Pin/Unpin the console output",
+                    alt: 'Pin/Unpin the console output',
                     layout: { top: 8, height: 16, left: 8, width: 16 }
                 })
             })
@@ -598,5 +598,5 @@ var formatTime = function(date) {
     if (secs.length > 2) {
         secs = secs.slice(secs.length - 2);
     }
-    return date.getHours() + ":" + mins + ":" + secs;
+    return date.getHours() + ':' + mins + ':' + secs;
 };

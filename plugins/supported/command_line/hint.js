@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime").SC;
+var SC = require('sproutcore/runtime').SC;
 
 /**
  * Various methods on Input return a set of hints, each of which includes an
@@ -97,10 +97,10 @@ exports.Hint = SC.Object.extend({
      */
     init: function() {
         if (!this.element) {
-            throw new Error("Missing element", this);
+            throw new Error('Missing element', this);
         }
         if (typeof this.level !== 'number') {
-            throw new Error("Missing level", this);
+            throw new Error('Missing level', this);
         }
     }
 });

@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -224,7 +224,7 @@ exports.CanvasView = SC.View.extend({
             canvasContext.id(this._cvCanvasId);
             canvasContext.attr('width', "" + parentFrame.width);
             canvasContext.attr('height', "" + parentFrame.height);
-            canvasContext.push("canvas tag not supported by your browser");
+            canvasContext.push('canvas tag not supported by your browser');
             canvasContext.end();
             return;
         }

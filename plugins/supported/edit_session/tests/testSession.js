@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -36,18 +36,18 @@
  * ***** END LICENSE BLOCK ***** */
 
 var t = require('plugindev');
-var DummyFileSource = require("filesystem:tests/fixture").DummyFileSource;
+var DummyFileSource = require('filesystem:tests/fixture').DummyFileSource;
 var fs = require('filesystem');
-var TextStorage = require("text_editor:models/textstorage").TextStorage;
+var TextStorage = require('text_editor:models/textstorage').TextStorage;
 var editsession = require('edit_session');
-var Promise = require("bespin:promise").Promise;
+var Promise = require('bespin:promise').Promise;
 
 var source = DummyFileSource.create({
     files: [
-        {name: "atTheTop.js", contents: "the top file"},
-        {name: "anotherAtTheTop.js", contents: "another file"},
-        {name: "foo/"},
-        {name: "deeply/nested/directory/andAFile.txt", contents: "text file"}
+        {name: "atTheTop.js", contents: 'the top file'},
+        {name: "anotherAtTheTop.js", contents: 'another file'},
+        {name: 'foo/'},
+        {name: "deeply/nested/directory/andAFile.txt", contents: 'text file'}
     ]
 });
 
@@ -57,25 +57,25 @@ exports.testBufferFileChange = function() {
     });
     var buffer = editsession.Buffer.create();
     t.ok(buffer.get('model') != null, 
-        "Model should be set to a TextStorage by default");
-    t.ok(buffer.untitled(), "Buffer should initially be untitled");
+        'Model should be set to a TextStorage by default');
+    t.ok(buffer.untitled(), 'Buffer should initially be untitled');
     var f = root.getFile("atTheTop.js");
     buffer.changeFileOnly(f);
-    t.ok(!buffer.untitled(), "Buffer should no longer be untitled");
-    t.equal("", buffer.get('model').get('value'), "Should be empty now");
+    t.ok(!buffer.untitled(), 'Buffer should no longer be untitled');
+    t.equal("", buffer.get('model').get('value'), 'Should be empty now');
     buffer.changeFileOnly(null);
-    t.ok(buffer.untitled(), "Buffer should be untitled again");
+    t.ok(buffer.untitled(), 'Buffer should be untitled again');
     buffer.set('file', f);
     var pr = new Promise();
     setTimeout(function() {
         var newtext = buffer.get('model').get('value');
-        t.equal(newtext, "the top file", "Expected file contents to be loaded");
+        t.equal(newtext, 'the top file', 'Expected file contents to be loaded');
         
         // now we want to reset the buffer.
         buffer.changeFile(null);
-        t.ok(buffer.untitled(), "Buffer should be untitled again");
+        t.ok(buffer.untitled(), 'Buffer should be untitled again');
         newtext = buffer.get('model').get('value');
-        t.equal(newtext, "", "editor text should be empty");
+        t.equal(newtext, "", 'editor text should be empty');
         pr.resolve();
     }, 1);
     return pr;
@@ -89,8 +89,8 @@ exports.testBufferFileChangeWithCallback = function() {
     var f = root.getFile("atTheTop.js");
     var pr = buffer.changeFile(f);
     var testpr = pr.then(function(b) {
-        t.equal(b, buffer, "should have gotten the buffer object in");
-        t.equal(b.get('model').get('value'), "the top file", "contents should be loaded");
+        t.equal(b, buffer, 'should have gotten the buffer object in');
+        t.equal(b.get('model').get('value'), 'the top file', 'contents should be loaded');
         if (testpr != undefined) {
             testpr.resolve();
         }
@@ -104,12 +104,12 @@ exports.testBufferSaving = function() {
     var root = fs.Filesystem.create({ source: source });
     var buffer = editsession.Buffer.create();
     buffer.setPath('model.value', 'foobar');
-    t.equal(buffer.getPath('model.value'), 'foobar', "the value stored in " +
-        "the model and the string that was just written to it");
+    t.equal(buffer.getPath('model.value'), 'foobar', 'the value stored in ' +
+        'the model and the string that was just written to it');
 
     var file1 = root.getFile("bar.txt");
     file1.exists().then(function(exists) {
-        t.ok(!exists, "file should not be there now");
+        t.ok(!exists, 'file should not be there now');
         buffer.saveAs(file1).then(function() { 
             var request = source.requests.pop();
             t.equal(request[0], 'saveContents');
@@ -117,7 +117,7 @@ exports.testBufferSaving = function() {
             t.equal(request[1][1], 'foobar');
 
             file1.exists().then(function(exists) {
-                t.ok(exists, "file should now exist");
+                t.ok(exists, 'file should now exist');
                 testpr.resolve();
             });
         });

@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,12 +35,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime").SC;
+var SC = require('sproutcore/runtime').SC;
 var diff_match_patch = require('diff').diff_match_patch;
 
-var cliController = require("command_line:controller").cliController;
-var Hint = require("command_line:hint").Hint;
-var Level = require("command_line:hint").Level;
+var cliController = require('command_line:controller').cliController;
+var Hint = require('command_line:hint').Hint;
+var Level = require('command_line:hint').Level;
 
 var diff = new diff_match_patch();
 
@@ -157,7 +157,7 @@ exports.Menu = SC.Object.extend({
 
                 link.addEventListener('mousedown', function(ev) {
                     SC.run(function() {
-                        cliController.set('input', this._prefix + item.name + " ");
+                        cliController.set('input', this._prefix + item.name + ' ');
                     }.bind(this));
                 }.bind(this), false);
 
@@ -194,10 +194,10 @@ exports.Menu = SC.Object.extend({
         }
 
         // If there is only one match, then the completion must complete to that
-        // so it's safe to add a " " to the end.
+        // so it's safe to add a ' ' to the end.
         /*
         if (this._items.length == 1) {
-            completion = completion + " ";
+            completion = completion + ' ';
         }
         */
 

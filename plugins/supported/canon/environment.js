@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,8 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime").SC;
-var catalog = require("bespin:plugins").catalog;
+var SC = require('sproutcore/runtime').SC;
+var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 
 /**
@@ -79,7 +79,7 @@ exports.Environment = SC.Object.extend({
         }
         var buffer = session.get('currentBuffer');
         if (!buffer) {
-            console.error("Session has no current buffer");
+            console.error('Session has no current buffer');
             return undefined;
         }
         return buffer.get('model');
@@ -112,7 +112,7 @@ exports.Environment = SC.Object.extend({
         }
         var buffer = session.get('currentBuffer');
         if (!buffer) {
-            console.error("Session has no current buffer");
+            console.error('Session has no current buffer');
             return undefined;
         }
         return buffer.get('file');

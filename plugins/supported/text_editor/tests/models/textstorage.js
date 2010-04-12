@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -43,13 +43,13 @@ exports.testCharacterMutators = function() {
     var storage = TextStorage.create({});
     storage.insertCharacters({ row: 0, column: 0 }, "foo\nbar\nbaz\n");
     t.equal(storage.get('value'), "foo\nbar\nbaz\n",
-        "characters inserted into an empty text storage object and the " +
-            "original characters");
+        'characters inserted into an empty text storage object and the ' +
+            'original characters');
     var lines = storage.lines;
-    t.equal(lines[0].length, 3, "length of first row and 3");
-    t.equal(lines[1].length, 3, "length of second row and 3");
-    t.equal(lines[2].length, 3, "length of third row and 3");
-    t.equal(lines[3].length, 0, "length of last row and 0");
+    t.equal(lines[0].length, 3, 'length of first row and 3');
+    t.equal(lines[1].length, 3, 'length of second row and 3');
+    t.equal(lines[2].length, 3, 'length of third row and 3');
+    t.equal(lines[3].length, 0, 'length of last row and 0');
 
     storage.deleteCharacters({
         start: {
@@ -62,11 +62,11 @@ exports.testCharacterMutators = function() {
         }
     });
     t.equal(storage.get('value'), "foo\nbz\n",
-        "the result of deleting characters from a text storage object and " +
-            "the expected string");
-    t.equal(lines[0].length, 3, "length of first row and 3");
-    t.equal(lines[1].length, 2, "length of second row and 2");
-    t.equal(lines[2].length, 0, "length of last row and 0");
+        'the result of deleting characters from a text storage object and ' +
+            'the expected string');
+    t.equal(lines[0].length, 3, 'length of first row and 3');
+    t.equal(lines[1].length, 2, 'length of second row and 2');
+    t.equal(lines[2].length, 0, 'length of last row and 0');
 
     storage.replaceCharacters({
         start: {
@@ -79,9 +79,9 @@ exports.testCharacterMutators = function() {
         }
     }, 'obarba');
     t.equal(storage.get('value'), "foobarbaz\n",
-        "the result of replacing characters in a text storage object and " +
-            "the expected string");
-    t.equal(lines[0].length, 9, "length of first row and 9");
+        'the result of replacing characters in a text storage object and ' +
+            'the expected string');
+    t.equal(lines[0].length, 9, 'length of first row and 9');
 };
 
 exports.testClampPosition = function() {
@@ -183,13 +183,13 @@ exports.testObserving = function() {
     var delegate = SC.Object.create({
         textStorageEdited: function(storage, oldRange, newRange) {
             called = true;
-            t.deepEqual(oldRange, deletionRange, "the old range passed in " +
-                "to textStorageEdited and the actual range deleted");
+            t.deepEqual(oldRange, deletionRange, 'the old range passed in ' +
+                'to textStorageEdited and the actual range deleted');
             t.deepEqual(newRange, {
                 start:  deletionRange.start,
                 end:    deletionRange.start
             }, "the new range passed in to textStorageEdited and a zero-" +
-                "length range located at the start of the deleted range");
+                'length range located at the start of the deleted range');
         }
     });
     storage.addDelegate(delegate);

@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -57,12 +57,12 @@ var mockCatalog = SC.Object.create({
         var promise = new Promise();
         var match = /^([^#]+)#/.exec(pointer);
         if (match === null) {
-            promise.reject(new Error("unexpected pointer: " + pointer));
+            promise.reject(new Error('unexpected pointer: ' + pointer));
         } else {
             var pluginName = match[1];
             promise.resolve(SC.Object.extend({
                 cssClass: pluginName,
-                cssResource: pluginName + ":" + pluginName + ".css"
+                cssResource: pluginName + ':' + pluginName + ".css"
             }));
         }
 
@@ -84,16 +84,16 @@ exports.testAddingAndRemovingPanes = function() {
 
     themeManager.addPane(paneB);
     var panes = themeManager.get('panes').sort();
-    t.equal(themeManager.get('panes').length, 2, "the number of panes " +
-        "managed by the theme manager after adding a pane and 2");
+    t.equal(themeManager.get('panes').length, 2, 'the number of panes ' +
+        'managed by the theme manager after adding a pane and 2');
 
     themeManager.removePane(paneA);
-    t.equal(themeManager.get('panes').length, 1, "the number of panes " +
-        "managed by the theme manager after removing a pane and 1");
+    t.equal(themeManager.get('panes').length, 1, 'the number of panes ' +
+        'managed by the theme manager after removing a pane and 1');
 
     themeManager.removePane(paneB);
-    t.equal(themeManager.get('panes').length, 0, "the number of panes " +
-        "managed by the theme manager after removing a pane and 0");
+    t.equal(themeManager.get('panes').length, 0, 'the number of panes ' +
+        'managed by the theme manager after removing a pane and 0');
 }
 
 exports.testThemeLoading = function() {
@@ -128,7 +128,7 @@ exports.testThemeLoading = function() {
 
     var mockPane = SC.Object.create({
         childViews: [ mockContainer ],
-        classNames: "bar baz".w(),
+        classNames: 'bar baz'.w(),
         theme:      'bar'
     });
 
@@ -141,14 +141,14 @@ exports.testThemeLoading = function() {
     themeManager.set('theme', 'foo');
 
     t.ok(bespinThemeChangedRun, "bespinThemeChangedRun() was called when " +
-        "changing the theme");
-    t.equal(bespinThemeChangedCSSClass, 'foo', "the CSS class of the theme " +
+        'changing the theme');
+    t.equal(bespinThemeChangedCSSClass, 'foo', 'the CSS class of the theme ' +
         "object passed into bespinThemeChangedRun() and \"foo\"");
 
-    t.deepEqual(mockPane.get('classNames').sort(), "baz foo".w(), "the " +
+    t.deepEqual(mockPane.get('classNames').sort(), 'baz foo'.w(), 'the ' +
         "class names on the pane's view after setting the theme and [ baz " +
         "foo ]");
-    t.equal(mockPane.get('theme'), 'foo', "the theme assigned to the pane " +
+    t.equal(mockPane.get('theme'), 'foo', 'the theme assigned to the pane ' +
         "and \"foo\"");
 };
 

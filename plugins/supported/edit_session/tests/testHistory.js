@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -43,42 +43,42 @@ exports.testHistory = function() {
     var mockStorage = {};
     var history = History.create({ storage: mockStorage });
 
-    t.equal(history.getRecent(100).length, 0, "the length of a freshly " +
-        "created history object and zero");
+    t.equal(history.getRecent(100).length, 0, 'the length of a freshly ' +
+        'created history object and zero');
 
     history.addPath('foo');
     history.addPath('bar');
     var paths = history.getRecent(10);
-    t.equal(paths.length, 2, "the length of the history object with two " +
-        "paths in it and 2");
-    t.equal(paths[0], 'bar', "the first path in the history object with " +
+    t.equal(paths.length, 2, 'the length of the history object with two ' +
+        'paths in it and 2');
+    t.equal(paths[0], 'bar', 'the first path in the history object with ' +
         "two paths added to it and \"bar\"");
-    t.equal(paths[1], 'foo', "the second path in the history object with " +
+    t.equal(paths[1], 'foo', 'the second path in the history object with ' +
         "two paths added to it and \"foo\"");
 
     history.addPath('baz');
     history.addPath('bar');
     history.addPath('boo');
     paths = history.getRecent(10);
-    t.equal(paths.length, 4, "the length of the history object with four " +
-        "paths in it and 4");
-    t.equal(paths[0], 'boo', "the first path in the history object with " +
+    t.equal(paths.length, 4, 'the length of the history object with four ' +
+        'paths in it and 4');
+    t.equal(paths[0], 'boo', 'the first path in the history object with ' +
         "four paths in it and \"boo\"");
-    t.equal(paths[1], 'bar', "the second path in the history object with " +
+    t.equal(paths[1], 'bar', 'the second path in the history object with ' +
         "four paths in it and \"bar\"");
-    t.equal(paths[2], 'baz', "the third path in the history object with " +
+    t.equal(paths[2], 'baz', 'the third path in the history object with ' +
         "four paths in it and \"baz\"");
-    t.equal(paths[3], 'foo', "the fourth path in the history object with " +
+    t.equal(paths[3], 'foo', 'the fourth path in the history object with ' +
         "four paths in it and \"foo\"");
 
     paths = history.getRecent(2);
-    t.equal(paths.length, 2, "the number of paths returned when requesting " +
-        "two paths from the history object with four paths in it and 2");
-    t.equal(paths[0], 'boo', "the first path in the list of paths returned " +
-        "when requesting two paths from the history object with four paths " +
+    t.equal(paths.length, 2, 'the number of paths returned when requesting ' +
+        'two paths from the history object with four paths in it and 2');
+    t.equal(paths[0], 'boo', 'the first path in the list of paths returned ' +
+        'when requesting two paths from the history object with four paths ' +
         "in it and \"boo\"");
-    t.equal(paths[1], 'bar', "the second path in the list of paths returned " +
-        "when requesting two paths from the history object with four paths " +
+    t.equal(paths[1], 'bar', 'the second path in the list of paths returned ' +
+        'when requesting two paths from the history object with four paths ' +
         "in it and \"bar\"");
 };
 

@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,10 +35,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime").SC;
+var SC = require('sproutcore/runtime').SC;
 
 var themeManager = require('theme_manager').themeManager;
-var Promise = require("bespin:promise").Promise;
+var Promise = require('bespin:promise').Promise;
 var server = require('bespin_server').server;
 
 // these are private, because we will likely want to put a little more
@@ -74,7 +74,7 @@ var kcPage = SC.Page.design({
             form: SC.View.design({
                 classNames: "bespin-form".w(),
                 
-                childViews: ("title passwordField description cancel ok").w(),
+                childViews: ('title passwordField description cancel ok').w(),
 
                 title: SC.LabelView.design({
                     classNames: 'title'.w(),
@@ -85,7 +85,7 @@ var kcPage = SC.Page.design({
                         width: 290,
                         height: 24
                     },
-                    value: "Keychain Password",
+                    value: 'Keychain Password',
                     controlSize: SC.LARGE_CONTROL_SIZE,
                     fontWeight: 'bold'
                 }),
@@ -108,7 +108,7 @@ var kcPage = SC.Page.design({
                         width: 275,
                         height: 150
                     },
-                    value: "Your keychain password is used to encrypt your " +
+                    value: 'Your keychain password is used to encrypt your ' +
                         "usernames, passwords and SSH keys for remote servers." +
                         " <b>Your password is set the first time you enter it</b>." +
                         "Please make sure this is a good, strong password, but " +
@@ -174,7 +174,7 @@ exports.getkey = function(env, args, request) {
     var pr = exports.getKeychainPassword().then(function(kcpass) {
         var pr;
         
-        var url = "/vcs/getkey/";
+        var url = '/vcs/getkey/';
         if (kcpass == null) {
             pr = server.request('POST', url, null);
         } else {
@@ -189,7 +189,7 @@ exports.getkey = function(env, args, request) {
                 kc.clearPassword();
                 request.doneWithError("Incorrect keychain password!");
             } else {
-                request.doneWithError("Error from server: " + error.message);
+                request.doneWithError('Error from server: ' + error.message);
             }
         });
         

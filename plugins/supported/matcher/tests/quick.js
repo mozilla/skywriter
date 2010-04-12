@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -54,26 +54,26 @@ exports.testQuickMatcher = function() {
         itemsAdded: function(addedItems) { items = addedItems; }
     });
 
-    t.equal(items.length, 2, "the number of matches when searching for " +
-        "\"foo\" and 2");
-    t.equal(items[0], 'foo', "the first match when searching for " +
+    t.equal(items.length, 2, 'the number of matches when searching for ' +
+        "\"foo\' and 2');
+    t.equal(items[0], 'foo', 'the first match when searching for ' +
         "\"foo\" and \"foo\"");
-    t.equal(items[1], 'foobar', "the second match when searching for " +
+    t.equal(items[1], 'foobar', 'the second match when searching for ' +
         "\"foo\" and \"foobar\"");
 
     matcher.set('query', 'ar');
-    t.equal(items.length, 2, "the number of matches when searching for " +
-        "\"ar\" and 2");
-    t.equal(items[0], 'bar', "the first match when searching for " +
+    t.equal(items.length, 2, 'the number of matches when searching for ' +
+        "\"ar\' and 2');
+    t.equal(items[0], 'bar', 'the first match when searching for ' +
         "\"ar\" and \"bar\"");
-    t.equal(items[1], 'foobar', "the second match when searching for " +
+    t.equal(items[1], 'foobar', 'the second match when searching for ' +
         "\"ar\" and \"foobar\"");
 
     matcher.set('query', 'bZ');
-    t.equal(items.length, 2, "the number of matches when searching for " +
-        "\"bZ\" and 2");
-    t.equal(items[0], 'baz', "the first match when searching for " +
+    t.equal(items.length, 2, 'the number of matches when searching for ' +
+        "\"bZ\' and 2');
+    t.equal(items[0], 'baz', 'the first match when searching for ' +
         "\"bZ\" and \"baz\"");
-    t.equal(items[1], 'baAaz', "the second match when searching for " +
+    t.equal(items[1], 'baAaz', 'the second match when searching for ' +
         "\"bZ\" and \"baAaz\"");
 };

@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,8 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var pathUtil = require("filesystem:path");
-var cliController = require("command_line:controller").cliController;
+var pathUtil = require('filesystem:path');
+var cliController = require('command_line:controller').cliController;
 
 /*
  * Creates a path based on the current open file, if there is
@@ -56,7 +56,7 @@ exports.filesCommand = function(env, args, request) {
     path = getCompletePath(env, path);
 
     if (path && !pathUtil.isDir(path)) {
-        path += "/";
+        path += '/';
     }
 
     request.async();
@@ -83,9 +83,9 @@ exports.mkdirCommand = function(env, args, request) {
     
     var files = env.get('files');
     files.makeDirectory(path).then(function() {
-        request.done("Directory " + path + " created.");
+        request.done('Directory ' + path + " created.");
     }, function(error) {
-        request.doneWithError("Unable to make directory " + path + ": " 
+        request.doneWithError('Unable to make directory ' + path + ': ' 
                               + error.message);
     });
 };
@@ -96,14 +96,14 @@ exports.mkdirCommand = function(env, args, request) {
 exports.saveCommand = function(env, args, request) {
     var buffer = env.get('buffer');
     if (buffer.untitled()) {
-        cliController.prompt("saveas ");
+        cliController.prompt('saveas ');
         request.done("The current buffer is untitled. Please enter a name.");
         return;
     }
 
     buffer.save().then(function() { request.done('Saved'); },
         function(error) {
-            request.doneWithError("Unable to save: " + error.message);
+            request.doneWithError('Unable to save: ' + error.message);
         }
     );
     request.async();
@@ -157,7 +157,7 @@ exports.revertCommand = function(env, args, request) {
     request.async();
     var buffer = env.get('buffer');
     buffer.reload().then(function() {
-        request.done("File reverted");
+        request.done('File reverted');
     }, function(error) {
         request.doneWithError(error.message);
     });

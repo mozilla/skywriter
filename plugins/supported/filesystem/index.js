@@ -6,7 +6,7 @@
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS"
+ * Software distributed under the License is distributed on an 'AS IS'
  * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.
  * See the License for the specific language governing rights and
  * limitations under the License.
@@ -22,12 +22,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require("sproutcore/runtime").SC;
+var SC = require('sproutcore/runtime').SC;
 var console = require('bespin:console').console;
-var util = require("bespin:util/util");
-var m_promise = require("bespin:promise");
+var util = require('bespin:util/util');
+var m_promise = require('bespin:promise');
 
-var pathUtil = require("filesystem:path");
+var pathUtil = require('filesystem:path');
 
 var Promise = m_promise.Promise;
 
@@ -218,7 +218,7 @@ exports.Filesystem = SC.Object.extend({
             self._load().then(function() {
                 var position = exports._binarySearch(self._files, path);
                 if (position === null) {
-                    pr.reject(new Error("Cannot find path " + path + " to remove"));
+                    pr.reject(new Error('Cannot find path ' + path + ' to remove'));
                     return;
                 }
                 self._files.splice(position, 1);
@@ -257,7 +257,7 @@ exports.Filesystem = SC.Object.extend({
                 if (file.substring(0, pathlength) != path) {
                     break;
                 }
-                var segmentEnd = file.indexOf("/", pathlength) + 1;
+                var segmentEnd = file.indexOf('/', pathlength) + 1;
                 if (segmentEnd == 0) {
                     segmentEnd = file.length;
                 }
@@ -283,7 +283,7 @@ exports.Filesystem = SC.Object.extend({
     makeDirectory: function(path) {
         path = pathUtil.trimLeadingSlash(path);
         if (!pathUtil.isDir(path)) {
-            path += "/";
+            path += '/';
         }
 
         var self = this;
