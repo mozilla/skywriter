@@ -276,7 +276,7 @@ exports.userIdentPage = SC.Page.design({
                     value:  "The <a href=\"http://mozillalabs.com/bespin/\' ' +
                             "target=\"_blank\">Bespin project</a> is " +
                             "building a web-based code editor using the " +
-                            "emerging HTML 5 standard. The editor is easily " +
+                            'emerging HTML 5 standard. The editor is easily ' +
                             'extensible with JavaScript and can be used in ' +
                             'your own applications or on our experimental ' +
                             "hosted service.",

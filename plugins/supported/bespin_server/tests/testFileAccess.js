@@ -46,7 +46,7 @@ var DummyServer = SC.Object.extend({
 exports.testLoadDirectory = function() {
     var server = DummyServer.create({
         responseData: [
-            "foo.js"
+            'foo.js'
         ]
     });
     var source = filesource.BespinFileSource.create({
@@ -59,7 +59,7 @@ exports.testLoadDirectory = function() {
     t.equal(server.url, '/file/list_all/');
     var testpr = new Promise();
     pr.then(function(data) {
-        t.equal(data[0], "foo.js", 'expected dummy data passed through');
+        t.equal(data[0], 'foo.js', 'expected dummy data passed through');
         testpr.resolve();
     });
     return testpr;
@@ -73,10 +73,10 @@ exports.testLoadContents = function() {
         server: server
     });
     
-    var pr = source.loadContents("myfile.txt");
+    var pr = source.loadContents('myfile.txt');
     t.ok(typeof(pr.then) == 'function', 'expected to get Promise back');
     t.equal(server.method, 'GET');
-    t.equal(server.url, "/file/at/myfile.txt");
+    t.equal(server.url, '/file/at/myfile.txt');
     var testpr = new Promise();
     pr.then(function(contents) {
         t.equal(contents, "This is the exciting data in the file.");
@@ -92,9 +92,9 @@ exports.testSaveContents = function() {
         server: server
     });
     
-    var pr = source.saveContents("myfile.txt", 'new file contents here');
+    var pr = source.saveContents('myfile.txt', 'new file contents here');
     t.ok(typeof(pr.then) == 'function', 'expected to get Promise back');
     t.equal(server.method, 'PUT');
     t.equal(server.payload, 'new file contents here');
-    t.equal(server.url, "/file/at/myfile.txt");
+    t.equal(server.url, '/file/at/myfile.txt');
 };

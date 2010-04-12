@@ -47,7 +47,7 @@ exports.ServerHistory = history.InMemoryHistory.extend({
     init: function() {
         // load last 50 instructions from history
         var project = this.files.userSettingsProject;
-        this.files.loadContents(project, "command.history", function(file) {
+        this.files.loadContents(project, 'command.history', function(file) {
             var typings = file.content.split(/\n/);
             var instructions = [];
 
@@ -74,7 +74,7 @@ exports.ServerHistory = history.InMemoryHistory.extend({
         });
         // save instructions back to server asynchronously
         this.files.saveFile(this.files.userSettingsProject, {
-            name: "command.history",
+            name: 'command.history',
             content: content,
             autosave: true,
             timestamp: new Date().getTime()

@@ -88,7 +88,7 @@ exports.add = function(env, args, request) {
         return;
     }
     
-    var pluginConfigFile = files.getFile("BespinSettings/pluginInfo.json");
+    var pluginConfigFile = files.getFile('BespinSettings/pluginInfo.json');
     
     pluginConfigFile.loadContents().then(function(contents) {
         var pluginConfig = JSON.parse(contents);
@@ -154,13 +154,13 @@ exports.remove = function(env, args, request) {
     }
     if (plugin.type != 'user') {
         request.doneWithError('Plugin ' + pluginName + ' is a ' + plugin.type
-            + " plugin. Only user installed/added plugins can be removed");
+            + ' plugin. Only user installed/added plugins can be removed');
         return;
     }
     catalog.removePlugin(pluginName);
     
     var files = catalog.getObject('files');
-    var pluginConfigFile = files.getFile("BespinSettings/pluginInfo.json");
+    var pluginConfigFile = files.getFile('BespinSettings/pluginInfo.json');
     
     pluginConfigFile.loadContents().then(function(contents) {
         var pluginConfig = JSON.parse(contents);

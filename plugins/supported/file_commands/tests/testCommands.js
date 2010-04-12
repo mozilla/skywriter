@@ -34,13 +34,13 @@ var Promise = require('bespin:promise').Promise;
 
 var source = exports.source = DummyFileSource.create({
     files: [
-        {name: "atTheTop.js", contents: 'the top file'},
-        {name: "anotherAtTheTop.js", contents: 'another file'},
+        {name: 'atTheTop.js', contents: 'the top file'},
+        {name: 'anotherAtTheTop.js', contents: 'another file'},
         {name: 'foo/'},
-        {name: "foo/1.txt", contents: 'firsttext'},
-        {name: "foo/2.txt", contents: 'secondtext'},
-        {name: "foo/bar/3.txt", contents: 'thirdtext'},
-        {name: "deeply/nested/directory/andAFile.txt", contents: 'text file'}
+        {name: 'foo/1.txt', contents: 'firsttext'},
+        {name: 'foo/2.txt', contents: 'secondtext'},
+        {name: 'foo/bar/3.txt', contents: 'thirdtext'},
+        {name: 'deeply/nested/directory/andAFile.txt', contents: 'text file'}
     ]
 });
 
@@ -72,7 +72,7 @@ exports.testFilesCommand = function() {
         output = request.outputs.join('');
         t.ok(output.indexOf("foo/<br/>") > -1, 'foo/ should be in output');
         t.ok(output.indexOf("atTheTop.js<br/>") > -1, 
-            "atTheTop.js should be in output");
+            'atTheTop.js should be in output');
         testpr.resolve();
     });
     
@@ -88,11 +88,11 @@ exports.testOpenFileWithNoOpenFile = function() {
     request.promise.then(function() {
         var f = env.get('file');
         t.ok(!request.error, 'Should not be in error state');
-        t.equal(f.path, "/foo/bar/3.txt", 'File should have been set');
+        t.equal(f.path, '/foo/bar/3.txt', 'File should have been set');
         testpr.resolve();
     });
     
-    file_commands.openCommand(env, {path: "/foo/bar/3.txt"}, request);
+    file_commands.openCommand(env, {path: '/foo/bar/3.txt'}, request);
 };
 
 exports.testFilesCommandDefaultsToRoot = function() {
@@ -105,7 +105,7 @@ exports.testFilesCommandDefaultsToRoot = function() {
         output = request.outputs.join('');
         t.ok(output.indexOf("foo/<br/>") > -1, 'foo/ should be in output');
         t.ok(output.indexOf("atTheTop.js<br/>") > -1, 
-            "atTheTop.js should be in output");
+            'atTheTop.js should be in output');
         testpr.resolve();
     });
     
@@ -117,16 +117,16 @@ exports.testFilesAreRelativeToCurrentOpenFile = function() {
     var env = getEnv();
     var buffer = env.get('buffer');
     var files = env.get('files');
-    buffer.changeFileOnly(files.getFile("foo/1.txt"));
+    buffer.changeFileOnly(files.getFile('foo/1.txt'));
     
     var testpr = new Promise();
     
     var request = Request.create();
     request.promise.then(function() {
         output = request.outputs.join('');
-        t.ok(output.indexOf("1.txt<br/>") > -1, "1.txt should be in the output");
+        t.ok(output.indexOf("1.txt<br/>") > -1, '1.txt should be in the output');
         t.ok(output.indexOf("2.txt<br/>") > -1, 
-            "2.txt should be in output");
+            '2.txt should be in output');
         testpr.resolve();
     });
     
@@ -138,13 +138,13 @@ exports.testFilesListingInDirectoryRelativeToOpenFile = function() {
     var env = getEnv();
     var buffer = env.get('buffer');
     var files = env.get('files');
-    buffer.changeFileOnly(files.getFile("foo/1.txt"));
+    buffer.changeFileOnly(files.getFile('foo/1.txt'));
     var testpr = new Promise();
     
     var request = Request.create();
     request.promise.then(function() {
         output = request.outputs.join('');
-        t.ok(output.indexOf("3.txt<br/>") > -1, "3.txt should be in the output");
+        t.ok(output.indexOf("3.txt<br/>") > -1, '3.txt should be in the output');
         testpr.resolve();
     });
     

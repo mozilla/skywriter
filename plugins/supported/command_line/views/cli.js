@@ -130,7 +130,7 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
             // Open/close output
             var closeEle = hover.begin('img');
             closeEle.attr({
-                src: imagePath + "closer.png",
+                src: imagePath + 'closer.png',
                 alt: 'Remove this command from the history',
                 title: 'Remove this command from the history',
                 onclick: function() {
@@ -166,7 +166,7 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
             var outputId = endWithId(outputEle);
 
             var throbEle = rowout.begin('img').attr({
-                src: imagePath + "throbber.gif"
+                src: imagePath + 'throbber.gif'
             });
             var throbId = endWithId(throbEle);
 
@@ -196,14 +196,14 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
             this.link(content, 'hideOutput', function(hideOutput) {
                 if (hideOutput) {
                     SC.$("#" + hideOutputId).attr({
-                        src: imagePath + "plus.png",
+                        src: imagePath + 'plus.png',
                         alt: 'Show command output',
                         title: 'Show command output'
                     });
                     SC.$("#" + hideOutputId).attr('display', 'none');
                 } else {
                     SC.$("#" + hideOutputId).attr({
-                        src: imagePath + "minus.png",
+                        src: imagePath + 'minus.png',
                         alt: 'Hide command output',
                         title: 'Hide command output'
                     });
@@ -461,7 +461,7 @@ exports.CliInputView = SC.View.design({
      * Push the focus into the input element
      */
     focus: function() {
-        this.getPath("contentView.input").becomeFirstResponder();
+        this.getPath('contentView.input').becomeFirstResponder();
     },
 
     /**

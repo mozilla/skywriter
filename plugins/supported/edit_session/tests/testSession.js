@@ -44,10 +44,10 @@ var Promise = require('bespin:promise').Promise;
 
 var source = DummyFileSource.create({
     files: [
-        {name: "atTheTop.js", contents: 'the top file'},
-        {name: "anotherAtTheTop.js", contents: 'another file'},
+        {name: 'atTheTop.js', contents: 'the top file'},
+        {name: 'anotherAtTheTop.js', contents: 'another file'},
         {name: 'foo/'},
-        {name: "deeply/nested/directory/andAFile.txt", contents: 'text file'}
+        {name: 'deeply/nested/directory/andAFile.txt', contents: 'text file'}
     ]
 });
 
@@ -59,7 +59,7 @@ exports.testBufferFileChange = function() {
     t.ok(buffer.get('model') != null, 
         'Model should be set to a TextStorage by default');
     t.ok(buffer.untitled(), 'Buffer should initially be untitled');
-    var f = root.getFile("atTheTop.js");
+    var f = root.getFile('atTheTop.js');
     buffer.changeFileOnly(f);
     t.ok(!buffer.untitled(), 'Buffer should no longer be untitled');
     t.equal('', buffer.get('model').get('value'), 'Should be empty now');
@@ -86,7 +86,7 @@ exports.testBufferFileChangeWithCallback = function() {
         source: source
     });
     var buffer = editsession.Buffer.create();
-    var f = root.getFile("atTheTop.js");
+    var f = root.getFile('atTheTop.js');
     var pr = buffer.changeFile(f);
     var testpr = pr.then(function(b) {
         t.equal(b, buffer, 'should have gotten the buffer object in');
@@ -107,13 +107,13 @@ exports.testBufferSaving = function() {
     t.equal(buffer.getPath('model.value'), 'foobar', 'the value stored in ' +
         'the model and the string that was just written to it');
 
-    var file1 = root.getFile("bar.txt");
+    var file1 = root.getFile('bar.txt');
     file1.exists().then(function(exists) {
         t.ok(!exists, 'file should not be there now');
         buffer.saveAs(file1).then(function() { 
             var request = source.requests.pop();
             t.equal(request[0], 'saveContents');
-            t.equal(request[1][0], "bar.txt");
+            t.equal(request[1][0], 'bar.txt');
             t.equal(request[1][1], 'foobar');
 
             file1.exists().then(function(exists) {

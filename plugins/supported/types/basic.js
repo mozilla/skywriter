@@ -165,7 +165,7 @@ exports.selection = {
         }
 
         if (!typeExt.data) {
-            console.error("Missing data on selection type extension. Skipping");
+            console.error('Missing data on selection type extension. Skipping');
             return true;
         }
 

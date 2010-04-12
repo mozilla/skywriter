@@ -56,9 +56,9 @@ exports.combine = function() {
 
 /**
  * Given a <code>path</code> return the directory
- * <li>directory("/path/to/directory/file.txt") -&gt; /path/to/directory/
+ * <li>directory('/path/to/directory/file.txt') -&gt; /path/to/directory/
  * <li>directory('/path/to/directory/') -&gt; /path/to/directory/
- * <li>directory("foo.txt") -&gt; ''
+ * <li>directory('foo.txt') -&gt; ''
  */
 exports.directory = function(path) {
     var match = /^(.*?\/)[^\/]*$/.exec(path);
@@ -150,7 +150,7 @@ exports.basename = function(path) {
 /*
  * splits the path from the extension, returning a 2 element array
  * '/foo/bar/' -> ['/foo/bar', '']
- * "/foo/bar/baz.js" -> ['/foo/bar/baz', 'js']
+ * '/foo/bar/baz.js' -> ['/foo/bar/baz', 'js']
  */
 exports.splitext = function(path) {
     var lastDot = path.lastIndexOf(".");
@@ -167,7 +167,7 @@ exports.splitext = function(path) {
  * '' -&gt; ''
  * '/' -&gt; ''
  * '/foo/bar/' -&gt; '/foo/'
- * "/foo/bar/baz.txt" -&gt; '/foo/bar/'
+ * '/foo/bar/baz.txt' -&gt; '/foo/bar/'
  */
 exports.parentdir = function(path) {
     if (path == '' || path == '/') {

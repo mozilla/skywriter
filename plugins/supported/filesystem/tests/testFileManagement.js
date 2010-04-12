@@ -30,10 +30,10 @@ var Promise = require('bespin:promise').Promise;
 
 var source = exports.source = fixture.DummyFileSource.create({
     files: [
-        {name: "atTheTop.js", contents: 'the top file'},
-        {name: "anotherAtTheTop.js", contents: 'another file'},
+        {name: 'atTheTop.js', contents: 'the top file'},
+        {name: 'anotherAtTheTop.js', contents: 'another file'},
         {name: 'foo/'},
-        {name: "deeply/nested/directory/andAFile.txt", contents: 'text file'}
+        {name: 'deeply/nested/directory/andAFile.txt', contents: 'text file'}
     ]
 });
 
@@ -89,7 +89,7 @@ exports.testDirectoryListing = function() {
     
     root.listDirectory('/').then(function(results) {
         t.equal(results.length, 4, 'Expected 4 items');
-        t.deepEqual(results, ["anotherAtTheTop.js", "atTheTop.js", 'deeply/', 
+        t.deepEqual(results, ['anotherAtTheTop.js', 'atTheTop.js', 'deeply/', 
                              'foo/']);
         testpr.resolve();
     });
@@ -104,7 +104,7 @@ exports.testFileContents = function() {
     var root = getNewRoot();
     var testpr = new Promise();
     
-    root.loadContents("atTheTop.js").then(function(contents) {
+    root.loadContents('atTheTop.js').then(function(contents) {
         t.equal(contents, 'the top file');
         testpr.resolve();
     });
@@ -126,9 +126,9 @@ exports.testPathRemoval = function() {
     source.reset();
     var root = getNewRoot();
     var testpr = new Promise();
-    root.remove("atTheTop.js").then(function() {
+    root.remove('atTheTop.js').then(function() {
         t.equal(root._files.length, 3, 'file should be removed from filesystem');
-        t.equal(root._files[1], "deeply/nested/directory/andAFile.txt");
+        t.equal(root._files[1], 'deeply/nested/directory/andAFile.txt');
         t.equal(source.requests[0][0], 'remove');
         testpr.resolve();
     });
@@ -139,7 +139,7 @@ exports.testFileAbstraction = function() {
     source.reset();
     var root = getNewRoot();
     var testpr = new Promise();
-    var file = root.getFile("deeply/nested/directory/andAFile.txt");
+    var file = root.getFile('deeply/nested/directory/andAFile.txt');
     t.equal(file.extension(), 'txt');
     t.equal(file.parentdir(), 'deeply/nested/directory/', 'parentdir is the root for this file');
     file.loadContents().then(function(contents) {
@@ -149,11 +149,11 @@ exports.testFileAbstraction = function() {
             // there will be a loadAll at the end, so we do -2
             var request = source.requests[source.requests.length-2];
             t.equal(request[0], 'saveContents');
-            t.equal(request[1][0], "deeply/nested/directory/andAFile.txt");
+            t.equal(request[1][0], 'deeply/nested/directory/andAFile.txt');
             t.equal(request[1][1], 'New data');
             file.exists().then(function(exists) {
                 t.ok(exists, 'File should exist');
-                var badfile = root.getFile("no/such/file.txt");
+                var badfile = root.getFile('no/such/file.txt');
                 badfile.exists().then(function(exists) {
                     t.ok(!exists, 'badfile should not exist');
                     testpr.resolve();

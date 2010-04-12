@@ -76,7 +76,7 @@ exports.server = SC.Object.create({
                 options[functionName].apply(null, args);
                 return true;
             } catch (ex) {
-                console.group("Error calling options." + functionName + " from server.request");
+                console.group("Error calling options." + functionName + ' from server.request');
                 console.log(options);
                 console.log(options[functionName].toString());
                 console.error(ex);
@@ -616,7 +616,7 @@ exports.server = SC.Object.create({
     /**
      * Returns JSON object with the key of filename, and the value of an array
      * of usernames:
-     * { "foo.txt": ['ben'], "SomeAjaxApp/foo.txt": ['dion'] }
+     * { 'foo.txt': ['ben'], 'SomeAjaxApp/foo.txt': ['dion'] }
      * @param onSuccess fires after listing the open files
      */
     listOpen: function(onSuccess) {

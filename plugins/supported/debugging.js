@@ -246,7 +246,7 @@ exports.templateCommand = function(env, args, request) {
 var uses = {
     sound: function() {
         this.editor.model.insertChunk({ row: 3, col: 0 },
-            '  <script type='text/javascript' src="soundmanager2.js"></script>\n');
+            '  <script type='text/javascript' src='soundmanager2.js'></script>\n');
         this.editor.model.insertChunk({ row: 4, col: 0 },
             "  <script>\n  var sound; \n  soundManager.onload = function() {\n    sound =  soundManager.createSound('mySound','/path/to/mysoundfile.mp3');\n  }\n  </script>\n");
     },
