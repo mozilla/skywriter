@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the 'License'); you may not use this file except in compliance with
+ * 1.1 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the 'GPL'), or
- * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -153,7 +153,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     // Returns the last valid position in the buffer.
     _lastCharacterPosition: function() {
         return {
-            row:    this.get('textLines').length - 1,
+            row: this.get('textLines').length - 1,
             col: this._maximumWidth
         };
     },
@@ -217,7 +217,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         return this.rectsForRange({
             start:  { row: 0, col: 0 },
             end:    {
-                row:    this.get('textLines').length - 1,
+                row: this.get('textLines').length - 1,
                 col: this._maximumWidth
             }
         })[0];
@@ -246,7 +246,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         var characterWidth = this.get('characterWidth');
         var textStorage = this.get('textStorage');
         var clampedPosition = textStorage.clampPosition({
-            row:    Math.floor(y / this.get('lineHeight')),
+            row: Math.floor(y / this.get('lineHeight')),
             col: Math.floor(x / characterWidth)
         });
 
@@ -273,11 +273,11 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         var x = rect.x - margin.left, y = rect.y - margin.top;
         return {
             start:  {
-                row:    Math.max(Math.floor(y / lineHeight), 0),
+                row: Math.max(Math.floor(y / lineHeight), 0),
                 col: Math.max(Math.floor(x / characterWidth), 0)
             },
             end:    {
-                row:    Math.floor((y + rect.height - 1) / lineHeight),
+                row: Math.floor((y + rect.height - 1) / lineHeight),
                 col: Math.floor((x + rect.width - 1) / characterWidth) + 1
             }
         };
