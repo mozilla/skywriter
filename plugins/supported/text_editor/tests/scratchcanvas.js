@@ -36,32 +36,25 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var t = require('core_test');
+var t = require('plugindev');
 var m_scratchcanvas = require('bespin:util/scratchcanvas');
 
-t.module('scratchcanvas', {
-    setup: function() {},
-    teardown: function() {}
-});
-
-t.test("the scratch canvas behaves as a singleton", function() {
+exports.testScratchCanvasBehavesAsASingleton = function() {
     t.ok(SC.none(document.getElementById('bespin-scratch-canvas')),
-        "there is no scratch canvas before the singleton is requested");
+        'there is no scratch canvas before the singleton is requested');
     var scratchCanvasA = m_scratchcanvas.get();
     var element = document.getElementById('bespin-scratch-canvas');
     t.ok(!SC.none(element),
-        "the element exists after the singleton is requested");
+        'the element exists after the singleton is requested');
     var scratchCanvasB = m_scratchcanvas.get();
     t.equal(scratchCanvasA, scratchCanvasB,
-        "the results of requesting a scratch canvas twice");
-});
+        'the results of requesting a scratch canvas twice');
+};
 
-t.test("the scratch canvas yields a usable canvas context", function() {
+exports.testTheScratchCanvasYieldsAUsableCanvasContext = function() {
     var scratchCanvas = m_scratchcanvas.get();
     var context = scratchCanvas.getContext();
     t.ok(!SC.none(context.measureText),
-        "the context has a measureText method");
-});
-
-t.plan.run();
+        'the context has a measureText method');
+};
 
