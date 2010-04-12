@@ -49,14 +49,34 @@
 </style>
 <script>
 window.onBespinLoad = function() {
+    var Range = tiki.require('rangeutils:utils/range');
+
     console.log("this is called when Bespin is loaded");
     window.bespin = document.getElementById("editor").bespin;
+
+    // Bespin event handler:
+    var preChange = document.getElementById('change');
+    window.bespin.addEventListener('textChange', function(evt) {
+        preChange.innerHTML = 'Change: at ' + Range.toString(evt.oldRange) +
+                                ' to \'' + evt.newValue + '\' at ' +
+                                    Range.toString(evt.newRange);
+    });
+
+    var preSelection = document.getElementById('selection');
+    window.bespin.addEventListener('select', function(evt) {
+        preSelection.innerHTML = 'Selection: ' + Range.toString(evt.selection);
+    });
 };
 
 function showContents() {
   // Just like a textarea, you can get/set value on the bespin object
   document.getElementById("copiedcontents").innerHTML = window.bespin.value.replace("<", "&lt;");
 };
+
+function showSelectedContents() {
+  document.getElementById('copiedcontents').innerHTML = window.bespin.getSelectedText().replace('<', '&lt;');
+};
+
 </script>
 </head>
 <body>
@@ -69,8 +89,12 @@ function editMe() {
 }
 </div>
 
+<pre id="change">Change:</pre>
+<pre id="selection">Selection:</pre>
+
 <div class="displaybutton">
   <input type="button" value="Show Contents Below" onclick="showContents()">
+  <input type="button" value="Show Selected Contents Below" onclick="showSelectedContents()">
 </div>
 <pre id="copiedcontents"></pre>
 

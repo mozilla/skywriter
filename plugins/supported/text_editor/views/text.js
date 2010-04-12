@@ -980,6 +980,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         // Set the new selection and invalidate it.
         this._selectedRange = textStorage.clampRange(newRange);
         this._invalidateSelection();
+        this.notifyDelegates('textViewSelectionChanged', this._selectedRange);
 
         this._rearmInsertionPointBlinkTimer();
 

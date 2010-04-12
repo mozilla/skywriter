@@ -34,7 +34,7 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
- 
+
 "define metadata";
 ({
     "dependencies": {
@@ -62,9 +62,11 @@
  */
 
 var SC = require("sproutcore/runtime").SC;
+var Range = require('rangeutils:utils/range');
 var DockView = require('dock_view').DockView;
 var EditorView = require('text_editor:views/editor').EditorView;
 var KeyListener = require('appsupport:views/keylistener').KeyListener;
+var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
 var bespin = require("bespin:index");
 var edit_session = require('edit_session');
 var settings = require('settings').settings;
@@ -72,7 +74,7 @@ var util = require("bespin:util/util");
 
 var embeddedEditorInstantiated = false;
 
-exports.EmbeddedEditor = SC.Object.extend({
+exports.EmbeddedEditor = SC.Object.extend(MultiDelegateSupport, {
     _editorView: null,
 
     _attachPane: function() {
@@ -177,6 +179,46 @@ exports.EmbeddedEditor = SC.Object.extend({
         }
     },
 
+    textStorageEdited: function(sender, oldRange, newRange, newValue) {
+        var evt = {
+            oldRange: oldRange,
+            newRange: newRange,
+            newValue: newValue
+        }
+        this.postMessage('textChange', evt);
+    },
+
+    textViewSelectionChanged: function(sender, selection) {
+        var evt = {
+            selection: selection
+        }
+        this.postMessage('select', evt);
+    },
+
+    _evtCallbacks: null,
+
+    /**
+     * Posts a message to the internal event handler.
+     */
+    postMessage: function(evtName, evtObj) {
+        evtObj.type = evtName;
+        if (!SC.none(this._evtCallbacks[evtName])) {
+            this._evtCallbacks[evtName].forEach(function(callback) {
+                callback.call(this, evtObj);
+            });
+        }
+    },
+
+    /**
+     * Adds an event listener for an event.
+     */
+    addEventListener: function(evtName, callback) {
+        if (SC.none(this._evtCallbacks[evtName])) {
+            this._evtCallbacks[evtName] = [];
+        }
+        this._evtCallbacks[evtName].push(callback);
+    },
+
     /**
      * @property{Node}
      *
@@ -252,6 +294,8 @@ exports.EmbeddedEditor = SC.Object.extend({
 
         embeddedEditorInstantiated = true;
 
+        this._evtCallbacks = {};
+
         var session = edit_session.EditSession.create();
         exports.session = session;
 
@@ -274,11 +318,14 @@ exports.EmbeddedEditor = SC.Object.extend({
         var buffer = edit_session.Buffer.create({ model: textStorage });
         session.set('currentBuffer', buffer);
         session.set('currentView', textView);
-        
+
         SC.run(function() {
             this._createValueProperty();
             this._setOptions();
         }.bind(this));
+
+        editorView.textView.addDelegate(this);
+        editorView.layoutManager.textStorage.addDelegate(this);
     },
 
     setFocus: function(makeFocused) {
@@ -333,6 +380,93 @@ exports.EmbeddedEditor = SC.Object.extend({
             this._editorView.setPath('layoutManager.syntaxManager.' +
                                                 'initialContext', syntax);
         }.bind(this));
+    },
+
+    /**
+     * Returns the current selection.
+     */
+    getSelection: function() {
+        // Returns a clone of the selection to make sure the user can't
+        // change the textView's selection.
+        return SC.clone(this._editorView.textView._selectedRange);
+    },
+
+    /**
+     * Sets the cursor position.
+     */
+    setCursor: function(position) {
+        if (!Range.isPosition(position)) {
+            throw new Error('setCursor: valid position must be supplied');
+        }
+
+        this._editorView.textView.moveCursorTo(position);
+    },
+
+    /**
+     * Sets the text selection.
+     */
+    setSelection: function(range) {
+        if (!Range.isRange(range)) {
+            throw new Error('setSelection: valid range must be supplied');
+        }
+        if (Range.comparePositions(range.start, range.end) === 0) {
+            this._editorView.textView.moveCursorTo(range.start);
+        } else {
+            var textView = this._editorView.textView;
+            textView.moveCursorTo(range.end);
+            textView.moveCursorTo(range.start, true);
+        }
+    },
+
+    /**
+     * Replaces a range witihn a text.
+     */
+    replace: function(range, text) {
+        if (typeof text !== 'string') {
+            throw new Error('replace: valid text must be supplied');
+        }
+        if (!Range.isRange(range)) {
+            throw new Error('replace: valid range must be supplied');
+        }
+
+        SC.run(function() {
+            range = Range.normalizeRange(range);
+            var view = this._editorView.textView;
+            view.groupChanges(function() {
+                view.replaceCharacters(range, text);
+                view.moveCursorTo(range.start);
+            });
+        }.bind(this));
+    },
+
+    /**
+     * Replaces the current text selection with a text.
+     */
+    replaceSelection: function(text) {
+        if (typeof text !== 'string') {
+            throw new Error('replaceSelection: valid text must be supplied');
+        }
+
+        this.replace(this.getSelection(), text);
+    },
+
+    /**
+     * Returns the text witihn a range.
+     */
+    getText: function(range) {
+        if (!Range.isRange(range)) {
+            throw new Error('getText: valid range must be supplied');
+        }
+
+        range = Range.normalizeRange(range);
+        return this._editorView.layoutManager.textStorage.getCharacters(range);
+    },
+
+    /**
+     * Returns the current selected text.
+     */
+    getSelectedText: function() {
+        return this.getText(this.getSelection());
     }
 });
 

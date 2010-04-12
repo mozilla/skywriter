@@ -163,3 +163,11 @@ exports.unionRanges = function(a, b) {
     };
 };
 
+exports.isPosition = function(pos) {
+    return !SC.none(pos) && !SC.none(pos.row) && !SC.none(pos.col);
+};
+
+exports.isRange = function(range) {
+    return (!SC.none(range) && exports.isPosition(range.start) &&
+                                                exports.isPosition(range.end));
+};
