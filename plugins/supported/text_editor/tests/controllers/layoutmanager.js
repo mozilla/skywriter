@@ -55,8 +55,8 @@ exports.testCharacterRectForPosition = function() {
     });
     layoutManager.setPath('textStorage.value', PANGRAMS);
 
-    var characterWidth = layoutManager._characterWidth;
-    var lineHeight = layoutManager._lineHeight;
+    var characterWidth = layoutManager.characterWidth;
+    var lineHeight = layoutManager.lineHeight;
 
     t.deepEqual(layoutManager.characterRectForPosition({ row: 3, col: 3 }), {
             x:      3 * characterWidth,
@@ -80,9 +80,9 @@ exports.testDimensionsCalculation = function() {
         'Santa Claus Conquers the Martians\n');
 
     var rect = layoutManager.boundingRect();
-    t.equal(rect.height, layoutManager._lineHeight * 5,
+    t.equal(rect.height, layoutManager.lineHeight * 5,
         'the total height and the line height times the number of lines');
-    t.equal(rect.width, layoutManager._characterWidth *
+    t.equal(rect.width, layoutManager.characterWidth *
         'Santa Claus Conquers the Martians'.length, 'the width and the ' +
         'character width times the length of the longest line');
 
@@ -92,9 +92,9 @@ exports.testDimensionsCalculation = function() {
     }, 'SuperBabies: Baby Geniuses 2');
 
     rect = layoutManager.boundingRect();
-    t.equal(rect.height, layoutManager._lineHeight * 4,
+    t.equal(rect.height, layoutManager.lineHeight * 4,
         'the total and the line height times the new number of lines');
-    t.equal(rect.width, layoutManager._characterWidth *
+    t.equal(rect.width, layoutManager.characterWidth *
         'The Star Wars Holiday Special'.length, 'the width and the ' +
         'character width times the length of what is now the longest line');
 };
@@ -107,8 +107,8 @@ exports.testInvalidRects = function() {
     var textStorage = layoutManager.get('textStorage');
     textStorage.set('value', 'foo\nbar\nbaz\nboo\n');
 
-    var characterWidth = layoutManager._characterWidth;
-    var lineHeight = layoutManager._lineHeight;
+    var characterWidth = layoutManager.characterWidth;
+    var lineHeight = layoutManager.lineHeight;
 
     var returnedRects;
     layoutManager.addDelegate(SC.Object.create({
@@ -166,8 +166,8 @@ exports.testPointToCharacterMapping = function() {
     var layoutManager = LayoutManager.create({
         margin: { left: leftMargin, bottom: 4, top: topMargin, right: 6 }
     });
-    var characterWidth = layoutManager._characterWidth;
-    var lineHeight = layoutManager._lineHeight;
+    var characterWidth = layoutManager.characterWidth;
+    var lineHeight = layoutManager.lineHeight;
 
     layoutManager.setPath('textStorage.value', PANGRAMS);
 
@@ -193,8 +193,8 @@ exports.testRectsForRange = function() {
     });
     layoutManager.setPath('textStorage.value', PANGRAMS);
 
-    var characterWidth = layoutManager._characterWidth;
-    var lineHeight = layoutManager._lineHeight;
+    var characterWidth = layoutManager.characterWidth;
+    var lineHeight = layoutManager.lineHeight;
     var maximumWidth = layoutManager._maximumWidth;
 
     var rects = layoutManager.rectsForRange({
