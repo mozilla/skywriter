@@ -73,7 +73,7 @@ exports.TextBuffer = {
             start:  start,
             end:    {
                 row:    start.row + lineCount - 1,
-                column: (lineCount === 1 ? start.column : 0) + lastLineLength
+                col: (lineCount === 1 ? start.col : 0) + lastLineLength
             }
         };
     }

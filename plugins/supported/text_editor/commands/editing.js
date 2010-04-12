@@ -69,10 +69,10 @@ exports.deleteLines = function(env, args, request) {
     var range = view.getSelectedRange();
 
     view.groupChanges(function() {
-        var startPos = { column: 0, row: range.start.row };
+        var startPos = { col: 0, row: range.start.row };
         view.replaceCharacters({
             start: startPos,
-            end: { column: 0, row: range.end.row + 1 }
+            end: { col: 0, row: range.end.row + 1 }
         }, '');
 
         view.moveCursorTo(startPos);
@@ -88,7 +88,7 @@ exports.deleteLines = function(env, args, request) {
 var newline = function(model, view) {
     var selection = view.getSelectedRange();
     var position = selection.start;
-    var row = position.row, col = position.column;
+    var row = position.row, col = position.col;
 
     var lines = model.get('lines');
     var prefix = lines[row].substring(0, col);
@@ -125,7 +125,7 @@ exports.openLine = function(env, args, request) {
     var selection = view.getSelectedRange();
     var row = selection.end.row;
     var lines = model.get('lines');
-    view.moveCursorTo({ row: row, column: lines[row].length });
+    view.moveCursorTo({ row: row, col: lines[row].length });
 
     newline(model, view);
 };
@@ -134,7 +134,7 @@ exports.tab = function(env, args, request) {
     var view = env.get('view');
     var tabstop = settings.get('tabstop');
     var selection = view.getSelectedRange();
-    var count = tabstop - selection.start.column % tabstop;
+    var count = tabstop - selection.start.col % tabstop;
 
     var str = '';
     for (var i = 0; i < count; i++) {

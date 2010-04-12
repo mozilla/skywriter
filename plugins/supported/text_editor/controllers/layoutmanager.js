@@ -154,7 +154,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     _lastCharacterPosition: function() {
         return {
             row:    this.get('textLines').length - 1,
-            column: this._maximumWidth
+            col: this._maximumWidth
         };
     },
 
@@ -215,10 +215,10 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
      */
     boundingRect: function() {
         return this.rectsForRange({
-            start:  { row: 0, column: 0 },
+            start:  { row: 0, col: 0 },
             end:    {
                 row:    this.get('textLines').length - 1,
-                column: this._maximumWidth
+                col: this._maximumWidth
             }
         })[0];
     },
@@ -228,7 +228,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
      *
      * @return Returns an object with three properties:
      *   * row: The row of the character nearest the point.
-     *   * column: The column of the character nearest the point.
+     *   * col: The col of the character nearest the point.
      *   * partialFraction: The fraction of the horizontal distance between
      *       this character and the next character. The extreme left of the
      *       character is 0.0, while the extreme right of the character is 1.0.
@@ -247,13 +247,13 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         var textStorage = this.get('textStorage');
         var clampedPosition = textStorage.clampPosition({
             row:    Math.floor(y / this.get('lineHeight')),
-            column: Math.floor(x / characterWidth)
+            col: Math.floor(x / characterWidth)
         });
 
         var lineLength = textStorage.get('lines')[clampedPosition.row].length;
         return SC.mixin(clampedPosition, {
             partialFraction:
-                x < 0 || clampedPosition.column === lineLength ? 0.0 :
+                x < 0 || clampedPosition.col === lineLength ? 0.0 :
                 x % characterWidth / characterWidth
         });
     },
@@ -274,11 +274,11 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         return {
             start:  {
                 row:    Math.max(Math.floor(y / lineHeight), 0),
-                column: Math.max(Math.floor(x / characterWidth), 0)
+                col: Math.max(Math.floor(x / characterWidth), 0)
             },
             end:    {
                 row:    Math.floor((y + rect.height - 1) / lineHeight),
-                column: Math.floor((x + rect.width - 1) / characterWidth) + 1
+                col: Math.floor((x + rect.width - 1) / characterWidth) + 1
             }
         };
     },
@@ -289,7 +289,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     characterRectForPosition: function(position) {
         return this.rectsForRange({
             start:  position,
-            end:    { row: position.row, column: position.column + 1 }
+            end:    { row: position.row, col: position.col + 1 }
         })[0];
     },
 
@@ -347,8 +347,8 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
      */
     lineRectForRow: function(row) {
         return this.rectsForRange({
-            start:  { row: row, column: 0                   },
-            end:    { row: row, column: this._maximumWidth  }
+            start:  { row: row, col: 0                   },
+            end:    { row: row, col: this._maximumWidth  }
         })[0];
     },
 
@@ -357,7 +357,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         var characterWidth = this.get('characterWidth');
         var lineHeight = this.get('lineHeight');
         return {
-            x:      margin.left + characterWidth * position.column,
+            x:      margin.left + characterWidth * position.col,
             y:      margin.top + lineHeight * position.row,
             width:  characterWidth,
             height: lineHeight
@@ -374,8 +374,8 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         var margin = this.get('margin');
 
         var start = range.start, end = range.end;
-        var startRow = start.row, startColumn = start.column;
-        var endRow = end.row, endColumn = end.column;
+        var startRow = start.row, startColumn = start.col;
+        var endRow = end.row, endColumn = end.col;
 
         if (startRow === endRow) {
             // The simple rectangle case.

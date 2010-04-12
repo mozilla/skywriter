@@ -41,7 +41,7 @@ var SC = require('sproutcore/runtime').SC;
  * Returns the result of adding the two positions.
  */
 exports.addPositions = function(a, b) {
-    return { row: a.row + b.row, column: a.column + b.column };
+    return { row: a.row + b.row, col: a.col + b.col };
 };
 
 /**
@@ -50,7 +50,7 @@ exports.addPositions = function(a, b) {
  */
 exports.comparePositions = function(positionA, positionB) {
     var rowDiff = positionA.row - positionB.row;
-    return rowDiff === 0 ? positionA.column - positionB.column : rowDiff;
+    return rowDiff === 0 ? positionA.col - positionB.col : rowDiff;
 };
 
 /**
@@ -64,10 +64,10 @@ exports.equal = function(rangeA, rangeB) {
 exports.extendRange = function(range, delta) {
     var end = range.end;
     return {
-        start:  range.start,
-        end:    {
-            row:    end.row + delta.row,
-            column: end.column + delta.column
+        start: range.start,
+        end:   {
+            row: end.row + delta.row,
+            col: end.col + delta.col
         }
     };
 };
@@ -113,7 +113,7 @@ exports.intersectRangeSets = function(setA, setB) {
 
 exports.isZeroLength = function(range) {
     return range.start.row === range.end.row &&
-        range.start.column === range.end.column;
+        range.start.col === range.end.col;
 };
 
 /**
@@ -146,7 +146,7 @@ exports.rangeSetBoundaries = function(rangeSet) {
 
 exports.toString = function(range) {
     var start = range.start, end = range.end;
-    return '[ %@,%@ %@,%@ ]'.fmt(start.row, start.column, end.row, end.column);
+    return '[ %@,%@ %@,%@ ]'.fmt(start.row, start.col, end.row, end.col);
 };
 
 /**
@@ -155,10 +155,10 @@ exports.toString = function(range) {
 exports.unionRanges = function(a, b) {
     return {
         start:  a.start.row < b.start.row ||
-            (a.start.row === b.start.row && a.start.column < b.start.column) ?
+            (a.start.row === b.start.row && a.start.col < b.start.col) ?
             a.start : b.start,
         end:    a.end.row > b.end.row ||
-            (a.end.row === b.end.row && a.end.column > b.end.column) ?
+            (a.end.row === b.end.row && a.end.col > b.end.col) ?
             a.end : b.end
     };
 };

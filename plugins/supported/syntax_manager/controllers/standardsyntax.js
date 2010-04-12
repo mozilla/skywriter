@@ -110,16 +110,16 @@ exports.StandardSyntax = SC.Object.extend({
 
         var endColumn = line.length;
 
-        var column = start;
-        while (column !== endColumn) {
-            var str = stickySupported ? line : line.substring(column);
+        var col = start;
+        while (col !== endColumn) {
+            var str = stickySupported ? line : line.substring(col);
 
             if (states[state] === undefined) {
                 throw new Error('StandardSyntax: no such states "%@"'.
                     fmt(state));
             }
 
-            var range = { start: column, state: state };
+            var range = { start: col, state: state };
             var newState;
             var alternations = states[state];
             var alternationCount = alternations.length;
@@ -129,7 +129,7 @@ exports.StandardSyntax = SC.Object.extend({
                 var regex = alt.regex;
 
                 if (stickySupported) {
-                    regex.lastIndex = column;
+                    regex.lastIndex = col;
                 }
 
                 var result = regex.exec(str);
@@ -138,7 +138,7 @@ exports.StandardSyntax = SC.Object.extend({
                 }
 
                 var resultLength = result[0].length;
-                range.end = column + resultLength;
+                range.end = col + resultLength;
                 range.tag = alt.tag;
                 range.actions = this._parseActions(alt.then);
 
@@ -158,23 +158,23 @@ exports.StandardSyntax = SC.Object.extend({
 
             if (range.tag === undefined) {
                 // The (inefficient) default case.
-                range.end = column + 1;
+                range.end = col + 1;
                 range.tag = 'plain';
                 range.actions = [];
             }
 
-            if (column !== range.end) {
+            if (col !== range.end) {
                 // Only push the range if it spans at least one character.
                 attrs.push(range);
             }
 
-            column = range.end;
+            col = range.end;
         }
 
         if (end === null) {
             // Style the newline.
             attrs.push({
-                start:      column,
+                start:      col,
                 end:        null,
                 state:      state,
                 tag:        'plain',

@@ -131,12 +131,12 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
                 continue;
             }
 
-            // Clamp the start column and end column to fit within the line
+            // Clamp the start col and end col to fit within the line
             // text.
             var characters = textLine.characters;
             var length = characters.length;
-            var endColumn = Math.min(rangeEnd.column, length);
-            var startColumn = rangeStart.column;
+            var endColumn = Math.min(rangeEnd.col, length);
+            var startColumn = rangeStart.col;
             if (startColumn >= length) {
                 continue;
             }
@@ -149,20 +149,20 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             }
 
             // And finally draw the line.
-            var column = colorRanges[colorIndex].start;
-            while (column !== null && column < endColumn) {
+            var col = colorRanges[colorIndex].start;
+            while (col !== null && col < endColumn) {
                 var colorRange = colorRanges[colorIndex];
                 var colorRangeEnd = colorRange.end;
                 context.fillStyle = colorRange.color;
 
                 var characterRect = layoutManager.characterRectForPosition({
                     row:    row,
-                    column: column
+                    col: col
                 });
 
                 var snippet = colorRangeEnd === null ?
-                    characters.substring(column) :
-                    characters.substring(column, colorRangeEnd);
+                    characters.substring(col) :
+                    characters.substring(col, colorRangeEnd);
                 context.fillText(snippet, characterRect.x,
                     characterRect.y + lineAscent);
 
@@ -174,7 +174,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
                         characterRect.height - 1);
                 }
 
-                column = colorRangeEnd;
+                col = colorRangeEnd;
                 colorIndex++;
             }
         }
@@ -253,7 +253,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         var oldPosition = this._selectedRangeEndVirtual !== null ?
             this._selectedRangeEndVirtual : this._selectedRange.end;
         var newPosition = Range.addPositions(oldPosition,
-            { row: offset, column: 0 });
+            { row: offset, col: 0 });
 
         this.moveCursorTo(newPosition, true, true);
     },
@@ -292,14 +292,13 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         var startLine = textLines[newStartRow];
         var endLine = textLines[newEndRow];
         this.setSelection({
-            start:  {
-                row:    newStartRow,
-                column: Math.min(range.start.column,
-                            startLine.characters.length)
+            start: {
+                row: newStartRow,
+                col: Math.min(range.start.col, startLine.characters.length)
             },
-            end:    {
-                row:    newEndRow,
-                column: Math.min(range.end.column, endLine.characters.length)
+            end: {
+                row: newEndRow,
+                col: Math.min(range.end.col, endLine.characters.length)
             }
         });
     },
@@ -357,7 +356,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     _selectionPositionForPoint: function(point) {
         var position = this.get('layoutManager').characterAtPoint(point);
         return position.partialFraction < 0.5 ? position :
-            Range.addPositions(position, { row: 0, column: 1 });
+            Range.addPositions(position, { row: 0, col: 1 });
     },
 
     _syntaxManagerUpdatedSyntaxForRows: function(startRow, endRow) {
@@ -369,8 +368,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         layoutManager.updateTextRows(startRow, endRow);
 
         layoutManager.rectsForRange({
-                start:  { row: startRow,    column: 0 },
-                end:    { row: endRow,      column: 0 }
+                start:  { row: startRow, col: 0 },
+                end:    { row: endRow,   col: 0 }
             }).forEach(this.setNeedsDisplayInRect, this);
     },
 
@@ -555,7 +554,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
         this._invalidRange = null;
         this._selectedRange =
-            { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } };
+            { start: { row: 0, col: 0 }, end: { row: 0, col: 0 } };
 
         // Allow the user to change the fields of the padding object without
         // screwing up the prototype.
@@ -584,11 +583,11 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             if (lines.length > 1) {
                 destPosition = {
                     row:    range.start.row + lines.length - 1,
-                    column: lines[lines.length - 1].length
+                    col: lines[lines.length - 1].length
                 };
             } else {
                 destPosition = Range.addPositions(range.start,
-                    { row: 0, column: text.length });
+                    { row: 0, col: text.length });
             }
 
             this.moveCursorTo(destPosition);
@@ -663,8 +662,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
                 return true;
             }
 
-            pos.column -= (pos.column == line.length ? 1 : 0);
-            var skipOnDelimiter = !this.isDelimiter(line[pos.column]);
+            pos.col -= (pos.col == line.length ? 1 : 0);
+            var skipOnDelimiter = !this.isDelimiter(line[pos.col]);
 
             var thisTextView = this;
             var searchForDelimiter = function(pos, dir) {
@@ -677,11 +676,11 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
                 return pos + (dir == 1 ? 0 : 1);
             };
 
-            var columnFrom = searchForDelimiter(pos.column, -1);
-            var columnTo   = searchForDelimiter(pos.column, 1);
+            var colFrom = searchForDelimiter(pos.col, -1);
+            var colTo   = searchForDelimiter(pos.col, 1);
 
-            this.moveCursorTo({ row: pos.row, column: columnFrom });
-            this.moveCursorTo({ row: pos.row, column: columnTo }, true);
+            this.moveCursorTo({ row: pos.row, col: colFrom });
+            this.moveCursorTo({ row: pos.row, col: colTo }, true);
 
             break;
 
@@ -692,11 +691,11 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             this.setSelection({
                 start: {
                     row: pos.row,
-                    column: 0
+                    col: 0
                 },
                 end: {
                     row: pos.row,
-                    column: lines[pos.row].length
+                    col: lines[pos.row].length
                 }
             });
             break;
@@ -750,13 +749,13 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
         if (virtual) {
             var lineCount = textStorage.get('lines').length;
-            var row = position.row, column = position.column;
+            var row = position.row, col = position.col;
             if (row > 0 && row < lineCount) {
                 this._selectedRangeEndVirtual = position;
             } else {
                 this._selectedRangeEndVirtual = {
-                    row:    row < 1 ? 0 : lineCount - 1,
-                    column: column
+                    row: row < 1 ? 0 : lineCount - 1,
+                    col: col
                 };
             }
         } else {
@@ -774,9 +773,9 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             position = range.end;
         } else {
             // Yes, this is actually what Cocoa does... weird, huh?
-            position = { row: range.end.row, column: range.start.column };
+            position = { row: range.end.row, col: range.start.col };
         }
-        position = Range.addPositions(position, { row: 1, column: 0 });
+        position = Range.addPositions(position, { row: 1, col: 0 });
 
         this.moveCursorTo(position, false, true);
     },
@@ -805,8 +804,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         var range = Range.normalizeRange(this._getVirtualSelection(true));
         position = Range.addPositions({
             row: range.start.row,
-            column: this._getVirtualSelection().end.column
-        }, { row: -1, column: 0 });
+            col: this._getVirtualSelection().end.col
+        }, { row: -1, col: 0 });
 
         this.moveCursorTo(position, false, true);
     },
@@ -849,14 +848,14 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             if (isBackspace) {
                 var start = range.start;
                 var tabstop = settings.get('tabstop');
-                var row = start.row, column = start.column;
+                var row = start.row, col = start.col;
                 var line = lines[row];
 
-                if (column > 0 && column % tabstop === 0 &&
-                        new RegExp('^\\s{' + column + '}').test(line)) {
+                if (col > 0 && col % tabstop === 0 &&
+                        new RegExp('^\\s{' + col + '}').test(line)) {
                     // 'Smart tab' behavior: delete a tab worth of whitespace.
                     range = {
-                        start:  { row: row, column: column - tabstop },
+                        start:  { row: row, col: col - tabstop },
                         end:    range.end
                     };
                 } else {
@@ -941,8 +940,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         var lines = this.getPath('layoutManager.textStorage.lines');
         var lastRow = lines.length - 1;
         this.setSelection({
-            start:  { row: 0, column: 0 },
-            end:    { row: lastRow, column: lines[lastRow].length }
+            start:  { row: 0, col: 0 },
+            end:    { row: lastRow, col: lines[lastRow].length }
         });
     },
 
@@ -990,7 +989,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     textInserted: function(text) {
-        if(!keyboardManager.processKeyInput(text, this,
+        if (!keyboardManager.processKeyInput(text, this,
                 { isTextView: true, isCommandKey: false })) {
             this.insertText(text);
             this.resetKeyBuffers();

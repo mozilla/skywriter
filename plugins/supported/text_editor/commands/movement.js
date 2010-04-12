@@ -99,7 +99,7 @@ var moveOrSelectEnd = function(env, shift, inLine) {
     var lines = model.get('lines');
     var selectedRange = view.getSelectedRange();
     var row = inLine ? selectedRange.end.row : lines.length - 1;
-    view.moveCursorTo({ row: row, column: lines[row].length }, shift);
+    view.moveCursorTo({ row: row, col: lines[row].length }, shift);
 };
 
 exports.moveLineEnd = function(env, args, request) {
@@ -126,7 +126,7 @@ var moveOrSelectStart = function(env, shift, inLine) {
     var view = env.get('view');
     var range = view.getSelectedRange();
     var row = inLine ? range.end.row : 0;
-    var position = { row: row, column: 0 };
+    var position = { row: row, col: 0 };
     view.moveCursorTo(position, shift);
 };
 
@@ -150,20 +150,20 @@ exports.selectDocStart = function(env, args, request) {
 // Move or select to the next or previous word.
 //
 
-var seekNextStop = function(view, text, column, dir, rowChanged) {
+var seekNextStop = function(view, text, col, dir, rowChanged) {
     var isDelim;
     var countDelim = 0;
     var wasOverNonDelim = false;
 
     if (dir < 0) {
-        column--;
+        col--;
         if (rowChanged) {
             countDelim = 1;
         }
     }
 
-    while (column < text.length && column > -1) {
-        isDelim = view.isDelimiter(text[column]);
+    while (col < text.length && col > -1) {
+        isDelim = view.isDelimiter(text[col]);
         if (isDelim) {
             countDelim++;
         } else {
@@ -172,14 +172,14 @@ var seekNextStop = function(view, text, column, dir, rowChanged) {
         if ((isDelim || countDelim > 1) && wasOverNonDelim) {
             break;
         }
-        column += dir;
+        col += dir;
     }
 
     if (dir < 0) {
-        column++;
+        col++;
     }
 
-    return column;
+    return col;
 };
 
 var moveOrSelectNextWord = function(env, shiftDown) {
@@ -188,25 +188,25 @@ var moveOrSelectNextWord = function(env, shiftDown) {
 
     var selectedRange = view.getSelectedRange(true);
     var end = selectedRange.end;
-    var row = end.row, column = end.column;
+    var row = end.row, col = end.col;
 
     var currentLine = lines[row];
     var changedRow = false;
 
-    if (column >= currentLine.length) {
+    if (col >= currentLine.length) {
         row++;
         changedRow = true;
         if (row < lines.length) {
-            column = 0;
+            col = 0;
             currentLine = lines[row];
         } else {
             currentLine = '';
         }
     }
 
-    column = seekNextStop(view, currentLine, column, 1, changedRow);
+    col = seekNextStop(view, currentLine, col, 1, changedRow);
 
-    view.moveCursorTo({ row: row, column: column }, shiftDown);
+    view.moveCursorTo({ row: row, col: col }, shiftDown);
 };
 
 var moveOrSelectPreviousWord = function(env, shiftDown) {
@@ -215,27 +215,27 @@ var moveOrSelectPreviousWord = function(env, shiftDown) {
     var lines = model.get('lines');
     var selectedRange = view.getSelectedRange(true);
     var end = selectedRange.end;
-    var row = end.row, column = end.column;
+    var row = end.row, col = end.col;
 
     var currentLine = lines[row];
     var changedRow = false;
 
-    if (column > currentLine.length) {
-        column = currentLine.length;
-    } else if (column == 0) {
+    if (col > currentLine.length) {
+        col = currentLine.length;
+    } else if (col == 0) {
         row--;
         changedRow = true;
         if (row > -1) {
             currentLine = lines[row];
-            column = currentLine.length;
+            col = currentLine.length;
         } else {
             currentLine = '';
         }
     }
 
-    column = seekNextStop(view, currentLine, column, -1, changedRow);
+    col = seekNextStop(view, currentLine, col, -1, changedRow);
 
-    view.moveCursorTo({ row: row, column: column }, shiftDown);
+    view.moveCursorTo({ row: row, col: col }, shiftDown);
 };
 
 exports.moveNextWord = function(env, args, request) {

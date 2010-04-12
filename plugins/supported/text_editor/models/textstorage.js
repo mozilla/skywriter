@@ -62,14 +62,14 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
         var lines = this.get('lines');
         var row = position.row;
         if (row < 0) {
-            return { row: 0, column: 0 };
+            return { row: 0, col: 0 };
         } else if (row >= lines.length) {
             return this.range().end;
         }
 
         return {
             row:    row,
-            column: Math.max(0, Math.min(position.column, lines[row].length))
+            col: Math.max(0, Math.min(position.col, lines[row].length))
         };
     },
 
@@ -96,25 +96,25 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
         for (var i = Math.abs(count); i !== 0; i--) {
             if (forward) {
                 var rowLength = lines[pos.row].length;
-                if (pos.row === lineCount - 1 && pos.column === rowLength) {
+                if (pos.row === lineCount - 1 && pos.col === rowLength) {
                     return pos;
                 }
-                pos = pos.column === rowLength ?
-                    { row: pos.row + 1, column: 0               } :
-                    { row: pos.row,     column: pos.column + 1  };
+                pos = pos.col === rowLength ?
+                    { row: pos.row + 1, col: 0               } :
+                    { row: pos.row,     col: pos.col + 1  };
             } else {
-                if (pos.row === 0 && pos.column == 0) {
+                if (pos.row === 0 && pos.col == 0) {
                     return pos;
                 }
 
-                if (pos.column === 0) {
+                if (pos.col === 0) {
                     var lines = this.get('lines');
                     pos = {
                         row:    pos.row - 1,
-                        column: lines[pos.row - 1].length
+                        col: lines[pos.row - 1].length
                     };
                 } else {
-                    pos = { row: pos.row, column: pos.column - 1 };
+                    pos = { row: pos.row, col: pos.col - 1 };
                 }
             }
         }
@@ -128,7 +128,7 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
         var lines = this.get('lines');
         var start = range.start, end = range.end;
         var startRow = start.row, endRow = end.row;
-        var startColumn = start.column, endColumn = end.column;
+        var startColumn = start.col, endColumn = end.col;
         if (startRow === endRow) {
             return lines[startRow].substring(startColumn, endColumn);
         }
@@ -150,10 +150,10 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
     range: function() {
         var lines = this.get('lines');
         return {
-            start:  { row: 0, column: 0 },
+            start:  { row: 0, col: 0 },
             end:    {
                 row:    lines.length - 1,
-                column: lines[lines.length - 1].length
+                col: lines[lines.length - 1].length
             }
         };
     },
@@ -169,13 +169,13 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
 
         var oldStart = oldRange.start, oldEnd = oldRange.end;
         var oldStartRow = oldStart.row, oldEndRow = oldEnd.row;
-        var oldStartColumn = oldStart.column;
+        var oldStartColumn = oldStart.col;
 
         var lines = this.get('lines');
         addedLines[0] = lines[oldStartRow].substring(0, oldStartColumn) +
             addedLines[0];
         addedLines[addedLineCount - 1] +=
-            lines[oldEndRow].substring(oldEnd.column);
+            lines[oldEndRow].substring(oldEnd.col);
 
         lines.replace(oldStartRow, oldEndRow - oldStartRow + 1, addedLines);
 

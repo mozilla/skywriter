@@ -76,10 +76,10 @@ exports.EditorSearchController = SC.Object.extend({
 
     _makeRange: function(searchResult, row) {
         return {
-            start: { row: row, column: searchResult.index },
+            start: { row: row, col: searchResult.index },
             end: {
                 row: row,
-                column: searchResult.index + searchResult[0].length
+                col: searchResult.index + searchResult[0].length
             }
         };
     },
@@ -151,7 +151,7 @@ exports.EditorSearchController = SC.Object.extend({
         var lines = textView.getPath('layoutManager.textStorage.lines');
         var searchResult;
 
-        searchRegExp.lastIndex = startPos.column;
+        searchRegExp.lastIndex = startPos.col;
 
         var row;
         for (row = startPos.row; row < lines.length; row++) {
@@ -195,7 +195,7 @@ exports.EditorSearchController = SC.Object.extend({
         var searchResults;
 
         // Treat the first line specially.
-        var firstLine = lines[startPos.row].substring(0, startPos.column);
+        var firstLine = lines[startPos.row].substring(0, startPos.col);
         searchResults = this._findMatchesInString(firstLine);
 
         if (searchResults.length !== 0) {

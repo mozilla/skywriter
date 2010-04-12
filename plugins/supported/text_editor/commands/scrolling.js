@@ -41,7 +41,7 @@
  * Scrolls to the start of the document.
  */
 exports.scrollDocStart = function(env, args, request) {
-    env.get('view').scrollToPosition({ column: 0, row: 0 });
+    env.get('view').scrollToPosition({ col: 0, row: 0 });
 };
 
 /**

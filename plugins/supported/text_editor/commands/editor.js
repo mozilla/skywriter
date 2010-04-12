@@ -103,7 +103,7 @@ exports.gotoCommand = function(env, args, request) {
     }
 
     var view = env.get('view');
-    view.moveCursorTo({ row: args.line - 1, column: 0 });
+    view.moveCursorTo({ row: args.line - 1, col: 0 });
     view.focus();
 };
 

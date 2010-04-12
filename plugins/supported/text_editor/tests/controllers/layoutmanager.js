@@ -58,10 +58,7 @@ exports.testCharacterRectForPosition = function() {
     var characterWidth = layoutManager._characterWidth;
     var lineHeight = layoutManager._lineHeight;
 
-    t.deepEqual(layoutManager.characterRectForPosition({
-            row:    3,
-            column: 3
-        }), {
+    t.deepEqual(layoutManager.characterRectForPosition({ row: 3, col: 3 }), {
             x:      3 * characterWidth,
             y:      3 * lineHeight,
             width:  characterWidth,
@@ -90,8 +87,8 @@ exports.testDimensionsCalculation = function() {
         'character width times the length of the longest line');
 
     textStorage.replaceCharacters({
-        start:  { row: 2, column: 0 },
-        end:    { row: 3, column: 'Santa Claus Conquers the Martians'.length }
+        start:  { row: 2, col: 0 },
+        end:    { row: 3, col: 'Santa Claus Conquers the Martians'.length }
     }, 'SuperBabies: Baby Geniuses 2');
 
     rect = layoutManager.boundingRect();
@@ -120,7 +117,7 @@ exports.testInvalidRects = function() {
         }
     }));
 
-    textStorage.insertCharacters({ row: 1, column: 1 }, 'aaa');
+    textStorage.insertCharacters({ row: 1, col: 1 }, 'aaa');
     t.deepEqual(returnedRects[0], {
             x:      characterWidth,
             y:      lineHeight,
@@ -129,8 +126,8 @@ exports.testInvalidRects = function() {
         }, 'the returned rect and the expected rect after no lines changed');
 
     textStorage.deleteCharacters({
-        start:  { row: 1, column: 0 },
-        end:    { row: 2, column: 0 }
+        start:  { row: 1, col: 0 },
+        end:    { row: 2, col: 0 }
     });
     t.deepEqual(returnedRects[0], {
         x:      0,
@@ -147,7 +144,7 @@ exports.testInvalidRects = function() {
     }, 'the second returned rect and the expected rect after one line was ' +
         'deleted');
 
-    textStorage.insertCharacters({ row: 1, column: 1 }, 'bar\n');
+    textStorage.insertCharacters({ row: 1, col: 1 }, 'bar\n');
     t.deepEqual(returnedRects[0], {
         x:      characterWidth,
         y:      lineHeight,
@@ -178,14 +175,14 @@ exports.testPointToCharacterMapping = function() {
         x: leftMargin + 5 * characterWidth,
         y: topMargin + 2 * lineHeight
     });
-    t.deepEqual(pos, { column: 5, row: 2, partialFraction: 0.0 }, 'the ' +
+    t.deepEqual(pos, { col: 5, row: 2, partialFraction: 0.0 }, 'the ' +
         'reported character position and the expected character position');
 
     pos = layoutManager.characterAtPoint({
         x: 100000,
         y: topMargin + 4 * lineHeight
     });
-    t.deepEqual(pos, { column: 32, row: 4, partialFraction: 0.0 }, 'the ' +
+    t.deepEqual(pos, { col: 32, row: 4, partialFraction: 0.0 }, 'the ' +
         'reported character position and the expected character ' +
         'position for a character off the right side of the text area');
 };
@@ -201,8 +198,8 @@ exports.testRectsForRange = function() {
     var maximumWidth = layoutManager._maximumWidth;
 
     var rects = layoutManager.rectsForRange({
-        start:  { row: 2, column: 2 },
-        end:    { row: 5, column: 2 }
+        start:  { row: 2, col: 2 },
+        end:    { row: 5, col: 2 }
     });
     t.equal(rects.length, 3, 'the length of the rects returned for a ' +
         'complex range and 3');
@@ -229,8 +226,8 @@ exports.testRectsForRange = function() {
             'rect');
 
     rects = layoutManager.rectsForRange({
-        start:  { row: 2, column: 0 },
-        end:    { row: 5, column: 0 }
+        start:  { row: 2, col: 0 },
+        end:    { row: 5, col: 0 }
     });
     t.equal(rects.length, 1, 'the length of the rects returned for a ' +
         'line-spanning range and 1');
@@ -243,8 +240,8 @@ exports.testRectsForRange = function() {
             'rect');
 
     rects = layoutManager.rectsForRange({
-        start:  { row: 2, column: 3 },
-        end:    { row: 2, column: 10 }
+        start:  { row: 2, col: 3 },
+        end:    { row: 2, col: 10 }
     });
     t.equal(rects.length, 1, 'the length of the rects returned for a ' +
         'single-line range and 1');
