@@ -52,6 +52,7 @@ var DEBUG_TEXT_RANGES = false;
 exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     _dragPoint: null,
     _dragTimer: null,
+    _enclosingScrollView: null,
     _inChangeGroup: false,
     _insertionPointBlinkTimer: null,
     _insertionPointVisible: true,
@@ -248,6 +249,10 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         this._keyState = 'start';
     },
 
+    _parentViewChanged: function() {
+        this._updateEnclosingScrollView();
+    }.observes('parentView'),
+
     _performVerticalKeyboardSelection: function(offset) {
         var textStorage = this.getPath('layoutManager.textStorage');
         var oldPosition = this._selectedRangeEndVirtual !== null ?
@@ -316,27 +321,18 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     _scrollPage: function(scrollUp) {
-        var scrollable = this._scrollView();
+        var scrollView = this._enclosingScrollView;
+        if (SC.none(scrollView)) {
+            return;
+        }
+
         var visibleFrame = this.get('clippingFrame');
-        scrollable.scrollTo(visibleFrame.x, visibleFrame.y +
+        scrollView.scrollTo(visibleFrame.x, visibleFrame.y +
             (visibleFrame.height + this._lineAscent) * (scrollUp ? -1 : 1));
     },
 
-    /**
-     * @private
-     *
-     * Returns the parent scroll view, if one exists.
-     */
-    _scrollView: function() {
-        var view = this.get('parentView');
-        while (!SC.none(view) && !view.get('isScrollable')) {
-            view = view.get('parentView');
-        }
-        return view;
-    },
-
     _scrollWhileDragging: function() {
-        var scrollView = this._scrollView();
+        var scrollView = this._enclosingScrollView;
         if (SC.none(scrollView)) {
             return;
         }
@@ -349,6 +345,13 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
         scrollView.scrollBy(offset.x, offset.y);
         this._drag();
+    },
+
+    _scrolled: function() {
+        var scrollView = this._enclosingScrollView;
+        var x = scrollView.get('horizontalScrollOffset');
+        var y = scrollView.get('verticalScrollOffset');
+        this.notifyDelegates('textViewWasScrolled', { x: x, y: y });
     },
 
     // Returns the character closest to the given point, obeying the selection
@@ -371,6 +374,34 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
                 start:  { row: startRow, col: 0 },
                 end:    { row: endRow,   col: 0 }
             }).forEach(this.setNeedsDisplayInRect, this);
+    },
+
+    // Updates the _enclosingScrollView instance member and (re-)registers
+    // observers appropriately.
+    _updateEnclosingScrollView: function() {
+        if (!SC.none(this._enclosingScrollView)) {
+            var enclosingScrollView = this._enclosingScrollView;
+            enclosingScrollView.removeObserver('horizontalScrollOffset', this,
+                this._scrolled);
+            enclosingScrollView.removeObserver('verticalScrollOffset', this,
+                this._scrolled);
+        }
+
+        var view = this.get('parentView');
+        while (!SC.none(view) && !view.get('isScrollable')) {
+            view = view.get('parentView');
+        }
+
+        console.log("updateEnclosingScrollView", view);
+
+        this._enclosingScrollView = view;
+
+        if (SC.none(view)) {
+            return;
+        }
+
+        view.addObserver('horizontalScrollOffset', this, this._scrolled);
+        view.addObserver('verticalScrollOffset', this, this._scrolled);
     },
 
     // Instructs the syntax manager to begin highlighting from the given row to
@@ -560,6 +591,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         // screwing up the prototype.
         this.set('padding', SC.clone(this.get('padding')));
         this.get('layoutManager').addDelegate(this);
+
+        this._updateEnclosingScrollView();
 
         this._resize();
     },
@@ -904,15 +937,23 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     /**
+     * If this view is in a scrollable container, scrolls to the given point (in
+     * pixels).
+     */
+    scrollTo: function(point) {
+        var scrollView = this._enclosingScrollView;
+        if (SC.none(scrollView)) {
+            return;
+        }
+
+        scrollView.scrollTo(point);
+    },
+
+    /**
      * If this view is in a scrollable container, scrolls to the given
      * character position.
      */
     scrollToPosition: function(position) {
-        var scrollable = this._scrollView();
-        if (SC.none(scrollable)) {
-            return;
-        }
-
         var rect = this.get('layoutManager').
             characterRectForPosition(position);
         var rectX = rect.x, rectY = rect.y;
@@ -925,12 +966,21 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         var width = frame.width - padding.right;
         var height = frame.height - padding.bottom;
 
-        scrollable.scrollTo(rectX >= frameX &&
-            rectX + rectWidth < frameX + width ?
-            frameX : rectX - width / 2 + rectWidth / 2,
-            rectY >= frameY &&
-            rectY + rectHeight < frameY + height ?
-            frameY : rectY - height / 2 + rectHeight / 2);
+        var x;
+        if (rectX >= frameX && rectX + rectWidth < frameX + width) {
+            x = frameX;
+        } else {
+            x = rectX - width / 2 + rectWidth / 2;
+        }
+
+        var y;
+        if (rectY >= frameY && rectY + rectHeight < frameY + height) {
+            y = frameY;
+        } else {
+            y = rectY - height / 2 + rectHeight / 2;
+        }
+
+        this.scrollTo({ x: x, y: y });
     },
 
     /**
