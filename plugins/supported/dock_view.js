@@ -37,9 +37,9 @@
 
 "define metadata";
 ({
-	'description': "A view that supports docked panels on the sides"
+	"description": "A view that supports docked panels on the sides"
 });
-'end';
+"end";
 
 var SC = require('sproutcore/runtime').SC;
 

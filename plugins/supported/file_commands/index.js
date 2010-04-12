@@ -179,7 +179,7 @@ exports.rmCommand = function(env, args, request) {
     path = getCompletePath(env, path);
 
     files.remove(path).then(function() {
-        request.done(path + " deleted.');
+        request.done(path + ' deleted.');
     }, function(error) {
         request.doneWithError('Unable to delete (' + error.message + ')');
     });

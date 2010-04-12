@@ -37,29 +37,29 @@
 
 "define metadata";
 ({
-    'description': "HTML syntax highlighter",
-    'dependencies': {
-        'syntax_manager': "0.0"
+    "description": "HTML syntax highlighter",
+    "dependencies": {
+        "syntax_manager": "0.0"
     },
-    'provides': [
+    "provides": [
         {
-            'ep': 'fileextension',
-            'name': 'htm',
-            'syntax': 'html'
+            "ep": "fileextension",
+            "name": "htm",
+            "syntax": "html"
         },
         {
-            'ep': 'fileextension',
-            'name': 'html',
-            'syntax': 'html'
+            "ep": "fileextension",
+            "name": "html",
+            "syntax": "html"
         },
         {
-            'ep': 'syntax',
-            'name': 'html',
-            'pointer': "#HTMLSyntax"
+            "ep": "syntax",
+            "name": "html",
+            "pointer": "#HTMLSyntax"
         }
     ]
 });
-'end';
+"end";
 
 require('sproutcore/runtime').SC;
 var StandardSyntax = require('syntax_manager:controllers/standardsyntax').

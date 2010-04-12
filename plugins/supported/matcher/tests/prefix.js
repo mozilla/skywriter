@@ -53,7 +53,7 @@ exports.testPrefixMatching = function() {
     });
 
     t.equal(items.length, 1, 'the length of the list of matches when ' +
-        'searching for \"b\" and 1");
+        'searching for \"b\" and 1');
     t.equal(items[0].item, 'bar', 'the text of the first matched item when ' +
         'searching for \"b\" and \"foo\"');
 

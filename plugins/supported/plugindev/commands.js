@@ -112,14 +112,14 @@ exports.list = function(env, args, request) {
     var plugins = catalog.getPlugins({
         sortBy: ['type', 'name']
     });
-    var output = ['<div class='plugin_list'>'];
+    var output = ['<div class="plugin_list">'];
     var lastPluginType = null;
     plugins.forEach(function(plugin) {
         if (plugin.type != lastPluginType) {
             if (lastPluginType) {
                 output.push('</table></div>');
             }
-            output.push('<div class='plugin_group'>');
+            output.push('<div class="plugin_group">');
             output.push('<h2>');
             output.push(plugin.type);
             output.push(' plugins</h2><table>');

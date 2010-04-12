@@ -35,13 +35,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var Promise = require('bespin:promise').Promise;
+var catalog = require('bespin:plugins').catalog;
+
 var SC = require('sproutcore/runtime').SC;
+
 var File = require('filesystem:index').File;
-var History = require('edit_session:history').History;
 var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
 var TextStorage = require('text_editor:models/textstorage').TextStorage;
-var catalog = require('bespin:plugins').catalog;
 var m_path = require('filesystem:path');
+
+var History = require('edit_session:history').History;
 
 /*
 * A Buffer connects a model and file together.
@@ -64,7 +68,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
         if (SC.none(file)) {
             return;
         }
-        
+
         var ext = file.extension();
         if (ext === null) {
             ext = '';
@@ -74,14 +78,14 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
 
     /*
     * The text model that is holding the content of the file.
-    */ 
+    */
     model: null,
 
     /**
      * The syntax manager associated with this file.
      */
     syntaxManager: null,
-    
+
     /*
     * The filesystem.File object that is associated with this Buffer.
     * If this Buffer has not been saved to a file, this will be null.
@@ -95,7 +99,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
         var self = this;
         if (newFile !== undefined) {
             this._file = newFile;
-            
+
             if (SC.none(newFile)) {
                 var model = self.get('model');
                 model.replaceCharacters(model.range(), '');
@@ -120,7 +124,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
 
         this._refreshSyntaxManager();
     },
-    
+
     /*
     * This is like calling set('file', value) except this returns
     * a promise so that you can take action once the contents have
@@ -129,7 +133,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
     changeFile: function(newFile) {
         var self = this;
         this.changeFileOnly(newFile);
-        
+
         // are we changing to a new file?
         if (SC.none(newFile)) {
             var model = self.get('model');
@@ -138,7 +142,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
             pr.resolve(this);
             return pr;
         }
-        
+
         return newFile.loadContents().then(function(contents) {
             SC.run(function() {
                 var model = self.get('model');
@@ -147,10 +151,10 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
             return self;
         });
     },
-    
+
     /*
      * Normally, you would just call set('file', fileObject) on a Buffer.
-     * However, that will replace the contents of the model (reloading the file), 
+     * However, that will replace the contents of the model (reloading the file),
      * which is not always what you want. Use this method to change the
      * file that is tracked by this Buffer without replacing the contents of the
      * model.
@@ -159,14 +163,14 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
         this._file = newFile;
         this.propertyDidChange('file');
     },
-    
+
     /*
      * reload the existing file contents from the server.
      */
     reload: function() {
         var file = this.get('file');
         var self = this;
-        
+
         return file.loadContents().then(function(contents) {
             var model = self.get('model');
             model.replaceCharacters(model.range(), contents);
@@ -175,7 +179,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
             // model.set('value', contents);
         });
     },
-    
+
     /*
      * Save the contents of this buffer. Returns a promise that resolves
      * once the file is saved.
@@ -194,7 +198,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
      */
     saveAs: function(newFile) {
         var promise = new Promise();
-        
+
         newFile.saveContents(this.getPath('model.value')).then(function() {
             this.changeFileOnly(newFile);
             promise.resolve();
@@ -224,12 +228,12 @@ exports.EditSession = SC.Object.extend({
      * the focus.
      */
     currentView: null,
-    
+
     /*
      * The 'current' Buffer is the one that backs the currentView.
      */
     currentBuffer: null,
-    
+
     /*
      * The 'current' user.
      */
@@ -239,7 +243,7 @@ exports.EditSession = SC.Object.extend({
      * The history object to store file history in.
      */
     history: null,
-    
+
     bufferFileChanged: function(sender, file) {
         if (!SC.none(file)) {
             this.get('history').addPath(file.path);
