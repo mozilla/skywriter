@@ -66,7 +66,8 @@ class Manifest(object):
     def __init__(self, include_core_test=False, plugins=None,
         search_path=None, sproutcore=None, bespin=None,
         output_dir="build", include_sample=False,
-        boot_file=None, unbundled_plugins=None):
+        boot_file=None, unbundled_plugins=None,
+        separate_sproutcore=False):
 
         self.include_core_test = include_core_test
         self.plugins = plugins
@@ -128,6 +129,8 @@ will be deleted before the build.""")
         
         if unbundled_plugins:
             self.unbundled_plugins = path(unbundled_plugins).abspath()
+            
+        self.separate_sproutcore = separate_sproutcore
 
     @classmethod
     def from_json(cls, json_string, overrides=None):
@@ -199,8 +202,9 @@ will be deleted before the build.""")
         output_js.write(inline_file.bytes())
 
         # include SproutCore
-        self._write_sproutcore_file(output_js, "sproutcore.js")
-        self._write_sproutcore_file(output_css, "sproutcore.css")
+        if not self.separate_sproutcore:
+            self._write_sproutcore_file(output_js, "sproutcore.js")
+            self._write_sproutcore_file(output_css, "sproutcore.css")
 
         # include coretest if desired
         if self.include_core_test:
@@ -292,7 +296,11 @@ tiki.require("bespin:plugins").catalog.load(%s);
         output_dir.makedirs()
 
         package_list = self.get_package_list()
-
+        
+        if self.separate_sproutcore:
+            self._write_sproutcore_file((output_dir / "sproutcore.js").open("w"), "sproutcore.js")
+            self._write_sproutcore_file((output_dir / "sproutcore.css").open("w"), "sproutcore.css")
+            
         jsfilename = output_dir / "BespinEmbedded.js"
         cssfilename = output_dir / "BespinEmbedded.css"
         jsfile = jsfilename.open("w")
