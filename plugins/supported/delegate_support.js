@@ -82,6 +82,16 @@ exports.MultiDelegateSupport = {
                 delegate[method].apply(delegate, args);
             }
         });
+    },
+
+    /**
+     * Removes a delegate from the list of delegates.
+     */
+    removeDelegate: function(oldDelegate) {
+        var delegates = this.get('delegates');
+        this.set('delegates', delegates.filter(function(delegate) {
+            return delegate !== oldDelegate;
+        }));
     }
 };
 
