@@ -184,6 +184,9 @@ exports.applicationController = SC.Object.create({
         mainPane.appendChild(applicationView);
 
         this._setupSession();
+
+        var textView = exports.session.get('currentView');
+        textView.focus();
     },
 
     _setupSession: function() {
@@ -203,9 +206,6 @@ exports.applicationController = SC.Object.create({
         exports.session.set('currentView', textView);
         exports.session.set('currentBuffer', buffer);
         exports.session.loadMostRecentOrNew();
-        setTimeout(function() {
-            textView.focus();
-        }, 25);
     },
 
     init: function() {
