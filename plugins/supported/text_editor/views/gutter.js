@@ -48,10 +48,10 @@ var InteriorGutterView = CanvasView.extend({
      * TODO: Convert to SproutCore's theme system.
      */
     theme: {
-        gutterStyle: "#4c4a41",
-        lineNumberColor: "#e5c138",
-        lineNumberFont: "10pt Monaco, Lucida Console, monospace",
-        editorTextFont: "10pt Monaco, Lucida Console, monospace"
+        gutterStyle: '#4c4a41',
+        lineNumberColor: '#e5c138',
+        lineNumberFont: '10pt Monaco, Lucida Console, monospace',
+        editorTextFont: '10pt Monaco, Lucida Console, monospace'
     },
 
     _frameChanged: function() {
@@ -167,7 +167,7 @@ exports.GutterView = SC.View.extend({
      * TODO: Convert to a SproutCore theme or plugin.
      */
     theme: {
-        lineNumberFont: "10pt Monaco, Lucida Console, monospace"
+        lineNumberFont: '10pt Monaco, Lucida Console, monospace'
     },
 
     /**

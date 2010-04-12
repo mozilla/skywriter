@@ -42,18 +42,18 @@ var t = require('plugindev');
 exports.testBinarySearch = function() {
     var compare = function(a, b) { return a - b; };
     t.equal(ArrayUtils.binarySearch([ 1, 2, 3, 4, 5 ], 0, compare), null,
-        "the result of searching for 0 in [1..5] and null");
+        'the result of searching for 0 in [1..5] and null');
     t.equal(ArrayUtils.binarySearch([ 1, 2, 3, 4, 5 ], 1, compare), 0,
-        "the result of searching for 1 in [1..5] and 0");
+        'the result of searching for 1 in [1..5] and 0');
     t.equal(ArrayUtils.binarySearch([ 1, 2, 3, 4, 5 ], 2, compare), 1,
-        "the result of searching for 2 in [1..5] and 1");
+        'the result of searching for 2 in [1..5] and 1');
     t.equal(ArrayUtils.binarySearch([ 1, 2, 3, 4, 5 ], 3, compare), 2,
-        "the result of searching for 3 in [1..5] and 2");
+        'the result of searching for 3 in [1..5] and 2');
     t.equal(ArrayUtils.binarySearch([ 1, 2, 3, 4, 5 ], 4, compare), 3,
-        "the result of searching for 4 in [1..5] and 3");
+        'the result of searching for 4 in [1..5] and 3');
     t.equal(ArrayUtils.binarySearch([ 1, 2, 3, 4, 5 ], 5, compare), 4,
-        "the result of searching for 5 in [1..5] and 4");
+        'the result of searching for 5 in [1..5] and 4');
     t.equal(ArrayUtils.binarySearch([ 1, 2, 3, 4, 5 ], 6, compare), null,
-        "the result of searching for 6 in [1..5] and null");
+        'the result of searching for 6 in [1..5] and null');
 };
 

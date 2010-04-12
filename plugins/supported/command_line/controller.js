@@ -151,7 +151,7 @@ exports.cliController = SC.Object.create({
             if (!command) {
                 hints.pushObject(hint.Hint.create({
                     level: hint.Level.Error,
-                    element: "Command not found."
+                    element: 'Command not found.'
                 }));
                 this.set('input', '');
                 return;

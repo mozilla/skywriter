@@ -151,7 +151,7 @@ exports.MemorySettings = SC.Object.extend({
             });
 
             if (!inline) {
-                console.warn('About to set string version of ', key, "delaying typed set.");
+                console.warn('About to set string version of ', key, 'delaying typed set.');
                 this.superclass(key, value);
             }
         }
@@ -174,17 +174,17 @@ exports.MemorySettings = SC.Object.extend({
      */
     addSetting: function(settingExt) {
         if (!settingExt.name) {
-            console.error("Setting.name == undefined. Ignoring.", settingExt);
+            console.error('Setting.name == undefined. Ignoring.', settingExt);
             return;
         }
 
         if (!settingExt.defaultValue === undefined) {
-            console.error("Setting.defaultValue == undefined", settingExt);
+            console.error('Setting.defaultValue == undefined', settingExt);
         }
 
         types.isValid(settingExt.defaultValue, settingExt.type).then(function(valid) {
             if (!valid) {
-                console.warn("!Setting.isValid(Setting.defaultValue)", settingExt);
+                console.warn('!Setting.isValid(Setting.defaultValue)', settingExt);
             }
 
             // Set the default value up.

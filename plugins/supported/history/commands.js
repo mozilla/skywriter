@@ -61,17 +61,17 @@ exports.historyNextCommand = function(env, args, request) {
  */
 exports.historyCommand = function(env, args, request) {
     var output = [];
-    output.push("<table>");
+    output.push('<table>');
     var count = 1;
 
     history.requests.forEach(function(request) {
-        output.push("<tr>");
+        output.push('<tr>');
         output.push('<th>' + count + '</th>');
-        output.push('<td>' + request.typed + "</td>");
-        output.push("</tr>");
+        output.push('<td>' + request.typed + '</td>');
+        output.push('</tr>');
         count++;
     });
-    output.push("</table>");
+    output.push('</table>');
 
     request.done(output.join(''));
 };

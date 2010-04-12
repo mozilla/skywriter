@@ -65,7 +65,7 @@ exports.ServerPersister = SC.Object.extend({
                 } catch (ex) {
                     var trace = new Trace(ex, true);
                     console.group('Error loading settings');
-                    console.error('Attempting ', setting, "=", data[setting]);
+                    console.error('Attempting ', setting, '=', data[setting]);
                     console.error(ex);
                     trace.log(3);
                     console.groupEnd();
@@ -91,7 +91,7 @@ exports.ServerPersister = SC.Object.extend({
         try {
             var settingsString = JSON.stringify(data);
         } catch (e) {
-            console.error("Unable to JSONify the settings! " + e);
+            console.error('Unable to JSONify the settings! ' + e);
             return;
         }
         // Send it to the server

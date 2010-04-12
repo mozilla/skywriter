@@ -51,7 +51,7 @@ exports.InMemoryHistory = SC.Object.extend({
      */
     requestsChanged: function() {
         this.pointer = history.requests.length;
-    }.observes("canon:request#history.requests.[]"),
+    }.observes('canon:request#history.requests.[]'),
 
     /**
      * Increment the 'current entry' pointer

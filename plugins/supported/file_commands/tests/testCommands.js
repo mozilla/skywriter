@@ -53,7 +53,7 @@ var getNewRoot = function() {
 var getEnv = function() {
     var root = getNewRoot();
     var buffer = edit_session.Buffer.create();
-    
+
     var session = edit_session.EditSession.create({
         currentBuffer: buffer
     });
@@ -70,14 +70,14 @@ exports.testFilesCommand = function() {
     var testpr = new Promise();
     request.promise.then(function() {
         output = request.outputs.join('');
-        t.ok(output.indexOf("foo/<br/>") > -1, 'foo/ should be in output');
-        t.ok(output.indexOf("atTheTop.js<br/>") > -1, 
+        t.ok(output.indexOf('foo/<br/>') > -1, 'foo/ should be in output');
+        t.ok(output.indexOf('atTheTop.js<br/>') > -1,
             'atTheTop.js should be in output');
         testpr.resolve();
     });
-    
+
     file_commands.filesCommand(env, {path: '/'}, request);
-    
+
     return testpr;
 };
 
@@ -91,24 +91,24 @@ exports.testOpenFileWithNoOpenFile = function() {
         t.equal(f.path, '/foo/bar/3.txt', 'File should have been set');
         testpr.resolve();
     });
-    
+
     file_commands.openCommand(env, {path: '/foo/bar/3.txt'}, request);
 };
 
 exports.testFilesCommandDefaultsToRoot = function() {
     var env = getEnv();
-    
+
     var testpr = new Promise();
-    
+
     var request = Request.create();
     request.promise.then(function() {
         output = request.outputs.join('');
-        t.ok(output.indexOf("foo/<br/>") > -1, 'foo/ should be in output');
-        t.ok(output.indexOf("atTheTop.js<br/>") > -1, 
+        t.ok(output.indexOf('foo/<br/>') > -1, 'foo/ should be in output');
+        t.ok(output.indexOf('atTheTop.js<br/>') > -1,
             'atTheTop.js should be in output');
         testpr.resolve();
     });
-    
+
     file_commands.filesCommand(env, {path: null}, request);
     return testpr;
 };
@@ -118,18 +118,18 @@ exports.testFilesAreRelativeToCurrentOpenFile = function() {
     var buffer = env.get('buffer');
     var files = env.get('files');
     buffer.changeFileOnly(files.getFile('foo/1.txt'));
-    
+
     var testpr = new Promise();
-    
+
     var request = Request.create();
     request.promise.then(function() {
         output = request.outputs.join('');
-        t.ok(output.indexOf("1.txt<br/>") > -1, '1.txt should be in the output');
-        t.ok(output.indexOf("2.txt<br/>") > -1, 
+        t.ok(output.indexOf('1.txt<br/>') > -1, '1.txt should be in the output');
+        t.ok(output.indexOf('2.txt<br/>') > -1,
             '2.txt should be in output');
         testpr.resolve();
     });
-    
+
     file_commands.filesCommand(env, {path: null}, request);
     return testpr;
 };
@@ -140,14 +140,14 @@ exports.testFilesListingInDirectoryRelativeToOpenFile = function() {
     var files = env.get('files');
     buffer.changeFileOnly(files.getFile('foo/1.txt'));
     var testpr = new Promise();
-    
+
     var request = Request.create();
     request.promise.then(function() {
         output = request.outputs.join('');
-        t.ok(output.indexOf("3.txt<br/>") > -1, '3.txt should be in the output');
+        t.ok(output.indexOf('3.txt<br/>') > -1, '3.txt should be in the output');
         testpr.resolve();
     });
-    
+
     file_commands.filesCommand(env, {path: 'bar/'}, request);
     return testpr;
 };
@@ -157,7 +157,7 @@ exports.testMakeDirectoryForNewDirectory = function() {
     var request = Request.create();
     var testpr = new Promise();
     var files = env.get('files');
-    
+
     request.promise.then(function() {
         files.listDirectory('/foo/').then(function(contents) {
             t.equal(contents.length, 4, 'should have four items in directory');
@@ -169,6 +169,6 @@ exports.testMakeDirectoryForNewDirectory = function() {
     });
 
     file_commands.mkdirCommand(env, {path: '/foo/one/'}, request);
-    
+
     return testpr;
 };

@@ -123,7 +123,7 @@ exports.CanvasView = SC.View.extend({
 
     didCreateLayer: function() {
         arguments.callee.base.apply(this, arguments);
-        this._cvCanvasDom = this.$("#" + this._cvCanvasId)[0];
+        this._cvCanvasDom = this.$('#' + this._cvCanvasId)[0];
         this.redraw();
     },
 

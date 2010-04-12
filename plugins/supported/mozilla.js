@@ -40,18 +40,18 @@
 
 "define metadata";
 ({
-    'provides': [
+    "provides": [
         {
-            'ep': 'command',
-            'name': 'feedback',
-            'description': "Let us know how we can make Bespin better.",
-            'pointer': "#feedbackCommand"
+            "ep": "command",
+            "name": "feedback",
+            "description": "Let us know how we can make Bespin better.",
+            "pointer": "#feedbackCommand"
         }
     ]
 });
-'end';
+"end";
 
 exports.feedbackCommand = function(env, args, request) {
-    window.open("http://feedback.mozillalabs.com/forums/49087-bespin",
+    window.open('http://feedback.mozillalabs.com/forums/49087-bespin',
         'feedback');
 };

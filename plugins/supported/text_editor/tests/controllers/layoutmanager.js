@@ -40,14 +40,14 @@ var t = require('plugindev');
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 
 var PANGRAMS =
-    "Cwm fjord bank glyphs vext quiz.\n" +
-    "Squdgy fez, blank jimp crwth vox!\n" +
-    "Jink cwm, zag veldt, fob qursh pyx.\n" +
-    "Veldt jynx grimps waqf zho buck.\n" +
-    "Junky qoph-flags vext crwd zimb.\n" +
-    "Quartz glyph job vex'd cwm finks.\n" +
-    "Cwm fjord veg balks nth pyx quiz.\n" +
-    "Vext cwm fly, zing, jabs kurd qoph.\n";
+    'Cwm fjord bank glyphs vext quiz.\n' +
+    'Squdgy fez, blank jimp crwth vox!\n' +
+    'Jink cwm, zag veldt, fob qursh pyx.\n' +
+    'Veldt jynx grimps waqf zho buck.\n' +
+    'Junky qoph-flags vext crwd zimb.\n' +
+    'Quartz glyph job vex\'d cwm finks.\n' +
+    'Cwm fjord veg balks nth pyx quiz.\n' +
+    'Vext cwm fly, zing, jabs kurd qoph.\n';
 
 exports.testCharacterRectForPosition = function() {
     var layoutManager = LayoutManager.create({
@@ -67,7 +67,7 @@ exports.testCharacterRectForPosition = function() {
             width:  characterWidth,
             height: lineHeight
         }, 'the character rect and the expected rect for the character at ' +
-        "position (3,3)");
+        'position (3,3)');
 };
 
 exports.testDimensionsCalculation = function() {
@@ -77,10 +77,10 @@ exports.testDimensionsCalculation = function() {
 
     var textStorage = layoutManager.get('textStorage');
     textStorage.set('value',
-        "Battlefield Earth\n" +
-        "The Star Wars Holiday Special\n" +
-        "Manos: The Hands of Fate\n" +
-        "Santa Claus Conquers the Martians\n");
+        'Battlefield Earth\n' +
+        'The Star Wars Holiday Special\n' +
+        'Manos: The Hands of Fate\n' +
+        'Santa Claus Conquers the Martians\n');
 
     var rect = layoutManager.boundingRect();
     t.equal(rect.height, layoutManager._lineHeight * 5,
@@ -108,7 +108,7 @@ exports.testInvalidRects = function() {
     });
 
     var textStorage = layoutManager.get('textStorage');
-    textStorage.set('value', "foo\nbar\nbaz\nboo\n");
+    textStorage.set('value', 'foo\nbar\nbaz\nboo\n');
 
     var characterWidth = layoutManager._characterWidth;
     var lineHeight = layoutManager._lineHeight;
@@ -147,7 +147,7 @@ exports.testInvalidRects = function() {
     }, 'the second returned rect and the expected rect after one line was ' +
         'deleted');
 
-    textStorage.insertCharacters({ row: 1, column: 1 }, "bar\n");
+    textStorage.insertCharacters({ row: 1, column: 1 }, 'bar\n');
     t.deepEqual(returnedRects[0], {
         x:      characterWidth,
         y:      lineHeight,
@@ -233,13 +233,13 @@ exports.testRectsForRange = function() {
         end:    { row: 5, column: 0 }
     });
     t.equal(rects.length, 1, 'the length of the rects returned for a ' +
-        "line-spanning range and 1");
+        'line-spanning range and 1');
     t.deepEqual(rects[0], {
             x:      0,
             y:      2 * lineHeight,
             width:  characterWidth * maximumWidth,
             height: 3 * lineHeight
-        }, "the rect returned for a line-spanning range and the expected " +
+        }, 'the rect returned for a line-spanning range and the expected ' +
             'rect');
 
     rects = layoutManager.rectsForRange({
@@ -247,12 +247,12 @@ exports.testRectsForRange = function() {
         end:    { row: 2, column: 10 }
     });
     t.equal(rects.length, 1, 'the length of the rects returned for a ' +
-        "single-line range and 1");
+        'single-line range and 1');
     t.deepEqual(rects[0], {
             x:      3 * characterWidth,
             y:      2 * lineHeight,
             width:  characterWidth * 7,
             height: lineHeight
-        }, "the rect returned for a single-line range and the expected rect");
+        }, 'the rect returned for a single-line range and the expected rect');
 };
 

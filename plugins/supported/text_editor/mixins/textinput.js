@@ -161,8 +161,8 @@ exports.TextInput = {
             var textFieldContext = context.begin('textarea');
             this._TextInput_textFieldId = SC.guidFor(textFieldContext);
             textFieldContext.id(this._TextInput_textFieldId);
-            textFieldContext.attr('style', "position: absolute; " +
-                "z-index: -99999; top: 0px; left: 0px; width: 0px; " +
+            textFieldContext.attr('style', 'position: absolute; ' +
+                'z-index: -99999; top: 0px; left: 0px; width: 0px; ' +
                 'height: 0px');
             textFieldContext.end();
         }
@@ -176,7 +176,7 @@ exports.TextInput = {
     didCreateLayer: function() {
         arguments.callee.base.apply(this, arguments);
 
-        var textField = this.$("#" + this._TextInput_textFieldId)[0];
+        var textField = this.$('#' + this._TextInput_textFieldId)[0];
         this._TextInput_textFieldDom = textField;
         var self = this;
 

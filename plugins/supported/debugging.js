@@ -212,16 +212,16 @@ exports.readonlyCommand = function(env, args, request) {
         msg = 'Toggling read only to ' + flag;
     } else if (flag == 'off' || flag == 'false') {
         flag = false;
-        msg = "No more read-only!";
+        msg = 'No more read-only!';
     } else {
         flag = true;
-        msg = "Read only mode turned on.";
+        msg = 'Read only mode turned on.';
     }
     editor.setReadOnly(flag);
     request.done(msg);
 };
 
-var templates = { 'in': "for (var key in object) {\n\n}" };
+var templates = { 'in': 'for (var key in object) {\n\n}' };
 
 /**
  * The 'template' command
@@ -238,7 +238,7 @@ exports.templateCommand = function(env, args, request) {
                 names.push(name);
             }
         }
-        var complain = (!type || type === '') ? "' : 'Unknown pattern '" + type + "'.<br/>";
+        var complain = (!type || type === '') ? '' : 'Unknown pattern \'' + type + '\'.<br/>';
         request.doneWithError(complain + 'Known patterns: ' + names.join(", "));
     }
 };
@@ -246,13 +246,13 @@ exports.templateCommand = function(env, args, request) {
 var uses = {
     sound: function() {
         this.editor.model.insertChunk({ row: 3, col: 0 },
-            '  <script type='text/javascript' src='soundmanager2.js'></script>\n');
+            '  <script type="text/javascript" src="soundmanager2.js"></script>\n');
         this.editor.model.insertChunk({ row: 4, col: 0 },
             "  <script>\n  var sound; \n  soundManager.onload = function() {\n    sound =  soundManager.createSound('mySound','/path/to/mysoundfile.mp3');\n  }\n  </script>\n");
     },
     jquery: function() {
         var jslib = 'http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.min.js';
-        var script = '<script type='text/javascript' src="' + jslib + '"></script>\n';
+        var script = '<script type="text/javascript" src="' + jslib + '"></script>\n';
         this.editor.model.insertChunk({ row: 3, col: 0 }, script);
     }
 };
@@ -264,7 +264,7 @@ exports.useCommand = function(env, args, request) {
     var type = args.type;
     if (util.isFunction(this.uses[type])) {
         this.uses[type]();
-        request.done('Added code for ' + type + ".<br>Please check the results carefully.");
+        request.done('Added code for ' + type + '.<br>Please check the results carefully.');
     } else {
         var names = [];
         for (var name in this.uses) {
@@ -272,8 +272,8 @@ exports.useCommand = function(env, args, request) {
                 names.push(name);
             }
         }
-        var complain = (!type || type === '') ? '' : "Unknown pattern '" + type + "'.<br/>";
-        request.doneWithError(complain + 'Known patterns: ' + names.join(", "));
+        var complain = (!type || type === '') ? '' : 'Unknown pattern \'' + type + '\'.<br/>';
+        request.doneWithError(complain + 'Known patterns: ' + names.join(', '));
     }
 };
 
@@ -285,15 +285,15 @@ exports.slowCommand = function(env, args, request) {
     var start = new Date().getTime();
 
     var parent = document.createElement('div');
-    var prefix = document.createTextNode("Working (");
+    var prefix = document.createTextNode('Working (');
     parent.appendChild(prefix);
     var counter = document.createElement('span');
     parent.appendChild(counter);
-    var suffix = document.createTextNode("%) ...");
+    var suffix = document.createTextNode('%) ...');
     parent.appendChild(suffix);
 
     var tick = document.createElement('img');
-    tick.setAttribute('src', "https://bespin.mozillalabs.com/images/splash_icn_register.png");
+    tick.setAttribute('src', 'https://bespin.mozillalabs.com/images/splash_icn_register.png');
 
     var interval = setInterval(function() {
         var interval = (new Date().getTime() - start) / 1000;
@@ -323,7 +323,7 @@ exports.promiseCommand = function(env, args, request) {
     var count = 0;
     dig.forEach(function(promise) {
         count++;
-        console.log("- Promise " + count + ': ', promise);
+        console.log('- Promise ' + count + ': ', promise);
     });
-    request.done(count + ' ' + args.which + " promises. Details logged to console.");
+    request.done(count + ' ' + args.which + ' promises. Details logged to console.');
 };

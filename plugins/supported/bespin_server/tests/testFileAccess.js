@@ -34,7 +34,7 @@ var DummyServer = SC.Object.extend({
         this.url = url;
         this.payload = payload;
         this.options = options;
-        
+
         var pr = new Promise();
         if (this.get('responseData')) {
             pr.resolve(this.get('responseData'));
@@ -52,7 +52,7 @@ exports.testLoadDirectory = function() {
     var source = filesource.BespinFileSource.create({
         server: server
     });
-    
+
     var pr = source.loadAll();
     t.ok(typeof(pr.then) == 'function', 'expected to get Promise back');
     t.equal(server.method, 'GET');
@@ -67,19 +67,19 @@ exports.testLoadDirectory = function() {
 
 exports.testLoadContents = function() {
     var server = DummyServer.create({
-        responseData: "This is the exciting data in the file."
+        responseData: 'This is the exciting data in the file.'
     });
     var source = filesource.BespinFileSource.create({
         server: server
     });
-    
+
     var pr = source.loadContents('myfile.txt');
     t.ok(typeof(pr.then) == 'function', 'expected to get Promise back');
     t.equal(server.method, 'GET');
     t.equal(server.url, '/file/at/myfile.txt');
     var testpr = new Promise();
     pr.then(function(contents) {
-        t.equal(contents, "This is the exciting data in the file.");
+        t.equal(contents, 'This is the exciting data in the file.');
         testpr.resolve();
     });
     return testpr;
@@ -91,7 +91,7 @@ exports.testSaveContents = function() {
     var source = filesource.BespinFileSource.create({
         server: server
     });
-    
+
     var pr = source.saveContents('myfile.txt', 'new file contents here');
     t.ok(typeof(pr.then) == 'function', 'expected to get Promise back');
     t.equal(server.method, 'PUT');

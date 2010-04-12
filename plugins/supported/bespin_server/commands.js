@@ -49,18 +49,18 @@ var megabytes = function(bytes) {
  * 'quota' command
  * TODO: Delete or correct
         {
-            'ep': 'command',
-            'name': 'quota',
-            'description': 'show your quota info',
-            'pointer': "#quotaCommand"
+            "ep": "command",
+            "name": "quota",
+            "description": "show your quota info",
+            "pointer": "#quotaCommand"
         },
  */
 exports.quotaCommand = function(instruction) {
     var free = megabytes(editSession.quota - editSession.amountUsed);
     var output = 'You have ' + free +
-                 " MB free space to put some great code!<br>" +
+                 ' MB free space to put some great code!<br>' +
                  'Used ' + megabytes(editSession.amountUsed) + ' MB ' +
-                 'out of your ' + megabytes(editSession.quota) + " MB quota.";
+                 'out of your ' + megabytes(editSession.quota) + ' MB quota.';
     request.done(output);
 };
 
@@ -78,9 +78,10 @@ exports.rescanCommand = function(env, args, request) {
     } else {
         project = args.project;
     }
-    
+
     if (!project) {
-        request.doneWithError("You need to supply a project name, if you don't have an open file.");
+        request.doneWithError('You need to supply a project name, ' +
+                'if you don\'t have an open file.');
         return;
     }
 

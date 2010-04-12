@@ -60,21 +60,21 @@ exports.setCommand = function(env, args, request) {
         });
 
         settingsList.forEach(function(setting) {
-            html += "<a class='setting' href='https://wiki.mozilla.org/Labs/Bespin/Settings#" +
+            html += '<a class="setting" href="https://wiki.mozilla.org/Labs/Bespin/Settings#' +
                     setting.key +
-                    "' title='View external documentation on setting: " +
+                    '" title="View external documentation on setting: ' +
                     setting.key +
-                    "' target='_blank'>" +
+                    '" target="_blank">' +
                     setting.key +
-                    "</a> = " +
+                    '</a> = ' +
                     setting.value +
-                    "<br/>";
+                    '<br/>';
         });
     } else {
         if (args.value === undefined) {
-            html = "<strong>" + args.setting + "</strong> = " + settings.get(args.setting);
+            html = '<strong>' + args.setting + '</strong> = ' + settings.get(args.setting);
         } else {
-            html = "Setting: <strong>" + args.setting + "</strong> = " + args.value;
+            html = 'Setting: <strong>' + args.setting + '</strong> = ' + args.value;
             settings.set(args.setting, args.value);
         }
     }

@@ -72,8 +72,8 @@ var AssertionEntry = SC.Object.extend({
     // expects status, message
     template:
         '<div class="plugindev_assertion %@1">' +
-            '<span class='name'>%@2</span>' +
-            '<span class='status'>%@1</span>' +
+            '<span class="name">%@2</span>' +
+            '<span class="status">%@1</span>' +
         '</div>',
 
     emit: function() {
@@ -124,18 +124,18 @@ var TestEntry = SC.Object.extend({
      */
     template: [
         '<div class="plugindev_test %@1">',
-            '<div class='header'>',
-                '<span class='name'>',
+            '<div class="header">',
+                '<span class="name">',
                     '<a onclick="document.getElementById(\'_testEntryAssertions_%@8\').style.display = \'block\'"">%@2</a>',
                 '</span>',
-                '<span class='status'>',
-                    '<span class='passed'>%@4</span>',
-                    '<span class='warnings'>%@7</span>',
-                    '<span class='failed'>%@5</span>',
-                    '<span class='errors'>%@6</span>',
+                '<span class="status">',
+                    '<span class="passed">%@4</span>',
+                    '<span class="warnings">%@7</span>',
+                    '<span class="failed">%@5</span>',
+                    '<span class="errors">%@6</span>',
                 '</span>',
             '</div>',
-            '<div class='entryAssertions' id="_testEntryAssertions_%@8">',
+            '<div class="entryAssertions" id="_testEntryAssertions_%@8">',
                 '%@3',
             '</div>',
         '</div>'
@@ -217,7 +217,7 @@ var ModuleEntry = SC.Object.extend({
 
     template: [
         '<div class="plugindev_module %@3">',
-            '<span class='name'>%@1</span>',
+            '<span class="name">%@1</span>',
             '%@2',
         '</div>'
     ].join(''),
@@ -269,8 +269,8 @@ var PlanEntry = SC.Object.extend({
     },
 
     template: [
-        '<div class='plugindev_plan'>',
-            '<span class='name'>%@1</span>',
+        '<div class="plugindev_plan">',
+            '<span class="name">%@1</span>',
             '%@2',
         '</div>'
     ].join(''),
@@ -339,9 +339,9 @@ var TestOutputLogger = SC.Object.extend({
 
     summarize: function() {
         var status = this.status;
-        var ret = ['<div class='plugindev_summary'>'];
+        var ret = ['<div class="plugindev_summary">'];
         ret.push(utils.fmt('Completed %@ assertions in %@ tests: ', status.assertions, status.tests));
-        ret.push(utils.fmt('<span class='passed'>%@ passed</span>', status.passed));
+        ret.push(utils.fmt('<span class="passed">%@ passed</span>', status.passed));
 
         var hasErrors = (status.failed + status.errors + status.warnings) > 0;
         if (hasErrors) {

@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -52,17 +52,17 @@ exports.testPrefixMatching = function() {
         itemsAdded: function(addedItems) { items = addedItems; }
     });
 
-    t.equal(items.length, 1, "the length of the list of matches when " +
-        "searching for \"b\" and 1");
-    t.equal(items[0].item, 'bar', "the text of the first matched item when " +
-        "searching for \"b\" and \"foo\"");
+    t.equal(items.length, 1, 'the length of the list of matches when ' +
+        'searching for \"b\" and 1");
+    t.equal(items[0].item, 'bar', 'the text of the first matched item when ' +
+        'searching for \"b\" and \"foo\"');
 
     matcher.set('query', 'FOO');
-    t.equal(items.length, 2, "the length of the list of matches when " +
-        "searching for \"FOO\" and 2");
-    t.equal(items[0].item, 'foo', "the text of the first matched item when " +
-        "searching for \"FOO\" and \"foo\"");
-    t.equal(items[1].item, 'foobar', "the text of the second matched item " +
-        "when searching for \"FOO\" and \"foobar\"");
+    t.equal(items.length, 2, 'the length of the list of matches when ' +
+        'searching for \"FOO\" and 2');
+    t.equal(items[0].item, 'foo', 'the text of the first matched item when ' +
+        'searching for \"FOO\" and \"foo\"');
+    t.equal(items[1].item, 'foobar', 'the text of the second matched item ' +
+        'when searching for \"FOO\" and \"foobar\"');
 };
 

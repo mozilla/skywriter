@@ -102,7 +102,7 @@ exports.testNumberIsValid = function() {
         t.equal(true, valid, 'Zero');
     });
     types.isValid(-1, 'number').then(function(valid) {
-        t.equal(true, valid, "-1");
+        t.equal(true, valid, '-1');
     });
     types.isValid(Infinity, 'number').then(function(valid) {
         t.equal(false, valid, 'Infinity');
@@ -116,8 +116,8 @@ exports.testNumberIsValid = function() {
     types.isValid('0', 'number').then(function(valid) {
         t.equal(false, valid, 'string 0');
     });
-    types.isValid("-1", 'number').then(function(valid) {
-        t.equal(false, valid, "string -1");
+    types.isValid('-1', 'number').then(function(valid) {
+        t.equal(false, valid, 'string -1');
     });
     types.isValid('null', 'number').then(function(valid) {
         t.equal(false, valid, 'string null');
@@ -129,16 +129,16 @@ exports.testNumberIsValid = function() {
 
 exports.testBooleanFromString = function() {
     types.fromString('true', 'boolean').then(function(converted) {
-        t.equal(converted, true, "'true' should be true");
+        t.equal(converted, true, '\'true\' should be true');
     });
     types.fromString('false', 'boolean').then(function(converted) {
-        t.equal(converted, false, "'false' should be false");
+        t.equal(converted, false, '\'false\' should be false');
     });
     types.fromString('TRUE', 'boolean').then(function(converted) {
-        t.equal(converted, true, "'TRUE' should be true");
+        t.equal(converted, true, '\'TRUE\' should be true');
     });
     types.fromString('FALSE', 'boolean').then(function(converted) {
-        t.equal(converted, false, "'FALSE' should be false");
+        t.equal(converted, false, '\'FALSE\' should be false');
     });
     types.fromString(null, 'boolean').then(function(converted) {
         t.equal(converted, null, 'null should be null');
@@ -173,8 +173,8 @@ exports.testBooleanIsValid = function() {
     types.isValid('0', 'boolean').then(function(valid) {
         t.equal(false, valid, 'string zero');
     });
-    types.isValid("-1", 'boolean').then(function(valid) {
-        t.equal(false, valid, "string -1");
+    types.isValid('-1', 'boolean').then(function(valid) {
+        t.equal(false, valid, 'string -1');
     });
     types.isValid('null', 'boolean').then(function(valid) {
         t.equal(false, valid, 'string null');

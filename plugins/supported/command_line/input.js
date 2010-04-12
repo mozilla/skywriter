@@ -99,7 +99,7 @@ exports.Input = SC.Object.extend({
      */
     init: function() {
         if (this.typed === null) {
-            throw new Error("Input requires something 'typed' to work on");
+            throw new Error('Input requires something \'typed\' to work on');
         }
         this._hints = [];
         this._argsPromise = new Promise();
@@ -184,7 +184,7 @@ exports.Input = SC.Object.extend({
             if (SC.none(nextToken)) {
                 break;
             }
-            if (nextToken[0] == '"' || nextToken[0] == "'") {
+            if (nextToken[0] == '"' || nextToken[0] == '\'') {
                 // It's quoting time
                 var eaten = [ nextToken.substring(1, nextToken.length) ];
                 var eataway;
@@ -194,7 +194,7 @@ exports.Input = SC.Object.extend({
                         break;
                     }
                     if (eataway[eataway.length - 1] == '"' ||
-                            eataway[eataway.length - 1] == "'") {
+                            eataway[eataway.length - 1] == '\'') {
                         // End quoting time
                         eaten.push(eataway.substring(0, eataway.length - 1));
                         break;
@@ -257,7 +257,7 @@ exports.Input = SC.Object.extend({
                     loadPromise.resolve(hint.Hint.create({
                         level: hint.Level.Error,
                         element: 'Failed to load command ' + commandExt.name +
-                            ': Pointer ' + commandExt._pluginName + ':' + commandExt.pointer + " is null."
+                            ': Pointer ' + commandExt._pluginName + ':' + commandExt.pointer + ' is null.'
                     }));
                     console.log(commandExt);
                 }
@@ -265,7 +265,7 @@ exports.Input = SC.Object.extend({
                 loadPromise.resolve(hint.Hint.create({
                     level: hint.Level.Error,
                     element: 'Failed to load command ' + commandExt.name +
-                        ': Pointer ' + commandExt._pluginName + ':' + commandExt.pointer + " failed to load." + ex
+                        ': Pointer ' + commandExt._pluginName + ':' + commandExt.pointer + ' failed to load.' + ex
                 }));
             });
             this._hints.push(loadPromise);
@@ -370,7 +370,7 @@ exports.Input = SC.Object.extend({
             if (used.indexOf(unparsedArg) == -1) {
                 this._hints.push(hint.Hint.create({
                     level: hint.Level.Error,
-                    element: "Parameter '" + unparsedArg + "' makes no sense."
+                    element: 'Parameter \'' + unparsedArg + '\' makes no sense.'
                 }));
                 unparsed = true;
             }
@@ -409,7 +409,7 @@ exports.Input = SC.Object.extend({
         for (var i = 0; i < this._unparsedArgs.length; i++) {
             var unparsedArg = this._unparsedArgs[i];
 
-            if ("--" + param.name == unparsedArg) {
+            if ('--' + param.name == unparsedArg) {
                 used.push(unparsedArg);
                 // boolean parameters don't have values, they default to false
                 if (types.equals(param.type, 'boolean')) {
@@ -527,7 +527,7 @@ exports.Input = SC.Object.extend({
         }, function(ex) {
             this._hints.push(hint.Hint.create({
                 level: hint.Level.Error,
-                element: "Can't convert '" + value + "' to a " +
+                element: 'Can\'t convert \'' + value + '\' to a ' +
                     param.type + ': ' + ex
             }));
         }.bind(this));
@@ -541,57 +541,57 @@ exports.Input = SC.Object.extend({
  */
 exports.documentCommand = function(cmdExt, typed) {
     var docs = [];
-    docs.push("<h1>" + cmdExt.name + "</h1>");
-    docs.push("<h2>Summary</h2>");
-    docs.push("<p>" + cmdExt.description + "</p>");
+    docs.push('<h1>' + cmdExt.name + '</h1>');
+    docs.push('<h2>Summary</h2>');
+    docs.push('<p>' + cmdExt.description + '</p>');
 
     if (cmdExt.manual) {
-        docs.push("<h2>Description</h2>");
-        docs.push("<p>" + cmdExt.description + "</p>");
+        docs.push('<h2>Description</h2>');
+        docs.push('<p>' + cmdExt.description + '</p>');
     }
 
     if (cmdExt.params && cmdExt.params.length > 0) {
-        docs.push("<h2>Synopsis</h2>");
-        docs.push("<pre>");
+        docs.push('<h2>Synopsis</h2>');
+        docs.push('<pre>');
         docs.push(cmdExt.name);
         var optionalParamCount = 0;
         cmdExt.params.forEach(function(param) {
             if (param.defaultValue === undefined) {
-                docs.push(" <i>");
+                docs.push(' <i>');
                 docs.push(param.name);
-                docs.push("</i>");
+                docs.push('</i>');
             } else if (param.defaultValue === null) {
-                docs.push(" <i>[");
+                docs.push(' <i>[');
                 docs.push(param.name);
-                docs.push("]</i>");
+                docs.push(']</i>');
             } else {
                 optionalParamCount++;
             }
         });
         if (optionalParamCount > 3) {
-            docs.push(" [options]");
+            docs.push(' [options]');
         } else if (optionalParamCount > 0) {
             cmdExt.params.forEach(function(param) {
                 if (param.defaultValue) {
-                    docs.push(" [--<i>");
+                    docs.push(' [--<i>');
                     docs.push(param.name);
                     if (types.equals(param.type, 'boolean')) {
-                        docs.push("</i>");
+                        docs.push('</i>');
                     } else {
-                        docs.push("</i> " + types.getSimpleName(param.type));
+                        docs.push('</i> ' + types.getSimpleName(param.type));
                     }
-                    docs.push("]");
+                    docs.push(']');
                 }
             });
         }
-        docs.push("</pre>");
+        docs.push('</pre>');
 
-        docs.push("<h2>Parameters</h2>");
+        docs.push('<h2>Parameters</h2>');
         cmdExt.params.forEach(function(param) {
-            docs.push("<h3 class='cmd_body'><i>" + param.name + "</i></h3>");
-            docs.push("<p>" + param.description + "</p>");
+            docs.push('<h3 class="cmd_body"><i>' + param.name + '</i></h3>');
+            docs.push('<p>' + param.description + '</p>');
             if (types.defaultValue) {
-                docs.push("<p>Default: " + types.defaultValue + "</p>");
+                docs.push('<p>Default: ' + types.defaultValue + '</p>');
             }
         });
     }

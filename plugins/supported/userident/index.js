@@ -168,7 +168,7 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
 
         if (this.changed.email || this.get('email' !== '')) {
             if (!this.get('email').match(/.+@.+\...+/)) {
-                this.set('emailHint', "When email is given, it has to be a valid format");
+                this.set('emailHint', 'When email is given, it has to be a valid format');
                 isValid = false;
             } else {
                 this.set('emailHint', '');
@@ -188,12 +188,12 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
         this.validate();
 
         if (!this.get('isValid')) {
-            pane = SC.AlertPane.error('Correct your signup', "Please correct your signup information.");
+            pane = SC.AlertPane.error('Correct your signup', 'Please correct your signup information.');
             pane.append();
         } else if (this.get('username') === '' ||
                 this.get('password1') === '') {
             pane = SC.AlertPane.error('Correct your signup', 'Please fill ' +
-                "all required fields (username + password).");
+                'all required fields (username + password).');
             pane.append();
         } else {
             var opts = {
@@ -237,7 +237,7 @@ exports.userIdentPage = SC.Page.design({
 
         contentView: SC.View.design({
             layout: { left: 0, top: 0, bottom: 0, right: 0 },
-            classNames: "bespin-color-field".w(),
+            classNames: 'bespin-color-field'.w(),
             childViews: 'welcome form logo'.w(),
 
             welcome: SC.View.design({
@@ -271,15 +271,15 @@ exports.userIdentPage = SC.Page.design({
                         height: 144
                     },
 
-                    classNames: "bespin-informational".w(),
+                    classNames: 'bespin-informational'.w(),
 
-                    value:  "The <a href=\"http://mozillalabs.com/bespin/\' ' +
-                            "target=\"_blank\">Bespin project</a> is " +
-                            "building a web-based code editor using the " +
+                    value:  'The <a href="http://mozillalabs.com/bespin/" ' +
+                            'target="_blank">Bespin project</a> is ' +
+                            'building a web-based code editor using the ' +
                             'emerging HTML 5 standard. The editor is easily ' +
                             'extensible with JavaScript and can be used in ' +
                             'your own applications or on our experimental ' +
-                            "hosted service.",
+                            'hosted service.',
 
                     escapeHTML: false
                 })
@@ -294,7 +294,7 @@ exports.userIdentPage = SC.Page.design({
                     height: LOGIN_FORM_HEIGHT
                 },
 
-                classNames: "bespin-form".w(),
+                classNames: 'bespin-form'.w(),
 
                 action: SC.RadioView.design({
                     layout: {
@@ -312,7 +312,7 @@ exports.userIdentPage = SC.Page.design({
                             value: 'loginView'
                         },
                         {
-                            title: "I'm new",
+                            title: 'I\'m new',
                             value: 'signupView'
                         }
                     ],
@@ -327,8 +327,8 @@ exports.userIdentPage = SC.Page.design({
                         height: LOGIN_CONTAINER_HEIGHT
                     },
 
-                    nowShowingBinding: "userident#userIdentPage.mainPane." +
-                        "contentView.form.action.value",
+                    nowShowingBinding: 'userident#userIdentPage.mainPane.' +
+                        'contentView.form.action.value',
 
                     contentViewDidChange: function() {
                         arguments.callee.base.apply(this, arguments);
@@ -357,7 +357,7 @@ exports.userIdentPage = SC.Page.design({
                         this.adjust('height', containerHeight);
 
                         setTimeout(function() {
-                            var view = page.getPath(value + ".usernameField");
+                            var view = page.getPath(value + '.usernameField');
                             pane.makeFirstResponder(view);
                         }, 0);
                     }
@@ -383,7 +383,7 @@ exports.userIdentPage = SC.Page.design({
             'passwordLabel submit').w(),
 
         usernameField: SC.TextFieldView.design({
-            valueBinding: "userident#loginController.username",
+            valueBinding: 'userident#loginController.username',
             controlSize: SC.SMALL_CONTROL_SIZE,
             layout: { left: 10, top: 92 - 91, width: 200, height: 24 }
         }),
@@ -409,7 +409,7 @@ exports.userIdentPage = SC.Page.design({
             },
 
             controlSize: SC.SMALL_CONTROL_SIZE,
-            valueBinding: "userident#loginController.password",
+            valueBinding: 'userident#loginController.password',
             isPassword: true
         }),
 
@@ -435,7 +435,7 @@ exports.userIdentPage = SC.Page.design({
 
             title: 'Log in',
             isDefault: true,
-            target: "userident#loginController",
+            target: 'userident#loginController',
             action: 'login'
         })
     }),
@@ -451,7 +451,7 @@ exports.userIdentPage = SC.Page.design({
         usernameField: SC.TextFieldView.design({
             layout: { left: 10, top: 92 - 91, width: 200, height: 24 },
             controlSize: SC.SMALL_CONTROL_SIZE,
-            valueBinding: "userident#signupController.username",
+            valueBinding: 'userident#signupController.username',
             commitEditing: function() {
                 arguments.callee.base.apply(this, arguments);
                 exports.signupController.validate('username');
@@ -475,7 +475,7 @@ exports.userIdentPage = SC.Page.design({
 
             classNames: 'signupValidationError'.w(),
             textAlign: 'right',
-            valueBinding: "userident#signupController.usernameError",
+            valueBinding: 'userident#signupController.usernameError',
             controlSize: SC.SMALL_CONTROL_SIZE
         }),
 
@@ -483,7 +483,7 @@ exports.userIdentPage = SC.Page.design({
             layout: { left: 10, top: 146 - 91, width: 200, height: 24 },
             controlSize: SC.SMALL_CONTROL_SIZE,
             isPassword: true,
-            valueBinding: "userident#signupController.password1",
+            valueBinding: 'userident#signupController.password1',
             commitEditing: function() {
                 arguments.callee.base.apply(this, arguments);
                 exports.signupController.validate('password1');
@@ -514,14 +514,14 @@ exports.userIdentPage = SC.Page.design({
             controlSize: SC.SMALL_CONTROL_SIZE,
             textAlign: 'right',
             classNames: 'signupValidationError'.w(),
-            valueBinding: "userident#signupController.password1Error"
+            valueBinding: 'userident#signupController.password1Error'
         }),
 
         password2Field: SC.TextFieldView.design({
             layout: { left: 10, top: 200 - 91, height: 24, width: 105 },
             controlSize: SC.SMALL_CONTROL_SIZE,
             isPassword: true,
-            valueBinding: "userident#signupController.password2",
+            valueBinding: 'userident#signupController.password2',
             commitEditing: function() {
                 arguments.callee.base.apply(this, arguments);
                 exports.signupController.validate('password2');
@@ -538,7 +538,7 @@ exports.userIdentPage = SC.Page.design({
             },
 
             controlSize: SC.SMALL_CONTROL_SIZE,
-            value: "Password <i>(confirm)</i>",
+            value: 'Password <i>(confirm)</i>',
             escapeHTML: false
         }),
 
@@ -553,14 +553,14 @@ exports.userIdentPage = SC.Page.design({
             controlSize: SC.SMALL_CONTROL_SIZE,
             textAlign: 'right',
             classNames: [ 'signupValidationError' ],
-            valueBinding: "userident#signupController.password2Error",
+            valueBinding: 'userident#signupController.password2Error',
             layout: { left: 265, top: 65, height: 30, width: 120 }
         }),
 
         emailField: SC.TextFieldView.design({
             layout: { left: 10, top: 254 - 91, width: 200, height: 24 },
             controlSize: SC.SMALL_CONTROL_SIZE,
-            valueBinding: "userident#signupController.email",
+            valueBinding: 'userident#signupController.email',
             commitEditing: function() {
                 arguments.callee.base.apply(this, arguments);
                 exports.signupController.validate('email');
@@ -577,7 +577,7 @@ exports.userIdentPage = SC.Page.design({
             },
 
             controlSize: SC.SMALL_CONTROL_SIZE,
-            value: "Email <i>(optional)</i>",
+            value: 'Email <i>(optional)</i>',
             escapeHTML: false
         }),
 
@@ -592,14 +592,14 @@ exports.userIdentPage = SC.Page.design({
             controlSize: SC.SMALL_CONTROL_SIZE,
             textAlign: 'right',
             classNames: 'signupValidationNote'.w(),
-            valueBinding: "userident#signupController.emailHint"
+            valueBinding: 'userident#signupController.emailHint'
         }),
 
         submit: SC.ButtonView.design({
             layout: { left: 10, top: 308 - 91, width: 200, height: 37 },
             isDefault: true,
             title: 'Sign up',
-            target: "userident#signupController",
+            target: 'userident#signupController',
             action: 'signup'
         })
     })
@@ -612,7 +612,7 @@ exports.userIdentPage = SC.Page.design({
  */
 exports.login = function(user, pass) {
     var url = '/register/login/' + user;
-    return server.request('POST', url, "password=" + escape(pass), {
+    return server.request('POST', url, 'password=' + escape(pass), {
         log: 'Login complete.'
     });
 };
@@ -626,7 +626,7 @@ exports.login = function(user, pass) {
 exports.signup = function(user, pass, email, opts) {
     opts = opts || {};
     var url = '/register/new/' + user;
-    var data = "password=" + encodeURI(pass) + "&email=" + encodeURI(email);
+    var data = 'password=' + encodeURI(pass) + '&email=' + encodeURI(email);
     return server.request('POST', url, data, opts);
 };
 

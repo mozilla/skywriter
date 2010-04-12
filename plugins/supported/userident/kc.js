@@ -46,7 +46,7 @@ var server = require('bespin_server').server;
 var kcpass = null;
 var pr = null;
 var pane = null;
-var pwpath = "contentView.form.passwordField.value";
+var pwpath = 'contentView.form.passwordField.value';
 
 exports.kcController = SC.Object.create({
     doCancel: function() {
@@ -54,7 +54,7 @@ exports.kcController = SC.Object.create({
         pane = null;
         pr.reject({message: 'Canceled'});
     },
-    
+
     savePassword: function() {
         kcpass = pane.getPath(pwpath);
         pane.setPath(pwpath, '');
@@ -67,13 +67,13 @@ exports.kcController = SC.Object.create({
 var kcPage = SC.Page.design({
     mainPane: SC.PanelPane.design({
         layout: { centerX: 0, centerY: 0, width: 300, height: 275 },
-        
+
         contentView: SC.View.design({
-            classNames: "bespin-color-field".w(),
+            classNames: 'bespin-color-field'.w(),
             childViews: 'form'.w(),
             form: SC.View.design({
-                classNames: "bespin-form".w(),
-                
+                classNames: 'bespin-form'.w(),
+
                 childViews: ('title passwordField description cancel ok').w(),
 
                 title: SC.LabelView.design({
@@ -89,7 +89,7 @@ var kcPage = SC.Page.design({
                     controlSize: SC.LARGE_CONTROL_SIZE,
                     fontWeight: 'bold'
                 }),
-                
+
                 passwordField: SC.TextFieldView.design({
                     layout: {
                         left: 10,
@@ -97,10 +97,10 @@ var kcPage = SC.Page.design({
                         width: 275,
                         height: 24
                     },
-                    valueBinding: ".password",
+                    valueBinding: '.password',
                     isPassword: true
                 }),
-                
+
                 description: SC.LabelView.design({
                     layout: {
                         left: 10,
@@ -109,29 +109,29 @@ var kcPage = SC.Page.design({
                         height: 150
                     },
                     value: 'Your keychain password is used to encrypt your ' +
-                        "usernames, passwords and SSH keys for remote servers." +
-                        " <b>Your password is set the first time you enter it</b>." +
-                        "Please make sure this is a good, strong password, but " +
-                        "one you can remember because we have no way to recover it.",
+                        'usernames, passwords and SSH keys for remote servers.' +
+                        ' <b>Your password is set the first time you enter it</b>.' +
+                        'Please make sure this is a good, strong password, but ' +
+                        'one you can remember because we have no way to recover it.',
                     escapeHTML: false
                 }),
-                
+
                 cancel: SC.ButtonView.design({
                     layout: { left: 10, top: 225, width: 100, height: 37 },
                     isCancel: true,
                     title: 'Cancel',
-                    target: "userident:kc#kcController",
+                    target: 'userident:kc#kcController',
                     action: 'doCancel'
                 }),
-                
+
                 ok: SC.ButtonView.design({
                     layout: { left: 175, top: 225, width: 100, height: 37 },
                     isDefault: true,
                     title: 'OK',
-                    target: "userident:kc#kcController",
+                    target: 'userident:kc#kcController',
                     action: 'savePassword'
                 })
-                
+
             })
         })
     })
@@ -142,19 +142,19 @@ exports.getKeychainPassword = function() {
     if (pane) {
         return null;
     }
-    
+
     pr = new Promise();
-    
+
     if (kcpass != null) {
         pr.resolve(kcpass);
         return pr;
     }
-    
+
     pane = kcPage.get('mainPane');
     themeManager.addPane(pane);
     pane.append();
     pane.becomeKeyPane();
-    pane.getPath("contentView.form.passwordField").becomeFirstResponder();
+    pane.getPath('contentView.form.passwordField').becomeFirstResponder();
     return pr;
 };
 
@@ -170,29 +170,29 @@ exports.getkey = function(env, args, request) {
     if (args.password == '') {
         args.password = undefined;
     }
-    
+
     var pr = exports.getKeychainPassword().then(function(kcpass) {
         var pr;
-        
+
         var url = '/vcs/getkey/';
         if (kcpass == null) {
             pr = server.request('POST', url, null);
         } else {
-            var params = "kcpass=" + escape(kcpass);
+            var params = 'kcpass=' + escape(kcpass);
             pr = server.request('POST', url, params);
         }
-        
+
         pr.then(function(key) {
-            request.done("Your SSH public key that Bespin can use for remote repository authentication:<br/>" + key);
+            request.done('Your SSH public key that Bespin can use for remote repository authentication:<br/>' + key);
         }, function(error) {
             if (error.status == '401') {
                 kc.clearPassword();
-                request.doneWithError("Incorrect keychain password!");
+                request.doneWithError('Incorrect keychain password!');
             } else {
                 request.doneWithError('Error from server: ' + error.message);
             }
         });
-        
+
     }, function() {
         request.done('Canceled');
     });
@@ -203,5 +203,5 @@ exports.getkey = function(env, args, request) {
  */
 exports.forget = function(env, args, request) {
     exports.clearPassword();
-    request.done("Password forgotten.");
+    request.done('Password forgotten.');
 };

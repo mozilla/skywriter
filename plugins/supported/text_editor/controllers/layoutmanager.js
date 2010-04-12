@@ -116,15 +116,15 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
      * TODO: Convert to a SproutCore theme.
      */
     theme: {
-        editorTextColor:            "rgb(230, 230, 230)",
-        editorTextColor_comment:    "rgb(102, 102, 102)",
-        editorTextColor_directive:  "rgb(153, 153, 153)",
-        editorTextColor_error:      "rgb(255, 0, 0)",
-        editorTextColor_identifier: "rgb(230, 230, 230)",
-        editorTextColor_keyword:    "rgb(66, 168, 237)",
-        editorTextColor_operator:   "rgb(136, 187, 255)",
-        editorTextColor_plain:      "rgb(230, 230, 230)",
-        editorTextColor_string:     "rgb(3, 154, 10)"
+        editorTextColor:            'rgb(230, 230, 230)',
+        editorTextColor_comment:    'rgb(102, 102, 102)',
+        editorTextColor_directive:  'rgb(153, 153, 153)',
+        editorTextColor_error:      'rgb(255, 0, 0)',
+        editorTextColor_identifier: 'rgb(230, 230, 230)',
+        editorTextColor_keyword:    'rgb(66, 168, 237)',
+        editorTextColor_operator:   'rgb(136, 187, 255)',
+        editorTextColor_plain:      'rgb(230, 230, 230)',
+        editorTextColor_string:     'rgb(3, 154, 10)'
     },
 
     _computeInvalidRects: function(oldRange, newRange) {

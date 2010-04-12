@@ -71,9 +71,9 @@ exports.evalCommand = function(env, args, request) {
         for (x in result) {
             if (result.hasOwnProperty(x)) {
                 if (util.isFunction(result[x])) {
-                    value = "[function]";
+                    value = '[function]';
                 } else if (util.isObject(result[x])) {
-                    value = "[object]";
+                    value = '[object]';
                 } else {
                     value = result[x];
                 }
@@ -95,8 +95,8 @@ exports.evalCommand = function(env, args, request) {
         type = typeof result;
     }
 
-    request.done("Result for eval <b>\"" + javascript + "\"</b>" +
-            " (type: "+ type+"): <br><br>"+ msg);
+    request.done('Result for eval <b>"' + javascript + '"</b>' +
+            ' (type: '+ type+'): <br><br>'+ msg);
 };
 
 /**
@@ -104,15 +104,15 @@ exports.evalCommand = function(env, args, request) {
  */
 exports.versionCommand = function(env, args, request) {
     var version = 'Your Bespin is at version ' + bespin.versionNumber +
-            ', Code name: "' + bespin.versionCodename + '"';
+            ', Code name: \'' + bespin.versionCodename + '\'';
     request.done(version);
 };
 
 var messages = [
-    "really wants you to trick it out in some way.",
-    "is your Web editor.",
-    "would love to be like Emacs on the Web.",
-    "is written on the Web platform, so you can tweak it."
+    'really wants you to trick it out in some way.',
+    'is your Web editor.',
+    'would love to be like Emacs on the Web.',
+    'is written on the Web platform, so you can tweak it.'
 ];
 
 /**

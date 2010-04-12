@@ -125,7 +125,7 @@ exports.reloadCommand = function(env, args, request) {
     try
     {
         exports.reload(args.plugin, function() {
-            request.done('Plugin ' + args.plugin + " reloaded.");
+            request.done('Plugin ' + args.plugin + ' reloaded.');
         });
     } catch (e) {
         if (e == 'Plugin undefined') {

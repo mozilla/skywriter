@@ -74,7 +74,7 @@ exports.DockView = SC.View.extend({
     addDockedView: function(viewClass, position) {
         var dockedViews = this.get('dockedViews');
         var index = dockedViews.length;
-        
+
         if (SC.none(position)) {
             position = exports.DOCK_BOTTOM;
         }
@@ -148,7 +148,7 @@ exports.DockView = SC.View.extend({
                 break;
 
             default:
-                throw new Error("invalid 'dock' property: " + dock);
+                throw new Error('invalid \'dock\' property: ' + dock);
                 break;  // silence jslint
             }
         });

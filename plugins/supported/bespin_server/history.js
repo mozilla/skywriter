@@ -69,7 +69,7 @@ exports.ServerHistory = history.InMemoryHistory.extend({
         var content = '';
         instructions.forEach(function(instruction) {
             if (instruction.typed && instruction.typed !== '') {
-                content += instruction.typed + "\n";
+                content += instruction.typed + '\n';
             }
         });
         // save instructions back to server asynchronously

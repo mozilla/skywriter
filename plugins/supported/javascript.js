@@ -37,24 +37,24 @@
 
 "define metadata";
 ({
-    'description': "JavaScript syntax highlighter",
-    'dependencies': {
-        'syntax_manager': "0.0"
+    "description": "JavaScript syntax highlighter",
+    "dependencies": {
+        "syntax_manager": "0.0"
     },
-    'provides': [
+    "provides": [
         {
-            'ep': 'fileextension',
-            'name': 'js',
-            'syntax': 'js'
+            "ep": "fileextension",
+            "name": "js",
+            "syntax": "js"
         },
         {
-            'ep': 'syntax',
-            'name': 'js',
-            'pointer': "#JSSyntax"
+            "ep": "syntax",
+            "name": "js",
+            "pointer": "#JSSyntax"
         }
     ]
 });
-'end';
+"end";
 
 var SC = require('sproutcore/runtime').SC;
 var Promise = require('bespin:promise').Promise;

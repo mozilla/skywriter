@@ -51,7 +51,7 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
         if (value !== undefined) {
             this.replaceCharacters(this.range(), value);
         }
-        return this.get('lines').join("\n");
+        return this.get('lines').join('\n');
     }.property('lines.[]'),
 
     /**
@@ -134,7 +134,7 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
         }
         return [ lines[startRow].substring(startColumn) ].
             concat(lines.slice(startRow + 1, endRow),
-            lines[endRow].substring(0, endColumn)).join("\n");
+            lines[endRow].substring(0, endColumn)).join('\n');
     },
 
     init: function() {
@@ -162,7 +162,7 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
      * Replaces the characters within the supplied range with the given string.
      */
     replaceCharacters: function(oldRange, characters) {
-        var addedLines = characters.split("\n");
+        var addedLines = characters.split('\n');
         var addedLineCount = addedLines.length;
 
         var newRange = this.resultingRangeForReplacement(oldRange, addedLines);

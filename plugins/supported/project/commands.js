@@ -2,11 +2,11 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -35,13 +35,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require("bespin:util/util");
+var util = require('bespin:util/util');
 
-var catalog = require("bespin:plugin").catalog;
+var catalog = require('bespin:plugin').catalog;
 
-var server = catalog.getObject("server");
-var editSession = catalog.getObject("editSession");
-var files = catalog.getObject("files");
+var server = catalog.getObject('server');
+var editSession = catalog.getObject('editSession');
+var files = catalog.getObject('files');
 
 /*
  * These are all currently dead, when we resurrect the first we will need this
@@ -80,7 +80,7 @@ exports.listCommand = function(instruction, extra) {
     files.projects(function(projectNames) {
         var projects = '';
         for (var x = 0; x < projectNames.length; x++) {
-            projects += projectNames[x].name + "<br/>";
+            projects += projectNames[x].name + '<br/>';
         }
         request.done(projects);
     });
@@ -106,14 +106,14 @@ exports.listCommand = function(instruction, extra) {
  */
 exports.createCommand = function(instruction, project) {
     if (!project) {
-        instruction.addParameterError("project", "Value missing");
+        instruction.addParameterError('project', 'Value missing');
         return;
     }
 
     var onSuccess = instruction.link(function() {
         editSession.setProject(project);
         request.done('Created project \'' + project + '\'.');
-        // publish("project:created", { project: project });
+        // publish('project:created', { project: project });
     });
 
     var onFailure = instruction.link(function(xhr) {
@@ -150,7 +150,7 @@ exports.deleteCommand = function(instruction, project) {
 
     var onSuccess = instruction.link(function() {
         request.done('Deleted project ' + project);
-        // publish("project:deleted", { project:project });
+        // publish('project:deleted', { project:project });
     });
 
     var onFailure = instruction.link(function(xhr) {
@@ -193,14 +193,14 @@ exports.renameCommand = function(instruction, args) {
         onSuccess: instruction.link(function() {
             editSession.setProject(args.newProject);
             request.done();
-            // publish("project:renamed", {
+            // publish('project:renamed', {
             //     oldName: args.currentProject, newName: args.newProject });
         }),
         onFailure: instruction.link(function(xhr) {
             request.doneWithError('Unable to rename project from ' +
-                    args.currentProject + " to " + args.newProject +
-                    "<br><br><em>Are you sure that the " + args.currentProject +
-                    " project exists?</em>");
+                    args.currentProject + ' to ' + args.newProject +
+                    '<br><br><em>Are you sure that the ' + args.currentProject +
+                    ' project exists?</em>');
         })
     });
 };
@@ -238,13 +238,13 @@ exports.exportCommand = function(instruction, args) {
     }
 
     files.projects(function(projects) {
-        var projectDir = project + "/";
-        if (util.indexOfProperty(projects, "name", projectDir) != null) {
+        var projectDir = project + '/';
+        if (util.indexOfProperty(projects, 'name', projectDir) != null) {
             // try to do it via the iframe
             server.exportProject(project, type);
         } else {
-            request.doneWithError("Unabled to export project " + project +
-                    " because it doesn't seem to exist.");
+            request.doneWithError('Unabled to export project ' + project +
+                    ' because it doesn\'t seem to exist.');
         }
     });
 };
@@ -252,13 +252,13 @@ exports.exportCommand = function(instruction, args) {
 /**
  * Given a URL, work out the project name as a default
  * For example, given http://foo.com/path/to/myproject.zip
- * return "myproject"
+ * return 'myproject'
  */
 var calculateProjectName = function(url) {
     var split = url.split('/');
-    var projectMaker = split[split.length - 1].split(".");
+    var projectMaker = split[split.length - 1].split('.');
     projectMaker.pop();
-    return projectMaker.join("_");
+    return projectMaker.join('_');
 };
 
 /**
@@ -274,15 +274,15 @@ var isURL = function(url) {
  */
 var dojo = {
     connect: function() {
-        throw new Error("Find an alternative for dojo.connect()");
+        throw new Error('Find an alternative for dojo.connect()');
     },
     disconnect: function() {
-        throw new Error("Find an alternative for dojo.disconnect()");
+        throw new Error('Find an alternative for dojo.disconnect()');
     },
     io: {
         iframe: {
             send: function() {
-                throw new Error("Find an alternative for dojo.io.iframe.send()");
+                throw new Error('Find an alternative for dojo.io.iframe.send()');
             }
         }
     }
@@ -295,19 +295,19 @@ var upload = function(project) {
     // use the center popup and inject a form in that points to the right place.
     var el = document.getElementById('centerpopup');
 
-    el.innerHTML = "<div id='upload-container'>" +
-            "<form method='POST' name='upload' id='upload' " +
-            "enctype='multipart/form-data'><div id='upload-header'>" +
-            "Import project via upload <img id='upload-close' " +
-            "src='images/icn_close_x.png' align='right'>" +
-            "</div><div id='upload-content'><div id='upload-status'></div>" +
-            "<p>Browse to find the project archive that you wish to archive" +
-            "<br>and then click on the <code>Upload</code> button.</p>" +
-            "<center><input type='file' id='filedata' name='filedata' " +
-            "accept='application/zip,application/x-gzip'> " +
-            "<input type='submit' value='Upload'></center></div></form></div>";
+    el.innerHTML = '<div id="upload-container">' +
+            '<form method="POST" name="upload" id="upload" ' +
+            'enctype="multipart/form-data"><div id="upload-header">' +
+            'Import project via upload <img id="upload-close" ' +
+            'src="images/icn_close_x.png" align="right">' +
+            '</div><div id="upload-content"><div id="upload-status"></div>' +
+            '<p>Browse to find the project archive that you wish to archive' +
+            '<br>and then click on the <code>Upload</code> button.</p>' +
+            '<center><input type="file" id="filedata" name="filedata" ' +
+            'accept="application/zip,application/x-gzip"> ' +
+            '<input type="submit" value="Upload"></center></div></form></div>';
 
-    dojo.connect(document.getElementById('upload'), "submit", function() {
+    dojo.connect(document.getElementById('upload'), 'submit', function() {
         var upload = document.getElementById('upload-status');
         upload.innerHTML = 'Importing file into new project ' + project;
         dojo.io.iframe.send({
@@ -316,7 +316,7 @@ var upload = function(project) {
             method: 'POST',
             handleAs: 'text',
             preventCache: true,
-            contentType: "multipart/form-data",
+            contentType: 'multipart/form-data',
             load: function(data, ioArg) {
                 upload.innerHTML = 'Thanks for uploading the file!';
             },
@@ -327,7 +327,7 @@ var upload = function(project) {
                             return project + '/' == test.name;
                         };
                         if (projectNames.some(isProject)) {
-                            // publish("project:created", { project: project });
+                            // publish('project:created', { project: project });
                             upload.innerHTML = 'Archive imported and project ' +
                                     project + ' has been created!';
                         } else {
@@ -350,10 +350,10 @@ var upload = function(project) {
         dojo.disconnect(uploadClose);
         dojo.disconnect(overlay);
     };
-    var closeEle = document.getElementById("upload-close");
-    var overlayEle = document.getElementById("overlay");
-    uploadClose = dojo.connect(closeEle, "onclick", hideCenterPopup);
-    overlay = dojo.connect(overlayEle, "onclick", hideCenterPopup);
+    var closeEle = document.getElementById('upload-close');
+    var overlayEle = document.getElementById('overlay');
+    uploadClose = dojo.connect(closeEle, 'onclick', hideCenterPopup);
+    overlay = dojo.connect(overlayEle, 'onclick', hideCenterPopup);
 };
 
 /**
@@ -390,7 +390,7 @@ exports.importCommand = function(instruction, args) {
 
     // Fail fast. Nothing given?
     if (!args.url) {
-        instruction.addParameterError("url", "Value missing");
+        instruction.addParameterError('url', 'Value missing');
         return;
         // Checking - import http://foo.com/path/to/archive.zip
     } else if (!args.project && isURL(args.url)) {
@@ -411,19 +411,19 @@ exports.importCommand = function(instruction, args) {
         project = args.project;
         url = args.url;
 
-        request.done("About to import " + project + " from:<br><br>" +
-                url + "<br><em>It can take awhile to download the project, " +
-                "so be patient!</em>");
+        request.done('About to import ' + project + ' from:<br><br>' +
+                url + '<br><em>It can take awhile to download the project, ' +
+                'so be patient!</em>');
 
         server.importProject(project, url, {
             onSuccess: function() {
-                request.done("Project " + project +
-                        " imported from:<br><br>" + url);
-                // publish("project:created", { project: project });
+                request.done('Project ' + project +
+                        ' imported from:<br><br>' + url);
+                // publish('project:created', { project: project });
             },
             onFailure: function(xhr) {
-                request.doneWithError("Unable to import " + project +
-                        " from:<br><br>" + url + ".<br><br>Maybe due to: " +
+                request.doneWithError('Unable to import ' + project +
+                        ' from:<br><br>' + url + '.<br><br>Maybe due to: ' +
                         xhr.responseText);
             }
         });

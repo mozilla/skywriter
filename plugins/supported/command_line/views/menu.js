@@ -117,7 +117,7 @@ exports.Menu = SC.Object.extend({
         // We start by saying 'not found' and remove it when we find something
         this._notFound = document.createElement('div');
         this._notFound.setAttribute('class', 'cmd_error');
-        this._notFound.innerHTML = "No matches for '" + this.input.typed + "'";
+        this._notFound.innerHTML = 'No matches for \'' + this.input.typed + '\'';
         this._parent.appendChild(this._notFound);
 
         this._list = document.createElement('ul');

@@ -40,7 +40,7 @@ var console = require('bespin:console').console;
 
 exports.syntaxContexts = function(env, args, request) {
     var contexts = env.get('contexts');
-    request.done("Contexts = [ " + contexts.join(", ") + " ]");
+    request.done('Contexts = [ ' + contexts.join(', ') + ' ]');
 };
 
 exports.whosOnFirst = function(env, args, request) {
@@ -48,10 +48,10 @@ exports.whosOnFirst = function(env, args, request) {
         var rootResponder = SC.RootResponder.responder;
         var keyPane = rootResponder.get('keyPane');
         var firstResponder = keyPane.get('firstResponder');
-        console.log("Key pane =", keyPane);
-        console.log("First responder =", firstResponder);
-        request.done("Key pane = " + keyPane.toString() +
-            "; first responder = " + firstResponder.toString());
+        console.log('Key pane =', keyPane);
+        console.log('First responder =', firstResponder);
+        request.done('Key pane = ' + keyPane.toString() +
+            '; first responder = ' + firstResponder.toString());
     }, 5000);
 
     request.async();

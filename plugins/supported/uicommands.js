@@ -57,7 +57,7 @@
 });
 "end";
 
-var pluginCatalog = require("bespin:plugins").catalog;
+var pluginCatalog = require('bespin:plugins').catalog;
 
 exports.jumpCommandLine = function(env, args, request) {
     var cli = pluginCatalog.getObject('cli');

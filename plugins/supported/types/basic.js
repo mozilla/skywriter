@@ -99,7 +99,7 @@ exports.number = {
         }
         var reply = parseInt(value, 10);
         if (isNaN(reply)) {
-            throw new Error("Can't convert '" + value + "' to a number.");
+            throw new Error('Can\'t convert "' + value + '" to a number.');
         }
         return reply;
     }
@@ -121,11 +121,11 @@ exports.bool = {
         if (value === null) {
             return null;
         }
-        
+
         if (!value.toLowerCase) {
             return !!value;
         }
-        
+
         var lower = value.toLowerCase();
         if (lower == 'true') {
             return true;

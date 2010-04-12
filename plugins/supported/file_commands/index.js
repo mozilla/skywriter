@@ -63,7 +63,7 @@ exports.filesCommand = function(env, args, request) {
     env.get('files').listDirectory(path).then(function(contents) {
         var files = '';
         for (var x = 0; x < contents.length; x++) {
-            files += contents[x] + "<br/>";
+            files += contents[x] + '<br/>';
         }
         request.done(files);
 
@@ -77,15 +77,15 @@ exports.filesCommand = function(env, args, request) {
  */
 exports.mkdirCommand = function(env, args, request) {
     var path = args.path;
-    
+
     path = getCompletePath(env, path);
     request.async();
-    
+
     var files = env.get('files');
     files.makeDirectory(path).then(function() {
-        request.done('Directory ' + path + " created.");
+        request.done('Directory ' + path + ' created.');
     }, function(error) {
-        request.doneWithError('Unable to make directory ' + path + ': ' 
+        request.doneWithError('Unable to make directory ' + path + ': '
                               + error.message);
     });
 };
@@ -97,7 +97,7 @@ exports.saveCommand = function(env, args, request) {
     var buffer = env.get('buffer');
     if (buffer.untitled()) {
         cliController.prompt('saveas ');
-        request.done("The current buffer is untitled. Please enter a name.");
+        request.done('The current buffer is untitled. Please enter a name.');
         return;
     }
 
@@ -115,12 +115,12 @@ exports.saveCommand = function(env, args, request) {
 exports.saveAsCommand = function(env, args, request) {
     var files = env.get('files');
     var path = getCompletePath(env, args.path).substring(1);
-    
+
     var newFile = files.getFile(path);
     env.get('buffer').saveAs(newFile).then(function() {
-        request.done("Saved to '" + path + "'");
+        request.done('Saved to \'' + path + '\'');
     }, function(err) {
-        request.doneWithError("Save failed (" + err.message + ")");
+        request.doneWithError('Save failed (' + err.message + ')');
     });
 
     request.async();
@@ -144,8 +144,8 @@ exports.openCommand = function(env, args, request) {
             request.done();
         },
         function(error) {
-            request.doneWithError("Unable to open the file (" +
-                error.message + ")");
+            request.doneWithError('Unable to open the file (' +
+                error.message + ')');
         }
     );
 };
@@ -179,9 +179,9 @@ exports.rmCommand = function(env, args, request) {
     path = getCompletePath(env, path);
 
     files.remove(path).then(function() {
-        request.done(path + " deleted.");
+        request.done(path + " deleted.');
     }, function(error) {
-        request.doneWithError("Unable to delete (" + error.message + ")");
+        request.doneWithError('Unable to delete (' + error.message + ')');
     });
     request.async();
 };

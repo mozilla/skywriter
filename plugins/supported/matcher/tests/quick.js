@@ -55,25 +55,25 @@ exports.testQuickMatcher = function() {
     });
 
     t.equal(items.length, 2, 'the number of matches when searching for ' +
-        "\"foo\' and 2');
+        '\'foo\' and 2');
     t.equal(items[0], 'foo', 'the first match when searching for ' +
-        "\"foo\" and \"foo\"");
+        '\'foo\' and \'foo\'');
     t.equal(items[1], 'foobar', 'the second match when searching for ' +
-        "\"foo\" and \"foobar\"");
+        '\'foo\' and \'foobar\'');
 
     matcher.set('query', 'ar');
     t.equal(items.length, 2, 'the number of matches when searching for ' +
-        "\"ar\' and 2');
+        '\'ar\' and 2');
     t.equal(items[0], 'bar', 'the first match when searching for ' +
-        "\"ar\" and \"bar\"");
+        '\'ar\' and \'bar\'');
     t.equal(items[1], 'foobar', 'the second match when searching for ' +
-        "\"ar\" and \"foobar\"");
+        '\'ar\' and \'foobar\'');
 
     matcher.set('query', 'bZ');
     t.equal(items.length, 2, 'the number of matches when searching for ' +
-        "\"bZ\' and 2');
+        '\'bZ\' and 2');
     t.equal(items[0], 'baz', 'the first match when searching for ' +
-        "\"bZ\" and \"baz\"");
+        '\'bZ\' and \'baz\'');
     t.equal(items[1], 'baAaz', 'the second match when searching for ' +
-        "\"bZ\" and \"baAaz\"");
+        '\'bZ\' and \'baAaz\'');
 };

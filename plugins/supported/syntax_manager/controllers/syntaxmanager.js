@@ -113,9 +113,9 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
 
     _attrsToString: function(attrs) {
         return attrs.map(function(range) {
-            return "%@.%@.%@@%@-%@".fmt(range.context, range.state, range.tag,
+            return '%@.%@.%@@%@-%@'.fmt(range.context, range.state, range.tag,
                 range.start, range.end);
-        }.bind(this)).join(", ");
+        }.bind(this)).join(', ');
     },
 
     _clearAttrsAtRow: function(row) {
@@ -615,14 +615,14 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
      * manager, for debugging purposes.
      */
     toString: function() {
-        return "{ lineAttrInfo: [ %@ ], invalidRows: [ %@ ] }".
+        return '{ lineAttrInfo: [ %@ ], invalidRows: [ %@ ] }'.
             fmt(this._lineAttrInfo.map(function(info) {
-                return "{ (%@) -> (%@) }".fmt(info.snapshot.map(function(cas) {
+                return '{ (%@) -> (%@) }'.fmt(info.snapshot.map(function(cas) {
                     return cas.context + ': ' + cas.state;
-                }).join(", "),
-                info.attrs.map(this._attrsToString.bind(this)).join(", "));
-            }.bind(this)).join(", "),
-            this._invalidRows.join(", "));
+                }).join(', '),
+                info.attrs.map(this._attrsToString.bind(this)).join(', '));
+            }.bind(this)).join(', '),
+            this._invalidRows.join(', '));
     },
 
     /**

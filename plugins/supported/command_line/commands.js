@@ -71,16 +71,16 @@ var _getHelp = function(prefix, options) {
 
         if (command) {
             // We must be looking at sub-commands
-            output.push("<h2>Sub-Commands of " + command.name + "</h2>");
-            output.push("<p>" + command.description + "</p>");
+            output.push('<h2>Sub-Commands of ' + command.name + '</h2>');
+            output.push('<p>' + command.description + '</p>');
         } else if (prefix) {
             if (prefix == 'hidden') { // sneaky, sneaky.
                 prefix = '';
                 showHidden = true;
             }
-            output.push("<h2>Commands starting with '" + prefix + "':</h2>");
+            output.push('<h2>Commands starting with \'' + prefix + '\':</h2>');
         } else {
-            output.push("<h2>Available Commands:</h2>");
+            output.push('<h2>Available Commands:</h2>');
         }
 
         var toBeSorted = [];
@@ -90,11 +90,11 @@ var _getHelp = function(prefix, options) {
 
         var sorted = toBeSorted.sort();
 
-        output.push("<table>");
+        output.push('<table>');
         for (var i = 0; i < sorted.length; i++) {
             command = catalog.getExtensionByKey('command', sorted[i]);
             if (!command) {
-                console.error("Huh? command ", command.name, ' cannot be looked up by name');
+                console.error('Huh? command ', command.name, ' cannot be looked up by name');
                 continue;
             }
 
@@ -120,12 +120,12 @@ var _getHelp = function(prefix, options) {
 
             // todo add back a column with parameter information, perhaps?
 
-            output.push("<tr>");
+            output.push('<tr>');
             output.push('<th>' + command.name + '</th>');
-            output.push('<td>' + command.description + "</td>");
-            output.push("</tr>");
+            output.push('<td>' + command.description + '</td>');
+            output.push('</tr>');
         }
-        output.push("</table>");
+        output.push('</table>');
 
         if (!prefix && options && options.suffix) {
             output.push(options.suffix);
@@ -140,7 +140,7 @@ var _getHelp = function(prefix, options) {
  */
 exports.helpCommand = function(env, args, request) {
     var output = _getHelp(args.search, {
-        prefix: "<h2>Welcome to Bespin - Code in the Cloud</h2><ul>" +
+        prefix: '<h2>Welcome to Bespin - Code in the Cloud</h2><ul>' +
             "<li><a href='http://labs.mozilla.com/projects/bespin' target='_blank'>Home Page</a>" +
             "<li><a href='https://wiki.mozilla.org/Labs/Bespin' target='_blank'>Wiki</a>" +
             "<li><a href='https://wiki.mozilla.org/Labs/Bespin/UserGuide' target='_blank'>User Guide</a>" +
@@ -161,23 +161,23 @@ exports.aliasCommand = function(env, args, request) {
 
     if (!args.alias) {
         // * show all
-        var output = "<table>";
+        var output = '<table>';
         for (var x in aliases) {
             if (aliases.hasOwnProperty(x)) {
-                output += "<tr><td style='text-align:right;'>" + x + "</td>" +
-                        "<td>&#x2192;</td><td>" + aliases[x] + "</td></tr>";
+                output += '<tr><td style="text-align:right;">' + x + '</td>' +
+                        '<td>&#x2192;</td><td>' + aliases[x] + '</td></tr>';
             }
         }
-        output += "</table>";
+        output += '</table>';
         request.done(output);
     } else {
         // * show just one
         if (args.command === undefined) {
           var alias = aliases[args.alias];
           if (alias) {
-              request.done(args.alias + " &#x2192; " + aliases[args.alias]);
+              request.done(args.alias + ' &#x2192; ' + aliases[args.alias]);
           } else {
-              request.done("No alias set for '" + args.alias + "'");
+              request.done('No alias set for \'' + args.alias + '\'');
           }
         } else {
             // * save a new alias
@@ -189,13 +189,13 @@ exports.aliasCommand = function(env, args, request) {
                 request.done('There is already a command with the name: ' + key);
             } else if (rootCanon.commands[aliascmd]) {
                 aliases[key] = value;
-                request.done('Saving alias: ' + key + " &#x2192; " + value);
+                request.done('Saving alias: ' + key + ' &#x2192; ' + value);
             } else if (aliases[aliascmd]) {
                 // TODO: have the symlink to the alias not the end point
                 aliases[key] = value;
-                request.done('Saving alias: ' + key + " &#x2192; " + aliases[value] + " (" + value + " was an alias itself)");
+                request.done('Saving alias: ' + key + ' &#x2192; ' + aliases[value] + ' (' + value + ' was an alias itself)');
             } else {
-                request.done("No command or alias with that name.");
+                request.done('No command or alias with that name.');
             }
         }
     }

@@ -41,17 +41,17 @@ var t = require('plugindev');
 exports.testKeyMatching = function() {
     var km = keyboard.keyboardManager;
     var command = {};
-    t.equal(km._commandMatches(command, 'meta_z', {}), false, 
+    t.equal(km._commandMatches(command, 'meta_z', {}), false,
         'no keymapping means false');
-    
+
     command = {
         key: 'meta_z'
     };
     t.equal(km._commandMatches(command, 'meta_z', {}), true,
-        "matching keys, simple string");
+        'matching keys, simple string');
     t.equal(km._commandMatches(command, 'meta_a', {}), false,
-        "not matching key, simple string");
-    
+        'not matching key, simple string');
+
     command = {
         key: {key: 'meta_z', predicates: {isGreen: true}}
     };
@@ -65,7 +65,7 @@ exports.testKeyMatching = function() {
         'object with neither matching');
     t.equal(km._commandMatches(command, 'meta_z', {isGreen: false}), false,
         'object with matching key and but different predicate');
-    
+
     command = {
         key: ['meta_b', {key: 'meta_z', predicates: {isGreen: true}},
             {key: 'meta_c'}]
@@ -85,5 +85,5 @@ exports.testKeyMatching = function() {
     t.equal(km._commandMatches(command, 'meta_c'), true,
         'list: object without predicate match');
     t.equal(km._commandMatches(command, 'meta_c', {isGreen: false}), true,
-        "list: flags don't matter without predicates");
+        'list: flags don\'t matter without predicates');
 };

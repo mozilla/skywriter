@@ -104,7 +104,7 @@ exports.Filesystem = SC.Object.extend({
         }
 
         if (!this.get('source')) {
-            throw new Error("Directory must have a source.");
+            throw new Error('Directory must have a source.');
         }
 
         this._loadingPromises = [];

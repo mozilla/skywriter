@@ -55,7 +55,7 @@ exports.server = SC.Object.create({
     _jobs: {},
 
     _jobsCount: 0,
-    
+
     // interval parameters
     _interval: {
         lo:   200,  // the lowest interval in ms
@@ -76,7 +76,7 @@ exports.server = SC.Object.create({
                 options[functionName].apply(null, args);
                 return true;
             } catch (ex) {
-                console.group("Error calling options." + functionName + ' from server.request');
+                console.group('Error calling options.' + functionName + ' from server.request');
                 console.log(options);
                 console.log(options[functionName].toString());
                 console.error(ex);
@@ -88,7 +88,7 @@ exports.server = SC.Object.create({
                     try {
                         options.onFailure({ responseText: ex.toString() });
                     } catch (ex2) {
-                        console.group("Error calling options.onFailure from server.request");
+                        console.group('Error calling options.onFailure from server.request');
                         console.error(ex2);
                         console.trace();
                         console.groupEnd();
@@ -117,7 +117,7 @@ exports.server = SC.Object.create({
         var server = this;
         var xhr = new XMLHttpRequest();
         options = options || {};
-        
+
         var pr = null;
         if (!options.onSuccess) {
             pr = new Promise();
@@ -132,10 +132,10 @@ exports.server = SC.Object.create({
                         try {
                             response = JSON.parse(response);
                         } catch (syntaxException) {
-                            console.log("Couldn't eval the JSON: " + response + " (SyntaxError: " + syntaxException + ")");
+                            console.log('Couldn\'t eval the JSON: ' + response + ' (SyntaxError: ' + syntaxException + ')');
                         }
                     }
-                    
+
                     if (pr) {
                         pr.resolve(response);
                     } else {
@@ -165,7 +165,7 @@ exports.server = SC.Object.create({
 
         this.protectXhrAgainstCsrf(xhr);
 
-        xhr.setRequestHeader("Content-Type", 'application/x-www-form-urlencoded');
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         if (options.headers) {
             for (var key in options.headers) {
                 if (options.headers.hasOwnProperty(key)) {
@@ -184,7 +184,7 @@ exports.server = SC.Object.create({
      * header, or by just calling this function
      */
     protectXhrAgainstCsrf: function(xhr) {
-        xhr.setRequestHeader("X-Domain-Token", this.getAntiCsrfToken());
+        xhr.setRequestHeader('X-Domain-Token', this.getAntiCsrfToken());
     },
 
     /**
@@ -193,10 +193,10 @@ exports.server = SC.Object.create({
      * @see protectXhrAgainstCsrf()
      */
     getAntiCsrfToken: function() {
-        var token = cookie.get("Domain-Token");
+        var token = cookie.get('Domain-Token');
         if (!token) {
             token = util.randomPassword();
-            cookie.set("Domain-Token", token);
+            cookie.set('Domain-Token', token);
         }
         return token;
     },
@@ -211,12 +211,12 @@ exports.server = SC.Object.create({
         // The response that we get from the server isn't a 'done it' response
         // any more - it's just a 'working on it' response.
         options.originalOnSuccess = options.onSuccess;
-        
+
         var pr = new Promise();
         options.promise = pr;
-        
+
         var self = this;
-        
+
         this.request(method, url, payload, options).then(function(response, xhr) {
             if (response.jobid == null) {
                 console.error('Missing jobid', response);
@@ -225,11 +225,11 @@ exports.server = SC.Object.create({
                 pr.reject(error);
                 return;
             }
-            
+
             if (response.taskname) {
                 console.log('Server is running : ' + response.taskname);
             }
-            
+
             self._jobs[response.jobid] = {
                 jobid: response.jobid,
                 options: options
@@ -237,7 +237,7 @@ exports.server = SC.Object.create({
             self._jobsCount++;
             //self._checkPolling();
         });
-        
+
         return pr;
     },
 
@@ -278,7 +278,7 @@ exports.server = SC.Object.create({
 
         var job = this._jobs[message.jobid];
         if (!job) {
-            console.debug("job unknown. page reload?", message, this);
+            console.debug('job unknown. page reload?', message, this);
             return;
         }
 
@@ -292,7 +292,7 @@ exports.server = SC.Object.create({
                 // that we need to pass on. We aggregate the
                 // messages and call originalOnSuccess
                 job.partials.push(message.output);
-                job.options.promise.resolve(job.partials.join("<br/>"));
+                job.options.promise.resolve(job.partials.join('<br/>'));
             } else {
                 // We're done, and all we have is what we've just
                 // been sent, so just call originalOnSuccess
@@ -308,7 +308,7 @@ exports.server = SC.Object.create({
                 if (SC.none(job.partials)) {
                     job.partials = [];
                 }
-                
+
                 // In progress, and no-where to send the messages,
                 // so we store them for onSuccess when we're done
                 job.partials.push(message.output);
@@ -344,14 +344,14 @@ exports.server = SC.Object.create({
         // the default
         this._doPoll(null);
     },
-    
+
     /**
      * Starts I/O for the message retrieval.
      */
     _doPoll: function(mobwritePayload) {
         /*
         if (mobwritePayload) {
-            console.log("FROM mobwrite:\n" + mobwritePayload);
+            console.log('FROM mobwrite:\n' + mobwritePayload);
         }
         */
         var self = this;
@@ -411,7 +411,7 @@ exports.server = SC.Object.create({
             self._poll();
         }, current);
     },
-    
+
     /**
      * Schedule the next poll.
      */
@@ -511,11 +511,11 @@ exports.server = SC.Object.create({
             return;
         }
         opts = opts || {};
-        opts.log = 'Saved file "' + project + '/' + path+ '"';
+        opts.log = 'Saved file \'' + project + '/' + path+ '\'';
 
         var url = util.path.combine('/file/at', project, (path || ''));
         if (lastOp) {
-            url += "?lastEdit=" + lastOp;
+            url += '?lastEdit=' + lastOp;
         }
 
         this.request('PUT', url, contents, opts);
@@ -575,7 +575,7 @@ exports.server = SC.Object.create({
         if (util.isFunction(onSuccess)) {
             opts.onSuccess = onSuccess;
         } else {
-            opts.log = "Made a directory: [project=" + project + ", path=" + path + "]";
+            opts.log = 'Made a directory: [project=' + project + ', path=' + path + ']';
         }
         if (util.isFunction(onFailure)) {
             opts.onFailure = onFailure;
@@ -604,7 +604,7 @@ exports.server = SC.Object.create({
         if (util.isFunction(onSuccess)) {
             opts.onSuccess = onSuccess;
         } else {
-            opts.log = "Removed directory: [project=" + project + ", path=" + path + "]";
+            opts.log = 'Removed directory: [project=' + project + ', path=' + path + ']';
         }
         if (util.isFunction(onFailure)) {
             opts.onFailure = onFailure;
@@ -653,7 +653,7 @@ exports.server = SC.Object.create({
         var opts = {
             onSuccess: onSuccess,
             evalJSON: true,
-            log: 'Listing searchfiles for: ' + project + ", searchkey: " + searchkey
+            log: 'Listing searchfiles for: ' + project + ', searchkey: ' + searchkey
         };
         this.request('GET', url, null, opts);
     },
@@ -669,7 +669,7 @@ exports.server = SC.Object.create({
         var url = util.path.combine('/edit/list', project, path);
         this.request('GET', url, null, {
             onSuccess: onSuccess,
-            log: "Edit Actions Complete."
+            log: 'Edit Actions Complete.'
         });
     },
 
@@ -684,7 +684,7 @@ exports.server = SC.Object.create({
         var url = util.path.combine('/edit/recent', index, project, path);
         this.request('GET', url, null, {
             onSuccess: onSuccess,
-            log: "Edit After Actions Complete."
+            log: 'Edit After Actions Complete.'
         });
     },
 
@@ -700,7 +700,7 @@ exports.server = SC.Object.create({
         path = path || '';
         var url = util.path.combine('/edit', project, path);
 
-        var sp = "[" + actions.join(",") + "]";
+        var sp = '[' + actions.join(',') + ']';
 
         this.request('PUT', url, sp, {
             onSuccess: function() { }
@@ -715,7 +715,7 @@ exports.server = SC.Object.create({
     exportProject: function(project, archivetype) {
         if (util.include(['zip','tgz','tar.gz'], archivetype)) {
             var iframe = document.createElement('iframe');
-            iframe.src = util.path.combine('/project/export', project + "." + archivetype);
+            iframe.src = util.path.combine('/project/export', project + '.' + archivetype);
             iframe.style.display = 'none';
             iframe.style.height = iframe.style.width = '0';
             document.getElementsByTagName('body')[0].appendChild(iframe);

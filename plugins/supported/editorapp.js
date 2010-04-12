@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -91,8 +91,8 @@ var loginController = m_userident.loginController;
 var signupController = m_userident.signupController;
 var registerUserPlugins = m_userident.registerUserPlugins;
 var userIdentPage = m_userident.userIdentPage;
-var BespinFileSource = require("bespin_server:filesource").BespinFileSource;
-var ServerPersister = require("bespin_server:settings").ServerPersister;
+var BespinFileSource = require('bespin_server:filesource').BespinFileSource;
+var ServerPersister = require('bespin_server:settings').ServerPersister;
 var themeManager = require('theme_manager').themeManager;
 var settings = require('settings').settings;
 var editsession = require('edit_session');
@@ -110,7 +110,7 @@ var createFilesystem = function() {
 
 exports.applicationController = SC.Object.create({
     _editorHasBeenSetup: false,
-    
+
     _application: SC.Application.extend(),
 
     _dockedViews: {},
@@ -139,7 +139,7 @@ exports.applicationController = SC.Object.create({
             view = dockedViews[name];
             applicationView.removeDockedView(view);
         }
-        
+
         // the require happens here so that reloading happens correctly.
         CliInputView = require('command_line:views/cli').CliInputView;
         dockedViews = {};
@@ -147,7 +147,7 @@ exports.applicationController = SC.Object.create({
         exports.cli = view;
         applicationView.appendChild(view);
         dockedViews.cli = view;
-		
+
 		/* TODO: the code below doesn't work --- promise never calls callbacks
 		// check for collab
 		if (catalog.plugins.collab) {
@@ -172,20 +172,20 @@ exports.applicationController = SC.Object.create({
             return;
         }
         this._editorHasBeenSetup = true;
-        
+
         settings.setPersister(ServerPersister.create());
 
         var applicationView = this._applicationView.create();
         this._applicationView = applicationView;
 
         this._createDockedViews();
-        
+
         var mainPane = this._mainPage.get('mainPane');
         mainPane.appendChild(applicationView);
 
         this._setupSession();
     },
-    
+
     _setupSession: function() {
         var editorView = this._applicationView.get('centerView');
         var layoutManager = editorView.get('layoutManager');
@@ -193,7 +193,7 @@ exports.applicationController = SC.Object.create({
 
         var syntaxManager = layoutManager.get('syntaxManager');
         syntaxManager.set('initialContext', 'html');
-        
+
         var buffer = editsession.Buffer.create({
             model:          textStorage,
             syntaxManager:  syntaxManager
@@ -222,17 +222,17 @@ exports.applicationController = SC.Object.create({
         themeManager.addPane(mainPane);
         loginController.addDelegate(this);
         signupController.addDelegate(this);
-        
+
         var self = this;
-        
+
         m_userident.currentuser().then(this.loginControllerAcceptedLogin.bind(this),
             this._displayLogin.bind(this));
 
     },
-    
+
     _displayLogin: function() {
         this._themeManager.addPane(userIdentPage.get('mainPane'));
-        
+
         SC.run(loginController.show);
     },
 
@@ -242,7 +242,7 @@ exports.applicationController = SC.Object.create({
         registerUserPlugins();
         this._showEditor();
     },
-    
+
     loginControllerLoggedOut: function(sender) {
         this._displayLogin();
     },
@@ -250,11 +250,11 @@ exports.applicationController = SC.Object.create({
     postRefresh: function(reloadDescription) {
         var pluginName = reloadDescription.pluginName;
         var dependents = reloadDescription.dependents;
-        
+
         if (pluginName == 'filesystem' || dependents.filesystem) {
             createFilesystem();
         }
-        
+
         // TODO make this better. Basically, there is an issue
         // with running the 'reload' command because the command line
         // is still expecting some things to be around. So,
@@ -269,7 +269,7 @@ exports.applicationController = SC.Object.create({
         console.log('preRefresh');
         return {
             keepModule: true,
-            callPointer: "#postRefresh"
+            callPointer: '#postRefresh'
         };
     }
 });

@@ -49,7 +49,7 @@ var mockCatalog = SC.Object.create({
         return {
             ep:         'extensionpoint',
             name:       key,
-            pointer:    key + "#" + key + 'Theme'
+            pointer:    key + '#' + key + 'Theme'
         };
     },
 
@@ -62,7 +62,7 @@ var mockCatalog = SC.Object.create({
             var pluginName = match[1];
             promise.resolve(SC.Object.extend({
                 cssClass: pluginName,
-                cssResource: pluginName + ':' + pluginName + ".css"
+                cssResource: pluginName + ':' + pluginName + '.css'
             }));
         }
 
@@ -140,15 +140,15 @@ exports.testThemeLoading = function() {
 
     themeManager.set('theme', 'foo');
 
-    t.ok(bespinThemeChangedRun, "bespinThemeChangedRun() was called when " +
+    t.ok(bespinThemeChangedRun, 'bespinThemeChangedRun() was called when ' +
         'changing the theme');
     t.equal(bespinThemeChangedCSSClass, 'foo', 'the CSS class of the theme ' +
-        "object passed into bespinThemeChangedRun() and \"foo\"");
+        'object passed into bespinThemeChangedRun() and \"foo\"');
 
     t.deepEqual(mockPane.get('classNames').sort(), 'baz foo'.w(), 'the ' +
-        "class names on the pane's view after setting the theme and [ baz " +
-        "foo ]");
+        'class names on the pane\'s view after setting the theme and [ baz ' +
+        'foo ]');
     t.equal(mockPane.get('theme'), 'foo', 'the theme assigned to the pane ' +
-        "and \"foo\"");
+        'and \"foo\"');
 };
 

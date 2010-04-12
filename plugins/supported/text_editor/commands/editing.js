@@ -94,7 +94,7 @@ var newline = function(model, view) {
     var prefix = lines[row].substring(0, col);
 
     var spaces = /^\s*/.exec(prefix);
-    view.insertText("\n" + spaces);
+    view.insertText('\n' + spaces);
 };
 
 /**

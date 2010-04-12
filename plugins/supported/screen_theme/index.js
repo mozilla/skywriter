@@ -38,7 +38,7 @@
 var SC = require('sproutcore/runtime').SC;
 
 exports.ScreenTheme = SC.Object.extend({
-    cssClass: "bespin-screen"
+    cssClass: 'bespin-screen'
 });
 
 // Change the themable properties of the SproutCore scroll bars. This is an

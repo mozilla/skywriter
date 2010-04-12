@@ -56,7 +56,7 @@ exports.history = SC.Object.create({
         while (this.requests.length > historyLength) {
             this.requests.shiftObject();
         }
-    }.observes(".requests")
+    }.observes('.requests')
 });
 
 /**

@@ -184,8 +184,8 @@ var KeyboardManager = SC.Object.extend({
                     // TODO: Some UI?
                     var trace = new Trace(ex, true);
                     console.group('Error calling command');
-                    console.log("command=", commandExt);
-                    console.log("args=", match.args);
+                    console.log('command=', commandExt);
+                    console.log('args=', match.args);
                     console.error(ex);
                     trace.log(3);
                     console.groupEnd();
@@ -208,12 +208,12 @@ var KeyboardManager = SC.Object.extend({
         // Escape a given Regex string.
         bindings.forEach(function(binding) {
             if (!SC.none(binding.key)) {
-                binding.key = new RegExp("^" + binding.key + "$");
+                binding.key = new RegExp('^' + binding.key + '$');
             } else if (SC.isArray(binding.regex)) {
-                binding.key = new RegExp("^" + binding.regex[1] + "$");
-                binding.regex = new RegExp(binding.regex.join('') + "$");
+                binding.key = new RegExp('^' + binding.regex[1] + '$');
+                binding.regex = new RegExp(binding.regex.join('') + '$');
             } else {
-                binding.regex = new RegExp(binding.regex + "$");
+                binding.regex = new RegExp(binding.regex + '$');
             }
         });
     },
@@ -372,9 +372,9 @@ var KeyboardManager = SC.Object.extend({
                 // Get the command.
                 commandExt = catalog.getExtensionByKey('command', binding.exec);
                 if (SC.none(commandExt)) {
-                    throw new Error("Can't find command " + binding.exec +
-                        " in state=" + sender._keyState +
-                        ", symbolicName=" + symbolicName);
+                    throw new Error('Can\'t find command ' + binding.exec +
+                        ' in state=' + sender._keyState +
+                        ', symbolicName=' + symbolicName);
                 }
 
                 // Bulid the arguments.
@@ -475,7 +475,7 @@ var KeyboardManager = SC.Object.extend({
                 this._buildBindingsRegex(ckc[mapping].states[state]);
             }
         }
-    }.observes("settings:index#settings.customKeymapping")
+    }.observes('settings:index#settings.customKeymapping')
 });
 
 /**

@@ -115,7 +115,7 @@ exports.StandardSyntax = SC.Object.extend({
             var str = stickySupported ? line : line.substring(column);
 
             if (states[state] === undefined) {
-                throw new Error("StandardSyntax: no such states '%@'".
+                throw new Error('StandardSyntax: no such states "%@"'.
                     fmt(state));
             }
 
@@ -148,7 +148,7 @@ exports.StandardSyntax = SC.Object.extend({
                     // Emit a helpful diagnostic rather than going into an
                     // infinite loop, to aid syntax writers...
                     throw new Error('Syntax regex matches the empty ' +
-                        "string and the state didn't change: " + regex.
+                        'string and the state didn\'t change: ' + regex.
                         toSource());
                 }
 

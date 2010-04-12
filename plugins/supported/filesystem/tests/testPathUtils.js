@@ -41,8 +41,8 @@ var t = require('plugindev');
 exports.testBasename = function() {
     var basename = path.basename;
     t.equal(basename(''), '', 'Empty string yields empty response');
-    t.equal(basename('foo/bar.js'), 'bar.js', "\"foo/bar.js\' yields ' +
-        "\"bar.js\"");
+    t.equal(basename('foo/bar.js'), 'bar.js', '\'foo/bar.js\' yields ' +
+        '\'bar.js\'');
     t.equal(basename('/'), '', 'Root alone yields empty response');
     t.equal(basename('/foo/'), '', 'Directory references yields empty response');
     t.equal(basename('/foo'), 'foo');
@@ -51,14 +51,14 @@ exports.testBasename = function() {
 
 exports.testDirectory = function() {
     var dir = path.directory;
-    t.equal(dir(''), '', "the directory part of \"\" and \"\"");
-    t.equal(dir('foo.txt'), '', "the directory part of \"foo.txt\" and \"\"");
+    t.equal(dir(''), '', 'the directory part of \'\' and \'\'');
+    t.equal(dir('foo.txt'), '', 'the directory part of \'foo.txt\' and \'\'');
     t.equal(dir('foo/bar/baz.txt'), 'foo/bar/', 'the directory part of ' +
-        "\"foo/bar/baz.txt\" and \"foo/bar/\"");
-    t.equal(dir('/foo.txt'), '/', "the directory part of \"/foo.txt\' and ' +
-        "\"/\"");
+        '\'foo/bar/baz.txt\' and \'foo/bar/\'');
+    t.equal(dir('/foo.txt'), '/', 'the directory part of \'/foo.txt\' and ' +
+        '\'/\'');
     t.equal(dir('/foo/bar/baz.txt'), '/foo/bar/', 'the directory part of ' +
-        "\"/foo/bar/baz.txt\" and \"/foo/bar/\"");
+        '\'/foo/bar/baz.txt\' and \'/foo/bar/\'');
 };
 
 exports.testSplitext = function() {
@@ -72,7 +72,7 @@ exports.testSplitext = function() {
 exports.testParentdir = function() {
     var parentdir = path.parentdir;
     t.equal(parentdir(''), '', 'Empty string is empty');
-    t.equal(parentdir('/'), '', "Root directory is empty (no parent)");
+    t.equal(parentdir('/'), '', 'Root directory is empty (no parent)');
     t.equal(parentdir('/foo/'), '/', 'Directory under root has root as parent');
     t.equal(parentdir('/foo.txt'), '/', 'File under root has root as parent');
     t.equal(parentdir('/foo/bar/'), '/foo/', 'directory gets proper parent');

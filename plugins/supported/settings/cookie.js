@@ -62,7 +62,7 @@ exports.CookiePersister = SC.Object.create({
             var stringData = JSON.stringify(data);
             cookie.set('settings', stringData);
         } catch (ex) {
-            console.error("Unable to JSONify the settings! " + ex);
+            console.error('Unable to JSONify the settings! ' + ex);
             return;
         }
     }

@@ -438,12 +438,12 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
      * TODO: Convert to a SproutCore theme. This is super ugly.
      */
     theme: {
-        backgroundStyle: "#2a211c",
-        cursorStyle: "#879aff",
-        editorSelectedTextColor: "rgb(240, 240, 240)",
-        editorSelectedTextBackground: "#526da5",
-        unfocusedCursorStrokeStyle: "#ff0033",
-        unfocusedCursorFillStyle: "#73171e"
+        backgroundStyle: '#2a211c',
+        cursorStyle: '#879aff',
+        editorSelectedTextColor: 'rgb(240, 240, 240)',
+        editorSelectedTextBackground: '#526da5',
+        unfocusedCursorStrokeStyle: '#ff0033',
+        unfocusedCursorFillStyle: '#73171e'
     },
 
     /**
@@ -578,7 +578,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
             // Update the selection to point immediately after the inserted
             // text.
-            var lines = text.split("\n");
+            var lines = text.split('\n');
 
             var destPosition;
             if (lines.length > 1) {
@@ -601,7 +601,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
      * TODO: Should this be moved out of the text view?
      */
     isDelimiter: function(character) {
-        return "\"',;.!~@#$%^&*?[]<>:/\\-+ \t".indexOf(character) !== -1;
+        return '\"',;.!~@#$%^&*?[]<>:/\\-+ \t".indexOf(character) !== -1;
     },
 
     keyDown: function(evt) {
@@ -853,7 +853,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
                 var line = lines[row];
 
                 if (column > 0 && column % tabstop === 0 &&
-                        new RegExp("^\\s{" + column + "}").test(line)) {
+                        new RegExp('^\\s{' + column + '}').test(line)) {
                     // 'Smart tab' behavior: delete a tab worth of whitespace.
                     range = {
                         start:  { row: row, column: column - tabstop },

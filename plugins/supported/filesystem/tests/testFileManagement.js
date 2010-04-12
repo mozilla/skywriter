@@ -39,7 +39,7 @@ var source = exports.source = fixture.DummyFileSource.create({
 
 var getNewRoot = function() {
     return fs.Filesystem.create({
-        source: "filesystem:tests/testFileManagement#source"
+        source: 'filesystem:tests/testFileManagement#source'
     });
 };
 
@@ -63,21 +63,21 @@ exports.testPrefixSearch = function() {
         arr.push('hello/' + i);
     }
     t.equal(ps(arr, 'hello'), 0, 'all match');
-    
+
     arr = [];
     for (i = 0; i < 9; i++) {
         arr.push('abracadabra/' + i);
     }
     arr.push('hello/10');
     t.equal(ps(arr, 'hello'), 9, 'last match');
-    
+
     arr = [];
     for (i = 0; i < 99; i++) {
         arr.push('abracadabra/' + i);
     }
     arr.splice(49, 0, 'hello/49');
     t.equal(ps(arr, 'hello'), 49, 'middle match');
-    
+
     arr.splice(45, 4, 'hello/45', 'hello/46', 'hello/47', 'hello/48');
     t.equal(ps(arr, 'hello'), 45, 'middle match with more');
 };
@@ -86,16 +86,16 @@ exports.testDirectoryListing = function() {
     source.reset();
     var root = getNewRoot();
     var testpr = new Promise();
-    
+
     root.listDirectory('/').then(function(results) {
         t.equal(results.length, 4, 'Expected 4 items');
-        t.deepEqual(results, ['anotherAtTheTop.js', 'atTheTop.js', 'deeply/', 
+        t.deepEqual(results, ['anotherAtTheTop.js', 'atTheTop.js', 'deeply/',
                              'foo/']);
         testpr.resolve();
     });
-    
+
     t.deepEqual(source.requests[0], ['loadAll']);
-    
+
     return testpr;
 };
 
@@ -103,7 +103,7 @@ exports.testFileContents = function() {
     source.reset();
     var root = getNewRoot();
     var testpr = new Promise();
-    
+
     root.loadContents('atTheTop.js').then(function(contents) {
         t.equal(contents, 'the top file');
         testpr.resolve();
@@ -144,7 +144,7 @@ exports.testFileAbstraction = function() {
     t.equal(file.parentdir(), 'deeply/nested/directory/', 'parentdir is the root for this file');
     file.loadContents().then(function(contents) {
         t.equal(contents, 'text file');
-        
+
         file.saveContents('New data').then(function() {
             // there will be a loadAll at the end, so we do -2
             var request = source.requests[source.requests.length-2];

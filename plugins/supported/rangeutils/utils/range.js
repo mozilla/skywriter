@@ -146,7 +146,7 @@ exports.rangeSetBoundaries = function(rangeSet) {
 
 exports.toString = function(range) {
     var start = range.start, end = range.end;
-    return "[ %@,%@ %@,%@ ]".fmt(start.row, start.column, end.row, end.column);
+    return '[ %@,%@ %@,%@ ]'.fmt(start.row, start.column, end.row, end.column);
 };
 
 /**

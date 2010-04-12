@@ -47,7 +47,7 @@ var getPluginName = function(path) {
         var trimmedPath = path.replace(/\/$/, '');
         return pathutils.basename(trimmedPath);
     }
-    
+
     return pathutils.splitext(pathutils.basename(path))[0];
 };
 
@@ -56,15 +56,15 @@ var finishAdd = function(request, pluginConfigFile, pluginConfig, path) {
         pluginConfig.plugins = [];
     }
     pluginConfig.plugins.push(path);
-    
+
     var pluginName = getPluginName(path);
-    
+
     pluginConfigFile.saveContents(JSON.stringify(pluginConfig)).then(
         function() {
             catalog.loadMetadata(server.SERVER_BASE_URL + '/plugin/reload/' + pluginName).then(function() {
-                request.done('Plugin ' + pluginName + " added.");
+                request.done('Plugin ' + pluginName + ' added.');
             });
-            
+
         },
         function(error) {
             request.doneWithError('Unable to save plugin configuration: ' +
@@ -81,15 +81,15 @@ exports.add = function(env, args, request) {
     var files = catalog.getObject('files');
     var session = env.get('session');
     path = session.getCompletePath(path);
-    
+
     var pluginName = getPluginName(path);
     if (catalog.plugins[pluginName]) {
-        request.done('Plugin ' + pluginName + " already exists.");
+        request.done('Plugin ' + pluginName + ' already exists.');
         return;
     }
-    
+
     var pluginConfigFile = files.getFile('BespinSettings/pluginInfo.json');
-    
+
     pluginConfigFile.loadContents().then(function(contents) {
         var pluginConfig = JSON.parse(contents);
         finishAdd(request, pluginConfigFile, pluginConfig, path);
@@ -149,7 +149,7 @@ exports.remove = function(env, args, request) {
     var pluginName = args.plugin;
     var plugin = catalog.get('plugins')[pluginName];
     if (!plugin) {
-        request.doneWithError('Plugin ' + pluginName + " not found.");
+        request.doneWithError('Plugin ' + pluginName + ' not found.');
         return;
     }
     if (plugin.type != 'user') {
@@ -158,10 +158,10 @@ exports.remove = function(env, args, request) {
         return;
     }
     catalog.removePlugin(pluginName);
-    
+
     var files = catalog.getObject('files');
     var pluginConfigFile = files.getFile('BespinSettings/pluginInfo.json');
-    
+
     pluginConfigFile.loadContents().then(function(contents) {
         var pluginConfig = JSON.parse(contents);
         var paths = pluginConfig.plugins;
@@ -177,16 +177,16 @@ exports.remove = function(env, args, request) {
         if (found) {
             var newConfig = JSON.stringify(pluginConfig);
             pluginConfigFile.saveContents(newConfig).then(function() {
-                request.done('Plugin ' + pluginName + " removed (but the files have been saved)");
+                request.done('Plugin ' + pluginName + ' removed (but the files have been saved)');
             }, function(error) {
                 request.doneWithError('Unable to save plugin config file: ' + error.message);
             });
         } else {
             var obj = files.remove(plugin.userLocation).then(function() {
-                request.done("Plugin removed.");
+                request.done('Plugin removed.');
             }, function(error) {
-                request.doneWithError('Unable to delete plugin files at ' 
-                    + plugin.userLocation + " (" + error.message + ")");
+                request.doneWithError('Unable to delete plugin files at '
+                    + plugin.userLocation + ' (' + error.message + ')');
             });
         }
     }, function(error) {
@@ -195,10 +195,10 @@ exports.remove = function(env, args, request) {
         // we know this is not a user edited plugin.
         if (error.xhr && error.xhr.status == 404) {
             var obj = files.remove(plugin.userLocation).remove().then(function() {
-                request.done("Plugin removed.");
+                request.done('Plugin removed.');
             }, function(error) {
-                request.doneWithError('Unable to delete plugin files at ' 
-                    + plugin.userLocation + " (" + error.message + ")");
+                request.doneWithError('Unable to delete plugin files at '
+                    + plugin.userLocation + ' (' + error.message + ')');
             });
         } else {
             request.doneWithError('Unable to load your plugin config: ' + error.message);
@@ -214,7 +214,7 @@ var locationValidator = /^(http|https):\/\//;
  */
 exports.install = function(env, args, request) {
     var body, url;
-    
+
     var plugin = args.plugin;
     if (locationValidator.exec(plugin)) {
         body = util.objectToQuery({url: plugin});
@@ -223,12 +223,12 @@ exports.install = function(env, args, request) {
         body = null;
         url = '/plugin/install/' + escape(plugin);
     }
-    
-    var pr = server.request('POST', url, 
+
+    var pr = server.request('POST', url,
         body, {
             evalJSON: true
     });
-    
+
     pr.then(function(metadata) {
         catalog.load(metadata);
         request.done('Plugin installed');
@@ -244,16 +244,16 @@ exports.install = function(env, args, request) {
  */
 exports.upload = function(env, args, request) {
     if (!args.pluginName) {
-        request.doneWithError("You must provide the name of the plugin to install.");
+        request.doneWithError('You must provide the name of the plugin to install.');
     }
-    var pr = server.request('POST', '/plugin/upload/' 
+    var pr = server.request('POST', '/plugin/upload/'
         + escape(args.pluginName));
     pr.then(function() {
-        request.done("Plugin successfully uploaded.");
+        request.done('Plugin successfully uploaded.');
     }, function(error) {
         request.doneWithError(error.xhr.responseText);
     });
-    
+
     request.async();
 };
 
@@ -267,18 +267,18 @@ exports.gallery = function(env, args, request) {
             evalJSON: true
     });
     pr.then(function(data) {
-        output = "<h2>Bespin Plugin Gallery</h2><p>These plugins can be installed " +
-            "by typing 'plugin install NAME'</p><table><thead><tr><th>Name</th>" +
-            "<th>Description</th></tr></thead><tbody>";
+        output = '<h2>Bespin Plugin Gallery</h2><p>These plugins can be installed ' +
+            'by typing \'plugin install NAME\'</p><table><thead><tr><th>Name</th>' +
+            '<th>Description</th></tr></thead><tbody>';
         data.forEach(function(p) {
-            output += "<tr><td>" + p.name + "</td><td>" + p.description + 
-                "</td></tr>";
+            output += '<tr><td>' + p.name + '</td><td>' + p.description +
+                '</td></tr>';
         });
-        output += "</tbody></table>";
+        output += '</tbody></table>';
         request.done(output);
     }, function(error) {
-        request.doneWithError("Error from server (" + error.message + 
-            ") " + error.xhr.responseText);
+        request.doneWithError('Error from server (' + error.message +
+            ') ' + error.xhr.responseText);
     });
     request.async();
 };

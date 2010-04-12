@@ -97,7 +97,7 @@ exports.EditorView = SC.View.extend(SC.Border, {
      * The font to use for the text view and the gutter view. Typically, this
      * value is set via the font settings.
      */
-    font: "10pt Monaco, Lucida Console, monospace",
+    font: '10pt Monaco, Lucida Console, monospace',
 
     /**
      * @property

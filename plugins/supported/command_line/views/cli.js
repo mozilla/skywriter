@@ -123,7 +123,7 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
                 }
             }).css({
                 verticalAlign: 'middle',
-                padding: "2px;"
+                padding: '2px;'
             });
             var hideOutputId = endWithId(hideOutputEle);
 
@@ -152,7 +152,7 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
             // What the user actually typed
             var prompt = rowin.begin('span')
                     .addClass('cmd_prompt')
-                    .html("> ");
+                    .html('> ');
             prompt.end();
 
             var typedEle = rowin.begin('span').addClass('cmd_typed');
@@ -175,48 +175,48 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
             this.link(settings, 'historytimemode', function(mode) {
                 if (mode == 'history') {
                     // TODO: replace # with invocation id
-                    SC.$("#" + openId).html("#").addClass('cmd_open_history');
+                    SC.$('#' + openId).html('#').addClass('cmd_open_history');
                 }
                 // else if (mode == 'time' && start) {
-                //     SC.$("#" + openId).html(formatTime(start)).addClass('cmd_open_time');
+                //     SC.$('#' + openId).html(formatTime(start)).addClass('cmd_open_time');
                 // }
                 else {
-                    SC.$("#" + openId).addClass('cmd_open_blank');
+                    SC.$('#' + openId).addClass('cmd_open_blank');
                 }
             });
 
             this.link(content, 'duration', function(duration) {
                 if (duration) {
-                    SC.$("#" + durationId).html('completed in ' + (duration / 1000) + ' sec ');
+                    SC.$('#' + durationId).html('completed in ' + (duration / 1000) + ' sec ');
                 } else {
-                    SC.$("#" + durationId).html('');
+                    SC.$('#' + durationId).html('');
                 }
             });
 
             this.link(content, 'hideOutput', function(hideOutput) {
                 if (hideOutput) {
-                    SC.$("#" + hideOutputId).attr({
+                    SC.$('#' + hideOutputId).attr({
                         src: imagePath + 'plus.png',
                         alt: 'Show command output',
                         title: 'Show command output'
                     });
-                    SC.$("#" + hideOutputId).attr('display', 'none');
+                    SC.$('#' + hideOutputId).attr('display', 'none');
                 } else {
-                    SC.$("#" + hideOutputId).attr({
+                    SC.$('#' + hideOutputId).attr({
                         src: imagePath + 'minus.png',
                         alt: 'Hide command output',
                         title: 'Hide command output'
                     });
-                    SC.$("#" + outputId).attr('display', 'block');
+                    SC.$('#' + outputId).attr('display', 'block');
                 }
             });
 
             this.link(content, 'typed', function(typed) {
-                SC.$("#" + typedId).html(typed);
+                SC.$('#' + typedId).html(typed);
             });
 
-            this.link(content, "outputs.[]", function(outputs) {
-                SC.$("#" + outputId).get(0).innerHTML = '';
+            this.link(content, 'outputs.[]', function(outputs) {
+                SC.$('#' + outputId).get(0).innerHTML = '';
                 outputs.forEach(function(output) {
                     var node;
                     if (typeof output == 'string') {
@@ -225,20 +225,20 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
                     } else {
                         node = output;
                     }
-                    SC.$("#" + outputId).append(node);
+                    SC.$('#' + outputId).append(node);
                 });
             });
 
             this.link(content, 'error', function(error) {
                 if (error) {
-                    SC.$("#" + outputId).addClass('cmd_error');
+                    SC.$('#' + outputId).addClass('cmd_error');
                 } else {
-                    SC.$("#" + outputId).removeClass('cmd_error');
+                    SC.$('#' + outputId).removeClass('cmd_error');
                 }
             });
 
             this.link(content, 'completed', function(completed) {
-                SC.$("#" + throbId).css({
+                SC.$('#' + throbId).css({
                     'display': completed ? 'none' : 'block'
                 });
             });
@@ -276,7 +276,7 @@ exports.CliInputView = SC.View.design({
         var layer = this.get('layer');
         layer.addEventListener('click', this._boundCancelBlur, true);
 
-        var hint = this.getPath("contentView.display.output.layer");
+        var hint = this.getPath('contentView.display.output.layer');
         this._ex = document.createElement('div');
         this._ex.className = 'cmd_ex';
         hint.appendChild(this._ex);
@@ -296,7 +296,7 @@ exports.CliInputView = SC.View.design({
      * Called whenever anything happens that could affect the output display
      */
     checkHeight: function(source, event) {
-        var pinned = this.getPath("contentView.display.toolbar.pin.isSelected");
+        var pinned = this.getPath('contentView.display.toolbar.pin.isSelected');
 
         var height = settings.get('minConsoleHeight');
         if (pinned || this.get('hasFocus')) {
@@ -306,13 +306,13 @@ exports.CliInputView = SC.View.design({
 
         if (this.get('layout').height != height) {
             this.adjust('height', height).updateLayout();
-            //this.getPath("contentView.display.hint").updateLayout();
+            //this.getPath('contentView.display.hint').updateLayout();
         }
     }.observes(
-        ".hasFocus", // Open whenever we have the focus
-        ".contentView.display.toolbar.pin.isSelected", // Open/close on pin
-        "settings:index#settings.maxConsoleHeight",
-        "settings:index#settings.minConsoleHeight"
+        '.hasFocus', // Open whenever we have the focus
+        '.contentView.display.toolbar.pin.isSelected', // Open/close on pin
+        'settings:index#settings.maxConsoleHeight',
+        'settings:index#settings.minConsoleHeight'
     ),
 
     /**
@@ -393,23 +393,23 @@ exports.CliInputView = SC.View.design({
         }.bind(this));
 
         this.$().setClass('error', level == Level.Error);
-    }.observes("command_line:controller#cliController.hints.[]"),
+    }.observes('command_line:controller#cliController.hints.[]'),
 
     /**
      * Scrolls the command line output area to the bottom of the output.
      */
     scrollOutputToBottom: function() {
         window.setTimeout(function() {
-            var height = this.getPath("contentView.display.output.contentView.layout").height;
+            var height = this.getPath('contentView.display.output.contentView.layout').height;
             if (height == this._contentHeight) {
                 return;
             }
-    
+
             this._contentHeight = height;
-            var scrollview = this.getPath("contentView.display.output");
+            var scrollview = this.getPath('contentView.display.output');
             scrollview.scrollBy({ x: 0, y: 1000000 });
         }.bind(this), 25);
-    }.observes(".contentView.display.output.contentView.layout"),
+    }.observes('.contentView.display.output.contentView.layout'),
 
     /**
      * We can't know where the focus is going to (willLoseKeyResponderTo only
@@ -442,7 +442,7 @@ exports.CliInputView = SC.View.design({
 
         // This list of things to observe should include all the views that can
         // be KeyResponders. hmmm
-    }.observes(".contentView.input.isKeyResponder"),
+    }.observes('.contentView.input.isKeyResponder'),
 
     /**
      * We have reason to believe that a blur event shouldn't happen
@@ -500,7 +500,7 @@ exports.CliInputView = SC.View.design({
                 layout: { top: 0, bottom: 0, left: 30, right: 0 },
                 hasHorizontalScroller: NO,
                 contentView: SC.StackedView.design({
-                    contentBinding: "canon:request#history.requests.[]",
+                    contentBinding: 'canon:request#history.requests.[]',
                     exampleView: InstructionView
                 })
             }),
@@ -519,7 +519,7 @@ exports.CliInputView = SC.View.design({
         prompt: BespinButtonView.design({
             classNames: [ 'cmd_prompt' ],
             titleMinWidth: 0,
-            title: "<span class='cmd_brackets'>{ }</span> &gt;",
+            title: '<span class="cmd_brackets">{ }</span> &gt;',
             layout: { height: 25, bottom: 0, left: 5, width: 40 }
         }),
 
@@ -528,11 +528,11 @@ exports.CliInputView = SC.View.design({
             escapeHTML: false,
             fontWeight: 'bold',
             completionChanged: function() {
-                var current = this.getPath("parentView.input.value");
-                var extra = this.getPath("parentView.parentView._completion");
-                this.set('value', "<span class='cmd_existing'>" + current +
-                    "</span>" + extra);
-            }.observes(".parentView.parentView._completion"),
+                var current = this.getPath('parentView.input.value');
+                var extra = this.getPath('parentView.parentView._completion');
+                this.set('value', '<span class="cmd_existing">' + current +
+                    '</span>' + extra);
+            }.observes('.parentView.parentView._completion'),
             // This is height:25, bottom:0 plus offsets added by SC, and <input>
             layout: { height: 18, bottom: 4, left: 45, right: 0 }
         }),
@@ -554,7 +554,7 @@ exports.CliInputView = SC.View.design({
             },
 
             classNames: [ 'cmd_input' ],
-            valueBinding: "command_line:controller#cliController.input",
+            valueBinding: 'command_line:controller#cliController.input',
             layout: { height: 25, bottom: 0, left: 40, right: 0 },
 
             keyDown: function(ev) {
@@ -579,7 +579,7 @@ exports.CliInputView = SC.View.design({
         submit: BespinButtonView.design({
             isDefault: true,
             title: 'Exec',
-            target: "command_line:controller#cliController",
+            target: 'command_line:controller#cliController',
             action: 'exec',
             layout: { height: 25, bottom: 0, width: 0, right: -10 }
         })

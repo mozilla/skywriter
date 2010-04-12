@@ -52,9 +52,9 @@ exports.testHistory = function() {
     t.equal(paths.length, 2, 'the length of the history object with two ' +
         'paths in it and 2');
     t.equal(paths[0], 'bar', 'the first path in the history object with ' +
-        "two paths added to it and \"bar\"");
+        'two paths added to it and \"bar\"');
     t.equal(paths[1], 'foo', 'the second path in the history object with ' +
-        "two paths added to it and \"foo\"");
+        'two paths added to it and \"foo\"');
 
     history.addPath('baz');
     history.addPath('bar');
@@ -63,22 +63,22 @@ exports.testHistory = function() {
     t.equal(paths.length, 4, 'the length of the history object with four ' +
         'paths in it and 4');
     t.equal(paths[0], 'boo', 'the first path in the history object with ' +
-        "four paths in it and \"boo\"");
+        'four paths in it and \"boo\"');
     t.equal(paths[1], 'bar', 'the second path in the history object with ' +
-        "four paths in it and \"bar\"");
+        'four paths in it and \"bar\"');
     t.equal(paths[2], 'baz', 'the third path in the history object with ' +
-        "four paths in it and \"baz\"");
+        'four paths in it and \"baz\"');
     t.equal(paths[3], 'foo', 'the fourth path in the history object with ' +
-        "four paths in it and \"foo\"");
+        'four paths in it and \"foo\"');
 
     paths = history.getRecent(2);
     t.equal(paths.length, 2, 'the number of paths returned when requesting ' +
         'two paths from the history object with four paths in it and 2');
     t.equal(paths[0], 'boo', 'the first path in the list of paths returned ' +
         'when requesting two paths from the history object with four paths ' +
-        "in it and \"boo\"");
+        'in it and \"boo\"');
     t.equal(paths[1], 'bar', 'the second path in the list of paths returned ' +
         'when requesting two paths from the history object with four paths ' +
-        "in it and \"bar\"");
+        'in it and \"bar\"');
 };
 

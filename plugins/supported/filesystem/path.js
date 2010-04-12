@@ -153,7 +153,7 @@ exports.basename = function(path) {
  * '/foo/bar/baz.js' -> ['/foo/bar/baz', 'js']
  */
 exports.splitext = function(path) {
-    var lastDot = path.lastIndexOf(".");
+    var lastDot = path.lastIndexOf('.');
     if (lastDot == -1) {
         return [path, ''];
     }
@@ -173,7 +173,7 @@ exports.parentdir = function(path) {
     if (path == '' || path == '/') {
         return '';
     }
-    
+
     if (exports.isDir(path)) {
         path = path.substring(0, path.length-1);
     }
