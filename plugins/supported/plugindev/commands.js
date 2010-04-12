@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -38,7 +38,7 @@
 var catalog = require("bespin:plugins").catalog;
 var SC = require("sproutcore/runtime").SC;
 
-var server = require("bespin_server").server;
+var server = require('bespin_server').server;
 var pathutils = require("filesystem:path");
 var util = require("bespin:util/util");
 
@@ -78,8 +78,8 @@ var finishAdd = function(request, pluginConfigFile, pluginConfig, path) {
  */
 exports.add = function(env, args, request) {
     var path = args.path;
-    var files = catalog.getObject("files");
-    var session = env.get("session");
+    var files = catalog.getObject('files');
+    var session = env.get('session');
     path = session.getCompletePath(path);
     
     var pluginName = getPluginName(path);
@@ -110,16 +110,16 @@ exports.add = function(env, args, request) {
  */
 exports.list = function(env, args, request) {
     var plugins = catalog.getPlugins({
-        sortBy: ["type", "name"]
+        sortBy: ['type', 'name']
     });
-    var output = ['<div class="plugin_list">'];
+    var output = ['<div class='plugin_list'>'];
     var lastPluginType = null;
     plugins.forEach(function(plugin) {
         if (plugin.type != lastPluginType) {
             if (lastPluginType) {
                 output.push('</table></div>');
             }
-            output.push('<div class="plugin_group">');
+            output.push('<div class='plugin_group'>');
             output.push('<h2>');
             output.push(plugin.type);
             output.push(' plugins</h2><table>');
@@ -147,19 +147,19 @@ exports.list = function(env, args, request) {
  */
 exports.remove = function(env, args, request) {
     var pluginName = args.plugin;
-    var plugin = catalog.get("plugins")[pluginName];
+    var plugin = catalog.get('plugins')[pluginName];
     if (!plugin) {
         request.doneWithError("Plugin " + pluginName + " not found.");
         return;
     }
-    if (plugin.type != "user") {
+    if (plugin.type != 'user') {
         request.doneWithError("Plugin " + pluginName + " is a " + plugin.type
             + " plugin. Only user installed/added plugins can be removed");
         return;
     }
     catalog.removePlugin(pluginName);
     
-    var files = catalog.getObject("files");
+    var files = catalog.getObject('files');
     var pluginConfigFile = files.getFile("BespinSettings/pluginInfo.json");
     
     pluginConfigFile.loadContents().then(function(contents) {
@@ -224,7 +224,7 @@ exports.install = function(env, args, request) {
         url = "/plugin/install/" + escape(plugin);
     }
     
-    var pr = server.request("POST", url, 
+    var pr = server.request('POST', url, 
         body, {
             evalJSON: true
     });
@@ -246,7 +246,7 @@ exports.upload = function(env, args, request) {
     if (!args.pluginName) {
         request.doneWithError("You must provide the name of the plugin to install.");
     }
-    var pr = server.request("POST", "/plugin/upload/" 
+    var pr = server.request('POST', "/plugin/upload/" 
         + escape(args.pluginName));
     pr.then(function() {
         request.done("Plugin successfully uploaded.");
@@ -262,7 +262,7 @@ exports.upload = function(env, args, request) {
  * plugin gallery
  */
 exports.gallery = function(env, args, request) {
-    var pr = server.request("GET", "/plugin/gallery/",
+    var pr = server.request('GET', "/plugin/gallery/",
         null, {
             evalJSON: true
     });

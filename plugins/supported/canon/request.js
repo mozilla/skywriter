@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -37,7 +37,7 @@
 
 var SC = require("sproutcore/runtime").SC;
 
-var settings = require("settings").settings;
+var settings = require('settings').settings;
 
 /**
  * TODO: Consider if this is actually the best way to tell the world about the
@@ -50,7 +50,7 @@ exports.history = SC.Object.create({
      * Keep the history to settings.historyLength
      */
     trim: function() {
-        var historyLength = settings.get("historyLength");
+        var historyLength = settings.get('historyLength');
         // This could probably be optimized with some maths, but 99.99% of the
         // time we will only be off by one, so save the maths.
         while (this.requests.length > historyLength) {
@@ -98,7 +98,7 @@ exports.Request = SC.Object.extend({
      * init() is expensive, and won't be used in the majority of cases
      */
     _init: function() {
-        this.set("_inited", true);
+        this.set('_inited', true);
         this.outputs = [];
         this.start = new Date();
         this.completed = false;
@@ -108,12 +108,12 @@ exports.Request = SC.Object.extend({
 
     /**
      * Sugar for:
-     * <pre>output.set("error", true).done(output);</pre>
+     * <pre>output.set('error', true).done(output);</pre>
      * Which is in turn sugar for:
-     * <pre>output.set("error", true).output(output).done();</pre>
+     * <pre>output.set('error', true).output(output).done();</pre>
      */
     doneWithError: function(content) {
-        this.set("error", true).done(content);
+        this.set('error', true).done(content);
     },
 
     /**
@@ -121,7 +121,7 @@ exports.Request = SC.Object.extend({
      * the command exits
      */
     async: function() {
-        if (!this.get("_inited")) {
+        if (!this.get('_inited')) {
             this._init();
         }
     },
@@ -132,7 +132,7 @@ exports.Request = SC.Object.extend({
      * can be used in the content of a DIV to create a DOM node.
      */
     output: function(content) {
-        if (!this.get("_inited")) {
+        if (!this.get('_inited')) {
             this._init();
         }
 
@@ -148,8 +148,8 @@ exports.Request = SC.Object.extend({
         if (content) {
             this.output(content);
         }
-        this.set("completed", true);
-        this.set("end", new Date());
-        this.set("duration", this.get("end").getTime() - this.get("start").getTime());
+        this.set('completed', true);
+        this.set('end', new Date());
+        this.set('duration', this.get('end').getTime() - this.get('start').getTime());
     }
 });

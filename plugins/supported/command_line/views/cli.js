@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -43,14 +43,14 @@ var console = require('bespin:console').console;
 var request = require("canon:request");
 var keyboardManager = require('canon:keyboard').keyboardManager;
 var environment = require('canon:environment').global;
-var settings = require("settings").settings;
+var settings = require('settings').settings;
 
 var cliController = require("command_line:controller").cliController;
 var Level = require("command_line:hint").Level;
 var BespinButtonView = require("command_line:views/image_button").BespinButtonView;
 var PinView = require("command_line:views/pin").PinView;
 
-var imagePath = catalog.getResourceURL("command_line") + "images/";
+var imagePath = catalog.getResourceURL('command_line') + "images/";
 
 /**
  * The height of the input area that is always visible.
@@ -70,15 +70,15 @@ var endWithId = function(ele) {
  * Display the results of a command invocation
  */
 var InstructionView = SC.View.extend(SC.StaticLayout, {
-    classNames: [ "instruction_view" ],
+    classNames: [ 'instruction_view' ],
     useStaticLayout: true,
 
     link: function(root, path, updater) {
         (function() {
-            var stack = this.getPath("parentView");
+            var stack = this.getPath('parentView');
             var doUpdate = function() {
                 SC.run(function() {
-                    // console.log("updating", path, "to", root.getPath(path));
+                    // console.log('updating', path, 'to', root.getPath(path));
                     updater(root.getPath(path));
                     // The stacked view gets confused about how tall it should be...
                     stack.updateHeight();
@@ -94,41 +94,41 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
 
     render: function(context, firstTime) {
         if (firstTime) {
-            var content = this.get("content");
-            content.set("hideOutput", false);
+            var content = this.get('content');
+            content.set('hideOutput', false);
 
             // The div for the input (i.e. what was typed)
-            var rowin = context.begin("div").addClass("cmd_rowin").attr({
+            var rowin = context.begin('div').addClass('cmd_rowin').attr({
                 onclick: function() {
                     // A single click on an invocation line in the console
                     // copies the command to the command line
-                    cliController.input = content.get("typed");
+                    cliController.input = content.get('typed');
                 },
                 ondblclick: function() {
                     // A double click on an invocation line in the console
                     // executes the command
-                    cliController.executeCommand(content.get("typed"));
+                    cliController.executeCommand(content.get('typed'));
                 }
             });
 
             // The execution time
-            var hover = rowin.begin("div").addClass("cmd_hover");
-            var durationEle = hover.begin("span").addClass("cmd_duration");
+            var hover = rowin.begin('div').addClass('cmd_hover');
+            var durationEle = hover.begin('span').addClass('cmd_duration');
             var durationId = endWithId(durationEle);
 
             // Toggle output display
-            var hideOutputEle = hover.begin("img").attr({
+            var hideOutputEle = hover.begin('img').attr({
                 onclick: function() {
-                    content.set("hideOutput", !content.get("hideOutput"));
+                    content.set('hideOutput', !content.get('hideOutput'));
                 }
             }).css({
-                verticalAlign: "middle",
+                verticalAlign: 'middle',
                 padding: "2px;"
             });
             var hideOutputId = endWithId(hideOutputEle);
 
             // Open/close output
-            var closeEle = hover.begin("img");
+            var closeEle = hover.begin('img');
             closeEle.attr({
                 src: imagePath + "closer.png",
                 alt: "Remove this command from the history",
@@ -138,54 +138,54 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
                 }
             });
             closeEle.css({
-                verticalAlign: "middle",
-                padding: "2px"
+                verticalAlign: 'middle',
+                padding: '2px'
             });
             closeEle.end();
 
             hover.end();
 
             // Place to put a history marker
-            var openEle = rowin.begin("span").addClass("cmd_open");
+            var openEle = rowin.begin('span').addClass('cmd_open');
             var openId = endWithId(openEle);
 
             // What the user actually typed
-            var prompt = rowin.begin("span")
-                    .addClass("cmd_prompt")
+            var prompt = rowin.begin('span')
+                    .addClass('cmd_prompt')
                     .html("> ");
             prompt.end();
 
-            var typedEle = rowin.begin("span").addClass("cmd_typed");
+            var typedEle = rowin.begin('span').addClass('cmd_typed');
             var typedId = endWithId(typedEle);
 
             rowin.end();
 
-            var rowout = context.begin("div").addClass("cmd_rowout");
+            var rowout = context.begin('div').addClass('cmd_rowout');
 
-            var outputEle = rowout.begin("div").addClass("cmd_output");
+            var outputEle = rowout.begin('div').addClass('cmd_output');
             var outputId = endWithId(outputEle);
 
-            var throbEle = rowout.begin("img").attr({
+            var throbEle = rowout.begin('img').attr({
                 src: imagePath + "throbber.gif"
             });
             var throbId = endWithId(throbEle);
 
             rowout.end();
 
-            this.link(settings, "historytimemode", function(mode) {
-                if (mode == "history") {
+            this.link(settings, 'historytimemode', function(mode) {
+                if (mode == 'history') {
                     // TODO: replace # with invocation id
-                    SC.$("#" + openId).html("#").addClass("cmd_open_history");
+                    SC.$("#" + openId).html("#").addClass('cmd_open_history');
                 }
-                // else if (mode == "time" && start) {
-                //     SC.$("#" + openId).html(formatTime(start)).addClass("cmd_open_time");
+                // else if (mode == 'time' && start) {
+                //     SC.$("#" + openId).html(formatTime(start)).addClass('cmd_open_time');
                 // }
                 else {
-                    SC.$("#" + openId).addClass("cmd_open_blank");
+                    SC.$("#" + openId).addClass('cmd_open_blank');
                 }
             });
 
-            this.link(content, "duration", function(duration) {
+            this.link(content, 'duration', function(duration) {
                 if (duration) {
                     SC.$("#" + durationId).html("completed in " + (duration / 1000) + " sec ");
                 } else {
@@ -193,25 +193,25 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
                 }
             });
 
-            this.link(content, "hideOutput", function(hideOutput) {
+            this.link(content, 'hideOutput', function(hideOutput) {
                 if (hideOutput) {
                     SC.$("#" + hideOutputId).attr({
                         src: imagePath + "plus.png",
                         alt: "Show command output",
                         title: "Show command output"
                     });
-                    SC.$("#" + hideOutputId).attr("display", "none");
+                    SC.$("#" + hideOutputId).attr('display', 'none');
                 } else {
                     SC.$("#" + hideOutputId).attr({
                         src: imagePath + "minus.png",
                         alt: "Hide command output",
                         title: "Hide command output"
                     });
-                    SC.$("#" + outputId).attr("display", "block");
+                    SC.$("#" + outputId).attr('display', 'block');
                 }
             });
 
-            this.link(content, "typed", function(typed) {
+            this.link(content, 'typed', function(typed) {
                 SC.$("#" + typedId).html(typed);
             });
 
@@ -219,8 +219,8 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
                 SC.$("#" + outputId).get(0).innerHTML = "";
                 outputs.forEach(function(output) {
                     var node;
-                    if (typeof output == "string") {
-                        node = document.createElement("p");
+                    if (typeof output == 'string') {
+                        node = document.createElement('p');
                         node.innerHTML = output;
                     } else {
                         node = output;
@@ -229,17 +229,17 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
                 });
             });
 
-            this.link(content, "error", function(error) {
+            this.link(content, 'error', function(error) {
                 if (error) {
-                    SC.$("#" + outputId).addClass("cmd_error");
+                    SC.$("#" + outputId).addClass('cmd_error');
                 } else {
-                    SC.$("#" + outputId).removeClass("cmd_error");
+                    SC.$("#" + outputId).removeClass('cmd_error');
                 }
             });
 
-            this.link(content, "completed", function(completed) {
+            this.link(content, 'completed', function(completed) {
                 SC.$("#" + throbId).css({
-                    "display": completed ? "none" : "block"
+                    'display': completed ? 'none' : 'block'
                 });
             });
         }
@@ -247,19 +247,19 @@ var InstructionView = SC.View.extend(SC.StaticLayout, {
 });
 
 var hintClass = {};
-hintClass[Level.Error] = "cmd_error";
-hintClass[Level.Incomplete] = "cmd_incom";
-hintClass[Level.Warning] = "cmd_warn";
-hintClass[Level.Info] = "cmd_info";
+hintClass[Level.Error] = 'cmd_error';
+hintClass[Level.Incomplete] = 'cmd_incom';
+hintClass[Level.Warning] = 'cmd_warn';
+hintClass[Level.Info] = 'cmd_info';
 
 /**
  * A view designed to dock in the bottom of the editor, holding the command
  * line input.
  */
 exports.CliInputView = SC.View.design({
-    classNames: [ "cmd_line" ],
+    classNames: [ 'cmd_line' ],
     layout: { height: 300, bottom: 0, left: 0, right: 0 },
-    childViews: [ "contentView" ],
+    childViews: [ 'contentView' ],
     hasFocus: false,
     table: null,
     _contentHeight: -1,
@@ -273,11 +273,11 @@ exports.CliInputView = SC.View.design({
      */
     didCreateLayer: function() {
         this._boundCancelBlur = this._cancelBlur.bind(this);
-        var layer = this.get("layer");
-        layer.addEventListener("click", this._boundCancelBlur, true);
+        var layer = this.get('layer');
+        layer.addEventListener('click', this._boundCancelBlur, true);
 
         var hint = this.getPath("contentView.display.output.layer");
-        this._ex = document.createElement("div");
+        this._ex = document.createElement('div');
         this._ex.className = 'cmd_ex';
         hint.appendChild(this._ex);
 
@@ -288,8 +288,8 @@ exports.CliInputView = SC.View.design({
      * Undo event registration from #didCreateLayer()
      */
     willDestroyLayer: function() {
-        var layer = this.get("layer");
-        layer.removeEventListener("click", this._boundCancelBlur, true);
+        var layer = this.get('layer');
+        layer.removeEventListener('click', this._boundCancelBlur, true);
     },
 
     /**
@@ -298,14 +298,14 @@ exports.CliInputView = SC.View.design({
     checkHeight: function(source, event) {
         var pinned = this.getPath("contentView.display.toolbar.pin.isSelected");
 
-        var height = settings.get("minConsoleHeight");
-        if (pinned || this.get("hasFocus")) {
-            height = settings.get("maxConsoleHeight");
+        var height = settings.get('minConsoleHeight');
+        if (pinned || this.get('hasFocus')) {
+            height = settings.get('maxConsoleHeight');
         }
         height += inputHeight;
 
-        if (this.get("layout").height != height) {
-            this.adjust("height", height).updateLayout();
+        if (this.get('layout').height != height) {
+            this.adjust('height', height).updateLayout();
             //this.getPath("contentView.display.hint").updateLayout();
         }
     }.observes(
@@ -319,13 +319,13 @@ exports.CliInputView = SC.View.design({
      * Apply the proposed completion
      */
     complete: function() {
-        var completion = this.get("_completion");
+        var completion = this.get('_completion');
         if (completion === undefined || completion === null) {
             return;
         }
 
-        var current = cliController.get("input");
-        cliController.set("input", current + completion);
+        var current = cliController.get('input');
+        cliController.set('input', current + completion);
     },
 
     /**
@@ -333,7 +333,7 @@ exports.CliInputView = SC.View.design({
      */
     setInput: function(command) {
         command = command || "";
-        cliController.set("input", command);
+        cliController.set('input', command);
     },
 
     /**
@@ -341,13 +341,13 @@ exports.CliInputView = SC.View.design({
      * output components to make it fit properly.
      */
     hintUpdated: function() {
-        var hints = cliController.get("hints");
+        var hints = cliController.get('hints');
         while (this._ex.firstChild) {
             this._ex.removeChild(this._ex.firstChild);
         }
 
         var level = Level.Info;
-        this.set("_completion", "");
+        this.set('_completion', "");
 
         /**
          * Find a way to populate a DOM node with this hint
@@ -358,7 +358,7 @@ exports.CliInputView = SC.View.design({
             }
 
             // Defer promises
-            if (typeof hint.then == "function") {
+            if (typeof hint.then == 'function') {
                 hint.then(function(hint) {
                     addHint(hintNode, hint);
                 }.bind(this));
@@ -370,29 +370,29 @@ exports.CliInputView = SC.View.design({
             } else {
                 // Maybe we should do something clever with exceptions?
                 // For now we just toString and call it done.
-                var parent = document.createElement("article");
+                var parent = document.createElement('article');
                 parent.appendChild(document.createTextNode(hint.element.toString()));
                 hintNode.appendChild(parent);
             }
 
-            // hintNode.setAttribute("class", "cmd_hint " + hintClass[hint.level]);
+            // hintNode.setAttribute('class', "cmd_hint " + hintClass[hint.level]);
 
             if (hint.completion) {
-                this.set("_completion", hint.completion);
+                this.set('_completion', hint.completion);
             }
 
             if (hint.level > level) {
                 level = hint.level;
             }
 
-            this.$().setClass("error", level == Level.Error);
+            this.$().setClass('error', level == Level.Error);
         }.bind(this);
 
         hints.forEach(function(hint) {
             addHint(this._ex, hint);
         }.bind(this));
 
-        this.$().setClass("error", level == Level.Error);
+        this.$().setClass('error', level == Level.Error);
     }.observes("command_line:controller#cliController.hints.[]"),
 
     /**
@@ -425,7 +425,7 @@ exports.CliInputView = SC.View.design({
         var focus = source[event];
         if (focus) {
             // Make sure that something isn't going to undo the hasFocus=true
-            this.set("hasFocus", true);
+            this.set('hasFocus', true);
         } else {
             // The current element has lost focus, but does that mean that the
             // whole CliInputView has lost focus? We delay setting hasFocus to
@@ -433,9 +433,9 @@ exports.CliInputView = SC.View.design({
 
             // We rely on something canceling this if we're not to lose focus
             this._blurTimeout = window.setTimeout(function() {
-                //console.log("_blurTimeout", arguments);
+                //console.log('_blurTimeout', arguments);
                 SC.run(function() {
-                    self.set("hasFocus", false);
+                    self.set('hasFocus', false);
                 });
             }, 1);
         }
@@ -450,7 +450,7 @@ exports.CliInputView = SC.View.design({
      * are canceling the blur action
      */
     _cancelBlur: function(reason) {
-        // console.log("_cancelBlur", arguments);
+        // console.log('_cancelBlur', arguments);
         if (this._blurTimeout) {
             window.clearTimeout(this._blurTimeout);
             this._blurTimeout = null;
@@ -468,7 +468,7 @@ exports.CliInputView = SC.View.design({
      * Positions the insertion point at the end of the input element.
      */
     replaceSelection: function(text) {
-        var element = this.getPath('contentView.input').$("input").get(0);
+        var element = this.getPath('contentView.input').$('input').get(0);
         var length = text.length;
         element.value = text;
         window.setTimeout(function() {
@@ -489,14 +489,14 @@ exports.CliInputView = SC.View.design({
      * TODO: Work out what the borkage is about and fix
      */
     contentView: SC.View.design({
-        childViews: [ "kbd", "display", "prompt", "completion", "input", "submit" ],
+        childViews: [ 'kbd', 'display', 'prompt', 'completion', 'input', 'submit' ],
 
         display: SC.View.design({
             layout: { top: 0, bottom: 27, left: 0, right: 0 },
-            childViews: [ "output", "toolbar" ],
+            childViews: [ 'output', 'toolbar' ],
 
             output: SC.ScrollView.design({
-                classNames: [ "cmd_view" ],
+                classNames: [ 'cmd_view' ],
                 layout: { top: 0, bottom: 0, left: 30, right: 0 },
                 hasHorizontalScroller: NO,
                 contentView: SC.StackedView.design({
@@ -507,7 +507,7 @@ exports.CliInputView = SC.View.design({
 
             toolbar: SC.View.design({
                 layout: { top: 0, bottom: 0, left: 0, width: 30 },
-                childViews: [ "pin" ],
+                childViews: [ 'pin' ],
 
                 pin: PinView.design({
                     alt: "Pin/Unpin the console output",
@@ -517,20 +517,20 @@ exports.CliInputView = SC.View.design({
         }),
 
         prompt: BespinButtonView.design({
-            classNames: [ "cmd_prompt" ],
+            classNames: [ 'cmd_prompt' ],
             titleMinWidth: 0,
             title: "<span class='cmd_brackets'>{ }</span> &gt;",
             layout: { height: 25, bottom: 0, left: 5, width: 40 }
         }),
 
         completion: SC.LabelView.design({
-            classNames: [ "cmd_completion" ],
+            classNames: [ 'cmd_completion' ],
             escapeHTML: false,
-            fontWeight: "bold",
+            fontWeight: 'bold',
             completionChanged: function() {
                 var current = this.getPath("parentView.input.value");
                 var extra = this.getPath("parentView.parentView._completion");
-                this.set("value", "<span class='cmd_existing'>" + current +
+                this.set('value', "<span class='cmd_existing'>" + current +
                     "</span>" + extra);
             }.observes(".parentView.parentView._completion"),
             // This is height:25, bottom:0 plus offsets added by SC, and <input>
@@ -542,7 +542,7 @@ exports.CliInputView = SC.View.design({
          */
         kbd: SC.View.design({
             layout: { height: 25, bottom: 0, left: 0, right: 0 },
-            tagName: "kbd"
+            tagName: 'kbd'
         }),
 
         input: SC.TextFieldView.design({
@@ -553,7 +553,7 @@ exports.CliInputView = SC.View.design({
                 return keyboardManager.processKeyEvent(ev, this, opt);
             },
 
-            classNames: [ "cmd_input" ],
+            classNames: [ 'cmd_input' ],
             valueBinding: "command_line:controller#cliController.input",
             layout: { height: 25, bottom: 0, left: 40, right: 0 },
 
@@ -578,9 +578,9 @@ exports.CliInputView = SC.View.design({
 
         submit: BespinButtonView.design({
             isDefault: true,
-            title: "Exec",
+            title: 'Exec',
             target: "command_line:controller#cliController",
-            action: "exec",
+            action: 'exec',
             layout: { height: 25, bottom: 0, width: 0, right: -10 }
         })
     })
@@ -590,11 +590,11 @@ exports.CliInputView = SC.View.design({
  * Quick utility to format the elapsed time for display as hh:mm:ss
  */
 var formatTime = function(date) {
-    var mins = "0" + date.getMinutes();
+    var mins = '0' + date.getMinutes();
     if (mins.length > 2) {
         mins = mins.slice(mins.length - 2);
     }
-    var secs = "0" + date.getSeconds();
+    var secs = '0' + date.getSeconds();
     if (secs.length > 2) {
         secs = secs.slice(secs.length - 2);
     }

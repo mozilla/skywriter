@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -48,7 +48,7 @@ exports.ServerPersister = SC.Object.extend({
     _loading: false,
 
     loadInitialValues: function(settings) {
-        var files = catalog.getObject("files");
+        var files = catalog.getObject('files');
         files.loadContents("BespinSettings/settings").then(function(contents) {
             var data;
             try {
@@ -95,7 +95,7 @@ exports.ServerPersister = SC.Object.extend({
             return;
         }
         // Send it to the server
-        var files = catalog.getObject("files");
+        var files = catalog.getObject('files');
         files.saveContents("BespinSettings/settings", settingsString);
     }
 });

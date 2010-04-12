@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require("bespin");
+var bespin = require('bespin');
 var console = require('bespin:console').console;
 var util = require("bespin:util/util");
 var cookie = require("bespin:util/cookie");
@@ -84,7 +84,7 @@ exports.server = SC.Object.create({
                 console.groupEnd();
 
                 // If got an exception on success it's really a failure
-                if (functionName == "onSuccess" && util.isFunction(options.onFailure)) {
+                if (functionName == 'onSuccess' && util.isFunction(options.onFailure)) {
                     try {
                         options.onFailure({ responseText: ex.toString() });
                     } catch (ex2) {
@@ -139,7 +139,7 @@ exports.server = SC.Object.create({
                     if (pr) {
                         pr.resolve(response);
                     } else {
-                        var handled = server._callCallback(options, "onSuccess", [ response, xhr ]);
+                        var handled = server._callCallback(options, 'onSuccess', [ response, xhr ]);
 
                         if (!handled && options.log) {
                             console.log(options.log);
@@ -258,10 +258,10 @@ exports.server = SC.Object.create({
     */
 
     _processResponse: function(message) {
-        if (!("jobid" in message)) {
-            if ("msgtargetid" in message) {
+        if (!('jobid' in message)) {
+            if ('msgtargetid' in message) {
                 var target = catalog.getExtensionByKey(
-                                "msgtargetid", message.msgtargetid);
+                                'msgtargetid', message.msgtargetid);
                 if (target) {
                     target.load(function (f) {
                         f(message);
@@ -332,7 +332,7 @@ exports.server = SC.Object.create({
             return;
         }
         // ask mobwrite
-        var mobwriteInstance = catalog.getExtensions("mobwriteinstance");
+        var mobwriteInstance = catalog.getExtensions('mobwriteinstance');
         if (mobwriteInstance && mobwriteInstance.length) {
             // always use the first instance
             var self = this;
@@ -418,7 +418,7 @@ exports.server = SC.Object.create({
     schedulePoll: function (ms, payload) {
         var self = this;
         var interval = this._interval;
-        if (typeof ms == "number" && (!interval.handle || ms < interval.current)) {
+        if (typeof ms == 'number' && (!interval.handle || ms < interval.current)) {
             // kill the current timeout
             if (interval.handle) {
                 clearTimeout(interval.handle);
@@ -616,7 +616,7 @@ exports.server = SC.Object.create({
     /**
      * Returns JSON object with the key of filename, and the value of an array
      * of usernames:
-     * { "foo.txt": ["ben"], "SomeAjaxApp/foo.txt": ["dion"] }
+     * { "foo.txt": ['ben'], "SomeAjaxApp/foo.txt": ['dion'] }
      * @param onSuccess fires after listing the open files
      */
     listOpen: function(onSuccess) {
@@ -714,11 +714,11 @@ exports.server = SC.Object.create({
      */
     exportProject: function(project, archivetype) {
         if (util.include(['zip','tgz','tar.gz'], archivetype)) {
-            var iframe = document.createElement("iframe");
+            var iframe = document.createElement('iframe');
             iframe.src = util.path.combine('/project/export', project + "." + archivetype);
             iframe.style.display = 'none';
-            iframe.style.height = iframe.style.width = "0";
-            document.getElementsByTagName("body")[0].appendChild(iframe);
+            iframe.style.height = iframe.style.width = '0';
+            document.getElementsByTagName('body')[0].appendChild(iframe);
         }
     },
 
@@ -769,7 +769,7 @@ exports.server = SC.Object.create({
      * - DELETE /settings/[setting] to delete a single setting
      */
     listSettings: function(onSuccess) {
-        if (typeof onSuccess == "function") {
+        if (typeof onSuccess == 'function') {
             this.request('GET', '/settings/', null, {
                 onSuccess: onSuccess,
                 evalJSON: true
@@ -778,7 +778,7 @@ exports.server = SC.Object.create({
     },
 
     getSetting: function(name, onSuccess) {
-        if (typeof onSuccess == "function") {
+        if (typeof onSuccess == 'function') {
             this.request('GET', '/settings/' + name, null, {
                 onSuccess: onSuccess
             });

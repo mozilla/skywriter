@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -97,13 +97,13 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
             this._file = newFile;
             
             if (SC.none(newFile)) {
-                var model = self.get("model");
+                var model = self.get('model');
                 model.replaceCharacters(model.range(), "");
             } else {
                 newFile.loadContents().then(function(contents) {
                     console.log("SET FILE CONTENTS: ", contents);
                     SC.run(function() {
-                        var model = self.get("model");
+                        var model = self.get('model');
                         model.replaceCharacters(model.range(), contents);
                     });
                 });
@@ -113,16 +113,16 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
     }.property(),
 
     init: function() {
-        var model = this.get("model");
+        var model = this.get('model');
         if (model == null) {
-            this.set("model", TextStorage.create());
+            this.set('model', TextStorage.create());
         }
 
         this._refreshSyntaxManager();
     },
     
     /*
-    * This is like calling set("file", value) except this returns
+    * This is like calling set('file', value) except this returns
     * a promise so that you can take action once the contents have
     * been loaded.
     */
@@ -132,7 +132,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
         
         // are we changing to a new file?
         if (SC.none(newFile)) {
-            var model = self.get("model");
+            var model = self.get('model');
             model.replaceCharacters(model.range(), "");
             var pr = new Promise();
             pr.resolve(this);
@@ -141,7 +141,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
         
         return newFile.loadContents().then(function(contents) {
             SC.run(function() {
-                var model = self.get("model");
+                var model = self.get('model');
                 model.replaceCharacters(model.range(), contents);
             });
             return self;
@@ -149,7 +149,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
     },
     
     /*
-     * Normally, you would just call set("file", fileObject) on a Buffer.
+     * Normally, you would just call set('file', fileObject) on a Buffer.
      * However, that will replace the contents of the model (reloading the file), 
      * which is not always what you want. Use this method to change the
      * file that is tracked by this Buffer without replacing the contents of the
@@ -157,22 +157,22 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
      */
     changeFileOnly: function(newFile) {
         this._file = newFile;
-        this.propertyDidChange("file");
+        this.propertyDidChange('file');
     },
     
     /*
      * reload the existing file contents from the server.
      */
     reload: function() {
-        var file = this.get("file");
+        var file = this.get('file');
         var self = this;
         
         return file.loadContents().then(function(contents) {
-            var model = self.get("model");
+            var model = self.get('model');
             model.replaceCharacters(model.range(), contents);
             // the following should theoretically work...
             // but does not seem to.
-            // model.set("value", contents);
+            // model.set('value', contents);
         });
     },
     
@@ -220,18 +220,18 @@ exports.EditSession = SC.Object.extend({
     }.observes('currentBuffer'),
 
     /*
-     * The "current" view is the editor component that most recently had
+     * The 'current' view is the editor component that most recently had
      * the focus.
      */
     currentView: null,
     
     /*
-     * The "current" Buffer is the one that backs the currentView.
+     * The 'current' Buffer is the one that backs the currentView.
      */
     currentBuffer: null,
     
     /*
-     * The "current" user.
+     * The 'current' user.
      */
     currentUser: null,
 
@@ -244,7 +244,7 @@ exports.EditSession = SC.Object.extend({
         if (!SC.none(file)) {
             this.get('history').addPath(file.path);
         }
-        catalog.getExtensions("bufferFileChanged").forEach(function (ext) {
+        catalog.getExtensions('bufferFileChanged').forEach(function (ext) {
             ext.load(function (f) {
                 f(file);
             });
@@ -261,10 +261,10 @@ exports.EditSession = SC.Object.extend({
         }
 
         if (path == null || path.substring(0, 1) != "/") {
-            var buffer = this.get("currentBuffer");
+            var buffer = this.get('currentBuffer');
             var file;
             if (buffer) {
-                file = buffer.get("file");
+                file = buffer.get('file');
             }
             if (!file) {
                 path = "/" + path;
@@ -281,7 +281,7 @@ exports.EditSession = SC.Object.extend({
         if (recent.length === 0) {
             return;
         }
-        var files = catalog.getObject("files");
+        var files = catalog.getObject('files');
         var file = files.getFile(recent[0]);
         this.get('currentBuffer').changeFile(file);
     },

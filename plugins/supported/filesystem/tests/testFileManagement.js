@@ -2,7 +2,7 @@
  * Version: MPL 1.1
  *
  * The contents of this file are subject to the Mozilla Public License
- * Version 1.1 (the "License"); you may not use this file except in
+ * Version 1.1 (the 'License'); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var t = require("plugindev");
-var fs = require("filesystem");
+var t = require('plugindev');
+var fs = require('filesystem');
 var fixture = require("filesystem:tests/fixture");
 var console = require('bespin:console').console;
 var Promise = require("bespin:promise").Promise;
@@ -53,33 +53,33 @@ exports.testPrefixSearch = function() {
     var i;
     var ps = fs._prefixSearch;
     var arr = [];
-    t.equal(ps(arr, "hello"), null, "Expected null for empty array");
-    arr = ["hello"];
-    t.equal(ps(arr, "hello"), 0, "Simple case: one matching element");
+    t.equal(ps(arr, 'hello'), null, "Expected null for empty array");
+    arr = ['hello'];
+    t.equal(ps(arr, 'hello'), 0, "Simple case: one matching element");
     arr = ["hello/there"];
-    t.equal(ps(arr, "hello"), 0, "Prefix case: one element");
+    t.equal(ps(arr, 'hello'), 0, "Prefix case: one element");
     arr = [];
     for (i = 0; i < 10; i++) {
         arr.push("hello/" + i);
     }
-    t.equal(ps(arr, "hello"), 0, "all match");
+    t.equal(ps(arr, 'hello'), 0, "all match");
     
     arr = [];
     for (i = 0; i < 9; i++) {
         arr.push("abracadabra/" + i);
     }
     arr.push("hello/10");
-    t.equal(ps(arr, "hello"), 9, "last match");
+    t.equal(ps(arr, 'hello'), 9, "last match");
     
     arr = [];
     for (i = 0; i < 99; i++) {
         arr.push("abracadabra/" + i);
     }
     arr.splice(49, 0, "hello/49");
-    t.equal(ps(arr, "hello"), 49, "middle match");
+    t.equal(ps(arr, 'hello'), 49, "middle match");
     
     arr.splice(45, 4, "hello/45", "hello/46", "hello/47", "hello/48");
-    t.equal(ps(arr, "hello"), 45, "middle match with more");
+    t.equal(ps(arr, 'hello'), 45, "middle match with more");
 };
 
 exports.testDirectoryListing = function() {
@@ -94,7 +94,7 @@ exports.testDirectoryListing = function() {
         testpr.resolve();
     });
     
-    t.deepEqual(source.requests[0], ["loadAll"]);
+    t.deepEqual(source.requests[0], ['loadAll']);
     
     return testpr;
 };
@@ -129,7 +129,7 @@ exports.testPathRemoval = function() {
     root.remove("atTheTop.js").then(function() {
         t.equal(root._files.length, 3, "file should be removed from filesystem");
         t.equal(root._files[1], "deeply/nested/directory/andAFile.txt");
-        t.equal(source.requests[0][0], "remove");
+        t.equal(source.requests[0][0], 'remove');
         testpr.resolve();
     });
     return testpr;
@@ -140,7 +140,7 @@ exports.testFileAbstraction = function() {
     var root = getNewRoot();
     var testpr = new Promise();
     var file = root.getFile("deeply/nested/directory/andAFile.txt");
-    t.equal(file.extension(), "txt");
+    t.equal(file.extension(), 'txt');
     t.equal(file.parentdir(), "deeply/nested/directory/", "parentdir is the root for this file");
     file.loadContents().then(function(contents) {
         t.equal(contents, "text file");
@@ -148,7 +148,7 @@ exports.testFileAbstraction = function() {
         file.saveContents("New data").then(function() {
             // there will be a loadAll at the end, so we do -2
             var request = source.requests[source.requests.length-2];
-            t.equal(request[0], "saveContents");
+            t.equal(request[0], 'saveContents');
             t.equal(request[1][0], "deeply/nested/directory/andAFile.txt");
             t.equal(request[1][1], "New data");
             file.exists().then(function(exists) {

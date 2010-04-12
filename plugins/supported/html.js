@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -37,29 +37,29 @@
 
 "define metadata";
 ({
-    "description": "HTML syntax highlighter",
-    "dependencies": {
-        "syntax_manager": "0.0"
+    'description': "HTML syntax highlighter",
+    'dependencies': {
+        'syntax_manager': "0.0"
     },
-    "provides": [
+    'provides': [
         {
-            "ep": "fileextension",
-            "name": "htm",
-            "syntax": "html"
+            'ep': 'fileextension',
+            'name': 'htm',
+            'syntax': 'html'
         },
         {
-            "ep": "fileextension",
-            "name": "html",
-            "syntax": "html"
+            'ep': 'fileextension',
+            'name': 'html',
+            'syntax': 'html'
         },
         {
-            "ep": "syntax",
-            "name": "html",
-            "pointer": "#HTMLSyntax"
+            'ep': 'syntax',
+            'name': 'html',
+            'pointer': "#HTMLSyntax"
         }
     ]
 });
-"end";
+'end';
 
 require('sproutcore/runtime').SC;
 var StandardSyntax = require('syntax_manager:controllers/standardsyntax').
@@ -75,7 +75,7 @@ var states = {};
 //
 
 var createTagStates = function(prefix, interiorActions) {
-    states[prefix + "_beforeAttrName"] = [
+    states[prefix + '_beforeAttrName'] = [
         {
             regex:  /^\s+/,
             tag:    'plain'
@@ -83,7 +83,7 @@ var createTagStates = function(prefix, interiorActions) {
         {
             regex:  /^\//,
             tag:    'operator',
-            then:   prefix + "_selfClosingStartTag"
+            then:   prefix + '_selfClosingStartTag'
         },
         {
             regex:  /^>/,
@@ -93,26 +93,26 @@ var createTagStates = function(prefix, interiorActions) {
         {
             regex:  /^./,
             tag:    'keyword',
-            then:   prefix + "_attrName"
+            then:   prefix + '_attrName'
         }
     ];
 
     // 10.2.4.35 Attribute name state
-    states[prefix + "_attrName"] = [
+    states[prefix + '_attrName'] = [
         {
             regex:  /^\s+/,
             tag:    'plain',
-            then:   prefix + "_afterAttrName"
+            then:   prefix + '_afterAttrName'
         },
         {
             regex:  /^\//,
             tag:    'operator',
-            then:   prefix + "_selfClosingStartTag"
+            then:   prefix + '_selfClosingStartTag'
         },
         {
             regex:  /^=/,
             tag:    'operator',
-            then:   prefix + "_beforeAttrValue"
+            then:   prefix + '_beforeAttrValue'
         },
         {
             regex:  /^>/,
@@ -129,7 +129,7 @@ var createTagStates = function(prefix, interiorActions) {
         }
     ];
 
-    states[prefix + "_afterAttrName"] = [
+    states[prefix + '_afterAttrName'] = [
         {
             regex:  /^\s+/,
             tag:    'plain'
@@ -137,12 +137,12 @@ var createTagStates = function(prefix, interiorActions) {
         {
             regex:  /^\//,
             tag:    'operator',
-            then:   prefix + "_selfClosingStartTag"
+            then:   prefix + '_selfClosingStartTag'
         },
         {
             regex:  /^=/,
             tag:    'operator',
-            then:   prefix + "_beforeAttrValue"
+            then:   prefix + '_beforeAttrValue'
         },
         {
             regex:  /^>/,
@@ -152,11 +152,11 @@ var createTagStates = function(prefix, interiorActions) {
         {
             regex:  /^./,
             tag:    'keyword',
-            then:   prefix + "_attrName"
+            then:   prefix + '_attrName'
         }
     ];
 
-    states[prefix + "_beforeAttrValue"] = [
+    states[prefix + '_beforeAttrValue'] = [
         {
             regex:  /^\s+/,
             tag:    'plain'
@@ -164,17 +164,17 @@ var createTagStates = function(prefix, interiorActions) {
         {
             regex:  /^"/,
             tag:    'string',
-            then:   prefix + "_attrValueQQ"
+            then:   prefix + '_attrValueQQ'
         },
         {
             regex:  /^(?=&)/,
             tag:    'plain',
-            then:   prefix + "_attrValueU"
+            then:   prefix + '_attrValueU'
         },
         {
             regex:  /^'/,
             tag:    'string',
-            then:   prefix + "_attrValueQ"
+            then:   prefix + '_attrValueQ'
         },
         {
             regex:  /^>/,
@@ -184,15 +184,15 @@ var createTagStates = function(prefix, interiorActions) {
         {
             regex:  /^./,
             tag:    'string',
-            then:   prefix + "_attrValueU"
+            then:   prefix + '_attrValueU'
         }
     ];
 
-    states[prefix + "_attrValueQQ"] = [
+    states[prefix + '_attrValueQQ'] = [
         {
             regex:  /^"/,
             tag:    'string',
-            then:   prefix + "_afterAttrValueQ"
+            then:   prefix + '_afterAttrValueQ'
         },
         {
             regex:  /^[^"]+/,
@@ -200,11 +200,11 @@ var createTagStates = function(prefix, interiorActions) {
         }
     ];
 
-    states[prefix + "_attrValueQ"] = [
+    states[prefix + '_attrValueQ'] = [
         {
             regex:  /^'/,
             tag:    'string',
-            then:   prefix + "_afterAttrValueQ"
+            then:   prefix + '_afterAttrValueQ'
         },
         {
             regex:  /^[^']+/,
@@ -212,11 +212,11 @@ var createTagStates = function(prefix, interiorActions) {
         }
     ];
 
-    states[prefix + "_attrValueU"] = [
+    states[prefix + '_attrValueU'] = [
         {
             regex:  /^\s/,
             tag:    'string',
-            then:   prefix + "_beforeAttrName"
+            then:   prefix + '_beforeAttrName'
         },
         {
             regex:  /^>/,
@@ -229,16 +229,16 @@ var createTagStates = function(prefix, interiorActions) {
         }
     ];
 
-    states[prefix + "_afterAttrValueQ"] = [
+    states[prefix + '_afterAttrValueQ'] = [
         {
             regex:  /^\s/,
             tag:    'plain',
-            then:   prefix + "_beforeAttrName"
+            then:   prefix + '_beforeAttrName'
         },
         {
             regex:  /^\//,
             tag:    'operator',
-            then:   prefix + "_selfClosingStartTag"
+            then:   prefix + '_selfClosingStartTag'
         },
         {
             regex:  /^>/,
@@ -248,12 +248,12 @@ var createTagStates = function(prefix, interiorActions) {
         {
             regex:  /^(?=.)/,
             tag:    'operator',
-            then:   prefix + "_beforeAttrName"
+            then:   prefix + '_beforeAttrName'
         }
     ];
 
     // 10.2.4.43 Self-closing start tag state
-    states[prefix + "_selfClosingStartTag"] = [
+    states[prefix + '_selfClosingStartTag'] = [
         {
             regex:  /^>/,
             tag:    'operator',
@@ -262,7 +262,7 @@ var createTagStates = function(prefix, interiorActions) {
         {
             regex:  /^./,
             tag:    'error',
-            then:   prefix + "_beforeAttrName"
+            then:   prefix + '_beforeAttrName'
         }
     ];
 };
@@ -770,8 +770,8 @@ states = {
     ]
 };
 
-createTagStates("normal", 'start');
-createTagStates("script", 'scriptData start:js');
+createTagStates('normal', 'start');
+createTagStates('script', 'scriptData start:js');
 
 /**
  * @class

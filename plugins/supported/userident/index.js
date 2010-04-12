@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -38,7 +38,7 @@
 var SC = require("sproutcore/runtime").SC;
 var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
 var util = require("bespin:util/util");
-var server = require("bespin_server").server;
+var server = require('bespin_server').server;
 var catalog = require("bespin:plugins").catalog;
 var console = require('bespin:console').console;
 var env = require('canon:environment').global;
@@ -60,9 +60,9 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
     password: "",
 
     login: function() {
-        var password = this.get("password");
-        this.set("password", "");
-        return exports.login(this.get("username"), password).
+        var password = this.get('password');
+        this.set('password', "");
+        return exports.login(this.get('username'), password).
             then(this.onSuccess.bind(this), this.onFailure.bind(this));
     },
 
@@ -80,7 +80,7 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
      * The login worked.
      */
     onSuccess: function() {
-        exports.userIdentPage.get("mainPane").remove();
+        exports.userIdentPage.get('mainPane').remove();
 
         this.notifyDelegates('loginControllerAcceptedLogin');
     },
@@ -140,7 +140,7 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
                 usernameError = "At least 4 chars";
                 isValid = false;
             }
-            this.set("usernameError", usernameError);
+            this.set('usernameError', usernameError);
         }
 
         if (this.changed.password1  || this.get('password1') !== '') {
@@ -153,7 +153,7 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
                 password1Error = "Maximum 20 chars";
                 isValid = false;
             }
-            this.set("password1Error", password1Error);
+            this.set('password1Error', password1Error);
         }
 
         if ((this.changed.password1  || this.get('username') !== '') &&
@@ -163,15 +163,15 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
                 password2Error = "Have to match";
                 isValid = false;
             }
-            this.set("password2Error", password2Error);
+            this.set('password2Error', password2Error);
         }
 
         if (this.changed.email || this.get('email' !== '')) {
             if (!this.get('email').match(/.+@.+\...+/)) {
-                this.set("emailHint", "When email is given, it has to be a valid format");
+                this.set('emailHint', "When email is given, it has to be a valid format");
                 isValid = false;
             } else {
-                this.set("emailHint", "");
+                this.set('emailHint', "");
             }
         }
 
@@ -208,7 +208,7 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
      * The sign up worked.
      */
     onSuccess: function() {
-        exports.userIdentPage.get("mainPane").remove();
+        exports.userIdentPage.get('mainPane').remove();
 
         this.notifyDelegates('loginControllerAcceptedLogin');
     },
@@ -316,7 +316,7 @@ exports.userIdentPage = SC.Page.design({
                             value: 'signupView'
                         }
                     ],
-                    value: "loginView"
+                    value: 'loginView'
                 }),
 
                 container: SC.ContainerView.design({
@@ -397,7 +397,7 @@ exports.userIdentPage = SC.Page.design({
             },
 
             controlSize: SC.SMALL_CONTROL_SIZE,
-            value: "Username"
+            value: 'Username'
         }),
 
         passwordField: SC.TextFieldView.design({
@@ -422,7 +422,7 @@ exports.userIdentPage = SC.Page.design({
             },
 
             controlSize: SC.SMALL_CONTROL_SIZE,
-            value: "Password"
+            value: 'Password'
         }),
 
         submit: SC.ButtonView.design({
@@ -436,7 +436,7 @@ exports.userIdentPage = SC.Page.design({
             title: "Log in",
             isDefault: true,
             target: "userident#loginController",
-            action: "login"
+            action: 'login'
         })
     }),
 
@@ -454,13 +454,13 @@ exports.userIdentPage = SC.Page.design({
             valueBinding: "userident#signupController.username",
             commitEditing: function() {
                 arguments.callee.base.apply(this, arguments);
-                exports.signupController.validate("username");
+                exports.signupController.validate('username');
                 return true;
             }
         }),
 
         usernameLabel: SC.LabelView.design({
-            value: "Username",
+            value: 'Username',
             controlSize: SC.SMALL_CONTROL_SIZE,
             layout: { left: 10, top: 92 - 91 + 26 + 3, width: 53, height: 14 }
         }),
@@ -473,7 +473,7 @@ exports.userIdentPage = SC.Page.design({
                 height: 14
             },
 
-            classNames: "signupValidationError".w(),
+            classNames: 'signupValidationError'.w(),
             textAlign: 'right',
             valueBinding: "userident#signupController.usernameError",
             controlSize: SC.SMALL_CONTROL_SIZE
@@ -486,7 +486,7 @@ exports.userIdentPage = SC.Page.design({
             valueBinding: "userident#signupController.password1",
             commitEditing: function() {
                 arguments.callee.base.apply(this, arguments);
-                exports.signupController.validate("password1");
+                exports.signupController.validate('password1');
                 return true;
             }
         }),
@@ -499,7 +499,7 @@ exports.userIdentPage = SC.Page.design({
                 height: 14
             },
 
-            value: "Password",
+            value: 'Password',
             controlSize: SC.SMALL_CONTROL_SIZE
         }),
 
@@ -513,7 +513,7 @@ exports.userIdentPage = SC.Page.design({
 
             controlSize: SC.SMALL_CONTROL_SIZE,
             textAlign: 'right',
-            classNames: "signupValidationError".w(),
+            classNames: 'signupValidationError'.w(),
             valueBinding: "userident#signupController.password1Error"
         }),
 
@@ -524,7 +524,7 @@ exports.userIdentPage = SC.Page.design({
             valueBinding: "userident#signupController.password2",
             commitEditing: function() {
                 arguments.callee.base.apply(this, arguments);
-                exports.signupController.validate("password2");
+                exports.signupController.validate('password2');
                 return true;
             }
         }),
@@ -552,7 +552,7 @@ exports.userIdentPage = SC.Page.design({
 
             controlSize: SC.SMALL_CONTROL_SIZE,
             textAlign: 'right',
-            classNames: [ "signupValidationError" ],
+            classNames: [ 'signupValidationError' ],
             valueBinding: "userident#signupController.password2Error",
             layout: { left: 265, top: 65, height: 30, width: 120 }
         }),
@@ -563,7 +563,7 @@ exports.userIdentPage = SC.Page.design({
             valueBinding: "userident#signupController.email",
             commitEditing: function() {
                 arguments.callee.base.apply(this, arguments);
-                exports.signupController.validate("email");
+                exports.signupController.validate('email');
                 return true;
             }
         }),
@@ -590,8 +590,8 @@ exports.userIdentPage = SC.Page.design({
             },
 
             controlSize: SC.SMALL_CONTROL_SIZE,
-            textAlign: "right",
-            classNames: "signupValidationNote".w(),
+            textAlign: 'right',
+            classNames: 'signupValidationNote'.w(),
             valueBinding: "userident#signupController.emailHint"
         }),
 
@@ -600,7 +600,7 @@ exports.userIdentPage = SC.Page.design({
             isDefault: true,
             title: "Sign up",
             target: "userident#signupController",
-            action: "signup"
+            action: 'signup'
         })
     })
 });
@@ -639,10 +639,10 @@ exports.logout = function() {
     return server.request('POST', url, null, {
         log: 'Logout complete.'
     }).then(function() {
-        env.get("session").set("currentUser", null);
-        exports.loginController.set("username", "");
-        exports.loginController.set("password", "");
-        exports.loginController.notifyDelegates("loginControllerLoggedOut");
+        env.get('session').set('currentUser', null);
+        exports.loginController.set('username', "");
+        exports.loginController.set('password', "");
+        exports.loginController.notifyDelegates('loginControllerLoggedOut');
     }, function(error) {
         var pane = SC.AlertPane.error("Unable to log out",
             "There was a problem logging out: " + error.message);

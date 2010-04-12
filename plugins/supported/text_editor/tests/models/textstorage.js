@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -77,7 +77,7 @@ exports.testCharacterMutators = function() {
             row:    1,
             column: 1
         }
-    }, "obarba");
+    }, 'obarba');
     t.equal(storage.get('value'), "foobarbaz\n",
         "the result of replacing characters in a text storage object and " +
             "the expected string");
@@ -168,7 +168,7 @@ exports.testGetCharacters = function() {
     t.equal(storage.getCharacters({
             start:  { row: 2, column: 0 },
             end:    { row: 2, column: 3 }
-        }), "baz", "the characters in the range (2,0 2,3) and \"baz\"");
+        }), 'baz', "the characters in the range (2,0 2,3) and \"baz\"");
     t.equal(storage.getCharacters({
             start:  { row: 2, column: 3 },
             end:    { row: 3, column: 0 }

@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -70,8 +70,8 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     /**
      * @property
      *
-     * The margins on each edge in pixels, expressed as an object with "left",
-     * "bottom", "top", and "right" properties.
+     * The margins on each edge in pixels, expressed as an object with 'left',
+     * 'bottom', 'top', and 'right' properties.
      *
      * Do not modify the properties of this object directly; clone, adjust, and
      * reset the margin property of the layout manager instead.
@@ -96,8 +96,8 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     /**
      * @property{Array<object>}
      *
-     * The marked-up lines of text. Each line has the properties "characters",
-     * "colors", and "lineHeight".
+     * The marked-up lines of text. Each line has the properties 'characters',
+     * 'colors', and 'lineHeight'.
      */
     textLines: null,
 
@@ -454,7 +454,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
 
         for (var i = 0; i < attrs.length; i++) {
             textLines[startRow + i].colors = attrs[i].map(function(range) {
-                var color = theme["editorTextColor_" + range.tag];
+                var color = theme['editorTextColor_' + range.tag];
                 if (SC.none(color)) {
                     color = theme.editorTextColor_plain;
                 }

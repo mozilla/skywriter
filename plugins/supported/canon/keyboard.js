@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -68,7 +68,7 @@ var KeyboardManager = SC.Object.extend({
      * beginning. The second value is the char string by itself.
      *
      * TODO: This is almost a carbon copy of a function from SproutCore. The
-     * only change is that "meta" is reported for function keys. This should be
+     * only change is that 'meta' is reported for function keys. This should be
      * exposed as a public API from SproutCore instead of duplicating their
      * code.
      *
@@ -80,7 +80,7 @@ var KeyboardManager = SC.Object.extend({
 
         var code=this.keyCode, ret=null, key=null, modifiers='', lowercase ;
 
-        // Absent a value for "keyCode" or "which", we can't compute the
+        // Absent a value for 'keyCode' or 'which', we can't compute the
         // command codes. Bail out.
         if (this.keyCode === 0 && this.which === 0) {
             return false;
@@ -246,9 +246,9 @@ var KeyboardManager = SC.Object.extend({
             // TODO: The keymapping setting will go away soon in favor of
             // simply enabling and disabling the appropriate plugins.
             var keymappingName = settings.get('keymapping');
-            if (!SC.none(keymappingName) && keymappingName !== "standard") {
+            if (!SC.none(keymappingName) && keymappingName !== 'standard') {
                 var keymapping = null;
-                catalog.getExtensions("keymapping").some(function(map) {
+                catalog.getExtensions('keymapping').some(function(map) {
                     if (map.name == keymappingName) {
                       if (SC.none(map._convertedRegExp)) {
                           this._buildKeymappingRegex(map);
@@ -300,7 +300,7 @@ var KeyboardManager = SC.Object.extend({
             }
         }
 
-        var commandExts = catalog.getExtensions("command");
+        var commandExts = catalog.getExtensions('command');
         var reply = null;
         var args = {};
 
@@ -370,7 +370,7 @@ var KeyboardManager = SC.Object.extend({
             // comand and the arguments.
             if (binding.exec) {
                 // Get the command.
-                commandExt = catalog.getExtensionByKey("command", binding.exec);
+                commandExt = catalog.getExtensionByKey('command', binding.exec);
                 if (SC.none(commandExt)) {
                     throw new Error("Can't find command " + binding.exec +
                         " in state=" + sender._keyState +
@@ -387,7 +387,7 @@ var KeyboardManager = SC.Object.extend({
                             value = param.defaultValue;
                         }
 
-                        if (param.type === "number") {
+                        if (param.type === 'number') {
                             value = parseInt(value);
                         }
 
@@ -403,7 +403,7 @@ var KeyboardManager = SC.Object.extend({
                 sender.resetKeyBuffers();
             }
 
-            // If there is no command matched now, then return a "false"
+            // If there is no command matched now, then return a 'false'
             // command to stop matching.
             if (SC.none(commandExt)) {
                 commandExt = "no command";

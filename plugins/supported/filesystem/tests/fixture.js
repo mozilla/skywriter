@@ -2,7 +2,7 @@
  * Version: MPL 1.1
  *
  * The contents of this file are subject to the Mozilla Public License
- * Version 1.1 (the "License"); you may not use this file except in
+ * Version 1.1 (the 'License'); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -24,9 +24,9 @@
 
 var SC = require("sproutcore/runtime").SC;
 var Promise = require("bespin:promise").Promise;
-var t = require("plugindev");
+var t = require('plugindev');
 var util = require("bespin:util/util");
-var pathUtil = require("path");
+var pathUtil = require('path');
 
 exports.DummyFileSource = SC.Object.extend({
     // populate this list of files
@@ -63,12 +63,12 @@ exports.DummyFileSource = SC.Object.extend({
     
     // Loads the complete file list
     loadAll: function() {
-        this.requests.push(["loadAll"]);
+        this.requests.push(['loadAll']);
         console.log("loadAll called");
         
         var pr = new Promise();
         var result = [];
-        this.get("files").forEach(function(f) {
+        this.get('files').forEach(function(f) {
             result.push(f.name);
         });
         pr.resolve(result);
@@ -77,7 +77,7 @@ exports.DummyFileSource = SC.Object.extend({
     },
     
     loadContents: function(path) {
-        this.requests.push(["loadContents", arguments]);
+        this.requests.push(['loadContents', arguments]);
         var pr = new Promise();
         var matches = this._findMatching(path);
         pr.resolve(matches.contents);
@@ -85,7 +85,7 @@ exports.DummyFileSource = SC.Object.extend({
     },
 
     saveContents: function(path, contents) {
-        this.requests.push(["saveContents", arguments]);
+        this.requests.push(['saveContents', arguments]);
         var pr = new Promise();
         var entry = this._findOrCreateFile(path);
         entry.contents = contents;
@@ -94,14 +94,14 @@ exports.DummyFileSource = SC.Object.extend({
     },
 
     remove: function(path) {
-        this.requests.push(["remove", arguments]);
+        this.requests.push(['remove', arguments]);
         var pr = new Promise();
         pr.resolve();
         return pr;
     },
     
     makeDirectory: function(path) {
-        this.requests.push(["makeDirectory", arguments]);
+        this.requests.push(['makeDirectory', arguments]);
         var pr = new Promise();
         this.files.push({name: path});
         pr.resolve(path);
@@ -118,7 +118,7 @@ exports.DummyFileSource = SC.Object.extend({
     },
     
     _findFile: function(path) {
-        var f = this.files.findProperty("name", path);
+        var f = this.files.findProperty('name', path);
         return f;
     },
 

@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -120,7 +120,7 @@ exports.testInvalidRects = function() {
         }
     }));
 
-    textStorage.insertCharacters({ row: 1, column: 1 }, "aaa");
+    textStorage.insertCharacters({ row: 1, column: 1 }, 'aaa');
     t.deepEqual(returnedRects[0], {
             x:      characterWidth,
             y:      lineHeight,
@@ -138,14 +138,14 @@ exports.testInvalidRects = function() {
         width:  Number.MAX_VALUE,
         height: lineHeight
     }, "the first returned rect and the expected rect after one line was " +
-        "deleted");
+        'deleted');
     t.deepEqual(returnedRects[1], {
         x:      0,
         y:      2 * lineHeight,
         width:  Number.MAX_VALUE,
         height: Number.MAX_VALUE
     }, "the second returned rect and the expected rect after one line was " +
-        "deleted");
+        'deleted');
 
     textStorage.insertCharacters({ row: 1, column: 1 }, "bar\n");
     t.deepEqual(returnedRects[0], {
@@ -154,14 +154,14 @@ exports.testInvalidRects = function() {
         width:  Number.MAX_VALUE,
         height: lineHeight
     }, "the first returned rect and the expected rect after one line was " +
-        "added");
+        'added');
     t.deepEqual(returnedRects[1], {
         x:      0,
         y:      2 * lineHeight,
         width:  Number.MAX_VALUE,
         height: Number.MAX_VALUE
     }, "the second returned rect and the expected rect after one line was " +
-        "added");
+        'added');
 };
 
 exports.testPointToCharacterMapping = function() {
@@ -212,21 +212,21 @@ exports.testRectsForRange = function() {
             width:  characterWidth * (maximumWidth - 2),
             height: lineHeight
         }, "the first rect returned for a complex range and the expected " +
-            "rect");
+            'rect');
     t.deepEqual(rects[1], {
             x:      0,
             y:      5 * lineHeight,
             width:  characterWidth * 2,
             height: lineHeight
         }, "the second rect returned for a complex range and the expected " +
-            "rect");
+            'rect');
     t.deepEqual(rects[2], {
             x:      0,
             y:      3 * lineHeight,
             width:  characterWidth * maximumWidth,
             height: 2 * lineHeight
         }, "the third rect returned for a complex range and the expected " +
-            "rect");
+            'rect');
 
     rects = layoutManager.rectsForRange({
         start:  { row: 2, column: 0 },
@@ -240,7 +240,7 @@ exports.testRectsForRange = function() {
             width:  characterWidth * maximumWidth,
             height: 3 * lineHeight
         }, "the rect returned for a line-spanning range and the expected " +
-            "rect");
+            'rect');
 
     rects = layoutManager.rectsForRange({
         start:  { row: 2, column: 3 },

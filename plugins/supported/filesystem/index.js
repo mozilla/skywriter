@@ -2,7 +2,7 @@
  * Version: MPL 1.1
  *
  * The contents of this file are subject to the Mozilla Public License
- * Version 1.1 (the "License"); you may not use this file except in
+ * Version 1.1 (the 'License'); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -83,9 +83,9 @@ exports._binarySearch = function(arr, find) {
     return null;
 };
 
-exports.NEW = { name: "NEW" };
-exports.LOADING = { name: "LOADING" };
-exports.READY = { name: "READY" };
+exports.NEW = { name: 'NEW' };
+exports.LOADING = { name: 'LOADING' };
+exports.READY = { name: 'READY' };
 
 exports.Filesystem = SC.Object.extend({
     // FileSource for this filesytem
@@ -98,12 +98,12 @@ exports.Filesystem = SC.Object.extend({
     _loadingPromises: null,
 
     init: function() {
-        var source = this.get("source");
-        if (typeof(source) == "string") {
-            this.set("source", SC.objectForPropertyPath(source));
+        var source = this.get('source');
+        if (typeof(source) == 'string') {
+            this.set('source', SC.objectForPropertyPath(source));
         }
 
-        if (!this.get("source")) {
+        if (!this.get('source')) {
             throw new Error("Directory must have a source.");
         }
 
@@ -117,9 +117,9 @@ exports.Filesystem = SC.Object.extend({
         } else if (this.status === exports.LOADING) {
             this._loadingPromises.push(pr);
         } else {
-            this.set("status", exports.LOADING);
+            this.set('status', exports.LOADING);
             this._loadingPromises.push(pr);
-            this.get("source").loadAll().then(this._fileListReceived.bind(this));
+            this.get('source').loadAll().then(this._fileListReceived.bind(this));
         }
         return pr;
     },
@@ -127,7 +127,7 @@ exports.Filesystem = SC.Object.extend({
     _fileListReceived: function(filelist) {
         filelist.sort();
         this._files = filelist;
-        this.set("status", exports.READY);
+        this.set('status', exports.READY);
         var lp = this._loadingPromises;
         while (lp.length > 0) {
             var pr = lp.pop();
@@ -141,7 +141,7 @@ exports.Filesystem = SC.Object.extend({
      */
     invalidate: function() {
         this._files = [];
-        this.set("status", exports.NEW);
+        this.set('status', exports.NEW);
     },
 
     /**
@@ -159,7 +159,7 @@ exports.Filesystem = SC.Object.extend({
      */
     loadContents: function(path) {
         path = pathUtil.trimLeadingSlash(path);
-        var source = this.get("source");
+        var source = this.get('source');
         return source.loadContents(path);
     },
 
@@ -170,7 +170,7 @@ exports.Filesystem = SC.Object.extend({
     saveContents: function(path, contents) {
         var pr = new Promise();
         path = pathUtil.trimLeadingSlash(path);
-        var source = this.get("source");
+        var source = this.get('source');
         var self = this;
         source.saveContents(path, contents).then(function() {
             self.exists(path).then(function(exists) {
@@ -213,7 +213,7 @@ exports.Filesystem = SC.Object.extend({
         path = pathUtil.trimLeadingSlash(path);
         var pr = new Promise();
         var self = this;
-        var source = this.get("source");
+        var source = this.get('source');
         source.remove(path).then(function() {
             self._load().then(function() {
                 var position = exports._binarySearch(self._files, path);
@@ -289,7 +289,7 @@ exports.Filesystem = SC.Object.extend({
         var self = this;
         var pr = new Promise();
         this._load().then(function() {
-            var source = self.get("source");
+            var source = self.get('source');
             source.makeDirectory(path).then(function() {
                 self._files.push(path);
                 // O(n log n), eh? but all in C so it's possible

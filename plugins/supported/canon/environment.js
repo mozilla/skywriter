@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -51,38 +51,38 @@ exports.Environment = SC.Object.extend({
      * Retrieves the EditSession
      */
     session: function() {
-        return catalog.getObject("session");
+        return catalog.getObject('session');
     }.property(),
 
     /**
      * Gets the currentView from the session.
      */
     view: function() {
-        var session = this.get("session");
+        var session = this.get('session');
         if (!session) {
             // This can happen if the session is being reloaded.
             return null;
         }
-        return session.get("currentView");
+        return session.get('currentView');
     }.property(),
 
     /**
      * The current editor model might not always be easy to find so you should
-     * use <code>instruction.get("model")</code> to access the view where
+     * use <code>instruction.get('model')</code> to access the view where
      * possible.
      */
     model: function() {
-        var session = this.get("session");
+        var session = this.get('session');
         if (!session) {
             console.error("command attempted to get model but there's no session");
             return undefined;
         }
-        var buffer = session.get("currentBuffer");
+        var buffer = session.get('currentBuffer');
         if (!buffer) {
             console.error("Session has no current buffer");
             return undefined;
         }
-        return buffer.get("model");
+        return buffer.get('model');
     }.property(),
 
     /**
@@ -105,29 +105,29 @@ exports.Environment = SC.Object.extend({
      * gets the current file from the session
      */
     file: function() {
-        var session = this.get("session");
+        var session = this.get('session');
         if (!session) {
             console.error("command attempted to get file but there's no session");
             return undefined;
         }
-        var buffer = session.get("currentBuffer");
+        var buffer = session.get('currentBuffer');
         if (!buffer) {
             console.error("Session has no current buffer");
             return undefined;
         }
-        return buffer.get("file");
+        return buffer.get('file');
     }.property(),
 
     /**
      * The current Buffer from the session
      */
     buffer: function() {
-        var session = this.get("session");
+        var session = this.get('session');
         if (!session) {
             console.error("command attempted to get buffer but there's no session");
             return undefined;
         }
-        return session.get("currentBuffer");
+        return session.get('currentBuffer');
     }.property(),
 
     /**
@@ -135,7 +135,7 @@ exports.Environment = SC.Object.extend({
      * mechanism for populating these things from the catalog?
      */
     files: function() {
-        return catalog.getObject("files");
+        return catalog.getObject('files');
     }.property().cacheable()
 });
 

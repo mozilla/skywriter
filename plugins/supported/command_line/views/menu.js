@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require("sproutcore/runtime").SC;
-var diff_match_patch = require("diff").diff_match_patch;
+var diff_match_patch = require('diff').diff_match_patch;
 
 var cliController = require("command_line:controller").cliController;
 var Hint = require("command_line:hint").Hint;
@@ -111,16 +111,16 @@ exports.Menu = SC.Object.extend({
      */
     init: function() {
         // The list of items
-        this._parent = document.createElement("div");
-        this._parent.setAttribute("class", "cmd_menu");
+        this._parent = document.createElement('div');
+        this._parent.setAttribute('class', 'cmd_menu');
 
         // We start by saying 'not found' and remove it when we find something
-        this._notFound = document.createElement("div");
-        this._notFound.setAttribute("class", "cmd_error");
+        this._notFound = document.createElement('div');
+        this._notFound.setAttribute('class', 'cmd_error');
         this._notFound.innerHTML = "No matches for '" + this.input.typed + "'";
         this._parent.appendChild(this._notFound);
 
-        this._list = document.createElement("ul");
+        this._list = document.createElement('ul');
         this._parent.appendChild(this._list);
 
         this._items = [];
@@ -144,20 +144,20 @@ exports.Menu = SC.Object.extend({
         items.forEach(function(item) {
             // Create the UI component
             if (this._items.length < MAX_ITEMS) {
-                var link = document.createElement("li");
+                var link = document.createElement('li');
                 link.appendChild(document.createTextNode(item.name));
 
                 if (item.description) {
-                    var dfn = document.createElement("dfn");
+                    var dfn = document.createElement('dfn');
                     dfn.appendChild(document.createTextNode(item.description));
                     link.appendChild(dfn);
                 }
 
                 this._list.appendChild(link);
 
-                link.addEventListener("mousedown", function(ev) {
+                link.addEventListener('mousedown', function(ev) {
                     SC.run(function() {
-                        cliController.set("input", this._prefix + item.name + " ");
+                        cliController.set('input', this._prefix + item.name + " ");
                     }.bind(this));
                 }.bind(this), false);
 

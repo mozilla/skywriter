@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -166,7 +166,7 @@ exports.Input = SC.Object.extend({
             // We would like to put some initial help here, but for anyone but
             // a complete novice a "type help" message is very annoying, so we
             // need to find a way to only display this message once, or for
-            // until the user click a "close" button or similar
+            // until the user click a 'close' button or similar
             this._hints.push(hint.Hint.create({
                 level: hint.Level.Incomplete,
                 element: "Type a command, see 'help' for available commands."
@@ -221,7 +221,7 @@ exports.Input = SC.Object.extend({
         var commandExt;
 
         while (true) {
-            commandExt = catalog.getExtensionByKey("command", initial);
+            commandExt = catalog.getExtensionByKey('command', initial);
 
             if (!commandExt) {
                 // Not found. break with commandExt == null
@@ -282,7 +282,7 @@ exports.Input = SC.Object.extend({
             // We don't know what the command is
             // TODO: We should probably cache this
             var commandExts = [];
-            catalog.getExtensions("command").forEach(function(commandExt) {
+            catalog.getExtensions('command').forEach(function(commandExt) {
                 if (keyboard.flagsMatch(commandExt.predicates, this.flags) &&
                         commandExt.description) {
                     commandExts.push(commandExt);
@@ -291,8 +291,8 @@ exports.Input = SC.Object.extend({
 
             hintSpec = {
                 param: {
-                    type: { name: "selection", data: commandExts },
-                    description: "Commands"
+                    type: { name: 'selection', data: commandExts },
+                    description: 'Commands'
                 },
                 value: this.typed
             };
@@ -345,7 +345,7 @@ exports.Input = SC.Object.extend({
 
         // Special case: if there is only 1 parameter, and that's of type text
         // we put all the params into the first param
-        if (params.length == 1 && params[0].type == "text") {
+        if (params.length == 1 && params[0].type == 'text') {
             // Warning: There is some potential problem here if spaces are
             // significant. It might be better to chop the command of the
             // start of this.typed? But that's not easy because there could be
@@ -412,7 +412,7 @@ exports.Input = SC.Object.extend({
             if ("--" + param.name == unparsedArg) {
                 used.push(unparsedArg);
                 // boolean parameters don't have values, they default to false
-                if (types.equals(param.type, "boolean")) {
+                if (types.equals(param.type, 'boolean')) {
                     this._assignments[index] = {
                         value: true,
                         param: param
@@ -575,7 +575,7 @@ exports.documentCommand = function(cmdExt, typed) {
                 if (param.defaultValue) {
                     docs.push(" [--<i>");
                     docs.push(param.name);
-                    if (types.equals(param.type, "boolean")) {
+                    if (types.equals(param.type, 'boolean')) {
                         docs.push("</i>");
                     } else {
                         docs.push("</i> " + types.getSimpleName(param.type));
@@ -597,7 +597,7 @@ exports.documentCommand = function(cmdExt, typed) {
     }
 
     return {
-        param: { type: "text", description: docs.join("") },
+        param: { type: 'text', description: docs.join("") },
         value: typed
     };
 };

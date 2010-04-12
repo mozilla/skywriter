@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -37,22 +37,22 @@
 
 // this isn't necessary under Abbot, and it's unclear to me why it's
 // necessary otherwise -- kdangoor
-require.loader.async("core_test");
+require.loader.async('core_test');
 
 var console = require('bespin:console').console;
-var core_test = require("core_test");
+var core_test = require('core_test');
 var assert = require("core_test:assert");
 var test = require("core_test:test");
 var DefaultLogger = require('loggers/default', 'core_test');
 
-var server = require("bespin_server").server;
+var server = require('bespin_server').server;
 var pluginCatalog = require("bespin:plugins").catalog;
 
 // Transfer names from core_test so that this is the
 // test interface used by plugins.
 
-var testNames = [ "test", "ok", "equal", "notEqual", "deepEqual",
-    "strictEqual", "throws" ];
+var testNames = [ 'test', 'ok', 'equal', 'notEqual', 'deepEqual',
+    'strictEqual', 'throws' ];
 
 testNames.forEach(function(name) {
     exports[name] = assert[name];

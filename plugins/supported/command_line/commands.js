@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var cliController = require("controller").cliController;
+var cliController = require('controller').cliController;
 var catalog = require("bespin:plugins").catalog;
 var console = require('bespin:console').console;
 
@@ -46,7 +46,7 @@ var rootCanon = { aliases:[], commands:[] };
  * Action to allow the command line to do completion
  */
 exports.completeCommand = function(env, args, request) {
-    var commandLine = env.get("commandLine");
+    var commandLine = env.get('commandLine');
     commandLine.complete();
 };
 
@@ -58,7 +58,7 @@ exports.completeCommand = function(env, args, request) {
 var _getHelp = function(prefix, options) {
     var output = [];
 
-    var command = catalog.getExtensionByKey("command", prefix);
+    var command = catalog.getExtensionByKey('command', prefix);
     if (command && command.pointer) {
         // caught a real command
         output.push(command.description);
@@ -74,7 +74,7 @@ var _getHelp = function(prefix, options) {
             output.push("<h2>Sub-Commands of " + command.name + "</h2>");
             output.push("<p>" + command.description + "</p>");
         } else if (prefix) {
-            if (prefix == "hidden") { // sneaky, sneaky.
+            if (prefix == 'hidden') { // sneaky, sneaky.
                 prefix = "";
                 showHidden = true;
             }
@@ -84,7 +84,7 @@ var _getHelp = function(prefix, options) {
         }
 
         var toBeSorted = [];
-        catalog.getExtensions("command").forEach(function(command) {
+        catalog.getExtensions('command').forEach(function(command) {
             toBeSorted.push(command.name);
         });
 
@@ -92,7 +92,7 @@ var _getHelp = function(prefix, options) {
 
         output.push("<table>");
         for (var i = 0; i < sorted.length; i++) {
-            command = catalog.getExtensionByKey("command", sorted[i]);
+            command = catalog.getExtensionByKey('command', sorted[i]);
             if (!command) {
                 console.error("Huh? command ", command.name, " cannot be looked up by name");
                 continue;

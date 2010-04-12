@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -37,7 +37,7 @@
 
 var catalog = require("bespin:plugins").catalog;
 var SC = require("sproutcore/runtime").SC;
-var Ct = require("core_test");
+var Ct = require('core_test');
 var DefaultLogger = require('loggers/default', 'core_test');
 var BrowserLogger = require("core_test:loggers/browser");
 var group = require("bespin:promise").group;
@@ -72,8 +72,8 @@ var AssertionEntry = SC.Object.extend({
     // expects status, message
     template:
         '<div class="plugindev_assertion %@1">' +
-            '<span class="name">%@2</span>' +
-            '<span class="status">%@1</span>' +
+            '<span class='name'>%@2</span>' +
+            '<span class='status'>%@1</span>' +
         '</div>',
 
     emit: function() {
@@ -124,18 +124,18 @@ var TestEntry = SC.Object.extend({
      */
     template: [
         '<div class="plugindev_test %@1">',
-            '<div class="header">',
-                '<span class="name">',
+            '<div class='header'>',
+                '<span class='name'>',
                     '<a onclick="document.getElementById(\'_testEntryAssertions_%@8\').style.display = \'block\'"">%@2</a>',
                 '</span>',
-                '<span class="status">',
-                    '<span class="passed">%@4</span>',
-                    '<span class="warnings">%@7</span>',
-                    '<span class="failed">%@5</span>',
-                    '<span class="errors">%@6</span>',
+                '<span class='status'>',
+                    '<span class='passed'>%@4</span>',
+                    '<span class='warnings'>%@7</span>',
+                    '<span class='failed'>%@5</span>',
+                    '<span class='errors'>%@6</span>',
                 '</span>',
             '</div>',
-            '<div class="entryAssertions" id="_testEntryAssertions_%@8">',
+            '<div class='entryAssertions' id="_testEntryAssertions_%@8">',
                 '%@3',
             '</div>',
         '</div>'
@@ -217,7 +217,7 @@ var ModuleEntry = SC.Object.extend({
 
     template: [
         '<div class="plugindev_module %@3">',
-            '<span class="name">%@1</span>',
+            '<span class='name'>%@1</span>',
             '%@2',
         '</div>'
     ].join(''),
@@ -269,8 +269,8 @@ var PlanEntry = SC.Object.extend({
     },
 
     template: [
-        '<div class="plugindev_plan">',
-            '<span class="name">%@1</span>',
+        '<div class='plugindev_plan'>',
+            '<span class='name'>%@1</span>',
             '%@2',
         '</div>'
     ].join(''),
@@ -339,9 +339,9 @@ var TestOutputLogger = SC.Object.extend({
 
     summarize: function() {
         var status = this.status;
-        var ret = ['<div class="plugindev_summary">'];
+        var ret = ['<div class='plugindev_summary'>'];
         ret.push(utils.fmt('Completed %@ assertions in %@ tests: ', status.assertions, status.tests));
-        ret.push(utils.fmt('<span class="passed">%@ passed</span>', status.passed));
+        ret.push(utils.fmt('<span class='passed'>%@ passed</span>', status.passed));
 
         var hasErrors = (status.failed + status.errors + status.warnings) > 0;
         if (hasErrors) {
@@ -466,7 +466,7 @@ exports.testrunner = function(env, args, request) {
     var testspec = args.testmodule;
     if (!testspec) {
         if (!lastTest) {
-            testspec = "all";
+            testspec = 'all';
         } else {
             testspec = lastTest;
         }
@@ -474,7 +474,7 @@ exports.testrunner = function(env, args, request) {
     lastTest = testspec;
 
     var testsToRun = [];
-    if (testspec == "all") {
+    if (testspec == 'all') {
         for (var pluginName in catalog.plugins) {
             plugin = catalog.plugins[pluginName];
             if (plugin.testmodules) {

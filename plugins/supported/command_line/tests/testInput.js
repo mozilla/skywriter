@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -75,65 +75,65 @@ exports.testInput = function() {
  */
 
 ({
-    "description": "blah blah",
-    "provides":
+    'description': "blah blah",
+    'provides':
     [
         {
-            "ep": "command",
-            "name": "tst",
-            "description": "Test Command"
+            'ep': 'command',
+            'name': 'tst',
+            'description': "Test Command"
         },
         {
-            "ep": "command",
-            "name": "tst list",
-            "params":
+            'ep': 'command',
+            'name': "tst list",
+            'params':
             [
                 {
-                    "name": "first",
-                    "type": "text",
-                    "description": "First param"
+                    'name': 'first',
+                    'type': 'text',
+                    'description': "First param"
                 }
             ],
-            "description": "Tst List",
-            "pointer": "test/testcommands#tstList"
+            'description': "Tst List",
+            'pointer': "test/testcommands#tstList"
         },
         {
-            "ep": "command",
-            "name": "tst add",
-            "params":
+            'ep': 'command',
+            'name': "tst add",
+            'params':
             [
                 {
-                    "name": "first",
-                    "type": "text",
-                    "description": "First param"
+                    'name': 'first',
+                    'type': 'text',
+                    'description': "First param"
                 },
                 {
-                    "name": "second",
-                    "type": { "name": "selection", "data": [ "aa", "bb" ] },
-                    "description": "Second param"
+                    'name': 'second',
+                    'type': { 'name': 'selection', 'data': [ 'aa', 'bb' ] },
+                    'description': "Second param"
                 },
                 {
-                    "name": "third",
-                    "type": "number",
-                    "description": "Third param",
-                    "defaultValue": 42
+                    'name': 'third',
+                    'type': 'number',
+                    'description': "Third param",
+                    'defaultValue': 42
                 },
                 {
-                    "name": "fourth",
-                    "type": "boolean",
-                    "description": "Fourth param",
-                    "defaultValue": true
+                    'name': 'fourth',
+                    'type': 'boolean',
+                    'description': "Fourth param",
+                    'defaultValue': true
                 }
             ],
-            "description": "Tst Add",
-            "pointer": "test/testcommands#tstAdd"
+            'description': "Tst Add",
+            'pointer': "test/testcommands#tstAdd"
         },
         {
-            "ep": "command",
-            "name": "tst remove",
-            "params": [],
-            "description": "Tst Remove",
-            "pointer": "test/testcommands#tstRemove"
+            'ep': 'command',
+            'name': "tst remove",
+            'params': [],
+            'description': "Tst Remove",
+            'pointer': "test/testcommands#tstRemove"
         }
     ]
 });

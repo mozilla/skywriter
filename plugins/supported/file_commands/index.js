@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -43,7 +43,7 @@ var cliController = require("command_line:controller").cliController;
  * no leading slash.
  */
 var getCompletePath = function(env, path) {
-    var session = env.get("session");
+    var session = env.get('session');
     return session.getCompletePath(path);
 };
 
@@ -60,7 +60,7 @@ exports.filesCommand = function(env, args, request) {
     }
 
     request.async();
-    env.get("files").listDirectory(path).then(function(contents) {
+    env.get('files').listDirectory(path).then(function(contents) {
         var files = "";
         for (var x = 0; x < contents.length; x++) {
             files += contents[x] + "<br/>";
@@ -81,7 +81,7 @@ exports.mkdirCommand = function(env, args, request) {
     path = getCompletePath(env, path);
     request.async();
     
-    var files = env.get("files");
+    var files = env.get('files');
     files.makeDirectory(path).then(function() {
         request.done("Directory " + path + " created.");
     }, function(error) {
@@ -94,14 +94,14 @@ exports.mkdirCommand = function(env, args, request) {
  * 'save' command
  */
 exports.saveCommand = function(env, args, request) {
-    var buffer = env.get("buffer");
+    var buffer = env.get('buffer');
     if (buffer.untitled()) {
         cliController.prompt("saveas ");
         request.done("The current buffer is untitled. Please enter a name.");
         return;
     }
 
-    buffer.save().then(function() { request.done("Saved"); },
+    buffer.save().then(function() { request.done('Saved'); },
         function(error) {
             request.doneWithError("Unable to save: " + error.message);
         }
@@ -113,11 +113,11 @@ exports.saveCommand = function(env, args, request) {
  * 'save as' command
  */
 exports.saveAsCommand = function(env, args, request) {
-    var files = env.get("files");
+    var files = env.get('files');
     var path = getCompletePath(env, args.path).substring(1);
     
     var newFile = files.getFile(path);
-    env.get("buffer").saveAs(newFile).then(function() {
+    env.get('buffer').saveAs(newFile).then(function() {
         request.done("Saved to '" + path + "'");
     }, function(err) {
         request.doneWithError("Save failed (" + err.message + ")");
@@ -130,8 +130,8 @@ exports.saveAsCommand = function(env, args, request) {
  * 'open' command
  */
 exports.openCommand = function(env, args, request) {
-    var files = env.get("files");
-    var buffer = env.get("buffer");
+    var files = env.get('files');
+    var buffer = env.get('buffer');
 
     var path = args.path;
     path = getCompletePath(env, path);
@@ -155,7 +155,7 @@ exports.openCommand = function(env, args, request) {
  */
 exports.revertCommand = function(env, args, request) {
     request.async();
-    var buffer = env.get("buffer");
+    var buffer = env.get('buffer');
     buffer.reload().then(function() {
         request.done("File reverted");
     }, function(error) {
@@ -164,16 +164,16 @@ exports.revertCommand = function(env, args, request) {
 };
 
 exports.newfileCommand = function(env, args, request) {
-    var buffer = env.get("buffer");
-    buffer.set("file", null);
+    var buffer = env.get('buffer');
+    buffer.set('file', null);
 };
 
 /**
  * 'rm' command
  */
 exports.rmCommand = function(env, args, request) {
-    var files = env.get("files");
-    var buffer = env.get("buffer");
+    var files = env.get('files');
+    var buffer = env.get('buffer');
 
     var path = args.path;
     path = getCompletePath(env, path);

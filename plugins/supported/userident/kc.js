@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -37,9 +37,9 @@
 
 var SC = require("sproutcore/runtime").SC;
 
-var themeManager = require("theme_manager").themeManager;
+var themeManager = require('theme_manager').themeManager;
 var Promise = require("bespin:promise").Promise;
-var server = require("bespin_server").server;
+var server = require('bespin_server').server;
 
 // these are private, because we will likely want to put a little more
 // control around the kcpass.
@@ -52,7 +52,7 @@ exports.kcController = SC.Object.create({
     doCancel: function() {
         pane.remove();
         pane = null;
-        pr.reject({message: "Canceled"});
+        pr.reject({message: 'Canceled'});
     },
     
     savePassword: function() {
@@ -70,14 +70,14 @@ var kcPage = SC.Page.design({
         
         contentView: SC.View.design({
             classNames: "bespin-color-field".w(),
-            childViews: "form".w(),
+            childViews: 'form'.w(),
             form: SC.View.design({
                 classNames: "bespin-form".w(),
                 
                 childViews: ("title passwordField description cancel ok").w(),
 
                 title: SC.LabelView.design({
-                    classNames: "title".w(),
+                    classNames: 'title'.w(),
 
                     layout: {
                         left: 10,
@@ -119,17 +119,17 @@ var kcPage = SC.Page.design({
                 cancel: SC.ButtonView.design({
                     layout: { left: 10, top: 225, width: 100, height: 37 },
                     isCancel: true,
-                    title: "Cancel",
+                    title: 'Cancel',
                     target: "userident:kc#kcController",
-                    action: "doCancel"
+                    action: 'doCancel'
                 }),
                 
                 ok: SC.ButtonView.design({
                     layout: { left: 175, top: 225, width: 100, height: 37 },
                     isDefault: true,
-                    title: "OK",
+                    title: 'OK',
                     target: "userident:kc#kcController",
-                    action: "savePassword"
+                    action: 'savePassword'
                 })
                 
             })
@@ -150,7 +150,7 @@ exports.getKeychainPassword = function() {
         return pr;
     }
     
-    pane = kcPage.get("mainPane");
+    pane = kcPage.get('mainPane');
     themeManager.addPane(pane);
     pane.append();
     pane.becomeKeyPane();
@@ -176,16 +176,16 @@ exports.getkey = function(env, args, request) {
         
         var url = "/vcs/getkey/";
         if (kcpass == null) {
-            pr = server.request("POST", url, null);
+            pr = server.request('POST', url, null);
         } else {
             var params = "kcpass=" + escape(kcpass);
-            pr = server.request("POST", url, params);
+            pr = server.request('POST', url, params);
         }
         
         pr.then(function(key) {
             request.done("Your SSH public key that Bespin can use for remote repository authentication:<br/>" + key);
         }, function(error) {
-            if (error.status == "401") {
+            if (error.status == '401') {
                 kc.clearPassword();
                 request.doneWithError("Incorrect keychain password!");
             } else {
@@ -194,7 +194,7 @@ exports.getkey = function(env, args, request) {
         });
         
     }, function() {
-        request.done("Canceled");
+        request.done('Canceled');
     });
 };
 

@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -94,8 +94,8 @@ var userIdentPage = m_userident.userIdentPage;
 var BespinFileSource = require("bespin_server:filesource").BespinFileSource;
 var ServerPersister = require("bespin_server:settings").ServerPersister;
 var themeManager = require('theme_manager').themeManager;
-var settings = require("settings").settings;
-var editsession = require("edit_session");
+var settings = require('settings').settings;
+var editsession = require('edit_session');
 
 exports.session = editsession.EditSession.create();
 exports.cli = null;
@@ -104,7 +104,7 @@ exports.social = null;
 var INITIAL_TEXT;   // defined at the end of the file to reduce ugliness
 
 var createFilesystem = function() {
-    var Filesystem = require("filesystem").Filesystem;
+    var Filesystem = require('filesystem').Filesystem;
     exports.files = Filesystem.create({source: BespinFileSource.create()});
 };
 
@@ -199,7 +199,7 @@ exports.applicationController = SC.Object.create({
             syntaxManager:  syntaxManager
         });
 
-        var textView = editorView.get("textView");
+        var textView = editorView.get('textView');
         exports.session.set('currentView', textView);
         exports.session.set('currentBuffer', buffer);
         exports.session.loadMostRecentOrNew();
@@ -237,7 +237,7 @@ exports.applicationController = SC.Object.create({
     },
 
     loginControllerAcceptedLogin: function(sender) {
-        exports.session.set("currentUser", sender);
+        exports.session.set('currentUser', sender);
         createFilesystem();
         registerUserPlugins();
         this._showEditor();
@@ -251,22 +251,22 @@ exports.applicationController = SC.Object.create({
         var pluginName = reloadDescription.pluginName;
         var dependents = reloadDescription.dependents;
         
-        if (pluginName == "filesystem" || dependents.filesystem) {
+        if (pluginName == 'filesystem' || dependents.filesystem) {
             createFilesystem();
         }
         
         // TODO make this better. Basically, there is an issue
-        // with running the "reload" command because the command line
+        // with running the 'reload' command because the command line
         // is still expecting some things to be around. So,
         // as a workaround, unless we're reloading the CommandLine
         // plugin, we don't recreate the docked views.
-        if (pluginName == "command_line" || dependents.command_line) {
+        if (pluginName == 'command_line' || dependents.command_line) {
             this._createDockedViews();
         }
     },
 
     preRefresh: function(reloadDescription) {
-        console.log("preRefresh");
+        console.log('preRefresh');
         return {
             keepModule: true,
             callPointer: "#postRefresh"

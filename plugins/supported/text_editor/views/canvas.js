@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -102,7 +102,7 @@ exports.CanvasView = SC.View.extend({
         }
     },
 
-    layoutStyle: { left: "0px", top: "0px" },
+    layoutStyle: { left: '0px', top: '0px' },
 
     /**
      * @property{Number}
@@ -219,11 +219,11 @@ exports.CanvasView = SC.View.extend({
 
         if (firstTime) {
             var parentFrame = this.getPath('parentView.frame');
-            var canvasContext = context.begin("canvas");
+            var canvasContext = context.begin('canvas');
             this._cvCanvasId = SC.guidFor(canvasContext);
             canvasContext.id(this._cvCanvasId);
-            canvasContext.attr("width", "" + parentFrame.width);
-            canvasContext.attr("height", "" + parentFrame.height);
+            canvasContext.attr('width', "" + parentFrame.width);
+            canvasContext.attr('height', "" + parentFrame.height);
             canvasContext.push("canvas tag not supported by your browser");
             canvasContext.end();
             return;

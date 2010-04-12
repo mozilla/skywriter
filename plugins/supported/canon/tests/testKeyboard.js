@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -35,55 +35,55 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var keyboard = require("keyboard");
-var t = require("plugindev");
+var keyboard = require('keyboard');
+var t = require('plugindev');
 
 exports.testKeyMatching = function() {
     var km = keyboard.keyboardManager;
     var command = {};
-    t.equal(km._commandMatches(command, "meta_z", {}), false, 
+    t.equal(km._commandMatches(command, 'meta_z', {}), false, 
         "no keymapping means false");
     
     command = {
-        key: "meta_z"
+        key: 'meta_z'
     };
-    t.equal(km._commandMatches(command, "meta_z", {}), true,
+    t.equal(km._commandMatches(command, 'meta_z', {}), true,
         "matching keys, simple string");
-    t.equal(km._commandMatches(command, "meta_a", {}), false,
+    t.equal(km._commandMatches(command, 'meta_a', {}), false,
         "not matching key, simple string");
     
     command = {
-        key: {key: "meta_z", predicates: {isGreen: true}}
+        key: {key: 'meta_z', predicates: {isGreen: true}}
     };
-    t.equal(km._commandMatches(command, "meta_z", {}), false,
+    t.equal(km._commandMatches(command, 'meta_z', {}), false,
         "object with not matching predicate");
-    t.equal(km._commandMatches(command, "meta_z", {isGreen: true}), true,
+    t.equal(km._commandMatches(command, 'meta_z', {isGreen: true}), true,
         "object with matching key and predicate");
-    t.equal(km._commandMatches(command, "meta_a", {isGreen: true}), false,
+    t.equal(km._commandMatches(command, 'meta_a', {isGreen: true}), false,
         "object with not matching key");
-    t.equal(km._commandMatches(command, "meta_a", {isGreen: false}), false,
+    t.equal(km._commandMatches(command, 'meta_a', {isGreen: false}), false,
         "object with neither matching");
-    t.equal(km._commandMatches(command, "meta_z", {isGreen: false}), false,
+    t.equal(km._commandMatches(command, 'meta_z', {isGreen: false}), false,
         "object with matching key and but different predicate");
     
     command = {
-        key: ["meta_b", {key: "meta_z", predicates: {isGreen: true}},
-            {key: "meta_c"}]
+        key: ['meta_b', {key: 'meta_z', predicates: {isGreen: true}},
+            {key: 'meta_c'}]
     };
-    t.equal(km._commandMatches(command, "meta_z", {}), false,
+    t.equal(km._commandMatches(command, 'meta_z', {}), false,
         "list: object with not matching predicate");
-    t.equal(km._commandMatches(command, "meta_z", {isGreen: true}), true,
+    t.equal(km._commandMatches(command, 'meta_z', {isGreen: true}), true,
         "list: object with matching key and predicate");
-    t.equal(km._commandMatches(command, "meta_a", {isGreen: true}), false,
+    t.equal(km._commandMatches(command, 'meta_a', {isGreen: true}), false,
         "list: object with not matching key");
-    t.equal(km._commandMatches(command, "meta_a", {isGreen: false}), false,
+    t.equal(km._commandMatches(command, 'meta_a', {isGreen: false}), false,
         "list: object with neither matching");
-    t.equal(km._commandMatches(command, "meta_z", {isGreen: false}), false,
+    t.equal(km._commandMatches(command, 'meta_z', {isGreen: false}), false,
         "list: object with matching key and but different predicate");
-    t.equal(km._commandMatches(command, "meta_b"), true,
+    t.equal(km._commandMatches(command, 'meta_b'), true,
         "list: simple key match");
-    t.equal(km._commandMatches(command, "meta_c"), true,
+    t.equal(km._commandMatches(command, 'meta_c'), true,
         "list: object without predicate match");
-    t.equal(km._commandMatches(command, "meta_c", {isGreen: false}), true,
+    t.equal(km._commandMatches(command, 'meta_c', {isGreen: false}), true,
         "list: flags don't matter without predicates");
 };

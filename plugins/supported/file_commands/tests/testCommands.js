@@ -2,7 +2,7 @@
  * Version: MPL 1.1
  *
  * The contents of this file are subject to the Mozilla Public License
- * Version 1.1 (the "License"); you may not use this file except in
+ * Version 1.1 (the 'License'); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,14 +22,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var t = require("plugindev");
+var t = require('plugindev');
 
-var fs = require("filesystem");
+var fs = require('filesystem');
 var DummyFileSource = require("filesystem:tests/fixture").DummyFileSource;
 var Environment = require("canon:tests/fixture").MockEnvironment;
 var Request = require("canon:tests/fixture").MockRequest;
-var file_commands = require("file_commands");
-var edit_session = require("edit_session");
+var file_commands = require('file_commands');
+var edit_session = require('edit_session');
 var Promise = require("bespin:promise").Promise;
 
 var source = exports.source = DummyFileSource.create({
@@ -37,9 +37,9 @@ var source = exports.source = DummyFileSource.create({
         {name: "atTheTop.js", contents: "the top file"},
         {name: "anotherAtTheTop.js", contents: "another file"},
         {name: "foo/"},
-        {name: "foo/1.txt", contents: "firsttext"},
-        {name: "foo/2.txt", contents: "secondtext"},
-        {name: "foo/bar/3.txt", contents: "thirdtext"},
+        {name: "foo/1.txt", contents: 'firsttext'},
+        {name: "foo/2.txt", contents: 'secondtext'},
+        {name: "foo/bar/3.txt", contents: 'thirdtext'},
         {name: "deeply/nested/directory/andAFile.txt", contents: "text file"}
     ]
 });
@@ -86,7 +86,7 @@ exports.testOpenFileWithNoOpenFile = function() {
     var request = Request.create();
     var testpr = new Promise();
     request.promise.then(function() {
-        var f = env.get("file");
+        var f = env.get('file');
         t.ok(!request.error, "Should not be in error state");
         t.equal(f.path, "/foo/bar/3.txt", "File should have been set");
         testpr.resolve();
@@ -115,8 +115,8 @@ exports.testFilesCommandDefaultsToRoot = function() {
 
 exports.testFilesAreRelativeToCurrentOpenFile = function() {
     var env = getEnv();
-    var buffer = env.get("buffer");
-    var files = env.get("files");
+    var buffer = env.get('buffer');
+    var files = env.get('files');
     buffer.changeFileOnly(files.getFile("foo/1.txt"));
     
     var testpr = new Promise();
@@ -136,8 +136,8 @@ exports.testFilesAreRelativeToCurrentOpenFile = function() {
 
 exports.testFilesListingInDirectoryRelativeToOpenFile = function() {
     var env = getEnv();
-    var buffer = env.get("buffer");
-    var files = env.get("files");
+    var buffer = env.get('buffer');
+    var files = env.get('files');
     buffer.changeFileOnly(files.getFile("foo/1.txt"));
     var testpr = new Promise();
     
@@ -156,7 +156,7 @@ exports.testMakeDirectoryForNewDirectory = function() {
     var env = getEnv();
     var request = Request.create();
     var testpr = new Promise();
-    var files = env.get("files");
+    var files = env.get('files');
     
     request.promise.then(function() {
         files.listDirectory("/foo/").then(function(contents) {

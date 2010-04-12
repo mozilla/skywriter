@@ -2,7 +2,7 @@
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
+ * 1.1 (the 'License'); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
@@ -22,8 +22,8 @@
  *   Bespin Team (bespin@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * either the GNU General Public License Version 2 or later (the 'GPL'), or
+ * the GNU Lesser General Public License Version 2.1 or later (the 'LGPL'),
  * in which case the provisions of the GPL or the LGPL are applicable instead
  * of those above. If you wish to allow use of your version of this file only
  * under the terms of either the GPL or the LGPL, and not to allow others to
@@ -49,14 +49,14 @@ var types = require("types:types");
  * @see MemorySettings.addSetting()
  */
 exports.addSetting = function(settingExt) {
-    require("settings").settings.addSetting(settingExt);
+    require('settings').settings.addSetting(settingExt);
 };
 
 /**
  * Fetch an array of the currently known settings
  */
 exports.getSettings = function() {
-    return catalog.getExtensions("setting");
+    return catalog.getExtensions('setting');
 };
 
 /**
@@ -65,13 +65,13 @@ exports.getSettings = function() {
  */
 exports.getTypeSpecFromAssignment = function(typeSpec) {
     var assignments = typeSpec.assignments;
-    var replacement = "text";
+    var replacement = 'text';
 
     if (assignments) {
-        // Find the assignment for "setting" so we can get it's value
+        // Find the assignment for 'setting' so we can get it's value
         var settingAssignment = null;
         assignments.forEach(function(assignment) {
-            if (assignment.param.name === "setting") {
+            if (assignment.param.name === 'setting') {
                 settingAssignment = assignment;
             }
         });
@@ -79,7 +79,7 @@ exports.getTypeSpecFromAssignment = function(typeSpec) {
         if (settingAssignment) {
             var settingName = settingAssignment.value;
             if (settingName && settingName !== "") {
-                var settingExt = catalog.getExtensionByKey("setting", settingName);
+                var settingExt = catalog.getExtensionByKey('setting', settingName);
                 if (settingExt) {
                     replacement = settingExt.type;
                 }
@@ -96,15 +96,15 @@ exports.getTypeSpecFromAssignment = function(typeSpec) {
  * <pre>
  * // Create manually, or require 'settings' from the container.
  * // This is the manual version:
- * var settings = require("bespin:plugins").catalog.getObject("settings");
+ * var settings = require("bespin:plugins").catalog.getObject('settings');
  * // Add a new setting
- * settings.addSetting({ name:"foo", ... });
+ * settings.addSetting({ name:'foo', ... });
  * // Display the default value
- * alert(settings.get("foo"));
+ * alert(settings.get('foo'));
  * // Alter the value, which also publishes the change etc.
- * settings.set("foo", "bar");
+ * settings.set('foo', 'bar');
  * // Reset the value to the default
- * settings.resetValue("foo");
+ * settings.resetValue('foo');
  * </pre>
  * @class
  */
@@ -126,12 +126,12 @@ exports.MemorySettings = SC.Object.extend({
      * validation.
      */
     set: function(key, value) {
-        var settingExt = catalog.getExtensionByKey("setting", key);
+        var settingExt = catalog.getExtensionByKey('setting', key);
         if (!settingExt) {
             throw new Error("Unknown setting: ", key, value);
         }
 
-        if (typeof value == "string" && settingExt.type == "string") {
+        if (typeof value == 'string' && settingExt.type == 'string') {
             // no conversion needed
             return this.superclass(key, value);
         } else {
@@ -163,10 +163,10 @@ exports.MemorySettings = SC.Object.extend({
      * Function to add to the list of available settings.
      * <p>Example usage:
      * <pre>
-     * var settings = require("bespin:plugins").catalog.getObject("settings");
+     * var settings = require("bespin:plugins").catalog.getObject('settings');
      * settings.addSetting({
-     *     name: "tabsize", // For use in settings.get("X")
-     *     type: "number",  // To allow value checking.
+     *     name: 'tabsize', // For use in settings.get('X')
+     *     type: 'number',  // To allow value checking.
      *     defaultValue: 4  // Default value for use when none is directly set
      * });
      * </pre>
@@ -204,7 +204,7 @@ exports.MemorySettings = SC.Object.extend({
      * Reset the value of the <code>key</code> setting to it's default
      */
     resetValue: function(key) {
-        var settingExt = catalog.getExtensionByKey("setting", key);
+        var settingExt = catalog.getExtensionByKey('setting', key);
         if (settingExt) {
             this.set(key, settingExt.defaultValue);
         } else {
@@ -217,7 +217,7 @@ exports.MemorySettings = SC.Object.extend({
      */
     _getSettingNames: function() {
         var typeNames = [];
-        catalog.getExtensions("setting").forEach(function(settingExt) {
+        catalog.getExtensions('setting').forEach(function(settingExt) {
             typeNames.push(settingExt.name);
         });
         return typeNames;
@@ -282,7 +282,7 @@ exports.MemorySettings = SC.Object.extend({
         for (var key in data) {
             if (data.hasOwnProperty(key)) {
                 var valueStr = data[key];
-                var settingExt = catalog.getExtensionByKey("setting", key);
+                var settingExt = catalog.getExtensionByKey('setting', key);
                 if (settingExt) {
                     // TODO: We shouldn't just ignore values without a setting
                     var promise = types.fromString(valueStr, settingExt.type);
@@ -313,7 +313,7 @@ exports.MemorySettings = SC.Object.extend({
 
         this._getSettingNames().forEach(function(key) {
             var value = this.get(key);
-            var settingExt = catalog.getExtensionByKey("setting", key);
+            var settingExt = catalog.getExtensionByKey('setting', key);
             if (settingExt) {
                 // TODO: We shouldn't just ignore values without a setting
                 var promise = types.toString(value, settingExt.type);
@@ -336,7 +336,7 @@ exports.MemorySettings = SC.Object.extend({
      */
     _defaultValues: function() {
         var defaultValues = {};
-        catalog.getExtensions("setting").forEach(function(settingExt) {
+        catalog.getExtensions('setting').forEach(function(settingExt) {
             defaultValues[settingExt.name] = settingExt.defaultValue;
         });
         return defaultValues;

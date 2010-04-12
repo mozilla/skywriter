@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var project_m = require("project");
+var project_m = require('project');
 var server = require("bespin_server:index").server;
 
 /**
@@ -70,7 +70,7 @@ exports.quotaCommand = function(instruction) {
 exports.rescanCommand = function(env, args, request) {
     var project;
     if (!args.project) {
-        var file = env.get("file");
+        var file = env.get('file');
         project = project_m.getProjectAndPath(file.path)[0];
         if (project) {
             project = project.name;
