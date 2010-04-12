@@ -75,8 +75,6 @@ var embeddedEditorInstantiated = false;
 exports.EmbeddedEditor = SC.Object.extend({
     _editorView: null,
 
-    _focused: false,
-
     _attachPane: function() {
         if (typeof(this.get('element')) === 'string') {
             this.set('element', document.getElementById('element'));
@@ -285,11 +283,10 @@ exports.EmbeddedEditor = SC.Object.extend({
 
     setFocus: function(makeFocused) {
         var pane = this.get('pane');
-        if (this._focused === makeFocused) {
+        if (this._editorView.textView.get('isFirstResponder') === makeFocused) {
             return;
         }
 
-        this._focused = makeFocused;
         if (makeFocused) {
             pane.becomeKeyPane();
             this._editorView.get('textView').focus();
