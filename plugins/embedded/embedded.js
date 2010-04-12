@@ -125,6 +125,10 @@ exports.EmbeddedEditor = SC.Object.extend(MultiDelegateSupport, {
         this.__defineSetter__('value', function(v) {
             SC.run(function() {
                 this._editorView.setPath('layoutManager.textStorage.value', v);
+                this._editorView.textView.moveCursorTo({
+                    column: 0,
+                    row: 0
+                })
             }.bind(this));
         });
     },
@@ -421,7 +425,7 @@ exports.EmbeddedEditor = SC.Object.extend(MultiDelegateSupport, {
     /**
      * Replaces a range witihn a text.
      */
-    replace: function(range, text) {
+    replace: function(range, text, clampSelection) {
         if (typeof text !== 'string') {
             throw new Error('replace: valid text must be supplied');
         }
@@ -433,9 +437,17 @@ exports.EmbeddedEditor = SC.Object.extend(MultiDelegateSupport, {
             range = Range.normalizeRange(range);
             var view = this._editorView.textView;
             view.groupChanges(function() {
-                view.replaceCharacters(range, text);
-                view.moveCursorTo(range.start);
-            });
+                if (clampSelection !== true) {
+                    view.moveCursorTo(range.start);
+                } else {
+                    var textStorage = view.getPath('layoutManager.textStorage');
+                    var sel = this.getSelection();
+                    sel.start = textStorage.clampPosition(sel.start);
+                    sel.end = textStorage.clampPosition(sel.end);
+                    view._selectedRangeEndVirtual = null;
+                    view.setSelection(sel);
+                }
+            }.bind(this));
         }.bind(this));
     },
 
