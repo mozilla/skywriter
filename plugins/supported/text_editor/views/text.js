@@ -989,6 +989,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         if (ensureVisible) {
             this.scrollToPosition(this._selectedRange.end);
         }
+
+        this.notifyDelegates('textViewChangedSelection', this._selectedRange);
     },
 
     textInserted: function(text) {
