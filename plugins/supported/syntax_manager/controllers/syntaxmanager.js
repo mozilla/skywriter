@@ -662,7 +662,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
                     }
 
                     promise.resolve({
-                        startRow:   startRow,
+                        startRow:   invalidRow,
                         endRow:     firstUnchangedRow
                     });
                 }.bind(this));

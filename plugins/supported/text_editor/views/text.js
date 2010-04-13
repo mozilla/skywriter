@@ -352,6 +352,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         var x = scrollView.get('horizontalScrollOffset');
         var y = scrollView.get('verticalScrollOffset');
         this.notifyDelegates('textViewWasScrolled', { x: x, y: y });
+
+        this._updateSyntax(null);
     },
 
     // Returns the character closest to the given point, obeying the selection
