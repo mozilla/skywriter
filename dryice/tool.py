@@ -50,7 +50,13 @@ from dryice.path import path
 from dryice import plugins, combiner
 
 class BuildError(Exception):
-    pass
+    def __init__(self, message, errors=None):
+        if errors:
+            message += "\n"
+            for e in errors:
+                message += "* %s\n" % (e)
+        Exception.__init__(self, message)
+                
 
 sample_dir = path(__file__).dirname() / "samples"
 inline_file = path(__file__).dirname() / "inline.js"
@@ -191,7 +197,7 @@ will be deleted before the build.""")
         output_dir = self.output_dir
 
         if self.errors:
-            raise BuildError("Errors found, stopping...")
+            raise BuildError("Errors found, stopping...", self.errors)
 
         # Wrap the whole thing in a closure to protect the global
         # namespace.
@@ -286,7 +292,7 @@ tiki.require("bespin:plugins").catalog.load(%s);
         """Run the build according to the instructions in the manifest.
         """
         if self.errors:
-            raise BuildError("Errors found, stopping...")
+            raise BuildError("Errors found, stopping...", self.errors)
 
         output_dir = self.output_dir
         print "Placing output in %s" % output_dir
@@ -377,12 +383,15 @@ def main(args=None):
         raise BuildError("Build manifest file (%s) does not exist" % (filename))
 
     print "Using build manifest: ", filename
-    manifest = Manifest.from_json(filename.text(), overrides=overrides)
-    manifest.build()
+    try:
+        manifest = Manifest.from_json(filename.text(), overrides=overrides)
+        manifest.build()
 
-    if options.jscompressor:
-        manifest.compress_js(options.jscompressor)
+        if options.jscompressor:
+            manifest.compress_js(options.jscompressor)
 
-    if options.csscompressor:
-        manifest.compress_css(options.csscompressor)
-
+        if options.csscompressor:
+            manifest.compress_css(options.csscompressor)
+    except BuildError, e:
+        print "Build aborted: %s" % (e)
+        
