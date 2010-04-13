@@ -191,7 +191,7 @@ exports.Menu = SC.Object.extend({
             this._items.forEach(function(item) {
                 if (longestPrefix.length > 0) {
                     var name = this._getFullName(item);
-                    var len = diff.diff_commonPrefix(longestPrefix, item.name);
+                    var len = diff.diff_commonPrefix(longestPrefix, name);
                     if (len < longestPrefix.length) {
                         longestPrefix = longestPrefix.substring(0, len);
                     }
@@ -200,7 +200,7 @@ exports.Menu = SC.Object.extend({
         }
 
         // Use the first match if there is no better
-        if (longestPrefix.length === 0) {
+        if (!longestPrefix || longestPrefix.length === 0) {
             longestPrefix = this._getFullName(this._items[0]);
         }
 
