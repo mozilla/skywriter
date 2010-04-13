@@ -178,7 +178,7 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
 
         if (this.changed.email || this.get('email') !== '') {
             if (!this.get('email').match(/.+@.+\...+/)) {
-                this.set('emailHint', 'When email is given, it has to be a valid format');
+                this.set('emailHint', 'Not a valid format');
                 isValid = false;
             } else {
                 this.set('emailHint', '');
