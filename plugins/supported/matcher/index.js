@@ -38,6 +38,12 @@
 var SC = require('sproutcore/runtime').SC;
 
 /**
+ * We ignore items whose score is more than <tt>excludeScoreMargin</tt> off
+ * the <tt>maxScore</tt>.
+ */
+var excludeScoreMargin = 500;
+
+/**
  * @class
  * Base class for matching strategies.
  */
@@ -60,6 +66,12 @@ exports.Matcher = SC.Object.extend({
      */
     _scoredItems: null,
 
+    /**
+     * @private
+     * We ignore items that are way off the pace. This is the pace.
+     */
+    _maxScore: null,
+
     init: function() {
         this._scoredItems = [];
         this._listeners = [];
@@ -75,28 +87,57 @@ exports.Matcher = SC.Object.extend({
     addItems: function(items) {
         var query = this.get('query');
         var addedScoredItems = [];
+        var maxScoreChanged = false;
 
         items.forEach(function(item) {
             var scoredItem = {
-                score: this.match(query, item.name),
+                score: this.score(query, item),
                 item: item
             };
             if (scoredItem.score > 0) {
                 addedScoredItems.push(scoredItem);
             }
+            if (scoredItem.score > this._maxScore) {
+                this._maxScore = scoredItem.score;
+                maxScoreChanged = true;
+            }
             this._scoredItems.push(scoredItem);
         }, this);
 
+        var itemsRemoved = false;
+        if (maxScoreChanged) {
+            // The max score has changed - this could mean that existing
+            // entries are no longer relevant. Check
+            this._scoredItems.forEach(function(scoredItem) {
+                if (scoredItem.score + excludeScoreMargin < this._maxScore) {
+                    itemsRemoved = true;
+                }
+            });
+        }
+
+        // TODO: There is a bug here in that listeners will not know how to
+        // slot these matches into the previously notified matches (we're not
+        // passing the score on).
         var sorter = function(a, b) {
             return b.score - a.score;
         };
         this._scoredItems.sort(sorter);
         addedScoredItems.sort(sorter);
 
-        var addedItems = addedScoredItems.map(function(addedScoredItem) {
-            return addedScoredItem.item;
-        });
+        var scoredItems;
+        if (itemsRemoved) {
+            this._callListeners('itemsCleared');
+            scoredItems = this._scoredItems;
+        } else {
+            scoredItems = addedScoredItems;
+        }
 
+        var addedItems = [];
+        scoredItems.forEach(function(scoredItem) {
+            if (scoredItem.score + excludeScoreMargin > this._maxScore) {
+                addedItems.push(scoredItem.item);
+            }
+        }.bind(this));
         this._callListeners('itemsAdded', addedItems);
     },
 
@@ -120,7 +161,7 @@ exports.Matcher = SC.Object.extend({
 
         var addedItems = [];
         this._scoredItems.forEach(function(scoredItem) {
-            scoredItem.score = this.match(query, scoredItem.item.name);
+            scoredItem.score = this.score(query, scoredItem.item);
             if (scoredItem.score > 0) {
                 addedItems.push(scoredItem.item);
             }

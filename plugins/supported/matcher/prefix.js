@@ -40,18 +40,17 @@ var Matcher = require('matcher').Matcher;
 
 /**
  * @class
- *
  * Performs simple prefix matching.
  */
 exports.PrefixMatcher = Matcher.extend({
-    match: function(query, str) {
+    score: function(query, item) {
         var queryLen = query.length;
-        if (queryLen > str.length) {
+        if (queryLen > item.name.length) {
             return 0;
         }
 
-        if (str.substring(0, queryLen).toLowerCase() === query.toLowerCase()) {
-            return 1000 - str.length;
+        if (item.name.substring(0, queryLen).toLowerCase() === query.toLowerCase()) {
+            return 1000 - item.name.length;
         }
 
         return 0;

@@ -40,37 +40,43 @@ var Matcher = require('matcher').Matcher;
 
 /**
  * @class
- *
  * Provides smart matching suitable for 'quick open' functionality.
  */
 exports.QuickMatcher = Matcher.extend({
-    match: function(query, str) {
-        var queryLen = query.length, strLen = str.length;
-        if (queryLen > strLen) {
-            return 0;
-        }
-
+    score: function(query, item) {
         query = query.toLowerCase();
-        str = str.toLowerCase();
+        var str = item.name.toLowerCase();
+        var path = item.path ? item.path.toLowerCase() : null;
 
-        // Prefix match?
-        if (str.substring(0, queryLen) === query) {
-            return 3000 - strLen;
+        // Name prefix match?
+        if (str.substring(0, query.length) === query) {
+            return 5000 - str.length;
         }
 
-        // Suffix match?
-        if (str.substring(strLen - queryLen, strLen) === query) {
-            return 2000 - strLen;
+        // Path prefix match?
+        if (path && path.substring(0, query.length) === query) {
+            return 4000 - path.length;
         }
 
-        // Fuzzy match?
-        var queryChar = query.substring(0, 1), queryIndex = 0, score = 1000;
-        for (var i = 0; i < strLen; i++) {
+        // Name suffix match?
+        if (str.substring(str.length - query.length, str.length) === query) {
+            return 3000 - str.length;
+        }
+
+        // Full name fuzzy match?
+        if (path) {
+            str = path + str;
+        }
+        var queryChar = query.substring(0, 1);
+        var queryIndex = 0;
+        var score = 2000;
+
+        for (var i = 0; i < str.length; i++) {
             if (str.substring(i, i + 1) === queryChar) {
                 queryIndex++;
 
                 // Have we found the whole query?
-                if (queryIndex === queryLen) {
+                if (queryIndex === query.length) {
                     return score;
                 }
 
