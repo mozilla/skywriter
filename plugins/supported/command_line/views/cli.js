@@ -489,7 +489,7 @@ exports.CliInputView = SC.View.design({
      * TODO: Work out what the borkage is about and fix
      */
     contentView: SC.View.design({
-        childViews: [ 'kbd', 'display', 'prompt', 'completion', 'input', 'submit' ],
+        childViews: [ 'kbd', 'display', 'prompt', 'completion', 'input' ],
 
         display: SC.View.design({
             layout: { top: 0, bottom: 27, left: 0, right: 0 },
@@ -559,6 +559,17 @@ exports.CliInputView = SC.View.design({
 
             keyDown: function(ev) {
                 var handled = this._processKeyEvent(ev, false);
+
+                if (ev.keyCode === 13) {
+                    // Make sure that the Enter key runs after any queued text
+                    // was inserted: see bug 558900.
+                    window.setTimeout(function() {
+                        SC.run(function() {
+                            cliController.exec(this);
+                        }.bind(this));
+                    }.bind(this), 0);
+                }
+
                 if (!handled) {
                     handled = arguments.callee.base.apply(this, arguments);
                 }
@@ -574,14 +585,6 @@ exports.CliInputView = SC.View.design({
 
                 return handled;
             }
-        }),
-
-        submit: BespinButtonView.design({
-            isDefault: true,
-            title: 'Exec',
-            target: 'command_line:controller#cliController',
-            action: 'exec',
-            layout: { height: 25, bottom: 0, width: 0, right: -10 }
         })
     })
 });
