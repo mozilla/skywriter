@@ -93,3 +93,20 @@ exports.rescanCommand = function(env, args, request) {
     });
     request.async();
 };
+
+/**
+* 'preview' command
+*/
+exports.preview = function(env, args, request) {
+    var buffer = env.get('buffer');
+    var fileName = buffer.untitled() ? 'Untitled' : buffer.getPath('file').path;
+
+    // Open a new window / popup and write the current buffer content to it.
+    popup = window.open('','Preview: ' + fileName,
+                                        'location=no,menubar=no');
+    popup.document.write(env.getPath('model.value'));
+    popup.document.close();
+    popup.focus();
+
+    request.done('Preview: ' + fileName);
+};
