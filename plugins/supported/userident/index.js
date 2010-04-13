@@ -50,9 +50,6 @@ var LOGIN_CONTAINER_HEIGHT = 237 + 37 - 76;
 var SIGNUP_FORM_HEIGHT = 395;
 var SIGNUP_PANE_HEIGHT = SIGNUP_FORM_HEIGHT + 34;
 var SIGNUP_CONTAINER_HEIGHT = 299 + 37 - 76;
-var LOST_FORM_HEIGHT = 356;
-var LOST_PANE_HEIGHT = LOST_FORM_HEIGHT + 34;
-var LOST_CONTAINER_HEIGHT = 299 + 37 - 76;
 
 var displayError = function(title, text) {
     var pane = SC.AlertPane.error(title, text);
@@ -179,7 +176,7 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
             this.set('password2Error', password2Error);
         }
 
-        if (this.changed.email || this.get('email' !== '')) {
+        if (this.changed.email || this.get('email') !== '') {
             if (!this.get('email').match(/.+@.+\...+/)) {
                 this.set('emailHint', 'When email is given, it has to be a valid format');
                 isValid = false;
@@ -203,9 +200,9 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
         if (!this.get('isValid')) {
             displayError('Correct your signup', 'Please correct your signup information.');
         } else if (this.get('username') === '' ||
-                this.get('password1') === '') {
+                this.get('password1') === '' || this.get('email') === '') {
             displayError('Correct your signup', 'Please fill ' +
-                            'all required fields (username + password).');
+                          'all required fields (username + password + email).');
         } else {
             var opts = {
                 onSuccess: this.onSuccess.bind(this),
@@ -252,18 +249,6 @@ exports.lostController = SC.Object.create(MultiDelegateSupport, {
                              this.onResetPwdFailure.bind(this));
     },
 
-    requestUsername: function() {
-        if (!this.get('email').match(/.+@.+\...+/)) {
-            displayInfo('Get Username',
-                            'The email address is not valid formated.');
-            return;
-        };
-
-        server.lost({email: this.get('email')}).
-                        then(this.onRequestUsernameSuccess.bind(this),
-                             this.onRequstUsernameFailure.bind(this));
-    },
-
     onResetPwdFailure: function() {
         displayError('Reset Password',
                         'Failed to reset password: Your Username is unkown.');
@@ -272,16 +257,6 @@ exports.lostController = SC.Object.create(MultiDelegateSupport, {
     onResetPwdSuccess: function() {
         displayInfo('Reset Password',
                         'Successfully reset password - check your Emails.');
-    },
-
-    onRequstUsernameFailure: function() {
-        displayError('Get Username',
-                'Failed to sent Username: Could not match email address.');
-    },
-
-    onRequestUsernameSuccess: function() {
-        displayInfo('Get Username',
-                    'An Email with your username is on the way.');
     }
 });
 
@@ -406,6 +381,7 @@ exports.userIdentPage = SC.Page.design({
 
                         var paneHeight, formHeight, containerHeight;
                         switch (value) {
+                        case 'lostView':
                         case 'loginView':
                             paneHeight = LOGIN_PANE_HEIGHT;
                             formHeight = LOGIN_FORM_HEIGHT;
@@ -415,11 +391,6 @@ exports.userIdentPage = SC.Page.design({
                             paneHeight = SIGNUP_PANE_HEIGHT;
                             formHeight = SIGNUP_FORM_HEIGHT;
                             containerHeight = SIGNUP_CONTAINER_HEIGHT;
-                            break;
-                        case 'lostView':
-                            paneHeight = LOST_PANE_HEIGHT;
-                            formHeight = LOST_FORM_HEIGHT;
-                            containerHeight = LOST_CONTAINER_HEIGHT;
                             break;
                         }
 
@@ -468,7 +439,7 @@ exports.userIdentPage = SC.Page.design({
             },
 
             controlSize: SC.SMALL_CONTROL_SIZE,
-            value: 'Username'
+            value: 'Username or Email'
         }),
 
         passwordField: SC.TextFieldView.design({
@@ -648,7 +619,7 @@ exports.userIdentPage = SC.Page.design({
             },
 
             controlSize: SC.SMALL_CONTROL_SIZE,
-            value: 'Email <i>(optional)</i>',
+            value: 'Email',
             escapeHTML: false
         }),
 
@@ -678,69 +649,40 @@ exports.userIdentPage = SC.Page.design({
     lostView: SC.View.design({
         layout: { left: 0, top: 0, right: 0, height: 399 },
 
-        childViews: ('usernameField usernameLabel resetPwd ' +
-            'emailField emailLabel requestUsername').w(),
+        childViews: ('p usernameField usernameLabel submit').w(),
+
+        p: SC.LabelView.design({
+            layout: {
+                left:   10,
+                top:    1,
+                width:  200,
+                height: 144
+            },
+
+            value:  'Don\'t worry, you can get ' +
+                    'a new password. Just tell us your:',
+            escapeHTML: false
+        }),
 
         usernameField: SC.TextFieldView.design({
-            layout: { left: 10, top: 92 - 91, width: 200, height: 24 },
+            layout: { left: 10, top: 146 - 91, width: 200, height: 24 },
             controlSize: SC.SMALL_CONTROL_SIZE,
-            valueBinding: 'userident#lostController.username',
-            keyDown: function(evt) {
-                arguments.callee.base.apply(this, arguments);
-                if (evt.keyCode === 13) {
-                    setTimeout(function() {
-                        this.owner.resetPwd.triggerAction();
-                    }.bind(this), 0);
-                }
-            }
+            valueBinding: 'userident#lostController.username'
         }),
 
         usernameLabel: SC.LabelView.design({
-            value: 'Username <i>(to reset you password)</i>',
+            value: 'Username or Email',
             controlSize: SC.SMALL_CONTROL_SIZE,
-            layout: { left: 10, top: 92 - 91 + 26 + 3, width: 200, height: 14 },
+            layout: { left: 10, top: 146 - 91 + 26 + 3, width: 200, height: 14 },
             escapeHTML: false
         }),
 
-        resetPwd: SC.ButtonView.design({
-            layout: { left: 10, top: 146 - 91, width: 200, height: 37 },
+        submit: SC.ButtonView.design({
+            layout: { left: 10, top: 200 - 91, width: 200, height: 37 },
+            isDefault: true,
             title: 'Reset Password',
             target: 'userident#lostController',
             action: 'resetPwd'
-        }),
-
-        emailField: SC.TextFieldView.design({
-            layout: { left: 10, top: 200 - 91 + 15, width: 200, height: 24 },
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            valueBinding: 'userident#lostController.email',
-            keyDown: function(evt) {
-                arguments.callee.base.apply(this, arguments);
-                if (evt.keyCode === 13) {
-                    setTimeout(function() {
-                        this.owner.requestUsername.triggerAction();
-                    }.bind(this), 0);
-                }
-            }
-        }),
-
-        emailLabel: SC.LabelView.design({
-            layout: {
-                left:   10,
-                top:    200 - 91 + 26 + 3 + 15,
-                height: 14,
-                width:  200
-            },
-
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            value: 'Email <i>(to get your username)</i>',
-            escapeHTML: false
-        }),
-
-        requestUsername: SC.ButtonView.design({
-            layout: { left: 10, top: 254 - 91 + 15, width: 200, height: 37 },
-            title: 'Get Username',
-            target: 'userident#lostController',
-            action: 'requestUsername'
         })
     })
 });
