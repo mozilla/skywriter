@@ -50,11 +50,11 @@ var MockMatcher = Matcher.extend({
 exports.testAddingStrings = function() {
     var matcher = MockMatcher.create({ scores: { foo: 1, bar: 2, baz: 3 } });
 
-    var items;
+    var items1 = null;
     var cleared1 = 0;
     matcher.addListener({
         itemsAdded: function(addedItems) {
-            items = addedItems;
+            items1 = addedItems;
         },
         itemsCleared: function() {
             cleared1++;
@@ -62,22 +62,22 @@ exports.testAddingStrings = function() {
     });
 
     matcher.addItem({ name: 'foo' });
-    t.equal(items.length, 1, 'the length of the matcher\'s list of items ' +
+    t.equal(items1.length, 1, 'the length of the matcher\'s list of items ' +
         'after adding \"foo\"; and 1');
-    t.equal(items[0], 'foo', 'the text of the matcher\'s first item ' +
+    t.equal(items1[0], 'foo', 'the text of the matcher\'s first item ' +
         'after adding \"foo\" and \"foo\"');
 
     matcher.addItems([ { name: 'bar' }, { name: 'baz' } ]);
 
-    t.equal(items.length, 2, 'the length of the matcher\'s list of items ' +
+    t.equal(items1.length, 2, 'the length of the matcher\'s list of items ' +
         'after adding \"bar\" and \"baz\"; and 2');
-    t.equal(items[0], 'baz', 'the text of the matcher\'s first item ' +
+    t.equal(items1[0], 'baz', 'the text of the matcher\'s first item ' +
         'after adding \"bar\" and \"baz\"; and \"baz\"');
-    t.equal(items[1], 'bar', 'the text of the matcher\'s second item ' +
+    t.equal(items1[1], 'bar', 'the text of the matcher\'s second item ' +
         'after adding \"bar\" and \"baz\"; and \"bar\"');
 
     // Matchers added after the date get the whole list
-    var items2;
+    var items2 = null;
     var cleared2 = 0;
     matcher.addListener({
         itemsAdded: function(addedItems) {
