@@ -301,10 +301,10 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
      * syntaxManager property.
      */
     createSyntaxManager: function() {
-        this.set('syntaxManager', this.get('syntaxManager').create({
-            delegates:      [ this ],
-            textStorage:    this.get('textStorage')
-        }));
+        var klass = this.get('syntaxManager');
+        var syntaxManager = klass.create();
+        syntaxManager.addDelegate(this);
+        this.set('syntaxManager', syntaxManager);
     },
 
     /**
@@ -332,10 +332,13 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
             }
         ]);
 
+        this.createSyntaxManager();
         this.createTextStorage();
         this.get('textStorage').addDelegate(this);
 
-        this.createSyntaxManager();
+        // Now that we've got a text storage object, tell the syntax manager
+        // about us.
+        this.get('syntaxManager').set('layoutManager', this);
 
         this._recomputeEntireLayout();
     },

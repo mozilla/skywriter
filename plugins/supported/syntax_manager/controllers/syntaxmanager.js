@@ -363,6 +363,10 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
         this._invalidRows = invalidRows.uniq();
     },
 
+    _layoutManagerChanged: function() {
+        this._reset();
+    }.observes('layoutManager'),
+
     _mergeAttrGroups: function(attrGroups) {
         var mergedGroups = [];
 
@@ -419,7 +423,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
         }
 
         var thisLineAttrInfo = lineAttrInfo[startRow];
-        var line = this.getPath('textStorage.lines')[startRow];
+        var line = this.getPath('layoutManager.textStorage.lines')[startRow];
 
         this._deepSyntaxInfoForLine(thisLineAttrInfo.snapshot, line).
             then(function(deepSyntaxInfo) {
@@ -466,7 +470,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
     // Invalidates all the highlighting.
     _reset: function() {
         var lineAttrInfo = [];
-        var lineCount = this.getPath('textStorage.lines').length;
+        var lineCount = this.getPath('layoutManager.textStorage.lines').length;
         var initialContext = this.get('initialContext');
 
         for (var i = 0; i < lineCount; i++) {
@@ -544,11 +548,11 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
     initialContext: 'plain',
 
     /**
-     * @property{TextStorage}
+     * @property{LayoutManager}
      *
-     * The character data is read from this text storage instance.
+     * The character info is read from this layout manager instance.
      */
-    textStorage: null,
+    layoutManager: null,
 
     /**
      * Returns the attributed text currently in the cache for the given range
@@ -576,10 +580,6 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
         }, this);
 
         return contexts;
-    },
-
-    init: function() {
-        this._reset();
     },
 
     /**
