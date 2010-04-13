@@ -120,12 +120,14 @@ exports.EmbeddedEditor = SC.Object.extend(MultiDelegateSupport, {
 
     _createValueProperty: function() {
         this.__defineGetter__('value', function() {
-            return this._editorView.getPath('layoutManager.textStorage.value');
+            var view = this._editorView;
+            return view.getPath('layoutManager.textStorage').getValue();
         });
         this.__defineSetter__('value', function(v) {
             SC.run(function() {
-                this._editorView.setPath('layoutManager.textStorage.value', v);
-                this._editorView.textView.moveCursorTo({
+                var view = this._editorView;
+                view.getPath('layoutManager.textStorage').setValue(v);
+                view.get('textView').moveCursorTo({
                     column: 0,
                     row: 0
                 })
@@ -146,7 +148,7 @@ exports.EmbeddedEditor = SC.Object.extend(MultiDelegateSupport, {
         // initialContent
         var initialContent = options.initialContent;
         if (!SC.none(initialContent)) {
-            layoutManager.setPath('textStorage.value', initialContent);
+            layoutManager.get('textStorage').setValue(initialContent);
         }
 
         // noAutoresize

@@ -41,18 +41,19 @@ var TextBuffer = require('mixins/textbuffer').TextBuffer;
 
 exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
     /**
+     * @property{string}
+     *
+     * The initial string to store in the text storage buffer. Has no meaning
+     * after this object is initialized.
+     */
+    initialValue: "",
+
+    /**
      * @property{Array<String>}
      *
      * The list of lines, stored as an array of strings. Read-only.
      */
     lines: null,
-
-    value: function(key, value) {
-        if (value !== undefined) {
-            this.replaceCharacters(this.range(), value);
-        }
-        return this.get('lines').join('\n');
-    }.property('lines.[]'),
 
     /**
      * Returns the position of the nearest character to the given position,
@@ -137,11 +138,15 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
             lines[endRow].substring(0, endColumn)).join('\n');
     },
 
-    init: function() {
-        this.superclass();
+    getValue: function() {
+        return this.get('lines').join('\n');
+    },
 
-        this.set('delegates', []);
-        this.set('lines', [ '' ]);
+    init: function() {
+        arguments.callee.base.apply(this, arguments);
+
+        this.set('lines', this.get('initialValue').split('\n'));
+        delete this.initialValue;
     },
 
     /**
@@ -180,6 +185,13 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
         lines.replace(oldStartRow, oldEndRow - oldStartRow + 1, addedLines);
 
         this.notifyDelegates('textStorageEdited', oldRange, newRange);
+    },
+
+    /**
+     * Sets the contents of the text buffer to the given string.
+     */
+    setValue: function(newValue) {
+        this.replaceCharacters(this.range(), newValue);
     }
 });
 

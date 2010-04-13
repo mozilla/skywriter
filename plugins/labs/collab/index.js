@@ -87,7 +87,7 @@ var ShareNode = SC.Object.extend({
             console.trace();
             throw new Error('Attempt to getClientText() before onFirstSync() called.');
         }
-		return env.get('model').get('value');
+		return env.get('model').getValue();
     },
 
     /**
@@ -125,7 +125,7 @@ var ShareNode = SC.Object.extend({
      */
     setClientText: function(text) {
         var cursor = this.captureCursor();
-		env.get('model').set('value', text);
+		env.get('model').setValue(text);
         this.restoreCursor(cursor);
 
         this.syncDone();
@@ -202,7 +202,7 @@ var ShareNode = SC.Object.extend({
         var newClientText = this._patchApply(patches, oldClientText, offsets);
         // Set the new text only if there is a change to be made.
         if (oldClientText != newClientText) {
-			env.get('model').set('value', newClientText);
+			env.get('model').setValue(newClientText);
             if (cursor) {
                 // Unpack the offset array.
                 cursor.startOffset = offsets[0];
@@ -336,7 +336,7 @@ var ShareNode = SC.Object.extend({
      */
     captureCursor: function() {
         var padLength = this.dmp.Match_MaxBits / 2;  // Normally 16.
-        var text = env.get('model').get('value');
+        var text = env.get('model').getValue();
 
         var cursor = this.captureSimpleCursor();
 
@@ -383,7 +383,7 @@ var ShareNode = SC.Object.extend({
         dmp.Match_Threshold = 0.9;
 
         var padLength = dmp.Match_MaxBits / 2; // Normally 16.
-        var newText = env.get('model').get('value');
+        var newText = env.get('model').getValue();
 
         // Find the start of the selection in the new text.
         var pattern1 = cursor.startPrefix + cursor.startSuffix;

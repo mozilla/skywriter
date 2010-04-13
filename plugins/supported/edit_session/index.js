@@ -174,9 +174,6 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
         return file.loadContents().then(function(contents) {
             var model = self.get('model');
             model.replaceCharacters(model.range(), contents);
-            // the following should theoretically work...
-            // but does not seem to.
-            // model.set('value', contents);
         });
     },
 
@@ -185,7 +182,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
      * once the file is saved.
      */
     save: function() {
-        return this._file.saveContents(this.getPath('model.value'));
+        return this._file.saveContents(this.get('model').getValue());
     },
 
     /**
@@ -199,7 +196,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
     saveAs: function(newFile) {
         var promise = new Promise();
 
-        newFile.saveContents(this.getPath('model.value')).then(function() {
+        newFile.saveContents(this.get('model').getValue()).then(function() {
             this.changeFileOnly(newFile);
             promise.resolve();
         }.bind(this), function(error) {

@@ -42,7 +42,7 @@ var TextStorage = require('models/textstorage').TextStorage;
 exports.testCharacterMutators = function() {
     var storage = TextStorage.create({});
     storage.insertCharacters({ row: 0, col: 0 }, 'foo\nbar\nbaz\n');
-    t.equal(storage.get('value'), 'foo\nbar\nbaz\n',
+    t.equal(storage.getValue(), 'foo\nbar\nbaz\n',
         'characters inserted into an empty text storage object and the ' +
             'original characters');
     var lines = storage.lines;
@@ -55,7 +55,7 @@ exports.testCharacterMutators = function() {
         start: { row: 1, col: 1 },
         end:   { row: 2, col: 2 }
     });
-    t.equal(storage.get('value'), 'foo\nbz\n',
+    t.equal(storage.getValue(), 'foo\nbz\n',
         'the result of deleting characters from a text storage object and ' +
             'the expected string');
     t.equal(lines[0].length, 3, 'length of first row and 3');
@@ -66,7 +66,7 @@ exports.testCharacterMutators = function() {
         start: { row: 0, col: 2 },
         end:   { row: 1, col: 1 }
     }, 'obarba');
-    t.equal(storage.get('value'), 'foobarbaz\n',
+    t.equal(storage.getValue(), 'foobarbaz\n',
         'the result of replacing characters in a text storage object and ' +
             'the expected string');
     t.equal(lines[0].length, 9, 'length of first row and 9');
@@ -147,7 +147,7 @@ exports.testDisplacePosition = function() {
 
 exports.testGetCharacters = function() {
     var storage = TextStorage.create();
-    storage.set('value', 'foo\nbar\nbaz\n');
+    storage.setValue('foo\nbar\nbaz\n');
 
     t.equal(storage.getCharacters({
             start:  { row: 0, col: 1 },

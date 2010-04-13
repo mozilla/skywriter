@@ -62,19 +62,19 @@ exports.testBufferFileChange = function() {
     var f = root.getFile('atTheTop.js');
     buffer.changeFileOnly(f);
     t.ok(!buffer.untitled(), 'Buffer should no longer be untitled');
-    t.equal('', buffer.get('model').get('value'), 'Should be empty now');
+    t.equal('', buffer.get('model').getValue(), 'Should be empty now');
     buffer.changeFileOnly(null);
     t.ok(buffer.untitled(), 'Buffer should be untitled again');
     buffer.set('file', f);
     var pr = new Promise();
     setTimeout(function() {
-        var newtext = buffer.get('model').get('value');
+        var newtext = buffer.get('model').getValue();
         t.equal(newtext, 'the top file', 'Expected file contents to be loaded');
         
         // now we want to reset the buffer.
         buffer.changeFile(null);
         t.ok(buffer.untitled(), 'Buffer should be untitled again');
-        newtext = buffer.get('model').get('value');
+        newtext = buffer.get('model').getValue();
         t.equal(newtext, '', 'editor text should be empty');
         pr.resolve();
     }, 1);
@@ -90,7 +90,7 @@ exports.testBufferFileChangeWithCallback = function() {
     var pr = buffer.changeFile(f);
     var testpr = pr.then(function(b) {
         t.equal(b, buffer, 'should have gotten the buffer object in');
-        t.equal(b.get('model').get('value'), 'the top file', 'contents should be loaded');
+        t.equal(b.get('model').getValue(), 'the top file', 'contents should be loaded');
         if (testpr != undefined) {
             testpr.resolve();
         }
@@ -103,8 +103,9 @@ exports.testBufferSaving = function() {
     var testpr = new Promise();
     var root = fs.Filesystem.create({ source: source });
     var buffer = editsession.Buffer.create();
-    buffer.setPath('model.value', 'foobar');
-    t.equal(buffer.getPath('model.value'), 'foobar', 'the value stored in ' +
+    var model = buffer.get('model');
+    model.setValue('foobar');
+    t.equal(model.getValue(), 'foobar', 'the value stored in ' +
         'the model and the string that was just written to it');
 
     var file1 = root.getFile('bar.txt');

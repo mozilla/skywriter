@@ -53,7 +53,7 @@ exports.testCharacterRectForPosition = function() {
     var layoutManager = LayoutManager.create({
         margin: { left: 0, bottom: 0, top: 0, right: 0 }
     });
-    layoutManager.setPath('textStorage.value', PANGRAMS);
+    layoutManager.get('textStorage').setValue(PANGRAMS);
 
     var characterWidth = layoutManager.characterWidth;
     var lineHeight = layoutManager.lineHeight;
@@ -73,8 +73,7 @@ exports.testDimensionsCalculation = function() {
     });
 
     var textStorage = layoutManager.get('textStorage');
-    textStorage.set('value',
-        'Battlefield Earth\n' +
+    textStorage.setValue('Battlefield Earth\n' +
         'The Star Wars Holiday Special\n' +
         'Manos: The Hands of Fate\n' +
         'Santa Claus Conquers the Martians\n');
@@ -105,7 +104,7 @@ exports.testInvalidRects = function() {
     });
 
     var textStorage = layoutManager.get('textStorage');
-    textStorage.set('value', 'foo\nbar\nbaz\nboo\n');
+    textStorage.setValue('foo\nbar\nbaz\nboo\n');
 
     var characterWidth = layoutManager.characterWidth;
     var lineHeight = layoutManager.lineHeight;
@@ -169,7 +168,7 @@ exports.testPointToCharacterMapping = function() {
     var characterWidth = layoutManager.characterWidth;
     var lineHeight = layoutManager.lineHeight;
 
-    layoutManager.setPath('textStorage.value', PANGRAMS);
+    layoutManager.get('textStorage').setValue(PANGRAMS);
 
     var pos = layoutManager.characterAtPoint({
         x: leftMargin + 5 * characterWidth,
@@ -191,7 +190,7 @@ exports.testRectsForRange = function() {
     var layoutManager = LayoutManager.create({
         margin: { left: 0, bottom: 0, top: 0, right: 0 }
     });
-    layoutManager.setPath('textStorage.value', PANGRAMS);
+    layoutManager.get('textStorage').setValue(PANGRAMS);
 
     var characterWidth = layoutManager.characterWidth;
     var lineHeight = layoutManager.lineHeight;
