@@ -97,7 +97,7 @@ exports.History = SC.Object.extend({
 
     getRecent: function(max) {
         var history = this._getHistory();
-        return history.slice(max >= history.length ? -max : 0);
+        return history.slice(max < history.length ? -max : 0);
     },
 
     /**
