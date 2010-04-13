@@ -43,14 +43,10 @@
     },
     "provides": [
         {
-            "ep": "fileextension",
-            "name": "js",
-            "syntax": "js"
-        },
-        {
             "ep": "syntax",
             "name": "js",
-            "pointer": "#JSSyntax"
+            "pointer": "#JSSyntax",
+            "fileexts": [ "js" ]
         }
     ]
 });

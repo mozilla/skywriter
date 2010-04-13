@@ -43,19 +43,10 @@
     },
     "provides": [
         {
-            "ep": "fileextension",
-            "name": "htm",
-            "syntax": "html"
-        },
-        {
-            "ep": "fileextension",
-            "name": "html",
-            "syntax": "html"
-        },
-        {
             "ep": "syntax",
             "name": "html",
-            "pointer": "#HTMLSyntax"
+            "pointer": "#HTMLSyntax",
+            "fileexts": [ "htm", "html" ]
         }
     ]
 });

@@ -55,6 +55,13 @@ var SyntaxInfo = SC.Object.extend({
     extension: null,
 
     /**
+     * @property{Array<string>}
+     *
+     * The set of file extensions that this syntax can handle.
+     */
+    fileExts: null,
+
+    /**
      * @property{string}
      *
      * The unique identifier for this syntax.
@@ -62,11 +69,16 @@ var SyntaxInfo = SC.Object.extend({
     name: null,
 
     init: function() {
-        this.set('name', this.get('extension').name);
+        var extension = this.get('extension');
+        this.set('name', extension.name);
+
+        var fileExts = extension.fileexts;
+        this.set('fileExts', SC.none(fileExts) ? [] : fileExts);
     }
 });
 
 exports.syntaxDirectory = SC.Object.create({
+    _fileExts: {},
     _syntaxInfo: {},
 
     /**
@@ -89,7 +101,20 @@ exports.syntaxDirectory = SC.Object.create({
 
     registerExtension: function(extension) {
         var syntaxInfo = SyntaxInfo.create({ extension: extension });
-        this._syntaxInfo[syntaxInfo.get('name')] = syntaxInfo;
+
+        var name = syntaxInfo.get('name');
+        this._syntaxInfo[name] = syntaxInfo;
+
+        // Add the file extensions to the index.
+        var fileExts = this._fileExts;
+        syntaxInfo.get('fileExts').forEach(function(fileExt) {
+            fileExts[fileExt] = name;
+        });
+    },
+
+    syntaxForFileExt: function(fileExt) {
+        var syntax = this._fileExts[fileExt.toLowerCase()];
+        return SC.none(syntax) ? 'plain' : syntax;
     }
 });
 

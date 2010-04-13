@@ -597,16 +597,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
      * associated syntax highlighter.
      */
     setInitialContextFromExt: function(fileExt) {
-        fileExt = fileExt.toLowerCase();
-        var extension = catalog.getExtensionByKey('fileextension', fileExt);
-
-        var syntax;
-        if (SC.none(extension) || SC.none(extension.syntax)) {
-            syntax = 'plain';
-        } else {
-            syntax = extension.syntax;
-        }
-
+        var syntax = syntaxDirectory.syntaxForFileExt(fileExt);
         this.set('initialContext', syntax);
     },
 
