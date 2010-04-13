@@ -138,7 +138,7 @@ exports.Menu = SC.Object.extend({
     },
 
     /**
-     * Create the clickable link
+     * Create the clickable links
      */
     addItems: function(items) {
         items.forEach(function(item) {
@@ -147,9 +147,10 @@ exports.Menu = SC.Object.extend({
                 var link = document.createElement('li');
                 link.appendChild(document.createTextNode(item.name));
 
-                if (item.description) {
+                if (item.description || item.path) {
                     var dfn = document.createElement('dfn');
-                    dfn.appendChild(document.createTextNode(item.description));
+                    var desc = item.description || item.path;
+                    dfn.appendChild(document.createTextNode(desc));
                     link.appendChild(dfn);
                 }
 
@@ -157,24 +158,11 @@ exports.Menu = SC.Object.extend({
 
                 link.addEventListener('mousedown', function(ev) {
                     SC.run(function() {
-                        cliController.set('input', this._prefix + item.name + ' ');
+                        var str = this._prefix + this._getFullName(item);
+                        cliController.set('input', str);
                     }.bind(this));
                 }.bind(this), false);
 
-            }
-
-            // Work out if there is a common prefix between all the matches
-            // (not just the ones that we are displaying)
-            if (this._commonPrefix === null) {
-                this._commonPrefix = item.name;
-            }
-
-            // Find the longest common prefix for completion
-            if (this._commonPrefix.length > 0) {
-                var len = diff.diff_commonPrefix(this._commonPrefix, item.name);
-                if (len < this._commonPrefix.length) {
-                    this._commonPrefix = this._commonPrefix.substring(0, len);
-                }
             }
 
             if (this._items.length === 0) {
@@ -185,23 +173,51 @@ exports.Menu = SC.Object.extend({
 
         }.bind(this));
 
-        var completion = this._commonPrefix;
-        if (!completion || completion.length === 0) {
-            completion = undefined;
-        } else {
-            var argLen = this.assignment.value ? this.assignment.value.length : 0;
-            completion = completion.substring(argLen, completion.length);
+        this.hint.completion = this._getBestCompletion();
+    },
+
+    /**
+     * Find the best completion.
+     * We'd most like to complete on a common prefix, however if one doesn't
+     * exist then we go with the first item.
+     */
+    _getBestCompletion: function() {
+        if (this._items.length === 0) {
+            return undefined;
         }
 
-        // If there is only one match, then the completion must complete to that
-        // so it's safe to add a ' ' to the end.
-        /*
-        if (this._items.length == 1) {
-            completion = completion + ' ';
+        var longestPrefix = this._getFullName(this._items[0]);
+        if (this._items.length > 1) {
+            this._items.forEach(function(item) {
+                if (longestPrefix.length > 0) {
+                    var name = this._getFullName(item);
+                    var len = diff.diff_commonPrefix(longestPrefix, item.name);
+                    if (len < longestPrefix.length) {
+                        longestPrefix = longestPrefix.substring(0, len);
+                    }
+                }
+            }.bind(this));
         }
-        */
 
-        this.hint.completion = completion;
+        // Use the first match if there is no better
+        if (longestPrefix.length === 0) {
+            longestPrefix = this._getFullName(this._items[0]);
+        }
+
+        // The length of the argument so far
+        var argLen = this.assignment.value ? this.assignment.value.length : 0;
+        // What was typed, without the argument so far
+        var prefix = this.input.typed.substring(0, this.input.typed.length - argLen);
+
+        return prefix + longestPrefix;
+    },
+
+    /**
+     * If the item has a path in place of a description, then we need to
+     * include this in our calculations that use the name
+     */
+    _getFullName: function(item) {
+        return (item.path || '') + item.name;
     }
 });
 

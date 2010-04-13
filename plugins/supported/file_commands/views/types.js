@@ -56,7 +56,17 @@ exports.existingFileHint = {
         var files = input.env.get('files');
         files.listAll().then(function(fileList) {
             matcher.addItems(fileList.map(function(item) {
-                return {name: '/' + item};
+                var lastSep = item.lastIndexOf('/');
+                if (lastSep === -1) {
+                    return {
+                        name: item,
+                        path: '/'
+                    };
+                }
+                return {
+                    name: item.substring(lastSep + 1),
+                    path: '/' + item.substring(0, lastSep + 1)
+                };
             }));
         });
 

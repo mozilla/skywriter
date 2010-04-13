@@ -44,6 +44,7 @@ var request = require('canon:request');
 var keyboardManager = require('canon:keyboard').keyboardManager;
 var environment = require('canon:environment').global;
 var settings = require('settings').settings;
+var diff_match_patch = require('diff').diff_match_patch;
 
 var cliController = require('command_line:controller').cliController;
 var Level = require('command_line:hint').Level;
@@ -51,6 +52,7 @@ var BespinButtonView = require('command_line:views/image_button').BespinButtonVi
 var PinView = require('command_line:views/pin').PinView;
 
 var imagePath = catalog.getResourceURL('command_line') + 'images/';
+var diff = new diff_match_patch();
 
 /**
  * The height of the input area that is always visible.
@@ -324,8 +326,7 @@ exports.CliInputView = SC.View.design({
             return;
         }
 
-        var current = cliController.get('input');
-        cliController.set('input', current + completion);
+        cliController.set('input', completion);
     },
 
     /**
@@ -377,9 +378,7 @@ exports.CliInputView = SC.View.design({
 
             // hintNode.setAttribute('class', 'cmd_hint ' + hintClass[hint.level]);
 
-            if (hint.completion) {
-                this.set('_completion', hint.completion);
-            }
+            this.set('_completion', hint.completion);
 
             if (hint.level > level) {
                 level = hint.level;
@@ -529,9 +528,20 @@ exports.CliInputView = SC.View.design({
             fontWeight: 'bold',
             completionChanged: function() {
                 var current = this.getPath('parentView.input.value');
-                var extra = this.getPath('parentView.parentView._completion');
-                this.set('value', '<span class="cmd_existing">' + current +
-                    '</span>' + extra);
+                var completion = this.getPath('parentView.parentView._completion');
+                var val;
+                if (!completion) {
+                    val = '';
+                } else if (completion.indexOf(current) === 0) {
+                    val = '<span class="cmd_existing">' + current +
+                        '</span>' + completion.substring(current.length);
+                } else {
+                    var len = diff.diff_commonPrefix(current, completion);
+                    var extension = completion.substring(len);
+                    val = '<span class="cmd_existing">' + current + '</span>' +
+                        '<span class="cmd_extension">' + extension + '</span>';
+                }
+                this.set('value', val);
             }.observes('.parentView.parentView._completion'),
             // This is height:25, bottom:0 plus offsets added by SC, and <input>
             layout: { height: 18, bottom: 4, left: 45, right: 0 }
