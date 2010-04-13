@@ -392,8 +392,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             view = view.get('parentView');
         }
 
-        console.log("updateEnclosingScrollView", view);
-
         this._enclosingScrollView = view;
 
         if (SC.none(view)) {
