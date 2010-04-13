@@ -823,7 +823,7 @@ exports.server = SC.Object.create({
     lost: function(values, opts) {
         opts = opts || {};
         var url = '/register/lost/';
-        this.request('POST', url, util.objectToQuery(values), opts);
+        return this.request('POST', url, util.objectToQuery(values), opts);
     },
 
     changePassword: function(username, newPassword, verifyCode, opts) {
