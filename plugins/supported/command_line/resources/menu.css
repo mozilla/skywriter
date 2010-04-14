@@ -119,3 +119,17 @@ div.cmd_menu .cmd_sep {
 div.cmd_menu .cmd_error {
   color: #F00;
 }
+
+div.cmd_menu abbr {
+  display: block;
+  float: right;
+  color: #963;
+  cursor: pointer;
+  font-size: 75%;
+  margin-left: 5px;
+  border: 0;
+  text-decoration: none;
+  -moz-transform: scaleX(0.8);
+  -webkit-transform: scaleX(0.8);
+  transform: scaleX(0.8);
+}

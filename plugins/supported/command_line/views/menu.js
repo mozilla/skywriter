@@ -69,6 +69,30 @@ exports.filter = function(filter, items) {
 var MAX_ITEMS = 10;
 
 /**
+ * Something of a hack to allow activateItemAction() to function by storing
+ * a global latest menu instance. There are probably race conditions associated
+ * with this. Technically it's possible to have more than one menu displaying
+ * at a time (although probably won't be in the future) and should actually
+ * happen now
+ */
+var latestMenu;
+
+/**
+ * Fire a menu accelerator to select a menu item. To save creating a new
+ * function for every numeric accelerator, we dig into the commandExt to find
+ * a number for the key press and use that.
+ */
+exports.activateItemAction = function(env, args, request) {
+    var key = request.commandExt.key;
+    var index = parseInt(key.replace(/[A-Za-z_]/g, ''), 10);
+    if (!latestMenu) {
+        return;
+    }
+    var action = latestMenu._itemActions[index];
+    action();
+};
+
+/**
  * A really basic UI hint for when someone is entering something from a
  * set of items, for example boolean|selection.
  */
@@ -107,6 +131,18 @@ exports.Menu = SC.Object.extend({
     _commonPrefix: undefined,
 
     /**
+     * A store of what to do one key-press of some numbered action, probably
+     * via a keyboard accelerator
+     */
+    _itemActions: undefined,
+
+    /**
+     * A list of the accelerator names, counting from 1 not 0, so we ignore the
+     * first character.
+     */
+    _accelerators: '-1234567890',
+
+    /**
      *
      */
     init: function() {
@@ -125,6 +161,7 @@ exports.Menu = SC.Object.extend({
 
         this._items = [];
         this._commonPrefix = null;
+        this._itemActions = [];
 
         var argLen = this.assignment.value ? this.assignment.value.length : 0;
         var baseLen = this.input.typed.length - argLen;
@@ -135,12 +172,16 @@ exports.Menu = SC.Object.extend({
             level: Level.Incomplete,
             completion: undefined
         });
+
+        // See notes for #latestMenu
+        latestMenu = this;
     },
 
     /**
      * Create the clickable links
      */
     addItems: function(items) {
+        var i = 1;
         items.forEach(function(item) {
             // Create the UI component
             if (this._items.length < MAX_ITEMS) {
@@ -154,6 +195,21 @@ exports.Menu = SC.Object.extend({
                     link.appendChild(dfn);
                 }
 
+                this._itemActions[i] = function(ev) {
+                    SC.run(function() {
+                        var str = this._prefix + this._getFullName(item);
+                        cliController.executeCommand(str);
+                    }.bind(this));
+                }.bind(this);
+
+                if (i < this._accelerators.length) {
+                    var abbr = document.createElement('abbr');
+                    var text = "ALT-" + this._accelerators[i];
+                    abbr.appendChild(document.createTextNode(text));
+                    link.appendChild(abbr);
+                    i++;
+                }
+
                 this._list.appendChild(link);
 
                 link.addEventListener('mousedown', function(ev) {
@@ -162,7 +218,6 @@ exports.Menu = SC.Object.extend({
                         cliController.set('input', str);
                     }.bind(this));
                 }.bind(this), false);
-
             }
 
             if (this._items.length === 0) {

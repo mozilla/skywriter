@@ -46,6 +46,83 @@
         },
         {
             "ep": "command",
+            "name": "menu1",
+            "predicates": { "isCommandLine": true, "isKeyUp": true },
+            "key": "alt_1",
+            "pointer": "views/menu#activateItemAction"
+        },
+        {
+            "ep": "command",
+            "name": "menu2",
+            "predicates": { "isCommandLine": true, "isKeyUp": true },
+            "key": "alt_2",
+            "pointer": "views/menu#activateItemAction"
+        },
+        {
+            "ep": "command",
+            "name": "menu1",
+            "predicates": { "isCommandLine": true, "isKeyUp": true },
+            "key": "alt_1",
+            "pointer": "views/menu#activateItemAction"
+        },
+        {
+            "ep": "command",
+            "name": "menu3",
+            "predicates": { "isCommandLine": true, "isKeyUp": true },
+            "key": "alt_3",
+            "pointer": "views/menu#activateItemAction"
+        },
+        {
+            "ep": "command",
+            "name": "menu4",
+            "predicates": { "isCommandLine": true, "isKeyUp": true },
+            "key": "alt_4",
+            "pointer": "views/menu#activateItemAction"
+        },
+        {
+            "ep": "command",
+            "name": "menu5",
+            "predicates": { "isCommandLine": true, "isKeyUp": true },
+            "key": "alt_5",
+            "pointer": "views/menu#activateItemAction"
+        },
+        {
+            "ep": "command",
+            "name": "menu6",
+            "predicates": { "isCommandLine": true, "isKeyUp": true },
+            "key": "alt_6",
+            "pointer": "views/menu#activateItemAction"
+        },
+        {
+            "ep": "command",
+            "name": "menu7",
+            "predicates": { "isCommandLine": true, "isKeyUp": true },
+            "key": "alt_7",
+            "pointer": "views/menu#activateItemAction"
+        },
+        {
+            "ep": "command",
+            "name": "menu8",
+            "predicates": { "isCommandLine": true, "isKeyUp": true },
+            "key": "alt_8",
+            "pointer": "views/menu#activateItemAction"
+        },
+        {
+            "ep": "command",
+            "name": "menu9",
+            "predicates": { "isCommandLine": true, "isKeyUp": true },
+            "key": "alt_9",
+            "pointer": "views/menu#activateItemAction"
+        },
+        {
+            "ep": "command",
+            "name": "menu0",
+            "predicates": { "isCommandLine": true, "isKeyUp": true },
+            "key": "alt_0",
+            "pointer": "views/menu#activateItemAction"
+        },
+        {
+            "ep": "command",
             "name": "help",
             "params":
             [
