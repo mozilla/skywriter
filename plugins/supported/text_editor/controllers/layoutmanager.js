@@ -45,6 +45,35 @@ var catalog = require('bespin:plugins').catalog;
 
 exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     _maximumWidth: 0,
+    _syntaxManagerInitialized: false,
+    _textStorage: null,
+
+    _textStorageChanged: function() {
+        var oldTextStorage = this._textStorage;
+        if (!SC.none(oldTextStorage)) {
+            oldTextStorage.removeDelegate(this);
+        }
+
+        var newTextStorage = this.get('textStorage');
+        this._textStorage = newTextStorage;
+        newTextStorage.addDelegate(this);
+
+        if (this._syntaxManagerInitialized) {
+            var oldRange = oldTextStorage.range();
+            var newRange = newTextStorage.range();
+
+            if (!SC.none(oldTextStorage)) {
+                var syntaxManager = this.get('syntaxManager');
+                syntaxManager.layoutManagerReplacedText(oldRange, newRange);
+            }
+
+            // During initial setup, the text storage is set before the syntax
+            // manager is. We can't recompute the layout before the syntax
+            // manager is set up, so we solve this chicken-and-egg problem by
+            // suppressing the layout.
+            this._recomputeLayoutForRanges(oldRange, newRange);
+        }
+    }.observes('textStorage'),
 
     /**
      * @property{number}
@@ -173,7 +202,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     },
 
     _recomputeEntireLayout: function() {
-        var entireRange = this.get('textStorage').range();
+        var entireRange = this._textStorage.range();
         this._recomputeLayoutForRanges(entireRange, entireRange);
     },
 
@@ -182,7 +211,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         var newEndRow = newRange.end.row;
         var newRowCount = newEndRow - oldStartRow + 1;
 
-        var lines = this.getPath('textStorage.lines');
+        var lines = this._textStorage.get('lines');
         var theme = this.get('theme');
         var plainColor = theme.editorTextColor_plain;
 
@@ -244,7 +273,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         var x = point.x - margin.left, y = point.y - margin.top;
 
         var characterWidth = this.get('characterWidth');
-        var textStorage = this.get('textStorage');
+        var textStorage = this._textStorage;
         var clampedPosition = textStorage.clampPosition({
             row: Math.floor(y / this.get('lineHeight')),
             col: Math.floor(x / characterWidth)
@@ -305,6 +334,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         var syntaxManager = klass.create({ layoutManager: this });
         syntaxManager.addDelegate(this);
         this.set('syntaxManager', syntaxManager);
+        this._syntaxManagerInitialized = true;
     },
 
     /**
@@ -317,7 +347,6 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     createTextStorage: function() {
         var klass = this.get('textStorage');
         var textStorage = klass.create();
-        textStorage.addDelegate(this);
         this.set('textStorage', textStorage);
     },
 
@@ -338,6 +367,8 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         this.createTextStorage();
         this.createSyntaxManager();
 
+        // Now that the syntax manager is set up, we can recompute the layout.
+        // (See comments in _textStorageChanged().)
         this._recomputeEntireLayout();
     },
 
