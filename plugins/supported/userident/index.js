@@ -752,7 +752,7 @@ exports.registerUserPlugins = function() {
     catalog.loadMetadata(server.SERVER_BASE_URL + '/plugin/register/user');
 };
 
-lost: function(values, opts) {
+exports.lost = function(values, opts) {
     opts = opts || {};
     var url = '/register/lost/';
     return server.request('POST', url, util.objectToQuery(values), opts);
