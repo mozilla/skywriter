@@ -363,10 +363,6 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
         this._invalidRows = invalidRows.uniq();
     },
 
-    _layoutManagerChanged: function() {
-        this._reset();
-    }.observes('layoutManager'),
-
     _mergeAttrGroups: function(attrGroups) {
         var mergedGroups = [];
 
@@ -550,7 +546,8 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
     /**
      * @property{LayoutManager}
      *
-     * The character info is read from this layout manager instance.
+     * The character info is read from this layout manager instance. Once the
+     * syntax manager is created, this cannot be modified.
      */
     layoutManager: null,
 
@@ -580,6 +577,10 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
         }, this);
 
         return contexts;
+    },
+
+    init: function() {
+        this._reset();
     },
 
     /**
