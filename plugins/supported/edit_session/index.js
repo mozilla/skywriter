@@ -57,6 +57,10 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
         this.notifyDelegates('bufferFileChanged', this._file);
     }.observes('file'),
 
+    _modelChanged: function() {
+        this.notifyDelegates('bufferModelChanged', this.get('model'));
+    }.observes('model'),
+
     /*
     * The text model that is holding the content of the file.
     */
@@ -77,21 +81,20 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
     * Buffer.changeFileOnly method.
     */
     file: function(key, newFile) {
-        var self = this;
         if (newFile !== undefined) {
             this._file = newFile;
 
             if (SC.none(newFile)) {
-                var model = self.get('model');
-                model.replaceCharacters(model.range(), '');
+                this.set('model', TextStorage.create());
             } else {
                 newFile.loadContents().then(function(contents) {
                     console.log('SET FILE CONTENTS: ', contents);
                     SC.run(function() {
-                        var model = self.get('model');
-                        model.replaceCharacters(model.range(), contents);
-                    });
-                });
+                        this.set('model', TextStorage.create({
+                            initialValue: contents
+                        }));
+                    }.bind(this));
+                }.bind(this));
             }
         }
         return this._file;
@@ -110,13 +113,11 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
     * been loaded.
     */
     changeFile: function(newFile) {
-        var self = this;
         this.changeFileOnly(newFile);
 
         // are we changing to a new file?
         if (SC.none(newFile)) {
-            var model = self.get('model');
-            model.replaceCharacters(model.range(), '');
+            this.set('model', TextStorage.create());
             var pr = new Promise();
             pr.resolve(this);
             return pr;
@@ -124,11 +125,11 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
 
         return newFile.loadContents().then(function(contents) {
             SC.run(function() {
-                var model = self.get('model');
-                model.replaceCharacters(model.range(), contents);
-            });
-            return self;
-        });
+                var model = TextStorage.create({ initialValue: contents });
+                this.set('model', model);
+            }.bind(this));
+            return this;
+        }.bind(this));
     },
 
     /*
@@ -151,9 +152,8 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
         var self = this;
 
         return file.loadContents().then(function(contents) {
-            var model = self.get('model');
-            model.replaceCharacters(model.range(), contents);
-        });
+            this.set('model', TextStorage.create({ initialValue: contents }));
+        }.bind(this));
     },
 
     /*
@@ -269,6 +269,10 @@ exports.EditSession = SC.Object.extend({
         });
     },
 
+    bufferModelChanged: function(sender, newModel) {
+        this._currentView.setPath('layoutManager.textStorage', newModel);
+    },
+
     /*
      * figures out the full path, taking into account the current file
      * being edited.
@@ -340,3 +344,4 @@ exports.EditSession = SC.Object.extend({
         this.set('history', History.create());
     }
 });
+
