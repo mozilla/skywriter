@@ -749,7 +749,7 @@ exports.currentuser = function() {
  */
 exports.registerUserPlugins = function() {
     // Load the plugin metadata for the user's plugins
-    catalog.loadMetadata(server.SERVER_BASE_URL + '/plugin/register/user');
+    catalog.loadMetadataFromURL(server.SERVER_BASE_URL + '/plugin/register/user');
 };
 
 exports.lost = function(values, opts) {

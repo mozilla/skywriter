@@ -30,7 +30,7 @@ var tiki = require.loader;
 
 main = function() {
     baseurl = window.SERVER_BASE_URL == undefined ? '/server' : SERVER_BASE_URL;
-    catalog.loadMetadata(baseurl + "/plugin/register/defaults").then(
+    catalog.loadMetadataFromURL(baseurl + "/plugin/register/defaults").then(
         function(result) {
             var response = result.response;
             if (response.isError) {

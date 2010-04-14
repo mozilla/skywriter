@@ -442,7 +442,7 @@ exports.Catalog = SC.Object.extend({
         // it indexes on name.
         var ep = this.getExtensionPoint("extensionpoint");
         ep.set("indexOn", "name");
-        this.load(builtins.metadata);
+        this.loadMetadata(builtins.metadata);
     },
 
     /**
@@ -568,7 +568,24 @@ exports.Catalog = SC.Object.extend({
         return sorted;
     },
 
-    load: function(metadata) {
+    loadMetadata: function(metadata) {
+        for (pluginName in metadata) {
+            var md = metadata[pluginName];
+            if (md.errors) {
+                console.error("Plugin ", pluginName, " has errors:");
+                md.errors.forEach(function(error) {
+                    console.error(error);
+                });
+                delete metadata[pluginName];
+                continue;
+            }
+
+            if (md.dependencies) {
+                md.depends = object_keys(md.dependencies);
+            }
+            tiki.register(pluginName, md);
+        }
+
         this._toposort(metadata).forEach(function(name) {
             var md = metadata[name];
             md.catalog = this;
@@ -593,15 +610,12 @@ exports.Catalog = SC.Object.extend({
             md.name = name;
             var plugin = exports.Plugin.create(md);
             this.plugins[name] = plugin;
-
-            // Add the loaded metadata to tiki.
-            tiki._catalog[name] = md;
-            // The metadata is loaded now. Make sure tiki's catalog plugin is
-            // resolved.
-            tiki._promises.catalog[name] = tiki._promiseFor(
-                                                    'catalog', name).resolve();
-
         }, this);
+
+        var plugins = this.plugins;
+        for (pluginName in metadata) {
+            this._checkLoops(pluginName, plugins, []);
+        }
     },
 
     /**
@@ -624,9 +638,9 @@ exports.Catalog = SC.Object.extend({
      * Retrieve metadata from the server. Returns a promise that is
      * resolved when the metadata has been loaded.
      */
-    loadMetadata: function(url) {
+    loadMetadataFromURL: function(url, type) {
         var pr = new Promise();
-        SC.Request.create({ address: url }).notify(0, this,
+        SC.Request.create({ address: url, type: type || "GET" }).notify(0, this,
             this._metadataFinishedLoading, { callback: function(catalog, response) {
                 pr.resolve({catalog: catalog, response: response});
             }}).send("");
@@ -662,33 +676,11 @@ exports.Catalog = SC.Object.extend({
 
     _metadataFinishedLoading: function(response, params) {
         var pluginName;
-        
+
         if (!response.isError) {
             var body = response.body();
             var data = JSON.parse(body);
-            for (pluginName in data) {
-                var md = data[pluginName];
-                if (md.errors) {
-                    console.error("Plugin ", pluginName, " has errors:");
-                    md.errors.forEach(function(error) {
-                        console.error(error);
-                    });
-                    delete data[pluginName];
-                    continue;
-                }
-                
-                if (md.dependencies) {
-                    md.depends = object_keys(md.dependencies);
-                }
-                tiki.register(pluginName, md);
-            }
-
-            this.load(data);
-
-            var plugins = this.plugins;
-            for (pluginName in data) {
-                this._checkLoops(pluginName, plugins, []);
-            }
+            this.loadMetadata(data);
         }
         if (params.callback) {
             params.callback(this, response);

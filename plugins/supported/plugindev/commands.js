@@ -61,7 +61,8 @@ var finishAdd = function(request, pluginConfigFile, pluginConfig, path) {
 
     pluginConfigFile.saveContents(JSON.stringify(pluginConfig)).then(
         function() {
-            catalog.loadMetadata(server.SERVER_BASE_URL + '/plugin/reload/' + pluginName).then(function() {
+            catalog.loadMetadataFromURL(server.SERVER_BASE_URL +
+                            '/plugin/reload/' + pluginName).then(function() {
                 request.done('Plugin ' + pluginName + ' added.');
             });
 
@@ -230,7 +231,7 @@ exports.install = function(env, args, request) {
     });
 
     pr.then(function(metadata) {
-        catalog.load(metadata);
+        catalog.loadMetadata(metadata);
         request.done('Plugin installed');
     }, function(error) {
         request.doneWithError('Plugin installation failed: ' + error.message + ' ' + error.xhr.responseText);

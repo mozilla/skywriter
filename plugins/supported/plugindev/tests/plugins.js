@@ -314,7 +314,7 @@ exports.testGetResourceURL = function() {
 
 // this requires a development server setup at this point.
 exports.testReloadHookIsCalledWhenAPluginIsReloaded = function() {
-    plugins.catalog.loadMetadata('/server/plugin/register/tests',
+    plugins.catalog.loadMetadataFromURL('/server/plugin/register/tests',
         t.asyncTester(function() {
             plugins.catalog.loadPlugin('BespinTesting1', t.asyncTester(function() {
                 t.ok(exports.Testing1Reloaded == undefined, 'flag should not be set now');
