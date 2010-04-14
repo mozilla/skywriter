@@ -54,27 +54,8 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
     _file: null,
 
     _fileChanged: function() {
-        this._refreshSyntaxManager();
         this.notifyDelegates('bufferFileChanged', this._file);
     }.observes('file'),
-
-    _refreshSyntaxManager: function() {
-        var syntaxManager = this.get('syntaxManager');
-        if (SC.none(syntaxManager)) {
-            return;
-        }
-
-        var file = this._file;
-        if (SC.none(file)) {
-            return;
-        }
-
-        var ext = file.extension();
-        if (ext === null) {
-            ext = '';
-        }
-        syntaxManager.setInitialContextFromExt(ext);
-    },
 
     /*
     * The text model that is holding the content of the file.
@@ -121,8 +102,6 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
         if (model == null) {
             this.set('model', TextStorage.create());
         }
-
-        this._refreshSyntaxManager();
     },
 
     /*
@@ -276,7 +255,13 @@ exports.EditSession = SC.Object.extend({
     bufferFileChanged: function(sender, file) {
         if (!SC.none(file)) {
             this.get('history').addPath(file.path);
+
+            var ext = file.extension();
+            var view = this._currentView;
+            var syntaxManager = view.getPath('layoutManager.syntaxManager');
+            syntaxManager.setInitialContextFromExt(ext === null ? '' : ext);
         }
+
         catalog.getExtensions('bufferFileChanged').forEach(function (ext) {
             ext.load(function (f) {
                 f(file);
