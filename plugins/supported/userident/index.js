@@ -751,3 +751,9 @@ exports.registerUserPlugins = function() {
     // Load the plugin metadata for the user's plugins
     catalog.loadMetadata(server.SERVER_BASE_URL + '/plugin/register/user');
 };
+
+lost: function(values, opts) {
+    opts = opts || {};
+    var url = '/register/lost/';
+    return server.request('POST', url, util.objectToQuery(values), opts);
+};
