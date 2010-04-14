@@ -89,6 +89,7 @@ var m_userident = require('userident');
 var catalog = require('bespin:plugins').catalog;
 var loginController = m_userident.loginController;
 var signupController = m_userident.signupController;
+var resetController = m_userident.resetController;
 var registerUserPlugins = m_userident.registerUserPlugins;
 var userIdentPage = m_userident.userIdentPage;
 var BespinFileSource = require('bespin_server:filesource').BespinFileSource;
@@ -223,10 +224,13 @@ exports.applicationController = SC.Object.create({
         loginController.addDelegate(this);
         signupController.addDelegate(this);
 
-        var promise = m_userident.currentuser();
-        promise.then(this.loginControllerAcceptedLogin.bind(this),
-            this._displayLogin.bind(this));
-
+        if (!resetController.isResetURL()) {
+            var promise = m_userident.currentuser();
+                promise.then(this.loginControllerAcceptedLogin.bind(this),
+                                this._displayLogin.bind(this));
+        } else {
+            this._displayLogin();
+        }
     },
 
     _displayLogin: function() {

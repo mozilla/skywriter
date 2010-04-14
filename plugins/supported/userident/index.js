@@ -83,7 +83,7 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
      */
     onFailure: function() {
         displayError('Login Failed',
-                        'Your Username or Password was not recognized');
+                        'Your Username or Password was not recognized.');
     },
 
     /**
@@ -97,6 +97,23 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
 
     show: function() {
         var pane = exports.userIdentPage.get('mainPane');
+
+        // Check if the user wants to reset his/her password.
+        if (exports.resetController.isResetURL()) {
+            var data = window.location.search.split('=')[1].split(';');
+            exports.resetController.username = data[0];
+            exports.resetController.hash = data[1];
+
+            // Make some changes to the UI.
+            var paneFormAction = pane.contentView.form.action;
+            paneFormAction.items[1] = {
+                title: 'Reset password',
+                value: 'resetView'
+            };
+            paneFormAction.items.propertyDidChange('[]');
+            paneFormAction.set('value', 'resetView');
+        }
+
         pane.append();
         pane.becomeKeyPane();
     }
@@ -244,9 +261,9 @@ exports.lostController = SC.Object.create(MultiDelegateSupport, {
             return;
         }
 
-        server.lost({username: this.get('username')}).
-                        then(this.onResetPwdSuccess.bind(this),
-                             this.onResetPwdFailure.bind(this));
+        exports.lostPassword({username: this.get('username')}).
+                                then(this.onResetPwdSuccess.bind(this),
+                                     this.onResetPwdFailure.bind(this));
     },
 
     onResetPwdFailure: function() {
@@ -256,7 +273,61 @@ exports.lostController = SC.Object.create(MultiDelegateSupport, {
 
     onResetPwdSuccess: function() {
         displayInfo('Reset Password',
-                        'Successfully reset password - check your Emails.');
+                        'Successfully reset password - check your emails.');
+    }
+});
+
+/**
+ * Controller for the sign-in process
+ */
+exports.resetController = SC.Object.create(MultiDelegateSupport, {
+    hash: '',
+
+    username: '',
+
+    password1: '',
+    password2: '',
+
+    reset: function() {
+        var len = this.get('password1').length;
+        if (len < 6 || len > 20) {
+            displayError('Reset Password',
+                'The password has to be at least 6 and maximum 20 characters.');
+            return;
+        }
+
+        if (this.get('password1') !== this.get('password2')) {
+            displayError('Reset Password', 'The typed passwords do not match.');
+            return;
+        }
+
+        exports.changePassword(
+            this.username, this.password1, this.hash
+        ).then(
+            this.onSuccess.bind(this),
+            this.onFailure.bind(this)
+        );
+    },
+
+    isResetURL: function() {
+        return window.location.search.indexOf('pwchange') !== -1;
+    },
+
+    /**
+     * The reset failed.
+     */
+    onFailure: function(error) {
+        displayError('Reset Password Failed', 'Reason: ' + error.xhr.responseText);
+    },
+
+    /**
+     * The reset worked.
+     */
+    onSuccess: function() {
+        var lc = exports.loginController;
+        lc.set('username', this.get('username'));
+        lc.set('password', this.get('password1'));
+        lc.signup();
     }
 });
 
@@ -382,6 +453,7 @@ exports.userIdentPage = SC.Page.design({
                         var paneHeight, formHeight, containerHeight;
                         switch (value) {
                         case 'lostView':
+                        case 'resetView':
                         case 'loginView':
                             paneHeight = LOGIN_PANE_HEIGHT;
                             formHeight = LOGIN_FORM_HEIGHT;
@@ -399,7 +471,12 @@ exports.userIdentPage = SC.Page.design({
                         this.adjust('height', containerHeight);
 
                         setTimeout(function() {
-                            var view = page.getPath(value + '.usernameField');
+                            var view;
+                            if (value !== 'resetView') {
+                                view = page.getPath(value + '.usernameField');
+                            } else {
+                                view = page.getPath(value + '.password1Field');
+                            }
                             pane.makeFirstResponder(view);
                         }, 0);
                     }
@@ -684,6 +761,57 @@ exports.userIdentPage = SC.Page.design({
             target: 'userident#lostController',
             action: 'resetPwd'
         })
+    }),
+
+    resetView: SC.View.design({
+        layout: { left: 0, top: 0, right: 0, height: 399 },
+
+        childViews: ('password1Field password1Label password2Field password2Label submit').w(),
+
+        password1Field: SC.TextFieldView.design({
+            layout: { left: 10, top: 92 - 91, width: 200, height: 24 },
+            controlSize: SC.SMALL_CONTROL_SIZE,
+            isPassword: true,
+            valueBinding: 'userident#resetController.password1'
+        }),
+
+        password1Label: SC.LabelView.design({
+            value: 'New Password',
+            controlSize: SC.SMALL_CONTROL_SIZE,
+            layout: { left: 10, top: 92 - 91 + 26 + 3, width: 200, height: 14 }
+        }),
+
+        password2Field: SC.TextFieldView.design({
+            layout: { left: 10, top: 146 - 91, width: 200, height: 24 },
+            controlSize: SC.SMALL_CONTROL_SIZE,
+            isPassword: true,
+            valueBinding: 'userident#resetController.password2',
+            commitEditing: function() {
+                arguments.callee.base.apply(this, arguments);
+                exports.signupController.validate('password1');
+                return true;
+            }
+        }),
+
+        password2Label: SC.LabelView.design({
+            layout: {
+                left:   10,
+                top:    146 - 91 + 26 + 3,
+                width:  200,
+                height: 14
+            },
+
+            value: 'Confirm Password',
+            controlSize: SC.SMALL_CONTROL_SIZE
+        }),
+
+        submit: SC.ButtonView.design({
+            layout: { left: 10, top: 200 - 91, width: 200, height: 37 },
+            isDefault: true,
+            title: 'Save New Password',
+            target: 'userident#resetController',
+            action: 'reset'
+        })
     })
 });
 
@@ -726,11 +854,27 @@ exports.logout = function() {
         exports.loginController.set('password', '');
         exports.loginController.notifyDelegates('loginControllerLoggedOut');
     }, function(error) {
-        var pane = SC.AlertPane.error('Unable to log out',
+        displayError('Unable to log out',
             'There was a problem logging out: ' + error.message);
-        pane.append();
-        pane.becomeKeyPane();
     });
+};
+
+/**
+ * Tell the backend that the user lost the password.
+ */
+exports.lostPassword = function(values, opts) {
+    opts = opts || {};
+    var url = '/register/lost/';
+    return server.request('POST', url, util.objectToQuery(values), opts);
+};
+
+/**
+ * Changes the user's password.
+ */
+exports.changePassword = function(username, newPassword, verifyCode, opts) {
+    var url = '/register/password/' + username;
+    var query = { newPassword: newPassword, code: verifyCode };
+    return server.request('POST', url, util.objectToQuery(query), opts || {});
 };
 
 /**
