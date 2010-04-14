@@ -236,3 +236,25 @@ For example:
 
 If you are using Bespin via a normal script tag, then you don't need to use the
 onBespinLoad() function.
+
+Events
+======
+
+Often, you'll want to execute some code whenever the user interacts with Bespin
+in some way; for example, whenever the text is changed. Bespin's API is designed
+to resemble the standard DOM Events API, so it's easy to pick up.
+
+To add an event handler, use `addEventListener()` as though Bespin were a DOM
+object:
+
+    :::js
+    bespin.addEventListener('textChange', function() {
+        alert("The text changed!");
+    });
+
+The available events are as follows:
+
+* `select`: Called whenever the selection changes.
+* `textChange`: Called whenever the text changes, either from user input or
+commands such as Undo.
+
