@@ -104,7 +104,7 @@ exports.preview = function(env, args, request) {
     // Open a new window / popup and write the current buffer content to it.
     popup = window.open('','Preview: ' + fileName,
                                         'location=no,menubar=no');
-    popup.document.write(env.getPath('model.value'));
+    popup.document.write(env.get('model').getValue());
     popup.document.close();
     popup.focus();
 
