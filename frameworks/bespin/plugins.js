@@ -593,6 +593,14 @@ exports.Catalog = SC.Object.extend({
             md.name = name;
             var plugin = exports.Plugin.create(md);
             this.plugins[name] = plugin;
+
+            // Add the loaded metadata to tiki.
+            tiki._catalog[name] = md;
+            // The metadata is loaded now. Make sure tiki's catalog plugin is
+            // resolved.
+            tiki._promises.catalog[name] = tiki._promiseFor(
+                                                    'catalog', name).resolve();
+
         }, this);
     },
 
