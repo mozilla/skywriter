@@ -244,6 +244,10 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         this.setNeedsDisplayInRect(adjustRect(rect));
     },
 
+    _isReadOnly: function() {
+        return this.getPath('layoutManager.textStorage.readOnly');
+    },
+
     _keymappingChanged: function() {
         this._keyBuffer = '';
         this._keyState = 'start';
@@ -600,8 +604,15 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     /**
      * Replaces the selection with the given text and updates the selection
      * boundaries appropriately.
+     *
+     * @return True if the text view was successfully updated; false if the
+     *     change couldn't be made because the text view is read-only.
      */
     insertText: function(text) {
+        if (this._isReadOnly()) {
+            return false;
+        }
+
         this.groupChanges(function() {
             var textStorage = this.getPath('layoutManager.textStorage');
             var range = Range.normalizeRange(this._selectedRange);
@@ -625,6 +636,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
             this.moveCursorTo(destPosition);
         }.bind(this));
+
+        return true;
     },
 
     /**
@@ -851,8 +864,22 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     /**
      * As an undoable action, replaces the characters within the old range with
      * the supplied characters.
+     *
+     * TODO: Factor this out into the undo controller. The fact that commands
+     * have to go through the view in order to make undoable changes is
+     * counterintuitive.
+     *
+     * @param oldRange{Range}    The range of characters to modify.
+     * @param characters{string} The string to replace the characters with.
+     *
+     * @return True if the changes were successfully made; false if the changes
+     *     couldn't be made because the editor is read-only.
      */
     replaceCharacters: function(oldRange, characters) {
+        if (this._isReadOnly()) {
+            return false;
+        }
+
         this.groupChanges(function() {
             oldRange = Range.normalizeRange(oldRange);
             this.notifyDelegates('textViewWillReplaceRange', oldRange);
@@ -862,16 +889,24 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             this.notifyDelegates('textViewReplacedCharacters', oldRange,
                 characters);
         }.bind(this));
+
+        return true;
     },
 
     /**
      * Performs a delete-backward or delete-forward operation.
      *
-     * @param isBackspace If true, the deletion proceeds backward (as if the
-     *                    backspace key were pressed); otherwise, deletion
-     *                    proceeds forward.
+     * @param isBackspace{boolean} If true, the deletion proceeds backward (as if
+     *     the backspace key were pressed); otherwise, deletion proceeds forward.
+     *
+     * @return True if the operation was successfully performed; false if the
+     *     operation failed because the editor is read-only.
      */
     performBackspaceOrDelete: function(isBackspace) {
+        if (this._isReadOnly()) {
+            return false;
+        }
+
         var model = this.getPath('layoutManager.textStorage');
 
         var lines = model.get('lines');
@@ -914,6 +949,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             // were just deleted.
             this.moveCursorTo(range.start);
         }.bind(this));
+
+        return true;
     },
 
     /** Removes all buffered keys. */
