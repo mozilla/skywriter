@@ -215,17 +215,23 @@ exports.Filesystem = SC.Object.extend({
         var self = this;
         var source = this.get('source');
         source.remove(path).then(function() {
-            self._load().then(function() {
-                var position = exports._binarySearch(self._files, path);
-                if (position === null) {
-                    pr.reject(new Error('Cannot find path ' + path + ' to remove'));
-                    return;
-                }
-                self._files.splice(position, 1);
+            // Check if the file list is already loaded or about to load.
+            // If true, then we have to remove the deleted file from the list.
+            if (self.status !== exports.NEW) {
+                self._load().then(function() {
+                    var position = exports._binarySearch(self._files, path);
+                    // In some circumstances, the deleted file might not be
+                    // in the file list.
+                    if (position !== null) {
+                        self._files.splice(position, 1);
+                    }
+                    pr.resolve();
+                }, function(error) {
+                    pr.reject(error);
+                });
+            } else {
                 pr.resolve();
-            }, function(error) {
-                pr.reject(error);
-            });
+            }
         }, function(error) {
             pr.reject(error);
         });
