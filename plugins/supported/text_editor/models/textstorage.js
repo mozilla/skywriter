@@ -56,6 +56,14 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
     lines: null,
 
     /**
+     * @property{boolean}
+     *
+     * Whether this model is read-only. Attempts to modify a read-only model
+     * result in exceptions.
+     */
+    readOnly: false,
+
+    /**
      * Returns the position of the nearest character to the given position,
      * according to the selection rules.
      */
@@ -69,7 +77,7 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
         }
 
         return {
-            row:    row,
+            row: row,
             col: Math.max(0, Math.min(position.col, lines[row].length))
         };
     },
@@ -167,6 +175,10 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
      * Replaces the characters within the supplied range with the given string.
      */
     replaceCharacters: function(oldRange, characters) {
+        if (this.get('readOnly')) {
+            throw new Error("Attempt to modify a read-only text storage object");
+        }
+
         var addedLines = characters.split('\n');
         var addedLineCount = addedLines.length;
 
