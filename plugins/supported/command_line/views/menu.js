@@ -298,8 +298,10 @@ exports.Menu = SC.Object.extend({
 
         // If we're fuzzy matching, prefix + longestPrefix might actually be
         // shorter than what we've already typed. In this case it's a useless
-        // completion, so we revert to the first
-        if (completion.indexOf(this.input.typed) != 0) {
+        // completion, so we revert to the first. Also, if the completion is
+        // the same as what's typed, it's useless - revert to first.
+        if (completion.indexOf(this.input.typed) != 0
+                || completion === this.input.typed) {
             completion = prefix + this._getFullName(this._items[0]);
             isFirst = true;
         }
