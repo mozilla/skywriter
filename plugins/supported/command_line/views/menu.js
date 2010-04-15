@@ -268,14 +268,7 @@ exports.Menu = SC.Object.extend({
             return { completion: undefined, isFirst: false };
         }
 
-        if (this._items.length === 1) {
-            return {
-                completion: this._getFullName(this._items[0]),
-                isFirst: true
-            };
-        }
-
-        var isFirst = false;
+        var isFirst = (this._items.length === 1);
 
         var longestPrefix = this._getFullName(this._items[0]);
         if (this._items.length > 1) {
