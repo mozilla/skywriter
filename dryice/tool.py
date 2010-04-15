@@ -248,7 +248,7 @@ will be deleted before the build.""")
             bundled_plugins.add(plugin.name)
             
         output_js.write("""
-tiki.require("bespin:plugins").catalog.load(%s);
+tiki.require("bespin:plugins").catalog.loadMetadata(%s);
 """ % (dumps(all_md)))
 
         output_js.write(self.boot_file.bytes())
@@ -394,4 +394,4 @@ def main(args=None):
             manifest.compress_css(options.csscompressor)
     except BuildError, e:
         print "Build aborted: %s" % (e)
-        
+
