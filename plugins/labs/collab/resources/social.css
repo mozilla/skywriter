@@ -60,3 +60,15 @@ div.social_msg_type_myself {
 	background-color: #444;
 	color: white;
 }
+
+.social_user {
+	background: -moz-linear-gradient(left top -60deg, #444, #888);
+	background: -webkit-gradient(linear, left top, right bottom, from(#444), to(#888));
+}
+
+.social_user .social_user_name {
+	font-size: 14px;
+	font-weight: bold;
+	vertical-align: top;
+	margin-left: 0.5em;
+}

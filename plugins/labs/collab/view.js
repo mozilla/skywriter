@@ -43,6 +43,9 @@ var env = require('canon:environment').global;
 var editorapp_m = require('editorapp');
 var project_m = require('project');
 
+var social_user = require('collab:user');
+
+
 
 var ChatLineView = SC.View.extend(SC.StaticLayout, {
     content: null,
@@ -70,6 +73,57 @@ var ChatLineView = SC.View.extend(SC.StaticLayout, {
     }
 });
 
+var AvatarLineView = SC.View.extend(SC.StaticLayout, {
+    content: null,
+    useStaticLayout: false,
+    classNames: ['social_user'],
+
+    render: function(ctx, firstTime) {
+        if (!firstTime) {
+            return;
+        }
+        
+        var username = this.get('content');
+        var userdata = social_user.getUserDataIfAvailable(username);
+
+        ctx.begin().
+            addClass('social_user_name_' + username).
+            begin().
+                begin('img').
+                    addClass('social_user_avatar').
+                    attr({
+                        width:  32,
+                        height: 32,
+                        src:    social_user.getAvatarImageUrl(username, 64)
+                    }).
+                end().
+                begin('span').
+                    addClass('social_user_name').
+                    text(username).
+                end().
+            end().
+            begin().
+                begin('a').
+                    addStyle({
+                        display: userdata ? 'inline' : 'none'
+                    }).
+                    attr({
+                        href:   social_user.getOhlohLink(username),
+                        target: '_blank'
+                    }).
+                    begin('img').
+                        addClass('social_user_ohloh_badge').
+                        attr({
+                            src: social_user.getOhlohBadgeUrl(username, 64)
+                        }).
+                    end().
+                end().
+            end().
+            begin('hr').end().
+        end();
+    }
+});
+
 exports.SocialView = SC.SplitView.design({
     dock: DOCK_RIGHT,
     layout: { width: 192, right: 0, top: 0, bottom: 0 },
@@ -81,10 +135,13 @@ exports.SocialView = SC.SplitView.design({
         contentView: SC.ListView.design({
             layout: { top: 0, left: 0, right: 0, bottom: 0 },
             hasContentIcon: false,
+            exampleView: AvatarLineView,
             content: [],
             canEditContent: false,
             canDeleteContent: false,
-            canReorderContent: false
+            canReorderContent: false,
+            rowHeight:  80,
+            rowSpacing: 5
         })
     }),
 

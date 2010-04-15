@@ -39,6 +39,8 @@
 var server = require('bespin_server').server;
 var cliController = require('command_line:controller').cliController;
 
+var social_user = require('collab:user');
+
 
 /**
  * Helper for when you have a command that needs to get a hold of it's params
@@ -133,7 +135,8 @@ exports.displayFollowers = function(followers, title) {
 		var cell = document.createElement('td');
 		row.appendChild(cell);
 		var img = document.createElement('img');
-		img.src = '/images/collab_icn_user.png';
+		img.className = 'social_user_avatar_' + follower;
+		img.src = social_user.getAvatarImageUrl(follower, 16);
 		img.width  = '16';
 		img.height = '16';
 		cell.appendChild(img);
@@ -369,7 +372,8 @@ function createMemberListDisplay (members, env, args, request) {
 		var cell = document.createElement('td');
 		row.appendChild(cell);
 		var img = document.createElement('img');
-		img.src = '/images/collab_icn_user.png';
+		img.className = 'social_user_avatar_' + member;
+		img.src = social_user.getAvatarImageUrl(member, 16);
 		img.width = 16;
 		img.height = 16;
 		cell.appendChild(img);

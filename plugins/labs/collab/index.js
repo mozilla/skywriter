@@ -148,14 +148,25 @@ var ShareNode = SC.Object.extend({
 			var list = social.getPath('topLeftView.contentView');
 			var content = [];
 			// we can have many "dead" sessions, which leads to duplication of users.
-			var seen = {};
+			var seen = {}, username = this.username;
 			userEntries.forEach(function (user) {
-				if (!seen.hasOwnProperty(user.handle)) {
+				if (user.handle != username && !seen.hasOwnProperty(user.handle)) {
 					seen[user.handle] = true;
 					content.push(user.handle);
 				}
 			});
 			content.sort();
+			content.unshift(username); // we are #1!
+			var old = list.get('content');
+			if (old.length == content.length) {
+				var same = old.every(function (username, i) {
+						return username == content[i];
+					});
+				if (same) {
+					// bail out
+					return;
+				}
+			}
 			list.set('content', content);
 		}
     },
