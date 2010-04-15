@@ -36,13 +36,10 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var diff_match_patch = require('diff').diff_match_patch;
 
 var cliController = require('command_line:controller').cliController;
 var Hint = require('command_line:hint').Hint;
 var Level = require('command_line:hint').Level;
-
-var diff = new diff_match_patch();
 
 /**
  *
@@ -90,6 +87,28 @@ exports.activateItemAction = function(env, args, request) {
     }
     var action = latestMenu._itemActions[index];
     action();
+};
+
+/**
+ * This is like diff_match_patch.diff_commonPrefix()
+ */
+exports.commonPrefixIC = function(a, b) {
+    /*
+    var diff_match_patch = require('diff').diff_match_patch;
+    var diff = new diff_match_patch();
+    return diff.diff_commonPrefix(a, b);
+    */
+
+    var i = 0;
+    while (true) {
+        if (a.charAt(i).toLocaleLowerCase() !== b.charAt(i).toLocaleLowerCase()) {
+            return i;
+        }
+        if (i >= a.length || i >= b.length) {
+            return i;
+        }
+        i++;
+    }
 };
 
 /**
@@ -182,6 +201,7 @@ exports.Menu = SC.Object.extend({
      */
     addItems: function(items) {
         var i = 1;
+        var maybeTabMenuItem;
         items.forEach(function(item) {
             // Create the UI component
             if (this._items.length < MAX_ITEMS) {
@@ -204,8 +224,10 @@ exports.Menu = SC.Object.extend({
 
                 if (i < this._accelerators.length) {
                     var abbr = document.createElement('abbr');
-                    var text = "ALT-" + this._accelerators[i];
-                    abbr.appendChild(document.createTextNode(text));
+                    abbr.innerHTML = "ALT-" + this._accelerators[i];
+                    if (i === 1) {
+                        maybeTabMenuItem = abbr;
+                    }
                     link.appendChild(abbr);
                     i++;
                 }
@@ -228,7 +250,12 @@ exports.Menu = SC.Object.extend({
 
         }.bind(this));
 
-        this.hint.completion = this._getBestCompletion();
+        var best = this._getBestCompletion();
+        this.hint.completion = best.completion;
+
+        if (best.isFirst && maybeTabMenuItem) {
+            maybeTabMenuItem.innerHTML = 'TAB';
+        }
     },
 
     /**
@@ -238,15 +265,17 @@ exports.Menu = SC.Object.extend({
      */
     _getBestCompletion: function() {
         if (this._items.length === 0) {
-            return undefined;
+            return { completion: undefined, isFirst: false };
         }
+
+        var isFirst = false;
 
         var longestPrefix = this._getFullName(this._items[0]);
         if (this._items.length > 1) {
             this._items.forEach(function(item) {
                 if (longestPrefix.length > 0) {
                     var name = this._getFullName(item);
-                    var len = diff.diff_commonPrefix(longestPrefix, name);
+                    var len = exports.commonPrefixIC(longestPrefix, name);
                     if (len < longestPrefix.length) {
                         longestPrefix = longestPrefix.substring(0, len);
                     }
@@ -257,6 +286,7 @@ exports.Menu = SC.Object.extend({
         // Use the first match if there is no better
         if (!longestPrefix || longestPrefix.length === 0) {
             longestPrefix = this._getFullName(this._items[0]);
+            isFirst = true;
         }
 
         // The length of the argument so far
@@ -264,7 +294,17 @@ exports.Menu = SC.Object.extend({
         // What was typed, without the argument so far
         var prefix = this.input.typed.substring(0, this.input.typed.length - argLen);
 
-        return prefix + longestPrefix;
+        var completion = prefix + longestPrefix;
+
+        // If we're fuzzy matching, prefix + longestPrefix might actually be
+        // shorter than what we've already typed. In this case it's a useless
+        // completion, so we revert to the first
+        if (completion.indexOf(this.input.typed) != 0) {
+            completion = prefix + this._getFullName(this._items[0]);
+            isFirst = true;
+        }
+
+        return { completion: completion, isFirst: isFirst };
     },
 
     /**
