@@ -40,7 +40,7 @@
         {
             "ep": "command",
             "name": "complete",
-            "predicates": { "isCommandLine": true },
+            "predicates": { "isCommandLine": true, "isKeyUp": false },
             "key": "tab",
             "pointer": "commands#completeCommand"
         },
