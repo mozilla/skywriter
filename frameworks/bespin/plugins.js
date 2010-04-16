@@ -400,7 +400,7 @@ exports.Plugin = SC.Object.extend({
         }
 
         // reload the plugin metadata
-        this.catalog.loadMetadata(this.reloadURL).then(
+        this.catalog.loadMetadataFromURL(this.reloadURL).then(
             function() {
                 // actually load the plugin, so that it's ready
                 // for any dependent plugins
