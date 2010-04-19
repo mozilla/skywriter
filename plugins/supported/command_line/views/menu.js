@@ -41,6 +41,15 @@ var cliController = require('command_line:controller').cliController;
 var Hint = require('command_line:hint').Hint;
 var Level = require('command_line:hint').Level;
 
+/*
+ * TODO:
+ * - When there is only one option, and it's the same as what has already been
+ *   typed, then don't display it.
+ * - keyboard shortcuts for UP/DOWN (hard)
+ * - in conjunction with the matchers - find a better way to order the matches
+ *   the current order doesn't make sense to the user.
+ */
+
 /**
  *
  */
