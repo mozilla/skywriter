@@ -13,13 +13,6 @@
             "indexOn": "name"
         },
         {
-            "ep": "setting",
-            "name": "test",
-            "description": "A test setting",
-            "type": { "name": "selection", "data": [ "aa", "bb", "cc" ] },
-            "defaultValue": "bb"
-        },
-        {
             "ep": "command",
             "name": "set",
             "params":
