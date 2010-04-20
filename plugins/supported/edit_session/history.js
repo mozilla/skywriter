@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var environment = require('canon:environment');
 
 var MAX_HISTORY_SIZE = 30;
 
@@ -45,10 +46,16 @@ var MAX_HISTORY_SIZE = 30;
  * A list of recently opened files.
  */
 exports.History = SC.Object.extend({
+    _getStorageName: function() {
+        return ('bespin.history.' +
+                        environment.global.get('session').currentUser.username);
+    },
+
     _getHistory: function() {
         var storage = this.get('storage');
-        if ('history2' in storage) {
-            return JSON.parse(storage.history2);
+        var value = storage[this._getStorageName()];
+        if (value) {
+            return JSON.parse(value);
         }
 
         return [];
@@ -56,7 +63,7 @@ exports.History = SC.Object.extend({
 
     _setHistory: function(newHistory) {
         var storage = this.get('storage');
-        storage.history2 = JSON.stringify(newHistory);
+        storage[this._getStorageName()] = JSON.stringify(newHistory);
     },
 
     /**
