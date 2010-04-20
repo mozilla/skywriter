@@ -95,8 +95,7 @@ var changePluginInfo = function(env, request) {
                 prChangeDone: prChangeDone
             });
         } else {
-            request.doneWithError('Unable to load your plugin config: ' +
-                                                        error.xhr.responseText);
+            request.doneWithError('Unable to load your plugin config: ' + error.message);
             prChangeDone.reject();
         }
     });
@@ -131,10 +130,7 @@ exports.add = function(env, args, request) {
             data.prChangeDone.resolve("Plugin loaded and pluginInfo file saved");
         })
     }, function(error) {
-        request.doneWithError(
-            'Couldn\'t load plugin metadata. Server returned: ' +
-                                                    error.xhr.responseText
-        );
+        request.doneWithError('Couldn\'t load plugin metadata: ' + error.message);
     });
 
     request.async();
@@ -280,7 +276,7 @@ exports.install = function(env, args, request) {
         catalog.loadMetadata(metadata);
         request.done('Plugin installed');
     }, function(error) {
-        request.doneWithError('Plugin installation failed: ' + error.message + ' ' + error.xhr.responseText);
+        request.doneWithError('Plugin installation failed: ' + error.message);
     });
     request.async();
 };
@@ -298,7 +294,7 @@ exports.upload = function(env, args, request) {
     pr.then(function() {
         request.done('Plugin successfully uploaded.');
     }, function(error) {
-        request.doneWithError(error.xhr.responseText);
+        request.doneWithError('Upload failed: ' + error.message);
     });
 
     request.async();
@@ -324,8 +320,7 @@ exports.gallery = function(env, args, request) {
         output += '</tbody></table>';
         request.done(output);
     }, function(error) {
-        request.doneWithError('Error from server (' + error.message +
-            ') ' + error.xhr.responseText);
+        request.doneWithError('Error from server: ' + error.message);
     });
     request.async();
 };

@@ -147,7 +147,7 @@ exports.server = SC.Object.create({
                     }
                 } else {
                     if (pr) {
-                        var error = new Error('Server returned ' + xhr.status);
+                        var error = new Error(xhr.responseText + ' (Status ' + xhr.status + ")");
                         error.xhr = xhr;
                         pr.reject(error);
                     } else {

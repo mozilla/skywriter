@@ -754,7 +754,7 @@ exports.Catalog = SC.Object.extend({
             pr.resolve({catalog: this, response: response});
         } else {
             var xhr = response.errorObject.errorValue.rawRequest;
-            var error = new Error('Server returned ' + xhr.status);
+            var error = new Error(xhr.responseText + ' (Status ' + xhr.status + ")");
             error.xhr = xhr;
             pr.reject(error);
         }

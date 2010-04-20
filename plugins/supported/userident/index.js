@@ -330,7 +330,7 @@ exports.resetController = SC.Object.create(MultiDelegateSupport, {
      * The reset failed.
      */
     onFailure: function(error) {
-        displayError('Reset Password Failed', 'Reason: ' + error.xhr.responseText);
+        displayError('Reset Password Failed', 'Reason: ' + error.message);
     },
 
     /**
@@ -933,8 +933,7 @@ exports.registerUserPlugins = function() {
     }, function(error) {
         if (!error.xhr || error.xhr.status != 404) {
             displayError('Register User Plugins',
-                        'Failed to load user\'s pluginInfo.json: ' +
-                                                error.xhr.responseText);
+                    'Failed to load user\'s pluginInfo.json: ' + error.message);
         }
         settings.setPersister(ServerPersister.create());
     });
