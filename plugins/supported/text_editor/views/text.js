@@ -646,7 +646,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
      * TODO: Should this be moved out of the text view?
      */
     isDelimiter: function(character) {
-        return '"\',;.!~@#$%^&*?[]<>:/\\-+ \t'.indexOf(character) !== -1;
+        return '"\',;.!~@#$%^&*?[]<>():/\\-+ \t'.indexOf(character) !== -1;
     },
 
     keyDown: function(evt) {
