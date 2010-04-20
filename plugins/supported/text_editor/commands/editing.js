@@ -65,6 +65,10 @@ exports.deleteCommand = function(env, args, request) {
  * insertion point at the end of the deleted range.
  */
 exports.deleteLines = function(env, args, request) {
+    if (env.getPath('model.readOnly')) {
+        return;
+    }
+
     var view = env.get('view');
     var range = view.getSelectedRange();
 
@@ -120,6 +124,10 @@ exports.newline = function(env, args, request) {
  * point there.
  */
 exports.openLine = function(env, args, request) {
+    if (env.getPath('model.readOnly')) {
+        return;
+    }
+
     var model = env.get('model'), view = env.get('view');
 
     var selection = view.getSelectedRange();
