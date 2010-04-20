@@ -95,7 +95,8 @@ var changePluginInfo = function(env, request) {
                 prChangeDone: prChangeDone
             });
         } else {
-            request.doneWithError('Unable to load your plugin config: ' + error.message);
+            request.doneWithError('Unable to load your plugin config: ' +
+                                                        error.xhr.responseText);
             prChangeDone.reject();
         }
     });

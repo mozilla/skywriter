@@ -926,6 +926,10 @@ exports.registerUserPlugins = function() {
         catalog.loadMetadata(pluginInfo.metadata);
         catalog.orderExtensions(pluginInfo.ordering);
     }, function(error) {
-        displayError('Register User Plugins', 'Failed to load user\'s pluginInfo.json');
+        if (!error.xhr || error.xhr.status != 404) {
+            displayError('Register User Plugins',
+                        'Failed to load user\'s pluginInfo.json: ' +
+                                                error.xhr.responseText);
+        }
     });
 };
