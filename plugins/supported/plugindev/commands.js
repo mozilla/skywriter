@@ -118,27 +118,22 @@ exports.add = function(env, args, request) {
         return;
     }
 
-    changePluginInfo(env, request).then(function(data) {
-        if (data.pluginConfig.plugins == undefined) {
-            data.pluginConfig.plugins = [];
-        }
-        data.pluginConfig.plugins.push(path);
+    catalog.loadMetadataFromURL(
+        server.SERVER_BASE_URL + '/plugin/reload/' + pluginName
+    ).then(function() {
+        changePluginInfo(env, request).then(function(data) {
+            if (data.pluginConfig.plugins == undefined) {
+                data.pluginConfig.plugins = [];
+            }
+            data.pluginConfig.plugins.push(path);
 
-        var prSaveDone = new Promise();
-        prSaveDone.then(function() {
-            catalog.loadMetadataFromURL(
-                server.SERVER_BASE_URL + '/plugin/reload/' + pluginName
-            ).then(function() {
-                request.done('Plugin ' + pluginName + ' added.');
-            }, function(error) {
-                request.doneWithError(
-                    'Saved configuration but unable to reload plugin: '
-                        + error.message
-                );
-            });
-        });
-
-        data.prChangeDone.resolve(prSaveDone);
+            data.prChangeDone.resolve("Plugin loaded and pluginInfo file saved");
+        })
+    }, function(error) {
+        request.doneWithError(
+            'Couldn\'t load plugin metadata. Server returned: ' +
+                                                    error.xhr.responseText
+        );
     });
 
     request.async();

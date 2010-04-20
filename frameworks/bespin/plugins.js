@@ -450,6 +450,10 @@ exports.Plugin = SC.Object.extend({
                         }
                     });
                 });
+            }, function() {
+                // TODO: There should be more error handling then just logging
+                // to the command line.
+                console.error('Failed to load metadata from ' + self.reloadURL);
             }
         );
     }
@@ -696,9 +700,7 @@ exports.Catalog = SC.Object.extend({
     loadMetadataFromURL: function(url, type) {
         var pr = new Promise();
         SC.Request.create({ address: url, type: type || "GET" }).notify(0, this,
-            this._metadataFinishedLoading, { callback: function(catalog, response) {
-                pr.resolve({catalog: catalog, response: response});
-            }}).send("");
+            this._metadataFinishedLoading, pr).send("");
         return pr;
     },
 
@@ -741,16 +743,20 @@ exports.Catalog = SC.Object.extend({
         return plugin.resourceURL;
     },
 
-    _metadataFinishedLoading: function(response, params) {
+    _metadataFinishedLoading: function(response, pr) {
         var pluginName;
 
         if (!response.isError) {
             var body = response.body();
             var data = JSON.parse(body);
             this.loadMetadata(data);
-        }
-        if (params.callback) {
-            params.callback(this, response);
+
+            pr.resolve({catalog: this, response: response});
+        } else {
+            var xhr = response.errorObject.errorValue.rawRequest;
+            var error = new Error('Server returned ' + xhr.status);
+            error.xhr = xhr;
+            pr.reject(error);
         }
     },
 
