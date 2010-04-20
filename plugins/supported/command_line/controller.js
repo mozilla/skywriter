@@ -125,62 +125,57 @@ exports.cliController = SC.Object.create({
         });
         var results = input.parse();
 
-        /**
-         *
-         */
-        var onError = function(ex) {
-            /*
+        var self = this;
+
+        var loadError = function(ex) {
             var trace = new Trace(ex, true);
             console.group('Error executing: ' + typed);
             console.error(ex);
             trace.log(3);
             console.groupEnd();
-            */
 
-            // TODO: Better UI
-            hints.pushObject(hint.Hint.create({
-                level: hint.Level.Error,
-                element: 'ex'
-            }));
-
-            this.set('input', '');
-        }.bind(this);
-
-        var exec = function(command, args) {
-            // Check the function pointed to in the meta-data exists
-            if (!command) {
-                hints.pushObject(hint.Hint.create({
-                    level: hint.Level.Error,
-                    element: 'Command not found.'
-                }));
-                this.set('input', '');
-                return;
-            }
-
-            var request = Request.create({
-                command: command,
-                commandExt: input._commandExt,
-                typed: typed,
-                args: args
-            });
-
-            try {
-                command(environment.global, args, request);
-
-                // Only clear the input if the command worked
-                this.set('input', '');
-            } catch (ex) {
-                onError(ex);
-            }
-        }.bind(this);
+            self.set('input', '');
+        };
 
         results.argsPromise.then(function(args) {
             input._commandExt.load().then(function(command) {
-                SC.run(function() {
-                    exec(command, args);
+                self.set('input', '');
+
+                // Check the function pointed to in the meta-data exists
+                if (!command) {
+                    hints.pushObject(hint.Hint.create({
+                        level: hint.Level.Error,
+                        element: 'Command not found.'
+                    }));
+                    return;
+                }
+
+                var request = Request.create({
+                    command: command,
+                    commandExt: input._commandExt,
+                    typed: typed,
+                    args: args
                 });
-            });
-        }, onError);
+
+                try {
+                    command(environment.global, args, request);
+                } catch (ex) {
+                    var trace = new Trace(ex, true);
+                    console.group('Error executing command \'' + typed + '\'');
+                    console.error(ex);
+                    trace.log(3);
+                    console.groupEnd();
+
+                    // TODO: Better UI
+                    hints.pushObject(hint.Hint.create({
+                        level: hint.Level.Error,
+                        element: ex.toString()
+                    }));
+
+                    request.doneWithError(ex);
+                }
+            }, loadError);
+        }, loadError);
     },
 
     /**
