@@ -136,7 +136,14 @@ exports.Request = SC.Object.extend({
             this._init();
         }
 
-        this.outputs.pushObject(content);
+        if (typeof content !== 'string') {
+            content = content.toString();
+        }
+
+        SC.run(function() {
+            this.outputs.pushObject(content);
+        }.bind(this));
+
         return this;
     },
 
