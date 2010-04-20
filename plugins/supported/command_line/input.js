@@ -489,10 +489,25 @@ exports.Input = SC.Object.extend({
         var convertPromises = [];
 
         this._assignments.forEach(function(assignment) {
+            // HACK! deferred types need to have some parameters
+            // by which to determine which type they should defer to
+            // so we hack in the assignments so the deferrer can work
+            assignment.param.type.assignments = this._assignments;
+
             var promise = this._convertType(assignment, argOutputs);
-            if (promise) {
-                convertPromises.push(promise);
-            }
+
+            promise.then(function(converted) {
+                assignment.converted = converted;
+                argOutputs[assignment.param.name] = converted;
+            }, function(ex) {
+                this._hints.push(hint.Hint.create({
+                    level: hint.Level.Error,
+                    element: 'Can\'t convert \'' + value + '\' to a ' +
+                        param.type + ': ' + ex
+                }));
+            }.bind(this));
+
+            convertPromises.push(promise);
         }.bind(this));
 
         groupPromises(convertPromises).then(function() {
@@ -509,30 +524,11 @@ exports.Input = SC.Object.extend({
      * type conversions.
      */
     _convertType: function(assignment, argOutputs) {
-        var param = assignment.param;
-        var value = assignment.value || param.defaultValue;
-        if (value === undefined) {
-            return null;
+        if (assignment.value !== null) {
+            return types.fromString(assignment.value, assignment.param.type);
+        } else {
+            return new Promise().resolve(assignment.param.defaultValue);
         }
-
-        // HACK! deferred types need to have some parameters
-        // by which to determine which type they should defer to
-        // so we hack in the assignments so the deferrer can work
-        param.type.assignments = this._assignments;
-
-        var convertPromise = types.fromString(value, param.type);
-        convertPromise.then(function(converted) {
-            assignment.converted = converted;
-            argOutputs[param.name] = converted;
-        }, function(ex) {
-            this._hints.push(hint.Hint.create({
-                level: hint.Level.Error,
-                element: 'Can\'t convert \'' + value + '\' to a ' +
-                    param.type + ': ' + ex
-            }));
-        }.bind(this));
-
-        return convertPromise;
     }
 });
 
