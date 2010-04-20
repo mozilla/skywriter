@@ -120,6 +120,40 @@ exports.newline = function(env, args, request) {
 };
 
 /**
+ * Join the following line with the current one. Removes trailing whitespaces.
+ */
+exports.joinLines = function(env, args, request) {
+    var model = env.get('model');
+    if (model.get('readOnly')) {
+        return;
+    }
+
+    var view = env.get('view');
+    var selection = view.getSelectedRange();
+    var lines = model.get('lines');
+    var row = selection.end.row;
+
+    // Last line selected, which can't get joined.
+    if (lines.length == row) {
+        return;
+    }
+
+    view.groupChanges(function() {
+        var endCol = lines[row].length;
+
+        view.replaceCharacters({
+            start: {
+                col: endCol,
+                row: row
+            },
+            end: {
+                col: /^\s*/.exec(lines[row + 1])[0].length,
+                row: row + 1
+        }}, '');
+    });
+};
+
+/**
  * Creates a new, empty line below the current one, and places the insertion
  * point there.
  */

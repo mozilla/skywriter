@@ -43,6 +43,14 @@
         },
         {
             "ep": "command",
+            "name": "openline",
+            "description": "Join the current line with the following",
+            "key": "ctrl_shift_j",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/editing#joinLines"
+        },
+        {
+            "ep": "command",
             "name": "insertText",
             "pointer": "commands/editing#insertText",
             "params": [
