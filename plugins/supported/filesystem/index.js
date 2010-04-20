@@ -180,6 +180,8 @@ exports.Filesystem = SC.Object.extend({
                 }
                 pr.resolve();
             });
+        }, function(error) {
+            pr.reject(error);
         });
         return pr;
     },
