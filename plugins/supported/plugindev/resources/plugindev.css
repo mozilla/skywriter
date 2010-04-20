@@ -85,3 +85,7 @@
 .plugin_list table th {
     font-weight: bold;
 }
+
+.plugin_list table .deactivated {
+    background-color: #7A480D;
+}

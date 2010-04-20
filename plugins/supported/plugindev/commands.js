@@ -148,9 +148,12 @@ exports.add = function(env, args, request) {
  * the plugin list command
  */
 exports.list = function(env, args, request) {
+    var deactivatedPlugins = catalog.deactivatedPlugins;
+
     var plugins = catalog.getPlugins({
         sortBy: ['type', 'name']
     });
+
     var output = ['<div class="plugin_list">'];
     var lastPluginType = null;
     plugins.forEach(function(plugin) {
@@ -164,9 +167,16 @@ exports.list = function(env, args, request) {
             output.push(' plugins</h2><table>');
             lastPluginType = plugin.type;
         }
-        output.push('<tr><th>');
+
+        if (deactivatedPlugins[plugin.name]) {
+            output.push('<tr class="deactivated"><th>');
+        } else {
+            output.push('<tr><th>');
+        }
         output.push(plugin.name);
+
         output.push('</th><td>');
+
         if (plugin.description) {
             output.push(plugin.description);
         } else {
@@ -174,9 +184,11 @@ exports.list = function(env, args, request) {
         }
         output.push('</td></tr>');
     });
+
     if (lastPluginType) {
         output.push('</table></div>');
     }
+
     output.push('</div>');
     request.done(output.join(''));
 };
