@@ -459,6 +459,7 @@ exports.Catalog = SC.Object.extend({
     init: function() {
         this.points = {};
         this.plugins = {};
+        this.deactivatedPlugins = {};
         this._extensionsOrdering = [];
 
         // set up the "extensionpoint" extension point.
@@ -612,7 +613,14 @@ exports.Catalog = SC.Object.extend({
     },
 
     loadMetadata: function(metadata) {
+        var plugins = this.plugins;
+
         for (pluginName in metadata) {
+            // Skip if the plugin is not activated.
+            if (this.deactivatedPlugins[pluginName]) {
+                continue;
+            }
+
             var md = metadata[pluginName];
             if (md.errors) {
                 console.error("Plugin ", pluginName, " has errors:");
@@ -631,8 +639,11 @@ exports.Catalog = SC.Object.extend({
 
         this._toposort(metadata).forEach(function(name) {
             var md = metadata[name];
+            var activated = !(this.deactivatedPlugins[name]);
+
             md.catalog = this;
-            if (md.provides) {
+            // Skip if the plugin is not activated.
+            if (md.provides && activated) {
                 var provides = md.provides;
                 for (var i = 0; i < provides.length; i++) {
                     var extension = exports.Extension.create(provides[i]);
@@ -652,10 +663,9 @@ exports.Catalog = SC.Object.extend({
             }
             md.name = name;
             var plugin = exports.Plugin.create(md);
-            this.plugins[name] = plugin;
+            plugins[name] = plugin;
         }, this);
 
-        var plugins = this.plugins;
         for (pluginName in metadata) {
             this._checkLoops(pluginName, plugins, []);
         }
@@ -692,6 +702,17 @@ exports.Catalog = SC.Object.extend({
         return pr;
     },
 
+    deactivatePlugin: function(pluginName) {
+        var plugins = this.get("plugins");
+        var plugin = plugins[pluginName];
+        if (plugin !== undefined) {
+            plugin.unregister();
+            plugin._cleanup();
+        }
+
+        this.deactivatedPlugins[pluginName] = true;
+    },
+
     /**
      * Removes a plugin, unregistering it and cleaning up.
      */
@@ -699,7 +720,8 @@ exports.Catalog = SC.Object.extend({
         var plugins = this.get("plugins");
         var plugin = plugins[pluginName];
         if (plugin == undefined) {
-            throw new Error("Attempted to remove plugin " + pluginName + " which does not exist.");
+            throw new Error("Attempted to remove plugin " + pluginName
+                                            + " which does not exist.");
         }
 
         plugin.unregister();

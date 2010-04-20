@@ -37,6 +37,7 @@
 
 var catalog = require('bespin:plugins').catalog;
 var Promise = require('bespin:promise').Promise;
+var groupPromises = require('bespin:promise').group;
 var SC = require('sproutcore/runtime').SC;
 
 var server = require('bespin_server').server;
@@ -339,4 +340,77 @@ exports.order = function(env, args, request) {
 
         data.prChangeDone.resolve("Pluginorder saved: " + newOrder.join(', '));
     });
+};
+
+exports.deactivate = function(env, args, request) {
+    var pluginNames = args.pluginNames.split(' ');
+
+    pluginNames.forEach(function(pluginName) {
+        catalog.deactivatePlugin(pluginName);
+    });
+
+    changePluginInfo(env, request).then(function(data) {
+        data.pluginConfig.deactivated = catalog.deactivatedPlugins;
+
+        data.prChangeDone.resolve("Deactivated plugins: " + pluginNames.join(', '));
+    });
+
+    request.async();
+};
+
+exports.activate = function(env, args, request) {
+    var pluginNames = args.pluginNames.split(' ');
+    var pluginsActivated = [];
+
+    var prReloadList = [];
+    var output = [];
+
+    // Activae/reload plugins.
+    pluginNames.forEach(function(pluginName) {
+        if (catalog.deactivatedPlugins[pluginName]) {
+            delete catalog.deactivatedPlugins[pluginName];
+
+            pluginsActivated.push(pluginName);
+
+            prReloadList.push(
+                catalog.loadMetadataFromURL(
+                    server.SERVER_BASE_URL + '/plugin/reload/' + pluginName
+                ).then(function() {
+                    output.push('Plugin activated: ' + pluginName);
+                }, function(error) {
+                    output.push('FAILED to activate plugin: ' + pluginName);
+                })
+            );
+        } else {
+            output.push('Plugin already activated: ' + pluginName);
+        }
+    });
+
+    if (pluginsActivated.length != 0) {
+        // Remove the now activated plugins from the deactivated list.
+        var prPluginInfoSaveDone = new Promise();
+        prReloadList.push(prPluginInfoSaveDone);
+
+        prPluginInfoSaveDone.then(function() {
+            output.push('Activated plugins saved.');
+        }, function(err) {
+            output.push('FAILED to save the new activated plugins: ' + err.message);
+        });
+
+        changePluginInfo(env, request).then(function(data) {
+            data.pluginConfig.deactivated = catalog.deactivatedPlugins;
+
+            data.prChangeDone.resolve(prPluginInfoSaveDone);
+        }, function() {
+            prPluginInfoSaveDone.reject();
+        });
+    } else {
+        output.push('No plugin got activated - pluginInfo was not saved.');
+    }
+    // Output the messages after all promises are done.
+    groupPromises(prReloadList).then(function() {
+        request.done('Finished with following messages: <UL><LI>' + output.join('<LI>') + '<UL>');
+    });
+
+    request.async();
 };

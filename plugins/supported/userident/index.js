@@ -900,6 +900,10 @@ exports.registerUserPlugins = function() {
     );
 
     pr.then(function(pluginInfo) {
+        for (pluginName in pluginInfo.deactivated) {
+            catalog.deactivatePlugin(pluginName);
+        }
+
         catalog.loadMetadata(pluginInfo.metadata);
         catalog.orderExtensions(pluginInfo.ordering);
     }, function(error) {

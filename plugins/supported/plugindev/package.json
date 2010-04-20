@@ -121,6 +121,34 @@
         },
         {
             "ep": "command",
+            "name": "plugin deactivate",
+            "description": "Deactivate plugins.",
+            "params": [
+                {
+                    "name": "pluginNames",
+                    "type": "text",
+                    "description": "Plugins to deactivate separated by a space",
+                    "defaultValue": ""
+                }
+            ],
+            "pointer": "commands#deactivate"
+        },
+        {
+            "ep": "command",
+            "name": "plugin activate",
+            "description": "Activate plugins.",
+            "params": [
+                {
+                    "name": "pluginNames",
+                    "type": "text",
+                    "description": "Plugins to activate separated by a space",
+                    "defaultValue": ""
+                }
+            ],
+            "pointer": "commands#activate"
+        },
+        {
+            "ep": "command",
             "name": "debug",
             "description": "Commands useful for debugging"
         },
