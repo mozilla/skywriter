@@ -85,7 +85,7 @@ exports.Promise = function () {
 
     // Debugging help
     this._id = _nextId++;
-    this._createTrace = new Trace(new Error());
+    //this._createTrace = new Trace(new Error());
     exports._outstanding[this._id] = this;
 };
 
@@ -147,7 +147,7 @@ exports.Promise.prototype.resolve = function(data) {
     this._value = data;
     this._callHandlers();
 
-    this._completeTrace = new Trace(new Error());
+    //this._completeTrace = new Trace(new Error());
     complete(this);
     return this;
 };
@@ -167,7 +167,7 @@ exports.Promise.prototype.reject = function(error) {
     this._value = error;
     this._callHandlers();
 
-    this._completeTrace = new Trace(new Error());
+    //this._completeTrace = new Trace(new Error());
     complete(this);
     return this;
 };
@@ -186,7 +186,7 @@ exports.Promise.prototype._callHandlers = function() {
 
     list.forEach(function(handler) {
         handler.call(null, this._value);
-    }.bind(this));
+    }, this);
 
     this._onSuccessHandlers.length = 0;
     this._onErrorHandlers.length = 0;
