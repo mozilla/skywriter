@@ -39,6 +39,8 @@ var SC = require('sproutcore/runtime').SC;
 var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
 var util = require('bespin:util/util');
 var server = require('bespin_server').server;
+var settings = require('settings').settings;
+var ServerPersister = require('bespin_server:settings').ServerPersister;
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var env = require('canon:environment').global;
@@ -925,11 +927,15 @@ exports.registerUserPlugins = function() {
 
         catalog.loadMetadata(pluginInfo.metadata);
         catalog.orderExtensions(pluginInfo.ordering);
+
+        // Init the settings after all the plugin data is loaded.
+        settings.setPersister(ServerPersister.create());
     }, function(error) {
         if (!error.xhr || error.xhr.status != 404) {
             displayError('Register User Plugins',
                         'Failed to load user\'s pluginInfo.json: ' +
                                                 error.xhr.responseText);
         }
+        settings.setPersister(ServerPersister.create());
     });
 };

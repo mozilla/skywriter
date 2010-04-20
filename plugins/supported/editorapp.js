@@ -47,7 +47,6 @@
 		"text_editor": "0.0",
         "filesystem": "0.0",
 		"plugindev": "0.0",
-		"settings": "0.0",
 		"theme_manager": "0.0",
 		"userident": "0.0"
     },
@@ -93,9 +92,7 @@ var resetController = m_userident.resetController;
 var registerUserPlugins = m_userident.registerUserPlugins;
 var userIdentPage = m_userident.userIdentPage;
 var BespinFileSource = require('bespin_server:filesource').BespinFileSource;
-var ServerPersister = require('bespin_server:settings').ServerPersister;
 var themeManager = require('theme_manager').themeManager;
-var settings = require('settings').settings;
 var editsession = require('edit_session');
 
 exports.session = editsession.EditSession.create();
@@ -173,8 +170,6 @@ exports.applicationController = SC.Object.create({
             return;
         }
         this._editorHasBeenSetup = true;
-
-        settings.setPersister(ServerPersister.create());
 
         var applicationView = this._applicationView.create();
         this._applicationView = applicationView;

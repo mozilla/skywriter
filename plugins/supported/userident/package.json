@@ -3,7 +3,8 @@
     "dependencies": {
         "bespin_server": "0.0",
         "delegate_support": "0.0",
-		"canon": "0.0"
+        "canon": "0.0",
+        "settings": "0.0"
     },
     "provides": [
         {
