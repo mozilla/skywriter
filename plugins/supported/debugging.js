@@ -163,6 +163,38 @@
             "hidden": true,
             "description": "Display a list of outstanding or recently completed promises",
             "pointer": "#promiseCommand"
+        },
+        {
+            "ep": "command",
+            "name": "error",
+            "params":
+            [
+                {
+                    "name": "type",
+                    "type":
+                    {
+                        "name": "selection",
+                        "data": [ "throw", "request" ]
+                    },
+                    "defaultValue": "throw",
+                    "description": "Do we cause the error by throwing or using request.doneWithError()?"
+                },
+                {
+                    "name": "async",
+                    "type": "boolean",
+                    "defaultValue": false,
+                    "description": "Do we become asyncronous before causing the error?"
+                },
+                {
+                    "name": "message",
+                    "type": "string",
+                    "defaultValue": "Error",
+                    "description": "What message should we report?"
+                }
+            ],
+            "hidden": true,
+            "description": "Create an error",
+            "pointer": "#errorCommand"
         }
     ]
 });
@@ -326,4 +358,24 @@ exports.promiseCommand = function(env, args, request) {
         console.log('- Promise ' + count + ': ', promise);
     });
     request.done(count + ' ' + args.which + ' promises. Details logged to console.');
+};
+
+/**
+ * The 'error' command
+ */
+exports.errorCommand = function(env, args, request) {
+    request.output('Some output before we die');
+    var die = function() {
+        if (args.type === 'throw') {
+            throw new Error(args.message);
+        } else {
+            request.doneWithError(args.message);
+        }
+    };
+    if (args.async) {
+        setTimeout(die, 100);
+        request.async();
+    } else {
+        die();
+    }
 };
