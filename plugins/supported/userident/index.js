@@ -862,6 +862,16 @@ exports.logout = function() {
     return server.request('POST', url, null, {
         log: 'Logout complete.'
     }).then(function() {
+        // Remove all user plugins.
+        for (pluginName in catalog.plugins) {
+            if (catalog.plugins[pluginName].type === 'user') {
+                catalog.removePlugin(pluginName);
+            }
+        }
+
+        // Reset all settings.
+        settings.resetAll();
+
         env.get('session').set('currentUser', null);
         exports.loginController.set('username', '');
         exports.loginController.set('password', '');

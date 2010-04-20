@@ -94,6 +94,7 @@
  * </ul>
  */
 
+var catalog = require('bespin:plugins');
 var MemorySettings = require('memory').MemorySettings;
 
 exports.settings = MemorySettings.create();

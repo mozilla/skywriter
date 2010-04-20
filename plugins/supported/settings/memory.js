@@ -212,6 +212,12 @@ exports.MemorySettings = SC.Object.extend({
         }
     },
 
+    resetAll: function() {
+        this._getSettingNames().forEach(function(key) {
+            this.resetValue(key);
+        }.bind(this));
+    },
+
     /**
      * Make a list of the valid type names
      */
