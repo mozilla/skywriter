@@ -60,7 +60,7 @@ exports.buildFlags = function(env, flags) {
  * @class
  */
 var KeyboardManager = SC.Object.extend({
-    _customKeymappingCache: {},
+    _customKeymappingCache: { states: {} },
 
     /**
      * Returns character codes for the event.  The first value is the
@@ -240,30 +240,6 @@ var KeyboardManager = SC.Object.extend({
         if (flags.isTextView) {
             var currentState = sender._keyState;
 
-            // List of all the keymappings to look at.
-            var allKeymappings = [];
-
-            // TODO: The keymapping setting will go away soon in favor of
-            // simply enabling and disabling the appropriate plugins.
-            var keymappingName = settings.get('keymapping');
-            if (!SC.none(keymappingName) && keymappingName !== 'standard') {
-                var keymapping = null;
-                catalog.getExtensions('keymapping').some(function(map) {
-                    if (map.name == keymappingName) {
-                      if (SC.none(map._convertedRegExp)) {
-                          this._buildKeymappingRegex(map);
-                      }
-                      keymapping = map;
-                      return true;
-                    }
-                    return false;
-                }.bind(this));
-                if (SC.none(keymapping)) {
-                    throw new Error('There is no keymapping named ' +
-                                                            keymappingName);
-                }
-            }
-
             // Don't add the symbolic name to the key buffer if the alt_ key is
             // part of the symbolic name. If it starts with alt_, this means
             // that the user hit an alt keycombo and there will be a single,
@@ -275,24 +251,28 @@ var KeyboardManager = SC.Object.extend({
                 sender._keyMetaBuffer += symbolicName;
             }
 
-            // Get the custom keymapping from the cache.
-            var ckmap = this._customKeymappingCache;
+            // List of all the keymappings to look at.
+            var ak = [ this._customKeymappingCache ];
 
-            if (ckmap[keymappingName] && ckmap[keymappingName].states &&
-                        ckmap[keymappingName].states[currentState]) {
-                allKeymappings.push(ckmap[keymappingName]);
-            }
-            if (keymapping && keymapping.states[currentState]) {
-                allKeymappings.push(keymapping);
-            }
+            // Get keymapping extension points.
+            ak = ak.concat(catalog.getExtensions('keymapping'));
 
-            for (var i = 0; i < allKeymappings.length; i++) {
+            for (var i = 0; i < ak.length; i++) {
+                // Check if the keymapping has the current state.
+                if (SC.none(ak[i].states[currentState])) {
+                    continue;
+                }
+
+                if (SC.none(ak[i]._convertedRegExp)) {
+                    this._buildKeymappingRegex(ak[i]);
+                }
+
                 // Try to match the current mapping.
                 var result = this._bindingsMatch(
                                     symbolicName,
                                     flags,
                                     sender,
-                                    allKeymappings[i]);
+                                    ak[i]);
 
                 if (!SC.none(result)) {
                     return result;
@@ -470,10 +450,10 @@ var KeyboardManager = SC.Object.extend({
         var ckc = this._customKeymappingCache =
                             JSON.parse(settings.get('customKeymapping'));
 
-        for (mapping in ckc) {
-            for (state in ckc[mapping].states) {
-                this._buildBindingsRegex(ckc[mapping].states[state]);
-            }
+        ckc.states = ckc.states || {};
+
+        for (state in ckc.states) {
+            this._buildBindingsRegex(ckc.states[state]);
         }
     }.observes('settings:index#settings.customKeymapping')
 });

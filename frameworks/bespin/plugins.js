@@ -208,6 +208,28 @@ exports.ExtensionPoint = SC.Object.extend({
                 }, "unregister");
             }
         });
+    },
+
+    /**
+     * Order the extensions by a plugin order.
+     */
+    orderExtensions: function(pluginOrder) {
+        var orderedExt = [];
+        var n;
+
+        for (var i = 0; i < pluginOrder.length; i++) {
+            n = 0;
+            while (n != this.extensions.length) {
+                if (this.extensions[n]._pluginName === pluginOrder[i]) {
+                    orderedExt.push(this.extensions[n]);
+                    this.extensions.splice(n, 1);
+                } else {
+                    n ++;
+                }
+            }
+        }
+
+        this.extensions = orderedExt.concat(this.extensions);
     }
 });
 
@@ -437,6 +459,7 @@ exports.Catalog = SC.Object.extend({
     init: function() {
         this.points = {};
         this.plugins = {};
+        this._extensionsOrdering = [];
 
         // set up the "extensionpoint" extension point.
         // it indexes on name.
@@ -501,6 +524,26 @@ exports.Catalog = SC.Object.extend({
             return [];
         }
         return ep.extensions;
+    },
+
+    /**
+     * Sets the order of the plugin's extensions. Note that this orders *only*
+     * Extensions and nothing else (load order of CSS files e.g.)
+     */
+    orderExtensions: function(pluginOrder) {
+        pluginOrder = pluginOrder || this._extensionsOrdering;
+
+        for (name in this.points) {
+            this.points[name].orderExtensions(pluginOrder);
+        }
+        this._extensionsOrdering = pluginOrder;
+    },
+
+    /**
+     * Returns the current plugin exentions ordering.
+     */
+    getExtensionsOrdering: function() {
+        return this._extensionsOrdering;
     },
 
     /**
@@ -616,6 +659,8 @@ exports.Catalog = SC.Object.extend({
         for (pluginName in metadata) {
             this._checkLoops(pluginName, plugins, []);
         }
+
+        this.orderExtensions();
     },
 
     /**

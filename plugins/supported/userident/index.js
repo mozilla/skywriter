@@ -893,5 +893,16 @@ exports.currentuser = function() {
  */
 exports.registerUserPlugins = function() {
     // Load the plugin metadata for the user's plugins
-    catalog.loadMetadataFromURL(server.SERVER_BASE_URL + '/plugin/register/user');
+    var pr = server.request('GET', '/plugin/register/user', null,
+        {
+            evalJSON: true
+        }
+    );
+
+    pr.then(function(pluginInfo) {
+        catalog.loadMetadata(pluginInfo.metadata);
+        catalog.orderExtensions(pluginInfo.ordering);
+    }, function(error) {
+        displayError('Register User Plugins', 'Failed to load user\'s pluginInfo.json');
+    });
 };

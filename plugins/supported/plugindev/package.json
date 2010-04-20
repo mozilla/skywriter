@@ -107,6 +107,20 @@
         },
         {
             "ep": "command",
+            "name": "plugin order",
+            "description": "Set the order of plugin extensions.",
+            "params": [
+                {
+                    "name": "order",
+                    "type": "text",
+                    "description": "if given, set the plugin order, otherwise show the order",
+                    "defaultValue": null
+                }
+            ],
+            "pointer": "commands#order"
+        },
+        {
+            "ep": "command",
             "name": "debug",
             "description": "Commands useful for debugging"
         },

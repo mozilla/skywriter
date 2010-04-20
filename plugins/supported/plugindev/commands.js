@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var catalog = require('bespin:plugins').catalog;
+var Promise = require('bespin:promise').Promise;
 var SC = require('sproutcore/runtime').SC;
 
 var server = require('bespin_server').server;
@@ -51,27 +52,54 @@ var getPluginName = function(path) {
     return pathutils.splitext(pathutils.basename(path))[0];
 };
 
-var finishAdd = function(request, pluginConfigFile, pluginConfig, path) {
-    if (pluginConfig.plugins == undefined) {
-        pluginConfig.plugins = [];
-    }
-    pluginConfig.plugins.push(path);
+var changePluginInfo = function(env, request) {
+    var files = env.get('files');
 
-    var pluginName = getPluginName(path);
+    var pr = new Promise();
+    var prChangeDone = new Promise();
 
-    pluginConfigFile.saveContents(JSON.stringify(pluginConfig)).then(
-        function() {
-            catalog.loadMetadataFromURL(server.SERVER_BASE_URL +
-                            '/plugin/reload/' + pluginName).then(function() {
-                request.done('Plugin ' + pluginName + ' added.');
+    var pluginConfig;
+
+    prChangeDone.then(function(prSaveDone) {
+        pluginConfigFile.saveContents(JSON.stringify(pluginConfig)).then(
+            function() {
+                if (typeOf(prSaveDone) == 'string') {
+                    request.done(prSaveDone);
+                } else if (!SC.none(prSaveDone)) {
+                    prSaveDone.resolve();
+                }
+            }, function(error) {
+                request.doneWithError('Unable to save plugin configuration: ' +
+                                        error.message);
+
+                if (typeOf(prSaveDone) != 'string' && !SC.none(prSaveDone)) {
+                    prSaveDone.reject();
+                }
+            }
+        );
+    });
+
+    var pluginConfigFile = files.getFile('BespinSettings/pluginInfo.json');
+    pluginConfigFile.loadContents().then(function(contents) {
+        pluginConfig = JSON.parse(contents);
+        pr.resolve({
+            pluginConfig: pluginConfig,
+            prChangeDone: prChangeDone
+        });
+    }, function(error) {
+        if (error.xhr && error.xhr.status == 404) {
+            pluginConfig = {};
+            pr.resolve({
+                pluginConfig: pluginConfig,
+                prChangeDone: prChangeDone
             });
-
-        },
-        function(error) {
-            request.doneWithError('Unable to save plugin configuration: ' +
-                error.message);
+        } else {
+            request.doneWithError('Unable to load your plugin config: ' + error.message);
+            prChangeDone.reject();
         }
-    );
+    });
+
+    return pr;
 };
 
 /*
@@ -89,20 +117,29 @@ exports.add = function(env, args, request) {
         return;
     }
 
-    var pluginConfigFile = files.getFile('BespinSettings/pluginInfo.json');
-
-    pluginConfigFile.loadContents().then(function(contents) {
-        var pluginConfig = JSON.parse(contents);
-        finishAdd(request, pluginConfigFile, pluginConfig, path);
-    }, function(error) {
-        // file not found from the server is okay, we just need
-        // to create the file.
-        if (error.xhr && error.xhr.status == 404) {
-            finishAdd(request, pluginConfigFile, {}, path);
-        } else {
-            request.doneWithError('Unable to load your plugin config: ' + error.message);
+    changePluginInfo(env, request).then(function(data) {
+        if (data.pluginConfig.plugins == undefined) {
+            data.pluginConfig.plugins = [];
         }
+        data.pluginConfig.plugins.push(path);
+
+        var prSaveDone = new Promise();
+        prSaveDone.then(function() {
+            catalog.loadMetadataFromURL(
+                server.SERVER_BASE_URL + '/plugin/reload/' + pluginName
+            ).then(function() {
+                request.done('Plugin ' + pluginName + ' added.');
+            }, function(error) {
+                request.doneWithError(
+                    'Saved configuration but unable to reload plugin: '
+                        + error.message
+                );
+            });
+        });
+
+        data.prChangeDone.resolve(prSaveDone);
     });
+
     request.async();
 };
 
@@ -282,4 +319,24 @@ exports.gallery = function(env, args, request) {
             ') ' + error.xhr.responseText);
     });
     request.async();
+};
+
+/*
+ * the plugin order command - order the plugins and save the new ordering to
+ * to the pluginInfo.json file.
+ */
+exports.order = function(env, args, request) {
+    if (args.order === null) {
+        request.done('Current pluginorder: ' +
+                                catalog.getExtensionsOrdering().join(', '));
+    }
+
+    var newOrder = args.order.split(' ');
+    catalog.orderExtensions(newOrder);
+
+    changePluginInfo(env, request).then(function(data) {
+        data.pluginConfig.ordering = newOrder;
+
+        data.prChangeDone.resolve("Pluginorder saved: " + newOrder.join(', '));
+    });
 };
