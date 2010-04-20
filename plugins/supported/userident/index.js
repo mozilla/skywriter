@@ -63,6 +63,17 @@ var displayInfo = function(title, text) {
     pane.becomeKeyPane();
 };
 
+var searchQuery;
+
+(function() {
+    if (window.location.search === "") {
+        searchQuery = {};
+    } else {
+        searchQuery = util.queryToObject(window.location.search.substring(1));
+    }
+})();
+
+
 /**
  * Controller for the sign-in process
  */
@@ -100,7 +111,7 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
 
         // Check if the user wants to reset his/her password.
         if (exports.resetController.isResetURL()) {
-            var data = window.location.search.split('=')[1].split(';');
+            var data = searchQuery.pwchange.split(';');
             exports.resetController.username = data[0];
             exports.resetController.hash = data[1];
 
@@ -310,7 +321,7 @@ exports.resetController = SC.Object.create(MultiDelegateSupport, {
     },
 
     isResetURL: function() {
-        return window.location.search.indexOf('pwchange') !== -1;
+        return !SC.none(searchQuery.pwchange);
     },
 
     /**
@@ -900,7 +911,15 @@ exports.registerUserPlugins = function() {
     );
 
     pr.then(function(pluginInfo) {
-        for (pluginName in pluginInfo.deactivated) {
+        var deactivatePlugins;
+
+        if (SC.none(searchQuery.safeMode)) {
+            deactivatePlugins = pluginInfo.deactivated;
+        } else {
+            deactivatePlugins = pluginInfo.metadata;
+        }
+
+        for (pluginName in deactivatePlugins) {
             catalog.deactivatePlugin(pluginName);
         }
 
