@@ -128,7 +128,12 @@ exports.MemorySettings = SC.Object.extend({
     set: function(key, value) {
         var settingExt = catalog.getExtensionByKey('setting', key);
         if (!settingExt) {
-            throw new Error('Unknown setting: ', key, value);
+            // If there is no definition for this setting, then warn the user
+            // and store the setting in raw format. If the setting gets defined,
+            // the addSetting() function is called which then takes up the
+            // here stored setting and calls set() to conver the setting.
+            console.warn('Setting not defined: ', key, value);
+            return this.superclass('__deactivated__' + key, value);
         }
 
         if (typeof value == 'string' && settingExt.type == 'string') {
@@ -187,8 +192,15 @@ exports.MemorySettings = SC.Object.extend({
                 console.warn('!Setting.isValid(Setting.defaultValue)', settingExt);
             }
 
+            // The value can be
+            // 1) the value of a setting that is not activated at the moment
+            //       OR
+            // 2) the defaultValue of the setting.
+            var value = (this.get('__deactivated__' + settingExt.name) ||
+                                                        settingExt.defaultValue);
+
             // Set the default value up.
-            this.set(settingExt.name, settingExt.defaultValue);
+            this.set(settingExt.name, value);
 
             // Add a setter to this so subclasses can save
             this.addObserver(settingExt.name, this, function() {
