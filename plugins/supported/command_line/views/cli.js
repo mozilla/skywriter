@@ -469,7 +469,7 @@ exports.CliInputView = SC.View.design({
     replaceSelection: function(text) {
         var element = this.getPath('contentView.input').$('input').get(0);
         var length = text.length;
-        element.value = text;
+        cliController.set('input', text);
         window.setTimeout(function() {
             element.setSelectionRange(length, length);
         }, 0);
