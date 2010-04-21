@@ -40,6 +40,22 @@ var server = require('bespin_server').server;
 
 var userDataCache = {};
 
+// well-known urls
+var urlDict = {
+	avatar: {
+		url: 'http://www.gravatar.com/avatar/{email_md5}?s={size}',
+		def: 'http://www.gravatar.com/avatar/default?s={size}'
+	},
+	ohloh_link: {
+		url: 'https://www.ohloh.net/accounts/{email_md5}?ref=Detailed',
+		def: 'javascript:alert("Information on this user is not available yet");return false'	// hack
+	},
+	ohloh_badge: {
+		url: 'https://www.ohloh.net/accounts/{email_md5}/widgets/account_detailed.gif',
+		def: ''
+	}
+}
+
 /**
  * Check if user data is available
  */
@@ -48,53 +64,45 @@ exports.getUserDataIfAvailable = function (username) {
 }
 
 /**
- * Get an avatar image for a given user.
+ * Get url for a given user.
  */
-exports.getAvatarImageUrl = function (username, size){
-	size = size || 80;
+exports.interpolateUrl = function (username, str, extra) {
+	if (typeof str == 'string') {
+		str = urlDict[str];
+	}
 	if (userDataCache.hasOwnProperty(username)) {
 		if (userDataCache[username]) {
-			return 'http://www.gravatar.com/avatar/' + userDataCache[username].email_md5 + '?s=' + size;
+			return replace(str.url, extra ? delegate(userDataCache[username], extra) : userDataCache[username]);
 		}
 	} else {
 		// fetch user's data
 		fetchUserData(username);
 	}
 	// return the default
-	return 'http://www.gravatar.com/avatar/default?s=' + size;
-}
+	return extra ? replace(str.def, extra) : str.def;
+};
+
+/**
+ * Get an avatar image for a given user.
+ */
+exports.getAvatarImageUrl = function (username, size) {
+	size = size || 80;
+	return exports.interpolateUrl(username, 'avatar', {size: size});
+};
 
 /**
  * Get an ohloh link for a given user.
  */
-exports.getOhlohLink = function (username){
-	if (userDataCache.hasOwnProperty(username)) {
-		if (userDataCache[username]) {
-			return 'https://www.ohloh.net/accounts/' + userDataCache[username].email_md5 + '?ref=Detailed';
-		}
-	} else {
-		// fetch user's data
-		fetchUserData(username);
-	}
-	// return the default
-	return 'javascript:alert("Information on this user is not available yet");return false';	// hack
-}
+exports.getOhlohLink = function (username) {
+	return exports.interpolateUrl(username, 'ohloh_link');
+};
 
 /**
  * Get an ohloh badge for a given user.
  */
-exports.getOhlohBadgeUrl = function (username){
-	if (userDataCache.hasOwnProperty(username)) {
-		if (userDataCache[username]) {
-			return 'https://www.ohloh.net/accounts/' + userDataCache[username].email_md5 + '/widgets/account_detailed.gif';
-		}
-	} else {
-		// fetch user's data
-		fetchUserData(username);
-	}
-	// return the default
-	return '';
-}
+exports.getOhlohBadgeUrl = function (username) {
+	return exports.interpolateUrl(username, 'ohloh_badge');
+};
 
 /**
  * fetch user data from server
@@ -105,13 +113,13 @@ function fetchUserData (username) {
 		evalJSON: true,
 		onSuccess: function(userdata) {
 			userDataCache[username] = userdata;
-			var gravatar   = 'http://www.gravatar.com/avatar/' + userdata.email_md5;
-			var ohlohLink  = 'https://www.ohloh.net/accounts/' + userdata.email_md5 + '?ref=Detailed';
-			var ohlohBadge = 'https://www.ohloh.net/accounts/' + userdata.email_md5 + '/widgets/account_detailed.gif';
+			var gravatar   = exports.interpolateUrl(username, 'avatar', {size: ''});
+			var ohlohLink  = exports.interpolateUrl(username, 'ohloh_link');
+			var ohlohBadge = exports.interpolateUrl(username, 'ohloh_badge');
 			SC.CoreQuery('.social_user_name_' + username).each(function () {
 				switch (this.tagName.toLowerCase()) {
 					case 'img':
-						this.src = gravatar + '?s=' + this.width;
+						this.src = gravatar + this.width;
 						var parent = this.parentNode;
 						if (parent && parent.tagName.toLowerCase() == 'a'){
 							parent.href = ohlohLink;
@@ -119,7 +127,7 @@ function fetchUserData (username) {
 						break;
 					case 'div':
 						SC.CoreQuery(this).find('img.social_user_avatar').each(function () {
-							this.src = gravatar + '?s=' + this.width;
+							this.src = gravatar + this.width;
 							var parent = this.parentNode;
 							if (parent && parent.tagName.toLowerCase() == 'a'){
 								parent.href = ohlohLink;
@@ -147,3 +155,37 @@ function fetchUserData (username) {
 function getUserData (username, opts) {
     server.request('GET', '/register/userdata/' + username, null, opts);
 };
+
+// borrowing from Dojo Toolkit under BSD license:
+
+function getObject (/*String*/ name, /*Object*/ context) {
+	var parts = name.split('.');
+	for(var i = 0, p; context && (p = parts[i]); ++i) {
+		if (context) {
+			context = context[p];
+		} else {
+			return undefined;
+		}
+	}
+	return context; // mixed
+}
+
+var replacePattern = /\{([^\}]+)\}/g;
+function replace (/*String*/ tmpl, /*Object*/ map, /*RegularExpression?*/ pattern) {
+	return tmpl.replace(pattern || replacePattern, function(_, k){ return getObject(k, map); });
+};
+
+function T () {}
+function delegate (base, props) {
+	T.prototype = base;
+	var t = new T();
+	T.prototype = null;
+	if (props) {
+		for (var name in props) {
+			if (props.hasOwnProperty(name)) {
+				t[name] = props[name];
+			}
+		}
+	}
+	return t;
+}
