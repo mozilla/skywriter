@@ -36,7 +36,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var DOCK_RIGHT = require('dock_view').DOCK_RIGHT;
 
 var server = require('bespin_server').server;
 var env = require('canon:environment').global;
@@ -125,7 +124,6 @@ var AvatarLineView = SC.View.extend(SC.StaticLayout, {
 });
 
 exports.SocialView = SC.SplitView.design({
-    dock: DOCK_RIGHT,
     layout: { width: 192, right: 0, top: 0, bottom: 0 },
     layoutDirection: SC.LAYOUT_VERTICAL,
     defaultThickness: 0.5,
@@ -217,7 +215,7 @@ exports.SocialView = SC.SplitView.design({
 
 
 // TODO: this is a hack to add the social view
-var view = editorapp_m.applicationController._applicationView.addDockedView(exports.SocialView, DOCK_RIGHT);
+var view = editorapp_m.applicationController._applicationView.addDockedView(exports.SocialView, 'right');
 editorapp_m.social = view;
 editorapp_m.applicationController._applicationView.appendChild(view);
 editorapp_m.applicationController._dockedViews.social = view;

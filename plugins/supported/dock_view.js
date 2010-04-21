@@ -43,11 +43,6 @@
 
 var SC = require('sproutcore/runtime').SC;
 
-exports.DOCK_LEFT = 'left';
-exports.DOCK_BOTTOM = 'bottom';
-exports.DOCK_TOP = 'top';
-exports.DOCK_RIGHT = 'right';
-
 /**
  * @class
  *
@@ -59,8 +54,21 @@ exports.DOCK_RIGHT = 'right';
 exports.DockView = SC.View.extend({
     classNames: [ 'bespin-dock-view' ],
 
-    centerView: SC.View,
+    /**
+     * @property{SC.View}
+     *
+     * The center view for this dock view. Will be instantiated when this view
+     * is created; can be reinstantiated with the @createCenterView() method.
+     */
+    centerView: null,
+
     dockedViews: [],
+
+    _createCenterView: function(centerViewClass) {
+        var view = this.createChildView(centerViewClass, { layoutView: this });
+        this.set('centerView', view);
+        return view;
+    },
 
     /**
      * Instantiates a view, adds it to the set of docked views, and returns it.
@@ -76,7 +84,7 @@ exports.DockView = SC.View.extend({
         var index = dockedViews.length;
 
         if (SC.none(position)) {
-            position = exports.DOCK_BOTTOM;
+            position = 'bottom';
         }
 
         var thisDockView = this;
@@ -101,11 +109,13 @@ exports.DockView = SC.View.extend({
     },
 
     createChildViews: function() {
-        var centerView = this.createChildView(this.get('centerView'), {
-            layoutView: this
-        });
-        this.set('centerView', centerView);
-        var childViews = [ centerView ];
+        var childViews = [];
+
+        var centerViewClass = this.get('centerView');
+        if (centerViewClass !== null) {
+            var centerView = this._createCenterView(centerViewClass);
+            childViews.push(centerView);
+        }
 
         var dockedViews = this.get('dockedViews');
         for (var i = 0; i < dockedViews.length; i++) {
@@ -116,6 +126,27 @@ exports.DockView = SC.View.extend({
         return this;
     },
 
+    /**
+     * Instantiates the given class as the new center view for this dock view,
+     * possibly replacing the old center view.
+     */
+    createCenterView: function(newCenterViewClass) {
+        var oldCenterView = this.get('centerView');
+        if (oldCenterView !== null) {
+            oldCenterView.removeFromParent();
+        }
+
+        var newCenterView = this._createCenterView(newCenterViewClass);
+        this._updateChildLayout();
+        return newCenterView;
+    },
+
+    init: function() {
+        arguments.callee.base.apply(this, arguments);
+
+        this.set('dockedViews', this.get('dockedViews').concat());
+    },
+
     _updateChildLayout: function() {
         var left = 0, bottom = 0, top = 0, right = 0;
         this.get('dockedViews').forEach(function(item) {
@@ -123,25 +154,25 @@ exports.DockView = SC.View.extend({
             var dock = item.get('dock');
 
             switch (dock) {
-            case exports.DOCK_LEFT:
+            case 'left':
                 left += frame.width;
                 item.adjust('top', top);
                 item.adjust('bottom', bottom);
                 break;
 
-            case exports.DOCK_BOTTOM:
+            case 'bottom':
                 bottom += frame.height;
                 item.adjust('left', left);
                 item.adjust('right', right);
                 break;
 
-            case exports.DOCK_TOP:
+            case 'top':
                 top += frame.height;
                 item.adjust('left', left);
                 item.adjust('right', right);
                 break;
 
-            case exports.DOCK_RIGHT:
+            case 'right':
                 right += frame.width;
                 item.adjust('top', top);
                 item.adjust('bottom', bottom);
@@ -153,8 +184,17 @@ exports.DockView = SC.View.extend({
             }
         });
 
-        var layout = { left: left, bottom: bottom, top: top, right: right };
-        this.get('centerView').adjust(layout);
+        var centerView = this.get('centerView');
+        if (centerView !== null) {
+            var layout = {
+                left:   left,
+                bottom: bottom,
+                top:    top,
+                right:  right
+            };
+
+            centerView.adjust(layout);
+        }
     },
 
     renderLayout: function(context, firstTime) {
