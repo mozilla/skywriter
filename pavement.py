@@ -371,8 +371,6 @@ def update_javascript_version():
             
         replaced_lines.append(line)
         
-        info("VLINE: %s", line)
-        
         # ignore comment lines
         if "/**" in line or re.match(r'^\s*$', line):
             pass
@@ -385,7 +383,6 @@ def update_javascript_version():
         else:
             raise BuildFailure("Invalid JavaScript version number line: %s" % line)
         
-        info("RELLINE: %s", lines[i])
     version_file.write_lines(lines)
     return replaced_lines
     
