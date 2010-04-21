@@ -36,6 +36,11 @@
 			"pointer": "view#shareTellMsg"
 		},
 		{
+			"ep": "msgtargetid",
+			"name": "file_event",
+			"pointer": "view#fileEventMsg"
+		},
+		{
 			"ep": "mobwriteinstance",
 			"pointer": "mobwrite/core#mobwrite"
 		},

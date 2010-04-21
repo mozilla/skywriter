@@ -55,18 +55,28 @@ var ChatLineView = SC.View.extend(SC.StaticLayout, {
             return;
         }
         
-        var msg = this.get('content');
+        var msg = this.get('content'), from = msg.from, text;
+
+        switch (msg.msgtargetid) {
+            case 'file_event':
+                text = msg.event + ' /' + msg.owner + '+' + msg.project + '/' + msg.path;
+                break;
+            default:
+                text = msg.text;
+                break;
+        }
 
         ctx.begin().
+            addClass('social_msg').
             addClass('social_msg_type_' + msg.msgtargetid).
             begin('span').
                 addClass('social_msg_from').
-                text(msg.from).
+                text(from).
                 push(':&nbsp;').
             end().
             begin('span').
                 addClass('social_msg_text').
-                text(msg.text).
+                text(text).
             end().
         end();
     }
@@ -227,7 +237,6 @@ exports.broadcastMsg = function (msg) {
         var chat = social.getPath('bottomRightView.chat.contentView');
         
         // as Patrick explained above it is not easy to add changes
-    
         var content = chat.get('content');
         content = content.concat(msg);
         chat.set('content', content);
@@ -241,7 +250,6 @@ exports.tellMsg = function (msg) {
         var chat = social.getPath('bottomRightView.chat.contentView');
         
         // as Patrick explained above it is not easy to add changes
-    
         var content = chat.get('content');
         content = content.concat(msg);
         chat.set('content', content);
@@ -255,7 +263,19 @@ exports.shareTellMsg = function (msg) {
         var chat = social.getPath('bottomRightView.chat.contentView');
         
         // as Patrick explained above it is not easy to add changes
-    
+        var content = chat.get('content');
+        content = content.concat(msg);
+        chat.set('content', content);
+    }
+}
+
+
+exports.fileEventMsg = function (msg) {
+    var social = editorapp_m.social;
+    if (social) {
+        var chat = social.getPath('bottomRightView.chat.contentView');
+        
+        // as Patrick explained above it is not easy to add changes
         var content = chat.get('content');
         content = content.concat(msg);
         chat.set('content', content);

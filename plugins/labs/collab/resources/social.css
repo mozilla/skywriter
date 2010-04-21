@@ -34,6 +34,10 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
+.social_msg {
+	font-size: 10px;
+}
+
 .social_msg_from {
 	font-weight: bold;
 }
@@ -59,6 +63,10 @@ div.social_msg_type_tell .social_msg_text {
 div.social_msg_type_myself {
 	background-color: #444;
 	color: white;
+}
+
+div.social_msg_type_file_event {
+	font-style: italic;
 }
 
 .social_user {
