@@ -300,6 +300,8 @@ def _update_static():
     index = index.replace("{{inline}}", inline)
     (editor_dir / "index.html").write_bytes(index)
     
+    (bt / "favicon.ico").copy(static / "favicon.ico")
+    
     editor_path = editor_dir / "editor.js"
     editor_file = editor_path.open("w")
     
@@ -395,9 +397,7 @@ def dist(options):
     
     index_file = path("dryice") / "prodindex.html"
     index_file.copy(output_dir / "static" / "index.html")
-    
-    # plugins_dir = path("plugins")
-    # plugins_dir.copytree(output_dir / "plugins")
+    (path("dryice") / "favicon.ico").copy(output_dir / "static" / "favicon.ico")
     
     sh("tar czf BespinServer.tgz BespinServer", cwd="tmp")
     
