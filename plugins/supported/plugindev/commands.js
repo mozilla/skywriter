@@ -118,20 +118,48 @@ exports.add = function(env, args, request) {
         return;
     }
 
-    catalog.loadMetadataFromURL(
-        server.SERVER_BASE_URL + '/plugin/reload/' + pluginName
-    ).then(function() {
-        changePluginInfo(env, request).then(function(data) {
-            if (data.pluginConfig.plugins == undefined) {
-                data.pluginConfig.plugins = [];
-            }
-            data.pluginConfig.plugins.push(path);
+    // Function to rollback the plugin addition from pluginInfo.js
+    var rollbackPluginAdd = function(data) {
+        if (data.pluginConfig.plugins != undefined) {
+            var plugins = data.pluginConfig.plugins;
 
-            data.prChangeDone.resolve("Plugin loaded and pluginInfo file saved");
-        })
-    }, function(error) {
-        request.doneWithError('Couldn\'t load plugin metadata: ' + error.message);
-    });
+            for (var i = 0; i < plugins.length; i++) {
+                if (plugins[i] == path) {
+                    plugins.splice(i, 1);
+                    break;
+                }
+            }
+        }
+
+        data.prChangeDone.resolve();
+    };
+
+    // Load the pluginInfo data.
+    changePluginInfo(env, request).then(function(data) {
+        var prSaveDone = new Promise();
+
+        // After the pluginInfo.json is saved, load the plugin metadata.
+        prSaveDone.then(function() {
+            catalog.loadMetadataFromURL(
+                server.SERVER_BASE_URL + '/plugin/reload/' + pluginName
+            ).then(function() {
+                request.done('Plugin loaded and pluginInfo file saved.');
+            }, function(error) {
+                request.doneWithError('Couldn\'t add the plugin: ' + error.message);
+
+                // We don't handle failure as we can't do anything if it fails.
+                changePluginInfo(env, request).then(rollbackPluginAdd);
+            });
+        });
+
+        // Add the plugin to the pluginInfo.json file.
+        if (data.pluginConfig.plugins == undefined) {
+            data.pluginConfig.plugins = [];
+        }
+        data.pluginConfig.plugins.push(path);
+
+        data.prChangeDone.resolve(prSaveDone);
+    })
 
     request.async();
 };
