@@ -103,8 +103,8 @@ exports.evalCommand = function(env, args, request) {
  * 'version' command
  */
 exports.versionCommand = function(env, args, request) {
-    var version = 'Your Bespin is at version ' + bespin.versionNumber +
-            ', Code name: \'' + bespin.versionCodename + '\'';
+    var version = 'Bespin ' + bespin.versionNumber + ' (' + 
+            bespin.versionCodename + ')';
     request.done(version);
 };
 

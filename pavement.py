@@ -354,6 +354,56 @@ def restore_python_version(replaced_lines):
     lines[version_block_start+1:version_block_end] = replaced_lines
     version_file.write_lines(lines)
 
+def update_javascript_version():
+    version_file = path("frameworks") / "bespin" / "index.js"
+    in_version_block = False
+    lines = version_file.lines()
+    replaced_lines = []
+    for i in range(0, len(lines)):
+        line = lines[i]
+        if "BEGIN VERSION BLOCK" in line:
+            in_version_block = True
+            continue
+        if "END VERSION BLOCK" in line:
+            break
+        if not in_version_block:
+            continue
+            
+        replaced_lines.append(line)
+        
+        info("VLINE: %s", line)
+        
+        # ignore comment lines
+        if "/**" in line or re.match(r'^\s*$', line):
+            pass
+        elif "versionNumber = " in line:
+            lines[i] = "exports.versionNumber = '%s';\n" % (options.version.number)
+        elif 'versionCodename = ' in line:
+            lines[i] = "exports.versionCodename = '%s';\n" % (options.version.name)
+        elif 'apiVersion = ' in line:
+            lines[i] = "exports.apiVersion = '%s';\n" % (options.version.api)
+        else:
+            raise BuildFailure("Invalid JavaScript version number line: %s" % line)
+        
+        info("RELLINE: %s", lines[i])
+    version_file.write_lines(lines)
+    return replaced_lines
+    
+def restore_javascript_version(replaced_lines):
+    version_file = path("frameworks") / "bespin" / "index.js"
+    lines = version_file.lines()
+    version_block_start = None
+    version_block_end = None
+    for i in range(0, len(lines)):
+        line = lines[i]
+        if "BEGIN VERSION BLOCK" in line:
+            version_block_start = i
+        if "END VERSION BLOCK" in line:
+            version_block_end = i
+            break
+    lines[version_block_start+1:version_block_end] = replaced_lines
+    version_file.write_lines(lines)
+
 
 @task
 @needs(['generate_setup', 'build_docs', 'fetch_compiler', 'sdist', 'release_embed'])
@@ -363,6 +413,7 @@ def dist(options):
     Creates the BespinServer.tar.gz file with all of the pieces for production
     deployment."""
     _update_static()
+    
     output_dir = path("tmp/BespinServer")
     output_dir.rmtree()
     
@@ -384,10 +435,14 @@ def dist(options):
     
     yui_compressor = path("abbot/vendor/yui-compressor/yuicompressor-2.4.2.jar")
     closure_compiler = options.fetch_compiler.dest_dir / "compiler.jar"
-
-    info(sh('dryice -j%s -c%s production.json' % 
-        (closure_compiler, yui_compressor), 
-        capture=True))
+    
+    replaced_lines = update_javascript_version()
+    try:
+        info(sh('dryice -j%s -c%s production.json' % 
+            (closure_compiler, yui_compressor), 
+            capture=True))
+    finally:
+        restore_javascript_version(replaced_lines)
         
     built_dropin = path("tmp") / ("BespinEmbedded-DropIn-%s" % (options.version.number))
     built_dropin.copytree(output_dir / "static" / "embedded")
@@ -616,29 +671,33 @@ def release_embed(options):
         % (version))
     
     info("Building DropIn using dryice")
-    info(sh('dryice -j%s -c%s -Doutput_dir=\\"%s\\" dropin.json' % 
-        (closure_compiler, yui_compressor, outputdir), 
-        capture=True, ignore_error=True))
+    replaced_lines = update_javascript_version()
+    try:
+        info(sh('dryice -j%s -c%s -Doutput_dir=\\"%s\\" dropin.json' % 
+            (closure_compiler, yui_compressor, outputdir), 
+            capture=True, ignore_error=True))
+        
+        path("LICENSE.txt").copy(outputdir / "LICENSE.txt")
+        path("embedded/README-DropIn.txt").copy(outputdir / "README.txt")
+        (builddir / "docs").copytree(outputdir / "docs")
+        sh("tar czf BespinEmbedded-DropIn-%s.tar.gz BespinEmbedded-DropIn-%s" % \
+            (version, version), cwd="tmp")
     
-    path("LICENSE.txt").copy(outputdir / "LICENSE.txt")
-    path("embedded/README-DropIn.txt").copy(outputdir / "README.txt")
-    (builddir / "docs").copytree(outputdir / "docs")
-    sh("tar czf BespinEmbedded-DropIn-%s.tar.gz BespinEmbedded-DropIn-%s" % \
-        (version, version), cwd="tmp")
+        outputdir = builddir / ("BespinEmbedded-Customizable-%s" % (version))
+        info("Building Customizable package")
+        if outputdir.exists():
+            outputdir.rmtree()
+        outputdir.mkdir()
+        path("LICENSE.txt").copy(outputdir / "LICENSE.txt")
+        path("embedded/README-Customizable.txt").copy(outputdir / "README.txt")
+        (builddir / "docs").copytree(outputdir / "docs")
     
-    outputdir = builddir / ("BespinEmbedded-Customizable-%s" % (version))
-    info("Building Customizable package")
-    if outputdir.exists():
-        outputdir.rmtree()
-    outputdir.mkdir()
-    path("LICENSE.txt").copy(outputdir / "LICENSE.txt")
-    path("embedded/README-Customizable.txt").copy(outputdir / "README.txt")
-    (builddir / "docs").copytree(outputdir / "docs")
-    
-    frameworks_dir = outputdir / "frameworks"
-    frameworks_dir.mkdir()
-    path("frameworks/bespin").copytree(frameworks_dir / "bespin")
-    path("sproutcore").copytree(outputdir / "sproutcore")
+        frameworks_dir = outputdir / "frameworks"
+        frameworks_dir.mkdir()
+        path("frameworks/bespin").copytree(frameworks_dir / "bespin")
+        path("sproutcore").copytree(outputdir / "sproutcore")
+    finally:
+        restore_javascript_version(replaced_lines)
     
     libdir = outputdir / "lib"
     libdir.mkdir()
