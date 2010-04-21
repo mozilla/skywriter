@@ -72,6 +72,7 @@
             ],
             "aliases": [ "load" ],
             "description": "load up the contents of the file",
+            "key": "ctrl_o",
             "pointer": "#openCommand"
         },
         {

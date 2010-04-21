@@ -35,6 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var catalog = require('bespin:plugins').catalog;
+
 var pathUtil = require('filesystem:path');
 var cliController = require('command_line:controller').cliController;
 
@@ -130,6 +132,16 @@ exports.saveAsCommand = function(env, args, request) {
  * 'open' command
  */
 exports.openCommand = function(env, args, request) {
+    if (!('path' in args)) {
+        var cliController = catalog.getObject('clicontroller');
+        if (!SC.none(cliController)) {
+            SC.run(function() {
+                cliController.prompt('open ');
+            });
+        }
+        return;
+    }
+
     var files = env.get('files');
     var buffer = env.get('buffer');
 
