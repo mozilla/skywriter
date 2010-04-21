@@ -35,23 +35,31 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/**
-
-When we come to write a growl system, there are many places in the code where
-we do showHint or hideHint that need replacing with whatever API the growl
-system uses.
-
-TODO: Search for showHint( and hideHint( and replace with this API
-
-*/
+var catalog = require('bespin:plugins').catalog;
 
 /**
- *
+ * Broadcast a notification to anyone listening
  */
-exports.notifications = [];
+exports.notify = function(notification) {
+    if (!notification.isNotification) {
+        notification = exports.Notification.create(notification);
+    }
+
+    var handlerExts = catalog.getExtensions('notificationHandler');
+    handlerExts.forEach(function(handlerExt) {
+        try {
+            handlerExt.load(function(handler) {
+                handler(notification);
+            });
+        } catch (ex) {
+            console.error(ex);
+        }
+    }, this);
+};
 
 /**
- * Internal - to allow? TODO: Do we need this?
+ * The unique ID to be applied to the next item.
+ * TODO: Do we need this?
  */
 var nextId = 0;
 
@@ -64,36 +72,42 @@ exports.Notification = SC.Object.extend({
      * Specifies the title of the notification.
      * Recommended read-write string
      */
-    title: null,
+    title: undefined,
 
     /**
      * Specifies the URL of the icon to display.
      * Recommended read-write string
      */
-    icon: null,
+    icon: undefined,
 
     /**
      * Specifies the additional subtitle. For example, this could be used to
      * display the appointment time for the calendar notification.
      * Optional read-write string
      */
-    subtitle: null,
+    subtitle: undefined,
 
     /**
      * Specifies the main content of the notification. For example, email
      * notifications could put a snippet in this field.
      * Optional read-write string
      */
-    description: null,
+    description: undefined,
 
     /**
+     * Yeay. Manual RTTI.
+     */
+    isNotification: true,
+
+    /*
+     * GEARS adds 2 further fields which could be useful, however we're not
+     * supporting them right now:
+     * - displayAtTime
      * This is the time when the notification is meant to be displayed.
      * If this is not provided, the notification will be displayed immediately.
      * Optional read-write Date
-     */
-    displayAtTime: null,
-
-    /**
+     *
+     * - displayUntilTime
      * This is the time when the notification is meant to go away.
      * If this is not set, the notification just get displayed and goes away
      * after the default timeout. If it is set, then once displayed, the
@@ -101,7 +115,6 @@ exports.Notification = SC.Object.extend({
      * desired time has arrived.
      * Optional read-write Date
      */
-    displayUntilTime: null,
 
     /**
      * A unique ID for the notification. It can be used for duplicate detection.
@@ -113,7 +126,7 @@ exports.Notification = SC.Object.extend({
     /**
      * @see #addAction()
      */
-    _actions: SC.Array.create(),
+    _actions: [],
 
     /**
      *

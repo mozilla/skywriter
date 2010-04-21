@@ -1,0 +1,40 @@
+{
+    "description": "Provides a way to un-obtrusively notify users of asynchronous events",
+    "dependencies": { },
+    "provides":
+    [
+        {
+            "ep": "extensionpoint",
+            "name": "notificationHandler",
+            "description": "A function to which notifications will be reported",
+            "indexOn": "name"
+        },
+        {
+            "ep": "command",
+            "name": "notify",
+            "params":
+            [
+                {
+                    "name": "message",
+                    "type": "text",
+                    "description": "The string to pass to the notification system"
+                }
+            ],
+            "hidden": true,
+            "description": "Inject a notification into the notify system",
+            "pointer": "commands#notifyCommand"
+        },
+        {
+            "ep": "notificationHandler",
+            "name": "consoleNotificationHandler",
+            "pointer": "console#handler"
+        },
+        {
+            "ep": "setting",
+            "name": "notifyToConsole",
+            "description": "Do we display notifications to the console?",
+            "type": "boolean",
+            "defaultValue": false
+        }
+    ]
+}
