@@ -49,7 +49,7 @@ except ImportError:
 
 setup(
     name="dryice",
-    version="0.7.2",
+    version="0.7.3",
     packages=["dryice"],
     entry_points="""
 [console_scripts]
@@ -59,8 +59,8 @@ dryice=dryice.tool:main
 
 options(
     version=Bunch(
-        number="0.7.2",
-        name="Ashwell",
+        number="0.7.3",
+        name="Bryce",
         api="4"
     ),
     virtualenv=Bunch(
