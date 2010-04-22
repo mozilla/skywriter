@@ -46,7 +46,7 @@ def test_manifest_creation():
     sample = """
     {
         "include_core_test": true,
-        "plugins": ["Editor"]
+        "plugins": ["text_editor"]
     }
 """
     manifest = tool.Manifest.from_json(sample)
@@ -58,7 +58,7 @@ def test_manifest_overrides():
     sample = """
     {
         "output_dir": "foo",
-        "plugins": ["Editor"]
+        "plugins": ["text_editor"]
     }
 """
     manifest = tool.Manifest.from_json(sample, dict(output_dir="bar"))
@@ -78,7 +78,7 @@ def test_search_path_adds_to_front():
 def test_manifest_errors():
     sample = """
 {
-    "plugins": ["BogusPlugin"]
+    "plugins": ["bogus_plugin"]
 }
 """
     manifest = tool.Manifest.from_json(sample)
@@ -114,7 +114,7 @@ def test_js_creation():
     assert "exports.Plugin = SC.Object.extend" in output
     assert '"dependencies": {"plugin2": "0.0"}' in output
     assert "SC.browser=" in output
-    assert 'tiki.require("Embedded")' in output
+    assert 'tiki.require("embedded")' in output
 
 def test_single_file_plugin_handling():
     manifest = tool.Manifest(plugins=["SingleFilePlugin1"],
@@ -131,7 +131,7 @@ def test_js_creation_with_core_test():
     sample = """
 {
     "include_core_test": true,
-    "plugins": ["Editor"]
+    "plugins": ["text_editor"]
 }
 """
     manifest = tool.Manifest.from_json(sample)
@@ -140,12 +140,12 @@ def test_js_creation_with_core_test():
     output = output.getvalue()
     assert "core_test" in output
     assert "var tiki =" in output
-    assert "PluginDev" in output
+    assert "plugindev" in output
 
 def test_js_creation_without_core_test():
     sample = """
 {
-    "plugins": ["Editor"]
+    "plugins": ["text_editor"]
 }
 """
     manifest = tool.Manifest.from_json(sample)
@@ -153,7 +153,7 @@ def test_js_creation_without_core_test():
     manifest.generate_output_files(output, StringIO())
     output = output.getvalue()
     assert "var tiki =" in output
-    assert "PluginDev" not in output
+    assert "plugindev" not in output
 
 
 def test_css_creation():
@@ -169,7 +169,7 @@ def test_css_creation():
 
 def test_full_output():
     tmppath = path.getcwd() / "tmp" / "testoutput"
-    manifest = tool.Manifest(plugins=["Editor"],
+    manifest = tool.Manifest(plugins=["text_editor"],
         output_dir=tmppath, include_sample=True)
     manifest.build()
     jsfile = tmppath / "BespinEmbedded.js"
