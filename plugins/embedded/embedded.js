@@ -79,7 +79,7 @@ exports.EmbeddedEditor = SC.Object.extend(MultiDelegateSupport, {
 
     _attachPane: function() {
         if (typeof(this.get('element')) === 'string') {
-            this.set('element', document.getElementById('element'));
+            this.set('element', document.getElementById(this.get('element')));
         }
 
         var element = this.get('element');
