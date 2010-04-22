@@ -294,8 +294,18 @@ exports.Plugin = SC.Object.extend({
     _cleanup: function() {
         var pluginName = this.get("name");
 
-        // remove all traces of the plugin
+        // Remove the css files.
+        this.stylesheets.forEach(function(stylesheet) {
+            var links = document.getElementsByTagName('link');
+            for (var i = 0; i < links.length; i++) {
+                if (links[i].href.indexOf(stylesheet.url) != -1) {
+                    links[i].parentNode.removeChild(links[i]);
+                    break;
+                }
+            }
+        });
 
+        // remove all traces of the plugin
         var nameMatch = new RegExp("^" + pluginName + ":");
 
         _removeFromList(nameMatch, tiki.scripts);
