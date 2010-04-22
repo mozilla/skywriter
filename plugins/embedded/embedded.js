@@ -350,11 +350,11 @@ exports.EmbeddedEditor = SC.Object.extend(MultiDelegateSupport, {
      * ranges from the view. The line number is 1-based.
      */
     setLineNumber: function(line) {
-        SC.RunLoop.begin();
-        var textView = this.getPath("pane.editorView.textView");
-        var point = {row: line-1, column: 0, partialFraction: 0};
-        textView.setSelection([{start: point, end: point}]);
-        SC.RunLoop.end();
+        SC.run(function() {
+            var textView = this._editorView.get('textView');
+            var position = { row: line-1, col: 0, partialFraction: 0 };
+            textView.setSelection({ start: position, end: position });
+        }.bind(this));
     },
 
     /**

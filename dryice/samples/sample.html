@@ -78,6 +78,9 @@ function showSelectedContents() {
   document.getElementById('copiedcontents').innerHTML = window.bespin.getSelectedText().replace('<', '&lt;');
 };
 
+function goToFirstLine() {
+  window.bespin.setLineNumber(1);
+};
 </script>
 </head>
 <body>
@@ -96,6 +99,7 @@ function editMe() {
 <div class="displaybutton">
   <input type="button" value="Show Contents Below" onclick="showContents()">
   <input type="button" value="Show Selected Contents Below" onclick="showSelectedContents()">
+  <input type="button" value="Go to First Line" onclick="goToFirstLine()">
 </div>
 <pre id="copiedcontents"></pre>
 
