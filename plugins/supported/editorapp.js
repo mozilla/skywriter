@@ -219,22 +219,21 @@ exports.applicationController = SC.Object.create({
         loginController.addDelegate(this);
         signupController.addDelegate(this);
 
+        this._themeManager.addPane(userIdentPage.get('mainPane'));
+
         if (!resetController.isResetURL()) {
-            var promise = m_userident.currentuser();
-                promise.then(this.loginControllerAcceptedLogin.bind(this),
-                                this._displayLogin.bind(this));
+            SC.run(loginController.showIfNotLoggedIn.bind(loginController));
         } else {
             this._displayLogin();
         }
     },
 
     _displayLogin: function() {
-        this._themeManager.addPane(userIdentPage.get('mainPane'));
-
         SC.run(loginController.show);
     },
 
     loginControllerAcceptedLogin: function(sender, username) {
+        console.log("setting current user", username);
         exports.session.set('currentUser', username);
         createFilesystem();
         registerUserPlugins();

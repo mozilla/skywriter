@@ -53,6 +53,8 @@ var SIGNUP_FORM_HEIGHT = 395;
 var SIGNUP_PANE_HEIGHT = SIGNUP_FORM_HEIGHT + 34;
 var SIGNUP_CONTAINER_HEIGHT = 299 + 37 - 76;
 
+var USER_INFO_URL = '/register/userinfo/';
+
 var displayError = function(title, text) {
     var pane = SC.AlertPane.error(title, text);
     pane.append();
@@ -80,6 +82,10 @@ var searchQuery;
  * Controller for the sign-in process
  */
 exports.loginController = SC.Object.create(MultiDelegateSupport, {
+    _getCurrentUser: function() {
+        return server.request('GET', USER_INFO_URL, null, { evalJSON: true });
+    },
+
     username: '',
 
     password: '',
@@ -130,6 +136,15 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
 
         pane.append();
         pane.becomeKeyPane();
+    },
+
+    /** Shows the login window if no user is logged in. */
+    showIfNotLoggedIn: function() {
+        this._getCurrentUser().then(function(userInfo) {
+                var username = userInfo.username;
+                this.notifyDelegates('loginControllerAcceptedLogin', username);
+            }.bind(this),
+            this.show.bind(this));
     }
 });
 
@@ -900,16 +915,6 @@ exports.changePassword = function(username, newPassword, verifyCode, opts) {
     var url = '/register/password/' + username;
     var query = { newPassword: newPassword, code: verifyCode };
     return server.request('POST', url, util.objectToQuery(query), opts || {});
-};
-
-/**
- * Return info on the current logged in user
- */
-exports.currentuser = function() {
-    var url = '/register/userinfo/';
-    return server.request('GET', url, null, {
-        evalJSON: true
-    });
 };
 
 /*
