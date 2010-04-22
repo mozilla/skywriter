@@ -1,0 +1,7 @@
+{
+    "description": "Dead simple event implementation",
+    "dependencies": {
+        "traits": "0.0"
+    },
+    "provides": []
+}
