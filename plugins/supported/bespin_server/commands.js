@@ -37,6 +37,7 @@
 
 var project_m = require('project');
 var server = require('bespin_server:index').server;
+var cliController = require('command_line:controller').cliController;
 
 /**
  * Utility to convert bytes to megabytes
@@ -99,14 +100,26 @@ exports.rescanCommand = function(env, args, request) {
 */
 exports.preview = function(env, args, request) {
     var buffer = env.get('buffer');
-    var fileName = buffer.untitled() ? 'Untitled' : buffer.getPath('file').path;
 
-    // Open a new window / popup and write the current buffer content to it.
-    popup = window.open('','Preview: ' + fileName,
-                                        'location=no,menubar=no');
-    popup.document.write(env.get('model').getValue());
-    popup.document.close();
-    popup.focus();
+    if (buffer.untitled()) {
+        cliController.prompt('saveas ');
+        request.done('The current buffer is untitled. Please enter a name.');
+        return;
+    }
 
-    request.done('Preview: ' + fileName);
+    buffer.save().then(function() {
+        var fileName = buffer.get('file').path;
+        popup = window.open(
+            server.SERVER_BASE_URL + '/preview/at' + fileName,
+            'Preview: ' + fileName, 'location=no,menubar=no'
+        );
+        popup.focus();
+
+        request.done('Preview: ' + fileName);
+    }, function(error) {
+            request.doneWithError('Could not save the file and as such can not preview it.');
+        }
+    );
+
+    request.async();
 };
