@@ -39,7 +39,6 @@ var SC = require('sproutcore/runtime').SC;
 
 var server = require('bespin_server').server;
 var env = require('canon:environment').global;
-var editorapp_m = require('editorapp');
 var project_m = require('project');
 
 var social_user = require('collab:user');
@@ -133,10 +132,25 @@ var AvatarLineView = SC.View.extend(SC.StaticLayout, {
     }
 });
 
+/**
+ * The singleton instance of the social pane.
+ */
+exports.social = null;
+
+/**
+ * The social pane class.
+ */
 exports.SocialView = SC.SplitView.design({
     layout: { width: 192, right: 0, top: 0, bottom: 0 },
     layoutDirection: SC.LAYOUT_VERTICAL,
     defaultThickness: 0.5,
+
+    init: function() {
+        arguments.callee.base.apply(this, arguments);
+
+        // Bit of an unfortunate hack here...
+        exports.social = this;
+    },
 
     topLeftView: SC.ScrollView.design({
         layout: { top: 0, left: 0, right: 0, bottom: 0 },
@@ -207,7 +221,9 @@ exports.SocialView = SC.SplitView.design({
                         chat.set('content', content);
 
                         // get the list of users
-                        var list = editorapp_m.social.getPath('topLeftView.contentView');
+                        var list = this.getPath('parentView.parentView.' +
+                            'topLeftView.contentView');
+
                         // remove ourselves
                         var recipients = list.get('content').filter(function (recipient) {
                             return recipient != username;
@@ -224,15 +240,8 @@ exports.SocialView = SC.SplitView.design({
 });
 
 
-// TODO: this is a hack to add the social view
-var view = editorapp_m.applicationController._applicationView.addDockedView(exports.SocialView, 'right');
-editorapp_m.social = view;
-editorapp_m.applicationController._applicationView.appendChild(view);
-editorapp_m.applicationController._dockedViews.social = view;
-
-
 exports.broadcastMsg = function (msg) {
-    var social = editorapp_m.social;
+    var social = exports.social;
     if (social) {
         var chat = social.getPath('bottomRightView.chat.contentView');
         
@@ -245,7 +254,7 @@ exports.broadcastMsg = function (msg) {
 
 
 exports.tellMsg = function (msg) {
-    var social = editorapp_m.social;
+    var social = exports.social;
     if (social) {
         var chat = social.getPath('bottomRightView.chat.contentView');
         
@@ -258,7 +267,7 @@ exports.tellMsg = function (msg) {
 
 
 exports.shareTellMsg = function (msg) {
-    var social = editorapp_m.social;
+    var social = exports.social;
     if (social) {
         var chat = social.getPath('bottomRightView.chat.contentView');
         

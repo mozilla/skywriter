@@ -1,10 +1,22 @@
 {
     "description": "Common services used in the editor application",
     "dependencies": {
-        "canon": "0.0"
+        "canon": "0.0",
+        "traits": "0.0"
     },
     "provides":
     [
+        {
+            "ep": "extensionhandler",
+            "name": "appcomponent",
+            "register": "controllers/bespin#registerAppComponent",
+            "unregister": "controllers/bespin#unregisterAppComponent"
+        },
+        {
+            "ep": "appcomponent",
+            "name": "key_listener",
+            "pointer": "views/keylistener#KeyListener"
+        },
         {
             "ep": "command",
             "name": "redo",
@@ -16,6 +28,18 @@
             "name": "undo",
             "key": [ "ctrl_z" ],
             "pointer": "controllers/undomanager#undoManagerCommand"
+        },
+        {
+            "ep": "factory",
+            "name": "files",
+            "pointer": "controllers/bespin#files",
+            "action": "value"
+        },
+        {
+            "ep": "factory",
+            "name": "session",
+            "pointer": "controllers/bespin#session",
+            "action": "value"
         }
     ]
 }

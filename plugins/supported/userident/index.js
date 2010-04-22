@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
+var Event = require('events').Event;
 var util = require('bespin:util/util');
 var server = require('bespin_server').server;
 var settings = require('settings').settings;
@@ -44,7 +44,6 @@ var ServerPersister = require('bespin_server:settings').ServerPersister;
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var env = require('canon:environment').global;
-
 
 var LOGIN_FORM_HEIGHT = 287;
 var LOGIN_PANE_HEIGHT = LOGIN_FORM_HEIGHT + 34;
@@ -81,7 +80,7 @@ var searchQuery;
 /**
  * Controller for the sign-in process
  */
-exports.loginController = SC.Object.create(MultiDelegateSupport, {
+exports.loginController = SC.Object.create({
     _getCurrentUser: function() {
         return server.request('GET', USER_INFO_URL, null, { evalJSON: true });
     },
@@ -89,6 +88,9 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
     username: '',
 
     password: '',
+
+    accepted: Event(),
+    loggedOut: Event(),
 
     login: function() {
         var password = this.get('password');
@@ -111,8 +113,7 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
     onSuccess: function() {
         exports.userIdentPage.get('mainPane').remove();
 
-        var username = this.get('username');
-        this.notifyDelegates('loginControllerAcceptedLogin', username);
+        this.accepted(this.get('username'));
     },
 
     show: function() {
@@ -140,18 +141,16 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
 
     /** Shows the login window if no user is logged in. */
     showIfNotLoggedIn: function() {
-        this._getCurrentUser().then(function(userInfo) {
-                var username = userInfo.username;
-                this.notifyDelegates('loginControllerAcceptedLogin', username);
-            }.bind(this),
-            this.show.bind(this));
+        var promise = this._getCurrentUser();
+        var accept = function(userInfo) { this.accepted(userInfo.username); };
+        promise.then(accept.bind(this), this.show.bind(this));
     }
 });
 
 /**
  * Controller for the registration process
  */
-exports.signupController = SC.Object.create(MultiDelegateSupport, {
+exports.signupController = SC.Object.create({
     isValid: true,
 
     username: '',
@@ -264,9 +263,7 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
     onSuccess: function() {
         exports.userIdentPage.get('mainPane').remove();
 
-        var login = exports.loginController;
-        var username = this.get('username');
-        login.notifyDelegates('loginControllerAcceptedLogin', username);
+        exports.loginController.accepted(this.get('username'));
     },
 
     /**
@@ -280,7 +277,7 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
 /**
  * Controller for the lost process
  */
-exports.lostController = SC.Object.create(MultiDelegateSupport, {
+exports.lostController = SC.Object.create({
     username: '',
 
     email: '',
@@ -311,7 +308,7 @@ exports.lostController = SC.Object.create(MultiDelegateSupport, {
 /**
  * Controller for the sign-in process
  */
-exports.resetController = SC.Object.create(MultiDelegateSupport, {
+exports.resetController = SC.Object.create({
     hash: '',
 
     username: '',
@@ -892,7 +889,7 @@ exports.logout = function() {
 
         exports.loginController.set('username', '');
         exports.loginController.set('password', '');
-        exports.loginController.notifyDelegates('loginControllerLoggedOut');
+        exports.loginController.loggedOut();
     }, function(error) {
         displayError('Unable to log out',
             'There was a problem logging out: ' + error.message);

@@ -10,6 +10,11 @@
     "provides":
     [
         {
+            "ep": "appcomponent",
+            "name": "command_line",
+            "pointer": "views/cli#CliInputView"
+        },
+        {
             "ep": "factory",
             "name": "clicontroller",
             "description": "The controller for the command line",

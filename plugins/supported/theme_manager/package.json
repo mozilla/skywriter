@@ -1,6 +1,12 @@
 {
     "provides": [
         {
+            "ep": "appcomponent",
+            "description": "Applies styles to the Bespin UI",
+            "name": "theme_manager",
+            "pointer": "#themeManager"
+        },
+        {
             "ep": "extensionpoint",
             "name": "theme",
             "indexOn": "name"

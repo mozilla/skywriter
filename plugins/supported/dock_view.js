@@ -37,7 +37,14 @@
 
 "define metadata";
 ({
-	"description": "A view that supports docked panels on the sides"
+	"description": "A view that supports docked panels on the sides",
+    "provides": [
+        {
+            "ep": "appcomponent",
+            "name": "dock_view",
+            "pointer": "#DockView"
+        }
+    ]
 });
 "end";
 

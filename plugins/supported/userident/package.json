@@ -2,11 +2,17 @@
     "description": "Identifies the user via a Bespin server",
     "dependencies": {
         "bespin_server": "0.0",
-        "delegate_support": "0.0",
         "canon": "0.0",
+        "events": "0.0",
         "settings": "0.0"
     },
     "provides": [
+        {
+            "ep": "appcomponent",
+            "description": "The login window",
+            "name": "login_controller",
+            "pointer": "#loginController"
+        },
         {
             "ep": "command",
             "name": "logout",

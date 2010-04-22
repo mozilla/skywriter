@@ -7,6 +7,11 @@
     },
     "provides": [
         {
+            "ep": "appcomponent",
+            "name": "edit_session",
+            "pointer": "index#editSessionClasses"
+        },
+        {
             "ep": "extensionpoint",
             "description": "Notifies that the current file is changed.",
             "name": "bufferFileChanged"

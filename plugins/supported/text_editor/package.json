@@ -12,6 +12,11 @@
     "provides":
     [
         {
+            "ep": "appcomponent",
+            "name": "editor_view",
+            "pointer": "views/editor#EditorView"
+        },
+        {
             "ep": "command",
             "name": "backspace",
             "key": "backspace",

@@ -347,3 +347,10 @@ exports.EditSession = SC.Object.extend({
     }
 });
 
+// A small object that's exported to the Bespin controller to allow the
+// controller to find the relevant classes.
+exports.editSessionClasses = {
+    Buffer: exports.Buffer,
+    EditSession: exports.EditSession
+};
+

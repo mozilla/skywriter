@@ -38,9 +38,9 @@ main = function() {
                     response.errorObject);
             }
 
-            tiki.async('editorapp').then(function() {
+            tiki.async('appsupport').then(function() {
                 SC.run(function() {
-                    tiki.require("editorapp");
+                    tiki.require('appsupport:controllers/bespin');
                 });
             });
         });

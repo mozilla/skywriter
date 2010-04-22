@@ -49,10 +49,7 @@ var server = require('bespin_server').server;
 var mobwrite = require('collab:mobwrite/core').mobwrite;
 var diff_match_patch = require('diff');
 
-var editorapp_m = require('editorapp');
-
-// TODO: this is a hack to add the social view
-var social_view = require('collab:view');
+var m_view = require('collab:view');
 
 /**
  * Mobwrite has a set of shareObjs which are designed to wrap DOM nodes.
@@ -143,7 +140,7 @@ var ShareNode = SC.Object.extend({
      * The session handles the collaborators side-bar
      */
     reportCollaborators: function(userEntries) {
-		var social = editorapp_m.social;
+        var social = m_view.social;
 		if (social) {
 			var list = social.getPath('topLeftView.contentView');
 			var content = [];
