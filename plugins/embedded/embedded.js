@@ -127,10 +127,7 @@ exports.EmbeddedEditor = SC.Object.extend(MultiDelegateSupport, {
             SC.run(function() {
                 var view = this._editorView;
                 view.getPath('layoutManager.textStorage').setValue(v);
-                view.get('textView').moveCursorTo({
-                    column: 0,
-                    row: 0
-                })
+                view.get('textView').moveCursorTo({ col: 0, row: 0 });
             }.bind(this));
         });
     },
