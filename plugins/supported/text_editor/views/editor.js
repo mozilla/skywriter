@@ -203,6 +203,9 @@ exports.EditorView = SC.View.extend(SC.Border, {
         this.get('searchController').set('textView', textView);
 
         this.set('childViews', [ gutterView, scrollView ]);
+
+        // Compute settings related stuff.
+        this._fontSizeChanged();
     },
 
     init: function() {
