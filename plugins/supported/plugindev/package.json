@@ -126,7 +126,11 @@
             "params": [
                 {
                     "name": "pluginNames",
-                    "type": "text",
+                    "type":
+                    {
+                        "name": "selection",
+                        "pointer": "plugindev:index#getUserActivePlugins"
+                    },
                     "description": "Plugins to deactivate separated by a space",
                     "defaultValue": ""
                 }
@@ -140,7 +144,11 @@
             "params": [
                 {
                     "name": "pluginNames",
-                    "type": "text",
+                    "type":
+                    {
+                        "name": "selection",
+                        "pointer": "plugindev:index#getUserDeactivatedPlugins"
+                    },
                     "description": "Plugins to activate separated by a space",
                     "defaultValue": ""
                 }

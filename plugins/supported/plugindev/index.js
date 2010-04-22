@@ -98,14 +98,11 @@ exports.reload = function(pluginName, callback) {
     plugin.reload(callback);
 };
 
-/**
- *
- */
-exports.getPlugins = function() {
+var getPluginsBasic = function(testFunc) {
     var reply = [];
     for (var name in pluginCatalog.plugins) {
         if (pluginCatalog.plugins.hasOwnProperty(name)) {
-            if (pluginCatalog.plugins[name].description) {
+            if (testFunc(pluginCatalog.plugins[name])) {
                 reply.push(pluginCatalog.plugins[name]);
             }
         }
@@ -113,8 +110,32 @@ exports.getPlugins = function() {
     reply.sort(function(a, b) {
         return a.name.localeCompare(b.name);
     });
+    return reply;
+};
+
+/**
+ *
+ */
+exports.getPlugins = function() {
+    var reply = getPluginsBasic(function(plugin) {
+        return plugin.description;
+    });
     reply.unshift({ name:'all', description:'Runs all the available tests' });
     return reply;
+};
+
+exports.getUserActivePlugins = function() {
+    return getPluginsBasic(function(plugin) {
+        return (plugin.type == 'user' &&
+                            !pluginCatalog.deactivatedPlugins[plugin.name]);
+    });
+};
+
+exports.getUserDeactivatedPlugins = function() {
+    return getPluginsBasic(function(plugin) {
+        return (plugin.type == 'user' &&
+                            pluginCatalog.deactivatedPlugins[plugin.name]);
+    });
 };
 
 exports.reloadCommand = function(env, args, request) {
