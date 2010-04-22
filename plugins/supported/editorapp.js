@@ -234,14 +234,15 @@ exports.applicationController = SC.Object.create({
         SC.run(loginController.show);
     },
 
-    loginControllerAcceptedLogin: function(sender) {
-        exports.session.set('currentUser', sender);
+    loginControllerAcceptedLogin: function(sender, username) {
+        exports.session.set('currentUser', username);
         createFilesystem();
         registerUserPlugins();
         this._showEditor();
     },
 
     loginControllerLoggedOut: function(sender) {
+        exports.session.set('currentUser', null);
         this._displayLogin();
     },
 

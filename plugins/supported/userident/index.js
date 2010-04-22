@@ -105,7 +105,8 @@ exports.loginController = SC.Object.create(MultiDelegateSupport, {
     onSuccess: function() {
         exports.userIdentPage.get('mainPane').remove();
 
-        this.notifyDelegates('loginControllerAcceptedLogin');
+        var username = this.get('username');
+        this.notifyDelegates('loginControllerAcceptedLogin', username);
     },
 
     show: function() {
@@ -248,7 +249,9 @@ exports.signupController = SC.Object.create(MultiDelegateSupport, {
     onSuccess: function() {
         exports.userIdentPage.get('mainPane').remove();
 
-        this.notifyDelegates('loginControllerAcceptedLogin');
+        var login = exports.loginController;
+        var username = this.get('username');
+        login.notifyDelegates('loginControllerAcceptedLogin', username);
     },
 
     /**
@@ -872,7 +875,6 @@ exports.logout = function() {
         // Reset all settings.
         settings.resetAll();
 
-        env.get('session').set('currentUser', null);
         exports.loginController.set('username', '');
         exports.loginController.set('password', '');
         exports.loginController.notifyDelegates('loginControllerLoggedOut');

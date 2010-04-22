@@ -235,7 +235,9 @@ exports.EditSession = SC.Object.extend({
     currentBuffer: null,
 
     /*
-     * The 'current' user.
+     * @type{string}
+     *
+     * The name of the user, or null if no user is logged in.
      */
     currentUser: null,
 

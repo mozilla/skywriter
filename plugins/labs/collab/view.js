@@ -198,7 +198,7 @@ exports.SocialView = SC.SplitView.design({
                         }
 
                         var content = chat.get('content');
-                        var username = env.get('session').get('currentUser').username;
+                        var username = env.get('session').get('currentUser');
                         content = content.concat({
                             msgtargetid: 'myself',
                             from: username,

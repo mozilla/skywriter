@@ -68,7 +68,7 @@ var ShareNode = SC.Object.extend({
     pausedText: '',
 
     init: function() {
-		this.username = env.get('session').get('currentUser').username;
+		this.username = env.get('session').get('currentUser');
 		this.project = project.getProjectAndPath(env.get('file').path);
 		var projectname = this.project[0].name;
 		if (projectname.indexOf('+') < 0) {

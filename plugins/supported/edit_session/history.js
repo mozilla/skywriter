@@ -47,8 +47,8 @@ var MAX_HISTORY_SIZE = 30;
  */
 exports.History = SC.Object.extend({
     _getStorageName: function() {
-        return ('bespin.history.' +
-                        environment.global.get('session').currentUser.username);
+        var user = environment.global.get('session').currentUser;
+        return 'bespin.history.' + user;
     },
 
     _getHistory: function() {
