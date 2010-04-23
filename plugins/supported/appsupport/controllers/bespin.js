@@ -325,7 +325,6 @@ bespinController = Object.create(Object.prototype, Trait({
     },
 
     _attach: function(componentName) {
-        console.log("attaching", componentName);
         var attach = this._registrationHandlers[componentName].attach;
         var promise = attach(this._components[componentName]);
         promise.then(this._attached.bind(this));
