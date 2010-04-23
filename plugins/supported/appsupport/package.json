@@ -22,12 +22,6 @@
             "name": "undo",
             "key": [ "ctrl_z" ],
             "pointer": "controllers/undomanager#undoManagerCommand"
-        },
-        {
-            "ep": "factory",
-            "name": "session",
-            "pointer": "controllers/bespin#session",
-            "action": "value"
         }
     ]
 }

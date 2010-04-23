@@ -306,7 +306,7 @@ bespinController = Object.create(Object.prototype, Trait({
                 });
 
                 var session = m_editsession.EditSession.create();
-                exports.session = session;
+                bespinController.session = session;
                 session.set('currentUser', bespinController._username);
                 session.set('currentView', textView);
                 session.set('currentBuffer', buffer);
@@ -319,7 +319,7 @@ bespinController = Object.create(Object.prototype, Trait({
             },
 
             detach: function() {
-                exports.session = null;
+                bespinController.session = null;
             }
         }), RegistrationHandler))
     },
@@ -382,6 +382,13 @@ bespinController = Object.create(Object.prototype, Trait({
      * The pane in which Bespin lives.
      */
     pane: null,
+
+    /**
+     * @type{EditSession}
+     *
+     * The current session, populated by the "edit_session" component.
+     */
+    session: null,
 
     /**
      * @type{class<SC.MainPane>}
@@ -450,7 +457,4 @@ exports.registerAppComponent = controller.registerAppComponent.
     bind(controller);
 exports.unregisterAppComponent = controller.unregisterAppComponent.
     bind(controller);
-
-/** The current session, populated by the "edit_session" component. */
-exports.session = null;
 

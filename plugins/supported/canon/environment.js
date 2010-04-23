@@ -36,7 +36,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var bespin = require('appsupport:controllers/bespin').bespinController;
 
@@ -52,7 +51,7 @@ exports.Environment = SC.Object.extend({
      * Retrieves the EditSession
      */
     session: function() {
-        return catalog.getObject('session');
+        return bespin.session;
     }.property(),
 
     /**
