@@ -38,6 +38,22 @@
 var SC = require('sproutcore/runtime').SC;
 var keyboardManager = require('canon:keyboard').keyboardManager;
 
+"define metadata";
+({
+    "description": "Routes keys to the appropriate destination",
+    "dependencies": {
+        "canon": "0.0"
+    },
+    "provides": [
+        {
+            "ep": "appcomponent",
+            "name": "key_listener",
+            "pointer": "#KeyListener"
+        }
+    ]
+});
+"end";
+
 /**
  * @class
  *
@@ -49,3 +65,4 @@ exports.KeyListener = SC.Responder.extend({
         keyboardManager.processKeyEvent(evt, this, { 'isApplication': true });
     }
 });
+

@@ -1,7 +1,6 @@
 {
     "description": "Common services used in the editor application",
     "dependencies": {
-        "canon": "0.0",
         "traits": "0.0"
     },
     "provides":
@@ -11,11 +10,6 @@
             "name": "appcomponent",
             "register": "controllers/bespin#registerAppComponent",
             "unregister": "controllers/bespin#unregisterAppComponent"
-        },
-        {
-            "ep": "appcomponent",
-            "name": "key_listener",
-            "pointer": "views/keylistener#KeyListener"
         },
         {
             "ep": "command",
@@ -43,4 +37,5 @@
         }
     ]
 }
+
 
