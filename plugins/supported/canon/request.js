@@ -136,13 +136,11 @@ exports.Request = SC.Object.extend({
             this._init();
         }
 
-        if (typeof content !== 'string') {
+        if (typeof content !== 'string' && !(content instanceof Node)) {
             content = content.toString();
         }
 
-        SC.run(function() {
-            this.outputs.pushObject(content);
-        }.bind(this));
+        this.outputs.pushObject(content);
 
         return this;
     },

@@ -36,6 +36,9 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var Trait = require('traits').Trait;
+var diff_match_patch = require('diff').diff_match_patch;
+
 var util = require('bespin:util/util');
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
@@ -44,7 +47,6 @@ var request = require('canon:request');
 var keyboardManager = require('canon:keyboard').keyboardManager;
 var environment = require('canon:environment').global;
 var settings = require('settings').settings;
-var diff_match_patch = require('diff').diff_match_patch;
 
 var cliController = require('command_line:controller').cliController;
 var Level = require('command_line:hint').Level;
@@ -58,201 +60,6 @@ var diff = new diff_match_patch();
  * The height of the input area that is always visible.
  */
 var inputHeight = 25;
-
-/**
- * Utility to create an ID while end()ing RenderContext
- */
-var endWithId = function(ele) {
-    var id = SC.guidFor(ele);
-    ele.id(id).end();
-    return id;
-};
-
-/**
- * Display the results of a command invocation
- */
-var InstructionView = SC.View.extend(SC.StaticLayout, {
-    classNames: [ 'instruction_view' ],
-    useStaticLayout: true,
-
-    link: function(root, path, updater) {
-        (function() {
-            var stack = this.getPath('parentView');
-            var doUpdate = function() {
-                SC.run(function() {
-                    // console.log('updating', path, 'to', root.getPath(path));
-                    updater(root.getPath(path));
-                    // The stacked view gets confused about how tall it should be...
-                    stack.updateHeight();
-                });
-            };
-
-            root.addObserver(path, this, function() {
-                doUpdate();
-            });
-            doUpdate();
-        }).invokeLater(this);
-    },
-
-    render: function(context, firstTime) {
-        if (firstTime) {
-            var content = this.get('content');
-            content.set('hideOutput', false);
-
-            // The div for the input (i.e. what was typed)
-            var rowin = context.begin('div').addClass('cmd_rowin').attr({
-                onclick: function() {
-                    // A single click on an invocation line in the console
-                    // copies the command to the command line
-                    cliController.input = content.get('typed');
-                },
-                ondblclick: function() {
-                    // A double click on an invocation line in the console
-                    // executes the command
-                    cliController.executeCommand(content.get('typed'));
-                }
-            });
-
-            // The execution time
-            var hover = rowin.begin('div').addClass('cmd_hover');
-            var durationEle = hover.begin('span').addClass('cmd_duration');
-            var durationId = endWithId(durationEle);
-
-            // Toggle output display
-            var hideOutputEle = hover.begin('img').attr({
-                onclick: function() {
-                    content.set('hideOutput', !content.get('hideOutput'));
-                }
-            }).css({
-                verticalAlign: 'middle',
-                padding: '2px;'
-            });
-            var hideOutputId = endWithId(hideOutputEle);
-
-            // Open/close output
-            var closeEle = hover.begin('img');
-            closeEle.attr({
-                src: imagePath + 'closer.png',
-                alt: 'Remove this command from the history',
-                title: 'Remove this command from the history',
-                onclick: function() {
-                    request.history.remove(content);
-                }
-            });
-            closeEle.css({
-                verticalAlign: 'middle',
-                padding: '2px'
-            });
-            closeEle.end();
-
-            hover.end();
-
-            // Place to put a history marker
-            var openEle = rowin.begin('span').addClass('cmd_open');
-            var openId = endWithId(openEle);
-
-            // What the user actually typed
-            var prompt = rowin.begin('span')
-                    .addClass('cmd_prompt')
-                    .html('> ');
-            prompt.end();
-
-            var typedEle = rowin.begin('span').addClass('cmd_typed');
-            var typedId = endWithId(typedEle);
-
-            rowin.end();
-
-            var rowout = context.begin('div').addClass('cmd_rowout');
-
-            var outputEle = rowout.begin('div').addClass('cmd_output');
-            var outputId = endWithId(outputEle);
-
-            var throbEle = rowout.begin('img').attr({
-                src: imagePath + 'throbber.gif'
-            });
-            var throbId = endWithId(throbEle);
-
-            rowout.end();
-
-            this.link(settings, 'historytimemode', function(mode) {
-                if (mode == 'history') {
-                    // TODO: replace # with invocation id
-                    SC.$('#' + openId).html('#').addClass('cmd_open_history');
-                }
-                // else if (mode == 'time' && start) {
-                //     SC.$('#' + openId).html(formatTime(start)).addClass('cmd_open_time');
-                // }
-                else {
-                    SC.$('#' + openId).addClass('cmd_open_blank');
-                }
-            });
-
-            this.link(content, 'duration', function(duration) {
-                if (duration) {
-                    SC.$('#' + durationId).html('completed in ' + (duration / 1000) + ' sec ');
-                } else {
-                    SC.$('#' + durationId).html('');
-                }
-            });
-
-            this.link(content, 'hideOutput', function(hideOutput) {
-                if (hideOutput) {
-                    SC.$('#' + hideOutputId).attr({
-                        src: imagePath + 'plus.png',
-                        alt: 'Show command output',
-                        title: 'Show command output'
-                    });
-                    SC.$('#' + hideOutputId).attr('display', 'none');
-                } else {
-                    SC.$('#' + hideOutputId).attr({
-                        src: imagePath + 'minus.png',
-                        alt: 'Hide command output',
-                        title: 'Hide command output'
-                    });
-                    SC.$('#' + outputId).attr('display', 'block');
-                }
-            });
-
-            this.link(content, 'typed', function(typed) {
-                SC.$('#' + typedId).html(typed);
-            });
-
-            this.link(content, 'outputs.[]', function(outputs) {
-                SC.$('#' + outputId).get(0).innerHTML = '';
-                outputs.forEach(function(output) {
-                    var node;
-                    if (typeof output == 'string') {
-                        node = document.createElement('p');
-                        node.innerHTML = output;
-                    } else {
-                        node = output;
-                    }
-                    SC.$('#' + outputId).append(node);
-                });
-            });
-
-            this.link(content, 'error', function(error) {
-                if (error) {
-                    SC.$('#' + outputId).addClass('cmd_error');
-                } else {
-                    SC.$('#' + outputId).removeClass('cmd_error');
-                }
-            });
-
-            this.link(content, 'completed', function(completed) {
-                SC.$('#' + throbId).css({
-                    'display': completed ? 'none' : 'block'
-                });
-            });
-        }
-    }
-});
-
-var hintClass = {};
-hintClass[Level.Error] = 'cmd_error';
-hintClass[Level.Incomplete] = 'cmd_incom';
-hintClass[Level.Warning] = 'cmd_warn';
-hintClass[Level.Info] = 'cmd_info';
 
 /**
  * A view designed to dock in the bottom of the editor, holding the command
@@ -278,10 +85,12 @@ exports.CliInputView = SC.View.design({
         var layer = this.get('layer');
         layer.addEventListener('click', this._boundCancelBlur, true);
 
+        /*
         var hint = this.getPath('contentView.display.output.layer');
         this._ex = document.createElement('div');
         this._ex.className = 'cmd_ex';
         hint.appendChild(this._ex);
+        */
 
         this.checkHeight();
     },
@@ -376,8 +185,6 @@ exports.CliInputView = SC.View.design({
                 hintNode.appendChild(parent);
             }
 
-            // hintNode.setAttribute('class', 'cmd_hint ' + hintClass[hint.level]);
-
             this.set('_completion', hint.completion);
 
             if (hint.level > level) {
@@ -393,6 +200,165 @@ exports.CliInputView = SC.View.design({
 
         this.$().setClass('error', level == Level.Error);
     }.observes('command_line:controller#cliController.hints.[]'),
+
+    /**
+     * Utility to update the CLI output table whenever some value changes
+     */
+    link: function(root, path, updater) {
+        var doUpdate = function() {
+            // console.log('updating', path, 'to', root.getPath(path));
+            updater(root.getPath(path));
+        };
+
+        root.addObserver(path, this, doUpdate);
+        doUpdate();
+    },
+
+    /**
+     * Adds a row to the CLI output display
+     */
+    addRequest: function(requests) {
+        // TODO: We should really replace the observation with some catalog
+        // thing, so until we do that we have a huge hack where we assume that
+        // we only add things to the command line, and we just add in the last
+        var request = requests[requests.length - 1];
+
+        request.set('hideOutput', false);
+
+        // The div for the input (i.e. what was typed)
+        var rowin = document.createElement('div');
+        rowin.className = 'cmd_rowin';
+        // A single click on an invocation line in the console
+        // copies the command to the command line
+        rowin.onclick = function() {
+            cliController.input = request.get('typed');
+        };
+        // A double click on an invocation line in the console
+        // executes the command
+        rowin.ondblclick = function() {
+            cliController.executeCommand(request.get('typed'));
+        };
+        this.table.appendChild(rowin);
+
+        // The execution time
+        var hover = document.createElement('div');
+        hover.className = 'cmd_hover';
+        rowin.appendChild(hover);
+
+        var durationEle = document.createElement('span');
+        durationEle.className = 'cmd_duration';
+        hover.appendChild(durationEle);
+
+        // Toggle output display
+        var hideOutputEle = document.createElement('img');
+        hideOutputEle.onclick = function() {
+            request.set('hideOutput', !request.get('hideOutput'));
+        };
+        hideOutputEle.style.verticalAlign = 'middle';
+        hideOutputEle.style.padding = '2px';
+        hover.appendChild(hideOutputEle);
+
+        // Open/close output
+        var closeEle = document.createElement('img');
+        closeEle.src = imagePath + 'closer.png';
+        closeEle.alt = 'Remove this command from the history';
+        closeEle.title = closeEle.alt;
+        closeEle.onclick = function() {
+            request.history.remove(request);
+        };
+        closeEle.style.verticalAlign = 'middle';
+        closeEle.style.padding = '2px';
+        hover.appendChild(closeEle);
+
+        // Place to put a history marker
+        var openEle = document.createElement('span');
+        openEle.className = 'cmd_open';
+        rowin.appendChild(openEle);
+
+        // What the user actually typed
+        var prompt = document.createElement('span');
+        prompt.className = 'cmd_prompt';
+        prompt.innerHTML = '&gt; ';
+        rowin.appendChild(prompt);
+
+        var typedEle = document.createElement('span');
+        typedEle.className = 'cmd_typed';
+        rowin.appendChild(typedEle);
+
+        var rowout = document.createElement('div');
+        rowout.className = 'cmd_rowout';
+        this.table.appendChild(rowout);
+
+        var outputEle = document.createElement('div');
+        outputEle.className = 'cmd_output';
+        rowout.appendChild(outputEle);
+
+        var throbEle = document.createElement('img');
+        throbEle.src = imagePath + 'throbber.gif';
+        rowout.appendChild(throbEle);
+
+        this.link(settings, 'historytimemode', function(mode) {
+            if (mode == 'history') {
+                // TODO: replace # with invocation id
+                openEle.innerHTML = '#';
+                openEle.className = 'cmd_open cmd_open_history';
+            }
+            else if (mode == 'time' && request.get('start')) {
+                openEle.innerHTML = formatTime(request.get('start'));
+                openEle.className = 'cmd_open cmd_open_time';
+            }
+            else {
+                openEle.innerHTML = '';
+                openEle.className = 'cmd_open cmd_open_blank';
+            }
+        });
+
+        this.link(request, 'duration', function(duration) {
+            durationEle.innerHTML = duration ?
+                'completed in ' + (duration / 1000) + ' sec ' :
+                '';
+        });
+
+        this.link(request, 'hideOutput', function(hideOutput) {
+            if (hideOutput) {
+                hideOutputEle.src = imagePath + 'plus.png';
+                hideOutputEle.alt = 'Show command output';
+                hideOutputEle.title = 'Show command output';
+                outputEle.style.display = 'none';
+            } else {
+                hideOutputEle.src = imagePath + 'minus.png';
+                hideOutputEle.alt = 'Hide command output';
+                hideOutputEle.title = 'Hide command output';
+                outputEle.style.display = 'block';
+            }
+        });
+
+        this.link(request, 'typed', function(typed) {
+            typedEle.innerHTML = typed;
+        });
+
+        this.link(request, 'outputs.[]', function(outputs) {
+            outputEle.innerHTML = '';
+            outputs.forEach(function(output) {
+                var node;
+                if (typeof output == 'string') {
+                    node = document.createElement('p');
+                    node.innerHTML = output;
+                } else {
+                    node = output;
+                }
+                outputEle.appendChild(node);
+            });
+        });
+
+        this.link(request, 'error', function(error) {
+            outputEle.className = 'cmd_output' + (error ? ' cmd_error' : '');
+        });
+
+        this.link(request, 'completed', function(completed) {
+            throbEle.style.display = completed ? 'none' : 'block';
+        });
+    }.observes('canon:request#history.requests.[]'),
 
     /**
      * Scrolls the command line output area to the bottom of the output.
@@ -481,6 +447,24 @@ exports.CliInputView = SC.View.design({
         cliController.set('view', this);
     },
 
+    completionChanged: function() {
+        var current = this.getPath('contentView.input.value');
+        var completion = this.getPath('._completion');
+        var val;
+        if (!completion) {
+            val = '';
+        } else if (completion.indexOf(current) === 0) {
+            val = '<span class="cmd_existing">' + current +
+                '</span>' + completion.substring(current.length);
+        } else {
+            var len = diff.diff_commonPrefix(current, completion);
+            var extension = completion.substring(len);
+            val = '<span class="cmd_existing">' + current + '</span>' +
+                '<span class="cmd_extension">' + extension + '</span>';
+        }
+        this.set('value', val);
+    }.observes('._completion'),
+
     /**
      * There's no good reason for having this contentView - the childViews could
      * be directly on CliInputView, except that the observes() on focusChanged
@@ -488,72 +472,40 @@ exports.CliInputView = SC.View.design({
      * TODO: Work out what the borkage is about and fix
      */
     contentView: SC.View.design({
-        childViews: [ 'kbd', 'display', 'prompt', 'completion', 'input' ],
+        didCreateLayer: function() {
+            var layer = this.get('layer');
 
-        display: SC.View.design({
-            layout: { top: 0, bottom: 27, left: 0, right: 0 },
-            childViews: [ 'output', 'toolbar' ],
+            // Used as something to hang styles off for input area
+            var kbd = document.createElement('kbd');
+            layer.appendChild(kbd);
 
-            output: SC.ScrollView.design({
-                classNames: [ 'cmd_view' ],
-                layout: { top: 0, bottom: 0, left: 30, right: 0 },
-                hasHorizontalScroller: NO,
-                contentView: SC.StackedView.design({
-                    contentBinding: 'canon:request#history.requests.[]',
-                    exampleView: InstructionView
-                })
-            }),
+            var table = document.createElement('div');
+            table.className = 'cmd_view';
+            this.parentView.table = table;
+            layer.appendChild(table);
 
-            toolbar: SC.View.design({
-                layout: { top: 0, bottom: 0, left: 0, width: 30 },
-                childViews: [ 'pin' ],
+            var toolbar = document.createElement('div');
+            toolbar.className = 'cmd_toolbar';
+            layer.appendChild(toolbar);
 
-                pin: PinView.design({
-                    alt: 'Pin/Unpin the console output',
-                    layout: { top: 8, height: 16, left: 8, width: 16 }
-                })
-            })
-        }),
+            // The pin/unpin button
+            var pin = document.createElement('img');
+            pin.src = 'images/pins.png';
+            pin.alt = 'Pin/Unpin the console output';
+            toolbar.appendChild(pin);
 
-        prompt: BespinButtonView.design({
-            classNames: [ 'cmd_prompt' ],
-            titleMinWidth: 0,
-            title: '<span class="cmd_brackets">{ }</span> &gt;',
-            layout: { height: 25, bottom: 0, left: 5, width: 40 }
-        }),
+            // The prompt
+            var prompt = document.createElement('div');
+            prompt.className = 'cmd_prompt';
+            prompt.innerHTML = '<span class="cmd_brackets">{ }</span> &gt;';
+            layer.appendChild(prompt);
 
-        completion: SC.LabelView.design({
-            classNames: [ 'cmd_completion' ],
-            escapeHTML: false,
-            fontWeight: 'bold',
-            completionChanged: function() {
-                var current = this.getPath('parentView.input.value');
-                var completion = this.getPath('parentView.parentView._completion');
-                var val;
-                if (!completion) {
-                    val = '';
-                } else if (completion.indexOf(current) === 0) {
-                    val = '<span class="cmd_existing">' + current +
-                        '</span>' + completion.substring(current.length);
-                } else {
-                    var len = diff.diff_commonPrefix(current, completion);
-                    var extension = completion.substring(len);
-                    val = '<span class="cmd_existing">' + current + '</span>' +
-                        '<span class="cmd_extension">' + extension + '</span>';
-                }
-                this.set('value', val);
-            }.observes('.parentView.parentView._completion'),
-            // This is height:25, bottom:0 plus offsets added by SC, and <input>
-            layout: { height: 18, bottom: 4, left: 45, right: 0 }
-        }),
+            // Completion
+            var completion = document.createElement('div');
+            completion.className = 'cmd_completion';
+        },
 
-        /**
-         * Used as something to hang styles off for input area
-         */
-        kbd: SC.View.design({
-            layout: { height: 25, bottom: 0, left: 0, right: 0 },
-            tagName: 'kbd'
-        }),
+        childViews: [ 'input' ],
 
         input: SC.TextFieldView.design({
             _processKeyEvent: function(ev, isKeyUp) {

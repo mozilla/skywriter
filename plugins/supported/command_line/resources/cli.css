@@ -46,6 +46,10 @@ this rule doesn't work, but might in the future */
 .cmd_line .cmd_prompt label { color: #FF8E00; font-weight: bold; }
 .cmd_line .cmd_prompt .cmd_brackets { color: #FFF; }
 
+div.cmd_prompt {
+  position:absolute; height:25px; bottom:0; left:5px; width:40px;
+}
+
 #command.commandLineError { color: red; }
 
 .cmd_line label.cmd_input input {
@@ -71,6 +75,7 @@ div.cmd_line div.sc-view.sc-gray-border { border: 0; }
 
 div.cmd_line div.cmd_completion { font-family: Arial,sans-serif; color: #443;
   font-size: 16px; font-weight: bold;
+  position:absolute; height:18px; bottom:4px; left:45px; right:0;
 }
 .cmd_existing { color: rgb(27,22,19); text-shadow: none; }
 .cmd_extension { margin-left:30px; }
@@ -80,10 +85,18 @@ div.cmd_line span.cmd_char { letter-spacing: -0.2ex; font-weight: bold; }
 
 /* Command Output */
 div.cmd_line div.cmd_view div.sc-collection-view {
-  overflow: auto; color: #aaa; font-family: Arial,sans-serif;
+  overflow:auto; color:#aaa; font-family:Arial,sans-serif;
 }
-div.cmd_view { font-size: 14px; }
+div.cmd_view { font-size:14px;
+  maxHeight:300px; overflow-y:scroll;
+  position:absolute; top:0; bottom:27px; left:30px; right:0;
+}
 
+div.cmd_toolbar {
+  position:absolute; top:0; bottom:27px; left:0; width:30px;
+}
+
+div.cmd_toolbar img { height:16px; width:16px; }
 
 /* cmd_rowin */
 div.cmd_view div.cmd_rowin {
@@ -180,6 +193,11 @@ div.cmd_line kbd {
     background:rgb(27,22,19);
     background:-moz-linear-gradient(top, rgb(27,22,19), rgb(25,20,16));
     background:-webkit-gradient(linear, left top, left bottom, from(rgb(27,22,19)), to(rgb(25,20,16)));
+    /*
+    position: absolute;
+    height:25px; bottom:0; left:0; right:0;
+    z-index: -10;
+    */
 }
 
 /*
