@@ -3,6 +3,7 @@ title: Bespin Release Notes
 layout: default
 ---
 
+* [0.7.3](notes073.html)
 * [0.7.2](notes072.html)
 * [0.7.1](notes071.html)
 * [0.7](notes07.html)

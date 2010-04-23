@@ -3,7 +3,7 @@ layout: default
 title: Bespin 0.7.2 ("Ashwell") Release Notes
 ---
 
-[Up](index.html) - Next Release - [Previous Release](notes071.html)
+[Up](index.html) - [Next Release](notes073.html) - [Previous Release](notes071.html)
 
 Known Issues
 ------------
