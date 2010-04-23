@@ -2,7 +2,8 @@
     "description": "Manages commands and their keyboard shortcuts",
     "dependencies": {
         "settings": "0.0",
-        "types": "0.0"
+        "types": "0.0",
+        "appsupport": "0.0"
     },
     "provides":
     [

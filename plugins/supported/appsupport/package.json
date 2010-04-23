@@ -25,12 +25,6 @@
         },
         {
             "ep": "factory",
-            "name": "files",
-            "pointer": "controllers/bespin#files",
-            "action": "value"
-        },
-        {
-            "ep": "factory",
             "name": "session",
             "pointer": "controllers/bespin#session",
             "action": "value"

@@ -35,13 +35,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var bespin = require('appsupport:controllers/bespin').bespinController;
 var util = require('bespin:util/util');
 
 var catalog = require('bespin:plugin').catalog;
 
 var server = catalog.getObject('server');
 var editSession = catalog.getObject('editSession');
-var files = catalog.getObject('files');
 
 /*
  * These are all currently dead, when we resurrect the first we will need this
@@ -77,7 +77,7 @@ exports.showCommand = function(instruction, projectname) {
         },
  */
 exports.listCommand = function(instruction, extra) {
-    files.projects(function(projectNames) {
+    bespin.files.projects(function(projectNames) {
         var projects = '';
         for (var x = 0; x < projectNames.length; x++) {
             projects += projectNames[x].name + '<br/>';
@@ -121,7 +121,7 @@ exports.createCommand = function(instruction, project) {
                 ': ' + xhr.responseText);
     });
 
-    files.makeDirectory(project, '', onSuccess, onFailure);
+    bespin.files.makeDirectory(project, '', onSuccess, onFailure);
 };
 
 /**
@@ -143,7 +143,7 @@ exports.createCommand = function(instruction, project) {
         },
  */
 exports.deleteCommand = function(instruction, project) {
-    if (!project || project == files.userSettingsProject) {
+    if (!project || project == bespin.files.userSettingsProject) {
         request.doneWithError('You can\'t delete the settings project.');
         return;
     }
@@ -158,7 +158,7 @@ exports.deleteCommand = function(instruction, project) {
                 + xhr.responseText);
     });
 
-    files.removeDirectory(project, '', onSuccess, onFailure);
+    bespin.files.removeDirectory(project, '', onSuccess, onFailure);
 };
 
 /**
@@ -237,7 +237,7 @@ exports.exportCommand = function(instruction, args) {
         type = 'zip';
     }
 
-    files.projects(function(projects) {
+    bespin.files.projects(function(projects) {
         var projectDir = project + '/';
         if (util.indexOfProperty(projects, 'name', projectDir) != null) {
             // try to do it via the iframe
@@ -322,7 +322,7 @@ var upload = function(project) {
             },
             error: function(error, ioArg) {
                 setTimeout(function() {
-                    files.projects(function(projectNames) {
+                    bespin.files.projects(function(projectNames) {
                         var isProject = function(test) {
                             return project + '/' == test.name;
                         };

@@ -30,6 +30,7 @@ var objectToQuery = require('bespin:util/util').objectToQuery;
 var getKeychainPassword = require("userident:kc").getKeychainPassword;
 var createStandardHandler = require('vcs')._createStandardHandler;
 var server = require("bespin_server").server;
+var bespin = require('appsupport:controllers/bespin').bespinController;
 
 /**
  * Controller for the clone form
@@ -111,8 +112,7 @@ exports.cloneController = SC.Object.create({
         var request = this._request;
         var pr = exports.cloneNewProject(data);
         createStandardHandler(pr, request).then(function() {
-            var files = catalog.getObject('files');
-            files.invalidate();
+            bespin.files.invalidate();
         });
     },
     

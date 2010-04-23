@@ -44,6 +44,7 @@ var File = require('filesystem:index').File;
 var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
 var TextStorage = require('text_editor:models/textstorage').TextStorage;
 var m_path = require('filesystem:path');
+var bespin = require('appsupport:controllers/bespin').bespinController;
 
 var History = require('edit_session:history').History;
 
@@ -315,8 +316,7 @@ exports.EditSession = SC.Object.extend({
         // it...)
         var scroll = recent.scroll, selection = recent.selection;
 
-        var files = catalog.getObject('files');
-        var file = files.getFile(recent.path);
+        var file = bespin.files.getFile(recent.path);
         this._currentBuffer.changeFile(file).then(function() {
             var view = this._currentView;
             if (!SC.none(scroll)) {

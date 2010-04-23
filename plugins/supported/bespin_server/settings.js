@@ -37,6 +37,7 @@
 
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
+var bespin = require('appsupport:controllers/bespin').bespinController;
 var Trace = require('bespin:util/stacktrace').Trace;
 
 /**
@@ -48,8 +49,8 @@ exports.ServerPersister = SC.Object.extend({
     _loading: false,
 
     loadInitialValues: function(settings) {
-        var files = catalog.getObject('files');
-        files.loadContents('BespinSettings/settings').then(function(contents) {
+        var promise = bespin.files.loadContents('BespinSettings/settings');
+        promise.then(function(contents) {
             var data;
             try {
                 data = JSON.parse(contents);
@@ -95,7 +96,6 @@ exports.ServerPersister = SC.Object.extend({
             return;
         }
         // Send it to the server
-        var files = catalog.getObject('files');
-        files.saveContents('BespinSettings/settings', settingsString);
+        bespin.files.saveContents('BespinSettings/settings', settingsString);
     }
 });

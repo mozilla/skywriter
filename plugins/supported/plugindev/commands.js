@@ -43,6 +43,7 @@ var SC = require('sproutcore/runtime').SC;
 var server = require('bespin_server').server;
 var pathutils = require('filesystem:path');
 var util = require('bespin:util/util');
+var bespin = require('appsupport:controllers/bespin').bespinController;
 
 var getPluginName = function(path) {
     if (util.endsWith(path, '/')) {
@@ -54,8 +55,6 @@ var getPluginName = function(path) {
 };
 
 var changePluginInfo = function(env, request) {
-    var files = env.get('files');
-
     var pr = new Promise();
     var prChangeDone = new Promise();
 
@@ -80,7 +79,8 @@ var changePluginInfo = function(env, request) {
         );
     });
 
-    var pluginConfigFile = files.getFile('BespinSettings/pluginInfo.json');
+    var pluginConfigPath = 'BespinSettings/pluginInfo.json';
+    var pluginConfigFile = bespin.files.getFile(pluginConfigPath);
     pluginConfigFile.loadContents().then(function(contents) {
         pluginConfig = JSON.parse(contents);
         pr.resolve({
@@ -108,7 +108,6 @@ var changePluginInfo = function(env, request) {
  */
 exports.add = function(env, args, request) {
     var path = args.path;
-    var files = catalog.getObject('files');
     var session = env.get('session');
     path = session.getCompletePath(path);
 
@@ -230,7 +229,6 @@ exports.remove = function(env, args, request) {
     }
     catalog.removePlugin(pluginName);
 
-    var files = catalog.getObject('files');
     var pluginConfigFile = files.getFile('BespinSettings/pluginInfo.json');
 
     pluginConfigFile.loadContents().then(function(contents) {

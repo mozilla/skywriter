@@ -40,8 +40,8 @@ var Trait = require('traits').Trait;
 var Promise = require('bespin:promise').Promise;
 
 var DEFAULT_COMPONENT_ORDER = [
-    'environment', 'theme_manager', 'login_controller', 'settings',
-    'file_source', 'key_listener', 'dock_view', 'command_line', 'social_view',
+    'environment', 'theme_manager', 'login_controller', 'file_source',
+    'settings', 'key_listener', 'dock_view', 'command_line', 'social_view',
     'editor_view', 'edit_session'
 ];
 
@@ -179,19 +179,10 @@ bespinController = Object.create(Object.prototype, Trait({
             },
         }), RegistrationHandler)),
 
-        settings: Trait.create(Object.prototype, Trait.override(Trait({
-            attach: function(settings) {
-                bespinController._environment.populateSettings(settings);
-                return new Promise().resolve();
-            },
-
-            detach: function() {}
-        }), RegistrationHandler)),
-
         file_source: Trait.create(Object.prototype, Trait.override(Trait({
             attach: function(fileSourceClass) {
                 var filesystemClass = require('filesystem').Filesystem;
-                exports.files = filesystemClass.create({
+                bespinController.files = filesystemClass.create({
                     source: fileSourceClass.create()
                 });
 
@@ -199,8 +190,17 @@ bespinController = Object.create(Object.prototype, Trait({
             },
 
             detach: function(fileSourceClass) {
-                exports.files = null;
+                bespinController.files = null;
             }
+        }), RegistrationHandler)),
+
+        settings: Trait.create(Object.prototype, Trait.override(Trait({
+            attach: function(settings) {
+                bespinController._environment.populateSettings(settings);
+                return new Promise().resolve();
+            },
+
+            detach: function() {}
         }), RegistrationHandler)),
 
         key_listener: Trait.create(Object.prototype, Trait.override(Trait({
@@ -325,6 +325,7 @@ bespinController = Object.create(Object.prototype, Trait({
     },
 
     _attach: function(componentName) {
+        console.log("attaching", componentName);
         var attach = this._registrationHandlers[componentName].attach;
         var promise = attach(this._components[componentName]);
         promise.then(this._attached.bind(this));
@@ -352,6 +353,13 @@ bespinController = Object.create(Object.prototype, Trait({
 
         this._attach(componentName);
     },
+
+    /**
+     * @type{FileSource}
+     *
+     * The file source, populated by the "file_source" component.
+     */
+    files: null,
 
     /**
      * @property{boolean}
@@ -398,7 +406,6 @@ bespinController = Object.create(Object.prototype, Trait({
         this._registeredComponents = {};
     },
 
-
     /**
      * Called whenever one of the application components has been loaded or
      * reloaded.
@@ -443,9 +450,6 @@ exports.registerAppComponent = controller.registerAppComponent.
     bind(controller);
 exports.unregisterAppComponent = controller.unregisterAppComponent.
     bind(controller);
-
-/** The file source, populated by the "file_source" component. */
-exports.files = null;
 
 /** The current session, populated by the "edit_session" component. */
 exports.session = null;

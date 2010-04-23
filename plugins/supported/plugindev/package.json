@@ -2,7 +2,8 @@
     "description": "Tools for testing and managing plugins.",
     "dependencies": {
         "types": "0.0",
-        "bespin_server": "0.0"
+        "bespin_server": "0.0",
+        "appsupport": "0.0"
     },
     "provides": [
         {
