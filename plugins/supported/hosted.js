@@ -85,6 +85,10 @@ exports.HostedEnvironment = Trait({
         var pane = mainPage.get('pane');
         this.pane = pane;
         pane.append();
+    },
+
+    populateSettings: function(settings) {
+        // No-op: the settings are fetched from the server.
     }
 });
 

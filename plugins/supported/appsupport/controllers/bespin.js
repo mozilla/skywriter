@@ -40,9 +40,9 @@ var Trait = require('traits').Trait;
 var Promise = require('bespin:promise').Promise;
 
 var DEFAULT_COMPONENT_ORDER = [
-    'environment', 'theme_manager', 'login_controller', 'file_source',
-    'key_listener', 'dock_view', 'command_line', 'social_view', 'editor_view',
-    'edit_session'
+    'environment', 'theme_manager', 'login_controller', 'settings',
+    'file_source', 'key_listener', 'dock_view', 'command_line', 'social_view',
+    'editor_view', 'edit_session'
 ];
 
 var RegistrationHandler = Trait({
@@ -77,6 +77,7 @@ bespinController = Object.create(Object.prototype, Trait({
 
     _dockView: null,
     _editorView: null,
+    _environment: null,
     _themeManager: null,
     _username: null,
 
@@ -88,6 +89,7 @@ bespinController = Object.create(Object.prototype, Trait({
                 var environment = Object.create(Object.prototype,
                     Trait.compose(environmentTrait, thisEnvironmentTrait));
                 environment.init();
+                bespinController._environment = environment;
 
                 var pane = environment.pane;
                 bespinController.pane = pane;
@@ -97,6 +99,7 @@ bespinController = Object.create(Object.prototype, Trait({
 
             detach: function() {
                 bespinController.pane = null;
+                bespinController._environment = null;
             }
         }), RegistrationHandler)),
 
@@ -174,6 +177,15 @@ bespinController = Object.create(Object.prototype, Trait({
                 var loginController = this._loginController;
                 SC.run(loginController.show.bind(loginController));
             },
+        }), RegistrationHandler)),
+
+        settings: Trait.create(Object.prototype, Trait.override(Trait({
+            attach: function(settings) {
+                bespinController._environment.populateSettings(settings);
+                return new Promise().resolve();
+            },
+
+            detach: function() {}
         }), RegistrationHandler)),
 
         file_source: Trait.create(Object.prototype, Trait.override(Trait({
