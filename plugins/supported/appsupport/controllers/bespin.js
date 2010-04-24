@@ -105,9 +105,9 @@ bespinController = Object.create(Object.prototype, Trait({
 
         theme_manager: Trait.create(Object.prototype, Trait.override(Trait({
             attach: function(themeManager) {
-                themeManager.addPane(bespinController.pane);
                 bespinController._themeManager = themeManager;
-                return new Promise().resolve();
+                themeManager.addPane(bespinController.pane);
+                return themeManager.loadTheme();
             },
 
             detach: function() {

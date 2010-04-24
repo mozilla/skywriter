@@ -6,7 +6,7 @@
         {
             "ep": "theme",
             "name": "Screen",
-            "pointer": "screen_theme:index#ScreenTheme"
+            "pointer": "#ScreenTheme"
         }
     ]
 }

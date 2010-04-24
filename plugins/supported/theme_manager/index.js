@@ -92,26 +92,6 @@ exports.ThemeManager = SC.Object.extend({
         this._applyTheme();
     }.observes('panes'),
 
-    _reloadTheme: function() {
-        var themeName = this.get('theme');
-        if (SC.none(themeName)) {
-            return;
-        }
-
-        var catalog = this.get('catalog');
-        var pointer = catalog.getExtensionByKey('theme', themeName).pointer;
-        var load = catalog.loadObjectForPropertyPath(pointer);
-        load.then(function(themeClass) {
-            var theme = themeClass.create();
-            this._theme = theme;
-            this._applyTheme();
-        }.bind(this));
-    },
-
-    _themeChanged: function() {
-        this._reloadTheme();
-    }.observes('theme'),
-
     /**
      * @property{Catalog}
      *
@@ -135,6 +115,15 @@ exports.ThemeManager = SC.Object.extend({
     theme: null,
 
     /**
+     * @type{Promise}
+     *
+     * A promise that resolves when the default theme is registered.
+     *
+     * TODO: Remove me when we get proper theme support.
+     */
+    themeRegistered: null,
+
+    /**
      * Adds a pane to the list of panes maintained by this theme.
      */
     addPane: function(pane) {
@@ -142,8 +131,25 @@ exports.ThemeManager = SC.Object.extend({
     },
 
     init: function() {
+        this.set('themeRegistered', new Promise());
         this.set('panes', this.get('panes').concat());
-        this._reloadTheme();
+    },
+
+    /**
+     * Loads the default theme and returns a promise that will resolve when the
+     * theme is loaded.
+     */
+    loadTheme: function() {
+        var loadPromise = new Promise();
+        this.get('themeRegistered').then(function(extension) {
+            extension.load().then(function(themeClass) {
+                var theme = themeClass.create();
+                this._theme = theme;
+                this._applyTheme();
+                loadPromise.resolve();
+            }.bind(this));
+        }.bind(this));
+        return loadPromise;
     },
 
     /**
@@ -157,3 +163,11 @@ exports.ThemeManager = SC.Object.extend({
 });
 
 exports.themeManager = exports.ThemeManager.create({theme: 'Screen'});
+
+exports.registerTheme = function(extension) {
+    var themeManager = exports.themeManager;
+    if (extension.name === themeManager.get('theme')) {
+        themeManager.get('themeRegistered').resolve(extension);
+    }
+};
+
