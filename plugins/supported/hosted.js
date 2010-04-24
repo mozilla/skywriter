@@ -46,7 +46,7 @@
         {
             "ep": "appcomponent",
             "name": "environment",
-            "pointer": "#HostedEnvironment"
+            "pointer": "#hostedEnvironment"
         }
     ]
 });
@@ -60,7 +60,7 @@ var Trait = require('traits').Trait;
  *
  * The environment when Bespin is hosted on the server.
  */
-exports.HostedEnvironment = Trait({
+exports.hostedEnvironment = Trait.object({
     /**
      * @type {SC.Pane}
      *
@@ -74,7 +74,7 @@ exports.HostedEnvironment = Trait({
      * The type of the pane in which Bespin lives. This field is supplied by
      * the Bespin controller and is instantiated in the init() function.
      */
-    paneClass: Trait.required,
+    paneClass: null,
 
     /** Initializes the hosted Bespin environment. */
     createPane: function() {
