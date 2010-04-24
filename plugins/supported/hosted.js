@@ -77,7 +77,7 @@ exports.HostedEnvironment = Trait({
     paneClass: Trait.required,
 
     /** Initializes the hosted Bespin environment. */
-    init: function() {
+    createPane: function() {
         var app = SC.Application.create({ NAMESPACE: 'bespin' });
         var mainPage = SC.Page.create({ pane: this.paneClass });
         app.set('mainPage', mainPage);
@@ -85,6 +85,8 @@ exports.HostedEnvironment = Trait({
         var pane = mainPage.get('pane');
         this.pane = pane;
         pane.append();
+
+        return new Promise().resolve(pane);
     },
 
     sessionInitialized: function(session) {}

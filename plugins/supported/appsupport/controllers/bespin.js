@@ -88,13 +88,15 @@ bespinController = Object.create(Object.prototype, Trait({
                 var thisEnvironmentTrait = Trait({ paneClass: paneClass });
                 var environment = Object.create(Object.prototype,
                     Trait.compose(environmentTrait, thisEnvironmentTrait));
-                environment.init();
                 bespinController._environment = environment;
 
-                var pane = environment.pane;
-                bespinController.pane = pane;
+                var promise = new Promise();
+                environment.createPane().then(function(pane) {
+                    bespinController.pane = pane;
+                    promise.resolve();
+                });
 
-                return new Promise().resolve();
+                return promise;
             },
 
             detach: function() {
