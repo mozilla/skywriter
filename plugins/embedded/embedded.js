@@ -37,20 +37,25 @@
 
 "define metadata";
 ({
+    "description": "The environment for an embedded Bespin instance",
     "dependencies": {
-		"appsupport": "0.0",
-		"dock_view": "0.0",
-		"edit_session": "0.0",
-		"keylistener": "0.0",
-		"text_editor": "0.0",
-		"settings": "0.0"
+        "appsupport": "0.0",
+        "dock_view": "0.0",
+        "edit_session": "0.0",
+        "events": "0.0",
+        "keylistener": "0.0",
+        "rangeutils": "0.0",
+        "screen_theme": "0.0",
+        "settings": "0.0",
+        "text_editor": "0.0",
+        "theme_manager": "0.0",
+        "traits": "0.0"
 	},
     "provides": [
         {
-            "ep": "factory",
-            "name": "session",
-            "pointer": "#session",
-            "action": "value"
+            "ep": "appcomponent",
+            "name": "environment",
+            "pointer": "#embeddedEditor"
         }
     ]
 });
@@ -62,47 +67,44 @@
  * and easy to learn to the embedding user.
  */
 
-var SC = require("sproutcore/runtime").SC;
-var Range = require('rangeutils:utils/range');
-var DockView = require('dock_view').DockView;
-var EditorView = require('text_editor:views/editor').EditorView;
-var KeyListener = require('keylistener').KeyListener;
-var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
-var bespin = require("bespin:index");
-var edit_session = require('edit_session');
-var settings = require('settings').settings;
-var util = require("bespin:util/util");
+var SC = require('sproutcore/runtime').SC;
+var Event = require('events').Event;
+var Promise = require('bespin:promise').Promise;
+var Trait = require('traits').Trait;
+var console = require('bespin:console').console;
+var m_range = require('rangeutils:utils/range');
 
-var embeddedEditorInstantiated = false;
+var embeddedEditor = Trait.object({
+    _element: null,
+    _elementChosen: new Promise(),
+    _events: null,
+    _options: null,
+    _session: null,
 
-exports.EmbeddedEditor = SC.Object.extend(MultiDelegateSupport, {
-    _editorView: null,
-
-    _attachPane: function() {
-        if (typeof(this.get('element')) === 'string') {
-            this.set('element', document.getElementById(this.get('element')));
+    _attachToElement: function() {
+        var element = this._element;
+        if (typeof(element) === 'string') {
+            element = document.getElementById(element);
+            this._element = element;
+        }
+        if (typeof(element) !== 'object') {
+            throw new Error("Expected a DOM element to attach Bespin to but " +
+                "found " + element);
         }
 
-        var element = this.get('element');
-        if (SC.none('element')) {
-            throw new Error("No element was specified to attach Bespin " +
-                "Embedded to");
-        }
-
-        var options = this.get('options');
-        if (SC.none(options.initialContent)) {
+        var options = this._options;
+        if (typeof(element) !== 'string') {
             options.initialContent = element.innerHTML;
         }
 
-        SC.$(element).css('position', 'relative');
-        element.innerHTML = "";
+        element.style.position = 'relative';
+        element.innerHTML = '';
 
-        this.get('pane').appendTo(element);
+        this.pane.appendTo(element);
     },
 
     _computeLayout: function() {
-        var element = this.get('element');
-
+        var element = this._element;
         var layout = {
             top:    0,
             left:   0,
@@ -110,8 +112,8 @@ exports.EmbeddedEditor = SC.Object.extend(MultiDelegateSupport, {
             height: element.clientHeight
         };
 
-        while (!SC.none(element)) {
-            layout.top += element.offsetTop + element.clientTop;
+        while (element !== null) {
+            layout.top  += element.offsetTop + element.clientTop;
             layout.left += element.offsetLeft + element.clientLeft;
             element = element.offsetParent;
         }
@@ -120,158 +122,99 @@ exports.EmbeddedEditor = SC.Object.extend(MultiDelegateSupport, {
     },
 
     _createValueProperty: function() {
-        this.__defineGetter__('value', function() {
-            var view = this._editorView;
-            return view.getPath('layoutManager.textStorage').getValue();
-        });
-        this.__defineSetter__('value', function(v) {
-            SC.run(function() {
-                var view = this._editorView;
-                view.getPath('layoutManager.textStorage').setValue(v);
-                view.get('textView').moveCursorTo({ col: 0, row: 0 });
-            }.bind(this));
-        });
+        this.__defineGetter__('value', this.getValue);
+        this.__defineSetter__('value', this.setValue);
+    },
+
+    _getTextStorage: function() {
+        var currentView = this._session.currentView;
+        return currentView.getPath('layoutManager.textStorage');
     },
 
     _hookWindowResizeEvent: function() {
-        window.addEventListener('resize', this.dimensionsChanged.bind(this),
-            false);
+        window.addEventListener('resize', this.dimensionsChanged, false);
     },
 
-    _setOptions: function() {
-        var editorView = this._editorView;
-        var layoutManager = editorView.get('layoutManager');
-        var options = this.get('options');
+    _unhookWindowResizeEvent: function() {
+        window.removeEventListener('resize', this.dimensionsChanged, false);
+    },
 
-        // initialContent
-        var initialContent = options.initialContent;
-        if (!SC.none(initialContent)) {
-            layoutManager.get('textStorage').setValue(initialContent);
+    /**
+     * @type {Array<string>}
+     *
+     * The component loading order in the embedded environment.
+     */
+    componentOrder: [
+        'environment', 'theme_manager', 'settings', 'key_listener',
+        'dock_view', 'editor_view', 'edit_session'
+    ],
+
+    /**
+     * @type {SC.Pane}
+     *
+     * The pane in which Bespin lives.
+     */
+    pane: null,
+
+    /**
+     * @type {class<SC.Pane>}
+     *
+     * The type of the pane in which Bespin lives. This field is supplied by
+     * the Bespin controller and is instantiated in the init() function.
+     */
+    paneClass: null,
+
+    /** Adds a callback to handle the specified event. */
+    addEventListener: function(eventName, callback) {
+        var events = this._events;
+        if (!(eventName in events)) {
+            console.warn('[Bespin] addEventListener(): unknown event: "' +
+                eventName + '"');
+        } else {
+            events[eventName].add(callback);
         }
+    },
 
-        // noAutoresize
-        var noAutoresize = options.noAutoresize;
-        if (SC.none(noAutoresize)) {
-            noAutoresize = options.dontHookWindowResizeEvent;   // the old name
-        }
-
-        if (SC.none(noAutoresize) || !noAutoresize) {
-            this._hookWindowResizeEvent();
-        }
-
-        // settings
-        var userSettings = options.settings;
-        if (!SC.none(userSettings)) {
-            for (key in userSettings) {
-                settings.set(key, userSettings[key]);
+    /** Initializes the embedded Bespin environment. */
+    createPane: function() {
+        var promise = new Promise();
+        this._elementChosen.then(function() {
+            if (this.pane !== null) {
+                throw new Error('Attempt to instantiate multiple instances ' +
+                    'of Bespin');
             }
-        }
 
-        // stealFocus
-        var stealFocus = options.stealFocus;
-        if (!SC.none(stealFocus) && stealFocus) {
-            window.setTimeout(function() { this.setFocus(true); }.bind(this),
-                1);
-        }
+            var paneClass = this.paneClass;
+            var pane = paneClass.create({
+                _layoutChanged: function() {
+                    this._recomputeLayoutStyle();
+                }.observes('layout'),
 
-        // syntax
-        // TODO: make this a true setting
-        var syntaxManager = layoutManager.get('syntaxManager');
-        var syntax = options.syntax;
-        if (!SC.none(syntax)) {
-            syntaxManager.set('initialContext', syntax);
-        }
-    },
+                _recomputeLayoutStyle: function() {
+                    var layout = this.get('layout');
+                    this.set('layoutStyle', {
+                        width:  layout.width + 'px',
+                        height: layout.height + 'px'
+                    });
+                },
 
-    textStorageEdited: function(sender, oldRange, newRange, newValue) {
-        var evt = {
-            oldRange: oldRange,
-            newRange: newRange,
-            newValue: newValue
-        }
-        this.postMessage('textChange', evt);
-    },
+                init: function() {
+                    arguments.callee.base.apply(this, arguments);
+                    this._recomputeLayoutStyle();
+                },
 
-    textViewSelectionChanged: function(sender, selection) {
-        var evt = {
-            selection: selection
-        }
-        this.postMessage('select', evt);
-    },
-
-    _evtCallbacks: null,
-
-    /**
-     * Posts a message to the internal event handler.
-     */
-    postMessage: function(evtName, evtObj) {
-        evtObj.type = evtName;
-        if (!SC.none(this._evtCallbacks[evtName])) {
-            this._evtCallbacks[evtName].forEach(function(callback) {
-                callback.call(this, evtObj);
+                layout: this._computeLayout(),
+                layoutStyle: {}
             });
-        }
+            this.pane = pane;
+
+            this._attachToElement();
+            this._hookWindowResizeEvent();
+
+            promise.resolve(pane);
+        }.bind(this));
+        return promise;
     },
-
-    /**
-     * Adds an event listener for an event.
-     */
-    addEventListener: function(evtName, callback) {
-        if (SC.none(this._evtCallbacks[evtName])) {
-            this._evtCallbacks[evtName] = [];
-        }
-        this._evtCallbacks[evtName].push(callback);
-    },
-
-    /**
-     * @property{Node}
-     *
-     * The DOM element to attach to.
-     */
-    element: null,
-
-    /**
-     * @property{object}
-     *
-     * The user-supplied options.
-     */
-    options: null,
-
-    /**
-     * @property{SC.Pane}
-     *
-     * The pane that the editor is part of.
-     */
-    pane: SC.Pane.extend({
-        _layoutChanged: function() {
-            this._recomputeLayoutStyle();
-        }.observes('layout'),
-
-        _recomputeLayoutStyle: function() {
-            var layout = this.get('layout');
-            this.set('layoutStyle', {
-                width:  "%@px".fmt(layout.width),
-                height: "%@px".fmt(layout.height)
-            });
-        },
-
-        applicationView: DockView.extend({
-            centerView: EditorView.extend(),
-            dockedViews: []
-        }),
-
-        childViews: 'applicationView'.w(),
-
-        layoutStyle: {},
-
-        init: function() {
-            arguments.callee.base.apply(this, arguments);
-
-            this.set('defaultResponder', KeyListener.create());
-
-            this._recomputeLayoutStyle();
-        }
-    }),
 
     /**
      * Triggers a layout change. Call this method whenever the position or size
@@ -279,9 +222,9 @@ exports.EmbeddedEditor = SC.Object.extend(MultiDelegateSupport, {
      */
     dimensionsChanged: function() {
         SC.run(function() {
-            var pane = this.get('pane');
+            var pane = this.pane;
             var oldLayout = pane.get('layout');
-            var newLayout = this._computeLayout(this.get("element"));
+            var newLayout = this._computeLayout();
 
             if (!SC.rectsEqual(oldLayout, newLayout)) {
                 pane.adjust(newLayout);
@@ -290,207 +233,257 @@ exports.EmbeddedEditor = SC.Object.extend(MultiDelegateSupport, {
         }.bind(this));
     },
 
-    init: function() {
-        if (embeddedEditorInstantiated === true) {
-            throw new Error("Attempt to instantiate multiple instances of " +
-                "Bespin");
-        }
-
-        embeddedEditorInstantiated = true;
-
-        this._evtCallbacks = {};
-
-        var session = edit_session.EditSession.create();
-        exports.session = session;
-
-        var pane = this.get('pane').create({
-            layout: this._computeLayout()
-        });
-
-        this.set('pane', pane);
-
-        this._attachPane();
-
-        var editorView = pane.getPath('applicationView.centerView');
-        this._editorView = editorView;
-
-        var textStorage = editorView.getPath('layoutManager.textStorage');
-        var textView = editorView.get('textView');
-        exports.model = textStorage;
-        exports.view = textView;
-
-        var buffer = edit_session.Buffer.create({ model: textStorage });
-        session.set('currentBuffer', buffer);
-        session.set('currentView', textView);
-
-        SC.run(function() {
-            this._createValueProperty();
-            this._setOptions();
-        }.bind(this));
-
-        editorView.textView.addDelegate(this);
-        editorView.layoutManager.textStorage.addDelegate(this);
-    },
-
-    setFocus: function(makeFocused) {
-        var pane = this.get('pane');
-        if (this._editorView.textView.get('isFirstResponder') === makeFocused) {
-            return;
-        }
-
-        if (makeFocused) {
-            pane.becomeKeyPane();
-            this._editorView.get('textView').focus();
-        } else {
-            pane.resignKeyPane();
-        }
-    },
-
-    /**
-     * jump to the line number given. This will clear any selected
-     * ranges from the view. The line number is 1-based.
-     */
-    setLineNumber: function(line) {
-        SC.run(function() {
-            var textView = this._editorView.get('textView');
-            var position = { row: line-1, col: 0, partialFraction: 0 };
-            textView.setSelection({ start: position, end: position });
-        }.bind(this));
-    },
-
-    /**
-     * Changes a setting.
-     */
-    setSetting: function(key, value) {
-        if (SC.none(key)) {
-            throw new Error("setSetting: key must be supplied");
-        }
-        if (SC.none(value)) {
-            throw new Error("setSetting: value must be supplied");
-        }
-
-        SC.run(function() { settings.set(key, value); });
-    },
-
-    /**
-     * Sets the initial syntax highlighting context (i.e. the language).
-     */
-     setSyntax: function(syntax) {
-        if (SC.none(syntax)) {
-            throw new Error("setSyntax: syntax must be supplied");
-        }
-
-        SC.run(function() {
-            this._editorView.setPath('layoutManager.syntaxManager.' +
-                                                'initialContext', syntax);
-        }.bind(this));
-    },
-
-    /**
-     * Returns the current selection.
-     */
+    /** Returns the currently-selected range. */
     getSelection: function() {
-        // Returns a clone of the selection to make sure the user can't
-        // change the textView's selection.
-        return SC.clone(this._editorView.textView._selectedRange);
+        var range = this._session.currentView.getSelectedRange(false);
+        return m_range.cloneRange(range);
     },
 
-    /**
-     * Sets the cursor position.
-     */
-    setCursor: function(position) {
-        if (!Range.isPosition(position)) {
-            throw new Error('setCursor: valid position must be supplied');
-        }
-
-        this._editorView.textView.moveCursorTo(position);
+    /** Returns the currently-selected text. */
+    getSelectedText: function() {
+        return this.getText(this.getSelection());
     },
 
-    /**
-     * Sets the text selection.
-     */
-    setSelection: function(range) {
-        if (!Range.isRange(range)) {
-            throw new Error('setSelection: valid range must be supplied');
+    /** Returns the text within the given range. */
+    getText: function(range) {
+        if (!m_range.isRange(range)) {
+            throw new Error('getText(): expected range but found "' + range +
+                '"');
         }
-        if (Range.comparePositions(range.start, range.end) === 0) {
-            this._editorView.textView.moveCursorTo(range.start);
+
+        var textStorage = this._getTextStorage();
+        return textStorage.getCharacters(m_range.normalizeRange(range));
+    },
+
+    /** Returns the current text. */
+    getValue: function() {
+        var textView = this._session.currentView;
+        return this._getTextStorage().getValue();
+    },
+
+    init: function() {
+        this._createValueProperty();
+        this._events = { select: Event(), textChange: Event() };
+    },
+
+    /** Removes the event listener on the given event. */
+    removeEventListener: function(eventName, callback) {
+        var events = this._events;
+        if (!(eventName in events)) {
+            console.warn('[Bespin] removeEventListener(): unknown event: "' +
+                eventName + '"');
         } else {
-            var textView = this._editorView.textView;
-            textView.moveCursorTo(range.end);
-            textView.moveCursorTo(range.start, true);
+            events[eventName].remove(callback);
         }
     },
 
     /**
-     * Replaces a range witihn a text.
+     * Replaces the text within a range, as an undoable action.
+     *
+     * @param {Range} range The range to replace.
+     * @param {string} newText The text to insert.
+     * @param {boolean} keepSelection True if the selection should be
+     *     be preserved, false otherwise.
      */
-    replace: function(range, text, clampSelection) {
-        if (typeof text !== 'string') {
-            throw new Error('replace: valid text must be supplied');
+    replace: function(range, newText, keepSelection) {
+        if (!m_range.isRange(range)) {
+            throw new Error('replace(): expected range but found "' + range +
+                "'");
         }
-        if (!Range.isRange(range)) {
-            throw new Error('replace: valid range must be supplied');
+        if (typeof(text) !== 'string') {
+            throw new Error('replace(): expected text string but found "' +
+                text + '"');
         }
 
         SC.run(function() {
-            range = Range.normalizeRange(range);
-            var view = this._editorView.textView;
+            var normalized = m_range.normalizeRange(range);
+
+            var view = this._session.currentView;
+            var oldSelection = view.getSelectedRange(false);
             view.groupChanges(function() {
-                if (clampSelection !== true) {
-                    view.moveCursorTo(range.start);
-                } else {
-                    var textStorage = view.getPath('layoutManager.textStorage');
-                    var sel = this.getSelection();
-                    sel.start = textStorage.clampPosition(sel.start);
-                    sel.end = textStorage.clampPosition(sel.end);
-                    view._selectedRangeEndVirtual = null;
-                    view.setSelection(sel);
+                view.replaceCharacters(normalized, newText);
+                if (keepSelection) {
+                    view.setSelection(oldSelection);
                 }
-            }.bind(this));
+            });
         }.bind(this));
     },
 
-    /**
-     * Replaces the current text selection with a text.
-     */
-    replaceSelection: function(text) {
-        if (typeof text !== 'string') {
-            throw new Error('replaceSelection: valid text must be supplied');
+    /** Replaces the current text selection with the given text. */
+    replaceSelection: function(newText) {
+        if (typeof(newText) !== 'string') {
+            throw new Error('replaceSelection(): expected string but found "' +
+                newText + '"');
         }
 
         this.replace(this.getSelection(), text);
     },
 
-    /**
-     * Returns the text witihn a range.
-     */
-    getText: function(range) {
-        if (!Range.isRange(range)) {
-            throw new Error('getText: valid range must be supplied');
+    /** Called by the Bespin controller once the app is fully set up. */
+    sessionInitialized: function(session) {
+        this._session = session;
+
+        var options = this._options;
+        for (var optionName in options) {
+            this.setOption(optionName, options[optionName]);
         }
 
-        range = Range.normalizeRange(range);
-        return this._editorView.layoutManager.textStorage.getCharacters(range);
+        var embeddedEditor = this;
+        this._getTextStorage().addDelegate(SC.Object.create({
+            textStorageEdited: function(sender, oldRange, newRange, newValue) {
+                // FIXME: newValue is not yet supported.
+                var params = {
+                    oldRange: oldRange,
+                    newRange: newRange,
+                    newValue: newValue
+                };
+
+                embeddedEditor._events.textChange(params);
+            }
+        }));
+        session.currentView.addDelegate(SC.Object.create({
+            textViewSelectionChanged: function(sender, selection) {
+                embeddedEditor._events.select({ selection: selection });
+            }
+        }));
+    },
+
+    /** Sets the position of the cursor. */
+    setCursor: function(newPosition) {
+        if (!m_range.isPosition(newPosition)) {
+            throw new Error('setCursor(): expected position but found "' +
+                newPosition + '"');
+        }
+
+        this._session.currentView.moveCursorTo(newPosition);
+    },
+
+    /** Focuses or unfocuses the editor. */
+    setFocus: function(makeFocused) {
+        makeFocused = !!makeFocused;
+
+        var pane = this.pane;
+        var view = this._session.currentView;
+        if (view.get('isFirstResponder') === makeFocused) {
+            return;
+        }
+
+        if (makeFocused) {
+            pane.becomeKeyPane();
+            view.focus();
+        } else {
+            pane.resignKeyPane();
+        }
+    },
+
+    /** Scrolls and moves the insertion point to the given line number. */
+    setLineNumber: function(lineNumber) {
+        var newPosition = { row: lineNumber - 1, col: 0 };
+        this._session.currentView.moveCursorTo(newPosition);
+    },
+
+    /** Changes the value of an option. */
+    setOption: function(name, value) {
+        switch (name) {
+        case 'initialContent':
+            this.setValue(value);
+            break;
+
+        case 'noAutoresize':
+            if (value) {
+                this._unhookWindowResizeEvent();
+            } else {
+                this._hookWindowResizeEvent();
+            }
+            break;
+
+        case 'settings':
+            for (var settingName in value) {
+                this.setSetting(settingName, value[settingName]);
+            }
+            break;
+
+        case 'stealFocus':
+            this.setFocus(value);
+            break;
+
+        case 'syntax':
+            this.setSyntax(value);
+            break;
+
+        default:
+            console.warn('[Bespin] unknown setting: "' + name + '"');
+            break;
+        }
+    },
+
+    /** Alters the selection. */
+    setSelection: function(newSelection) {
+        if (!m_range.isRange(newSelection)) {
+            throw new Error('setSelection(): selection must be supplied');
+        }
+
+        this._session.currentView.setSelection(newSelection);
+    },
+
+    /** Changes a setting. */
+    setSetting: function(key, value) {
+        if (key === null || key === undefined) {
+            throw new Error('setSetting(): key must be supplied');
+        }
+        if (value === null || value === undefined) {
+            throw new Error('setSetting(): value must be supplied');
+        }
+
+        SC.run(function() {
+            var settings = require('settings').settings;
+            settings.set(key, value);
+        });
+    },
+
+    /** Sets the initial syntax highlighting context (i.e. the language). */
+    setSyntax: function(syntax) {
+        if (syntax === null || syntax === undefined) {
+            throw new Error('setSyntax(): syntax must be supplied');
+        }
+
+        SC.run(function() {
+            var view = this._session.currentView;
+            var syntaxManager = view.getPath('layoutManager.syntaxManager');
+            syntaxManager.set('initialContext', syntax);
+        }.bind(this));
     },
 
     /**
-     * Returns the current selected text.
+     * Sets the text to the given value and moves the cursor to the beginning
+     * of the buffer.
      */
-    getSelectedText: function() {
-        return this.getText(this.getSelection());
+    setValue: function(newValue) {
+        SC.run(function() {
+            var textView = this._session.currentView;
+            textView.getPath('layoutManager.textStorage').setValue(newValue);
+            textView.moveCursorTo({ row: 0, col: 0 });
+        }.bind(this));
+    },
+
+    /** Replaces an element with the Bespin editor. */
+    useBespin: function(element, options) {
+        if (options === null || options === undefined) {
+            options = {};
+        }
+
+        this._element = element;
+        this._options = options;
+
+        this._elementChosen.resolve();
+
+        return this;
     }
 });
 
-exports.session = null;
+exports.embeddedEditor = embeddedEditor;
+embeddedEditor.init();
 
-/**
- * Initialize a Bespin component on a given element.
- */
-exports.useBespin = function(element, options) {
-    return exports.EmbeddedEditor.create({
-        element: element,
-        options: SC.none(options) ? {} : options
-    });
-};
+/** Replaces an element with the Bespin editor. */
+exports.useBespin = embeddedEditor.useBespin;
 
