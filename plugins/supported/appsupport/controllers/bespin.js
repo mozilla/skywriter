@@ -196,7 +196,6 @@ bespinController = Object.create(Object.prototype, Trait({
 
         settings: Trait.create(Object.prototype, Trait.override(Trait({
             attach: function(settings) {
-                bespinController._environment.populateSettings(settings);
                 return new Promise().resolve();
             },
 
@@ -314,6 +313,8 @@ bespinController = Object.create(Object.prototype, Trait({
                 if (bespinController.loadFile) {
                     session.loadMostRecentOrNew();
                 }
+
+                bespinController._environment.sessionInitialized(session);
 
                 return new Promise().resolve();
             },

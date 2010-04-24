@@ -87,8 +87,6 @@ exports.HostedEnvironment = Trait({
         pane.append();
     },
 
-    populateSettings: function(settings) {
-        // No-op: the settings are fetched from the server.
-    }
+    sessionInitialized: function(session) {}
 });
 
