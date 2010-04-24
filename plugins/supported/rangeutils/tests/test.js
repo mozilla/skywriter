@@ -50,6 +50,18 @@ exports.testAddPositions = function() {
         { row: -1, col: -2 }), { row: 0, col: 0 }, '1,2 + -1,-2 and 0,0');
 };
 
+exports.testCloneRange = function() {
+    var oldRange = { start: { row: 1, col: 2 }, end: { row: 3, col: 4 } };
+    var newRange = Range.cloneRange(oldRange);
+    t.deepEqual(oldRange, newRange, "the old range and the new range");
+    t.ok(oldRange.start !== newRange.start, "the old range's start position " +
+        "is distinct from the new range's start position");
+    t.ok(oldRange.end !== newRange.end, "the old range's end position is " +
+        "distinct from the new range's end position");
+    t.ok(oldRange !== newRange, "the old range is distinct from the new " +
+        "range");
+};
+
 exports.testComparePositions = function() {
     t.equal(Range.comparePositions({ row: 0, col: 0 },
         { row: 0, col: 0 }), 0, '0,0 = 0,0');

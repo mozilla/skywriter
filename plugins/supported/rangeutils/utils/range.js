@@ -44,6 +44,14 @@ exports.addPositions = function(a, b) {
     return { row: a.row + b.row, col: a.col + b.col };
 };
 
+/** Returns a copy of the given range. */
+exports.cloneRange = function(range) {
+    var oldStart = range.start, oldEnd = range.end;
+    var newStart = { row: oldStart.row, col: oldStart.col };
+    var newEnd = { row: oldEnd.row, col: oldEnd.col };
+    return { start: newStart, end: newEnd };
+};
+
 /**
  * Given two positions a and b, returns a negative number if a < b, 0 if a = b,
  * or a positive number if a > b.
