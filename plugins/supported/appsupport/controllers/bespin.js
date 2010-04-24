@@ -39,12 +39,6 @@ var SC = require('sproutcore/runtime').SC;
 var Trait = require('traits').Trait;
 var Promise = require('bespin:promise').Promise;
 
-var DEFAULT_COMPONENT_ORDER = [
-    'environment', 'theme_manager', 'login_controller', 'file_source',
-    'settings', 'key_listener', 'dock_view', 'command_line', 'social_view',
-    'editor_view', 'edit_session'
-];
-
 var RegistrationHandler = Trait({
     attach: Trait.required,
     detach: function() {}
@@ -85,6 +79,7 @@ bespinController = Object.create(Object.prototype, Trait({
         environment: Trait.create(Object.prototype, Trait.override(Trait({
             attach: function(environment) {
                 bespinController._environment = environment;
+                bespinController._componentOrder = environment.componentOrder;
 
                 environment.paneClass = bespinController.paneClass;
 
@@ -369,14 +364,6 @@ bespinController = Object.create(Object.prototype, Trait({
     loadFile: true,
 
     /**
-     * @property{boolean}
-     *
-     * Whether login is required in order to use the editor. If this is true,
-     * the "userident" plugin must be present for the editor to boot.
-     */
-    loginRequired: true,
-
-    /**
      * @type{SC.MainPane}
      *
      * The pane in which Bespin lives.
@@ -401,12 +388,8 @@ bespinController = Object.create(Object.prototype, Trait({
     }),
 
     init: function() {
-        var componentOrder = DEFAULT_COMPONENT_ORDER.concat();
+        var componentOrder = [ 'environment' ];
         this._componentOrder = componentOrder;
-        if (!this.loginRequired) {
-            var index = componentOrder.indexOf('login_controller');
-            componentOrder.splice(index, 1);
-        }
 
         this._components = {};
         this._loadedComponents = {};

@@ -62,6 +62,17 @@ var Trait = require('traits').Trait;
  */
 exports.hostedEnvironment = Trait.object({
     /**
+     * @type {Array<string>}
+     *
+     * The component loading order in the hosted environment.
+     */
+    componentOrder: [
+        'environment', 'theme_manager', 'login_controller', 'file_source',
+        'settings', 'key_listener', 'dock_view', 'command_line', 'social_view',
+        'editor_view', 'edit_session'
+    ],
+
+    /**
      * @type {SC.Pane}
      *
      * The pane in which Bespin lives.
