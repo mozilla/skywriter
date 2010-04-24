@@ -39,7 +39,7 @@ exports.Event = function() {
     var handlers = [];
     var evt = function() {
         var args = arguments;
-        handlers.forEach(function(handler) { handler(args); });
+        handlers.forEach(function(handler) { handler.apply(null, args); });
     };
 
     evt.add = function(handler) { handlers.push(handler); };
