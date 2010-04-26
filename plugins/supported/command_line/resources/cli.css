@@ -34,168 +34,105 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
+/* Global styles */
 .cmd_line { background:rgb(30,25,22); }
-.cmd_line .sc-view.sc-text-field-view { background: inherit; }
+.cmd_error { color: #F99; }
 
-/* ::-moz-selection appears to only work on divs etc, and not input elements so
-this rule doesn't work, but might in the future */
-.cmd_line input::selection { color: #44A; background: #AA4; }
-.cmd_line input::-moz-selection { color: #44A; background: #AA4; }
 
-.cmd_line .cmd_prompt,
-.cmd_line .cmd_prompt label { color: #FF8E00; font-weight: bold; }
-.cmd_line .cmd_prompt .cmd_brackets { color: #FFF; }
-
-div.cmd_prompt {
+/* The prompt */
+.cmd_prompt {
   position:absolute; height:25px; bottom:0; left:5px; width:40px;
+  color: #FF8E00; font-weight: bold; font-size: 120%;
 }
+.cmd_brackets { color: #FFF; }
 
-#command.commandLineError { color: red; }
 
-.cmd_line .cmd_input {
-  font-family: Arial,sans-serif;
-  color: #FFF;
-  font-size: 16px;
-  font-weight: bold;
+/* The input area */
+/* When we lose the SC CSS we can drop the .cmd_line specificity trump card */
+.cmd_line > .cmd_input {
+  font: 100% Arial,sans-serif; color: #FFF;
   background: transparent;
-  -webkit-box-shadow: none;
-  outline: none;
-  position:absolute; height:25px; bottom:0; left:40px; right:0;
+  -webkit-box-shadow: none; outline: none; border: 0;
+  position: absolute; height: 25px; bottom: 0px; left: 40px;
+  /* why doesn't right:0 work on an input? */
+  right: 0px; width: 3000px;
 }
+.cmd_input.focus { outline-width: 0px; outline: 0px; }
 
-.cmd_line label.cmd_input input:focus { color: #FFF; }
-.cmd_line.error label.cmd_input input { color: #F00; }
-.cmd_line label.cmd_input .border {
-  -moz-appearance: none; -webkit-appearance: none; border: 0;
-}
-.cmd_line label.cmd_input.focus {
-  outline-width: 0px; outline: 0px;
-}
-div.cmd_line div.sc-view.sc-gray-border { border: 0; }
 
-div.cmd_line div.cmd_completion { font-family: Arial,sans-serif; color: #443;
-  font-size: 16px; font-weight: bold;
+/* Command line completion */
+.cmd_completion {
+  font: 100%, Arial,sans-serif; color: #443;
   position:absolute; height:18px; bottom:4px; left:45px; right:0;
 }
 .cmd_existing { color: rgb(27,22,19); text-shadow: none; }
 .cmd_extension { margin-left:30px; }
 .cmd_extension:before { content:"\2794\00a0 "; }
+.cmd_char { letter-spacing: -0.2ex; font-weight: bold; }
 
-div.cmd_line span.cmd_char { letter-spacing: -0.2ex; font-weight: bold; }
-
-/* Command Output */
-div.cmd_line div.cmd_view div.sc-collection-view {
-  overflow:auto; color:#aaa; font-family:Arial,sans-serif;
-}
-div.cmd_view { font-size:14px;
-  maxHeight:300px; overflow-y:scroll;
-  position:absolute; top:0; bottom:27px; left:30px; right:0;
-}
-
-div.cmd_toolbar {
+.cmd_toolbar {
   position:absolute; top:0; bottom:27px; left:0; width:30px;
 }
+.cmd_toolbar img { height:16px; width:16px; }
 
-div.cmd_toolbar img { height:16px; width:16px; }
 
-/* cmd_rowin */
-div.cmd_view div.cmd_rowin {
-  font-size: 14px; background-color: rgb(27,22,19); font-weight: bold; color: #fff;
+/* Command Output */
+.cmd_view {
+  font-size: 100%;
+  maxHeight: 300px; overflow-y: scroll;
+  position: absolute; top: 0; bottom: 27px; left: 30px; right: 0;
 }
-div.cmd_view div.cmd_rowin img { cursor: pointer; }
-div.cmd_view div.cmd_rowin:hover .cmd_hover { display: block; }
 
+.cmd_rowin {
+  font-size: 110%; font-weight: bold; color: #fff;
+  background-color: rgb(27,22,19);
+}
+.cmd_rowin > img { cursor: pointer; }
+.cmd_rowin:hover > .cmd_hover { display: block; }
 
-/* div.cmd_view div { border: 0; } */
-
-div.cmd_view .cmd_open {
+.cmd_open {
   padding: 3px 3px 2px 5px;
-  font-size: 12px;
+  font-size: 100%;
   color :#666;
 }
-div.cmd_view .cmd_open_history { width: 20px; }
-div.cmd_view .cmd_open_time { width: 40px; }
-div.cmd_view .cmd_open_blank { width: 1px; }
+.cmd_open_history { width: 20px; }
+.cmd_open_time { width: 40px; }
+.cmd_open_blank { width: 1px; }
 
-div.cmd_view .cmd_typed { padding-left: 5px; }
+.cmd_typed { padding-left: 5px; }
 
-div.cmd_view .cmd_hover {
-  float: right; font-size: 12px; font-weight: normal; height: 100%; color: #666;
-  text-align: right; display: none;
+.cmd_hover {
+  float: right; height: 100%; display: none;
+  font-size: 100%; font-weight: normal; color: #666; text-align: right;
 }
-div.cmd_view .cmd_hover * {
+/* WARNING: this selector is SLLLOOOOWWW. Fix it */
+.cmd_hover * {
   vertical-align: middle; padding-left: 3px; padding-right: 3px;
 }
-div.cmd_view .cmd_hover .cmd_duration {
+.cmd_duration {
   float: left; padding-top: 2px;
 }
 
+.cmd_output { padding-left: 10px; line-height: 1.2em; }
 
-div.cmd_view div.cmd_rowout div.cmd_output { padding-left: 10px;
-  line-height: 1.2em;
-}
-div.cmd_view div.cmd_rowout div.cmd_error { color: #f99; }
-div.cmd_view div.cmd_rowout th {
-  text-align: right;
-  vertical-align: top;
-}
-div.cmd_view div.cmd_rowout td,
-div.cmd_view div.cmd_rowout th,
-div.cmd_view div.cmd_rowout table { border: 0; padding: 1px 4px; }
-
-div.cmd_line a {
-  font-weight: bold;
-  color: inherit;
-  text-decoration: none;
-}
-div.cmd_line a:hover { text-decoration: underline; cursor: pointer; }
-
-div.cmd_view input[type=password], div.cmd_view input[type=text],
-div.cmd_view textarea {
-  font-family: Arial,sans-serif; background: transparent;
-  border: 1px solid #ff9600; color: #fff; font-size: 14px; border-radius: 5px;
-  padding: 3px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
+.cmd_line a { font-weight: bold; color: inherit; text-decoration: none; }
+.cmd_line a:hover { text-decoration: underline; cursor: pointer; }
+.cmd_line input[type=password],
+.cmd_line input[type=text],
+.cmd_line textarea {
+  font-family: Arial,sans-serif; color: #fff; font-size: 120%;
+  background: transparent; padding: 3px; border: 1px solid #ff9600;
+  border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
 }
 
-/*
-div.cmd_line div.cmd_hints {
-  position: relative; width: 100%; height: 100%;
+.cmd_line > .cmd_ex {
+  position: absolute; bottom: 27px; z-index: 1; line-height: 1.2em;
 }
-*/
-
-div.cmd_line div.cmd_ex {
-  position: absolute; bottom: 27px;
-  z-index: 1;
-  line-height:1.2em;
+.cmd_line > kbd {
+  border-top: 2px solid #000;
+  -moz-border-top-colors: #000 rgb(30,25,22);
+  background: rgb(27,22,19);
+  background: -moz-linear-gradient(top, rgb(27,22,19), rgb(25,20,16));
+  background: -webkit-gradient(linear, left top, left bottom, from(rgb(27,22,19)), to(rgb(25,20,16)));
+  position: absolute; height: 25px; bottom: 0; left: 0; right: 0;
 }
-
-/*
-div.cmd_line div.cmd_ex samp {
-  color:#666;
-  z-index:10;
-  font-family:Arial, sans-serif;
-  position:absolute; bottom:0; left:0; right:0;
-  display:block;
-  padding-bottom:6px;
-}
-*/
-
-div.cmd_line kbd {
-  border-top:2px solid #000;
-  -moz-border-top-colors:#000 rgb(30,25,22);
-  background:rgb(27,22,19);
-  background:-moz-linear-gradient(top, rgb(27,22,19), rgb(25,20,16));
-  background:-webkit-gradient(linear, left top, left bottom, from(rgb(27,22,19)), to(rgb(25,20,16)));
-  /*
-  position: absolute; height:25px; bottom:0; left:0; right:0;
-  z-index: -10;
-  */
-}
-
-/*
-div.cmd_line div.cmd_ex .cmd_prompt { color:#FF8E00; font-weight:bold; }
-div.cmd_line div.cmd_ex input { background-color:transparent; margin-bottom:3px;
-  font-family:inherit; border:0; font-size:100%; color:#FFF;
-  height:18px; width:90%
-}
-*/
