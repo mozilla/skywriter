@@ -154,6 +154,123 @@ The supplied regex is anchored to the end of the buffer; for example, the value
 of the `regex` property in this example corresponds to the regex `/dd$/`
 (matched against the contents of the buffer).
 
+## Command arguments ##
+
+It's possible to use the `regex` property to extract arguments that are passed
+to commands:
+
+    :::js
+    {
+        "regex":    "([0-9]*)j",
+        "exec":     "vim moveDown",
+        "params": [
+            {
+                "name":     "n",
+                "match":    1,
+                "type":     "number",
+                "defaultValue":     1
+            }
+        ]
+    },
+
+Let the *keyboard buffer* be "10j", then the `regex` will match. The part of
+the RegExp to match the number - ([0-9]\*) - is grouped. Grouped parts of a RegExp
+can be used as arguments. The arguments/params to pass to the command are defined
+within the `params` section. `name` specifies the name of the argument. `type`
+can be "*number*" or "*text*". `match` means the match/group of the RegExp to use
+for this argument. In this example the matched numbers are used as
+argument for "n", where "n" means how many lines to move down. To access the
+match of the first group, `match` has to be *1*. Counting starts at 1 and not 0
+as this is parallel to how you access the groups in normal JS-RegExp-Exec-Results
+where 0 represents the entire part of the matched text.
+If there is no match, then the `defaultValue` will be used.
+
+## Using predicates ##
+
+In the same way you use predicates for commands you can use them for bindings:
+
+    :::js
+    {
+        "regex":    "([0-9]*)j",
+        "exec":     "vim moveDown",
+        "params": [
+            {
+                "name":     "n",
+                "match":    1,
+                "type":     "number",
+                "defaultValue":     1
+            }
+        ],
+        "predicates": {
+            "isCommandKey": false
+        }
+    },
+
+The predicate *isCommandKey* is set by the KeyboardManager. If the *symbolic name*
+is a combination of a command key (CTRL/ALT/META) + a key, then `isCommandKey`
+will be true, otherwise it's false.
+
+## Match the symbolic name and the buffer ##
+
+So far, we can match either the *keyboard buffer* or the *symbolic name*, but
+not both. If you want to detect the "return" key and use former typed numbers as
+argument, you can write:
+
+    :::js
+    {
+        "regex":    [ "([0-9]*)", "(j|down|return)" ],
+        "exec":     "vim moveDown",
+        "params": [
+            {
+                "name":     "n",
+                "match":    1,
+                "type":     "number",
+                "defaultValue":     1
+            }
+        ]
+    },
+
+The `regex` property is an array now. Internal, this is converted to
+
+    :::js
+    regex = [ "([0-9]*)", "(j|down|return)" ];
+
+    key = new RegExp("^" + regex[1] + "$");
+    regex = new RegExp(regex.join('') + "$");
+
+which means that the second element of the `regex` array has to match the *symbolic
+name* and the items in the array combined have to match the *keyboard buffer*.
+This way, you can make sure that the user has not typed "1", "r", "e", "t", "u", "r", "n"
+as individual characters which then matches the binding. The combination
+of of a `key` and `regex` property is not allowed.
+
+## Disallow matches ##
+
+Disallow matches is a way to tell the KeyboardManager to not use a binding if the
+`regex` property matches certain groups.
+
+    :::js
+    {
+        "regex":  [ "(meta_[0-9]*)*", "([0-9]+)" ],
+        "disallowMatches":  [ 1 ],
+        "exec": "insertText",
+        "params": [
+            {
+                "name": "text",
+                "match": 2,
+                "type": "text"
+            }
+        ],
+        "predicates": {
+            "isCommandKey": false
+        }
+    },
+
+Let's say the *keyboard buffer* looks like "meta_12". In this case, the RegExp
+will match the *buffer* and the first matched group will be "meta_1". But as we
+specified in the `disallowMatches` property that the first group is not allowed
+to match, this binding doesn't fit.
+
 ## Further reading ##
 
 To get more familiar with keymappings in Bespin, take a look at the files
