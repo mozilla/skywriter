@@ -94,6 +94,8 @@ exports.reload = function(pluginName, callback) {
     var plugin = pluginCatalog.plugins[pluginName];
     if (plugin == undefined) {
         throw 'Plugin undefined';
+    } else if (pluginCatalog.deactivatedPlugins[pluginName]) {
+        throw 'Plugin deactivated';
     }
     plugin.reload(callback);
 };
@@ -151,6 +153,9 @@ exports.reloadCommand = function(env, args, request) {
     } catch (e) {
         if (e == 'Plugin undefined') {
             request.doneWithError('Cannot find plugin ' + args.plugin);
+            return;
+        } else if (e == 'Plugin deactivated') {
+            request.doneWithError('Plugin ' + args.plugin + ' is deactivated.');
             return;
         }
         throw e;
