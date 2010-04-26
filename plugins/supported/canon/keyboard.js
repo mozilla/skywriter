@@ -361,7 +361,7 @@ var KeyboardManager = SC.Object.extend({
                 if (binding.params) {
                     var value;
                     binding.params.forEach(function(param) {
-                        if (!SC.none(param.match)) {
+                        if (!SC.none(param.match) && !SC.none(match)) {
                             value = match[param.match] || param.defaultValue;
                         } else {
                             value = param.defaultValue;
