@@ -68,6 +68,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     _selectedRange: null,
     _selectedRangeEndVirtual: null,
+    
+    classNames: ['text_editor'],
 
     _drag: function() {
         var point = this.convertFrameFromView(this._dragPoint);

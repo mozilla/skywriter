@@ -414,3 +414,6 @@ body.sc-theme {
     opacity: 0.3;
 }
 
+.sc-view .text_editor {
+    cursor: text;
+}

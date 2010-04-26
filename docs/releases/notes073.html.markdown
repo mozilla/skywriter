@@ -80,3 +80,4 @@ Fixes
   the command immediately (you'd have to reload the page). This
   works properly now, without reloads. (bug 556345)
 * The "version" command works properly (bug 552672)
+* The correct cursor is now used for the editor (bug 561332)
