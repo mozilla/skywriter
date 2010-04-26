@@ -53,6 +53,26 @@ var Range = require('rangeutils:utils/range');
             "pointer": "#insertText"
         },
         {
+            "ep": "command",
+            "name": "emacs moveLeft",
+            "pointer": "#moveLeft"
+        },
+        {
+            "ep": "command",
+            "name": "emacs moveRight",
+            "pointer": "#moveRight"
+        },
+        {
+            "ep": "command",
+            "name": "emacs moveUp",
+            "pointer": "#moveUp"
+        },
+        {
+            "ep": "command",
+            "name": "emacs moveDown",
+            "pointer": "#moveDown"
+        },
+        {
             "ep": "keymapping",
             "name": "emacs",
             "handleMetaKey": true,
@@ -64,7 +84,7 @@ var Range = require('rangeutils:utils/range');
                     },
                     {
                         "regex": [ "(?:meta_([0-9]*))*", "(down|ctrl_n)" ],
-                        "exec": "move down",
+                        "exec": "emacs moveDown",
                         "params": [
                             {
                                 "name": "n",
@@ -76,7 +96,7 @@ var Range = require('rangeutils:utils/range');
                     },
                     {
                         "regex": [ "(?:meta_([0-9]*))*", "(right|ctrl_f)" ],
-                        "exec": "move right",
+                        "exec": "emacs moveRight",
                         "params": [
                             {
                                 "name": "n",
@@ -88,7 +108,7 @@ var Range = require('rangeutils:utils/range');
                     },
                     {
                         "regex": [ "(?:meta_([0-9]*))*", "(up|ctrl_p)" ],
-                        "exec": "move up",
+                        "exec": "emacs moveUp",
                         "params": [
                             {
                                 "name": "n",
@@ -100,7 +120,7 @@ var Range = require('rangeutils:utils/range');
                     },
                     {
                         "regex": [ "(?:meta_([0-9]*))*", "(left|ctrl_b)" ],
-                        "exec": "move left",
+                        "exec": "emacs moveLeft",
                         "params": [
                             {
                                 "name": "n",
@@ -178,3 +198,34 @@ exports.insertText = function(env, args) {
     view.insertText(text);
 };
 
+exports.moveLeft = function(env, args) {
+    var view = env.get('view');
+
+    while (args.n--) {
+        view.moveLeft();
+    }
+};
+
+exports.moveRight = function(env, args) {
+    var view = env.get('view');
+
+    while (args.n--) {
+        view.moveRight();
+    }
+};
+
+exports.moveUp = function(env, args) {
+    var view = env.get('view');
+
+    while (args.n--) {
+        view.moveUp();
+    }
+};
+
+exports.moveDown = function(env, args) {
+    var view = env.get('view');
+
+    while (args.n--) {
+        view.moveDown();
+    }
+};

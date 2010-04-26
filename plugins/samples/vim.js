@@ -58,6 +58,16 @@ var Range = require('rangeutils:utils/range');
             "pointer": "#moveRight"
         },
         {
+            "ep": "command",
+            "name": "vim moveUp",
+            "pointer": "#moveUp"
+        },
+        {
+            "ep": "command",
+            "name": "vim moveDown",
+            "pointer": "#moveDown"
+        },
+        {
             "ep": "keymapping",
             "name": "vim",
             "states": {
@@ -68,7 +78,7 @@ var Range = require('rangeutils:utils/range');
                     },
                     {
                         "regex":    [ "([0-9]*)", "(k|up)" ],
-                        "exec":     "move up",
+                        "exec":     "vim moveUp",
                         "params": [
                             {
                                 "name":     "n",
@@ -80,7 +90,7 @@ var Range = require('rangeutils:utils/range');
                     },
                     {
                         "regex":    [ "([0-9]*)", "(j|down|return)" ],
-                        "exec":     "move down",
+                        "exec":     "vim moveDown",
                         "params": [
                             {
                                 "name":     "n",
@@ -125,30 +135,6 @@ var Range = require('rangeutils:utils/range');
                         "then":     "start"
                     },
                     {
-                        "key":      "up",
-                        "exec":     "move up",
-                        "params": [
-                            {
-                                "name":     "n",
-                                "match":    1,
-                                "type":     "number",
-                                "defaultValue":     1
-                            }
-                        ]
-                    },
-                    {
-                        "key":      "move down",
-                        "exec":     "move down",
-                        "params": [
-                            {
-                                "name":     "n",
-                                "match":    1,
-                                "type":     "number",
-                                "defaultValue":     1
-                            }
-                        ]
-                    },
-                    {
                         "key":      "right",
                         "exec":     "vim moveRight",
                         "params": [
@@ -184,7 +170,7 @@ exports.moveLeft = function(env, args) {
     var range = view.getSelectedRange();
 
     view.moveCursorTo({
-        column: Math.max(range.start.column - args.n, 0),
+        col: Math.max(range.start.col - args.n, 0),
         row: range.start.row
     });
 };
@@ -196,7 +182,23 @@ exports.moveRight = function(env, args) {
     var lineLength = lines[range.start.row].length
 
     view.moveCursorTo({
-        column: Math.min(range.start.column + args.n, lineLength),
+        col: Math.min(range.start.col + args.n, lineLength),
         row: range.start.row
     });
+};
+
+exports.moveUp = function(env, args) {
+    var view = env.get('view');
+
+    while (args.n--) {
+        view.moveUp();
+    }
+};
+
+exports.moveDown = function(env, args) {
+    var view = env.get('view');
+
+    while (args.n--) {
+        view.moveDown();
+    }
 };
