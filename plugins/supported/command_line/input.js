@@ -44,6 +44,7 @@ var Trace = require('bespin:util/stacktrace').Trace;
 
 var types = require('types:types');
 var keyboard = require('canon:keyboard');
+var environment = require('canon:environment');
 
 var hint = require('command_line:hint');
 var typehint = require('command_line:typehint');
@@ -125,7 +126,7 @@ exports.Input = SC.Object.extend({
         }
 
         if (!this.flags) {
-            flags = keyboard.buildFlags(environment.global, { });
+            flags = keyboard.buildFlags(this.env, { });
         }
 
         this.parse();

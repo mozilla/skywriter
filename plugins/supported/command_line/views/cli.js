@@ -50,6 +50,7 @@ var settings = require('settings').settings;
 
 var cliController = require('command_line:controller').cliController;
 var Level = require('command_line:hint').Level;
+var Input = require('command_line:input').Input;
 
 var imagePath = catalog.getResourceURL('command_line') + 'images/';
 var diff = new diff_match_patch();
@@ -146,6 +147,7 @@ exports.CliInputView = SC.View.design({
         // Completion
         this._completer = document.createElement('div');
         this._completer.className = 'cmd_completion';
+        layer.appendChild(this._completer);
 
         // The input field
         this._inputer = document.createElement('input');
@@ -281,14 +283,14 @@ exports.CliInputView = SC.View.design({
                 level = hint.level;
             }
 
-            this.$().setClass('error', level == Level.Error);
+            this.$().setClass('cmd_error', level == Level.Error);
         }.bind(this);
 
         hints.forEach(function(hint) {
             addHint(this._ex, hint);
         }.bind(this));
 
-        this.$().setClass('error', level == Level.Error);
+        this.$().setClass('cmd_error', level == Level.Error);
     },
 
     /**
