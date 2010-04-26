@@ -35,6 +35,13 @@ This guide is primarily geared toward people using the Bespin server at
 bespin.mozillalabs.com, but there are topics covered that also apply in the
 other uses of Bespin.
 
+Getting Help
+------------
+
+Beyond this documentation, Bespin also has mailing lists and a feedback
+forum. Take a look at the [Bespin Project homepage](http://mozillalabs.com/bespin/)
+for links to these resources.
+
 Getting Started
 ---------------
 
