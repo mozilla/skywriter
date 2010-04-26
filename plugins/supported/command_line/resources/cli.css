@@ -52,7 +52,7 @@ div.cmd_prompt {
 
 #command.commandLineError { color: red; }
 
-.cmd_line label.cmd_input input {
+.cmd_line .cmd_input {
   font-family: Arial,sans-serif;
   color: #FFF;
   font-size: 16px;
@@ -60,7 +60,7 @@ div.cmd_prompt {
   background: transparent;
   -webkit-box-shadow: none;
   outline: none;
-  width: 100%;
+  position:absolute; height:25px; bottom:0; left:40px; right:0;
 }
 
 .cmd_line label.cmd_input input:focus { color: #FFF; }
@@ -106,12 +106,12 @@ div.cmd_view div.cmd_rowin img { cursor: pointer; }
 div.cmd_view div.cmd_rowin:hover .cmd_hover { display: block; }
 
 
-/* div.cmd_view div { border: 0; }*/
+/* div.cmd_view div { border: 0; } */
 
 div.cmd_view .cmd_open {
-    padding: 3px 3px 2px 5px;
-    font-size: 12px;
-    color :#666;
+  padding: 3px 3px 2px 5px;
+  font-size: 12px;
+  color :#666;
 }
 div.cmd_view .cmd_open_history { width: 20px; }
 div.cmd_view .cmd_open_time { width: 40px; }
@@ -136,17 +136,17 @@ div.cmd_view div.cmd_rowout div.cmd_output { padding-left: 10px;
 }
 div.cmd_view div.cmd_rowout div.cmd_error { color: #f99; }
 div.cmd_view div.cmd_rowout th {
-    text-align: right;
-    vertical-align: top;
+  text-align: right;
+  vertical-align: top;
 }
 div.cmd_view div.cmd_rowout td,
 div.cmd_view div.cmd_rowout th,
 div.cmd_view div.cmd_rowout table { border: 0; padding: 1px 4px; }
 
 div.cmd_line a {
-    font-weight: bold;
-    color: inherit;
-    text-decoration: none;
+  font-weight: bold;
+  color: inherit;
+  text-decoration: none;
 }
 div.cmd_line a:hover { text-decoration: underline; cursor: pointer; }
 
@@ -159,45 +159,37 @@ div.cmd_view textarea {
 
 /*
 div.cmd_line div.cmd_hints {
-    position: relative;
-    width: 100%;
-    height: 100%;
+  position: relative; width: 100%; height: 100%;
 }
 */
 
 div.cmd_line div.cmd_ex {
-    position: absolute;
-    bottom: 0px;
-    z-index: 1;
-    line-height:1.2em;
+  position: absolute; bottom: 27px;
+  z-index: 1;
+  line-height:1.2em;
 }
-
 
 /*
 div.cmd_line div.cmd_ex samp {
-    color:#666;
-    z-index:10;
-    font-family:Arial, sans-serif;
-    position:absolute;
-    bottom:0;
-    left:0;
-    right:0;
-    display:block;
-    padding-bottom:6px;
+  color:#666;
+  z-index:10;
+  font-family:Arial, sans-serif;
+  position:absolute; bottom:0; left:0; right:0;
+  display:block;
+  padding-bottom:6px;
 }
 */
 
 div.cmd_line kbd {
-    border-top:2px solid #000;
-    -moz-border-top-colors:#000 rgb(30,25,22);
-    background:rgb(27,22,19);
-    background:-moz-linear-gradient(top, rgb(27,22,19), rgb(25,20,16));
-    background:-webkit-gradient(linear, left top, left bottom, from(rgb(27,22,19)), to(rgb(25,20,16)));
-    /*
-    position: absolute;
-    height:25px; bottom:0; left:0; right:0;
-    z-index: -10;
-    */
+  border-top:2px solid #000;
+  -moz-border-top-colors:#000 rgb(30,25,22);
+  background:rgb(27,22,19);
+  background:-moz-linear-gradient(top, rgb(27,22,19), rgb(25,20,16));
+  background:-webkit-gradient(linear, left top, left bottom, from(rgb(27,22,19)), to(rgb(25,20,16)));
+  /*
+  position: absolute; height:25px; bottom:0; left:0; right:0;
+  z-index: -10;
+  */
 }
 
 /*
@@ -207,4 +199,3 @@ div.cmd_line div.cmd_ex input { background-color:transparent; margin-bottom:3px;
   height:18px; width:90%
 }
 */
-

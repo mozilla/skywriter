@@ -50,8 +50,6 @@ var settings = require('settings').settings;
 
 var cliController = require('command_line:controller').cliController;
 var Level = require('command_line:hint').Level;
-var BespinButtonView = require('command_line:views/image_button').BespinButtonView;
-var PinView = require('command_line:views/pin').PinView;
 
 var imagePath = catalog.getResourceURL('command_line') + 'images/';
 var diff = new diff_match_patch();
@@ -68,29 +66,118 @@ var inputHeight = 25;
 exports.CliInputView = SC.View.design({
     classNames: [ 'cmd_line' ],
     layout: { height: 300, bottom: 0, left: 0, right: 0 },
-    childViews: [ 'contentView' ],
     hasFocus: false,
-    table: null,
-    _contentHeight: -1,
-    _completion: null,
 
     /**
-     * We need to know if blur events from the input really matter (i.e. are
-     * they going to the editor or another view, or just to another part of this
-     * view) so we listen for clicks in this view.
-     * This allows us to cancel the effects of a blur
+     * Are we currently pinned?
+     */
+    _pinned: undefined,
+
+    /**
+     * The DOM table of output elements
+     */
+    _table: undefined,
+
+    /**
+     * The DOM element that displays the current completion
+     */
+    _completer: undefined,
+
+    /**
+     * The input field
+     */
+    _inputer: undefined,
+
+    /**
+     * The parsed version of the input. A command_line:input.
+     */
+    _input: undefined,
+
+    /**
+     * Setup the UI
      */
     didCreateLayer: function() {
-        this._boundCancelBlur = this._cancelBlur.bind(this);
+        this._pinned = false;
+
         var layer = this.get('layer');
+
+        // We need to know if blur events from the input really matter (i.e. are
+        // they going to the editor or another view, or just to another part of
+        // this view) so we listen for clicks in this view.
+        // This allows us to cancel the effects of a blur
+        this._boundCancelBlur = this._cancelBlur.bind(this);
         layer.addEventListener('click', this._boundCancelBlur, true);
 
-        /*
-        var hint = this.getPath('contentView.display.output.layer');
+        // A div to hang hints on
         this._ex = document.createElement('div');
         this._ex.className = 'cmd_ex';
-        hint.appendChild(this._ex);
-        */
+        layer.appendChild(this._ex);
+
+        // Used as something to hang styles off for input area
+        var kbd = document.createElement('kbd');
+        layer.appendChild(kbd);
+
+        // CLI output table
+        this._table = document.createElement('div');
+        this._table.className = 'cmd_view';
+        layer.appendChild(this._table);
+
+        // Toolbar
+        var toolbar = document.createElement('div');
+        toolbar.className = 'cmd_toolbar';
+        layer.appendChild(toolbar);
+
+        // The pin/unpin button
+        var pin = document.createElement('img');
+        pin.src = 'images/pins.png';
+        pin.alt = 'Pin/Unpin the console output';
+        pin.onclick = function(ev) {
+            this._pinned = !this._pinned;
+            this.checkHeight();
+        }.bind(this);
+        toolbar.appendChild(pin);
+
+        // The prompt
+        var prompt = document.createElement('div');
+        prompt.className = 'cmd_prompt';
+        prompt.innerHTML = '<span class="cmd_brackets">{ }</span> &gt;';
+        layer.appendChild(prompt);
+
+        // Completion
+        this._completer = document.createElement('div');
+        this._completer.className = 'cmd_completion';
+
+        // The input field
+        this._inputer = document.createElement('input');
+        this._inputer.className = 'cmd_input';
+        this._input = Input.create({ typed: '' });
+
+        this._inputer.onkeydown = function(ev) {
+            environment.set('commandLine', this);
+            var handled = keyboardManager.processKeyEvent(ev, this, {
+                isCommandLine: true, isKeyUp: false
+            });
+
+            if (ev.keyCode === 13) {
+                cliController.executeCommand(this._input);
+                this.setInput('');
+            } else {
+                var typed = this._inputer.value;
+                if (this._input.typed !== typed) {
+                    this._input = Input.create({ typed: typed });
+                    this._input.argsPromise.then(hintUpdated.bind(this));
+                }
+            }
+            return handled;
+        }.bind(this);
+        this._inputer.onkeyup = function(ev) {
+            environment.set('commandLine', this);
+            return keyboardManager.processKeyEvent(ev, this, {
+                isCommandLine: true, isKeyUp: true
+            });
+        }.bind(this);
+        // valueBinding: 'command_line:controller#cliController.input',
+        layer.appendChild(this._inputer);
 
         this.checkHeight();
     },
@@ -107,10 +194,8 @@ exports.CliInputView = SC.View.design({
      * Called whenever anything happens that could affect the output display
      */
     checkHeight: function(source, event) {
-        var pinned = this.getPath('contentView.display.toolbar.pin.isSelected');
-
         var height = settings.get('minConsoleHeight');
-        if (pinned || this.get('hasFocus')) {
+        if (this._pinned || this.get('hasFocus')) {
             height = settings.get('maxConsoleHeight');
         }
         height += inputHeight;
@@ -121,7 +206,6 @@ exports.CliInputView = SC.View.design({
         }
     }.observes(
         '.hasFocus', // Open whenever we have the focus
-        '.contentView.display.toolbar.pin.isSelected', // Open/close on pin
         'settings:index#settings.maxConsoleHeight',
         'settings:index#settings.minConsoleHeight'
     ),
@@ -130,12 +214,7 @@ exports.CliInputView = SC.View.design({
      * Apply the proposed completion
      */
     complete: function() {
-        var completion = this.get('_completion');
-        if (completion === undefined || completion === null) {
-            return;
-        }
-
-        cliController.set('input', completion);
+        this._inputer.value = this._completer.value;
     },
 
     /**
@@ -143,7 +222,17 @@ exports.CliInputView = SC.View.design({
      */
     setInput: function(command) {
         command = command || '';
-        cliController.set('input', command);
+        this._inputer.value = command;
+        this._input = Input.create({ typed: command });
+    },
+
+    /**
+     * Place a given value on the command line.
+     * TODO: Perhaps we should store existing values that are on the command
+     * line so that we can put them back when return is pressed?
+     */
+    prompt: function(command) {
+        this._inputer.value = command;
     },
 
     /**
@@ -157,7 +246,7 @@ exports.CliInputView = SC.View.design({
         }
 
         var level = Level.Info;
-        this.set('_completion', '');
+        this.setCompletion('');
 
         /**
          * Find a way to populate a DOM node with this hint
@@ -181,11 +270,12 @@ exports.CliInputView = SC.View.design({
                 // Maybe we should do something clever with exceptions?
                 // For now we just toString and call it done.
                 var parent = document.createElement('article');
-                parent.appendChild(document.createTextNode(hint.element.toString()));
+                var text = hint.element.toString();
+                parent.appendChild(document.createTextNode(text));
                 hintNode.appendChild(parent);
             }
 
-            this.set('_completion', hint.completion);
+            this.setCompletion(hint.completion);
 
             if (hint.level > level) {
                 level = hint.level;
@@ -199,7 +289,7 @@ exports.CliInputView = SC.View.design({
         }.bind(this));
 
         this.$().setClass('error', level == Level.Error);
-    }.observes('command_line:controller#cliController.hints.[]'),
+    },
 
     /**
      * Utility to update the CLI output table whenever some value changes
@@ -238,7 +328,7 @@ exports.CliInputView = SC.View.design({
         rowin.ondblclick = function() {
             cliController.executeCommand(request.get('typed'));
         };
-        this.table.appendChild(rowin);
+        this._table.appendChild(rowin);
 
         // The execution time
         var hover = document.createElement('div');
@@ -287,7 +377,7 @@ exports.CliInputView = SC.View.design({
 
         var rowout = document.createElement('div');
         rowout.className = 'cmd_rowout';
-        this.table.appendChild(rowout);
+        this._table.appendChild(rowout);
 
         var outputEle = document.createElement('div');
         outputEle.className = 'cmd_output';
@@ -358,23 +448,9 @@ exports.CliInputView = SC.View.design({
         this.link(request, 'completed', function(completed) {
             throbEle.style.display = completed ? 'none' : 'block';
         });
+
+        // TODO: Add scroll to bottom code back in here
     }.observes('canon:request#history.requests.[]'),
-
-    /**
-     * Scrolls the command line output area to the bottom of the output.
-     */
-    scrollOutputToBottom: function() {
-        window.setTimeout(function() {
-            var height = this.getPath('contentView.display.output.contentView.layout').height;
-            if (height == this._contentHeight) {
-                return;
-            }
-
-            this._contentHeight = height;
-            var scrollview = this.getPath('contentView.display.output');
-            scrollview.scrollBy({ x: 0, y: 1000000 });
-        }.bind(this), 25);
-    }.observes('.contentView.display.output.contentView.layout'),
 
     /**
      * We can't know where the focus is going to (willLoseKeyResponderTo only
@@ -405,9 +481,9 @@ exports.CliInputView = SC.View.design({
             }, 1);
         }
 
-        // This list of things to observe should include all the views that can
-        // be KeyResponders. hmmm
-    }.observes('.contentView.input.isKeyResponder'),
+        // TODO: This list of things to observe should include all the views
+        // that can be KeyResponders. hmmm
+    }.observes('.isKeyResponder'),
 
     /**
      * We have reason to believe that a blur event shouldn't happen
@@ -426,30 +502,27 @@ exports.CliInputView = SC.View.design({
      * Push the focus into the input element
      */
     focus: function() {
-        this.getPath('contentView.input').becomeFirstResponder();
+        this._inputer.focus();
     },
 
     /**
      * Positions the insertion point at the end of the input element.
      */
     replaceSelection: function(text) {
-        var element = this.getPath('contentView.input').$('input').get(0);
         var length = text.length;
         cliController.set('input', text);
         window.setTimeout(function() {
-            element.setSelectionRange(length, length);
-        }, 0);
+            this._inputer.setSelectionRange(length, length);
+        }.bind(this), 0);
     },
 
-    init: function() {
-        arguments.callee.base.apply(this, arguments);
-
-        cliController.set('view', this);
-    },
-
-    completionChanged: function() {
-        var current = this.getPath('contentView.input.value');
-        var completion = this.getPath('._completion');
+    /**
+     * Set the completion field including setting some styling to ensure that
+     * everything displays properly.
+     * @param completion {string} The full completion value
+     */
+    setCompletion: function(completion) {
+        var current = this._inputer.value;
         var val;
         if (!completion) {
             val = '';
@@ -463,92 +536,7 @@ exports.CliInputView = SC.View.design({
                 '<span class="cmd_extension">' + extension + '</span>';
         }
         this.set('value', val);
-    }.observes('._completion'),
-
-    /**
-     * There's no good reason for having this contentView - the childViews could
-     * be directly on CliInputView, except that the observes() on focusChanged
-     * is borked without it.
-     * TODO: Work out what the borkage is about and fix
-     */
-    contentView: SC.View.design({
-        didCreateLayer: function() {
-            var layer = this.get('layer');
-
-            // Used as something to hang styles off for input area
-            var kbd = document.createElement('kbd');
-            layer.appendChild(kbd);
-
-            var table = document.createElement('div');
-            table.className = 'cmd_view';
-            this.parentView.table = table;
-            layer.appendChild(table);
-
-            var toolbar = document.createElement('div');
-            toolbar.className = 'cmd_toolbar';
-            layer.appendChild(toolbar);
-
-            // The pin/unpin button
-            var pin = document.createElement('img');
-            pin.src = 'images/pins.png';
-            pin.alt = 'Pin/Unpin the console output';
-            toolbar.appendChild(pin);
-
-            // The prompt
-            var prompt = document.createElement('div');
-            prompt.className = 'cmd_prompt';
-            prompt.innerHTML = '<span class="cmd_brackets">{ }</span> &gt;';
-            layer.appendChild(prompt);
-
-            // Completion
-            var completion = document.createElement('div');
-            completion.className = 'cmd_completion';
-        },
-
-        childViews: [ 'input' ],
-
-        input: SC.TextFieldView.design({
-            _processKeyEvent: function(ev, isKeyUp) {
-                var opt = { isCommandLine: true, isKeyUp: isKeyUp };
-                var cliInputView = this.getPath('parentView.parentView');
-                environment.set('commandLine', cliInputView);
-                return keyboardManager.processKeyEvent(ev, this, opt);
-            },
-
-            classNames: [ 'cmd_input' ],
-            valueBinding: 'command_line:controller#cliController.input',
-            layout: { height: 25, bottom: 0, left: 40, right: 0 },
-
-            keyDown: function(ev) {
-                var handled = this._processKeyEvent(ev, false);
-
-                if (ev.keyCode === 13) {
-                    // Make sure that the Enter key runs after any queued text
-                    // was inserted: see bug 558900.
-                    window.setTimeout(function() {
-                        SC.run(function() {
-                            cliController.exec(this);
-                        }.bind(this));
-                    }.bind(this), 0);
-                }
-
-                if (!handled) {
-                    handled = arguments.callee.base.apply(this, arguments);
-                }
-
-                return handled;
-            },
-
-            keyUp: function(ev) {
-                var handled = this._processKeyEvent(ev, true);
-                if (!handled) {
-                    handled = arguments.callee.base.apply(this, arguments);
-                }
-
-                return handled;
-            }
-        })
-    })
+    }
 });
 
 /**

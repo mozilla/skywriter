@@ -62,14 +62,30 @@ exports.Input = SC.Object.extend({
 
     /**
      * The global environment (as passed to the commands) to be passed to the
-     * various completion systems.
+     * various completion systems. Defaulted to environment.global if not
+     * specified.
      */
     env: undefined,
 
     /**
-     * Flags for us to check against the predicates specified with the commands
+     * Flags for us to check against the predicates specified with the commands.
+     * Defaulted to <tt>keyboard.buildFlags(environment.global, { });</tt> if
+     * not specified.
      */
     flags: undefined,
+
+    /**
+     * Output value. Should not be specified in ctor.
+     * The hints that we would like displayed to help the user enter a command.
+     */
+    hints: undefined,
+
+    /**
+     * Output value. Should not be specified in ctor.
+     * A promise of an args hash which contains typed values for use in
+     * executing the final command.
+     */
+    argsPromise: undefined,
 
     /**
      * Once tokenize() has been called, we have the #typed string cut up into
@@ -101,9 +117,18 @@ exports.Input = SC.Object.extend({
         if (this.typed === null) {
             throw new Error('Input requires something \'typed\' to work on');
         }
-        this._hints = [];
-        this._argsPromise = new Promise();
-        this._alive = true;
+        this.hints = [];
+        this.argsPromise = new Promise();
+
+        if (!this.env) {
+            this.env = environment.global;
+        }
+
+        if (!this.flags) {
+            flags = keyboard.buildFlags(environment.global, { });
+        }
+
+        this.parse();
     },
 
     /**
@@ -132,7 +157,7 @@ exports.Input = SC.Object.extend({
 
             // Something failed, so the argsPromise wont complete. Kill it
             if (!success) {
-                this._argsPromise.reject(new Error('Parse error'));
+                this.argsPromise.reject(new Error('Parse error'));
             }
         } catch (ex) {
             var trace = new Trace(ex, true);
@@ -140,21 +165,8 @@ exports.Input = SC.Object.extend({
             console.error(ex);
             trace.log(3);
             console.groupEnd();
-            this._argsPromise.reject(ex);
+            this.argsPromise.reject(ex);
         }
-
-        return {
-            hints: this._hints,
-            argsPromise: this._argsPromise
-        };
-    },
-
-    /**
-     * Request early termination - the results of the current parse will not
-     * be used.
-     */
-    cancel: function() {
-        this._alive = false;
     },
 
     /**
@@ -167,7 +179,7 @@ exports.Input = SC.Object.extend({
             // a complete novice a 'type help' message is very annoying, so we
             // need to find a way to only display this message once, or for
             // until the user click a 'close' button or similar
-            this._hints.push(hint.Hint.create({
+            this.hints.push(hint.Hint.create({
                 level: hint.Level.Incomplete,
                 element: "Type a command, see 'help' for available commands."
             }));
@@ -268,7 +280,7 @@ exports.Input = SC.Object.extend({
                         ': Pointer ' + commandExt._pluginName + ':' + commandExt.pointer + ' failed to load.' + ex
                 }));
             });
-            this._hints.push(loadPromise);
+            this.hints.push(loadPromise);
 
             // The user hasn't started to type any params
             if (this._parts.length === 1) {
@@ -300,7 +312,7 @@ exports.Input = SC.Object.extend({
 
         if (hintSpec) {
             var hintPromise = typehint.getHint(this, hintSpec);
-            this._hints.push(hintPromise);
+            this.hints.push(hintPromise);
         }
 
         return !SC.none(this._commandExt);
@@ -336,7 +348,7 @@ exports.Input = SC.Object.extend({
                 return true;
             }
 
-            this._hints.push(hint.Hint.create({
+            this.hints.push(hint.Hint.create({
                 level: hint.Level.Error,
                 element: this._commandExt.name + ' does not take any parameters'
             }));
@@ -368,7 +380,7 @@ exports.Input = SC.Object.extend({
         var unparsed = false;
         unparsedArgs.forEach(function(unparsedArg) {
             if (used.indexOf(unparsedArg) == -1) {
-                this._hints.push(hint.Hint.create({
+                this.hints.push(hint.Hint.create({
                     level: hint.Level.Error,
                     element: 'Parameter \'' + unparsedArg + '\' makes no sense.'
                 }));
@@ -390,7 +402,7 @@ exports.Input = SC.Object.extend({
             assignment.param.type.assignments = this._assignments;
 
             if (assignment) {
-                this._hints.push(typehint.getHint(this, assignment));
+                this.hints.push(typehint.getHint(this, assignment));
             }
         }
 
@@ -420,7 +432,7 @@ exports.Input = SC.Object.extend({
                 } else {
                     if (i + 1 < this._unparsedArgs.length) {
                         // Missing value for this param
-                        this._hints.push(hint.Hint.create({
+                        this.hints.push(hint.Hint.create({
                             level: hint.Level.Incomplete,
                             element: 'Missing parameter: ' + param.name
                         }));
@@ -448,7 +460,7 @@ exports.Input = SC.Object.extend({
 
             if (param.defaultValue === undefined) {
                 // There is no default, and we've not supplied one so far
-                this._hints.push(hint.Hint.create({
+                this.hints.push(hint.Hint.create({
                     level: hint.Level.Incomplete,
                     element: 'Missing parameter: ' + param.name
                 }));
@@ -479,7 +491,7 @@ exports.Input = SC.Object.extend({
     _convertTypes: function() {
         // Use {} when there are no params
         if (!this._commandExt.params) {
-            this._argsPromise.resolve({});
+            this.argsPromise.resolve({});
             return true;
         }
 
@@ -500,7 +512,7 @@ exports.Input = SC.Object.extend({
                 assignment.converted = converted;
                 argOutputs[assignment.param.name] = converted;
             }, function(ex) {
-                this._hints.push(hint.Hint.create({
+                this.hints.push(hint.Hint.create({
                     level: hint.Level.Error,
                     element: 'Can\'t convert \'' + value + '\' to a ' +
                         param.type + ': ' + ex
@@ -511,7 +523,7 @@ exports.Input = SC.Object.extend({
         }.bind(this));
 
         groupPromises(convertPromises).then(function() {
-            this._argsPromise.resolve(argOutputs);
+            this.argsPromise.resolve(argOutputs);
         }.bind(this));
 
         return true;

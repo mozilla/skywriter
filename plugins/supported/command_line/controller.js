@@ -35,157 +35,55 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
-var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var Trace = require('bespin:util/stacktrace').Trace;
 
-var environment = require('canon:environment');
 var keyboard = require('canon:keyboard');
 var Request = require('canon:request').Request;
 
-var hint = require('command_line:hint');
-var typehint = require('command_line:typehint');
-var Input = require('command_line:input').Input;
+/**
+ * Debug to the console
+ */
+var loadError = function(ex) {
+    var trace = new Trace(ex, true);
+    console.group('Error executing: ' + input.typed);
+    console.error(ex);
+    trace.log(3);
+    console.groupEnd();
+};
 
 /**
- * Command line controller.
+ * Take the results of a parseInput, wait for the argsPromise to resolve
+ * load the command and then execute it.
  */
-exports.cliController = SC.Object.create({
-    /**
-     * @property{CliInputView}
-     * The current command line view.
-     */
-    view: null,
+exports.executeResults = function(input) {
+    input.argsPromise.then(function(args) {
+        input._commandExt.load().then(function(command) {
 
-    /**
-     * A string containing the current contents of the command line
-     */
-    input: null,
+            var request = Request.create({
+                command: command,
+                commandExt: input._commandExt,
+                typed: input.typed,
+                args: args
+            });
 
-    /**
-     * A set of hints which could help the user complete their typing
-     */
-    hints: null,
+            // Check the function pointed to in the meta-data exists
+            if (!command) {
+                request.doneWithError('Command not found.');
+                return;
+            }
 
-    /**
-     * Is the input in a state where it could possibly work?
-     */
-    error: false,
+            try {
+                command(input.env, args, request);
+            } catch (ex) {
+                var trace = new Trace(ex, true);
+                console.group('Error executing command \'' + input.typed + '\'');
+                console.error(ex);
+                trace.log(3);
+                console.groupEnd();
 
-    init: function() {
-        this.hints = [];
-    },
-
-    /**
-     * Called by the UI to execute a command. Assumes that #input is bound to
-     * the CLI input text field.
-     */
-    exec: function() {
-        this.executeCommand(this.get('input'));
-    },
-
-    /**
-     * We need to re-parse the CLI whenever the input changes
-     */
-    _inputChanged: function() {
-        var hints = this.get('hints');
-        hints.propertyWillChange('[]');
-        hints.length = 0;
-
-        var input = Input.create({
-            typed: this.get('input'),
-            env: environment.global,
-            flags: keyboard.buildFlags(environment.global, { })
-        });
-        var results = input.parse();
-        results.hints.forEach(function(hint) {
-            hints.pushObject(hint);
-        }.bind(this));
-
-        hints.propertyDidChange('[]');
-    }.observes('input'),
-
-    /**
-     * Execute a command manually without using the UI
-     * @param typed {String} The command to turn into an Instruction and execute
-     */
-    executeCommand: function(typed) {
-        console.log('executeCommand "' + typed + '"');
-        var hints = this.get('hints');
-
-        if (!typed || typed === '') {
-            return;
-        }
-
-        var input = Input.create({
-            typed: typed,
-            env: environment.global,
-            flags: keyboard.buildFlags(environment.global, { })
-        });
-        var results = input.parse();
-
-        var self = this;
-
-        var loadError = function(ex) {
-            var trace = new Trace(ex, true);
-            console.group('Error executing: ' + typed);
-            console.error(ex);
-            trace.log(3);
-            console.groupEnd();
-
-            self.set('input', '');
-        };
-
-        results.argsPromise.then(function(args) {
-            input._commandExt.load().then(function(command) {
-                self.set('input', '');
-
-                // Check the function pointed to in the meta-data exists
-                if (!command) {
-                    hints.pushObject(hint.Hint.create({
-                        level: hint.Level.Error,
-                        element: 'Command not found.'
-                    }));
-                    return;
-                }
-
-                var request = Request.create({
-                    command: command,
-                    commandExt: input._commandExt,
-                    typed: typed,
-                    args: args
-                });
-
-                try {
-                    command(environment.global, args, request);
-                } catch (ex) {
-                    var trace = new Trace(ex, true);
-                    console.group('Error executing command \'' + typed + '\'');
-                    console.error(ex);
-                    trace.log(3);
-                    console.groupEnd();
-
-                    // TODO: Better UI
-                    hints.pushObject(hint.Hint.create({
-                        level: hint.Level.Error,
-                        element: ex.toString()
-                    }));
-
-                    request.doneWithError(ex);
-                }
-            }, loadError);
+                request.doneWithError(ex);
+            }
         }, loadError);
-    },
-
-    /**
-     * Replaces the contents of the command line with the given text as a
-     * prompt, positions the insertion point at the end, and focuses the
-     * command line.
-     */
-    prompt: function(text) {
-        var view = this.get('view');
-        view.focus();
-        view.replaceSelection(text);
-    }
-});
+    }, loadError);
+};
