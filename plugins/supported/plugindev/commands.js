@@ -229,7 +229,7 @@ exports.remove = function(env, args, request) {
     }
     catalog.removePlugin(pluginName);
 
-    var pluginConfigFile = files.getFile('BespinSettings/pluginInfo.json');
+    var pluginConfigFile = bespin.files.getFile('BespinSettings/pluginInfo.json');
 
     pluginConfigFile.loadContents().then(function(contents) {
         var pluginConfig = JSON.parse(contents);
@@ -246,13 +246,13 @@ exports.remove = function(env, args, request) {
         if (found) {
             var newConfig = JSON.stringify(pluginConfig);
             pluginConfigFile.saveContents(newConfig).then(function() {
-                request.done('Plugin ' + pluginName + ' removed (but the files have been saved)');
+                request.done('Plugin ' + pluginName + ' removed and plugin config file saved.');
             }, function(error) {
                 request.doneWithError('Unable to save plugin config file: ' + error.message);
             });
         } else {
             var obj = files.remove(plugin.userLocation).then(function() {
-                request.done('Plugin removed.');
+                request.done('Plugin ' + pluginName + ' removed.');
             }, function(error) {
                 request.doneWithError('Unable to delete plugin files at '
                     + plugin.userLocation + ' (' + error.message + ')');
