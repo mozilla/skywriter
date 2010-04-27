@@ -41,22 +41,10 @@ require("globals");
 var Promise = require("promise").Promise;
 var builtins = require("builtins");
 var console = require("console").console;
+var objectKeys = require("util/util").objectKeys;
 var r = require;
 
 var tiki = require.loader;
-
-var object_keys = Object.keys;
-if (!object_keys) {
-    object_keys = function(obj) {
-        var k, ret = [];
-        for (k in obj) {
-            if (obj.hasOwnProperty(k)) {
-                ret.push(k);
-            }
-        }
-        return ret;
-    };
-}
 
 /**
  * Split an extension pointer from module/path#objectName into an object of the
@@ -168,6 +156,20 @@ exports.ExtensionPoint = SC.Object.extend({
         this.extensions = [];
         this.handlers = [];
     },
+    
+    /**
+    * Retrieves the list of plugins which provide extensions
+    * for this extension point.
+    */
+    getImplementingPlugins: function() {
+        var pluginSet = {};
+        this.extensions.forEach(function(ext) {
+            pluginSet[ext._pluginName] = true;
+        });
+        var matches = objectKeys(pluginSet);
+        matches.sort();
+        return matches;
+    },
 
     /**
      * If we are keeping an index (an indexOn property is set on the
@@ -238,7 +240,7 @@ exports.Plugin = SC.Object.extend({
         var provides = this.provides;
         var self = this;
         this.provides.forEach(function(extension) {
-            var ep = self.get("catalog").getExtensionPoint(extension.ep);
+            var ep = self.get("catalog").getExtensionPoint(extension.ep, true);
             ep.register(extension);
         });
     },
@@ -247,7 +249,7 @@ exports.Plugin = SC.Object.extend({
         var provides = this.provides;
         var self = this;
         this.provides.forEach(function(extension) {
-            var ep = self.get("catalog").getExtensionPoint(extension.ep);
+            var ep = self.get("catalog").getExtensionPoint(extension.ep, true);
             ep.unregister(extension);
         });
     },
@@ -358,7 +360,7 @@ exports.Plugin = SC.Object.extend({
 
         var self = this;
 
-        var pluginList = object_keys(this.catalog.plugins);
+        var pluginList = objectKeys(this.catalog.plugins);
 
         this._findDependents(pluginList, dependents);
 
@@ -478,7 +480,7 @@ exports.Catalog = SC.Object.extend({
 
         // set up the "extensionpoint" extension point.
         // it indexes on name.
-        var ep = this.getExtensionPoint("extensionpoint");
+        var ep = this.getExtensionPoint("extensionpoint", true);
         ep.set("indexOn", "name");
         this.loadMetadata(builtins.metadata);
     },
@@ -518,9 +520,11 @@ exports.Catalog = SC.Object.extend({
         return obj;
     },
 
-    /** Retrieve an extension point object by name. */
-    getExtensionPoint: function(name) {
-        if (this.points[name] === undefined) {
+    /** Retrieve an extension point object by name, optionally creating it if it
+    * does not exist.
+    */
+    getExtensionPoint: function(name, create) {
+        if (create && this.points[name] === undefined) {
             this.points[name] = exports.ExtensionPoint.create({
                 name: name,
                 catalog: this
@@ -575,7 +579,7 @@ exports.Catalog = SC.Object.extend({
     },
 
     _registerExtensionPoint: function(extension) {
-        var ep = this.getExtensionPoint(extension.name);
+        var ep = this.getExtensionPoint(extension.name, true);
         ep.handlers.push(extension);
         if (extension.indexOn) {
             ep.set("indexOn", extension.indexOn);
@@ -583,7 +587,7 @@ exports.Catalog = SC.Object.extend({
     },
 
     _registerExtensionHandler: function(extension) {
-        var ep = this.getExtensionPoint(extension.name);
+        var ep = this.getExtensionPoint(extension.name, true);
         ep.handlers.push(extension);
         if (extension.register) {
             extension.load(function(register) {
@@ -646,7 +650,7 @@ exports.Catalog = SC.Object.extend({
             }
 
             if (md.dependencies) {
-                md.depends = object_keys(md.dependencies);
+                md.depends = objectKeys(md.dependencies);
             }
             tiki.register(pluginName, md);
         }
@@ -669,7 +673,7 @@ exports.Catalog = SC.Object.extend({
                     } else if (epname == "extensionhandler") {
                         this._registerExtensionHandler(extension);
                     }
-                    var ep = this.getExtensionPoint(extension.ep);
+                    var ep = this.getExtensionPoint(extension.ep, true);
                     ep.register(extension);
                 }
             } else {
@@ -886,7 +890,7 @@ var _removeFromList = function(regex, array, matchFunc) {
 };
 
 var _removeFromObject = function(regex, obj) {
-    var keys = object_keys(obj);
+    var keys = objectKeys(obj);
     var i = keys.length;
     while (--i > 0) {
         if (regex.exec(keys[i])) {

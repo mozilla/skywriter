@@ -89,3 +89,7 @@
 .plugin_list table .deactivated {
     background-color: #7A480D;
 }
+
+..plugin_info li {
+    list-style-type: disc;
+}

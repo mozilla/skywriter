@@ -158,6 +158,32 @@
         },
         {
             "ep": "command",
+            "name": "plugin info",
+            "description": "Display detailed information for a plugin",
+            "params": [
+                {
+                    "name": "pluginName",
+                    "type": "text",
+                    "description": "name of the plugin for which to display info"
+                }
+            ],
+            "pointer": "commands#info"
+        },
+        {
+            "ep": "command",
+            "name": "ep",
+            "description": "Display information about the extension points in this Bespin",
+            "params": [
+                {
+                    "name": "ep",
+                    "type": "text",
+                    "description": "(optional) name of an extension point for which to display details"
+                }
+            ],
+            "pointer": "commands#ep"
+        },
+        {
+            "ep": "command",
             "name": "debug",
             "description": "Commands useful for debugging"
         },

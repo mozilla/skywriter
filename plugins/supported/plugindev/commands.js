@@ -39,6 +39,7 @@ var catalog = require('bespin:plugins').catalog;
 var Promise = require('bespin:promise').Promise;
 var groupPromises = require('bespin:promise').group;
 var SC = require('sproutcore/runtime').SC;
+var objectKeys = require('bespin:util/util').objectKeys;
 
 var server = require('bespin_server').server;
 var pathutils = require('filesystem:path');
@@ -158,7 +159,7 @@ exports.add = function(env, args, request) {
         data.pluginConfig.plugins.push(path);
 
         data.prChangeDone.resolve(prSaveDone);
-    })
+    });
 
     request.async();
 };
@@ -442,4 +443,92 @@ exports.activate = function(env, args, request) {
     });
 
     request.async();
+};
+
+// plugin info command
+exports.info = function(env, args, request) {
+    if (!args.pluginName) {
+        request.doneWithError('Please provide a plugin name.');
+        return;
+    }
+    var plugin = catalog.plugins[args.pluginName];
+    if (!plugin) {
+        request.doneWithError('Unknown plugin: ' + pluginName);
+        return;
+    }
+    var output = [];
+    output.push('<div class="plugin_info"><h2>');
+    output.push(plugin.name);
+    output.push('</h2>');
+    output.push('<p>');
+    output.push(plugin.description);
+    output.push('</p>');
+    output.push('<h3>Plugin provides:</h3>');
+    output.push('<ul>');
+    plugin.provides.forEach(function(provided) {
+        output.push('<li>');
+        output.push(provided.ep);
+        if (provided.name) {
+            output.push(" (");
+            output.push(provided.name);
+            output.push(")");
+        }
+        output.push('</li>');
+    });
+    output.push('</ul>');
+    output.push('</div>');
+    request.done(output.join(""));
+};
+
+// ep command
+exports.ep = function(env, args, request) {
+    var output = '';
+    if (args.ep) {
+        var ep = catalog.getExtensionPoint(args.ep);
+        if (ep === undefined) {
+            request.doneWithError('Unknown extension point: ' + args.ep);
+            return;
+        }
+        output += '<div class="ep_info"><h2>';
+        output += ep.name;
+        output += '</h2>';
+        output += '<p>';
+        output += ep.description;
+        output += '</p>';
+        if (ep.params) {
+            output += '<h3>Parameters:</h3>';
+            output += '<table class="params"><tbody>';
+            ep.params.forEach(function(param) {
+                output += '<tr><td>';
+                output += param.name;
+                if (param.type) {
+                    output += ' (';
+                    output += param.type;
+                    output += ')';
+                }
+                output += '</td><td>';
+                output += param.description;
+                output += '</td></tr>';
+            });
+            output += '</tbody></table>';
+        }
+        output += '<h3>Installed plugins which provide these extensions:</h3>';
+        output += '<ul>';
+        ep.getImplementingPlugins().forEach(function(pluginName) {
+            output += '<li>';
+            output += pluginName;
+            output += '</li>';
+        });
+        output += '</ul></div>';
+    } else {
+        output += '<div class="ep_info"><h2>Available extension points</h2>';
+        output += '<ul>';
+        var epNames = objectKeys(catalog.points);
+        epNames.sort();
+        epNames.forEach(function(epName) {
+            output += '<li>' + epName + '</li>';
+        });
+        output += '</ul></div>';
+    }
+    request.done(output);
 };
