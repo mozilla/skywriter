@@ -567,7 +567,7 @@ exports.CliInputView = SC.View.design({
             val = '<span class="cmd_existing">' + current + '</span>' +
                 '<span class="cmd_extension">' + extension + '</span>';
         }
-console.log('comp', val);
+
         this._completer.innerHTML = val;
     }
 });
