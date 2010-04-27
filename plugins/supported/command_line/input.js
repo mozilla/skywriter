@@ -45,6 +45,7 @@ var Trace = require('bespin:util/stacktrace').Trace;
 var types = require('types:types');
 var keyboard = require('canon:keyboard');
 var environment = require('canon:environment');
+var Request = require('canon:request').Request;
 
 var hint = require('command_line:hint');
 var typehint = require('command_line:typehint');
@@ -129,37 +130,10 @@ exports.Input = SC.Object.extend({
             flags = keyboard.buildFlags(this.env, { });
         }
 
-        this.parse();
-    },
-
-    /**
-     * Go through the input checking and generating hints, and if possible an
-     * arguments array.
-     * @return An object that contains a set of hints and hintPromises, and
-     * a promise of a argument object if the parse succeeds.
-     */
-    parse: function() {
-        var success = false;
-
         try {
-            // Cut up the input into parts
-            if (this._tokenize()) {
-                // Split the command from the args
-                if (this._split()) {
-                    // Assign input to declared parameters
-                    if (this._assign()) {
-                        // Convert input into declared types
-                        if (this._convertTypes()) {
-                            success = true;
-                        }
-                    }
-                }
-            }
-
-            // Something failed, so the argsPromise wont complete. Kill it
-            if (!success) {
-                this.argsPromise.reject(new Error('Parse error'));
-            }
+            // Go through the input checking and generating hints,
+            // and if possible an arguments array.
+            this._tokenize();
         } catch (ex) {
             var trace = new Trace(ex, true);
             console.group('Error calling command: ' + this.typed);
@@ -175,17 +149,16 @@ exports.Input = SC.Object.extend({
      */
     _tokenize: function() {
         if (!this.typed || this.typed === '') {
-            /*
             // We would like to put some initial help here, but for anyone but
             // a complete novice a 'type help' message is very annoying, so we
             // need to find a way to only display this message once, or for
             // until the user click a 'close' button or similar
             this.hints.push(hint.Hint.create({
                 level: hint.Level.Incomplete,
-                element: "Type a command, see 'help' for available commands."
+                element: null
             }));
-            */
-            return false;
+
+            return;
         }
 
         var incoming = this.typed.trimLeft().split(/\s+/);
@@ -221,7 +194,8 @@ exports.Input = SC.Object.extend({
             }
         }
 
-        return true;
+        // Split the command from the args
+        this._split();
     },
 
     /**
@@ -316,7 +290,12 @@ exports.Input = SC.Object.extend({
             this.hints.push(hintPromise);
         }
 
-        return !SC.none(this._commandExt);
+        if (SC.none(this._commandExt)) {
+            return;
+        }
+
+        // Assign input to declared parameters
+        this._assign();
     },
 
     /**
@@ -339,35 +318,40 @@ exports.Input = SC.Object.extend({
         var params = this._commandExt.params;
         var unparsedArgs = this._unparsedArgs;
 
-        // If this command does not take parameters
+        // Create an error if the command does not take parameters, but we have
+        // been given them ...
         if (!params || params.length === 0) {
-            if (unparsedArgs.length === 0) {
-                return true;
-            }
-            // Also no problem if there is a blank parameter
-            if (unparsedArgs.length === 1 && unparsedArgs[0].trim() === '') {
-                return true;
-            }
+            // No problem if we're passed nothing or an empty something
+            var argCount = 0;
+            unparsedArgs.forEach(function(unparsedArg) {
+                if (unparsedArg.trim() !== '') {
+                    argCount++;
+                }
+            });
 
-            this.hints.push(hint.Hint.create({
-                level: hint.Level.Error,
-                element: this._commandExt.name + ' does not take any parameters'
-            }));
-            return false;
+            if (argCount !== 0) {
+                this.hints.push(hint.Hint.create({
+                    level: hint.Level.Error,
+                    element: this._commandExt.name + ' does not take any parameters'
+                }));
+                return;
+            }
         }
 
-        // Special case: if there is only 1 parameter, and that's of type text
-        // we put all the params into the first param
+        // Special case: if there is only 1 parameter, and that's of type
+        // text we put all the params into the first param
         if (params.length == 1 && params[0].type == 'text') {
             // Warning: There is some potential problem here if spaces are
             // significant. It might be better to chop the command of the
-            // start of this.typed? But that's not easy because there could be
-            // multiple spaces in the command if we're doing sub-commands
+            // start of this.typed? But that's not easy because there could
+            // be multiple spaces in the command if we're doing sub-commands
             this._assignments[0] = {
                 value: unparsedArgs.length === 0 ? null : unparsedArgs.join(' '),
                 param: params[0]
             };
-            return true;
+
+            // Continue to the next step;
+            this._convertTypes();
         }
 
         // The normal case where we have to assign params individually
@@ -390,7 +374,7 @@ exports.Input = SC.Object.extend({
         }.bind(this));
 
         if (unparsed) {
-            return false;
+            return;
         }
 
         // Show a hint for the last parameter
@@ -407,7 +391,8 @@ exports.Input = SC.Object.extend({
             }
         }
 
-        return true;
+        // Convert input into declared types
+        this._convertTypes();
     },
 
     /**
@@ -441,7 +426,7 @@ exports.Input = SC.Object.extend({
                         used.push(this._unparsedArgs[i + 1]);
                     }
                 }
-                return true;
+                return;
             }
         }
 
@@ -467,8 +452,6 @@ exports.Input = SC.Object.extend({
                 }));
             }
         }
-
-        return true;
     },
 
     /**
@@ -493,7 +476,7 @@ exports.Input = SC.Object.extend({
         // Use {} when there are no params
         if (!this._commandExt.params) {
             this.argsPromise.resolve({});
-            return true;
+            return;
         }
 
         // The data we pass to the command
@@ -515,8 +498,8 @@ exports.Input = SC.Object.extend({
             }, function(ex) {
                 this.hints.push(hint.Hint.create({
                     level: hint.Level.Error,
-                    element: 'Can\'t convert \'' + value + '\' to a ' +
-                        param.type + ': ' + ex
+                    element: 'Can\'t convert \'' + assignment.value +
+                        '\' to a ' + param.type + ': ' + ex
                 }));
             }.bind(this));
 
@@ -526,8 +509,6 @@ exports.Input = SC.Object.extend({
         groupPromises(convertPromises).then(function() {
             this.argsPromise.resolve(argOutputs);
         }.bind(this));
-
-        return true;
     },
 
     /**
@@ -542,6 +523,51 @@ exports.Input = SC.Object.extend({
         } else {
             return new Promise().resolve(assignment.param.defaultValue);
         }
+    },
+
+    /**
+     * Take the results of a parseInput, wait for the argsPromise to resolve
+     * load the command and then execute it.
+     */
+    execute: function() {
+        // Debug to the console
+        var loadError = function(ex) {
+            var trace = new Trace(ex, true);
+            console.group('Error executing: ' + this.typed);
+            console.error(ex);
+            trace.log(3);
+            console.groupEnd();
+        }.bind(this);
+
+        this.argsPromise.then(function(args) {
+            this._commandExt.load().then(function(command) {
+
+                var request = Request.create({
+                    command: command,
+                    commandExt: this._commandExt,
+                    typed: this.typed,
+                    args: args
+                });
+
+                // Check the function pointed to in the meta-data exists
+                if (!command) {
+                    request.doneWithError('Command not found.');
+                    return;
+                }
+
+                try {
+                    command(this.env, args, request);
+                } catch (ex) {
+                    var trace = new Trace(ex, true);
+                    console.group('Error executing command \'' + this.typed + '\'');
+                    console.error(ex);
+                    trace.log(3);
+                    console.groupEnd();
+
+                    request.doneWithError(ex);
+                }
+            }.bind(this), loadError);
+        }.bind(this), loadError);
     }
 });
 

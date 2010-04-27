@@ -43,12 +43,13 @@ var util = require('bespin:util/util');
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 
+var keyutil = require('canon:keyutil');
+
 var request = require('canon:request');
 var keyboardManager = require('canon:keyboard').keyboardManager;
 var environment = require('canon:environment').global;
 var settings = require('settings').settings;
 
-var cliController = require('command_line:controller').cliController;
 var Level = require('command_line:hint').Level;
 var Input = require('command_line:input').Input;
 
@@ -67,7 +68,12 @@ var inputHeight = 25;
 exports.CliInputView = SC.View.design({
     classNames: [ 'cmd_line' ],
     layout: { height: 300, bottom: 0, left: 0, right: 0 },
-    hasFocus: false,
+
+    /**
+     * Used to track if we have focus, and therefore should the CLI be expanded
+     * or collapsed
+     */
+    _hasFocus: false,
 
     /**
      * Are we currently pinned?
@@ -130,9 +136,10 @@ exports.CliInputView = SC.View.design({
 
         // The pin/unpin button
         var pin = document.createElement('img');
-        pin.src = 'images/pins.png';
+        pin.src = imagePath + 'pinout.png';
         pin.alt = 'Pin/Unpin the console output';
         pin.onclick = function(ev) {
+            // TODO: change the image
             this._pinned = !this._pinned;
             this.checkHeight();
         }.bind(this);
@@ -140,7 +147,7 @@ exports.CliInputView = SC.View.design({
 
         // The prompt
         var prompt = document.createElement('div');
-        prompt.className = 'cmd_prompt';
+        prompt.className = 'cmd_prompt cmd_gt';
         prompt.innerHTML = '<span class="cmd_brackets">{ }</span> &gt;';
         layer.appendChild(prompt);
 
@@ -154,32 +161,44 @@ exports.CliInputView = SC.View.design({
         this._inputer.className = 'cmd_input';
         this._input = Input.create({ typed: '' });
 
-        this._inputer.onkeydown = function(ev) {
+        keyutil.addKeyDownListener(this._inputer, function(ev) {
             environment.set('commandLine', this);
             var handled = keyboardManager.processKeyEvent(ev, this, {
                 isCommandLine: true, isKeyUp: false
             });
+            return handled;
+        }.bind(this));
+
+        this._inputer.onkeyup = function(ev) {
+            environment.set('commandLine', this);
+            var handled = keyboardManager.processKeyEvent(ev, this, {
+                isCommandLine: true, isKeyUp: true
+            });
 
             if (ev.keyCode === 13) {
-                cliController.executeCommand(this._input);
+                this._input.execute();
                 this.setInput('');
             } else {
                 var typed = this._inputer.value;
                 if (this._input.typed !== typed) {
                     this._input = Input.create({ typed: typed });
-                    this._input.argsPromise.then(hintUpdated.bind(this));
+                    this.hintUpdated();
                 }
             }
+
             return handled;
         }.bind(this);
-        this._inputer.onkeyup = function(ev) {
-            environment.set('commandLine', this);
-            return keyboardManager.processKeyEvent(ev, this, {
-                isCommandLine: true, isKeyUp: true
-            });
-        }.bind(this);
-        // valueBinding: 'command_line:controller#cliController.input',
         layer.appendChild(this._inputer);
+
+        layer.addEventListener('focus', function(ev) {
+            this._hasFocus = true;
+            this.checkHeight();
+        }.bind(this), true);
+
+        layer.addEventListener('blur', function(ev) {
+            this._hasFocus = false;
+            this.checkHeight();
+        }.bind(this), true);
 
         this.checkHeight();
     },
@@ -195,9 +214,9 @@ exports.CliInputView = SC.View.design({
     /**
      * Called whenever anything happens that could affect the output display
      */
-    checkHeight: function(source, event) {
+    checkHeight: function() {
         var height = settings.get('minConsoleHeight');
-        if (this._pinned || this.get('hasFocus')) {
+        if (this._pinned || this._hasFocus) {
             height = settings.get('maxConsoleHeight');
         }
         height += inputHeight;
@@ -207,7 +226,6 @@ exports.CliInputView = SC.View.design({
             //this.getPath('contentView.display.hint').updateLayout();
         }
     }.observes(
-        '.hasFocus', // Open whenever we have the focus
         'settings:index#settings.maxConsoleHeight',
         'settings:index#settings.minConsoleHeight'
     ),
@@ -226,6 +244,7 @@ exports.CliInputView = SC.View.design({
         command = command || '';
         this._inputer.value = command;
         this._input = Input.create({ typed: command });
+        this.hintUpdated();
     },
 
     /**
@@ -242,7 +261,7 @@ exports.CliInputView = SC.View.design({
      * output components to make it fit properly.
      */
     hintUpdated: function() {
-        var hints = cliController.get('hints');
+        var hints = this._input.hints;
         while (this._ex.firstChild) {
             this._ex.removeChild(this._ex.firstChild);
         }
@@ -259,14 +278,17 @@ exports.CliInputView = SC.View.design({
             }
 
             // Defer promises
-            if (typeof hint.then == 'function') {
+            if (hint.isPromise) {
                 hint.then(function(hint) {
                     addHint(hintNode, hint);
                 }.bind(this));
                 return;
             }
 
-            if (hint.element && hint.element.addEventListener) {
+            if (!hint.element) {
+                // If we have nothing to show, ignore
+            } else if (hint.element.addEventListener) {
+                // instanceof Node?
                 hintNode.appendChild(hint.element);
             } else {
                 // Maybe we should do something clever with exceptions?
@@ -283,14 +305,14 @@ exports.CliInputView = SC.View.design({
                 level = hint.level;
             }
 
-            this.$().setClass('cmd_error', level == Level.Error);
+            util.setClass(this._inputer, 'cmd_error', level == Level.Error);
         }.bind(this);
 
         hints.forEach(function(hint) {
             addHint(this._ex, hint);
         }.bind(this));
 
-        this.$().setClass('cmd_error', level == Level.Error);
+        util.setClass(this._inputer, 'cmd_error', level == Level.Error);
     },
 
     /**
@@ -328,7 +350,8 @@ exports.CliInputView = SC.View.design({
         // A double click on an invocation line in the console
         // executes the command
         rowin.ondblclick = function() {
-            cliController.executeCommand(request.get('typed'));
+            this._input = Input.create({ typed: request.get('typed') });
+            this._input.execute();
         };
         this._table.appendChild(rowin);
 
@@ -369,7 +392,7 @@ exports.CliInputView = SC.View.design({
 
         // What the user actually typed
         var prompt = document.createElement('span');
-        prompt.className = 'cmd_prompt';
+        prompt.className = 'cmd_gt';
         prompt.innerHTML = '&gt; ';
         rowin.appendChild(prompt);
 
@@ -441,7 +464,8 @@ exports.CliInputView = SC.View.design({
                 }
                 outputEle.appendChild(node);
             });
-        });
+            this.scrollToBottom();
+        }.bind(this));
 
         this.link(request, 'error', function(error) {
             outputEle.className = 'cmd_output' + (error ? ' cmd_error' : '');
@@ -450,9 +474,17 @@ exports.CliInputView = SC.View.design({
         this.link(request, 'completed', function(completed) {
             throbEle.style.display = completed ? 'none' : 'block';
         });
-
-        // TODO: Add scroll to bottom code back in here
     }.observes('canon:request#history.requests.[]'),
+
+    /**
+     * Scroll the output area to the bottom
+     */
+    scrollToBottom: function() {
+        // certain browsers have a bug such that scrollHeight is too small
+        // when content does not fill the client area of the element
+        var scrollHeight = Math.max(this._table.scrollHeight, this._table.clientHeight);
+        this._table.scrollTop = scrollHeight - this._table.clientHeight;
+    },
 
     /**
      * We can't know where the focus is going to (willLoseKeyResponderTo only
@@ -463,12 +495,11 @@ exports.CliInputView = SC.View.design({
     checkfocus: function(source, event) {
         // We don't want old blurs to happen whatever
         this._cancelBlur('focus event');
-        var self = this;
 
         var focus = source[event];
         if (focus) {
             // Make sure that something isn't going to undo the hasFocus=true
-            this.set('hasFocus', true);
+            this._hasFocus = true;
         } else {
             // The current element has lost focus, but does that mean that the
             // whole CliInputView has lost focus? We delay setting hasFocus to
@@ -477,10 +508,8 @@ exports.CliInputView = SC.View.design({
             // We rely on something canceling this if we're not to lose focus
             this._blurTimeout = window.setTimeout(function() {
                 //console.log('_blurTimeout', arguments);
-                SC.run(function() {
-                    self.set('hasFocus', false);
-                });
-            }, 1);
+                this._hasFocus = false;
+            }.bind(this), 1);
         }
 
         // TODO: This list of things to observe should include all the views
@@ -525,6 +554,7 @@ exports.CliInputView = SC.View.design({
      */
     setCompletion: function(completion) {
         var current = this._inputer.value;
+
         var val;
         if (!completion) {
             val = '';
@@ -537,7 +567,8 @@ exports.CliInputView = SC.View.design({
             val = '<span class="cmd_existing">' + current + '</span>' +
                 '<span class="cmd_extension">' + extension + '</span>';
         }
-        this.set('value', val);
+console.log('comp', val);
+        this._completer.innerHTML = val;
     }
 });
 

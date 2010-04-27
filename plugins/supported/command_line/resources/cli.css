@@ -42,10 +42,9 @@
 /* The prompt */
 .cmd_prompt {
   position:absolute; height:25px; bottom:0; left:5px; width:40px;
-  color: #FF8E00; font-weight: bold; font-size: 120%;
 }
 .cmd_brackets { color: #FFF; }
-
+.cmd_gt { color: #FF8E00; font-weight: bold; font-size: 120%; }
 
 /* The input area */
 /* When we lose the SC CSS we can drop the .cmd_line specificity trump card */
@@ -79,7 +78,7 @@
 /* Command Output */
 .cmd_view {
   font-size: 100%;
-  maxHeight: 300px; overflow-y: scroll;
+  maxHeight: 300px; overflow-y: auto; overflow-x: hidden;
   position: absolute; top: 0; bottom: 27px; left: 30px; right: 0;
 }
 
@@ -115,15 +114,21 @@
 
 .cmd_output { padding-left: 10px; line-height: 1.2em; }
 
-.cmd_line a { font-weight: bold; color: inherit; text-decoration: none; }
+.cmd_line { color: #AAA; }
+.cmd_line strong, .cmd_line b, .cmd_line th,
+.cmd_line h1, .cmd_line h2, .cmd_line h3 { color: #FFF; }
+.cmd_line .cmd_output a { font-weight: bold; color: #FCA; text-decoration: none; }
 .cmd_line a:hover { text-decoration: underline; cursor: pointer; }
 .cmd_line input[type=password],
 .cmd_line input[type=text],
 .cmd_line textarea {
-  font-family: Arial,sans-serif; color: #fff; font-size: 120%;
+  font-family: Arial,sans-serif; color: #FFF; font-size: 120%;
   background: transparent; padding: 3px; border: 1px solid #ff9600;
   border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
 }
+.cmd_line h2, .cmd_line h3 { margin:0.83em 0; } /* Remove this when we remove SC */
+.cmd_line table, .cmd_line td, .cmd_line th { border:0; padding:2px; }
+.cmd_line .right { text-align:right; }
 
 .cmd_line > .cmd_ex {
   position: absolute; bottom: 27px; z-index: 1; line-height: 1.2em;
