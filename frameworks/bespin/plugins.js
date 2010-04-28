@@ -41,7 +41,6 @@ require("globals");
 var Promise = require("promise").Promise;
 var builtins = require("builtins");
 var console = require("console").console;
-var objectKeys = require("util/util").objectKeys;
 var util = require("util/util");
 
 var r = require;
@@ -161,7 +160,7 @@ exports.ExtensionPoint = SC.Object.extend({
         this.extensions = [];
         this.handlers = [];
     },
-    
+
     /**
     * Retrieves the list of plugins which provide extensions
     * for this extension point.
@@ -171,11 +170,11 @@ exports.ExtensionPoint = SC.Object.extend({
         this.extensions.forEach(function(ext) {
             pluginSet[ext._pluginName] = true;
         });
-        var matches = objectKeys(pluginSet);
+        var matches = util.objectKeys(pluginSet);
         matches.sort();
         return matches;
     },
-    
+
     /*
      * get the name of the plugin that defines this extension point.
      */
@@ -372,7 +371,7 @@ exports.Plugin = SC.Object.extend({
 
         var self = this;
 
-        var pluginList = objectKeys(this.catalog.plugins);
+        var pluginList = util.objectKeys(this.catalog.plugins);
 
         this._findDependents(pluginList, dependents);
 
@@ -665,7 +664,7 @@ exports.Catalog = SC.Object.extend({
             }
 
             if (md.dependencies) {
-                md.depends = objectKeys(md.dependencies);
+                md.depends = util.objectKeys(md.dependencies);
             }
             tiki.register(pluginName, md);
         }
@@ -950,7 +949,7 @@ var _removeFromList = function(regex, array, matchFunc) {
 };
 
 var _removeFromObject = function(regex, obj) {
-    var keys = objectKeys(obj);
+    var keys = util.objectKeys(obj);
     var i = keys.length;
     while (--i > 0) {
         if (regex.exec(keys[i])) {

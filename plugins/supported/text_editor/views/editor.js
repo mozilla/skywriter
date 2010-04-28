@@ -36,6 +36,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var catalog = require('bespin:plugins').catalog;
+
 var GutterView = require('views/gutter').GutterView;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var ScrollView = require('views/scroll').ScrollView;
