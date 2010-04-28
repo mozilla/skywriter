@@ -387,7 +387,7 @@ var KeyboardManager = SC.Object.extend({
         for (state in ckc.states) {
             this._buildBindingsRegex(ckc.states[state]);
         }
-    }.observes('settings:index#settings.customKeymapping')
+    }
 });
 
 /**
