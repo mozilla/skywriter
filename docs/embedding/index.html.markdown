@@ -177,6 +177,46 @@ to it fairly easily:
 The DOM node that contains the editor gets a "bespin" property on it with
 the embedded editor convenience API.
 
+There are a handful of other convenient functions you can use:
+
+getSelection()
+:   returns the currently selected range
+
+getSelectedText()
+:   returns the currently selected text
+
+getText(range)
+:   returns the text within the provided range
+
+getValue()
+:   returns the whole document
+
+setValue(newText)
+:   replaces the document text with newText and moves the cursor to the beginning
+
+replace(range, newText, keepSelection)
+:   replaces the range of text with newText. If keepSelection is true, the
+    current selection is maintained
+
+replaceSelection(newText)
+:   replaces the currently selected text with the newText
+
+setCursor(newPosition)
+:   moves the cursor to newPosition
+
+setFocus(makeFocused)
+:   focuses or unfocuses the editor
+
+setLineNumber(lineNumber)
+:   scrolls and moves the cursor to the given line number
+
+setSelection(range)
+:   selects the given range of text
+
+setSyntax(syntax)
+:   sets the syntax highlighting to the chosen syntax ("html", for example)
+
+
 Dimensions
 ----------
 
@@ -258,3 +298,5 @@ The available events are as follows:
 * `textChange`: Called whenever the text changes, either from user input or
 commands such as Undo.
 
+There is a `removeEventListener` function as a companion to `addEventListener`,
+should you need to remove a listener from Bespin.
