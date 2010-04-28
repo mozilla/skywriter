@@ -170,6 +170,13 @@ exports.ExtensionPoint = SC.Object.extend({
         matches.sort();
         return matches;
     },
+    
+    /*
+     * get the name of the plugin that defines this extension point.
+     */
+    getDefiningPluginName: function() {
+        return this._pluginName;
+    },
 
     /**
      * If we are keeping an index (an indexOn property is set on the
@@ -581,6 +588,7 @@ exports.Catalog = SC.Object.extend({
     _registerExtensionPoint: function(extension) {
         var ep = this.getExtensionPoint(extension.name, true);
         ep.description = extension.description;
+        ep._pluginName = extension._pluginName;
         ep.params = extension.params;
         ep.handlers.push(extension);
         if (extension.indexOn) {

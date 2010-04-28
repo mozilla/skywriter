@@ -490,15 +490,18 @@ exports.ep = function(env, args, request) {
         output += '<div class="ep_info"><h2>';
         output += ep.name;
         output += '</h2>';
-        output += '<p>';
-        output += ep.description;
-        output += '</p>';
+        output += '<p>' + ep.description + '</p>';
+        output += '<p>This extension point is defined in the plugin ' + ep.getDefiningPluginName() + '</p>';
         if (ep.params) {
             output += '<h3>Parameters:</h3>';
             output += '<table class="params"><tbody>';
             ep.params.forEach(function(param) {
-                output += '<tr><td>';
-                output += param.name;
+                if (param.required) {
+                    output += '<tr class="required">';
+                } else {
+                    output += '<tr>';
+                }
+                output += '<td><span class="name">' + param.name + '</span>';
                 if (param.type) {
                     output += ' (';
                     output += param.type;

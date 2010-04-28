@@ -90,6 +90,14 @@
     background-color: #7A480D;
 }
 
-..plugin_info li {
+.plugin_info li {
     list-style-type: disc;
+}
+
+.ep_info td span.name {
+    font-weight: bold
+}
+
+.ep_info tr.required td span.name {
+    color: #cc1111
 }

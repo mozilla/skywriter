@@ -44,23 +44,65 @@ exports.metadata =
             {
                 "ep": "extensionpoint",
                 "name": "extensionpoint",
-                "description": "Use the 'extensionpoint' extension point to \
-define new extension points. You can provide an 'indexOn' property to name a \
-property of extensions through which you'd like to be able to easily look up the \
-extension. You can also provide a 'register' and 'unregister' properties which are \
-pointers to functions that are called whenever a new extension is discovered or \
-removed, respectively. 'register' and 'unregister' \
-should be used sparingly, because your plugin will be loaded whenever a \
-matching plugin is available."
+                "description": "Defines a new extension point",
+                "params": [
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "description": "the extension point's name",
+                        "required": true
+                    },
+                    {
+                        "name": "description",
+                        "type": "string",
+                        "description": "description of what the extension point is for"
+                    },
+                    {
+                        "name": "params",
+                        "type": "array of objects",
+                        "description": "parameters that provide the metadata for a given extension. Each object should have name and description, minimally. It can also have a 'type' (eg string, pointer, or array) and required to denote whether or not this parameter must be present on the extension."
+                    },
+                    {
+                        "name": "indexOn",
+                        "type": "string",
+                        "description": "You can provide an 'indexOn' property  \
+                        to name a property of extensions through which you'd  \
+                        like to be able to easily look up the extension."
+                    },
+                    {
+                        "name": "register",
+                        "type": "pointer",
+                        "description": "function that is called when a new extension is discovered. Note that this should be used sparingly, because it will cause your plugin to be loaded whenever a matching plugin appears."
+                    },
+                    {
+                        "name": "unregister",
+                        "type": "pointer",
+                        "description": "function that is called when an extension is removed. Note that this should be used sparingly, because it will cause your plugin to be loaded whenever a matching plugin appears."
+                    }
+                ]
             },
             {
                 "ep": "extensionpoint",
                 "name": "extensionhandler",
-                "description": "extensionhandlers are able to have 'register' \
-and 'unregister' pointers to functions that are called with each extension as \
-it is discovered or unregistered. Use 'register' sparingly as your plugin will \
-be loaded automatically if there is a matching extension (and not just when \
-your extension's functionality is required)."
+                "description": "Used to attach listeners ",
+                "params": [
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "description": "name of the extension point to listen to",
+                        "required": true
+                    },
+                    {
+                        "name": "register",
+                        "type": "pointer",
+                        "description": "function that is called when a new extension is discovered. Note that this should be used sparingly, because it will cause your plugin to be loaded whenever a matching plugin appears."
+                    },
+                    {
+                        "name": "unregister",
+                        "type": "pointer",
+                        "description": "function that is called when an extension is removed. Note that this should be used sparingly, because it will cause your plugin to be loaded whenever a matching plugin appears."
+                    }
+                ]
             },
             {
                 "ep": "extensionpoint",
@@ -68,7 +110,14 @@ your extension's functionality is required)."
                 "description": "A function that should be called at startup. This should be used \
 sparingly, as these plugins will be eagerly loaded at the beginning. All that's needed for this \
 extension point is a pointer to a function that takes no arguments.",
-                "register": "plugins#startupHandler"
+                "register": "plugins#startupHandler",
+                "params": [
+                    {
+                        "name": "pointer",
+                        "description": "Pointer to a function that takes no parameters",
+                        "required": true
+                    }
+                ]
             },
             {
                 "ep": "extensionpoint",
