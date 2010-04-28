@@ -94,7 +94,6 @@
  * </ul>
  */
 
-
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var Promise = require('bespin:promise').Promise;
