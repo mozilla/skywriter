@@ -674,6 +674,10 @@ exports.Catalog = SC.Object.extend({
             var activated = !(this.deactivatedPlugins[name]);
 
             md.catalog = this;
+            md.name = name;
+            var plugin = exports.Plugin.create(md);
+            plugins[name] = plugin;
+
             // Skip if the plugin is not activated.
             if (md.provides && activated) {
                 var provides = md.provides;
@@ -693,9 +697,6 @@ exports.Catalog = SC.Object.extend({
             } else {
                 md.provides = [];
             }
-            md.name = name;
-            var plugin = exports.Plugin.create(md);
-            plugins[name] = plugin;
         }, this);
 
         for (pluginName in metadata) {
