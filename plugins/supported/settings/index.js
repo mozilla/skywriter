@@ -174,6 +174,11 @@ exports.MemorySettings = Trait({
     _values: {},
 
     /**
+     * Storage for deactivated values
+     */
+    _deactivated: {},
+
+    /**
      * A Persister is able to store settings. It is an object that defines
      * two functions:
      * loadInitialValues(settings) and persistValue(settings, key, value).
@@ -204,7 +209,7 @@ exports.MemorySettings = Trait({
             // the addSetting() function is called which then takes up the
             // here stored setting and calls set() to convert the setting.
             console.warn('Setting not defined: ', key, value);
-            this._values['__deactivated__' + key] = value;
+            this._deactivated[key] = value;
         }
         else if (typeof value == 'string' && settingExt.type == 'string') {
             // no conversion needed
@@ -265,8 +270,8 @@ exports.MemorySettings = Trait({
             // 1) the value of a setting that is not activated at the moment
             //       OR
             // 2) the defaultValue of the setting.
-            var value = (this.get('__deactivated__' + settingExt.name) ||
-                                                        settingExt.defaultValue);
+            var value = this._deactivated[settingExt.name] ||
+                    settingExt.defaultValue;
 
             // Set the default value up.
             this.set(settingExt.name, value);
