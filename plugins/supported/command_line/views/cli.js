@@ -245,6 +245,14 @@ exports.CliInputView = SC.View.design({
         this._inputer.value = command;
         this._input = Input.create({ typed: command });
         this.hintUpdated();
+        this.focus();
+    },
+
+    /**
+     * Push the focus into the input element
+     */
+    focus: function() {
+        this._inputer.focus();
     },
 
     /**
@@ -518,13 +526,6 @@ exports.CliInputView = SC.View.design({
             window.clearTimeout(this._blurTimeout);
             this._blurTimeout = null;
         }
-    },
-
-    /**
-     * Push the focus into the input element
-     */
-    focus: function() {
-        this._inputer.focus();
     },
 
     /**
