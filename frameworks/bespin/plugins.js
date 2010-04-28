@@ -206,7 +206,11 @@ exports.ExtensionPoint = SC.Object.extend({
         this.handlers.forEach(function(handler) {
             if (handler.register) {
                 handler.load(function(register) {
-                    register(extension);
+                    if (!register) {
+                        console.error('missing register function for pluginName=', extension._pluginName, ", extension=", extension.name);
+                    } else {
+                         register(extension);
+                    }
                 }, "register");
             }
         });
@@ -217,7 +221,11 @@ exports.ExtensionPoint = SC.Object.extend({
         this.handlers.forEach(function(handler) {
             if (handler.unregister) {
                 handler.load(function(unregister) {
-                    unregister(extension);
+                    if (!unregister) {
+                        console.error('missing unregister function for pluginName=', extension._pluginName, ", extension=", extension.name);
+                    } else {
+                         unregister(extension);
+                    }
                 }, "unregister");
             }
         });
