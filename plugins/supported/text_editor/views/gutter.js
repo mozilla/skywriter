@@ -40,17 +40,6 @@ var CanvasView = require('views/canvas').CanvasView;
 var m_scratchcanvas = require('bespin:util/scratchcanvas');
 
 var InteriorGutterView = CanvasView.extend({
-    /**
-     * @property
-     * Theme information for the gutter. Currently exposed properties are
-     * gutterStyle, lineNumberColor, and lineNumberFont.
-     *
-     * TODO: Convert to SproutCore's theme system.
-     */
-    theme: {
-        gutterStyle: '#4c4a41',
-        lineNumberColor: '#e5c138'
-    },
 
     _frameChanged: function() {
         // We have to be more aggressive than the canvas view alone would be,
@@ -60,8 +49,9 @@ var InteriorGutterView = CanvasView.extend({
     }.observes('frame'),
 
     drawRect: function(rect, context) {
-        var theme = this.get('theme');
-        context.fillStyle = theme.gutterStyle;
+        var theme = this.getPath('parentView._theme');
+
+        context.fillStyle = theme.backgroundColor;
         context.fillRect(rect.x, rect.y, rect.width, rect.height);
 
         context.save();
@@ -76,7 +66,7 @@ var InteriorGutterView = CanvasView.extend({
             layoutManager.get('textLines').length - 1);
         var lineAscent = layoutManager.get('lineAscent');
 
-        context.fillStyle = theme.lineNumberColor;
+        context.fillStyle = theme.color;
         context.font = parentView.get('editor').font;
 
         for (var row = range.start.row; row <= endRow; row++) {
@@ -90,13 +80,19 @@ var InteriorGutterView = CanvasView.extend({
 });
 
 exports.GutterView = SC.View.extend({
+    /**
+     * Theme colors. Value is set by editorView class. Don't change this
+     * property directly. Use the editorView function to adjust it.
+     */
+    _theme: { },
+
     _interiorView: null,
 
     _computeWidth: function() {
         var padding = this.get('padding');
         var paddingWidth = padding.left + padding.right;
 
-        var lineNumberFont = this.get('theme').lineNumberFont;
+        var lineNumberFont = this.editor.font;
 
         var layoutManager = this.get('layoutManager');
         var lineCount = layoutManager.get('textLines').length;
@@ -156,17 +152,6 @@ exports.GutterView = SC.View.extend({
      * object with 'bottom', 'left', and 'right' properties.
      */
     padding: { bottom: 30, left: 5, right: 10 },
-
-    /**
-     * @property{object}
-     *
-     * The properties of the theme in use.
-     *
-     * TODO: Convert to a SproutCore theme or plugin.
-     */
-    theme: {
-        lineNumberFont: '10pt Monaco, Lucida Console, monospace'
-    },
 
     /**
      * @property{number}

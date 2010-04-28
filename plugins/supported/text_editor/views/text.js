@@ -98,18 +98,18 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
         context.save();
 
-        var theme = this.get('theme');
+        var theme = this.get('_theme');
         if (this.get('isFirstResponder')) {
-            context.strokeStyle = theme.cursorStyle;
+            context.strokeStyle = theme.cursorColor;
             context.beginPath();
             context.moveTo(x + 0.5, y);
             context.lineTo(x + 0.5, y + height);
             context.closePath();
             context.stroke();
         } else {
-            context.fillStyle = theme.unfocusedCursorFillStyle;
+            context.fillStyle = theme.unfocusedCursorBackgroundColor;
             context.fillRect(x + 0.5, y, width, height);
-            context.strokeStyle = theme.unfocusedCursorStrokeStyle;
+            context.strokeStyle = theme.unfocusedCursorColor;
             context.strokeRect(x + 0.5, y + 0.5, width - 1, height - 1);
         }
 
@@ -120,7 +120,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         var layoutManager = this.get('layoutManager');
         var textLines = layoutManager.get('textLines');
         var lineAscent = layoutManager.get('lineAscent');
-        var theme = this.get('theme');
+        var theme = this.get('_theme');
 
         context.save();
         context.font = this.getPath('editor.font');
@@ -187,10 +187,10 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     // Draws the background highlight for selections.
     _drawSelectionHighlight: function(rect, context) {
-        var theme = this.get('theme');
+        var theme = this.get('_theme');
         var fillStyle = this.get('isFirstResponder') ?
-            theme.editorSelectedTextBackground :
-            theme.unfocusedCursorFillStyle;
+            theme.selectedTextBackgroundColor :
+            theme.unfocusedCursorBackgroundColor;
         var layoutManager = this.get('layoutManager');
 
         context.save();
@@ -467,22 +467,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     padding: { bottom: 0, right: 0 },
 
     /**
-     * @property
-     *
-     * The theme to use.
-     *
-     * TODO: Convert to a SproutCore theme. This is super ugly.
-     */
-    theme: {
-        backgroundStyle: '#2a211c',
-        cursorStyle: '#879aff',
-        editorSelectedTextColor: 'rgb(240, 240, 240)',
-        editorSelectedTextBackground: '#526da5',
-        unfocusedCursorStrokeStyle: '#ff0033',
-        unfocusedCursorFillStyle: '#73171e'
-    },
-
-    /**
      * Toggles the visible state of the insertion point.
      */
     blinkInsertionPoint: function() {
@@ -524,7 +508,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
      * used to draw as little as possible.
      */
     drawRect: function(rect, context) {
-        context.fillStyle = this.get('theme').backgroundStyle;
+        context.fillStyle = this.get('_theme').backgroundColor;
         context.fillRect(rect.x, rect.y, rect.width, rect.height);
 
         this._drawSelection(rect, context);

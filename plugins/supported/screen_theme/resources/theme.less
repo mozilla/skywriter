@@ -317,14 +317,14 @@ body.sc-theme {
 }
 
 .bespin-screen .sc-scroller-view:hover .track {
-    background-color: rgba(50, 50, 50, 0.8);
-    border: solid rgb(150, 150, 150) 1px;
+    background-color: @scrollerTrackBackgroundColor;
+    border: solid @scrollerTrackBorderColor 1px;
 }
 
 .bespin-screen .sc-scroller-view .thumb,
 .bespin-screen .sc-scroller-view .button-bottom,
 .bespin-screen .sc-scroller-view .button-top {
-    border: solid rgb(150, 150, 150) 1px;
+    border: solid @scrollerButtonThumbOutline 1px;
     -moz-border-radius: 12px;
     -webkit-border-radius: 12px;
     opacity: 0.3;
@@ -337,14 +337,14 @@ body.sc-theme {
 }
 
 .bespin-screen .sc-scroller-view .thumb {
-    background-color: black;
+    background-color: @scrollerThumbColor;
     -moz-border-radius: 12px;
     -webkit-border-radius: 12px;
 }
 
 .bespin-screen .sc-scroller-view .button-bottom,
 .bespin-screen .sc-scroller-view .button-top {
-    background-color: rgb(100, 100, 100);
+    background-color: @scollerButtonColor;
     opacity: 0.3;
 }
 
@@ -389,31 +389,28 @@ body.sc-theme {
 .bespin-screen .sc-scroller-view.sc-vertical .button-bottom {
     bottom: 7px;
     background: url(images/scroll-down.png) no-repeat center center
-        rgb(100, 100, 100);
+        @scollerButtonColor;
 }
 
 .bespin-screen .sc-scroller-view.sc-horizontal .button-bottom {
     right: 7px;
     background: url(images/scroll-right.png) no-repeat center center
-        rgb(100, 100, 100);
+        @scollerButtonColor;
 }
 
 .bespin-screen .sc-scroller-view.sc-vertical .button-top {
     top: 7px;
     background: url(images/scroll-up.png) no-repeat center center
-        rgb(100, 100, 100);
+        @scollerButtonColor;
 }
 
 .bespin-screen .sc-scroller-view.sc-horizontal .button-top {
     left: 7px;
     background: url(images/scroll-left.png) no-repeat center center
-        rgb(100, 100, 100);
+        @scollerButtonColor;
 }
 
 .bespin-screen .disabled {
     opacity: 0.3;
 }
 
-.sc-view .text_editor {
-    cursor: text;
-}

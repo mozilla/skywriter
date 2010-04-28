@@ -266,7 +266,7 @@ less.Parser = function Parser(env) {
                 lines = input.split('\n');
                 line = (input.slice(0, i).match(/\n/g) || "").length + 1;
 
-                for (var n = i, column = -1; input[n] !== '\n'; n--) { column++ }
+                for (var n = i, column = -1; input[n] !== '\n' && n >= 0; n--) { column++ }
 
                 error = {
                     name: "ParseError",

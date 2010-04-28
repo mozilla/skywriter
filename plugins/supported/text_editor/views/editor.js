@@ -96,6 +96,41 @@ exports.EditorView = SC.View.extend(SC.Border, {
      */
     font: '10pt Monaco, Lucida Console, monospace',
 
+    _themeVariableDidChange: function() {
+        var theme = {};
+
+        var plugin = catalog.plugins['text_editor'];
+        var provides = plugin.provides;
+        var i = provides.length;
+
+        while (i--) {
+            if (provides[i].ep === 'themevariable') {
+                var value = provides[i].value || provides[i].defaultValue;
+
+                switch (provides[i].name) {
+                    case 'gutter':
+                        this.setPath('gutterView._theme', value);
+                        break;
+                    case 'editor':
+                        this.setPath('textView._theme', value);
+                        break;
+                    case 'highlighter':
+                        this.setPath('layoutManager._theme', value);
+                    break;
+                }
+            }
+        }
+
+        SC.run(function() {
+            // Refresh the entire editor.
+            var lines = this.layoutManager.textStorage.lines;
+            this.layoutManager.updateTextRows(0, lines.length - 1);
+
+            this.textView.setNeedsDisplay();
+            this.gutterView._recomputeLayout();
+        }.bind(this))
+    },
+
     /**
      * @property
      *
@@ -208,8 +243,13 @@ exports.EditorView = SC.View.extend(SC.Border, {
             pointer: this._fontSizeChanged.bind(this)
         });
 
+        catalog.registerExtension('themeChange', {
+            pointer: this._themeVariableDidChange.bind(this)
+        });
+
         // Compute settings related stuff.
         this._fontSizeChanged();
+        this._themeVariableDidChange();
     },
 
     init: function() {

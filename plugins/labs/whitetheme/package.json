@@ -1,0 +1,12 @@
+{
+    "description": "Provides a white theme for Bespin",
+    "provides": [
+        {
+            "ep": "theme",
+            "name": "white",
+            "description": "A basic white theme",
+            "url": "theme.less",
+            "pointer": "index#whiteTheme"
+       }
+    ]
+}

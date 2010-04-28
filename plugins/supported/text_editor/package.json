@@ -7,7 +7,8 @@
         "delegate_support": "0.0",
         "rangeutils": "0.0",
         "settings": "0.0",
-        "syntax_manager" : "0.0"
+        "syntax_manager" : "0.0",
+        "theme_handler": "0.0"
     },
     "provides":
     [
@@ -412,6 +413,42 @@
             "description": "The editor font face",
             "type": "text",
             "defaultValue": "Monaco, Lucida Console, monospace"
+        },
+        {
+            "ep": "themevariable",
+            "name": "gutter",
+            "defaultValue": {
+                "color": "#e5c138",
+                "backgroundColor": "#4c4a41"
+            }
+        },
+        {
+            "ep": "themevariable",
+            "name": "editor",
+            "defaultValue": {
+                "color": "#e6e6e6",
+                "backgroundColor": "#2a211c",
+
+                "cursorColor": "#879aff",
+                "selectedTextBackgroundColor": "#526da5",
+
+                "unfocusedCursorColor": "#ff0033",
+                "unfocusedCursorBackgroundColor": "#73171e"
+            }
+        },
+        {
+            "ep": "themevariable",
+            "name": "highlighter",
+            "defaultValue": {
+                "plain":      "#e6e6e6",
+                "comment":    "#666666",
+                "directive":  "#999999",
+                "error":      "#ff0000",
+                "identifier": "#e6e6e6",
+                "keyword":    "#42A8ED",
+                "operator":   "#88BBFF",
+                "string":     "#039A0A"
+            }
         }
     ]
 }

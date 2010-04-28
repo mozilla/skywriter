@@ -7,6 +7,37 @@
             "ep": "theme",
             "name": "Screen",
             "pointer": "#ScreenTheme"
+        },
+        {
+            "ep": "themestyles",
+            "url": [
+                "theme.less"
+            ]
+        },
+        {
+            "ep": "themevariable",
+            "name": "scollerButtonColor",
+            "defaultValue": "rgb(100, 100, 100)"
+        },
+        {
+            "ep": "themevariable",
+            "name": "scrollerThumbColor",
+            "defaultValue": "black"
+        },
+        {
+            "ep": "themevariable",
+            "name": "scrollerButtonThumbOutline",
+            "defaultValue": "rgb(150, 150, 150)"
+        },
+        {
+            "ep": "themevariable",
+            "name": "scrollerTrackBackgroundColor",
+            "defaultValue": "rgb(60, 60, 60)"
+        },
+        {
+            "ep": "themevariable",
+            "name": "scrollerTrackBorderColor",
+            "defaultValue": "rgb(60, 60, 60)"
         }
     ]
 }

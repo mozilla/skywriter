@@ -76,6 +76,12 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     }.observes('textStorage'),
 
     /**
+     * Theme colors. Value is set by editorView class. Don't change this
+     * property directly. Use the editorView function to adjust it.
+     */
+    _theme: { },
+
+    /**
      * @property{number}
      *
      * The width of one character.
@@ -137,25 +143,6 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
      */
     textStorage: TextStorage,
 
-    /**
-     * @property
-     *
-     * The theme to use.
-     *
-     * TODO: Convert to a SproutCore theme.
-     */
-    theme: {
-        editorTextColor:            'rgb(230, 230, 230)',
-        editorTextColor_comment:    'rgb(102, 102, 102)',
-        editorTextColor_directive:  'rgb(153, 153, 153)',
-        editorTextColor_error:      'rgb(255, 0, 0)',
-        editorTextColor_identifier: 'rgb(230, 230, 230)',
-        editorTextColor_keyword:    'rgb(66, 168, 237)',
-        editorTextColor_operator:   'rgb(136, 187, 255)',
-        editorTextColor_plain:      'rgb(230, 230, 230)',
-        editorTextColor_string:     'rgb(3, 154, 10)'
-    },
-
     _computeInvalidRects: function(oldRange, newRange) {
         var startRect = this.characterRectForPosition(oldRange.start);
 
@@ -212,8 +199,8 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         var newRowCount = newEndRow - oldStartRow + 1;
 
         var lines = this._textStorage.get('lines');
-        var theme = this.get('theme');
-        var plainColor = theme.editorTextColor_plain;
+        var theme = this.get('_theme');
+        var plainColor = theme.plain;
 
         var newTextLines = [];
         for (var i = 0; i < newRowCount; i++) {
@@ -358,7 +345,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
                     {
                         start:  0,
                         end:    0,
-                        color:  this.get('theme').editorTextColor
+                        color:  this.get('_theme').plain
                     }
                 ]
             }
@@ -482,11 +469,11 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     updateTextRows: function(startRow, endRow) {
         var textLines = this.get('textLines');
         var attrs = this.get('syntaxManager').attrsForRows(startRow, endRow);
-        var theme = this.get('theme');
+        var theme = this.get('_theme');
 
         for (var i = 0; i < attrs.length; i++) {
             textLines[startRow + i].colors = attrs[i].map(function(range) {
-                var color = theme['editorTextColor_' + range.tag];
+                var color = theme[range.tag];
                 if (SC.none(color)) {
                     color = theme.editorTextColor_plain;
                 }
