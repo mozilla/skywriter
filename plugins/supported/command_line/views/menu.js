@@ -37,7 +37,6 @@
 
 var SC = require('sproutcore/runtime').SC;
 
-var cliController = require('command_line:controller').cliController;
 var Hint = require('command_line:hint').Hint;
 var Level = require('command_line:hint').Level;
 
@@ -227,7 +226,7 @@ exports.Menu = SC.Object.extend({
                 this._itemActions[i] = function(ev) {
                     SC.run(function() {
                         var str = this._prefix + this._getFullName(item);
-                        cliController.executeCommand(str);
+                        this.input.env.execute(str);
                     }.bind(this));
                 }.bind(this);
 
@@ -246,7 +245,7 @@ exports.Menu = SC.Object.extend({
                 link.addEventListener('mousedown', function(ev) {
                     SC.run(function() {
                         var str = this._prefix + this._getFullName(item);
-                        cliController.set('input', str);
+                        this.input.env.execute.setInput('input', str);
                     }.bind(this));
                 }.bind(this), false);
             }

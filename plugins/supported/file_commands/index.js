@@ -38,7 +38,6 @@
 var catalog = require('bespin:plugins').catalog;
 
 var pathUtil = require('filesystem:path');
-var cliController = require('command_line:controller').cliController;
 
 /*
  * Creates a path based on the current open file, if there is
@@ -98,7 +97,7 @@ exports.mkdirCommand = function(env, args, request) {
 exports.saveCommand = function(env, args, request) {
     var buffer = env.get('buffer');
     if (buffer.untitled()) {
-        cliController.prompt('saveas ');
+        env.commandLine.setInput('saveas ');
         request.done('The current buffer is untitled. Please enter a name.');
         return;
     }
@@ -133,12 +132,7 @@ exports.saveAsCommand = function(env, args, request) {
  */
 exports.openCommand = function(env, args, request) {
     if (!('path' in args)) {
-        var cliController = catalog.getObject('clicontroller');
-        if (!SC.none(cliController)) {
-            SC.run(function() {
-                cliController.prompt('open ');
-            });
-        }
+        env.commandLine.setInput('open ');
         return;
     }
 
