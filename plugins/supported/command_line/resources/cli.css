@@ -89,15 +89,6 @@
 .cmd_rowin > img { cursor: pointer; }
 .cmd_rowin:hover > .cmd_hover { display: block; }
 
-.cmd_open {
-  padding: 3px 3px 2px 5px;
-  font-size: 100%;
-  color :#666;
-}
-.cmd_open_history { width: 20px; }
-.cmd_open_time { width: 40px; }
-.cmd_open_blank { width: 1px; }
-
 .cmd_typed { padding-left: 5px; }
 
 .cmd_hover {

@@ -397,11 +397,6 @@ exports.CliInputView = SC.View.design({
         closeEle.style.padding = '2px';
         hover.appendChild(closeEle);
 
-        // Place to put a history marker
-        var openEle = document.createElement('span');
-        openEle.className = 'cmd_open';
-        rowin.appendChild(openEle);
-
         // What the user actually typed
         var prompt = document.createElement('span');
         prompt.className = 'cmd_gt';
@@ -423,22 +418,6 @@ exports.CliInputView = SC.View.design({
         var throbEle = document.createElement('img');
         throbEle.src = imagePath + 'throbber.gif';
         rowout.appendChild(throbEle);
-
-        this.link(settings, 'historytimemode', function(mode) {
-            if (mode == 'history') {
-                // TODO: replace # with invocation id
-                openEle.innerHTML = '#';
-                openEle.className = 'cmd_open cmd_open_history';
-            }
-            else if (mode == 'time' && request.get('start')) {
-                openEle.innerHTML = formatTime(request.get('start'));
-                openEle.className = 'cmd_open cmd_open_time';
-            }
-            else {
-                openEle.innerHTML = '';
-                openEle.className = 'cmd_open cmd_open_blank';
-            }
-        });
 
         this.link(request, 'duration', function(duration) {
             durationEle.innerHTML = duration ?
