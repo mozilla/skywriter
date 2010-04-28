@@ -82,10 +82,7 @@ exports.EditorView = SC.View.extend(SC.Border, {
         var fontFace = settings.get('fontface');
         var font = fontSize + 'px ' + fontFace;
         this.set('font', font);
-    }.observes(
-        'settings:index#settings.fontsize',
-        'settings:index#settings.fontface'
-    ),
+    },
 
     borderStyle: SC.BORDER_GRAY,
 
@@ -203,6 +200,11 @@ exports.EditorView = SC.View.extend(SC.Border, {
         this.get('searchController').set('textView', textView);
 
         this.set('childViews', [ gutterView, scrollView ]);
+
+        catalog.registerExtension('settingChange', {
+            match: "font[size|face]",
+            pointer: this._fontSizeChanged.bind(this)
+        });
 
         // Compute settings related stuff.
         this._fontSizeChanged();
