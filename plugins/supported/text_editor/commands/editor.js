@@ -43,11 +43,7 @@ var settings = require('settings').settings;
  */
 exports.findCommand = function(env, args, request) {
     if (!('value' in args)) {
-        var cliController = catalog.getObject('clicontroller');
-        if (!SC.none(cliController)) {
-            cliController.prompt('find ');
-        }
-
+        env.commandLine.setInput('find ');
         return;
     }
 
@@ -94,11 +90,7 @@ exports.findPrevCommand = function(env, args, request) {
  */
 exports.gotoCommand = function(env, args, request) {
     if (!('line' in args)) {
-        var cliController = catalog.getObject('clicontroller');
-        if (!SC.none(cliController)) {
-            cliController.prompt('goto ');
-        }
-
+        env.commandLine.setInput('goto ');
         return;
     }
 

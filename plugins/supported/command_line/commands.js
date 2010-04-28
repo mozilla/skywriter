@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var cliController = require('controller').cliController;
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 
