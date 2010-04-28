@@ -456,28 +456,26 @@ exports.info = function(env, args, request) {
         request.doneWithError('Unknown plugin: ' + pluginName);
         return;
     }
-    var output = [];
-    output.push('<div class="plugin_info"><h2>');
-    output.push(plugin.name);
-    output.push('</h2>');
-    output.push('<p>');
-    output.push(plugin.description);
-    output.push('</p>');
-    output.push('<h3>Plugin provides:</h3>');
-    output.push('<ul>');
+    var output = '';
+    output += '<div class="plugin_info"><h2>';
+    output += plugin.name;
+    output += '</h2>';
+    output += '<p>';
+    output += plugin.description;
+    output += '</p>';
+    output += '<h3>Plugin provides:</h3>';
+    output += '<ul>';
     plugin.provides.forEach(function(provided) {
-        output.push('<li>');
-        output.push(provided.ep);
+        output += '<li>';
+        output += provided.ep;
         if (provided.name) {
-            output.push(" (");
-            output.push(provided.name);
-            output.push(")");
+            output += " (" + provided.name + ')';
         }
-        output.push('</li>');
+        output += '</li>';
     });
-    output.push('</ul>');
-    output.push('</div>');
-    request.done(output.join(""));
+    output += '</ul>';
+    output += '</div>';
+    request.done(output);
 };
 
 // ep command

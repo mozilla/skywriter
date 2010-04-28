@@ -580,6 +580,8 @@ exports.Catalog = SC.Object.extend({
 
     _registerExtensionPoint: function(extension) {
         var ep = this.getExtensionPoint(extension.name, true);
+        ep.description = extension.description;
+        ep.params = extension.params;
         ep.handlers.push(extension);
         if (extension.indexOn) {
             ep.set("indexOn", extension.indexOn);
