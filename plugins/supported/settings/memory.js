@@ -143,7 +143,7 @@ exports.MemorySettings = SC.Object.extend({
             // We want to call observer.set, and normally could call
             // superclass(...) to do this but we're prevented because the
             // promise changes the callee. So we need to cache it.
-            // Excuse me while a puke.
+            // Excuse me while I puke.
             var superSet = arguments.callee.base;
 
             var inline = false;
@@ -151,6 +151,9 @@ exports.MemorySettings = SC.Object.extend({
             types.fromString(value, settingExt.type).then(function(converted) {
                 inline = true;
                 superSet.apply(this, [ key, converted ]);
+
+                // Inform subscriptions of the change
+                catalog.publish('settingChange', key, converted);
             }.bind(this), function(ex) {
                 console.error('Error setting', key, ': ', ex);
             });

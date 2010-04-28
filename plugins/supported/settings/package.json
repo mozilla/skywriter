@@ -7,16 +7,21 @@
     [
         {
             "ep": "appcomponent",
-            "description": "Storage for the customizable Bespin settings",
             "name": "settings",
+            "description": "Storage for the customizable Bespin settings",
             "pointer": "index#settings"
         },
         {
             "ep": "extensionpoint",
-            "description": "A Choice is something that the application offers as a way to customize how it works",
             "name": "setting",
+            "description": "A setting is something that the application offers as a way to customize how it works",
             "register": "memory#addSetting",
             "indexOn": "name"
+        },
+        {
+            "ep": "extensionpoint",
+            "name": "settingChange",
+            "description": "A settingChange is a way to be notified of changes to a setting"
         },
         {
             "ep": "command",

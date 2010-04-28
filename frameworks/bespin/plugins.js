@@ -42,6 +42,8 @@ var Promise = require("promise").Promise;
 var builtins = require("builtins");
 var console = require("console").console;
 var objectKeys = require("util/util").objectKeys;
+var util = require("util/util");
+
 var r = require;
 
 var tiki = require.loader;
@@ -82,40 +84,42 @@ var _retrieveObject = function(pointerObj) {
 };
 
 exports.Extension = SC.Object.extend({
-    _getPointer: function(property) {
-        property = property || "pointer";
-        return _splitPointer(this._pluginName, this.get(property));
-    },
-
     init: function() {
         this._observers = [];
     },
 
     load: function(callback, property) {
-        var pointer = this._getPointer(property);
+        var promise = new Promise();
 
-        if (!pointer) {
-            console.error("Extension cannot be loaded because it has no 'pointer'");
-            console.log(this);
-            return null;
+        var onComplete = function(func) {
+            if (callback) {
+                callback(func);
+            }
+            promise.resolve(func);
+        };
+
+        var pointerVal = this.get(property || "pointer");
+        if (util.isFunction(pointerVal)) {
+            onComplete(pointerVal);
+            return promise;
         }
 
-        var promise = new Promise();
+        var pointerObj = _splitPointer(this._pluginName, pointerVal);
+        if (!pointerObj) {
+            console.error("Extension cannot be loaded because it has no 'pointer'");
+            console.log(this);
+
+            promise.reject(new Error('Extension has no \'pointer\' to call'));
+            return promise;
+        }
 
         tiki.async(this._pluginName).then(function() {
             SC.run(function() {
-                var module = r(pointer.modName);
-                var data;
-                if (pointer.objName) {
-                    data = module[pointer.objName];
-                } else {
-                    data = module;
-                }
+                var func = _retrieveObject(pointerObj);
+                onComplete(func);
 
-                if (callback) {
-                    callback(data);
-                }
-                promise.resolve(data);
+                // TODO: consider caching 'func' to save looking it up again
+                // Something like: this._setPointer(property, data);
             });
         });
 
@@ -146,8 +150,9 @@ exports.Extension = SC.Object.extend({
     },
 
     _getLoaded: function(property) {
-        var pointer = this._getPointer(property);
-        return _retrieveObject(pointer);
+        var pointerVal = this.get(property || "pointer");
+        var pointerObj = _splitPointer(this._pluginName, pointerVal);
+        return _retrieveObject(pointerObj);
     }
 });
 
@@ -882,6 +887,51 @@ exports.Catalog = SC.Object.extend({
         });
 
         return promise;
+    },
+
+    /**
+     * Publish <tt>value</tt> to all plugins that match both <tt>ep</tt> and
+     * <tt>key</tt>.
+     * @param ep {string} An extension point (indexed by the catalog) to which
+     * we publish the information.
+     * @param key {string} A key to which we publish (linearly searched, allowing
+     * for regex matching).
+     * @param value {object} The data to be passed to the subscribing function.
+     */
+    publish: function(ep, key, value) {
+        var subscriptions = this.getExtensions(ep);
+        subscriptions.forEach(function(sub) {
+            // compile regexes only once
+            if (sub.match && !sub.regexp) {
+                sub.regexp = new RegExp(sub.match);
+            }
+            if (sub.regexp && sub.regexp.test(key) || sub.key === key) {
+                sub.load().then(function(handler) {
+                    handler(key, value);
+                });
+            }
+        });
+    },
+
+    /**
+     * The subscribe side of #publish for use when the object which will
+     * publishes is created dynamically.
+     * @param ep The extension point name to subscribe to
+     * @param metadata An object containing:
+     * <ul>
+     * <li>pointer: A function which should be called on matching publish().
+     * This can also be specified as a pointer string, however if you can do
+     * that, you should be placing the metadata in package.json.
+     * <li>key: A string that exactly matches the key passed to the publish()
+     * function. For smarter matching, you can use 'match' instead...
+     * <li>match: A regexp to be used in place of key
+     * </ul>
+     */
+    registerExtension: function(ep, metadata) {
+        var extension = exports.Extension.create(metadata);
+        extension._pluginName = '__dynamic';
+        var ep = this.getExtensionPoint(ep);
+        ep.register(extension);
     }
 });
 

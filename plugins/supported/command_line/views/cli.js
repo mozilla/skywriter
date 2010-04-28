@@ -200,6 +200,10 @@ exports.CliInputView = SC.View.design({
             this.checkHeight();
         }.bind(this), true);
 
+        catalog.registerExtension('settingChange', {
+            match: "[min|max]ConsoleHeight",
+            pointer: this.checkHeight.bind(this)
+        });
         this.checkHeight();
     },
 
@@ -223,12 +227,8 @@ exports.CliInputView = SC.View.design({
 
         if (this.get('layout').height != height) {
             this.adjust('height', height).updateLayout();
-            //this.getPath('contentView.display.hint').updateLayout();
         }
-    }.observes(
-        'settings:index#settings.maxConsoleHeight',
-        'settings:index#settings.minConsoleHeight'
-    ),
+    },
 
     /**
      * Apply the proposed completion
@@ -245,6 +245,18 @@ exports.CliInputView = SC.View.design({
         this._inputer.value = command;
         this._input = Input.create({ typed: command });
         this.hintUpdated();
+    },
+
+    /**
+     * Some sugar around <tt>Input.create({ typed:... }).execute();</tt> that
+     * is useful to ensure any output is associated with this command line.
+     * Note that this association isn't currently special, however it could
+     * become special in the future, and this method will do it for you
+     * automagically.
+     */
+    execute: function(command) {
+        var input = Input.create({ typed: command });
+        input.execute();
     },
 
     /**
