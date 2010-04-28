@@ -99,7 +99,7 @@ var console = require('bespin:console').console;
 var Promise = require('bespin:promise').Promise;
 var groupPromises = require('bespin:promise').group;
 
-var SC = require('sproutcore/runtime').SC;
+var Trait = require('traits').Trait;
 
 var types = require('types:types');
 
@@ -167,7 +167,12 @@ exports.getTypeSpecFromAssignment = function(typeSpec) {
  * </pre>
  * @class
  */
-exports.MemorySettings = SC.Object.extend({
+exports.MemorySettings = Trait({
+    /**
+     * Storage for the setting values
+     */
+    _values: {},
+
     /**
      * A Persister is able to store settings. It is an object that defines
      * two functions:
@@ -181,6 +186,13 @@ exports.MemorySettings = SC.Object.extend({
     },
 
     /**
+     * Read accessor
+     */
+    get: function(key) {
+        return this._values[key];
+    },
+
+    /**
      * Override observable.set(key, value) to provide type conversion and
      * validation.
      */
@@ -190,26 +202,20 @@ exports.MemorySettings = SC.Object.extend({
             // If there is no definition for this setting, then warn the user
             // and store the setting in raw format. If the setting gets defined,
             // the addSetting() function is called which then takes up the
-            // here stored setting and calls set() to conver the setting.
+            // here stored setting and calls set() to convert the setting.
             console.warn('Setting not defined: ', key, value);
-            return this.superclass('__deactivated__' + key, value);
+            this._values['__deactivated__' + key] = value;
         }
-
-        if (typeof value == 'string' && settingExt.type == 'string') {
+        else if (typeof value == 'string' && settingExt.type == 'string') {
             // no conversion needed
-            return this.superclass(key, value);
-        } else {
-            // We want to call observer.set, and normally could call
-            // superclass(...) to do this but we're prevented because the
-            // promise changes the callee. So we need to cache it.
-            // Excuse me while I puke.
-            var superSet = arguments.callee.base;
-
+            this._values[key] = value;
+        }
+        else {
             var inline = false;
 
             types.fromString(value, settingExt.type).then(function(converted) {
                 inline = true;
-                superSet.apply(this, [ key, converted ]);
+                this._values[key] = converted;
 
                 // Inform subscriptions of the change
                 catalog.publish('settingChange', key, converted);
@@ -219,10 +225,11 @@ exports.MemorySettings = SC.Object.extend({
 
             if (!inline) {
                 console.warn('About to set string version of ', key, 'delaying typed set.');
-                this.superclass(key, value);
+                this._values[key] = value;
             }
         }
 
+        this._persistValue(key, value);
         return this;
     },
 
@@ -263,12 +270,6 @@ exports.MemorySettings = SC.Object.extend({
 
             // Set the default value up.
             this.set(settingExt.name, value);
-
-            // Add a setter to this so subclasses can save
-            this.addObserver(settingExt.name, this, function() {
-                this._persistValue(settingExt.name, this.get(settingExt.name));
-            }.bind(this));
-
         }.bind(this), function(ex) {
             console.error('Type error ', ex, ' ignoring setting ', settingExt);
         });
@@ -423,4 +424,4 @@ exports.MemorySettings = SC.Object.extend({
     }
 });
 
-exports.settings = exports.MemorySettings.create();
+exports.settings = Trait.create(Object.prototype, exports.MemorySettings);
