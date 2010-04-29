@@ -65,7 +65,7 @@ var ShareNode = SC.Object.extend({
     pausedText: '',
 
     init: function() {
-		this.username = env.session.get('currentUser');
+		this.username = env.session.currentUser;
 		this.project = project.getProjectAndPath(env.file.path);
 		var projectname = this.project[0].name;
 		if (projectname.indexOf('+') < 0) {
@@ -83,6 +83,12 @@ var ShareNode = SC.Object.extend({
         if (!allowUnsynced && this.onFirstSync) {
             console.trace();
             throw new Error('Attempt to getClientText() before onFirstSync() called.');
+        }
+
+        // HACK: When booting up, the env.model is not ready. Return a dummy value
+        //       for now.
+        if (env.model === null) {
+            return '';
         }
 		return env.model.getValue();
     },
@@ -463,6 +469,12 @@ var ShareNode = SC.Object.extend({
      * @private
      */
 	_convertRangeToOffsets: function(range){
+	    // HACK: When the collab tool is initialized, in some cases the mdoel
+	    //       is not ready. Capture that and return some dummy data.
+	    if (env.model === null) {
+	        return { startOffset: 0, endOffset: 0 };
+	    }
+	
 		var lines = env.model.get('lines');
 		var startOffset = 0;
 		var endOffset = 0;
