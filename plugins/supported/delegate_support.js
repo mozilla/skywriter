@@ -37,11 +37,16 @@
 
 "define metadata";
 ({
+    "dependencies":
+    {
+        "traits": "0.0"
+    },
     "description": "Simple support for multiple delegates on an object"
 });
 "end";
 
 var SC = require('sproutcore/runtime').SC;
+var Trait = require('traits').Trait;
 
 /**
  * @namespace
@@ -95,3 +100,47 @@ exports.MultiDelegateSupport = {
     }
 };
 
+exports.DelegateTrait = Trait({
+    /**
+     * @property{Array}
+     *
+     * The set of delegates.
+     */
+    delegates: [],
+
+    /**
+     * Adds a delegate to the list of delegates.
+     */
+    addDelegate: function(delegate) {
+        this.delegates = this.delegates.concat(delegate);
+    },
+
+    /**
+     * @protected
+     *
+     * For each delegate that implements the given method, calls it, passing
+     * this object as the first parameter along with any other parameters
+     * specified.
+     */
+    notifyDelegates: function(method) {
+        var args = [ this ];
+        for (var i = 1; i < arguments.length; i++) {
+            args.push(arguments[i]);
+        }
+
+        this.delegates.forEach(function(delegate) {
+            if (delegate[method]) {
+                delegate[method].apply(delegate, args);
+            }
+        });
+    },
+
+    /**
+     * Removes a delegate from the list of delegates.
+     */
+    removeDelegate: function(oldDelegate) {
+        this.delegates = this.delegates.filter(function(delegate) {
+            return delegate !== oldDelegate;
+        })
+    }
+});
