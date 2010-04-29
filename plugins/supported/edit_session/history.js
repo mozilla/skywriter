@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
+var Trait = require('traits').Trait;
 var environment = require('canon:environment');
 
 var MAX_HISTORY_SIZE = 30;
@@ -45,14 +45,22 @@ var MAX_HISTORY_SIZE = 30;
  *
  * A list of recently opened files.
  */
-exports.History = SC.Object.extend({
+var HistoryTrait = Trait({
+
+    /**
+     * @property{LocalStorage}
+     *
+     * The backing store to use. Defaults to HTML 5 local storage.
+     */
+    storage: window.localStorage,
+
     _getStorageName: function() {
         var user = environment.global.session.currentUser;
         return 'bespin.history.' + user;
     },
 
     _getHistory: function() {
-        var storage = this.get('storage');
+        var storage = this.storage;
         var value = storage[this._getStorageName()];
         if (value) {
             return JSON.parse(value);
@@ -62,16 +70,9 @@ exports.History = SC.Object.extend({
     },
 
     _setHistory: function(newHistory) {
-        var storage = this.get('storage');
+        var storage = this.storage;
         storage[this._getStorageName()] = JSON.stringify(newHistory);
     },
-
-    /**
-     * @property{LocalStorage}
-     *
-     * The backing store to use. Defaults to HTML 5 local storage.
-     */
-    storage: window.localStorage,
 
     /**
      * Adds the supplied path to the history.
@@ -128,3 +129,12 @@ exports.History = SC.Object.extend({
     }
 });
 
+exports.History = {
+    create: function(options) {
+        var ret = Trait.create(Object.prototype, HistoryTrait);
+        for (option in options) {
+            ret.option = options[option];
+        }
+    },
+    trait: HistoryTrait
+}
