@@ -41,27 +41,27 @@
  * Scrolls to the start of the document.
  */
 exports.scrollDocStart = function(env, args, request) {
-    env.get('view').scrollToPosition({ col: 0, row: 0 });
+    env.view.scrollToPosition({ col: 0, row: 0 });
 };
 
 /**
  * Scrolls to the end of the document.
  */
 exports.scrollDocEnd = function(env, args, request) {
-    env.get('view').scrollToPosition(env.get('model').range().end);
+    env.view.scrollToPosition(env.model.range().end);
 };
 
 /**
  * Scrolls down by one screenful of text.
  */
 exports.scrollPageDown = function(env, args, request) {
-    env.get('view').scrollPageDown();
+    env.view.scrollPageDown();
 };
 
 /**
  * Scrolls up by one screenful of text.
  */
 exports.scrollPageUp = function(env, args, request) {
-    env.get('view').scrollPageUp();
+    env.view.scrollPageUp();
 };
 

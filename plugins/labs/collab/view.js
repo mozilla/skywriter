@@ -212,7 +212,7 @@ exports.SocialView = SC.SplitView.design({
                         }
 
                         var content = chat.get('content');
-                        var username = env.get('session').get('currentUser');
+                        var username = env.session.get('currentUser');
                         content = content.concat({
                             msgtargetid: 'myself',
                             from: username,
@@ -297,7 +297,7 @@ exports.fileEventMsg = function (msg) {
  */
 function share_tell (recipients, text, opts) {
     if (recipients.length && text) {
-        var file = env.get('file');
+        var file = env.file;
         if (file) {
             var project = project_m.getProjectAndPath(file.path);
             if (project[0]) {

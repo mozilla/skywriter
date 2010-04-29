@@ -166,7 +166,7 @@ var Range = require('rangeutils:utils/range');
 "end";
 
 exports.moveLeft = function(env, args) {
-    var view = env.get('view');
+    var view = env.view;
     var range = view.getSelectedRange();
 
     view.moveCursorTo({
@@ -176,8 +176,8 @@ exports.moveLeft = function(env, args) {
 };
 
 exports.moveRight = function(env, args) {
-    var view = env.get('view');
-    var lines = env.getPath('model.lines');
+    var view = env.view;
+    var lines = env.model.get('lines');
     var range = view.getSelectedRange();
     var lineLength = lines[range.start.row].length
 
@@ -188,7 +188,7 @@ exports.moveRight = function(env, args) {
 };
 
 exports.moveUp = function(env, args) {
-    var view = env.get('view');
+    var view = env.view;
 
     while (args.n--) {
         view.moveUp();
@@ -196,7 +196,7 @@ exports.moveUp = function(env, args) {
 };
 
 exports.moveDown = function(env, args) {
-    var view = env.get('view');
+    var view = env.view;
 
     while (args.n--) {
         view.moveDown();

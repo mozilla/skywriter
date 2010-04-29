@@ -70,7 +70,7 @@ exports.quotaCommand = function(instruction) {
 exports.rescanCommand = function(env, args, request) {
     var project;
     if (!args.project) {
-        var file = env.get('file');
+        var file = env.file;
         project = project_m.getProjectAndPath(file.path)[0];
         if (project) {
             project = project.name;
@@ -98,10 +98,10 @@ exports.rescanCommand = function(env, args, request) {
  * 'preview' command
  */
 exports.preview = function(env, args, request) {
-    var buffer = env.get('buffer');
+    var buffer = env.buffer;
 
     if (buffer.untitled()) {
-        env.get('commandLine').prompt('saveas ');
+        env.commandLine.prompt('saveas ');
         request.done('The current buffer is untitled. Please enter a name.');
         return;
     }

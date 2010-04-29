@@ -47,22 +47,22 @@ var Range = require('rangeutils:utils/range');
 //
 
 exports.moveDown = function(env, args, request) {
-    var view = env.get('view');
+    var view = env.view;
     view.moveDown();
 };
 
 exports.moveLeft = function(env, args, request) {
-    var view = env.get('view');
+    var view = env.view;
     view.moveLeft();
 };
 
 exports.moveRight = function(env, args, request) {
-    var view = env.get('view');
+    var view = env.view;
     view.moveRight();
 };
 
 exports.moveUp = function(env, args, request) {
-    var view = env.get('view');
+    var view = env.view;
     view.moveUp();
 };
 
@@ -71,22 +71,22 @@ exports.moveUp = function(env, args, request) {
 //
 
 exports.selectDown = function(env, args, request) {
-    var view = env.get('view');
+    var view = env.view;
     view.selectDown();
 };
 
 exports.selectLeft = function(env, args, request) {
-    var view = env.get('view');
+    var view = env.view;
     view.selectLeft();
 };
 
 exports.selectRight = function(env, args, request) {
-    var view = env.get('view');
+    var view = env.view;
     view.selectRight();
 };
 
 exports.selectUp = function(env, args, request) {
-    var view = env.get('view');
+    var view = env.view;
     view.selectUp();
 };
 
@@ -95,7 +95,7 @@ exports.selectUp = function(env, args, request) {
 //
 
 var moveOrSelectEnd = function(env, shift, inLine) {
-    var view = env.get('view'), model = env.get('model');
+    var view = env.view, model = env.model;
     var lines = model.get('lines');
     var selectedRange = view.getSelectedRange();
     var row = inLine ? selectedRange.end.row : lines.length - 1;
@@ -123,7 +123,7 @@ exports.selectDocEnd = function(env, args, request) {
 //
 
 var moveOrSelectStart = function(env, shift, inLine) {
-    var view = env.get('view');
+    var view = env.view;
     var range = view.getSelectedRange();
     var row = inLine ? range.end.row : 0;
     var position = { row: row, col: 0 };
@@ -183,7 +183,7 @@ var seekNextStop = function(view, text, col, dir, rowChanged) {
 };
 
 var moveOrSelectNextWord = function(env, shiftDown) {
-    var view = env.get('view'), model = env.get('model');
+    var view = env.view, model = env.model;
     var lines = model.get('lines');
 
     var selectedRange = view.getSelectedRange(true);
@@ -210,7 +210,7 @@ var moveOrSelectNextWord = function(env, shiftDown) {
 };
 
 var moveOrSelectPreviousWord = function(env, shiftDown) {
-    var view = env.get('view'), model = env.get('model');
+    var view = env.view, model = env.model;
 
     var lines = model.get('lines');
     var selectedRange = view.getSelectedRange(true);
@@ -262,6 +262,6 @@ exports.selectPreviousWord = function(env, args, request) {
  * Selects all characters in the buffer.
  */
 exports.selectAll = function(env, args, request) {
-    var view = env.get('view');
+    var view = env.view;
     view.selectAll();
 };

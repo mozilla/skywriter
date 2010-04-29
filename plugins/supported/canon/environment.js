@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
+var Trait = require('traits').Trait;
 var console = require('bespin:console').console;
 var bespin = require('appsupport:controllers/bespin').bespinController;
 
@@ -46,33 +46,36 @@ var bespin = require('appsupport:controllers/bespin').bespinController;
  * are changed by the system.
  * <p>The role of the Environment is likely to be expanded over time.
  */
-exports.Environment = SC.Object.extend({
+exports.EnvironmentTrait = Trait({
+
+    commandLine: null,
+
     /**
      * Retrieves the EditSession
      */
-    session: function() {
+    getSession: function() {
         return bespin.session;
-    }.property(),
+    },
 
     /**
      * Gets the currentView from the session.
      */
-    view: function() {
-        var session = this.get('session');
+    getView: function() {
+        var session = this.getSession();
         if (!session) {
             // This can happen if the session is being reloaded.
             return null;
         }
         return session.get('currentView');
-    }.property(),
+    },
 
     /**
      * The current editor model might not always be easy to find so you should
      * use <code>instruction.get('model')</code> to access the view where
      * possible.
      */
-    model: function() {
-        var session = this.get('session');
+    getModel: function() {
+        var session = this.getSession();
         if (!session) {
             console.error("command attempted to get model but there's no session");
             return undefined;
@@ -83,29 +86,29 @@ exports.Environment = SC.Object.extend({
             return undefined;
         }
         return buffer.get('model');
-    }.property(),
+    },
 
     /**
      * Returns the currently-active syntax contexts.
      */
-    contexts: function() {
-        var textView = this.get('view');
-        
+    getContexts: function() {
+        var textView = this.getView();
+
         // when editorapp is being refreshed, the textView is not available.
         if (!textView) {
             return [];
         }
-        
-        var syntaxManager = textView.getPath('layoutManager.syntaxManager');
+
+        var syntaxManager = textView.layoutManager.syntaxManager;
         var pos = textView.getSelectedRange().start;
         return syntaxManager.contextsAtPosition(pos);
-    }.property(),
-    
+    },
+
     /**
      * gets the current file from the session
      */
-    file: function() {
-        var session = this.get('session');
+    getFile: function() {
+        var session = this.getSession();
         if (!session) {
             console.error("command attempted to get file but there's no session");
             return undefined;
@@ -116,31 +119,43 @@ exports.Environment = SC.Object.extend({
             return undefined;
         }
         return buffer.get('file');
-    }.property(),
+    },
 
     /**
      * The current Buffer from the session
      */
-    buffer: function() {
-        var session = this.get('session');
+    getBuffer: function() {
+        var session = this.getSession();
         if (!session) {
             console.error("command attempted to get buffer but there's no session");
             return undefined;
         }
         return session.get('currentBuffer');
-    }.property(),
+    },
 
     /**
      * If files are available, this will get them. Perhaps we need some other
      * mechanism for populating these things from the catalog?
      */
-    files: function() {
+    getFiles: function() {
         return bespin.files;
-    }.property()
+    },
+
+    init: function() {
+        this.__defineGetter__('session', this.getSession);
+        this.__defineGetter__('view', this.getView);
+        this.__defineGetter__('model', this.getModel);
+        this.__defineGetter__('contexts', this.getContexts);
+        this.__defineGetter__('file', this.getFile);
+        this.__defineGetter__('buffer', this.getBuffer);
+        this.__defineGetter__('files', this.getFiles);
+
+        return this;
+    }
 });
 
 /**
  * The global environment.
  * TODO: Check that this is the best way to do this.
  */
-exports.global = exports.Environment.create();
+exports.global = Trait.create(Object.prototype, exports.EnvironmentTrait).init();

@@ -47,7 +47,7 @@ var m_range = require('rangeutils:utils/range');
  * insertion point.
  */
 exports.backspace = function(env, args, request) {
-    var view = env.get('view');
+    var view = env.view;
     view.performBackspaceOrDelete(true);
 };
 
@@ -56,7 +56,7 @@ exports.backspace = function(env, args, request) {
  * insertion point.
  */
 exports.deleteCommand = function(env, args, request) {
-    var view = env.get('view');
+    var view = env.view;
     view.performBackspaceOrDelete(false);
 };
 
@@ -65,11 +65,11 @@ exports.deleteCommand = function(env, args, request) {
  * insertion point at the end of the deleted range.
  */
 exports.deleteLines = function(env, args, request) {
-    if (env.getPath('model.readOnly')) {
+    if (env.model.get('readOnly')) {
         return;
     }
 
-    var view = env.get('view');
+    var view = env.view;
     var range = view.getSelectedRange();
 
     view.groupChanges(function() {
@@ -106,7 +106,7 @@ var newline = function(model, view) {
  * boundaries appropriately.
  */
 exports.insertText = function(env, args, request) {
-    var view = env.get('view');
+    var view = env.view;
     var text = args.text;
     view.insertText(text);
 };
@@ -115,7 +115,7 @@ exports.insertText = function(env, args, request) {
  * Inserts a newline at the insertion point.
  */
 exports.newline = function(env, args, request) {
-    var model = env.get('model'), view = env.get('view');
+    var model = env.model, view = env.view;
     newline(model, view);
 };
 
@@ -123,12 +123,12 @@ exports.newline = function(env, args, request) {
  * Join the following line with the current one. Removes trailing whitespaces.
  */
 exports.joinLines = function(env, args, request) {
-    var model = env.get('model');
+    var model = env.model;
     if (model.get('readOnly')) {
         return;
     }
 
-    var view = env.get('view');
+    var view = env.view;
     var selection = view.getSelectedRange();
     var lines = model.get('lines');
     var row = selection.end.row;
@@ -158,11 +158,11 @@ exports.joinLines = function(env, args, request) {
  * point there.
  */
 exports.openLine = function(env, args, request) {
-    if (env.getPath('model.readOnly')) {
+    if (env.model.get('readOnly')) {
         return;
     }
 
-    var model = env.get('model'), view = env.get('view');
+    var model = env.model, view = env.view;
 
     var selection = view.getSelectedRange();
     var row = selection.end.row;
@@ -173,7 +173,7 @@ exports.openLine = function(env, args, request) {
 };
 
 exports.tab = function(env, args, request) {
-    var view = env.get('view');
+    var view = env.view;
     var tabstop = settings.get('tabstop');
     var selection = view.getSelectedRange();
     var count = tabstop - selection.start.col % tabstop;

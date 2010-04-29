@@ -76,6 +76,6 @@ exports.snippetCommand = function(env, args, request) {
         return;
     }
 
-    var range = env.get('view').getSelectedRange();
-    env.get('model').replaceCharacters(range, snippetExt.contents);
+    var range = env.view.getSelectedRange();
+    env.model.replaceCharacters(range, snippetExt.contents);
 };

@@ -52,7 +52,7 @@ var environment = require('canon:environment');
  *
  */
 exports.buildFlags = function(env, flags) {
-    flags.context = env.get('contexts')[0];
+    flags.context = env.contexts[0];;
     return flags;
 };
 

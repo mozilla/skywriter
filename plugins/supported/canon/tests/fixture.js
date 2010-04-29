@@ -39,9 +39,9 @@ var SC = require('sproutcore/runtime').SC;
 var catalog = require('bespin:plugins').catalog;
 var Promise = require('bespin:promise').Promise;
 var Request = require('request').Request;
-var Environment = require('environment').Environment;
+var EnvironmentTrait = require('environment').EnvironmentTrait;
 
-exports.MockEnvironment = Environment;
+exports.MockEnvironmentTrait = EnvironmentTrait;
 
 exports.MockRequest = Request.extend({
     init: function() {

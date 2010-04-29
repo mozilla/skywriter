@@ -146,7 +146,7 @@ var commitPage = SC.Page.design({
  * Commit all outstanding changes
  */
 exports.commit = function(env, args, request) {
-    var file = env.get("file");
+    var file = env.file;
     if (!file) {
         request.doneWithError("There is no currently opened file.");
         return;
@@ -180,7 +180,7 @@ exports.revert = function(env, args, request) {
     exports._performVCSCommandWithFiles("revert", env, args, request, {
         acceptAll: true
     }).then(function() {
-        var buffer = env.get("buffer");
+        var buffer = env.buffer;
         buffer.reload();
     });
 };
@@ -191,7 +191,7 @@ exports.revert = function(env, args, request) {
  * Push changes to the specified destination
  */
 exports.push = function(env, args, request) {
-    var file = env.get("file");
+    var file = env.file;
     if (!file) {
         request.doneWithError("There is no currently opened file.");
         return;
@@ -247,7 +247,7 @@ exports.resolved = function(env, args, request) {
  * Show changed files under the working directory
  */
 exports.status = function(env, args, request) {
-    var file = env.get("file");
+    var file = env.file;
     if (!file) {
         request.doneWithError("There is no currently opened file.");
         return;
@@ -270,7 +270,7 @@ exports.status = function(env, args, request) {
  * Show changed files under the working directory
  */
 exports.log = function(env, args, request) {
-    var file = env.get("file");
+    var file = env.file;
     if (!file) {
         request.doneWithError("There is no currently opened file.");
         return;
@@ -293,7 +293,7 @@ exports.log = function(env, args, request) {
  * Pull updates from the repository into the current working directory
  */
 exports.update = function(env, args, request) {
-    var file = env.get("file");
+    var file = env.file;
     if (!file) {
         request.doneWithError("There is no currently opened file.");
         return;
@@ -337,7 +337,7 @@ exports.update = function(env, args, request) {
  * Initialize an HG repository
  */
 exports.hginit = function(env, args, request) {
-    var file = env.get("file");
+    var file = env.file;
     if (!file) {
         request.doneWithError("There is no currently opened file.");
         return;
@@ -418,7 +418,7 @@ exports._performVCSCommandWithFiles = function(vcsCommand, env, args, request,
     options = options || { acceptAll: true };
     var project, path, command, pr, message;
     
-    var file = env.get("file");
+    var file = env.file;
     if (!file) {
         message = "There is no currently opened file.";
         request.doneWithError();

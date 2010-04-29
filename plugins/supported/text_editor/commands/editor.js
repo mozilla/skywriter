@@ -47,7 +47,7 @@ exports.findCommand = function(env, args, request) {
         return;
     }
 
-    var view = env.get('view'), search = view.get('searchController');
+    var view = env.view, search = view.get('searchController');
     var sel = view.getSelectedRange();
     var output = '';
 
@@ -66,7 +66,7 @@ exports.findCommand = function(env, args, request) {
 };
 
 exports.findNextCommand = function(env, args, request) {
-    var view = env.get('view'), search = view.get('searchController');
+    var view = env.view, search = view.get('searchController');
     var sel = view.getSelectedRange();
     var match = search.findNext(sel.end, true);
     if (match) {
@@ -76,7 +76,7 @@ exports.findNextCommand = function(env, args, request) {
 };
 
 exports.findPrevCommand = function(env, args, request) {
-    var view = env.get('view'), search = view.get('searchController');
+    var view = env.view, search = view.get('searchController');
     var sel = view.getSelectedRange();
     var match = search.findPrevious(sel.start, true);
     if (match) {
@@ -94,7 +94,7 @@ exports.gotoCommand = function(env, args, request) {
         return;
     }
 
-    var view = env.get('view');
+    var view = env.view;
     view.moveCursorTo({ row: args.line - 1, col: 0 });
     view.focus();
 };
@@ -104,13 +104,13 @@ exports.gotoCommand = function(env, args, request) {
  * TODO: If the selection is empty, broaden the scope to the whole file?
  */
 var withSelection = function(env, action) {
-    var view = env.get('view');
+    var view = env.view;
     var selection = view.getSelectedCharacters();
 
     var replacement = action(selection);
 
     var range = view.getSelectedRange();
-    var model = env.get('model');
+    var model = env.model;
     model.replaceCharacters(range, replacement);
 };
 

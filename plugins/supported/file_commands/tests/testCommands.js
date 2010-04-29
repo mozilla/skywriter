@@ -26,7 +26,7 @@ var t = require('plugindev');
 
 var fs = require('filesystem');
 var DummyFileSource = require('filesystem:tests/fixture').DummyFileSource;
-var Environment = require('canon:tests/fixture').MockEnvironment;
+var EnvironmentTrait = require('canon:tests/fixture').MockEnvironment;
 var Request = require('canon:tests/fixture').MockRequest;
 var file_commands = require('file_commands');
 var edit_session = require('edit_session');
@@ -86,7 +86,7 @@ exports.testOpenFileWithNoOpenFile = function() {
     var request = Request.create();
     var testpr = new Promise();
     request.promise.then(function() {
-        var f = env.get('file');
+        var f = env.file;
         t.ok(!request.error, 'Should not be in error state');
         t.equal(f.path, '/foo/bar/3.txt', 'File should have been set');
         testpr.resolve();
@@ -115,8 +115,8 @@ exports.testFilesCommandDefaultsToRoot = function() {
 
 exports.testFilesAreRelativeToCurrentOpenFile = function() {
     var env = getEnv();
-    var buffer = env.get('buffer');
-    var files = env.get('files');
+    var buffer = env.buffer;
+    var files = env.files;
     buffer.changeFileOnly(files.getFile('foo/1.txt'));
 
     var testpr = new Promise();
@@ -136,8 +136,8 @@ exports.testFilesAreRelativeToCurrentOpenFile = function() {
 
 exports.testFilesListingInDirectoryRelativeToOpenFile = function() {
     var env = getEnv();
-    var buffer = env.get('buffer');
-    var files = env.get('files');
+    var buffer = env.buffer;
+    var files = env.files;
     buffer.changeFileOnly(files.getFile('foo/1.txt'));
     var testpr = new Promise();
 
@@ -156,7 +156,7 @@ exports.testMakeDirectoryForNewDirectory = function() {
     var env = getEnv();
     var request = Request.create();
     var testpr = new Promise();
-    var files = env.get('files');
+    var files = env.files;
 
     request.promise.then(function() {
         files.listDirectory('/foo/').then(function(contents) {

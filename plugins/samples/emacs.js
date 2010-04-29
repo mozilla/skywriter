@@ -194,12 +194,12 @@ exports.insertText = function(env, args) {
         text += args.text;
     }
 
-    var view = env.get('view');
+    var view = env.view;
     view.insertText(text);
 };
 
 exports.moveLeft = function(env, args) {
-    var view = env.get('view');
+    var view = env.view;
 
     while (args.n--) {
         view.moveLeft();
@@ -207,7 +207,7 @@ exports.moveLeft = function(env, args) {
 };
 
 exports.moveRight = function(env, args) {
-    var view = env.get('view');
+    var view = env.view;
 
     while (args.n--) {
         view.moveRight();
@@ -215,7 +215,7 @@ exports.moveRight = function(env, args) {
 };
 
 exports.moveUp = function(env, args) {
-    var view = env.get('view');
+    var view = env.view;
 
     while (args.n--) {
         view.moveUp();
@@ -223,7 +223,7 @@ exports.moveUp = function(env, args) {
 };
 
 exports.moveDown = function(env, args) {
-    var view = env.get('view');
+    var view = env.view;
 
     while (args.n--) {
         view.moveDown();

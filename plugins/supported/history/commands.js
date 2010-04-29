@@ -42,7 +42,7 @@ var history = require('canon:request').history;
  * CLI 'up'
  */
 exports.historyPreviousCommand = function(env, args, request) {
-    var commandLine = env.get('commandLine');
+    var commandLine = env.commandLine;
     var history = catalog.getObject('history');
     commandLine.setInput(history.previous());
 };
@@ -51,7 +51,7 @@ exports.historyPreviousCommand = function(env, args, request) {
  * CLI 'down'
  */
 exports.historyNextCommand = function(env, args, request) {
-    var commandLine = env.get('commandLine');
+    var commandLine = env.commandLine;
     var history = catalog.getObject('history');
     commandLine.setInput(history.next());
 };

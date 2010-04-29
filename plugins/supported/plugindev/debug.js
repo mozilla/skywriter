@@ -39,7 +39,7 @@ var SC = require('sproutcore/runtime').SC;
 var console = require('bespin:console').console;
 
 exports.syntaxContexts = function(env, args, request) {
-    var contexts = env.get('contexts');
+    var contexts = env.contexts;
     request.done('Contexts = [ ' + contexts.join(', ') + ' ]');
 };
 

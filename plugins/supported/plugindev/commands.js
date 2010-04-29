@@ -109,7 +109,7 @@ var changePluginInfo = function(env, request) {
  */
 exports.add = function(env, args, request) {
     var path = args.path;
-    var session = env.get('session');
+    var session = env.session;
     path = session.getCompletePath(path);
     path = path.replace(/\/$/, '');
 

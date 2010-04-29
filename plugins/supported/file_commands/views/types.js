@@ -53,7 +53,7 @@ exports.existingFileHint = {
             matcher: matcher
         });
 
-        var files = input.env.get('files');
+        var files = input.env.files;
         files.listAll().then(function(fileList) {
             matcher.addItems(fileList.map(function(item) {
                 var lastSep = item.lastIndexOf('/');

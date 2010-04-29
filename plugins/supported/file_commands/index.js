@@ -44,7 +44,7 @@ var pathUtil = require('filesystem:path');
  * no leading slash.
  */
 var getCompletePath = function(env, path) {
-    var session = env.get('session');
+    var session = env.session;
     return session.getCompletePath(path);
 };
 
@@ -61,7 +61,7 @@ exports.filesCommand = function(env, args, request) {
     }
 
     request.async();
-    env.get('files').listDirectory(path).then(function(contents) {
+    env.files.listDirectory(path).then(function(contents) {
         var files = '';
         for (var x = 0; x < contents.length; x++) {
             files += contents[x] + '<br/>';
@@ -82,7 +82,7 @@ exports.mkdirCommand = function(env, args, request) {
     path = getCompletePath(env, path);
     request.async();
 
-    var files = env.get('files');
+    var files = env.files;
     files.makeDirectory(path).then(function() {
         request.done('Directory ' + path + ' created.');
     }, function(error) {
@@ -95,7 +95,7 @@ exports.mkdirCommand = function(env, args, request) {
  * 'save' command
  */
 exports.saveCommand = function(env, args, request) {
-    var buffer = env.get('buffer');
+    var buffer = env.buffer;
     if (buffer.untitled()) {
         env.commandLine.setInput('saveas ');
         request.done('The current buffer is untitled. Please enter a name.');
@@ -114,11 +114,11 @@ exports.saveCommand = function(env, args, request) {
  * 'save as' command
  */
 exports.saveAsCommand = function(env, args, request) {
-    var files = env.get('files');
+    var files = env.files;
     var path = getCompletePath(env, args.path).substring(1);
 
     var newFile = files.getFile(path);
-    env.get('buffer').saveAs(newFile).then(function() {
+    env.buffer.saveAs(newFile).then(function() {
         request.done('Saved to \'' + path + '\'');
     }, function(err) {
         request.doneWithError('Save failed (' + err.message + ')');
@@ -136,8 +136,8 @@ exports.openCommand = function(env, args, request) {
         return;
     }
 
-    var files = env.get('files');
-    var buffer = env.get('buffer');
+    var files = env.files;
+    var buffer = env.buffer;
 
     var path = args.path;
     path = getCompletePath(env, path);
@@ -161,7 +161,7 @@ exports.openCommand = function(env, args, request) {
  */
 exports.revertCommand = function(env, args, request) {
     request.async();
-    var buffer = env.get('buffer');
+    var buffer = env.buffer;
     buffer.reload().then(function() {
         request.done('File reverted');
     }, function(error) {
@@ -170,7 +170,7 @@ exports.revertCommand = function(env, args, request) {
 };
 
 exports.newfileCommand = function(env, args, request) {
-    var buffer = env.get('buffer');
+    var buffer = env.buffer;
     buffer.set('file', null);
 };
 
@@ -178,8 +178,8 @@ exports.newfileCommand = function(env, args, request) {
  * 'rm' command
  */
 exports.rmCommand = function(env, args, request) {
-    var files = env.get('files');
-    var buffer = env.get('buffer');
+    var files = env.files;
+    var buffer = env.buffer;
 
     var path = args.path;
     path = getCompletePath(env, path);

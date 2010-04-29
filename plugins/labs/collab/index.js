@@ -65,8 +65,8 @@ var ShareNode = SC.Object.extend({
     pausedText: '',
 
     init: function() {
-		this.username = env.get('session').get('currentUser');
-		this.project = project.getProjectAndPath(env.get('file').path);
+		this.username = env.session.get('currentUser');
+		this.project = project.getProjectAndPath(env.file.path);
 		var projectname = this.project[0].name;
 		if (projectname.indexOf('+') < 0) {
 			// add username
@@ -84,7 +84,7 @@ var ShareNode = SC.Object.extend({
             console.trace();
             throw new Error('Attempt to getClientText() before onFirstSync() called.');
         }
-		return env.get('model').getValue();
+		return env.model.getValue();
     },
 
     /**
@@ -122,7 +122,7 @@ var ShareNode = SC.Object.extend({
      */
     setClientText: function(text) {
         var cursor = this.captureCursor();
-		env.get('model').setValue(text);
+		env.model.setValue(text);
         this.restoreCursor(cursor);
 
         this.syncDone();
@@ -210,7 +210,7 @@ var ShareNode = SC.Object.extend({
         var newClientText = this._patchApply(patches, oldClientText, offsets);
         // Set the new text only if there is a change to be made.
         if (oldClientText != newClientText) {
-			env.get('model').setValue(newClientText);
+			env.model.setValue(newClientText);
             if (cursor) {
                 // Unpack the offset array.
                 cursor.startOffset = offsets[0];
@@ -331,7 +331,7 @@ var ShareNode = SC.Object.extend({
      * @private
      */
     captureSimpleCursor: function() {
-		var selection = env.get('view').getSelectedRange();
+		var selection = env.view.getSelectedRange();
 		return this._convertRangeToOffsets(selection);
     },
 
@@ -344,7 +344,7 @@ var ShareNode = SC.Object.extend({
      */
     captureCursor: function() {
         var padLength = this.dmp.Match_MaxBits / 2;  // Normally 16.
-        var text = env.get('model').getValue();
+        var text = env.model.getValue();
 
         var cursor = this.captureSimpleCursor();
 
@@ -391,7 +391,7 @@ var ShareNode = SC.Object.extend({
         dmp.Match_Threshold = 0.9;
 
         var padLength = dmp.Match_MaxBits / 2; // Normally 16.
-        var newText = env.get('model').getValue();
+        var newText = env.model.getValue();
 
         // Find the start of the selection in the new text.
         var pattern1 = cursor.startPrefix + cursor.startSuffix;
@@ -441,7 +441,7 @@ var ShareNode = SC.Object.extend({
 
         // Cursor position
         var range = this._convertOffsetsToRange(cursorStartPoint, cursorEndPoint);
-		var view = env.get('view');
+		var view = env.view;
 		view.moveCursorTo(range.start);
 
         // Selection
@@ -463,7 +463,7 @@ var ShareNode = SC.Object.extend({
      * @private
      */
 	_convertRangeToOffsets: function(range){
-		var lines = env.get('model').get('lines');
+		var lines = env.model.get('lines');
 		var startOffset = 0;
 		var endOffset = 0;
 		
@@ -494,7 +494,7 @@ var ShareNode = SC.Object.extend({
      * @private
      */
 	_convertOffsetsToRange: function(startOffset, endOffset){
-		var lines = env.get('model').get('lines');
+		var lines = env.model.get('lines');
 
 		if (typeof endOffset != 'number') {
 			endOffset = startOffset;

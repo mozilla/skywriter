@@ -161,8 +161,10 @@ exports.CliInputView = SC.View.design({
         this._inputer.className = 'cmd_input';
         this._input = Input.create({ typed: '' });
 
+        // TODO: This is a hack... how to do it right?
+        environment.commandLine = this;
+
         keyutil.addKeyDownListener(this._inputer, function(ev) {
-            environment.set('commandLine', this);
             var handled = keyboardManager.processKeyEvent(ev, this, {
                 isCommandLine: true, isKeyUp: false
             });
@@ -170,7 +172,6 @@ exports.CliInputView = SC.View.design({
         }.bind(this));
 
         this._inputer.onkeyup = function(ev) {
-            environment.set('commandLine', this);
             var handled = keyboardManager.processKeyEvent(ev, this, {
                 isCommandLine: true, isKeyUp: true
             });

@@ -45,7 +45,7 @@ var rootCanon = { aliases:[], commands:[] };
  * Action to allow the command line to do completion
  */
 exports.completeCommand = function(env, args, request) {
-    var commandLine = env.get('commandLine');
+    var commandLine = env.commandLine;
     commandLine.complete();
 };
 
