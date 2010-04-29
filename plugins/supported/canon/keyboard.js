@@ -39,13 +39,14 @@ var SC = require('sproutcore/runtime').SC;
 
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
+var Trace = require('bespin:util/stacktrace').Trace;
+var util = require('bespin:util/util');
+
 var settings = require('settings').settings;
 
 var keyutil = require('canon:keyutil');
 var Request = require('canon:request').Request;
 var environment = require('canon:environment');
-
-var Trace = require('bespin:util/stacktrace').Trace;
 
 /**
  *
@@ -79,7 +80,7 @@ var KeyboardManager = SC.Object.extend({
         // Use our modified commandCodes function to detect the meta key in
         // more circumstances than SproutCore alone does.
         var symbolicName = keyutil.commandCodes(evt)[0];
-        if (SC.none(symbolicName)) {
+        if (util.none(symbolicName)) {
             return false;
         }
 
@@ -139,7 +140,7 @@ var KeyboardManager = SC.Object.extend({
     _buildBindingsRegex: function(bindings) {
         // Escape a given Regex string.
         bindings.forEach(function(binding) {
-            if (!SC.none(binding.key)) {
+            if (!util.none(binding.key)) {
                 binding.key = new RegExp('^' + binding.key + '$');
             } else if (SC.isArray(binding.regex)) {
                 binding.key = new RegExp('^' + binding.regex[1] + '$');
@@ -191,11 +192,11 @@ var KeyboardManager = SC.Object.extend({
 
             for (var i = 0; i < ak.length; i++) {
                 // Check if the keymapping has the current state.
-                if (SC.none(ak[i].states[currentState])) {
+                if (util.none(ak[i].states[currentState])) {
                     continue;
                 }
 
-                if (SC.none(ak[i]._convertedRegExp)) {
+                if (util.none(ak[i]._convertedRegExp)) {
                     this._buildKeymappingRegex(ak[i]);
                 }
 
@@ -206,7 +207,7 @@ var KeyboardManager = SC.Object.extend({
                                     sender,
                                     ak[i]);
 
-                if (!SC.none(result)) {
+                if (!util.none(result)) {
                     return result;
                 }
             }
@@ -226,7 +227,7 @@ var KeyboardManager = SC.Object.extend({
             return false;
         }.bind(this));
 
-        return SC.none(reply) ? null : { commandExt: reply, args: args};
+        return util.none(reply) ? null : { commandExt: reply, args: args };
     },
 
 
@@ -240,7 +241,7 @@ var KeyboardManager = SC.Object.extend({
         var args = {};
         var bufferToUse;
 
-        if (!SC.none(keymapping.hasMetaKey)) {
+        if (!util.none(keymapping.hasMetaKey)) {
             bufferToUse = sender._keyBuffer;
         } else {
             bufferToUse = sender._keyMetaBuffer;
@@ -283,7 +284,7 @@ var KeyboardManager = SC.Object.extend({
             if (binding.exec) {
                 // Get the command.
                 commandExt = catalog.getExtensionByKey('command', binding.exec);
-                if (SC.none(commandExt)) {
+                if (util.none(commandExt)) {
                     throw new Error('Can\'t find command ' + binding.exec +
                         ' in state=' + sender._keyState +
                         ', symbolicName=' + symbolicName);
@@ -293,7 +294,7 @@ var KeyboardManager = SC.Object.extend({
                 if (binding.params) {
                     var value;
                     binding.params.forEach(function(param) {
-                        if (!SC.none(param.match) && !SC.none(match)) {
+                        if (!util.none(param.match) && !util.none(match)) {
                             value = match[param.match] || param.defaultValue;
                         } else {
                             value = param.defaultValue;
@@ -317,14 +318,14 @@ var KeyboardManager = SC.Object.extend({
 
             // If there is no command matched now, then return a 'false'
             // command to stop matching.
-            if (SC.none(commandExt)) {
+            if (util.none(commandExt)) {
                 commandExt = 'no command';
             }
 
             return true;
         });
 
-        if (SC.none(commandExt)) {
+        if (util.none(commandExt)) {
             return null;
         }
 
@@ -394,7 +395,7 @@ var KeyboardManager = SC.Object.extend({
  *
  */
 exports.flagsMatch = function(predicates, flags) {
-    if (SC.none(predicates)) {
+    if (util.none(predicates)) {
         return true;
     }
 

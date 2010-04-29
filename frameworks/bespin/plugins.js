@@ -636,7 +636,7 @@ exports.Catalog = SC.Object.extend({
 
             visited[key] = true;
             var depends = metadata[key].dependencies;
-            if (!SC.none(depends)) {
+            if (!util.none(depends)) {
                 for (var dependName in depends) {
                     visit(dependName);
                 }
@@ -882,7 +882,7 @@ exports.Catalog = SC.Object.extend({
 
         var pluginName = parts[1];
         if (pluginName === "") {
-            if (SC.none(context)) {
+            if (util.none(context)) {
                 throw new Error("loadObjectForPropertyPath: no plugin name " +
                     "supplied and no context is present");
             }

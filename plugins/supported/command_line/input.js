@@ -167,7 +167,7 @@ exports.Input = SC.Object.extend({
         var nextToken;
         while (true) {
             nextToken = incoming.shift();
-            if (SC.none(nextToken)) {
+            if (util.none(nextToken)) {
                 break;
             }
             if (nextToken[0] == '"' || nextToken[0] == '\'') {
@@ -290,7 +290,7 @@ exports.Input = SC.Object.extend({
             this.hints.push(hintPromise);
         }
 
-        if (SC.none(this._commandExt)) {
+        if (util.none(this._commandExt)) {
             return;
         }
 
@@ -461,7 +461,7 @@ exports.Input = SC.Object.extend({
     _getAssignmentForLastArg: function() {
         var highestAssign = null;
         this._assignments.forEach(function(assignment) {
-            if (!highestAssign || !SC.none(assignment.value)) {
+            if (!highestAssign || !util.none(assignment.value)) {
                 highestAssign = assignment;
             }
         });

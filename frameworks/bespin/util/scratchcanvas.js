@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var util = require('bespin:util/util');
 
 /**
  * @class
@@ -54,7 +55,7 @@ var ScratchCanvas = SC.Object.extend({
         // It's possible that another ScratchCanvas instance in another sandbox
         // exists on the page. If so, we assume they're compatible, and use
         // that one.
-        if (!SC.none(document.getElementById('bespin-scratch-canvas'))) {
+        if (!util.none(document.getElementById('bespin-scratch-canvas'))) {
             return;
         }
 
@@ -73,7 +74,7 @@ var ScratchCanvas = SC.Object.extend({
      * given font.
      */
     measureStringWidth: function(font, str) {
-        if (SC.none(str)) {
+        if (util.none(str)) {
             str = "M";
         }
 

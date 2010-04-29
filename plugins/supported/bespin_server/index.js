@@ -35,13 +35,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var SC = require('sproutcore/runtime').SC;
+
 var bespin = require('bespin');
 var console = require('bespin:console').console;
-var util = require('bespin:util/util');
-var cookie = require('bespin:util/cookie');
-var SC = require('sproutcore/runtime').SC;
 var Promise = require('bespin:promise').Promise;
 var catalog = require('bespin:plugins').catalog;
+
+var util = require('bespin:util/util');
+var cookie = require('bespin:util/cookie');
 
 /**
  * The Server object implements the Bespin Server API (See
@@ -305,7 +307,7 @@ exports.server = SC.Object.create({
                 // messages that we've just been sent
                 job.options.onPartial(message.output);
             } else {
-                if (SC.none(job.partials)) {
+                if (util.none(job.partials)) {
                     job.partials = [];
                 }
 
