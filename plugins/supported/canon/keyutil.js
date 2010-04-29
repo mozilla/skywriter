@@ -81,77 +81,6 @@ exports.KeyHelper = function() {
         isFunctionOrNonPrintableKey: function(evt) {
             return !!(evt.altKey || evt.ctrlKey || evt.metaKey ||
                     ((evt.charCode !== evt.which) && this.FUNCTION_KEYS[evt.which]));
-        },
-
-        getCommandCodes: function(evt, dontIgnoreMeta) {
-            var code = evt._keyCode || evt.keyCode;
-            var charCode = (evt._charCode === undefined ? evt.charCode : evt._charCode);
-            var ret = null;
-            var key = null;
-            var modifiers = '';
-            var lowercase;
-            var allowShift = true;
-
-            // Absent a value for 'keyCode' or 'which', we can't compute the
-            // command codes. Bail out.
-            if (code === 0 && evt.which === 0) {
-                return false;
-            }
-
-            // If the charCode is not zero, then we do not handle a command key
-            // here. Bail out.
-            if (charCode !== 0) {
-                return false;
-            }
-
-            // Check for modifier keys.
-            if (this.MODIFIER_KEYS[charCode]) {
-                return [this.MODIFIER_KEYS[charCode], null];
-            }
-
-            // handle function keys.
-            if (code) {
-                ret = this.FUNCTION_KEYS[code] ;
-                if (!ret && (evt.altKey || evt.ctrlKey || evt.metaKey)) {
-                    ret = this.PRINTABLE_KEYS[code];
-                    // Don't handle the shift key if the combo is
-                    //    (meta_|ctrl_)<number>
-                    // This is necessary for the French keyboard. On that keyboard,
-                    // you have to hold down the shift key to access the number
-                    // characters.
-                    if (code > 47 && code < 58) allowShift = evt.altKey;
-                }
-
-                if (ret) {
-                   if (evt.altKey) modifiers += 'alt_' ;
-                   if (evt.ctrlKey) modifiers += 'ctrl_' ;
-                   if (evt.metaKey) modifiers += 'meta_';
-                } else if (evt.ctrlKey || evt.metaKey) {
-                    return false;
-                }
-            }
-
-            // otherwise just go get the right key.
-            if (!ret) {
-                code = evt.which ;
-                key = ret = String.fromCharCode(code) ;
-                lowercase = ret.toLowerCase() ;
-                if (evt.metaKey) {
-                   modifiers = 'meta_' ;
-                   ret = lowercase;
-
-                } else ret = null ;
-            }
-
-            if (evt.shiftKey && ret && allowShift) modifiers += 'shift_' ;
-
-            if (ret) ret = modifiers + ret ;
-
-            if (!dontIgnoreMeta && ret) {
-                ret = ret.replace(/ctrl_meta|meta/,'ctrl');
-            }
-
-            return [ret, key] ;
         }
     };
 
@@ -175,74 +104,76 @@ exports.KeyHelper = function() {
  * The second value is the char string by itself.
  * @return {Array}
  */
-exports.commandCodes = function(ev) {
-    if (ev.originalEvent) {
-        return exports.commandCodesSC(ev);
+exports.commandCodes = function(evt, dontIgnoreMeta) {
+    if (evt.originalEvent) {
+        return exports.commandCodesSC(evt);
     }
-    var orgEvt = ev;
-    var allowShift = true;
 
-    var code = ev.keyCode;
+    var code = evt._keyCode || evt.keyCode;
+    var charCode = (evt._charCode === undefined ? evt.charCode : evt._charCode);
     var ret = null;
     var key = null;
     var modifiers = '';
     var lowercase;
+    var allowShift = true;
 
     // Absent a value for 'keyCode' or 'which', we can't compute the
     // command codes. Bail out.
-    if (ev.keyCode === 0 && ev.which === 0) {
+    if (code === 0 && evt.which === 0) {
         return false;
+    }
+
+    // If the charCode is not zero, then we do not handle a command key
+    // here. Bail out.
+    if (charCode !== 0) {
+        return false;
+    }
+
+    // Check for modifier keys.
+    if (exports.KeyHelper.MODIFIER_KEYS[charCode]) {
+        return [exports.KeyHelper.MODIFIER_KEYS[charCode], null];
     }
 
     // handle function keys.
     if (code) {
-        ret = SC.FUNCTION_KEYS[code] ;
-        if (!ret && (orgEvt.altKey || orgEvt.ctrlKey || orgEvt.metaKey)) {
-            ret = SC.PRINTABLE_KEYS[code];
+        ret = exports.KeyHelper.FUNCTION_KEYS[code] ;
+        if (!ret && (evt.altKey || evt.ctrlKey || evt.metaKey)) {
+            ret = exports.KeyHelper.PRINTABLE_KEYS[code];
             // Don't handle the shift key if the combo is
             //    (meta_|ctrl_)<number>
             // This is necessary for the French keyboard. On that keyboard,
             // you have to hold down the shift key to access the number
             // characters.
-            if (code > 47 && code < 58) {
-                allowShift = orgEvt.altKey;
-            }
+            if (code > 47 && code < 58) allowShift = evt.altKey;
         }
 
         if (ret) {
-           if (orgEvt.altKey) {
-               modifiers += 'alt_';
-           }
-           if (orgEvt.ctrlKey) {
-               modifiers += 'ctrl_';
-           }
-           if (orgEvt.metaKey) {
-               modifiers += 'meta_';
-           }
-        } else if (orgEvt.ctrlKey || orgEvt.metaKey) {
+           if (evt.altKey) modifiers += 'alt_' ;
+           if (evt.ctrlKey) modifiers += 'ctrl_' ;
+           if (evt.metaKey) modifiers += 'meta_';
+        } else if (evt.ctrlKey || evt.metaKey) {
             return false;
         }
     }
 
     // otherwise just go get the right key.
     if (!ret) {
-        code = ev.which;
-        key = ret = String.fromCharCode(code);
-        lowercase = ret.toLowerCase();
-        if (orgEvt.metaKey) {
-           modifiers = 'meta_';
+        code = evt.which ;
+        key = ret = String.fromCharCode(code) ;
+        lowercase = ret.toLowerCase() ;
+        if (evt.metaKey) {
+           modifiers = 'meta_' ;
            ret = lowercase;
-        } else {
-            ret = null;
-        }
+
+        } else ret = null ;
     }
 
-    if (ev.shiftKey && ret && allowShift) {
-        modifiers += 'shift_';
-    }
+    if (evt.shiftKey && ret && allowShift) modifiers += 'shift_' ;
 
-    if (ret) {
-        ret = modifiers + ret;
+    if (ret) ret = modifiers + ret ;
+
+    if (!dontIgnoreMeta && ret) {
+        ret = ret.replace(/ctrl_meta|meta/,'ctrl');
     }
 
     return [ret, key];
@@ -334,6 +265,17 @@ exports.commandCodesSC = function(ev) {
  * in keydown and handle them then in keypress.
  */
 exports.addKeyDownListener = function(element, boundFunction) {
+
+    var handleBoundFunc = function(evt) {
+        var handled = boundFunction(evt);
+        // If the boundFunction returned true, then stop the event.
+        if (handled) {
+            evt.preventDefault();
+            evt.stopPropagation();
+        }
+        return handled;
+    };
+
     element.addEventListener('keydown', function(evt) {
         if (isMozilla) {
             // Check for function keys (like DELETE, TAB, LEFT, RIGHT...)
@@ -347,7 +289,7 @@ exports.addKeyDownListener = function(element, boundFunction) {
         }
 
         if (exports.KeyHelper.isFunctionOrNonPrintableKey(evt)) {
-            return boundFunction(evt);
+            return handleBoundFunc(evt);
         }
 
         return true;
@@ -371,7 +313,7 @@ exports.addKeyDownListener = function(element, boundFunction) {
                 // special variables.
                 evt._keyCode = exports.KeyHelper.PRINTABLE_KEYS_CHARCODE[evt.charCode];
                 evt._charCode = 0;
-                return boundFunction(evt);
+                return handleBoundFunc(evt);
             }
         }
 
@@ -380,6 +322,6 @@ exports.addKeyDownListener = function(element, boundFunction) {
             return true;
         }
 
-        return boundFunction(evt);
+        return handleBoundFunc(evt);
     }, false);
 };
