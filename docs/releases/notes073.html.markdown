@@ -43,7 +43,6 @@ Changes
 Features
 --------
 
-* The preview command is back (bug 554958)
 * The open command is now bound to cmd/ctrl-O (bug 560943)
 * The file completion for the open command now allows you to press
   ALT-# to select a given file from the list quickly and without
@@ -52,6 +51,11 @@ Features
 * The display of a completion result when the result is not a prefix
   match has been improved. It now displays 
   what\_you\_typed -> what\_it\_completes\_to (bug 555959)
+* `ep` command will list the extension points in your Bespin or provide details
+  about a single extension point. This makes it a lot easier to write extensions.
+* `plugin info` command lists details about a given plugin and what it provides.
+* The preview command is back (bug 554958)
+* The Bespin Embedded API has been improved, with many new methods (bug 545208)
 * The password recovery feature is back (bug 558323)
 * You can now log in using your email address or username. (Note that
   if your email address is associated with more than one account, you

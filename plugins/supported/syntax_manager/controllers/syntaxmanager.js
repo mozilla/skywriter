@@ -499,7 +499,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
                 attrs:  this._defaultAttrs(),
                 next:   { context: 'plain', state: 'start' }
             });
-        } else {
+        } else if (context !== null) {
             syntaxDirectory.loadSyntax(context).then(function(syntax) {
                 try {
                     syntax.syntaxInfoForLineFragment(context, state, line,
@@ -515,6 +515,12 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
                     });
                 }
             }.bind(this));
+        } else {
+            console.log('No syntax context');
+            promise.resolve({
+                attrs:  this._defaultAttrs(),
+                next:   { context: 'plain', state: 'start' }
+            });
         }
 
         return promise;

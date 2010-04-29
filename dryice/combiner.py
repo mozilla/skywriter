@@ -205,7 +205,7 @@ def _get_file_list(paths, pattern, filters=None):
     
     return flist
 
-def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
+def combine_sproutcore_files(paths, starting=u"", pattern="javascript.js",
     filters=None, manual_maps=[], ignore_dependencies=False):
     """Combines files that are output by Abbot, taking extra care with the
     stylesheets because we want to explicitly register them rather than
@@ -225,9 +225,10 @@ def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
     Returns: the combined bytes
     """
     stylesheets = set()
-    
-    newcode = ""
-    
+
+    starting = unicode(starting)
+    newcode = u""
+
     flist = _get_file_list(paths, pattern, filters)
     
     packages = []
@@ -289,7 +290,7 @@ def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
             if not found:
                 print "Module in %s is missing the register call" % f
                 print firstline
-                newcode += f.bytes()
+                newcode += f.text('utf-8')
                 continue
             
             # there was a manual mapping, but we don't have
@@ -319,7 +320,7 @@ def combine_sproutcore_files(paths, starting="", pattern="javascript.js",
     #     return ""
     
     if not found_tiki:
-        newcode = starting + "".join('tiki.stylesheet("%s");' % 
+        newcode = starting + u"".join(u'tiki.stylesheet("%s");' %
                 s for s in stylesheets) + newcode
     else:
         newcode = starting + newcode

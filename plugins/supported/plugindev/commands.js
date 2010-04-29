@@ -111,6 +111,7 @@ exports.add = function(env, args, request) {
     var path = args.path;
     var session = env.get('session');
     path = session.getCompletePath(path);
+    path = path.replace(/\/$/, '');
 
     var pluginName = getPluginName(path);
     if (catalog.plugins[pluginName]) {
