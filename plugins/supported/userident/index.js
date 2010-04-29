@@ -301,7 +301,7 @@ exports.lostController = SC.Object.create({
 
     onResetPwdSuccess: function() {
         displayInfo('Reset Password',
-                        'Successfully reset password - check your emails.');
+                        'Confirmation email sent - check your mail and follow the link');
     }
 });
 
@@ -355,7 +355,9 @@ exports.resetController = SC.Object.create({
         var lc = exports.loginController;
         lc.set('username', this.get('username'));
         lc.set('password', this.get('password1'));
-        lc.signup();
+        SC.run(function() {
+            exports.loginController.login();
+        });
     }
 });
 
