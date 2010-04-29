@@ -35,6 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var util = require('bespin:util/util');
+
 var SC = require('sproutcore/runtime').SC;
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
