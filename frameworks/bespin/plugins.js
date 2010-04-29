@@ -44,7 +44,8 @@ var console = require("console").console;
 var objectKeys = require("util/util").objectKeys;
 var r = require;
 
-var tiki = require.loader;
+var loader = require.loader;
+var browser = loader.sources[0];
 
 /**
  * Split an extension pointer from module/path#objectName into an object of the
@@ -101,21 +102,22 @@ exports.Extension = SC.Object.extend({
         }
 
         var promise = new Promise();
+        require.ensurePackage(this._pluginName, function() {
+            require.ensure(pointer.modName, function() {
+                SC.run(function() {
+                    var module = r(pointer.modName);
+                    var data;
+                    if (pointer.objName) {
+                        data = module[pointer.objName];
+                    } else {
+                        data = module;
+                    }
 
-        tiki.async(this._pluginName).then(function() {
-            SC.run(function() {
-                var module = r(pointer.modName);
-                var data;
-                if (pointer.objName) {
-                    data = module[pointer.objName];
-                } else {
-                    data = module;
-                }
-
-                if (callback) {
-                    callback(data);
-                }
-                promise.resolve(data);
+                    if (callback) {
+                        callback(data);
+                    }
+                    promise.resolve(data);
+                });
             });
         });
 
@@ -315,24 +317,7 @@ exports.Plugin = SC.Object.extend({
         });
 
         // remove all traces of the plugin
-        var nameMatch = new RegExp("^" + pluginName + ":");
-
-        _removeFromList(nameMatch, tiki.scripts);
-        _removeFromList(nameMatch, tiki.modules, function(module) {
-            delete tiki._factories[module];
-        });
-        _removeFromList(nameMatch, tiki.stylesheets);
-        _removeFromList(new RegExp("^" + pluginName + "$"), tiki.packages);
-
-        var promises = tiki._promises;
-
-        delete promises.catalog[pluginName];
-        delete promises.loads[pluginName];
-        _removeFromObject(nameMatch, promises.modules);
-        _removeFromObject(nameMatch, promises.scripts);
-        _removeFromObject(nameMatch, promises.stylesheets);
-
-        delete tiki._catalog[pluginName];
+        // TODO
     },
 
     /**
@@ -340,6 +325,8 @@ exports.Plugin = SC.Object.extend({
      * dependent plugins
      */
     reload: function(callback) {
+        // TODO: Broken. Needs to be updated to the latest Tiki.
+
         var func, dependName;
 
         // All reloadable plugins will have a reloadURL
@@ -662,7 +649,16 @@ exports.Catalog = SC.Object.extend({
             if (md.dependencies) {
                 md.depends = objectKeys(md.dependencies);
             }
-            tiki.register(pluginName, md);
+
+            md.name = pluginName;
+            md.version = null;
+            console.log("loading metadata for", pluginName, " -> ", md);
+
+            var packageId = browser.canonicalPackageId(pluginName);
+            if (packageId === null) {
+                browser.register('::' + pluginName, md);
+                continue;
+            }
         }
 
         this._toposort(metadata).forEach(function(name) {
@@ -709,12 +705,7 @@ exports.Catalog = SC.Object.extend({
      * object.
      */
     loadPlugin: function(pluginName, callback) {
-        var p = tiki.async(pluginName);
-        if (callback) {
-            p.then(callback, function(reason) {
-                console.error("Plugin loading canceled: ", reason);
-            });
-        }
+        require.ensurePackage(pluginName, callback);
     },
 
     /**
@@ -877,7 +868,7 @@ exports.Catalog = SC.Object.extend({
             pluginName = context;
         }
 
-        tiki.async(pluginName).then(function() {
+        require.ensurePackage(pluginName, function() {
             promise.resolve(SC.objectForPropertyPath(path));
         });
 

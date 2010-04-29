@@ -184,7 +184,7 @@ tiki.main("%s", "main");
 ####
 
 _make_json=re.compile('([\{,])(\w+):')
-_register_line = re.compile(r'tiki\.register\(["\']([\w/_]+)["\'],\s*(.*)')
+_register_line = re.compile(r'tiki\.register\(["\'](::[\w/_]+)["\'],\s*(.*)')
 _globals_line = re.compile(r'tiki\.global\(["\']([\w/]+)["\']\);')
 _package_info_line = "/* >>>>>>>>>> BEGIN package_info.js */\n"
 
@@ -249,8 +249,9 @@ def combine_sproutcore_files(paths, starting=u"", pattern="javascript.js",
         while firstline != "" and firstline != _package_info_line:
             firstline = filehandle.readline()
 
-        # Go to the next one.
+        # Skip two lines.
         if firstline == _package_info_line:
+            filehandle.readline()
             firstline = filehandle.readline()
 
         # look for a tiki.register line to get package

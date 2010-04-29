@@ -26,8 +26,6 @@
 
 var catalog = require("bespin:plugins").catalog;
 
-var tiki = require.loader;
-
 main = function() {
     baseurl = window.SERVER_BASE_URL == undefined ? '/server' : SERVER_BASE_URL;
     catalog.loadMetadataFromURL(baseurl + "/plugin/register/defaults").then(
@@ -38,9 +36,10 @@ main = function() {
                     response.errorObject);
             }
 
-            tiki.async('appsupport').then(function() {
+            require.ensurePackage('appsupport', function() {
                 SC.run(function() {
-                    tiki.require('appsupport:controllers/bespin');
+                    var unit = function() {};
+                    require.ensure('appsupport:controllers/bespin', unit);
                 });
             });
         });
