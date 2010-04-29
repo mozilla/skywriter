@@ -133,8 +133,9 @@ exports.History = {
     create: function(options) {
         var ret = Trait.create(Object.prototype, HistoryTrait);
         for (option in options) {
-            ret.option = options[option];
+            ret[option] = options[option];
         }
+        return ret;
     },
     trait: HistoryTrait
-}
+};

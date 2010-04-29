@@ -22,7 +22,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
+var Trait = require('traits').Trait;
 var console = require('bespin:console').console;
 var util = require('bespin:util/util');
 var m_promise = require('bespin:promise');
@@ -87,7 +87,7 @@ exports.NEW = { name: 'NEW' };
 exports.LOADING = { name: 'LOADING' };
 exports.READY = { name: 'READY' };
 
-exports.Filesystem = SC.Object.extend({
+var FilesystemTrait = Trait({
     // FileSource for this filesytem
     source: null,
 
@@ -98,12 +98,13 @@ exports.Filesystem = SC.Object.extend({
     _loadingPromises: null,
 
     init: function() {
-        var source = this.get('source');
+        var source = this.source;
         if (typeof(source) == 'string') {
-            this.set('source', SC.objectForPropertyPath(source));
+            throw new Error('FilesystemTrait: Getting source from string is not back yet.');
+            // this.source = SC.objectForPropertyPath(source);
         }
 
-        if (!this.get('source')) {
+        if (!this.source) {
             throw new Error('Directory must have a source.');
         }
 
@@ -117,9 +118,9 @@ exports.Filesystem = SC.Object.extend({
         } else if (this.status === exports.LOADING) {
             this._loadingPromises.push(pr);
         } else {
-            this.set('status', exports.LOADING);
+            this.status = exports.LOADING;
             this._loadingPromises.push(pr);
-            this.get('source').loadAll().then(this._fileListReceived.bind(this));
+            this.source.loadAll().then(this._fileListReceived.bind(this));
         }
         return pr;
     },
@@ -127,7 +128,7 @@ exports.Filesystem = SC.Object.extend({
     _fileListReceived: function(filelist) {
         filelist.sort();
         this._files = filelist;
-        this.set('status', exports.READY);
+        this.status = exports.READY;
         var lp = this._loadingPromises;
         while (lp.length > 0) {
             var pr = lp.pop();
@@ -141,7 +142,7 @@ exports.Filesystem = SC.Object.extend({
      */
     invalidate: function() {
         this._files = [];
-        this.set('status', exports.NEW);
+        this.status = exports.NEW;
     },
 
     /**
@@ -159,7 +160,7 @@ exports.Filesystem = SC.Object.extend({
      */
     loadContents: function(path) {
         path = pathUtil.trimLeadingSlash(path);
-        var source = this.get('source');
+        var source = this.source;
         return source.loadContents(path);
     },
 
@@ -170,7 +171,7 @@ exports.Filesystem = SC.Object.extend({
     saveContents: function(path, contents) {
         var pr = new Promise();
         path = pathUtil.trimLeadingSlash(path);
-        var source = this.get('source');
+        var source = this.source;
         var self = this;
         source.saveContents(path, contents).then(function() {
             self.exists(path).then(function(exists) {
@@ -215,7 +216,7 @@ exports.Filesystem = SC.Object.extend({
         path = pathUtil.trimLeadingSlash(path);
         var pr = new Promise();
         var self = this;
-        var source = this.get('source');
+        var source = this.source;
         source.remove(path).then(function() {
             // Check if the file list is already loaded or about to load.
             // If true, then we have to remove the deleted file from the list.
@@ -309,6 +310,18 @@ exports.Filesystem = SC.Object.extend({
         return pr;
     }
 });
+
+exports.Filesystem = {
+    create: function(options) {
+        var ret = Trait.create(Object.prototype, FilesystemTrait);
+        for (option in options) {
+            ret[option] = options[option];
+        }
+        ret.init();
+        return ret;
+    },
+    trait: FilesystemTrait
+};
 
 exports.File = function(fs, path) {
     this.fs = fs;
