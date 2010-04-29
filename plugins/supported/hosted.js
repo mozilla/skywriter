@@ -53,6 +53,7 @@
 "end";
 
 var SC = require('sproutcore/runtime').SC;
+var Promise = require('bespin:promise').Promise;
 var Trait = require('traits').Trait;
 
 /**

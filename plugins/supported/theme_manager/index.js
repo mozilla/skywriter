@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var Promise = require('bespin:promise').Promise;
 var m_plugins = require('bespin:plugins');
 
 /**
