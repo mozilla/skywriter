@@ -96,9 +96,6 @@ exports.Hint = SC.Object.extend({
      *
      */
     init: function() {
-        if (!this.element) {
-            throw new Error('Missing element', this);
-        }
         if (typeof this.level !== 'number') {
             throw new Error('Missing level', this);
         }

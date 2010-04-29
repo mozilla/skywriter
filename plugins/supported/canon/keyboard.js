@@ -41,6 +41,7 @@ var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var settings = require('settings').settings;
 
+var keyutil = require('canon:keyutil');
 var Request = require('canon:request').Request;
 var environment = require('canon:environment');
 
@@ -63,70 +64,6 @@ var KeyboardManager = SC.Object.extend({
     _customKeymappingCache: { states: {} },
 
     /**
-     * Returns character codes for the event.  The first value is the
-     * normalized code string, with any Shift or Ctrl characters added to the
-     * beginning. The second value is the char string by itself.
-     *
-     * TODO: This is almost a carbon copy of a function from SproutCore. The
-     * only change is that 'meta' is reported for function keys. This should be
-     * exposed as a public API from SproutCore instead of duplicating their
-     * code.
-     *
-     * @return{Array}
-     */
-    _commandCodes: function() {
-        var orgEvt = this.originalEvent;
-        var allowShift = true;
-
-        var code=this.keyCode, ret=null, key=null, modifiers='', lowercase ;
-
-        // Absent a value for 'keyCode' or 'which', we can't compute the
-        // command codes. Bail out.
-        if (this.keyCode === 0 && this.which === 0) {
-            return false;
-        }
-
-        // handle function keys.
-        if (code) {
-            ret = SC.FUNCTION_KEYS[code] ;
-            if (!ret && (orgEvt.altKey || orgEvt.ctrlKey || orgEvt.metaKey)) {
-                ret = SC.PRINTABLE_KEYS[code];
-                // Don't handle the shift key if the combo is
-                //    (meta_|ctrl_)<number>
-                // This is necessary for the French keyboard. On that keyboard,
-                // you have to hold down the shift key to access the number
-                // characters.
-                if (code > 47 && code < 58) allowShift = orgEvt.altKey;
-            }
-
-            if (ret) {
-               if (orgEvt.altKey) modifiers += 'alt_' ;
-               if (orgEvt.ctrlKey) modifiers += 'ctrl_' ;
-               if (orgEvt.metaKey) modifiers += 'meta_';
-            } else if (orgEvt.ctrlKey || orgEvt.metaKey) {
-                return false;
-            }
-        }
-
-        // otherwise just go get the right key.
-        if (!ret) {
-            code = this.which ;
-            key = ret = String.fromCharCode(code) ;
-            lowercase = ret.toLowerCase() ;
-            if (orgEvt.metaKey) {
-               modifiers = 'meta_' ;
-               ret = lowercase;
-
-            } else ret = null ;
-        }
-
-        if (this.shiftKey && ret && allowShift) modifiers += 'shift_' ;
-
-        if (ret) ret = modifiers + ret ;
-        return [ret, key] ;
-    },
-
-    /**
      * Searches through the command canon for an event matching the given flags
      * with a key equivalent matching the given SproutCore event, and, if the
      * command is found, sends a message to the appropriate target.
@@ -139,14 +76,9 @@ var KeyboardManager = SC.Object.extend({
      * @return True if a matching command was found, false otherwise.
      */
     processKeyEvent: function(evt, sender, flags) {
-        //
         // Use our modified commandCodes function to detect the meta key in
         // more circumstances than SproutCore alone does.
-        //
-        // TODO: See comment in _commandCodes.
-        //
-
-        var symbolicName = this._commandCodes.call(evt)[0];
+        var symbolicName = keyutil.commandCodes(evt)[0];
         if (SC.none(symbolicName)) {
             return false;
         }
@@ -455,7 +387,7 @@ var KeyboardManager = SC.Object.extend({
         for (state in ckc.states) {
             this._buildBindingsRegex(ckc.states[state]);
         }
-    }.observes('settings:index#settings.customKeymapping')
+    }
 });
 
 /**

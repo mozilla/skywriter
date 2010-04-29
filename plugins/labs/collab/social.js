@@ -37,7 +37,6 @@
 
 //var console = require('bespin:console').console;
 var server = require('bespin_server').server;
-var cliController = require('command_line:controller').cliController;
 
 var social_user = require('collab:user');
 
@@ -79,7 +78,7 @@ exports.followCommand = function(env, args, request) {
                     return;
                 }
 
-                var parent = exports.displayFollowers(followers);
+                var parent = exports.displayFollowers(env, followers);
                 request.done(parent);
             },
             onFailure: function(xhr) {
@@ -97,7 +96,7 @@ exports.followCommand = function(env, args, request) {
                     return;
                 }
 
-                var parent = exports.displayFollowers(followers);
+                var parent = exports.displayFollowers(env, followers);
                 request.done(parent);
             },
             onFailure: function(xhr) {
@@ -120,7 +119,7 @@ function follow(usernames, opts) {
  * Utility to take an string array of follower names, and publish a
  * "Following: ..." message as a command line response.
  */
-exports.displayFollowers = function(followers, title) {
+exports.displayFollowers = function(env, followers, title) {
     var parent = document.createElement('div');
 	var child  = document.createElement('div');
 	child.innerHTML = title || 'You are following these users:';
@@ -150,7 +149,7 @@ exports.displayFollowers = function(followers, title) {
 		a.innerHTML = '<small>(unfollow)</small>';
 		// TODO: use better way to attach an event handler
 		a.onclick = function () {
-			cliController.executeCommand('unfollow ' + follower);
+			env.commandLine.execute('unfollow ' + follower);
 		};
 		cell.appendChild(a);
     });
@@ -176,7 +175,7 @@ exports.unfollowCommand = function(env, args, request) {
                     return;
                 }
 
-                var parent = exports.displayFollowers(followers);
+                var parent = exports.displayFollowers(env, followers);
                 request.done(parent);
             },
             onFailure: function(xhr) {
@@ -330,7 +329,7 @@ function createGroupListDisplay (groups, env, args, request) {
 		a.innerHTML = '<small>(remove)</small>';
 		// TODO: use better way to attach an event handler
 		a.onclick = function () {
-			cliController.executeCommand('group remove ' + group);
+			env.commandLine.execute('group remove ' + group);
 		};
 		cell.appendChild(a);
 		var span = document.createElement('span');
@@ -340,7 +339,7 @@ function createGroupListDisplay (groups, env, args, request) {
 		a.innerHTML = '<small>(list)</small>';
 		// TODO: use better way to attach an event handler
 		a.onclick = function () {
-			cliController.executeCommand('group list ' + group);
+			env.commandLine.execute('group list ' + group);
 		};
 		cell.appendChild(a);
 	});
@@ -387,7 +386,7 @@ function createMemberListDisplay (members, env, args, request) {
 		a.innerHTML = '<small>(ungroup)</small>';
 		// TODO: use better way to attach an event handler
 		a.onclick = function () {
-			cliController.executeCommand('group remove ' +
+			env.commandLine.execute('group remove ' +
 					args.group + ' ' + member);
 		};
 		cell.appendChild(a);
@@ -576,7 +575,7 @@ function createShareDisplayElement (shares, env, args, request) {
 		a.innerHTML = '<small>(unshare)</small>';
 		// TODO: use better way to attach an event handler
 		a.onclick = function () {
-			cliController.executeCommand('share remove ' + share.project);
+			env.commandLine.execute('share remove ' + share.project);
 		};
 		cell.appendChild(a);
     });

@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var cliController = require('controller').cliController;
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 
@@ -121,7 +120,7 @@ var _getHelp = function(prefix, options) {
             // todo add back a column with parameter information, perhaps?
 
             output.push('<tr>');
-            output.push('<th>' + command.name + '</th>');
+            output.push('<th class="right">' + command.name + '</th>');
             output.push('<td>' + command.description + '</td>');
             output.push('</tr>');
         }

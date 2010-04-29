@@ -44,6 +44,8 @@ var Trace = require('bespin:util/stacktrace').Trace;
 
 var types = require('types:types');
 var keyboard = require('canon:keyboard');
+var environment = require('canon:environment');
+var Request = require('canon:request').Request;
 
 var hint = require('command_line:hint');
 var typehint = require('command_line:typehint');
@@ -62,14 +64,30 @@ exports.Input = SC.Object.extend({
 
     /**
      * The global environment (as passed to the commands) to be passed to the
-     * various completion systems.
+     * various completion systems. Defaulted to environment.global if not
+     * specified.
      */
     env: undefined,
 
     /**
-     * Flags for us to check against the predicates specified with the commands
+     * Flags for us to check against the predicates specified with the commands.
+     * Defaulted to <tt>keyboard.buildFlags(environment.global, { });</tt> if
+     * not specified.
      */
     flags: undefined,
+
+    /**
+     * Output value. Should not be specified in ctor.
+     * The hints that we would like displayed to help the user enter a command.
+     */
+    hints: undefined,
+
+    /**
+     * Output value. Should not be specified in ctor.
+     * A promise of an args hash which contains typed values for use in
+     * executing the final command.
+     */
+    argsPromise: undefined,
 
     /**
      * Once tokenize() has been called, we have the #typed string cut up into
@@ -101,60 +119,29 @@ exports.Input = SC.Object.extend({
         if (this.typed === null) {
             throw new Error('Input requires something \'typed\' to work on');
         }
-        this._hints = [];
-        this._argsPromise = new Promise();
-        this._alive = true;
-    },
+        this.hints = [];
+        this.argsPromise = new Promise();
 
-    /**
-     * Go through the input checking and generating hints, and if possible an
-     * arguments array.
-     * @return An object that contains a set of hints and hintPromises, and
-     * a promise of a argument object if the parse succeeds.
-     */
-    parse: function() {
-        var success = false;
+        if (!this.env) {
+            this.env = environment.global;
+        }
+
+        if (!this.flags) {
+            flags = keyboard.buildFlags(this.env, { });
+        }
 
         try {
-            // Cut up the input into parts
-            if (this._tokenize()) {
-                // Split the command from the args
-                if (this._split()) {
-                    // Assign input to declared parameters
-                    if (this._assign()) {
-                        // Convert input into declared types
-                        if (this._convertTypes()) {
-                            success = true;
-                        }
-                    }
-                }
-            }
-
-            // Something failed, so the argsPromise wont complete. Kill it
-            if (!success) {
-                this._argsPromise.reject(new Error('Parse error'));
-            }
+            // Go through the input checking and generating hints,
+            // and if possible an arguments array.
+            this._tokenize();
         } catch (ex) {
             var trace = new Trace(ex, true);
             console.group('Error calling command: ' + this.typed);
             console.error(ex);
             trace.log(3);
             console.groupEnd();
-            this._argsPromise.reject(ex);
+            this.argsPromise.reject(ex);
         }
-
-        return {
-            hints: this._hints,
-            argsPromise: this._argsPromise
-        };
-    },
-
-    /**
-     * Request early termination - the results of the current parse will not
-     * be used.
-     */
-    cancel: function() {
-        this._alive = false;
     },
 
     /**
@@ -162,17 +149,16 @@ exports.Input = SC.Object.extend({
      */
     _tokenize: function() {
         if (!this.typed || this.typed === '') {
-            /*
             // We would like to put some initial help here, but for anyone but
             // a complete novice a 'type help' message is very annoying, so we
             // need to find a way to only display this message once, or for
             // until the user click a 'close' button or similar
-            this._hints.push(hint.Hint.create({
+            this.hints.push(hint.Hint.create({
                 level: hint.Level.Incomplete,
-                element: "Type a command, see 'help' for available commands."
+                element: null
             }));
-            */
-            return false;
+
+            return;
         }
 
         var incoming = this.typed.trimLeft().split(/\s+/);
@@ -208,7 +194,8 @@ exports.Input = SC.Object.extend({
             }
         }
 
-        return true;
+        // Split the command from the args
+        this._split();
     },
 
     /**
@@ -268,7 +255,7 @@ exports.Input = SC.Object.extend({
                         ': Pointer ' + commandExt._pluginName + ':' + commandExt.pointer + ' failed to load.' + ex
                 }));
             });
-            this._hints.push(loadPromise);
+            this.hints.push(loadPromise);
 
             // The user hasn't started to type any params
             if (this._parts.length === 1) {
@@ -300,10 +287,15 @@ exports.Input = SC.Object.extend({
 
         if (hintSpec) {
             var hintPromise = typehint.getHint(this, hintSpec);
-            this._hints.push(hintPromise);
+            this.hints.push(hintPromise);
         }
 
-        return !SC.none(this._commandExt);
+        if (SC.none(this._commandExt)) {
+            return;
+        }
+
+        // Assign input to declared parameters
+        this._assign();
     },
 
     /**
@@ -326,35 +318,40 @@ exports.Input = SC.Object.extend({
         var params = this._commandExt.params;
         var unparsedArgs = this._unparsedArgs;
 
-        // If this command does not take parameters
+        // Create an error if the command does not take parameters, but we have
+        // been given them ...
         if (!params || params.length === 0) {
-            if (unparsedArgs.length === 0) {
-                return true;
-            }
-            // Also no problem if there is a blank parameter
-            if (unparsedArgs.length === 1 && unparsedArgs[0].trim() === '') {
-                return true;
-            }
+            // No problem if we're passed nothing or an empty something
+            var argCount = 0;
+            unparsedArgs.forEach(function(unparsedArg) {
+                if (unparsedArg.trim() !== '') {
+                    argCount++;
+                }
+            });
 
-            this._hints.push(hint.Hint.create({
-                level: hint.Level.Error,
-                element: this._commandExt.name + ' does not take any parameters'
-            }));
-            return false;
+            if (argCount !== 0) {
+                this.hints.push(hint.Hint.create({
+                    level: hint.Level.Error,
+                    element: this._commandExt.name + ' does not take any parameters'
+                }));
+                return;
+            }
         }
 
-        // Special case: if there is only 1 parameter, and that's of type text
-        // we put all the params into the first param
+        // Special case: if there is only 1 parameter, and that's of type
+        // text we put all the params into the first param
         if (params.length == 1 && params[0].type == 'text') {
             // Warning: There is some potential problem here if spaces are
             // significant. It might be better to chop the command of the
-            // start of this.typed? But that's not easy because there could be
-            // multiple spaces in the command if we're doing sub-commands
+            // start of this.typed? But that's not easy because there could
+            // be multiple spaces in the command if we're doing sub-commands
             this._assignments[0] = {
                 value: unparsedArgs.length === 0 ? null : unparsedArgs.join(' '),
                 param: params[0]
             };
-            return true;
+
+            // Continue to the next step;
+            this._convertTypes();
         }
 
         // The normal case where we have to assign params individually
@@ -368,7 +365,7 @@ exports.Input = SC.Object.extend({
         var unparsed = false;
         unparsedArgs.forEach(function(unparsedArg) {
             if (used.indexOf(unparsedArg) == -1) {
-                this._hints.push(hint.Hint.create({
+                this.hints.push(hint.Hint.create({
                     level: hint.Level.Error,
                     element: 'Parameter \'' + unparsedArg + '\' makes no sense.'
                 }));
@@ -377,7 +374,7 @@ exports.Input = SC.Object.extend({
         }.bind(this));
 
         if (unparsed) {
-            return false;
+            return;
         }
 
         // Show a hint for the last parameter
@@ -390,11 +387,12 @@ exports.Input = SC.Object.extend({
             assignment.param.type.assignments = this._assignments;
 
             if (assignment) {
-                this._hints.push(typehint.getHint(this, assignment));
+                this.hints.push(typehint.getHint(this, assignment));
             }
         }
 
-        return true;
+        // Convert input into declared types
+        this._convertTypes();
     },
 
     /**
@@ -420,7 +418,7 @@ exports.Input = SC.Object.extend({
                 } else {
                     if (i + 1 < this._unparsedArgs.length) {
                         // Missing value for this param
-                        this._hints.push(hint.Hint.create({
+                        this.hints.push(hint.Hint.create({
                             level: hint.Level.Incomplete,
                             element: 'Missing parameter: ' + param.name
                         }));
@@ -428,7 +426,7 @@ exports.Input = SC.Object.extend({
                         used.push(this._unparsedArgs[i + 1]);
                     }
                 }
-                return true;
+                return;
             }
         }
 
@@ -448,14 +446,12 @@ exports.Input = SC.Object.extend({
 
             if (param.defaultValue === undefined) {
                 // There is no default, and we've not supplied one so far
-                this._hints.push(hint.Hint.create({
+                this.hints.push(hint.Hint.create({
                     level: hint.Level.Incomplete,
                     element: 'Missing parameter: ' + param.name
                 }));
             }
         }
-
-        return true;
     },
 
     /**
@@ -479,8 +475,8 @@ exports.Input = SC.Object.extend({
     _convertTypes: function() {
         // Use {} when there are no params
         if (!this._commandExt.params) {
-            this._argsPromise.resolve({});
-            return true;
+            this.argsPromise.resolve({});
+            return;
         }
 
         // The data we pass to the command
@@ -500,10 +496,10 @@ exports.Input = SC.Object.extend({
                 assignment.converted = converted;
                 argOutputs[assignment.param.name] = converted;
             }, function(ex) {
-                this._hints.push(hint.Hint.create({
+                this.hints.push(hint.Hint.create({
                     level: hint.Level.Error,
-                    element: 'Can\'t convert \'' + value + '\' to a ' +
-                        param.type + ': ' + ex
+                    element: 'Can\'t convert \'' + assignment.value +
+                        '\' to a ' + param.type + ': ' + ex
                 }));
             }.bind(this));
 
@@ -511,10 +507,8 @@ exports.Input = SC.Object.extend({
         }.bind(this));
 
         groupPromises(convertPromises).then(function() {
-            this._argsPromise.resolve(argOutputs);
+            this.argsPromise.resolve(argOutputs);
         }.bind(this));
-
-        return true;
     },
 
     /**
@@ -529,6 +523,51 @@ exports.Input = SC.Object.extend({
         } else {
             return new Promise().resolve(assignment.param.defaultValue);
         }
+    },
+
+    /**
+     * Take the results of a parseInput, wait for the argsPromise to resolve
+     * load the command and then execute it.
+     */
+    execute: function() {
+        // Debug to the console
+        var loadError = function(ex) {
+            var trace = new Trace(ex, true);
+            console.group('Error executing: ' + this.typed);
+            console.error(ex);
+            trace.log(3);
+            console.groupEnd();
+        }.bind(this);
+
+        this.argsPromise.then(function(args) {
+            this._commandExt.load().then(function(command) {
+
+                var request = Request.create({
+                    command: command,
+                    commandExt: this._commandExt,
+                    typed: this.typed,
+                    args: args
+                });
+
+                // Check the function pointed to in the meta-data exists
+                if (!command) {
+                    request.doneWithError('Command not found.');
+                    return;
+                }
+
+                try {
+                    command(this.env, args, request);
+                } catch (ex) {
+                    var trace = new Trace(ex, true);
+                    console.group('Error executing command \'' + this.typed + '\'');
+                    console.error(ex);
+                    trace.log(3);
+                    console.groupEnd();
+
+                    request.doneWithError(ex);
+                }
+            }.bind(this), loadError);
+        }.bind(this), loadError);
     }
 });
 

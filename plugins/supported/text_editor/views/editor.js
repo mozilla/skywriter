@@ -36,6 +36,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var catalog = require('bespin:plugins').catalog;
+
 var GutterView = require('views/gutter').GutterView;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var ScrollView = require('views/scroll').ScrollView;
@@ -82,10 +84,7 @@ exports.EditorView = SC.View.extend(SC.Border, {
         var fontFace = settings.get('fontface');
         var font = fontSize + 'px ' + fontFace;
         this.set('font', font);
-    }.observes(
-        'settings:index#settings.fontsize',
-        'settings:index#settings.fontface'
-    ),
+    },
 
     borderStyle: SC.BORDER_GRAY,
 
@@ -203,6 +202,11 @@ exports.EditorView = SC.View.extend(SC.Border, {
         this.get('searchController').set('textView', textView);
 
         this.set('childViews', [ gutterView, scrollView ]);
+
+        catalog.registerExtension('settingChange', {
+            match: "font[size|face]",
+            pointer: this._fontSizeChanged.bind(this)
+        });
 
         // Compute settings related stuff.
         this._fontSizeChanged();

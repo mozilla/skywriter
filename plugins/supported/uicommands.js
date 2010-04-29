@@ -60,13 +60,9 @@
 var pluginCatalog = require('bespin:plugins').catalog;
 
 exports.jumpCommandLine = function(env, args, request) {
-    var cliController = pluginCatalog.getObject('clicontroller');
-    if (cliController !== null && cliController !== undefined) {
-        cliController.get('view').focus();
-    }
+    env.commandLine.focus();
 };
 
 exports.jumpEditor = function(env, args, request) {
-    var view = env.get('view');
-    view.focus();
+    env.view.focus();
 };

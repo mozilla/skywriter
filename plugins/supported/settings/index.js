@@ -94,7 +94,339 @@
  * </ul>
  */
 
-var catalog = require('bespin:plugins');
-var MemorySettings = require('memory').MemorySettings;
+var catalog = require('bespin:plugins').catalog;
+var console = require('bespin:console').console;
+var Promise = require('bespin:promise').Promise;
+var groupPromises = require('bespin:promise').group;
 
-exports.settings = MemorySettings.create();
+var Trait = require('traits').Trait;
+
+var types = require('types:types');
+
+/**
+ * Find and configure the settings object.
+ * @see MemorySettings.addSetting()
+ */
+exports.addSetting = function(settingExt) {
+    require('settings').settings.addSetting(settingExt);
+};
+
+/**
+ * Fetch an array of the currently known settings
+ */
+exports.getSettings = function() {
+    return catalog.getExtensions('setting');
+};
+
+/**
+ * Something of a hack to allow the set command to give a clearer definition
+ * of the type to the command line.
+ */
+exports.getTypeSpecFromAssignment = function(typeSpec) {
+    var assignments = typeSpec.assignments;
+    var replacement = 'text';
+
+    if (assignments) {
+        // Find the assignment for 'setting' so we can get it's value
+        var settingAssignment = null;
+        assignments.forEach(function(assignment) {
+            if (assignment.param.name === 'setting') {
+                settingAssignment = assignment;
+            }
+        });
+
+        if (settingAssignment) {
+            var settingName = settingAssignment.value;
+            if (settingName && settingName !== '') {
+                var settingExt = catalog.getExtensionByKey('setting', settingName);
+                if (settingExt) {
+                    replacement = settingExt.type;
+                }
+            }
+        }
+    }
+
+    return replacement;
+};
+
+/**
+ * A base class for all the various methods of storing settings.
+ * <p>Usage:
+ * <pre>
+ * // Create manually, or require 'settings' from the container.
+ * // This is the manual version:
+ * var settings = require('bespin:plugins').catalog.getObject('settings');
+ * // Add a new setting
+ * settings.addSetting({ name:'foo', ... });
+ * // Display the default value
+ * alert(settings.get('foo'));
+ * // Alter the value, which also publishes the change etc.
+ * settings.set('foo', 'bar');
+ * // Reset the value to the default
+ * settings.resetValue('foo');
+ * </pre>
+ * @class
+ */
+exports.MemorySettings = Trait({
+    /**
+     * Storage for the setting values
+     */
+    _values: {},
+
+    /**
+     * Storage for deactivated values
+     */
+    _deactivated: {},
+
+    /**
+     * A Persister is able to store settings. It is an object that defines
+     * two functions:
+     * loadInitialValues(settings) and persistValue(settings, key, value).
+     */
+    setPersister: function(persister) {
+        this._persister = persister;
+        if (persister) {
+            persister.loadInitialValues(this);
+        }
+    },
+
+    /**
+     * Read accessor
+     */
+    get: function(key) {
+        return this._values[key];
+    },
+
+    /**
+     * Override observable.set(key, value) to provide type conversion and
+     * validation.
+     */
+    set: function(key, value) {
+        var settingExt = catalog.getExtensionByKey('setting', key);
+        if (!settingExt) {
+            // If there is no definition for this setting, then warn the user
+            // and store the setting in raw format. If the setting gets defined,
+            // the addSetting() function is called which then takes up the
+            // here stored setting and calls set() to convert the setting.
+            console.warn('Setting not defined: ', key, value);
+            this._deactivated[key] = value;
+        }
+        else if (typeof value == 'string' && settingExt.type == 'string') {
+            // no conversion needed
+            this._values[key] = value;
+        }
+        else {
+            var inline = false;
+
+            types.fromString(value, settingExt.type).then(function(converted) {
+                inline = true;
+                this._values[key] = converted;
+
+                // Inform subscriptions of the change
+                catalog.publish('settingChange', key, converted);
+            }.bind(this), function(ex) {
+                console.error('Error setting', key, ': ', ex);
+            });
+
+            if (!inline) {
+                console.warn('About to set string version of ', key, 'delaying typed set.');
+                this._values[key] = value;
+            }
+        }
+
+        this._persistValue(key, value);
+        return this;
+    },
+
+    /**
+     * Function to add to the list of available settings.
+     * <p>Example usage:
+     * <pre>
+     * var settings = require('bespin:plugins').catalog.getObject('settings');
+     * settings.addSetting({
+     *     name: 'tabsize', // For use in settings.get('X')
+     *     type: 'number',  // To allow value checking.
+     *     defaultValue: 4  // Default value for use when none is directly set
+     * });
+     * </pre>
+     * @param {object} settingExt Object containing name/type/defaultValue members.
+     */
+    addSetting: function(settingExt) {
+        if (!settingExt.name) {
+            console.error('Setting.name == undefined. Ignoring.', settingExt);
+            return;
+        }
+
+        if (!settingExt.defaultValue === undefined) {
+            console.error('Setting.defaultValue == undefined', settingExt);
+        }
+
+        types.isValid(settingExt.defaultValue, settingExt.type).then(function(valid) {
+            if (!valid) {
+                console.warn('!Setting.isValid(Setting.defaultValue)', settingExt);
+            }
+
+            // The value can be
+            // 1) the value of a setting that is not activated at the moment
+            //       OR
+            // 2) the defaultValue of the setting.
+            var value = this._deactivated[settingExt.name] ||
+                    settingExt.defaultValue;
+
+            // Set the default value up.
+            this.set(settingExt.name, value);
+        }.bind(this), function(ex) {
+            console.error('Type error ', ex, ' ignoring setting ', settingExt);
+        });
+    },
+
+    /**
+     * Reset the value of the <code>key</code> setting to it's default
+     */
+    resetValue: function(key) {
+        var settingExt = catalog.getExtensionByKey('setting', key);
+        if (settingExt) {
+            this.set(key, settingExt.defaultValue);
+        } else {
+            console.log('ignore resetValue on ', key);
+        }
+    },
+
+    resetAll: function() {
+        this._getSettingNames().forEach(function(key) {
+            this.resetValue(key);
+        }.bind(this));
+    },
+
+    /**
+     * Make a list of the valid type names
+     */
+    _getSettingNames: function() {
+        var typeNames = [];
+        catalog.getExtensions('setting').forEach(function(settingExt) {
+            typeNames.push(settingExt.name);
+        });
+        return typeNames;
+    },
+
+    /**
+     * Retrieve a list of the known settings and their values
+     */
+    _list: function() {
+        var reply = [];
+        this._getSettingNames().forEach(function(setting) {
+            reply.push({
+                'key': setting,
+                'value': this.get(setting)
+            });
+        }.bind(this));
+        return reply;
+    },
+
+    /**
+     * delegates to the persister. no-op if there's no persister.
+     */
+    _persistValue: function(key, value) {
+        var persister = this._persister;
+        if (persister) {
+            persister.persistValue(this, key, value);
+        }
+    },
+
+    /**
+     * Delegates to the persister, otherwise sets up the defaults if no
+     * persister is available.
+     */
+    _loadInitialValues: function() {
+        var persister = this._persister;
+        if (persister) {
+            persister.loadInitialValues(this);
+        } else {
+            this._loadDefaultValues();
+        }
+    },
+
+    /**
+     * Prime the local cache with the defaults.
+     */
+    _loadDefaultValues: function() {
+        return this._loadFromObject(this._defaultValues());
+    },
+
+    /**
+     * Utility to load settings from an object
+     */
+    _loadFromObject: function(data) {
+        var promises = [];
+        // take the promise action out of the loop to avoid closure problems
+        var setterFactory = function(keyName) {
+            return function(value) {
+                this.set(keyName, value);
+            };
+        };
+
+        for (var key in data) {
+            if (data.hasOwnProperty(key)) {
+                var valueStr = data[key];
+                var settingExt = catalog.getExtensionByKey('setting', key);
+                if (settingExt) {
+                    // TODO: We shouldn't just ignore values without a setting
+                    var promise = types.fromString(valueStr, settingExt.type);
+                    var setter = setterFactory(key);
+                    promise.then(setter);
+                    promises.push(promise);
+                }
+            }
+        }
+
+        // Promise.group (a.k.a groupPromises) gives you a list of all the data
+        // in the grouped promises. We don't want that in case we change how
+        // this works with ignored settings (see above).
+        // So we do this to hide the list of promise resolutions.
+        var replyPromise = new Promise();
+        groupPromises(promises).then(function() {
+            replyPromise.resolve();
+        });
+        return replyPromise;
+    },
+
+    /**
+     * Utility to grab all the settings and export them into an object
+     */
+    _saveToObject: function() {
+        var promises = [];
+        var reply = {};
+
+        this._getSettingNames().forEach(function(key) {
+            var value = this.get(key);
+            var settingExt = catalog.getExtensionByKey('setting', key);
+            if (settingExt) {
+                // TODO: We shouldn't just ignore values without a setting
+                var promise = types.toString(value, settingExt.type);
+                promise.then(function(value) {
+                    reply[key] = value;
+                });
+                promises.push(promise);
+            }
+        }.bind(this));
+
+        var replyPromise = new Promise();
+        groupPromises(promises).then(function() {
+            replyPromise.resolve(reply);
+        });
+        return replyPromise;
+    },
+
+    /**
+     * The default initial settings
+     */
+    _defaultValues: function() {
+        var defaultValues = {};
+        catalog.getExtensions('setting').forEach(function(settingExt) {
+            defaultValues[settingExt.name] = settingExt.defaultValue;
+        });
+        return defaultValues;
+    }
+});
+
+exports.settings = Trait.create(Object.prototype, exports.MemorySettings);

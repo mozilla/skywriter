@@ -110,7 +110,12 @@ function stringifyArguments(args) {
  */
 var decoders = {
     chrome: function(e) {
-        return e.stack.replace(/^.*?\n/, '').
+        var stack = e.stack;
+        if (!stack) {
+            console.log(e);
+            return [];
+        }
+        return stack.replace(/^.*?\n/, '').
                 replace(/^.*?\n/, '').
                 replace(/^.*?\n/, '').
                 replace(/^[^\(]+?[\n$]/gm, '').

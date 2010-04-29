@@ -37,7 +37,6 @@
 
 var project_m = require('project');
 var server = require('bespin_server:index').server;
-var cliController = require('command_line:controller').cliController;
 
 /**
  * Utility to convert bytes to megabytes
@@ -96,13 +95,13 @@ exports.rescanCommand = function(env, args, request) {
 };
 
 /**
-* 'preview' command
-*/
+ * 'preview' command
+ */
 exports.preview = function(env, args, request) {
     var buffer = env.get('buffer');
 
     if (buffer.untitled()) {
-        cliController.prompt('saveas ');
+        env.get('commandLine').prompt('saveas ');
         request.done('The current buffer is untitled. Please enter a name.');
         return;
     }
@@ -117,9 +116,8 @@ exports.preview = function(env, args, request) {
 
         request.done('Preview: ' + fileName);
     }, function(error) {
-            request.doneWithError('Could not save the file and as such can not preview it.');
-        }
-    );
+        request.doneWithError('Could not save the file and as such can not preview it.');
+    });
 
     request.async();
 };
