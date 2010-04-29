@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
+var Trait = require('traits').Trait;
 
 var bespin = require('bespin');
 var console = require('bespin:console').console;
@@ -50,7 +50,7 @@ var cookie = require('bespin:util/cookie');
  * https://wiki.mozilla.org/BespinServerAPI) giving the client access to the
  * backend store. The FileSystem object uses this to talk back.
  */
-exports.server = SC.Object.create({
+exports.server = {
     SERVER_BASE_URL: window.SERVER_BASE_URL == undefined ? '/server' : SERVER_BASE_URL,
 
     // Stores the outstanding asynchronous tasks that we've submitted
@@ -434,8 +434,7 @@ exports.server = SC.Object.create({
             }, ms);
         }
     }
-});
+};
 
 // start polling
-
 exports.server._poll();

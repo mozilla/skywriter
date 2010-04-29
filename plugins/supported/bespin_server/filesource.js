@@ -35,12 +35,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
+var Trait = require('traits').Trait;
 var Promise = require('bespin:promise').Promise;
 var server = require('bespin_server').server;
 var pathUtil = require('filesystem:path');
 
-exports.BespinFileSource = SC.Object.extend({
+BespinFileSourceTrait = Trait({
     server: server,
     
     loadAll: function() {
@@ -71,3 +71,14 @@ exports.BespinFileSource = SC.Object.extend({
         return this.server.request('PUT', url, null);
     }
 });
+
+exports.BespinFileSource = {
+    create: function(options) {
+        var ret = Trait.create(Object.prototype, BespinFileSourceTrait);
+        for (option in options) {
+            ret[option] = options[option];
+        }
+        return ret;
+    },
+    trait: BespinFileSourceTrait
+}
