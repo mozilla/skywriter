@@ -92,7 +92,7 @@ var run = function() {
                                 this._writtenText.substring(0,
                                 this._writtenText.length - 1));
                             this.set('_actionText', "backspace");
-                            return YES;
+                            return true;
                         }
                         return false;
                     },
