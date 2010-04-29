@@ -294,16 +294,13 @@ bespinController = Object.create(Object.prototype, Trait({
                 var textStorage = layoutManager.get('textStorage');
                 var syntaxManager = layoutManager.get('syntaxManager');
 
-                var buffer = m_editsession.Buffer.create({
-                    model:          textStorage,
-                    syntaxManager:  syntaxManager
-                });
+                var buffer = m_editsession.makeBuffer(textStorage, syntaxManager);
 
-                var session = m_editsession.EditSession.create();
+                var session = m_editsession.makeEditSession();
                 bespinController.session = session;
-                session.set('currentUser', bespinController._username);
-                session.set('currentView', textView);
-                session.set('currentBuffer', buffer);
+                session.currentUser = bespinController._username;
+                session.currentView = textView;
+                session.currentBuffer = buffer;
 
                 if (bespinController.loadFile) {
                     session.loadMostRecentOrNew();

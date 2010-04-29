@@ -38,10 +38,11 @@
 var Promise = require('bespin:promise').Promise;
 var catalog = require('bespin:plugins').catalog;
 
-var SC = require('sproutcore/runtime').SC;
+var Trait = require('traits').Trait;
+var util = require('bespin:util/util');
 
 var File = require('filesystem:index').File;
-var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
+var DelegateTrait = require('delegate_support').DelegateTrait;
 var TextStorage = require('text_editor:models/textstorage').TextStorage;
 var m_path = require('filesystem:path');
 var bespin = require('appsupport:controllers/bespin').bespinController;
@@ -51,28 +52,10 @@ var History = require('edit_session:history').History;
 /*
 * A Buffer connects a model and file together.
 */
-exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
+exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
     _file: null,
 
-    _fileChanged: function() {
-        this.notifyDelegates('bufferFileChanged', this._file);
-    }.observes('file'),
-
-    _modelChanged: function() {
-        this.notifyDelegates('bufferModelChanged', this.get('model'));
-    }.observes('model'),
-
-    /*
-    * The text model that is holding the content of the file.
-    */
-    model: null,
-
-    /**
-     * The syntax manager associated with this file.
-     */
-    syntaxManager: null,
-
-    /*
+   /**
     * The filesystem.File object that is associated with this Buffer.
     * If this Buffer has not been saved to a file, this will be null.
     * If you change the file object, its contents will be loaded
@@ -81,34 +64,71 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
     * don't want to update the model. If that's the case, use the
     * Buffer.changeFileOnly method.
     */
-    file: function(key, newFile) {
-        if (newFile !== undefined) {
+    setFile: function(newFile) {
+        if (newFile !== this._file) {
             this._file = newFile;
 
-            if (SC.none(newFile)) {
-                this.set('model', TextStorage.create());
+            if (util.none(newFile)) {
+                this.model = TextStorage.create();
             } else {
                 newFile.loadContents().then(function(contents) {
                     console.log('SET FILE CONTENTS: ', contents);
                     SC.run(function() {
-                        this.set('model', TextStorage.create({
+                        this.model = TextStorage.create({
                             initialValue: contents
-                        }));
+                        });
                     }.bind(this));
                 }.bind(this));
             }
-        }
-        return this._file;
-    }.property(),
 
-    init: function() {
-        var model = this.get('model');
-        if (model == null) {
-            this.set('model', TextStorage.create());
+            this.notifyDelegates('bufferFileChanged', this._file);
         }
     },
 
-    /*
+    getFile: function() {
+        return this._file;
+    },
+
+   /**
+    * The text model that is holding the content of the file.
+    */
+    _model: null,
+
+    setModel: function(newModel) {
+        if (this._model !== newModel) {
+            this._model = newModel;
+            this.notifyDelegates('bufferModelChanged', this._model);
+        }
+    },
+
+    getModel: function() {
+        return this._model;
+    },
+
+    /**
+     * The syntax manager associated with this file.
+     */
+    syntaxManager: null,
+
+    init: function(model, syntaxManager) {
+        if (model == null) {
+            this.model = TextStorage.create();
+        } else {
+            this.model = model;
+        }
+
+        this.syntaxManager = syntaxManager;
+
+        this.__defineGetter__('model', this.getModel);
+        this.__defineSetter__('model', this.setModel);
+
+        this.__defineGetter__('file', this.getFile);
+        this.__defineSetter__('file', this.setFile);
+
+        return this;
+    },
+
+   /**
     * This is like calling set('file', value) except this returns
     * a promise so that you can take action once the contents have
     * been loaded.
@@ -117,8 +137,8 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
         this.changeFileOnly(newFile);
 
         // are we changing to a new file?
-        if (SC.none(newFile)) {
-            this.set('model', TextStorage.create());
+        if (util.none(newFile)) {
+            this.model = TextStorage.create();
             var pr = new Promise();
             pr.resolve(this);
             return pr;
@@ -126,14 +146,13 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
 
         return newFile.loadContents().then(function(contents) {
             SC.run(function() {
-                var model = TextStorage.create({ initialValue: contents });
-                this.set('model', model);
+                this.model = TextStorage.create({ initialValue: contents });
             }.bind(this));
             return this;
         }.bind(this));
     },
 
-    /*
+    /**
      * Normally, you would just call set('file', fileObject) on a Buffer.
      * However, that will replace the contents of the model (reloading the file),
      * which is not always what you want. Use this method to change the
@@ -141,28 +160,27 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
      * model.
      */
     changeFileOnly: function(newFile) {
-        this._file = newFile;
-        this.propertyDidChange('file');
+        this.file = newFile;
     },
 
     /*
      * reload the existing file contents from the server.
      */
     reload: function() {
-        var file = this.get('file');
+        var file = this._file;
         var self = this;
 
         return file.loadContents().then(function(contents) {
-            this.set('model', TextStorage.create({ initialValue: contents }));
+            this.model = TextStorage.create({ initialValue: contents });
         }.bind(this));
     },
 
-    /*
+    /**
      * Save the contents of this buffer. Returns a promise that resolves
      * once the file is saved.
      */
     save: function() {
-        return this._file.saveContents(this.get('model').getValue());
+        return this._file.saveContents(this._model.getValue());
     },
 
     /**
@@ -176,7 +194,7 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
     saveAs: function(newFile) {
         var promise = new Promise();
 
-        newFile.saveContents(this.get('model').getValue()).then(function() {
+        newFile.saveContents(this._model.getValue()).then(function() {
             this.changeFileOnly(newFile);
             promise.resolve();
         }.bind(this), function(error) {
@@ -191,49 +209,60 @@ exports.Buffer = SC.Object.extend(MultiDelegateSupport, {
      * been saved with @saveAs) or false otherwise.
      */
     untitled: function() {
-        return SC.none(this._file);
+        return util.none(this._file);
     }
-});
+}));
 
-exports.EditSession = SC.Object.extend({
+exports.EditSessionTrait = Trait({
+
     _currentBuffer: null,
-    _currentView: null,
 
-    _currentBufferChanged: function() {
+    setCurrentBuffer: function(newBuffer) {
         var oldBuffer = this._currentBuffer;
-        if (!SC.none(oldBuffer)) {
-            oldBuffer.removeDelegate(this);
-        }
+        if (newBuffer !== oldBuffer) {
+            if (!SC.none(oldBuffer)) {
+                oldBuffer.removeDelegate(this);
+            }
 
-        var newBuffer = this.get('currentBuffer');
-        this._currentBuffer = newBuffer;
-        newBuffer.addDelegate(this);
-    }.observes('currentBuffer'),
-
-    _currentViewChanged: function() {
-        var oldView = this._currentView;
-        if (!SC.none(oldView)) {
-            oldView.removeDelegate(this);
-        }
-
-        var newView = this.get('currentView');
-        this._currentView = newView;
-        newView.addDelegate(this);
-    }.observes('currentView'),
-
-    _updateHistoryProperty: function(key, value) {
-        var file = this._currentBuffer.get('file');
-        if (!SC.none(file)) {
-            this.get('history').update(file.path, key, value);
+            this._currentBuffer = newBuffer;
+            newBuffer.addDelegate(this);
         }
     },
 
+    getCurrentBuffer: function() {
+        return this._currentBuffer;
+    },
+
     /**
-     * @property
+     * @property{TextView}
      *
-     * The 'current' buffer is the one that backs the current view.
+     * The 'current' view is the editor component that most recently had
+     * the focus.
      */
-    currentBuffer: null,
+    _currentView: null,
+
+    setCurrentView: function(newView) {
+        var oldView = this._currentView;
+        if (newView !== oldView) {
+            if (!SC.none(oldView)) {
+                oldView.removeDelegate(this);
+            }
+
+            this._currentView = newView;
+            newView.addDelegate(this);
+        }
+    },
+
+    getCurrentView: function() {
+        return this._currentView;
+    },
+
+    _updateHistoryProperty: function(key, value) {
+        var file = this._currentBuffer.file;
+        if (!SC.none(file)) {
+            this.history.update(file.path, key, value);
+        }
+    },
 
     /*
      * @type{string}
@@ -243,21 +272,13 @@ exports.EditSession = SC.Object.extend({
     currentUser: null,
 
     /**
-     * @property{TextView}
-     *
-     * The 'current' view is the editor component that most recently had
-     * the focus.
-     */
-    currentView: null,
-
-    /**
      * The history object to store file history in.
      */
     history: null,
 
     bufferFileChanged: function(sender, file) {
-        if (!SC.none(file)) {
-            this.get('history').addPath(file.path);
+        if (!util.none(file)) {
+            this.history.addPath(file.path);
 
             var ext = file.extension();
             var view = this._currentView;
@@ -289,7 +310,7 @@ exports.EditSession = SC.Object.extend({
             var buffer = this._currentBuffer;
             var file;
             if (buffer) {
-                file = buffer.get('file');
+                file = buffer.file;
             }
             if (!file) {
                 path = '/' + path;
@@ -302,7 +323,7 @@ exports.EditSession = SC.Object.extend({
     },
 
     loadMostRecentOrNew: function() {
-        var recents = this.get('history').getRecent(1);
+        var recents = this.history.getRecent(1);
         if (recents.length === 0) {
             return;
         }
@@ -319,10 +340,10 @@ exports.EditSession = SC.Object.extend({
         var file = bespin.files.getFile(recent.path);
         this._currentBuffer.changeFile(file).then(function() {
             var view = this._currentView;
-            if (!SC.none(scroll)) {
+            if (!util.none(scroll)) {
                 view.scrollTo(scroll);
             }
-            if (!SC.none(selection)) {
+            if (!util.none(selection)) {
                 view.setSelection(selection);
             }
         }.bind(this));
@@ -343,14 +364,29 @@ exports.EditSession = SC.Object.extend({
     },
 
     init: function() {
-        this.set('history', History.create());
+        this.history = History.create();
+
+        this.__defineGetter__('currentView', this.getCurrentView);
+        this.__defineSetter__('currentView', this.setCurrentView);
+
+        this.__defineGetter__('currentBuffer', this.getCurrentBuffer);
+        this.__defineSetter__('currentBuffer', this.setCurrentBuffer);
+
+        return this;
     }
 });
 
 // A small object that's exported to the Bespin controller to allow the
 // controller to find the relevant classes.
 exports.editSessionClasses = {
-    Buffer: exports.Buffer,
-    EditSession: exports.EditSession
+    makeBuffer: function(model, syntaxManager) {
+        var Buffer = Trait.create(Object.prototype, exports.BufferTrait);
+        Buffer.init(model, syntaxManager);
+        return Buffer;
+    },
+
+    makeEditSession: function() {
+        return Trait.create(Object.prototype, exports.EditSessionTrait).init();
+    }
 };
 

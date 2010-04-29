@@ -107,7 +107,7 @@ exports.preview = function(env, args, request) {
     }
 
     buffer.save().then(function() {
-        var fileName = buffer.get('file').path;
+        var fileName = buffer.file.path;
         popup = window.open(
             server.SERVER_BASE_URL + '/preview/at' + fileName,
             'Preview: ' + fileName, 'location=no,menubar=no'

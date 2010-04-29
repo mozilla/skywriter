@@ -83,7 +83,10 @@ exports.MultiDelegateSupport = {
         }
 
         this.get('delegates').forEach(function(delegate) {
-            if (delegate.respondsTo(method)) {
+            // As we have a branch of non SC classes now, we can't use the
+            // respondsTo function anymore...
+            // if (delegate.respondsTo(method)) {
+            if (delegate[method]) {
                 delegate[method].apply(delegate, args);
             }
         });

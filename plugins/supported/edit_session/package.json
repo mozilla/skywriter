@@ -4,7 +4,8 @@
         "delegate_support": "0.0",
         "text_editor": "0.0",
         "filesystem": "0.0",
-        "appsupport": "0.0"
+        "appsupport": "0.0",
+        "traits": "0.0"
     },
     "provides": [
         {

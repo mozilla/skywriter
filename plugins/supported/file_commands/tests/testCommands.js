@@ -54,9 +54,8 @@ var getEnv = function() {
     var root = getNewRoot();
     var buffer = edit_session.Buffer.create();
 
-    var session = edit_session.EditSession.create({
-        currentBuffer: buffer
-    });
+    var session = edit_session.makeEditSession(buffer);
+
     var env = Environment.create({
         files: root,
         session: session

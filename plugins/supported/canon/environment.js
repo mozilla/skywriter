@@ -66,12 +66,12 @@ exports.EnvironmentTrait = Trait({
             // This can happen if the session is being reloaded.
             return null;
         }
-        return session.get('currentView');
+        return session.currentView;
     },
 
     /**
      * The current editor model might not always be easy to find so you should
-     * use <code>instruction.get('model')</code> to access the view where
+     * use <code>instruction.model</code> to access the view where
      * possible.
      */
     getModel: function() {
@@ -80,12 +80,12 @@ exports.EnvironmentTrait = Trait({
             console.error("command attempted to get model but there's no session");
             return undefined;
         }
-        var buffer = session.get('currentBuffer');
+        var buffer = session.currentBuffer;
         if (!buffer) {
             console.error('Session has no current buffer');
             return undefined;
         }
-        return buffer.get('model');
+        return buffer.model;
     },
 
     /**
@@ -113,12 +113,12 @@ exports.EnvironmentTrait = Trait({
             console.error("command attempted to get file but there's no session");
             return undefined;
         }
-        var buffer = session.get('currentBuffer');
+        var buffer = session.currentBuffer;
         if (!buffer) {
             console.error('Session has no current buffer');
             return undefined;
         }
-        return buffer.get('file');
+        return buffer.file;
     },
 
     /**
@@ -130,7 +130,7 @@ exports.EnvironmentTrait = Trait({
             console.error("command attempted to get buffer but there's no session");
             return undefined;
         }
-        return session.get('currentBuffer');
+        return session.currentBuffer;
     },
 
     /**
