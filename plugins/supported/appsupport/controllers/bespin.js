@@ -171,7 +171,7 @@ bespinController = Object.create(Object.prototype, Trait({
 
                 var loginController = this._loginController;
                 SC.run(loginController.show.bind(loginController));
-            },
+            }
         }), RegistrationHandler)),
 
         file_source: Trait.create(Object.prototype, Trait.override(Trait({
