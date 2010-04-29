@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
+var Trait = require('traits').Trait;
 
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
@@ -61,7 +61,7 @@ exports.buildFlags = function(env, flags) {
  * events and dispatch command messages to targets.
  * @class
  */
-var KeyboardManager = SC.Object.extend({
+var KeyboardManagerTrait = Trait({
     _customKeymappingCache: { states: {} },
 
     /**
@@ -79,7 +79,7 @@ var KeyboardManager = SC.Object.extend({
     processKeyEvent: function(evt, sender, flags) {
         // Use our modified commandCodes function to detect the meta key in
         // more circumstances than SproutCore alone does.
-        var symbolicName = keyutil.commandCodes(evt)[0];
+        var symbolicName = keyutil.commandCodes(evt, true)[0];
         if (util.none(symbolicName)) {
             return false;
         }
@@ -415,5 +415,4 @@ exports.flagsMatch = function(predicates, flags) {
 /**
  * The global exported KeyboardManager
  */
-exports.keyboardManager = KeyboardManager.create();
-
+exports.keyboardManager = Trait.create(Object.prototype, KeyboardManagerTrait);

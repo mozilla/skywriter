@@ -4,7 +4,8 @@
     {
         "settings": "0.0",
         "types": "0.0",
-        "appsupport": "0.0"
+        "appsupport": "0.0",
+        "traits": "0.0"
     },
     "provides":
     [
