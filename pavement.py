@@ -88,7 +88,12 @@ options(
     )
 )
 
-TIKI_TEMPLATE = u"""%(preamble)s
+TIKI_TEMPLATE = u"""
+if ("undefined" === typeof bespin) {
+    var bespin = {};
+}
+(function() {
+%(preamble)s
 tiki.register('%(package_id)s', {
 "name": "tiki",
 "version": "%(TIKI_VERSION)s",
@@ -98,6 +103,10 @@ tiki.module('%(package_id)s:tiki', function(require, exports, module) {
 %(body)s
 });
 %(postamble)s
+
+bespin.tiki = tiki;
+})();
+
 """
 
 @cmdopts([('git', 'g', 'use git to download'), ('force', 'f', 'force download of snapshot')])
@@ -110,17 +119,17 @@ def install_tiki(options):
     if not options.git:
         if snapshot.exists():
             if options.force:
-                snapshot.rm()
+                snapshot.unlink()
             else:
                 info("Tiki snapshot installed already.")
                 return
         info("Downloading Tiki Snapshot")
-        preamble = urllib2.urlopen("http://github.com/sproutit/tiki/raw/master/__preamble__.js").read()
-        body = urllib2.urlopen("http://github.com/sproutit/tiki/raw/master/lib/tiki.js").read()
-        postamble = urllib2.urlopen("http://github.com/sproutit/tiki/raw/master/__postamble__.js")
-        TIKI_VERSION = "1.0.0"
-        package_id = "::tiki/%s" % (TIKI_VERSION)
-        snapshot.write_text(TIKI_TEMPLATE % locals())
+        preamble = urllib2.urlopen("http://github.com/sproutit/tiki/raw/master/__preamble__.js").read().decode("utf8")
+        body = urllib2.urlopen("http://github.com/sproutit/tiki/raw/master/lib/tiki.js").read().decode("utf8")
+        postamble = urllib2.urlopen("http://github.com/sproutit/tiki/raw/master/__postamble__.js").read().decode("utf8")
+        TIKI_VERSION = u"1.0.0"
+        package_id = u"::tiki/%s" % (TIKI_VERSION)
+        snapshot.write_text(TIKI_TEMPLATE % locals(), "utf8")
         return
 
     def get_component(base_name, dest_name, dest_path=".", branch=None, account="dangoor"):
