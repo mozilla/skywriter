@@ -248,7 +248,7 @@ will be deleted before the build.""")
             bundled_plugins.add(plugin.name)
             
         output_js.write("""
-tiki.require("bespin:plugins").catalog.loadMetadata(%s);
+SC.ready(function() {tiki.require("bespin:plugins").catalog.loadMetadata(%s);});
 """ % (dumps(all_md)))
 
         output_js.write(self.boot_file.bytes())
