@@ -15,9 +15,21 @@
             "params":
             [
                 {
-                    "name": "message",
+                    "name": "title",
                     "type": "text",
                     "description": "The string to pass to the notification system"
+                },
+                {
+                    "name": "body",
+                    "type": "text",
+                    "description": "Detailed text behind the message",
+                    "defaultValue": null
+                },
+                {
+                    "name": "iconUrl",
+                    "type": "text",
+                    "description": "URL to an Icon to display with the message",
+                    "defaultValue": null
                 }
             ],
             "hidden": true,

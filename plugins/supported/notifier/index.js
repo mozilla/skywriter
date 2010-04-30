@@ -38,110 +38,142 @@
 var catalog = require('bespin:plugins').catalog;
 
 /**
- * Broadcast a notification to anyone listening
+ * This API follows the broad principles of the Gears notification API in the
+ * hope that a future HTML spec might.
  */
-exports.notify = function(notification) {
-    if (!notification.isNotification) {
-        notification = exports.Notification.create(notification);
-    }
-
-    var handlerExts = catalog.getExtensions('notificationHandler');
-    handlerExts.forEach(function(handlerExt) {
-        try {
-            handlerExt.load(function(handler) {
-                handler(notification);
-            });
-        } catch (ex) {
-            console.error(ex);
-        }
-    }, this);
+var Notification = function(iconUrl, title, body) {
+    this.iconUrl = iconUrl;
+    this.title = title;
+    this.body = body;
 };
 
-/**
- * The unique ID to be applied to the next item.
- * TODO: Do we need this?
- */
-var nextId = 0;
-
-/**
- * This API follows the broad principles of the Gears notification API in the
- * hope that a future HTML spec might
- */
-exports.Notification = SC.Object.extend({
+Notification.prototype = {
     /**
-     * Specifies the title of the notification.
-     * Recommended read-write string
+     * Causes the notification to displayed to the user. This may or may not
+     * happen immediately, depending on the constraints of the presentation
+     * method.
      */
-    title: undefined,
-
-    /**
-     * Specifies the URL of the icon to display.
-     * Recommended read-write string
-     */
-    icon: undefined,
-
-    /**
-     * Specifies the additional subtitle. For example, this could be used to
-     * display the appointment time for the calendar notification.
-     * Optional read-write string
-     */
-    subtitle: undefined,
-
-    /**
-     * Specifies the main content of the notification. For example, email
-     * notifications could put a snippet in this field.
-     * Optional read-write string
-     */
-    description: undefined,
-
-    /**
-     * Yeay. Manual RTTI.
-     */
-    isNotification: true,
-
-    /*
-     * GEARS adds 2 further fields which could be useful, however we're not
-     * supporting them right now:
-     * - displayAtTime
-     * This is the time when the notification is meant to be displayed.
-     * If this is not provided, the notification will be displayed immediately.
-     * Optional read-write Date
-     *
-     * - displayUntilTime
-     * This is the time when the notification is meant to go away.
-     * If this is not set, the notification just get displayed and goes away
-     * after the default timeout. If it is set, then once displayed, the
-     * notification will remain on screen until the user dismisses it or the
-     * desired time has arrived.
-     * Optional read-write Date
-     */
-
-    /**
-     * A unique ID for the notification. It can be used for duplicate detection.
-     * If this is not set, a unique ID will be generated.
-     * Mandatory private read-only string
-     */
-    _id: null,
-
-    /**
-     * @see #addAction()
-     */
-    _actions: [],
-
-    /**
-     *
-     */
-    init: function() {
-        this._id = '' + (nextId++);
+    show: function() {
+        var handlerExts = catalog.getExtensions('notificationHandler');
+        handlerExts.forEach(function(handlerExt) {
+            try {
+                handlerExt.load(function(handler) {
+                    handler.showNotification(this);
+                }.bind(this));
+            } catch (ex) {
+                console.error(ex);
+            }
+        }, this);
     },
 
     /**
-     * Adds an action for this notification.
-     * The parameter text specifies the text to display for the action.
-     * The action is a JavaScript function to use when the user selects the
-     * action.
+     * Causes the notification to not be displayed.
+     * If the notification has been displayed already, it must be closed.
+     * If it has not yet been displayed, it must be removed from the set of
+     * pending notifications.
      */
-    addAction: function(text, action) {
-        this._actions.pushObject({ text:text, action:action });
-    }
-});
+    cancel: function() {
+        var handlerExts = catalog.getExtensions('notificationHandler');
+        handlerExts.forEach(function(handlerExt) {
+            try {
+                handlerExt.load(function(handler) {
+                    handler.cancelNotification(this);
+                });
+            } catch (ex) {
+                console.error(ex);
+            }
+        }, this);
+    },
+
+    /**
+     * Event listener function corresponding to event type "display".
+     * This listener must be called when the notification is displayed to the
+     * user, which need not be immediately when show() is called.
+     */
+    ondisplay: null,
+
+    /**
+     * Event listener function corresponding to event type "error".
+     * This listener must be called when the notification cannot be displayed to
+     * the user because of an error.
+     */
+    onerror: null,
+
+    /**
+     * Event listener function corresponding to event type "close".
+     * This listener must be called when the notification is closed by the user.
+     * This event must not occur until the "display" event.
+     */
+    onclose: null
+};
+
+/**
+ * Creates a new notification object with the provided content.
+ * <p>If the origin of the script which executes this method does not have
+ * permission level PERMISSION_ALLOWED, this method will throw a security
+ * exception.
+ * @param iconUrl {string} contains the URL of an image resource to be shown
+ * with the notification;
+ * @param title {string} contains a string which is the primary text of the
+ * notification;
+ * @param body {string} contains a string which is secondary text for the
+ * notification.
+ * @return Notification
+ */
+exports.createNotification = function(iconUrl, title, body) {
+    return new Notification(iconUrl, title, body);
+};
+
+/*
+ * For Bespin it is likely that the content will be already on the server so
+ * it makes more sense to do this with some local URL only? Since this function
+ * is optional, we are excluding it until we know the best way to handle it.
+ * <p>User agents with the ability to present notifications with HTML contents
+ * should implement this method; user agents without that ability may only
+ * implement createNotification.
+ * @param url {string} contains the URL of a resource which contains HTML
+ * content to be shown as the content of the notification.
+ * If the origin of the script which executes this method does not have
+ * permission level PERMISSION_ALLOWED, this method will throw a security
+ * exception.
+ * @return Notification
+ *
+exports.createHTMLNotification = function(url) {
+};
+*/
+
+/**
+ * Indicates that the user has granted permission to scripts with this origin to
+ * show notifications.
+ */
+exports.PERMISSION_ALLOWED = 0;
+
+/**
+ * Indicates that the user has not taken an action regarding notifications for
+ * scripts from this origin.
+ */
+exports.PERMISSION_NOT_ALLOWED = 1;
+
+/**
+ * Indicates that the user has explicitly blocked scripts with this origin from
+ * showing notifications.
+ */
+exports.PERMISSION_DENIED = 2;
+
+/**
+ * For Bespin, since there will be a number of ways of notifying the user
+ * some of which will not require permission, this function will always return
+ * PERMISSION_ALLOWED.
+ * @return {number} PERMISSION_ALLOWED
+ */
+exports.checkPermission = function() {
+    return exports.PERMISSION_ALLOWED;
+};
+
+/**
+ * Since Bespin handles permissions for notifications, this method will always
+ * call callback quickly.
+ */
+exports.requestPermission = function(callback) {
+    window.setTimeout(callback, 1);
+};

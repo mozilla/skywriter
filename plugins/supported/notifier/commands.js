@@ -35,11 +35,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var notify = require('notifier').notify;
+var notifier = require('notifier');
 
 /**
  * The 'notify' command
  */
 exports.notifyCommand = function(env, args, request) {
-    notify({ title: args.message });
+    var notification = notifier.createNotification(args.iconUrl, args.title, args.body);
+    notification.show();
 };
