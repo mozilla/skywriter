@@ -38,11 +38,10 @@
 var catalog = require('bespin:plugins').catalog;
 var Promise = require('bespin:promise').Promise;
 var groupPromises = require('bespin:promise').group;
-var objectKeys = require('bespin:util/util').objectKeys;
+var util = require('bespin:util/util');
 
 var server = require('bespin_server').server;
 var pathutils = require('filesystem:path');
-var util = require('bespin:util/util');
 var bespin = require('appsupport:controllers/bespin').bespinController;
 
 var getPluginName = function(path) {
@@ -524,7 +523,7 @@ exports.ep = function(env, args, request) {
     } else {
         output += '<div class="ep_info"><h2>Available extension points</h2>';
         output += '<ul>';
-        var epNames = objectKeys(catalog.points);
+        var epNames = Object.keys(catalog.points);
         epNames.sort();
         epNames.forEach(function(epName) {
             output += '<li>' + epName + '</li>';

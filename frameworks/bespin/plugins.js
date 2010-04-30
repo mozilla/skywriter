@@ -170,7 +170,7 @@ exports.ExtensionPoint = SC.Object.extend({
         this.extensions.forEach(function(ext) {
             pluginSet[ext._pluginName] = true;
         });
-        var matches = util.objectKeys(pluginSet);
+        var matches = Object.keys(pluginSet);
         matches.sort();
         return matches;
     },
@@ -379,7 +379,7 @@ exports.Plugin = SC.Object.extend({
 
         var self = this;
 
-        var pluginList = util.objectKeys(this.catalog.plugins);
+        var pluginList = Object.keys(this.catalog.plugins);
 
         this._findDependents(pluginList, dependents);
 
@@ -672,7 +672,7 @@ exports.Catalog = SC.Object.extend({
             }
 
             if (md.dependencies) {
-                md.depends = util.objectKeys(md.dependencies);
+                md.depends = Object.keys(md.dependencies);
             }
             tiki.register(pluginName, md);
         }
@@ -958,7 +958,7 @@ var _removeFromList = function(regex, array, matchFunc) {
 };
 
 var _removeFromObject = function(regex, obj) {
-    var keys = util.objectKeys(obj);
+    var keys = Object.keys(obj);
     var i = keys.length;
     while (--i > 0) {
         if (regex.exec(keys[i])) {

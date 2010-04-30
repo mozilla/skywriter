@@ -471,22 +471,6 @@ exports.formatDate = function (date) {
 exports.formatDate.shortMonths = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ];
 
 /**
- * Retrieves the list of keys on an object.
- */
-exports.objectKeys = Object.keys;
-if (!exports.objectKeys) {
-    exports.objectKeys = function(obj) {
-        var k, ret = [];
-        for (k in obj) {
-            if (obj.hasOwnProperty(k)) {
-                ret.push(k);
-            }
-        }
-        return ret;
-    };
-}
-
-/**
  * String the spaces from the start and end of a string
  */
 exports.trim = function(str) {

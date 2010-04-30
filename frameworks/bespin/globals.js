@@ -53,6 +53,21 @@ var installGlobals = function() {
         };
     }
 
+    /**
+     * Retrieves the list of keys on an object.
+     */
+    if (!Object.keys) {
+        Object.keys = function(obj) {
+            var k, ret = [];
+            for (k in obj) {
+                if (obj.hasOwnProperty(k)) {
+                    ret.push(k);
+                }
+            }
+            return ret;
+        };
+    }
+
     if (!Function.prototype.bind) {
         // From Narwhal
         Function.prototype.bind = function () {
