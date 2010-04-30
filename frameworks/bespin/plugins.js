@@ -45,7 +45,8 @@ var util = require("util/util");
 
 var r = require;
 
-var tiki = require.loader;
+var loader = require.loader;
+var browser = loader.sources[0];
 
 /**
  * Split an extension pointer from module/path#objectName into an object of the
@@ -83,42 +84,41 @@ var _retrieveObject = function(pointerObj) {
 };
 
 exports.Extension = SC.Object.extend({
+    _getPointer: function(property) {
+        property = property || "pointer";
+        return _splitPointer(this._pluginName, this.get(property));
+    },
+
     init: function() {
         this._observers = [];
     },
 
     load: function(callback, property) {
-        var promise = new Promise();
+        var pointer = this._getPointer(property);
 
-        var onComplete = function(func) {
-            if (callback) {
-                callback(func);
-            }
-            promise.resolve(func);
-        };
-
-        var pointerVal = this.get(property || "pointer");
-        if (util.isFunction(pointerVal)) {
-            onComplete(pointerVal);
-            return promise;
-        }
-
-        var pointerObj = _splitPointer(this._pluginName, pointerVal);
-        if (!pointerObj) {
+        if (!pointer) {
             console.error("Extension cannot be loaded because it has no 'pointer'");
             console.log(this);
-
-            promise.reject(new Error('Extension has no \'pointer\' to call'));
-            return promise;
+            return null;
         }
 
-        tiki.async(this._pluginName).then(function() {
-            SC.run(function() {
-                var func = _retrieveObject(pointerObj);
-                onComplete(func);
+        var promise = new Promise();
+        require.ensurePackage(this._pluginName, function() {
+            require.ensure(pointer.modName, function() {
+                SC.run(function() {
+                    var module = r(pointer.modName);
+                    var data;
+                    if (pointer.objName) {
+                        data = module[pointer.objName];
+                    } else {
+                        data = module;
+                    }
 
-                // TODO: consider caching 'func' to save looking it up again
-                // Something like: this._setPointer(property, data);
+                    if (callback) {
+                        callback(data);
+                    }
+                    promise.resolve(data);
+                });
             });
         });
 
@@ -149,9 +149,8 @@ exports.Extension = SC.Object.extend({
     },
 
     _getLoaded: function(property) {
-        var pointerVal = this.get(property || "pointer");
-        var pointerObj = _splitPointer(this._pluginName, pointerVal);
-        return _retrieveObject(pointerObj);
+        var pointer = this._getPointer(property);
+        return _retrieveObject(pointer);
     }
 });
 
@@ -160,7 +159,7 @@ exports.ExtensionPoint = SC.Object.extend({
         this.extensions = [];
         this.handlers = [];
     },
-
+    
     /**
     * Retrieves the list of plugins which provide extensions
     * for this extension point.
@@ -174,7 +173,7 @@ exports.ExtensionPoint = SC.Object.extend({
         matches.sort();
         return matches;
     },
-
+    
     /*
      * get the name of the plugin that defines this extension point.
      */
@@ -327,24 +326,7 @@ exports.Plugin = SC.Object.extend({
         });
 
         // remove all traces of the plugin
-        var nameMatch = new RegExp("^" + pluginName + ":");
-
-        _removeFromList(nameMatch, tiki.scripts);
-        _removeFromList(nameMatch, tiki.modules, function(module) {
-            delete tiki._factories[module];
-        });
-        _removeFromList(nameMatch, tiki.stylesheets);
-        _removeFromList(new RegExp("^" + pluginName + "$"), tiki.packages);
-
-        var promises = tiki._promises;
-
-        delete promises.catalog[pluginName];
-        delete promises.loads[pluginName];
-        _removeFromObject(nameMatch, promises.modules);
-        _removeFromObject(nameMatch, promises.scripts);
-        _removeFromObject(nameMatch, promises.stylesheets);
-
-        delete tiki._catalog[pluginName];
+        // TODO
     },
 
     /**
@@ -352,6 +334,8 @@ exports.Plugin = SC.Object.extend({
      * dependent plugins
      */
     reload: function(callback) {
+        // TODO: Broken. Needs to be updated to the latest Tiki.
+
         var func, dependName;
 
         // All reloadable plugins will have a reloadURL
@@ -674,7 +658,16 @@ exports.Catalog = SC.Object.extend({
             if (md.dependencies) {
                 md.depends = Object.keys(md.dependencies);
             }
-            tiki.register(pluginName, md);
+
+            md.name = pluginName;
+            md.version = null;
+            console.log("loading metadata for", pluginName, " -> ", md);
+
+            var packageId = browser.canonicalPackageId(pluginName);
+            if (packageId === null) {
+                browser.register('::' + pluginName, md);
+                continue;
+            }
         }
 
         this._toposort(metadata).forEach(function(name) {
@@ -722,12 +715,7 @@ exports.Catalog = SC.Object.extend({
      * object.
      */
     loadPlugin: function(pluginName, callback) {
-        var p = tiki.async(pluginName);
-        if (callback) {
-            p.then(callback, function(reason) {
-                console.error("Plugin loading canceled: ", reason);
-            });
-        }
+        require.ensurePackage(pluginName, callback);
     },
 
     /**
@@ -890,7 +878,7 @@ exports.Catalog = SC.Object.extend({
             pluginName = context;
         }
 
-        tiki.async(pluginName).then(function() {
+        require.ensurePackage(pluginName, function() {
             promise.resolve(SC.objectForPropertyPath(path));
         });
 

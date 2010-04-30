@@ -166,9 +166,15 @@ exports.ThemeManager = SC.Object.extend({
 
 exports.themeManager = exports.ThemeManager.create({theme: 'Screen'});
 
+var resolved = false;
 exports.registerTheme = function(extension) {
+    if (resolved) {
+        return;
+    }
+
     var themeManager = exports.themeManager;
     if (extension.name === themeManager.get('theme')) {
+        resolved = true;
         themeManager.get('themeRegistered').resolve(extension);
     }
 };
