@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var util = require('bespin:util/util');
 
 /**
  * @namespace
@@ -130,7 +131,7 @@ exports.TextInput = {
      * you should call this function in your implementation.
      */
     focusTextInput: function() {
-        if (SC.none(this._TextInput_textFieldDom)) {
+        if (util.none(this._TextInput_textFieldDom)) {
             // Avoid accessing the nonexistent DOM element, and simply set an
             // internal flag that didCreateLayer() will check later.
             this._TextInput_wantsFocus = true;

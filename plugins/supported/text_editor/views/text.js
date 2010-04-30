@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var util = require('bespin:util/util');
 var CanvasView = require('views/canvas').CanvasView;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
@@ -68,7 +69,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     _selectedRange: null,
     _selectedRangeEndVirtual: null,
-    
+
     classNames: ['text_editor'],
 
     _drag: function() {
@@ -130,7 +131,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         var startRow = rangeStart.row, endRow = rangeEnd.row;
         for (var row = startRow; row <= endRow; row++) {
             var textLine = textLines[row];
-            if (SC.none(textLine)) {
+            if (util.none(textLine)) {
                 continue;
             }
 
@@ -328,7 +329,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     _scrollPage: function(scrollUp) {
         var scrollView = this._enclosingScrollView;
-        if (SC.none(scrollView)) {
+        if (util.none(scrollView)) {
             return;
         }
 
@@ -339,7 +340,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     _scrollWhileDragging: function() {
         var scrollView = this._enclosingScrollView;
-        if (SC.none(scrollView)) {
+        if (util.none(scrollView)) {
             return;
         }
 
@@ -387,7 +388,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     // Updates the _enclosingScrollView instance member and (re-)registers
     // observers appropriately.
     _updateEnclosingScrollView: function() {
-        if (!SC.none(this._enclosingScrollView)) {
+        if (!util.none(this._enclosingScrollView)) {
             var enclosingScrollView = this._enclosingScrollView;
             enclosingScrollView.removeObserver('horizontalScrollOffset', this,
                 this._scrolled);
@@ -396,13 +397,13 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }
 
         var view = this.get('parentView');
-        while (!SC.none(view) && !view.get('isScrollable')) {
+        while (!util.none(view) && !view.get('isScrollable')) {
             view = view.get('parentView');
         }
 
         this._enclosingScrollView = view;
 
-        if (SC.none(view)) {
+        if (util.none(view)) {
             return;
         }
 
@@ -965,7 +966,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
      */
     scrollTo: function(point) {
         var scrollView = this._enclosingScrollView;
-        if (SC.none(scrollView)) {
+        if (util.none(scrollView)) {
             return;
         }
 

@@ -37,6 +37,7 @@
 
 var SC = require('sproutcore/runtime').SC;
 var Promise = require('bespin:promise').Promise;
+var util = require('bespin:util/util');
 
 /**
  * Registers a new syntax module as it's discovered in a plugin.
@@ -73,7 +74,7 @@ var SyntaxInfo = SC.Object.extend({
         this.set('name', extension.name);
 
         var fileExts = extension.fileexts;
-        this.set('fileExts', SC.none(fileExts) ? [] : fileExts);
+        this.set('fileExts', util.none(fileExts) ? [] : fileExts);
     }
 });
 
@@ -114,7 +115,7 @@ exports.syntaxDirectory = SC.Object.create({
 
     syntaxForFileExt: function(fileExt) {
         var syntax = this._fileExts[fileExt.toLowerCase()];
-        return SC.none(syntax) ? 'plain' : syntax;
+        return util.none(syntax) ? 'plain' : syntax;
     }
 });
 

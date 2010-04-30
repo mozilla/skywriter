@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var util = require('bespin:util/util');
 var m_promise = require('bespin:promise');
 var ArrayUtils = require('utils/array');
 var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
@@ -413,7 +414,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
             return promise;
         }
 
-        if (SC.none(depth)) {
+        if (util.none(depth)) {
             depth = 0;
         }
 

@@ -35,6 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var SC = require('sproutcore/runtime').SC;
+
 var Promise = require('bespin:promise').Promise;
 var catalog = require('bespin:plugins').catalog;
 
@@ -220,7 +222,7 @@ exports.EditSessionTrait = Trait({
     setCurrentBuffer: function(newBuffer) {
         var oldBuffer = this._currentBuffer;
         if (newBuffer !== oldBuffer) {
-            if (!SC.none(oldBuffer)) {
+            if (!util.none(oldBuffer)) {
                 oldBuffer.removeDelegate(this);
             }
 
@@ -244,7 +246,7 @@ exports.EditSessionTrait = Trait({
     setCurrentView: function(newView) {
         var oldView = this._currentView;
         if (newView !== oldView) {
-            if (!SC.none(oldView)) {
+            if (!util.none(oldView)) {
                 oldView.removeDelegate(this);
             }
 
@@ -259,7 +261,7 @@ exports.EditSessionTrait = Trait({
 
     _updateHistoryProperty: function(key, value) {
         var file = this._currentBuffer.file;
-        if (!SC.none(file)) {
+        if (!util.none(file)) {
             this.history.update(file.path, key, value);
         }
     },

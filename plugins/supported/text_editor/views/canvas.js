@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var util = require('bespin:util/util');
 var Rect = require('utils/rect');
 
 /**
@@ -82,7 +83,7 @@ exports.CanvasView = SC.View.extend({
         var parentFrame = this.getPath('parentView.frame');
 
         var canvas = this._cvCanvasDom;
-        if (SC.none(canvas)) {
+        if (util.none(canvas)) {
             return;
         }
 

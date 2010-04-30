@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var util = require('bespin:util/util');
 var Range = require('rangeutils:utils/range');
 var console = require('bespin:console').console;
 
@@ -141,7 +142,7 @@ exports.EditorSearchController = SC.Object.extend({
      */
     findNext: function(startPos, allowFromStart) {
         var searchRegExp = this.get('searchRegExp');
-        if (SC.none(searchRegExp)) {
+        if (util.none(searchRegExp)) {
             return null;
         }
 
@@ -156,7 +157,7 @@ exports.EditorSearchController = SC.Object.extend({
         var row;
         for (row = startPos.row; row < lines.length; row++) {
             searchResult = searchRegExp.exec(lines[row]);
-            if (!SC.none(searchResult)) {
+            if (!util.none(searchResult)) {
                 return this._makeRange(searchResult, row);
             }
         }
@@ -168,7 +169,7 @@ exports.EditorSearchController = SC.Object.extend({
         // Wrap around.
         for (row = 0; row <= startPos.row; row++) {
             searchResult = searchRegExp.exec(lines[row]);
-            if (!SC.none(searchResult)) {
+            if (!util.none(searchResult)) {
                 return this._makeRange(searchResult, row);
             }
         }
@@ -184,7 +185,7 @@ exports.EditorSearchController = SC.Object.extend({
      */
     findPrevious: function(startPos, allowFromEnd) {
         var searchRegExp = this.get('searchRegExp');
-        if (SC.none(searchRegExp)) {
+        if (util.none(searchRegExp)) {
             return null;
         }
 

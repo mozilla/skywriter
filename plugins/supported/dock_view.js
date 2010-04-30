@@ -49,6 +49,7 @@
 "end";
 
 var SC = require('sproutcore/runtime').SC;
+var util = require('bespin:util/util');
 
 /**
  * @class
@@ -90,7 +91,7 @@ exports.DockView = SC.View.extend({
         var dockedViews = this.get('dockedViews');
         var index = dockedViews.length;
 
-        if (SC.none(position)) {
+        if (util.none(position)) {
             position = 'bottom';
         }
 

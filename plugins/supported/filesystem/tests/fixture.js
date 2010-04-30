@@ -126,7 +126,7 @@ exports.DummyFileSource = SC.Object.extend({
         path = pathUtil.trimLeadingSlash(path);
 
         var f = this._findFile(path);
-        if (SC.none(f)) {
+        if (util.none(f)) {
             f = {name: path, contents: ''};
             this.files.push(f);
         }

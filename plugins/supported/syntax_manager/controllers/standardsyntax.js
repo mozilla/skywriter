@@ -37,6 +37,7 @@
 
 var SC = require('sproutcore/runtime').SC;
 var Promise = require('bespin:promise').Promise;
+var util = require('bespin:util/util');
 
 /**
  * @class
@@ -47,7 +48,7 @@ exports.StandardSyntax = SC.Object.extend({
     _stickySupported: null,
 
     _parseActions: function(actions) {
-        if (SC.none(actions)) {
+        if (util.none(actions)) {
             return [];
          }
 

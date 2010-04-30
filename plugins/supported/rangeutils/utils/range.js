@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var util = require('bespin:util/util');
 
 /**
  * Returns the result of adding the two positions.
@@ -172,10 +173,10 @@ exports.unionRanges = function(a, b) {
 };
 
 exports.isPosition = function(pos) {
-    return !SC.none(pos) && !SC.none(pos.row) && !SC.none(pos.col);
+    return !util.none(pos) && !util.none(pos.row) && !util.none(pos.col);
 };
 
 exports.isRange = function(range) {
-    return (!SC.none(range) && exports.isPosition(range.start) &&
+    return (!util.none(range) && exports.isPosition(range.start) &&
                                                 exports.isPosition(range.end));
 };

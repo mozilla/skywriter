@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var util = require('bespin:util/util');
 var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
 var Range = require('rangeutils:utils/range');
 var SyntaxManager = require('syntax_manager:controllers/syntaxmanager').
@@ -50,7 +51,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
 
     _textStorageChanged: function() {
         var oldTextStorage = this._textStorage;
-        if (!SC.none(oldTextStorage)) {
+        if (!util.none(oldTextStorage)) {
             oldTextStorage.removeDelegate(this);
         }
 
@@ -62,7 +63,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
             var oldRange = oldTextStorage.range();
             var newRange = newTextStorage.range();
 
-            if (!SC.none(oldTextStorage)) {
+            if (!util.none(oldTextStorage)) {
                 var syntaxManager = this.get('syntaxManager');
                 syntaxManager.layoutManagerReplacedText(oldRange, newRange);
             }
@@ -474,7 +475,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         for (var i = 0; i < attrs.length; i++) {
             textLines[startRow + i].colors = attrs[i].map(function(range) {
                 var color = theme[range.tag];
-                if (SC.none(color)) {
+                if (util.none(color)) {
                     color = theme.editorTextColor_plain;
                 }
 

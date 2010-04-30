@@ -38,7 +38,6 @@
 var catalog = require('bespin:plugins').catalog;
 var Promise = require('bespin:promise').Promise;
 var groupPromises = require('bespin:promise').group;
-var SC = require('sproutcore/runtime').SC;
 var objectKeys = require('bespin:util/util').objectKeys;
 
 var server = require('bespin_server').server;
@@ -66,14 +65,14 @@ var changePluginInfo = function(env, request) {
             function() {
                 if (typeOf(prSaveDone) == 'string') {
                     request.done(prSaveDone);
-                } else if (!SC.none(prSaveDone)) {
+                } else if (!util.none(prSaveDone)) {
                     prSaveDone.resolve();
                 }
             }, function(error) {
                 request.doneWithError('Unable to save plugin configuration: ' +
                                         error.message);
 
-                if (typeOf(prSaveDone) != 'string' && !SC.none(prSaveDone)) {
+                if (typeOf(prSaveDone) != 'string' && !util.none(prSaveDone)) {
                     prSaveDone.reject();
                 }
             }

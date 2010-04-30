@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var util = require('bespin:util/util');
 var Promise = require('bespin:promise').Promise;
 var m_plugins = require('bespin:plugins');
 
@@ -49,7 +50,7 @@ exports.ThemeManager = SC.Object.extend({
 
     _applyTheme: function() {
         var theme = this._theme;
-        if (SC.none(theme)) {
+        if (util.none(theme)) {
             return;
         }
 
@@ -58,12 +59,12 @@ exports.ThemeManager = SC.Object.extend({
 
     _applyThemeToPane: function(pane) {
         var oldTheme = pane.get('theme');
-        if (SC.none(oldTheme)) {
+        if (util.none(oldTheme)) {
             oldTheme = window.ENV.theme;
         }
 
         var classNames = pane.get('classNames');
-        if (!SC.none(oldTheme)) {
+        if (!util.none(oldTheme)) {
             var notOldTheme = function(theme) { return theme !== oldTheme; };
             classNames = classNames.filter(notOldTheme);
         }

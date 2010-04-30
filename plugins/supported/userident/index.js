@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
+var util = require('bespin:util/util');
 var Event = require('events').Event;
 var util = require('bespin:util/util');
 var server = require('bespin_server').server;
@@ -338,7 +339,7 @@ exports.resetController = SC.Object.create({
     },
 
     isResetURL: function() {
-        return !SC.none(searchQuery.pwchange);
+        return !util.none(searchQuery.pwchange);
     },
 
     /**
@@ -931,7 +932,7 @@ exports.registerUserPlugins = function() {
     pr.then(function(pluginInfo) {
         var deactivatePlugins;
 
-        if (SC.none(searchQuery.safeMode)) {
+        if (util.none(searchQuery.safeMode)) {
             deactivatePlugins = pluginInfo.deactivated;
         } else {
             deactivatePlugins = pluginInfo.metadata;
