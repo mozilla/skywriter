@@ -46,14 +46,7 @@ var t = require('plugindev');
 function parse(command) {
     var promise = new Promise();
 
-    var input = new Input({
-        typed: command,
-        env: environment.global,
-        flags: keyboard.buildFlags(environment.global, { })
-    });
-
-    var results = input.parse();
-    results.argsPromise.then(function(args) {
+    new Input(command).argsPromise.then(function(args) {
         promise.resolve({
             args: args,
             input: input

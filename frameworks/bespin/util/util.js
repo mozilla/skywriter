@@ -471,13 +471,6 @@ exports.formatDate = function (date) {
 exports.formatDate.shortMonths = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ];
 
 /**
- * String the spaces from the start and end of a string
- */
-exports.trim = function(str) {
-    return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-}
-
-/**
  * Add a CSS class to the list of classes on the given node
  */
 exports.addClass = function(node, className) {
@@ -489,7 +482,7 @@ exports.addClass = function(node, className) {
             cls += c + " ";
         }
     }
-    node.className = exports.trim(cls);
+    node.className = cls.trim();
 };
 
 /**
@@ -503,7 +496,7 @@ exports.removeClass = function(node, className) {
         for (var i = 0, len = parts.length; i < len; ++i) {
             cls = cls.replace(" " + parts[i] + " ", " ");
         }
-        cls = exports.trim(cls);
+        cls = cls.trim();
     } else {
         cls = "";
     }

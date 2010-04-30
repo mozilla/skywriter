@@ -115,7 +115,9 @@ exports.Input = function(typed, options) {
     }
 };
 
-
+/**
+ * Implementation of Input
+ */
 exports.Input.prototype = {
     /**
      * Split up the input taking into account ' and "
@@ -130,7 +132,8 @@ exports.Input.prototype = {
             return;
         }
 
-        var incoming = this.typed.trimLeft().split(/\s+/);
+        // replace(/^\s\s*/, '') = trimLeft()
+        var incoming = this.typed.replace(/^\s\s*/, '').split(/\s+/);
 
         var nextToken;
         while (true) {
