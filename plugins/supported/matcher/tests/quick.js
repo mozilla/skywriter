@@ -35,12 +35,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var QuickMatcher = require('matcher:quick').QuickMatcher;
 var t = require('plugindev');
 
 exports.testQuickMatcher = function() {
-    var matcher = QuickMatcher.create({ query: 'foo' });
+    var matcher = new QuickMatcher('foo');
     matcher.addItems([
         { name:'foo' },
         { name:'foobar' },

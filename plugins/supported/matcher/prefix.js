@@ -35,25 +35,26 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-require('sproutcore/runtime');
 var Matcher = require('matcher').Matcher;
 
 /**
- * @class
  * Performs simple prefix matching.
  */
-exports.PrefixMatcher = Matcher.extend({
-    score: function(query, item) {
-        var queryLen = query.length;
-        if (queryLen > item.name.length) {
-            return 0;
-        }
+exports.PrefixMatcher = function(query) {
+    Matcher.call(this, query);
+};
 
-        if (item.name.substring(0, queryLen).toLowerCase() === query.toLowerCase()) {
-            return 1000 - item.name.length;
-        }
+exports.PrefixMatcher.prototype = new Matcher('subclassPrototype');
 
+exports.PrefixMatcher.prototype.score = function(query, item) {
+    var queryLen = query.length;
+    if (queryLen > item.name.length) {
         return 0;
     }
-});
 
+    if (item.name.substring(0, queryLen).toLowerCase() === query.toLowerCase()) {
+        return 1000 - item.name.length;
+    }
+
+    return 0;
+};

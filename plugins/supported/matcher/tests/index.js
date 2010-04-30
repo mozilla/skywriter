@@ -35,20 +35,24 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var Matcher = require('matcher').Matcher;
 var t = require('plugindev');
 
-var MockMatcher = Matcher.extend({
-    scores: null,
+/**
+ * Performs simple prefix matching.
+ */
+var MockMatcher = function(scores) {
+    this.scores = scores;
+};
 
-    match: function(query, str) {
-        return this.get('scores')[str];
-    }
-});
+MockMatcher.prototype = new Matcher('subclassPrototype');
+
+MockMatcher.prototype.score = function(query, item) {
+    return this.scores[item.name];
+};
 
 exports.testAddingStrings = function() {
-    var matcher = MockMatcher.create({ scores: { foo: 1, bar: 2, baz: 3 } });
+    var matcher = new MockMatcher({ scores: { foo: 1, bar: 2, baz: 3 } });
 
     var items1 = null;
     var cleared1 = 0;

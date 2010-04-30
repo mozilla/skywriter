@@ -35,12 +35,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var PrefixMatcher = require('matcher:prefix').PrefixMatcher;
 var t = require('plugindev');
 
 exports.testPrefixMatching = function() {
-    var matcher = PrefixMatcher.create({ query: 'b' });
+    var matcher = new PrefixMatcher('b');
     matcher.addItems([
         { name:'foo' },
         { name:'foobar' },
@@ -65,4 +64,3 @@ exports.testPrefixMatching = function() {
     t.equal(items[1].item, 'foobar', 'the text of the second matched item ' +
         'when searching for \"FOO\" and \"foobar\"');
 };
-

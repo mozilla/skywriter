@@ -56,7 +56,7 @@ exports.selection = {
         }
 
         var query = assignment.value || '';
-        var matcher = PrefixMatcher.create({ query: query });
+        var matcher = new PrefixMatcher(query);
 
         var items = ext.data.map(function(name) {
             if (typeof name === 'string') {
