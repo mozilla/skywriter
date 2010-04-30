@@ -142,7 +142,7 @@ var KeyboardManagerTrait = Trait({
         bindings.forEach(function(binding) {
             if (!util.none(binding.key)) {
                 binding.key = new RegExp('^' + binding.key + '$');
-            } else if (SC.isArray(binding.regex)) {
+            } else if (Array.isArray(binding.regex)) {
                 binding.key = new RegExp('^' + binding.regex[1] + '$');
                 binding.regex = new RegExp(binding.regex.join('') + '$');
             } else {
