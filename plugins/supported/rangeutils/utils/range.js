@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var util = require('bespin:util/util');
 
 /**
@@ -86,7 +85,7 @@ exports.extendRange = function(range, delta) {
  * of the sets but not both.
  */
 exports.intersectRangeSets = function(setA, setB) {
-    var stackA = SC.clone(setA), stackB = SC.clone(setB);
+    var stackA = util.clone(setA), stackB = util.clone(setB);
     var result = [];
     while (stackA.length > 0 && stackB.length > 0) {
         var rangeA = stackA.shift(), rangeB = stackB.shift();
