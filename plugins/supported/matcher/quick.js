@@ -35,61 +35,62 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var Matcher = require('matcher').Matcher;
 
 /**
- * @class
  * Provides smart matching suitable for 'quick open' functionality.
  */
-exports.QuickMatcher = Matcher.extend({
-    score: function(query, item) {
-        query = query.toLowerCase();
-        var str = item.name.toLowerCase();
-        var path = item.path ? item.path.toLowerCase() : null;
+exports.QuickMatcher = function(query) {
+    Matcher.call(this, query);
+};
 
-        // Name prefix match?
-        if (str.substring(0, query.length) === query) {
-            return 5000 - str.length;
-        }
+exports.QuickMatcher.prototype = new Matcher('subclassPrototype');
 
-        // Path prefix match?
-        if (path && path.substring(0, query.length) === query) {
-            return 4000 - path.length;
-        }
+exports.QuickMatcher.prototype.score = function(query, item) {
+    query = query.toLowerCase();
+    var str = item.name.toLowerCase();
+    var path = item.path ? item.path.toLowerCase() : null;
 
-        // Name suffix match?
-        if (str.substring(str.length - query.length, str.length) === query) {
-            return 3000 - str.length;
-        }
-
-        // Full name fuzzy match?
-        if (path) {
-            str = path + str;
-        }
-        var queryChar = query.substring(0, 1);
-        var queryIndex = 0;
-        var score = 2000;
-
-        for (var i = 0; i < str.length; i++) {
-            if (str.substring(i, i + 1) === queryChar) {
-                queryIndex++;
-
-                // Have we found the whole query?
-                if (queryIndex === query.length) {
-                    return score;
-                }
-
-                queryChar = query.substring(queryIndex, queryIndex + 1);
-            } else if (queryIndex !== 0) {
-                // Dock a point for every intervening character between the
-                // first and last characters in the query.
-                score--;
-            }
-        }
-
-        // No match.
-        return 0;
+    // Name prefix match?
+    if (str.substring(0, query.length) === query) {
+        return 5000 - str.length;
     }
-});
 
+    // Path prefix match?
+    if (path && path.substring(0, query.length) === query) {
+        return 4000 - path.length;
+    }
+
+    // Name suffix match?
+    if (str.substring(str.length - query.length, str.length) === query) {
+        return 3000 - str.length;
+    }
+
+    // Full name fuzzy match?
+    if (path) {
+        str = path + str;
+    }
+    var queryChar = query.substring(0, 1);
+    var queryIndex = 0;
+    var score = 2000;
+
+    for (var i = 0; i < str.length; i++) {
+        if (str.substring(i, i + 1) === queryChar) {
+            queryIndex++;
+
+            // Have we found the whole query?
+            if (queryIndex === query.length) {
+                return score;
+            }
+
+            queryChar = query.substring(queryIndex, queryIndex + 1);
+        } else if (queryIndex !== 0) {
+            // Dock a point for every intervening character between the
+            // first and last characters in the query.
+            score--;
+        }
+    }
+
+    // No match.
+    return 0;
+};

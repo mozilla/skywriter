@@ -36,20 +36,20 @@
  * ***** END LICENSE BLOCK ***** */
 
 var util = require('bespin:util/util');
-
-var SC = require('sproutcore/runtime').SC;
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var Promise = require('bespin:promise').Promise;
 var groupPromises = require('bespin:promise').group;
 var Trace = require('bespin:util/stacktrace').Trace;
+var util = require('bespin:util/util');
 
 var types = require('types:types');
 var keyboard = require('canon:keyboard');
 var environment = require('canon:environment');
 var Request = require('canon:request').Request;
 
-var hint = require('command_line:hint');
+var Hint = require('command_line:hint').Hint;
+var Level = require('command_line:hint').Level;
 var typehint = require('command_line:typehint');
 
 /**
@@ -57,95 +57,67 @@ var typehint = require('command_line:typehint');
  * data steps.
  * <p>Part of the contract of Input objects is that they NOT be observed. This
  * is a temporary object and we don't want the overhead of using get() and set()
+ * <p>The 'output' of the parse is held in 2 objects: input.hints which is an
+ * array of hints to display to the user. In the future this will become a
+ * single value.
+ * <p>The other output value is input.argsPromise which gives access to an
+ * args object for use in executing the final command.
+ * @param typed {string} The instruction as typed by the user so far
+ * @param options {object} A list of optional named parameters. Can be any of:
+ * <b>env</b>: The global environment (as passed to the commands) to be passed
+ * to the various completion systems. Defaulted to environment.global if not
+ * specified.
+ * <b>flags</b>: Flags for us to check against the predicates specified with the
+ * commands. Defaulted to <tt>keyboard.buildFlags(environment.global, { });</tt>
+ * if not specified.
  */
-exports.Input = SC.Object.extend({
-    /**
-     * The instruction as typed by the user so far
-     */
-    typed: undefined,
+exports.Input = function(typed, options) {
+    if (util.none(typed)) {
+        throw new Error('Input requires something \'typed\' to work on');
+    }
+    this.typed = typed;
+    this.hints = [];
+    this.argsPromise = new Promise();
 
-    /**
-     * The global environment (as passed to the commands) to be passed to the
-     * various completion systems. Defaulted to environment.global if not
-     * specified.
-     */
-    env: undefined,
+    options = options || {};
 
-    /**
-     * Flags for us to check against the predicates specified with the commands.
-     * Defaulted to <tt>keyboard.buildFlags(environment.global, { });</tt> if
-     * not specified.
-     */
-    flags: undefined,
+    options.env = options.env || environment.global;
+    this.env = options.env;
 
-    /**
-     * Output value. Should not be specified in ctor.
-     * The hints that we would like displayed to help the user enter a command.
-     */
-    hints: undefined,
+    options.flags = options.flags || keyboard.buildFlags(this.env, { });
+    this.flags = options.flags;
 
-    /**
-     * Output value. Should not be specified in ctor.
-     * A promise of an args hash which contains typed values for use in
-     * executing the final command.
-     */
-    argsPromise: undefined,
+    // Once tokenize() has been called, we have the #typed string cut up into
+    // #_parts
+    this._parts = [];
 
-    /**
-     * Once tokenize() has been called, we have the #typed string cut up into
-     * #_parts
-     */
-    _parts: undefined,
+    // Once split has been called we have #_parts split into #_unparsedArgs and
+    // #commandExt (if there is a matching command).
+    this._unparsedArgs = undefined;
 
-    /**
-     * Once split has been called we have #_parts split into #_unparsedArgs and
-     * #commandExt (if there is a matching command).
-     */
-    _unparsedArgs: undefined,
+    // If #typed specifies a command to execute, this is that commands metadata
+    this._commandExt = undefined;
 
-    /**
-     * If #typed specifies a command to execute, this is that commands metadata
-     */
-    _commandExt: undefined,
+    // Assign matches #_unparsedArgs to the params declared by the #_commandExt
+    // A list of arguments in commandExt.params order
+    this._assignments = undefined;
 
-    /**
-     * Assign matches #_unparsedArgs to the params declared by the #_commandExt
-     * A list of arguments in commandExt.params order
-     */
-    _assignments: undefined,
+    try {
+        // Go through the input checking and generating hints,
+        // and if possible an arguments array.
+        this._tokenize();
+    } catch (ex) {
+        var trace = new Trace(ex, true);
+        console.group('Error calling command: ' + this.typed);
+        console.error(ex);
+        trace.log(3);
+        console.groupEnd();
+        this.argsPromise.reject(ex);
+    }
+};
 
-    /**
-     * Check 'typed' input. Possibly overkill.
-     */
-    init: function() {
-        if (this.typed === null) {
-            throw new Error('Input requires something \'typed\' to work on');
-        }
-        this.hints = [];
-        this.argsPromise = new Promise();
 
-        if (!this.env) {
-            this.env = environment.global;
-        }
-
-        if (!this.flags) {
-            flags = keyboard.buildFlags(this.env, { });
-        }
-
-        try {
-            // Go through the input checking and generating hints,
-            // and if possible an arguments array.
-            this._tokenize();
-        } catch (ex) {
-            var trace = new Trace(ex, true);
-            console.group('Error calling command: ' + this.typed);
-            console.error(ex);
-            trace.log(3);
-            console.groupEnd();
-            this.argsPromise.reject(ex);
-        }
-    },
-
+exports.Input.prototype = {
     /**
      * Split up the input taking into account ' and "
      */
@@ -155,16 +127,11 @@ exports.Input = SC.Object.extend({
             // a complete novice a 'type help' message is very annoying, so we
             // need to find a way to only display this message once, or for
             // until the user click a 'close' button or similar
-            this.hints.push(hint.Hint.create({
-                level: hint.Level.Incomplete,
-                element: null
-            }));
-
+            this.hints.push(new Hint(Level.Incomplete));
             return;
         }
 
         var incoming = this.typed.trimLeft().split(/\s+/);
-        this._parts = [];
 
         var nextToken;
         while (true) {
@@ -236,6 +203,7 @@ exports.Input = SC.Object.extend({
 
         // Do we know what the command is.
         var hintSpec = null;
+        var message;
         if (this._commandExt) {
             // Load the command to check that it will load
             var loadPromise = new Promise();
@@ -243,19 +211,16 @@ exports.Input = SC.Object.extend({
                 if (command) {
                     loadPromise.resolve(null);
                 } else {
-                    loadPromise.resolve(hint.Hint.create({
-                        level: hint.Level.Error,
-                        element: 'Failed to load command ' + commandExt.name +
-                            ': Pointer ' + commandExt._pluginName + ':' + commandExt.pointer + ' is null.'
-                    }));
-                    console.log(commandExt);
+                    message = 'Failed to load command ' + commandExt.name +
+                            ': Pointer ' + commandExt._pluginName +
+                            ':' + commandExt.pointer + ' is null.';
+                    loadPromise.resolve(new Hint(Level.Error, message));
                 }
             }, function(ex) {
-                loadPromise.resolve(hint.Hint.create({
-                    level: hint.Level.Error,
-                    element: 'Failed to load command ' + commandExt.name +
-                        ': Pointer ' + commandExt._pluginName + ':' + commandExt.pointer + ' failed to load.' + ex
-                }));
+                message = 'Failed to load command ' + commandExt.name +
+                        ': Pointer ' + commandExt._pluginName +
+                        ':' + commandExt.pointer + ' failed to load.' + ex;
+                loadPromise.resolve(new Hint(Level.Error, message));
             });
             this.hints.push(loadPromise);
 
@@ -319,6 +284,7 @@ exports.Input = SC.Object.extend({
         this._assignments = [];
         var params = this._commandExt.params;
         var unparsedArgs = this._unparsedArgs;
+        var message;
 
         // Create an error if the command does not take parameters, but we have
         // been given them ...
@@ -332,10 +298,8 @@ exports.Input = SC.Object.extend({
             });
 
             if (argCount !== 0) {
-                this.hints.push(hint.Hint.create({
-                    level: hint.Level.Error,
-                    element: this._commandExt.name + ' does not take any parameters'
-                }));
+                message = this._commandExt.name + ' does not take any parameters';
+                this.hints.push(new Hint(Level.Error, message));
                 return;
             }
         }
@@ -367,10 +331,8 @@ exports.Input = SC.Object.extend({
         var unparsed = false;
         unparsedArgs.forEach(function(unparsedArg) {
             if (used.indexOf(unparsedArg) == -1) {
-                this.hints.push(hint.Hint.create({
-                    level: hint.Level.Error,
-                    element: 'Parameter \'' + unparsedArg + '\' makes no sense.'
-                }));
+                message = 'Parameter \'' + unparsedArg + '\' makes no sense.';
+                this.hints.push(new Hint(Level.Error, message));
                 unparsed = true;
             }
         }.bind(this));
@@ -405,6 +367,7 @@ exports.Input = SC.Object.extend({
      * into the original params array.
      */
     _assignParam: function(param, index, used) {
+        var message;
         // Look for '--param X' style inputs
         for (var i = 0; i < this._unparsedArgs.length; i++) {
             var unparsedArg = this._unparsedArgs[i];
@@ -419,11 +382,9 @@ exports.Input = SC.Object.extend({
                     };
                 } else {
                     if (i + 1 < this._unparsedArgs.length) {
+                        message = 'Missing parameter: ' + param.name;
                         // Missing value for this param
-                        this.hints.push(hint.Hint.create({
-                            level: hint.Level.Incomplete,
-                            element: 'Missing parameter: ' + param.name
-                        }));
+                        this.hints.push(new Hint(Level.Incomplete, message));
                     } else {
                         used.push(this._unparsedArgs[i + 1]);
                     }
@@ -448,10 +409,8 @@ exports.Input = SC.Object.extend({
 
             if (param.defaultValue === undefined) {
                 // There is no default, and we've not supplied one so far
-                this.hints.push(hint.Hint.create({
-                    level: hint.Level.Incomplete,
-                    element: 'Missing parameter: ' + param.name
-                }));
+                message = 'Missing parameter: ' + param.name;
+                this.hints.push(new Hint(Level.Incomplete, message));
             }
         }
     },
@@ -498,11 +457,9 @@ exports.Input = SC.Object.extend({
                 assignment.converted = converted;
                 argOutputs[assignment.param.name] = converted;
             }, function(ex) {
-                this.hints.push(hint.Hint.create({
-                    level: hint.Level.Error,
-                    element: 'Can\'t convert \'' + assignment.value +
-                        '\' to a ' + param.type + ': ' + ex
-                }));
+                var message = 'Can\'t convert \'' + assignment.value +
+                        '\' to a ' + param.type + ': ' + ex;
+                this.hints.push(new Hint(Level.Error, message));
             }.bind(this));
 
             convertPromises.push(promise);
@@ -571,7 +528,7 @@ exports.Input = SC.Object.extend({
             }.bind(this), loadError);
         }.bind(this), loadError);
     }
-});
+};
 
 /**
  * Provide some documentation for a command

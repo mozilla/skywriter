@@ -44,140 +44,129 @@ var SC = require('sproutcore/runtime').SC;
 var excludeScoreMargin = 500;
 
 /**
- * @class
  * Base class for matching strategies.
+ * @param query {string} The string that we match against.
+ * This is the only member of a matcher that should be observed.
+ * @constructor
  */
-exports.Matcher = SC.Object.extend({
-    /**
-     * The string that we match against.
-     * This is the only member of a matcher that should be observed.
-     */
-    query: null,
+exports.Matcher = function(query) {
+    if (arguments[0] === 'subclassPrototype') {
+        return;
+    }
 
-    /**
-     * @private
-     * List of objects to be notified of changes.
-     */
-    _listeners: null,
+    this._query = query;
 
-    /**
-     * @private
-     * Looks something like [ { item:{ name:'...' }, score:N }, ... ]
-     */
-    _scoredItems: null,
+    // Looks something like [ { item:{ name:'...' }, score:N }, ... ]
+    this._scoredItems = [];
 
-    /**
-     * @private
-     * We ignore items that are way off the pace. This is the pace.
-     */
-    _maxScore: null,
+    // List of objects to be notified of changes.
+    this._listeners = [];
 
-    init: function() {
-        this._scoredItems = [];
-        this._listeners = [];
-    },
+    // We ignore items that are way off the pace. This is the pace.
+    this._maxScore = null;
+};
 
-    addItem: function(item) {
-        this.addItems([ item ]);
-    },
+/**
+ * Add a single item to be considered by this matcher
+ */
+exports.Matcher.prototype.addItem = function(item) {
+    this.addItems([ item ]);
+};
 
-    /**
-     * All additions should go through this method
-     */
-    addItems: function(items) {
-        var query = this.get('query');
-        var addedScoredItems = [];
-        var maxScoreChanged = false;
+/**
+ * Add multiple items to be considered by this matcher.
+ */
+exports.Matcher.prototype.addItems = function(items) {
+    var addedScoredItems = [];
+    var maxScoreChanged = false;
 
-        items.forEach(function(item) {
-            var scoredItem = {
-                score: this.score(query, item),
-                item: item
-            };
-            if (scoredItem.score > 0) {
-                addedScoredItems.push(scoredItem);
-            }
-            if (scoredItem.score > this._maxScore) {
-                this._maxScore = scoredItem.score;
-                maxScoreChanged = true;
-            }
-            this._scoredItems.push(scoredItem);
-        }, this);
-
-        var itemsRemoved = false;
-        if (maxScoreChanged) {
-            // The max score has changed - this could mean that existing
-            // entries are no longer relevant. Check
-            this._scoredItems.forEach(function(scoredItem) {
-                if (scoredItem.score + excludeScoreMargin < this._maxScore) {
-                    itemsRemoved = true;
-                }
-            });
-        }
-
-        // TODO: There is a bug here in that listeners will not know how to
-        // slot these matches into the previously notified matches (we're not
-        // passing the score on).
-        var sorter = function(a, b) {
-            return b.score - a.score;
+    items.forEach(function(item) {
+        var scoredItem = {
+            score: this.score(this._query, item),
+            item: item
         };
-        this._scoredItems.sort(sorter);
-        addedScoredItems.sort(sorter);
-
-        var scoredItems;
-        if (itemsRemoved) {
-            this._callListeners('itemsCleared');
-            scoredItems = this._scoredItems;
-        } else {
-            scoredItems = addedScoredItems;
+        if (scoredItem.score > 0) {
+            addedScoredItems.push(scoredItem);
         }
-
-        var addedItems = [];
-        scoredItems.forEach(function(scoredItem) {
-            if (scoredItem.score + excludeScoreMargin > this._maxScore) {
-                addedItems.push(scoredItem.item);
-            }
-        }.bind(this));
-        this._callListeners('itemsAdded', addedItems);
-    },
-
-    addListener: function(listener) {
-        this._listeners.push(listener);
-
-        var items = [];
-        this._scoredItems.forEach(function(scoredItem) {
-            if (scoredItem.score > 0) {
-                items.push(scoredItem.item);
-            }
-        }, this);
-
-        if (typeof listener.itemsAdded === 'function') {
-            listener.itemsAdded(items);
+        if (scoredItem.score > this._maxScore) {
+            this._maxScore = scoredItem.score;
+            maxScoreChanged = true;
         }
-    },
+        this._scoredItems.push(scoredItem);
+    }, this);
 
-    _queryChanged: function() {
-        var query = this.get('query');
-
-        var addedItems = [];
+    var itemsRemoved = false;
+    if (maxScoreChanged) {
+        // The max score has changed - this could mean that existing
+        // entries are no longer relevant. Check
         this._scoredItems.forEach(function(scoredItem) {
-            scoredItem.score = this.score(query, scoredItem.item);
-            if (scoredItem.score > 0) {
-                addedItems.push(scoredItem.item);
-            }
-        }, this);
-
-        this._callListeners('itemsCleared');
-        this._callListeners('itemsAdded', addedItems);
-    }.observes('query'),
-
-    _callListeners: function() {
-        var args = Array.prototype.slice.call(arguments);
-        var method = args.shift();
-        this._listeners.forEach(function(listener) {
-            if (typeof listener[method] === 'function') {
-                listener[method].apply(null, args);
+            if (scoredItem.score + excludeScoreMargin < this._maxScore) {
+                itemsRemoved = true;
             }
         });
     }
+
+    // TODO: There is a bug here in that listeners will not know how to
+    // slot these matches into the previously notified matches (we're not
+    // passing the score on).
+    var sorter = function(a, b) {
+        return b.score - a.score;
+    };
+    this._scoredItems.sort(sorter);
+    addedScoredItems.sort(sorter);
+
+    var scoredItems;
+    if (itemsRemoved) {
+        this._callListeners('itemsCleared');
+        scoredItems = this._scoredItems;
+    } else {
+        scoredItems = addedScoredItems;
+    }
+
+    var addedItems = [];
+    scoredItems.forEach(function(scoredItem) {
+        if (scoredItem.score + excludeScoreMargin > this._maxScore) {
+            addedItems.push(scoredItem.item);
+        }
+    }.bind(this));
+    this._callListeners('itemsAdded', addedItems);
+};
+
+exports.Matcher.prototype.addListener = function(listener) {
+    this._listeners.push(listener);
+
+    var items = [];
+    this._scoredItems.forEach(function(scoredItem) {
+        if (scoredItem.score > 0) {
+            items.push(scoredItem.item);
+        }
+    }, this);
+
+    if (typeof listener.itemsAdded === 'function') {
+        listener.itemsAdded(items);
+    }
+};
+
+exports.Matcher.prototype.__defineSetter__('query', function(value) {
+    this._query = value;
+    var addedItems = [];
+    this._scoredItems.forEach(function(scoredItem) {
+        scoredItem.score = this.score(this._query, scoredItem.item);
+        if (scoredItem.score > 0) {
+            addedItems.push(scoredItem.item);
+        }
+    }, this);
+
+    this._callListeners('itemsCleared');
+    this._callListeners('itemsAdded', addedItems);
 });
+
+exports.Matcher.prototype._callListeners = function() {
+    var args = Array.prototype.slice.call(arguments);
+    var method = args.shift();
+    this._listeners.forEach(function(listener) {
+        if (typeof listener[method] === 'function') {
+            listener[method].apply(null, args);
+        }
+    });
+};

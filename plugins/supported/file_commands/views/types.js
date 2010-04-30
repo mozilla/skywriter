@@ -43,15 +43,8 @@ var MatcherMenu = require('command_line:views/menu').MatcherMenu;
  */
 exports.existingFileHint = {
     getHint: function(input, assignment, typeExt) {
-        var query = assignment.value || '';
-        var matcher = QuickMatcher.create({ query: query });
-
-        var menu = MatcherMenu.create({
-            input: input,
-            assignment: assignment,
-            typeExt: typeExt,
-            matcher: matcher
-        });
+        var matcher = new QuickMatcher(assignment.value || '');
+        var menu = new MatcherMenu(input, assignment, matcher);
 
         var files = input.env.files;
         files.listAll().then(function(fileList) {
@@ -70,6 +63,6 @@ exports.existingFileHint = {
             }));
         });
 
-        return menu.get('hint');
+        return menu.hint;
     }
 };
