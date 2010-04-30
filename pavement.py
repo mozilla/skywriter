@@ -40,16 +40,9 @@ from paver.easy import *
 from paver.setuputils import setup
 import paver.virtual
 
-try:
-    from dryice.combiner import (combine_sproutcore_files, 
-        combine_sproutcore_stylesheets, combine_files,
-        copy_sproutcore_files)
-except ImportError:
-    pass
-
 setup(
     name="dryice",
-    version="0.7.3",
+    version="0.8.0",
     packages=["dryice"],
     entry_points="""
 [console_scripts]
@@ -59,8 +52,8 @@ dryice=dryice.tool:main
 
 options(
     version=Bunch(
-        number="0.7.3",
-        name="Bryce",
+        number="0.8.0",
+        name="Theora",
         api="4"
     ),
     virtualenv=Bunch(
@@ -69,18 +62,17 @@ options(
     server=Bunch(
         # set to true to allow connections from other machines
         address="",
-        port=lambda: "4020" if not options.server.abbot else "8080",
+        port="8080",
         try_build=False,
         dburl=None,
         async=False,
         config_file=path("devconfig.py"),
         directory=path("../bespinserver/").abspath(),
-        clientdir=path.getcwd(),
-        abbot=False
+        clientdir=path.getcwd()
     ),
     server_pavement=lambda: options.server.directory / "pavement.py",
     builddir=path("tmp"),
-    install_sproutcore=Bunch(
+    install_tiki=Bunch(
         git=False,
         force=False
     ),
@@ -89,7 +81,6 @@ options(
         download_location=path("external") / "jsdoc_toolkit-2.3.0.zip",
         dest_dir=path("external") / "jsdoc-toolkit"
     ),
-    sproutcore_snapshot_url="http://ftp.mozilla.org/pub/mozilla.org/labs/bespin/dev/sproutcore-20100407.tgz",
     fetch_compiler=Bunch(
         dest_dir=path("external") / "compiler",
         download_url="http://closure-compiler.googlecode.com/files/compiler-latest.zip",
@@ -97,28 +88,39 @@ options(
     )
 )
 
-@task
+TIKI_TEMPLATE = u"""%(preamble)s
+tiki.register('%(package_id)s', {
+"name": "tiki",
+"version": "%(TIKI_VERSION)s",
+});
+
+tiki.module('%(package_id)s:tiki', function(require, exports, module) {
+%(body)s
+});
+%(postamble)s
+"""
+
 @cmdopts([('git', 'g', 'use git to download'), ('force', 'f', 'force download of snapshot')])
-def install_sproutcore(options):
-    """Installs the versions of SproutCore that are required.
+def install_tiki(options):
+    """Installs the versions of Tiki that are required.
     Can optionally download using git, so that you can keep
     up to date easier."""
     
+    snapshot = path("static") / "tiki.js"
     if not options.git:
-        snapshot = path("sproutcore")
         if snapshot.exists():
             if options.force:
-                snapshot.rmtree()
+                snapshot.rm()
             else:
-                info("SproutCore snapshot installed already.")
+                info("Tiki snapshot installed already.")
                 return
-        info("Downloading SproutCore Snapshot")
-        tarball = urllib2.urlopen(options.sproutcore_snapshot_url)
-        base_name = path(options.sproutcore_snapshot_url).basename()
-        info("Extracting SproutCore Snapshot")
-        tar = tarfile.open(name=base_name, fileobj=StringIO(tarball.read()))
-        tar.extractall('.')
-        tar.close()
+        info("Downloading Tiki Snapshot")
+        preamble = urllib2.urlopen("http://github.com/sproutit/tiki/raw/master/__preamble__.js").read()
+        body = urllib2.urlopen("http://github.com/sproutit/tiki/raw/master/lib/tiki.js").read()
+        postamble = urllib2.urlopen("http://github.com/sproutit/tiki/raw/master/__postamble__.js")
+        TIKI_VERSION = "1.0.0"
+        package_id = "::tiki/%s" % (TIKI_VERSION)
+        snapshot.write_text(TIKI_TEMPLATE % locals())
         return
 
     def get_component(base_name, dest_name, dest_path=".", branch=None, account="dangoor"):
@@ -144,13 +146,17 @@ def install_sproutcore(options):
         if branch:
             sh("git checkout --track origin/%s" % branch, cwd=os.path.join(dest_path, dest_name))
 
-    get_component("sproutcore-abbot", "abbot", branch="tiki")
-    get_component("sproutcore", "sproutcore", dest_path="frameworks", account="pcwalton")
     get_component("tiki", "tiki", dest_path="frameworks")
     get_component("core_test", "core_test", dest_path="frameworks")
+    preamble = path("frameworks/tiki/__preamble__.js").text()
+    postamble = path("frameworks/tiki/__postamble__.js").text()
+    body = path("frameworks/tiki/lib/tiki.js").text()
+    TIKI_VERSION = "1.0.0"
+    package_id = "::tiki/%s" % (TIKI_VERSION)
+    snapshot.write_text(TIKI_TEMPLATE % locals())
 
 @task
-@needs(["install_sproutcore"])
+@needs(["install_tiki"])
 def initial():
     """Initial setup help."""
     call_task("develop")
@@ -252,66 +258,18 @@ def start(options):
     
     will allow remote connections (assuming you don't have a firewall
     blocking the connection) and start the server on port 8000.
-    
-    Also, if you need to hack on SproutCore and have SC source installed
-    (paver install_sproutcore -g) you can run
-    
-    paver server.abbot=1 start
-    
-    to launch Abbot.
     """
     additional_options = []
     if options.server.address:
         additional_options.append("server.address=%s" % (options.server.address))
     
-    if options.server.abbot:
-        additional_options.append("server_base_url=server/")
-    else:
-        static = _update_static()
-        additional_options.append("staticdir=" + static)
+    additional_options.append("staticdir=static")
     
     paver_command = additional_options +     ["clientdir=../bespinclient", 
             "server.port=%s" % (options.server.port), 
             "start"]
         
-    if options.server.abbot:
-        command = "abbot/bin/sc-server"
-        popen = subprocess.Popen(command, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
-        call_pavement("../bespinserver/pavement.py", paver_command)
-        popen.wait()
-    else:
-        call_pavement("../bespinserver/pavement.py", paver_command)
-
-def _update_static():
-    static = path("tmp") / "static"
-    static.rmtree()
-    static.makedirs()
-    for f in path("sproutcore").glob("*"):
-        if not f.isdir():
-            f.copy(static)
-        else:
-            f.copytree(static / f.basename())
-    
-    editor_dir = static / "editor"
-    editor_dir.mkdir()
-    bt = path("dryice")
-    inline = (bt / "inline.js").bytes()
-    index = (bt / "devindex.html").bytes()
-    index = index.replace("{{inline}}", inline)
-    (editor_dir / "index.html").write_bytes(index)
-    
-    (bt / "favicon.ico").copy(static / "favicon.ico")
-    
-    editor_path = editor_dir / "editor.js"
-    editor_file = editor_path.open("w")
-    
-    combine_files(editor_file, None, "editor", path("apps") / "editor", add_main=True)
-    
-    bespin_path = static / "bespin.js"
-    bespin_file = bespin_path.open("w")
-    combine_files(bespin_file, None, "bespin", path("frameworks") / "bespin")
-    
-    return static
+    call_pavement("../bespinserver/pavement.py", paver_command)
 
 def update_python_version():
     version_file = options.server.directory / "bespin" / "__init__.py"
@@ -409,8 +367,6 @@ def dist(options):
     
     Creates the BespinServer.tar.gz file with all of the pieces for production
     deployment."""
-    _update_static()
-    
     output_dir = path("tmp/BespinServer")
     output_dir.rmtree()
     
@@ -449,7 +405,7 @@ def dist(options):
     
     index_file = path("dryice") / "prodindex.html"
     index_file.copy(output_dir / "static" / "index.html")
-    (path("dryice") / "favicon.ico").copy(output_dir / "static" / "favicon.ico")
+    (path("static") / "favicon.ico").copy(output_dir / "static" / "favicon.ico")
     
     sh("tar czf BespinServer.tgz BespinServer", cwd="tmp")
     
@@ -464,194 +420,6 @@ def build_docs(options):
     docsdir = builddir / "docs"
     sh("growl.py . ../%s" % docsdir, cwd="docs")
     
-
-@task
-@needs(["hidefiles"])
-def sc_build(options):
-    """Create a sproutcore-snapshot from SproutCore source."""
-    builddir = options.builddir
-
-    (builddir / "production").rmtree()
-
-    try:
-        sh("abbot/bin/sc-build editor --project . --include-required")
-    finally:
-        resetfiles()
-
-    snapshot = path("sproutcore")
-    snapshot.rmtree()
-    snapshot.mkdir()
-
-    sproutcore_built = builddir / "production" / "build" / "static"
-
-    sproutcore_filters=["welcome", "tests", "docs", "bootstrap", "mobile", "iphone_theme"]
-
-    combined = combine_sproutcore_files([sproutcore_built / "tiki", sproutcore_built / "sproutcore"], 
-        filters=sproutcore_filters,
-        manual_maps=[(re.compile(r'tiki/en/\w+/javascript\.js'), "tiki")])
-
-    # this is a temporary hack. Once SproutCore has become fully Tiki, this can go away.
-    # until then, we need to do this to avoid the creation of two unrelated SC objects
-    combined = combined.replace("SC = SproutCore = {} ;", """
-    if (window.SC == undefined) {
-        SC = SproutCore = {} ; 
-    } else {
-        SC = window.SC;
-    }
-""")
-    combined = combined.replace("console = (env && env.global) ? env.global.console : null;", """
-    if (window.console == undefined) {
-        console = (env && env.global) ? env.global.console : null;
-    } else {
-        console = window.console;
-    }
-""")
-    
-    output = snapshot / "sproutcore.js"
-    output.write_text(combined, 'utf_8')
-    
-    combined = combine_sproutcore_stylesheets(sproutcore_built / "sproutcore", filters=sproutcore_filters)
-    output = snapshot / "sproutcore.css"
-    output.write_text(combined, 'utf_8')
-    
-    copy_sproutcore_files(sproutcore_built / "sproutcore", snapshot, filters=sproutcore_filters)
-    
-    combined = combine_sproutcore_stylesheets(sproutcore_built / "core_test")
-    output = snapshot / "core_test.css"
-    output.write_text(combined, 'utf_8')
-    
-    combined = combine_sproutcore_files([sproutcore_built / "core_test"], ignore_dependencies=True)
-    output = snapshot / "core_test.js"
-    output.write_text(combined, 'utf_8')
-    
-BUILD_POSTAMBLE="""tiki.require("bespin:boot");"""
-
-def _find_build_output(toplevel, name):
-    en = toplevel / name / "en"
-    
-    # get sorted list of builds, in descending order
-    # of modification time
-    builds = sorted(en.glob("*"), 
-                key=lambda item: item.getmtime(), 
-                reverse=True)
-    if not builds:
-        raise BuildFailure("Could not find a Bespin build in " + en)
-    return builds[0]
-
-class Match(object):
-    def __init__(self, include, score):
-        self.include = include
-        self.score = score
-
-class RE(object):
-    def __init__(self, expr):
-        # subtract one from the score, because regexes are often
-        # of the form foo/bar/.* and are less-specific than a complete 
-        # filename
-        self.score = len(expr.split("/")) - 1
-        self.expr = re.compile(expr)
-
-class Rule(object):
-    def __init__(self, include, prefix, specifics=None):
-        self.include = include
-        self.prefix = prefix + "/"
-        self.prefix_segments = len(prefix.split('/'))
-        self.specifics = specifics
-    
-    def test(self, filename):
-        if not filename.startswith(self.prefix):
-            return None
-        filename = filename[len(self.prefix):]
-        if not self.specifics:
-            return Match(self.include, self.prefix_segments)
-            
-        for specific in self.specifics:
-            if isinstance(specific, RE) and specific.expr.match(filename):
-                return Match(self.include, 
-                    self.prefix_segments + specific.score)
-                
-            if filename == specific:
-                return Match(self.include, 
-                    self.prefix_segments + len(filename.split('/')))
-        
-        return None
-        
-class Include(Rule):
-    def __init__(self, prefix, specifics=None):
-        super(Include, self).__init__(True, prefix, specifics)
-
-class Exclude(Rule):
-    def __init__(self, prefix, specifics=None):
-        super(Exclude, self).__init__(False, prefix, specifics)
-        
-DEFAULT_EXCLUDE = Match(False, -1)
-
-class FilterRules(object):
-    def __init__(self):
-        self.rules = []
-    
-    def add(self, rule):
-        self.rules.append(rule)
-    
-    def test(self, filename):
-        best_match = DEFAULT_EXCLUDE
-        
-        for rule in self.rules:
-            match = rule.test(filename)
-            if match:
-                if match.score > best_match.score:
-                    best_match = match
-        
-        return best_match.include
-
-BASE_RULES = FilterRules()
-BASE_RULES.add(Include("bespin"))
-BASE_RULES.add(Include("tiki"))
-BASE_RULES.add(Include("sproutcore"))
-BASE_RULES.add(Include("core_test"))
-BASE_RULES.add(Exclude("tiki/frameworks/system/experimental"))
-BASE_RULES.add(Exclude("sproutcore/frameworks", [
-    RE("datejs/.*"),
-    RE("mini/.*"),
-    RE("designer/.*"),
-    RE("datastore/.*"),
-    RE("testing/.*"),
-    RE("core_tools/.*")
-]))
-BASE_RULES.add(Exclude("sproutcore/frameworks/runtime", [
-    RE("debug/.*")
-]))
-BASE_RULES.add(Exclude("sproutcore/frameworks/foundation", [
-    RE("debug/.*"),
-    "system/datetime.js",
-    "system/json.js",
-    RE("tests/.*")
-]))
-BASE_RULES.add(Exclude("sproutcore/frameworks/desktop", [
-    RE("debug/.*"),
-    RE("tests/.*")
-]))
-
-@task
-def resetfiles():
-    info("Resetting hidden files")
-    frameworks = path("frameworks")
-    for f in frameworks.walkfiles("*.jsignore"):
-        f.rename(f.splitext()[0] + ".js")
-
-@task
-def hidefiles():
-    info("Hiding files from SproutCore build")
-    frameworks = path("frameworks")
-    for f in frameworks.walkfiles():
-        if not f.ext in [".js", ".jsignore"]:
-            continue
-        common, remainder = f.split("/", 1)
-        include = BASE_RULES.test(remainder)
-        if not include and f.ext != ".jsignore":
-            f.rename(f.splitext()[0] + ".jsignore")
-        if include and f.ext == ".jsignore":
-            f.rename(f.splitext()[0] + ".js")
 
 @task
 @needs(['build_docs', 'fetch_compiler'])
@@ -692,7 +460,6 @@ def release_embed(options):
         frameworks_dir = outputdir / "frameworks"
         frameworks_dir.mkdir()
         path("frameworks/bespin").copytree(frameworks_dir / "bespin")
-        path("sproutcore").copytree(outputdir / "sproutcore")
     finally:
         restore_javascript_version(replaced_lines)
     

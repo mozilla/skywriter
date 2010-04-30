@@ -13,15 +13,13 @@
 ^src/bespin/tmp
 ^src/growl
 ^docs/_site
-^narwhal/
 ^build/
 ^frameworks/sproutcore
 ^frameworks/tiki
 ^frameworks/core_test
-^abbot
 ^external
-^sproutcore
 ^dryice.egg-info
 ^dist
 ^setup\.py
+^static/tiki.js
 
