@@ -40,7 +40,8 @@ var console = require('bespin:console').console;
 var Promise = require('bespin:promise').Promise;
 var types = require('types:types');
 
-var hint = require('command_line:hint');
+var Hint = require('command_line:hint').Hint;
+var Level = require('command_line:hint').Level;
 
 /**
  * If there isn't a typehint to define a hint UI component then we just use the
@@ -50,10 +51,7 @@ function createDefaultHint(description) {
     var parent = document.createElement('article');
     parent.innerHTML = description;
 
-    return hint.Hint.create({
-        element: parent,
-        level: hint.Level.Info
-    });
+    return new Hint(Level.Info, parent);
 };
 
 /**

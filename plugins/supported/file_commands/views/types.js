@@ -46,12 +46,7 @@ exports.existingFileHint = {
         var query = assignment.value || '';
         var matcher = QuickMatcher.create({ query: query });
 
-        var menu = MatcherMenu.create({
-            input: input,
-            assignment: assignment,
-            typeExt: typeExt,
-            matcher: matcher
-        });
+        var menu = new MatcherMenu(input, assignment, matcher);
 
         var files = input.env.get('files');
         files.listAll().then(function(fileList) {
@@ -70,6 +65,6 @@ exports.existingFileHint = {
             }));
         });
 
-        return menu.get('hint');
+        return menu.hint;
     }
 };

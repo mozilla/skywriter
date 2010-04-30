@@ -36,7 +36,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 var SC = require('sproutcore/runtime').SC;
-var Trait = require('traits').Trait;
 var diff_match_patch = require('diff').diff_match_patch;
 
 var util = require('bespin:util/util');
@@ -159,7 +158,7 @@ exports.CliInputView = SC.View.design({
         // The input field
         this._inputer = document.createElement('input');
         this._inputer.className = 'cmd_input';
-        this._input = Input.create({ typed: '' });
+        this._input = new Input('');
 
         keyutil.addKeyDownListener(this._inputer, function(ev) {
             environment.set('commandLine', this);
@@ -181,7 +180,7 @@ exports.CliInputView = SC.View.design({
             } else {
                 var typed = this._inputer.value;
                 if (this._input.typed !== typed) {
-                    this._input = Input.create({ typed: typed });
+                    this._input = new Input(typed);
                     this.hintUpdated();
                 }
             }
@@ -243,7 +242,7 @@ exports.CliInputView = SC.View.design({
     setInput: function(command) {
         command = command || '';
         this._inputer.value = command;
-        this._input = Input.create({ typed: command });
+        this._input = new Input(command);
         this.hintUpdated();
         this.focus();
     },
@@ -256,14 +255,14 @@ exports.CliInputView = SC.View.design({
     },
 
     /**
-     * Some sugar around <tt>Input.create({ typed:... }).execute();</tt> that
-     * is useful to ensure any output is associated with this command line.
+     * Some sugar around <tt>new Input(...).execute();</tt> that is useful to
+     * ensure any output is associated with this command line.
      * Note that this association isn't currently special, however it could
      * become special in the future, and this method will do it for you
      * automagically.
      */
     execute: function(command) {
-        var input = Input.create({ typed: command });
+        var input = new Input(command);
         input.execute();
     },
 
@@ -370,7 +369,7 @@ exports.CliInputView = SC.View.design({
         // A double click on an invocation line in the console
         // executes the command
         rowin.ondblclick = function() {
-            this._input = Input.create({ typed: request.get('typed') });
+            this._input = new Input(request.get('typed'));
             this._input.execute();
         };
         this._table.appendChild(rowin);

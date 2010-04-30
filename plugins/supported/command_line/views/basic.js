@@ -41,8 +41,8 @@ var Promise = require('bespin:promise').Promise;
 var basic = require('types:basic');
 var PrefixMatcher = require('matcher:prefix').PrefixMatcher;
 
-var MatcherMenu = require('command_line:views/menu').MatcherMenu;
 var Menu = require('command_line:views/menu').Menu;
+var MatcherMenu = require('command_line:views/menu').MatcherMenu;
 
 /**
  * A choice between a known set of options
@@ -67,13 +67,8 @@ exports.selection = {
 
         matcher.addItems(items);
 
-        var menu = MatcherMenu.create({
-            input: input,
-            assignment: assignment,
-            matcher: matcher
-        });
-
-        return menu.get('hint');
+        var menu = new MatcherMenu(input, assignment, matcher);
+        return menu.hint;
     },
 
     resolveTypeSpec: basic.selection.resolveTypeSpec
@@ -85,12 +80,8 @@ exports.selection = {
  */
 exports.bool = {
     getHint: function(input, assignment, ext) {
-        var menu = Menu.create({
-            input: input,
-            assignment: assignment
-        });
-
+        var menu = new Menu(input, assignment);
         menu.addItems([ { name: 'true' }, { name: 'false' } ]);
-        return menu.get('hint');
+        return menu.hint;
     }
 };

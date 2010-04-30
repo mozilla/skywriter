@@ -35,8 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
-
 /**
  * Various methods on Input return a set of hints, each of which includes an
  * indicator of the severity of the hint.
@@ -73,31 +71,13 @@ exports.Level = {
 /**
  * A Quick wrapper for a Hint, data about something we show to the user as part
  * of typing at the command line.
- * <p>Part of the contract of Input objects is that they NOT be observed. This
- * is a temporary object and we don't want the overhead of using get() and set()
+ * @param element {Element|string} The thing to display
+ * @param level {number} See exports.Level
+ * @param completion {string} Describes how the command line should look if the
+ * user presses TAB
  */
-exports.Hint = SC.Object.extend({
-    /**
-     * Required. A string, or DOM node to display
-     */
-    element: null,
-
-    /**
-     * Some text describing how the command line will have to look
-     */
-    completion: null,
-
-    /**
-     * @see exports.Level
-     */
-    level: null,
-
-    /**
-     *
-     */
-    init: function() {
-        if (typeof this.level !== 'number') {
-            throw new Error('Missing level', this);
-        }
-    }
-});
+exports.Hint = function(level, element, completion) {
+    this.level = level;
+    this.element = element;
+    this.completion = completion;
+};
