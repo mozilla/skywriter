@@ -22,7 +22,7 @@ In order to access remote VCSes, Bespin stores your login information for those 
 
 Bespin supports username and password-based access to remote systems. It can also use SSH, and Bespin will generate a public/private keypair that you can use on the remote system. The private key is stored in your keychain. You can get your public key using the command:
 
-  vcs getkey
+  keychain getkey
 
 If your remote repository is at a site like [http://bitbucket.org](Bitbucket), it is easy to copy and paste this public key into the web interface of the site to get read and write access to your repositories from Bespin.
 
@@ -60,7 +60,7 @@ Push to URL
 : Sometimes you will use a different URL for pushing than pulling, perhaps using http to pull and ssh to push. This allows you to set the URL for pushing.
 
 Authentication type
-: Bespin can use SSH for authentication or username/password. See the `vcs getkey` command for more information about Bespin's SSH authentication.
+: Bespin can use SSH for authentication or username/password. See the `keychain getkey` command for more information about Bespin's SSH authentication.
 
 Username
 : You should always fill in the username that you will be using to log into the remote system
@@ -90,11 +90,11 @@ Shows you the differences between your current set of files and what's checked i
 
 This does not access remote files, so you will not need your keychain password for this command.
 
-##### vcs getkey #####
+##### keychain getkey #####
 
-As mentioned in the section ''Securely accessing remote systems'', Bespin will generate an SSH public/private keypair for you. The `vcs getkey` command will display your public key so that you can copy and paste it into the remote host. After you do that, Bespin should be able to access the remote system.
+As mentioned in the section ''Securely accessing remote systems'', Bespin will generate an SSH public/private keypair for you. The `keychain getkey` command will display your public key so that you can copy and paste it into the remote host. After you do that, Bespin should be able to access the remote system.
 
-When your key is first generated, you will need to enter your keychain password so that Bespin can securely store your private key in your keychain file. After this initial key generation step, you will not need to enter your keychain password for the `vcs getkey` command.
+When your key is first generated, you will need to enter your keychain password so that Bespin can securely store your private key in your keychain file. After this initial key generation step, you will not need to enter your keychain password for the `keychain getkey` command.
 
 ##### vcs push #####
 
