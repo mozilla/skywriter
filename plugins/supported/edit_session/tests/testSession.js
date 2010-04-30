@@ -42,21 +42,19 @@ var TextStorage = require('text_editor:models/textstorage').TextStorage;
 var editsession = require('edit_session');
 var Promise = require('bespin:promise').Promise;
 
-var source = DummyFileSource.create({
-    files: [
-        {name: 'atTheTop.js', contents: 'the top file'},
-        {name: 'anotherAtTheTop.js', contents: 'another file'},
-        {name: 'foo/'},
-        {name: 'deeply/nested/directory/andAFile.txt', contents: 'text file'}
-    ]
-});
+var source = new DummyFileSource([
+    {name: 'atTheTop.js', contents: 'the top file'},
+    {name: 'anotherAtTheTop.js', contents: 'another file'},
+    {name: 'foo/'},
+    {name: 'deeply/nested/directory/andAFile.txt', contents: 'text file'}
+]);
 
 exports.testBufferFileChange = function() {
     var root = fs.Filesystem.create({
         source: source
     });
     var buffer = editsession.Buffer.create();
-    t.ok(buffer.get('model') != null, 
+    t.ok(buffer.get('model') != null,
         'Model should be set to a TextStorage by default');
     t.ok(buffer.untitled(), 'Buffer should initially be untitled');
     var f = root.getFile('atTheTop.js');
@@ -70,7 +68,7 @@ exports.testBufferFileChange = function() {
     setTimeout(function() {
         var newtext = buffer.get('model').getValue();
         t.equal(newtext, 'the top file', 'Expected file contents to be loaded');
-        
+
         // now we want to reset the buffer.
         buffer.changeFile(null);
         t.ok(buffer.untitled(), 'Buffer should be untitled again');
@@ -111,7 +109,7 @@ exports.testBufferSaving = function() {
     var file1 = root.getFile('bar.txt');
     file1.exists().then(function(exists) {
         t.ok(!exists, 'file should not be there now');
-        buffer.saveAs(file1).then(function() { 
+        buffer.saveAs(file1).then(function() {
             var request = source.requests.pop();
             t.equal(request[0], 'saveContents');
             t.equal(request[1][0], 'bar.txt');
@@ -123,6 +121,6 @@ exports.testBufferSaving = function() {
             });
         });
     });
-    
+
     return testpr;
 };

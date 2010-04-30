@@ -24,18 +24,16 @@
 
 var t = require('plugindev');
 var fs = require('filesystem');
-var fixture = require('filesystem:tests/fixture');
+var DummyFileSource = require('filesystem:tests/fixture').DummyFileSource;
 var console = require('bespin:console').console;
 var Promise = require('bespin:promise').Promise;
 
-var source = exports.source = fixture.DummyFileSource.create({
-    files: [
-        {name: 'atTheTop.js', contents: 'the top file'},
-        {name: 'anotherAtTheTop.js', contents: 'another file'},
-        {name: 'foo/'},
-        {name: 'deeply/nested/directory/andAFile.txt', contents: 'text file'}
-    ]
-});
+var source = new DummyFileSource([
+    { name: 'atTheTop.js', contents: 'the top file' },
+    { name: 'anotherAtTheTop.js', contents: 'another file' },
+    { name: 'foo/' },
+    { name: 'deeply/nested/directory/andAFile.txt', contents: 'text file' }
+]);
 
 var getNewRoot = function() {
     return fs.Filesystem.create({

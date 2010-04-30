@@ -22,37 +22,33 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var Promise = require('bespin:promise').Promise;
 var t = require('plugindev');
 var util = require('bespin:util/util');
 var pathUtil = require('path');
 
-exports.DummyFileSource = SC.Object.extend({
-    // populate this list of files
-    // should be a list, each item an object with path
-    // (ending in / for directories) and contents for files.
-    files: null,
-    
-    // the list of requests made
-    requests: null,
-    
-    // set this to check for this status on the next status-changing call
-    checkStatus: null,
-    
-    init: function() {
-        // keep a shallow copy of the files list
-        var originalFiles = [];
-        this.files.forEach(function(f) {
-            originalFiles.push({name: f.name, contents: f.contents});
-        });
-        this._originalFiles = originalFiles;
-        this.reset();
-    },
-    
+/**
+ * @param files {file[]} Should be a list, each item an object with path
+ * (ending in / for directories) and contents for files.
+ * @param requests the list of requests made
+ */
+exports.DummyFileSource = function(files, requests) {
+    this.files = files;
+    this.requests = requests;
+
+    // keep a shallow copy of the files list
+    var originalFiles = [];
+    this.files.forEach(function(f) {
+        originalFiles.push({name: f.name, contents: f.contents});
+    });
+    this._originalFiles = originalFiles;
+    this.reset();
+};
+
+exports.DummyFileSource.prototype = {
     reset: function() {
         this.requests = [];
-        
+
         // restore the files list
         var files = [];
         this._originalFiles.forEach(function(f) {
@@ -60,12 +56,12 @@ exports.DummyFileSource = SC.Object.extend({
         });
         this.files = files;
     },
-    
+
     // Loads the complete file list
     loadAll: function() {
         this.requests.push(['loadAll']);
         console.log('loadAll called');
-        
+
         var pr = new Promise();
         var result = [];
         this.get('files').forEach(function(f) {
@@ -75,7 +71,7 @@ exports.DummyFileSource = SC.Object.extend({
         console.log('returning from loadAll');
         return pr;
     },
-    
+
     loadContents: function(path) {
         this.requests.push(['loadContents', arguments]);
         var pr = new Promise();
@@ -99,7 +95,7 @@ exports.DummyFileSource = SC.Object.extend({
         pr.resolve();
         return pr;
     },
-    
+
     makeDirectory: function(path) {
         this.requests.push(['makeDirectory', arguments]);
         var pr = new Promise();
@@ -107,7 +103,7 @@ exports.DummyFileSource = SC.Object.extend({
         pr.resolve(path);
         return pr;
     },
-    
+
     _findMatching: function(path, deep) {
         path = pathUtil.trimLeadingSlash(path);
         if (path == '' || pathUtil.isDir(path)) {
@@ -116,7 +112,7 @@ exports.DummyFileSource = SC.Object.extend({
             return this._findFile(path);
         }
     },
-    
+
     _findFile: function(path) {
         var f = this.files.findProperty('name', path);
         return f;
@@ -133,7 +129,7 @@ exports.DummyFileSource = SC.Object.extend({
 
         return f;
     },
-    
+
     _findInDirectory: function(path, deep) {
         path = path.slice(0, path.length - 1);
         var segments = path.split('/');
@@ -148,7 +144,7 @@ exports.DummyFileSource = SC.Object.extend({
                     return;
                 }
             }
-            
+
             // If the search we're doing is for the directory
             // itself and the directory is listed in the
             // file list, we don't want to return the
@@ -172,4 +168,4 @@ exports.DummyFileSource = SC.Object.extend({
         });
         return matches;
     }
-});
+};
