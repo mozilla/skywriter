@@ -40,10 +40,12 @@ var cookie = require('bespin:util/cookie');
 /**
  * Save the settings in a cookie
  * This code has not been tested since reboot
- * @class
+ * @constructor
  */
-exports.CookiePersister = SC.Object.create({
+exports.CookiePersister = function() {
+};
 
+exports.CookiePersister.prototype = {
     loadInitialValues: function(settings) {
         settings._loadDefaultValues().then(function() {
             var data = cookie.get('settings');
@@ -66,4 +68,4 @@ exports.CookiePersister = SC.Object.create({
             return;
         }
     }
-});
+};
