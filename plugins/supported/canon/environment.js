@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Trait = require('traits').Trait;
 var console = require('bespin:console').console;
 var bespin = require('appsupport:controllers/bespin').bespinController;
 
@@ -46,27 +45,54 @@ var bespin = require('appsupport:controllers/bespin').bespinController;
  * are changed by the system.
  * <p>The role of the Environment is likely to be expanded over time.
  */
-exports.EnvironmentTrait = Trait({
+exports.Environment = function() {
+    // The current command line pushes this value into here
+    this.commandLine = null;
+};
 
-    commandLine: null,
+exports.Environment.prototype = {
 
     /**
      * Retrieves the EditSession
      */
-    getSession: function() {
+    get session() {
         return bespin.session;
     },
 
     /**
      * Gets the currentView from the session.
      */
-    getView: function() {
-        var session = this.getSession();
-        if (!session) {
+    get view() {
+        if (!this.session) {
             // This can happen if the session is being reloaded.
             return null;
         }
-        return session.currentView;
+        return this.session.currentView;
+    },
+
+    /**
+     * Returns the currently-active syntax contexts.
+     */
+    get contexts() {
+        // when editorapp is being refreshed, the textView is not available.
+        if (!this.view) {
+            return [];
+        }
+
+        var syntaxManager = this.view.layoutManager.syntaxManager;
+        var pos = this.view.getSelectedRange().start;
+        return syntaxManager.contextsAtPosition(pos);
+    },
+
+    /**
+     * The current Buffer from the session
+     */
+    get buffer() {
+        if (!this.session) {
+            console.error("command attempted to get buffer but there's no session");
+            return undefined;
+        }
+        return this.session.currentBuffer;
     },
 
     /**
@@ -74,63 +100,23 @@ exports.EnvironmentTrait = Trait({
      * use <code>instruction.model</code> to access the view where
      * possible.
      */
-    getModel: function() {
-        var session = this.getSession();
-        if (!session) {
-            console.error("command attempted to get model but there's no session");
-            return undefined;
-        }
-        var buffer = session.currentBuffer;
-        if (!buffer) {
+    get model() {
+        if (!this.buffer) {
             console.error('Session has no current buffer');
             return undefined;
         }
-        return buffer.model;
-    },
-
-    /**
-     * Returns the currently-active syntax contexts.
-     */
-    getContexts: function() {
-        var textView = this.getView();
-
-        // when editorapp is being refreshed, the textView is not available.
-        if (!textView) {
-            return [];
-        }
-
-        var syntaxManager = textView.layoutManager.syntaxManager;
-        var pos = textView.getSelectedRange().start;
-        return syntaxManager.contextsAtPosition(pos);
+        return this.buffer.model;
     },
 
     /**
      * gets the current file from the session
      */
-    getFile: function() {
-        var session = this.getSession();
-        if (!session) {
-            console.error("command attempted to get file but there's no session");
-            return undefined;
-        }
-        var buffer = session.currentBuffer;
-        if (!buffer) {
+    get file() {
+        if (!this.buffer) {
             console.error('Session has no current buffer');
             return undefined;
         }
-        return buffer.file;
-    },
-
-    /**
-     * The current Buffer from the session
-     */
-    getBuffer: function() {
-        var session = this.getSession();
-        if (!session) {
-            console.error("command attempted to get buffer but there's no session");
-            return undefined;
-        }
-        return session.currentBuffer;
+        return this.buffer.file;
     },
 
     /**
@@ -139,23 +125,11 @@ exports.EnvironmentTrait = Trait({
      */
     getFiles: function() {
         return bespin.files;
-    },
-
-    init: function() {
-        this.__defineGetter__('session', this.getSession);
-        this.__defineGetter__('view', this.getView);
-        this.__defineGetter__('model', this.getModel);
-        this.__defineGetter__('contexts', this.getContexts);
-        this.__defineGetter__('file', this.getFile);
-        this.__defineGetter__('buffer', this.getBuffer);
-        this.__defineGetter__('files', this.getFiles);
-
-        return this;
     }
-});
+};
 
 /**
  * The global environment.
  * TODO: Check that this is the best way to do this.
  */
-exports.global = Trait.create(Object.prototype, exports.EnvironmentTrait).init();
+exports.global = new exports.Environment();

@@ -297,5 +297,3 @@ exports.MatcherMenu = function(input, assignment, matcher, loaded) {
 };
 
 exports.MatcherMenu.prototype = new exports.Menu('subclassPrototype');
-
-console.log('exports.MatcherMenu', exports.MatcherMenu);

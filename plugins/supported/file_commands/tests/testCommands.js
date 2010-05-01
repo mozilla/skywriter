@@ -32,17 +32,15 @@ var file_commands = require('file_commands');
 var edit_session = require('edit_session');
 var Promise = require('bespin:promise').Promise;
 
-var source = exports.source = DummyFileSource.create({
-    files: [
-        {name: 'atTheTop.js', contents: 'the top file'},
-        {name: 'anotherAtTheTop.js', contents: 'another file'},
-        {name: 'foo/'},
-        {name: 'foo/1.txt', contents: 'firsttext'},
-        {name: 'foo/2.txt', contents: 'secondtext'},
-        {name: 'foo/bar/3.txt', contents: 'thirdtext'},
-        {name: 'deeply/nested/directory/andAFile.txt', contents: 'text file'}
-    ]
-});
+var source = new DummyFileSource([
+    {name: 'atTheTop.js', contents: 'the top file'},
+    {name: 'anotherAtTheTop.js', contents: 'another file'},
+    {name: 'foo/'},
+    {name: 'foo/1.txt', contents: 'firsttext'},
+    {name: 'foo/2.txt', contents: 'secondtext'},
+    {name: 'foo/bar/3.txt', contents: 'thirdtext'},
+    {name: 'deeply/nested/directory/andAFile.txt', contents: 'text file'}
+]);
 
 var getNewRoot = function() {
     return fs.Filesystem.create({

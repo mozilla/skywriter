@@ -41,19 +41,20 @@ var settings = require('settings').settings;
  * A very quick rough and ready notificationHandler that just writes to the
  * console if configured.
  */
-exports.handler = function(notification) {
-    if (settings.get('notifyToConsole')) {
-        if (notification.subTitle || notification.description) {
-            console.group(notification.title);
-            if (notification.subTitle) {
-                console.log(notification.subTitle);
+exports.handler = {
+    showNotification: function(notification) {
+        if (settings.get('notifyToConsole')) {
+            if (notification.body) {
+                console.group(notification.title);
+                console.log(notification.body);
+                console.groupEnd();
+            } else {
+                console.log(notification.title);
             }
-            if (notification.description) {
-                console.log(notification.description);
-            }
-            console.groupEnd();
-        } else {
-            console.log(notification.title);
         }
+    },
+
+    cancelNotification: function(notification) {
     }
 };
+

@@ -48,7 +48,7 @@ exports.scrollDocStart = function(env, args, request) {
  * Scrolls to the end of the document.
  */
 exports.scrollDocEnd = function(env, args, request) {
-    env.view.scrollToPosition(env.model.range().end);
+    env.view.scrollToPosition(env.model.range.end);
 };
 
 /**

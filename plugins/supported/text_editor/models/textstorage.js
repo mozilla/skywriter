@@ -35,51 +35,62 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
-var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
-var TextBuffer = require('mixins/textbuffer').TextBuffer;
+var Event = require('events').Event;
 
-exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
+var TextStorage;
+
+/**
+ * Creates a new text storage object holding the given string (if supplied).
+ *
+ * @constructor
+ * @exports TextStorage as text_editor:models.textstorage.TextStorage
+ */
+TextStorage = function(initialValue) {
+    if (initialValue !== null && initialValue !== undefined) {
+        this._lines = initialValue.split("\n");
+    } else {
+        this._lines = [ '' ];
+    }
+
+    return this;
+};
+
+TextStorage.prototype = {
+    /** @lends TextStorage */
+
+    _lines: null,
+
     /**
-     * @property{string}
-     *
-     * The initial string to store in the text storage buffer. Has no meaning
-     * after this object is initialized.
+     * Called whenever the text changes with the old and new ranges supplied.
      */
-    initialValue: "",
+    changed: new Event(),
 
     /**
-     * @property{Array<String>}
-     *
-     * The list of lines, stored as an array of strings. Read-only.
-     */
-    lines: null,
-
-    /**
-     * @property{boolean}
-     *
      * Whether this model is read-only. Attempts to modify a read-only model
      * result in exceptions.
+     *
+     * @type {boolean}
      */
     readOnly: false,
 
     /**
      * Returns the position of the nearest character to the given position,
      * according to the selection rules.
+     *
+     * @param {position} pos The position to clamp.
      */
-    clampPosition: function(position) {
-        var lines = this.get('lines');
-        var row = position.row;
+    clampPosition: function(pos) {
+        var lines = this._lines;
+
+        var row = pos.row;
         if (row < 0) {
             return { row: 0, col: 0 };
         } else if (row >= lines.length) {
-            return this.range().end;
+            return this.range.end;
         }
 
-        return {
-            row: row,
-            col: Math.max(0, Math.min(position.col, lines[row].length))
-        };
+        var col = Math.max(0, Math.min(pos.col, lines[row].length));
+        return { row: row, col: col };
     },
 
     /**
@@ -87,19 +98,23 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
      * selection rules.
      */
     clampRange: function(range) {
-        return {
-            start:  this.clampPosition(range.start),
-            end:    this.clampPosition(range.end)
-        };
+        var start = this.clampPosition(range.start);
+        var end = this.clampPosition(range.end);
+        return { start: start, end: end };
+    },
+
+    /** Deletes all characters in the range. */
+    deleteCharacters: function(range) {
+        this.replaceCharacters(range, '');
     },
 
     /**
-     * Returns the result of displacing the given position by @count characters
-     * forward (if @count > 0) or backward (if @count < 0).
+     * Returns the result of displacing the given position by count characters
+     * forward (if count > 0) or backward (if count < 0).
      */
     displacePosition: function(pos, count) {
         var forward = count > 0;
-        var lines = this.get('lines');
+        var lines = this._lines;
         var lineCount = lines.length;
 
         for (var i = Math.abs(count); i !== 0; i--) {
@@ -117,7 +132,7 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
                 }
 
                 if (pos.col === 0) {
-                    var lines = this.get('lines');
+                    var lines = this._lines;
                     pos = {
                         row:    pos.row - 1,
                         col: lines[pos.row - 1].length
@@ -134,49 +149,62 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
      * Returns the characters in the given range as a string.
      */
     getCharacters: function(range) {
-        var lines = this.get('lines');
+        var lines = this._lines;
         var start = range.start, end = range.end;
         var startRow = start.row, endRow = end.row;
-        var startColumn = start.col, endColumn = end.col;
+        var startCol = start.col, endCol = end.col;
+
         if (startRow === endRow) {
-            return lines[startRow].substring(startColumn, endColumn);
+            return lines[startRow].substring(startCol, endCol);
         }
-        return [ lines[startRow].substring(startColumn) ].
-            concat(lines.slice(startRow + 1, endRow),
-            lines[endRow].substring(0, endColumn)).join('\n');
+
+        var firstLine = lines[startRow].substring(startCol);
+        var middleLines = lines.slice(startRow + 1, endRow);
+        var endLine = lines[endRow].substring(0, endCol);
+        return [ firstLine ].concat(middleLines, endLine).join('\n');
     },
 
+    /** Returns the lines of the text storage as a read-only array. */
+    getLines: function() {
+        return this._lines;
+    },
+
+    get lines() {
+        return this.getLines();
+    },
+
+    /** Returns the span of the entire text content. */
+    getRange: function() {
+        var lines = this._lines;
+        var endRow = lines.length - 1;
+        var endCol = lines[endRow].length;
+        var start = { row: 0, col: 0 }, end = { row: endRow, col: endCol };
+        return { start: start, end: end };
+    },
+
+    get range() {
+        return this.getRange();
+    },
+
+    /** Returns the text in the text storage as a string. */
     getValue: function() {
-        return this.get('lines').join('\n');
+        return this._lines.join('\n');
     },
 
-    init: function() {
-        arguments.callee.base.apply(this, arguments);
-
-        this.set('lines', this.get('initialValue').split('\n'));
-        delete this.initialValue;
+    get value() {
+        return this.getValue();
     },
 
-    /**
-     * Returns the span of the entire text content.
-     */
-    range: function() {
-        var lines = this.get('lines');
-        return {
-            start:  { row: 0, col: 0 },
-            end:    {
-                row: lines.length - 1,
-                col: lines[lines.length - 1].length
-            }
-        };
+    /** Inserts characters at the supplied position. */
+    insertCharacters: function(pos, chars) {
+        this.replaceCharacters({ start: pos, end: pos }, chars);
     },
 
-    /**
-     * Replaces the characters within the supplied range with the given string.
-     */
+    /** Replaces the characters within the supplied range. */
     replaceCharacters: function(oldRange, characters) {
-        if (this.get('readOnly')) {
-            throw new Error("Attempt to modify a read-only text storage object");
+        if (this.readOnly) {
+            throw new Error("Attempt to modify a read-only text storage " +
+                "object");
         }
 
         var addedLines = characters.split('\n');
@@ -188,7 +216,7 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
         var oldStartRow = oldStart.row, oldEndRow = oldEnd.row;
         var oldStartColumn = oldStart.col;
 
-        var lines = this.get('lines');
+        var lines = this._lines;
         addedLines[0] = lines[oldStartRow].substring(0, oldStartColumn) +
             addedLines[0];
         addedLines[addedLineCount - 1] +=
@@ -196,14 +224,38 @@ exports.TextStorage = SC.Object.extend(MultiDelegateSupport, TextBuffer, {
 
         lines.replace(oldStartRow, oldEndRow - oldStartRow + 1, addedLines);
 
-        this.notifyDelegates('textStorageEdited', oldRange, newRange);
+        this.changed(oldRange, newRange);
     },
 
     /**
-     * Sets the contents of the text buffer to the given string.
+     * Returns the character range that would be modified if the range were
+     * replaced with the given lines.
      */
+    resultingRangeForReplacement: function(range, lines) {
+        var lineCount = lines.length;
+        var lastLineLength = lines[lineCount - 1].length;
+        var start = range.start;
+        var endRow = start.row + lineCount - 1;
+        var endCol = (lineCount === 1 ? start.col : 0) + lastLineLength;
+        return { start: start, end: { row: endRow, col: endCol } };
+    },
+
+    setLines: function(newLines) {
+        this.setValue(newLines.join('\n'));
+    },
+
+    set lines(newLines) {
+        return this.setLines(newLines);
+    },
+
     setValue: function(newValue) {
-        this.replaceCharacters(this.range(), newValue);
+        this.replaceCharacters(this.range, newValue);
+    },
+
+    set value(newValue) {
+        this.setValue(newValue);
     }
-});
+};
+
+exports.TextStorage = TextStorage;
 

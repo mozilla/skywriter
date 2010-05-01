@@ -96,7 +96,7 @@ exports.selectUp = function(env, args, request) {
 
 var moveOrSelectEnd = function(env, shift, inLine) {
     var view = env.view, model = env.model;
-    var lines = model.get('lines');
+    var lines = model.lines;
     var selectedRange = view.getSelectedRange();
     var row = inLine ? selectedRange.end.row : lines.length - 1;
     view.moveCursorTo({ row: row, col: lines[row].length }, shift);
@@ -184,7 +184,7 @@ var seekNextStop = function(view, text, col, dir, rowChanged) {
 
 var moveOrSelectNextWord = function(env, shiftDown) {
     var view = env.view, model = env.model;
-    var lines = model.get('lines');
+    var lines = model.lines;
 
     var selectedRange = view.getSelectedRange(true);
     var end = selectedRange.end;
@@ -212,7 +212,7 @@ var moveOrSelectNextWord = function(env, shiftDown) {
 var moveOrSelectPreviousWord = function(env, shiftDown) {
     var view = env.view, model = env.model;
 
-    var lines = model.get('lines');
+    var lines = model.lines;
     var selectedRange = view.getSelectedRange(true);
     var end = selectedRange.end;
     var row = end.row, col = end.col;

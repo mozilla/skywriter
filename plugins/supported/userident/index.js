@@ -90,8 +90,8 @@ exports.loginController = SC.Object.create({
 
     password: '',
 
-    accepted: Event(),
-    loggedOut: Event(),
+    accepted: new Event(),
+    loggedOut: new Event(),
 
     login: function() {
         var password = this.get('password');

@@ -71,14 +71,12 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
             this._file = newFile;
 
             if (util.none(newFile)) {
-                this.model = TextStorage.create();
+                this.model = new TextStorage;
             } else {
                 newFile.loadContents().then(function(contents) {
                     console.log('SET FILE CONTENTS: ', contents);
                     SC.run(function() {
-                        this.model = TextStorage.create({
-                            initialValue: contents
-                        });
+                        this.model = new TextStorage(contents);
                     }.bind(this));
                 }.bind(this));
             }
@@ -114,7 +112,7 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
 
     init: function(model, syntaxManager) {
         if (model == null) {
-            this.model = TextStorage.create();
+            this.model = new TextStorage;
         } else {
             this.model = model;
         }
@@ -140,7 +138,7 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
 
         // are we changing to a new file?
         if (util.none(newFile)) {
-            this.model = TextStorage.create();
+            this.model = new TextStorage;
             var pr = new Promise();
             pr.resolve(this);
             return pr;
@@ -148,7 +146,7 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
 
         return newFile.loadContents().then(function(contents) {
             SC.run(function() {
-                this.model = TextStorage.create({ initialValue: contents });
+                this.model = new TextStorage(contents);
             }.bind(this));
             return this;
         }.bind(this));
@@ -173,7 +171,7 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
         var self = this;
 
         return file.loadContents().then(function(contents) {
-            this.model = TextStorage.create({ initialValue: contents });
+            this.model = new TextStorage(contents);
         }.bind(this));
     },
 
@@ -182,7 +180,7 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
      * once the file is saved.
      */
     save: function() {
-        return this._file.saveContents(this._model.getValue());
+        return this._file.saveContents(this._model.value);
     },
 
     /**
@@ -196,7 +194,7 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
     saveAs: function(newFile) {
         var promise = new Promise();
 
-        newFile.saveContents(this._model.getValue()).then(function() {
+        newFile.saveContents(this._model.value).then(function() {
             this.changeFileOnly(newFile);
             promise.resolve();
         }.bind(this), function(error) {

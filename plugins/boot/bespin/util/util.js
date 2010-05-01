@@ -523,3 +523,42 @@ exports.setClass = function(node, className, include) {
 exports.none = function(obj) {
     return obj === null || obj === undefined;
 };
+
+/**
+ * Creates a clone of the passed object.  This function can take just about
+ * any type of object and create a clone of it, including primitive values
+ * (which are not actually cloned because they are immutable).
+ * If the passed object implements the clone() method, then this function
+ * will simply call that method and return the result.
+ * @param object {Object} the object to clone
+ * @returns {Object} the cloned object
+ */
+exports.clone = function(object) {
+    // TODO: delete this when SC is gone
+    if (object && object.isCopyable) {
+        return object.copy();
+    }
+
+    if (typeof object === 'object') {
+        if (object === null) {
+            return null;
+        }
+
+        var reply = {};
+        for (var key in object) {
+            reply[key] = object[key];
+        }
+        return reply;
+    }
+
+    if (object.clone && typeof(object.clone) === 'function') {
+        return object.clone();
+    }
+
+    if (Array.isArray(object)) {
+        return object.slice();
+    }
+
+    // That leaves numbers, booleans, undefined. Doesn't it?
+    return object;
+};

@@ -35,12 +35,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
-
-exports.Project = SC.Object.extend({
-    directory: null,
-    name: null
-});
+exports.Project = function(directory, name) {
+    this.directory = directory;
+    this.name = name;
+};
 
 /*
  * Given a full path in the bespin file system, figure out which
@@ -58,9 +56,9 @@ exports.getProjectAndPath = function(path) {
         path = path.substring(1);
         slash = path.indexOf('/');
     }
-    
+
     var projectName = path.substring(0, slash);
-    
+
     // todo: also need to include the directory when setting up the
     // project
     var project = exports.Project.create({

@@ -136,7 +136,7 @@ exports.commandCodes = function(evt, dontIgnoreMeta) {
 
     // handle function keys.
     if (code) {
-        ret = exports.KeyHelper.FUNCTION_KEYS[code] ;
+        ret = exports.KeyHelper.FUNCTION_KEYS[code];
         if (!ret && (evt.altKey || evt.ctrlKey || evt.metaKey)) {
             ret = exports.KeyHelper.PRINTABLE_KEYS[code];
             // Don't handle the shift key if the combo is
@@ -144,13 +144,21 @@ exports.commandCodes = function(evt, dontIgnoreMeta) {
             // This is necessary for the French keyboard. On that keyboard,
             // you have to hold down the shift key to access the number
             // characters.
-            if (code > 47 && code < 58) allowShift = evt.altKey;
+            if (code > 47 && code < 58) {
+                allowShift = evt.altKey;
+            }
         }
 
         if (ret) {
-           if (evt.altKey) modifiers += 'alt_' ;
-           if (evt.ctrlKey) modifiers += 'ctrl_' ;
-           if (evt.metaKey) modifiers += 'meta_';
+           if (evt.altKey) {
+               modifiers += 'alt_';
+           }
+           if (evt.ctrlKey) {
+               modifiers += 'ctrl_';
+           }
+           if (evt.metaKey) {
+               modifiers += 'meta_';
+           }
         } else if (evt.ctrlKey || evt.metaKey) {
             return false;
         }
@@ -158,19 +166,24 @@ exports.commandCodes = function(evt, dontIgnoreMeta) {
 
     // otherwise just go get the right key.
     if (!ret) {
-        code = evt.which ;
-        key = ret = String.fromCharCode(code) ;
-        lowercase = ret.toLowerCase() ;
+        code = evt.which;
+        key = ret = String.fromCharCode(code);
+        lowercase = ret.toLowerCase();
+
         if (evt.metaKey) {
-           modifiers = 'meta_' ;
+           modifiers = 'meta_';
            ret = lowercase;
 
-        } else ret = null ;
+        } else ret = null;
     }
 
-    if (evt.shiftKey && ret && allowShift) modifiers += 'shift_' ;
+    if (evt.shiftKey && ret && allowShift) {
+        modifiers += 'shift_';
+    }
 
-    if (ret) ret = modifiers + ret ;
+    if (ret) {
+        ret = modifiers + ret;
+    }
 
     if (!dontIgnoreMeta && ret) {
         ret = ret.replace(/ctrl_meta|meta/,'ctrl');
@@ -204,9 +217,9 @@ exports.commandCodesSC = function(ev) {
 
     // handle function keys.
     if (code) {
-        ret = SC.FUNCTION_KEYS[code] ;
+        ret = exports.KeyHelper.FUNCTION_KEYS[code];
         if (!ret && (orgEvt.altKey || orgEvt.ctrlKey || orgEvt.metaKey)) {
-            ret = SC.PRINTABLE_KEYS[code];
+            ret = exports.KeyHelper.PRINTABLE_KEYS[code];
             // Don't handle the shift key if the combo is
             //    (meta_|ctrl_)<number>
             // This is necessary for the French keyboard. On that keyboard,

@@ -475,7 +475,7 @@ var ShareNode = SC.Object.extend({
 	        return { startOffset: 0, endOffset: 0 };
 	    }
 	
-		var lines = env.model.get('lines');
+		var lines = env.model.lines;
 		var startOffset = 0;
 		var endOffset = 0;
 		
@@ -506,7 +506,7 @@ var ShareNode = SC.Object.extend({
      * @private
      */
 	_convertOffsetsToRange: function(startOffset, endOffset){
-		var lines = env.model.get('lines');
+		var lines = env.model.lines;
 
 		if (typeof endOffset != 'number') {
 			endOffset = startOffset;

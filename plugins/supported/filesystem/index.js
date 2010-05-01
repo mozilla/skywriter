@@ -101,7 +101,7 @@ var FilesystemTrait = Trait({
         var source = this.source;
         if (typeof(source) == 'string') {
             throw new Error('FilesystemTrait: Getting source from string is not back yet.');
-            // this.source = SC.objectForPropertyPath(source);
+            // this.source = objectForPropertyPath(source);
         }
 
         if (!this.source) {

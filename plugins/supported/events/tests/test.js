@@ -39,13 +39,13 @@ var t = require('plugindev');
 var Event = require('events').Event;
 
 exports.testEventsAreCallable = function() {
-    var evt = Event();
+    var evt = new Event();
     evt();
     t.ok(true, "events are callable");
 };
 
 exports.testAddingEvents = function() {
-    var evt = Event();
+    var evt = new Event();
     var run1 = false, run2 = false, run3 = false;
     evt.add(function() { run1 = true; });
     evt.add(function() { run2 = true; });
@@ -62,7 +62,7 @@ exports.testAddingEvents = function() {
 };
 
 exports.testRemovingEvents = function() {
-    var evt = Event();
+    var evt = new Event();
     var run1 = false, run2 = false, run3 = false;
     var callback1 = function() { run1 = true; };
     var callback2 = function() { run2 = true; };

@@ -248,7 +248,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     _isReadOnly: function() {
-        return this.getPath('layoutManager.textStorage.readOnly');
+        return this.getPath('layoutManager.textStorage').readOnly;
     },
 
     _keymappingChanged: function() {
@@ -429,7 +429,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }
 
         var self = this;
-        var lines = layoutManager.getPath('textStorage.lines');
+        var lines = layoutManager.get('textStorage').lines;
         var syntaxManager = layoutManager.get('syntaxManager');
         var lastRow = Math.min(lines.length, endRow + 1);
         syntaxManager.updateSyntaxForRows(startRow, lastRow).
@@ -781,7 +781,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         });
 
         if (virtual) {
-            var lineCount = textStorage.get('lines').length;
+            var lineCount = textStorage.lines.length;
             var row = position.row, col = position.col;
             if (row > 0 && row < lineCount) {
                 this._selectedRangeEndVirtual = position;
@@ -896,7 +896,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
         var model = this.getPath('layoutManager.textStorage');
 
-        var lines = model.get('lines');
+        var lines = model.lines;
         var range = this.getSelectedRange();
 
         if (Range.isZeroLength(range)) {
@@ -1011,7 +1011,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
      * Selects all characters in the buffer.
      */
     selectAll: function() {
-        var lines = this.getPath('layoutManager.textStorage.lines');
+        var lines = this.getPath('layoutManager.textStorage').lines;
         var lastRow = lines.length - 1;
         this.setSelection({
             start:  { row: 0, col: 0 },
