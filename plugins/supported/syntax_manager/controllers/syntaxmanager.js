@@ -419,7 +419,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
         }
 
         var thisLineAttrInfo = lineAttrInfo[startRow];
-        var line = this.getPath('layoutManager.textStorage.lines')[startRow];
+        var line = this.getPath('layoutManager.textStorage').lines[startRow];
 
         this._deepSyntaxInfoForLine(thisLineAttrInfo.snapshot, line).
             then(function(deepSyntaxInfo) {
@@ -466,7 +466,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
     // Invalidates all the highlighting.
     _reset: function() {
         var lineAttrInfo = [];
-        var lineCount = this.getPath('layoutManager.textStorage.lines').length;
+        var lineCount = this.getPath('layoutManager.textStorage').lines.length;
         var initialContext = this.get('initialContext');
 
         for (var i = 0; i < lineCount; i++) {

@@ -194,7 +194,7 @@ exports.testObserving = function() {
 exports.testRange = function() {
     var storage = TextStorage.create({});
     storage.insertCharacters({ row: 0, col: 0 }, 'foo\nbar\nbaz\n');
-    t.deepEqual(storage.range(), {
+    t.deepEqual(storage.range, {
         start:  { row: 0, col: 0 },
         end:    { row: 3, col: 0 }
     }, 'the character range and [ 0,0 3,0 ]');
@@ -203,7 +203,7 @@ exports.testRange = function() {
         start:  { row: 2, col: 3 },
         end:    { row: 3, col: 0 }
     });
-    t.deepEqual(storage.range(), {
+    t.deepEqual(storage.range, {
         start:  { row: 0, col: 0 },
         end:    { row: 2, col: 3 }
     }, 'the character range and [ 0,0 2,3 ]');

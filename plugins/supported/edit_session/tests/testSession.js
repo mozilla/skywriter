@@ -38,7 +38,6 @@
 var t = require('plugindev');
 var DummyFileSource = require('filesystem:tests/fixture').DummyFileSource;
 var fs = require('filesystem');
-var TextStorage = require('text_editor:models/textstorage').TextStorage;
 var editsession = require('edit_session');
 var Promise = require('bespin:promise').Promise;
 

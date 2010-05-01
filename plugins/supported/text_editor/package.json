@@ -8,7 +8,8 @@
         "rangeutils": "0.0",
         "settings": "0.0",
         "syntax_manager" : "0.0",
-        "theme_handler": "0.0"
+        "theme_handler": "0.0",
+        "traits": "0.0"
     },
     "provides":
     [

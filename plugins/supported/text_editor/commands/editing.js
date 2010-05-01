@@ -65,7 +65,7 @@ exports.deleteCommand = function(env, args, request) {
  * insertion point at the end of the deleted range.
  */
 exports.deleteLines = function(env, args, request) {
-    if (env.model.get('readOnly')) {
+    if (env.model.readOnly) {
         return;
     }
 
@@ -94,7 +94,7 @@ var newline = function(model, view) {
     var position = selection.start;
     var row = position.row, col = position.col;
 
-    var lines = model.get('lines');
+    var lines = model.lines;
     var prefix = lines[row].substring(0, col);
 
     var spaces = /^\s*/.exec(prefix);
@@ -130,7 +130,7 @@ exports.joinLines = function(env, args, request) {
 
     var view = env.view;
     var selection = view.getSelectedRange();
-    var lines = model.get('lines');
+    var lines = model.lines;
     var row = selection.end.row;
 
     // Last line selected, which can't get joined.
@@ -166,7 +166,7 @@ exports.openLine = function(env, args, request) {
 
     var selection = view.getSelectedRange();
     var row = selection.end.row;
-    var lines = model.get('lines');
+    var lines = model.lines;
     view.moveCursorTo({ row: row, col: lines[row].length });
 
     newline(model, view);

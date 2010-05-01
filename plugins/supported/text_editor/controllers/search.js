@@ -149,7 +149,7 @@ exports.EditorSearchController = SC.Object.extend({
         var textView = this.get('textView');
         startPos = startPos || textView.getSelectedRange().end;
 
-        var lines = textView.getPath('layoutManager.textStorage.lines');
+        var lines = textView.getPath('layoutManager.textStorage').lines;
         var searchResult;
 
         searchRegExp.lastIndex = startPos.col;
@@ -192,7 +192,7 @@ exports.EditorSearchController = SC.Object.extend({
         var textView = this.get('textView');
         startPos = startPos || textView.getSelectedRange().start;
 
-        var lines = textView.getPath('layoutManager.textStorage.lines');
+        var lines = textView.getPath('layoutManager.textStorage').lines;
         var searchResults;
 
         // Treat the first line specially.

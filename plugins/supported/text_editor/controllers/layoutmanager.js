@@ -52,16 +52,16 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     _textStorageChanged: function() {
         var oldTextStorage = this._textStorage;
         if (!util.none(oldTextStorage)) {
-            oldTextStorage.removeDelegate(this);
+            oldTextStorage.changed.remove(this.textStorageChanged);
         }
 
         var newTextStorage = this.get('textStorage');
         this._textStorage = newTextStorage;
-        newTextStorage.addDelegate(this);
+        newTextStorage.changed.add(this.textStorageChanged);
 
         if (this._syntaxManagerInitialized) {
-            var oldRange = oldTextStorage.range();
-            var newRange = newTextStorage.range();
+            var oldRange = oldTextStorage.range;
+            var newRange = newTextStorage.range;
 
             if (!util.none(oldTextStorage)) {
                 var syntaxManager = this.get('syntaxManager');
@@ -190,7 +190,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     },
 
     _recomputeEntireLayout: function() {
-        var entireRange = this._textStorage.range();
+        var entireRange = this._textStorage.range;
         this._recomputeLayoutForRanges(entireRange, entireRange);
     },
 
@@ -199,7 +199,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         var newEndRow = newRange.end.row;
         var newRowCount = newEndRow - oldStartRow + 1;
 
-        var lines = this._textStorage.get('lines');
+        var lines = this._textStorage.lines;
         var theme = this.get('_theme');
         var plainColor = theme.plain;
 
@@ -267,7 +267,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
             col: Math.floor(x / characterWidth)
         });
 
-        var lineLength = textStorage.get('lines')[clampedPosition.row].length;
+        var lineLength = textStorage.lines[clampedPosition.row].length;
         return SC.mixin(clampedPosition, {
             partialFraction:
                 x < 0 || clampedPosition.col === lineLength ? 0.0 :
@@ -334,11 +334,13 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
      */
     createTextStorage: function() {
         var klass = this.get('textStorage');
-        var textStorage = klass.create();
+        var textStorage = new klass();
         this.set('textStorage', textStorage);
     },
 
     init: function() {
+        this.textStorageChanged = this.textStorageChanged.bind(this);
+
         this.set('textLines', [
             {
                 characters: '',
@@ -456,7 +458,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         this._recomputeEntireLayout();
     },
 
-    textStorageEdited: function(sender, oldRange, newRange) {
+    textStorageChanged: function(oldRange, newRange) {
         this.get('syntaxManager').layoutManagerReplacedText(oldRange,
             newRange);
         this._recomputeLayoutForRanges(oldRange, newRange);
