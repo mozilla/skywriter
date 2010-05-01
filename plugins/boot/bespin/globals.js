@@ -35,51 +35,57 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
+/*
+* Installs ES5 and SproutCore monkeypatches as needed.
+*/
+var installGlobals = function() {
+    /**
+     * Array detector.
+     * Firefox 3.5 and Safari 4 have this already. Chrome 4 however ...
+     * Note to Dojo - your isArray is still broken: instanceof doesn't work with
+     * Arrays taken from a different frame/window.
+     */
+    if (!Array.isArray) {
+        Array.isArray = function(data) {
+            return (data && Object.prototype.toString.call(data) == "[object Array]");
+        };
+    }
 
-var names = [
-    "log", "debug", "info", "warn", "error", "assert", "dir", "dirxml",
-    "trace", "group", "groupCollapsed", "groupEnd", "time", "timeEnd",
-    "profile", "profileEnd", "count"
-];
+    /**
+     * Retrieves the list of keys on an object.
+     */
+    if (!Object.keys) {
+        Object.keys = function(obj) {
+            var k, ret = [];
+            for (k in obj) {
+                if (obj.hasOwnProperty(k)) {
+                    ret.push(k);
+                }
+            }
+            return ret;
+        };
+    }
 
-var dict = {
-    _error: function() { /* Is there anything sane we can do here? */ }
+    if (!Function.prototype.bind) {
+        // From Narwhal
+        Function.prototype.bind = function () {
+            var args = Array.prototype.slice.call(arguments);
+            var self = this;
+            var bound = function () {
+                return self.call.apply(
+                    self,
+                    args.concat(
+                        Array.prototype.slice.call(arguments)
+                    )
+                );
+            };
+            bound.name = this.name;
+            bound.displayName = this.displayName;
+            bound.length = this.length;
+            bound.unbound = self;
+            return bound;
+        };
+    }
 };
 
-function stub () {
-    this._error(arguments);
-}
-
-function redirect (name) {
-    return function () {
-        window.console[name].apply(window.console, arguments);
-    };
-}
-
-if (window.console) {
-    // there is a native window console
-    names.forEach(function (name) {
-        if (window.console[name]) {
-            dict[name] = redirect(name);
-        }
-    });
-}
-
-// stub the rest
-names.forEach(function (name) {
-    if (!dict[name]) {
-        dict[name] = stub;
-    }
-});
-
-if (!window.console) {
-    // HACK! SproutCore uses console. Copy it across. We should remove this.
-    window.console = exports.console;
-}
-
-/**
- * This object represents a "safe console" object that forwards debugging
- * messages appropriately without creating a dependency on Firebug in Firefox.
- */
-exports.console = SC.Object.create(dict);
+installGlobals();

@@ -165,7 +165,29 @@ def install_tiki(options):
     snapshot.write_text(TIKI_TEMPLATE % locals())
 
 @task
-@needs(["install_tiki"])
+@cmdopts([('force', 'f', 'force download of snapshot')])
+def install_jquery(options):
+    destination = path("plugins/boot/jquery.js")
+    if destination.exists() and not options.force:
+        info("jquery already installed")
+        return
+    
+    destination.unlink()
+    
+    info("Downloading jquery")
+    jquery = urllib2.urlopen("http://code.jquery.com/jquery-1.4.2.js").read().decode("utf8")
+    jquery = u"""
+"define metadata";
+({});
+"end";
+
+""" + jquery + """
+exports.$ = $.noConflict(true);
+"""
+    destination.write_text(jquery, "utf8")
+
+@task
+@needs(["install_tiki", "install_jquery"])
 def initial():
     """Initial setup help."""
     call_task("develop")

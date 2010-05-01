@@ -22,4 +22,5 @@
 ^dist
 ^setup\.py
 ^static/tiki.js
+^plugins/boot/jquery.js
 

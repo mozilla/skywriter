@@ -1,0 +1,6 @@
+{
+    "name": "bespin",
+    "dependencies": {
+        "jquery": "1.4.0"
+    }
+}

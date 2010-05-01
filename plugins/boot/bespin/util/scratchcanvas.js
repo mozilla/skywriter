@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var util = require('bespin:util/util');
 
 /**
@@ -45,28 +44,28 @@ var util = require('bespin:util/util');
  * is needed (e.g. for computing text sizes), but an actual canvas isn't handy
  * at the moment.
  */
-var ScratchCanvas = SC.Object.extend({
+var ScratchCanvas = function() {
+    // It's possible that another ScratchCanvas instance in another sandbox
+    // exists on the page. If so, we assume they're compatible, and use
+    // that one.
+    if (!util.none(document.getElementById('bespin-scratch-canvas'))) {
+        return;
+    }
+
+    var element = document.createElement('canvas');
+    element.id = 'bespin-scratch-canvas';
+    element.width = 400;
+    element.height = 300;
+    element.style.position = 'absolute';
+    element.style.top = "-10000px";
+    element.style.left = "-10000px";
+    document.body.appendChild(element);
+};
+
+ScratchCanvas.prototype = {
     getContext: function() {
         return document.getElementById('bespin-scratch-canvas').
             getContext('2d');
-    },
-
-    init: function() {
-        // It's possible that another ScratchCanvas instance in another sandbox
-        // exists on the page. If so, we assume they're compatible, and use
-        // that one.
-        if (!util.none(document.getElementById('bespin-scratch-canvas'))) {
-            return;
-        }
-
-        var element = document.createElement('canvas');
-        element.id = 'bespin-scratch-canvas';
-        element.width = 400;
-        element.height = 300;
-        element.style.position = 'absolute';
-        element.style.top = "-10000px";
-        element.style.left = "-10000px";
-        document.body.appendChild(element);
     },
 
     /**
@@ -85,7 +84,7 @@ var ScratchCanvas = SC.Object.extend({
         context.restore();
         return width;
     }
-});
+};
 
 var singleton = null;
 
@@ -95,8 +94,7 @@ var singleton = null;
  */
 exports.get = function() {
     if (singleton === null) {
-        singleton = ScratchCanvas.create();
+        singleton = new ScratchCanvas();
     }
     return singleton;
-}
-
+};
