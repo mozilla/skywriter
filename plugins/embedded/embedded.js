@@ -263,7 +263,7 @@ var embeddedEditor = Trait.object({
 
     init: function() {
         this._createValueProperty();
-        this._events = { select: Event(), textChange: Event() };
+        this._events = { select: new Event(), textChange: new Event() };
     },
 
     /** Removes the event listener on the given event. */
