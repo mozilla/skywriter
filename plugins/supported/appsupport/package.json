@@ -8,8 +8,8 @@
         {
             "ep": "extensionhandler",
             "name": "appcomponent",
-            "register": "controllers/bespin#registerAppComponent",
-            "unregister": "controllers/bespin#unregisterAppComponent"
+            "__register": "controllers/bespin#registerAppComponent",
+            "__unregister": "controllers/bespin#unregisterAppComponent"
         },
         {
             "ep": "command",

@@ -9,7 +9,7 @@
         {
             "ep": "extensionhandler",
             "name": "theme",
-            "register": "#registerTheme"
+            "__register": "#registerTheme"
         },
         {
             "ep": "extensionpoint",

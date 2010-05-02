@@ -9,7 +9,7 @@
         {
             "ep": "extensionhandler",
             "name": "syntax",
-            "register": "controllers/syntaxdirectory#discoveredNewSyntax"
+            "__register": "controllers/syntaxdirectory#discoveredNewSyntax"
         },
         {
             "ep": "extensionpoint",

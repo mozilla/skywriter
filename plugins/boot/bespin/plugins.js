@@ -735,6 +735,7 @@ exports.Catalog.prototype = {
             dataType: "json",
             success: function(data, textStatus, xhr) {
                 this.loadMetadata(data);
+                pr.resolve();
             }.bind(this),
             error: function(xhr, textStatus, errorThrown) {
                 pr.reject(errorThrown);

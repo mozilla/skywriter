@@ -14,8 +14,8 @@
         {
             "ep": "extensionhandler",
             "name": "themestyles",
-            "register": "themestyles#registerThemeStyles",
-            "unregister": "themestyles#unregisterThemeStyles"
+            "__register": "themestyles#registerThemeStyles",
+            "__unregister": "themestyles#unregisterThemeStyles"
         },
         {
             "ep": "extensionpoint",
@@ -29,8 +29,8 @@
         {
             "ep": "extensionhandler",
             "name": "theme",
-            "register": "index#registerTheme",
-            "unregister": "index#unregisterTheme"
+            "__register": "index#registerTheme",
+            "__unregister": "index#unregisterTheme"
         },
         {
             "ep": "setting",

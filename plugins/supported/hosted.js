@@ -39,68 +39,9 @@
 ({
     "description": "Constructs what you see on a hosted Bespin server",
     "dependencies": {
-        "appsupport": "0.0",
-        "traits": "0.0"
-    },
-    "provides": [
-        {
-            "ep": "appcomponent",
-            "name": "environment",
-            "pointer": "#hostedEnvironment"
-        }
-    ]
+    }
 });
 "end";
 
-var SC = require('sproutcore/runtime').SC;
-var Promise = require('bespin:promise').Promise;
-var Trait = require('traits').Trait;
-
-/**
- * @trait
- *
- * The environment when Bespin is hosted on the server.
- */
-exports.hostedEnvironment = Trait.object({
-    /**
-     * @type {Array<string>}
-     *
-     * The component loading order in the hosted environment.
-     */
-    componentOrder: [
-        'environment', 'theme_manager', 'login_controller', 'file_source',
-        'settings', 'key_listener', 'dock_view', 'command_line', 'social_view',
-        'editor_view', 'edit_session'
-    ],
-
-    /**
-     * @type {SC.Pane}
-     *
-     * The pane in which Bespin lives.
-     */
-    pane: null,
-
-    /**
-     * @type {class<SC.Pane>}
-     *
-     * The type of the pane in which Bespin lives. This field is supplied by
-     * the Bespin controller and is instantiated in the init() function.
-     */
-    paneClass: null,
-
-    /** Initializes the hosted Bespin environment. */
-    createPane: function() {
-        var app = SC.Application.create({ NAMESPACE: 'bespin' });
-        var mainPage = SC.Page.create({ pane: this.paneClass });
-        app.set('mainPage', mainPage);
-
-        var pane = mainPage.get('pane');
-        this.pane = pane;
-        pane.append();
-
-        return new Promise().resolve(pane);
-    },
-
-    sessionInitialized: function(session) {}
-});
+document.body.innerHTML = "The future is now.";
 

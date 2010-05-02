@@ -35,15 +35,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
-
 var settings = require('settings').settings;
 
 /**
  * TODO: Consider if this is actually the best way to tell the world about the
  * created Output objects...
  */
-exports.history = SC.Object.create({
+exports.history = {
     requests: [],
 
     /**
@@ -56,8 +54,8 @@ exports.history = SC.Object.create({
         while (this.requests.length > historyLength) {
             this.requests.shiftObject();
         }
-    }.observes('.requests')
-});
+    } // TODO .observes('.requests')
+};
 
 /**
  * To create an invocation, you need to do something like this (all the ctor
@@ -71,7 +69,11 @@ exports.history = SC.Object.create({
  * });
  * </pre>
  */
-exports.Request = SC.Object.extend({
+exports.Request = function() {
+    
+};
+
+exports.Request.prototype = {
     // Will be used in the keyboard case and the cli case
     command: undefined,
     commandExt: undefined,
@@ -157,4 +159,4 @@ exports.Request = SC.Object.extend({
         this.set('end', new Date());
         this.set('duration', this.get('end').getTime() - this.get('start').getTime());
     }
-});
+};

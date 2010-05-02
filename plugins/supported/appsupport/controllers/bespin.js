@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var Trait = require('traits').Trait;
 var Promise = require('bespin:promise').Promise;
 
@@ -374,16 +373,6 @@ bespinController = Object.create(Object.prototype, Trait({
      */
     session: null,
 
-    /**
-     * @type{class<SC.MainPane>}
-     *
-     * The class of the pane in which Bespin lives. This field will be
-     * instantiated when the environment is.
-     */
-    paneClass: SC.MainPane.extend({
-        layout: { left: 0, bottom: 0, top: 0, right: 0 }
-    }),
-
     init: function() {
         var componentOrder = [ 'environment' ];
         this._componentOrder = componentOrder;
@@ -429,12 +418,4 @@ bespinController = Object.create(Object.prototype, Trait({
     }
 }));
 
-bespinController.init();
-exports.bespinController = bespinController;
-
-var controller = exports.bespinController;
-exports.registerAppComponent = controller.registerAppComponent.
-    bind(controller);
-exports.unregisterAppComponent = controller.unregisterAppComponent.
-    bind(controller);
-
+exports.bespinController = {};
