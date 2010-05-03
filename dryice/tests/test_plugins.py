@@ -184,6 +184,7 @@ def test_single_plugin_in_path():
     assert p.name == "SinglePlugin"
     plugin_type = p.metadata['type']
     assert plugin_type == "user"
+    assert p.templates == {}
     
 def test_nonexistent_plugin():
     temppath = pluginpath[:]
@@ -191,3 +192,11 @@ def test_nonexistent_plugin():
         chop=len(thisdir)))
     plugin = plugins.lookup_plugin("NotThere", temppath)
     assert plugin is None
+
+def test_templates_in_plugin():
+    plugin = plugins.lookup_plugin("plugin1", pluginpath)
+    templates = plugin.templates
+    assert len(templates) == 1
+    assert 'one.jsmt' in templates
+    assert 'js micro template' in templates['one.jsmt']
+    

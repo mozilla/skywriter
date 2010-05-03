@@ -38,9 +38,9 @@ import re
 from urllib import quote as urlquote
 
 try:
-    from json import loads
+    from json import loads, dumps
 except ImportError:
-    from simplejson import loads
+    from simplejson import loads, dumps
 
 _metadata_declaration = re.compile("^[^=]*=\s*")
 _trailing_semi = re.compile(";*\s*$")
@@ -181,7 +181,7 @@ class Plugin(object):
         except AttributeError:
             loc = self.location
             if loc.isdir():
-                l = [loc.relpathto(f) for f in self.location.walkfiles(glob)]
+                l = [loc.relpathto(f) for f in loc.walkfiles(glob)]
             else:
                 l = [] if allowEmpty else [""]
             setattr(self, attribute, l)
@@ -196,7 +196,20 @@ class Plugin(object):
     def scripts(self):
         return self._putFilesInAttribute("_scripts", "*.js", 
             allowEmpty=False)
-    
+        
+    @property
+    def templates(self):
+        loc = self.location
+        if loc.isdir():
+            loc = loc / "templates"
+            if not loc.exists():
+                return {}
+                
+            return dict((loc.relpathto(f), f.text("utf8")) 
+                for f in loc.walkfiles("*"))
+        else:
+            return {}
+        
     def get_script_text(self, scriptname):
         """Look up the script at scriptname within this plugin."""
         if not self.location.isdir():
