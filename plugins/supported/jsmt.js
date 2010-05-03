@@ -34,6 +34,10 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+ 
+"define metadata";
+({});
+"end";
 
 // Adapted from John Resig's JavaScript Micro Templates
 // http://ejohn.org/blog/javascript-micro-templating/
@@ -49,7 +53,7 @@ exports.compile = function(template) {
             "with(obj){p.push('" +
 
             // Convert the template into pure JavaScript
-    str.replace(/[\r\t\n]/g, " ")
+    template.replace(/[\r\t\n]/g, " ")
        .replace(/'(?=[^%]*%>)/g,"\t")
        .split("'").join("\\'")
        .split("\t").join("'")
@@ -60,7 +64,7 @@ exports.compile = function(template) {
 };
 
 var basename = function(name) {
-    var lastDot = path.lastIndexOf('.');
+    var lastDot = name.lastIndexOf('.');
     return name.substring(0, lastDot);
 };
 
