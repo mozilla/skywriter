@@ -59,7 +59,6 @@ class BuildError(Exception):
                 
 
 sample_dir = path(__file__).dirname() / "samples"
-inline_file = path(__file__).dirname() / "inline.js"
 
 def ignore_css(src, names):
     return [name for name in names if name.endswith(".css")]
@@ -70,10 +69,9 @@ class Manifest(object):
     unbundled_plugins = None
     
     def __init__(self, include_core_test=False, plugins=None,
-        search_path=None, sproutcore=None, bespin=None,
+        search_path=None, bespin=None,
         output_dir="build", include_sample=False,
-        boot_file=None, unbundled_plugins=None,
-        separate_sproutcore=False):
+        boot_file=None, unbundled_plugins=None, loader=None):
 
         self.include_core_test = include_core_test
         self.plugins = plugins
@@ -102,26 +100,17 @@ class Manifest(object):
 
         self.search_path = search_path
 
-        if sproutcore is None:
-            sproutcore = path("sproutcore")
-
-        if not sproutcore or not sproutcore.exists():
-            raise BuildError("Cannot find SproutCore (looked in %s)"
-                % sproutcore.abspath())
-
-        self.sproutcore = sproutcore
-
         if bespin is None:
-            bespin = path("frameworks") / "bespin"
+            bespin = path("plugins") / "boot" / "bespin"
 
         if not bespin or not bespin.exists():
             raise BuildError("Cannot find Bespin core code (looked in %s)"
                 % bespin.abspath())
         
-        if not boot_file:
-            self.boot_file = path(__file__).dirname() / "boot.js"
-        else:
+        if boot_file:
             self.boot_file = path(boot_file).abspath()
+        else:
+            self.boot_file = boot_file
 
         self.bespin = bespin
 
@@ -135,9 +124,12 @@ will be deleted before the build.""")
         
         if unbundled_plugins:
             self.unbundled_plugins = path(unbundled_plugins).abspath()
+        
+        if loader is None:
+            self.loader = path("static/tiki.js")
+        else:
+            self.loader = path(loader)
             
-        self.separate_sproutcore = separate_sproutcore
-
     @classmethod
     def from_json(cls, json_string, overrides=None):
         """Takes a JSON string and creates a Manifest object from it."""
@@ -181,16 +173,6 @@ will be deleted before the build.""")
         plugin = self.get_plugin(name)
         return combiner.Package(plugin.name, plugin.dependencies)
 
-    def _write_sproutcore_file(self, f, filename):
-        """Writes one of the sproutcore files to the file
-        object f."""
-        fullpath = self.sproutcore / filename
-        if not fullpath.exists():
-            raise BuildError("%s file missing at %s" %
-                (filename, fullpath.abspath()))
-
-        f.write(fullpath.bytes())
-
     def generate_output_files(self, output_js, output_css, package_list=None):
         """Generates the combined JavaScript file, putting the
         output into output_file."""
@@ -199,23 +181,7 @@ will be deleted before the build.""")
         if self.errors:
             raise BuildError("Errors found, stopping...", self.errors)
 
-        # Wrap the whole thing in a closure to protect the global
-        # namespace.
-        # commented out for now (see the note at the end of this
-        # function where the closure is closed off)
-#         output_js.write("""var tiki = function(){
-# """)
-        output_js.write(inline_file.bytes())
-
-        # include SproutCore
-        if not self.separate_sproutcore:
-            self._write_sproutcore_file(output_js, "sproutcore.js")
-            self._write_sproutcore_file(output_css, "sproutcore.css")
-
-        # include coretest if desired
-        if self.include_core_test:
-            self._write_sproutcore_file(output_js, "core_test.js")
-            self._write_sproutcore_file(output_css, "core_test.css")
+        output_js.write(self.loader.bytes())
 
         # include Bespin core code
         exclude_tests = not self.include_core_test
@@ -251,16 +217,8 @@ will be deleted before the build.""")
 SC.ready(function() {tiki.require("bespin:plugins").catalog.loadMetadata(%s);});
 """ % (dumps(all_md)))
 
-        output_js.write(self.boot_file.bytes())
-
-        # close off our closure
-        # commented out because this doesn't work yet
-        # we have *two* SC namespaces showing up and need to
-        # reconcile that first.
-#         output_js.write("""
-#     return tiki;
-# }();
-# """)
+        if self.boot_file:
+            output_js.write(self.boot_file.bytes())
 
     def get_package_list(self):
         package_list = [self.get_package(p)
@@ -303,10 +261,6 @@ SC.ready(function() {tiki.require("bespin:plugins").catalog.loadMetadata(%s);});
 
         package_list = self.get_package_list()
         
-        if self.separate_sproutcore:
-            self._write_sproutcore_file((output_dir / "sproutcore.js").open("w"), "sproutcore.js")
-            self._write_sproutcore_file((output_dir / "sproutcore.css").open("w"), "sproutcore.css")
-            
         jsfilename = output_dir / "BespinEmbedded.js"
         cssfilename = output_dir / "BespinEmbedded.css"
         jsfile = jsfilename.open("w")
@@ -317,8 +271,6 @@ SC.ready(function() {tiki.require("bespin:plugins").catalog.loadMetadata(%s);});
         
         if self.unbundled_plugins:
             self._output_unbundled_plugins(self.unbundled_plugins)
-
-        combiner.copy_sproutcore_files(self.sproutcore, output_dir)
 
         for package in package_list:
             plugin = self.get_plugin(package.name)

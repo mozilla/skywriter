@@ -111,10 +111,8 @@ def test_js_creation():
     assert """tiki.register("plugin2",""" in output
     assert """tiki.module("plugin2:mycode",""" in output
     assert """exports.plugin2func = function""" in output
-    assert "exports.Plugin = SC.Object.extend" in output
+    assert "exports.Plugin = function" in output
     assert '"dependencies": {"plugin2": "0.0"}' in output
-    assert "SC.browser=" in output
-    assert 'tiki.require("embedded")' in output
 
 def test_single_file_plugin_handling():
     manifest = tool.Manifest(plugins=["SingleFilePlugin1"],
@@ -164,7 +162,6 @@ def test_css_creation():
     manifest.generate_output_files(output_js, output_css)
     output_css = output_css.getvalue()
     assert "color: white" in output_css
-    assert ".sc-alert" in output_css
     assert "background-image: url(resources/plugin1/images/prompt1.png);" in output_css
 
 def test_full_output():
@@ -183,10 +180,6 @@ def test_image_copying():
         search_path=pluginpath, include_core_test=True,
         output_dir=tmppath)
     manifest.build()
-    imagedir = tmppath / "images"
-    assert imagedir.exists()
-    themefile = imagedir / "sproutcore-logo.png"
-    assert themefile.exists()
 
     plugin_image_dir = tmppath / "resources" / "plugin1" / "images"
     promptfile = plugin_image_dir / "prompt1.png"
