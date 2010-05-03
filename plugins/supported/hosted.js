@@ -39,9 +39,22 @@
 ({
     "description": "Constructs what you see on a hosted Bespin server",
     "dependencies": {
+        "jlayout_border": "0.0.0"
     }
 });
 "end";
 
-document.body.innerHTML = "The future is now.";
+require("jlayout_border");
+var $ = require("jquery").$;
 
+document.body.innerHTML = '<div id="container" style="width: 100%; height: 100%; margin: 0"><div class="center">Editor goes here</div><div class="south">Command line goes here</div></div>';
+
+var container = $('#container');
+
+function relayout() {
+	container.layout({type: 'border', resize: false});
+}
+
+relayout();
+
+$(window).resize(relayout);
