@@ -28,7 +28,7 @@ Depending on what you're trying to accomplish and how much time you're willing
 to invest, there are several ways in which you can use Bespin:
 
 * use https://bespin.mozillalabs.com without downloading anything
-* [download Bespin Embedded](http://ftp.mozilla.org/labs/bespin/Embedded) for use in your own applications
+* [download Bespin Embedded](http://ftp.mozilla.org/pub/mozilla.org/labs/bespin/Embedded/) for use in your own applications
 * set up your own Bespin server (not for the faint of heart!)
 
 This guide is primarily geared toward people using the Bespin server at 
