@@ -76,10 +76,12 @@ var basename = function(name) {
  * keys, and the values will be callable functions that render the
  * template with the context provided.
  */
-exports.compileAll = function(obj) {
-    var result = {};
+exports.compileAll = function(obj, mixInto) {
+    if ("undefined" === typeof(mixInto)) {
+        mixInto = {};
+    }
     Object.keys(obj).forEach(function(name) {
-        result[basename(name)] = exports.compile(obj[name]);
+        mixInto[basename(name)] = exports.compile(obj[name]);
     });
-    return result;
+    return mixInto;
 };
