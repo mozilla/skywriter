@@ -51,9 +51,9 @@ var bespin = require('appsupport:controllers/bespin').bespinController;
 
 var History = require('edit_session:history').History;
 
-/*
-* A Buffer connects a model and file together.
-*/
+/**
+ * A Buffer connects a model and file together.
+ */
 exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
     _file: null,
 
