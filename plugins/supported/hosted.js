@@ -49,7 +49,15 @@
 require("jlayout_border");
 var $ = require("jquery").$;
 
-document.body.innerHTML = '<div id="container" style="width: 100%; height: 100%; margin: 0"><div class="center">Editor goes here</div><div class="south">Command line goes here</div></div>';
+var d = document.createElement("div");
+d.setAttribute("id", "container");
+d.setAttribute("style", "width: 100%; height: 100%; margin: 0");
+document.body.appendChild(d);
+
+d.innerHTML = '<div class="center">Editor goes here</div><div class="south">Command line goes here</div>';
+
+var loading = document.getElementById("loading");
+document.body.removeChild(loading);
 
 var container = $('#container');
 
