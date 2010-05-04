@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var console = require('bespin:console').console;
 var undoManager = require('appsupport:controllers/undomanager').undoManager;
 
@@ -50,7 +49,52 @@ var undoManager = require('appsupport:controllers/undomanager').undoManager;
  * presence of direct modification to the text storage by other objects. This
  * is important for collaboration.
  */
-exports.EditorUndoController = SC.Object.extend({
+exports.EditorUndoController = function(textView) {
+    this._redoStack = [];
+    this._undoStack = [];
+    
+    this.textView = textView;
+
+    textView.beganChangeGroup.add(function(sender, selection) {
+        this._beginTransaction();
+        this._record.selectionBefore = selection;
+    });
+
+    textView.endedChangeGroup.add(function(sender, selection) {
+        this._record.selectionAfter = selection;
+        this._endTransaction();
+    });
+
+    textView.replacedCharacters.add(function(sender, oldRange, characters) {
+        if (!this._inTransaction) {
+            throw new Error('UndoController.textViewReplacedCharacters()' +
+                ' called outside a transaction');
+        }
+
+        this._record.patches.push({
+            oldCharacters:  this._deletedCharacters,
+            oldRange:       oldRange,
+            newCharacters:  characters,
+            newRange:       this.textView.layoutManager.textStorage.
+                            resultingRangeForReplacement(oldRange,
+                            characters.split('\n'))
+        });
+
+        this._deletedCharacters = null;
+    });
+
+    textView.willReplaceRange(function(sender, oldRange) {
+        if (!this._inTransaction) {
+            throw new Error('UndoController.textViewWillReplaceRange() called' +
+                ' outside a transaction');
+        }
+
+        this._deletedCharacters = this.textView.layoutManager.textStorage.
+                            getCharacters(oldRange);
+    });
+};
+
+exports.EditorUndoController.prototype = {
     _inTransaction: false,
     _record: null,
 
@@ -86,7 +130,7 @@ exports.EditorUndoController = SC.Object.extend({
     },
 
     _tryApplyingPatches: function(patches) {
-        var textStorage = this.getPath('textView.layoutManager.textStorage');
+        var textStorage = this.textView.layoutManager.textStorage;
         patches.forEach(function(patch) {
             textStorage.replaceCharacters(patch.oldRange, patch.newCharacters);
         });
@@ -105,59 +149,14 @@ exports.EditorUndoController = SC.Object.extend({
             return false;
         }
 
-        this.get('textView').setSelection(selection, true);
+        this.textView.setSelection(selection, true);
         return true;
-    },
-
-    init: function() {
-        this._redoStack = [];
-        this._undoStack = [];
-
-        this.get('textView').addDelegate(this);
     },
 
     redo: function(record) {
         var patches = record.patches.concat();
         patches.reverse();
         return this._undoOrRedo(patches, record.selectionAfter);
-    },
-
-    textViewBeganChangeGroup: function(sender, selection) {
-        this._beginTransaction();
-        this._record.selectionBefore = selection;
-    },
-
-    textViewEndedChangeGroup: function(sender, selection) {
-        this._record.selectionAfter = selection;
-        this._endTransaction();
-    },
-
-    textViewReplacedCharacters: function(sender, oldRange, characters) {
-        if (!this._inTransaction) {
-            throw new Error('UndoController.textViewReplacedCharacters()' +
-                ' called outside a transaction');
-        }
-
-        this._record.patches.push({
-            oldCharacters:  this._deletedCharacters,
-            oldRange:       oldRange,
-            newCharacters:  characters,
-            newRange:       this.getPath('textView.layoutManager.textStorage').
-                            resultingRangeForReplacement(oldRange,
-                            characters.split('\n'))
-        });
-
-        this._deletedCharacters = null;
-    },
-
-    textViewWillReplaceRange: function(sender, oldRange) {
-        if (!this._inTransaction) {
-            throw new Error('UndoController.textViewWillReplaceRange() called' +
-                ' outside a transaction');
-        }
-
-        this._deletedCharacters = this.getPath('textView.layoutManager.' +
-            'textStorage').getCharacters(oldRange);
     },
 
     undo: function(record) {
@@ -170,5 +169,5 @@ exports.EditorUndoController = SC.Object.extend({
                 };
             }), record.selectionBefore);
     }
-});
+};
 

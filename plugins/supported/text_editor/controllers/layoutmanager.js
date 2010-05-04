@@ -35,9 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Trait = require('traits').Trait;
 var util = require('bespin:util/util');
-var DelegateTrait = require('delegate_support').DelegateTrait;
+var Event = require("events").Event;
 var Range = require('rangeutils:utils/range');
 var SyntaxManager = require('syntax_manager:controllers/syntaxmanager').
     SyntaxManager;
@@ -53,18 +52,18 @@ exports.LayoutManager = function(opts) {
     
     obj.textStorageChanged = obj.textStorageChanged.bind(this);
 
-    obj.set('textLines', [
+    obj.textLines = [
         {
             characters: '',
             colors:     [
                 {
                     start:  0,
                     end:    0,
-                    color:  obj.get('_theme').plain
+                    color:  obj._theme.plain
                 }
             ]
         }
-    ]);
+    ];
 
     obj.createTextStorage();
     obj.createSyntaxManager();
@@ -80,14 +79,18 @@ exports.LayoutManager.prototype = {
     _syntaxManagerInitialized: false,
     _textStorage: null,
 
-    _textStorageChanged: function() {
+    get textStorage() {
+        return this._textStorage;
+    },
+    
+    set textStorage(newTextStorage) {
         var oldTextStorage = this._textStorage;
+        this._textStorage = newTextStorage;
+        
         if (!util.none(oldTextStorage)) {
             oldTextStorage.changed.remove(this.textStorageChanged);
         }
 
-        var newTextStorage = this.get('textStorage');
-        this._textStorage = newTextStorage;
         newTextStorage.changed.add(this.textStorageChanged);
 
         if (this._syntaxManagerInitialized) {
@@ -95,7 +98,7 @@ exports.LayoutManager.prototype = {
             var newRange = newTextStorage.range;
 
             if (!util.none(oldTextStorage)) {
-                var syntaxManager = this.get('syntaxManager');
+                var syntaxManager = this.syntaxManager;
                 syntaxManager.layoutManagerReplacedText(oldRange, newRange);
             }
 
@@ -105,8 +108,8 @@ exports.LayoutManager.prototype = {
             // suppressing the layout.
             this._recomputeLayoutForRanges(oldRange, newRange);
         }
-    }.observes('textStorage'),
-
+    },
+    
     /**
      * Theme colors. Value is set by editorView class. Don't change this
      * property directly. Use the editorView function to adjust it.
@@ -191,7 +194,7 @@ exports.LayoutManager.prototype = {
                 lineRect,
                 {
                     x:      0,
-                    y:      startRect.y + this.get('lineHeight'),
+                    y:      startRect.y + this.lineHeight,
                     width:  Number.MAX_VALUE,
                     height: Number.MAX_VALUE
                 }
@@ -201,7 +204,7 @@ exports.LayoutManager.prototype = {
     // Returns the last valid position in the buffer.
     _lastCharacterPosition: function() {
         return {
-            row: this.get('textLines').length - 1,
+            row: this.textLines.length - 1,
             col: this._maximumWidth
         };
     },
@@ -209,7 +212,7 @@ exports.LayoutManager.prototype = {
     _recalculateMaximumWidth: function() {
         // Lots of room for optimization here if this turns out to be slow. But
         // for now...
-        var textLines = this.get('textLines');
+        var textLines = this.textLines;
         var max = 0;
         textLines.forEach(function(line) {
             var width = line.characters.length;
@@ -231,7 +234,7 @@ exports.LayoutManager.prototype = {
         var newRowCount = newEndRow - oldStartRow + 1;
 
         var lines = this._textStorage.lines;
-        var theme = this.get('_theme');
+        var theme = this._theme;
         var plainColor = theme.plain;
 
         var newTextLines = [];
@@ -249,12 +252,15 @@ exports.LayoutManager.prototype = {
 
         // Take the cached attributes from the syntax manager.
         this.updateTextRows(oldStartRow, newEndRow + 1);
-
-        this.notifyDelegates('layoutManagerChangedTextAtRow', oldStartRow);
+        
+        this.changedTextAtRow(this, oldStartRow);
 
         var invalidRects = this._computeInvalidRects(oldRange, newRange);
-        this.notifyDelegates('layoutManagerInvalidatedRects', invalidRects);
+        this.invalidatedRects(this, invalidRects);
     },
+    
+    changedTextAtRow: new Event(),
+    invalidatedRects: new Event(),
 
     /**
      * Determines the boundaries of the entire text area.
@@ -265,7 +271,7 @@ exports.LayoutManager.prototype = {
         return this.rectsForRange({
             start:  { row: 0, col: 0 },
             end:    {
-                row: this.get('textLines').length - 1,
+                row: this.textLines.length - 1,
                 col: this._maximumWidth
             }
         })[0];
@@ -288,13 +294,13 @@ exports.LayoutManager.prototype = {
      * given point is returned, according to the selection rules.
      */
     characterAtPoint: function(point) {
-        var margin = this.get('margin');
+        var margin = this.margin;
         var x = point.x - margin.left, y = point.y - margin.top;
 
-        var characterWidth = this.get('characterWidth');
+        var characterWidth = this.characterWidth;
         var textStorage = this._textStorage;
         var clampedPosition = textStorage.clampPosition({
-            row: Math.floor(y / this.get('lineHeight')),
+            row: Math.floor(y / this.lineHeight),
             col: Math.floor(x / characterWidth)
         });
 
@@ -315,9 +321,9 @@ exports.LayoutManager.prototype = {
     characterRangeForBoundingRect: function(rect) {
         // TODO: variable line heights, needed for word wrap and perhaps
         // extensions as well
-        var lineHeight = this.get('lineHeight');
-        var characterWidth = this.get('characterWidth');
-        var margin = this.get('margin');
+        var lineHeight = this.lineHeight;
+        var characterWidth = this.characterWidth;
+        var margin = this.margin;
         var x = rect.x - margin.left, y = rect.y - margin.top;
         return {
             start:  {
@@ -349,7 +355,7 @@ exports.LayoutManager.prototype = {
      * syntaxManager property.
      */
     createSyntaxManager: function() {
-        var klass = this.get('syntaxManager');
+        var klass = this.syntaxManager;
         var syntaxManager = klass.create({ layoutManager: this });
         syntaxManager.addDelegate(this);
         this.set('syntaxManager', syntaxManager);
@@ -364,7 +370,7 @@ exports.LayoutManager.prototype = {
      * textStorage property.
      */
     createTextStorage: function() {
-        var klass = this.get('textStorage');
+        var klass = this.textStorage;
         var textStorage = new klass();
         this.set('textStorage', textStorage);
     },
@@ -385,9 +391,9 @@ exports.LayoutManager.prototype = {
     },
 
     rectForPosition: function(position) {
-        var margin = this.get('margin');
-        var characterWidth = this.get('characterWidth');
-        var lineHeight = this.get('lineHeight');
+        var margin = this.margin;
+        var characterWidth = this.characterWidth;
+        var lineHeight = this.lineHeight;
         return {
             x:      margin.left + characterWidth * position.col,
             y:      margin.top + lineHeight * position.row,
@@ -400,10 +406,10 @@ exports.LayoutManager.prototype = {
      * Returns the 1, 2, or 3 rectangles that make up the given range.
      */
     rectsForRange: function(range) {
-        var characterWidth = this.get('characterWidth');
-        var lineHeight = this.get('lineHeight');
+        var characterWidth = this.characterWidth;
+        var lineHeight = this.lineHeight;
         var maximumWidth = this._maximumWidth;
-        var margin = this.get('margin');
+        var margin = this.margin;
 
         var start = range.start, end = range.end;
         var startRow = start.row, startColumn = start.col;
@@ -469,7 +475,7 @@ exports.LayoutManager.prototype = {
     },
 
     textStorageChanged: function(oldRange, newRange) {
-        this.get('syntaxManager').layoutManagerReplacedText(oldRange,
+        this.syntaxManager.layoutManagerReplacedText(oldRange,
             newRange);
         this._recomputeLayoutForRanges(oldRange, newRange);
     },
@@ -480,9 +486,9 @@ exports.LayoutManager.prototype = {
      * highlighters.
      */
     updateTextRows: function(startRow, endRow) {
-        var textLines = this.get('textLines');
-        var attrs = this.get('syntaxManager').attrsForRows(startRow, endRow);
-        var theme = this.get('_theme');
+        var textLines = this.textLines;
+        var attrs = this.syntaxManager.attrsForRows(startRow, endRow);
+        var theme = this._theme;
 
         for (var i = 0; i < attrs.length; i++) {
             textLines[startRow + i].colors = attrs[i].map(function(range) {

@@ -173,12 +173,10 @@ exports.GutterView = SC.View.extend({
 
     init: function() {
         arguments.callee.base.apply(this, arguments);
-
-        this.get('layoutManager').addDelegate(this);
-    },
-
-    layoutManagerInvalidatedRects: function(sender, rects) {
-        this._recomputeLayout();
+        
+        this.layoutManager.invalidatedRects.add(function(sender, rects) {
+            this._recomputeLayout();
+        }.bind(this));
     }
 });
 

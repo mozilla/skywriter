@@ -581,8 +581,18 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         // Allow the user to change the fields of the padding object without
         // screwing up the prototype.
         this.set('padding', SC.clone(this.get('padding')));
-        this.get('layoutManager').addDelegate(this);
-
+        var layoutManager = this.layoutManager;
+        
+        layoutManager.changedTextAtRow.add(function(sender, row) {
+            this._updateSyntax(row);
+            this._repositionSelection();
+        }.bind(this));
+        
+        layoutManager.invalidatedRects.add(function(sender, rects) {
+            rects.forEach(this.setNeedsDisplayInRect, this);
+            this._resize();
+        }.bind(this));
+        
         this._updateEnclosingScrollView();
 
         this._resize();
@@ -652,23 +662,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             // otherwise the textInput mixin can't detect the key events.
             return false;
         }
-    },
-
-    /**
-     * Runs the syntax highlighter from the given row to the end of the visible
-     * range, and repositions the selection.
-     */
-    layoutManagerChangedTextAtRow: function(sender, row) {
-        this._updateSyntax(row);
-        this._repositionSelection();
-    },
-
-    /**
-     * Marks the given rectangles as invalid.
-     */
-    layoutManagerInvalidatedRects: function(sender, rects) {
-        rects.forEach(this.setNeedsDisplayInRect, this);
-        this._resize();
     },
 
     mouseDown: function(evt) {

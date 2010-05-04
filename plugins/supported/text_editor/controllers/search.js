@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var util = require('bespin:util/util');
 var Range = require('rangeutils:utils/range');
 var console = require('bespin:console').console;
@@ -45,7 +44,10 @@ var console = require('bespin:console').console;
  *
  * Manages the Find functionality.
  */
-exports.EditorSearchController = SC.Object.extend({
+exports.EditorSearchController = function() {
+};
+
+exports.EditorSearchController.prototype = {
     /**
      * This is based on the idea from:
      *      http://simonwillison.net/2006/Jan/20/escape/.
@@ -129,9 +131,9 @@ exports.EditorSearchController = SC.Object.extend({
         } else {
             regExp = new RegExp(text);
         }
-        this.set('searchRegExp', regExp);
-        this.set('isRegExp', isRegExp);
-        this.set('searchText', text);
+        this.searchRegExp = regExp;
+        this.isRegExp = isRegExp;
+        this.searchText = text;
     },
 
     /**
@@ -149,7 +151,7 @@ exports.EditorSearchController = SC.Object.extend({
         var textView = this.get('textView');
         startPos = startPos || textView.getSelectedRange().end;
 
-        var lines = textView.getPath('layoutManager.textStorage').lines;
+        var lines = textView.layoutManager.textStorage.lines;
         var searchResult;
 
         searchRegExp.lastIndex = startPos.col;
@@ -192,7 +194,7 @@ exports.EditorSearchController = SC.Object.extend({
         var textView = this.get('textView');
         startPos = startPos || textView.getSelectedRange().start;
 
-        var lines = textView.getPath('layoutManager.textStorage').lines;
+        var lines = textView.layoutManager.textStorage.lines;
         var searchResults;
 
         // Treat the first line specially.
@@ -229,5 +231,5 @@ exports.EditorSearchController = SC.Object.extend({
 
         return null;
     }
-});
+};
 
