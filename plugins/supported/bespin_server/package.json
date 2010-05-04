@@ -2,7 +2,7 @@
     "description": "Provides communication with the Bespin Server",
     "dependencies":  {
         "filesystem": "0.0",
-        "history": "0.0",
+        "canon": "0.0",
         "settings": "0.0",
         "project": "0.0",
         "appsupport": "0.0"

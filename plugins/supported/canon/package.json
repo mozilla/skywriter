@@ -19,6 +19,12 @@
             "description": "How many typed commands do we recall for reference?",
             "type": "number",
             "defaultValue": 50
+        },
+        {
+            "ep": "factory",
+            "name": "history",
+            "action": "create",
+            "pointer": "history#InMemoryHistory"
         }
     ]
 }
