@@ -40,7 +40,8 @@
     "description": "Constructs what you see on a hosted Bespin server",
     "dependencies": {
         "jlayout_border": "0.0.0",
-        "jsmt": "0.0.0"
+        "jsmt": "0.0.0",
+        "text_editor": "0.0.0"
     }
 });
 "end";

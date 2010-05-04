@@ -45,63 +45,7 @@
 });
 "end";
 
-var SC = require('sproutcore/runtime').SC;
 var Trait = require('traits').Trait;
-
-/**
- * @namespace
- *
- * This mixin provides support for delegate objects. It's similar to
- * SC.DelegateSupport but is simpler and allows multiple delegates.
- */
-exports.MultiDelegateSupport = {
-    /**
-     * @property{Array}
-     *
-     * The set of delegates.
-     */
-    delegates: [],
-
-    /**
-     * Adds a delegate to the list of delegates.
-     */
-    addDelegate: function(delegate) {
-        this.set('delegates', this.get('delegates').concat(delegate));
-    },
-
-    /**
-     * @protected
-     *
-     * For each delegate that implements the given method, calls it, passing
-     * this object as the first parameter along with any other parameters
-     * specified.
-     */
-    notifyDelegates: function(method) {
-        var args = [ this ];
-        for (var i = 1; i < arguments.length; i++) {
-            args.push(arguments[i]);
-        }
-
-        this.get('delegates').forEach(function(delegate) {
-            // As we have a branch of non SC classes now, we can't use the
-            // respondsTo function anymore...
-            // if (delegate.respondsTo(method)) {
-            if (delegate[method]) {
-                delegate[method].apply(delegate, args);
-            }
-        });
-    },
-
-    /**
-     * Removes a delegate from the list of delegates.
-     */
-    removeDelegate: function(oldDelegate) {
-        var delegates = this.get('delegates');
-        this.set('delegates', delegates.filter(function(delegate) {
-            return delegate !== oldDelegate;
-        }));
-    }
-};
 
 exports.DelegateTrait = Trait({
     /**
@@ -144,6 +88,6 @@ exports.DelegateTrait = Trait({
     removeDelegate: function(oldDelegate) {
         this.delegates = this.delegates.filter(function(delegate) {
             return delegate !== oldDelegate;
-        })
+        });
     }
 });

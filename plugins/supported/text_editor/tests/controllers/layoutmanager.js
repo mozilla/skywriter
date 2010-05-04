@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var t = require('plugindev');
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 
@@ -50,10 +49,10 @@ var PANGRAMS =
     'Vext cwm fly, zing, jabs kurd qoph.\n';
 
 exports.testCharacterRectForPosition = function() {
-    var layoutManager = LayoutManager.create({
+    var layoutManager = new LayoutManager({
         margin: { left: 0, bottom: 0, top: 0, right: 0 }
     });
-    layoutManager.get('textStorage').setValue(PANGRAMS);
+    layoutManager.textStorage.setValue(PANGRAMS);
 
     var characterWidth = layoutManager.characterWidth;
     var lineHeight = layoutManager.lineHeight;
@@ -68,11 +67,11 @@ exports.testCharacterRectForPosition = function() {
 };
 
 exports.testDimensionsCalculation = function() {
-    var layoutManager = LayoutManager.create({
+    var layoutManager = new LayoutManager({
         margin: { left: 0, bottom: 0, top: 0, right: 0 }
     });
 
-    var textStorage = layoutManager.get('textStorage');
+    var textStorage = layoutManager.textStorage;
     textStorage.setValue('Battlefield Earth\n' +
         'The Star Wars Holiday Special\n' +
         'Manos: The Hands of Fate\n' +
@@ -99,22 +98,22 @@ exports.testDimensionsCalculation = function() {
 };
 
 exports.testInvalidRects = function() {
-    var layoutManager = LayoutManager.create({
+    var layoutManager = new LayoutManager({
         margin: { left: 0, bottom: 0, top: 0, right: 0 }
     });
 
-    var textStorage = layoutManager.get('textStorage');
+    var textStorage = layoutManager.textStorage;
     textStorage.setValue('foo\nbar\nbaz\nboo\n');
 
     var characterWidth = layoutManager.characterWidth;
     var lineHeight = layoutManager.lineHeight;
 
     var returnedRects;
-    layoutManager.addDelegate(SC.Object.create({
+    layoutManager.addDelegate({
         layoutManagerInvalidatedRects: function(sender, rects) {
             returnedRects = rects;
         }
-    }));
+    });
 
     textStorage.insertCharacters({ row: 1, col: 1 }, 'aaa');
     t.deepEqual(returnedRects[0], {
@@ -162,13 +161,13 @@ exports.testInvalidRects = function() {
 
 exports.testPointToCharacterMapping = function() {
     var leftMargin = 3, topMargin = 5;
-    var layoutManager = LayoutManager.create({
+    var layoutManager = new LayoutManager({
         margin: { left: leftMargin, bottom: 4, top: topMargin, right: 6 }
     });
     var characterWidth = layoutManager.characterWidth;
     var lineHeight = layoutManager.lineHeight;
 
-    layoutManager.get('textStorage').setValue(PANGRAMS);
+    layoutManager.textStorage.setValue(PANGRAMS);
 
     var pos = layoutManager.characterAtPoint({
         x: leftMargin + 5 * characterWidth,
@@ -187,10 +186,10 @@ exports.testPointToCharacterMapping = function() {
 };
 
 exports.testRectsForRange = function() {
-    var layoutManager = LayoutManager.create({
+    var layoutManager = new LayoutManager({
         margin: { left: 0, bottom: 0, top: 0, right: 0 }
     });
-    layoutManager.get('textStorage').setValue(PANGRAMS);
+    layoutManager.textStorage.setValue(PANGRAMS);
 
     var characterWidth = layoutManager.characterWidth;
     var lineHeight = layoutManager.lineHeight;

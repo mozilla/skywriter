@@ -35,16 +35,47 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
+var Trait = require('traits').Trait;
 var util = require('bespin:util/util');
-var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
+var DelegateTrait = require('delegate_support').DelegateTrait;
 var Range = require('rangeutils:utils/range');
 var SyntaxManager = require('syntax_manager:controllers/syntaxmanager').
     SyntaxManager;
 var TextStorage = require('models/textstorage').TextStorage;
 var catalog = require('bespin:plugins').catalog;
 
-exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
+exports.LayoutManager = function(opts) {
+    var obj = Trait.create(LayoutManager.prototype, DelegateTrait);
+    
+    Object.keys(opts).forEach(function(key) {
+        obj[key] = opts[key];
+    });
+    
+    obj.textStorageChanged = obj.textStorageChanged.bind(this);
+
+    obj.set('textLines', [
+        {
+            characters: '',
+            colors:     [
+                {
+                    start:  0,
+                    end:    0,
+                    color:  obj.get('_theme').plain
+                }
+            ]
+        }
+    ]);
+
+    obj.createTextStorage();
+    obj.createSyntaxManager();
+
+    // Now that the syntax manager is set up, we can recompute the layout.
+    // (See comments in _textStorageChanged().)
+    obj._recomputeEntireLayout();
+    return obj;
+};
+
+exports.LayoutManager.prototype = {
     _maximumWidth: 0,
     _syntaxManagerInitialized: false,
     _textStorage: null,
@@ -268,11 +299,11 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         });
 
         var lineLength = textStorage.lines[clampedPosition.row].length;
-        return SC.mixin(clampedPosition, {
-            partialFraction:
-                x < 0 || clampedPosition.col === lineLength ? 0.0 :
-                x % characterWidth / characterWidth
-        });
+        clampedPosition.partialFraction = x < 0 || 
+            clampedPosition.col === lineLength ? 0.0 :
+            x % characterWidth / characterWidth;
+        
+        return clampedPosition;
     },
 
     /**
@@ -339,27 +370,6 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
     },
 
     init: function() {
-        this.textStorageChanged = this.textStorageChanged.bind(this);
-
-        this.set('textLines', [
-            {
-                characters: '',
-                colors:     [
-                    {
-                        start:  0,
-                        end:    0,
-                        color:  this.get('_theme').plain
-                    }
-                ]
-            }
-        ]);
-
-        this.createTextStorage();
-        this.createSyntaxManager();
-
-        // Now that the syntax manager is set up, we can recompute the layout.
-        // (See comments in _textStorageChanged().)
-        this._recomputeEntireLayout();
     },
 
     /**
@@ -485,5 +495,5 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
             });
         }
     }
-});
+};
 
