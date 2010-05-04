@@ -358,7 +358,7 @@ exports.LayoutManager.prototype = {
         var klass = this.syntaxManager;
         var syntaxManager = klass.create({ layoutManager: this });
         syntaxManager.addDelegate(this);
-        this.set('syntaxManager', syntaxManager);
+        this.syntaxManager = syntaxManager;
         this._syntaxManagerInitialized = true;
     },
 
@@ -372,10 +372,7 @@ exports.LayoutManager.prototype = {
     createTextStorage: function() {
         var klass = this.textStorage;
         var textStorage = new klass();
-        this.set('textStorage', textStorage);
-    },
-
-    init: function() {
+        this.textStorage = textStorage;
     },
 
     /**

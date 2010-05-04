@@ -362,6 +362,9 @@ exports.isChrome = parseFloat(ua.split("Chrome/")[1]) || undefined;
 /** Is the user using a browser that identifies itself as Mac OS */
 exports.isMac = av.indexOf("Macintosh") >= 0;
 
+/* Is this Firefox or related? */
+exports.isMozilla = av.indexOf('Gecko/') >= 0;
+
 if (ua.indexOf("AdobeAIR") >= 0) {
     exports.isAIR = 1;
 }

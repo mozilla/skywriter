@@ -35,51 +35,67 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var util = require('bespin:util/util');
 
 /**
  * @namespace
  *
- * This mixin delivers text input events similar to those defined in the DOM
- * Level 3 specification. It allows views to support internationalized text
- * input via non-US keyboards, dead keys, and/or IMEs. It also provides support
- * for copy and paste. Currently, an invisible contentEditable div is used, but
- * in the future this module should use DOM 3 TextInput events directly where
- * available.
+ * This class provides a hidden text input to provide events similar to those 
+ * defined in the DOM Level 3 specification. It allows views to support
+ * internationalized text input via non-US keyboards, dead keys, and/or IMEs. 
+ * It also provides support for copy and paste. Currently, an invisible 
+ * contentEditable div is used, but in the future this module should use 
+ * DOM 3 TextInput events directly where available.
  *
- * To use this mixin, derive from it and implement the functions (don't have to)
+ * To use this class, instantiate it and provide the optional functions
  *   - copy: function() { return 'text for clipboard' }
  *   - cut: function() { 'Cut some text'; return 'text for clipboard'}
  *   - textInserted: function(newInsertedText) { 'handle new inserted text'; }
- * Note: Pasted text is provied through the textInserted(pastedText) function.
+ * Note: Pasted text is provided through the textInserted(pastedText) function.
  *
- * Make sure to call the superclass implementation if you override any of the
- * following functions:
- *   - render(context, firstTime)
- *   - didCreateLayer()
- *   - mouseDown(event)
- *   - willBecomeKeyResponderFrom(responder)
- *   - willLoseKeyResponderTo(responder)
+ * You can also provide an DOM node to take focus from by providing the optional
+ * "takeFocusFrom" parameter.
+ * 
+ * The first parameter is a container node.
  */
-exports.TextInput = {
-    _TextInput_composing: false,
-    _TextInput_ignore: false,
-    _TextInput_ignoreBlur: false,
-    _TextInput_textFieldId: undefined,
-    _TextInput_textFieldDom: undefined,
-    _TextInput_wantsFocus: false,
+exports.TextInput = function(container, opts) {
+    var textFieldDom = this._textFieldDom = document.createElement('textarea');
+    textFieldDom.setAttribute('style', 'position: absolute; ' +
+        'z-index: -99999; top: -999px; left: -999px; width: 0px; ' +
+        'height: 0px');
+    container.appendChild(textFieldDom);
+    
+    this.copy = opts.copy;
+    this.cut = opts.cut;
+    this.paste = opts.paste;
+    if (opts.takeFocusFrom) {
+        opts.takeFocusFrom.addEventListener("focus", function(evt) {
+            this.focusTextInput();
+            return true;
+        }.bind(this));
+        
+        opts.takeFocusFrom.addEventListener("blur", function(evt) {
+            this.unfocusTextInput();
+            return true;
+        }.bind(this));
+    }
+    
+    this._configureListeners(textFieldDom);
+};
 
-    // Keyevents and copy/cut/paste are not the same on Safari and Chrome.
-    _isChrome: !!parseFloat(navigator.userAgent.split('Chrome/')[1]),
+exports.TextInput.prototype = {
+    _composing: false,
+    _ignore: false,
+    _ignoreBlur: false,
+    _textFieldDom: undefined,
 
     // This function doesn't work on WebKit! The textContent comes out empty...
-    _TextInput_textFieldChanged: function() {
-        if (this._TextInput_composing || this._TextInput_ignore) {
+    _textFieldChanged: function() {
+        if (this._composing || this._ignore) {
             return;
         }
 
-        var textField = this._TextInput_textFieldDom;
+        var textField = this._textFieldDom;
         var text = textField.value;
         // On FF textFieldChanged is called sometimes although nothing changed.
         // -> don't call textInserted() in such a case.
@@ -88,39 +104,33 @@ exports.TextInput = {
         }
         textField.value = '';
 
-        this._TextInput_textInserted(text);
+        this._textInserted(text);
     },
 
-    _TextInput_copy: function() {
+    _copy: function() {
         var copyData = false;
-        if (this.respondsTo('copy')) {
-            SC.RunLoop.begin();
+        if (this.copy) {
             copyData = this.copy();
-            SC.RunLoop.end();
         }
         return copyData;
     },
 
-    _TextInput_cut: function() {
+    _cut: function() {
         var cutData = false;
-        if (this.respondsTo('cut')) {
-            SC.RunLoop.begin();
+        if (this.cut) {
             cutData = this.cut();
-            SC.RunLoop.end();
         }
         return cutData;
     },
 
-    _TextInput_textInserted: function(text) {
-        if (this.respondsTo('textInserted')) {
-            SC.RunLoop.begin();
+    _textInserted: function(text) {
+        if (this.textInserted) {
             this.textInserted(text);
-            SC.RunLoop.end();
         }
     },
 
-    _TextInput_setValueAndSelect: function(text) {
-        var textField = this._TextInput_textFieldDom;
+    _setValueAndSelect: function(text) {
+        var textField = this._textFieldDom;
         textField.value = text;
         textField.select();
     },
@@ -131,13 +141,7 @@ exports.TextInput = {
      * you should call this function in your implementation.
      */
     focusTextInput: function() {
-        if (util.none(this._TextInput_textFieldDom)) {
-            // Avoid accessing the nonexistent DOM element, and simply set an
-            // internal flag that didCreateLayer() will check later.
-            this._TextInput_wantsFocus = true;
-        } else {
-            this._TextInput_textFieldDom.focus();
-        }
+        this._textFieldDom.focus();
     },
 
     /**
@@ -146,27 +150,7 @@ exports.TextInput = {
      * you should call this function in your implementation.
      */
     unfocusTextInput: function() {
-        this._TextInput_textFieldDom.blur();
-    },
-
-    /**
-     * If you override this method, you should call that function as well.
-     */
-    render: function(context, firstTime) {
-        arguments.callee.base.apply(this, arguments);
-
-        if (firstTime) {
-            // Add a textarea to handle focus, copy & paste and key input
-            // within the current view and hide it under the view.
-            var frame = this.get('frame');
-            var textFieldContext = context.begin('textarea');
-            this._TextInput_textFieldId = SC.guidFor(textFieldContext);
-            textFieldContext.id(this._TextInput_textFieldId);
-            textFieldContext.attr('style', 'position: absolute; ' +
-                'z-index: -99999; top: -999px; left: -999px; width: 0px; ' +
-                'height: 0px');
-            textFieldContext.end();
-        }
+        this._textFieldDom.blur();
     },
 
     /**
@@ -174,48 +158,36 @@ exports.TextInput = {
      * be notified of events. If you override this method, you should call
      * that function as well.
      */
-    didCreateLayer: function() {
-        arguments.callee.base.apply(this, arguments);
-
-        var textField = this.$('#' + this._TextInput_textFieldId)[0];
-        this._TextInput_textFieldDom = textField;
+    _configureListeners: function(textField) {
         var self = this;
-
-        // If the focusTextInput() function has been called, set the focus now.
-        if (this._TextInput_wantsFocus) {
-            window.setTimeout(this.becomeFirstResponder.bind(this), 0);
-        }
 
         // No way that I can see around this ugly browser sniffing, without
         // more complicated hacks. No browsers have a complete enough
         // implementation of DOM 3 events at the current time (12/2009). --pcw
-        if (SC.browser.safari) {    // Chrome too
+        if (util.isWebKit) {    // Chrome too
             // On Chrome the compositionend event is fired as well as the
             // textInput event, but only one of them has to be handled.
-            if (!this._isChrome) {
+            if (!util.isChrome) {
                 textField.addEventListener('compositionend', function(evt) {
-                    self._TextInput_textInserted(evt.data);
+                    self._textInserted(evt.data);
                 }, false);
             }
             textField.addEventListener('textInput', function(evt) {
-                self._TextInput_textInserted(evt.data);
+                self._textInserted(evt.data);
             }, false);
             textField.addEventListener('paste', function(evt) {
-                self._TextInput_textInserted(evt.clipboardData.
+                self._textInserted(evt.clipboardData.
                     getData('text/plain'));
                 evt.preventDefault();
             }, false);
         } else {
-            var textFieldChangedFn = function(evt) {
-                self._TextInput_textFieldChanged();
-            };
+            var textFieldChangedFn = self._textFieldChanged.bind(self);
 
             // Same as above, but executes after all pending events. This
             // ensures that content gets added to the text field before the
             // value field is read.
             var textFieldChangedLater = function() {
-                window.setTimeout(function() { SC.run(textFieldChangedFn); },
-                    0);
+                window.setTimeout(textFieldChangedFn, 0);
             };
 
             textField.addEventListener('keydown', textFieldChangedLater,
@@ -224,11 +196,11 @@ exports.TextInput = {
             textField.addEventListener('keyup', textFieldChangedFn, false);
 
             textField.addEventListener('compositionstart', function(evt) {
-                self._TextInput_composing = true;
+                self._composing = true;
             }, false);
             textField.addEventListener('compositionend', function(evt) {
-                self._TextInput_composing = false;
-                self._TextInput_textFieldChanged();
+                self._composing = false;
+                self._textFieldChanged();
             }, false);
 
             textField.addEventListener('paste', function(evt) {
@@ -242,9 +214,9 @@ exports.TextInput = {
                 // Sometimes a delay of 0 is too short for Fx. In such a case
                 // the keyUp events occur a little bit later and the pasted
                 // content is detected there.
-                self._TextInput_setValueAndSelect('');
+                self._setValueAndSelect('');
                 window.setTimeout(function() {
-                    self._TextInput_textFieldChanged();
+                    self._textFieldChanged();
                 }, 0);
             }, false);
         }
@@ -256,35 +228,30 @@ exports.TextInput = {
         var copyCutBaseFn = function(evt) {
             // Get the data that should be copied/cutted.
             var copyCutData = evt.type.indexOf('copy') != -1 ?
-                            self._TextInput_copy() :
-                            self._TextInput_cut();
+                            self._copy() :
+                            self._cut();
             // Set the textField's value equal to the copyCutData.
             // After this function is called, the real copy or cut
             // event takes place and the selected text in the
             // textField is pushed to the OS's clipboard.
-            self._TextInput_setValueAndSelect(copyCutData);
+            self._setValueAndSelect(copyCutData);
         };
 
         // For all browsers that are not Safari running on Mac.
-        if (!(SC.browser.isSafari && !this._isChrome && SC.browser.isMac)) {
+        if (!(util.isWebKit && !util.isChrome && util.isMac)) {
             var copyCutMozillaFn = false;
-            if (SC.browser.isMozilla) {
+            if (util.isMozilla) {
                 // If the browser is Mozilla like, the copyCut function has to
                 // be extended.
                 copyCutMozillaFn = function(evt) {
                     // Call the basic copyCut function.
                     copyCutBaseFn(evt);
 
-                    // On Firefox you have to ignore the textarea's content
-                    // until it's copied / cutted. Otherwise the value of the
-                    // textarea is inserted again.
-                    if (SC.browser.isMozilla) {
-                        self._TextInput_ignore = true;
-                        window.setTimeout(function() {
-                            self._TextInput_setValueAndSelect('');
-                            self._TextInput_ignore = false;
-                        }, 0);
-                    }
+                    self._ignore = true;
+                    window.setTimeout(function() {
+                        self._setValueAndSelect('');
+                        self._ignore = false;
+                    }, 0);
                 };
             }
             textField.addEventListener('copy', copyCutMozillaFn ||
@@ -318,53 +285,6 @@ exports.TextInput = {
                 false);
             textField.addEventListener('beforecut',  copyCutSafariMacFn,
                 false);
-        }
-
-        // Clicking the address bar causes a blur, but SproutCore won't notice
-        // unless we tell it explicitly.
-        textField.addEventListener('blur', function(evt) {
-            SC.run(function() {
-                self._TextInput_ignoreBlur = true;
-                self.resignFirstResponder();
-                self._TextInput_ignoreBlur = false;
-            });
-        }, false);
-
-        // If the textinput gets the focus from a non SproutCore view, the
-        // willBecomeKeyResponderFrom() will not be called. For this reason,
-        // the textInput has to listen to the focus event itself.
-        textField.addEventListener('focus', function(evt) {
-            SC.run(function() { self.becomeFirstResponder(); });
-        }, false);
-    },
-
-    /**
-     * The default implementation of this event sets the focus. If you
-     * override this method, you should call that function as well.
-     */
-    mouseDown: function(evt) {
-        arguments.callee.base.apply(this, arguments);
-        window.setTimeout(this.becomeFirstResponder.bind(this), 0);
-        return true;
-    },
-
-    /**
-     * The default implementation of this event calls focusTextarea(). If you
-     * override this method, you should call that function as well.
-     */
-    willBecomeKeyResponderFrom: function(responder) {
-        arguments.callee.base.apply(this, arguments);
-        this.focusTextInput();
-    },
-
-    /**
-     * The default implementation of this event calls unfocusTextarea(). If you
-     * override this method, you should call that function as well.
-     */
-    willLoseKeyResponderTo: function(responder) {
-        arguments.callee.base.apply(this, arguments);
-        if (!this._TextInput_ignoreBlur) {
-            this.unfocusTextInput();
         }
     }
 };
