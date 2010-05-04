@@ -43,9 +43,9 @@ var Trace = require('bespin:util/stacktrace').Trace;
 var util = require('bespin:util/util');
 
 var types = require('types:types');
-var keyboard = require('canon:keyboard');
 var environment = require('canon:environment');
 var Request = require('canon:request').Request;
+var keyboard = require('keyboard:keyboard');
 
 var Hint = require('command_line:hint').Hint;
 var Level = require('command_line:hint').Level;

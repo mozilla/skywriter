@@ -42,10 +42,10 @@ var util = require('bespin:util/util');
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 
-var keyutil = require('canon:keyutil');
+var keyutil = require('keyboard:keyutil');
+var keyboardManager = require('keyboard:keyboard').keyboardManager;
 
 var request = require('canon:request');
-var keyboardManager = require('canon:keyboard').keyboardManager;
 var environment = require('canon:environment').global;
 var settings = require('settings').settings;
 

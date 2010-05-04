@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var keyboard = require('keyboard');
+var keyboard = require('keyboard:keyboard');
 var t = require('plugindev');
 
 exports.testKeyMatching = function() {

@@ -1,11 +1,9 @@
 {
-    "description": "Manages commands and their keyboard shortcuts",
+    "description": "Manages commands",
     "dependencies":
     {
         "settings": "0.0",
-        "types": "0.0",
-        "appsupport": "0.0",
-        "traits": "0.0"
+        "appsupport": "0.0"
     },
     "provides":
     [
@@ -21,11 +19,6 @@
             "description": "How many typed commands do we recall for reference?",
             "type": "number",
             "defaultValue": 50
-        },
-        {
-            "ep": "settingChanged",
-            "key": "customKeymapping",
-            "pointer": "keyboard#keyboardManager._customKeymappingChanged"
         }
     ]
 }

@@ -38,8 +38,8 @@
 var SC = require('sproutcore/runtime').SC;
 var catalog = require('bespin:plugins').catalog;
 var Promise = require('bespin:promise').Promise;
-var Request = require('request').Request;
-var EnvironmentTrait = require('environment').EnvironmentTrait;
+var Request = require('canon:request').Request;
+var EnvironmentTrait = require('canon:environment').EnvironmentTrait;
 
 exports.MockEnvironmentTrait = EnvironmentTrait;
 
@@ -47,12 +47,12 @@ exports.MockRequest = Request.extend({
     init: function() {
         this.set('promise', new Promise());
     },
-    
+
     doneWithError: function(errorMessage) {
         this.superclass(errorMessage);
         this.promise.reject(this);
     },
-    
+
     done: function(content) {
         this.superclass(content);
         this.promise.resolve(this);

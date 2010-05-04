@@ -3,6 +3,7 @@
     "dependencies":
     {
         "canon": "0.0",
+        "keyboard": "0.0",
         "types": "0.0",
         "settings": "0.0",
         "diff": "0.0",

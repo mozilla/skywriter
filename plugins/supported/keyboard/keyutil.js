@@ -29,8 +29,6 @@ For more information about SproutCore, visit http://www.sproutcore.com
 ==========================================================================
 @license */
 
-var Trait = require('traits').Trait;
-
 // Note: Most of the following code is taken from SproutCore with a few changes.
 //       Julian Viereck, 04-23-2010
 

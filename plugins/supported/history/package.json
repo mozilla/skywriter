@@ -1,8 +1,8 @@
 {
     "description": "Command line history",
-    "dependencies": {
-        "canon": "0.0",
-        "appsupport": "0.0"
+    "dependencies":
+    {
+        "canon": "0.0"
     },
     "provides":
     [

@@ -44,7 +44,7 @@ var util = require('bespin:util/util');
 
 var settings = require('settings').settings;
 
-var keyutil = require('canon:keyutil');
+var keyutil = require('keyboard:keyutil');
 var Request = require('canon:request').Request;
 var environment = require('canon:environment');
 
@@ -52,7 +52,7 @@ var environment = require('canon:environment');
  *
  */
 exports.buildFlags = function(env, flags) {
-    flags.context = env.contexts[0];;
+    flags.context = env.contexts[0];
     return flags;
 };
 
