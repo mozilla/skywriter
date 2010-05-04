@@ -35,8 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
-
 /**
  * @private
  *
@@ -75,7 +73,7 @@ exports.merge = function(set) {
                     set.removeAt(j, 1);
 
                     // There's room for optimization here...
-                    newSet[newSet.length - 1] = SC.unionRects(rectA, rectB);
+                    newSet[newSet.length - 1] = exports.unionRects(rectA, rectB);
 
                     modified = true;
                     break;
@@ -87,7 +85,7 @@ exports.merge = function(set) {
     } while (modified);
 
     return set;
-},
+};
 
 /**
  * Returns the vector representing the shortest offset between the given
@@ -95,8 +93,8 @@ exports.merge = function(set) {
  */
 exports.offsetFromRect = function(rect, point) {
     return {
-        x: exports._distanceFromBounds(point.x, rect.x, SC.maxX(rect)),
-        y: exports._distanceFromBounds(point.y, rect.y, SC.maxY(rect))
+        x: exports._distanceFromBounds(point.x, rect.x, exports.maxX(rect)),
+        y: exports._distanceFromBounds(point.y, rect.y, exports.maxY(rect))
     };
 };
 
@@ -105,7 +103,7 @@ exports.offsetFromRect = function(rect, point) {
  * rectangles don't count; they must actually overlap some region.
  */
 exports.rectsIntersect = function(a, b) {
-    var intersection = SC.intersectRects(a, b);
+    var intersection = exports.intersectRects(a, b);
     return intersection.width !== 0 && intersection.height !== 0;
 };
 
@@ -135,3 +133,59 @@ exports.rectsSideBySide = function(a, b) {
     return false;
 };
 
+// extracted from SproutCore
+exports.intersectRects = function(r1, r2) {
+  // find all four edges
+  var ret = {
+    x: Math.max(exports.minX(r1), exports.minX(r2)),
+    y: Math.max(exports.minY(r1), exports.minY(r2)),
+    width: Math.min(exports.maxX(r1), exports.maxX(r2)),
+    height: Math.min(exports.maxY(r1), exports.maxY(r2))
+  } ;
+  
+  // convert edges to w/h
+  ret.width = Math.max(0, ret.width - ret.x) ;
+  ret.height = Math.max(0, ret.height - ret.y) ;
+  return ret ;
+};
+
+/** Return the left edge of the frame */
+exports.minX = function(frame) { 
+  return frame.x || 0; 
+};
+
+/** Return the right edge of the frame. */
+exports.maxX = function(frame) { 
+  return (frame.x || 0) + (frame.width || 0); 
+};
+
+/** Return the top edge of the frame */
+exports.minY = function(frame) {
+  return frame.y || 0 ;
+};
+
+/** Return the bottom edge of the frame */
+exports.maxY = function(frame) {
+  return (frame.y || 0) + (frame.height || 0) ;
+};
+
+/** Returns the union between two rectangles
+
+  @param r1 {Rect} The first rect
+  @param r2 {Rect} The second rect
+  @returns {Rect} The union rect.
+*/
+exports.unionRects = function(r1, r2) {
+  // find all four edges
+  var ret = {
+    x: Math.min(exports.minX(r1), exports.minX(r2)),
+    y: Math.min(exports.minY(r1), exports.minY(r2)),
+    width: Math.max(exports.maxX(r1), exports.maxX(r2)),
+    height: Math.max(exports.maxY(r1), exports.maxY(r2))
+  } ;
+  
+  // convert edges to w/h
+  ret.width = Math.max(0, ret.width - ret.x) ;
+  ret.height = Math.max(0, ret.height - ret.y) ;
+  return ret ;
+};
