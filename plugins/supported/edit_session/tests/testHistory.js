@@ -41,7 +41,7 @@ var History = require('edit_session:history').History;
 
 exports.testHistory = function() {
     var mockStorage = {};
-    var history = History.create({ storage: mockStorage });
+    var history = new History(mockStorage);
 
     t.equal(history.getRecent(100).length, 0, 'the length of a freshly ' +
         'created history object and zero');

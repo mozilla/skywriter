@@ -214,7 +214,7 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
 }));
 
 exports.EditSession = function() {
-    this.history = History.create();
+    this.history = new History();
 };
 
 exports.EditSession.prototype = {
