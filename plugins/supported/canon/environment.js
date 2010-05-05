@@ -123,7 +123,7 @@ exports.Environment.prototype = {
      * If files are available, this will get them. Perhaps we need some other
      * mechanism for populating these things from the catalog?
      */
-    getFiles: function() {
+    get files() {
         return bespin.files;
     }
 };
