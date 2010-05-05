@@ -39,7 +39,7 @@ var UndoManager = require('controllers/undomanager').UndoManager;
 var t = require('plugindev');
 
 exports.testUndoAndRedo = function() {
-    var undoManager = UndoManager.create();
+    var undoManager = new UndoManager();
 
     var redoReceived = null;
     var undoReceived = null;
