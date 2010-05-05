@@ -35,18 +35,35 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var Promise = require('bespin:promise').Promise;
 var util = require('bespin:util/util');
 
+exports.StandardSyntax = function(states) {
+    this.states = states;
+
+    // Set the sticky flag on the regexes, if we can.
+    for (var i = 0; i < this.states.length; i++) {
+        var alternations = this.states[i];
+        var alternationCount = alternations.length;
+        for (var j = 0; j < alternationCount; j++) {
+            var alternation = alternations[j];
+            var regex = alternation.regex;
+
+            if (this._stickySupported === null) {
+                this._stickySupported = regex.sticky !== undefined;
+            }
+
+            if (this._stickySupported) {
+                regex.sticky = true;
+            }
+        }
+    }
+};
+
 /**
- * @class
- *
  * This syntax controller exposes a simple regex- and line-based parser.
  */
-exports.StandardSyntax = SC.Object.extend({
-    _stickySupported: null,
-
+exports.StandardSyntax.prototype = {
     _parseActions: function(actions) {
         if (util.none(actions)) {
             return [];
@@ -69,41 +86,11 @@ exports.StandardSyntax = SC.Object.extend({
         return newState;
     },
 
-    states: null,
-
-    init: function() {
-        var stickySupported = null;
-
-        // Set the sticky flag on the regexes, if we can.
-        var states = this.get('states');
-        var stateCount = states.length;
-        for (var i = 0; i < stateCount; i++) {
-            var alternations = states[i];
-            var alternationCount = alternations.length;
-            for (var j = 0; j < alternationCount; j++) {
-                var alternation = alternations[j];
-                var regex = alternation.regex;
-
-                if (stickySupported === null) {
-                    stickySupported = regex.sticky !== undefined;
-                }
-
-                if (stickySupported) {
-                    regex.sticky = true;
-                }
-            }
-        }
-
-        this._stickySupported = stickySupported;
-    },
-
     syntaxInfoForLineFragment: function(context, state, line, start, end) {
         var promise = new Promise();
 
         var attrs = [];
         var stickySupported = this._stickySupported;
-        var lineLength = line.length;
-        var states = this.get('states');
 
         if (end !== null && end < line.length) {
             line = line.substring(0, end);
@@ -115,14 +102,14 @@ exports.StandardSyntax = SC.Object.extend({
         while (col !== endColumn) {
             var str = stickySupported ? line : line.substring(col);
 
-            if (states[state] === undefined) {
+            if (this.states[state] === undefined) {
                 throw new Error('StandardSyntax: no such states "%@"'.
                     fmt(state));
             }
 
             var range = { start: col, state: state };
             var newState;
-            var alternations = states[state];
+            var alternations = this.states[state];
             var alternationCount = alternations.length;
 
             for (var i = 0; i < alternationCount; i++) {
@@ -187,5 +174,4 @@ exports.StandardSyntax = SC.Object.extend({
         promise.resolve({ attrs: attrs, next: next });
         return promise;
     }
-});
-
+};

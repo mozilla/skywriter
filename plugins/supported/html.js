@@ -765,10 +765,7 @@ createTagStates('normal', 'start');
 createTagStates('script', 'scriptData start:js');
 
 /**
- * @class
- *
  * This syntax engine exposes an HTML parser modeled on the WHATWG HTML 5
  * specification.
  */
-exports.HTMLSyntax = StandardSyntax.create({ states: states });
-
+exports.HTMLSyntax = new StandardSyntax(states);
