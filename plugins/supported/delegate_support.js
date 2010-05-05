@@ -45,7 +45,6 @@
 });
 "end";
 
-var SC = require('sproutcore/runtime').SC;
 var Trait = require('traits').Trait;
 
 /**
@@ -144,6 +143,6 @@ exports.DelegateTrait = Trait({
     removeDelegate: function(oldDelegate) {
         this.delegates = this.delegates.filter(function(delegate) {
             return delegate !== oldDelegate;
-        })
+        });
     }
 });

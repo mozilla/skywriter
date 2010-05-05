@@ -97,82 +97,82 @@ exports.Extension = function(metadata) {
     this._observers = [];
 };
 
-/**
- * Asynchronously load the actual code represented by this Extension
- * @param callback Function to call when the load has finished (deprecated)
- * @param property Extension property to load (default 'pointer')
- * @returns A promise to be fulfilled on completion. Preferred over using the
- * <tt>callback</tt> parameter.
- */
-exports.Extension.prototype.load = function(callback, property) {
-    var promise = new Promise();
+exports.Extension.prototype = {
+    /**
+     * Asynchronously load the actual code represented by this Extension
+     * @param callback Function to call when the load has finished (deprecated)
+     * @param property Extension property to load (default 'pointer')
+     * @returns A promise to be fulfilled on completion. Preferred over using the
+     * <tt>callback</tt> parameter.
+     */
+    load: function(callback, property) {
+        var promise = new Promise();
 
-    var onComplete = function(func) {
-        if (callback) {
-            callback(func);
+        var onComplete = function(func) {
+            if (callback) {
+                callback(func);
+            }
+            promise.resolve(func);
+        };
+
+        var pointerVal = this[property || 'pointer'];
+        if (util.isFunction(pointerVal)) {
+            onComplete(pointerVal);
+            return promise;
         }
-        promise.resolve(func);
-    };
 
-    var pointerVal = this[property || 'pointer'];
-    if (util.isFunction(pointerVal)) {
-        onComplete(pointerVal);
-        return promise;
-    }
+        var pointerObj = _splitPointer(this._pluginName, pointerVal);
+        if (!pointerObj) {
+            console.error('Extension cannot be loaded because it has no \'pointer\'');
+            console.log(this);
 
-    var pointerObj = _splitPointer(this._pluginName, pointerVal);
-    if (!pointerObj) {
-        console.error("Extension cannot be loaded because it has no 'pointer'");
-        console.log(this);
+            promise.reject(new Error('Extension has no \'pointer\' to call'));
+            return promise;
+        }
 
-        promise.reject(new Error('Extension has no \'pointer\' to call'));
-        return promise;
-    }
-
-    tiki.async(this._pluginName).then(function() {
-        SC.run(function() {
+        tiki.async(this._pluginName).then(function() {
             var func = _retrieveObject(pointerObj);
             onComplete(func);
 
             // TODO: consider caching 'func' to save looking it up again
             // Something like: this._setPointer(property, data);
         });
-    });
 
-    return promise;
-};
+        return promise;
+    },
 
-/**
- * Loads this extension and passes the result to the callback.
- * Any time this extension changes, the callback is called with the new value.
- * Note that if this extension goes away, the callback will be called with
- * undefined.
- * <p>observingPlugin is required, because if that plugin is torn down,
- * all of its observing callbacks need to be torn down as well.
- */
-exports.Extension.prototype.observe = function(observingPlugin, callback, property) {
-    this._observers.push({
-        plugin: observingPlugin,
-        callback: callback,
-        property: property
-    });
-    this.load(callback, property);
-};
+    /**
+     * Loads this extension and passes the result to the callback.
+     * Any time this extension changes, the callback is called with the new value.
+     * Note that if this extension goes away, the callback will be called with
+     * undefined.
+     * <p>observingPlugin is required, because if that plugin is torn down,
+     * all of its observing callbacks need to be torn down as well.
+     */
+    observe: function(observingPlugin, callback, property) {
+        this._observers.push({
+            plugin: observingPlugin,
+            callback: callback,
+            property: property
+        });
+        this.load(callback, property);
+    },
 
-/**
- * Returns the name of the plugin that provides this extension.
- */
-exports.Extension.prototype.getPluginName = function() {
-    return this._pluginName;
-};
+    /**
+     * Returns the name of the plugin that provides this extension.
+     */
+    getPluginName: function() {
+        return this._pluginName;
+    },
 
-/**
- *
- */
-exports.Extension.prototype._getLoaded = function(property) {
-    var pointerVal = this[property || 'pointer'];
-    var pointerObj = _splitPointer(this._pluginName, pointerVal);
-    return _retrieveObject(pointerObj);
+    /**
+     *
+     */
+    _getLoaded: function(property) {
+        var pointerVal = this[property || 'pointer'];
+        var pointerObj = _splitPointer(this._pluginName, pointerVal);
+        return _retrieveObject(pointerObj);
+    }
 };
 
 /**
@@ -377,24 +377,7 @@ exports.Plugin.prototype = {
         });
 
         // remove all traces of the plugin
-        var nameMatch = new RegExp("^" + this.name + ":");
-
-        _removeFromList(nameMatch, tiki.scripts);
-        _removeFromList(nameMatch, tiki.modules, function(module) {
-            delete tiki._factories[module];
-        });
-        _removeFromList(nameMatch, tiki.stylesheets);
-        _removeFromList(new RegExp("^" + this.name + "$"), tiki.packages);
-
-        var promises = tiki._promises;
-
-        delete promises.catalog[this.name];
-        delete promises.loads[this.name];
-        _removeFromObject(nameMatch, promises.modules);
-        _removeFromObject(nameMatch, promises.scripts);
-        _removeFromObject(nameMatch, promises.stylesheets);
-
-        delete tiki._catalog[this.name];
+        // TODO
     },
 
     /**
@@ -402,6 +385,8 @@ exports.Plugin.prototype = {
      * dependent plugins
      */
     reload: function(callback) {
+        // TODO: Broken. Needs to be updated to the latest Tiki.
+
         // All reloadable plugins will have a reloadURL
         if (!this.reloadURL) {
             return;
@@ -495,32 +480,31 @@ exports.Plugin.prototype = {
             sandbox.clear.apply(sandbox, fullModList);
         }
 
+        // reload the plugin metadata
         var onLoad = function() {
             // actually load the plugin, so that it's ready
             // for any dependent plugins
             tiki.async(this.name).then(function() {
-                SC.run(function() {
-                    // re-register all of the dependent plugins
-                    for (dependName in dependents) {
-                        this.catalog.plugins[dependName].register();
-                    }
+                // re-register all of the dependent plugins
+                for (dependName in dependents) {
+                    this.catalog.plugins[dependName].register();
+                }
 
-                    for (dependName in dependents) {
-                        if (dependents[dependName].callPointer) {
-                            parts = _splitPointer(dependName,
-                                dependents[dependName].callPointer);
-                            var func = _retrieveObject(parts);
-                            if (func) {
-                                func(reloadDescription);
-                            }
+                for (dependName in dependents) {
+                    if (dependents[dependName].callPointer) {
+                        var parts = _splitPointer(dependName,
+                            dependents[dependName].callPointer);
+                        var func = _retrieveObject(parts);
+                        if (func) {
+                            func(reloadDescription);
                         }
                     }
+                }
 
-                    if (callback) {
-                        // at long last, reloading is done.
-                        callback();
-                    }
-                }.bind(this));
+                if (callback) {
+                    // at long last, reloading is done.
+                    callback();
+                }
             });
         }.bind(this);
 
@@ -530,7 +514,6 @@ exports.Plugin.prototype = {
             console.error('Failed to load metadata from ' + this.reloadURL);
         }.bind(this);
 
-        // Reload the plugin metadata
         this.catalog.loadMetadataFromURL(this.reloadURL).then(onLoad, onError);
     }
 };

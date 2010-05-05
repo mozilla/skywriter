@@ -64,8 +64,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
             var newRange = newTextStorage.range;
 
             if (!util.none(oldTextStorage)) {
-                var syntaxManager = this.get('syntaxManager');
-                syntaxManager.layoutManagerReplacedText(oldRange, newRange);
+                this.syntaxManager.layoutManagerReplacedText(oldRange, newRange);
             }
 
             // During initial setup, the text storage is set before the syntax
@@ -318,10 +317,11 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
      * syntaxManager property.
      */
     createSyntaxManager: function() {
-        var klass = this.get('syntaxManager');
-        var syntaxManager = klass.create({ layoutManager: this });
-        syntaxManager.addDelegate(this);
-        this.set('syntaxManager', syntaxManager);
+        this.syntaxManager = new this.syntaxManager(this);
+
+        var boundRecompute = this._recomputeEntireLayout.bind(this);
+        this.syntaxManager.invalidatedSyntax.add(boundRecompute);
+
         this._syntaxManagerInitialized = true;
     },
 
@@ -454,13 +454,8 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         return rects;
     },
 
-    syntaxManagerInvalidatedSyntax: function(sender) {
-        this._recomputeEntireLayout();
-    },
-
     textStorageChanged: function(oldRange, newRange) {
-        this.get('syntaxManager').layoutManagerReplacedText(oldRange,
-            newRange);
+        this.syntaxManager.layoutManagerReplacedText(oldRange, newRange);
         this._recomputeLayoutForRanges(oldRange, newRange);
     },
 
@@ -471,7 +466,7 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
      */
     updateTextRows: function(startRow, endRow) {
         var textLines = this.get('textLines');
-        var attrs = this.get('syntaxManager').attrsForRows(startRow, endRow);
+        var attrs = this.syntaxManager.attrsForRows(startRow, endRow);
         var theme = this.get('_theme');
 
         for (var i = 0; i < attrs.length; i++) {
@@ -486,4 +481,3 @@ exports.LayoutManager = SC.Object.extend(MultiDelegateSupport, {
         }
     }
 });
-
