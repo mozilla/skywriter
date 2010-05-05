@@ -44,34 +44,34 @@ var TextStorage = require('models/textstorage').TextStorage;
 var catalog = require('bespin:plugins').catalog;
 
 exports.LayoutManager = function(opts) {
-    var obj = Trait.create(LayoutManager.prototype, DelegateTrait);
+    this.changedTextAtRow = new Event();
+    this.invalidatedRects = new Event();
     
     Object.keys(opts).forEach(function(key) {
         obj[key] = opts[key];
     });
     
-    obj.textStorageChanged = obj.textStorageChanged.bind(this);
+    this.textStorageChanged = this.textStorageChanged.bind(this);
 
-    obj.textLines = [
+    this.textLines = [
         {
             characters: '',
             colors:     [
                 {
                     start:  0,
                     end:    0,
-                    color:  obj._theme.plain
+                    color:  this._theme.plain
                 }
             ]
         }
     ];
 
-    obj.createTextStorage();
-    obj.createSyntaxManager();
+    this.createTextStorage();
+    this.createSyntaxManager();
 
     // Now that the syntax manager is set up, we can recompute the layout.
     // (See comments in _textStorageChanged().)
-    obj._recomputeEntireLayout();
-    return obj;
+    this._recomputeEntireLayout();
 };
 
 exports.LayoutManager.prototype = {
@@ -259,9 +259,6 @@ exports.LayoutManager.prototype = {
         this.invalidatedRects(this, invalidRects);
     },
     
-    changedTextAtRow: new Event(),
-    invalidatedRects: new Event(),
-
     /**
      * Determines the boundaries of the entire text area.
      *

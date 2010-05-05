@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var util = require('bespin:util/util');
 var Rect = require('utils/rect');
+var Event = require('events').Event;
 
 /**
  * @class
@@ -51,38 +51,77 @@ var Rect = require('utils/rect');
  * The actual size of the canvas is always the size of the container the canvas
  * view is placed in.
  */
-exports.CanvasView = SC.View.extend({
-    _cvCanvasContext: null,
-    _cvCanvasDom: null,
-    _cvCanvasId: null,
-    _cvInvalidRects: null,
-    _cvLastRedrawTime: null,
-    _cvPreviousClippingFrame: null,
-    _cvRedrawTimer: null,
+exports.CanvasView = function(container) {
+    this._invalidRects = [];
+    
+    // TODO figure out the equivalent here!
+    //this.parentView.addObserver('frame', this,
+    //    this.parentViewFrameChanged);
+    // ultimately, this needs to do:
+    // this._resizeCanvas();
+    
+    /**
+     * Users of the CanvasView should observe this event to perform any 
+     * drawing that they need to.
+     *
+     * @param sender{CanvasView} the CanvasView object that requires drawing
+     * @param rect{Rect} The rectangle to draw in.
+     * @param context{CanvasRenderingContext2D} The 2D graphics context, taken
+     *   from the canvas.
+     */
+    this.drawRect = new Event();
+    
+    // TODO fix this
+    var parentFrame = this.parentView.frame;
+    
+    var canvas = document.createElement("canvas");
+    canvas.setAttribute('width', '' + parentFrame.width);
+    canvas.setAttribute('height', '' + parentFrame.height);
+    canvas.innerHTML = 'canvas tag not supported by your browser';
+    container.appendChild(canvas);
+    this._canvasDom = canvas;
+    window.setTimeout(this.tryRedraw.bind(this), 0);
+};
 
-    _cvClippingFrameChanged: function() {
+exports.CanvasView.prototype = {
+    _canvasContext: null,
+    _canvasDom: null,
+    _canvasId: null,
+    _invalidRects: null,
+    _lastRedrawTime: null,
+    _previousClippingFrame: null,
+    _redrawTimer: null,
+    
+    _clippingFrame: null,
+    
+    get clippingFrame() {
+        return this._clippingFrame;
+    },
+    
+    set clippingFrame(clippingFrame) {
+        this._clippingFrame = clippingFrame;
+        
         // False positives here are very common, so check to make sure before
         // we take the slow path.
-        var previousClippingFrame = this._cvPreviousClippingFrame;
-        var clippingFrame = this.get('clippingFrame');
+        var previousClippingFrame = this._previousClippingFrame;
         if (previousClippingFrame === null ||
-                !SC.rectsEqual(clippingFrame, previousClippingFrame)) {
-            this._cvPreviousClippingFrame = clippingFrame;
+                !Rect.rectsEqual(clippingFrame, previousClippingFrame)) {
+            this._previousClippingFrame = clippingFrame;
             this.clippingFrameChanged();
         }
-    }.observes('clippingFrame'),
-
-    _cvGetContext: function() {
-        if (this._cvCanvasContext === null) {
-            this._cvCanvasContext = this._cvCanvasDom.getContext('2d');
-        }
-        return this._cvCanvasContext;
     },
 
-    _cvResizeCanvas: function() {
-        var parentFrame = this.getPath('parentView.frame');
+    _getContext: function() {
+        if (this._canvasContext === null) {
+            this._canvasContext = this._canvasDom.getContext('2d');
+        }
+        return this._canvasContext;
+    },
 
-        var canvas = this._cvCanvasDom;
+    _resizeCanvas: function() {
+        var parentFrame = this.parentView.frame;
+
+        var canvas = this._canvasDom;
         if (util.none(canvas)) {
             return;
         }
@@ -103,8 +142,6 @@ exports.CanvasView = SC.View.extend({
         }
     },
 
-    layoutStyle: { left: '0px', top: '0px' },
-
     /**
      * @property{Number}
      *
@@ -122,40 +159,6 @@ exports.CanvasView = SC.View.extend({
         this.setNeedsDisplay();
     },
 
-    didCreateLayer: function() {
-        arguments.callee.base.apply(this, arguments);
-        this._cvCanvasDom = this.$('#' + this._cvCanvasId)[0];
-        this.redraw();
-    },
-
-    /**
-     * Subclasses should override this method to perform any drawing that they
-     * need to.
-     *
-     * @param rect{Rect} The rectangle to draw in.
-     * @param context{CanvasRenderingContext2D} The 2D graphics context, taken
-     *   from the canvas.
-     */
-    drawRect: function(rect, context) {
-        // empty
-    },
-
-    init: function() {
-        arguments.callee.base.apply(this, arguments);
-        this._cvInvalidRects = [];
-        this.get('parentView').addObserver('frame', this,
-            this.parentViewFrameChanged);
-    },
-
-    /**
-     * Subclasses that need custom logic when the parent view's frame changes
-     * (to maintain a minimum size, for example) should override this method
-     * and chain up to the parent implementation.
-     */
-    parentViewFrameChanged: function() {
-        this._cvResizeCanvas();
-    },
-
     /**
      * Calls drawRect() on all the invalid rects to redraw the canvas contents.
      * Generally, you should not need to call this function unless you override
@@ -165,16 +168,16 @@ exports.CanvasView = SC.View.extend({
      *   done because the view wasn't visible.
      */
     redraw: function() {
-        var frame = this.get('frame');
+        var frame = this.frame;
         if (frame.x < 0) {
             this.computeFrameWithParentFrame(null);
         }
 
-        var context = this._cvGetContext();
+        var context = this._getContext();
         context.save();
         context.translate(Math.round(frame.x), Math.round(frame.y));
 
-        var clippingFrame = this.get('clippingFrame');
+        var clippingFrame = this.clippingFrame;
         clippingFrame = {
             x:      Math.round(clippingFrame.x),
             y:      Math.round(clippingFrame.y),
@@ -182,14 +185,14 @@ exports.CanvasView = SC.View.extend({
             height: clippingFrame.height
         };
 
-        var invalidRects = this._cvInvalidRects;
+        var invalidRects = this._invalidRects;
         if (invalidRects === 'all') {
-            this.drawRect(clippingFrame, context);
+            this.drawRect(this, clippingFrame, context);
         } else {
             Rect.merge(invalidRects).forEach(function(rect) {
                 context.save();
 
-                rect = SC.intersectRects(rect, clippingFrame);
+                rect = Rect.intersectRects(rect, clippingFrame);
                 if (rect.width !== 0 && rect.height !== 0) {
                     var x = rect.x, y = rect.y;
                     var width = rect.width, height = rect.height;
@@ -201,7 +204,7 @@ exports.CanvasView = SC.View.extend({
                     context.closePath();
                     context.clip();
 
-                    this.drawRect(rect, context);
+                    this.drawRect(this, rect, context);
                 }
 
                 context.restore();
@@ -210,50 +213,17 @@ exports.CanvasView = SC.View.extend({
 
         context.restore();
 
-        this._cvInvalidRects = [];
-        this._cvLastRedrawTime = new Date().getTime();
+        this._invalidRects = [];
+        this._lastRedrawTime = new Date().getTime();
         return true;
-    },
-
-    render: function(context, firstTime) {
-        arguments.callee.base.apply(this, arguments);
-
-        if (firstTime) {
-            var parentFrame = this.getPath('parentView.frame');
-            var canvasContext = context.begin('canvas');
-            this._cvCanvasId = SC.guidFor(canvasContext);
-            canvasContext.id(this._cvCanvasId);
-            canvasContext.attr('width', '' + parentFrame.width);
-            canvasContext.attr('height', '' + parentFrame.height);
-            canvasContext.push('canvas tag not supported by your browser');
-            canvasContext.end();
-            return;
-        }
-
-        // The render() method can actually get called multiple times during an
-        // event handler, because other calls to render() can be queued after
-        // the first render() runs. This workaround forces tryRedraw() to be
-        // called only once per event handler.
-        this.invokeLater(this.tryRedraw, 0);
-    },
-
-    renderLayout: function(context, firstTime) {
-        arguments.callee.base.apply(this, arguments);
-
-        var parentFrame = this.getPath('parentView.frame');
-        if (firstTime) {
-            context.attr('width', parentFrame.width);
-            context.attr('height', parentFrame.height);
-            return;
-        }
     },
 
     /**
      * Invalidates the entire visible region of the canvas.
      */
     setNeedsDisplay: function(rect) {
-        this._cvInvalidRects = 'all';
-        this.set('layerNeedsUpdate', true);
+        this._invalidRects = 'all';
+        this.layerNeedsUpdate = true;
     },
 
     /**
@@ -261,18 +231,18 @@ exports.CanvasView = SC.View.extend({
      * the canvas to be redrawn at the end of the run loop.
      */
     setNeedsDisplayInRect: function(rect) {
-        var invalidRects = this._cvInvalidRects;
+        var invalidRects = this._invalidRects;
         if (invalidRects !== 'all') {
             invalidRects.push(rect);
         }
 
-        this.set('layerNeedsUpdate', true);
+        this.layerNeedsUpdate = true;
     },
 
     tryRedraw: function(context, firstTime) {
         var now = new Date().getTime();
-        var lastRedrawTime = this._cvLastRedrawTime;
-        var minimumRedrawDelay = this.get('minimumRedrawDelay');
+        var lastRedrawTime = this._lastRedrawTime;
+        var minimumRedrawDelay = this.minimumRedrawDelay;
 
         if (lastRedrawTime === null ||
                 now - lastRedrawTime >= minimumRedrawDelay) {
@@ -280,17 +250,14 @@ exports.CanvasView = SC.View.extend({
             return;
         }
 
-        var redrawTimer = this._cvRedrawTimer;
-        if (redrawTimer !== null && redrawTimer.get('isValid')) {
+        var redrawTimer = this._redrawTimer;
+        if (redrawTimer !== null && redrawTimer.isValid) {
             return; // already scheduled
         }
 
-        this._cvRedrawTimer = SC.Timer.schedule({
-            target:     this,
-            action:     this.redraw,
-            interval:   minimumRedrawDelay,
-            repeats:    false
-        });
+        // TODO This is not as good as SC.Timer... Will it work?
+        this._redrawTimer = window.setTimeout(this.redraw.bind(this),
+            minimumRedrawDelay);
     }
-});
+};
 

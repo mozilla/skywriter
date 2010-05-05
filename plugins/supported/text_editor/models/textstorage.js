@@ -51,6 +51,11 @@ TextStorage = function(initialValue) {
     } else {
         this._lines = [ '' ];
     }
+    
+    /**
+     * Called whenever the text changes with the old and new ranges supplied.
+     */
+    this.changed = new Event();
 
     return this;
 };
@@ -59,11 +64,6 @@ TextStorage.prototype = {
     /** @lends TextStorage */
 
     _lines: null,
-
-    /**
-     * Called whenever the text changes with the old and new ranges supplied.
-     */
-    changed: new Event(),
 
     /**
      * Whether this model is read-only. Attempts to modify a read-only model
@@ -132,7 +132,7 @@ TextStorage.prototype = {
                 }
 
                 if (pos.col === 0) {
-                    var lines = this._lines;
+                    lines = this._lines;
                     pos = {
                         row:    pos.row - 1,
                         col: lines[pos.row - 1].length
