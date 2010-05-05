@@ -35,15 +35,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var UndoManager = require('controllers/undomanager').UndoManager;
 var t = require('plugindev');
 
 exports.testUndoAndRedo = function() {
     var undoManager = UndoManager.create();
 
-    var redoReceived = null, undoReceived = null;
-    var receiver = SC.Object.create({
+    var redoReceived = null;
+    var undoReceived = null;
+
+    var receiver = {
         redo: function(context) {
             redoReceived = context;
             return true;
@@ -53,7 +54,7 @@ exports.testUndoAndRedo = function() {
             undoReceived = context;
             return true;
         }
-    });
+    };
 
     undoManager.registerUndo(receiver, 'foo');
     t.equal(undoManager._undoStack.length, 1, 'the size of the undo stack ' +
