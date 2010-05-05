@@ -46,39 +46,21 @@ exports.discoveredNewSyntax = function(syntaxExtension) {
     exports.syntaxDirectory.registerExtension(syntaxExtension);
 };
 
-var SyntaxInfo = SC.Object.extend({
-    /**
-     * @property{Extension}
-     *
-     * The extension that defines this syntax. This property must be filled in
-     * upon instantiating the syntax info.
-     */
-    extension: null,
+/**
+ * @param extension The extension that defines this syntax.
+ * This property must be filled in upon instantiating the syntax info.
+ */
+var SyntaxInfo = function(extension) {
+    this.extension = extension;
 
-    /**
-     * @property{Array<string>}
-     *
-     * The set of file extensions that this syntax can handle.
-     */
-    fileExts: null,
+    // The unique identifier for this syntax.
+    this.name = this.extension.name;
 
-    /**
-     * @property{string}
-     *
-     * The unique identifier for this syntax.
-     */
-    name: null,
+    // The set of file extensions that this syntax can handle.
+    this.fileExts = extension.fileexts || [];
+};
 
-    init: function() {
-        var extension = this.get('extension');
-        this.set('name', extension.name);
-
-        var fileExts = extension.fileexts;
-        this.set('fileExts', util.none(fileExts) ? [] : fileExts);
-    }
-});
-
-exports.syntaxDirectory = SC.Object.create({
+exports.syntaxDirectory = {
     _fileExts: {},
     _syntaxInfo: {},
 
@@ -93,7 +75,7 @@ exports.syntaxDirectory = SC.Object.create({
         }
 
         var promise = new Promise();
-        syntaxInfo.get('extension').load(function(pointer) {
+        syntaxInfo.extension.load(function(pointer) {
             promise.resolve(pointer);
         });
 
@@ -101,15 +83,14 @@ exports.syntaxDirectory = SC.Object.create({
     },
 
     registerExtension: function(extension) {
-        var syntaxInfo = SyntaxInfo.create({ extension: extension });
+        var syntaxInfo = new SyntaxInfo(extension);
 
-        var name = syntaxInfo.get('name');
-        this._syntaxInfo[name] = syntaxInfo;
+        this._syntaxInfo[syntaxInfo.name] = syntaxInfo;
 
         // Add the file extensions to the index.
         var fileExts = this._fileExts;
-        syntaxInfo.get('fileExts').forEach(function(fileExt) {
-            fileExts[fileExt] = name;
+        syntaxInfo.fileExts.forEach(function(fileExt) {
+            fileExts[fileExt] = syntaxInfo.name;
         });
     },
 
@@ -117,5 +98,4 @@ exports.syntaxDirectory = SC.Object.create({
         var syntax = this._fileExts[fileExt.toLowerCase()];
         return util.none(syntax) ? 'plain' : syntax;
     }
-});
-
+};

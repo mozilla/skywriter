@@ -36,7 +36,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 var catalog = require('bespin:plugins').catalog;
-var SC = require('sproutcore/runtime').SC;
 var Ct = require('core_test');
 var DefaultLogger = require('loggers/default', 'core_test');
 var BrowserLogger = require('core_test:loggers/browser');
@@ -68,39 +67,41 @@ var _text = function(str) {
 /**
  * knows how to emit a single assertion
  */
-var AssertionEntry = SC.Object.extend({
-    // expects status, message
-    template:
-        '<div class="plugindev_assertion %@1">' +
-            '<span class="name">%@2</span>' +
-            '<span class="status">%@1</span>' +
-        '</div>',
+var AssertionEntry = function(owner, status, message) {
+    this.owner = owner;
+    this.status = status;
+    this.message = message;
+};
 
-    emit: function() {
-        return utils.fmt(this.template, _text(this.status), _text(this.message));
-    }
-});
+AssertionEntry.prototype.template =
+    '<div class="plugindev_assertion %@1">' +
+        '<span class="name">%@2</span>' +
+        '<span class="status">%@1</span>' +
+    '</div>';
+
+AssertionEntry.prototype.emit = function() {
+    return utils.fmt(this.template, _text(this.status), _text(this.message));
+};
 
 var testEntryCounter = 0;
 
 /**
  * knows how to emit a single test (along with its assertions)
  */
-var TestEntry = SC.Object.extend({
-    init: function() {
-        this.assertions = [];
-        this.status = { passed: 0, failed: 0, errors: 0, warnings: 0 };
-    },
+var TestEntry = function(owner, name) {
+    this.owner = owner;
+    this.name = name;
 
+    this.assertions = [];
+    this.status = { passed: 0, failed: 0, errors: 0, warnings: 0 };
+};
+
+TestEntry.prototype = {
     /**
      * add an assertion to the log - also updates stats on the assertion
      */
     add: function(status, message) {
-        var entry = AssertionEntry.create({
-            owner: this,
-            status: status,
-            message: message
-        });
+        var entry = new AssertionEntry(this, status, message);
 
         this.assertions.push(entry);
         if (this.status[status] !== undefined) {
@@ -122,34 +123,31 @@ var TestEntry = SC.Object.extend({
     /**
      * expects status, name, assertions, passed, failed, errors, warnings
      */
-    template: [
-        '<div class="plugindev_test %@1">',
-            '<div class="header">',
-                '<span class="name">',
-                    '<a onclick="document.getElementById(\'_testEntryAssertions_%@8\').style.display = \'block\'"">%@2</a>',
-                '</span>',
-                '<span class="status">',
-                    '<span class="passed">%@4</span>',
-                    '<span class="warnings">%@7</span>',
-                    '<span class="failed">%@5</span>',
-                    '<span class="errors">%@6</span>',
-                '</span>',
-            '</div>',
-            '<div class="entryAssertions" id="_testEntryAssertions_%@8">',
-                '%@3',
-            '</div>',
-        '</div>'
-    ].join(''),
+    template:
+        '<div class="plugindev_test %@1">' +
+            '<div class="header">' +
+                '<span class="name">' +
+                    '<a onclick="document.getElementById(\'_testEntryAssertions_%@8\').style.display = \'block\'"">%@2</a>' +
+                '</span>' +
+                '<span class="status">' +
+                    '<span class="passed">%@4</span>' +
+                    '<span class="warnings">%@7</span>' +
+                    '<span class="failed">%@5</span>' +
+                    '<span class="errors">%@6</span>' +
+                '</span>' +
+            '</div>' +
+            '<div class="entryAssertions" id="_testEntryAssertions_%@8">' +
+                '%@3' +
+            '</div>' +
+        '</div>',
 
     /**
      * emits the result
      */
     emit: function() {
-        var status = this.status;
-
         var statsum = [];
-        for (var key in status) {
-            if (status[key] > 0) {
+        for (var key in this.status) {
+            if (this.status[key] > 0) {
                 statsum.push(_text(key));
             }
         }
@@ -161,22 +159,26 @@ var TestEntry = SC.Object.extend({
         assertions = assertions.join('');
 
         testEntryCounter += 1;
-        return utils.fmt(this.template, statsum, _text(this.name), assertions, status.passed, status.failed, status.errors, status.warnings, testEntryCounter);
+        return utils.fmt(this.template, statsum, _text(this.name), assertions,
+                this.status.passed, this.status.failed, this.status.errors,
+                this.status.warnings, testEntryCounter);
     }
-});
+};
 
 /**
  * knows how to emit a module
  */
-var ModuleEntry = SC.Object.extend({
+var ModuleEntry = function(owner, name) {
+    this.owner = owner;
+    this.name = name;
 
-    init: function() {
-        this.entries = []; // add another module or test here
-        this._modules = {}; // for lookup
-        this._tests = {}; // for lookup
-        this.didPass = true;
-    },
+    this.entries = []; // add another module or test here
+    this._modules = {}; // for lookup
+    this._tests = {}; // for lookup
+    this.didPass = true;
+};
 
+ModuleEntry.prototype = {
     /**
      * add or get module by name
      */
@@ -184,7 +186,7 @@ var ModuleEntry = SC.Object.extend({
         if (this._modules[moduleName]) {
             return this._modules[moduleName];
         }
-        var ret = ModuleEntry.create({ owner: this, name: moduleName });
+        var ret = new ModuleEntry(this, moduleName);
         this._modules[moduleName] = ret;
         this.entries.push(ret);
         return ret;
@@ -197,7 +199,7 @@ var ModuleEntry = SC.Object.extend({
         if (this._tests[testName]) {
             return this._tests[testName];
         }
-        var ret = TestEntry.create({ owner: this, name: testName });
+        var ret = new TestEntry(this, testName);
         this._tests[testName] = ret ;
         this.entries.push(ret);
         this.plan().tests++;
@@ -215,12 +217,11 @@ var ModuleEntry = SC.Object.extend({
         return this.owner.plan();
     },
 
-    template: [
-        '<div class="plugindev_module %@3">',
-            '<span class="name">%@1</span>',
-            '%@2',
-        '</div>'
-    ].join(''),
+    template:
+        '<div class="plugindev_module %@3">' +
+            '<span class="name">%@1</span>' +
+            '%@2' +
+        '</div>',
 
     emit: function() {
         var assertions = [];
@@ -232,24 +233,25 @@ var ModuleEntry = SC.Object.extend({
         var passed = this.didPass ? 'passed' : '';
         return utils.fmt(this.template, _text(this.name), assertions, passed);
     }
-});
+};
 
 /**
  * knows how to emit a full plan
  */
-var PlanEntry = SC.Object.extend({
+var PlanEntry = function(name) {
+    this.name = name;
 
-    init: function() {
-        this.entries = [];
-        this._modules = {};
-        this.passed = 0;
-        this.errors = 0;
-        this.failed = 0;
-        this.warnings = 0;
-        this.tests = 0;
-        this.assertions = 0;
-    },
+    this.entries = [];
+    this._modules = {};
+    this.passed = 0;
+    this.errors = 0;
+    this.failed = 0;
+    this.warnings = 0;
+    this.tests = 0;
+    this.assertions = 0;
+};
 
+PlanEntry.prototype = {
     pass: function() {
         // noop
     },
@@ -262,18 +264,17 @@ var PlanEntry = SC.Object.extend({
         if (this._modules[moduleName]) {
             return this._modules[moduleName];
         }
-        var ret = ModuleEntry.create({ owner: this, name: moduleName });
+        var ret = new ModuleEntry(this, moduleName);
         this._modules[moduleName] = ret ;
         this.entries.push(ret);
         return ret;
     },
 
-    template: [
-        '<div class="plugindev_plan">',
-            '<span class="name">%@1</span>',
-            '%@2',
-        '</div>'
-    ].join(''),
+    template:
+        '<div class="plugindev_plan">' +
+            '<span class="name">%@1</span>' +
+            '%@2' +
+        '</div>',
 
     emit: function() {
         var assertions = [];
@@ -284,32 +285,27 @@ var PlanEntry = SC.Object.extend({
 
         return utils.fmt(this.template, _text(this.name), assertions);
     }
-});
+};
 
-var TestOutputLogger = SC.Object.extend({
-    /**
-     * The request that this test run is associated with
-     */
-    request: null,
+var TestOutputLogger = function(request) {
+    // The request that this test run is associated with
+    this.request = request;
 
-    /**
-     * The next logger in the chain. Set with then().
-     * @type {Ct.DefaultLogger}
-     */
-    next: null,
+    // The next logger in the chain. Set with then().
+    this.next = null;
 
-    init: function() {
-        this.plans = [];
-        this.status = {
-            passed: 0,
-            failed: 0,
-            errors: 0,
-            warnings: 0,
-            tests: 0,
-            assertions: 0
-        };
-    },
+    this.plans = [];
+    this.status = {
+        passed: 0,
+        failed: 0,
+        errors: 0,
+        warnings: 0,
+        tests: 0,
+        assertions: 0
+    };
+};
 
+TestOutputLogger.prototype = {
     /**
      * Sets the next logger in the chain; returns receiver
      * @param {Ct.DefaultLogger} the next logger
@@ -332,7 +328,7 @@ var TestOutputLogger = SC.Object.extend({
     },
 
     begin: function(planName) {
-        var plan = PlanEntry.create({ name: planName });
+        var plan = new PlanEntry(planName);
         this.plans.push(plan);
         this.currentPlan = plan;
     },
@@ -500,7 +496,7 @@ exports.testrunner = function(env, args, request) {
 
     // TODO make it ensure that the modules are all loaded
     var plan = new Ct.Plan(testspec);
-    var logger = TestOutputLogger.create({request: request});
+    var logger = new TestOutputLogger(request);
     plan.logger(logger);
 
     var promises = [];

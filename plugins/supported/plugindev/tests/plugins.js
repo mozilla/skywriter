@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var t = require('plugindev');
 var plugins = require('bespin:plugins');
 
@@ -116,7 +115,7 @@ exports.testActivationOrDeactivationHandlersAreCalled = function() {
 };
 
 exports.testCanRetrieveFactoryObjectsFromTheCatalog = function() {
-    var catalog = plugins.Catalog.create();
+    var catalog = new plugins.Catalog();
     catalog.load({
         plugindev: {
             provides: [
@@ -125,12 +124,6 @@ exports.testCanRetrieveFactoryObjectsFromTheCatalog = function() {
                     name: 'testing',
                     pointer: 'tests/plugins#factoryObj',
                     action: 'value'
-                },
-                {
-                    ep: 'factory',
-                    name: 'itsAClass',
-                    pointer: 'tests/plugins#factoryClass',
-                    action: 'create'
                 },
                 {
                     ep: 'factory',
@@ -232,10 +225,6 @@ exports.factoryObj = {
     name: 'The Factory Object'
 };
 
-exports.factoryClass = SC.Object.extend({
-    name: 'The Factory Class'
-});
-
 exports.traditionalClass = function() {
     this.name = 'traditional';
 };
@@ -248,23 +237,22 @@ exports.simpleFunction = function() {
 
 exports._testNumber = 1;
 
-MyObserver = SC.Object.extend({
-    catalog: null,
-    callback: null,
-    currentval: 0,
+var MyObserver = function(catalog, callback) {
+    this.catalog = catalog;
+    this.callback = callback;
+    this.currentval = 0;
+};
 
-    makeConnection: function() {
-        var self = this;
-        var ext = this.get('catalog').getExtensions('testpoint');
-        ext[0].observe('plugindev', function(obj) {
-            console.log('setting testpoint value to ', obj);
-            self.set('currentval', obj);
-            self.get('callback')();
-        });
-    }
-});
+MyObserver.prototype.makeConnection = function() {
+    var ext = this.catalog.getExtensions('testpoint');
+    ext[0].observe('plugindev', function(obj) {
+        console.log('setting testpoint value to ', obj);
+        this.currentval = obj;
+        this.callback();
+    }.bind(this));
+};
 
-// < rRfactor theses!
+// < Refactor theses!
 
 exports.testPluginsCanObserveAnExtension = function() {
     var catalog = plugins.Catalog.create();
@@ -283,19 +271,18 @@ exports.testPluginsCanObserveAnExtension = function() {
         }
     });
 
-    var ob = MyObserver.create({
-        catalog: catalog,
-        callback: function() {
-            console.log('checking result 1');
-            t.equal(ob.get('currentval'), 1);
-            var observers = catalog.plugins.plugindev._getObservers();
-            console.log(observers);
-            t.equal(observers.testpoint[0].plugin, 'plugindev');
-            t.ok(observers.testpoint[0].callback, 'Expected function to be set');
-            t.start();
-        }
-    });
+    var ob = null;
+    var callback = function() {
+        console.log('checking result 1');
+        t.equal(ob.get('currentval'), 1);
+        var observers = catalog.plugins.plugindev._getObservers();
+        console.log(observers);
+        t.equal(observers.testpoint[0].plugin, 'plugindev');
+        t.ok(observers.testpoint[0].callback, 'Expected function to be set');
+        t.start();
+    };
 
+    ob = new MyObserver(catalog, callback);
     ob.makeConnection();
     t.stop(1000);
 };
