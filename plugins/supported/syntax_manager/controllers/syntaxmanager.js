@@ -39,7 +39,7 @@ var SC = require('sproutcore/runtime').SC;
 var util = require('bespin:util/util');
 var m_promise = require('bespin:promise');
 var ArrayUtils = require('utils/array');
-var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
+var Event = require('events').Event;
 var Promise = m_promise.Promise;
 var Range = require('rangeutils:utils/range');
 var catalog = require('bespin:plugins').catalog;
@@ -47,16 +47,28 @@ var console = require('bespin:console').console;
 var syntaxDirectory = require('controllers/syntaxdirectory').syntaxDirectory;
 
 /**
- * @class
- *
  * The syntax manager manages syntax contexts and controls the interaction of
  * the syntax highlighting modules and the layout manager. It receives text
  * editing notifications, updates and stores the relevant syntax attributes,
  * and provides marked up text as the layout manager requests it.
  */
-exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
-    _invalidRows: [],
-    _lineAttrInfo: null,
+exports.SyntaxManager = function(layoutManager) {
+    // The character info is read from this layout manager instance. Once the
+    // syntax manager is created, this cannot be modified.
+    this.layoutManager = layoutManager;
+
+    // The initial context. Defaults to 'plain'.
+    this.initialContext = 'plain';
+
+    this._invalidRows = [];
+    this._lineAttrInfo = null;
+
+    this.invalidatedSyntax = new Event();
+
+    this._reset();
+};
+
+exports.SyntaxManager.prototype = {
 
     _adjustInvalidRowsForDeletion: function(startRow, endRow) {
         var newInvalidRows = [];
@@ -105,7 +117,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
             });
 
         if (attrIndex === null) {
-            console.error('position not found', position);
+            console.error('position not found', attrs, column);
         }
 
         return attrIndex;
@@ -263,7 +275,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
 
     _initialContextChanged: function() {
         this._reset();
-        this.notifyDelegates('syntaxManagerInvalidatedSyntax');
+        this.invalidatedSyntax();
     }.observes('initialContext'),
 
     _innerRangesFromAttrs: function(outerAttrs, innerContextAndState) {
@@ -419,7 +431,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
         }
 
         var thisLineAttrInfo = lineAttrInfo[startRow];
-        var line = this.getPath('layoutManager.textStorage').lines[startRow];
+        var line = this.layoutManager.textStorage.lines[startRow];
 
         this._deepSyntaxInfoForLine(thisLineAttrInfo.snapshot, line).
             then(function(deepSyntaxInfo) {
@@ -445,12 +457,10 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
                     // Do a 'manual tail call' so that we don't overflow the
                     // call stack. See bug 556151.
                     window.setTimeout(function() {
-                        SC.run(function() {
-                            this._recomputeAttrInfoForRows(startRow + 1,
-                                endRow, 0).then(function(lastRow) {
-                                    promise.resolve(lastRow);
-                                });
-                        }.bind(this));
+                        this._recomputeAttrInfoForRows(startRow + 1, endRow, 0)
+                            .then(function(lastRow) {
+                                promise.resolve(lastRow);
+                            });
                     }.bind(this), 0);
                 } else {
                     this._recomputeAttrInfoForRows(startRow + 1, endRow,
@@ -466,13 +476,12 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
     // Invalidates all the highlighting.
     _reset: function() {
         var lineAttrInfo = [];
-        var lineCount = this.getPath('layoutManager.textStorage').lines.length;
-        var initialContext = this.get('initialContext');
+        var lineCount = this.layoutManager.textStorage.lines.length;
 
         for (var i = 0; i < lineCount; i++) {
             var firstContext;
             if (i === 0) {
-                firstContext = { context: initialContext, state: 'start' };
+                firstContext = { context: this.initialContext, state: 'start' };
             } else {
                 firstContext = { context: null };
             }
@@ -543,21 +552,6 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
     },
 
     /**
-     * @property{string}
-     *
-     * The initial context. Defaults to 'plain'.
-     */
-    initialContext: 'plain',
-
-    /**
-     * @property{LayoutManager}
-     *
-     * The character info is read from this layout manager instance. Once the
-     * syntax manager is created, this cannot be modified.
-     */
-    layoutManager: null,
-
-    /**
      * Returns the attributed text currently in the cache for the given range
      * of rows. To ensure that the text returned by this method is up to date,
      * updateSyntaxForRows() should be called first.
@@ -585,10 +579,6 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
         return contexts;
     },
 
-    init: function() {
-        this._reset();
-    },
-
     /**
      * Informs the syntax manager that a range of text has changed. The
      * attributes are altered and invalidated as appropriate.
@@ -605,7 +595,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
      */
     setInitialContextFromExt: function(fileExt) {
         var syntax = syntaxDirectory.syntaxForFileExt(fileExt);
-        this.set('initialContext', syntax);
+        this.initialContext = syntax;
     },
 
     /**
@@ -644,7 +634,7 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
             // Nothing to do.
             promise.resolve({ startRow: startRow, endRow: startRow });
         } else {
-            var invalidRow = invalidRows[index];
+            invalidRow = invalidRows[index];
 
             // Remove any invalid rows within the range we're about to update.
             while (index < invalidRows.length && invalidRows[index] < endRow) {
@@ -668,5 +658,4 @@ exports.SyntaxManager = SC.Object.extend(MultiDelegateSupport, {
 
         return promise;
     }
-});
-
+};
