@@ -45,6 +45,7 @@ var util = require('bespin:util/util');
 var settings = require('settings').settings;
 
 var keyutil = require('keyboard:keyutil');
+var history = require('canon:history');
 var Request = require('canon:request').Request;
 var environment = require('canon:environment');
 
@@ -105,25 +106,11 @@ var KeyboardManagerTrait = Trait({
 
             var commandExt = match.commandExt;
             commandExt.load(function(command) {
-                var request = Request.create({
+                var request = new Request({
                     command: command,
                     commandExt: commandExt
                 });
-
-                try {
-                    command(environment.global, match.args, request);
-                    return true;
-                } catch (ex) {
-                    // TODO: Some UI?
-                    var trace = new Trace(ex, true);
-                    console.group('Error calling command');
-                    console.log('command=', commandExt);
-                    console.log('args=', match.args);
-                    console.error(ex);
-                    trace.log(3);
-                    console.groupEnd();
-                    return false;
-                }
+                history.execute(environment.global, match.args, request);
             });
             return true;
         }

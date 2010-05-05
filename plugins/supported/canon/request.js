@@ -35,35 +35,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
-
-var settings = require('settings').settings;
-
-/**
- * TODO: Consider if this is actually the best way to tell the world about the
- * created Output objects...
- */
-exports.history = SC.Object.create({
-    requests: [],
-
-    /**
-     * Keep the history to settings.historyLength
-     */
-    trim: function() {
-        var historyLength = settings.get('historyLength');
-        // This could probably be optimized with some maths, but 99.99% of the
-        // time we will only be off by one, so save the maths.
-        while (this.requests.length > historyLength) {
-            this.requests.shiftObject();
-        }
-    }.observes('.requests')
-});
+var Event = require('events').Event;
+var history = require('canon:history');
 
 /**
  * To create an invocation, you need to do something like this (all the ctor
  * args are optional):
  * <pre>
- * var request = Request.create({
+ * var request = new Request({
  *     command: command,
  *     commandExt: commandExt,
  *     args: args,
@@ -71,90 +50,90 @@ exports.history = SC.Object.create({
  * });
  * </pre>
  */
-exports.Request = SC.Object.extend({
+exports.Request = function(options) {
+    options = options || {};
+
     // Will be used in the keyboard case and the cli case
-    command: undefined,
-    commandExt: undefined,
+    this.command = options.command;
+    this.commandExt = options.commandExt;
 
     // Will be used only in the cli case
-    args: undefined,
-    typed: undefined,
+    this.args = options.args;
+    this.typed = options.typed;
 
-    // Stuff we keep track of
-    outputs: undefined,
-    start: undefined,
-    end: undefined,
-    duration: undefined,
-    completed: undefined,
-    error: undefined,
+    // Have we been initialized?
+    this._begunOutput = false;
 
-    /**
-     * Have we been initialized?
-     */
-    _inited: undefined,
+    this.start = new Date();
+    this.end = null;
+    this.completed = false;
+    this.error = false;
 
-    /**
-     * Lazy init to register with the history should only be done on output.
-     * init() is expensive, and won't be used in the majority of cases
-     */
-    _init: function() {
-        this.set('_inited', true);
-        this.outputs = [];
-        this.start = new Date();
-        this.completed = false;
-        this.error = false;
-        exports.history.requests.pushObject(this);
-    },
+    this.changed = new Event();
+};
 
-    /**
-     * Sugar for:
-     * <pre>output.set('error', true).done(output);</pre>
-     * Which is in turn sugar for:
-     * <pre>output.set('error', true).output(output).done();</pre>
-     */
-    doneWithError: function(content) {
-        this.set('error', true).done(content);
-    },
+/**
+ * Lazy init to register with the history should only be done on output.
+ * init() is expensive, and won't be used in the majority of cases
+ */
+exports.Request.prototype._beginOutput = function() {
+    this._begunOutput = true;
+    this.outputs = [];
 
-    /**
-     * Declares that this function will not be automatically done when
-     * the command exits
-     */
-    async: function() {
-        if (!this.get('_inited')) {
-            this._init();
-        }
-    },
+    history.addRequestOutput(this);
+};
 
-    /**
-     * Complete the currently executing command with successful output.
-     * @param output Either DOM node, an SproutCore element or something that
-     * can be used in the content of a DIV to create a DOM node.
-     */
-    output: function(content) {
-        if (!this.get('_inited')) {
-            this._init();
-        }
+/**
+ * Sugar for:
+ * <pre>request.error = true; request.done(output);</pre>
+ */
+exports.Request.prototype.doneWithError = function(content) {
+    this.error = true;
+    this.done(content);
+};
 
-        if (typeof content !== 'string' && !(content instanceof Node)) {
-            content = content.toString();
-        }
-
-        this.outputs.pushObject(content);
-
-        return this;
-    },
-
-    /**
-     * All commands that do output must call this to indicate that the command
-     * has finished execution.
-     */
-    done: function(content) {
-        if (content) {
-            this.output(content);
-        }
-        this.set('completed', true);
-        this.set('end', new Date());
-        this.set('duration', this.get('end').getTime() - this.get('start').getTime());
+/**
+ * Declares that this function will not be automatically done when
+ * the command exits
+ */
+exports.Request.prototype.async = function() {
+    if (!this._begunOutput) {
+        this._beginOutput();
     }
-});
+};
+
+/**
+ * Complete the currently executing command with successful output.
+ * @param output Either DOM node, an SproutCore element or something that
+ * can be used in the content of a DIV to create a DOM node.
+ */
+exports.Request.prototype.output = function(content) {
+    if (!this._begunOutput) {
+        this._beginOutput();
+    }
+
+    if (typeof content !== 'string' && !(content instanceof Node)) {
+        content = content.toString();
+    }
+
+    this.outputs.pushObject(content);
+    this.changed();
+
+    return this;
+};
+
+/**
+ * All commands that do output must call this to indicate that the command
+ * has finished execution.
+ */
+exports.Request.prototype.done = function(content) {
+    this.completed = true;
+    this.end = new Date();
+    this.duration = this.end.getTime() - this.start.getTime();
+
+    if (content) {
+        this.output(content);
+    } else {
+        this.changed();
+    }
+};

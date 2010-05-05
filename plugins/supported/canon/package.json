@@ -3,6 +3,7 @@
     "dependencies":
     {
         "settings": "0.0",
+        "events": "0.0",
         "appsupport": "0.0"
     },
     "provides":
@@ -12,6 +13,11 @@
             "name": "command",
             "description": "A command is a bit of functionality with optional typed arguments which can do something small like moving the cursor around the screen, or large like cloning a project from VCS.",
             "indexOn": "name"
+        },
+        {
+            "ep": "extensionpoint",
+            "name": "addedRequestOutput",
+            "description": "An extension point to be called whenever a new command begins output."
         },
         {
             "ep": "setting",

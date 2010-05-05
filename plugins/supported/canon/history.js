@@ -35,102 +35,71 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
-
-var history = require('canon:request').history;
-
-/**
- * Store command line history, and keep a pointer to the current command so
- * we can use arrow keys to navigate through the history.
- */
-exports.InMemoryHistory = SC.Object.extend({
-    pointer: 0,
-
-    /**
-     * Add an instruction to our list of things that have been executed
-     */
-    requestsChanged: function() {
-        this.pointer = history.requests.length;
-    }.observes('canon:request#history.requests.[]'),
-
-    /**
-     * Increment the 'current entry' pointer
-     */
-    next: function() {
-        if (this.pointer < history.requests.length) {
-            this.pointer++;
-        }
-
-        if (this.pointer == history.requests.length) {
-            return '';
-        } else {
-            return history.requests[this.pointer].typed;
-        }
-    },
-
-    /**
-     * Decrement the 'current entry' pointer
-     */
-    previous: function() {
-        if (this.pointer > 0) {
-            this.pointer--;
-        }
-
-        if (this.pointer == history.requests.length) {
-            return '';
-        } else {
-            return history.requests[this.pointer].typed;
-        }
-    },
-
-    /**
-     * Mutator for our list of instructions
-     */
-    setInstructions: function(instructions) {
-        if (instructions) {
-            history.requests = instructions;
-        } else {
-            history.requests = [];
-        }
-
-        // Set the pointer to one past the end so you can go back and hit the
-        // last one not the one before last
-        this.pointer = history.requests.length;
-    },
-
-    /**
-     * Accessor for our store of previous instructions
-     */
-    getInstructions: function() {
-        return history.requests;
-    },
-
-    /**
-     * Persist the instruction history.
-     * <p>Does nothing in this implementation. See a subclass for an
-     * implementation of this method.
-     */
-    save: function(instructions) {
-        // Don't save in the basic implementation
-    }
-});
+var Trace = require('bespin:util/stacktrace').Trace;
+var catalog = require('bespin:plugins').catalog;
 
 /**
- * Store the history using browser globalStorage
+ * Current requirements are around displaying the command line, and provision
+ * of a 'history' command and cursor up|down navigation of history.
+ * <p>Future requirements could include:
+ * <ul>
+ * <li>Multiple command lines
+ * <li>The ability to recall key presses (i.e. requests with no output) which
+ * will likely be needed for macro recording or similar
+ * <li>The ability to store the command history either on the server or in the
+ * browser local storage.
+ * </ul>
+ * <p>The execute() command doesn't really live here, except as part of that
+ * last future requirement, and because it doesn't really have anywhere else to
+ * live.
  */
-exports.LocalStorageHistory = exports.InMemoryHistory.extend({
-    init: function() {
-        if (window.globalStorage) {
-            var data = globalStorage[location.hostname].history;
-            var instructions = JSON.parse(data);
-            this.setInstructions(instructions);
-        }
-    },
 
-    save: function(instructions) {
-        var data = JSON.stringify(instructions);
-        if (window.globalStorage) {
-            globalStorage[location.hostname].history = data;
-        }
+/**
+ * The array of requests that wish to announce their presence
+ */
+exports.requests = [];
+
+/**
+ * How many requests do we store?
+ */
+var maxRequestLength = 100;
+
+/**
+ * Called by Request instances when some output (or a cell to async() happens)
+ */
+exports.addRequestOutput = function(request) {
+    exports.requests.push(request);
+    // This could probably be optimized with some maths, but 99.99% of the
+    // time we will only be off by one, and I'm feeling lazy.
+    while (exports.requests.length > maxRequestLength) {
+        exports.requests.shiftObject();
     }
-});
+
+    catalog.publish('addedRequestOutput', null, request);
+};
+
+/**
+ * Execute a new command.
+ * This is basically an error trapping wrapper around request.command(...)
+ */
+exports.execute = function(env, args, request) {
+    // Check the function pointed to in the meta-data exists
+    if (!request.command) {
+        request.doneWithError('Command not found.');
+        return;
+    }
+
+    try {
+        request.command(env, args, request);
+    } catch (ex) {
+        var trace = new Trace(ex, true);
+        console.group('Error executing command \'' + request.typed + '\'');
+        console.log('command=', request.commandExt);
+        console.log('args=', args);
+        console.error(ex);
+        trace.log(3);
+        console.groupEnd();
+
+        request.doneWithError(ex);
+    }
+};

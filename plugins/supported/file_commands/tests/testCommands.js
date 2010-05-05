@@ -27,7 +27,7 @@ var t = require('plugindev');
 var fs = require('filesystem');
 var DummyFileSource = require('filesystem:tests/fixture').DummyFileSource;
 var EnvironmentTrait = require('canon:tests/fixture').MockEnvironment;
-var Request = require('canon:tests/fixture').MockRequest;
+var MockRequest = require('canon:tests/fixture').MockRequest;
 var file_commands = require('file_commands');
 var edit_session = require('edit_session');
 var Promise = require('bespin:promise').Promise;
@@ -63,7 +63,7 @@ var getEnv = function() {
 
 exports.testFilesCommand = function() {
     var env = getEnv();
-    var request = Request.create();
+    var request = new MockRequest();
     var testpr = new Promise();
     request.promise.then(function() {
         output = request.outputs.join('');
@@ -80,7 +80,7 @@ exports.testFilesCommand = function() {
 
 exports.testOpenFileWithNoOpenFile = function() {
     var env = getEnv();
-    var request = Request.create();
+    var request = new MockRequest();
     var testpr = new Promise();
     request.promise.then(function() {
         var f = env.file;
@@ -97,7 +97,7 @@ exports.testFilesCommandDefaultsToRoot = function() {
 
     var testpr = new Promise();
 
-    var request = Request.create();
+    var request = new MockRequest();
     request.promise.then(function() {
         output = request.outputs.join('');
         t.ok(output.indexOf('foo/<br/>') > -1, 'foo/ should be in output');
@@ -118,7 +118,7 @@ exports.testFilesAreRelativeToCurrentOpenFile = function() {
 
     var testpr = new Promise();
 
-    var request = Request.create();
+    var request = new MockRequest();
     request.promise.then(function() {
         output = request.outputs.join('');
         t.ok(output.indexOf('1.txt<br/>') > -1, '1.txt should be in the output');
@@ -138,7 +138,7 @@ exports.testFilesListingInDirectoryRelativeToOpenFile = function() {
     buffer.changeFileOnly(files.getFile('foo/1.txt'));
     var testpr = new Promise();
 
-    var request = Request.create();
+    var request = new MockRequest();
     request.promise.then(function() {
         output = request.outputs.join('');
         t.ok(output.indexOf('3.txt<br/>') > -1, '3.txt should be in the output');
@@ -151,7 +151,7 @@ exports.testFilesListingInDirectoryRelativeToOpenFile = function() {
 
 exports.testMakeDirectoryForNewDirectory = function() {
     var env = getEnv();
-    var request = Request.create();
+    var request = new MockRequest();
     var testpr = new Promise();
     var files = env.files;
 

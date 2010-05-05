@@ -45,6 +45,7 @@ var util = require('bespin:util/util');
 var types = require('types:types');
 var environment = require('canon:environment');
 var Request = require('canon:request').Request;
+var history = require('canon:history');
 var keyboard = require('keyboard:keyboard');
 
 var Hint = require('command_line:hint').Hint;
@@ -278,8 +279,8 @@ exports.Input.prototype = {
      * </ul>
      * The resulting #_assignments member created by this function is a list of
      * assignments of arguments in commandExt.params order.
-     * TODO: _unparsedArgs should be a list of objects that contain the following
-     * values: name, param (when assigned) and maybe hints?
+     * TODO: _unparsedArgs should be a list of objects that contain the
+     * following values: name, param (when assigned) and maybe hints?
      */
     _assign: function() {
         // TODO: something smarter than just assuming that they are all in order
@@ -502,31 +503,13 @@ exports.Input.prototype = {
 
         this.argsPromise.then(function(args) {
             this._commandExt.load().then(function(command) {
-
-                var request = Request.create({
+                var request = new Request({
                     command: command,
                     commandExt: this._commandExt,
                     typed: this.typed,
                     args: args
                 });
-
-                // Check the function pointed to in the meta-data exists
-                if (!command) {
-                    request.doneWithError('Command not found.');
-                    return;
-                }
-
-                try {
-                    command(this.env, args, request);
-                } catch (ex) {
-                    var trace = new Trace(ex, true);
-                    console.group('Error executing command \'' + this.typed + '\'');
-                    console.error(ex);
-                    trace.log(3);
-                    console.groupEnd();
-
-                    request.doneWithError(ex);
-                }
+                history.execute(environment.global, args, request);
             }.bind(this), loadError);
         }.bind(this), loadError);
     }

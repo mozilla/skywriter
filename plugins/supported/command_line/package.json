@@ -208,6 +208,10 @@
             "params": []
         },
         {
+            "ep": "addedRequestOutput",
+            "pointer": "commands/history#addedRequestOutput"
+        },
+        {
             "ep": "extensionpoint",
             "name": "typehint",
             "description": "A function to allow the command line to show a hint to the user on how they should finish what they're typing",
