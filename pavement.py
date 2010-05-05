@@ -187,9 +187,10 @@ exports.$ = $.noConflict(true);
     destination.write_text(jquery, "utf8")
 
 @task
-@needs(["install_tiki", "install_jquery"])
 def initial():
     """Initial setup help."""
+    call_task('install_jquery')
+    call_task('install_tiki')
     call_task("develop")
     venv_command = "Scripts/activate.bat" if sys.platform == 'win32' \
         else "source bin/activate"
