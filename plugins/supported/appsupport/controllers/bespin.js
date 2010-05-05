@@ -275,7 +275,7 @@ bespinController = Object.create(Object.prototype, Trait({
 
                 var buffer = m_editsession.makeBuffer(textStorage, syntaxManager);
 
-                var session = m_editsession.makeEditSession();
+                var session = new m_editsession.EditSession();
                 bespinController.session = session;
                 session.currentUser = bespinController._username;
                 session.currentView = textView;
