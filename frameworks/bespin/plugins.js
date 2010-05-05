@@ -913,7 +913,9 @@ exports.Catalog = SC.Object.extend({
             if (sub.match && !sub.regexp) {
                 sub.regexp = new RegExp(sub.match);
             }
-            if (sub.regexp && sub.regexp.test(key) || sub.key === key) {
+            if (sub.regexp && sub.regexp.test(key)
+                    || sub.key === key
+                    || (util.none(sub.key) && util.none(key))) {
                 sub.load().then(function(handler) {
                     handler(key, value);
                 });
