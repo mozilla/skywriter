@@ -35,141 +35,90 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
-var util = require('bespin:util/util');
-var Promise = require('bespin:promise').Promise;
-var m_plugins = require('bespin:plugins');
+var catalog = require('bespin:plugins').catalog;
+var Event = require('events').Event;
+var ThemeStyles = require('themestyles');
+var settings = require('settings').settings;
 
-/**
- * @class
- *
- * Manages Bespin themes for a series of panes.
- */
-exports.ThemeManager = SC.Object.extend({
-    _theme: null,
+exports._currentThemeExtension = null;
 
-    _applyTheme: function() {
-        var theme = this._theme;
-        if (util.none(theme)) {
-            return;
+exports.themeEvent = Event();
+
+exports.themeSettingDidChanged = function(settingName, themeName) {
+    var theme = catalog.getExtensionByKey('theme', themeName);
+
+    if (themeName === 'standard') {
+        if (exports._currentThemeExtension) {
+            ThemeStyles.unregisterThemeStyles(exports._currentThemeExtension);
         }
 
-        this.get('panes').forEach(this._applyThemeToPane, this);
-    },
+        exports._currentThemeExtension = undefined;
 
-    _applyThemeToPane: function(pane) {
-        var oldTheme = pane.get('theme');
-        if (util.none(oldTheme)) {
-            oldTheme = window.ENV.theme;
-        }
-
-        var classNames = pane.get('classNames');
-        if (!util.none(oldTheme)) {
-            var notOldTheme = function(theme) { return theme !== oldTheme; };
-            classNames = classNames.filter(notOldTheme);
-        }
-
-        var cssClass = this._theme.get('cssClass');
-        classNames.push(cssClass);
-
-        pane.set('classNames', classNames);
-        pane.set('theme', cssClass);
-        pane.set('bespinThemeManager', this);
-
-        pane.updateLayer();
-
-        this._applyThemeToView(pane);
-    },
-
-    _applyThemeToView: function(view) {
-        var theme = this._theme;
-        if (view.respondsTo('bespinThemeChanged')) {
-            view.bespinThemeChanged(this, theme);
-        }
-
-        view.get('childViews').forEach(this._applyThemeToView, this);
-    },
-
-    _panesChanged: function() {
-        this._applyTheme();
-    }.observes('panes'),
-
-    /**
-     * @property{Catalog}
-     *
-     * The plugin catalog to use. Can be set to a mock object for unit testing.
-     */
-    catalog: m_plugins.catalog,
-
-    /**
-     * @property{Array<SC.Pane>}
-     *
-     * An immutable list of panes to maintain themes for.
-     */
-    panes: [],
-
-    /**
-     * @property{string}
-     *
-     * The name of the theme to use (i.e. the key of the 'theme' endpoint of
-     * the desired theme).
-     */
-    theme: null,
-
-    /**
-     * @type{Promise}
-     *
-     * A promise that resolves when the default theme is registered.
-     *
-     * TODO: Remove me when we get proper theme support.
-     */
-    themeRegistered: null,
-
-    /**
-     * Adds a pane to the list of panes maintained by this theme.
-     */
-    addPane: function(pane) {
-        this.set('panes', this.get('panes').concat(pane));
-    },
-
-    init: function() {
-        this.set('themeRegistered', new Promise());
-        this.set('panes', this.get('panes').concat());
-    },
-
-    /**
-     * Loads the default theme and returns a promise that will resolve when the
-     * theme is loaded.
-     */
-    loadTheme: function() {
-        var loadPromise = new Promise();
-        this.get('themeRegistered').then(function(extension) {
-            extension.load().then(function(themeClass) {
-                var theme = themeClass.create();
-                this._theme = theme;
-                this._applyTheme();
-                loadPromise.resolve();
-            }.bind(this));
-        }.bind(this));
-        return loadPromise;
-    },
-
-    /**
-     * Removes a pane from the list of panes maintained by this theme.
-     */
-    removePane: function(pane) {
-        this.set('panes', this.get('panes').filter(function(otherPane) {
-            return pane !== otherPane;
-        }));
+        var themeVariableExt = catalog.getExtensions('themevariable');
+        themeVariableExt.forEach(function(extension) {
+            if (extension.value) {
+                extension.value = undefined;
+                ThemeStyles.parsePlugin(extension.getPluginName());
+            }
+        });
+        catalog.publish('themeChange');
+        return;
     }
+
+    if (!themeName || !theme) {
+        // request.doneWithError('Couldn\'t find a theme for the name: ' + themeName);
+        return;
+    }
+
+    theme.load().then(function(extension) {
+        // Remove the former themeStyle file, if the former extension has one declaired.
+        if (exports._currentThemeExtension) {
+            ThemeStyles.unregisterThemeStyles(exports._currentThemeExtension);
+        }
+
+        var data = extension();
+        // Store the data for later use.
+        exports._currentThemeExtension = theme;
+
+        var themeVariableExt = catalog.getExtensions('themevariable');
+        var newValue;
+        themeVariableExt.forEach(function(extension) {
+            if (data[extension._pluginName] && data[extension._pluginName][extension.name]) {
+                newValue = data[extension._pluginName][extension.name];
+            } else {
+                newValue = undefined;
+            }
+            if (newValue !== extension.value) {
+                extension.value = newValue;
+                ThemeStyles.parsePlugin(extension._pluginName);
+            }
+        });
+
+        catalog.publish('themeChange');
+
+        // If the theme has a url that points to a themeStyles file, then register it.
+        if (theme.url) {
+            ThemeStyles.registerThemeStyles(theme);
+        }
+    }, function(err) {
+        // request.doneWithError('Error while loading theme plugin: ' + err.message);
+    });
+};
+
+catalog.registerExtension('settingChange', {
+    match: "theme",
+    pointer: exports.themeSettingDidChanged.bind(exports)
 });
 
-exports.themeManager = exports.ThemeManager.create({theme: 'Screen'});
-
 exports.registerTheme = function(extension) {
-    var themeManager = exports.themeManager;
-    if (extension.name === themeManager.get('theme')) {
-        themeManager.get('themeRegistered').resolve(extension);
+    var currentThemeName = settings.get('theme');
+    if (extension.name === currentThemeName) {
+        exports.themeSettingDidChanged();
     }
 };
 
+exports.unregisterTheme = function(extension) {
+    if (extension.name === settings.get('theme')) {
+        exports.themeSettingDidChanged('standard');
+    }
+};

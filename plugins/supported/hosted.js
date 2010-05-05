@@ -40,6 +40,7 @@
     "description": "Constructs what you see on a hosted Bespin server",
     "dependencies": {
         "appsupport": "0.0",
+        "theme_manager": "0.0",
         "traits": "0.0"
     },
     "provides": [
@@ -68,7 +69,7 @@ exports.hostedEnvironment = Trait.object({
      * The component loading order in the hosted environment.
      */
     componentOrder: [
-        'environment', 'theme_manager', 'login_controller', 'file_source',
+        'environment', 'login_controller', 'file_source',
         'settings', 'key_listener', 'dock_view', 'command_line', 'social_view',
         'editor_view', 'edit_session'
     ],

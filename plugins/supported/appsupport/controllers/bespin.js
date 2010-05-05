@@ -72,7 +72,6 @@ bespinController = Object.create(Object.prototype, Trait({
     _dockView: null,
     _editorView: null,
     _environment: null,
-    _themeManager: null,
     _username: null,
 
     _registrationHandlers: {
@@ -98,20 +97,6 @@ bespinController = Object.create(Object.prototype, Trait({
             }
         }), RegistrationHandler)),
 
-        theme_manager: Trait.create(Object.prototype, Trait.override(Trait({
-            attach: function(themeManager) {
-                bespinController._themeManager = themeManager;
-                themeManager.addPane(bespinController.pane);
-                return themeManager.loadTheme();
-            },
-
-            detach: function() {
-                var themeManager = bespinController._themeManager;
-                _themeManager.removePane(bespinController.pane);
-                bespinController._themeManager = null;
-            }
-        }), RegistrationHandler)),
-
         login_controller: Trait.create(Object.prototype, Trait.override(Trait({
             _loginController: null,
             _loginPane: null,
@@ -129,9 +114,6 @@ bespinController = Object.create(Object.prototype, Trait({
                 var loginPane = page.get('mainPane');
                 this._loginPane = loginPane;
 
-                var themeManager = bespinController._themeManager;
-                themeManager.addPane(loginPane);
-
                 var promise = new Promise();
                 this._promise = promise;
                 var showIfNotLoggedIn = loginController.showIfNotLoggedIn;
@@ -140,9 +122,6 @@ bespinController = Object.create(Object.prototype, Trait({
             },
 
             detach: function() {
-                var themeManager = bespinController._themeManager;
-                themeManager.removePane(this._loginPane);
-
                 var loginController = this._loginController;
                 var loggedOutEvent = loginController.get('loggedOut');
                 var acceptedEvent = loginController.get('accepted');
