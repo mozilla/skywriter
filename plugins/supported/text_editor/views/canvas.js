@@ -50,8 +50,11 @@ var Event = require('events').Event;
  *
  * The actual size of the canvas is always the size of the container the canvas
  * view is placed in.
+ * 
+ * The canvas that is created is available in the domNode attribute and should
+ * be added to the document by the caller.
  */
-exports.CanvasView = function(container) {
+exports.CanvasView = function() {
     this._invalidRects = [];
     
     // TODO figure out the equivalent here!
@@ -79,13 +82,13 @@ exports.CanvasView = function(container) {
     canvas.setAttribute('height', '' + parentFrame.height);
     canvas.innerHTML = 'canvas tag not supported by your browser';
     container.appendChild(canvas);
-    this._canvasDom = canvas;
+    this.domNode = canvas;
     window.setTimeout(this.tryRedraw.bind(this), 0);
 };
 
 exports.CanvasView.prototype = {
     _canvasContext: null,
-    _canvasDom: null,
+    domNode: null,
     _canvasId: null,
     _invalidRects: null,
     _lastRedrawTime: null,
@@ -113,7 +116,7 @@ exports.CanvasView.prototype = {
 
     _getContext: function() {
         if (this._canvasContext === null) {
-            this._canvasContext = this._canvasDom.getContext('2d');
+            this._canvasContext = this.domNode.getContext('2d');
         }
         return this._canvasContext;
     },
@@ -121,7 +124,7 @@ exports.CanvasView.prototype = {
     _resizeCanvas: function() {
         var parentFrame = this.parentView.frame;
 
-        var canvas = this._canvasDom;
+        var canvas = this.domNode;
         if (util.none(canvas)) {
             return;
         }

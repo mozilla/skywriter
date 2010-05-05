@@ -35,39 +35,64 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var CanvasView = require('views/canvas').CanvasView;
 var m_scratchcanvas = require('bespin:util/scratchcanvas');
 
-var InteriorGutterView = CanvasView.extend({
+// TODO need to implement this behavior
+// _frameChanged: function() {
+//     // We have to be more aggressive than the canvas view alone would be,
+//     // because of the possibility that we will have to draw additional line
+//     // numbers in the gutter when the height of the text changes.
+//     this.setNeedsDisplay();
+// }.observes('frame')
 
-    _frameChanged: function() {
-        // We have to be more aggressive than the canvas view alone would be,
-        // because of the possibility that we will have to draw additional line
-        // numbers in the gutter when the height of the text changes.
-        this.setNeedsDisplay();
-    }.observes('frame'),
+/*
+ * A view that renders the gutter for the editor.
+ * 
+ * The domNode attribute contains the domNode for this view that should be
+ * added to the document appropriately.
+ */
+exports.GutterView = function() {
+    this.layoutManager.invalidatedRects.add(function(sender, rects) {
+        this._recomputeLayout();
+    }.bind(this));
+    var interiorView = new CanvasView();
+    interiorView.drawRect.add(this.drawRect.bind(this));
+    this._interiorView = interiorView;
+    this.domNode = interiorView.domNode;
 
-    drawRect: function(rect, context) {
-        var theme = this.getPath('parentView._theme');
+    this._recomputeLayout();
+};
+
+exports.GutterView.prototype = {
+    /**
+     * Theme colors. Value is set by editorView class. Don't change this
+     * property directly. Use the editorView function to adjust it.
+     */
+    _theme: { },
+
+    _interiorView: null,
+    
+    drawRect: function(canvasview, rect, context) {
+        var theme = this.parentView._theme;
 
         context.fillStyle = theme.backgroundColor;
         context.fillRect(rect.x, rect.y, rect.width, rect.height);
 
         context.save();
 
-        var parentView = this.get('parentView');
-        var padding = parentView.get('padding');
+        var parentView = this.parentView;
+        var padding = parentView.padding;
         context.translate(padding.left, 0);
 
-        var layoutManager = parentView.get('layoutManager');
+        var layoutManager = parentView.layoutManager;
         var range = layoutManager.characterRangeForBoundingRect(rect);
         var endRow = Math.min(range.end.row,
-            layoutManager.get('textLines').length - 1);
-        var lineAscent = layoutManager.get('lineAscent');
+            layoutManager.textLines.length - 1);
+        var lineAscent = layoutManager.lineAscent;
 
         context.fillStyle = theme.color;
-        context.font = parentView.get('editor').font;
+        context.font = parentView.editor.font;
 
         for (var row = range.start.row; row <= endRow; row++) {
             // TODO: breakpoints
@@ -76,29 +101,19 @@ var InteriorGutterView = CanvasView.extend({
         }
 
         context.restore();
-    }
-});
-
-exports.GutterView = SC.View.extend({
-    /**
-     * Theme colors. Value is set by editorView class. Don't change this
-     * property directly. Use the editorView function to adjust it.
-     */
-    _theme: { },
-
-    _interiorView: null,
+    },
 
     _computeWidth: function() {
-        var padding = this.get('padding');
+        var padding = this.padding;
         var paddingWidth = padding.left + padding.right;
 
         var lineNumberFont = this.editor.font;
 
-        var layoutManager = this.get('layoutManager');
-        var lineCount = layoutManager.get('textLines').length;
+        var layoutManager = this.layoutManager;
+        var lineCount = layoutManager.textLines.length;
         var lineCountStr = '' + lineCount;
 
-        var characterWidth = layoutManager.get('characterWidth');
+        var characterWidth = layoutManager.characterWidth;
         var strWidth = characterWidth * lineCountStr.length;
 
         return strWidth + paddingWidth;
@@ -109,22 +124,22 @@ exports.GutterView = SC.View.extend({
     }.observes('frame'),
 
     _recomputeLayout: function() {
-        var layoutManager = this.get('layoutManager');
-        var padding = this.get('padding');
+        var layoutManager = this.layoutManager;
+        var padding = this.padding;
 
         var width = this._computeWidth();
 
-        var layout = SC.clone(this.get('layout'));
+        var layout = SC.clone(this.layout);
         if (layout.width !== width) {
             layout.width = width;
             this.set('layout', layout); // triggers a restart of this function
             return;
         }
 
-        var frame = this.get('frame');
+        var frame = this.frame;
         this._interiorView.set('layout', {
             left:   0,
-            top:    -this.get('verticalScrollOffset'),
+            top:    -this.verticalScrollOffset,
             width:  width,
             height: Math.max(frame.height,
                     layoutManager.boundingRect().height + padding.bottom)
@@ -159,24 +174,6 @@ exports.GutterView = SC.View.extend({
      * The amount by which the user has scrolled the neighboring editor in
      * pixels.
      */
-    verticalScrollOffset: 0,
-
-    createChildViews: function() {
-        var interiorView = this.createChildView(InteriorGutterView);
-        this._interiorView = interiorView;
-
-        var frame = this.get('frame');
-        this._recomputeLayout();
-
-        this.set('childViews', [ interiorView ]);
-    },
-
-    init: function() {
-        arguments.callee.base.apply(this, arguments);
-        
-        this.layoutManager.invalidatedRects.add(function(sender, rects) {
-            this._recomputeLayout();
-        }.bind(this));
-    }
-});
+    verticalScrollOffset: 0
+};
 

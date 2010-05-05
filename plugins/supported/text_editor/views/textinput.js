@@ -44,7 +44,7 @@ var util = require('bespin:util/util');
  * defined in the DOM Level 3 specification. It allows views to support
  * internationalized text input via non-US keyboards, dead keys, and/or IMEs. 
  * It also provides support for copy and paste. Currently, an invisible 
- * contentEditable div is used, but in the future this module should use 
+ * textarea is used, but in the future this module should use 
  * DOM 3 TextInput events directly where available.
  *
  * To use this class, instantiate it and provide the optional functions
@@ -56,14 +56,15 @@ var util = require('bespin:util/util');
  * You can also provide an DOM node to take focus from by providing the optional
  * "takeFocusFrom" parameter.
  * 
- * The first parameter is a container node.
+ * The DOM node created for text input is in the "domNode" attribute
+ * and that caller should add the DOM node to the document in the appropriate
+ * place.
  */
-exports.TextInput = function(container, opts) {
-    var textFieldDom = this._textFieldDom = document.createElement('textarea');
-    textFieldDom.setAttribute('style', 'position: absolute; ' +
+exports.TextInput = function(opts) {
+    var domNode = this.domNode = document.createElement('textarea');
+    domNode.setAttribute('style', 'position: absolute; ' +
         'z-index: -99999; top: -999px; left: -999px; width: 0px; ' +
         'height: 0px');
-    container.appendChild(textFieldDom);
     
     this.copy = opts.copy;
     this.cut = opts.cut;
@@ -80,14 +81,14 @@ exports.TextInput = function(container, opts) {
         }.bind(this));
     }
     
-    this._configureListeners(textFieldDom);
+    this._configureListeners(domNode);
 };
 
 exports.TextInput.prototype = {
     _composing: false,
     _ignore: false,
     _ignoreBlur: false,
-    _textFieldDom: undefined,
+    domNode: undefined,
 
     // This function doesn't work on WebKit! The textContent comes out empty...
     _textFieldChanged: function() {
@@ -95,7 +96,7 @@ exports.TextInput.prototype = {
             return;
         }
 
-        var textField = this._textFieldDom;
+        var textField = this.domNode;
         var text = textField.value;
         // On FF textFieldChanged is called sometimes although nothing changed.
         // -> don't call textInserted() in such a case.
@@ -130,7 +131,7 @@ exports.TextInput.prototype = {
     },
 
     _setValueAndSelect: function(text) {
-        var textField = this._textFieldDom;
+        var textField = this.domNode;
         textField.value = text;
         textField.select();
     },
@@ -141,7 +142,7 @@ exports.TextInput.prototype = {
      * you should call this function in your implementation.
      */
     focusTextInput: function() {
-        this._textFieldDom.focus();
+        this.domNode.focus();
     },
 
     /**
@@ -150,7 +151,7 @@ exports.TextInput.prototype = {
      * you should call this function in your implementation.
      */
     unfocusTextInput: function() {
-        this._textFieldDom.blur();
+        this.domNode.blur();
     },
 
     /**
