@@ -35,16 +35,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
-var keyboardManager = require('canon:keyboard').keyboardManager;
-
 "define metadata";
 ({
     "description": "Routes keys to the appropriate destination",
-    "dependencies": {
-        "canon": "0.0"
+    "dependencies":
+    {
+        "keyboard": "0.0"
     },
-    "provides": [
+    "provides":
+    [
         {
             "ep": "appcomponent",
             "name": "key_listener",
@@ -53,6 +52,9 @@ var keyboardManager = require('canon:keyboard').keyboardManager;
     ]
 });
 "end";
+
+var SC = require('sproutcore/runtime').SC;
+var keyboardManager = require('keyboard:keyboard').keyboardManager;
 
 /**
  * @class

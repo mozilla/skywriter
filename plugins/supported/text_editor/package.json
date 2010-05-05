@@ -4,11 +4,11 @@
     {
         "appsupport": "0.0",
         "canon": "0.0",
+        "keyboard": "0.0",
         "delegate_support": "0.0",
         "rangeutils": "0.0",
         "settings": "0.0",
         "syntax_manager" : "0.0",
-        "theme_handler": "0.0",
         "traits": "0.0"
     },
     "provides":

@@ -36,24 +36,40 @@
  * ***** END LICENSE BLOCK ***** */
 
 var catalog = require('bespin:plugins').catalog;
-var history = require('canon:request').history;
+var history = require('canon:history');
+
+/**
+ * The pointer to the command that we show on up|down
+ */
+var pointer = 0;
 
 /**
  * CLI 'up'
+ * Decrement the 'current entry' pointer
  */
 exports.historyPreviousCommand = function(env, args, request) {
-    var commandLine = env.commandLine;
-    var history = catalog.getObject('history');
-    commandLine.setInput(history.previous());
+    if (pointer > 0) {
+        pointer--;
+    }
+
+    var display = history.requests[pointer].typed;
+    env.commandLine.setInput(display);
 };
 
 /**
  * CLI 'down'
+ * Increment the 'current entry' pointer
  */
 exports.historyNextCommand = function(env, args, request) {
-    var commandLine = env.commandLine;
-    var history = catalog.getObject('history');
-    commandLine.setInput(history.next());
+    if (pointer < history.requests.length) {
+        pointer++;
+    }
+
+    var display = (pointer === history.requests.length)
+        ? ''
+        : history.requests[pointer].typed;
+
+    env.commandLine.setInput(display);
 };
 
 /**
@@ -74,4 +90,11 @@ exports.historyCommand = function(env, args, request) {
     output.push('</table>');
 
     request.done(output.join(''));
+};
+
+/**
+ * Reset the pointer to the latest command execution
+ */
+exports.addedRequestOutput = function() {
+    pointer = history.requests.length;
 };

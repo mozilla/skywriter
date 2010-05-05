@@ -37,7 +37,6 @@
 
 var SC = require('sproutcore/runtime').SC;
 
-var themeManager = require('theme_manager').themeManager;
 var Promise = require('bespin:promise').Promise;
 var server = require('bespin_server').server;
 
@@ -151,7 +150,6 @@ exports.getKeychainPassword = function() {
     }
 
     pane = kcPage.get('mainPane');
-    themeManager.addPane(pane);
     pane.append();
     pane.becomeKeyPane();
     pane.getPath('contentView.form.passwordField').becomeFirstResponder();

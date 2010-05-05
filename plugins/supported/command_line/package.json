@@ -3,6 +3,7 @@
     "dependencies":
     {
         "canon": "0.0",
+        "keyboard": "0.0",
         "types": "0.0",
         "settings": "0.0",
         "diff": "0.0",
@@ -41,7 +42,7 @@
             "name": "complete",
             "predicates": { "isCommandLine": true, "isKeyUp": false },
             "key": "tab",
-            "pointer": "commands#completeCommand"
+            "pointer": "commands/simple#completeCommand"
         },
         {
             "ep": "command",
@@ -133,7 +134,7 @@
                 }
             ],
             "description": "Get help on the available commands.",
-            "pointer": "commands#helpCommand"
+            "pointer": "commands/simple#helpCommand"
         },
         {
             "ep": "command",
@@ -154,7 +155,7 @@
                 }
             ],
             "description": "define and show aliases for commands",
-            "pointer": "commands#aliasCommand"
+            "pointer": "commands/simple#aliasCommand"
         },
         {
             "ep": "command",
@@ -169,21 +170,46 @@
             ],
             "description": "evals given js code and show the result",
             "hidden": true,
-            "pointer": "basiccommands#evalCommand"
+            "pointer": "commands/basic#evalCommand"
         },
         {
             "ep": "command",
             "name": "version",
             "description": "show the Bespin version",
             "hidden": true,
-            "pointer": "basiccommands#versionCommand"
+            "pointer": "commands/basic#versionCommand"
         },
         {
             "ep": "command",
             "name": "bespin",
             "description": "has",
             "hidden": true,
-            "pointer": "basiccommands#bespinCommand"
+            "pointer": "commands/basic#bespinCommand"
+        },
+        {
+            "ep": "command",
+            "name": "historyPrevious",
+            "predicates": { "isCommandLine": true, "isKeyUp": true },
+            "key": "up",
+            "pointer": "commands/history#historyPreviousCommand"
+        },
+        {
+            "ep": "command",
+            "name": "historyNext",
+            "predicates": { "isCommandLine": true, "isKeyUp": true },
+            "key": "down",
+            "pointer": "commands/history#historyNextCommand"
+        },
+        {
+            "ep": "command",
+            "name": "history",
+            "description": "Show history of the commands",
+            "pointer": "commands/history#historyCommand",
+            "params": []
+        },
+        {
+            "ep": "addedRequestOutput",
+            "pointer": "commands/history#addedRequestOutput"
         },
         {
             "ep": "extensionpoint",

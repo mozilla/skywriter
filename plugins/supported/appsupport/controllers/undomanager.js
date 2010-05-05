@@ -35,18 +35,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
-
 /**
- * @class
- *
  * This simple undo manager coordinates undo for the app that embeds Bespin.
  * It's similar to SproutCore's UndoManager class, but it separates undo and
  * redo and correctly flushes the redo stack when an action is performed.
  */
-exports.undoManager = SC.Object.create({
-    _redoStack: null,
-    _undoStack: null,
+exports.undoManager = {
+    _redoStack: [],
+    _undoStack: [],
 
     _undoOrRedo: function(method, stack, otherStack) {
         if (stack.length === 0) {
@@ -64,14 +60,8 @@ exports.undoManager = SC.Object.create({
         return true;
     },
 
-    init: function() {
-        this._redoStack = [];
-        this._undoStack = [];
-    },
-
     /**
-     * Redoes the last undone action.
-     *
+     * Redo the last undone action.
      * @return{boolean} True if the action was successfully redone, false
      *     otherwise.
      */
@@ -99,7 +89,7 @@ exports.undoManager = SC.Object.create({
     undo: function() {
         return this._undoOrRedo('undo', this._undoStack, this._redoStack);
     }
-});
+};
 
 /**
  *

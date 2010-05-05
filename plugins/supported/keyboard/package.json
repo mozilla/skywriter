@@ -1,0 +1,17 @@
+{
+    "description": "Keyboard shortcuts",
+    "dependencies":
+    {
+        "settings": "0.0",
+        "traits": "0.0",
+        "canon": "0.0"
+    },
+    "provides":
+    [
+        {
+            "ep": "settingChanged",
+            "key": "customKeymapping",
+            "pointer": "keyboard#keyboardManager._customKeymappingChanged"
+        }
+    ]
+}

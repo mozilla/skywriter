@@ -28,27 +28,25 @@ var SC = require('sproutcore/runtime').SC;
 var Promise = require('bespin:promise').Promise;
 var filesource = require('filesource');
 
-var DummyServer = SC.Object.extend({
-    request: function(method, url, payload, options) {
-        this.method = method;
-        this.url = url;
-        this.payload = payload;
-        this.options = options;
+var DummyServer = function(responseData) {
+    this.responseData = responseData;
+};
 
-        var pr = new Promise();
-        if (this.get('responseData')) {
-            pr.resolve(this.get('responseData'));
-        }
-        return pr;
+DummyServer.prototype.request = function(method, url, payload, options) {
+    this.method = method;
+    this.url = url;
+    this.payload = payload;
+    this.options = options;
+
+    var pr = new Promise();
+    if (this.get('responseData')) {
+        pr.resolve(this.get('responseData'));
     }
-});
+    return pr;
+};
 
 exports.testLoadDirectory = function() {
-    var server = DummyServer.create({
-        responseData: [
-            'foo.js'
-        ]
-    });
+    var server = new DummyServer([ 'foo.js' ]);
     var source = filesource.BespinFileSource.create({
         server: server
     });
@@ -66,9 +64,7 @@ exports.testLoadDirectory = function() {
 };
 
 exports.testLoadContents = function() {
-    var server = DummyServer.create({
-        responseData: 'This is the exciting data in the file.'
-    });
+    var server = new DummyServer([ 'This is the exciting data in the file.' ]);
     var source = filesource.BespinFileSource.create({
         server: server
     });
@@ -86,8 +82,7 @@ exports.testLoadContents = function() {
 };
 
 exports.testSaveContents = function() {
-    var server = DummyServer.create({
-    });
+    var server = new DummyServer();
     var source = filesource.BespinFileSource.create({
         server: server
     });

@@ -43,7 +43,7 @@ var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
 var Range = require('rangeutils:utils/range');
 var Rect = require('utils/rect');
 var TextInput = require('mixins/textinput').TextInput;
-var keyboardManager = require('canon:keyboard').keyboardManager;
+var keyboardManager = require('keyboard:keyboard').keyboardManager;
 var settings = require('settings').settings;
 
 // Set this to true to outline all text ranges with a box. This may be useful

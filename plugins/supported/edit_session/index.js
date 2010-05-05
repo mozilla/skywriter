@@ -51,9 +51,9 @@ var bespin = require('appsupport:controllers/bespin').bespinController;
 
 var History = require('edit_session:history').History;
 
-/*
-* A Buffer connects a model and file together.
-*/
+/**
+ * A Buffer connects a model and file together.
+ */
 exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
     _file: null,
 
@@ -213,11 +213,14 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
     }
 }));
 
-exports.EditSessionTrait = Trait({
+exports.EditSession = function() {
+    this.history = new History();
+};
 
+exports.EditSession.prototype = {
     _currentBuffer: null,
 
-    setCurrentBuffer: function(newBuffer) {
+    set currentBuffer(newBuffer) {
         var oldBuffer = this._currentBuffer;
         if (newBuffer !== oldBuffer) {
             if (!util.none(oldBuffer)) {
@@ -229,7 +232,7 @@ exports.EditSessionTrait = Trait({
         }
     },
 
-    getCurrentBuffer: function() {
+    get currentBuffer() {
         return this._currentBuffer;
     },
 
@@ -241,7 +244,7 @@ exports.EditSessionTrait = Trait({
      */
     _currentView: null,
 
-    setCurrentView: function(newView) {
+    set currentView(newView) {
         var oldView = this._currentView;
         if (newView !== oldView) {
             if (!util.none(oldView)) {
@@ -253,7 +256,7 @@ exports.EditSessionTrait = Trait({
         }
     },
 
-    getCurrentView: function() {
+    get currentView() {
         return this._currentView;
     },
 
@@ -361,20 +364,8 @@ exports.EditSessionTrait = Trait({
      */
     textViewWasScrolled: function(sender, point) {
         this._updateHistoryProperty('scroll', point);
-    },
-
-    init: function() {
-        this.history = History.create();
-
-        this.__defineGetter__('currentView', this.getCurrentView);
-        this.__defineSetter__('currentView', this.setCurrentView);
-
-        this.__defineGetter__('currentBuffer', this.getCurrentBuffer);
-        this.__defineSetter__('currentBuffer', this.setCurrentBuffer);
-
-        return this;
     }
-});
+};
 
 // A small object that's exported to the Bespin controller to allow the
 // controller to find the relevant classes.
@@ -385,8 +376,6 @@ exports.editSessionClasses = {
         return Buffer;
     },
 
-    makeEditSession: function() {
-        return Trait.create(Object.prototype, exports.EditSessionTrait).init();
-    }
+    EditSession: exports.EditSession
 };
 

@@ -42,10 +42,10 @@ var util = require('bespin:util/util');
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 
-var keyutil = require('canon:keyutil');
+var keyutil = require('keyboard:keyutil');
+var keyboardManager = require('keyboard:keyboard').keyboardManager;
 
-var request = require('canon:request');
-var keyboardManager = require('canon:keyboard').keyboardManager;
+var history = require('canon:history');
 var environment = require('canon:environment').global;
 var settings = require('settings').settings;
 
@@ -204,6 +204,11 @@ exports.CliInputView = SC.View.design({
             match: "[min|max]ConsoleHeight",
             pointer: this.checkHeight.bind(this)
         });
+
+        catalog.registerExtension('addedRequestOutput', {
+            pointer: this.addedRequestOutput.bind(this)
+        });
+
         this.checkHeight();
     },
 
@@ -336,28 +341,10 @@ exports.CliInputView = SC.View.design({
     },
 
     /**
-     * Utility to update the CLI output table whenever some value changes
-     */
-    link: function(root, path, updater) {
-        var doUpdate = function() {
-            // console.log('updating', path, 'to', root.getPath(path));
-            updater(root.getPath(path));
-        };
-
-        root.addObserver(path, this, doUpdate);
-        doUpdate();
-    },
-
-    /**
      * Adds a row to the CLI output display
      */
-    addRequest: function(requests) {
-        // TODO: We should really replace the observation with some catalog
-        // thing, so until we do that we have a huge hack where we assume that
-        // we only add things to the command line, and we just add in the last
-        var request = requests[requests.length - 1];
-
-        request.set('hideOutput', false);
+    addedRequestOutput: function(key, request) {
+        request.hideOutput = false;
 
         // The div for the input (i.e. what was typed)
         var rowin = document.createElement('div');
@@ -365,12 +352,12 @@ exports.CliInputView = SC.View.design({
         // A single click on an invocation line in the console
         // copies the command to the command line
         rowin.onclick = function() {
-            cliController.input = request.get('typed');
-        };
+            this.setInput(request.typed);
+        }.bind(this);
         // A double click on an invocation line in the console
         // executes the command
         rowin.ondblclick = function() {
-            this._input = new Input(request.get('typed'));
+            this._input = new Input(request.typed);
             this._input.execute();
         };
         this._table.appendChild(rowin);
@@ -387,7 +374,7 @@ exports.CliInputView = SC.View.design({
         // Toggle output display
         var hideOutputEle = document.createElement('img');
         hideOutputEle.onclick = function() {
-            request.set('hideOutput', !request.get('hideOutput'));
+            request.hideOutput = !request.hideOutput;
         };
         hideOutputEle.style.verticalAlign = 'middle';
         hideOutputEle.style.padding = '2px';
@@ -399,7 +386,7 @@ exports.CliInputView = SC.View.design({
         closeEle.alt = 'Remove this command from the history';
         closeEle.title = closeEle.alt;
         closeEle.onclick = function() {
-            request.history.remove(request);
+            history.history.remove(request);
         };
         closeEle.style.verticalAlign = 'middle';
         closeEle.style.padding = '2px';
@@ -427,14 +414,12 @@ exports.CliInputView = SC.View.design({
         throbEle.src = imagePath + 'throbber.gif';
         rowout.appendChild(throbEle);
 
-        this.link(request, 'duration', function(duration) {
-            durationEle.innerHTML = duration ?
-                'completed in ' + (duration / 1000) + ' sec ' :
+        request.changed.add(function() {
+            durationEle.innerHTML = request.duration ?
+                'completed in ' + (request.duration / 1000) + ' sec ' :
                 '';
-        });
 
-        this.link(request, 'hideOutput', function(hideOutput) {
-            if (hideOutput) {
+            if (request.hideOutput) {
                 hideOutputEle.src = imagePath + 'plus.png';
                 hideOutputEle.alt = 'Show command output';
                 hideOutputEle.title = 'Show command output';
@@ -445,15 +430,11 @@ exports.CliInputView = SC.View.design({
                 hideOutputEle.title = 'Hide command output';
                 outputEle.style.display = 'block';
             }
-        });
 
-        this.link(request, 'typed', function(typed) {
-            typedEle.innerHTML = typed;
-        });
+            typedEle.innerHTML = request.typed;
 
-        this.link(request, 'outputs.[]', function(outputs) {
             outputEle.innerHTML = '';
-            outputs.forEach(function(output) {
+            request.outputs.forEach(function(output) {
                 var node;
                 if (typeof output == 'string') {
                     node = document.createElement('p');
@@ -464,16 +445,12 @@ exports.CliInputView = SC.View.design({
                 outputEle.appendChild(node);
             });
             this.scrollToBottom();
+
+            outputEle.className = 'cmd_output' + (request.error ? ' cmd_error' : '');
+
+            throbEle.style.display = request.completed ? 'none' : 'block';
         }.bind(this));
-
-        this.link(request, 'error', function(error) {
-            outputEle.className = 'cmd_output' + (error ? ' cmd_error' : '');
-        });
-
-        this.link(request, 'completed', function(completed) {
-            throbEle.style.display = completed ? 'none' : 'block';
-        });
-    }.observes('canon:request#history.requests.[]'),
+    },
 
     /**
      * Scroll the output area to the bottom
@@ -533,7 +510,7 @@ exports.CliInputView = SC.View.design({
      */
     replaceSelection: function(text) {
         var length = text.length;
-        cliController.set('input', text);
+        this.setInput(text);
         window.setTimeout(function() {
             this._inputer.setSelectionRange(length, length);
         }.bind(this), 0);

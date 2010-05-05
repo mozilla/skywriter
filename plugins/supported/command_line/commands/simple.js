@@ -38,9 +38,6 @@
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 
-// TODO: fix
-var rootCanon = { aliases:[], commands:[] };
-
 /**
  * Action to allow the command line to do completion
  */
@@ -151,6 +148,9 @@ exports.helpCommand = function(env, args, request) {
     });
     request.done(output);
 };
+
+// TODO: fix
+var rootCanon = { aliases:[], commands:[] };
 
 /**
  * 'alias' command

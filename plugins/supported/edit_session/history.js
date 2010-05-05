@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Trait = require('traits').Trait;
 var environment = require('canon:environment');
 
 var MAX_HISTORY_SIZE = 30;
@@ -45,14 +44,18 @@ var MAX_HISTORY_SIZE = 30;
  *
  * A list of recently opened files.
  */
-var HistoryTrait = Trait({
+exports.History = function(storage) {
+    this.storage = storage || window.localStorage;
+};
+
+exports.History.prototype = {
 
     /**
      * @property{LocalStorage}
      *
      * The backing store to use. Defaults to HTML 5 local storage.
      */
-    storage: window.localStorage,
+    storage: null,
 
     _getStorageName: function() {
         var user = environment.global.session.currentUser;
@@ -127,15 +130,4 @@ var HistoryTrait = Trait({
 
         this._setHistory(history);
     }
-});
-
-exports.History = {
-    create: function(options) {
-        var ret = Trait.create(Object.prototype, HistoryTrait);
-        for (option in options) {
-            ret[option] = options[option];
-        }
-        return ret;
-    },
-    trait: HistoryTrait
 };

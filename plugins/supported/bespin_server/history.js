@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var history = require('history:history');
+var history = require('canon:history');
 
 /**
  * Store the history in BespinSettings/command.history.

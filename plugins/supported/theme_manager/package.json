@@ -1,20 +1,44 @@
 {
-    "provides": [
+    "description": "Handles colors in Bespin",
+    "dependencies": {
+        "bespin_server": "0.0",
+        "less": "0.0",
+        "settings": "0.0"
+    },
+    "provides":
+    [
         {
-            "ep": "appcomponent",
-            "description": "Applies styles to the Bespin UI",
-            "name": "theme_manager",
-            "pointer": "#themeManager"
+            "ep": "extensionpoint",
+            "name": "themestyles"
         },
         {
             "ep": "extensionhandler",
-            "name": "theme",
-            "__register": "#registerTheme"
+            "name": "themestyles",
+            "register": "themestyles#registerThemeStyles",
+            "unregister": "themestyles#unregisterThemeStyles"
+        },
+        {
+            "ep": "extensionpoint",
+            "name": "themeChange",
+            "description": "A themeChange is a way to be notified of changes to a theme"
         },
         {
             "ep": "extensionpoint",
             "name": "theme",
             "indexOn": "name"
+        },
+        {
+            "ep": "extensionhandler",
+            "name": "theme",
+            "register": "index#registerTheme",
+            "unregister": "index#unregisterTheme"
+        },
+        {
+            "ep": "setting",
+            "name": "theme",
+            "description": "The theme to use",
+            "type": "text",
+            "defaultValue": "default"
         }
     ]
 }

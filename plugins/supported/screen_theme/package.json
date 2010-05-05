@@ -4,11 +4,6 @@
     },
     "provides": [
         {
-            "ep": "theme",
-            "name": "Screen",
-            "pointer": "#ScreenTheme"
-        },
-        {
             "ep": "themestyles",
             "url": [
                 "theme.less"

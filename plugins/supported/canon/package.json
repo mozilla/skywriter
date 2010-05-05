@@ -1,11 +1,10 @@
 {
-    "description": "Manages commands and their keyboard shortcuts",
+    "description": "Manages commands",
     "dependencies":
     {
         "settings": "0.0",
-        "types": "0.0",
-        "appsupport": "0.0",
-        "traits": "0.0"
+        "events": "0.0",
+        "appsupport": "0.0"
     },
     "provides":
     [
@@ -16,6 +15,11 @@
             "indexOn": "name"
         },
         {
+            "ep": "extensionpoint",
+            "name": "addedRequestOutput",
+            "description": "An extension point to be called whenever a new command begins output."
+        },
+        {
             "ep": "setting",
             "name": "historyLength",
             "description": "How many typed commands do we recall for reference?",
@@ -23,9 +27,10 @@
             "defaultValue": 50
         },
         {
-            "ep": "settingChanged",
-            "key": "customKeymapping",
-            "pointer": "keyboard#keyboardManager._customKeymappingChanged"
+            "ep": "factory",
+            "name": "history",
+            "action": "create",
+            "pointer": "history#InMemoryHistory"
         }
     ]
 }

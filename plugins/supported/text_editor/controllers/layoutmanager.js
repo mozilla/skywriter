@@ -98,8 +98,7 @@ exports.LayoutManager.prototype = {
             var newRange = newTextStorage.range;
 
             if (!util.none(oldTextStorage)) {
-                var syntaxManager = this.syntaxManager;
-                syntaxManager.layoutManagerReplacedText(oldRange, newRange);
+                this.syntaxManager.layoutManagerReplacedText(oldRange, newRange);
             }
 
             // During initial setup, the text storage is set before the syntax
@@ -352,10 +351,11 @@ exports.LayoutManager.prototype = {
      * syntaxManager property.
      */
     createSyntaxManager: function() {
-        var klass = this.syntaxManager;
-        var syntaxManager = klass.create({ layoutManager: this });
-        syntaxManager.addDelegate(this);
-        this.syntaxManager = syntaxManager;
+        this.syntaxManager = new this.syntaxManager(this);
+
+        var boundRecompute = this._recomputeEntireLayout.bind(this);
+        this.syntaxManager.invalidatedSyntax.add(boundRecompute);
+
         this._syntaxManagerInitialized = true;
     },
 
@@ -464,13 +464,8 @@ exports.LayoutManager.prototype = {
         return rects;
     },
 
-    syntaxManagerInvalidatedSyntax: function(sender) {
-        this._recomputeEntireLayout();
-    },
-
     textStorageChanged: function(oldRange, newRange) {
-        this.syntaxManager.layoutManagerReplacedText(oldRange,
-            newRange);
+        this.syntaxManager.layoutManagerReplacedText(oldRange, newRange);
         this._recomputeLayoutForRanges(oldRange, newRange);
     },
 
@@ -495,5 +490,4 @@ exports.LayoutManager.prototype = {
             });
         }
     }
-};
-
+});

@@ -40,7 +40,7 @@ var console = require('bespin:console').console;
 var Promise = require('bespin:promise').Promise;
 
 var environment = require('canon:environment');
-var keyboard = require('canon:keyboard');
+var keyboard = require('keyboard:keyboard');
 
 /**
  * Find and configure a snippet object.

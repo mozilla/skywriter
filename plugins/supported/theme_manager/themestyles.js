@@ -79,7 +79,7 @@ var parseExtension = function(extension, colorHeader) {
             return;
         }
 
-        if (styleElem.firstChild) {
+        if (styleElem && styleElem.firstChild) {
             styleElem.firstChild.textContent = css;
         } else {
             var cssContentNode = document.createTextNode(css);
@@ -164,4 +164,5 @@ exports.unregisterThemeStyles = function(extension) {
 
     var styleElem = document.getElementById('_bespin_theme_style_' + extension._styleID);
     styleElem.parentNode.removeChild(styleElem);
+    extension._styleID = undefined;
 };

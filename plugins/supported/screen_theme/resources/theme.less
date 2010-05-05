@@ -39,7 +39,7 @@ body.sc-theme {
     background: #706f63;
 }
 
-.bespin-screen {
+ {
     font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial,
         Helvetica, sans-serif;
     background: transparent;
@@ -49,7 +49,7 @@ body.sc-theme {
     line-height: 1.8em;
 }
 
-.bespin-screen.sc-pane {
+.sc-pane {
     color: rgba(255,255,255,1);
     text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
     -moz-transition-property: all;
@@ -58,11 +58,11 @@ body.sc-theme {
     -webkit-transition-duration: 0.5s;
 }
 
-.bespin-screen.sc-pane a {
+.sc-pane a {
     color: rgba(255,255,255,1);
 }
 
-.bespin-screen .sc-button-view {
+ .sc-button-view {
     background: transparent -moz-linear-gradient(top, rgba(62,108,185,1),
         rgba(56,50,146,1));
     background: transparent -webkit-gradient(linear, 50% 0%, 50% 100%, from(rgba(62, 108, 185, 1)), to(rgba(56, 50, 146, 1)));
@@ -85,11 +85,11 @@ body.sc-theme {
         rgba(0, 0, 0, 0.1) 0px 1px 2px;
 }
 
-.bespin-screen .sc-button-inner {
+ .sc-button-inner {
     margin: 8px 12px;
 }
 
-.bespin-screen .bespin-color-field {
+ .bespin-color-field {
 	background: transparent url(images/lines.png) no-repeat top right #45443c;
     border-top: 1px solid rgba(255,255,255,0.1);
     border-left: 1px solid rgba(0, 0, 0, 0.1);
@@ -103,22 +103,22 @@ body.sc-theme {
     -webkit-box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px;
 }
 
-.bespin-screen .title {
+ .title {
     font-family: 'DroidSans';
     text-transform:uppercase;
     color: rgba(218,212,186,1);
     text-align: center;
 }
 
-.bespin-screen .arrow {
+ .arrow {
     vertical-align: middle;
 }
 
-.bespin-screen .sc-text-field-view {
+ .sc-text-field-view {
     overflow: visible;  /* so that the glow shows through */
 }
 
-.bespin-screen .sc-text-field-view .padding {
+ .sc-text-field-view .padding {
     display: block;
     position: absolute;
     left: 0px;
@@ -128,7 +128,7 @@ body.sc-theme {
     overflow: visible;
 }
 
-.bespin-screen .sc-text-field-view input {
+ .sc-text-field-view input {
     display: block;
     position: absolute;
     left: 0px;
@@ -154,8 +154,8 @@ body.sc-theme {
         inset rgba(0,0,0,0.3) 0px 0px 4px;
 }
 
-.bespin-screen .sc-text-field-view input:focus,
-.bespin-screen .sc-button-view.active {
+ .sc-text-field-view input:focus,
+ .sc-button-view.active {
     color: rgba(255,150,0,1);
     border: 1px solid rgba(225,180,31,1);
     outline: none;
@@ -167,7 +167,7 @@ body.sc-theme {
         inset rgba(255,150,0,0.3) 0px 0px 6px;
 }
 
-.bespin-screen textarea {
+ textarea {
     border: 0px;
     padding: 4px;
     width: 100%;
@@ -185,7 +185,7 @@ body.sc-theme {
         inset rgba(0,0,0,0.3) 0px 0px 4px;
 }
 
-.bespin-screen textarea:focus {
+textarea:focus {
     color: rgba(255,150,0,1);
     border: 1px solid rgba(225,180,31,1);
     -moz-box-shadow:
@@ -196,28 +196,28 @@ body.sc-theme {
         inset rgba(255,150,0,0.3) 0px 0px 6px;
 }
 
-.bespin-screen .button {
+.button {
     width: 200px;
 }
 
-.bespin-screen .sc-radio-view {
+.sc-radio-view {
     line-height: 24px;
 }
 
-.bespin-screen .sc-radio-button input {
+.sc-radio-button input {
     height: 1px;
     width: 1px;
     opacity: 0;
 }
 
-.bespin-screen .sc-radio-button {
+.sc-radio-button {
     position: relative;
     margin: 0px 0px 6px 0px;
     height: 24px;
     font-size: 11pt;
 }
 
-.bespin-screen .sc-radio-button .button {
+.sc-radio-button .button {
     display: block;
     position: absolute;
     top: 0;
@@ -228,19 +228,19 @@ body.sc-theme {
     background-repeat: no-repeat;
 }
 
-.bespin-screen .sc-radio-button .sc-button-label {
+.sc-radio-button .sc-button-label {
     display: block;
     position: absolute;
     top: 0;
     left: 27px;
 }
 
-.bespin-screen .sc-radio-button.sel .button,
-.bespin-screen .sc-radio-button.active .button {
+.sc-radio-button.sel .button,
+.sc-radio-button.active .button {
     background-image: url(images/radio-selected.png)
 }
 
-.bespin-screen .bespin-form {
+.bespin-form {
     position: absolute;
 	background: transparent url(images/lines.png) no-repeat top right;
 	color: rgba(255,255,255,1);
@@ -257,7 +257,7 @@ body.sc-theme {
     -webkit-transition-duration: 0.5s;
 }
 
-.bespin-screen .sc-huge-size {
+.sc-huge-size {
     font-family: MuseoSans, Helvetica;
     font-size: 29pt;
     letter-spacing: -1.25px;
@@ -265,7 +265,7 @@ body.sc-theme {
     text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
 }
 
-.bespin-screen .bespin-informational.sc-regular-size {
+.bespin-informational.sc-regular-size {
     font-family: Arial, Lucida, Helvetica, sans-serif;
     font-size: 14px;
     color: #dad4ba;
@@ -277,12 +277,12 @@ body.sc-theme {
     background-image: url(images/bespin-s.png);
 }
 
-.bespin-screen .sc-text-field-view.cmd_input {
+.sc-text-field-view.cmd_input {
     border: none;
     background: transparent;
 }
 
-.bespin-screen .sc-text-field-view.cmd_input input {
+.sc-text-field-view.cmd_input input {
     border: none;
     margin-top: 3px;
     margin-left: 4px;
@@ -291,126 +291,126 @@ body.sc-theme {
     -moz-box-shadow: none;
 }
 
-.bespin-screen .sc-button-view.cmd_prompt,
-.bespin-screen .sc-button-view.sc-pin-view {
+.sc-button-view.cmd_prompt,
+.sc-button-view.sc-pin-view {
     border: none;
     background: transparent;
     -moz-box-shadow: none;
 }
 
-.bespin-screen .sc-button-view.cmd_prompt .sc-button-inner,
-.bespin-screen .sc-button-view.sc-pin-view .sc-button-inner {
+.sc-button-view.cmd_prompt .sc-button-inner,
+.sc-button-view.sc-pin-view .sc-button-inner {
     border: none;
     background: transparent;
     margin: 0px;
 }
 
-.bespin-screen .sc-scroller-view.controls-hidden {
+.sc-scroller-view.controls-hidden {
     display: none;
 }
 
-.bespin-screen .sc-scroller-view .track,
-.bespin-screen .sc-scroller-view .thumb,
-.bespin-screen .sc-scroller-view .button-bottom,
-.bespin-screen .sc-scroller-view .button-top {
+.sc-scroller-view .track,
+.sc-scroller-view .thumb,
+.sc-scroller-view .button-bottom,
+.sc-scroller-view .button-top {
     position: absolute;
 }
 
-.bespin-screen .sc-scroller-view:hover .track {
+.sc-scroller-view:hover .track {
     background-color: @scrollerTrackBackgroundColor;
     border: solid @scrollerTrackBorderColor 1px;
 }
 
-.bespin-screen .sc-scroller-view .thumb,
-.bespin-screen .sc-scroller-view .button-bottom,
-.bespin-screen .sc-scroller-view .button-top {
+.sc-scroller-view .thumb,
+.sc-scroller-view .button-bottom,
+.sc-scroller-view .button-top {
     border: solid @scrollerButtonThumbOutline 1px;
     -moz-border-radius: 12px;
     -webkit-border-radius: 12px;
     opacity: 0.3;
 }
 
-.bespin-screen .sc-scroller-view:hover .thumb,
-.bespin-screen .sc-scroller-view:hover .button-bottom,
-.bespin-screen .sc-scroller-view:hover .button-top {
+.sc-scroller-view:hover .thumb,
+.sc-scroller-view:hover .button-bottom,
+.sc-scroller-view:hover .button-top {
     opacity: 1.0;
 }
 
-.bespin-screen .sc-scroller-view .thumb {
+.sc-scroller-view .thumb {
     background-color: @scrollerThumbColor;
     -moz-border-radius: 12px;
     -webkit-border-radius: 12px;
 }
 
-.bespin-screen .sc-scroller-view .button-bottom,
-.bespin-screen .sc-scroller-view .button-top {
+.sc-scroller-view .button-bottom,
+.sc-scroller-view .button-top {
     background-color: @scollerButtonColor;
     opacity: 0.3;
 }
 
-.bespin-screen .sc-scroller-view.sc-vertical .track {
+.sc-scroller-view.sc-vertical .track {
     left: 0px;
     right: 0px;
     top: 15px;
     bottom: 15px;
 }
 
-.bespin-screen .sc-scroller-view.sc-horizontal .track {
+.sc-scroller-view.sc-horizontal .track {
     left: 15px;
     right: 15px;
     top: 0px;
     bottom: 0px;
 }
 
-.bespin-screen .sc-scroller-view.sc-vertical .thumb {
+.sc-scroller-view.sc-vertical .thumb {
     left: 0px;
     right: 0px;
 }
 
-.bespin-screen .sc-scroller-view.sc-horizontal .thumb {
+.sc-scroller-view.sc-horizontal .thumb {
     top: 0px;
     bottom: 0px;
 }
 
-.bespin-screen .sc-scroller-view.sc-vertical .button-bottom,
-.bespin-screen .sc-scroller-view.sc-vertical .button-top {
+.sc-scroller-view.sc-vertical .button-bottom,
+.sc-scroller-view.sc-vertical .button-top {
     left: 1px;
     right: 1px;
     height: 13px;
 }
 
-.bespin-screen .sc-scroller-view.sc-horizontal .button-bottom,
-.bespin-screen .sc-scroller-view.sc-horizontal .button-top {
+.sc-scroller-view.sc-horizontal .button-bottom,
+.sc-scroller-view.sc-horizontal .button-top {
     top: 1px;
     bottom: 1px;
     width: 13px;
 }
 
-.bespin-screen .sc-scroller-view.sc-vertical .button-bottom {
+.sc-scroller-view.sc-vertical .button-bottom {
     bottom: 7px;
     background: url(images/scroll-down.png) no-repeat center center
         @scollerButtonColor;
 }
 
-.bespin-screen .sc-scroller-view.sc-horizontal .button-bottom {
+.sc-scroller-view.sc-horizontal .button-bottom {
     right: 7px;
     background: url(images/scroll-right.png) no-repeat center center
         @scollerButtonColor;
 }
 
-.bespin-screen .sc-scroller-view.sc-vertical .button-top {
+.sc-scroller-view.sc-vertical .button-top {
     top: 7px;
     background: url(images/scroll-up.png) no-repeat center center
         @scollerButtonColor;
 }
 
-.bespin-screen .sc-scroller-view.sc-horizontal .button-top {
+.sc-scroller-view.sc-horizontal .button-top {
     left: 7px;
     background: url(images/scroll-left.png) no-repeat center center
         @scollerButtonColor;
 }
 
-.bespin-screen .disabled {
+.disabled {
     opacity: 0.3;
 }
 

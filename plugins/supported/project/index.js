@@ -61,8 +61,6 @@ exports.getProjectAndPath = function(path) {
 
     // todo: also need to include the directory when setting up the
     // project
-    var project = exports.Project.create({
-        name: projectName
-    });
+    var project = new exports.Project(undefined, projectName);
     return [project, path.substring(slash+1)];
 };

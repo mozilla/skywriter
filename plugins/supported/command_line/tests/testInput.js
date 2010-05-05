@@ -38,7 +38,7 @@
 var Promise = require('bespin:promise').Promise;
 
 var environment = require('canon:environment');
-var keyboard = require('canon:keyboard');
+var keyboard = require('keyboard:keyboard');
 
 var Input = require('command_line:input').Input;
 var t = require('plugindev');
@@ -49,7 +49,7 @@ function parse(command) {
     new Input(command).argsPromise.then(function(args) {
         promise.resolve({
             args: args,
-            input: input
+            input: command
         });
     }, t.never());
 

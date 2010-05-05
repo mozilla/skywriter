@@ -41,11 +41,15 @@ var names = [
     "profile", "profileEnd", "count"
 ];
 
-var dict = {
+/**
+ * This object represents a "safe console" object that forwards debugging
+ * messages appropriately without creating a dependency on Firebug in Firefox.
+ */
+exports.console = {
     _error: function() { /* Is there anything sane we can do here? */ }
 };
 
-function stub () {
+function stub() {
     this._error(arguments);
 }
 
@@ -59,20 +63,15 @@ if (window.console) {
     // there is a native window console
     names.forEach(function (name) {
         if (window.console[name]) {
-            dict[name] = redirect(name);
+            exports.console[name] = redirect(name);
         }
     });
 }
 
 // stub the rest
 names.forEach(function (name) {
-    if (!dict[name]) {
-        dict[name] = stub;
+    if (!exports.console[name]) {
+        exports.console[name] = stub;
     }
 });
 
-/**
- * This object represents a "safe console" object that forwards debugging
- * messages appropriately without creating a dependency on Firebug in Firefox.
- */
-exports.console = dict;
