@@ -742,8 +742,7 @@ util.mixin(exports.TextView.prototype, {
 
         case 3:
             var lines = this.layoutManager.textStorage.lines;
-            var pos = this._selectionPositionForPoint(this.
-                convertFrameFromView(point));
+            var pos = this._selectionPositionForPoint(point);
             this.setSelection({
                 start: {
                     row: pos.row,
