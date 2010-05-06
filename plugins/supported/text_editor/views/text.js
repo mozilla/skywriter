@@ -700,21 +700,18 @@ util.mixin(exports.TextView.prototype, {
         util.stopEvent(evt);
         this.hasFocus = true;
 
-        var point = { x: evt.pageX, y: evt.pageY };
+        var point = { x: evt.layerX, y: evt.layerY };
 
-        switch (evt.clickCount) {
+        switch (evt.detail) {
         case 1:
-            var pos = this._selectionPositionForPoint(this.
-                convertFrameFromView(point));
+            var pos = this._selectionPositionForPoint(point);
             this.moveCursorTo(pos, evt.shiftKey);
             break;
 
         // Select the word under the cursor.
         case 2:
-            var pos = this._selectionPositionForPoint(this.
-                convertFrameFromView(point));
-            var line = this.layoutManager.textStorage.
-                                                        lines[pos.row];
+            var pos = this._selectionPositionForPoint(point);
+            var line = this.layoutManager.textStorage.lines[pos.row];
 
             // If there is nothing to select in this line, then skip.
             if (line.length === 0) {
