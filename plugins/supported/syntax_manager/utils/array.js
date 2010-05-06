@@ -35,8 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
-
 exports.binarySearch = function(list, value, compare) {
     var low = 0, high = list.length;
     while (low < high) {

@@ -38,7 +38,6 @@
 var SC = require('sproutcore/runtime').SC;
 var util = require('bespin:util/util');
 var Event = require('events').Event;
-var util = require('bespin:util/util');
 var server = require('bespin_server').server;
 var settings = require('settings').settings;
 var ServerPersister = require('bespin_server:settings').ServerPersister;

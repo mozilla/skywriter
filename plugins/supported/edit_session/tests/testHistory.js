@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-require('sproutcore/runtime').SC;
 var t = require('plugindev');
 var History = require('edit_session:history').History;
 

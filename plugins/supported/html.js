@@ -52,7 +52,6 @@
 });
 "end";
 
-require('sproutcore/runtime').SC;
 var StandardSyntax = require('syntax_manager:controllers/standardsyntax').
     StandardSyntax;
 

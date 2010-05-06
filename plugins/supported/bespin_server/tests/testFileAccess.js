@@ -24,7 +24,6 @@
 
 var t = require('plugindev');
 var fs = require('filesystem');
-var SC = require('sproutcore/runtime').SC;
 var Promise = require('bespin:promise').Promise;
 var filesource = require('filesource');
 

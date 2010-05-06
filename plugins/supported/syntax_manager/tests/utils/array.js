@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-require('sproutcore/runtime');
 var ArrayUtils = require('utils/array');
 var t = require('plugindev');
 

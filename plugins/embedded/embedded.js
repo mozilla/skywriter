@@ -67,11 +67,11 @@
  * and easy to learn to the embedding user.
  */
 
-var SC = require('sproutcore/runtime').SC;
 var Event = require('events').Event;
 var Promise = require('bespin:promise').Promise;
 var Trait = require('traits').Trait;
 var console = require('bespin:console').console;
+var util = require('bespin:util/util');
 var m_range = require('rangeutils:utils/range');
 
 var embeddedEditor = Trait.object({
@@ -225,7 +225,7 @@ var embeddedEditor = Trait.object({
         var oldLayout = pane.get('layout');
         var newLayout = this._computeLayout();
 
-        if (!SC.rectsEqual(oldLayout, newLayout)) {
+        if (!util.rectsEqual(oldLayout, newLayout)) {
             pane.adjust(newLayout);
             pane.updateLayout();    // writes the layoutStyle to the DOM
         }
@@ -325,7 +325,7 @@ var embeddedEditor = Trait.object({
         }
 
         var embeddedEditor = this;
-        this._getTextStorage().addDelegate(SC.Object.create({
+        this._getTextStorage().addDelegate({
             textStorageEdited: function(sender, oldRange, newRange, newValue) {
                 // FIXME: newValue is not yet supported.
                 var params = {
@@ -336,12 +336,12 @@ var embeddedEditor = Trait.object({
 
                 embeddedEditor._events.textChange(params);
             }
-        }));
-        session.currentView.addDelegate(SC.Object.create({
+        });
+        session.currentView.addDelegate({
             textViewSelectionChanged: function(sender, selection) {
                 embeddedEditor._events.select({ selection: selection });
             }
-        }));
+        });
     },
 
     /** Sets the position of the cursor. */

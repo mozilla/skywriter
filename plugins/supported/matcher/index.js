@@ -35,8 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
-
 /**
  * We ignore items whose score is more than <tt>excludeScoreMargin</tt> off
  * the <tt>maxScore</tt>.

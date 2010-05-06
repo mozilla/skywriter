@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-require('sproutcore/runtime');
 var t = require('plugindev');
 var Range = require('utils/range');
 

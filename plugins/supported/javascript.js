@@ -52,7 +52,6 @@
 });
 "end";
 
-var SC = require('sproutcore/runtime').SC;
 var Promise = require('bespin:promise').Promise;
 var StandardSyntax = require('syntax_manager:controllers/standardsyntax').
     StandardSyntax;
