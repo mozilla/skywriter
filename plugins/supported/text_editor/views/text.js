@@ -71,6 +71,8 @@ exports.TextView = function(container, editor) {
     // etc...
     var dom = this.domNode;
     dom.addEventListener('mousedown', this.mouseDown.bind(this), false);
+    dom.addEventListener('mousemove', this.mouseMove.bind(this), false);
+    dom.addEventListener('mouseup', this.mouseUp.bind(this), false);
 
     layoutManager.invalidatedRects.add(this.layoutManagerInvalidatedRects.bind(this));
     layoutManager.changedTextAtRow.add(this.layoutManagerChangedTextAtRow.bind(this));
@@ -101,6 +103,7 @@ util.mixin(exports.TextView.prototype, {
     _selectedRangeEndVirtual: null,
 
     _hasFocus: false,
+    _mouseIsDown: false,
 
     beganChangeGroup: null,
     endedChangeGroup: null,
@@ -142,7 +145,7 @@ util.mixin(exports.TextView.prototype, {
     },
 
     _drag: function() {
-        var point = this.convertFrameFromView(this._dragPoint);
+        var point = this._dragPoint;
         var offset = Rect.offsetFromRect(this.clippingFrame, point);
 
         this.moveCursorTo(this._selectionPositionForPoint({
@@ -698,7 +701,9 @@ util.mixin(exports.TextView.prototype, {
 
     mouseDown: function(evt) {
         util.stopEvent(evt);
+
         this.hasFocus = true;
+        this._mouseIsDown = true;
 
         var point = { x: evt.layerX, y: evt.layerY };
 
@@ -769,13 +774,15 @@ util.mixin(exports.TextView.prototype, {
         return true;
     },
 
-    mouseDragged: function(evt) {
-        this._dragPoint = { x: evt.pageX, y: evt.pageY };
-        this._drag();
-        return true;
+    mouseMove: function(evt) {
+        if (this._mouseIsDown) {
+            this._dragPoint = { x: evt.layerX, y: evt.layerY };
+            this._drag();
+        }
     },
 
     mouseUp: function(evt) {
+        this._mouseIsDown = false;
         if (this._dragTimer !== null) {
             this._dragTimer.invalidate();
         }
