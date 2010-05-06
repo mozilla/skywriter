@@ -47,9 +47,7 @@ exports.LayoutManager = function(opts) {
     this.changedTextAtRow = new Event();
     this.invalidatedRects = new Event();
 
-    Object.keys(opts).forEach(function(key) {
-        obj[key] = opts[key];
-    });
+    util.mixin(this, opts);
 
     this.textStorageChanged = this.textStorageChanged.bind(this);
 
@@ -78,6 +76,17 @@ exports.LayoutManager.prototype = {
     _maximumWidth: 0,
     _syntaxManagerInitialized: false,
     _textStorage: null,
+
+    /**
+     * @protected
+     *
+     * Instantiates the internal text storage object. The default
+     * implementation of this method simply calls create() on the internal
+     * textStorage property.
+     */
+    createTextStorage: function() {
+        this.textStorage = new TextStorage();
+    },
 
     get textStorage() {
         return this._textStorage;
@@ -170,13 +179,6 @@ exports.LayoutManager.prototype = {
      */
     textLines: null,
 
-    /**
-     * @property
-     *
-     * The model instance that this object is responsible for laying out.
-     */
-    textStorage: TextStorage,
-
     _computeInvalidRects: function(oldRange, newRange) {
         var startRect = this.characterRectForPosition(oldRange.start);
 
@@ -245,8 +247,8 @@ exports.LayoutManager.prototype = {
             };
         }
 
-        this.textLines.replace(oldStartRow, oldEndRow - oldStartRow + 1,
-            newTextLines);
+        util.replace(this.textLines, oldStartRow, oldEndRow - oldStartRow + 1,
+                        newTextLines);
         this._recalculateMaximumWidth();
 
         // Take the cached attributes from the syntax manager.
@@ -357,19 +359,6 @@ exports.LayoutManager.prototype = {
         this.syntaxManager.invalidatedSyntax.add(boundRecompute);
 
         this._syntaxManagerInitialized = true;
-    },
-
-    /**
-     * @protected
-     *
-     * Instantiates the internal text storage object. The default
-     * implementation of this method simply calls create() on the internal
-     * textStorage property.
-     */
-    createTextStorage: function() {
-        var klass = this.textStorage;
-        var textStorage = new klass();
-        this.textStorage = textStorage;
     },
 
     /**

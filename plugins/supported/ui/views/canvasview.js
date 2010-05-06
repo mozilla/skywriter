@@ -35,123 +35,85 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+
 var util = require('bespin:util/util');
-var Rect = require('utils/rect');
-var Event = require('events').Event;
+var ViewClass = require('views/view').View;
 
-/**
- * @class
- *
- * This class provides support for manual scrolling and positioning for canvas-
- * based elements. Getting these elements to play nicely with SproutCore is
- * tricky and error-prone, so all canvas-based views should consider deriving
- * from this class. Derived views should implement drawRect() in order to
- * perform the appropriate canvas drawing logic.
- *
- * The actual size of the canvas is always the size of the container the canvas
- * view is placed in.
- *
- * The canvas that is created is available in the domNode attribute and should
- * be added to the document by the caller.
- */
-exports.CanvasView = function(container) {
-    if (!container) {
-        return;
-    }
+exports.CanvasView = function(node) {
+    console.log('construct me!');
 
-    this._invalidRects = [];
-    this._frame = {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0
-    };
+    // Call the ViewClass constructor to init it.
+    ViewClass.call(this, node);
 
-    this._clippingFrame = this._frame;
-
-    var canvas = document.createElement("canvas");
-    canvas.innerHTML = 'canvas tag not supported by your browser';
-    canvas.setAttribute('style', 'position: absolute');
-    container.appendChild(canvas);
-    this.domNode = canvas;
-
-    this.clippingEvent = new Event();
-    this.clippingEvent.add(this.clippingFrameChanged.bind(this));
+    this._cvInvalidRects = [];
+    this.dimensionEvent.add(this.viewDimensionChanged);
 };
+exports.CanvasView.prototype = new ViewClass();
 
-exports.CanvasView.prototype = {
+util.mixin(exports.CanvasView.prototype, {
+
+    _scrollView: null,
+
+    _canvasDOM: null,
     _canvasContext: null,
-    domNode: null,
-    _canvasId: null,
     _invalidRects: null,
     _lastRedrawTime: null,
+    _previousClippingFrame: null,
     _redrawTimer: null,
-    _clippingFrame: null,
-
-    _frame: null,
-
-    clippingEvent: null,
-
-    get clippingFrame() {
-        return this._clippingFrame;
-    },
-
-    set clippingFrame(clippingFrame) {
-        clippingFrame = util.mixin(this._clippingFrame, clippingFrame);
-
-        if (this._clippingFrame === null ||
-                !Rect.rectsEqual(clippingFrame, this._clippingFrame)) {
-            this._clippingFrame = clippingFrame;
-            this.clippingEvent();
-        }
-    },
-
-    setFrame: function(frame, preventDownsize) {
-        var domStyle = this.domNode.style;
-        domStyle.left = frame.x + 'px';
-        domStyle.top = frame.y + 'px';
-
-        var widthChanged, heightChanged;
-        if (frame.width !== this._frame.width) {
-            if (frame.width < this._frame.width) {
-                if (!preventDownsize) {
-                    widthChanged = true;
-                }
-            } else {
-                widthChanged = true;
-            }
-        }
-        if (frame.height !== this._frame.height) {
-            if (frame.height < this._frame.height) {
-                if (!preventDownsize) {
-                    heightChanged = true;
-                }
-            } else {
-                heightChanged = true;
-            }
-        }
-
-        if (widthChanged) {
-            this.domNode.width = frame.width;
-        }
-        if (heightChanged) {
-            this.domNode.height = frame.height;
-        }
-
-        this._frame = frame;
-
-        // The clipping frame might have changed if the size changed.
-        this.clippingFrame = {
-            width: frame.width,
-            height: frame.height
-        };
-    },
+    _renderTimer: null,
 
     _getContext: function() {
         if (this._canvasContext === null) {
-            this._canvasContext = this.domNode.getContext('2d');
+            this._canvasContext = this._canvasDOM.getContext('2d');
         }
         return this._canvasContext;
+    },
+
+    /**
+     * Returns the clipping frame to use. This can be either the clipping frame
+     * of ths ScrollView, *if* the canvas is inside of one, or just the dimension
+     * of the CanvasView itself.
+     */
+    _getClippingFrame: function() {
+        if (this._scrollView) {
+            return this.scrollView.clippingFrame;
+        } else {
+            var dim = this.dimension;
+
+            return {
+                x: 0,
+                y: 0,
+                width: dim.width,
+                height: dim.height
+            }
+        }
+    },
+
+    _clippingFrameChanged: function() {
+        var canvas = this.canvasDom;
+        if (util.none(canvas)) {
+            return;
+        }
+
+        var clippingFrame = this._getClippingFrame();
+
+        // Do we need this anymore? JV 05052010
+        // this.notifyDelegates('canvasViewClippingFrameChanged');
+
+        var widthChanged = canvas.width < clippingFrame.width;
+        var heightChanged = canvas.height < clippingFrame.height;
+
+        if (widthChanged) {
+            canvas.width = clippingFrame.width;
+        }
+
+        if (heightChanged) {
+            canvas.height = clippingFrame.height;
+        }
+
+        if (widthChanged || heightChanged) {
+            this.setNeedsDisplay();
+        }
     },
 
     /**
@@ -163,15 +125,14 @@ exports.CanvasView.prototype = {
     minimumRedrawDelay: 1000.0 / 30.0,
 
     /**
-     * Subclasses can override this method to provide custom behavior whenever
-     * the clipping frame changes. The default implementation simply
-     * invalidates the entire visible area.
+     * Subclasses have to override this method to perform any drawing that they
+     * need to.
+     *
+     * @param rect{Rect} The rectangle to draw in.
+     * @param context{CanvasRenderingContext2D} The 2D graphics context, taken
+     *   from the canvas.
      */
-    clippingFrameChanged: function() {
-        this.setNeedsDisplay();
-    },
-
-    drawRect: function(rect, context) { },
+    drawRect: function(rect) { },
 
     /**
      * Calls drawRect() on all the invalid rects to redraw the canvas contents.
@@ -182,7 +143,7 @@ exports.CanvasView.prototype = {
      *   done because the view wasn't visible.
      */
     redraw: function() {
-        var clippingFrame = this.clippingFrame;
+        var clippingFrame = this._getClippingFrame();
         clippingFrame = {
             x:      Math.round(clippingFrame.x),
             y:      Math.round(clippingFrame.y),
@@ -192,14 +153,18 @@ exports.CanvasView.prototype = {
 
         var context = this._getContext();
         context.save();
-        context.translate(Math.round(clippingFrame.x), Math.round(clippingFrame.y));
+        context.translate(clippingFrame.x, clippingFrame.y);
 
         var invalidRects = this._invalidRects;
         if (invalidRects === 'all') {
             this.drawRect(clippingFrame, context);
         } else {
-            Rect.merge(invalidRects).forEach(function(rect) {
-                rect = Rect.intersectRects(rect, clippingFrame);
+            var rect;
+            var invalidRects = Rect.merge(invalidRects);
+            var i = invalidRects.length;
+
+            while (i--) {
+                rect = Rect.intersectRects(invalidRects[i], clippingFrame);
                 if (rect.width !== 0 && rect.height !== 0) {
                     context.save();
 
@@ -217,27 +182,41 @@ exports.CanvasView.prototype = {
 
                     context.restore();
                 }
-
-            }, this);
+            }
         }
 
         context.restore();
 
         this._invalidRects = [];
-        this._redrawTimer = null;
         this._lastRedrawTime = new Date().getTime();
         return true;
     },
 
-    render: function() {
-         // Don't continue if there is a rendering or redraw timer already.
+    render: function(firstTime) {
+        if (firstTime) {
+            var cNode = document.createElement('canvas');
+            // this._cvCanvasId = SC.guidFor(canvasContext);
+            // canvasContext.id(this._cvCanvasId);
+            cNode.setAttribute('style', 'position: absolute; left:0; top:0;');
+            this._canvasDom = cNode;
+
+            this.node.appendChild(cNode);
+            return;
+        }
+
+        // Don't continue if there is a rendering or redraw timer already.
         if (this._renderTimer || this._redrawTimer) {
             return;
         }
 
+        var self = this;
+
         // Queue the redraw at the end of the current event queue to make sure
         // everyting is done when redrawing.
-        this._renderTimer = setTimeout(this.tryRedraw.bind(this), 0);
+        this._renderTimer = setTimeout(function() {
+            self.tryRedraw();
+            self._renderTimer = null;
+        }, 0);
     },
 
     /**
@@ -256,13 +235,12 @@ exports.CanvasView.prototype = {
         var invalidRects = this._invalidRects;
         if (invalidRects !== 'all') {
             invalidRects.push(rect);
-            this.render();
         }
+
+        this.render();
     },
 
-    tryRedraw: function(context, firstTime) {
-        this._renderTimer = null;
-
+    tryRedraw: function() {
         var now = new Date().getTime();
         var lastRedrawTime = this._lastRedrawTime;
         var minimumRedrawDelay = this.minimumRedrawDelay;
@@ -278,9 +256,28 @@ exports.CanvasView.prototype = {
             return; // already scheduled
         }
 
-        // TODO This is not as good as SC.Timer... Will it work?
-        this._redrawTimer = window.setTimeout(this.redraw.bind(this),
-            minimumRedrawDelay);
-    }
-};
+        var self = this;
+        this._redrawTimer = setTimeout(function() {
+            self._redrawTimer = null;
+            self.redraw();
+        }, minimumRedrawDelay);
+    },
 
+    scrollViewClippingFrameChanged: function() {
+        this._clippingFrameChanged();
+    },
+
+    viewDimensionChanged: function() {
+        // Don't catch this if we are inside of a ScrollView.
+        if (this._scrollView === null) {
+            this._clippingFrameChanged();
+        }
+    },
+
+    set scrollView(scrollView) {
+        this._scrollView = scrollView;
+
+        scrollView.clippingEvent.add(this.scrollViewClippingFrameChanged);
+
+    }
+});

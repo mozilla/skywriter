@@ -272,11 +272,6 @@ exports.SyntaxManager.prototype = {
         return flattenedAttrs;
     },
 
-    _initialContextChanged: function() {
-        this._reset();
-        this.invalidatedSyntax();
-    }.observes('initialContext'),
-
     _innerRangesFromAttrs: function(outerAttrs, innerContextAndState) {
         var currentContext = innerContextAndState.context;
         var currentState = innerContextAndState.state;
@@ -595,6 +590,8 @@ exports.SyntaxManager.prototype = {
     setInitialContextFromExt: function(fileExt) {
         var syntax = syntaxDirectory.syntaxForFileExt(fileExt);
         this.initialContext = syntax;
+        this._reset();
+        this.invalidatedSyntax();
     },
 
     /**

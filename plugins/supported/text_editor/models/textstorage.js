@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var Event = require('events').Event;
+var util = require('bespin:util/util');
 
 var TextStorage;
 
@@ -222,7 +223,7 @@ TextStorage.prototype = {
         addedLines[addedLineCount - 1] +=
             lines[oldEndRow].substring(oldEnd.col);
 
-        lines.replace(oldStartRow, oldEndRow - oldStartRow + 1, addedLines);
+        util.replace(lines, oldStartRow, oldEndRow - oldStartRow + 1, addedLines);
 
         this.changed(oldRange, newRange);
     },

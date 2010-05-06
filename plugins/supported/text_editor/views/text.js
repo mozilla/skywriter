@@ -35,14 +35,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var util = require('bespin:util/util');
 var CanvasView = require('views/canvas').CanvasView;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
 var Range = require('rangeutils:utils/range');
 var Rect = require('utils/rect');
-var TextInput = require('mixins/textinput').TextInput;
+var TextInput = require('views/textinput').TextInput;
 var keyboardManager = require('keyboard:keyboard').keyboardManager;
 var settings = require('settings').settings;
 
@@ -50,7 +49,31 @@ var settings = require('settings').settings;
 // when optimizing syntax highlighting engines.
 var DEBUG_TEXT_RANGES = false;
 
-exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
+
+exports.TextView = function(container, editor) {
+    CanvasView.call(this, container);
+
+    this.editor = editor;
+    this.layoutManager = this.editor.layoutManager;
+
+    this._selectedRange = {
+        start: { row: 0, col: 0 },
+        end: { row: 0, col: 0 }
+    };
+
+    this.clippingEvent.add(this.clippingFrameChanged.bind(this));
+
+    // TODO: bind some UI events here:
+    // 1) drag
+    // 2) mouse events
+    // etc...
+    var dom = this.domNode;
+    dom.addEventListener('mousedown', this.mouseDown.bind(this), false);
+};
+
+exports.TextView.prototype = new CanvasView();
+
+util.mixin(exports.TextView.prototype, {
     _dragPoint: null,
     _dragTimer: null,
     _enclosingScrollView: null,
@@ -63,25 +86,41 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     _keyMetaBuffer: '',
     _keyState: 'start',
 
-    // TODO: calculate from the size or let the user override via themes if
-    // desired
-    _lineAscent: 16,
-
     _selectedRange: null,
     _selectedRangeEndVirtual: null,
 
-    classNames: ['text_editor'],
+    _hasFocus: false,
+
+    set hasFocus(value) {
+        console.log('set hasFocus', value);
+
+        this._hasFocus = true;
+
+        if (this._hasFocus) {
+            this._rearmInsertionPointBlinkTimer();
+            this._invalidateSelection();
+        } else {
+            if (this._insertionPointBlinkTimer) {
+                clearInterval(this._insertionPointBlinkTimer);
+                this._insertionPointBlinkTimer = null;
+            }
+            this._insertionPointVisible = true;
+            this._invalidateSelection();
+        }
+    },
+
+    get hasFocus() {
+        return this._hasFocus;
+    },
 
     _drag: function() {
         var point = this.convertFrameFromView(this._dragPoint);
-        var offset = Rect.offsetFromRect(this.get('clippingFrame'), point);
+        var offset = Rect.offsetFromRect(this.clippingFrame, point);
 
         this.moveCursorTo(this._selectionPositionForPoint({
                 x:  point.x - offset.x,
                 y:  point.y - offset.y
             }), true);
-
-        this.becomeFirstResponder();
     },
 
     // Draws a single insertion point.
@@ -91,7 +130,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }
 
         var range = this._selectedRange;
-        var characterRect = this.get('layoutManager').
+        var characterRect = this.layoutManager.
             characterRectForPosition(range.start);
         var x = Math.floor(characterRect.x), y = characterRect.y;
         var width = Math.ceil(characterRect.width);
@@ -99,8 +138,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
         context.save();
 
-        var theme = this.get('_theme');
-        if (this.get('isFirstResponder')) {
+        var theme = this._theme;
+        if (this._hasFocus) {
             context.strokeStyle = theme.cursorColor;
             context.beginPath();
             context.moveTo(x + 0.5, y);
@@ -118,13 +157,13 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     _drawLines: function(rect, context) {
-        var layoutManager = this.get('layoutManager');
-        var textLines = layoutManager.get('textLines');
-        var lineAscent = layoutManager.get('lineAscent');
-        var theme = this.get('_theme');
+        var layoutManager = this.layoutManager;
+        var textLines = layoutManager.textLines;
+        var lineAscent = layoutManager.lineAscent;
+        var theme = this._theme;
 
         context.save();
-        context.font = this.getPath('editor.font');
+        context.font = this.editor.font;
 
         var range = layoutManager.characterRangeForBoundingRect(rect);
         var rangeStart = range.start, rangeEnd = range.end;
@@ -188,11 +227,11 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     // Draws the background highlight for selections.
     _drawSelectionHighlight: function(rect, context) {
-        var theme = this.get('_theme');
-        var fillStyle = this.get('isFirstResponder') ?
+        var theme = this._theme;
+        var fillStyle = this._hasFocus ?
             theme.selectedTextBackgroundColor :
             theme.unfocusedCursorBackgroundColor;
-        var layoutManager = this.get('layoutManager');
+        var layoutManager = this.layoutManager;
 
         context.save();
 
@@ -232,7 +271,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             };
         };
 
-        var layoutManager = this.get('layoutManager');
+        var layoutManager = this.layoutManager;
         var range = Range.normalizeRange(this._selectedRange);
         if (!this._rangeIsInsertionPoint(range)) {
             var rects = layoutManager.rectsForRange(range);
@@ -248,7 +287,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     },
 
     _isReadOnly: function() {
-        return this.getPath('layoutManager.textStorage').readOnly;
+        return this.layoutManager.textStorage.readOnly;
     },
 
     _keymappingChanged: function() {
@@ -256,12 +295,13 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         this._keyState = 'start';
     },
 
-    _parentViewChanged: function() {
-        this._updateEnclosingScrollView();
-    }.observes('parentView'),
+    // TODO: Do we need this anymore?
+    // _parentViewChanged: function() {
+    //     this._updateEnclosingScrollView();
+    // }.observes('parentView'),
 
     _performVerticalKeyboardSelection: function(offset) {
-        var textStorage = this.getPath('layoutManager.textStorage');
+        var textStorage = this.layoutManager.textStorage;
         var oldPosition = this._selectedRangeEndVirtual !== null ?
             this._selectedRangeEndVirtual : this._selectedRange.end;
         var newPosition = Range.addPositions(oldPosition,
@@ -281,21 +321,18 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }
 
         if (this._insertionPointBlinkTimer !== null) {
-            this._insertionPointBlinkTimer.invalidate();
+            clearInterval(this._insertionPointBlinkTimer);
         }
 
-        this._insertionPointBlinkTimer = SC.Timer.schedule({
-            target:     this,
-            action:     'blinkInsertionPoint',
-            interval:   750,
-            repeats:    true
-        });
+        this._insertionPointBlinkTimer = setInterval(
+                                            this.blinkInsertionPoint.bind(this),
+                                            750);
     },
 
     // Moves the selection, if necessary, to keep all the positions pointing to
     // actual characters.
     _repositionSelection: function() {
-        var textLines = this.getPath('layoutManager.textLines');
+        var textLines = this.layoutManager.textLines;
         var textLineLength = textLines.length;
 
         var range = this._selectedRange;
@@ -315,17 +352,19 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         });
     },
 
-    _resize: function() {
-        var boundingRect = this.get('layoutManager').boundingRect();
-        var padding = this.get('padding');
-        var parentFrame = this.getPath('parentView.frame');
-        this.set('layout', SC.mixin(SC.clone(this.get('layout')), {
-            width:  Math.max(parentFrame.width,
-                    boundingRect.width + padding.right),
-            height: Math.max(parentFrame.height,
-                    boundingRect.height + padding.bottom)
-        }));
-    },
+    // TODO: Done by the editor?
+    //
+    // _resize: function() {
+    //     var boundingRect = this.layoutManager.boundingRect();
+    //     var padding = this.padding;
+    //     var parentFrame = this.getPath('parentView.frame');
+    //     this.set('layout', SC.mixin(SC.clone(this.layout), {
+    //         width:  Math.max(parentFrame.width,
+    //                 boundingRect.width + padding.right),
+    //         height: Math.max(parentFrame.height,
+    //                 boundingRect.height + padding.bottom)
+    //     }));
+    // },
 
     _scrollPage: function(scrollUp) {
         var scrollView = this._enclosingScrollView;
@@ -333,7 +372,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             return;
         }
 
-        var visibleFrame = this.get('clippingFrame');
+        var visibleFrame = this.clippingFrame;
         scrollView.scrollTo(visibleFrame.x, visibleFrame.y +
             (visibleFrame.height + this._lineAscent) * (scrollUp ? -1 : 1));
     },
@@ -344,7 +383,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             return;
         }
 
-        var offset = Rect.offsetFromRect(this.get('clippingFrame'),
+        var offset = Rect.offsetFromRect(this.clippingFrame,
             this.convertFrameFromView(this._dragPoint));
         if (offset.x === 0 && offset.y === 0) {
             return;
@@ -356,9 +395,13 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
 
     _scrolled: function() {
         var scrollView = this._enclosingScrollView;
-        var x = scrollView.get('horizontalScrollOffset');
-        var y = scrollView.get('verticalScrollOffset');
-        this.notifyDelegates('textViewWasScrolled', { x: x, y: y });
+        var x = scrollView.horizontalScrollOffset;
+        var y = scrollView.verticalScrollOffset;
+
+        // TODO: There is only one delegate for this in EditSession.
+        //       As EditSession is within another plugin, we can't use events
+        //       for this. Well check back later.
+        // this.notifyDelegates('textViewWasScrolled', { x: x, y: y });
 
         this._updateSyntax(null);
     },
@@ -366,7 +409,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
     // Returns the character closest to the given point, obeying the selection
     // rules (including the partialFraction field).
     _selectionPositionForPoint: function(point) {
-        var position = this.get('layoutManager').characterAtPoint(point);
+        var position = this.layoutManager.characterAtPoint(point);
         return position.partialFraction < 0.5 ? position :
             Range.addPositions(position, { row: 0, col: 1 });
     },
@@ -376,7 +419,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             return;
         }
 
-        var layoutManager = this.get('layoutManager');
+        var layoutManager = this.layoutManager;
         layoutManager.updateTextRows(startRow, endRow);
 
         layoutManager.rectsForRange({
@@ -385,39 +428,40 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             }).forEach(this.setNeedsDisplayInRect, this);
     },
 
-    // Updates the _enclosingScrollView instance member and (re-)registers
-    // observers appropriately.
-    _updateEnclosingScrollView: function() {
-        if (!util.none(this._enclosingScrollView)) {
-            var enclosingScrollView = this._enclosingScrollView;
-            enclosingScrollView.removeObserver('horizontalScrollOffset', this,
-                this._scrolled);
-            enclosingScrollView.removeObserver('verticalScrollOffset', this,
-                this._scrolled);
-        }
-
-        var view = this.get('parentView');
-        while (!util.none(view) && !view.get('isScrollable')) {
-            view = view.get('parentView');
-        }
-
-        this._enclosingScrollView = view;
-
-        if (util.none(view)) {
-            return;
-        }
-
-        view.addObserver('horizontalScrollOffset', this, this._scrolled);
-        view.addObserver('verticalScrollOffset', this, this._scrolled);
-    },
+    // TODO: Necessary anymore?
+    // // Updates the _enclosingScrollView instance member and (re-)registers
+    // // observers appropriately.
+    // _updateEnclosingScrollView: function() {
+    //     if (!util.none(this._enclosingScrollView)) {
+    //         var enclosingScrollView = this._enclosingScrollView;
+    //         enclosingScrollView.removeObserver('horizontalScrollOffset', this,
+    //             this._scrolled);
+    //         enclosingScrollView.removeObserver('verticalScrollOffset', this,
+    //             this._scrolled);
+    //     }
+    //
+    //     var view = this.parentView;
+    //     while (!util.none(view) && !view.isScrollable) {
+    //         view = view.parentView;
+    //     }
+    //
+    //     this._enclosingScrollView = view;
+    //
+    //     if (util.none(view)) {
+    //         return;
+    //     }
+    //
+    //     view.addObserver('horizontalScrollOffset', this, this._scrolled);
+    //     view.addObserver('verticalScrollOffset', this, this._scrolled);
+    // },
 
     // Instructs the syntax manager to begin highlighting from the given row to
     // the end of the visible range, or within the entire visible range if the
     // row is null.
     _updateSyntax: function(row) {
-        var layoutManager = this.get('layoutManager');
+        var layoutManager = this.layoutManager;
         var visibleRange = layoutManager.characterRangeForBoundingRect(this.
-            get('clippingFrame'));
+            clippingFrame);
         var startRow = visibleRange.start.row, endRow = visibleRange.end.row;
 
         if (row !== null) {
@@ -429,8 +473,8 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }
 
         var self = this;
-        var lines = layoutManager.get('textStorage').lines;
-        var syntaxManager = layoutManager.get('syntaxManager');
+        var lines = layoutManager.textStorage.lines;
+        var syntaxManager = layoutManager.syntaxManager;
         var lastRow = Math.min(lines.length, endRow + 1);
         syntaxManager.updateSyntaxForRows(startRow, lastRow).
             then(function(result) {
@@ -438,34 +482,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
                     result.endRow);
             });
     },
-
-    acceptsFirstResponder: true,
-
-    /**
-     * @property{Boolean}
-     *
-     * This property is always true for objects that expose a padding property.
-     * The BespinScrollView uses this.
-     */
-    hasPadding: true,
-
-    /**
-     * @property
-     *
-     * The layout manager from which this editor view receives text.
-     */
-    layoutManager: null,
-
-    /**
-     * @property
-     *
-     * The padding to leave inside the clipping frame, given as an object with
-     * 'bottom' and 'right' properties. Text content is displayed inside this
-     * padding as usual, but the cursor cannot enter it. In a BespinScrollView,
-     * this feature is used to prevent the cursor from ever going behind the
-     * scroll bars.
-     */
-    padding: { bottom: 0, right: 0 },
 
     /**
      * Toggles the visible state of the insertion point.
@@ -480,7 +496,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
      * frame of the text view changes.
      */
     clippingFrameChanged: function() {
-        arguments.callee.base.apply(this, arguments);
         this._updateSyntax(null);
     },
 
@@ -509,7 +524,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
      * used to draw as little as possible.
      */
     drawRect: function(rect, context) {
-        context.fillStyle = this.get('_theme').backgroundColor;
+        context.fillStyle = this._theme.backgroundColor;
         context.fillRect(rect.x, rect.y, rect.width, rect.height);
 
         this._drawSelection(rect, context);
@@ -529,7 +544,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
      */
     getSelectedCharacters: function() {
         return this._rangeIsInsertionPoint(this._selectedRange) ? '' :
-            this.getPath('layoutManager.textStorage').getCharacters(Range.
+            this.layoutManager.textStorage.getCharacters(Range.
             normalizeRange(this._selectedRange));
     },
 
@@ -560,42 +575,19 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }
 
         this._inChangeGroup = true;
-        this.notifyDelegates('textViewBeganChangeGroup', this._selectedRange);
+
+        // TODO: add back later.
+        // this.notifyDelegates('textViewBeganChangeGroup', this._selectedRange);
 
         try {
             performChanges();
         } finally {
             this._inChangeGroup = false;
-            this.notifyDelegates('textViewEndedChangeGroup',
-                this._selectedRange);
+
+            // TODO: add back later.
+            // this.notifyDelegates('textViewEndedChangeGroup',
+            //     this._selectedRange);
         }
-    },
-
-    init: function() {
-        arguments.callee.base.apply(this, arguments);
-
-        this._invalidRange = null;
-        this._selectedRange =
-            { start: { row: 0, col: 0 }, end: { row: 0, col: 0 } };
-
-        // Allow the user to change the fields of the padding object without
-        // screwing up the prototype.
-        this.set('padding', SC.clone(this.get('padding')));
-        var layoutManager = this.layoutManager;
-        
-        layoutManager.changedTextAtRow.add(function(sender, row) {
-            this._updateSyntax(row);
-            this._repositionSelection();
-        }.bind(this));
-        
-        layoutManager.invalidatedRects.add(function(sender, rects) {
-            rects.forEach(this.setNeedsDisplayInRect, this);
-            this._resize();
-        }.bind(this));
-        
-        this._updateEnclosingScrollView();
-
-        this._resize();
     },
 
     /**
@@ -664,8 +656,25 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         }
     },
 
+    /**
+     * Runs the syntax highlighter from the given row to the end of the visible
+     * range, and repositions the selection.
+     */
+    layoutManagerChangedTextAtRow: function(sender, row) {
+        this._updateSyntax(row);
+        this._repositionSelection();
+    },
+
+    /**
+     * Marks the given rectangles as invalid.
+     */
+    layoutManagerInvalidatedRects: function(sender, rects) {
+        rects.forEach(this.setNeedsDisplayInRect, this);
+        this._resize();
+    },
+
     mouseDown: function(evt) {
-        arguments.callee.base.apply(this, arguments);
+        this.hasFocus = true;
 
         var point = { x: evt.pageX, y: evt.pageY };
 
@@ -727,13 +736,15 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             break;
         }
 
-        this._dragPoint = point;
-        this._dragTimer = SC.Timer.schedule({
-            target:     this,
-            action:     '_scrollWhileDragging',
-            interval:   100,
-            repeats:    true
-        });
+        // TODO: Add this back again.
+        //
+        // this._dragPoint = point;
+        // this._dragTimer = SC.Timer.schedule({
+        //     target:     this,
+        //     action:     '_scrollWhileDragging',
+        //     interval:   100,
+        //     repeats:    true
+        // });
 
         return true;
     },
@@ -971,15 +982,15 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
      * character position.
      */
     scrollToPosition: function(position) {
-        var rect = this.get('layoutManager').
+        var rect = this.layoutManager.
             characterRectForPosition(position);
         var rectX = rect.x, rectY = rect.y;
         var rectWidth = rect.width, rectHeight = rect.height;
 
-        var frame = this.get('clippingFrame');
+        var frame = this.clippingFrame;
         var frameX = frame.x, frameY = frame.y;
 
-        var padding = this.get('padding');
+        var padding = this.padding;
         var width = frame.width - padding.right;
         var height = frame.height - padding.bottom;
 
@@ -1049,7 +1060,7 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
         this._invalidateSelection();
         this.notifyDelegates('textViewSelectionChanged', this._selectedRange);
 
-        if (this.get('isFirstResponder')) {
+        if (this._hasFocus) {
             this._rearmInsertionPointBlinkTimer();
         }
 
@@ -1066,19 +1077,6 @@ exports.TextView = CanvasView.extend(MultiDelegateSupport, TextInput, {
             this.insertText(text);
             this.resetKeyBuffers();
         }
-    },
-
-    willBecomeKeyResponderFrom: function() {
-        arguments.callee.base.apply(this, arguments);
-        this._invalidateSelection();
-        this._rearmInsertionPointBlinkTimer();
-    },
-
-    willLoseKeyResponderTo: function() {
-        arguments.callee.base.apply(this, arguments);
-        this._invalidateSelection();
-        this._insertionPointBlinkTimer.invalidate();
-        this._insertionPointVisible = true;
     }
 });
 

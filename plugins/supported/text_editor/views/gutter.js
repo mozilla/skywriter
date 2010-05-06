@@ -35,8 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var util = require('bespin:util/util');
+
 var CanvasView = require('views/canvas').CanvasView;
-var m_scratchcanvas = require('bespin:util/scratchcanvas');
 
 // TODO need to implement this behavior
 // _frameChanged: function() {
@@ -48,51 +49,51 @@ var m_scratchcanvas = require('bespin:util/scratchcanvas');
 
 /*
  * A view that renders the gutter for the editor.
- * 
+ *
  * The domNode attribute contains the domNode for this view that should be
  * added to the document appropriately.
  */
-exports.GutterView = function() {
-    this.layoutManager.invalidatedRects.add(function(sender, rects) {
-        this._recomputeLayout();
-    }.bind(this));
-    var interiorView = new CanvasView();
-    interiorView.drawRect.add(this.drawRect.bind(this));
-    this._interiorView = interiorView;
-    this.domNode = interiorView.domNode;
+exports.GutterView = function(container, editor) {
+    CanvasView.call(this, container);
 
-    this._recomputeLayout();
+    this.editor = editor;
+    this.layoutManager = editor.layoutManager;
+
+    // this.layoutManager.invalidatedRects.add(function(sender, rects) {
+    //     this._recomputeLayout();
+    // }.bind(this));
+    // var interiorView = new CanvasView();
+    // interiorView.drawRect.add(this.drawRect.bind(this));
+    // this._interiorView = interiorView;
+    // this.domNode = interiorView.domNode;
+    //
+    // this._recomputeLayout();
 };
 
-exports.GutterView.prototype = {
-    /**
-     * Theme colors. Value is set by editorView class. Don't change this
-     * property directly. Use the editorView function to adjust it.
-     */
-    _theme: { },
+exports.GutterView.prototype = new CanvasView();
 
-    _interiorView: null,
-    
-    drawRect: function(canvasview, rect, context) {
-        var theme = this.parentView._theme;
+util.mixin(exports.GutterView.prototype, {
+    padding: { left: 5, right: 10 },
+
+    drawRect: function(rect, context) {
+        var theme = this._theme;
 
         context.fillStyle = theme.backgroundColor;
         context.fillRect(rect.x, rect.y, rect.width, rect.height);
 
         context.save();
 
-        var parentView = this.parentView;
-        var padding = parentView.padding;
+        var padding = this.padding;
         context.translate(padding.left, 0);
 
-        var layoutManager = parentView.layoutManager;
+        var layoutManager = this.layoutManager;
         var range = layoutManager.characterRangeForBoundingRect(rect);
         var endRow = Math.min(range.end.row,
             layoutManager.textLines.length - 1);
         var lineAscent = layoutManager.lineAscent;
 
         context.fillStyle = theme.color;
-        context.font = parentView.editor.font;
+        context.font = this.editor.font;
 
         for (var row = range.start.row; row <= endRow; row++) {
             // TODO: breakpoints
@@ -103,7 +104,7 @@ exports.GutterView.prototype = {
         context.restore();
     },
 
-    _computeWidth: function() {
+    computeWidth: function() {
         var padding = this.padding;
         var paddingWidth = padding.left + padding.right;
 
@@ -118,62 +119,4 @@ exports.GutterView.prototype = {
 
         return strWidth + paddingWidth;
     },
-
-    _frameChanged: function() {
-        this._recomputeLayout();
-    }.observes('frame'),
-
-    _recomputeLayout: function() {
-        var layoutManager = this.layoutManager;
-        var padding = this.padding;
-
-        var width = this._computeWidth();
-
-        var layout = SC.clone(this.layout);
-        if (layout.width !== width) {
-            layout.width = width;
-            this.set('layout', layout); // triggers a restart of this function
-            return;
-        }
-
-        var frame = this.frame;
-        this._interiorView.set('layout', {
-            left:   0,
-            top:    -this.verticalScrollOffset,
-            width:  width,
-            height: Math.max(frame.height,
-                    layoutManager.boundingRect().height + padding.bottom)
-        });
-    },
-
-    _verticalScrollOffsetChanged: function() {
-        this._recomputeLayout();
-    }.observes('verticalScrollOffset'),
-
-    layout: { left: 0, top: 0, bottom: 0, width: 32 },
-
-    /**
-     * @property{LayoutManager}
-     *
-     * The layout manager to monitor. This property must be filled in upon
-     * instantiating the gutter view.
-     */
-    layoutManager: null,
-
-    /**
-     * @property
-     *
-     * The amount of padding to leave on the sides of the gutter, given as an
-     * object with 'bottom', 'left', and 'right' properties.
-     */
-    padding: { bottom: 30, left: 5, right: 10 },
-
-    /**
-     * @property{number}
-     *
-     * The amount by which the user has scrolled the neighboring editor in
-     * pixels.
-     */
-    verticalScrollOffset: 0
-};
-
+});

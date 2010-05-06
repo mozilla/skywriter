@@ -566,6 +566,44 @@ exports.clone = function(object) {
     return object;
 };
 
+
+/**
+ * Taken from John Resig, http://ejohn.org/blog/javascript-getters-and-setters/.
+ *
+ * Copies all properties from source to target. Returns the extended target
+ * object.
+ */
+// Helper method for extending one object with another
+exports.mixin = function(a,b) {
+    for ( var i in b ) {
+        var g = b.__lookupGetter__(i), s = b.__lookupSetter__(i);
+
+        if ( g || s ) {
+            if ( g )
+                a.__defineGetter__(i, g);
+            if ( s )
+                a.__defineSetter__(i, s);
+         } else
+             a[i] = b[i];
+    }
+    return a;
+}
+
+/**
+ * Basicly taken from Sproutcore.
+ *
+ * Replaces the count items from idx with objects.
+ */
+exports.replace = function(arr, idx, amt, objects) {
+    if (!objects || objects.length === 0) {
+        arr.splice(idx, amt) ;
+    } else {
+        var args = [idx, amt].concat(objects) ;
+        arr.splice.apply(this, args) ;
+    }
+    return arr;
+};
+
 /**
  * Return true if the two frames match.  You can also pass only points or sizes.
  * @param r1 {Rect} the first rect

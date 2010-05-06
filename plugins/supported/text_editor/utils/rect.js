@@ -70,7 +70,7 @@ exports.merge = function(set) {
                 var rectB = set[j];
                 if (exports.rectsSideBySide(rectA, rectB) ||
                                         exports.rectsIntersect(rectA, rectB)) {
-                    set.removeAt(j, 1);
+                    set.splice(j, 1);
 
                     // There's room for optimization here...
                     newSet[newSet.length - 1] = exports.unionRects(rectA, rectB);

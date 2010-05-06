@@ -35,48 +35,49 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-"define metadata";
-({
-    "description": "Constructs what you see on a hosted Bespin server",
-    "dependencies":
-    {
-        "command_line": "0.0.0",
-        "jlayout_border": "0.0.0",
-        "jsmt": "0.0.0",
-        "text_editor": "0.0.0"
+var Event = require('events').Event;
+
+exports.View = function(node){
+    this.node = node;
+
+    // Setup the event.
+    this.dimensionEvent = new Event();
+
+    // Render the view.
+    this.render(true);
+};
+
+exports.View.prototype = {
+    /**
+     * The underlaying HTMLNode for this view.
+     */
+    node: null,
+
+    /**
+     * The event called when the dimension has changed.
+     */
+    dimensionEvent: null,
+
+    /**
+     * Returns the dimension of the node.
+     */
+    get dimension() {
+        return {
+            width: this.node.scrollWidth || this.node.offsetWidth,
+            height: this.node.scrollHeight || this.node.offsetHeight
+        }
+    },
+
+    /**
+     * This function is called to update the view's DOM.
+     * Subclasses can implement this function.
+     */
+    render: function(firstTime) { },
+
+    /**
+     * Call this funciton if the dimension of the view changed.
+     */
+    dimensionChanged: function() {
+        this.dimensionEvent();
     }
-});
-"end";
-
-require("jlayout_border");
-var $ = require("jquery").$;
-var CliInputView = require('command_line:views/cli').CliInputView;
-
-var parent = document.createElement("div");
-parent.setAttribute("id", "container");
-parent.setAttribute("style", "width: 100%; height: 100%; margin: 0");
-document.body.appendChild(parent);
-
-parent.innerHTML = '<div id="editor" class="center">Editor goes here</div><div class="south">Command line goes here</div>';
-
-var cliInputView = new CliInputView();
-parent.appendChild(cliInputView.element);
-
-var loading = document.getElementById("loading");
-document.body.removeChild(loading);
-
-var container = $('#container');
-
-function relayout() {
-	container.layout({type: 'border', resize: false});
-}
-
-relayout();
-
-$(window).resize(relayout);
-
-// ---
-// Setup the editor:
-
-var EditorView = require('text_editor:views/editor').EditorView;
-var editorView = new EditorView(document.getElementById('editor'));
+};
