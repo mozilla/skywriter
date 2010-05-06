@@ -35,8 +35,9 @@
 * ***** END LICENSE BLOCK ***** */
 
 /* Global styles */
-.cmd_line { background:rgb(30,25,22);
-  position:absolute; height:300px; bottom:0; left:0; right:0;
+.cmd_line { background: rgb(30,25,22);
+  font-family: Arial,sans-serif; font-size: 80%;
+  /* position: absolute; height: 300px; bottom: 0; left: 0; right: 0; */
 }
 .cmd_error { color: #F99; }
 
@@ -50,8 +51,8 @@
 
 /* The input area */
 /* When we lose the SC CSS we can drop the .cmd_line specificity trump card */
-.cmd_line > .cmd_input {
-  font: 100% Arial,sans-serif; color: #FFF;
+.cmd_input {
+  color: #FFF; font-size: 110%;
   background: transparent;
   -webkit-box-shadow: none; outline: none; border: 0;
   position: absolute; height: 25px; bottom: 0px; left: 40px;
@@ -63,7 +64,7 @@
 
 /* Command line completion */
 .cmd_completion {
-  font: 100%, Arial,sans-serif; color: #443;
+  color: #443;
   position:absolute; height:18px; bottom:4px; left:45px; right:0;
 }
 .cmd_existing { color: rgb(27,22,19); text-shadow: none; }
@@ -79,7 +80,6 @@
 
 /* Command Output */
 .cmd_view {
-  font-size: 100%;
   maxHeight: 300px; overflow-y: auto; overflow-x: hidden;
   position: absolute; top: 0; bottom: 27px; left: 30px; right: 0;
 }
@@ -95,7 +95,7 @@
 
 .cmd_hover {
   float: right; height: 100%; display: none;
-  font-size: 100%; font-weight: normal; color: #666; text-align: right;
+  font-weight: normal; color: #666; text-align: right;
 }
 /* WARNING: this selector is SLLLOOOOWWW. Fix it */
 .cmd_hover * {
@@ -110,17 +110,16 @@
 .cmd_line { color: #AAA; }
 .cmd_line strong, .cmd_line b, .cmd_line th,
 .cmd_line h1, .cmd_line h2, .cmd_line h3 { color: #FFF; }
-.cmd_line .cmd_output a { font-weight: bold; color: #FCA; text-decoration: none; }
+.cmd_line .cmd_output a { font-weight: bold; color: #ACF; text-decoration: none; }
 .cmd_line a:hover { text-decoration: underline; cursor: pointer; }
 .cmd_line input[type=password],
 .cmd_line input[type=text],
 .cmd_line textarea {
-  font-family: Arial,sans-serif; color: #FFF; font-size: 120%;
+  color: #FFF; font-size: 120%;
   background: transparent; padding: 3px; border: 1px solid #ff9600;
   border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
 }
-.cmd_line h2, .cmd_line h3 { margin:0.83em 0; } /* Remove this when we remove SC */
-.cmd_line table, .cmd_line td, .cmd_line th { border:0; padding:2px; }
+.cmd_line table, .cmd_line td, .cmd_line th { border:0; padding:0 2px; }
 .cmd_line .right { text-align:right; }
 
 .cmd_line > .cmd_ex {
