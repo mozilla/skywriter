@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var util = require('bespin:util/util');
+var Event = require('events').Event;
 var CanvasView = require('views/canvas').CanvasView;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
@@ -52,16 +53,17 @@ var DEBUG_TEXT_RANGES = false;
 
 exports.TextView = function(container, editor) {
     CanvasView.call(this, container);
-
     this.editor = editor;
-    this.layoutManager = this.editor.layoutManager;
+
+    var layoutManager = this.layoutManager = this.editor.layoutManager;
+    var textInput = this.textInput = new TextInput(container, this);
 
     this._selectedRange = {
         start: { row: 0, col: 0 },
         end: { row: 0, col: 0 }
     };
 
-    this.clippingEvent.add(this.clippingFrameChanged.bind(this));
+    this.clipping.add(this.clippingFrameChanged.bind(this));
 
     // TODO: bind some UI events here:
     // 1) drag
@@ -69,6 +71,15 @@ exports.TextView = function(container, editor) {
     // etc...
     var dom = this.domNode;
     dom.addEventListener('mousedown', this.mouseDown.bind(this), false);
+
+    layoutManager.invalidatedRects.add(this.layoutManagerInvalidatedRects.bind(this));
+    layoutManager.changedTextAtRow.add(this.layoutManagerChangedTextAtRow.bind(this));
+
+    // Changeevents.
+    this.beganChangeGroup = new Event();
+    this.endedChangeGroup = new Event();
+    this.willReplaceRange = new Event();
+    this.replacedCharacters = new Event();
 };
 
 exports.TextView.prototype = new CanvasView();
@@ -91,14 +102,22 @@ util.mixin(exports.TextView.prototype, {
 
     _hasFocus: false,
 
-    set hasFocus(value) {
-        console.log('set hasFocus', value);
+    beganChangeGroup: null,
+    endedChangeGroup: null,
+    willReplaceRange: null,
+    replacedCharacters: null,
 
-        this._hasFocus = true;
+    set hasFocus(value) {
+        if (value == this._hasFocus) {
+            return;
+        }
+
+        this._hasFocus = value;
 
         if (this._hasFocus) {
             this._rearmInsertionPointBlinkTimer();
             this._invalidateSelection();
+            this.textInput.focus();
         } else {
             if (this._insertionPointBlinkTimer) {
                 clearInterval(this._insertionPointBlinkTimer);
@@ -106,11 +125,20 @@ util.mixin(exports.TextView.prototype, {
             }
             this._insertionPointVisible = true;
             this._invalidateSelection();
+            this.textInput.blur();
         }
     },
 
     get hasFocus() {
         return this._hasFocus;
+    },
+
+    didFocus: function() {
+        this.hasFocus = true;
+    },
+
+    didBlur: function() {
+        this.hasFocus = false;
     },
 
     _drag: function() {
@@ -357,7 +385,7 @@ util.mixin(exports.TextView.prototype, {
     // _resize: function() {
     //     var boundingRect = this.layoutManager.boundingRect();
     //     var padding = this.padding;
-    //     var parentFrame = this.getPath('parentView.frame');
+    //     var parentFrame = this.parentView.frame;
     //     this.set('layout', SC.mixin(SC.clone(this.layout), {
     //         width:  Math.max(parentFrame.width,
     //                 boundingRect.width + padding.right),
@@ -535,7 +563,7 @@ util.mixin(exports.TextView.prototype, {
      * Directs keyboard input to this text view.
      */
     focus: function() {
-        this.focusTextInput();
+        this.textInput.focus();
     },
 
     /**
@@ -575,18 +603,13 @@ util.mixin(exports.TextView.prototype, {
         }
 
         this._inChangeGroup = true;
-
-        // TODO: add back later.
-        // this.notifyDelegates('textViewBeganChangeGroup', this._selectedRange);
+        this.beganChangeGroup(this, this._selectedRange);
 
         try {
             performChanges();
         } finally {
             this._inChangeGroup = false;
-
-            // TODO: add back later.
-            // this.notifyDelegates('textViewEndedChangeGroup',
-            //     this._selectedRange);
+            this.endedChangeGroup(this, this._selectedRange);
         }
     },
 
@@ -598,12 +621,14 @@ util.mixin(exports.TextView.prototype, {
      *     change couldn't be made because the text view is read-only.
      */
     insertText: function(text) {
+        console.log('insertText', text);
+
         if (this._isReadOnly()) {
             return false;
         }
 
         this.groupChanges(function() {
-            var textStorage = this.getPath('layoutManager.textStorage');
+            var textStorage = this.layoutManager.textStorage;
             var range = Range.normalizeRange(this._selectedRange);
 
             this.replaceCharacters(range, text);
@@ -639,11 +664,7 @@ util.mixin(exports.TextView.prototype, {
     },
 
     keyDown: function(evt) {
-        // SC puts keyDown and keyPress event together. Here we only want to
-        // handle the real/browser's keydown event. To do so, we have to check
-        // if the evt.charCode value is set. If this isn't set, we have been
-        // called after a keypress event took place.
-        if (evt.charCode === 0) {
+        if (evt.charCode === 0 || evt._charCode === 0 /* This is a hack for FF*/) {
             return keyboardManager.processKeyEvent(evt, this,
                 { isTextView: true });
         } else if (evt.keyCode === 9) {
@@ -670,10 +691,13 @@ util.mixin(exports.TextView.prototype, {
      */
     layoutManagerInvalidatedRects: function(sender, rects) {
         rects.forEach(this.setNeedsDisplayInRect, this);
-        this._resize();
+
+        // TODO: Do we need this anymore?
+        // this._resize();
     },
 
     mouseDown: function(evt) {
+        util.stopEvent(evt);
         this.hasFocus = true;
 
         var point = { x: evt.pageX, y: evt.pageY };
@@ -689,7 +713,7 @@ util.mixin(exports.TextView.prototype, {
         case 2:
             var pos = this._selectionPositionForPoint(this.
                 convertFrameFromView(point));
-            var line = this.getPath('layoutManager.textStorage').
+            var line = this.layoutManager.textStorage.
                                                         lines[pos.row];
 
             // If there is nothing to select in this line, then skip.
@@ -720,7 +744,7 @@ util.mixin(exports.TextView.prototype, {
             break;
 
         case 3:
-            var lines = this.getPath('layoutManager.textStorage').lines;
+            var lines = this.layoutManager.textStorage.lines;
             var pos = this._selectionPositionForPoint(this.
                 convertFrameFromView(point));
             this.setSelection({
@@ -776,7 +800,7 @@ util.mixin(exports.TextView.prototype, {
      *        moving vertically.
      */
     moveCursorTo: function(position, select, virtual) {
-        var textStorage = this.getPath('layoutManager.textStorage');
+        var textStorage = this.layoutManager.textStorage;
         var positionToUse = textStorage.clampPosition(position);
 
         this.setSelection({
@@ -820,7 +844,7 @@ util.mixin(exports.TextView.prototype, {
     moveLeft: function() {
         var range = Range.normalizeRange(this._selectedRange);
         if (this._rangeIsInsertionPoint(range)) {
-            this.moveCursorTo(this.getPath('layoutManager.textStorage').
+            this.moveCursorTo(this.layoutManager.textStorage.
                 displacePosition(range.start, -1));
         } else {
             this.moveCursorTo(range.start);
@@ -830,7 +854,7 @@ util.mixin(exports.TextView.prototype, {
     moveRight: function() {
         var range = Range.normalizeRange(this._selectedRange);
         if (this._rangeIsInsertionPoint(range)) {
-            this.moveCursorTo(this.getPath('layoutManager.textStorage').
+            this.moveCursorTo(this.layoutManager.textStorage.
                 displacePosition(range.end, 1));
         } else {
             this.moveCursorTo(range.end);
@@ -873,12 +897,11 @@ util.mixin(exports.TextView.prototype, {
 
         this.groupChanges(function() {
             oldRange = Range.normalizeRange(oldRange);
-            this.notifyDelegates('textViewWillReplaceRange', oldRange);
+            this.willReplaceRange(this, oldRange);
 
-            var textStorage = this.getPath('layoutManager.textStorage');
+            var textStorage = this.layoutManager.textStorage;
             textStorage.replaceCharacters(oldRange, characters);
-            this.notifyDelegates('textViewReplacedCharacters', oldRange,
-                characters);
+            this.replacedCharacters(this, oldRange, characters);
         }.bind(this));
 
         return true;
@@ -898,7 +921,7 @@ util.mixin(exports.TextView.prototype, {
             return false;
         }
 
-        var model = this.getPath('layoutManager.textStorage');
+        var model = this.layoutManager.textStorage;
 
         var lines = model.lines;
         var range = this.getSelectedRange();
@@ -982,40 +1005,42 @@ util.mixin(exports.TextView.prototype, {
      * character position.
      */
     scrollToPosition: function(position) {
-        var rect = this.layoutManager.
-            characterRectForPosition(position);
-        var rectX = rect.x, rectY = rect.y;
-        var rectWidth = rect.width, rectHeight = rect.height;
-
-        var frame = this.clippingFrame;
-        var frameX = frame.x, frameY = frame.y;
-
-        var padding = this.padding;
-        var width = frame.width - padding.right;
-        var height = frame.height - padding.bottom;
-
-        var x;
-        if (rectX >= frameX && rectX + rectWidth < frameX + width) {
-            x = frameX;
-        } else {
-            x = rectX - width / 2 + rectWidth / 2;
-        }
-
-        var y;
-        if (rectY >= frameY && rectY + rectHeight < frameY + height) {
-            y = frameY;
-        } else {
-            y = rectY - height / 2 + rectHeight / 2;
-        }
-
-        this.scrollTo({ x: x, y: y });
+        // TODO: add this back later.
+        //
+        // var rect = this.layoutManager.
+        //     characterRectForPosition(position);
+        // var rectX = rect.x, rectY = rect.y;
+        // var rectWidth = rect.width, rectHeight = rect.height;
+        //
+        // var frame = this.clippingFrame;
+        // var frameX = frame.x, frameY = frame.y;
+        //
+        // var padding = this.padding;
+        // var width = frame.width - padding.right;
+        // var height = frame.height - padding.bottom;
+        //
+        // var x;
+        // if (rectX >= frameX && rectX + rectWidth < frameX + width) {
+        //     x = frameX;
+        // } else {
+        //     x = rectX - width / 2 + rectWidth / 2;
+        // }
+        //
+        // var y;
+        // if (rectY >= frameY && rectY + rectHeight < frameY + height) {
+        //     y = frameY;
+        // } else {
+        //     y = rectY - height / 2 + rectHeight / 2;
+        // }
+        //
+        // this.scrollTo({ x: x, y: y });
     },
 
     /**
      * Selects all characters in the buffer.
      */
     selectAll: function() {
-        var lines = this.getPath('layoutManager.textStorage').lines;
+        var lines = this.layoutManager.textStorage.lines;
         var lastRow = lines.length - 1;
         this.setSelection({
             start:  { row: 0, col: 0 },
@@ -1028,12 +1053,12 @@ util.mixin(exports.TextView.prototype, {
     },
 
     selectLeft: function() {
-        this.moveCursorTo((this.getPath('layoutManager.textStorage').
+        this.moveCursorTo((this.layoutManager.textStorage.
             displacePosition(this._selectedRange.end, -1)), true);
     },
 
     selectRight: function() {
-        this.moveCursorTo((this.getPath('layoutManager.textStorage').
+        this.moveCursorTo((this.layoutManager.textStorage.
             displacePosition(this._selectedRange.end, 1)), true);
     },
 
@@ -1045,7 +1070,7 @@ util.mixin(exports.TextView.prototype, {
      * Directly replaces the current selection with a new one.
      */
     setSelection: function(newRange, ensureVisible) {
-        var textStorage = this.getPath('layoutManager.textStorage');
+        var textStorage = this.layoutManager.textStorage;
 
         newRange = textStorage.clampRange(newRange);
         if (Range.equal(newRange, this._selectedRange)) {
@@ -1058,7 +1083,9 @@ util.mixin(exports.TextView.prototype, {
         // Set the new selection and invalidate it.
         this._selectedRange = textStorage.clampRange(newRange);
         this._invalidateSelection();
-        this.notifyDelegates('textViewSelectionChanged', this._selectedRange);
+
+        // TODO: add this back working over plugin boundaries.
+        // this.notifyDelegates('textViewSelectionChanged', this._selectedRange);
 
         if (this._hasFocus) {
             this._rearmInsertionPointBlinkTimer();
@@ -1068,7 +1095,8 @@ util.mixin(exports.TextView.prototype, {
             this.scrollToPosition(this._selectedRange.end);
         }
 
-        this.notifyDelegates('textViewChangedSelection', this._selectedRange);
+        // TODO: add this back working over plugin boundaries.
+        // this.notifyDelegates('textViewChangedSelection', this._selectedRange);
     },
 
     textInserted: function(text) {

@@ -595,13 +595,7 @@ exports.mixin = function(a,b) {
  * Replaces the count items from idx with objects.
  */
 exports.replace = function(arr, idx, amt, objects) {
-    if (!objects || objects.length === 0) {
-        arr.splice(idx, amt) ;
-    } else {
-        var args = [idx, amt].concat(objects) ;
-        arr.splice.apply(this, args) ;
-    }
-    return arr;
+    return arr.slice(0, idx).concat(objects).concat(arr.slice(idx + amt));
 };
 
 /**

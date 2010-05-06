@@ -43,7 +43,8 @@
         "command_line": "0.0.0",
         "jlayout_border": "0.0.0",
         "jsmt": "0.0.0",
-        "text_editor": "0.0.0"
+        "text_editor": "0.0.0",
+        "edit_session": "0.0.0"
     }
 });
 "end";
@@ -88,5 +89,21 @@ $(window).resize(relayout);
 // ---
 // Setup the editor:
 
+var env = require('canon:environment').global
+var bespin = require('appsupport:controllers/bespin').bespinController;
 var EditorView = require('text_editor:views/editor').EditorView;
+var m_editsession = require('edit_session').editSessionClasses;
+
 var editorView = new EditorView(document.getElementById('editor'));
+
+// TODO: This is a temporary hack.
+var session = new m_editsession.EditSession();
+var layoutManager = editorView.layoutManager;
+var textStorage = layoutManager.textStorage;
+var syntaxManager = layoutManager.syntaxManager;
+
+var buffer = m_editsession.makeBuffer(textStorage, syntaxManager);
+
+session.currentBuffer = buffer;
+session.currentView = editorView.textView;
+bespin.session = session;

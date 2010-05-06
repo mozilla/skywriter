@@ -52,7 +52,7 @@ TextStorage = function(initialValue) {
     } else {
         this._lines = [ '' ];
     }
-    
+
     /**
      * Called whenever the text changes with the old and new ranges supplied.
      */
@@ -223,7 +223,7 @@ TextStorage.prototype = {
         addedLines[addedLineCount - 1] +=
             lines[oldEndRow].substring(oldEnd.col);
 
-        util.replace(lines, oldStartRow, oldEndRow - oldStartRow + 1, addedLines);
+        this._lines = util.replace(lines, oldStartRow, oldEndRow - oldStartRow + 1, addedLines);
 
         this.changed(oldRange, newRange);
     },

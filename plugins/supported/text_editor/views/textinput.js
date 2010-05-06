@@ -36,15 +36,18 @@
  * ***** END LICENSE BLOCK ***** */
 
 var util = require('bespin:util/util');
+var Event = require('events').Event;
+
+var KeyUtil = require('keyboard:keyutil');
 
 /**
  * @namespace
  *
- * This class provides a hidden text input to provide events similar to those 
+ * This class provides a hidden text input to provide events similar to those
  * defined in the DOM Level 3 specification. It allows views to support
- * internationalized text input via non-US keyboards, dead keys, and/or IMEs. 
- * It also provides support for copy and paste. Currently, an invisible 
- * textarea is used, but in the future this module should use 
+ * internationalized text input via non-US keyboards, dead keys, and/or IMEs.
+ * It also provides support for copy and paste. Currently, an invisible
+ * textarea is used, but in the future this module should use
  * DOM 3 TextInput events directly where available.
  *
  * To use this class, instantiate it and provide the optional functions
@@ -55,40 +58,32 @@ var util = require('bespin:util/util');
  *
  * You can also provide an DOM node to take focus from by providing the optional
  * "takeFocusFrom" parameter.
- * 
+ *
  * The DOM node created for text input is in the "domNode" attribute
  * and that caller should add the DOM node to the document in the appropriate
  * place.
  */
-exports.TextInput = function(opts) {
+exports.TextInput = function(container, delegate) {
     var domNode = this.domNode = document.createElement('textarea');
     domNode.setAttribute('style', 'position: absolute; ' +
-        'z-index: -99999; top: -999px; left: -999px; width: 0px; ' +
-        'height: 0px');
-    
-    this.copy = opts.copy;
-    this.cut = opts.cut;
-    this.paste = opts.paste;
-    if (opts.takeFocusFrom) {
-        opts.takeFocusFrom.addEventListener("focus", function(evt) {
-            this.focusTextInput();
-            return true;
-        }.bind(this));
-        
-        opts.takeFocusFrom.addEventListener("blur", function(evt) {
-            this.unfocusTextInput();
-            return true;
-        }.bind(this));
-    }
-    
-    this._configureListeners(domNode);
+        // 'z-index: -99999; top: -999px; left: -999px; width: 0px; ' +
+        // 'height: 0px');
+         'z-index: 100; top: 20px; left: 20px; width: 50px; ' +
+         'height: 50px');
+
+    container.appendChild(domNode);
+
+    this.delegate = delegate;
+
+    this._attachEvents();
 };
 
 exports.TextInput.prototype = {
     _composing: false,
-    _ignore: false,
-    _ignoreBlur: false,
-    domNode: undefined,
+
+    domNode: null,
+
+    delegate: null,
 
     // This function doesn't work on WebKit! The textContent comes out empty...
     _textFieldChanged: function() {
@@ -110,23 +105,26 @@ exports.TextInput.prototype = {
 
     _copy: function() {
         var copyData = false;
-        if (this.copy) {
-            copyData = this.copy();
+        var delegate = this.delegate;
+        if (delegate && delegate.copy) {
+            copyData = delegate.copy();
         }
         return copyData;
     },
 
     _cut: function() {
         var cutData = false;
-        if (this.cut) {
-            cutData = this.cut();
+        var delegate = this.delegate;
+        if (delegate && delegate.cut) {
+            cutData = delegate.cut();
         }
         return cutData;
     },
 
     _textInserted: function(text) {
-        if (this.textInserted) {
-            this.textInserted(text);
+        var delegate = this.delegate;
+        if (delegate && delegate.textInserted) {
+            delegate.textInserted(text);
         }
     },
 
@@ -141,7 +139,7 @@ exports.TextInput.prototype = {
      * delivered to the view. If you override willBecomeKeyResponderFrom(),
      * you should call this function in your implementation.
      */
-    focusTextInput: function() {
+    focus: function() {
         this.domNode.focus();
     },
 
@@ -150,7 +148,7 @@ exports.TextInput.prototype = {
      * longer delivered to this view. If you override willLoseKeyResponderTo(),
      * you should call this function in your implementation.
      */
-    unfocusTextInput: function() {
+     blur: function() {
         this.domNode.blur();
     },
 
@@ -159,8 +157,28 @@ exports.TextInput.prototype = {
      * be notified of events. If you override this method, you should call
      * that function as well.
      */
-    _configureListeners: function(textField) {
-        var self = this;
+    _attachEvents: function() {
+        var textField = this.domNode, self = this;
+
+        // Listen focus/blur event.
+        textField.addEventListener('focus', function(evt) {
+            if (self.delegate && self.delegate.didFocus) {
+                self.delegate.didFocus();
+            }
+        }, false);
+        textField.addEventListener('blur', function(evt) {
+            if (self.delegate && self.delegate.didBlur) {
+                self.delegate.didBlur();
+            }
+        }, false);
+
+        KeyUtil.addKeyDownListener(textField, function(evt) {
+            if (self.delegate && self.delegate.keyDown) {
+                return self.delegate.keyDown(evt);
+            } else {
+                return false;
+            }
+        });
 
         // No way that I can see around this ugly browser sniffing, without
         // more complicated hacks. No browsers have a complete enough

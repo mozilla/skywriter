@@ -107,6 +107,12 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
     syntaxManager: null,
 
     init: function(model, syntaxManager) {
+        this.__defineGetter__('model', this.getModel);
+        this.__defineSetter__('model', this.setModel);
+
+        this.__defineGetter__('file', this.getFile);
+        this.__defineSetter__('file', this.setFile);
+
         if (model == null) {
             this.model = new TextStorage;
         } else {
@@ -114,12 +120,6 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
         }
 
         this.syntaxManager = syntaxManager;
-
-        this.__defineGetter__('model', this.getModel);
-        this.__defineSetter__('model', this.setModel);
-
-        this.__defineGetter__('file', this.getFile);
-        this.__defineSetter__('file', this.setFile);
 
         return this;
     },
@@ -246,7 +246,8 @@ exports.EditSession.prototype = {
             }
 
             this._currentView = newView;
-            newView.addDelegate(this);
+            // TODO: Add this back later again.
+            // newView.addDelegate(this);
         }
     },
 

@@ -46,7 +46,7 @@ exports.CanvasView = function(node) {
     ViewClass.call(this, node);
 
     this._cvInvalidRects = [];
-    this.dimensionEvent.add(this.viewDimensionChanged);
+    this.dimension.add(this.viewDimensionChanged);
 };
 exports.CanvasView.prototype = new ViewClass();
 
@@ -277,7 +277,7 @@ util.mixin(exports.CanvasView.prototype, {
     set scrollView(scrollView) {
         this._scrollView = scrollView;
 
-        scrollView.clippingEvent.add(this.scrollViewClippingFrameChanged);
+        scrollView.clipping.add(this.scrollViewClippingFrameChanged);
 
     }
 });

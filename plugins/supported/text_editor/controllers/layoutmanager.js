@@ -49,8 +49,6 @@ exports.LayoutManager = function(opts) {
 
     util.mixin(this, opts);
 
-    this.textStorageChanged = this.textStorageChanged.bind(this);
-
     this.textLines = [
         {
             characters: '',
@@ -100,7 +98,9 @@ exports.LayoutManager.prototype = {
             oldTextStorage.changed.remove(this.textStorageChanged);
         }
 
-        newTextStorage.changed.add(this.textStorageChanged);
+        console.log('setTextStorage');
+
+        newTextStorage.changed.add(this.textStorageChanged.bind(this));
 
         if (this._syntaxManagerInitialized) {
             var oldRange = oldTextStorage.range;
@@ -247,8 +247,8 @@ exports.LayoutManager.prototype = {
             };
         }
 
-        util.replace(this.textLines, oldStartRow, oldEndRow - oldStartRow + 1,
-                        newTextLines);
+        this.textLines = util.replace(this.textLines, oldStartRow,
+                                oldEndRow - oldStartRow + 1, newTextLines);
         this._recalculateMaximumWidth();
 
         // Take the cached attributes from the syntax manager.

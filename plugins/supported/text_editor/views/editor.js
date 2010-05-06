@@ -58,7 +58,7 @@ exports.EditorView = function(container) {
     this.container = container;
     container.style.overflow = 'hidden';
 
-    this.scrollEvent = new Event();
+    this.scrollChanged = new Event();
 
     var layoutManager = this.layoutManager = new LayoutManager();
     var searchController = this.searchController = new EditorSearchController()
@@ -78,7 +78,7 @@ exports.EditorView.prototype = {
     horizontalScrollOffset: null,
     verticalScrollOffset: null,
 
-    scrollEvent: null,
+    scrollChanged: null,
 
     recomputeLayout: function() {
         var width = this.container.offsetWidth;

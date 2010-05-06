@@ -366,7 +366,13 @@ exports.SyntaxManager.prototype = {
 
         invalidRows.push(row);
         invalidRows.sort(function(a, b) { return a - b; });
-        this._invalidRows = invalidRows.uniq();
+
+        var invalidRow = this._invalidRows = [];
+        invalidRows.forEach(function(elm) {
+            if (invalidRow.indexOf(elm) < 0) {
+                invalidRow[invalidRow.length] = elm;
+            }
+        });
     },
 
     _mergeAttrGroups: function(attrGroups) {

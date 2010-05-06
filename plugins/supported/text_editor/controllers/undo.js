@@ -52,18 +52,18 @@ var undoManager = require('appsupport:controllers/undomanager').undoManager;
 exports.EditorUndoController = function(textView) {
     this._redoStack = [];
     this._undoStack = [];
-    
+
     this.textView = textView;
 
     textView.beganChangeGroup.add(function(sender, selection) {
         this._beginTransaction();
         this._record.selectionBefore = selection;
-    });
+    }.bind(this));
 
     textView.endedChangeGroup.add(function(sender, selection) {
         this._record.selectionAfter = selection;
         this._endTransaction();
-    });
+    }.bind(this));
 
     textView.replacedCharacters.add(function(sender, oldRange, characters) {
         if (!this._inTransaction) {
@@ -81,9 +81,9 @@ exports.EditorUndoController = function(textView) {
         });
 
         this._deletedCharacters = null;
-    });
+    }.bind(this));
 
-    textView.willReplaceRange(function(sender, oldRange) {
+    textView.willReplaceRange.add(function(sender, oldRange) {
         if (!this._inTransaction) {
             throw new Error('UndoController.textViewWillReplaceRange() called' +
                 ' outside a transaction');
@@ -91,7 +91,7 @@ exports.EditorUndoController = function(textView) {
 
         this._deletedCharacters = this.textView.layoutManager.textStorage.
                             getCharacters(oldRange);
-    });
+    }.bind(this));
 };
 
 exports.EditorUndoController.prototype = {
