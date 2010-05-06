@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var diff_match_patch = require('diff').diff_match_patch;
 
 var util = require('bespin:util/util');
@@ -64,160 +63,125 @@ var inputHeight = 25;
  * A view designed to dock in the bottom of the editor, holding the command
  * line input.
  */
-exports.CliInputView = SC.View.design({
-    classNames: [ 'cmd_line' ],
-    layout: { height: 300, bottom: 0, left: 0, right: 0 },
+exports.CliInputView = function() {
+    // Used to track if we have focus, and therefore should the CLI be expanded
+    // or collapsed
+    this._hasFocus = false;
 
-    /**
-     * Used to track if we have focus, and therefore should the CLI be expanded
-     * or collapsed
-     */
-    _hasFocus: false,
+    // Are we currently pinned?
+    this._pinned = false;
 
-    /**
-     * Are we currently pinned?
-     */
-    _pinned: undefined,
+    this.element = document.createElement('div');
+    this.element.className = 'cmd_line';
 
-    /**
-     * The DOM table of output elements
-     */
-    _table: undefined,
+    // We need to know if blur events from the input really matter (i.e. are
+    // they going to the editor or another view, or just to another part of
+    // this view) so we listen for clicks in this view.
+    // This allows us to cancel the effects of a blur
+    this._boundCancelBlur = this._cancelBlur.bind(this);
+    this.element.addEventListener('click', this._boundCancelBlur, true);
 
-    /**
-     * The DOM element that displays the current completion
-     */
-    _completer: undefined,
+    // A div to hang hints on
+    this._ex = document.createElement('div');
+    this._ex.className = 'cmd_ex';
+    this.element.appendChild(this._ex);
 
-    /**
-     * The input field
-     */
-    _inputer: undefined,
+    // Used as something to hang styles off for input area
+    var kbd = document.createElement('kbd');
+    this.element.appendChild(kbd);
 
-    /**
-     * The parsed version of the input. A command_line:input.
-     */
-    _input: undefined,
+    // CLI output table
+    this._table = document.createElement('div');
+    this._table.className = 'cmd_view';
+    this.element.appendChild(this._table);
 
-    /**
-     * Setup the UI
-     */
-    didCreateLayer: function() {
-        this._pinned = false;
+    // Toolbar
+    var toolbar = document.createElement('div');
+    toolbar.className = 'cmd_toolbar';
+    this.element.appendChild(toolbar);
 
-        var layer = this.get('layer');
-
-        // We need to know if blur events from the input really matter (i.e. are
-        // they going to the editor or another view, or just to another part of
-        // this view) so we listen for clicks in this view.
-        // This allows us to cancel the effects of a blur
-        this._boundCancelBlur = this._cancelBlur.bind(this);
-        layer.addEventListener('click', this._boundCancelBlur, true);
-
-        // A div to hang hints on
-        this._ex = document.createElement('div');
-        this._ex.className = 'cmd_ex';
-        layer.appendChild(this._ex);
-
-        // Used as something to hang styles off for input area
-        var kbd = document.createElement('kbd');
-        layer.appendChild(kbd);
-
-        // CLI output table
-        this._table = document.createElement('div');
-        this._table.className = 'cmd_view';
-        layer.appendChild(this._table);
-
-        // Toolbar
-        var toolbar = document.createElement('div');
-        toolbar.className = 'cmd_toolbar';
-        layer.appendChild(toolbar);
-
-        // The pin/unpin button
-        var pin = document.createElement('img');
-        pin.src = imagePath + 'pinout.png';
-        pin.alt = 'Pin/Unpin the console output';
-        pin.onclick = function(ev) {
-            // TODO: change the image
-            this._pinned = !this._pinned;
-            this.checkHeight();
-        }.bind(this);
-        toolbar.appendChild(pin);
-
-        // The prompt
-        var prompt = document.createElement('div');
-        prompt.className = 'cmd_prompt cmd_gt';
-        prompt.innerHTML = '<span class="cmd_brackets">{ }</span> &gt;';
-        layer.appendChild(prompt);
-
-        // Completion
-        this._completer = document.createElement('div');
-        this._completer.className = 'cmd_completion';
-        layer.appendChild(this._completer);
-
-        // The input field
-        this._inputer = document.createElement('input');
-        this._inputer.className = 'cmd_input';
-        this._input = new Input('');
-
-        // TODO: This is a hack... how to do it right?
-        environment.commandLine = this;
-
-        keyutil.addKeyDownListener(this._inputer, function(ev) {
-            var handled = keyboardManager.processKeyEvent(ev, this, {
-                isCommandLine: true, isKeyUp: false
-            });
-            return handled;
-        }.bind(this));
-
-        this._inputer.onkeyup = function(ev) {
-            var handled = keyboardManager.processKeyEvent(ev, this, {
-                isCommandLine: true, isKeyUp: true
-            });
-
-            if (ev.keyCode === 13) {
-                this._input.execute();
-                this.setInput('');
-            } else {
-                var typed = this._inputer.value;
-                if (this._input.typed !== typed) {
-                    this._input = new Input(typed);
-                    this.hintUpdated();
-                }
-            }
-
-            return handled;
-        }.bind(this);
-        layer.appendChild(this._inputer);
-
-        layer.addEventListener('focus', function(ev) {
-            this._hasFocus = true;
-            this.checkHeight();
-        }.bind(this), true);
-
-        layer.addEventListener('blur', function(ev) {
-            this._hasFocus = false;
-            this.checkHeight();
-        }.bind(this), true);
-
-        catalog.registerExtension('settingChange', {
-            match: "[min|max]ConsoleHeight",
-            pointer: this.checkHeight.bind(this)
-        });
-
-        catalog.registerExtension('addedRequestOutput', {
-            pointer: this.addedRequestOutput.bind(this)
-        });
-
+    // The pin/unpin button
+    var pin = document.createElement('img');
+    pin.src = imagePath + 'pinout.png';
+    pin.alt = 'Pin/Unpin the console output';
+    pin.onclick = function(ev) {
+        // TODO: change the image
+        this._pinned = !this._pinned;
         this.checkHeight();
-    },
+    }.bind(this);
+    toolbar.appendChild(pin);
 
+    // The prompt
+    var prompt = document.createElement('div');
+    prompt.className = 'cmd_prompt cmd_gt';
+    prompt.innerHTML = '<span class="cmd_brackets">{ }</span> &gt;';
+    this.element.appendChild(prompt);
+
+    // Completion
+    this._completer = document.createElement('div');
+    this._completer.className = 'cmd_completion';
+    this.element.appendChild(this._completer);
+
+    // The input field
+    this._inputer = document.createElement('input');
+    this._inputer.className = 'cmd_input';
+    this._input = new Input('');
+
+    keyutil.addKeyDownListener(this._inputer, function(ev) {
+        var handled = keyboardManager.processKeyEvent(ev, this, {
+            isCommandLine: true, isKeyUp: false
+        });
+        return handled;
+    }.bind(this));
+
+    this._inputer.onkeyup = function(ev) {
+        var handled = keyboardManager.processKeyEvent(ev, this, {
+            isCommandLine: true, isKeyUp: true
+        });
+
+        if (ev.keyCode === 13) {
+            this._input.execute();
+            this.setInput('');
+        } else {
+            var typed = this._inputer.value;
+            if (this._input.typed !== typed) {
+                this._input = new Input(typed);
+                this.hintUpdated();
+            }
+        }
+
+        return handled;
+    }.bind(this);
+    this.element.appendChild(this._inputer);
+
+    this.element.addEventListener('focus', function(ev) {
+        this._hasFocus = true;
+        this.checkHeight();
+    }.bind(this), true);
+
+    this.element.addEventListener('blur', function(ev) {
+        this._hasFocus = false;
+        this.checkHeight();
+    }.bind(this), true);
+
+    catalog.registerExtension('settingChange', {
+        match: "[min|max]ConsoleHeight",
+        pointer: this.checkHeight.bind(this)
+    });
+
+    catalog.registerExtension('addedRequestOutput', {
+        pointer: this.addedRequestOutput.bind(this)
+    });
+
+    this.checkHeight();
+};
+
+exports.CliInputView.prototype = {
     /**
-     * Undo event registration from #didCreateLayer()
+     * Undo event registration
      */
-    willDestroyLayer: function() {
-        var layer = this.get('layer');
-        layer.removeEventListener('click', this._boundCancelBlur, true);
+    destroy: function() {
+        this.element.removeEventListener('click', this._boundCancelBlur, true);
     },
 
     /**
@@ -230,8 +194,8 @@ exports.CliInputView = SC.View.design({
         }
         height += inputHeight;
 
-        if (this.get('layout').height != height) {
-            this.adjust('height', height).updateLayout();
+        if (this.element.height != height) {
+            this.element.height = height;
         }
     },
 
@@ -268,6 +232,9 @@ exports.CliInputView = SC.View.design({
      * automagically.
      */
     execute: function(command) {
+        // TODO: This is a hack... how to do it right?
+        environment.commandLine = this;
+
         var input = new Input(command);
         input.execute();
     },
@@ -357,6 +324,9 @@ exports.CliInputView = SC.View.design({
         // A double click on an invocation line in the console
         // executes the command
         rowin.ondblclick = function() {
+            // TODO: This is a hack... how to do it right?
+            environment.commandLine = this;
+
             this._input = new Input(request.typed);
             this._input.execute();
         };
@@ -487,10 +457,7 @@ exports.CliInputView = SC.View.design({
                 this._hasFocus = false;
             }.bind(this), 1);
         }
-
-        // TODO: This list of things to observe should include all the views
-        // that can be KeyResponders. hmmm
-    }.observes('.isKeyResponder'),
+    },
 
     /**
      * We have reason to believe that a blur event shouldn't happen
@@ -539,7 +506,7 @@ exports.CliInputView = SC.View.design({
 
         this._completer.innerHTML = val;
     }
-});
+};
 
 /**
  * Quick utility to format the elapsed time for display as hh:mm:ss
