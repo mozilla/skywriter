@@ -71,7 +71,20 @@ exports.EditorView = function(container) {
 
     this.recomputeLayout();
 
-    window.addEventListener('resize', this.recomputeLayout.bind(this), false);
+    window.addEventListener('resize', this.dimensionChanged.bind(this), false);
+
+    // TODO: Is this hack okay or should it be solved in a more elegant way?
+    layoutManager.invalidatedRects.add(function(sender, rects) {
+        if (this._textLinesLength !== layoutManager.textLines.length) {
+            var gutterWidth = gutterView.computeWidth();
+            if (gutterWidth !== this._gutterViewWidth) {
+                this.recomputeLayout();
+            } else {
+                gutterView.setNeedsDisplay();
+            }
+            this._textLinesLength = layoutManager.textLines.length;
+        }
+    }.bind(this));
 };
 
 exports.EditorView.prototype = {
@@ -80,11 +93,14 @@ exports.EditorView.prototype = {
 
     scrollChanged: null,
 
+    _textLinesLength: 0,
+    _gutterViewWidth: 0,
+
     recomputeLayout: function() {
         var width = this.container.offsetWidth;
         var height = this.container.offsetHeight;
 
-        var gutterWidth = this.gutterView.computeWidth();
+        var gutterWidth = this._gutterViewWidth = this.gutterView.computeWidth();
         this.gutterView.setFrame({
             x: 0,
             y: 0,
@@ -104,7 +120,7 @@ exports.EditorView.prototype = {
     },
 
     dimensionChanged: function() {
-
+        this.recomputeLayout();
     },
 
     /**

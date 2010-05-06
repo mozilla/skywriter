@@ -58,16 +58,6 @@ exports.GutterView = function(container, editor) {
 
     this.editor = editor;
     this.layoutManager = editor.layoutManager;
-
-    // this.layoutManager.invalidatedRects.add(function(sender, rects) {
-    //     this._recomputeLayout();
-    // }.bind(this));
-    // var interiorView = new CanvasView();
-    // interiorView.drawRect.add(this.drawRect.bind(this));
-    // this._interiorView = interiorView;
-    // this.domNode = interiorView.domNode;
-    //
-    // this._recomputeLayout();
 };
 
 exports.GutterView.prototype = new CanvasView();
