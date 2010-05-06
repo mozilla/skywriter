@@ -35,8 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
-
 var Promise = require('bespin:promise').Promise;
 var catalog = require('bespin:plugins').catalog;
 
@@ -75,9 +73,7 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
             } else {
                 newFile.loadContents().then(function(contents) {
                     console.log('SET FILE CONTENTS: ', contents);
-                    SC.run(function() {
-                        this.model = new TextStorage(contents);
-                    }.bind(this));
+                    this.model = new TextStorage(contents);
                 }.bind(this));
             }
 
@@ -145,9 +141,7 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
         }
 
         return newFile.loadContents().then(function(contents) {
-            SC.run(function() {
-                this.model = new TextStorage(contents);
-            }.bind(this));
+            this.model = new TextStorage(contents);
             return this;
         }.bind(this));
     },
@@ -163,7 +157,7 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
         this.file = newFile;
     },
 
-    /*
+    /**
      * reload the existing file contents from the server.
      */
     reload: function() {
@@ -267,9 +261,8 @@ exports.EditSession.prototype = {
         }
     },
 
-    /*
+    /**
      * @type{string}
-     *
      * The name of the user, or null if no user is logged in.
      */
     currentUser: null,
@@ -300,7 +293,7 @@ exports.EditSession.prototype = {
         this._currentView.setPath('layoutManager.textStorage', newModel);
     },
 
-    /*
+    /**
      * figures out the full path, taking into account the current file
      * being edited.
      */

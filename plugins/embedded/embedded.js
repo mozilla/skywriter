@@ -221,16 +221,14 @@ var embeddedEditor = Trait.object({
      * of the element containing the Bespin editor might have changed.
      */
     dimensionsChanged: function() {
-        SC.run(function() {
-            var pane = this.pane;
-            var oldLayout = pane.get('layout');
-            var newLayout = this._computeLayout();
+        var pane = this.pane;
+        var oldLayout = pane.get('layout');
+        var newLayout = this._computeLayout();
 
-            if (!SC.rectsEqual(oldLayout, newLayout)) {
-                pane.adjust(newLayout);
-                pane.updateLayout();    // writes the layoutStyle to the DOM
-            }
-        }.bind(this));
+        if (!SC.rectsEqual(oldLayout, newLayout)) {
+            pane.adjust(newLayout);
+            pane.updateLayout();    // writes the layoutStyle to the DOM
+        }
     },
 
     /** Returns the currently-selected range. */
@@ -295,18 +293,16 @@ var embeddedEditor = Trait.object({
                 text + '"');
         }
 
-        SC.run(function() {
-            var normalized = m_range.normalizeRange(range);
+        var normalized = m_range.normalizeRange(range);
 
-            var view = this._session.currentView;
-            var oldSelection = view.getSelectedRange(false);
-            view.groupChanges(function() {
-                view.replaceCharacters(normalized, newText);
-                if (keepSelection) {
-                    view.setSelection(oldSelection);
-                }
-            });
-        }.bind(this));
+        var view = this._session.currentView;
+        var oldSelection = view.getSelectedRange(false);
+        view.groupChanges(function() {
+            view.replaceCharacters(normalized, newText);
+            if (keepSelection) {
+                view.setSelection(oldSelection);
+            }
+        });
     },
 
     /** Replaces the current text selection with the given text. */
@@ -435,10 +431,8 @@ var embeddedEditor = Trait.object({
             throw new Error('setSetting(): value must be supplied');
         }
 
-        SC.run(function() {
-            var settings = require('settings').settings;
-            settings.set(key, value);
-        });
+        var settings = require('settings').settings;
+        settings.set(key, value);
     },
 
     /** Sets the initial syntax highlighting context (i.e. the language). */
@@ -447,11 +441,9 @@ var embeddedEditor = Trait.object({
             throw new Error('setSyntax(): syntax must be supplied');
         }
 
-        SC.run(function() {
-            var view = this._session.currentView;
-            var syntaxManager = view.getPath('layoutManager.syntaxManager');
-            syntaxManager.set('initialContext', syntax);
-        }.bind(this));
+        var view = this._session.currentView;
+        var syntaxManager = view.getPath('layoutManager.syntaxManager');
+        syntaxManager.set('initialContext', syntax);
     },
 
     /**
@@ -459,11 +451,9 @@ var embeddedEditor = Trait.object({
      * of the buffer.
      */
     setValue: function(newValue) {
-        SC.run(function() {
-            var textView = this._session.currentView;
-            textView.getPath('layoutManager.textStorage').setValue(newValue);
-            textView.moveCursorTo({ row: 0, col: 0 });
-        }.bind(this));
+        var textView = this._session.currentView;
+        textView.getPath('layoutManager.textStorage').setValue(newValue);
+        textView.moveCursorTo({ row: 0, col: 0 });
     },
 
     /** Replaces an element with the Bespin editor. */

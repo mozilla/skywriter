@@ -115,8 +115,8 @@ bespinController = Object.create(Object.prototype, Trait({
 
                 var promise = new Promise();
                 this._promise = promise;
-                var showIfNotLoggedIn = loginController.showIfNotLoggedIn;
-                SC.run(showIfNotLoggedIn.bind(loginController));
+
+                loginController.showIfNotLoggedIn();
                 return promise;
             },
 
@@ -147,8 +147,7 @@ bespinController = Object.create(Object.prototype, Trait({
                 bespinController._rollback('login_controller');
                 bespinController._username = null;
 
-                var loginController = this._loginController;
-                SC.run(loginController.show.bind(loginController));
+                this._loginController.show();
             }
         }), RegistrationHandler)),
 

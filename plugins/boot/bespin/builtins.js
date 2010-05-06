@@ -65,9 +65,7 @@ exports.metadata =
                     {
                         "name": "indexOn",
                         "type": "string",
-                        "description": "You can provide an 'indexOn' property  \
-                        to name a property of extensions through which you'd  \
-                        like to be able to easily look up the extension."
+                        "description": "You can provide an 'indexOn' property to name a property of extensions through which you'd like to be able to easily look up the extension."
                     },
                     {
                         "name": "register",
@@ -107,9 +105,7 @@ exports.metadata =
             {
                 "ep": "extensionpoint",
                 "name": "startup",
-                "description": "A function that should be called at startup. This should be used \
-sparingly, as these plugins will be eagerly loaded at the beginning. All that's needed for this \
-extension point is a pointer to a function that takes no arguments.",
+                "description": "A function that should be called at startup. This should be used sparingly, as these plugins will be eagerly loaded at the beginning. All that's needed for this extension point is a pointer to a function that takes no arguments.",
                 "register": "plugins#startupHandler",
                 "params": [
                     {
@@ -122,11 +118,7 @@ extension point is a pointer to a function that takes no arguments.",
             {
                 "ep": "extensionpoint",
                 "name": "factory",
-                "description": "Provides a factory for singleton components. Each extension needs to \
-provide a name, a pointer and an action. The action can be 'call' (if the pointer refers to \
-a function), 'create' (if the pointer refers to an SC.Object), 'new' (if the pointer refers to \
-a traditional JS object) or 'value' (if the pointer refers to the object itself that is the \
-component).",
+                "description": "Provides a factory for singleton components. Each extension needs to provide a name, a pointer and an action. The action can be 'call' (if the pointer refers to a function), 'new' (if the pointer refers to a traditional JS object) or 'value' (if the pointer refers to the object itself that is the component).",
                 "indexOn": "name"
             },
             {

@@ -96,8 +96,6 @@ exports.EditorView = SC.View.extend(SC.Border, {
     font: '10pt Monaco, Lucida Console, monospace',
 
     _themeVariableDidChange: function() {
-        var theme = {};
-
         var plugin = catalog.plugins['text_editor'];
         var provides = plugin.provides;
         var i = provides.length;
@@ -120,14 +118,12 @@ exports.EditorView = SC.View.extend(SC.Border, {
             }
         }
 
-        SC.run(function() {
-            // Refresh the entire editor.
-            var lines = this.layoutManager.textStorage.lines;
-            this.layoutManager.updateTextRows(0, lines.length - 1);
+        // Refresh the entire editor.
+        var lines = this.layoutManager.textStorage.lines;
+        this.layoutManager.updateTextRows(0, lines.length - 1);
 
-            this.textView.setNeedsDisplay();
-            this.gutterView._recomputeLayout();
-        }.bind(this))
+        this.textView.setNeedsDisplay();
+        this.gutterView._recomputeLayout();
     },
 
     /**
