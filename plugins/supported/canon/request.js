@@ -116,7 +116,7 @@ exports.Request.prototype.output = function(content) {
         content = content.toString();
     }
 
-    this.outputs.pushObject(content);
+    this.outputs.push(content);
     this.changed();
 
     return this;

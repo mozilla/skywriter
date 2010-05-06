@@ -38,7 +38,9 @@
 "define metadata";
 ({
     "description": "Constructs what you see on a hosted Bespin server",
-    "dependencies": {
+    "dependencies":
+    {
+        "command_line": "0.0.0",
         "jlayout_border": "0.0.0",
         "jsmt": "0.0.0",
         "text_editor": "0.0.0"
@@ -48,13 +50,17 @@
 
 require("jlayout_border");
 var $ = require("jquery").$;
+var CliInputView = require('command_line:views/cli').CliInputView;
 
-var d = document.createElement("div");
-d.setAttribute("id", "container");
-d.setAttribute("style", "width: 100%; height: 100%; margin: 0");
-document.body.appendChild(d);
+var parent = document.createElement("div");
+parent.setAttribute("id", "container");
+parent.setAttribute("style", "width: 100%; height: 100%; margin: 0");
+document.body.appendChild(parent);
 
-d.innerHTML = '<div class="center">Editor goes here</div><div class="south">Command line goes here</div>';
+parent.innerHTML = '<div class="center">Editor goes here</div><div class="south">Command line goes here</div>';
+
+var cliInputView = new CliInputView();
+parent.appendChild(cliInputView.element);
 
 var loading = document.getElementById("loading");
 document.body.removeChild(loading);
