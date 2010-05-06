@@ -152,7 +152,7 @@ exports.registerThemeStyles = function(extension) {
             // parse the plugin.
             exports.parsePlugin(extension.getPluginName());
         }, function(err) {
-            console.error('registerLessFile: Could not load ' + lessExtension.url);
+            console.error('registerLessFile: Could not load ' + extension.url);
         });
     })
 };

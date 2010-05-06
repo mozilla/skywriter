@@ -51,7 +51,7 @@ var cookie = require('bespin:util/cookie');
  * backend store. The FileSystem object uses this to talk back.
  */
 exports.server = {
-    SERVER_BASE_URL: window.SERVER_BASE_URL == undefined ? '/server' : SERVER_BASE_URL,
+    SERVER_BASE_URL: window.SERVER_BASE_URL == undefined ? '' : SERVER_BASE_URL,
 
     // Stores the outstanding asynchronous tasks that we've submitted
     _jobs: {},
