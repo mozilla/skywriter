@@ -46,11 +46,11 @@ var catalog = require('bespin:plugins').catalog;
 exports.LayoutManager = function(opts) {
     this.changedTextAtRow = new Event();
     this.invalidatedRects = new Event();
-    
+
     Object.keys(opts).forEach(function(key) {
         obj[key] = opts[key];
     });
-    
+
     this.textStorageChanged = this.textStorageChanged.bind(this);
 
     this.textLines = [
@@ -82,11 +82,11 @@ exports.LayoutManager.prototype = {
     get textStorage() {
         return this._textStorage;
     },
-    
+
     set textStorage(newTextStorage) {
         var oldTextStorage = this._textStorage;
         this._textStorage = newTextStorage;
-        
+
         if (!util.none(oldTextStorage)) {
             oldTextStorage.changed.remove(this.textStorageChanged);
         }
@@ -108,7 +108,7 @@ exports.LayoutManager.prototype = {
             this._recomputeLayoutForRanges(oldRange, newRange);
         }
     },
-    
+
     /**
      * Theme colors. Value is set by editorView class. Don't change this
      * property directly. Use the editorView function to adjust it.
@@ -251,13 +251,13 @@ exports.LayoutManager.prototype = {
 
         // Take the cached attributes from the syntax manager.
         this.updateTextRows(oldStartRow, newEndRow + 1);
-        
+
         this.changedTextAtRow(this, oldStartRow);
 
         var invalidRects = this._computeInvalidRects(oldRange, newRange);
         this.invalidatedRects(this, invalidRects);
     },
-    
+
     /**
      * Determines the boundaries of the entire text area.
      *
@@ -301,10 +301,10 @@ exports.LayoutManager.prototype = {
         });
 
         var lineLength = textStorage.lines[clampedPosition.row].length;
-        clampedPosition.partialFraction = x < 0 || 
+        clampedPosition.partialFraction = x < 0 ||
             clampedPosition.col === lineLength ? 0.0 :
             x % characterWidth / characterWidth;
-        
+
         return clampedPosition;
     },
 
@@ -490,4 +490,4 @@ exports.LayoutManager.prototype = {
             });
         }
     }
-});
+};
