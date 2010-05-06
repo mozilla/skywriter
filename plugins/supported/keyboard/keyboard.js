@@ -323,15 +323,16 @@ var KeyboardManagerTrait = Trait({
      * Check that the given command fits the given key name and flags.
      */
     _commandMatches: function(commandExt, symbolicName, flags) {
+        var mappedKeys = commandExt.key;
+        if (!mappedKeys) {
+            return false;
+        }
+
         // Check predicates
         if (!exports.flagsMatch(commandExt.predicates, flags)) {
             return false;
         }
 
-        var mappedKeys = commandExt.key;
-        if (!mappedKeys) {
-            return false;
-        }
         if (typeof(mappedKeys) === 'string') {
             if (mappedKeys != symbolicName) {
                 return false;
@@ -339,7 +340,7 @@ var KeyboardManagerTrait = Trait({
             return true;
         }
 
-        if (!mappedKeys.isArray) {
+        if (!Array.isArray(mappedKeys)) {
             mappedKeys = [mappedKeys];
             commandExt.key = mappedKeys;
         }
