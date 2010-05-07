@@ -58,13 +58,13 @@ exports.GutterView = function(container, editor) {
 
     this.editor = editor;
     this.layoutManager = editor.layoutManager;
+
+    this.padding = { left: 5, right: 10 };
 };
 
 exports.GutterView.prototype = new CanvasView();
 
 util.mixin(exports.GutterView.prototype, {
-    padding: { left: 5, right: 10 },
-
     drawRect: function(rect, context) {
         var theme = this._theme;
 

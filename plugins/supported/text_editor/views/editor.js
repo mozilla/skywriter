@@ -35,6 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var util = require('bespin:util/util');
+
 var catalog = require('bespin:plugins').catalog;
 var Event = require('events').Event;
 var settings = require('settings').settings;
@@ -44,6 +46,10 @@ var TextView = require('views/text').TextView;
 var GutterView = require('views/gutter').GutterView;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var EditorSearchController = require('controllers/search').EditorSearchController;
+
+var Scroller = require('views/scroller');
+var ScrollerView = Scroller.ScrollerCanvasView;
+
 // var EditorUndoController = require('controllers/undo').EditorUndoController;
 
 
@@ -66,25 +72,64 @@ exports.EditorView = function(container) {
     var gutterView = this.gutterView = new GutterView(container, this);
     var textView = this.textView = new TextView(container, this);
 
+    var verticalScroller = this.verticalScroller = new ScrollerView(this, Scroller.LAYOUT_VERTICAL);
+    var horizontalScroller = this.horizontalScroller = new ScrollerView(this, Scroller.LAYOUT_HORIZONTAL);
+
     this._fontSettingChanged();
     this._themeVariableDidChange();
 
     this.recomputeLayout();
 
-    window.addEventListener('resize', this.dimensionChanged.bind(this), false);
+    this._scrollOffset = {
+        x: 0, y: 0
+    }
 
-    // TODO: Is this hack okay or should it be solved in a more elegant way?
-    layoutManager.invalidatedRects.add(function(sender, rects) {
-        if (this._textLinesLength !== layoutManager.textLines.length) {
+    this._textViewSize = {
+        width: 0,
+        height: 0
+    };
+
+    window.addEventListener('resize', this.dimensionChanged.bind(this), false);
+    container.addEventListener(util.isMozilla ? 'DOMMouseScroll' : 'mousewheel', this.onMouseWheel.bind(this), false);
+
+    layoutManager.sizeChanged.add(function(size) {
+        if (this._textLinesCount !== size.height) {
             var gutterWidth = gutterView.computeWidth();
             if (gutterWidth !== this._gutterViewWidth) {
                 this.recomputeLayout();
             } else {
                 gutterView.setNeedsDisplay();
             }
-            this._textLinesLength = layoutManager.textLines.length;
+            this._textLinesLength = size.height;
+        }
+
+        var frame = this.textViewPaddingFrame;
+        var width = size.width * layoutManager.characterWidth;
+        var height = size.height * layoutManager.lineHeight;
+
+        this._textViewSize = {
+            width: width,
+            height: height
+        };
+
+        if (height < frame.height) {
+            verticalScroller.isVisible = false;
+        } else {
+            verticalScroller.isVisible = true;
+            verticalScroller.proportion = frame.height / height;
+            verticalScroller.maximum = height - frame.height;
+        }
+
+        if (width < frame.width) {
+            horizontalScroller.isVisible = false;
+        } else {
+            horizontalScroller.isVisible = true;
+            horizontalScroller.proportion = frame.width / width;
+            horizontalScroller.maximum = width - frame.width;
         }
     }.bind(this));
+
+    window.bespin.editor = this;
 };
 
 exports.EditorView.prototype = {
@@ -93,8 +138,108 @@ exports.EditorView.prototype = {
 
     scrollChanged: null,
 
-    _textLinesLength: 0,
+    _textViewSize: null,
+
+    _textLinesCount: 0,
     _gutterViewWidth: 0,
+
+    _scrollOffset: null,
+
+    onMouseWheel: function(evt) {
+        var delta = 0;
+        if (evt.wheelDelta) {
+            delta = -evt.wheelDelta;
+        } else if (evt.detail) {
+            delta = evt.detail * 40;
+        }
+
+        var isVertical = true;
+        if (evt.axis) { // Firefox 3.1 world
+            if (evt.axis == evt.HORIZONTAL_AXIS) isVertical = false;
+        } else if (evt.wheelDeltaY || evt.wheelDeltaX) {
+            if (evt.wheelDeltaX == evt.wheelDelta) isVertical = false;
+        } else if (evt.shiftKey) isVertical = false;
+
+        if (isVertical) {
+            this.scrollBy(0, delta);
+        } else {
+            this.scrollBy(delta * 5, 0);
+        }
+
+        util.stopEvent(evt);
+    },
+
+    get textViewPaddingFrame() {
+        var frame = util.clone(this.textView.frame);
+        var padding = this.textView.padding;
+        var charWidth = this.layoutManager.characterWidth;
+
+        frame.width -= padding.left + padding.right + charWidth;
+        frame.height -= padding.top + padding.bottom;
+        return frame;
+    },
+
+    set scrollOffset(pos) {
+        if (pos.x === undefined) pos.x = this._scrollOffset.x;
+        if (pos.y === undefined) pos.y = this._scrollOffset.y;
+
+        var frame = this.textViewPaddingFrame;
+
+        if (pos.y < 0) {
+            pos.y = 0;
+        } else if (this._textViewSize.height < frame.height) {
+            pos.y = 0;
+        } else if (pos.y + frame.height > this._textViewSize.height) {
+            pos.y = this._textViewSize.height - frame.height;
+        }
+
+        if (pos.x < 0) {
+            pos.x = 0;
+        } else if (this._textViewSize.width < frame.width) {
+            pos.x = 0;
+        } else if (pos.x + frame.width > this._textViewSize.width) {
+            pos.x = this._textViewSize.width - frame.width;
+        }
+
+        if (pos.x === this._scrollOffset.x && pos.y === this._scrollOffset.y) {
+            return;
+        }
+
+        this._scrollOffset = pos;
+
+        this.verticalScroller.value = pos.y;
+        this.horizontalScroller.value = pos.x;
+
+        this.textView.clippingFrame = {
+            x: pos.x,
+            y: pos.y
+        };
+
+        this.gutterView.clippingFrame = {
+            y: pos.y
+        };
+
+        this.gutterView.setNeedsDisplay();
+        this.textView.setNeedsDisplay();
+    },
+
+    scrollTo: function(pos) {
+        this.scrollOffset = pos;
+    },
+
+    scrollBy: function(deltaX, deltaY) {
+        this.scrollOffset = {
+            x: this._scrollOffset.x + deltaX,
+            y: this._scrollOffset.y + deltaY
+        };
+    },
+
+    get frame() {
+        return {
+            width: this.container.offsetWidth,
+            height: this.container.offsetHeight
+        }
+    },
 
     recomputeLayout: function() {
         var width = this.container.offsetWidth;
@@ -115,8 +260,28 @@ exports.EditorView.prototype = {
             height: height
         }, true);
 
+        // TODO: Get this values from the scroller theme.
+        var scrollerPadding = 5;
+        var scrollerSize = 17;
+
+        this.horizontalScroller.setFrame({
+            x: gutterWidth + scrollerPadding,
+            y: height - (scrollerSize + scrollerPadding),
+            width: width - (gutterWidth + 2 * scrollerPadding + scrollerSize),
+            height: scrollerSize
+        });
+
+        this.verticalScroller.setFrame({
+            x: width - (scrollerPadding + scrollerSize),
+            y: scrollerPadding,
+            width: scrollerSize,
+            height: height - (2 * scrollerPadding + scrollerSize)
+        });
+
         this.gutterView.setNeedsDisplay();
         this.textView.setNeedsDisplay();
+        this.verticalScroller.setNeedsDisplay();
+        this.horizontalScroller.setNeedsDisplay();
     },
 
     dimensionChanged: function() {

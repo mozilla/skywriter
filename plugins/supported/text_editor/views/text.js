@@ -63,6 +63,13 @@ exports.TextView = function(container, editor) {
         end: { row: 0, col: 0 }
     };
 
+    this.padding = {
+        top: 0,
+        bottom: 30,
+        left: 0,
+        right: 30
+    };
+
     this.clipping.add(this.clippingFrameChanged.bind(this));
 
     // TODO: bind some UI events here:
@@ -72,7 +79,7 @@ exports.TextView = function(container, editor) {
     var dom = this.domNode;
     dom.addEventListener('mousedown', this.mouseDown.bind(this), false);
     dom.addEventListener('mousemove', this.mouseMove.bind(this), false);
-    dom.addEventListener('mouseup', this.mouseUp.bind(this), false);
+    window.addEventListener('mouseup', this.mouseUp.bind(this), false);
 
     layoutManager.invalidatedRects.add(this.layoutManagerInvalidatedRects.bind(this));
     layoutManager.changedTextAtRow.add(this.layoutManagerChangedTextAtRow.bind(this));
@@ -409,19 +416,21 @@ util.mixin(exports.TextView.prototype, {
     },
 
     _scrollWhileDragging: function() {
-        var scrollView = this._enclosingScrollView;
-        if (util.none(scrollView)) {
+        var point = this._dragPoint;
+        var scroll = { x: 0, y: 0};
+
+        if (point.layerY < 100) {
+            scroll.y = point.layerY - 100;
+        }
+
+        scroll.y = (scroll.y < 0 ? -1 : 1) * scroll.y * scroll.y;
+
+        if (scroll.x === 0 && scroll.y === 0) {
             return;
         }
 
-        var offset = Rect.offsetFromRect(this.clippingFrame,
-            this.convertFrameFromView(this._dragPoint));
-        if (offset.x === 0 && offset.y === 0) {
-            return;
-        }
-
-        scrollView.scrollBy(offset.x, offset.y);
-        this._drag();
+        this.editor.scrollBy(scroll.x, scroll.y);
+        //this._drag();
     },
 
     _scrolled: function() {
@@ -705,7 +714,8 @@ util.mixin(exports.TextView.prototype, {
         this.hasFocus = true;
         this._mouseIsDown = true;
 
-        var point = { x: evt.layerX, y: evt.layerY };
+        var point = this.computeWithClippingFrame(evt.layerX, evt.layerY);
+        util.mixin(point, { layerX: evt.layerX, layerY: evt.layerY});
 
         switch (evt.detail) {
         case 1:
@@ -761,22 +771,14 @@ util.mixin(exports.TextView.prototype, {
             break;
         }
 
-        // TODO: Add this back again.
-        //
-        // this._dragPoint = point;
-        // this._dragTimer = SC.Timer.schedule({
-        //     target:     this,
-        //     action:     '_scrollWhileDragging',
-        //     interval:   100,
-        //     repeats:    true
-        // });
-
-        return true;
+        this._dragPoint = point;
+        this._dragTimer = setInterval(this._scrollWhileDragging.bind(this), 100);
     },
 
     mouseMove: function(evt) {
         if (this._mouseIsDown) {
-            this._dragPoint = { x: evt.layerX, y: evt.layerY };
+            this._dragPoint = this.computeWithClippingFrame(evt.layerX, evt.layerY);
+            util.mixin(this._dragPoint, { layerX: evt.layerX, layerY: evt.layerY});
             this._drag();
         }
     },
@@ -784,7 +786,8 @@ util.mixin(exports.TextView.prototype, {
     mouseUp: function(evt) {
         this._mouseIsDown = false;
         if (this._dragTimer !== null) {
-            this._dragTimer.invalidate();
+            clearInterval(this._dragTimer);
+            this._dragTimer = null;
         }
     },
 
@@ -991,52 +994,37 @@ util.mixin(exports.TextView.prototype, {
     },
 
     /**
-     * If this view is in a scrollable container, scrolls to the given point (in
-     * pixels).
-     */
-    scrollTo: function(point) {
-        var scrollView = this._enclosingScrollView;
-        if (util.none(scrollView)) {
-            return;
-        }
-
-        scrollView.scrollTo(point);
-    },
-
-    /**
      * If this view is in a scrollable container, scrolls to the given
      * character position.
      */
     scrollToPosition: function(position) {
-        // TODO: add this back later.
-        //
-        // var rect = this.layoutManager.
-        //     characterRectForPosition(position);
-        // var rectX = rect.x, rectY = rect.y;
-        // var rectWidth = rect.width, rectHeight = rect.height;
-        //
-        // var frame = this.clippingFrame;
-        // var frameX = frame.x, frameY = frame.y;
-        //
-        // var padding = this.padding;
-        // var width = frame.width - padding.right;
-        // var height = frame.height - padding.bottom;
-        //
-        // var x;
-        // if (rectX >= frameX && rectX + rectWidth < frameX + width) {
-        //     x = frameX;
-        // } else {
-        //     x = rectX - width / 2 + rectWidth / 2;
-        // }
-        //
-        // var y;
-        // if (rectY >= frameY && rectY + rectHeight < frameY + height) {
-        //     y = frameY;
-        // } else {
-        //     y = rectY - height / 2 + rectHeight / 2;
-        // }
-        //
-        // this.scrollTo({ x: x, y: y });
+        var rect = this.layoutManager.
+            characterRectForPosition(position);
+        var rectX = rect.x, rectY = rect.y;
+        var rectWidth = rect.width, rectHeight = rect.height;
+
+        var frame = this.clippingFrame;
+        var frameX = frame.x, frameY = frame.y;
+
+        var padding = this.padding;
+        var width = frame.width - padding.right;
+        var height = frame.height - padding.bottom;
+
+        var x;
+        if (rectX >= frameX && rectX + rectWidth < frameX + width) {
+            x = frameX;
+        } else {
+            x = rectX - width / 2 + rectWidth / 2;
+        }
+
+        var y;
+        if (rectY >= frameY && rectY + rectHeight < frameY + height) {
+            y = frameY;
+        } else {
+            y = rectY - height / 2 + rectHeight / 2;
+        }
+
+        this.editor.scrollTo({ x: x, y: y });
     },
 
     /**

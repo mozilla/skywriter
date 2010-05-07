@@ -147,11 +147,23 @@ exports.CanvasView.prototype = {
         };
     },
 
+    get frame() {
+        return this._frame;
+    },
+
     _getContext: function() {
         if (this._canvasContext === null) {
             this._canvasContext = this.domNode.getContext('2d');
         }
         return this._canvasContext;
+    },
+
+    computeWithClippingFrame: function(x, y) {
+        var clippingFrame = this.clippingFrame;
+        return {
+            x: x + clippingFrame.x,
+            y: y + clippingFrame.y
+        }
     },
 
     /**
@@ -192,7 +204,7 @@ exports.CanvasView.prototype = {
 
         var context = this._getContext();
         context.save();
-        context.translate(Math.round(clippingFrame.x), Math.round(clippingFrame.y));
+        context.translate(-clippingFrame.x, -clippingFrame.y);
 
         var invalidRects = this._invalidRects;
         if (invalidRects === 'all') {

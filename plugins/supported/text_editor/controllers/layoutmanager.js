@@ -65,6 +65,9 @@ exports.LayoutManager = function(opts) {
     this.createTextStorage();
     this.createSyntaxManager();
 
+    this._size = { width: 0, height: 0 };
+    this.sizeChanged = new Event();
+
     // Now that the syntax manager is set up, we can recompute the layout.
     // (See comments in _textStorageChanged().)
     this._recomputeEntireLayout();
@@ -74,6 +77,19 @@ exports.LayoutManager.prototype = {
     _maximumWidth: 0,
     _syntaxManagerInitialized: false,
     _textStorage: null,
+
+    _size: null,
+    sizeChanged: null,
+
+    set size(size) {
+        if (size.width !== this._size.width || size.height !== this._size.height) {
+            this.sizeChanged(size);
+        }
+    },
+
+    get size() {
+        return this._size;
+    },
 
     /**
      * @protected
@@ -222,6 +238,8 @@ exports.LayoutManager.prototype = {
             }
         });
         this._maximumWidth = max;
+
+        this.size = { width: max, height: this.textLines.length };
     },
 
     _recomputeEntireLayout: function() {
