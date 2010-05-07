@@ -89,8 +89,6 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
     _maximum: 0,
 
     set maximum(maximum) {
-        console.log('setMaximum', maximum);
-
         if (this._value > this._maximum) {
             this._value = this._maximum;
         }

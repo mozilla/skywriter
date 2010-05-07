@@ -633,8 +633,6 @@ util.mixin(exports.TextView.prototype, {
      *     change couldn't be made because the text view is read-only.
      */
     insertText: function(text) {
-        console.log('insertText', text);
-
         if (this._isReadOnly()) {
             return false;
         }

@@ -114,8 +114,6 @@ exports.LayoutManager.prototype = {
             oldTextStorage.changed.remove(this.textStorageChanged);
         }
 
-        console.log('setTextStorage');
-
         newTextStorage.changed.add(this.textStorageChanged.bind(this));
 
         if (this._syntaxManagerInitialized) {
