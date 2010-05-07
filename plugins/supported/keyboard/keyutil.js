@@ -29,12 +29,9 @@ For more information about SproutCore, visit http://www.sproutcore.com
 ==========================================================================
 @license */
 
-// Note: Most of the following code is taken from SproutCore with a few changes.
-//       Julian Viereck, 04-23-2010
+// Most of the following code is taken from SproutCore with a few changes.
 
-var userAgent = navigator.userAgent.toLowerCase();
-var isMozilla = /mozilla/.test(userAgent) &&
-    !/(compatible|webkit)/.test(userAgent);
+var util = require('bespin:util/util');
 
 // Helper functions and hashs for key handling.
 exports.KeyHelper = function() {
@@ -281,14 +278,13 @@ exports.addKeyDownListener = function(element, boundFunction) {
         var handled = boundFunction(evt);
         // If the boundFunction returned true, then stop the event.
         if (handled) {
-            evt.preventDefault();
-            evt.stopPropagation();
+            util.stopEvent(evt);
         }
         return handled;
     };
 
     element.addEventListener('keydown', function(evt) {
-        if (isMozilla) {
+        if (util.isMozilla) {
             // Check for function keys (like DELETE, TAB, LEFT, RIGHT...)
             if (exports.KeyHelper.FUNCTION_KEYS[evt.keyCode]) {
                 return true;
@@ -307,7 +303,7 @@ exports.addKeyDownListener = function(element, boundFunction) {
     }, false);
 
     element.addEventListener('keypress', function(evt) {
-        if (isMozilla) {
+        if (util.isMozilla) {
             // If this is a function key, we have to use the keyCode.
             if (exports.KeyHelper.FUNCTION_KEYS[evt.keyCode]) {
                 return boundFunction(evt);

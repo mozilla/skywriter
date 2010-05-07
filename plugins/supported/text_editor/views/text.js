@@ -1103,6 +1103,10 @@ util.mixin(exports.TextView.prototype, {
     },
 
     textInserted: function(text) {
+        // We don't handle the new line char at this point.
+        if (text === '\n') {
+            return;
+        }
         if (!keyboardManager.processKeyInput(text, this,
                 { isTextView: true, isCommandKey: false })) {
             this.insertText(text);
