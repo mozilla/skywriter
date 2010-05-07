@@ -36,7 +36,7 @@
 
 /* Global styles */
 .cmd_line { background: rgb(30,25,22); color: #AAA;
-  font-family: Arial,sans-serif; font-size: 80%;
+  font-family: Calibri,Arial,sans-serif; font-size: 90%;
   /* position: absolute; height: 300px; bottom: 0; left: 0; right: 0; */
   overflow-x: hidden;
 }
@@ -53,7 +53,7 @@
 /* The input area */
 /* When we lose the SC CSS we can drop the .cmd_line specificity trump card */
 input.cmd_input {
-  color: #FFF; font-size: 110%;
+  color: #FFF; font-size: 110%; font-family: Calibri,Arial,sans-serif; 
   background: transparent;
   -webkit-box-shadow: none; outline: none; border: 0;
   position: absolute; height: 25px; bottom: 0px; left: 40px;
@@ -65,8 +65,8 @@ input.cmd_input {
 
 /* Command line completion */
 .cmd_completion {
-  color: #443;
-  position:absolute; height:18px; bottom:4px; left:45px; right:0;
+  color: #443; font-size: 110%; font-family: Calibri,Arial,sans-serif; 
+  position:absolute; height:18px; bottom:6px; left:43px; right:0;
 }
 .cmd_existing { color: rgb(27,22,19); text-shadow: none; }
 .cmd_extension { margin-left:30px; }
@@ -130,6 +130,7 @@ input.cmd_input {
 .cmd_line > .cmd_ex {
   position: absolute; bottom: 27px; z-index: 1; line-height: 1.2em;
 }
+
 .cmd_line > kbd {
   border-top: 2px solid #000;
   -moz-border-top-colors: #000 rgb(30,25,22);
