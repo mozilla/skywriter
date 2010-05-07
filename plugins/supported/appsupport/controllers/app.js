@@ -34,54 +34,52 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
- 
-"define metadata";
-({});
-"end";
 
-// Adapted from John Resig's JavaScript Micro Templates
-// http://ejohn.org/blog/javascript-micro-templating/
-// with the signle quote fix from
-// http://www.west-wind.com/Weblog/posts/509108.aspx
+var userident = require("userident");
 
-// Compiles a template into straight JS
-exports.compile = function(template) {
-    return new Function("obj",
-            "obj=obj||{};var p=[],print=function(){p.push.apply(p,arguments);};" +
+userident.showLogin();
 
-            // Introduce the data as local variables using with(){}
-            "with(obj){p.push('" +
+exports.loggedIn = function() {
+    require('jlayout_border');
+    var $ = require('jquery').$;
+    var util = require('bespin:util/util');
+    var CliInputView = require('command_line:views/cli').CliInputView;
 
-            // Convert the template into pure JavaScript
-    template.replace(/[\r\t\n]/g, " ")
-       .replace(/'(?=[^%]*%>)/g,"\t")
-       .split("'").join("\\'")
-       .split("\t").join("'")
-       .replace(/<%=(.+?)%>/g, "',$1,'")
-       .split("<%").join("');")
-       .split("%>").join("p.push('")
-       + "');}return p.join('');");
-};
+    var parent = document.createElement('div');
+    parent.setAttribute('id', 'container');
+    parent.setAttribute('style', 'width: 100%; height: 100%; margin: 0');
+    document.body.appendChild(parent);
 
-var basename = function(name) {
-    var lastDot = name.lastIndexOf('.');
-    return name.substring(0, lastDot);
-};
+    parent.innerHTML = '<div id="editor" class="center">Editor goes here</div>';
 
-/*
- * Compiles a collection of templates, returning a new object.
- * The object coming in should have keys that are the filenames of the
- * templates (including the extension) and the values are the templates
- * themselves. The result will have the extensions stripped off of the
- * keys, and the values will be callable functions that render the
- * template with the context provided.
- */
-exports.compileAll = function(obj, mixInto) {
-    if ("undefined" === typeof(mixInto)) {
-        mixInto = {};
+    var cliInputView = new CliInputView();
+    parent.appendChild(cliInputView.element);
+    util.addClass(cliInputView.element, 'south');
+    cliInputView.element.style.height = '300px';
+
+    var loading = document.getElementById('loading');
+    document.body.removeChild(loading);
+
+    var container = $('#container');
+
+    function relayout() {
+    	container.layout({
+    	    type: 'border',
+    	    resize: false,
+    	    south__minSize: 300,
+            south__resizable: true,
+            south__spacing_open: 10,
+            south__spacing_closed: 5
+    	});
     }
-    Object.keys(obj).forEach(function(name) {
-        mixInto[basename(name)] = exports.compile(obj[name]);
-    });
-    return mixInto;
+
+    relayout();
+
+    $(window).resize(relayout);
+
+    // ---
+    // Setup the editor:
+
+    var EditorView = require('text_editor:views/editor').EditorView;
+    var editorView = new EditorView(document.getElementById('editor'));
 };

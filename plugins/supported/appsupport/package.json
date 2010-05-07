@@ -6,6 +6,30 @@
     "provides":
     [
         {
+            "ep": "extensionpoint",
+            "name": "loggedin",
+            "description": "Tells extensions when the user has logged in.",
+            "params": [
+                {
+                    "name": "pointer",
+                    "description": "function to call when the user is logged in. An object representing the user will be passed in. The data on that object is application-specific at this time.",
+                    "type": "pointer"
+                }
+            ]
+        },
+        {
+            "ep": "extensionpoint",
+            "name": "loggedout",
+            "description": "Tells extensions when the user has logged out",
+            "params": [
+                {
+                    "name": "pointer",
+                    "description": "function to call when the user is logged out. An object represeting the user will be passed in. The data on that object is application-specific at this time.",
+                    "type": "pointer"
+                }
+            ]
+        },
+        {
             "ep": "extensionhandler",
             "name": "appcomponent",
             "__register": "controllers/bespin#registerAppComponent",
@@ -22,6 +46,10 @@
             "name": "undo",
             "key": [ "ctrl_z" ],
             "pointer": "controllers/undomanager#undoManagerCommand"
+        },
+        {
+            "ep": "loggedin",
+            "pointer": "controllers/app#loggedIn"
         }
     ]
 }

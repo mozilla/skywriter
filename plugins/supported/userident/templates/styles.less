@@ -1,0 +1,164 @@
+/**************
+*
+* screen.css
+*
+/**************/
+
+/* ------- HTML ELEMENTS ------- */
+
+html {
+	padding-bottom: 0px; 
+	padding-top: 40px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+body { 
+	font-family: arial, lucida, helvetica, sans-serif;
+	background: #4f4e45;
+	padding: 0px; 
+	color: rgba(218,212,186,1);
+	font-size:14px;
+	margin: 0 auto;
+	
+}
+
+@font-face {
+	font-family: "MuseoSans";
+	src: url(MuseoSans_500.otf) format("opentype");
+}
+
+.commentButton {font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial, Helvetica, sans-serif; font-size: 14px; text-shadow: 1px 1px rgba(0, 0, 0, 0.4);}
+#commentform {font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.8em;}
+#commentform p{ margin-bottom: 6px; margin-top: 6px; text-shadow: 1px 1px rgba(0, 0, 0, 0.4);}
+
+#form {
+	width: 220px;
+	padding: 15px 10px;
+	background: transparent url('lines.png') no-repeat top right;
+	color: rgba(255,255,255,1);
+	margin-left: 310px;
+	-moz-border-radius: .5em;
+	border-top: 2px solid #ccc;
+	border-left: 2px solid #ccc;
+	border-right: 2px solid #ccc;
+	border-bottom: 2px solid #aaa;
+	-moz-border-top-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
+	-moz-border-right-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
+	-moz-border-left-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
+	-moz-border-bottom-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
+}
+
+#welcome {
+	width: 300px;
+	float: left;
+}
+
+.colorField {
+	padding: 15px 10px;
+	-moz-border-radius: .5em;
+	background: transparent url('lines.png') no-repeat top right;
+	border-top: 1px solid rgba(255,255,255,0.1);
+	border-left: 1px solid rgba(0, 0, 0, 0.1);
+	border-right: 1px solid rgba(0, 0, 0, 0.1);
+	border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+	background-color: rgba(69,68,60,1);
+	-moz-box-shadow:
+		rgba(0, 0, 0, 0.1) 0px 1px 2px;
+	margin: 20px auto;
+	max-width: 560px;
+	text-align: left;
+}
+
+.colorField h1{ 
+	font-family: "MuseoSans", Helvetica; 
+	color: rgba(255,255,255,1);
+	font-size: 2.8em; 
+	letter-spacing: -1.25px;
+	line-height: 1.0;
+	margin-top: 0px;
+	margin-left: 10px;
+	margin-bottom: 25px;
+	margin-top: 10px;
+	text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+.colorField p { margin-left: 10px; margin-bottom: 6px; margin-top: 6px; text-shadow: 1px 1px rgba(0, 0, 0, 0.4); line-height: 24px;}
+
+
+input {
+	border: 0px;
+	padding: 4px;
+	width: 200px;
+	margin-right: 10px;
+	color: rgba(225,180,31,1);
+	background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(0,0,0,0.2);
+	-moz-border-radius: 0.25em;
+	-moz-box-shadow:
+		rgba(255,255,255,0.3) 0px 0px 2px,
+		inset rgba(0,0,0,0.3) 0px 0px 4px;
+}
+
+input:focus {
+	color: rgba(255,150,0,1);
+	 border: 1px solid rgba(225,180,31,1);
+	 -moz-box-shadow:
+		rgba(255,150,0,0.6) 0px 0px 2px,
+		inset rgba(255,150,0,0.3) 0px 0px 6px;
+}
+
+textarea {
+	border: 0px;
+	padding: 4px;
+	height: 80px;
+	width: 200px;
+	color: rgba(225,180,31,1);
+	background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(0,0,0,0.2);
+	-moz-border-radius: 0.25em;
+	-moz-box-shadow:
+		rgba(255,255,255,0.3) 0px 0px 2px,
+		inset rgba(0,0,0,0.3) 0px 0px 4px;
+	
+}
+
+textarea:focus {
+	color: rgba(255,150,0,1);
+	 border: 1px solid rgba(225,180,31,1);
+	-moz-box-shadow:
+		rgba(255,150,0,0.6) 0px 0px 2px,
+		inset rgba(255,150,0,0.3) 0px 0px 6px;
+	
+}
+
+.commentButton {
+	padding: 8px 12px;
+	margin-left: 10px;
+	color: rgba(255,255,255,1);
+	-moz-border-radius: .25em;
+	border: 1px solid rgba(37,34,91,1);
+	-moz-box-shadow: 
+		inset rgba(255, 255, 255, 0.2) 0 1px 0px,
+		inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
+		rgba(0, 0, 0, 0.1) 0px 1px 2px;
+	background: transparent -moz-linear-gradient(top, rgba(62,108,185,1), rgba(56,50,146,1));
+}
+
+.button {
+	width: 200px;
+}
+
+.radio {
+	margin-bottom: -6px;
+}
+
+.logo {
+	margin-top: 18px;
+	margin-right: -24px;
+	float: right;
+}
+
+#commentform {
+	text-align: left;
+}

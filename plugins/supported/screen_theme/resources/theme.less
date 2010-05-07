@@ -35,382 +35,380 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-body.sc-theme {
-    background: #706f63;
-}
+.bespin {
+    body {
+        background: #706f63;
+        font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial,
+            Helvetica, sans-serif;
+        background: transparent;
+        padding: 0px;
+        color: rgba(218,212,186,1);
+        font-size:14px;
+        line-height: 1.8em;
+    }
 
- {
-    font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial,
-        Helvetica, sans-serif;
-    background: transparent;
-    padding: 0px;
-    color: rgba(218,212,186,1);
-    font-size:14px;
-    line-height: 1.8em;
-}
+    .pane {
+        color: rgba(255,255,255,1);
+        text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+        -moz-transition-property: all;
+        -moz-transition-duration: 0.5s;
+        -webkit-transition-property: all;
+        -webkit-transition-duration: 0.5s;
+    }
 
-.sc-pane {
-    color: rgba(255,255,255,1);
-    text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
-    -moz-transition-property: all;
-    -moz-transition-duration: 0.5s;
-    -webkit-transition-property: all;
-    -webkit-transition-duration: 0.5s;
-}
+    .pane a {
+        color: rgba(255,255,255,1);
+    }
 
-.sc-pane a {
-    color: rgba(255,255,255,1);
-}
+     .button-view {
+        background: transparent -moz-linear-gradient(top, rgba(62,108,185,1),
+            rgba(56,50,146,1));
+        background: transparent -webkit-gradient(linear, 50% 0%, 50% 100%, from(rgba(62, 108, 185, 1)), to(rgba(56, 50, 146, 1)));
+        font-size: 14px;
+        text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(37,34,91,1);
+        -moz-border-radius: .25em;
+        -webkit-border-radius: .25em;
+        -moz-box-shadow:
+            inset rgba(255, 255, 255, 0.2) 0 1px 0px,
+            inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
+            rgba(0, 0, 0, 0.1) 0px 1px 2px;
+        -webkit-box-shadow:
+            inset rgba(255, 255, 255, 0.2) 0 1px 0px,
+            inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
+            rgba(0, 0, 0, 0.1) 0px 1px 2px;
+        box-shadow:
+            inset rgba(255, 255, 255, 0.2) 0 1px 0px,
+            inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
+            rgba(0, 0, 0, 0.1) 0px 1px 2px;
+    }
 
- .sc-button-view {
-    background: transparent -moz-linear-gradient(top, rgba(62,108,185,1),
-        rgba(56,50,146,1));
-    background: transparent -webkit-gradient(linear, 50% 0%, 50% 100%, from(rgba(62, 108, 185, 1)), to(rgba(56, 50, 146, 1)));
-    font-size: 14px;
-    text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(37,34,91,1);
-    -moz-border-radius: .25em;
-    -webkit-border-radius: .25em;
-    -moz-box-shadow:
-        inset rgba(255, 255, 255, 0.2) 0 1px 0px,
-        inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
-        rgba(0, 0, 0, 0.1) 0px 1px 2px;
-    -webkit-box-shadow:
-        inset rgba(255, 255, 255, 0.2) 0 1px 0px,
-        inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
-        rgba(0, 0, 0, 0.1) 0px 1px 2px;
-    box-shadow:
-        inset rgba(255, 255, 255, 0.2) 0 1px 0px,
-        inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
-        rgba(0, 0, 0, 0.1) 0px 1px 2px;
-}
+     .button-inner {
+        margin: 8px 12px;
+    }
 
- .sc-button-inner {
-    margin: 8px 12px;
-}
+     .bespin-color-field {
+    	background: transparent url(images/lines.png) no-repeat top right #45443c;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        border-left: 1px solid rgba(0, 0, 0, 0.1);
+        border-right: 1px solid rgba(0, 0, 0, 0.1);
+        border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+        background-color: rgba(69,68,60,1);
+        overflow: visible;
+        -moz-border-radius: .5em;
+        -webkit-border-radius: .5em;
+        -moz-box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px;
+        -webkit-box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px;
+    }
 
- .bespin-color-field {
-	background: transparent url(images/lines.png) no-repeat top right #45443c;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    border-left: 1px solid rgba(0, 0, 0, 0.1);
-    border-right: 1px solid rgba(0, 0, 0, 0.1);
-    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
-    background-color: rgba(69,68,60,1);
-    overflow: visible;
-    -moz-border-radius: .5em;
-    -webkit-border-radius: .5em;
-    -moz-box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px;
-    -webkit-box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px;
-}
+     .title {
+        font-family: 'DroidSans';
+        text-transform:uppercase;
+        color: rgba(218,212,186,1);
+        text-align: center;
+    }
 
- .title {
-    font-family: 'DroidSans';
-    text-transform:uppercase;
-    color: rgba(218,212,186,1);
-    text-align: center;
-}
+     .arrow {
+        vertical-align: middle;
+    }
 
- .arrow {
-    vertical-align: middle;
-}
+     .text-field-view {
+        overflow: visible;  /* so that the glow shows through */
+    }
 
- .sc-text-field-view {
-    overflow: visible;  /* so that the glow shows through */
-}
+     .text-field-view .padding {
+        display: block;
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        bottom: 0px;
+        right: 0px;
+        overflow: visible;
+    }
 
- .sc-text-field-view .padding {
-    display: block;
-    position: absolute;
-    left: 0px;
-    top: 0px;
-    bottom: 0px;
-    right: 0px;
-    overflow: visible;
-}
+     .text-field-view input {
+        display: block;
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: 190px;
+        height: 14px;
+        border: 0px;
+        padding: 4px;
+        color: rgba(225,180,31,1);
+        background: rgba(0,0,0,0.2);
+        border: 1px solid rgba(0,0,0,0.2);
+        font-size: 8pt;
+        -moz-border-radius: 0.25em;
+        -webkit-border-radius: 0.25em;
+        box-shadow:
+            rgba(255,255,255,0.3) 0px 0px 2px,
+            inset rgba(0,0,0,0.3) 0px 0px 4px;
+        -moz-box-shadow:
+            rgba(255,255,255,0.3) 0px 0px 2px,
+            inset rgba(0,0,0,0.3) 0px 0px 4px;
+        -webkit-box-shadow:
+            rgba(255,255,255,0.3) 0px 0px 2px,
+            inset rgba(0,0,0,0.3) 0px 0px 4px;
+    }
 
- .sc-text-field-view input {
-    display: block;
-    position: absolute;
-    left: 0px;
-    top: 0px;
-    width: 190px;
-    height: 14px;
-    border: 0px;
-    padding: 4px;
-    color: rgba(225,180,31,1);
-    background: rgba(0,0,0,0.2);
-    border: 1px solid rgba(0,0,0,0.2);
-    font-size: 8pt;
-    -moz-border-radius: 0.25em;
-    -webkit-border-radius: 0.25em;
-    box-shadow:
-        rgba(255,255,255,0.3) 0px 0px 2px,
-        inset rgba(0,0,0,0.3) 0px 0px 4px;
-    -moz-box-shadow:
-        rgba(255,255,255,0.3) 0px 0px 2px,
-        inset rgba(0,0,0,0.3) 0px 0px 4px;
-    -webkit-box-shadow:
-        rgba(255,255,255,0.3) 0px 0px 2px,
-        inset rgba(0,0,0,0.3) 0px 0px 4px;
-}
+     .text-field-view input:focus,
+     .button-view.active {
+        color: rgba(255,150,0,1);
+        border: 1px solid rgba(225,180,31,1);
+        outline: none;
+        box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
+            inset rgba(255,150,0,0.3) 0px 0px 6px;
+        -moz-box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
+            inset rgba(255,150,0,0.3) 0px 0px 6px;
+        -webkit-box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
+            inset rgba(255,150,0,0.3) 0px 0px 6px;
+    }
 
- .sc-text-field-view input:focus,
- .sc-button-view.active {
-    color: rgba(255,150,0,1);
-    border: 1px solid rgba(225,180,31,1);
-    outline: none;
-    box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
-        inset rgba(255,150,0,0.3) 0px 0px 6px;
-    -moz-box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
-        inset rgba(255,150,0,0.3) 0px 0px 6px;
-    -webkit-box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
-        inset rgba(255,150,0,0.3) 0px 0px 6px;
-}
+     textarea {
+        border: 0px;
+        padding: 4px;
+        width: 100%;
+        height: 100%;
+        color: rgba(225,180,31,1);
+        background: rgba(0,0,0,0.2);
+        border: 1px solid rgba(0,0,0,0.2);
+        -moz-border-radius: 0.25em;
+        -webkit-border-radius: 0.25em;
+        -moz-box-shadow:
+            rgba(255,255,255,0.3) 0px 0px 2px,
+            inset rgba(0,0,0,0.3) 0px 0px 4px;
+        -webkit-box-shadow:
+            rgba(255,255,255,0.3) 0px 0px 2px,
+            inset rgba(0,0,0,0.3) 0px 0px 4px;
+    }
 
- textarea {
-    border: 0px;
-    padding: 4px;
-    width: 100%;
-    height: 100%;
-    color: rgba(225,180,31,1);
-    background: rgba(0,0,0,0.2);
-    border: 1px solid rgba(0,0,0,0.2);
-    -moz-border-radius: 0.25em;
-    -webkit-border-radius: 0.25em;
-    -moz-box-shadow:
-        rgba(255,255,255,0.3) 0px 0px 2px,
-        inset rgba(0,0,0,0.3) 0px 0px 4px;
-    -webkit-box-shadow:
-        rgba(255,255,255,0.3) 0px 0px 2px,
-        inset rgba(0,0,0,0.3) 0px 0px 4px;
-}
+    textarea:focus {
+        color: rgba(255,150,0,1);
+        border: 1px solid rgba(225,180,31,1);
+        -moz-box-shadow:
+            rgba(255,150,0,0.6) 0px 0px 2px,
+            inset rgba(255,150,0,0.3) 0px 0px 6px;
+        -webkit-box-shadow:
+            rgba(255,150,0,0.6) 0px 0px 2px,
+            inset rgba(255,150,0,0.3) 0px 0px 6px;
+    }
 
-textarea:focus {
-    color: rgba(255,150,0,1);
-    border: 1px solid rgba(225,180,31,1);
-    -moz-box-shadow:
-        rgba(255,150,0,0.6) 0px 0px 2px,
-        inset rgba(255,150,0,0.3) 0px 0px 6px;
-    -webkit-box-shadow:
-        rgba(255,150,0,0.6) 0px 0px 2px,
-        inset rgba(255,150,0,0.3) 0px 0px 6px;
-}
+    .button {
+        width: 200px;
+    }
 
-.button {
-    width: 200px;
-}
+    .radio-view {
+        line-height: 24px;
+    }
 
-.sc-radio-view {
-    line-height: 24px;
-}
+    .radio-button input {
+        height: 1px;
+        width: 1px;
+        opacity: 0;
+    }
 
-.sc-radio-button input {
-    height: 1px;
-    width: 1px;
-    opacity: 0;
-}
+    .radio-button {
+        position: relative;
+        margin: 0px 0px 6px 0px;
+        height: 24px;
+        font-size: 11pt;
+    }
 
-.sc-radio-button {
-    position: relative;
-    margin: 0px 0px 6px 0px;
-    height: 24px;
-    font-size: 11pt;
-}
+    .radio-button .button {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 24px;
+        height: 24px;
+        background-image: url(images/radio-unselected.png);
+        background-repeat: no-repeat;
+    }
 
-.sc-radio-button .button {
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 24px;
-    height: 24px;
-    background-image: url(images/radio-unselected.png);
-    background-repeat: no-repeat;
-}
+    .radio-button .button-label {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 27px;
+    }
 
-.sc-radio-button .sc-button-label {
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 27px;
-}
+    .radio-button.sel .button,
+    .radio-button.active .button {
+        background-image: url(images/radio-selected.png)
+    }
 
-.sc-radio-button.sel .button,
-.sc-radio-button.active .button {
-    background-image: url(images/radio-selected.png)
-}
+    .bespin-form {
+        position: absolute;
+    	background: transparent url(images/lines.png) no-repeat top right;
+    	color: rgba(255,255,255,1);
+        border: solid 2px rgba(255,255,255,0.1);
+    	-moz-border-radius: .5em;
+    	-webkit-border-radius: .5em;
+    	-moz-border-top-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
+    	-moz-border-right-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
+    	-moz-border-left-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
+    	-moz-border-bottom-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
+        -moz-transition-property: height;
+        -moz-transition-duration: 0.5s;
+        -webkit-transition-property: height;
+        -webkit-transition-duration: 0.5s;
+    }
 
-.bespin-form {
-    position: absolute;
-	background: transparent url(images/lines.png) no-repeat top right;
-	color: rgba(255,255,255,1);
-    border: solid 2px rgba(255,255,255,0.1);
-	-moz-border-radius: .5em;
-	-webkit-border-radius: .5em;
-	-moz-border-top-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
-	-moz-border-right-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
-	-moz-border-left-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
-	-moz-border-bottom-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
-    -moz-transition-property: height;
-    -moz-transition-duration: 0.5s;
-    -webkit-transition-property: height;
-    -webkit-transition-duration: 0.5s;
-}
+    .huge-size {
+        font-family: MuseoSans, Helvetica;
+        font-size: 29pt;
+        letter-spacing: -1.25px;
+        line-height: 1;
+        text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+    }
 
-.sc-huge-size {
-    font-family: MuseoSans, Helvetica;
-    font-size: 29pt;
-    letter-spacing: -1.25px;
-    line-height: 1;
-    text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
-}
+    .bespin-informational.regular-size {
+        font-family: Arial, Lucida, Helvetica, sans-serif;
+        font-size: 14px;
+        color: #dad4ba;
+        line-height: 24px;
+        text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+    }
 
-.bespin-informational.sc-regular-size {
-    font-family: Arial, Lucida, Helvetica, sans-serif;
-    font-size: 14px;
-    color: #dad4ba;
-    line-height: 24px;
-    text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
-}
+    .bespin-logo {
+        background-image: url(images/bespin-s.png);
+    }
 
-.bespin-logo {
-    background-image: url(images/bespin-s.png);
-}
+    .text-field-view.cmd_input {
+        border: none;
+        background: transparent;
+    }
 
-.sc-text-field-view.cmd_input {
-    border: none;
-    background: transparent;
-}
+    .text-field-view.cmd_input input {
+        border: none;
+        margin-top: 3px;
+        margin-left: 4px;
+        height: 18px;
+        padding: 0px;
+        -moz-box-shadow: none;
+    }
 
-.sc-text-field-view.cmd_input input {
-    border: none;
-    margin-top: 3px;
-    margin-left: 4px;
-    height: 18px;
-    padding: 0px;
-    -moz-box-shadow: none;
-}
+    .button-view.cmd_prompt,
+    .button-view.pin-view {
+        border: none;
+        background: transparent;
+        -moz-box-shadow: none;
+    }
 
-.sc-button-view.cmd_prompt,
-.sc-button-view.sc-pin-view {
-    border: none;
-    background: transparent;
-    -moz-box-shadow: none;
-}
+    .button-view.cmd_prompt .button-inner,
+    .button-view.pin-view .button-inner {
+        border: none;
+        background: transparent;
+        margin: 0px;
+    }
 
-.sc-button-view.cmd_prompt .sc-button-inner,
-.sc-button-view.sc-pin-view .sc-button-inner {
-    border: none;
-    background: transparent;
-    margin: 0px;
-}
+    .scroller-view.controls-hidden {
+        display: none;
+    }
 
-.sc-scroller-view.controls-hidden {
-    display: none;
-}
+    .scroller-view .track,
+    .scroller-view .thumb,
+    .scroller-view .button-bottom,
+    .scroller-view .button-top {
+        position: absolute;
+    }
 
-.sc-scroller-view .track,
-.sc-scroller-view .thumb,
-.sc-scroller-view .button-bottom,
-.sc-scroller-view .button-top {
-    position: absolute;
-}
+    .scroller-view:hover .track {
+        background-color: @scrollerTrackBackgroundColor;
+        border: solid @scrollerTrackBorderColor 1px;
+    }
 
-.sc-scroller-view:hover .track {
-    background-color: @scrollerTrackBackgroundColor;
-    border: solid @scrollerTrackBorderColor 1px;
-}
+    .scroller-view .thumb,
+    .scroller-view .button-bottom,
+    .scroller-view .button-top {
+        border: solid @scrollerButtonThumbOutline 1px;
+        -moz-border-radius: 12px;
+        -webkit-border-radius: 12px;
+        opacity: 0.3;
+    }
 
-.sc-scroller-view .thumb,
-.sc-scroller-view .button-bottom,
-.sc-scroller-view .button-top {
-    border: solid @scrollerButtonThumbOutline 1px;
-    -moz-border-radius: 12px;
-    -webkit-border-radius: 12px;
-    opacity: 0.3;
-}
+    .scroller-view:hover .thumb,
+    .scroller-view:hover .button-bottom,
+    .scroller-view:hover .button-top {
+        opacity: 1.0;
+    }
 
-.sc-scroller-view:hover .thumb,
-.sc-scroller-view:hover .button-bottom,
-.sc-scroller-view:hover .button-top {
-    opacity: 1.0;
-}
+    .scroller-view .thumb {
+        background-color: @scrollerThumbColor;
+        -moz-border-radius: 12px;
+        -webkit-border-radius: 12px;
+    }
 
-.sc-scroller-view .thumb {
-    background-color: @scrollerThumbColor;
-    -moz-border-radius: 12px;
-    -webkit-border-radius: 12px;
-}
+    .scroller-view .button-bottom,
+    .scroller-view .button-top {
+        background-color: @scollerButtonColor;
+        opacity: 0.3;
+    }
 
-.sc-scroller-view .button-bottom,
-.sc-scroller-view .button-top {
-    background-color: @scollerButtonColor;
-    opacity: 0.3;
-}
+    .scroller-view.vertical .track {
+        left: 0px;
+        right: 0px;
+        top: 15px;
+        bottom: 15px;
+    }
 
-.sc-scroller-view.sc-vertical .track {
-    left: 0px;
-    right: 0px;
-    top: 15px;
-    bottom: 15px;
-}
+    .scroller-view.horizontal .track {
+        left: 15px;
+        right: 15px;
+        top: 0px;
+        bottom: 0px;
+    }
 
-.sc-scroller-view.sc-horizontal .track {
-    left: 15px;
-    right: 15px;
-    top: 0px;
-    bottom: 0px;
-}
+    .scroller-view.vertical .thumb {
+        left: 0px;
+        right: 0px;
+    }
 
-.sc-scroller-view.sc-vertical .thumb {
-    left: 0px;
-    right: 0px;
-}
+    .scroller-view.horizontal .thumb {
+        top: 0px;
+        bottom: 0px;
+    }
 
-.sc-scroller-view.sc-horizontal .thumb {
-    top: 0px;
-    bottom: 0px;
-}
+    .scroller-view.vertical .button-bottom,
+    .scroller-view.vertical .button-top {
+        left: 1px;
+        right: 1px;
+        height: 13px;
+    }
 
-.sc-scroller-view.sc-vertical .button-bottom,
-.sc-scroller-view.sc-vertical .button-top {
-    left: 1px;
-    right: 1px;
-    height: 13px;
-}
+    .scroller-view.horizontal .button-bottom,
+    .scroller-view.horizontal .button-top {
+        top: 1px;
+        bottom: 1px;
+        width: 13px;
+    }
 
-.sc-scroller-view.sc-horizontal .button-bottom,
-.sc-scroller-view.sc-horizontal .button-top {
-    top: 1px;
-    bottom: 1px;
-    width: 13px;
-}
+    .scroller-view.vertical .button-bottom {
+        bottom: 7px;
+        background: url(images/scroll-down.png) no-repeat center center
+            @scollerButtonColor;
+    }
 
-.sc-scroller-view.sc-vertical .button-bottom {
-    bottom: 7px;
-    background: url(images/scroll-down.png) no-repeat center center
-        @scollerButtonColor;
-}
+    .scroller-view.horizontal .button-bottom {
+        right: 7px;
+        background: url(images/scroll-right.png) no-repeat center center
+            @scollerButtonColor;
+    }
 
-.sc-scroller-view.sc-horizontal .button-bottom {
-    right: 7px;
-    background: url(images/scroll-right.png) no-repeat center center
-        @scollerButtonColor;
-}
+    .scroller-view.vertical .button-top {
+        top: 7px;
+        background: url(images/scroll-up.png) no-repeat center center
+            @scollerButtonColor;
+    }
 
-.sc-scroller-view.sc-vertical .button-top {
-    top: 7px;
-    background: url(images/scroll-up.png) no-repeat center center
-        @scollerButtonColor;
-}
+    .scroller-view.horizontal .button-top {
+        left: 7px;
+        background: url(images/scroll-left.png) no-repeat center center
+            @scollerButtonColor;
+    }
 
-.sc-scroller-view.sc-horizontal .button-top {
-    left: 7px;
-    background: url(images/scroll-left.png) no-repeat center center
-        @scollerButtonColor;
+    .disabled {
+        opacity: 0.3;
+    }
 }
-
-.disabled {
-    opacity: 0.3;
-}
-

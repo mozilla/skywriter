@@ -1,0 +1,32 @@
+<div id="bespinloginform" class="colorField" style="display:none">
+	
+	<div id="welcome">
+
+		<img class="logo" src="bespin-s.png"><h1>Welcome to Bespin</h1>
+		<p>The Bespin project is building a web-based code editor using the emerging HTML5 standard. The editor is easily extensible with JavaScript and can be used in your own applications or on our experimental hosted service.</p>
+
+	</div>
+		
+	<div id="form">
+		
+		<form id="commentform">
+
+		
+			<p><img class="radio" src="radio-selected.png"> I have a Bespin Account</p>
+			<p><img class="radio" src="radio-unselected.png"> I'm new</p>
+			
+			<br>
+	
+			<p><input type="text" name="username" id="username" abindex="1"  />
+			<br><label for="username"><small>Username</small></label></p>
+	
+			<p><input type="password" name="password" id="password"  tabindex="2"  />
+
+			<br><label for="password"><small>Password</small></label></p>
+		
+			<div class="align-center button"><input class="commentButton" name="submit" type="submit" id="loginsubmit" tabindex="5" value="Log in" /></div>
+		
+		</form>	
+	
+	</div>
+</div>

@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
 var util = require('bespin:util/util');
 var Event = require('events').Event;
 var server = require('bespin_server').server;
@@ -45,12 +44,9 @@ var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var env = require('canon:environment').global;
 
-var LOGIN_FORM_HEIGHT = 287;
-var LOGIN_PANE_HEIGHT = LOGIN_FORM_HEIGHT + 34;
-var LOGIN_CONTAINER_HEIGHT = 237 + 37 - 76;
-var SIGNUP_FORM_HEIGHT = 395;
-var SIGNUP_PANE_HEIGHT = SIGNUP_FORM_HEIGHT + 34;
-var SIGNUP_CONTAINER_HEIGHT = 299 + 37 - 76;
+var $ = require("jquery").$;
+require("overlay");
+require("toolbox_expose");
 
 var USER_INFO_URL = '/register/userinfo/';
 
@@ -76,11 +72,54 @@ var searchQuery;
     }
 })();
 
+var notifyLoggedIn = function(data) {
+    catalog.getExtensions("loggedin").forEach(function(ext) {
+        ext.load().then(function(func) {
+            func(data);
+        });
+    });
+};
+
+var _getCurrentUser = function() {
+    return server.request('GET', USER_INFO_URL, null, { evalJSON: true });
+};
+
+var showLoginForm = function() {
+    var loginform = require("templates").login();
+    loginform = $(loginform)[0];
+    document.body.appendChild(loginform);
+    var overlayNode = $('#bespinloginform').overlay({
+        mask: {
+            color: '#fff',
+            loadSpeed: 200,
+            opacity: 0.5
+        },
+        closeOnClick: false,
+        closeOnEsc: false,
+        close: null,
+        load: true
+    });
+    $("#loginsubmit").click(function() {
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+        var pr = exports.login(username, password);
+        pr.then(function(data) {
+            overlayNode.eq(0).overlay().close();
+            notifyLoggedIn(data);
+        });
+        return false;x
+    });
+};
+
+exports.showLogin = function() {
+    var pr = _getCurrentUser();
+    pr.then(notifyLoggedIn, showLoginForm);
+};
 
 /**
  * Controller for the sign-in process
  */
-exports.loginController = SC.Object.create({
+exports.loginController = {
     _getCurrentUser: function() {
         return server.request('GET', USER_INFO_URL, null, { evalJSON: true });
     },
@@ -145,12 +184,12 @@ exports.loginController = SC.Object.create({
         var accept = function(userInfo) { this.accepted(userInfo.username); };
         promise.then(accept.bind(this), this.show.bind(this));
     }
-});
+};
 
 /**
  * Controller for the registration process
  */
-exports.signupController = SC.Object.create({
+exports.signupController = {
     isValid: true,
 
     username: '',
@@ -272,12 +311,12 @@ exports.signupController = SC.Object.create({
     onFailure: function(xhr) {
         displayError('Signup Failed', xhr.responseText);
     }
-});
+};
 
 /**
  * Controller for the lost process
  */
-exports.lostController = SC.Object.create({
+exports.lostController = {
     username: '',
 
     email: '',
@@ -303,12 +342,12 @@ exports.lostController = SC.Object.create({
         displayInfo('Reset Password',
                         'Confirmation email sent - check your mail and follow the link');
     }
-});
+};
 
 /**
  * Controller for the sign-in process
  */
-exports.resetController = SC.Object.create({
+exports.resetController = {
     hash: '',
 
     username: '',
@@ -359,491 +398,491 @@ exports.resetController = SC.Object.create({
             exports.loginController.login();
         });
     }
-});
-
-/**
- *
- */
-exports.userIdentPage = SC.Page.design({
-    mainPane: SC.PanelPane.design({
-        layout: {
-            centerX:    0,
-            width:      580,
-            centerY:    0,
-            height:     LOGIN_PANE_HEIGHT
-        },
-
-        contentView: SC.View.design({
-            layout: { left: 0, top: 0, bottom: 0, right: 0 },
-            classNames: 'bespin-color-field'.w(),
-            childViews: 'welcome form logo'.w(),
-
-            welcome: SC.View.design({
-                childViews: 'h1 p'.w(),
-
-                layout: {
-                    left:   10,
-                    top:    15,
-                    width:  300,
-                    height: 263
-                },
-
-                h1: SC.LabelView.design({
-                    layout: {
-                        left:   10,
-                        top:    10,
-                        width:  290,
-                        height: 85
-                    },
-
-                    value: 'Welcome to Bespin',
-                    controlSize: SC.HUGE_CONTROL_SIZE,
-                    fontWeight: 'bold'
-                }),
-
-                p: SC.LabelView.design({
-                    layout: {
-                        left:   10,
-                        top:    113,
-                        width:  290,
-                        height: 144
-                    },
-
-                    classNames: 'bespin-informational'.w(),
-
-                    value:  'The <a href="http://mozillalabs.com/bespin/" ' +
-                            'target="_blank">Bespin project</a> is ' +
-                            'building a web-based code editor using the ' +
-                            'emerging HTML 5 standard. The editor is easily ' +
-                            'extensible with JavaScript and can be used in ' +
-                            'your own applications or on our experimental ' +
-                            'hosted service.',
-
-                    escapeHTML: false
-                })
-            }),
-
-            form: SC.View.design({
-                childViews: 'action container'.w(),
-                layout: {
-                    left:   310 + 2 + 10,
-                    top:    15 + 2,
-                    width:  240,
-                    height: LOGIN_FORM_HEIGHT
-                },
-
-                classNames: 'bespin-form'.w(),
-
-                action: SC.RadioView.design({
-                    layout: {
-                        left:   20,
-                        top:    15,
-                        width:  220,
-                        height: 31 + 90
-                    },
-
-                    itemValueKey: 'value',
-                    itemTitleKey: 'title',
-                    items: [
-                        {
-                            title: 'I have a Bespin account',
-                            value: 'loginView'
-                        },
-                        {
-                            title: 'I don\'t remember...',
-                            value: 'lostView'
-                        },
-                        {
-                            title: 'I\'m new',
-                            value: 'signupView'
-                        }
-                    ],
-                    value: 'loginView'
-                }),
-
-                container: SC.ContainerView.design({
-                    layout: {
-                        left:   10,
-                        top:    91 + 21 + 10,
-                        width:  220,
-                        height: LOGIN_CONTAINER_HEIGHT
-                    },
-
-                    nowShowingBinding: 'userident#userIdentPage.mainPane.' +
-                        'contentView.form.action.value',
-
-                    contentViewDidChange: function() {
-                        arguments.callee.base.apply(this, arguments);
-
-                        var page = exports.userIdentPage;
-                        var pane = page.get('mainPane');
-                        var form = pane.getPath('contentView.form');
-                        var value = form.getPath('action.value');
-
-                        var paneHeight, formHeight, containerHeight;
-                        switch (value) {
-                        case 'lostView':
-                        case 'resetView':
-                        case 'loginView':
-                            paneHeight = LOGIN_PANE_HEIGHT;
-                            formHeight = LOGIN_FORM_HEIGHT;
-                            containerHeight = LOGIN_CONTAINER_HEIGHT;
-                            break;
-                        case 'signupView':
-                            paneHeight = SIGNUP_PANE_HEIGHT;
-                            formHeight = SIGNUP_FORM_HEIGHT;
-                            containerHeight = SIGNUP_CONTAINER_HEIGHT;
-                            break;
-                        }
-
-                        pane.adjust('height', paneHeight);
-                        form.adjust('height', formHeight);
-                        this.adjust('height', containerHeight);
-
-                        setTimeout(function() {
-                            var view;
-                            if (value !== 'resetView') {
-                                view = page.getPath(value + '.usernameField');
-                            } else {
-                                view = page.getPath(value + '.password1Field');
-                            }
-                            pane.makeFirstResponder(view);
-                        }, 0);
-                    }
-                })
-            }),
-
-            logo: SC.ImageView.design({
-                layout: {
-                    left:   251 + 11,
-                    top:    18 + 16,
-                    width:  73,
-                    height: 70
-                },
-
-                value:  'bespin-logo'
-            })
-        })
-    }),
-
-    loginView: SC.View.design({
-        layout: { left: 0, top: 0, right: 0, height: 291 },
-        childViews: ('usernameField usernameLabel passwordField ' +
-            'passwordLabel submit').w(),
-
-        usernameField: SC.TextFieldView.design({
-            valueBinding: 'userident#loginController.username',
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            layout: { left: 10, top: 92 - 91, width: 200, height: 24 }
-        }),
-
-        usernameLabel: SC.LabelView.design({
-            layout: {
-                left:   10,
-                top:    92 - 91 + 26 + 3,
-                width:  200,
-                height: 14
-            },
-
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            value: 'Username or Email'
-        }),
-
-        passwordField: SC.TextFieldView.design({
-            layout: {
-                left:   10,
-                top:    146 - 91,
-                width:  200,
-                height: 24
-            },
-
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            valueBinding: 'userident#loginController.password',
-            isPassword: true
-        }),
-
-        passwordLabel: SC.LabelView.design({
-            layout: {
-                left:   10,
-                top:    146 - 91 + 26 + 3,
-                width:  200,
-                height: 14
-            },
-
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            value: 'Password'
-        }),
-
-        submit: SC.ButtonView.design({
-            layout: {
-                left:   10,
-                top:    200 - 91,
-                width:  200,
-                height: 37
-            },
-
-            title: 'Log in',
-            isDefault: true,
-            target: 'userident#loginController',
-            action: 'login'
-        })
-    }),
-
-    signupView: SC.View.design({
-        layout: { left: 0, top: 0, right: 0, height: 399 },
-
-        childViews: ('usernameField usernameLabel usernameError ' +
-            'password1Field password1Label password1Error ' +
-            'password2Field password2Label password2Error ' +
-            'emailField emailLabel emailHint submit').w(),
-
-        usernameField: SC.TextFieldView.design({
-            layout: { left: 10, top: 92 - 91, width: 200, height: 24 },
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            valueBinding: 'userident#signupController.username',
-            commitEditing: function() {
-                arguments.callee.base.apply(this, arguments);
-                exports.signupController.validate('username');
-                return true;
-            }
-        }),
-
-        usernameLabel: SC.LabelView.design({
-            value: 'Username',
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            layout: { left: 10, top: 92 - 91 + 26 + 3, width: 53, height: 14 }
-        }),
-
-        usernameError: SC.LabelView.design({
-            layout: {
-                right:  10,
-                top:    92 - 91 + 26 + 3,
-                width:  200,
-                height: 14
-            },
-
-            classNames: 'signupValidationError'.w(),
-            textAlign: 'right',
-            valueBinding: 'userident#signupController.usernameError',
-            controlSize: SC.SMALL_CONTROL_SIZE
-        }),
-
-        password1Field: SC.TextFieldView.design({
-            layout: { left: 10, top: 146 - 91, width: 200, height: 24 },
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            isPassword: true,
-            valueBinding: 'userident#signupController.password1',
-            commitEditing: function() {
-                arguments.callee.base.apply(this, arguments);
-                exports.signupController.validate('password1');
-                return true;
-            }
-        }),
-
-        password1Label: SC.LabelView.design({
-            layout: {
-                left:   10,
-                top:    146 - 91 + 26 + 3,
-                width:  200,
-                height: 14
-            },
-
-            value: 'Password',
-            controlSize: SC.SMALL_CONTROL_SIZE
-        }),
-
-        password1Error: SC.LabelView.design({
-            layout: {
-                right:  10,
-                top:    146 - 91 + 26 + 3,
-                height: 14,
-                width:  200
-            },
-
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            textAlign: 'right',
-            classNames: 'signupValidationError'.w(),
-            valueBinding: 'userident#signupController.password1Error'
-        }),
-
-        password2Field: SC.TextFieldView.design({
-            layout: { left: 10, top: 200 - 91, height: 24, width: 105 },
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            isPassword: true,
-            valueBinding: 'userident#signupController.password2',
-            commitEditing: function() {
-                arguments.callee.base.apply(this, arguments);
-                exports.signupController.validate('password2');
-                return true;
-            }
-        }),
-
-        password2Label: SC.LabelView.design({
-            layout: {
-                left:   10,
-                top:    200 - 91 + 26 + 3,
-                height: 14,
-                width:  200
-            },
-
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            value: 'Password <i>(confirm)</i>',
-            escapeHTML: false
-        }),
-
-        password2Error: SC.LabelView.design({
-            layout: {
-                right:  10,
-                top:    200 - 91 + 26 + 3,
-                height: 14,
-                width:  200
-            },
-
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            textAlign: 'right',
-            classNames: [ 'signupValidationError' ],
-            valueBinding: 'userident#signupController.password2Error',
-            layout: { left: 265, top: 65, height: 30, width: 120 }
-        }),
-
-        emailField: SC.TextFieldView.design({
-            layout: { left: 10, top: 254 - 91, width: 200, height: 24 },
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            valueBinding: 'userident#signupController.email',
-            commitEditing: function() {
-                arguments.callee.base.apply(this, arguments);
-                exports.signupController.validate('email');
-                return true;
-            }
-        }),
-
-        emailLabel: SC.LabelView.design({
-            layout: {
-                left:   10,
-                top:    254 - 91 + 26 + 3,
-                height: 14,
-                width:  200
-            },
-
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            value: 'Email',
-            escapeHTML: false
-        }),
-
-        emailHint: SC.LabelView.design({
-            layout: {
-                right:  10,
-                top:    254 - 91 + 26 + 3,
-                height: 14,
-                width:  200
-            },
-
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            textAlign: 'right',
-            classNames: 'signupValidationNote'.w(),
-            valueBinding: 'userident#signupController.emailHint'
-        }),
-
-        submit: SC.ButtonView.design({
-            layout: { left: 10, top: 308 - 91, width: 200, height: 37 },
-            isDefault: true,
-            title: 'Sign up',
-            target: 'userident#signupController',
-            action: 'signup'
-        })
-    }),
-
-    lostView: SC.View.design({
-        layout: { left: 0, top: 0, right: 0, height: 399 },
-
-        childViews: ('p usernameField usernameLabel submit').w(),
-
-        p: SC.LabelView.design({
-            layout: {
-                left:   10,
-                top:    1,
-                width:  200,
-                height: 144
-            },
-
-            value:  'Don\'t worry, you can get ' +
-                    'a new password. Just tell us your:',
-            escapeHTML: false
-        }),
-
-        usernameField: SC.TextFieldView.design({
-            layout: { left: 10, top: 146 - 91, width: 200, height: 24 },
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            valueBinding: 'userident#lostController.username'
-        }),
-
-        usernameLabel: SC.LabelView.design({
-            value: 'Username or Email',
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            layout: { left: 10, top: 146 - 91 + 26 + 3, width: 200, height: 14 },
-            escapeHTML: false
-        }),
-
-        submit: SC.ButtonView.design({
-            layout: { left: 10, top: 200 - 91, width: 200, height: 37 },
-            isDefault: true,
-            title: 'Reset Password',
-            target: 'userident#lostController',
-            action: 'resetPwd'
-        })
-    }),
-
-    resetView: SC.View.design({
-        layout: { left: 0, top: 0, right: 0, height: 399 },
-
-        childViews: ('password1Field password1Label password2Field password2Label submit').w(),
-
-        password1Field: SC.TextFieldView.design({
-            layout: { left: 10, top: 92 - 91, width: 200, height: 24 },
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            isPassword: true,
-            valueBinding: 'userident#resetController.password1'
-        }),
-
-        password1Label: SC.LabelView.design({
-            value: 'New Password',
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            layout: { left: 10, top: 92 - 91 + 26 + 3, width: 200, height: 14 }
-        }),
-
-        password2Field: SC.TextFieldView.design({
-            layout: { left: 10, top: 146 - 91, width: 200, height: 24 },
-            controlSize: SC.SMALL_CONTROL_SIZE,
-            isPassword: true,
-            valueBinding: 'userident#resetController.password2',
-            commitEditing: function() {
-                arguments.callee.base.apply(this, arguments);
-                exports.signupController.validate('password1');
-                return true;
-            }
-        }),
-
-        password2Label: SC.LabelView.design({
-            layout: {
-                left:   10,
-                top:    146 - 91 + 26 + 3,
-                width:  200,
-                height: 14
-            },
-
-            value: 'Confirm Password',
-            controlSize: SC.SMALL_CONTROL_SIZE
-        }),
-
-        submit: SC.ButtonView.design({
-            layout: { left: 10, top: 200 - 91, width: 200, height: 37 },
-            isDefault: true,
-            title: 'Save New Password',
-            target: 'userident#resetController',
-            action: 'reset'
-        })
-    })
-});
+};
+
+// /**
+//  *
+//  */
+// exports.userIdentPage = SC.Page.design({
+//     mainPane: SC.PanelPane.design({
+//         layout: {
+//             centerX:    0,
+//             width:      580,
+//             centerY:    0,
+//             height:     LOGIN_PANE_HEIGHT
+//         },
+// 
+//         contentView: SC.View.design({
+//             layout: { left: 0, top: 0, bottom: 0, right: 0 },
+//             classNames: 'bespin-color-field'.w(),
+//             childViews: 'welcome form logo'.w(),
+// 
+//             welcome: SC.View.design({
+//                 childViews: 'h1 p'.w(),
+// 
+//                 layout: {
+//                     left:   10,
+//                     top:    15,
+//                     width:  300,
+//                     height: 263
+//                 },
+// 
+//                 h1: SC.LabelView.design({
+//                     layout: {
+//                         left:   10,
+//                         top:    10,
+//                         width:  290,
+//                         height: 85
+//                     },
+// 
+//                     value: 'Welcome to Bespin',
+//                     controlSize: SC.HUGE_CONTROL_SIZE,
+//                     fontWeight: 'bold'
+//                 }),
+// 
+//                 p: SC.LabelView.design({
+//                     layout: {
+//                         left:   10,
+//                         top:    113,
+//                         width:  290,
+//                         height: 144
+//                     },
+// 
+//                     classNames: 'bespin-informational'.w(),
+// 
+//                     value:  'The <a href="http://mozillalabs.com/bespin/" ' +
+//                             'target="_blank">Bespin project</a> is ' +
+//                             'building a web-based code editor using the ' +
+//                             'emerging HTML 5 standard. The editor is easily ' +
+//                             'extensible with JavaScript and can be used in ' +
+//                             'your own applications or on our experimental ' +
+//                             'hosted service.',
+// 
+//                     escapeHTML: false
+//                 })
+//             }),
+// 
+//             form: SC.View.design({
+//                 childViews: 'action container'.w(),
+//                 layout: {
+//                     left:   310 + 2 + 10,
+//                     top:    15 + 2,
+//                     width:  240,
+//                     height: LOGIN_FORM_HEIGHT
+//                 },
+// 
+//                 classNames: 'bespin-form'.w(),
+// 
+//                 action: SC.RadioView.design({
+//                     layout: {
+//                         left:   20,
+//                         top:    15,
+//                         width:  220,
+//                         height: 31 + 90
+//                     },
+// 
+//                     itemValueKey: 'value',
+//                     itemTitleKey: 'title',
+//                     items: [
+//                         {
+//                             title: 'I have a Bespin account',
+//                             value: 'loginView'
+//                         },
+//                         {
+//                             title: 'I don\'t remember...',
+//                             value: 'lostView'
+//                         },
+//                         {
+//                             title: 'I\'m new',
+//                             value: 'signupView'
+//                         }
+//                     ],
+//                     value: 'loginView'
+//                 }),
+// 
+//                 container: SC.ContainerView.design({
+//                     layout: {
+//                         left:   10,
+//                         top:    91 + 21 + 10,
+//                         width:  220,
+//                         height: LOGIN_CONTAINER_HEIGHT
+//                     },
+// 
+//                     nowShowingBinding: 'userident#userIdentPage.mainPane.' +
+//                         'contentView.form.action.value',
+// 
+//                     contentViewDidChange: function() {
+//                         arguments.callee.base.apply(this, arguments);
+// 
+//                         var page = exports.userIdentPage;
+//                         var pane = page.get('mainPane');
+//                         var form = pane.getPath('contentView.form');
+//                         var value = form.getPath('action.value');
+// 
+//                         var paneHeight, formHeight, containerHeight;
+//                         switch (value) {
+//                         case 'lostView':
+//                         case 'resetView':
+//                         case 'loginView':
+//                             paneHeight = LOGIN_PANE_HEIGHT;
+//                             formHeight = LOGIN_FORM_HEIGHT;
+//                             containerHeight = LOGIN_CONTAINER_HEIGHT;
+//                             break;
+//                         case 'signupView':
+//                             paneHeight = SIGNUP_PANE_HEIGHT;
+//                             formHeight = SIGNUP_FORM_HEIGHT;
+//                             containerHeight = SIGNUP_CONTAINER_HEIGHT;
+//                             break;
+//                         }
+// 
+//                         pane.adjust('height', paneHeight);
+//                         form.adjust('height', formHeight);
+//                         this.adjust('height', containerHeight);
+// 
+//                         setTimeout(function() {
+//                             var view;
+//                             if (value !== 'resetView') {
+//                                 view = page.getPath(value + '.usernameField');
+//                             } else {
+//                                 view = page.getPath(value + '.password1Field');
+//                             }
+//                             pane.makeFirstResponder(view);
+//                         }, 0);
+//                     }
+//                 })
+//             }),
+// 
+//             logo: SC.ImageView.design({
+//                 layout: {
+//                     left:   251 + 11,
+//                     top:    18 + 16,
+//                     width:  73,
+//                     height: 70
+//                 },
+// 
+//                 value:  'bespin-logo'
+//             })
+//         })
+//     }),
+// 
+//     loginView: SC.View.design({
+//         layout: { left: 0, top: 0, right: 0, height: 291 },
+//         childViews: ('usernameField usernameLabel passwordField ' +
+//             'passwordLabel submit').w(),
+// 
+//         usernameField: SC.TextFieldView.design({
+//             valueBinding: 'userident#loginController.username',
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             layout: { left: 10, top: 92 - 91, width: 200, height: 24 }
+//         }),
+// 
+//         usernameLabel: SC.LabelView.design({
+//             layout: {
+//                 left:   10,
+//                 top:    92 - 91 + 26 + 3,
+//                 width:  200,
+//                 height: 14
+//             },
+// 
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             value: 'Username or Email'
+//         }),
+// 
+//         passwordField: SC.TextFieldView.design({
+//             layout: {
+//                 left:   10,
+//                 top:    146 - 91,
+//                 width:  200,
+//                 height: 24
+//             },
+// 
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             valueBinding: 'userident#loginController.password',
+//             isPassword: true
+//         }),
+// 
+//         passwordLabel: SC.LabelView.design({
+//             layout: {
+//                 left:   10,
+//                 top:    146 - 91 + 26 + 3,
+//                 width:  200,
+//                 height: 14
+//             },
+// 
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             value: 'Password'
+//         }),
+// 
+//         submit: SC.ButtonView.design({
+//             layout: {
+//                 left:   10,
+//                 top:    200 - 91,
+//                 width:  200,
+//                 height: 37
+//             },
+// 
+//             title: 'Log in',
+//             isDefault: true,
+//             target: 'userident#loginController',
+//             action: 'login'
+//         })
+//     }),
+// 
+//     signupView: SC.View.design({
+//         layout: { left: 0, top: 0, right: 0, height: 399 },
+// 
+//         childViews: ('usernameField usernameLabel usernameError ' +
+//             'password1Field password1Label password1Error ' +
+//             'password2Field password2Label password2Error ' +
+//             'emailField emailLabel emailHint submit').w(),
+// 
+//         usernameField: SC.TextFieldView.design({
+//             layout: { left: 10, top: 92 - 91, width: 200, height: 24 },
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             valueBinding: 'userident#signupController.username',
+//             commitEditing: function() {
+//                 arguments.callee.base.apply(this, arguments);
+//                 exports.signupController.validate('username');
+//                 return true;
+//             }
+//         }),
+// 
+//         usernameLabel: SC.LabelView.design({
+//             value: 'Username',
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             layout: { left: 10, top: 92 - 91 + 26 + 3, width: 53, height: 14 }
+//         }),
+// 
+//         usernameError: SC.LabelView.design({
+//             layout: {
+//                 right:  10,
+//                 top:    92 - 91 + 26 + 3,
+//                 width:  200,
+//                 height: 14
+//             },
+// 
+//             classNames: 'signupValidationError'.w(),
+//             textAlign: 'right',
+//             valueBinding: 'userident#signupController.usernameError',
+//             controlSize: SC.SMALL_CONTROL_SIZE
+//         }),
+// 
+//         password1Field: SC.TextFieldView.design({
+//             layout: { left: 10, top: 146 - 91, width: 200, height: 24 },
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             isPassword: true,
+//             valueBinding: 'userident#signupController.password1',
+//             commitEditing: function() {
+//                 arguments.callee.base.apply(this, arguments);
+//                 exports.signupController.validate('password1');
+//                 return true;
+//             }
+//         }),
+// 
+//         password1Label: SC.LabelView.design({
+//             layout: {
+//                 left:   10,
+//                 top:    146 - 91 + 26 + 3,
+//                 width:  200,
+//                 height: 14
+//             },
+// 
+//             value: 'Password',
+//             controlSize: SC.SMALL_CONTROL_SIZE
+//         }),
+// 
+//         password1Error: SC.LabelView.design({
+//             layout: {
+//                 right:  10,
+//                 top:    146 - 91 + 26 + 3,
+//                 height: 14,
+//                 width:  200
+//             },
+// 
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             textAlign: 'right',
+//             classNames: 'signupValidationError'.w(),
+//             valueBinding: 'userident#signupController.password1Error'
+//         }),
+// 
+//         password2Field: SC.TextFieldView.design({
+//             layout: { left: 10, top: 200 - 91, height: 24, width: 105 },
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             isPassword: true,
+//             valueBinding: 'userident#signupController.password2',
+//             commitEditing: function() {
+//                 arguments.callee.base.apply(this, arguments);
+//                 exports.signupController.validate('password2');
+//                 return true;
+//             }
+//         }),
+// 
+//         password2Label: SC.LabelView.design({
+//             layout: {
+//                 left:   10,
+//                 top:    200 - 91 + 26 + 3,
+//                 height: 14,
+//                 width:  200
+//             },
+// 
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             value: 'Password <i>(confirm)</i>',
+//             escapeHTML: false
+//         }),
+// 
+//         password2Error: SC.LabelView.design({
+//             layout: {
+//                 right:  10,
+//                 top:    200 - 91 + 26 + 3,
+//                 height: 14,
+//                 width:  200
+//             },
+// 
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             textAlign: 'right',
+//             classNames: [ 'signupValidationError' ],
+//             valueBinding: 'userident#signupController.password2Error',
+//             layout: { left: 265, top: 65, height: 30, width: 120 }
+//         }),
+// 
+//         emailField: SC.TextFieldView.design({
+//             layout: { left: 10, top: 254 - 91, width: 200, height: 24 },
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             valueBinding: 'userident#signupController.email',
+//             commitEditing: function() {
+//                 arguments.callee.base.apply(this, arguments);
+//                 exports.signupController.validate('email');
+//                 return true;
+//             }
+//         }),
+// 
+//         emailLabel: SC.LabelView.design({
+//             layout: {
+//                 left:   10,
+//                 top:    254 - 91 + 26 + 3,
+//                 height: 14,
+//                 width:  200
+//             },
+// 
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             value: 'Email',
+//             escapeHTML: false
+//         }),
+// 
+//         emailHint: SC.LabelView.design({
+//             layout: {
+//                 right:  10,
+//                 top:    254 - 91 + 26 + 3,
+//                 height: 14,
+//                 width:  200
+//             },
+// 
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             textAlign: 'right',
+//             classNames: 'signupValidationNote'.w(),
+//             valueBinding: 'userident#signupController.emailHint'
+//         }),
+// 
+//         submit: SC.ButtonView.design({
+//             layout: { left: 10, top: 308 - 91, width: 200, height: 37 },
+//             isDefault: true,
+//             title: 'Sign up',
+//             target: 'userident#signupController',
+//             action: 'signup'
+//         })
+//     }),
+// 
+//     lostView: SC.View.design({
+//         layout: { left: 0, top: 0, right: 0, height: 399 },
+// 
+//         childViews: ('p usernameField usernameLabel submit').w(),
+// 
+//         p: SC.LabelView.design({
+//             layout: {
+//                 left:   10,
+//                 top:    1,
+//                 width:  200,
+//                 height: 144
+//             },
+// 
+//             value:  'Don\'t worry, you can get ' +
+//                     'a new password. Just tell us your:',
+//             escapeHTML: false
+//         }),
+// 
+//         usernameField: SC.TextFieldView.design({
+//             layout: { left: 10, top: 146 - 91, width: 200, height: 24 },
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             valueBinding: 'userident#lostController.username'
+//         }),
+// 
+//         usernameLabel: SC.LabelView.design({
+//             value: 'Username or Email',
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             layout: { left: 10, top: 146 - 91 + 26 + 3, width: 200, height: 14 },
+//             escapeHTML: false
+//         }),
+// 
+//         submit: SC.ButtonView.design({
+//             layout: { left: 10, top: 200 - 91, width: 200, height: 37 },
+//             isDefault: true,
+//             title: 'Reset Password',
+//             target: 'userident#lostController',
+//             action: 'resetPwd'
+//         })
+//     }),
+// 
+//     resetView: SC.View.design({
+//         layout: { left: 0, top: 0, right: 0, height: 399 },
+// 
+//         childViews: ('password1Field password1Label password2Field password2Label submit').w(),
+// 
+//         password1Field: SC.TextFieldView.design({
+//             layout: { left: 10, top: 92 - 91, width: 200, height: 24 },
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             isPassword: true,
+//             valueBinding: 'userident#resetController.password1'
+//         }),
+// 
+//         password1Label: SC.LabelView.design({
+//             value: 'New Password',
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             layout: { left: 10, top: 92 - 91 + 26 + 3, width: 200, height: 14 }
+//         }),
+// 
+//         password2Field: SC.TextFieldView.design({
+//             layout: { left: 10, top: 146 - 91, width: 200, height: 24 },
+//             controlSize: SC.SMALL_CONTROL_SIZE,
+//             isPassword: true,
+//             valueBinding: 'userident#resetController.password2',
+//             commitEditing: function() {
+//                 arguments.callee.base.apply(this, arguments);
+//                 exports.signupController.validate('password1');
+//                 return true;
+//             }
+//         }),
+// 
+//         password2Label: SC.LabelView.design({
+//             layout: {
+//                 left:   10,
+//                 top:    146 - 91 + 26 + 3,
+//                 width:  200,
+//                 height: 14
+//             },
+// 
+//             value: 'Confirm Password',
+//             controlSize: SC.SMALL_CONTROL_SIZE
+//         }),
+// 
+//         submit: SC.ButtonView.design({
+//             layout: { left: 10, top: 200 - 91, width: 200, height: 37 },
+//             isDefault: true,
+//             title: 'Save New Password',
+//             target: 'userident#resetController',
+//             action: 'reset'
+//         })
+//     })
+// });
 
 /**
  * Try to login to the backend system.
