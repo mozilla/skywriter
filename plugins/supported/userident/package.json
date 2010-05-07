@@ -10,12 +10,7 @@
     },
     "provides": [
         {
-            "ep": "authProvider",
-            "pointer": "#showLogin",
-            "logoutpointer": "#logout"
-        },
-        {
-            "ep": "themstyles",
+            "ep": "themestyles",
             "url": "styles.less"
         },
         {
