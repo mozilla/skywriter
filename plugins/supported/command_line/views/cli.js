@@ -125,6 +125,7 @@ exports.CliInputView = function() {
     // The input field
     this._inputer = document.createElement('input');
     this._inputer.className = 'cmd_input';
+    this._inputer.type = 'text';
     this._input = new Input('');
 
     keyutil.addKeyDownListener(this._inputer, function(ev) {

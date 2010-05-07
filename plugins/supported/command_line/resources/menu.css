@@ -37,6 +37,7 @@
 div.cmd_menu {
   display:inline-block;
   margin-bottom:-2px;
+  color:#FFF;
   padding:8px;
   border:2px #000 solid;
   border-bottom:0;
