@@ -36,7 +36,10 @@
  * ***** END LICENSE BLOCK ***** */
 
 var util = require('bespin:util/util');
+var Event = require('events').Event;
 var console = require('bespin:console').console;
+
+var Rect = require('utils/rect');
 
 var CanvasView = require('views/canvas').CanvasView;
 
@@ -54,6 +57,24 @@ exports.ScrollerCanvasView = function(editor, layoutDirection) {
     CanvasView.call(this, editor.container);
     this.editor = editor;
     this.layoutDirection = layoutDirection;
+
+    var on = function(eventName, func, target) {
+        target = target || this.domNode;
+        target.addEventListener(eventName, function(evt) {
+            func.call(this, evt);
+            util.stopEvent(evt);
+        }.bind(this), false);
+    }.bind(this);
+
+    on('mouseover', this.mouseEntered);
+    on('mouseout', this.mouseExited);
+    on('mousedown', this.mouseDown);
+    // Bind the following events to the window as we want to catch them
+    // even when the mouse is outside of the scroller.
+    on('mouseup', this.mouseUp, window);
+    on('mousemove', this.mouseMove, window);
+
+    this.valueChanged = new Event();
 };
 
 exports.ScrollerCanvasView.prototype = new CanvasView();
@@ -90,7 +111,7 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
 
     set maximum(maximum) {
         if (this._value > this._maximum) {
-            this._value = this._maximum;
+            this.value = this._maximum;
         }
 
         if (maximum === this._maximum) {
@@ -102,6 +123,7 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
     },
 
     _value: 0,
+    valueChanged: null,
 
     set value(value) {
         if (value < 0) {
@@ -115,6 +137,7 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
         }
 
         this._value = value;
+        this.valueChanged(value);
         this.setNeedsDisplay();
     },
 
@@ -373,11 +396,11 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
     },
 
     _segmentForMouseEvent: function(evt) {
-        var point = this.convertFrameFromView({ x: evt.pageX, y: evt.pageY });
+        var point = { x: evt.layerX, y: evt.layerY };
         var clientFrame = this._getClientFrame();
         var padding = this.padding;
 
-        if (!SC.pointInRect(point, clientFrame)) {
+        if (!Rect.pointInRect(point, clientFrame)) {
             return null;
         }
 
@@ -403,7 +426,7 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
         }
 
         var handleFrame = this._getHandleFrame();
-        if (SC.pointInRect(point, handleFrame)) {
+        if (Rect.pointInRect(point, handleFrame)) {
             return 'handle';
         }
 
@@ -574,16 +597,15 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
     _repeatAction: function(method, interval) {
         var repeat = method();
         if (repeat !== false) {
-            this._scrollTimer = SC.Timer.schedule({
-                target: this,
-                action: function() { this._repeatAction(method, 100); },
-                interval: interval
-            });
+            var func = function() {
+                this._repeatAction(method, 100);
+            }.bind(this);
+            this._scrollTimer = setTimeout(func, interval);
         }
     },
 
     _scrollByDelta: function(delta) {
-        this._value = value + delta;
+        this.value = this._value + delta;
     },
 
     _scrollUpOneLine: function() {
@@ -651,7 +673,7 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
 
         // The _mouseDownScreenPoint value might be needed although the segment
         // was not the handle at the moment.
-        switch (parentView.get('layoutDirection')) {
+        switch (this.layoutDirection) {
         case LAYOUT_HORIZONTAL:
             this._mouseDownScreenPoint = evt.pageX;
             break;
@@ -664,8 +686,10 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
         }
     },
 
-    mouseDragged: function(evt) {
-        var parentView = this.get('parentView');
+    mouseMove: function(evt) {
+        if (this._mouseDownScreenPoint === null) {
+            return;
+        }
 
         // Handle the segments. If the current segment is the handle or
         // nothing, then drag the handle around (as null = mouse outside of
@@ -674,12 +698,12 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
         if (segment == 'handle' || this._mouseOverHandle === true) {
             this._mouseOverHandle = true;
             if (this._scrollTimer !== null) {
-                this._scrollTimer.invalidate();
+                clearTimeout(this._scrollTimer);
                 this._scrollTimer = null;
             }
 
             var eventDistance;
-            switch (parentView.get('layoutDirection')) {
+            switch (this.layoutDirection) {
                 case LAYOUT_HORIZONTAL:
                     eventDistance = evt.pageX;
                     break;
@@ -693,13 +717,13 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
 
             var eventDelta = eventDistance - this._mouseDownScreenPoint;
 
-            var maximum = parentView.get('maximum');
-            var oldValue = parentView.get('value');
+            var maximum = this._maximum;
+            var oldValue = this._value;
             var gutterLength = this._getGutterLength();
             var handleLength = this._getHandleLength();
             var emptyGutterLength = gutterLength - handleLength;
             var valueDelta = maximum * eventDelta / emptyGutterLength;
-            parentView.set('value', oldValue + valueDelta);
+            this.value = oldValue + valueDelta;
 
             this._mouseDownScreenPoint = eventDistance;
         }
@@ -721,28 +745,28 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
         this._mouseDownScreenPoint = null;
         this._mouseDownValue = null;
         if (this._scrollTimer) {
-            this._scrollTimer.invalidate();
+            clearTimeout(this._scrollTimer);
             this._scrollTimer = null;
         }
         this.setNeedsDisplay();
-    },
-
-    mouseWheel: function(evt) {
-        var parentView = this.get('parentView');
-
-        var delta;
-        switch (parentView.get('layoutDirection')) {
-        case LAYOUT_HORIZONTAL:
-            delta = evt.wheelDeltaX;
-            break;
-        case LAYOUT_VERTICAL:
-            delta = evt.wheelDeltaY;
-            break;
-        default:
-            console.error("unknown layout direction");
-            return;
-        }
-
-        parentView.set('value', parentView.get('value') + 2*delta);
     }
+
+    // mouseWheel: function(evt) {
+    //     var parentView = this.get('parentView');
+    //
+    //     var delta;
+    //     switch (parentView.get('layoutDirection')) {
+    //     case LAYOUT_HORIZONTAL:
+    //         delta = evt.wheelDeltaX;
+    //         break;
+    //     case LAYOUT_VERTICAL:
+    //         delta = evt.wheelDeltaY;
+    //         break;
+    //     default:
+    //         console.error("unknown layout direction");
+    //         return;
+    //     }
+    //
+    //     parentView.set('value', parentView.get('value') + 2*delta);
+    // }
 });

@@ -107,6 +107,14 @@ exports.EditorView = function() {
         window.addEventListener('resize', this.dimensionChanged.bind(this), false);
         container.addEventListener(util.isMozilla ? 'DOMMouseScroll' : 'mousewheel', this.onMouseWheel.bind(this), false);
 
+        verticalScroller.valueChanged.add(function(value) {
+            this.scrollOffset = { y: value };
+        }.bind(this));
+
+        horizontalScroller.valueChanged.add(function(value) {
+            this.scrollOffset = { x: value };
+        }.bind(this));
+
         layoutManager.sizeChanged.add(function(size) {
             console.log('layoutManagerSizeChanged');
             if (this._textLinesCount !== size.height) {

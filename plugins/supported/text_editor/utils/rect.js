@@ -142,7 +142,7 @@ exports.intersectRects = function(r1, r2) {
     width: Math.min(exports.maxX(r1), exports.maxX(r2)),
     height: Math.min(exports.maxY(r1), exports.maxY(r2))
   } ;
-  
+
   // convert edges to w/h
   ret.width = Math.max(0, ret.width - ret.x) ;
   ret.height = Math.max(0, ret.height - ret.y) ;
@@ -150,13 +150,13 @@ exports.intersectRects = function(r1, r2) {
 };
 
 /** Return the left edge of the frame */
-exports.minX = function(frame) { 
-  return frame.x || 0; 
+exports.minX = function(frame) {
+  return frame.x || 0;
 };
 
 /** Return the right edge of the frame. */
-exports.maxX = function(frame) { 
-  return (frame.x || 0) + (frame.width || 0); 
+exports.maxX = function(frame) {
+  return (frame.x || 0) + (frame.width || 0);
 };
 
 /** Return the top edge of the frame */
@@ -167,6 +167,14 @@ exports.minY = function(frame) {
 /** Return the bottom edge of the frame */
 exports.maxY = function(frame) {
   return (frame.y || 0) + (frame.height || 0) ;
+};
+
+/** Check if the given point is inside the rect. */
+exports.pointInRect = function(point, f) {
+    return  (point.x >= exports.minX(f)) &&
+            (point.y >= exports.minY(f)) &&
+            (point.x <= exports.maxX(f)) &&
+            (point.y <= exports.maxY(f)) ;
 };
 
 /** Returns the union between two rectangles
@@ -183,7 +191,7 @@ exports.unionRects = function(r1, r2) {
     width: Math.max(exports.maxX(r1), exports.maxX(r2)),
     height: Math.max(exports.maxY(r1), exports.maxY(r2))
   } ;
-  
+
   // convert edges to w/h
   ret.width = Math.max(0, ret.width - ret.x) ;
   ret.height = Math.max(0, ret.height - ret.y) ;
@@ -200,9 +208,9 @@ exports.unionRects = function(r1, r2) {
 exports.rectsEqual = function(r1, r2, delta) {
     if (!r1 || !r2) return (r1 == r2) ;
     if (!delta && delta !== 0) delta = 0.1;
-    if ((r1.y != r2.y) && (Math.abs(r1.y - r2.y) > delta)) return false ; 
-    if ((r1.x != r2.x) && (Math.abs(r1.x - r2.x) > delta)) return false ; 
-    if ((r1.width != r2.width) && (Math.abs(r1.width - r2.width) > delta)) return false ; 
-    if ((r1.height != r2.height) && (Math.abs(r1.height - r2.height) > delta)) return false ; 
+    if ((r1.y != r2.y) && (Math.abs(r1.y - r2.y) > delta)) return false ;
+    if ((r1.x != r2.x) && (Math.abs(r1.x - r2.x) > delta)) return false ;
+    if ((r1.width != r2.width) && (Math.abs(r1.width - r2.width) > delta)) return false ;
+    if ((r1.height != r2.height) && (Math.abs(r1.height - r2.height) > delta)) return false ;
     return true ;
 };
