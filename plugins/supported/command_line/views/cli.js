@@ -127,6 +127,7 @@ exports.CliInputView = function() {
     this._inputer = document.createElement('input');
     this._inputer.className = 'cmd_input';
     this._inputer.type = 'text';
+    this.element.appendChild(this._inputer);
     this._input = new Input('');
 
     keyutil.addKeyDownListener(this._inputer, function(ev) {
@@ -134,15 +135,18 @@ exports.CliInputView = function() {
         var handled = keyboardManager.processKeyEvent(ev, this, {
             isCommandLine: true, isKeyUp: false
         });
+        if (ev.keyCode === keyutil.KeyHelper.KEY.TAB) {
+            return true;
+        }
         return handled;
     }.bind(this));
 
-    this._inputer.onkeyup = function(ev) {
+    this._inputer.addEventListener('keyup', function(ev) {
         var handled = keyboardManager.processKeyEvent(ev, this, {
             isCommandLine: true, isKeyUp: true
         });
 
-        if (ev.keyCode === 13) {
+        if (ev.keyCode === keyutil.KeyHelper.KEY.RETURN) {
             this._input.execute();
             this.setInput('');
         } else {
@@ -154,8 +158,7 @@ exports.CliInputView = function() {
         }
 
         return handled;
-    }.bind(this);
-    this.element.appendChild(this._inputer);
+    }.bind(this), true);
 
     this.element.addEventListener('focus', function(ev) {
         this._hasFocus = true;
@@ -179,6 +182,9 @@ exports.CliInputView = function() {
     this.checkHeight();
 };
 
+/**
+ *
+ */
 exports.CliInputView.prototype = {
     /**
      * Undo event registration
