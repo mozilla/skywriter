@@ -37,8 +37,8 @@
 
 var catalog = require('bespin:plugins').catalog;
 var console = require("bespin:console").console;
+var $ = require("jquery").$;
 
-var server = require('bespin_server').server;
 var less = require('less');
 
 // The less parser to use.
@@ -141,19 +141,23 @@ exports.registerThemeStyles = function(extension) {
     }
 
     extension.url.forEach(function(file) {
-        server.request('GET', resourceURL + file).then(function(response) {
-            if (!extension._data) {
-                extension._data = '';
+        $.ajax({
+            url: resourceURL + file,
+            success: function(response) {
+                if (!extension._data) {
+                    extension._data = '';
+                }
+
+                // convert url(something) tor url(resourceURL/something).
+                extension._data += response.replace(/url\(['"]*([^'")]*)(['"]*)\)/g, 'url(' + resourceURL + '$1)');
+
+                // parse the plugin.
+                exports.parsePlugin(extension.getPluginName());
+            },
+            error: function(err) {
+                console.error('registerLessFile: Could not load ' + extension.url);
             }
-
-            // convert url(something) tor url(resourceURL/something).
-            extension._data += response.replace(/url\(([^)]*)\)/g, 'url(' + resourceURL + '$1)');
-
-            // parse the plugin.
-            exports.parsePlugin(extension.getPluginName());
-        }, function(err) {
-            console.error('registerLessFile: Could not load ' + extension.url);
-        });
+        })
     })
 };
 
