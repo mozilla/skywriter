@@ -921,20 +921,6 @@ exports.Catalog.prototype = {
         return promise;
     },
 
-    objectForPropertyPath: function(path, root, stopAt) {
-        stopAt = (stopAt == undefined) ? path.length : stopAt;
-        var hashed = path.split("#");
-        if (hashed.length == 1) {
-            return this.objectForPropertyPathSC(path, root, stopAt);
-        }
-        var module = require(hashed[0]);
-        if (module === undefined) {
-            return undefined;
-        }
-        stopAt = stopAt - hashed[0].length;
-        return this.objectForPropertyPathSC(hashed[1], module, stopAt);
-    },
-
     /**
      * Finds the object for the passed path or array of path components.  This is
      * the standard method used in SproutCore to traverse object paths.
@@ -943,20 +929,28 @@ exports.Catalog.prototype = {
      * @param stopAt {Integer} optional point to stop searching the path.
      * @returns {Object} the found object or undefined.
      */
-    objectForPropertyPathSC: function(path, root, stopAt) {
-
+    objectForPropertyPath: function(path, root, stopAt) {
+        stopAt = (stopAt == undefined) ? path.length : stopAt;
         if (!root) {
             root = window;
         }
 
-        if (stopAt === undefined) {
-            stopAt = path.length;
+        var hashed = path.split("#");
+        if (hashed.length !== 1) {
+            var module = require(hashed[0]);
+            if (module === undefined) {
+                return undefined;
+            }
+
+            path = hashed[1];
+            root = module;
+            stopAt = stopAt - hashed[0].length;
         }
 
         var loc = 0;
-        while ((root) && (loc < stopAt)) {
+        while (root && loc < stopAt) {
             var nextDotAt = path.indexOf('.', loc);
-            if ((nextDotAt < 0) || (nextDotAt > stopAt)) {
+            if (nextDotAt < 0 || nextDotAt > stopAt) {
                 nextDotAt = stopAt;
             }
             var key = path.slice(loc, nextDotAt);
