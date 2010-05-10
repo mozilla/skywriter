@@ -121,6 +121,7 @@ exports.CliInputView = function() {
     this._completer = document.createElement('div');
     this._completer.className = 'cmd_completion';
     this.element.appendChild(this._completer);
+    this._completion = '';
 
     // The input field
     this._inputer = document.createElement('input');
@@ -129,6 +130,7 @@ exports.CliInputView = function() {
     this._input = new Input('');
 
     keyutil.addKeyDownListener(this._inputer, function(ev) {
+        environment.commandLine = this;
         var handled = keyboardManager.processKeyEvent(ev, this, {
             isCommandLine: true, isKeyUp: false
         });
@@ -204,7 +206,7 @@ exports.CliInputView.prototype = {
      * Apply the proposed completion
      */
     complete: function() {
-        this._inputer.value = this._completer.value;
+        this._inputer.value = this._completion;
     },
 
     /**
@@ -490,6 +492,7 @@ exports.CliInputView.prototype = {
      * @param completion {string} The full completion value
      */
     setCompletion: function(completion) {
+        this._completion = completion;
         var current = this._inputer.value;
 
         var val;
