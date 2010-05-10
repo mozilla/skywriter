@@ -43,6 +43,7 @@ var builtins = require("builtins");
 var console = require("console").console;
 var util = require("util/util");
 var $ = require("jquery").$;
+var Trace = require("util/stacktrace").Trace;
 
 var r = require;
 
@@ -588,13 +589,16 @@ exports.Catalog.prototype = {
      * the factory cannot be found.
      */
     createObject: function(name) {
+        console.log("Creating", name);
         var instance = this.instances[name];
         var pr = new Promise();
         
         if (instance !== undefined) {
+            console.log("Already have one (it's very nice)");
             pr.resolve(instance);
             return pr;
         }
+        
         
         var descriptor = this._objectDescriptors[name];
         if (descriptor === undefined) {
@@ -609,12 +613,13 @@ exports.Catalog.prototype = {
                 '", there is no factory called "' + factoryName + 
                 '" available."');
         }
-        var factoryArguments = descriptor.factoryArguments || [];
+        var factoryArguments = descriptor.arguments || [];
         var argumentPromises = [];
         for (var i=0; i < factoryArguments.length; i++) {
             var arg = factoryArguments[i];
             if (typeof(arg) == "object" && 
                 arg._Registered_Object) {
+                    console.log("Need to create ", arg._Registered_Object, "first");
                     var ropr = this.createObject(arg._Registered_Object);
                     argumentPromises.push(ropr);
                     // i is changing, so we can't count on using it
@@ -629,19 +634,24 @@ exports.Catalog.prototype = {
         
         group(argumentPromises).then(function() {
             ext.load().then(function(factory) {
+                console.log("Got factory for ", name);
                 var action = ext.action;
                 var obj;
-
+                
                 if (action === "call") {
                     obj = factory.apply(factory, factoryArguments);
                 } else if (action === "new") {
-                    obj = new factory();
-                    factory.prototype.constructor.apply(obj, factoryArguments);
+                    if (factoryArguments.length > 1) {
+                        pr.reject(new Error('For object ' + name + ', create a simple factory function and change the action to call because JS cannot handle this case.'));
+                        return;
+                    }
+                    obj = new factory(factoryArguments[0]);
                 } else if (action === "value") {
                     obj = factory;
                 } else {
                     pr.reject(new Error("Create action must be call|new|value. " +
                             "Found" + action));
+                    return;
                 }
 
                 this.instances[name] = obj;

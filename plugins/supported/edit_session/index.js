@@ -53,6 +53,8 @@ var History = require('edit_session:history').History;
  * A Buffer connects a model and file together.
  */
 exports.Buffer = function(session, model, syntaxManager) {
+    this.session = session;
+    
     if (model == null) {
         this.model = new TextStorage;
     } else {
@@ -87,7 +89,7 @@ exports.Buffer.prototype = {
                 }.bind(this));
             }
 
-            this.session.bufferFileChanged(this._file);
+            this.session.bufferFileChanged(this, this._file);
         }
     },
 
@@ -103,7 +105,7 @@ exports.Buffer.prototype = {
     set model(newModel) {
         if (this._model !== newModel) {
             this._model = newModel;
-            this.session.bufferModelChanged(this._model);
+            this.session.bufferModelChanged(this, this._model);
         }
     },
 
@@ -255,7 +257,7 @@ exports.EditSession.prototype = {
 
             var ext = file.extension();
             var view = this._currentView;
-            var syntaxManager = view.getPath('layoutManager.syntaxManager');
+            var syntaxManager = view.layoutManager.syntaxManager;
             syntaxManager.setInitialContextFromExt(ext === null ? '' : ext);
         }
 
@@ -267,7 +269,7 @@ exports.EditSession.prototype = {
     },
 
     bufferModelChanged: function(sender, newModel) {
-        this._currentView.setPath('layoutManager.textStorage', newModel);
+        this._currentView.layoutManager.textStorage = newModel;
     },
 
     /**
@@ -343,14 +345,14 @@ exports.EditSession.prototype = {
  */
 exports.createSession = function(view) {
     var session = new exports.EditSession();
+    session.currentView = view.textView;
     var layoutManager = view.layoutManager;
     var textStorage = layoutManager.textStorage;
     var syntaxManager = layoutManager.syntaxManager;
 
-    var buffer = new exports.Buffer(textStorage, syntaxManager);
+    var buffer = new exports.Buffer(session, textStorage, syntaxManager);
 
     session.currentBuffer = buffer;
-    session.currentView = editorView.textView;
     return session;
 };
 

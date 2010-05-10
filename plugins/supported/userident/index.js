@@ -79,6 +79,7 @@ exports.loginController.prototype = {
 
     notifyLoggedIn: function(data) {
         catalog.getExtensions("loggedin").forEach(function(ext) {
+            console.log(ext);
             ext.load().then(function(func) {
                 func(data);
             });

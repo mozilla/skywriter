@@ -2,7 +2,6 @@
     "description": "Common services used in the editor application",
     "dependencies": {
         "traits": "0.0.0",
-        "jlayout_border": "0.0.0",
         "jsmt": "0.0.0"
     },
     "provides":

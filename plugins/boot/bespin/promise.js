@@ -224,7 +224,7 @@ exports.group = function(promiseList) {
     };
 
     promiseList.forEach(function(promise, index) {
-        promise.then(onSuccessFactory(index), promise.reject);
+        promise.then(onSuccessFactory(index), promise.reject.bind(promise));
     });
 
     return promise;

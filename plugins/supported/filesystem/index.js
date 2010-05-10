@@ -89,7 +89,7 @@ exports.LOADING = { name: 'LOADING' };
 exports.READY = { name: 'READY' };
 
 exports.Filesystem = function(source) {
-    if (!this.source) {
+    if (!source) {
         throw new Error('Filesystem must have a source.');
     }
 

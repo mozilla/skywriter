@@ -57,82 +57,89 @@ var ScrollerView = Scroller.ScrollerCanvasView;
  * @class
  *
  * A view responsible for laying out a scrollable text view and its associated
- * gutter view, as well as maintaining a layout manager.
+ * gutter view, as well as maintaining a layout manager. This really needs
+ * to change so that it's not taking the container as a parameter.
  */
-
 exports.EditorView = function(container) {
-    this.container = container;
-    container.style.overflow = 'hidden';
-
-    this.scrollChanged = new Event();
-
-    var layoutManager = this.layoutManager = new LayoutManager();
-    var searchController = this.searchController = new EditorSearchController()
-
-    var gutterView = this.gutterView = new GutterView(container, this);
-    var textView = this.textView = new TextView(container, this);
-
-    var verticalScroller = this.verticalScroller = new ScrollerView(this, Scroller.LAYOUT_VERTICAL);
-    var horizontalScroller = this.horizontalScroller = new ScrollerView(this, Scroller.LAYOUT_HORIZONTAL);
-
-    this._fontSettingChanged();
-    this._themeVariableDidChange();
-
-    this.recomputeLayout();
-
-    this._scrollOffset = {
-        x: 0, y: 0
-    }
-
-    this._textViewSize = {
-        width: 0,
-        height: 0
-    };
-
-    window.addEventListener('resize', this.dimensionChanged.bind(this), false);
-    container.addEventListener(util.isMozilla ? 'DOMMouseScroll' : 'mousewheel', this.onMouseWheel.bind(this), false);
-
-    layoutManager.sizeChanged.add(function(size) {
-        if (this._textLinesCount !== size.height) {
-            var gutterWidth = gutterView.computeWidth();
-            if (gutterWidth !== this._gutterViewWidth) {
-                this.recomputeLayout();
-            } else {
-                gutterView.setNeedsDisplay();
-            }
-            this._textLinesLength = size.height;
-        }
-
-        var frame = this.textViewPaddingFrame;
-        var width = size.width * layoutManager.characterWidth;
-        var height = size.height * layoutManager.lineHeight;
-
-        this._textViewSize = {
-            width: width,
-            height: height
-        };
-
-        if (height < frame.height) {
-            verticalScroller.isVisible = false;
-        } else {
-            verticalScroller.isVisible = true;
-            verticalScroller.proportion = frame.height / height;
-            verticalScroller.maximum = height - frame.height;
-        }
-
-        if (width < frame.width) {
-            horizontalScroller.isVisible = false;
-        } else {
-            horizontalScroller.isVisible = true;
-            horizontalScroller.proportion = frame.width / width;
-            horizontalScroller.maximum = width - frame.width;
-        }
-    }.bind(this));
-
-    window.bespin.editor = this;
+    if (!container) { return; }
+    this._placeEditor(container);
 };
 
+
 exports.EditorView.prototype = {
+    _placeEditor: function(container) {
+        // element is the new protocol..
+        this.element = container;
+        this.container = container;
+        container.style.overflow = 'hidden';
+
+        var layoutManager = this.layoutManager = new LayoutManager();
+
+        this.scrollChanged = new Event();
+
+        var searchController = this.searchController = new EditorSearchController()
+
+        var gutterView = this.gutterView = new GutterView(container, this);
+        var textView = this.textView = new TextView(container, this);
+
+        var verticalScroller = this.verticalScroller = new ScrollerView(this, Scroller.LAYOUT_VERTICAL);
+        var horizontalScroller = this.horizontalScroller = new ScrollerView(this, Scroller.LAYOUT_HORIZONTAL);
+
+        this._fontSettingChanged();
+        this._themeVariableDidChange();
+
+        this.recomputeLayout();
+
+        this._scrollOffset = {
+            x: 0, y: 0
+        }
+
+        this._textViewSize = {
+            width: 0,
+            height: 0
+        };
+
+        window.addEventListener('resize', this.dimensionChanged.bind(this), false);
+        container.addEventListener(util.isMozilla ? 'DOMMouseScroll' : 'mousewheel', this.onMouseWheel.bind(this), false);
+
+        layoutManager.sizeChanged.add(function(size) {
+            if (this._textLinesCount !== size.height) {
+                var gutterWidth = gutterView.computeWidth();
+                if (gutterWidth !== this._gutterViewWidth) {
+                    this.recomputeLayout();
+                } else {
+                    gutterView.setNeedsDisplay();
+                }
+                this._textLinesLength = size.height;
+            }
+
+            var frame = this.textViewPaddingFrame;
+            var width = size.width * layoutManager.characterWidth;
+            var height = size.height * layoutManager.lineHeight;
+
+            this._textViewSize = {
+                width: width,
+                height: height
+            };
+
+            if (height < frame.height) {
+                verticalScroller.isVisible = false;
+            } else {
+                verticalScroller.isVisible = true;
+                verticalScroller.proportion = frame.height / height;
+                verticalScroller.maximum = height - frame.height;
+            }
+
+            if (width < frame.width) {
+                horizontalScroller.isVisible = false;
+            } else {
+                horizontalScroller.isVisible = true;
+                horizontalScroller.proportion = frame.width / width;
+                horizontalScroller.maximum = width - frame.width;
+            }
+        }.bind(this));
+    },
+    
     horizontalScrollOffset: null,
     verticalScrollOffset: null,
 
