@@ -49,8 +49,27 @@ var history = require('canon:history');
 var Request = require('canon:request').Request;
 var environment = require('canon:environment');
 
+/*
+ * Things to do to sanitize this code:
+ * - 'no command' is a bizarre special value at the very least it should be a
+ *   constant to make typos more obvious, but it would be better to refactor
+ *   so that a natural value like null worked.
+ * - sender seems to be totally customized to the editor case, and the functions
+ *   that we assume that it has make no sense for the commandLine case. We
+ *   should either document and implement the same function set for both cases
+ *   or admit that the cases are different enough to have separate
+ *   implementations.
+ * - remove remaining sproutcore-isms
+ * - fold buildFlags into processKeyEvent or something better, preferably the
+ *   latter. We don't want the environment to become a singleton
+ */
+
 /**
- *
+ * Every time we call processKeyEvent, we pass in some flags that require the
+ * same processing to set them up. This function can be called to do that
+ * setup.
+ * @param env Probably environment.global
+ * @param flags Probably {} (but check other places where this is called)
  */
 exports.buildFlags = function(env, flags) {
     flags.context = env.contexts[0];
