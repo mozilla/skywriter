@@ -42,17 +42,27 @@ var Trait = require('traits').Trait;
 var util = require('bespin:util/util');
 
 var File = require('filesystem:index').File;
-var DelegateTrait = require('delegate_support').DelegateTrait;
 var TextStorage = require('text_editor:models/textstorage').TextStorage;
 var m_path = require('filesystem:path');
 var bespin = require('appsupport:controllers/bespin').bespinController;
+var Event = require("events").Event;
 
 var History = require('edit_session:history').History;
 
 /**
  * A Buffer connects a model and file together.
  */
-exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
+exports.Buffer = function(session, model, syntaxManager) {
+    if (model == null) {
+        this.model = new TextStorage;
+    } else {
+        this.model = model;
+    }
+
+    this.syntaxManager = syntaxManager;
+};
+
+exports.Buffer.prototype = {
     _file: null,
 
    /**
@@ -77,7 +87,7 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
                 }.bind(this));
             }
 
-            this.notifyDelegates('bufferFileChanged', this._file);
+            this.session.bufferFileChanged(this._file);
         }
     },
 
@@ -90,14 +100,14 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
     */
     _model: null,
 
-    setModel: function(newModel) {
+    set model(newModel) {
         if (this._model !== newModel) {
             this._model = newModel;
-            this.notifyDelegates('bufferModelChanged', this._model);
+            this.session.bufferModelChanged(this._model);
         }
     },
 
-    getModel: function() {
+    get model() {
         return this._model;
     },
 
@@ -105,24 +115,6 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
      * The syntax manager associated with this file.
      */
     syntaxManager: null,
-
-    init: function(model, syntaxManager) {
-        this.__defineGetter__('model', this.getModel);
-        this.__defineSetter__('model', this.setModel);
-
-        this.__defineGetter__('file', this.getFile);
-        this.__defineSetter__('file', this.setFile);
-
-        if (model == null) {
-            this.model = new TextStorage;
-        } else {
-            this.model = model;
-        }
-
-        this.syntaxManager = syntaxManager;
-
-        return this;
-    },
 
    /**
     * This is like calling set('file', value) except this returns
@@ -205,30 +197,14 @@ exports.BufferTrait = Trait.compose(DelegateTrait, Trait({
     untitled: function() {
         return util.none(this._file);
     }
-}));
+};
 
 exports.EditSession = function() {
     this.history = new History();
 };
 
 exports.EditSession.prototype = {
-    _currentBuffer: null,
-
-    set currentBuffer(newBuffer) {
-        var oldBuffer = this._currentBuffer;
-        if (newBuffer !== oldBuffer) {
-            if (!util.none(oldBuffer)) {
-                oldBuffer.removeDelegate(this);
-            }
-
-            this._currentBuffer = newBuffer;
-            newBuffer.addDelegate(this);
-        }
-    },
-
-    get currentBuffer() {
-        return this._currentBuffer;
-    },
+    currentBuffer: null,
 
     /**
      * @property{TextView}
@@ -361,15 +337,20 @@ exports.EditSession.prototype = {
     }
 };
 
-// A small object that's exported to the Bespin controller to allow the
-// controller to find the relevant classes.
-exports.editSessionClasses = {
-    makeBuffer: function(model, syntaxManager) {
-        var Buffer = Trait.create(Object.prototype, exports.BufferTrait);
-        Buffer.init(model, syntaxManager);
-        return Buffer;
-    },
+/*
+ * set up a session based on a view. This seems a bit convoluted and is
+ * likely to change.
+ */
+exports.createSession = function(view) {
+    var session = new exports.EditSession();
+    var layoutManager = view.layoutManager;
+    var textStorage = layoutManager.textStorage;
+    var syntaxManager = layoutManager.syntaxManager;
 
-    EditSession: exports.EditSession
+    var buffer = new exports.Buffer(textStorage, syntaxManager);
+
+    session.currentBuffer = buffer;
+    session.currentView = editorView.textView;
+    return session;
 };
 

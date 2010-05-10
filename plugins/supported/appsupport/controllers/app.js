@@ -35,11 +35,111 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var userident = require("userident");
+var catalog = require("bespin:plugins").catalog;
 
-userident.showLogin();
+exports.runningConfig = null;
 
-exports.loggedIn = function() {
+/*
+ * launch Bespin with the configuration provided. The configuration is
+ * an object with the following properties:
+ * - objects: an object with a collection of named objects that will be
+ *            registered with the plugin catalog (see PluginCatalog.registerObject)
+ *            This will automatically be augmented with sane defaults (for
+ *            example, most Bespin users want a text editor!)
+ * - gui: instructions on how to build a GUI. Specifically, the current border
+ *        layout positions will be filled in. Again this provides sane defaults.
+ * - container: node to attach to (optional). If not provided a node will be 
+ *              created. and added to the body.
+ */
+exports.launch = function(config) {
+    config = config || {};
+    exports.normalizeConfig(config);
+    var objects = config.objects;
+    for (var key in objects) {
+        catalog.registerObject(key, objects[key]);
+    }
+    runningConfig = config;
+    
+    if (objects.loginController) {
+        catalog.createObject("loginController").then(
+            function(loginController) {
+                loginController.showLogin();
+            });
+    } else {
+        exports.launchEditor();
+    }
+};
+
+exports.normalizeConfig = function(config) {
+    if (config.objects === undefined) { 
+        config.objects = {};
+    }
+    if (config.autoload === undefined) {
+        config.autoload = [];
+    }
+    if (!config.objects.loginController && catalog.plugins.userident) {
+        config.objects.loginController = {
+        };
+    }
+    if (!config.objects.server && catalog.plugins.bespin_server) {
+        config.objects.server = {
+            factory: "bespin_server"
+        };
+        config.objects.filesource = {
+            factory: "bespin_filesource",
+            arguments: [
+                {
+                    _Registered_Object: "server"
+                }
+            ]
+        };
+    }
+    if (!config.objects.files && catalog.plugins.filesystem &&
+        config.objects.filesource) {
+        config.objects.files = {
+            arguments: [
+                {
+                    _Registered_Object: "filesource"
+                }
+            ]
+        };
+    }
+    if (!config.objects.editor) {
+        config.objects.editor = {
+            factory: "text_editor"
+        };
+    }
+    if (!config.objects.session) {
+        config.objects.session = {
+            arguments: [
+                {
+                    _Registered_Object: "editor"
+                }
+            ]
+        };
+    }
+    if (!config.objects.commandLine && catalog.plugins.command_line) {
+        config.objects.commandLine = {
+        };
+    }
+    
+    if (config.gui === undefined) {
+        config.gui = {};
+    }
+    if (!config.gui.center && config.objects.editor) {
+        config.gui.center = {
+            component: "editor"
+        };
+    }
+    if (!config.gui.south && config.objects.commandLine) {
+        config.gui.south = {
+            component: "commandLine",
+            height: 300
+        };
+    }
+};
+
+exports.launchEditor = function() {
     require('jlayout_border');
     var $ = require('jquery').$;
     var util = require('bespin:util/util');
@@ -84,7 +184,7 @@ exports.loggedIn = function() {
     // ---
     // Setup the editor:
 
-    var env = require('canon:environment').global
+    var env = require('canon:environment').global;
     var bespin = require('appsupport:controllers/bespin').bespinController;
     var EditorView = require('text_editor:views/editor').EditorView;
     var m_editsession = require('edit_session').editSessionClasses;

@@ -38,6 +38,7 @@
 require("globals");
 
 var Promise = require("promise").Promise;
+var group = require("promise").group;
 var builtins = require("builtins");
 var console = require("console").console;
 var util = require("util/util");
@@ -527,6 +528,8 @@ exports.Catalog = function() {
     this.plugins = {};
     this.deactivatedPlugins = {};
     this._extensionsOrdering = [];
+    this.instances = {};
+    this._objectDescriptors = {};
 
     // set up the "extensionpoint" extension point.
     // it indexes on name.
@@ -536,39 +539,125 @@ exports.Catalog = function() {
 };
 
 exports.Catalog.prototype = {
+    /*
+     * Registers information about an instance that will be tracked
+     * by the catalog. The first parameter is the name used for looking up
+     * the object. The descriptor should contain:
+     * - factory (optional): name of the factory extension used to create the
+     *                       object. defaults to the same value as the name
+     *                       property.
+     * - arguments (optional): array that is passed in if the factory is a
+     *                      function.
+     * 
+     * One special feature of arguments is that an argument can be an object
+     * that refers to another registered object. Such an object would look
+     * like this:
+     * {
+     *      "_Registered_Object": "objectname"
+     * }
+     * 
+     * If the plugin containing the factory is reloaded, the object will
+     * be recreated. The object will also be recreated if objects passed in
+     * are reloaded.
+     * 
+     * This method returns nothing and does not actually create the objects.
+     * The objects are created via the createObject method and retrieved
+     * via the getObject method.
+     */
+    registerObject: function(name, descriptor) {
+        this._objectDescriptors[name] = descriptor;
+    },
+    
+    /*
+     * Stores an object directly in the instance cache. This should
+     * not generally be used because reloading cannot work with
+     * these objects.
+     */
+    _setObject: function(name, obj) {
+        this.instances[name] = obj;
+    },
+    
+    /*
+     * Creates an object with a previously registered descriptor.
+     * 
+     * Returns a promise that will be resolved (with the created object)
+     * once the object has been made. The promise will be resolved
+     * immediately if the instance is already there.
+     * 
+     * throws an exception if the object is not registered or if
+     * the factory cannot be found.
+     */
+    createObject: function(name) {
+        var instance = this.instances[name];
+        var pr = new Promise();
+        
+        if (instance !== undefined) {
+            pr.resolve(instance);
+            return pr;
+        }
+        
+        var descriptor = this._objectDescriptors[name];
+        if (descriptor === undefined) {
+            throw new Error('Tried to create object "' + name +
+                '" but that object is not registered.');
+        }
+        
+        var factoryName = descriptor.factory || name;
+        var ext = this.getExtensionByKey("factory", factoryName);
+        if (ext === undefined) {
+            throw new Error('When creating object "' + name + 
+                '", there is no factory called "' + factoryName + 
+                '" available."');
+        }
+        var factoryArguments = descriptor.factoryArguments || [];
+        var argumentPromises = [];
+        for (var i=0; i < factoryArguments.length; i++) {
+            var arg = factoryArguments[i];
+            if (typeof(arg) == "object" && 
+                arg._Registered_Object) {
+                    var ropr = this.createObject(arg._Registered_Object);
+                    argumentPromises.push(ropr);
+                    // i is changing, so we can't count on using it
+                    // in the closure. we'll just save it on the
+                    // promise
+                    ropr.i = i;
+                    ropr.then(function(obj) {
+                        factoryArguments[this.i] = obj;
+                    }.bind(ropr));
+                }
+        }
+        
+        group(argumentPromises).then(function() {
+            ext.load().then(function(factory) {
+                var action = ext.action;
+                var obj;
+
+                if (action === "call") {
+                    obj = factory.apply(factory, factoryArguments);
+                } else if (action === "new") {
+                    obj = new factory();
+                    factory.prototype.constructor.apply(obj, factoryArguments);
+                } else if (action === "value") {
+                    obj = factory;
+                } else {
+                    pr.reject(new Error("Create action must be call|new|value. " +
+                            "Found" + action));
+                }
+
+                this.instances[name] = obj;
+                pr.resolve(obj);
+            }.bind(this));
+        }.bind(this));
+        
+        return pr;
+    },
+    
     /**
-     * Retrieve a registered singleton. Returns undefined
-     * if that factory is not registered.
+     * Retrieve a registered object. Returns undefined
+     * if the instance has not been created.
      */
     getObject: function(name) {
-        var ext = this.getExtensionByKey("factory", name);
-        if (ext === undefined) {
-            return undefined;
-        }
-
-        var obj = ext.instance;
-        if (obj) {
-            return obj;
-        }
-
-        var exported = ext._getLoaded();
-        var action = ext.action;
-
-        if (action === "call") {
-            obj = exported();
-        } else if (action === "create") {
-            obj = exported.create();
-        } else if (action === "new") {
-            obj = new exported();
-        } else if (action === "value") {
-            obj = exported;
-        } else {
-            throw new Error("Create action must be call|create|new|value. " +
-                    "Found" + action);
-        }
-
-        ext.instance = obj;
-        return obj;
+        return this.instances[name];
     },
 
     /** Retrieve an extension point object by name, optionally creating it if it
@@ -753,14 +842,18 @@ exports.Catalog.prototype = {
     },
 
     /**
-     * Loads the named plugin, calling the provided callback
+     * Loads the named plugin, returning a promise called
      * when the plugin is loaded. This function is a convenience
      * for unusual situations and debugging only. Generally,
      * you should load plugins by calling load() on an Extension
      * object.
      */
-    loadPlugin: function(pluginName, callback) {
-        require.ensurePackage(pluginName, callback);
+    loadPlugin: function(pluginName) {
+        var pr = new Promise();
+        require.ensurePackage(pluginName, function() {
+            pr.resolve();
+        });
+        return pr;
     },
 
     /**

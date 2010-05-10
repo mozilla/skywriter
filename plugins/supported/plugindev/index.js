@@ -189,7 +189,7 @@ exports.tempTest = function(testmodule) {
     if (!pluginName) {
         pluginName = testmodule;
     }
-    pluginCatalog.loadPlugin(pluginName, function() {
+    pluginCatalog.loadPlugin(pluginName).then(function() {
         core_test.module(testmodule);
         var mod = require(testmodule);
         // run the tests, logging to the console

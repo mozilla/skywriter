@@ -9,6 +9,12 @@
     },
     "provides": [
         {
+            "ep": "factory",
+            "name": "session",
+            "pointer": "#createSession",
+            "action": "call"
+        },
+        {
             "ep": "appcomponent",
             "name": "edit_session",
             "pointer": "index#editSessionClasses"

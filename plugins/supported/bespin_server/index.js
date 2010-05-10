@@ -45,14 +45,25 @@ var catalog = require('bespin:plugins').catalog;
 var util = require('bespin:util/util');
 var cookie = require('bespin:util/cookie');
 
+exports.createServer = function(base_url) {
+    exports.server = new exports.BespinServer(base_url);
+    
+    // start polling
+    exports.server._poll();
+
+    return exports.server;
+};
+
+exports.BespinServer = function(base_url) {
+    this.base_url = base_url || '';
+};
+
 /**
  * The Server object implements the Bespin Server API (See
  * https://wiki.mozilla.org/BespinServerAPI) giving the client access to the
  * backend store. The FileSystem object uses this to talk back.
  */
-exports.server = {
-    SERVER_BASE_URL: window.SERVER_BASE_URL == undefined ? '' : SERVER_BASE_URL,
-
+exports.BespinServer.prototype = {
     // Stores the outstanding asynchronous tasks that we've submitted
     _jobs: {},
 
@@ -163,7 +174,7 @@ exports.server = {
         };
 
         xhr.onreadystatechange = onreadystatechange;
-        xhr.open(method, this.SERVER_BASE_URL + url, true); // url must have leading /
+        xhr.open(method, this.base_url + url, true); // url must have leading /
 
         this.protectXhrAgainstCsrf(xhr);
 
@@ -435,6 +446,3 @@ exports.server = {
         }
     }
 };
-
-// start polling
-exports.server._poll();

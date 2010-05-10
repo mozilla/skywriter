@@ -1,7 +1,9 @@
 {
     "description": "Common services used in the editor application",
     "dependencies": {
-        "traits": "0.0"
+        "traits": "0.0.0",
+        "jlayout_border": "0.0.0",
+        "jsmt": "0.0.0"
     },
     "provides":
     [
@@ -49,7 +51,7 @@
         },
         {
             "ep": "loggedin",
-            "pointer": "controllers/app#loggedIn"
+            "pointer": "controllers/app#launchEditor"
         }
     ]
 }

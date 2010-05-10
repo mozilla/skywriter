@@ -40,9 +40,11 @@ var Promise = require('bespin:promise').Promise;
 var server = require('bespin_server').server;
 var pathUtil = require('filesystem:path');
 
-BespinFileSourceTrait = Trait({
-    server: server,
-    
+exports.BespinFileSource = function(server) {
+    this.server = server;
+};
+
+exports.BespinFileSource.prototype = {
     loadAll: function() {
         var opts = {
             evalJSON: true
@@ -70,15 +72,4 @@ BespinFileSourceTrait = Trait({
         var url = pathUtil.combine('/file/at/', path);
         return this.server.request('PUT', url, null);
     }
-});
-
-exports.BespinFileSource = {
-    create: function(options) {
-        var ret = Trait.create(Object.prototype, BespinFileSourceTrait);
-        for (option in options) {
-            ret[option] = options[option];
-        }
-        return ret;
-    },
-    trait: BespinFileSourceTrait
-}
+};

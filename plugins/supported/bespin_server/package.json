@@ -8,6 +8,18 @@
         "appsupport": "0.0"
     },
 	"provides": [
+    	{
+	        "ep": "factory",
+	        "name": "bespin_server",
+	        "action": "call",
+	        "pointer": "#createServer"
+    	},
+    	{
+    	    "ep": "factory",
+    	    "name": "bespin_filesource",
+    	    "action": "new",
+    	    "pointer": "filesource#BespinFileSource"
+    	},
         {
             "ep": "appcomponent",
             "description": "The default server file source",

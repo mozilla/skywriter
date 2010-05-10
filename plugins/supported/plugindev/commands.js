@@ -140,7 +140,7 @@ exports.add = function(env, args, request) {
         // After the pluginInfo.json is saved, load the plugin metadata.
         prSaveDone.then(function() {
             catalog.loadMetadataFromURL(
-                server.SERVER_BASE_URL + '/plugin/reload/' + pluginName
+                server.base_url + '/plugin/reload/' + pluginName
             ).then(function() {
                 request.done('Plugin loaded and pluginInfo file saved.');
             }, function(error) {
@@ -403,7 +403,7 @@ exports.activate = function(env, args, request) {
 
             prReloadList.push(
                 catalog.loadMetadataFromURL(
-                    server.SERVER_BASE_URL + '/plugin/reload/' + pluginName
+                    server.base_url + '/plugin/reload/' + pluginName
                 ).then(function() {
                     output.push('Plugin activated: ' + pluginName);
                 }, function(error) {

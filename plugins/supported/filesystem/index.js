@@ -88,7 +88,16 @@ exports.NEW = { name: 'NEW' };
 exports.LOADING = { name: 'LOADING' };
 exports.READY = { name: 'READY' };
 
-var FilesystemTrait = Trait({
+exports.Filesystem = function(source) {
+    if (!this.source) {
+        throw new Error('Filesystem must have a source.');
+    }
+
+    this._loadingPromises = [];
+    this.source = source;
+};
+
+exports.Filesystem.prototype = {
     // FileSource for this filesytem
     source: null,
 
@@ -309,18 +318,6 @@ var FilesystemTrait = Trait({
         });
         return pr;
     }
-});
-
-exports.Filesystem = {
-    create: function(options) {
-        var ret = Trait.create(Object.prototype, FilesystemTrait);
-        for (option in options) {
-            ret[option] = options[option];
-        }
-        ret.init();
-        return ret;
-    },
-    trait: FilesystemTrait
 };
 
 exports.File = function(fs, path) {

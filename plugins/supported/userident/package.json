@@ -10,6 +10,12 @@
     },
     "provides": [
         {
+            "ep": "factory",
+            "name": "loginController",
+            "action": "new",
+            "pointer": "#loginController"
+        },
+        {
             "ep": "themestyles",
             "url": "styles.less"
         },

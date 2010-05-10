@@ -37,7 +37,6 @@
 
 var util = require('bespin:util/util');
 var Event = require('events').Event;
-var server = require('bespin_server').server;
 var settings = require('settings').settings;
 var ServerPersister = require('bespin_server:settings').ServerPersister;
 var catalog = require('bespin:plugins').catalog;
@@ -50,18 +49,6 @@ require("toolbox_expose");
 
 var USER_INFO_URL = '/register/userinfo/';
 
-var displayError = function(title, text) {
-    var pane = SC.AlertPane.error(title, text);
-    pane.append();
-    pane.becomeKeyPane();
-};
-
-var displayInfo = function(title, text) {
-    var pane = SC.AlertPane.info(title, text);
-    pane.append();
-    pane.becomeKeyPane();
-};
-
 var searchQuery;
 
 (function() {
@@ -72,54 +59,65 @@ var searchQuery;
     }
 })();
 
-var notifyLoggedIn = function(data) {
-    catalog.getExtensions("loggedin").forEach(function(ext) {
-        ext.load().then(function(func) {
-            func(data);
-        });
-    });
-};
-
-var _getCurrentUser = function() {
+var _getCurrentUser = function(server) {
     return server.request('GET', USER_INFO_URL, null, { evalJSON: true });
 };
 
-var showLoginForm = function() {
-    var loginform = require("templates").login();
-    loginform = $(loginform)[0];
-    document.body.appendChild(loginform);
-    var overlayNode = $('#bespinloginform').overlay({
-        mask: {
-            color: '#fff',
-            loadSpeed: 200,
-            opacity: 0.5
-        },
-        closeOnClick: false,
-        closeOnEsc: false,
-        close: null,
-        load: true
-    });
-    $("#loginsubmit").click(function() {
-        var username = document.getElementById("username").value;
-        var password = document.getElementById("password").value;
-        var pr = exports.login(username, password);
-        pr.then(function(data) {
-            overlayNode.eq(0).overlay().close();
-            notifyLoggedIn(data);
-        });
-        return false;x
-    });
+
+exports.loginController = function() {
+    
 };
 
-exports.showLogin = function() {
-    var pr = _getCurrentUser();
-    pr.then(notifyLoggedIn, showLoginForm);
+exports.loginController.prototype = {
+    showLogin: function() {
+        catalog.createObject("server").then(function(server) {
+            var pr = _getCurrentUser(server);
+            pr.then(this.notifyLoggedIn.bind(this), 
+                this.showLoginForm.bind(this));
+        }.bind(this));
+    },
+
+    notifyLoggedIn: function(data) {
+        catalog.getExtensions("loggedin").forEach(function(ext) {
+            ext.load().then(function(func) {
+                func(data);
+            });
+        });
+    },
+
+    showLoginForm: function() {
+        var loginform = require("templates").login();
+        loginform = $(loginform)[0];
+        document.body.appendChild(loginform);
+        var overlayNode = $('#bespinloginform').overlay({
+            mask: {
+                color: '#fff',
+                loadSpeed: 200,
+                opacity: 0.5
+            },
+            closeOnClick: false,
+            closeOnEsc: false,
+            close: null,
+            load: true
+        });
+        var self = this;
+        $("#loginsubmit").click(function() {
+            var username = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+            var pr = exports.login(username, password);
+            pr.then(function(data) {
+                overlayNode.eq(0).overlay().close();
+                self.notifyLoggedIn(data);
+            });
+            return false;
+        });
+    }
 };
 
 /**
  * Controller for the sign-in process
  */
-exports.loginController = {
+exports.oldLoginController = {
     _getCurrentUser: function() {
         return server.request('GET', USER_INFO_URL, null, { evalJSON: true });
     },
@@ -890,6 +888,7 @@ exports.resetController = {
  * @param pass is the password
  */
 exports.login = function(user, pass) {
+    var server = catalog.getObject('server');
     var url = '/register/login/' + user;
     return server.request('POST', url, 'password=' + escape(pass), {
         log: 'Login complete.'
@@ -903,6 +902,7 @@ exports.login = function(user, pass) {
  * @param email is the email
  */
 exports.signup = function(user, pass, email, opts) {
+    var server = catalog.getObject('server');
     opts = opts || {};
     var url = '/register/new/' + user;
     var data = 'password=' + encodeURI(pass) + '&email=' + encodeURI(email);
@@ -914,6 +914,7 @@ exports.signup = function(user, pass, email, opts) {
  * @param onSuccess fires after the logout attempt
  */
 exports.logout = function() {
+    var server = catalog.getObject('server');
     var url = '/register/logout/';
     return server.request('POST', url, null, {
         log: 'Logout complete.'
@@ -941,6 +942,7 @@ exports.logout = function() {
  * Tell the backend that the user lost the password.
  */
 exports.lostPassword = function(values, opts) {
+    var server = catalog.getObject('server');
     opts = opts || {};
     var url = '/register/lost/';
     return server.request('POST', url, util.objectToQuery(values), opts);
@@ -950,6 +952,7 @@ exports.lostPassword = function(values, opts) {
  * Changes the user's password.
  */
 exports.changePassword = function(username, newPassword, verifyCode, opts) {
+    var server = catalog.getObject('server');
     var url = '/register/password/' + username;
     var query = { newPassword: newPassword, code: verifyCode };
     return server.request('POST', url, util.objectToQuery(query), opts || {});
@@ -960,6 +963,7 @@ exports.changePassword = function(username, newPassword, verifyCode, opts) {
  * of installed plugins.
  */
 exports.registerUserPlugins = function() {
+    var server = catalog.getObject('server');
     // Load the plugin metadata for the user's plugins
     var pr = server.request('GET', '/plugin/register/user', null,
         {

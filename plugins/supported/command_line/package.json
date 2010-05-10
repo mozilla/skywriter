@@ -12,6 +12,12 @@
     "provides":
     [
         {
+            "ep": "factory",
+            "name": "commandLine",
+            "action": "new",
+            "pointer": "views/cli#CliInputView"
+        },
+        {
             "ep": "appcomponent",
             "name": "command_line",
             "pointer": "views/cli#CliInputView"
