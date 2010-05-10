@@ -26,6 +26,7 @@ var Trait = require('traits').Trait;
 var console = require('bespin:console').console;
 var util = require('bespin:util/util');
 var m_promise = require('bespin:promise');
+var catalog = require('bespin:plugins').catalog;
 
 var pathUtil = require('filesystem:path');
 
@@ -100,8 +101,7 @@ var FilesystemTrait = Trait({
     init: function() {
         var source = this.source;
         if (typeof(source) == 'string') {
-            throw new Error('FilesystemTrait: Getting source from string is not back yet.');
-            // this.source = objectForPropertyPath(source);
+            this.source = catalog.objectForPropertyPath(source);
         }
 
         if (!this.source) {
