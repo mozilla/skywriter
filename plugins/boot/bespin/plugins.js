@@ -95,7 +95,7 @@ exports.Extension = function(metadata) {
             this[property] = metadata[property];
         }
     }
-    
+
     this._observers = [];
 };
 
@@ -212,7 +212,7 @@ exports.ExtensionPoint.prototype = {
         matches.sort();
         return matches;
     },
-    
+
     /**
      * Get the name of the plugin that defines this extension point.
      */
@@ -915,10 +915,60 @@ exports.Catalog.prototype = {
         }
 
         require.ensurePackage(pluginName, function() {
-            promise.resolve(SC.objectForPropertyPath(path));
-        });
+            promise.resolve(this.objectForPropertyPath(path));
+        }.bind(this));
 
         return promise;
+    },
+
+    objectForPropertyPath: function(path, root, stopAt) {
+        stopAt = (stopAt == undefined) ? path.length : stopAt;
+        var hashed = path.split("#");
+        if (hashed.length == 1) {
+            return this.objectForPropertyPathSC(path, root, stopAt);
+        }
+        var module = require(hashed[0]);
+        if (module === undefined) {
+            return undefined;
+        }
+        stopAt = stopAt - hashed[0].length;
+        return this.objectForPropertyPathSC(hashed[1], module, stopAt);
+    },
+
+    /**
+     * Finds the object for the passed path or array of path components.  This is
+     * the standard method used in SproutCore to traverse object paths.
+     * @param path {String} the path
+     * @param root {Object} optional root object.  window is used otherwise
+     * @param stopAt {Integer} optional point to stop searching the path.
+     * @returns {Object} the found object or undefined.
+     */
+    objectForPropertyPathSC: function(path, root, stopAt) {
+
+        if (!root) {
+            root = window;
+        }
+
+        if (stopAt === undefined) {
+            stopAt = path.length;
+        }
+
+        var loc = 0;
+        while ((root) && (loc < stopAt)) {
+            var nextDotAt = path.indexOf('.', loc);
+            if ((nextDotAt < 0) || (nextDotAt > stopAt)) {
+                nextDotAt = stopAt;
+            }
+            var key = path.slice(loc, nextDotAt);
+            root = root[key];
+            loc = nextDotAt + 1;
+        }
+
+        if (loc < stopAt) {
+            root = undefined; // hit a dead end. :(
+        }
+
+        return root;
     },
 
     /**
