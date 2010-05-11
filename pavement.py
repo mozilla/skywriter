@@ -53,7 +53,7 @@ dryice=dryice.tool:main
 options(
     version=Bunch(
         number="0.8.0",
-        name="Theora",
+        name="Cheviot",
         api="4"
     ),
     virtualenv=Bunch(
