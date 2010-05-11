@@ -41,6 +41,8 @@ var Promise = require("bespin:promise").Promise;
 var console = require("bespin:console").console;
 var Trace = require("bespin:util/stacktrace").Trace;
 
+require("jlayout_border");
+
 exports.runningConfig = null;
 
 /*
@@ -108,24 +110,24 @@ exports.normalizeConfig = function(config) {
             ]
         };
     }
-    if (!config.objects.editor) {
-        // TODO temporary hack until the editor follows the new protocol
-        var editorContainer = document.createElement("div");
-        editorContainer.setAttribute("class", "center");
-        config.objects.editor = {
-            factory: "text_editor",
-            arguments: [
-                editorContainer
-            ]
-        };
-    }
+    // if (!config.objects.editor) {
+    //     // TODO temporary hack until the editor follows the new protocol
+    //     var editorContainer = document.createElement("div");
+    //     editorContainer.setAttribute("class", "center");
+    //     config.objects.editor = {
+    //         factory: "text_editor",
+    //         arguments: [
+    //             editorContainer
+    //         ]
+    //     };
+    // }
     if (!config.objects.session) {
         config.objects.session = {
-            arguments: [
-                {
-                    _Registered_Object: "editor"
-                }
-            ]
+            // arguments: [
+            //     {
+            //         _Registered_Object: "editor"
+            //     }
+            // ]
         };
     }
     if (!config.objects.commandLine && catalog.plugins.command_line) {
@@ -141,12 +143,73 @@ exports.normalizeConfig = function(config) {
             component: "editor"
         };
     }
-    if (!config.gui.south && config.objects.commandLine) {
-        config.gui.south = {
-            component: "commandLine",
-            height: 300
-        };
+    // if (!config.gui.south && config.objects.commandLine) {
+    //     config.gui.south = {
+    //         component: "commandLine",
+    //         height: 300
+    //     };
+    // }
+};
+
+exports.oldlaunchEditor = function() {
+    require('jlayout_border');
+    var $ = require('jquery').$;
+    var util = require('bespin:util/util');
+    var CliInputView = require('command_line:views/cli').CliInputView;
+
+    var parent = document.createElement('div');
+    parent.setAttribute('id', 'container');
+    parent.setAttribute('style', 'width: 100%; height: 100%; margin: 0');
+    document.body.appendChild(parent);
+
+    parent.innerHTML = '<div id="editor" class="center">Editor goes here</div>';
+
+    var cliInputView = new CliInputView();
+    parent.appendChild(cliInputView.element);
+    util.addClass(cliInputView.element, 'south');
+    cliInputView.element.style.height = '300px';
+
+    var loading = document.getElementById('loading');
+    document.body.removeChild(loading);
+
+    var container = $('#container');
+
+    function relayout() {
+    	container.layout({
+    	    type: 'border',
+    	    resize: false,
+    	    south__minSize: 300,
+            south__resizable: true,
+            south__spacing_open: 10,
+            south__spacing_closed: 5
+    	});
     }
+
+    relayout();
+
+    $(window).resize(relayout);
+
+    // ---
+    // Setup the editor:
+
+    var env = require('canon:environment').global;
+    var bespin = require('appsupport:controllers/bespin').bespinController;
+    var EditorView = require('text_editor:views/editor').EditorView;
+    var m_editsession = require('edit_session').editSessionClasses;
+
+    var editorView = new EditorView(document.getElementById('editor'));
+
+    // TODO: This is a temporary hack.
+    var session = new m_editsession.EditSession();
+    var layoutManager = editorView.layoutManager;
+    var textStorage = layoutManager.textStorage;
+    var syntaxManager = layoutManager.syntaxManager;
+
+    var buffer = m_editsession.makeBuffer(textStorage, syntaxManager);
+
+    session.currentBuffer = buffer;
+    session.currentView = editorView.textView;
+    bespin.session = session;
 };
 
 exports.launchEditor = function() {
@@ -182,12 +245,9 @@ var generateGUI = function() {
     var container = document.createElement('div');
     container.setAttribute('class', 'bespin container');
     
-    console.log("adding container");
-    if (config.element) {
-        config.element.appendChild(container);
-    } else {
-        document.body.appendChild(container);
-    }
+    var centerContainer = document.createElement('div');
+    centerContainer.setAttribute('class', 'bespin center-container');
+    container.appendChild(centerContainer);
     
     console.log("Placing components");
     for (var place in config.gui) {
@@ -209,8 +269,28 @@ var generateGUI = function() {
         
         console.log(descriptor.component, " goes ", place);
         $(element).addClass(place);
-        container.appendChild(element);
+        
+        if (place == 'west' || place == 'east' || place == 'center') {
+            centerContainer.appendChild(element);
+        } else {
+            container.appendChild(element);
+        }
     }
+    
+    console.log("adding container");
+    if (config.element) {
+        config.element.appendChild(container);
+    } else {
+        document.body.appendChild(container);
+    }
+    
+    var editorDiv = document.createElement("div");
+    editorDiv.setAttribute('class', "center");
+    centerContainer.appendChild(editorDiv);
+    var EditorView = require('text_editor:views/editor').EditorView;
+    var editorView = new EditorView(editorDiv);
+    catalog.getObject("session").currentView = editorView.textView;
+    
     // var util = require('bespin:util/util');
     // var CliInputView = require('command_line:views/cli').CliInputView;
     // 

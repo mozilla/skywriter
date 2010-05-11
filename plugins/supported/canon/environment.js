@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var console = require('bespin:console').console;
-var bespin = require('appsupport:controllers/bespin').bespinController;
+// var bespin = require('appsupport:controllers/bespin').bespinController;
 
 /**
  * The environment plays a similar role to the environment under unix.

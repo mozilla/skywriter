@@ -6,7 +6,8 @@
         "events": "0.0",
         "settings": "0.0",
         "overlay": "1.2.0",
-        "toolbox_expose": "1.2.0"
+        "toolbox_expose": "1.2.0",
+        "edit_session": "0.0.0"
     },
     "provides": [
         {

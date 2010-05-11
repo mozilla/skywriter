@@ -345,14 +345,16 @@ exports.EditSession.prototype = {
  */
 exports.createSession = function(view) {
     var session = new exports.EditSession();
-    session.currentView = view.textView;
-    var layoutManager = view.layoutManager;
-    var textStorage = layoutManager.textStorage;
-    var syntaxManager = layoutManager.syntaxManager;
+    if (view) {
+        session.currentView = view.textView;
+        var layoutManager = view.layoutManager;
+        var textStorage = layoutManager.textStorage;
+        var syntaxManager = layoutManager.syntaxManager;
 
-    var buffer = new exports.Buffer(session, textStorage, syntaxManager);
+        var buffer = new exports.Buffer(session, textStorage, syntaxManager);
 
-    session.currentBuffer = buffer;
+        session.currentBuffer = buffer;
+    }
     return session;
 };
 

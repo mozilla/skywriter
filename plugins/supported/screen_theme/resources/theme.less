@@ -48,38 +48,50 @@
     }
     
     .container {
-        display: box;
-        box-orient: vertical;
-        width: 100%;
+        display: -moz-box;
+        -moz-box-orient: vertical;
+        -moz-width: 100%;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-width: 100%;
         height: 100%;
         margin: 0;
     }
     
     .north {
-        box-ordinal-group: 1;
+        -moz-box-ordinal-group: 1;
+        -webkit-box-ordinal-group: 1;
     }
     
     .center-container {
-        display: box;
-        box-orient: horizontal;
-        box-ordinal-group: 2;
+        display: -moz-box;
+        -moz-box-orient: horizontal;
+        -moz-box-ordinal-group: 2;
+        display: -webkit-box;
+        -webkit-box-orient: horizontal;
+        -webkit-box-ordinal-group: 2;
     }
     
     .south {
-        box-ordinal-group: 3;
+        -moz-box-ordinal-group: 3;
+        -webkit-box-ordinal-group: 3;
     }
     
     .west {
-        box-ordinal-group: 1;
+        -moz-box-ordinal-group: 1;
+        -webkit-box-ordinal-group: 1;
     }
     
     .center {
-        box-flex: 1;
-        box-ordinal-group: 2;
+        -moz-box-flex: 1;
+        -moz-box-ordinal-group: 2;
+        -webkit-box-flex: 1;
+        -webkit-box-ordinal-group: 2;
     }
     
     .east {
-        box-ordinal-group: 3;
+        -moz-box-ordinal-group: 3;
+        -webkit-box-ordinal-group: 3;
     }
     
     .pane {

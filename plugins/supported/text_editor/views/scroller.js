@@ -447,6 +447,9 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
     },
 
     drawRect: function(rect, ctx) {
+        // TODO re-enable this!
+        return;
+        
         // Only draw when visible.
         if (!this._isVisible) {
             return;

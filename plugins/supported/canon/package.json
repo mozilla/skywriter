@@ -3,8 +3,7 @@
     "dependencies":
     {
         "settings": "0.0",
-        "events": "0.0",
-        "appsupport": "0.0"
+        "events": "0.0"
     },
     "provides":
     [
