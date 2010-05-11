@@ -35,43 +35,40 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var names = [
-    "log", "debug", "info", "warn", "error", "assert", "dir", "dirxml",
-    "trace", "group", "groupCollapsed", "groupEnd", "time", "timeEnd",
-    "profile", "profileEnd", "count"
-];
 
 /**
  * This object represents a "safe console" object that forwards debugging
  * messages appropriately without creating a dependency on Firebug in Firefox.
  */
-exports.console = {
-    _error: function() { /* Is there anything sane we can do here? */ }
-};
 
-function stub() {
-    this._error(arguments);
-}
+// We could prefer to copy the methods on window.console to exports.console
+// one by one because then we could be sure of using the safe subset that is
+// implemented on all browsers, however this doesn't work properly everywhere
+// ...
 
-function redirect (name) {
-    return function () {
-        window.console[name].apply(window.console, arguments);
-    };
-}
+if (window.console && window.console.markTimeline) {
+    // Webkit's output functions are bizarre because they get confused if 'this'
+    // is not window.console, so we just copy it all across
+    exports.console = window.console;
+} else {
+    // So we're not in Webkit, but we may still be no console object (in the
+    // case of Firefox without Firebug)
+    exports.console = { };
 
-if (window.console) {
-    // there is a native window console
-    names.forEach(function (name) {
-        if (window.console[name]) {
-            exports.console[name] = redirect(name);
+    var names = [
+        "log", "debug", "info", "warn", "error", "assert", "dir", "dirxml",
+        "trace", "group", "groupCollapsed", "groupEnd", "time", "timeEnd",
+        "profile", "profileEnd", "count"
+    ];
+
+    // For each of the console functions, copy them if they exist, stub if not
+    names.forEach(function(name) {
+        if (window.console && window.console[name]) {
+            exports.console[name] = window.console[name];
+        } else {
+            exports.console[name] = function() {
+                // There's probably nothing smart we can do here.
+            };
         }
     });
 }
-
-// stub the rest
-names.forEach(function (name) {
-    if (!exports.console[name]) {
-        exports.console[name] = stub;
-    }
-});
-
