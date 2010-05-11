@@ -289,6 +289,7 @@ var generateGUI = function() {
     centerContainer.appendChild(editorDiv);
     var EditorView = require('text_editor:views/editor').EditorView;
     var editorView = new EditorView(editorDiv);
+    catalog.instances['editor'] = editorView;
     catalog.getObject("session").currentView = editorView.textView;
     
     // var util = require('bespin:util/util');

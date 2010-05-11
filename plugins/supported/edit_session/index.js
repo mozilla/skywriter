@@ -227,6 +227,14 @@ exports.EditSession.prototype = {
             // TODO: Add this back later again.
             // newView.addDelegate(this);
         }
+        
+        var layoutManager = newView.layoutManager;
+        var textStorage = layoutManager.textStorage;
+        var syntaxManager = layoutManager.syntaxManager;
+
+        var buffer = new exports.Buffer(this, textStorage, syntaxManager);
+
+        this.currentBuffer = buffer;
     },
 
     get currentView() {
