@@ -116,23 +116,24 @@ def install_tiki(options):
     up to date easier."""
     
     snapshot = path("static") / "tiki.js"
+    if snapshot.exists():
+        if options.force:
+            snapshot.unlink()
+        else:
+            info("Tiki snapshot installed already.")
+            return
+
     if not options.git:
-        if snapshot.exists():
-            if options.force:
-                snapshot.unlink()
-            else:
-                info("Tiki snapshot installed already.")
-                return
         info("Downloading Tiki Snapshot")
-        preamble = urllib2.urlopen("http://github.com/sproutit/tiki/raw/master/__preamble__.js").read().decode("utf8")
-        body = urllib2.urlopen("http://github.com/sproutit/tiki/raw/master/lib/tiki.js").read().decode("utf8")
-        postamble = urllib2.urlopen("http://github.com/sproutit/tiki/raw/master/__postamble__.js").read().decode("utf8")
+        preamble = urllib2.urlopen("http://github.com/pcwalton/tiki/raw/master/__preamble__.js").read().decode("utf8")
+        body = urllib2.urlopen("http://github.com/pcwalton/tiki/raw/master/lib/tiki.js").read().decode("utf8")
+        postamble = urllib2.urlopen("http://github.com/pcwalton/tiki/raw/master/__postamble__.js").read().decode("utf8")
         TIKI_VERSION = u"1.0.0"
         package_id = u"::tiki/%s" % (TIKI_VERSION)
         snapshot.write_text(TIKI_TEMPLATE % locals(), "utf8")
         return
 
-    def get_component(base_name, dest_name, dest_path=".", branch=None, account="dangoor"):
+    def get_component(base_name, dest_name, dest_path=".", branch=None, account="pcwalton"):
         dest_complete = path(dest_path) / dest_name
         if dest_complete.exists():
             info("%s is already here, no action being taken", base_name)
@@ -157,12 +158,12 @@ def install_tiki(options):
 
     get_component("tiki", "tiki", dest_path="frameworks")
     get_component("core_test", "core_test", dest_path="frameworks")
-    preamble = path("frameworks/tiki/__preamble__.js").text()
-    postamble = path("frameworks/tiki/__postamble__.js").text()
-    body = path("frameworks/tiki/lib/tiki.js").text()
+    preamble = path("frameworks/tiki/__preamble__.js").text('utf8')
+    postamble = path("frameworks/tiki/__postamble__.js").text('utf8')
+    body = path("frameworks/tiki/lib/tiki.js").text('utf8')
     TIKI_VERSION = "1.0.0"
     package_id = "::tiki/%s" % (TIKI_VERSION)
-    snapshot.write_text(TIKI_TEMPLATE % locals())
+    snapshot.write_text(TIKI_TEMPLATE % locals(), 'utf8')
 
 @task
 @cmdopts([('force', 'f', 'force download of snapshot')])
