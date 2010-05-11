@@ -54,8 +54,12 @@ exports.loggedIn = function() {
 
     var cliInputView = new CliInputView();
     parent.appendChild(cliInputView.element);
-    util.addClass(cliInputView.element, 'south');
-    cliInputView.element.style.height = '300px';
+    util.addClass(cliInputView.element, 'north');
+
+    // We call this to tell the widget that it's geometry has changed (i.e.
+    // we've attached to a side, which changes how it does height/width)
+    // Perhaps this should be part of some bigger 'widget' spec/thing
+    cliInputView.layout();
 
     var loading = document.getElementById('loading');
     document.body.removeChild(loading);

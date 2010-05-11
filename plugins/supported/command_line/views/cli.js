@@ -73,6 +73,7 @@ exports.CliInputView = function() {
 
     this.element = document.createElement('div');
     this.element.className = 'cmd_line';
+    this.element.style.height = '300px';
 
     // We need to know if blur events from the input really matter (i.e. are
     // they going to the editor or another view, or just to another part of
@@ -107,7 +108,7 @@ exports.CliInputView = function() {
     pin.onclick = function(ev) {
         // TODO: change the image
         this._pinned = !this._pinned;
-        this.checkHeight();
+        this.checkSize();
     }.bind(this);
     toolbar.appendChild(pin);
 
@@ -162,24 +163,24 @@ exports.CliInputView = function() {
 
     this.element.addEventListener('focus', function(ev) {
         this._hasFocus = true;
-        this.checkHeight();
+        this.checkSize();
     }.bind(this), true);
 
     this.element.addEventListener('blur', function(ev) {
         this._hasFocus = false;
-        this.checkHeight();
+        this.checkSize();
     }.bind(this), true);
 
     catalog.registerExtension('settingChange', {
         match: "[min|max]ConsoleHeight",
-        pointer: this.checkHeight.bind(this)
+        pointer: this.checkSize.bind(this)
     });
 
     catalog.registerExtension('addedRequestOutput', {
         pointer: this.addedRequestOutput.bind(this)
     });
 
-    this.checkHeight();
+    this._lastOrientation = null;
 };
 
 /**
@@ -194,17 +195,69 @@ exports.CliInputView.prototype = {
     },
 
     /**
+     * See note in app.js
+     */
+    layout: function() {
+        this.checkSize();
+    },
+
+    /**
+     * Perhaps this should be part of some widget superclass?
+     */
+    getOrientation: function() {
+        var className = this.element.className;
+        var north = /\bnorth\b/.test(className);
+        var south = /\bsouth\b/.test(className);
+        var east = /\beast\b/.test(className);
+        var west = /\bwest\b/.test(className);
+
+        if (north && !south && !east && !west) {
+            return 'north';
+        }
+        if (!north && south && !east && !west) {
+            return 'south';
+        }
+        if (!north && !south && east && !west) {
+            return 'east';
+        }
+        if (!north && !south && !east && west) {
+            return 'west';
+        }
+
+        throw new Error('Ambiguous orientation: north=' + north +
+                ', south=' + south + ', east=' + east + ', west=' + west);
+    },
+
+    /**
      * Called whenever anything happens that could affect the output display
      */
-    checkHeight: function() {
-        var height = settings.get('minConsoleHeight');
-        if (this._pinned || this._hasFocus) {
-            height = settings.get('maxConsoleHeight');
+    checkSize: function() {
+        var orientation = this.getOrientation();
+        if (orientation === this._lastOrientation) {
+            if (orientation === 'north' || orientation === 'south') {
+                // We've changed to vertical orientation (east/west)
+                this.element.style.height = '100%';
+                // Width also calculated when orientation is unchanged (below)
+            } else {
+                // We've changed to horizontal orientation (north/south)
+                // Height also calculated when orientation is unchanged (below)
+                this.element.style.width = '100%';
+            }
         }
-        height += inputHeight;
 
-        if (this.element.height != height) {
-            this.element.height = height;
+        if (orientation === 'north' || orientation === 'south') {
+            var height = settings.get('minConsoleHeight');
+            if (this._pinned || this._hasFocus) {
+                height = settings.get('maxConsoleHeight');
+            }
+            height += inputHeight;
+
+            this.element.style.height = height + 'px';
+        }
+
+        if (orientation === 'east' || orientation === 'west') {
+            // TODO - setting?
+            this.element.style.width = '400px';
         }
     },
 
@@ -479,17 +532,6 @@ exports.CliInputView.prototype = {
             window.clearTimeout(this._blurTimeout);
             this._blurTimeout = null;
         }
-    },
-
-    /**
-     * Positions the insertion point at the end of the input element.
-     */
-    replaceSelection: function(text) {
-        var length = text.length;
-        this.setInput(text);
-        window.setTimeout(function() {
-            this._inputer.setSelectionRange(length, length);
-        }.bind(this), 0);
     },
 
     /**
