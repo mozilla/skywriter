@@ -453,8 +453,7 @@ TestOutputLogger.prototype = {
             this.next.info(testInfo, msg);
         }
     }
-
-});
+};
 
 exports.testrunner = function(env, args, request) {
     var plugin;
