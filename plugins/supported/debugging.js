@@ -57,7 +57,7 @@
             ],
             "hidden": true,
             "description": "execute any editor action",
-            "pointer": "debug#actionCommand"
+            "pointer": "#actionCommand"
         },
         {
             "ep": "command",
@@ -67,7 +67,7 @@
                 {
                     "name": "message",
                     "type": "text",
-                    "description": "???"
+                    "description": "The text to echo to the command line"
                 }
             ],
             "hidden": true,
@@ -214,8 +214,6 @@ var util = require('bespin:util/util');
 var catalog = require('bespin:plugins').catalog;
 var promiseMod = require('bespin:promise');
 
-var editor = catalog.get('editor');
-
 /**
  * The 'action' command
  */
@@ -227,7 +225,7 @@ exports.actionCommand = function(env, args, request) {
  * The 'echo' command
  */
 exports.echoCommand = function(env, args, request) {
-    request.done(args);
+    request.done(args.message);
 };
 
 /**
