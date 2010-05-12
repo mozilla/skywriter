@@ -43,7 +43,6 @@
         "dock_view": "0.0",
         "edit_session": "0.0",
         "events": "0.0",
-        "keylistener": "0.0",
         "rangeutils": "0.0",
         "screen_theme": "0.0",
         "settings": "0.0",
@@ -150,15 +149,11 @@ var embeddedEditor = Trait.object({
     ],
 
     /**
-     * @type {SC.Pane}
-     *
      * The pane in which Bespin lives.
      */
     pane: null,
 
     /**
-     * @type {class<SC.Pane>}
-     *
      * The type of the pane in which Bespin lives. This field is supplied by
      * the Bespin controller and is instantiated in the init() function.
      */

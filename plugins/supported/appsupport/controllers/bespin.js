@@ -338,8 +338,6 @@ bespinController = Object.create(Object.prototype, Trait({
     loadFile: true,
 
     /**
-     * @type{SC.MainPane}
-     *
      * The pane in which Bespin lives.
      */
     pane: null,
