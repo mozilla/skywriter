@@ -41,7 +41,7 @@ var settings = require('settings').settings;
 var ServerPersister = require('bespin_server:settings').ServerPersister;
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
-var env = require('canon:environment').global;
+var Promise = require("bespin:promise").Promise;
 
 var $ = require("jquery").$;
 require("overlay");
@@ -70,23 +70,18 @@ exports.loginController = function() {
 
 exports.loginController.prototype = {
     showLogin: function() {
+        var pr = new Promise();
         catalog.createObject("server").then(function(server) {
-            var pr = _getCurrentUser(server);
-            pr.then(this.notifyLoggedIn.bind(this), 
-                this.showLoginForm.bind(this));
+            var prAlreadyLoggedIn = _getCurrentUser(server);
+            prAlreadyLoggedIn.then(pr.resolve.bind(pr), 
+                function() {
+                    this._showLoginForm(pr);
+                }.bind(this));
         }.bind(this));
+        return pr;
     },
 
-    notifyLoggedIn: function(data) {
-        catalog.getExtensions("loggedin").forEach(function(ext) {
-            console.log(ext);
-            ext.load().then(function(func) {
-                func(data);
-            });
-        });
-    },
-
-    showLoginForm: function() {
+    _showLoginForm: function(pr) {
         var loginform = require("templates").login();
         loginform = $(loginform)[0];
         document.body.appendChild(loginform);
@@ -105,10 +100,10 @@ exports.loginController.prototype = {
         $("#loginsubmit").click(function() {
             var username = document.getElementById("username").value;
             var password = document.getElementById("password").value;
-            var pr = exports.login(username, password);
-            pr.then(function(data) {
+            var prLogin = exports.login(username, password);
+            prLogin.then(function(data) {
                 overlayNode.eq(0).overlay().close();
-                self.notifyLoggedIn(data);
+                pr.resolve(data);
             });
             return false;
         });

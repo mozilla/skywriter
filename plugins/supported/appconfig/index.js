@@ -41,8 +41,6 @@ var Promise = require("bespin:promise").Promise;
 var console = require("bespin:console").console;
 var Trace = require("bespin:util/stacktrace").Trace;
 
-exports.runningConfig = null;
-
 /*
  * launch Bespin with the configuration provided. The configuration is
  * an object with the following properties:
@@ -62,15 +60,17 @@ exports.launch = function(config) {
     for (var key in objects) {
         catalog.registerObject(key, objects[key]);
     }
-    exports.runningConfig = config;
     
     if (objects.loginController) {
         catalog.createObject("loginController").then(
             function(loginController) {
-                loginController.showLogin();
+                var pr = loginController.showLogin();
+                pr.then(function() {
+                    exports.launchEditor(config);
+                });
             });
     } else {
-        exports.launchEditor();
+        exports.launchEditor(config);
     }
 };
 
@@ -149,9 +149,7 @@ exports.normalizeConfig = function(config) {
     }
 };
 
-exports.launchEditor = function() {
-    var config = exports.runningConfig;
-
+exports.launchEditor = function(config) {
     if (config === null) {
         var message = 'Cannot start editor without a configuration!';
         console.error(message);
@@ -159,7 +157,9 @@ exports.launchEditor = function() {
     }
     
     var pr = createAllObjects(config);
-    pr.then(generateGUI, function(error) {
+    pr.then(function() {
+        generateGUI(config);
+    }, function(error) {
         console.log('Error while creating objects');
         new Trace(error).log();
     });
@@ -173,9 +173,7 @@ var createAllObjects = function(config) {
     return group(promises);
 };
 
-var generateGUI = function() {
-    var config = exports.runningConfig;
-    
+var generateGUI = function(config) {
     var $ = require('jquery').$;
     
     var container = document.createElement('div');
