@@ -42,7 +42,6 @@ var util = require('bespin:util/util');
 
 var server = require('bespin_server').server;
 var pathutils = require('filesystem:path');
-var bespin = require('appsupport:controllers/bespin').bespinController;
 
 var getPluginName = function(path) {
     if (util.endsWith(path, '/')) {
@@ -79,7 +78,7 @@ var changePluginInfo = function(env, request) {
     });
 
     var pluginConfigPath = 'BespinSettings/pluginInfo.json';
-    var pluginConfigFile = bespin.files.getFile(pluginConfigPath);
+    var pluginConfigFile = catalog.getObject("files").getFile(pluginConfigPath);
     pluginConfigFile.loadContents().then(function(contents) {
         pluginConfig = JSON.parse(contents);
         pr.resolve({
@@ -229,7 +228,7 @@ exports.remove = function(env, args, request) {
     }
     catalog.removePlugin(pluginName);
 
-    var pluginConfigFile = bespin.files.getFile('BespinSettings/pluginInfo.json');
+    var pluginConfigFile = catalog.getObject("files").getFile('BespinSettings/pluginInfo.json');
 
     pluginConfigFile.loadContents().then(function(contents) {
         var pluginConfig = JSON.parse(contents);

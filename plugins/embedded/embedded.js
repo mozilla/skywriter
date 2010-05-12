@@ -39,8 +39,7 @@
 ({
     "description": "The environment for an embedded Bespin instance",
     "dependencies": {
-        "appsupport": "0.0",
-        "dock_view": "0.0",
+        "appconfig": "0.0",
         "edit_session": "0.0",
         "events": "0.0",
         "keylistener": "0.0",

@@ -2,12 +2,11 @@
     "description": "Identifies the user via a Bespin server",
     "dependencies": {
         "bespin_server": "0.0",
-        "canon": "0.0",
+        "jsmt": "0.0.0",
         "events": "0.0",
         "settings": "0.0",
         "overlay": "1.2.0",
-        "toolbox_expose": "1.2.0",
-        "edit_session": "0.0.0"
+        "toolbox_expose": "1.2.0"
     },
     "provides": [
         {

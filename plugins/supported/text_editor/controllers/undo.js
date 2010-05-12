@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var console = require('bespin:console').console;
-var undoManager = require('appsupport:controllers/undomanager').undoManager;
+var undoManager = require('undomanager').undoManager;
 
 /**
  * @class

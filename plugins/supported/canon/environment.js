@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var console = require('bespin:console').console;
-// var bespin = require('appsupport:controllers/bespin').bespinController;
+var catalog = require("bespin:plugins").catalog;
 
 /**
  * The environment plays a similar role to the environment under unix.
@@ -56,7 +56,7 @@ exports.Environment.prototype = {
      * Retrieves the EditSession
      */
     get session() {
-        return bespin.session;
+        return catalog.getObject('session');
     },
 
     /**
@@ -124,7 +124,7 @@ exports.Environment.prototype = {
      * mechanism for populating these things from the catalog?
      */
     get files() {
-        return bespin.files;
+        return catalog.getObject('files');
     }
 };
 

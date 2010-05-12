@@ -38,7 +38,6 @@
 var Trait = require('traits').Trait;
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
-var bespin = require('appsupport:controllers/bespin').bespinController;
 var Trace = require('bespin:util/stacktrace').Trace;
 
 /**
@@ -50,7 +49,7 @@ var ServerPersisterTrait = Trait({
     _loading: false,
 
     loadInitialValues: function(settings) {
-        var promise = bespin.files.loadContents('BespinSettings/settings');
+        var promise = catalog.getObject("files").loadContents('BespinSettings/settings');
         promise.then(function(contents) {
             var data;
             try {
@@ -97,7 +96,7 @@ var ServerPersisterTrait = Trait({
             return;
         }
         // Send it to the server
-        bespin.files.saveContents('BespinSettings/settings', settingsString);
+        catalog.getObject("files").saveContents('BespinSettings/settings', settingsString);
     }
 });
 

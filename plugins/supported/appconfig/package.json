@@ -1,8 +1,6 @@
 {
-    "description": "Common services used in the editor application",
+    "description": "Instantiates components and displays the GUI based on configuration.",
     "dependencies": {
-        "traits": "0.0.0",
-        "jsmt": "0.0.0",
         "screen_theme": "0.0.0"
     },
     "provides":
@@ -32,26 +30,8 @@
             ]
         },
         {
-            "ep": "extensionhandler",
-            "name": "appcomponent",
-            "__register": "controllers/bespin#registerAppComponent",
-            "__unregister": "controllers/bespin#unregisterAppComponent"
-        },
-        {
-            "ep": "command",
-            "name": "redo",
-            "key": [ "ctrl_shift_z" ],
-            "pointer": "controllers/undomanager#undoManagerCommand"
-        },
-        {
-            "ep": "command",
-            "name": "undo",
-            "key": [ "ctrl_z" ],
-            "pointer": "controllers/undomanager#undoManagerCommand"
-        },
-        {
             "ep": "loggedin",
-            "pointer": "controllers/app#launchEditor"
+            "pointer": "#launchEditor"
         }
     ]
 }

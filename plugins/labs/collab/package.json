@@ -6,9 +6,7 @@
 		"diff": "0.0",
 		"command_line": "0.0",
 		"project": "0.0",
-		"text_editor": "0.0",
-        "dock_view": "0.0",
-        "appsupport": "0.0"
+		"text_editor": "0.0"
 	},
     "provides": [
         {

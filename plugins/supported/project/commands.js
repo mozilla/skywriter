@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var bespin = require('appsupport:controllers/bespin').bespinController;
 var util = require('bespin:util/util');
 
 var catalog = require('bespin:plugin').catalog;
@@ -77,7 +76,7 @@ exports.showCommand = function(instruction, projectname) {
         },
  */
 exports.listCommand = function(instruction, extra) {
-    bespin.files.projects(function(projectNames) {
+    catalog.getObject('files').projects(function(projectNames) {
         var projects = '';
         for (var x = 0; x < projectNames.length; x++) {
             projects += projectNames[x].name + '<br/>';
@@ -121,7 +120,7 @@ exports.createCommand = function(instruction, project) {
                 ': ' + xhr.responseText);
     });
 
-    bespin.files.makeDirectory(project, '', onSuccess, onFailure);
+    catalog.getObject('files').makeDirectory(project, '', onSuccess, onFailure);
 };
 
 /**
@@ -143,7 +142,7 @@ exports.createCommand = function(instruction, project) {
         },
  */
 exports.deleteCommand = function(instruction, project) {
-    if (!project || project == bespin.files.userSettingsProject) {
+    if (!project || project == catalog.getObject('files').userSettingsProject) {
         request.doneWithError('You can\'t delete the settings project.');
         return;
     }
@@ -158,7 +157,7 @@ exports.deleteCommand = function(instruction, project) {
                 + xhr.responseText);
     });
 
-    bespin.files.removeDirectory(project, '', onSuccess, onFailure);
+    catalog.getObject('files').removeDirectory(project, '', onSuccess, onFailure);
 };
 
 /**
@@ -237,7 +236,7 @@ exports.exportCommand = function(instruction, args) {
         type = 'zip';
     }
 
-    bespin.files.projects(function(projects) {
+    catalog.getObject('files').projects(function(projects) {
         var projectDir = project + '/';
         if (util.indexOfProperty(projects, 'name', projectDir) != null) {
             // try to do it via the iframe
@@ -322,7 +321,7 @@ var upload = function(project) {
             },
             error: function(error, ioArg) {
                 setTimeout(function() {
-                    bespin.files.projects(function(projectNames) {
+                    catalog.getObject('files').projects(function(projectNames) {
                         var isProject = function(test) {
                             return project + '/' == test.name;
                         };

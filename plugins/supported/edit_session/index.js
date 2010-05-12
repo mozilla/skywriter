@@ -38,13 +38,11 @@
 var Promise = require('bespin:promise').Promise;
 var catalog = require('bespin:plugins').catalog;
 
-var Trait = require('traits').Trait;
 var util = require('bespin:util/util');
 
 var File = require('filesystem:index').File;
 var TextStorage = require('text_editor:models/textstorage').TextStorage;
 var m_path = require('filesystem:path');
-var bespin = require('appsupport:controllers/bespin').bespinController;
 var Event = require("events").Event;
 
 var History = require('edit_session:history').History;
@@ -268,12 +266,6 @@ exports.EditSession.prototype = {
             var syntaxManager = view.layoutManager.syntaxManager;
             syntaxManager.setInitialContextFromExt(ext === null ? '' : ext);
         }
-
-        catalog.getExtensions('bufferFileChanged').forEach(function (ext) {
-            ext.load(function (f) {
-                f(file);
-            });
-        });
     },
 
     bufferModelChanged: function(sender, newModel) {
@@ -320,7 +312,7 @@ exports.EditSession.prototype = {
         // it...)
         var scroll = recent.scroll, selection = recent.selection;
 
-        var file = bespin.files.getFile(recent.path);
+        var file = catalog.getObject("files").getFile(recent.path);
         this._currentBuffer.changeFile(file).then(function() {
             var view = this._currentView;
             if (!util.none(scroll)) {

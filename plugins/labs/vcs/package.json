@@ -2,8 +2,7 @@
     "dependencies": {
         "bespin_server": "0.0",
         "userident": "0.0",
-        "project": "0.0",
-        "appsupport": "0.0"
+        "project": "0.0"
     },
     
     "provides": [

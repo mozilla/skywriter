@@ -936,7 +936,7 @@ exports.Catalog.prototype = {
             }
         });
         if (circular) {
-            return;
+            return true;
         }
         trail.push(pluginName);
         if (!data[pluginName]) {
@@ -945,10 +945,15 @@ exports.Catalog.prototype = {
             if (data[pluginName].dependencies) {
                 for (var dependency in data[pluginName].dependencies) {
                     var trailClone = trail.slice();
-                    this._checkLoops(dependency, data, trailClone);
+                    var errors = this._checkLoops(dependency, data, trailClone);
+                    if (errors) {
+                        console.error("Errors found when looking at ", pluginName);
+                        return true;
+                    }
                 }
             }
         }
+        return false;
     },
 
     /**

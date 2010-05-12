@@ -1,11 +1,8 @@
 {
     "description": "Ties together the files being edited with the views on screen",
     "dependencies": {
-        "delegate_support": "0.0",
         "text_editor": "0.0",
-        "filesystem": "0.0",
-        "appsupport": "0.0",
-        "traits": "0.0"
+        "filesystem": "0.0"
     },
     "provides": [
         {
@@ -13,16 +10,6 @@
             "name": "session",
             "pointer": "#createSession",
             "action": "call"
-        },
-        {
-            "ep": "appcomponent",
-            "name": "edit_session",
-            "pointer": "index#editSessionClasses"
-        },
-        {
-            "ep": "extensionpoint",
-            "description": "Notifies that the current file is changed.",
-            "name": "bufferFileChanged"
         }
     ]
 }
