@@ -107,7 +107,7 @@ var showLoginForm = function() {
             overlayNode.eq(0).overlay().close();
             notifyLoggedIn(data);
         });
-        return false;x
+        return false;
     });
 };
 
@@ -411,22 +411,22 @@ exports.resetController = {
 //             centerY:    0,
 //             height:     LOGIN_PANE_HEIGHT
 //         },
-// 
+//
 //         contentView: SC.View.design({
 //             layout: { left: 0, top: 0, bottom: 0, right: 0 },
 //             classNames: 'bespin-color-field'.w(),
 //             childViews: 'welcome form logo'.w(),
-// 
+//
 //             welcome: SC.View.design({
 //                 childViews: 'h1 p'.w(),
-// 
+//
 //                 layout: {
 //                     left:   10,
 //                     top:    15,
 //                     width:  300,
 //                     height: 263
 //                 },
-// 
+//
 //                 h1: SC.LabelView.design({
 //                     layout: {
 //                         left:   10,
@@ -434,12 +434,12 @@ exports.resetController = {
 //                         width:  290,
 //                         height: 85
 //                     },
-// 
+//
 //                     value: 'Welcome to Bespin',
 //                     controlSize: SC.HUGE_CONTROL_SIZE,
 //                     fontWeight: 'bold'
 //                 }),
-// 
+//
 //                 p: SC.LabelView.design({
 //                     layout: {
 //                         left:   10,
@@ -447,9 +447,9 @@ exports.resetController = {
 //                         width:  290,
 //                         height: 144
 //                     },
-// 
+//
 //                     classNames: 'bespin-informational'.w(),
-// 
+//
 //                     value:  'The <a href="http://mozillalabs.com/bespin/" ' +
 //                             'target="_blank">Bespin project</a> is ' +
 //                             'building a web-based code editor using the ' +
@@ -457,11 +457,11 @@ exports.resetController = {
 //                             'extensible with JavaScript and can be used in ' +
 //                             'your own applications or on our experimental ' +
 //                             'hosted service.',
-// 
+//
 //                     escapeHTML: false
 //                 })
 //             }),
-// 
+//
 //             form: SC.View.design({
 //                 childViews: 'action container'.w(),
 //                 layout: {
@@ -470,9 +470,9 @@ exports.resetController = {
 //                     width:  240,
 //                     height: LOGIN_FORM_HEIGHT
 //                 },
-// 
+//
 //                 classNames: 'bespin-form'.w(),
-// 
+//
 //                 action: SC.RadioView.design({
 //                     layout: {
 //                         left:   20,
@@ -480,7 +480,7 @@ exports.resetController = {
 //                         width:  220,
 //                         height: 31 + 90
 //                     },
-// 
+//
 //                     itemValueKey: 'value',
 //                     itemTitleKey: 'title',
 //                     items: [
@@ -499,7 +499,7 @@ exports.resetController = {
 //                     ],
 //                     value: 'loginView'
 //                 }),
-// 
+//
 //                 container: SC.ContainerView.design({
 //                     layout: {
 //                         left:   10,
@@ -507,18 +507,18 @@ exports.resetController = {
 //                         width:  220,
 //                         height: LOGIN_CONTAINER_HEIGHT
 //                     },
-// 
+//
 //                     nowShowingBinding: 'userident#userIdentPage.mainPane.' +
 //                         'contentView.form.action.value',
-// 
+//
 //                     contentViewDidChange: function() {
 //                         arguments.callee.base.apply(this, arguments);
-// 
+//
 //                         var page = exports.userIdentPage;
 //                         var pane = page.get('mainPane');
 //                         var form = pane.getPath('contentView.form');
 //                         var value = form.getPath('action.value');
-// 
+//
 //                         var paneHeight, formHeight, containerHeight;
 //                         switch (value) {
 //                         case 'lostView':
@@ -534,11 +534,11 @@ exports.resetController = {
 //                             containerHeight = SIGNUP_CONTAINER_HEIGHT;
 //                             break;
 //                         }
-// 
+//
 //                         pane.adjust('height', paneHeight);
 //                         form.adjust('height', formHeight);
 //                         this.adjust('height', containerHeight);
-// 
+//
 //                         setTimeout(function() {
 //                             var view;
 //                             if (value !== 'resetView') {
@@ -551,7 +551,7 @@ exports.resetController = {
 //                     }
 //                 })
 //             }),
-// 
+//
 //             logo: SC.ImageView.design({
 //                 layout: {
 //                     left:   251 + 11,
@@ -559,23 +559,23 @@ exports.resetController = {
 //                     width:  73,
 //                     height: 70
 //                 },
-// 
+//
 //                 value:  'bespin-logo'
 //             })
 //         })
 //     }),
-// 
+//
 //     loginView: SC.View.design({
 //         layout: { left: 0, top: 0, right: 0, height: 291 },
 //         childViews: ('usernameField usernameLabel passwordField ' +
 //             'passwordLabel submit').w(),
-// 
+//
 //         usernameField: SC.TextFieldView.design({
 //             valueBinding: 'userident#loginController.username',
 //             controlSize: SC.SMALL_CONTROL_SIZE,
 //             layout: { left: 10, top: 92 - 91, width: 200, height: 24 }
 //         }),
-// 
+//
 //         usernameLabel: SC.LabelView.design({
 //             layout: {
 //                 left:   10,
@@ -583,11 +583,11 @@ exports.resetController = {
 //                 width:  200,
 //                 height: 14
 //             },
-// 
+//
 //             controlSize: SC.SMALL_CONTROL_SIZE,
 //             value: 'Username or Email'
 //         }),
-// 
+//
 //         passwordField: SC.TextFieldView.design({
 //             layout: {
 //                 left:   10,
@@ -595,12 +595,12 @@ exports.resetController = {
 //                 width:  200,
 //                 height: 24
 //             },
-// 
+//
 //             controlSize: SC.SMALL_CONTROL_SIZE,
 //             valueBinding: 'userident#loginController.password',
 //             isPassword: true
 //         }),
-// 
+//
 //         passwordLabel: SC.LabelView.design({
 //             layout: {
 //                 left:   10,
@@ -608,11 +608,11 @@ exports.resetController = {
 //                 width:  200,
 //                 height: 14
 //             },
-// 
+//
 //             controlSize: SC.SMALL_CONTROL_SIZE,
 //             value: 'Password'
 //         }),
-// 
+//
 //         submit: SC.ButtonView.design({
 //             layout: {
 //                 left:   10,
@@ -620,22 +620,22 @@ exports.resetController = {
 //                 width:  200,
 //                 height: 37
 //             },
-// 
+//
 //             title: 'Log in',
 //             isDefault: true,
 //             target: 'userident#loginController',
 //             action: 'login'
 //         })
 //     }),
-// 
+//
 //     signupView: SC.View.design({
 //         layout: { left: 0, top: 0, right: 0, height: 399 },
-// 
+//
 //         childViews: ('usernameField usernameLabel usernameError ' +
 //             'password1Field password1Label password1Error ' +
 //             'password2Field password2Label password2Error ' +
 //             'emailField emailLabel emailHint submit').w(),
-// 
+//
 //         usernameField: SC.TextFieldView.design({
 //             layout: { left: 10, top: 92 - 91, width: 200, height: 24 },
 //             controlSize: SC.SMALL_CONTROL_SIZE,
@@ -646,13 +646,13 @@ exports.resetController = {
 //                 return true;
 //             }
 //         }),
-// 
+//
 //         usernameLabel: SC.LabelView.design({
 //             value: 'Username',
 //             controlSize: SC.SMALL_CONTROL_SIZE,
 //             layout: { left: 10, top: 92 - 91 + 26 + 3, width: 53, height: 14 }
 //         }),
-// 
+//
 //         usernameError: SC.LabelView.design({
 //             layout: {
 //                 right:  10,
@@ -660,13 +660,13 @@ exports.resetController = {
 //                 width:  200,
 //                 height: 14
 //             },
-// 
+//
 //             classNames: 'signupValidationError'.w(),
 //             textAlign: 'right',
 //             valueBinding: 'userident#signupController.usernameError',
 //             controlSize: SC.SMALL_CONTROL_SIZE
 //         }),
-// 
+//
 //         password1Field: SC.TextFieldView.design({
 //             layout: { left: 10, top: 146 - 91, width: 200, height: 24 },
 //             controlSize: SC.SMALL_CONTROL_SIZE,
@@ -678,7 +678,7 @@ exports.resetController = {
 //                 return true;
 //             }
 //         }),
-// 
+//
 //         password1Label: SC.LabelView.design({
 //             layout: {
 //                 left:   10,
@@ -686,11 +686,11 @@ exports.resetController = {
 //                 width:  200,
 //                 height: 14
 //             },
-// 
+//
 //             value: 'Password',
 //             controlSize: SC.SMALL_CONTROL_SIZE
 //         }),
-// 
+//
 //         password1Error: SC.LabelView.design({
 //             layout: {
 //                 right:  10,
@@ -698,13 +698,13 @@ exports.resetController = {
 //                 height: 14,
 //                 width:  200
 //             },
-// 
+//
 //             controlSize: SC.SMALL_CONTROL_SIZE,
 //             textAlign: 'right',
 //             classNames: 'signupValidationError'.w(),
 //             valueBinding: 'userident#signupController.password1Error'
 //         }),
-// 
+//
 //         password2Field: SC.TextFieldView.design({
 //             layout: { left: 10, top: 200 - 91, height: 24, width: 105 },
 //             controlSize: SC.SMALL_CONTROL_SIZE,
@@ -716,7 +716,7 @@ exports.resetController = {
 //                 return true;
 //             }
 //         }),
-// 
+//
 //         password2Label: SC.LabelView.design({
 //             layout: {
 //                 left:   10,
@@ -724,12 +724,12 @@ exports.resetController = {
 //                 height: 14,
 //                 width:  200
 //             },
-// 
+//
 //             controlSize: SC.SMALL_CONTROL_SIZE,
 //             value: 'Password <i>(confirm)</i>',
 //             escapeHTML: false
 //         }),
-// 
+//
 //         password2Error: SC.LabelView.design({
 //             layout: {
 //                 right:  10,
@@ -737,14 +737,14 @@ exports.resetController = {
 //                 height: 14,
 //                 width:  200
 //             },
-// 
+//
 //             controlSize: SC.SMALL_CONTROL_SIZE,
 //             textAlign: 'right',
 //             classNames: [ 'signupValidationError' ],
 //             valueBinding: 'userident#signupController.password2Error',
 //             layout: { left: 265, top: 65, height: 30, width: 120 }
 //         }),
-// 
+//
 //         emailField: SC.TextFieldView.design({
 //             layout: { left: 10, top: 254 - 91, width: 200, height: 24 },
 //             controlSize: SC.SMALL_CONTROL_SIZE,
@@ -755,7 +755,7 @@ exports.resetController = {
 //                 return true;
 //             }
 //         }),
-// 
+//
 //         emailLabel: SC.LabelView.design({
 //             layout: {
 //                 left:   10,
@@ -763,12 +763,12 @@ exports.resetController = {
 //                 height: 14,
 //                 width:  200
 //             },
-// 
+//
 //             controlSize: SC.SMALL_CONTROL_SIZE,
 //             value: 'Email',
 //             escapeHTML: false
 //         }),
-// 
+//
 //         emailHint: SC.LabelView.design({
 //             layout: {
 //                 right:  10,
@@ -776,13 +776,13 @@ exports.resetController = {
 //                 height: 14,
 //                 width:  200
 //             },
-// 
+//
 //             controlSize: SC.SMALL_CONTROL_SIZE,
 //             textAlign: 'right',
 //             classNames: 'signupValidationNote'.w(),
 //             valueBinding: 'userident#signupController.emailHint'
 //         }),
-// 
+//
 //         submit: SC.ButtonView.design({
 //             layout: { left: 10, top: 308 - 91, width: 200, height: 37 },
 //             isDefault: true,
@@ -791,12 +791,12 @@ exports.resetController = {
 //             action: 'signup'
 //         })
 //     }),
-// 
+//
 //     lostView: SC.View.design({
 //         layout: { left: 0, top: 0, right: 0, height: 399 },
-// 
+//
 //         childViews: ('p usernameField usernameLabel submit').w(),
-// 
+//
 //         p: SC.LabelView.design({
 //             layout: {
 //                 left:   10,
@@ -804,25 +804,25 @@ exports.resetController = {
 //                 width:  200,
 //                 height: 144
 //             },
-// 
+//
 //             value:  'Don\'t worry, you can get ' +
 //                     'a new password. Just tell us your:',
 //             escapeHTML: false
 //         }),
-// 
+//
 //         usernameField: SC.TextFieldView.design({
 //             layout: { left: 10, top: 146 - 91, width: 200, height: 24 },
 //             controlSize: SC.SMALL_CONTROL_SIZE,
 //             valueBinding: 'userident#lostController.username'
 //         }),
-// 
+//
 //         usernameLabel: SC.LabelView.design({
 //             value: 'Username or Email',
 //             controlSize: SC.SMALL_CONTROL_SIZE,
 //             layout: { left: 10, top: 146 - 91 + 26 + 3, width: 200, height: 14 },
 //             escapeHTML: false
 //         }),
-// 
+//
 //         submit: SC.ButtonView.design({
 //             layout: { left: 10, top: 200 - 91, width: 200, height: 37 },
 //             isDefault: true,
@@ -831,25 +831,25 @@ exports.resetController = {
 //             action: 'resetPwd'
 //         })
 //     }),
-// 
+//
 //     resetView: SC.View.design({
 //         layout: { left: 0, top: 0, right: 0, height: 399 },
-// 
+//
 //         childViews: ('password1Field password1Label password2Field password2Label submit').w(),
-// 
+//
 //         password1Field: SC.TextFieldView.design({
 //             layout: { left: 10, top: 92 - 91, width: 200, height: 24 },
 //             controlSize: SC.SMALL_CONTROL_SIZE,
 //             isPassword: true,
 //             valueBinding: 'userident#resetController.password1'
 //         }),
-// 
+//
 //         password1Label: SC.LabelView.design({
 //             value: 'New Password',
 //             controlSize: SC.SMALL_CONTROL_SIZE,
 //             layout: { left: 10, top: 92 - 91 + 26 + 3, width: 200, height: 14 }
 //         }),
-// 
+//
 //         password2Field: SC.TextFieldView.design({
 //             layout: { left: 10, top: 146 - 91, width: 200, height: 24 },
 //             controlSize: SC.SMALL_CONTROL_SIZE,
@@ -861,7 +861,7 @@ exports.resetController = {
 //                 return true;
 //             }
 //         }),
-// 
+//
 //         password2Label: SC.LabelView.design({
 //             layout: {
 //                 left:   10,
@@ -869,11 +869,11 @@ exports.resetController = {
 //                 width:  200,
 //                 height: 14
 //             },
-// 
+//
 //             value: 'Confirm Password',
 //             controlSize: SC.SMALL_CONTROL_SIZE
 //         }),
-// 
+//
 //         submit: SC.ButtonView.design({
 //             layout: { left: 10, top: 200 - 91, width: 200, height: 37 },
 //             isDefault: true,
