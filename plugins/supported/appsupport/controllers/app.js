@@ -151,7 +151,7 @@ exports.normalizeConfig = function(config) {
     // }
 };
 
-exports.oldlaunchEditor = function() {
+exports.launchEditor = function() {
     require('jlayout_border');
     var $ = require('jquery').$;
     var util = require('bespin:util/util');
@@ -195,7 +195,7 @@ exports.oldlaunchEditor = function() {
     var env = require('canon:environment').global;
     var bespin = require('appsupport:controllers/bespin').bespinController;
     var EditorView = require('text_editor:views/editor').EditorView;
-    var m_editsession = require('edit_session').editSessionClasses;
+    var m_editsession = require('edit_session');
 
     var editorView = new EditorView(document.getElementById('editor'));
 
@@ -205,14 +205,14 @@ exports.oldlaunchEditor = function() {
     var textStorage = layoutManager.textStorage;
     var syntaxManager = layoutManager.syntaxManager;
 
-    var buffer = m_editsession.makeBuffer(textStorage, syntaxManager);
+    // var buffer = m_editsession.makeBuffer(textStorage, syntaxManager);
 
-    session.currentBuffer = buffer;
+    // session.currentBuffer = buffer;
     session.currentView = editorView.textView;
     bespin.session = session;
 };
 
-exports.launchEditor = function() {
+exports.newlaunchEditor = function() {
     var config = exports.runningConfig;
 
     if (config === null) {
