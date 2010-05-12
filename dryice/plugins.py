@@ -204,9 +204,9 @@ class Plugin(object):
             loc = loc / "templates"
             if not loc.exists():
                 return {}
-                
+
             return dict((loc.relpathto(f), f.text("utf8")) 
-                for f in loc.walkfiles("*"))
+                for f in loc.walkfiles("*.jsmt"))
         else:
             return {}
         
