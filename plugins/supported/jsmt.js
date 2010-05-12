@@ -34,14 +34,14 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
- 
+
 "define metadata";
 ({});
 "end";
 
 // Adapted from John Resig's JavaScript Micro Templates
 // http://ejohn.org/blog/javascript-micro-templating/
-// with the signle quote fix from
+// with the single quote fix from
 // http://www.west-wind.com/Weblog/posts/509108.aspx
 
 // Compiles a template into straight JS
@@ -68,7 +68,7 @@ var basename = function(name) {
     return name.substring(0, lastDot);
 };
 
-/*
+/**
  * Compiles a collection of templates, returning a new object.
  * The object coming in should have keys that are the filenames of the
  * templates (including the extension) and the values are the templates
