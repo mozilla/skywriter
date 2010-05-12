@@ -71,7 +71,6 @@ exports.CanvasView = function(container) {
 
     var canvas = document.createElement("canvas");
     canvas.innerHTML = 'canvas tag not supported by your browser';
-    canvas.setAttribute('style', 'position: absolute');
     container.appendChild(canvas);
     this.domNode = canvas;
 

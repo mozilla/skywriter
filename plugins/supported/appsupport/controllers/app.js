@@ -41,8 +41,6 @@ var Promise = require("bespin:promise").Promise;
 var console = require("bespin:console").console;
 var Trace = require("bespin:util/stacktrace").Trace;
 
-require("jlayout_border");
-
 exports.runningConfig = null;
 
 /*
@@ -237,38 +235,23 @@ var createAllObjects = function(config) {
 };
 
 var generateGUI = function() {
-    console.log("GUI generation");
     var config = exports.runningConfig;
     
     var $ = require('jquery').$;
     
-    var container = $('<div class="bespin container">');
-    console.log("Container is:");
-    console.log(container);
+    var container = document.createElement('div');
+    container.setAttribute('class', 'bespin container');
     
-    function relayout() {
-    	container.layout({
-    	    type: 'border',
-    	    resize: false,
-    	    south__minSize: 300,
-            south__resizable: true,
-            south__spacing_open: 10,
-            south__spacing_closed: 5
-    	});
-    }
-
-    relayout();
-
-    $(window).resize(relayout);
+    var centerContainer = document.createElement('div');
+    centerContainer.setAttribute('class', 'bespin center-container');
+    container.appendChild(centerContainer);
     
-    
-    console.log("Placing components");
     for (var place in config.gui) {
         var descriptor = config.gui[place];
         
         var component = catalog.getObject(descriptor.component);
         if (!component) {
-            console.log('Cannot find object ' + descriptor.component + ' to attach to the Bespin UI');
+            console.error('Cannot find object ' + descriptor.component + ' to attach to the Bespin UI');
             continue;
         }
         
@@ -280,22 +263,24 @@ var generateGUI = function() {
             continue;
         }
         
-        console.log(descriptor.component, " goes ", place);
         $(element).addClass(place);
         
-        container.append(element);
+        if (place == 'west' || place == 'east' || place == 'center') {
+            centerContainer.appendChild(element);
+        } else {
+            container.appendChild(element);
+        }
     }
     
-    console.log("adding container");
     if (config.element) {
-        $(config.element).append(container);
+        config.element.appendChild(container);
     } else {
-        $(document.body).append(container);
+        document.body.appendChild(container);
     }
     
     var editorDiv = document.createElement("div");
     editorDiv.setAttribute('class', "center");
-    container.append(editorDiv);
+    centerContainer.appendChild(editorDiv);
     var EditorView = require('text_editor:views/editor').EditorView;
     var editorView = new EditorView(editorDiv);
     catalog.instances['editor'] = editorView;

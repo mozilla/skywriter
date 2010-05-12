@@ -82,7 +82,7 @@ input.cmd_input {
 /* Command Output */
 .cmd_view {
   maxHeight: 300px; overflow-y: auto; overflow-x: hidden;
-  position: absolute; top: 0; bottom: 27px; left: 30px; right: 0;
+  top: 0; bottom: 27px; left: 30px; right: 0;
 }
 
 .cmd_rowin {
