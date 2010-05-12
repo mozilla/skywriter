@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 // Load up Bespin's boot code (the plugin system, basically)
+bespin.tiki.require.loader.sources[0].xhr = true;
 bespin.tiki.require.ensurePackage("::bespin", function() {
     var require = bespin.tiki.require;
     var plugins = require("bespin:plugins");
@@ -49,4 +50,5 @@ bespin.tiki.require.ensurePackage("::bespin", function() {
         console.log("Unable to load metadata: ", error);
     });
 });
+
 
