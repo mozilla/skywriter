@@ -55,10 +55,12 @@ if (window.console && window.console.markTimeline) {
     // case of Firefox without Firebug)
     exports.console = { };
 
+    // These are the functions that are available in Chrome 4/5, Safari 4
+    // and Firefox 3.6. Don't add to this list without checking browser support
     var names = [
-        "log", "debug", "info", "warn", "error", "assert", "dir", "dirxml",
-        "trace", "group", "groupCollapsed", "groupEnd", "time", "timeEnd",
-        "profile", "profileEnd", "count"
+        "assert", "count", "debug", "dir", "dirxml", "error",
+        "group", "groupEnd", "info", "log", "profile", "profileEnd",
+        "time", "timeEnd", "trace", "warn"
     ];
 
     // For each of the console functions, copy them if they exist, stub if not
