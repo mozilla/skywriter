@@ -2,12 +2,13 @@
     "description": "Provides the command line user interface",
     "dependencies":
     {
-        "canon": "0.0",
-        "keyboard": "0.0",
-        "types": "0.0",
-        "settings": "0.0",
-        "diff": "0.0",
-        "matcher": "0.0"   
+        "canon": "0.0.0",
+        "keyboard": "0.0.0",
+        "types": "0.0.0",
+        "settings": "0.0.0",
+        "diff": "0.0.0",
+        "matcher": "0.0.0",
+        "templater": "0.0.0"
     },
     "provides":
     [
