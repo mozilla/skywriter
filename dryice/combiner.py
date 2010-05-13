@@ -40,9 +40,9 @@
 import re
 
 try:
-    from json import loads
+    from json import loads, dumps
 except ImportError:
-    from simplejson import loads
+    from simplejson import loads, dumps
 
 class Package(object):
     visited = False
@@ -101,7 +101,7 @@ def toposort(unsorted, package_factory=None, reset_first=False):
 
 _css_images_url = re.compile(r'url\(\s*([\'"]*)images/')
 
-def combine_files(jsfile, cssfile, name, p, add_main=False, 
+def combine_files(jsfile, cssfile, plugin, p, 
                   exclude_tests=True, image_path_prepend=None):
     """Combines the files in an app into a single .js, with all
     of the proper information for Tiki.
@@ -112,16 +112,21 @@ def combine_files(jsfile, cssfile, name, p, add_main=False,
         there is no CSS)
     name: application name (will become Tiki package name)
     p: path object pointing to the app's directory
-    add_main: for an app (rather than a plugin) you should add a call
-        to main so that SproutCore will start the app
     exclude_tests: should contents of tests directories be included in the
         combined output?
     """
+    name = plugin.name
     
     if cssfile is None:
         cssfile = NullOutput()
+        
+    mini_md = {
+        "name": plugin.name,
+        "dependencies": plugin.dependencies
+    }
     
-    jsfile.write(""";tiki.register("%s",{});""" % (name))
+    jsfile.write(""";bespin.tiki.register("::%s",%s);""" % (name,
+        dumps(mini_md)))
     
     has_index = False
     
@@ -155,7 +160,7 @@ def combine_files(jsfile, cssfile, name, p, add_main=False,
             has_index = True
         
         jsfile.write("""
-tiki.module("%s:%s",function(require,exports,module) {
+bespin.tiki.module("%s:%s",function(require,exports,module) {
 """ % (name, modname))
         jsfile.write(f.bytes())
         jsfile.write("""
@@ -163,204 +168,8 @@ tiki.module("%s:%s",function(require,exports,module) {
 """)
     
     if not has_index:
-        if add_main:
-            module_contents = """
-exports.main = require("main").main;
-"""
-        else:
-            module_contents = ""
+        module_contents = ""
         jsfile.write("""
-tiki.module("%s:index",function(require,exports,module){%s});
+bespin.tiki.module("%s:index",function(require,exports,module){%s});
 """ % (name, module_contents))
-    
-    if add_main:
-        jsfile.write("""
-tiki.main("%s", "main");
-""" % (name))
-
-
-####
-# This part is for combining the SproutCore files.
-####
-
-_make_json=re.compile('([\{,])(\w+):')
-_register_line = re.compile(r'tiki\.register\(["\'](::[\w/_]+)["\'],\s*(.*)')
-_globals_line = re.compile(r'tiki\.global\(["\']([\w/]+)["\']\);')
-_package_info_line = "/* >>>>>>>>>> BEGIN package_info.js */\n"
-
-def _quotewrap(m):
-    return m.group(1) + '"' + m.group(2) + '":'
-    
-def _get_file_list(paths, pattern, filters=None):
-    flist = []
-    
-    for p in paths:
-        flist.extend(list(p.walkfiles(pattern)))
-    
-    flist = [f for f in flist if "en" in f]
-    
-    if filters:
-        for filter in filters:
-            flist = [f for f in flist if filter not in f]
-    
-    return flist
-
-def combine_sproutcore_files(paths, starting=u"", pattern="javascript.js",
-    filters=None, manual_maps=[], ignore_dependencies=False):
-    """Combines files that are output by Abbot, taking extra care with the
-    stylesheets because we want to explicitly register them rather than
-    loading them individually.
-    
-    Arguments:
-    paths: list of path objects to look for files in
-    starting: initial text, if you're using multiple calls to this function
-    pattern: file glob to search for
-    filters: list of substring matches to perform. any that match are tossed
-    manual_maps: (regex, name) tuples that map matching files to that package name
-                this is used if the file does not contain a parseable tiki.register
-                line.
-    ignore_dependencies: this is there largely for core_test. We assume that
-            the dependencies will already be included on the page.
-    
-    Returns: the combined bytes
-    """
-    stylesheets = set()
-
-    starting = unicode(starting)
-    newcode = u""
-
-    flist = _get_file_list(paths, pattern, filters)
-    
-    packages = []
-    
-    # keep track of whether or not we've seen the "tiki"
-    # package. If we have, then we know that the stylesheet
-    # declarations need to come after the tiki package,
-    # otherwise tiki.stylesheet() will not be defined.
-    found_tiki = False
-    
-    for f in flist:
-        splitname = f.splitall()
-        if not "en" in splitname:
-            continue
-        
-        filehandle = f.open()
-        firstline = filehandle.readline()
-        while firstline != "" and firstline != _package_info_line:
-            firstline = filehandle.readline()
-
-        # Skip two lines.
-        if firstline == _package_info_line:
-            filehandle.readline()
-            firstline = filehandle.readline()
-
-        # look for a tiki.register line to get package
-        # metadata
-        m = _register_line.search(firstline)
-        if m:
-            name = m.group(1)
-            data_text = m.group(2)
-            if data_text.endswith(");"):
-                data_text = data_text[:-2]
-            else:
-                data_text = "{"
-                nextline = filehandle.readline()
-                while nextline:
-                    if nextline.startswith("});"):
-                        data_text += "}"
-                        break
-                    else:
-                        data_text += nextline
-                    nextline = filehandle.readline()
-            
-            filehandle.close()
-            
-            data_text = _make_json.sub(_quotewrap, data_text)
-            data = loads(data_text)
-        else:
-            filehandle.close()
-            # no package metadata found, see if there's
-            # a manual mapping to package name
-            found = False
-            for expr, name in manual_maps:
-                if expr.search(f):
-                    found = True
-                    
-            # no manual mapping. we'll assume it's okay
-            # to just add this JavaScript.
-            if not found:
-                print "Module in %s is missing the register call" % f
-                print firstline
-                newcode += f.text('utf-8')
-                continue
-            
-            # there was a manual mapping, but we don't have
-            # metadata other than the name
-            data = {}
-            
-        # store package information so that we can do a
-        # topological sort of it
-        if "stylesheets" in data:
-            for s in data['stylesheets']:
-                stylesheets.add(s['id'])
-        
-        if name == "tiki":
-            found_tiki = True
-            
-        p = Package(name, data.get('depends', []))
-        packages.append(p)
-        p.content = f.text('utf_8')
-    
-    # commented out for the moment. this is not necessary (and may actually
-    # even be a problem)
-    # globals = set()
-    # def replace_global(m):
-    #     """Remove the global call, but keep track of it so that it can be added to the end of the file.
-    #     Tiki doesn't want the global registered until the file is ready to load."""
-    #     globals.add(m.group(1))
-    #     return ""
-    
-    if not found_tiki:
-        newcode = starting + u"".join(u'tiki.stylesheet("%s");' %
-                s for s in stylesheets) + newcode
-    else:
-        newcode = starting + newcode
-    
-    if not ignore_dependencies:
-        packages = toposort(packages)
-        
-    for p in packages:
-        newcode += p.content
-        if found_tiki and p.name == "tiki":
-            newcode += "".join('tiki.stylesheet("%s");' % 
-                    s.encode("utf-8") for s in stylesheets)
-        
-    return newcode
-
-_images_url = re.compile(r'url\(.*/en/\w+/images/(.*)[\'"]\)')
-
-def _url_replacer(m):
-    return 'url("images/%s")' % (m.group(1))
-
-def combine_sproutcore_stylesheets(p, combined="", filters=None):
-    flist = _get_file_list([p], "stylesheet.css", filters)
-    for f in flist:
-        content = f.text('utf_8')
-        content = _images_url.sub(_url_replacer, content)
-        combined += content
-    return combined
-
-def copy_sproutcore_files(p, dest, filters=None):
-    paths = list(p.walkdirs("images"))
-    if filters:
-        for f in filters:
-            paths = [path for path in paths if f not in path]
-            
-    for p in paths:
-        for f in p.walkfiles():
-            destpath = dest / "images" / p.relpathto(f)
-            destdir = destpath.dirname()
-            if not destdir.exists():
-                destdir.makedirs()
-            f.copy(destpath)
     

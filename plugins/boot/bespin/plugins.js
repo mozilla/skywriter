@@ -917,11 +917,19 @@ exports.Catalog.prototype = {
      * get at that plugin's resources (images, etc.).
      */
     getResourceURL: function(pluginName) {
+        var link = document.getElementById("bespin_base");
+        var base = "";
+        if (link) {
+            base += link.href;
+            if (!util.endsWith(base, "/")) {
+                base += "/";
+            }
+        }
         var plugin = this.plugins[pluginName];
         if (plugin == undefined) {
             return undefined;
         }
-        return plugin.resourceURL;
+        return base + plugin.resourceURL;
     },
 
     /**

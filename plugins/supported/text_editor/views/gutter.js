@@ -108,5 +108,5 @@ util.mixin(exports.GutterView.prototype, {
         var strWidth = characterWidth * lineCountStr.length;
 
         return strWidth + paddingWidth;
-    },
+    }
 });

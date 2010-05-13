@@ -59,6 +59,7 @@ class BuildError(Exception):
                 
 
 sample_dir = path(__file__).dirname() / "samples"
+_boot_file = path(__file__).dirname() / "boot.js"
 
 def ignore_css(src, names):
     return [name for name in names if name.endswith(".css")]
@@ -69,11 +70,12 @@ class Manifest(object):
     unbundled_plugins = None
     
     def __init__(self, include_core_test=False, plugins=None,
-        search_path=None, bespin=None,
+        search_path=None, 
         output_dir="build", include_sample=False,
         boot_file=None, unbundled_plugins=None, loader=None):
 
         self.include_core_test = include_core_test
+        plugins.insert(0, "bespin")
         self.plugins = plugins
 
         if search_path is not None:
@@ -100,19 +102,10 @@ class Manifest(object):
 
         self.search_path = search_path
 
-        if bespin is None:
-            bespin = path("plugins") / "boot" / "bespin"
-
-        if not bespin or not bespin.exists():
-            raise BuildError("Cannot find Bespin core code (looked in %s)"
-                % bespin.abspath())
-        
         if boot_file:
             self.boot_file = path(boot_file).abspath()
         else:
-            self.boot_file = boot_file
-
-        self.bespin = bespin
+            self.boot_file = _boot_file
 
         if not output_dir:
             raise BuildError("""Cannot run unless output_dir is set
@@ -186,9 +179,6 @@ will be deleted before the build.""")
         # include Bespin core code
         exclude_tests = not self.include_core_test
 
-        combiner.combine_files(output_js, output_css, "bespin",
-            self.bespin, exclude_tests=exclude_tests)
-
         # finally, package up the plugins
 
         if package_list is None:
@@ -196,7 +186,7 @@ will be deleted before the build.""")
 
         for package in package_list:
             plugin = self.get_plugin(package.name)
-            combiner.combine_files(output_js, output_css, plugin.name,
+            combiner.combine_files(output_js, output_css, plugin,
                                    plugin.location,
                                    exclude_tests=exclude_tests,
                                    image_path_prepend="resources/%s/"
@@ -214,9 +204,9 @@ will be deleted before the build.""")
             bundled_plugins.add(plugin.name)
             
         output_js.write("""
-SC.ready(function() {tiki.require("bespin:plugins").catalog.loadMetadata(%s);});
+bespin.tiki.require("bespin:plugins").catalog.loadMetadata(%s);;
 """ % (dumps(all_md)))
-
+        
         if self.boot_file:
             output_js.write(self.boot_file.bytes())
 

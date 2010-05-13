@@ -364,7 +364,7 @@ exports.EditorView.prototype = {
         this.textView.setNeedsDisplay();
         // TODO: Add this back.
         //this.gutterView._recomputeLayout();
-    },
+    }
 };
 
 // exports.EditorView = SC.View.extend(SC.Border, {
