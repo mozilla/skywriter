@@ -65,8 +65,8 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
 
     /**
      * @property
-     * Specifies the direction of the scroll bar: one of SC.LAYOUT_HORIZONTAL
-     * or SC.LAYOUT_VERTICAL.
+     * Specifies the direction of the scroll bar: one of LAYOUT_HORIZONTAL
+     * or LAYOUT_VERTICAL.
      *
      * Changes to this value after the view has been created have no effect.
      */
@@ -655,10 +655,10 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
         // The _mouseDownScreenPoint value might be needed although the segment
         // was not the handle at the moment.
         switch (parentView.get('layoutDirection')) {
-        case SC.LAYOUT_HORIZONTAL:
+        case LAYOUT_HORIZONTAL:
             this._mouseDownScreenPoint = evt.pageX;
             break;
-        case SC.LAYOUT_VERTICAL:
+        case LAYOUT_VERTICAL:
             this._mouseDownScreenPoint = evt.pageY;
             break;
         default:
@@ -683,10 +683,10 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
 
             var eventDistance;
             switch (parentView.get('layoutDirection')) {
-                case SC.LAYOUT_HORIZONTAL:
+                case LAYOUT_HORIZONTAL:
                     eventDistance = evt.pageX;
                     break;
-                case SC.LAYOUT_VERTICAL:
+                case LAYOUT_VERTICAL:
                     eventDistance = evt.pageY;
                     break;
                 default:
@@ -735,10 +735,10 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
 
         var delta;
         switch (parentView.get('layoutDirection')) {
-        case SC.LAYOUT_HORIZONTAL:
+        case LAYOUT_HORIZONTAL:
             delta = evt.wheelDeltaX;
             break;
-        case SC.LAYOUT_VERTICAL:
+        case LAYOUT_VERTICAL:
             delta = evt.wheelDeltaY;
             break;
         default:

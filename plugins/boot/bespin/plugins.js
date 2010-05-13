@@ -805,7 +805,7 @@ exports.Catalog.prototype = {
 
             md.name = pluginName;
             md.version = null;
-            console.log("loading metadata for", pluginName, " -> ", md);
+            // console.log("loading metadata for", pluginName, " -> ", md);
 
             var packageId = browser.canonicalPackageId(pluginName);
             if (packageId === null) {

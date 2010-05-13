@@ -45,7 +45,7 @@ plugins at the `syntax` extension point like so:
     }
 
 The syntax object that you provide as the target of the pointer is either an
-instance of `StandardSyntax`, for the standard API, or of `SC.Object`, for the
+instance of `StandardSyntax`, for the standard API, or a JS Object, for the
 programmatic API.
 
 ## The Standard API ##

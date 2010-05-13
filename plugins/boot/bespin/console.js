@@ -46,30 +46,25 @@
 // implemented on all browsers, however this doesn't work properly everywhere
 // ...
 
-var names = [
-    "log", "debug", "info", "warn", "error", "assert", "dir", "dirxml",
-    "trace", "group", "groupCollapsed", "groupEnd", "time", "timeEnd",
-    "profile", "profileEnd", "count"
-];
-
-var noop = function() {};
+var noop = function() {
+};
 
 if (window.console && window.console.markTimeline) {
     // Webkit's output functions are bizarre because they get confused if 'this'
     // is not window.console, so we just copy it all across
     exports.console = window.console;
-    
-    // webkit browsers don't have as many console methods. make sure they're
-    // at least not going to make us crash.
-    names.forEach(function(name) {
-        if (!exports.console[name]) {
-            exports.console[name] = noop;
-        }
-    });
 } else {
     // So we're not in Webkit, but we may still be no console object (in the
     // case of Firefox without Firebug)
     exports.console = { };
+
+    // These are the functions that are available in Chrome 4/5, Safari 4
+    // and Firefox 3.6. Don't add to this list without checking browser support
+    var names = [
+        "assert", "count", "debug", "dir", "dirxml", "error",
+        "group", "groupEnd", "info", "log", "profile", "profileEnd",
+        "time", "timeEnd", "trace", "warn"
+    ];
 
     // For each of the console functions, copy them if they exist, stub if not
     names.forEach(function(name) {

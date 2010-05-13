@@ -50,8 +50,9 @@ var settings = require('settings').settings;
 
 var Level = require('command_line:hint').Level;
 var Input = require('command_line:input').Input;
+var templater = require('templater');
 
-var imagePath = catalog.getResourceURL('command_line') + 'images/';
+var imagePath = catalog.getResourceURL('command_line') + 'images';
 var diff = new diff_match_patch();
 
 /**
@@ -71,65 +72,20 @@ exports.CliInputView = function() {
     // Are we currently pinned?
     this._pinned = false;
 
-    this.element = document.createElement('div');
-    this.element.className = 'cmd_line';
-    this.element.style.height = '300px';
-
-    // We need to know if blur events from the input really matter (i.e. are
-    // they going to the editor or another view, or just to another part of
-    // this view) so we listen for clicks in this view.
-    // This allows us to cancel the effects of a blur
-    this._boundCancelBlur = this._cancelBlur.bind(this);
-    this.element.addEventListener('click', this._boundCancelBlur, true);
-
-    // A div to hang hints on
-    this._ex = document.createElement('div');
-    this._ex.className = 'cmd_ex';
-    this.element.appendChild(this._ex);
-
-    // Used as something to hang styles off for input area
-    var kbd = document.createElement('kbd');
-    this.element.appendChild(kbd);
-
-    // CLI output table
-    this._table = document.createElement('div');
-    this._table.className = 'cmd_view';
-    this.element.appendChild(this._table);
-
-    // Toolbar
-    var toolbar = document.createElement('div');
-    toolbar.className = 'cmd_toolbar';
-    this.element.appendChild(toolbar);
-
-    // The pin/unpin button
-    var pin = document.createElement('img');
-    pin.src = imagePath + 'pinout.png';
-    pin.alt = 'Pin/Unpin the console output';
-    pin.onclick = function(ev) {
-        // TODO: change the image
-        this._pinned = !this._pinned;
-        this.checkSize();
-    }.bind(this);
-    toolbar.appendChild(pin);
-
-    // The prompt
-    var prompt = document.createElement('div');
-    prompt.className = 'cmd_prompt cmd_gt';
-    prompt.innerHTML = '<span class="cmd_brackets">{ }</span> &gt;';
-    this.element.appendChild(prompt);
-
-    // Completion
-    this._completer = document.createElement('div');
-    this._completer.className = 'cmd_completion';
-    this.element.appendChild(this._completer);
+    // What should the input field look like when someone presses TAB
     this._completion = '';
 
-    // The input field
-    this._inputer = document.createElement('input');
-    this._inputer.className = 'cmd_input';
-    this._inputer.type = 'text';
-    this.element.appendChild(this._inputer);
+    // For parsing the input
     this._input = new Input('');
+
+    // If we discover a change in size, we need to change a few styles
+    this._lastOrientation = null;
+
+    var template = require('templates').cli();
+    templater.processTemplate(template, {
+        cliInputView: this,
+        imagePath: imagePath
+    });
 
     keyutil.addKeyDownListener(this._inputer, function(ev) {
         environment.commandLine = this;
@@ -161,16 +117,6 @@ exports.CliInputView = function() {
         return handled;
     }.bind(this), true);
 
-    this.element.addEventListener('focus', function(ev) {
-        this._hasFocus = true;
-        this.checkSize();
-    }.bind(this), true);
-
-    this.element.addEventListener('blur', function(ev) {
-        this._hasFocus = false;
-        this.checkSize();
-    }.bind(this), true);
-
     catalog.registerExtension('settingChange', {
         match: "[min|max]ConsoleHeight",
         pointer: this.checkSize.bind(this)
@@ -179,21 +125,12 @@ exports.CliInputView = function() {
     catalog.registerExtension('addedRequestOutput', {
         pointer: this.addedRequestOutput.bind(this)
     });
-
-    this._lastOrientation = null;
 };
 
 /**
  *
  */
 exports.CliInputView.prototype = {
-    /**
-     * Undo event registration
-     */
-    destroy: function() {
-        this.element.removeEventListener('click', this._boundCancelBlur, true);
-    },
-
     /**
      * See note in app.js
      */
@@ -226,6 +163,23 @@ exports.CliInputView.prototype = {
 
         throw new Error('Ambiguous orientation: north=' + north +
                 ', south=' + south + ', east=' + east + ', west=' + west);
+    },
+
+    /**
+     *
+     */
+    _focusCheck: function(ev) {
+        this._hasFocus = (ev.type == 'focus');
+        this.checkSize();
+    },
+
+    /**
+     * onClick for the pin button in the toolbar
+     */
+    _togglePin: function() {
+        // TODO: change the image
+        this._pinned = !this._pinned;
+        this.checkSize();
     },
 
     /**
@@ -414,7 +368,7 @@ exports.CliInputView.prototype = {
 
         // Open/close output
         var closeEle = document.createElement('img');
-        closeEle.src = imagePath + 'closer.png';
+        closeEle.src = imagePath + '/closer.png';
         closeEle.alt = 'Remove this command from the history';
         closeEle.title = closeEle.alt;
         closeEle.onclick = function() {
@@ -443,7 +397,7 @@ exports.CliInputView.prototype = {
         rowout.appendChild(outputEle);
 
         var throbEle = document.createElement('img');
-        throbEle.src = imagePath + 'throbber.gif';
+        throbEle.src = imagePath + '/throbber.gif';
         rowout.appendChild(throbEle);
 
         request.changed.add(function() {
@@ -452,12 +406,12 @@ exports.CliInputView.prototype = {
                 '';
 
             if (request.hideOutput) {
-                hideOutputEle.src = imagePath + 'plus.png';
+                hideOutputEle.src = imagePath + '/plus.png';
                 hideOutputEle.alt = 'Show command output';
                 hideOutputEle.title = 'Show command output';
                 outputEle.style.display = 'none';
             } else {
-                hideOutputEle.src = imagePath + 'minus.png';
+                hideOutputEle.src = imagePath + '/minus.png';
                 hideOutputEle.alt = 'Hide command output';
                 hideOutputEle.title = 'Hide command output';
                 outputEle.style.display = 'block';
@@ -522,6 +476,11 @@ exports.CliInputView.prototype = {
     },
 
     /**
+     * We need to know if blur events from the input really matter (i.e. are
+     * they going to the editor or another view, or just to another part of
+     * this view) so we listen for clicks in this view.
+     * This allows us to cancel the effects of a blur
+     *
      * We have reason to believe that a blur event shouldn't happen
      * @param {String} reason For debugging we (where we can) declare why we
      * are canceling the blur action

@@ -137,7 +137,7 @@ exports.Promise.prototype.chainPromise = function(onSuccess) {
  */
 exports.Promise.prototype.resolve = function(data) {
     if (this._status != PENDING) {
-        console.groupCollapsed('Promise already closed');
+        console.group('Promise already closed');
         console.error('Attempted resolve() with ', data);
         console.error('Previous status = ', this._status, ', previous value = ', this._value);
         console.trace();
