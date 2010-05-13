@@ -60,58 +60,6 @@ var diff = new diff_match_patch();
  */
 var inputHeight = 25;
 
-var processTemplate = function(name, data) {
-    var cli = data.cliInputView;
-    cli.element = document.createElement('div');
-    cli.element.className = 'cmd_line';
-    cli.element.addEventListener('click', cli._cancelBlur.bind(cli), true);
-    cli.element.addEventListener('focus', cli._focusCheck.bind(cli), true);
-    cli.element.addEventListener('blur', cli._focusCheck.bind(cli), true);
-
-    // A div to hang hints on
-    cli._ex = document.createElement('div');
-    cli._ex.className = 'cmd_ex';
-    cli.element.appendChild(cli._ex);
-
-    // Used as something to hang styles off for input area
-    var kbd = document.createElement('kbd');
-    cli.element.appendChild(kbd);
-
-    // CLI output table
-    cli._table = document.createElement('div');
-    cli._table.className = 'cmd_view';
-    cli.element.appendChild(cli._table);
-
-    // Toolbar
-    var toolbar = document.createElement('div');
-    toolbar.className = 'cmd_toolbar';
-    cli.element.appendChild(toolbar);
-
-    // The pin/unpin button
-    var pin = document.createElement('img');
-    pin.src = data.imagePath + '/pinout.png';
-    pin.alt = 'Pin/Unpin the console output';
-    pin.onclick = cli._togglePin.bind(cli);
-    toolbar.appendChild(pin);
-
-    // The prompt
-    var prompt = document.createElement('div');
-    prompt.className = 'cmd_prompt cmd_gt';
-    prompt.innerHTML = '<span class="cmd_brackets">{ }</span> &gt;';
-    cli.element.appendChild(prompt);
-
-    // Completion
-    cli._completer = document.createElement('div');
-    cli._completer.className = 'cmd_completion';
-    cli.element.appendChild(cli._completer);
-
-    // The input field
-    cli._inputer = document.createElement('input');
-    cli._inputer.className = 'cmd_input';
-    cli._inputer.type = 'text';
-    cli.element.appendChild(cli._inputer);
-};
-
 /**
  * A view designed to dock in the bottom of the editor, holding the command
  * line input.
