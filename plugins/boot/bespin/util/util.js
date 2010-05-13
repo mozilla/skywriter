@@ -587,10 +587,10 @@ exports.mixin = function(a,b) {
              a[i] = b[i];
     }
     return a;
-}
+};
 
 /**
- * Basicly taken from Sproutcore.
+ * Basically taken from Sproutcore.
  *
  * Replaces the count items from idx with objects.
  */
