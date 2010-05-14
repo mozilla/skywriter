@@ -39,7 +39,6 @@ var util = require('bespin:util/util');
 var Event = require('events').Event;
 var CanvasView = require('views/canvas').CanvasView;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
-var MultiDelegateSupport = require('delegate_support').MultiDelegateSupport;
 var Range = require('rangeutils:utils/range');
 var Rect = require('utils/rect');
 var TextInput = require('views/textinput').TextInput;

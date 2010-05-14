@@ -1,7 +1,6 @@
 {
     "description": "Provides various routines to match items in a list",
     "dependencies": {
-        "delegate_support": "0.0"
     }
 }
 
