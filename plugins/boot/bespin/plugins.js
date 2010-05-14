@@ -839,6 +839,7 @@ exports.Catalog.prototype = {
                     var ep = this.getExtensionPoint(extension.ep, true);
                     ep.register(extension);
                 }
+                plugin.register();
             } else {
                 md.provides = [];
             }
