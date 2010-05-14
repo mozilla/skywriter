@@ -503,6 +503,15 @@ def release_embed(options):
     path("dryice").copytree(dryice_dest)
     for f in dryice_dest.walkfiles("*.pyc"):
         f.unlink()
+    
+    import static
+    static_library = path(static.__file__)
+    if static_library.endswith(".pyc"):
+        static_library = path(static_library[:-1])
+        
+    static_library.copy(libdir / "static.py")
+    
+    path("static/tiki.js").copy(libdir / "tiki.js")
         
     path("embedded/dryice.py").copy(outputdir / "dryice.py")
     path("plugins").copytree(outputdir / "plugins")

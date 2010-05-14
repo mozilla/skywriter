@@ -121,6 +121,8 @@ will be deleted before the build.""")
         
         if loader is None:
             self.loader = path("static/tiki.js")
+            if not self.loader.exists():
+                self.loader = path("lib/tiki.js")
         else:
             self.loader = path(loader)
             
