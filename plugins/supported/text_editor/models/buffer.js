@@ -74,32 +74,16 @@ exports.Buffer.prototype = {
      */
     _layoutManager: null,
 
-    get layoutManager() {
-        return this._layoutManager;
-    },
-
-    get syntaxManager() {
-        this._layoutManager.syntaxManager;
-    },
-
     /**
      * The file object associated with this buffer. The file instance can only
      * be assigned when constructing the buffer or calling saveAs.
      */
     _file: null,
 
-    get file() {
-        return this._file;
-    },
-
    /**
     * The text model that is holding the content of the file.
     */
     _model: null,
-
-    get model() {
-        return this._model;
-    },
 
     /**
      * Save the contents of this buffer. Returns a promise that resolves
@@ -157,3 +141,29 @@ exports.Buffer.prototype = {
         return util.none(this._file);
     }
 };
+
+Object.defineProperties(exports.Buffer.prototype, {
+    layoutManager: {
+        get: function() {
+            return this._layoutManager;
+        }
+    },
+
+    syntaxManager: {
+        get: function() {
+            this._layoutManager.syntaxManager;
+        }
+    },
+    
+    file: {
+        get: function() {
+            return this._file;
+        }
+    },
+    
+    model: {
+        get: function() {
+            return this._model;
+        }
+    }
+});

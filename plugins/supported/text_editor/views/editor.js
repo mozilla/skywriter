@@ -199,31 +199,6 @@ exports.EditorView.prototype = {
         return oldBuffer;
     },
 
-    set buffer(newBuffer) {
-        if (newBuffer === this._buffer) {
-            return;
-        }
-
-        // In some cases the buffer is set before the UI is initialized.
-        if (this.textView) {
-            this.textView.moveCursorTo({ row: 0, col: 0 });
-            this.layoutManager.sizeChanged.remove(this);
-        }
-
-        this.willChangeBuffer(newBuffer);
-        this.layoutManager = newBuffer.layoutManager;
-        this._buffer = newBuffer;
-
-        this.layoutManager.sizeChanged.add(this,
-                                    this.layoutManagerSizeChanged.bind(this));
-
-        this._recomputeLayout();
-    },
-
-    get buffer() {
-        return this._buffer;
-    },
-
     layoutManagerSizeChanged: function(size) {
         if (this._textLinesCount !== size.height) {
             var gutterWidth = this.gutterView.computeWidth();
@@ -294,60 +269,6 @@ exports.EditorView.prototype = {
         }
 
         util.stopEvent(evt);
-    },
-
-    get textViewPaddingFrame() {
-        var frame = util.clone(this.textView.frame);
-        var padding = this.textView.padding;
-        var charWidth = this.layoutManager.fontDimension.characterWidth;
-
-        frame.width -= padding.left + padding.right + charWidth;
-        frame.height -= padding.top + padding.bottom;
-        return frame;
-    },
-
-    set scrollOffset(pos) {
-        if (pos.x === undefined) pos.x = this._scrollOffset.x;
-        if (pos.y === undefined) pos.y = this._scrollOffset.y;
-
-        var frame = this.textViewPaddingFrame;
-
-        if (pos.y < 0) {
-            pos.y = 0;
-        } else if (this._textViewSize.height < frame.height) {
-            pos.y = 0;
-        } else if (pos.y + frame.height > this._textViewSize.height) {
-            pos.y = this._textViewSize.height - frame.height;
-        }
-
-        if (pos.x < 0) {
-            pos.x = 0;
-        } else if (this._textViewSize.width < frame.width) {
-            pos.x = 0;
-        } else if (pos.x + frame.width > this._textViewSize.width) {
-            pos.x = this._textViewSize.width - frame.width;
-        }
-
-        if (pos.x === this._scrollOffset.x && pos.y === this._scrollOffset.y) {
-            return;
-        }
-
-        this._scrollOffset = pos;
-
-        this.verticalScroller.value = pos.y;
-        this.horizontalScroller.value = pos.x;
-
-        this.textView.clippingFrame = {
-            x: pos.x,
-            y: pos.y
-        };
-
-        this.gutterView.clippingFrame = {
-            y: pos.y
-        };
-
-        this.gutterView.invalidate();
-        this.textView.invalidate();
     },
 
     scrollTo: function(pos) {
@@ -447,3 +368,90 @@ exports.EditorView.prototype = {
         this.textView.invalidate();
     },
 };
+
+Object.defineProperties(exports.EditorView.prototype, {
+    buffer: {
+        set: function(newBuffer) {
+            if (newBuffer === this._buffer) {
+                return;
+            }
+
+            // In some cases the buffer is set before the UI is initialized.
+            if (this.textView) {
+                this.textView.moveCursorTo({ row: 0, col: 0 });
+                this.layoutManager.sizeChanged.remove(this);
+            }
+
+            this.willChangeBuffer(newBuffer);
+            this.layoutManager = newBuffer.layoutManager;
+            this._buffer = newBuffer;
+
+            this.layoutManager.sizeChanged.add(this,
+                                        this.layoutManagerSizeChanged.bind(this));
+
+            this._recomputeLayout();
+        },
+
+        get: function() {
+            return this._buffer;
+        }
+    },
+    
+    textViewPaddingFrame: {
+        get: function() {
+            var frame = util.clone(this.textView.frame);
+            var padding = this.textView.padding;
+            var charWidth = this.layoutManager.fontDimension.characterWidth;
+
+            frame.width -= padding.left + padding.right + charWidth;
+            frame.height -= padding.top + padding.bottom;
+            return frame;
+        }
+    },
+    
+    scrollOffset: {
+        set: function(pos) {
+            if (pos.x === undefined) pos.x = this._scrollOffset.x;
+            if (pos.y === undefined) pos.y = this._scrollOffset.y;
+
+            var frame = this.textViewPaddingFrame;
+
+            if (pos.y < 0) {
+                pos.y = 0;
+            } else if (this._textViewSize.height < frame.height) {
+                pos.y = 0;
+            } else if (pos.y + frame.height > this._textViewSize.height) {
+                pos.y = this._textViewSize.height - frame.height;
+            }
+
+            if (pos.x < 0) {
+                pos.x = 0;
+            } else if (this._textViewSize.width < frame.width) {
+                pos.x = 0;
+            } else if (pos.x + frame.width > this._textViewSize.width) {
+                pos.x = this._textViewSize.width - frame.width;
+            }
+
+            if (pos.x === this._scrollOffset.x && pos.y === this._scrollOffset.y) {
+                return;
+            }
+
+            this._scrollOffset = pos;
+
+            this.verticalScroller.value = pos.y;
+            this.horizontalScroller.value = pos.x;
+
+            this.textView.clippingFrame = {
+                x: pos.x,
+                y: pos.y
+            };
+
+            this.gutterView.clippingFrame = {
+                y: pos.y
+            };
+
+            this.gutterView.invalidate();
+            this.textView.invalidate();
+        }
+    }
+});

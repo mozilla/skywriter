@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
- * Portions created by the Initialal Developer are Copyright (C) 2009
+ * Portions created by the Initial Developer are Copyright (C) 2009
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -45,7 +45,6 @@ var Rect = require('utils/rect');
 var TextInput = require('views/textinput').TextInput;
 var keyboardManager = require('keyboard:keyboard').keyboardManager;
 var settings = require('settings').settings;
-
 
 // Set this to true to outline all text ranges with a box. This may be useful
 // when optimizing syntax highlighting engines.
@@ -135,32 +134,6 @@ util.mixin(exports.TextView.prototype, {
                                 this.layoutManagerInvalidatedRects.bind(this));
         layoutManager.changedTextAtRow.add(this,
                                 this.layoutManagerChangedTextAtRow.bind(this));
-    },
-
-    set hasFocus(value) {
-        if (value == this._hasFocus) {
-            return;
-        }
-
-        this._hasFocus = value;
-
-        if (this._hasFocus) {
-            this._rearmInsertionPointBlinkTimer();
-            this._invalidateSelection();
-            this.textInput.focus();
-        } else {
-            if (this._insertionPointBlinkTimer) {
-                clearInterval(this._insertionPointBlinkTimer);
-                this._insertionPointBlinkTimer = null;
-            }
-            this._insertionPointVisible = true;
-            this._invalidateSelection();
-            this.textInput.blur();
-        }
-    },
-
-    get hasFocus() {
-        return this._hasFocus;
     },
 
     didFocus: function() {
@@ -1119,3 +1092,32 @@ util.mixin(exports.TextView.prototype, {
     }
 });
 
+Object.defineProperties(exports.TextView.prototype, {
+    hasFocus: {
+        get: function() {
+            return this._hasFocus;
+        },
+        
+        set: function(value) {
+            if (value == this._hasFocus) {
+                return;
+            }
+
+            this._hasFocus = value;
+
+            if (this._hasFocus) {
+                this._rearmInsertionPointBlinkTimer();
+                this._invalidateSelection();
+                this.textInput.focus();
+            } else {
+                if (this._insertionPointBlinkTimer) {
+                    clearInterval(this._insertionPointBlinkTimer);
+                    this._insertionPointBlinkTimer = null;
+                }
+                this._insertionPointVisible = true;
+                this._invalidateSelection();
+                this.textInput.blur();
+            }
+        }
+    }
+});

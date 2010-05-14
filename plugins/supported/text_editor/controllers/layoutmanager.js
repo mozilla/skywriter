@@ -127,20 +127,6 @@ exports.LayoutManager.prototype = {
     _size: null,
     sizeChanged: null,
 
-    set size(size) {
-        if (size.width !== this._size.width || size.height !== this._size.height) {
-            this.sizeChanged(size);
-        }
-    },
-
-    get size() {
-        return this._size;
-    },
-
-    get textStorage() {
-        return this._textStorage;
-    },
-
     /**
      * Theme colors. Value is set by editorView class. Don't change this
      * property directly. Use the editorView function to adjust it.
@@ -477,3 +463,23 @@ exports.LayoutManager.prototype = {
         }
     }
 };
+
+Object.defineProperties(exports.LayoutManager.prototype, {
+    size: {
+        set: function(size) {
+            if (size.width !== this._size.width || size.height !== this._size.height) {
+                this.sizeChanged(size);
+            }
+        },
+        
+        get size() {
+            return this._size;
+        }
+    },
+
+    textStorage: {
+        get: function() {
+            return this._textStorage;
+        }
+    }
+})

@@ -74,7 +74,9 @@ exports.directory = function(path) {
  * </pre>
  */
 exports.makeDirectory = function(path) {
-    if (!(/\/$/).test(path)){path += '/';}
+    if (!((/\/$/).test(path))) {
+        path += '/';
+    }
     return path;
 };
 

@@ -770,3 +770,51 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
     //     parentView.set('value', parentView.get('value') + 2*delta);
     // }
 });
+
+Object.defineProperties(exports.ScrollerCanvasView.prototype, {
+    isVisible: {
+        set: function(isVisible) {
+            if (this._isVisible === isVisible) {
+                return;
+            }
+
+            this._isVisible = isVisible;
+            this.domNode.style.display = isVisible ? 'block' : 'none';
+            if (isVisible) {
+                this.invalidate();
+            }
+        }
+    },
+
+    maximum: {
+        set: function(maximum) {
+            if (this._value > this._maximum) {
+                this._value = this._maximum;
+            }
+
+            if (maximum === this._maximum) {
+                return;
+            }
+
+            this._maximum = maximum;
+            this.invalidate();
+        }
+    },
+
+    value: {
+        set: function(value) {
+            if (value < 0) {
+                value = 0;
+            } else if (value > this._maximum) {
+                value = this._maximum;
+            }
+
+            if (value === this._value) {
+                return;
+            }
+
+            this._value = value;
+            this.invalidate();
+        }
+    }
+});

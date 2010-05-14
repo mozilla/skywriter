@@ -37,6 +37,7 @@
 <!DOCTYPE html>
 <html><head>
 
+<link id="bespin_base" href="..">
 <link href="../BespinEmbedded.css" type="text/css" rel="stylesheet">
 
 <script type="text/javascript" src="../BespinEmbedded.js"></script>
@@ -49,24 +50,24 @@
 </style>
 <script>
 window.onBespinLoad = function() {
-    var console = tiki.require('bespin:console').console;
-    var Range = tiki.require('rangeutils:utils/range');
+    var console = bespin.tiki.require('bespin:console').console;
+    var Range = bespin.tiki.require('rangeutils:utils/range');
 
     console.log("this is called when Bespin is loaded");
     window.bespin = document.getElementById("editor").bespin;
 
     // Bespin event handler:
     var preChange = document.getElementById('change');
-    window.bespin.addEventListener('textChange', function(evt) {
-        preChange.innerHTML = 'Change: at ' + Range.toString(evt.oldRange) +
-                                ' to \'' + evt.newValue + '\' at ' +
-                                    Range.toString(evt.newRange);
-    });
+    // window.bespin.addEventListener('textChange', function(evt) {
+    //     preChange.innerHTML = 'Change: at ' + Range.toString(evt.oldRange) +
+    //                             ' to \'' + evt.newValue + '\' at ' +
+    //                                 Range.toString(evt.newRange);
+    // });
 
     var preSelection = document.getElementById('selection');
-    window.bespin.addEventListener('select', function(evt) {
-        preSelection.innerHTML = 'Selection: ' + Range.toString(evt.selection);
-    });
+    // window.bespin.addEventListener('select', function(evt) {
+    //     preSelection.innerHTML = 'Selection: ' + Range.toString(evt.selection);
+    // });
 };
 
 function showContents() {

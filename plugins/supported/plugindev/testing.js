@@ -38,7 +38,7 @@
 var catalog = require('bespin:plugins').catalog;
 var Ct = require('core_test');
 var DefaultLogger = require('loggers/default', 'core_test');
-var BrowserLogger = require('core_test:loggers/browser');
+var Promise = require("bespin:promise").Promise;
 var group = require('bespin:promise').group;
 var test = require('core_test:test');
 var utils = require('core_test:utils');
@@ -501,7 +501,11 @@ exports.testrunner = function(env, args, request) {
     var promises = [];
     testsToRun.forEach(function(testmodule) {
         var pluginName = testmodule.split(':')[0];
-        promises.push(tiki.async(pluginName));
+        var modpr = new Promise();
+        require.ensurePackage("::" + pluginName, function(pack) {
+            modpr.resolve(pack);
+        });
+        promises.push(modpr);
     });
 
     if (promises.length === 0) {

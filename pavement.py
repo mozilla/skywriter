@@ -85,6 +85,11 @@ options(
         dest_dir=path("external") / "compiler",
         download_url="http://closure-compiler.googlecode.com/files/compiler-latest.zip",
         download_location=path("external") / "compiler-latest.zip"
+    ),
+    fetch_css_compiler=Bunch(
+        dest_dir = path("external") / "yui_compressor",
+        download_url="http://yuilibrary.com/downloads/yuicompressor/yuicompressor-2.4.2.zip",
+        download_location=path("external") / "yui_compressor.zip"
     )
 )
 
@@ -96,7 +101,7 @@ if ("undefined" === typeof bespin) {
 %(preamble)s
 tiki.register('%(package_id)s', {
 "name": "tiki",
-"version": "%(TIKI_VERSION)s",
+"version": "%(TIKI_VERSION)s"
 });
 
 tiki.module('%(package_id)s:tiki', function(require, exports, module) {
@@ -346,7 +351,7 @@ def restore_python_version(replaced_lines):
     version_file.write_lines(lines)
 
 def update_javascript_version():
-    version_file = path("frameworks") / "bespin" / "index.js"
+    version_file = path("plugins") / "boot" / "bespin" / "index.js"
     in_version_block = False
     lines = version_file.lines()
     replaced_lines = []
@@ -378,7 +383,7 @@ def update_javascript_version():
     return replaced_lines
     
 def restore_javascript_version(replaced_lines):
-    version_file = path("frameworks") / "bespin" / "index.js"
+    version_file = path("plugins") / "boot" / "bespin" / "index.js"
     lines = version_file.lines()
     version_block_start = None
     version_block_end = None
@@ -455,13 +460,13 @@ def build_docs(options):
     
 
 @task
-@needs(['build_docs', 'fetch_compiler'])
+@needs(['build_docs', 'fetch_compiler', 'fetch_css_compiler'])
 def release_embed(options):
     builddir = options.builddir
     if not builddir.exists():
         builddir.mkdir()
     
-    yui_compressor = path("abbot/vendor/yui-compressor/yuicompressor-2.4.2.jar")
+    yui_compressor = path("external/yui_compressor/build/yuicompressor-2.4.2.jar")
     closure_compiler = options.fetch_compiler.dest_dir / "compiler.jar"
     
     version = options.version.number
@@ -489,10 +494,6 @@ def release_embed(options):
         path("LICENSE.txt").copy(outputdir / "LICENSE.txt")
         path("embedded/README-Customizable.txt").copy(outputdir / "README.txt")
         (builddir / "docs").copytree(outputdir / "docs")
-    
-        frameworks_dir = outputdir / "frameworks"
-        frameworks_dir.mkdir()
-        path("frameworks/bespin").copytree(frameworks_dir / "bespin")
     finally:
         restore_javascript_version(replaced_lines)
     
@@ -502,6 +503,15 @@ def release_embed(options):
     path("dryice").copytree(dryice_dest)
     for f in dryice_dest.walkfiles("*.pyc"):
         f.unlink()
+    
+    import static
+    static_library = path(static.__file__)
+    if static_library.endswith(".pyc"):
+        static_library = path(static_library[:-1])
+        
+    static_library.copy(libdir / "static.py")
+    
+    path("static/tiki.js").copy(libdir / "tiki.js")
         
     path("embedded/dryice.py").copy(outputdir / "dryice.py")
     path("plugins").copytree(outputdir / "plugins")
@@ -519,7 +529,7 @@ def release_embed(options):
 def _fetchfile(name, dest_dir, download_location, download_url):
     external = path("external")
     if not dest_dir.exists():
-        external.mkdir()
+        dest_dir.makedirs()
         if not download_location.exists():
             info("Downloading %s from %s", name, download_url)
             zi = urllib2.urlopen(download_url)
@@ -541,17 +551,24 @@ def _fetchfile(name, dest_dir, download_location, download_url):
                 
             outname = name.split('/', 1)[1]
             if name.endswith('/'):
-                (external / outname).makedirs()
+                (dest_dir / outname).makedirs()
             else:
                 info("Expanding %s", outname)
-                open(external / outname, "wb").write(zf.read(name))
+                open(dest_dir / outname, "wb").write(zf.read(name))
     
     
 @task
+def fetch_css_compiler(options):
+    """Fetches the YUI Compressor used to compress CSS files."""
+    _fetchfile("YUI Compressor", options.fetch_css_compiler.dest_dir, options.fetch_css_compiler.download_location,
+        options.fetch_css_compiler.download_url)
+
+
+@task
 def fetch_compiler(options):
     """Fetches the Closure Compiler used to compress builds."""
-    _fetchfile("Closure Compiler", options.dest_dir, options.download_location,
-        options.download_url)
+    _fetchfile("Closure Compiler", options.fetch_compiler.dest_dir, options.fetch_compiler.download_location,
+        options.fetch_compiler.download_url)
     
 @task
 def jsdocs(options):

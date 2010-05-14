@@ -72,6 +72,8 @@ exports.launch = function(config) {
     } else {
         exports.launchEditor(config);
     }
+    var env = require("canon:environment").global;
+    return env;
 };
 
 exports.normalizeConfig = function(config) {

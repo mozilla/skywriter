@@ -92,70 +92,6 @@ exports.CanvasView.prototype = {
 
     _frame: null,
 
-    get clippingFrame() {
-        return this._clippingFrame;
-    },
-
-    set clippingFrame(clippingFrame) {
-        clippingFrame = util.mixin(this._clippingFrame, clippingFrame);
-
-        if (this._clippingFrame === null ||
-                !Rect.rectsEqual(clippingFrame, this._clippingFrame)) {
-            this._clippingFrame = clippingFrame;
-            this.clippingChanged();
-        }
-    },
-
-    get frame() {
-        return this._frame;
-    },
-
-    set frame(frame) {
-        var domNode = this.domNode;
-        var domStyle = domNode.style;
-        var preventDownsize = this._preventDownsize;
-        var domWidth = domNode.width;
-        var domHeight = domNode.height;
-        var domStyle = domNode.style;
-        domStyle.left = frame.x + 'px';
-        domStyle.top = frame.y + 'px';
-
-        var widthChanged, heightChanged;
-        if (frame.width !== domWidth) {
-            if (frame.width < domWidth) {
-                if (!preventDownsize) {
-                    widthChanged = true;
-                }
-            } else {
-                widthChanged = true;
-            }
-        }
-        if (frame.height !== domHeight) {
-            if (frame.height < domHeight) {
-                if (!preventDownsize) {
-                    heightChanged = true;
-                }
-            } else {
-                heightChanged = true;
-            }
-        }
-
-        if (widthChanged) {
-            this.domNode.width = frame.width;
-        }
-        if (heightChanged) {
-            this.domNode.height = frame.height;
-        }
-
-        this._frame = frame;
-
-        // The clipping frame might have changed if the size changed.
-        this.clippingFrame = {
-            width: frame.width,
-            height: frame.height
-        };
-    },
-
     _getContext: function() {
         if (this._canvasContext === null) {
             this._canvasContext = this.domNode.getContext('2d');
@@ -168,7 +104,7 @@ exports.CanvasView.prototype = {
         return {
             x: x + clippingFrame.x,
             y: y + clippingFrame.y
-        }
+        };
     },
 
     /**
@@ -303,3 +239,72 @@ exports.CanvasView.prototype = {
     }
 };
 
+Object.defineProperties(exports.CanvasView.prototype, {
+    clippingFrame: {
+        get: function() {
+            return this._clippingFrame;
+        },
+
+        set: function(clippingFrame) {
+            clippingFrame = util.mixin(this._clippingFrame, clippingFrame);
+
+            if (this._clippingFrame === null ||
+                    !Rect.rectsEqual(clippingFrame, this._clippingFrame)) {
+                this._clippingFrame = clippingFrame;
+                this.clippingChanged();
+            }
+        }
+    },
+
+    frame: {
+        get: function() {
+            return this._frame;
+        },
+        
+        set: function(frame) {
+            var domNode = this.domNode;
+            var domStyle = domNode.style;
+            var preventDownsize = this._preventDownsize;
+            var domWidth = domNode.width;
+            var domHeight = domNode.height;
+            var domStyle = domNode.style;
+            domStyle.left = frame.x + 'px';
+            domStyle.top = frame.y + 'px';
+
+            var widthChanged, heightChanged;
+            if (frame.width !== domWidth) {
+                if (frame.width < domWidth) {
+                    if (!preventDownsize) {
+                        widthChanged = true;
+                    }
+                } else {
+                    widthChanged = true;
+                }
+            }
+            if (frame.height !== domHeight) {
+                if (frame.height < domHeight) {
+                    if (!preventDownsize) {
+                        heightChanged = true;
+                    }
+                } else {
+                    heightChanged = true;
+                }
+            }
+
+            if (widthChanged) {
+                this.domNode.width = frame.width;
+            }
+            if (heightChanged) {
+                this.domNode.height = frame.height;
+            }
+
+            this._frame = frame;
+
+            // The clipping frame might have changed if the size changed.
+            this.clippingFrame = {
+                width: frame.width,
+                height: frame.height
+            };
+        }
+    }
+});

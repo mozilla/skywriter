@@ -39,6 +39,7 @@ import sys
 import os
 import optparse
 import subprocess
+from wsgiref.simple_server import make_server
 
 try:
     from json import loads, dumps
@@ -59,6 +60,7 @@ class BuildError(Exception):
                 
 
 sample_dir = path(__file__).dirname() / "samples"
+_boot_file = path(__file__).dirname() / "boot.js"
 
 def ignore_css(src, names):
     return [name for name in names if name.endswith(".css")]
@@ -69,11 +71,12 @@ class Manifest(object):
     unbundled_plugins = None
     
     def __init__(self, include_core_test=False, plugins=None,
-        search_path=None, bespin=None,
+        search_path=None, 
         output_dir="build", include_sample=False,
         boot_file=None, unbundled_plugins=None, loader=None):
 
         self.include_core_test = include_core_test
+        plugins.insert(0, "bespin")
         self.plugins = plugins
 
         if search_path is not None:
@@ -100,19 +103,10 @@ class Manifest(object):
 
         self.search_path = search_path
 
-        if bespin is None:
-            bespin = path("plugins") / "boot" / "bespin"
-
-        if not bespin or not bespin.exists():
-            raise BuildError("Cannot find Bespin core code (looked in %s)"
-                % bespin.abspath())
-        
         if boot_file:
             self.boot_file = path(boot_file).abspath()
         else:
-            self.boot_file = boot_file
-
-        self.bespin = bespin
+            self.boot_file = _boot_file
 
         if not output_dir:
             raise BuildError("""Cannot run unless output_dir is set
@@ -127,6 +121,8 @@ will be deleted before the build.""")
         
         if loader is None:
             self.loader = path("static/tiki.js")
+            if not self.loader.exists():
+                self.loader = path("lib/tiki.js")
         else:
             self.loader = path(loader)
             
@@ -186,9 +182,6 @@ will be deleted before the build.""")
         # include Bespin core code
         exclude_tests = not self.include_core_test
 
-        combiner.combine_files(output_js, output_css, "bespin",
-            self.bespin, exclude_tests=exclude_tests)
-
         # finally, package up the plugins
 
         if package_list is None:
@@ -196,7 +189,7 @@ will be deleted before the build.""")
 
         for package in package_list:
             plugin = self.get_plugin(package.name)
-            combiner.combine_files(output_js, output_css, plugin.name,
+            combiner.combine_files(output_js, output_css, plugin,
                                    plugin.location,
                                    exclude_tests=exclude_tests,
                                    image_path_prepend="resources/%s/"
@@ -214,9 +207,9 @@ will be deleted before the build.""")
             bundled_plugins.add(plugin.name)
             
         output_js.write("""
-SC.ready(function() {tiki.require("bespin:plugins").catalog.loadMetadata(%s);});
+bespin.tiki.require("bespin:plugins").catalog.loadMetadata(%s);;
 """ % (dumps(all_md)))
-
+        
         if self.boot_file:
             output_js.write(self.boot_file.bytes())
 
@@ -317,6 +310,8 @@ def main(args=None):
     parser.add_option("-D", "--variable", dest="variables",
         action="append",
         help="override values in the manifest (use format KEY=VALUE, where VALUE is JSON)")
+    parser.add_option("-s", "--server", dest="server",
+        help="starts a server on [address:]port. example: -s 8080")
     options, args = parser.parse_args(args)
 
     overrides = {}
@@ -335,6 +330,78 @@ def main(args=None):
         raise BuildError("Build manifest file (%s) does not exist" % (filename))
 
     print "Using build manifest: ", filename
+    
+    if options.server:
+        start_server(filename, options, overrides)
+    else:
+        do_build(filename, options, overrides)
+
+index_html = """
+<!DOCTYPE html>
+<html><head>
+
+<link href="BespinEmbedded.css" type="text/css" rel="stylesheet">
+
+<script type="text/javascript" src="BespinEmbedded.js"></script>
+</head>
+<body style="height: 100%; width: 100%; margin: 0">
+<div id="editor" class="bespin" data-bespinoptions='{ "settings": { "tabstop": 4 }, "syntax": "js", "stealFocus": true }' style="width: 100%; height: 100%">// The text of this div shows up in the editor.
+var thisCode = "what shows up in the editor";
+function editMe() {
+ alert("and have fun!");
+}
+</div>
+</body>
+</html>
+"""
+
+class DryIceAndWSGI(object):
+    def __init__(self, filename, options, overrides):
+        from static import Cling
+
+        self.filename = filename
+        self.options = options
+        self.overrides = overrides
+        
+        manifest = Manifest.from_json(filename.text())
+        self.static_app = Cling(manifest.output_dir)
+        
+    def __call__(self, environ, start_response):
+        path_info = environ.get("PATH_INFO", "")
+        if not path_info or path_info == "/index.html" or path_info == "/":
+            headers = [
+                ('Content-Type', 'text/html'),
+                ('Content-Length', str(len(index_html)))
+            ]
+            if environ['REQUEST_METHOD'] == "HEAD":
+                headers.append(('Allow', 'GET, HEAD'))
+                start_response("200 OK", headers)
+                return ['']
+            else:
+                start_response("200 OK", headers)
+                do_build(self.filename, self.options, self.overrides)
+                return [index_html]
+        else:
+            return self.static_app(environ, start_response)
+
+def start_server(filename, options, overrides):
+    """Starts the little webserver"""
+    app = DryIceAndWSGI(filename, options, overrides)
+    server_option = options.server
+    if ":" in server_option:
+        host, port = server_option.split(":")
+    else:
+        host = "localhost"
+        port = server_option
+    port = int(port)
+    print "Server started on %s, port %s" % (host, port)
+    try:
+        make_server(host, port, app).serve_forever()
+    except KeyboardInterrupt:
+        pass
+    
+def do_build(filename, options, overrides):
+    """Runs the actual build"""
     try:
         manifest = Manifest.from_json(filename.text(), overrides=overrides)
         manifest.build()

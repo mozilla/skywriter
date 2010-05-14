@@ -6,7 +6,7 @@
 
 
 var utils = require('utils'),
-    Promise = require('promise', 'tiki'),
+    Promise = require('promise', 'bespin').Promise,
     Ct = require('core');
     
 require('system/module'); // add Ct.Module
@@ -160,7 +160,7 @@ Ct.Plan = utils.extend({
     @returns {Promise} the final promise for the plan schedule 
   */
   run: function(filter) {
-    var pr  = utils.Promise.create(),
+    var pr  = new utils.Promise(),
         ret = this.schedule(pr, filter);
         
     // cleanup memory when finished

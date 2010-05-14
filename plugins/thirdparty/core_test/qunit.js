@@ -34,7 +34,7 @@ exports.module = function(moduleName, opts) {
       
   Ct.setup(function(t) {
     
-    var pr = utils.Promise.create() ;
+    var pr = new utils.Promise() ;
     
     var st = {
       test: t,
@@ -56,7 +56,7 @@ exports.module = function(moduleName, opts) {
 
   Ct.teardown(function(t) {
     var st = Ct.qUnitStatus,
-        pr = utils.Promise.create();
+        pr = new utils.Promise();
         
     st.promise = pr ;
     st.isFinished = false;
@@ -88,7 +88,7 @@ exports.test  = function(testName, handler) {
   
   Ct.test(testName, function(t) {
     var st = Ct.qUnitStatus,
-        pr = utils.Promise.create();
+        pr = new utils.Promise();
         
     st.promise = pr;
     st.isFinished = false;

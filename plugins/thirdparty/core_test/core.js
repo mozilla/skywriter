@@ -86,8 +86,12 @@ CoreTest = {
   _schedule: function(pr) {
     if (arguments.length===0) {
       if (!(pr = this._scheduleTail)) {
-        pr = this._scheduleTail = Promise.create('CoreTest.head');
-        tiki.ready(pr, pr.resolve);
+        pr = this._scheduleTail = new Promise('CoreTest.head');
+        // I don't know what the line below was supposed to do,
+        // but tiki no longer has this API. commenting out to
+        // see if this is even necessary with the current code.
+        // kdangoor 2010/05/14
+        // tiki.ready(pr, pr.resolve);
       }
       return pr ;
     } else {

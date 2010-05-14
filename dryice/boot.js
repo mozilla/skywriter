@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an 'AS IS' basis,
+ * Software distributed under the License is distributed on an "AS IS" basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,54 +35,26 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Event = require('events').Event;
+// This module is set up to be dependency-less so that Narwhal
+// will be able to run it right away.
 
-exports.View = function(node){
-    this.node = node;
-
-    // Setup the event.
-    this.dimensionEvent = new Event();
-
-    // Render the view.
-    this.render(true);
+bespin.useBespin = function(element, options) {
+    options = options || {};
+    var appconfig = bespin.tiki.require("appconfig");
+    options.element = element;
+    return appconfig.launch(options);
 };
 
-exports.View.prototype = {
-    /**
-     * The underlaying HTMLNode for this view.
-     */
-    node: null,
-
-    /**
-     * The event called when the dimension has changed.
-     */
-    dimensionEvent: null,
-
-    /**
-     * Returns the dimension of the node.
-     */
-    /**
-     * This function is called to update the view's DOM.
-     * Subclasses can implement this function.
-     */
-    render: function(firstTime) { },
-
-    /**
-     * Call this funciton if the dimension of the view changed.
-     */
-    dimensionChanged: function() {
-        this.dimensionEvent();
+document.addEventListener("DOMContentLoaded", function() {
+    var nodes = document.querySelectorAll(".bespin");
+    for (var i = 0; i < nodes.length; i++) {
+        var node = nodes[i];
+        var options = node.getAttribute('data-bespinoptions');
+        node.bespin = bespin.useBespin(node, JSON.parse(options));
     }
-};
 
-Object.defineProperties(exports.View.prototype, {
-    dimension: {
-        get: function() {
-            return {
-                width: this.node.scrollWidth || this.node.offsetWidth,
-                height: this.node.scrollHeight || this.node.offsetHeight
-            };
-        }
+    // If users want a custom startup
+    if (window.onBespinLoad) {
+        window.onBespinLoad();
     }
-});
-
+}, false);

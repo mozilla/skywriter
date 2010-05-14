@@ -134,15 +134,17 @@ exports.parsePlugin = function(pluginName) {
 };
 
 exports.registerThemeStyles = function(extension) {
-    var resourceURL = catalog.plugins[extension.getPluginName()].resourceURL;
+    var resourceURL = catalog.getResourceURL(extension.getPluginName());
 
     if (!(extension.url instanceof Array)) {
         extension.url = [ extension.url ];
     }
+    
+    var url = resourceURL + extension.url;
 
     extension.url.forEach(function(file) {
         $.ajax({
-            url: resourceURL + file,
+            url: url,
             success: function(response) {
                 if (!extension._data) {
                     extension._data = '';
@@ -155,7 +157,7 @@ exports.registerThemeStyles = function(extension) {
                 exports.parsePlugin(extension.getPluginName());
             },
             error: function(err) {
-                console.error('registerLessFile: Could not load ' + extension.url);
+                console.error('registerLessFile: Could not load ' + url);
             }
         })
     })
