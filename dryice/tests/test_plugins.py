@@ -200,3 +200,7 @@ def test_templates_in_plugin():
     assert 'one.jsmt' in templates
     assert 'js micro template' in templates['one.jsmt']
     
+    tm = plugin.template_module
+    assert "plugin1:templates" in tm
+    assert "js micro template" in tm
+    

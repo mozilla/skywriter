@@ -44,6 +44,8 @@ try:
 except ImportError:
     from simplejson import loads, dumps
 
+from dryice.plugins import wrap_script
+
 class Package(object):
     visited = False
     
@@ -159,17 +161,12 @@ def combine_files(jsfile, cssfile, plugin, p,
         if modname == "index":
             has_index = True
         
-        jsfile.write("""
-bespin.tiki.module("%s:%s",function(require,exports,module) {
-""" % (name, modname))
-        jsfile.write(f.bytes())
-        jsfile.write("""
-});
-""")
+        jsfile.write(wrap_script(plugin, modname, f.bytes()))
     
     if not has_index:
-        module_contents = ""
-        jsfile.write("""
-bespin.tiki.module("%s:index",function(require,exports,module){%s});
-""" % (name, module_contents))
+        jsfile.write(wrap_script(plugin, "index", ""))
+    
+    template_module = plugin.template_module
+    if template_module:
+        jsfile.write(template_module)
     

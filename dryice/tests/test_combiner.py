@@ -39,6 +39,7 @@ from cStringIO import StringIO
 from path import path
 
 from dryice.combiner import Package, toposort, combine_files
+from dryice.plugins import Plugin
 
 def test_toposort():
     a = Package("a", [])
@@ -67,27 +68,13 @@ def test_toposort_with_undefined_packages():
     assert l[1] == b
     
     
-def test_app_combination():
-    p = path(__file__).dirname() / "testapp"
-    output = StringIO()
-    combine_files(output, StringIO(), "testapp", p, 
-                  add_main=True, exclude_tests=False)
-    combined = output.getvalue()
-    print combined
-    assert "exports.main = function() {" in combined
-    assert """exports.main = require("main").main;""" in combined
-    assert 'tiki.register("testapp"' in combined
-    assert 'tiki.module("testapp:index"' in combined
-    assert 'tiki.main("testapp", "main")' in combined
-    
-    assert 'exports.bar = 1;' in combined
-    assert 'tiki.module("testapp:subpack/foo"' in combined
-    
 def test_package_index_generation():
     p = path(__file__).dirname() / "noindexapp"
     output = StringIO()
-    combine_files(output, StringIO(), "noindexapp", p)
+    plugin = Plugin("noindexapp", p, dict(name="testing"))
+    combine_files(output, StringIO(), plugin, p)
     combined = output.getvalue()
     print combined
     assert 'tiki.module("noindexapp:index"' in combined
     assert 'tiki.main' not in combined
+    

@@ -39,6 +39,7 @@ import sys
 import os
 import optparse
 import subprocess
+from wsgiref.simple_server import make_server
 
 try:
     from json import loads, dumps
@@ -307,6 +308,8 @@ def main(args=None):
     parser.add_option("-D", "--variable", dest="variables",
         action="append",
         help="override values in the manifest (use format KEY=VALUE, where VALUE is JSON)")
+    parser.add_option("-s", "--server", dest="server",
+        help="starts a server on [address:]port. example: -s 8080")
     options, args = parser.parse_args(args)
 
     overrides = {}
@@ -325,6 +328,78 @@ def main(args=None):
         raise BuildError("Build manifest file (%s) does not exist" % (filename))
 
     print "Using build manifest: ", filename
+    
+    if options.server:
+        start_server(filename, options, overrides)
+    else:
+        do_build(filename, options, overrides)
+
+index_html = """
+<!DOCTYPE html>
+<html><head>
+
+<link href="BespinEmbedded.css" type="text/css" rel="stylesheet">
+
+<script type="text/javascript" src="BespinEmbedded.js"></script>
+</head>
+<body style="height: 100%; width: 100%; margin: 0">
+<div id="editor" class="bespin" data-bespinoptions='{ "settings": { "tabstop": 4 }, "syntax": "js", "stealFocus": true }' style="width: 100%; height: 100%">// The text of this div shows up in the editor.
+var thisCode = "what shows up in the editor";
+function editMe() {
+ alert("and have fun!");
+}
+</div>
+</body>
+</html>
+"""
+
+class DryIceAndWSGI(object):
+    def __init__(self, filename, options, overrides):
+        from static import Cling
+
+        self.filename = filename
+        self.options = options
+        self.overrides = overrides
+        
+        manifest = Manifest.from_json(filename.text())
+        self.static_app = Cling(manifest.output_dir)
+        
+    def __call__(self, environ, start_response):
+        path_info = environ.get("PATH_INFO", "")
+        if not path_info or path_info == "/index.html" or path_info == "/":
+            headers = [
+                ('Content-Type', 'text/html'),
+                ('Content-Length', str(len(index_html)))
+            ]
+            if environ['REQUEST_METHOD'] == "HEAD":
+                headers.append(('Allow', 'GET, HEAD'))
+                start_response("200 OK", headers)
+                return ['']
+            else:
+                start_response("200 OK", headers)
+                do_build(self.filename, self.options, self.overrides)
+                return [index_html]
+        else:
+            return self.static_app(environ, start_response)
+
+def start_server(filename, options, overrides):
+    """Starts the little webserver"""
+    app = DryIceAndWSGI(filename, options, overrides)
+    server_option = options.server
+    if ":" in server_option:
+        host, port = server_option.split(":")
+    else:
+        host = "localhost"
+        port = server_option
+    port = int(port)
+    print "Server started on %s, port %s" % (host, port)
+    try:
+        make_server(host, port, app).serve_forever()
+    except KeyboardInterrupt:
+        pass
+    
+def do_build(filename, options, overrides):
+    """Runs the actual build"""
     try:
         manifest = Manifest.from_json(filename.text(), overrides=overrides)
         manifest.build()

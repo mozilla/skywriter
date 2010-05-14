@@ -107,8 +107,8 @@ def test_js_creation():
     manifest.generate_output_files(output, StringIO())
     output = output.getvalue()
     assert "var tiki =" in output
-    assert """tiki.register("plugin1",""" in output
-    assert """tiki.register("plugin2",""" in output
+    assert """tiki.register("::plugin1",""" in output
+    assert """tiki.register("::plugin2",""" in output
     assert """tiki.module("plugin2:mycode",""" in output
     assert """exports.plugin2func = function""" in output
     assert "exports.Plugin = function" in output

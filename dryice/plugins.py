@@ -49,6 +49,12 @@ _trailing_paren = re.compile(r"\s*\)\s*$")
 _start_tag = re.compile(r'^\s*[\'"]define\s+metadata[\'"]\s*;*\s*$')
 _end_tag = re.compile(r'^\s*[\'"]end[\'"]\s*;*\s*$')
 
+def wrap_script(plugin, mod_name, script_text):
+    return """
+bespin.tiki.module("%s:%s",function(require,exports,module) {
+%s
+});
+""" % (plugin.name, mod_name, script_text)
 
 def _parse_md_text(lines):
     """Parses the plugin metadata out of the lines of the JS file.
@@ -209,6 +215,20 @@ class Plugin(object):
                 for f in loc.walkfiles("*.jsmt"))
         else:
             return {}
+    
+    @property
+    def template_module(self):
+        templates = self.templates
+        if not templates:
+            return None
+
+        return wrap_script(self, "templates", """
+var jsmt = require('jsmt');
+
+jsmt.compileAll(%s, exports);
+
+""" % (dumps(templates)))
+        
         
     def get_script_text(self, scriptname):
         """Look up the script at scriptname within this plugin."""
