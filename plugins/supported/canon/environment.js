@@ -99,6 +99,7 @@ Object.defineProperties(exports.Environment.prototype, {
                 return undefined;
             }
             return this.session.currentBuffer;
+        }
     },
 
     /**
@@ -138,7 +139,7 @@ Object.defineProperties(exports.Environment.prototype, {
             return catalog.getObject('files');
         }
     }
-}});
+});
 
 /**
  * The global environment.
