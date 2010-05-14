@@ -71,7 +71,7 @@ util.mixin(exports.GutterView.prototype, {
         var range = layoutManager.characterRangeForBoundingRect(rect);
         var endRow = Math.min(range.end.row,
             layoutManager.textLines.length - 1);
-        var lineAscent = layoutManager.lineAscent;
+        var lineAscent = layoutManager.fontDimension.lineAscent;
 
         context.fillStyle = theme.color;
         context.font = this.editor.font;
@@ -95,7 +95,7 @@ util.mixin(exports.GutterView.prototype, {
         var lineCount = layoutManager.textLines.length;
         var lineCountStr = '' + lineCount;
 
-        var characterWidth = layoutManager.characterWidth;
+        var characterWidth = layoutManager.fontDimension.characterWidth;
         var strWidth = characterWidth * lineCountStr.length;
 
         return strWidth + paddingWidth;

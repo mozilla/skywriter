@@ -217,7 +217,7 @@ util.mixin(exports.TextView.prototype, {
     _drawLines: function(rect, context) {
         var layoutManager = this.editor.layoutManager;
         var textLines = layoutManager.textLines;
-        var lineAscent = layoutManager.lineAscent;
+        var lineAscent = layoutManager.fontDimension.lineAscent;
         var themeHighlighter = this.editor.themeData.highlighter
 
         context.save();
@@ -424,6 +424,7 @@ util.mixin(exports.TextView.prototype, {
     //     }));
     // },
 
+    // TODO: BRING THIS BACK!
     _scrollPage: function(scrollUp) {
         var scrollView = this._enclosingScrollView;
         if (util.none(scrollView)) {
@@ -435,6 +436,7 @@ util.mixin(exports.TextView.prototype, {
             (visibleFrame.height + this._lineAscent) * (scrollUp ? -1 : 1));
     },
 
+    // TODO: BRING THIS BACK!
     _scrollWhileDragging: function() {
         var point = this._dragPoint;
         var scroll = { x: 0, y: 0};

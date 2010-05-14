@@ -42,10 +42,46 @@ var SyntaxManager = require('syntax_manager:controllers/syntaxmanager').
     SyntaxManager;
 var TextStorage = require('models/textstorage').TextStorage;
 var catalog = require('bespin:plugins').catalog;
+var settings = require('settings').settings;
+var m_scratchcanvas = require('bespin:util/scratchcanvas');
+
+var fontDimension = {};
+
+var computeFontDimension = function() {
+    var fontSize = settings.get('fontsize');
+    var fontFace = settings.get('fontface');
+    var font = fontSize + 'px ' + fontFace;
+
+    var canvas = m_scratchcanvas.get();
+
+    // Measure a large string to work around the fact that width and height
+    // are truncated to the nearest integer in the canvas API.
+    var str = '';
+    for (var i = 0; i < 100; i++) {
+        str += 'M';
+    }
+
+    var width = canvas.measureStringWidth(font, str) / 100;
+
+    fontDimension.characterWidth = width;
+
+    fontDimension.lineHeight = Math.floor(fontSize * 1.6);
+    fontDimension.lineAscent = Math.floor(fontSize * 1.3);
+};
+
+computeFontDimension();
+
+catalog.registerExtension('settingChange', {
+    match: "font[size|face]",
+    pointer: computeFontDimension
+});
 
 exports.LayoutManager = function(opts) {
     this.changedTextAtRow = new Event();
     this.invalidatedRects = new Event();
+
+    // Put the global variable on the instance.
+    this.fontDimension = fontDimension;
 
     // There is no setter for textStorage so we have to change it to
     // _textStorage to make things work with util.mixin().
@@ -112,27 +148,6 @@ exports.LayoutManager.prototype = {
     _theme: { },
 
     /**
-     * @property{number}
-     *
-     * The width of one character.
-     */
-    characterWidth: 8,
-
-    /**
-     * @property{number}
-     *
-     * The ascent of one line. This is used for painting text.
-     */
-    lineAscent: 16,
-
-    /**
-     * @property{number}
-     *
-     * The height of one line.
-     */
-    lineHeight: 20,
-
-    /**
      * @property
      *
      * The margins on each edge in pixels, expressed as an object with 'left',
@@ -182,7 +197,7 @@ exports.LayoutManager.prototype = {
                 lineRect,
                 {
                     x:      0,
-                    y:      startRect.y + this.lineHeight,
+                    y:      startRect.y + fontDimension.lineHeight,
                     width:  Number.MAX_VALUE,
                     height: Number.MAX_VALUE
                 }
@@ -284,10 +299,10 @@ exports.LayoutManager.prototype = {
         var margin = this.margin;
         var x = point.x - margin.left, y = point.y - margin.top;
 
-        var characterWidth = this.characterWidth;
+        var characterWidth = fontDimension.characterWidth;
         var textStorage = this._textStorage;
         var clampedPosition = textStorage.clampPosition({
-            row: Math.floor(y / this.lineHeight),
+            row: Math.floor(y / fontDimension.lineHeight),
             col: Math.floor(x / characterWidth)
         });
 
@@ -308,8 +323,8 @@ exports.LayoutManager.prototype = {
     characterRangeForBoundingRect: function(rect) {
         // TODO: variable line heights, needed for word wrap and perhaps
         // extensions as well
-        var lineHeight = this.lineHeight;
-        var characterWidth = this.characterWidth;
+        var lineHeight = fontDimension.lineHeight;
+        var characterWidth = fontDimension.characterWidth;
         var margin = this.margin;
         var x = rect.x - margin.left, y = rect.y - margin.top;
         return {
@@ -364,8 +379,8 @@ exports.LayoutManager.prototype = {
 
     rectForPosition: function(position) {
         var margin = this.margin;
-        var characterWidth = this.characterWidth;
-        var lineHeight = this.lineHeight;
+        var characterWidth = fontDimension.characterWidth;
+        var lineHeight = fontDimension.lineHeight;
         return {
             x:      margin.left + characterWidth * position.col,
             y:      margin.top + lineHeight * position.row,
@@ -378,8 +393,8 @@ exports.LayoutManager.prototype = {
      * Returns the 1, 2, or 3 rectangles that make up the given range.
      */
     rectsForRange: function(range) {
-        var characterWidth = this.characterWidth;
-        var lineHeight = this.lineHeight;
+        var characterWidth = fontDimension.characterWidth;
+        var lineHeight = fontDimension.lineHeight;
         var maximumWidth = this._maximumWidth;
         var margin = this.margin;
 

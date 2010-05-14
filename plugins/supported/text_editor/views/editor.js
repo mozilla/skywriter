@@ -130,10 +130,19 @@ exports.EditorView = function() {
 
     // Create all the necessary stuff once the container has been added.
     this.elementAppended.add(function() {
-        this._fontSettingChanged();
+        // Set the font property.
+        this.font = settings.get('fontsize') + 'px ' + settings.get('fontface');
 
+        // Watch out for the themeChange event to then repaint stuff.
         catalog.registerExtension('themeChange', {
             pointer: this._themeVariableDidChange.bind(this)
+        });
+
+        // Watch out for the set fontSize/face event to repaint stuff and set
+        // the font property on the editor.
+        catalog.registerExtension('settingChange', {
+            match: "font[size|face]",
+            pointer: this._fontSettingChanged.bind(this)
         });
 
         // When adding an container that is managed by FlexBox, the size is not
@@ -144,9 +153,12 @@ exports.EditorView = function() {
             this._recomputeLayout();
         }.bind(this), 0)
 
+        // Other event to listen to.
         window.addEventListener('resize', this.dimensionChanged.bind(this), false);
         container.addEventListener(util.isMozilla ? 'DOMMouseScroll' : 'mousewheel', this.onMouseWheel.bind(this), false);
 
+        var wheelEvent = util.isMozilla ? 'DOMMouseScroll' : 'mousewheel';
+        container.addEventListener(wheelEvent, this.onMouseWheel.bind(this), false);
         verticalScroller.valueChanged.add(function(value) {
             this.scrollOffset = { y: value };
         }.bind(this));
@@ -217,13 +229,9 @@ exports.EditorView.prototype = {
             this._textLinesLength = size.height;
         }
 
-        var frame = this.textViewPaddingFrame;
-        var width = size.width * this.layoutManager.characterWidth;
-        var height = size.height * this.layoutManager.lineHeight;
-
         this._textViewSize = {
-            width: width,
-            height: height
+            width: size.width * this.layoutManager.fontDimension.characterWidth,
+            height: size.height * this.layoutManager.fontDimension.lineHeight
         };
 
         this._updateScrollers();
@@ -280,7 +288,7 @@ exports.EditorView.prototype = {
     get textViewPaddingFrame() {
         var frame = util.clone(this.textView.frame);
         var padding = this.textView.padding;
-        var charWidth = this.layoutManager.characterWidth;
+        var charWidth = this.layoutManager.fontDimension.characterWidth;
 
         frame.width -= padding.left + padding.right + charWidth;
         frame.height -= padding.top + padding.bottom;
@@ -402,35 +410,14 @@ exports.EditorView.prototype = {
      * The font to use for the text view and the gutter view. Typically, this
      * value is set via the font settings.
      */
-    font: '10pt Monaco, Lucida Console, monospace',
+    font: null,
 
     _fontSettingChanged: function() {
-        var fontSize = settings.get('fontsize');
-        var fontFace = settings.get('fontface');
-        var font = fontSize + 'px ' + fontFace;
-        this.font = font;
-
-        var canvas = m_scratchcanvas.get();
-        var layoutManager = this.layoutManager;
-
-        // Measure a large string to work around the fact that width and height
-        // are truncated to the nearest integer in the canvas API.
-        var str = '';
-        for (var i = 0; i < 100; i++) {
-            str += 'M';
-        }
-
-        var width = canvas.measureStringWidth(this.font, str) / 100;
-
-        layoutManager.characterWidth = width;
-
-        layoutManager.lineHeight = Math.floor(fontSize * 1.6);
-        layoutManager.lineAscent = Math.floor(fontSize * 1.3);
+        this.font = settings.get('fontsize') + 'px ' + settings.get('fontface');
 
         // Recompute the layouts.
-        this.layoutManager._recomputeEntireLayout();
-        // TODO: add this back again.
-        //this.gutterView._recomputeLayout();
+        this.layoutManager._recalculateMaximumWidth();
+        this._recomputeLayout();
         this.textView.setNeedsDisplay();
     },
 
