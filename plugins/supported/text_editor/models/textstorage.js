@@ -170,10 +170,6 @@ TextStorage.prototype = {
         return this._lines;
     },
 
-    get lines() {
-        return this.getLines();
-    },
-
     /** Returns the span of the entire text content. */
     getRange: function() {
         var lines = this._lines;
@@ -183,17 +179,9 @@ TextStorage.prototype = {
         return { start: start, end: end };
     },
 
-    get range() {
-        return this.getRange();
-    },
-
     /** Returns the text in the text storage as a string. */
     getValue: function() {
         return this._lines.join('\n');
-    },
-
-    get value() {
-        return this.getValue();
     },
 
     /** Inserts characters at the supplied position. */
@@ -245,18 +233,35 @@ TextStorage.prototype = {
         this.setValue(newLines.join('\n'));
     },
 
-    set lines(newLines) {
-        return this.setLines(newLines);
-    },
-
     setValue: function(newValue) {
         this.replaceCharacters(this.range, newValue);
-    },
-
-    set value(newValue) {
-        this.setValue(newValue);
     }
 };
 
 exports.TextStorage = TextStorage;
 
+Object.defineProperties(exports.TextStorage.prototype, {
+    lines: {
+        get: function() {
+            return this.getLines();
+        },
+        set: function(newLines) {
+            return this.setLines(newLines);
+        }
+    },
+    
+    range: {
+        get: function() {
+            return this.getRange();
+        }
+    },
+    
+    value: {
+        get: function() {
+            return this.getValue();
+        },
+        set: function(newValue) {
+            this.setValue(newValue);
+        }
+    }
+});

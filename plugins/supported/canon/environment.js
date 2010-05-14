@@ -50,49 +50,55 @@ exports.Environment = function() {
     this.commandLine = null;
 };
 
-exports.Environment.prototype = {
-
+Object.defineProperties(exports.Environment.prototype, {
     /**
      * Retrieves the EditSession
      */
-    get session() {
-        return catalog.getObject('session');
+    session: {
+        get: function() {
+            return catalog.getObject('session');
+        }
     },
 
     /**
      * Gets the currentView from the session.
      */
-    get view() {
-        if (!this.session) {
-            // This can happen if the session is being reloaded.
-            return null;
+    view: {
+        get: function() {
+            if (!this.session) {
+                // This can happen if the session is being reloaded.
+                return null;
+            }
+            return this.session.currentView;
         }
-        return this.session.currentView;
     },
 
     /**
      * Returns the currently-active syntax contexts.
      */
-    get contexts() {
-        // when editorapp is being refreshed, the textView is not available.
-        if (!this.view) {
-            return [];
-        }
+    contexts: {
+        get: function() {
+            // when editorapp is being refreshed, the textView is not available.
+            if (!this.view) {
+                return [];
+            }
 
-        var syntaxManager = this.view.layoutManager.syntaxManager;
-        var pos = this.view.getSelectedRange().start;
-        return syntaxManager.contextsAtPosition(pos);
+            var syntaxManager = this.view.layoutManager.syntaxManager;
+            var pos = this.view.getSelectedRange().start;
+            return syntaxManager.contextsAtPosition(pos);
+        }
     },
 
     /**
      * The current Buffer from the session
      */
-    get buffer() {
-        if (!this.session) {
-            console.error("command attempted to get buffer but there's no session");
-            return undefined;
-        }
-        return this.session.currentBuffer;
+    buffer: {
+        get: function() {
+            if (!this.session) {
+                console.error("command attempted to get buffer but there's no session");
+                return undefined;
+            }
+            return this.session.currentBuffer;
     },
 
     /**
@@ -100,33 +106,39 @@ exports.Environment.prototype = {
      * use <code>instruction.model</code> to access the view where
      * possible.
      */
-    get model() {
-        if (!this.buffer) {
-            console.error('Session has no current buffer');
-            return undefined;
+    model: {
+        get: function() {
+            if (!this.buffer) {
+                console.error('Session has no current buffer');
+                return undefined;
+            }
+            return this.buffer.model;
         }
-        return this.buffer.model;
     },
 
     /**
      * gets the current file from the session
      */
-    get file() {
-        if (!this.buffer) {
-            console.error('Session has no current buffer');
-            return undefined;
+    file: {
+        get: function() {
+            if (!this.buffer) {
+                console.error('Session has no current buffer');
+                return undefined;
+            }
+            return this.buffer.file;
         }
-        return this.buffer.file;
     },
 
     /**
      * If files are available, this will get them. Perhaps we need some other
      * mechanism for populating these things from the catalog?
      */
-    get files() {
-        return catalog.getObject('files');
+    files: {
+        get: function() {
+            return catalog.getObject('files');
+        }
     }
-};
+}});
 
 /**
  * The global environment.

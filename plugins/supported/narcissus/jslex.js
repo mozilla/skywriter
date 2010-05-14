@@ -70,18 +70,6 @@ function Tokenizer(s, f, l) {
 }
 
 Tokenizer.prototype = {
-    get done() {
-        return this.peek() == END;
-    },
-
-    get token() {
-        return this.tokens[this.tokenIndex];
-    },
-
-    get input() {
-        return this.source[this.lineno - 1];
-    },
-
     match: function (tt) {
         return this.get() == tt || this.unget();
     },
@@ -458,3 +446,22 @@ Tokenizer.prototype = {
     }
 };
 
+Object.defineProperties(Tokenizer.prototype, {
+    done: {
+        get: function() {
+            return this.peek() == END;
+        }
+    },
+
+    token: {
+        get: function() {
+            return this.tokens[this.tokenIndex];
+        }
+    },
+
+    input: {
+        get: function() {
+            return this.source[this.lineno - 1];
+        }
+    }
+});

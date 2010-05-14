@@ -81,16 +81,6 @@ exports.LayoutManager.prototype = {
     _size: null,
     sizeChanged: null,
 
-    set size(size) {
-        if (size.width !== this._size.width || size.height !== this._size.height) {
-            this.sizeChanged(size);
-        }
-    },
-
-    get size() {
-        return this._size;
-    },
-
     /**
      * @protected
      *
@@ -100,36 +90,6 @@ exports.LayoutManager.prototype = {
      */
     createTextStorage: function() {
         this.textStorage = new TextStorage();
-    },
-
-    get textStorage() {
-        return this._textStorage;
-    },
-
-    set textStorage(newTextStorage) {
-        var oldTextStorage = this._textStorage;
-        this._textStorage = newTextStorage;
-
-        if (!util.none(oldTextStorage)) {
-            oldTextStorage.changed.remove(this.textStorageChanged);
-        }
-
-        newTextStorage.changed.add(this.textStorageChanged.bind(this));
-
-        if (this._syntaxManagerInitialized) {
-            var oldRange = oldTextStorage.range;
-            var newRange = newTextStorage.range;
-
-            if (!util.none(oldTextStorage)) {
-                this.syntaxManager.layoutManagerReplacedText(oldRange, newRange);
-            }
-
-            // During initial setup, the text storage is set before the syntax
-            // manager is. We can't recompute the layout before the syntax
-            // manager is set up, so we solve this chicken-and-egg problem by
-            // suppressing the layout.
-            this._recomputeLayoutForRanges(oldRange, newRange);
-        }
     },
 
     /**
@@ -496,3 +456,46 @@ exports.LayoutManager.prototype = {
         }
     }
 };
+
+Object.defineProperties(exports.LayoutManager.prototype, {
+    size: {
+        set: function(size) {
+            if (size.width !== this._size.width || size.height !== this._size.height) {
+                this.sizeChanged(size);
+            }
+        },
+        get: function() {
+            return this._size;
+        }
+    },
+    textStorage: {
+        get: function() {
+            return this._textStorage;
+        },
+        set: function(newTextStorage) {
+            var oldTextStorage = this._textStorage;
+            this._textStorage = newTextStorage;
+
+            if (!util.none(oldTextStorage)) {
+                oldTextStorage.changed.remove(this.textStorageChanged);
+            }
+
+            newTextStorage.changed.add(this.textStorageChanged.bind(this));
+
+            if (this._syntaxManagerInitialized) {
+                var oldRange = oldTextStorage.range;
+                var newRange = newTextStorage.range;
+
+                if (!util.none(oldTextStorage)) {
+                    this.syntaxManager.layoutManagerReplacedText(oldRange, newRange);
+                }
+
+                // During initial setup, the text storage is set before the syntax
+                // manager is. We can't recompute the layout before the syntax
+                // manager is set up, so we solve this chicken-and-egg problem by
+                // suppressing the layout.
+                this._recomputeLayoutForRanges(oldRange, newRange);
+            }
+        }
+    }
+});

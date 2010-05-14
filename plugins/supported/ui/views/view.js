@@ -61,13 +61,6 @@ exports.View.prototype = {
     /**
      * Returns the dimension of the node.
      */
-    get dimension() {
-        return {
-            width: this.node.scrollWidth || this.node.offsetWidth,
-            height: this.node.scrollHeight || this.node.offsetHeight
-        }
-    },
-
     /**
      * This function is called to update the view's DOM.
      * Subclasses can implement this function.
@@ -81,3 +74,15 @@ exports.View.prototype = {
         this.dimensionEvent();
     }
 };
+
+Object.defineProperties(exports.View.prototype, {
+    dimension: {
+        get: function() {
+            return {
+                width: this.node.scrollWidth || this.node.offsetWidth,
+                height: this.node.scrollHeight || this.node.offsetHeight
+            };
+        }
+    }
+});
+

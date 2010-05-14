@@ -74,49 +74,9 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
 
     _isVisible: false,
 
-    set isVisible(isVisible) {
-        if (this._isVisible === isVisible) {
-            return;
-        }
-
-        this._isVisible = isVisible;
-        this.domNode.style.display = isVisible ? 'block' : 'none';
-        if (isVisible) {
-            this.setNeedsDisplay();
-        }
-    },
-
     _maximum: 0,
 
-    set maximum(maximum) {
-        if (this._value > this._maximum) {
-            this._value = this._maximum;
-        }
-
-        if (maximum === this._maximum) {
-            return;
-        }
-
-        this._maximum = maximum;
-        this.setNeedsDisplay();
-    },
-
     _value: 0,
-
-    set value(value) {
-        if (value < 0) {
-            value = 0;
-        } else if (value > this._maximum) {
-            value = this._maximum;
-        }
-
-        if (value === this._value) {
-            return;
-        }
-
-        this._value = value;
-        this.setNeedsDisplay();
-    },
 
     /**
      * @property
@@ -747,5 +707,53 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
         }
 
         parentView.set('value', parentView.get('value') + 2*delta);
+    }
+});
+
+Object.defineProperties(exports.ScrollerCanvasView.prototype, {
+    isVisible: {
+        set: function(isVisible) {
+            if (this._isVisible === isVisible) {
+                return;
+            }
+
+            this._isVisible = isVisible;
+            this.domNode.style.display = isVisible ? 'block' : 'none';
+            if (isVisible) {
+                this.setNeedsDisplay();
+            }
+        }
+    },
+
+    maximum: {
+        set: function(maximum) {
+            if (this._value > this._maximum) {
+                this._value = this._maximum;
+            }
+
+            if (maximum === this._maximum) {
+                return;
+            }
+
+            this._maximum = maximum;
+            this.setNeedsDisplay();
+        }
+    },
+
+    value: {
+        set: function(value) {
+            if (value < 0) {
+                value = 0;
+            } else if (value > this._maximum) {
+                value = this._maximum;
+            }
+
+            if (value === this._value) {
+                return;
+            }
+
+            this._value = value;
+            this.setNeedsDisplay();
+        }
     }
 });

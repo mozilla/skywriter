@@ -85,7 +85,7 @@ util.mixin(exports.CanvasView.prototype, {
                 y: 0,
                 width: dim.width,
                 height: dim.height
-            }
+            };
         }
     },
 
@@ -272,12 +272,15 @@ util.mixin(exports.CanvasView.prototype, {
         if (this._scrollView === null) {
             this._clippingFrameChanged();
         }
-    },
+    }
+});
 
-    set scrollView(scrollView) {
-        this._scrollView = scrollView;
+Object.defineProperties(exports.CanvasView.prototype, {
+    scrollView: {
+        set: function(scrollView) {
+            this._scrollView = scrollView;
 
-        scrollView.clipping.add(this.scrollViewClippingFrameChanged);
-
+            scrollView.clipping.add(this.scrollViewClippingFrameChanged);
+        }
     }
 });

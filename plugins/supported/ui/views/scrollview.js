@@ -86,71 +86,6 @@ util.mixin(exports.ScrollView.prototype, {
 
     scrollContentView: true,
 
-    get clippingFrame() {
-        var dim = this.dimension;
-
-        return {
-            x: this.verticalScrollValue,
-            y: this.horizontalScrollValue,
-            width: dim.width,
-            height: dim.height
-        };
-    },
-
-    set horizontalScrollValue(value) {
-        var oldValue = this._horizontalScrollValue;
-        var newValue;
-
-        var cvDimension = this.contentView.dimension;
-        newValue = Math.max(value, cvDimension.width - this.dimension.width);
-        newValue = Math.min(newValue, 0);
-
-        if (oldValue !== newValue) {
-            if (scrollContentView) {
-                this.contentView.scrollLeft = newValue;
-            }
-            this._horizontalScrollValue = newValue;
-
-            this.horizontalScrollEvent(newValue);
-            this.clippingFrameEvent();
-        }
-    },
-
-    get horizontalScrollValue() {
-        return this._horizontalScrollValue;
-    },
-
-    set verticalScrollValue(value) {
-        var oldValue = this._verticalScrollValue;
-        var newValue;
-
-        var cvDimension = this.contentView.dimension;
-        newValue = Math.max(value, cvDimension.height - this.dimension.height);
-        newValue = Math.min(newValue, 0);
-
-        if (oldValue !== newValue) {
-            if (scrollContentView) {
-                 this.contentView.scrollTop = newValue;
-            }
-            this._verticalScrollValue = newValue;
-
-            this.verticalScrollEvent();
-            this.clippingFrameEvent();
-        }
-    },
-
-    get verticalScrollValue() {
-        return this._verticalScrollValue;
-    },
-
-    set horizontalScrollbar(scrollbar) {
-        this._horizontalScrollbar = scrollbar;
-    },
-
-    set verticalScrollbar(scrollbar) {
-        this._verticalScrollbar = scrollbar;
-    },
-
     /**
      * Called whenever the dimension of the contentView changed.
      * Notify the scrollers to update there UI.
@@ -175,6 +110,82 @@ util.mixin(exports.ScrollView.prototype, {
     }
 });
 
+Object.defineProperties(exports.ScrollView.prototype, {
+    clippingFrame: {
+        get: function() {
+            var dim = this.dimension;
+
+            return {
+                x: this.verticalScrollValue,
+                y: this.horizontalScrollValue,
+                width: dim.width,
+                height: dim.height
+            };
+        }
+    },
+
+    horizontalScrollValue: {
+        get: function() {
+            return this._horizontalScrollValue;
+        },
+
+        set: function(value) {
+            var oldValue = this._horizontalScrollValue;
+            var newValue;
+
+            var cvDimension = this.contentView.dimension;
+            newValue = Math.max(value, cvDimension.width - this.dimension.width);
+            newValue = Math.min(newValue, 0);
+
+            if (oldValue !== newValue) {
+                if (scrollContentView) {
+                    this.contentView.scrollLeft = newValue;
+                }
+                this._horizontalScrollValue = newValue;
+
+                this.horizontalScrollEvent(newValue);
+                this.clippingFrameEvent();
+            }
+        }
+    },
+
+    verticalScrollValue: {
+        get: function() {
+            return this._verticalScrollValue;
+        },
+
+        set: function(value) {
+            var oldValue = this._verticalScrollValue;
+            var newValue;
+
+            var cvDimension = this.contentView.dimension;
+            newValue = Math.max(value, cvDimension.height - this.dimension.height);
+            newValue = Math.min(newValue, 0);
+
+            if (oldValue !== newValue) {
+                if (scrollContentView) {
+                     this.contentView.scrollTop = newValue;
+                }
+                this._verticalScrollValue = newValue;
+
+                this.verticalScrollEvent();
+                this.clippingFrameEvent();
+            }
+        }
+    },
+    
+    horizontalScrollbar: {
+        set: function (scrollbar) {
+            this._horizontalScrollbar = scrollbar;
+        }
+    },
+
+    verticalScrollbar: {
+        set:function(scrollbar) {
+            this._verticalScrollbar = scrollbar;
+        }
+    }
+});
 
 /**
  * Constructor for ScrollViews.

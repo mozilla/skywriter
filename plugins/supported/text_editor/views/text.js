@@ -117,32 +117,6 @@ util.mixin(exports.TextView.prototype, {
     willReplaceRange: null,
     replacedCharacters: null,
 
-    set hasFocus(value) {
-        if (value == this._hasFocus) {
-            return;
-        }
-
-        this._hasFocus = value;
-
-        if (this._hasFocus) {
-            this._rearmInsertionPointBlinkTimer();
-            this._invalidateSelection();
-            this.textInput.focus();
-        } else {
-            if (this._insertionPointBlinkTimer) {
-                clearInterval(this._insertionPointBlinkTimer);
-                this._insertionPointBlinkTimer = null;
-            }
-            this._insertionPointVisible = true;
-            this._invalidateSelection();
-            this.textInput.blur();
-        }
-    },
-
-    get hasFocus() {
-        return this._hasFocus;
-    },
-
     didFocus: function() {
         this.hasFocus = true;
     },
@@ -1101,3 +1075,32 @@ util.mixin(exports.TextView.prototype, {
     }
 });
 
+Object.defineProperties(exports.TextView.prototype, {
+    hasFocus: {
+        get: function() {
+            return this._hasFocus;
+        },
+        
+        set: function(value) {
+            if (value == this._hasFocus) {
+                return;
+            }
+
+            this._hasFocus = value;
+
+            if (this._hasFocus) {
+                this._rearmInsertionPointBlinkTimer();
+                this._invalidateSelection();
+                this.textInput.focus();
+            } else {
+                if (this._insertionPointBlinkTimer) {
+                    clearInterval(this._insertionPointBlinkTimer);
+                    this._insertionPointBlinkTimer = null;
+                }
+                this._insertionPointVisible = true;
+                this._invalidateSelection();
+                this.textInput.blur();
+            }
+        }
+    }
+});

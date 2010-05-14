@@ -91,20 +91,6 @@ exports.CanvasView.prototype = {
 
     clippingChanged: null,
 
-    get clippingFrame() {
-        return this._clippingFrame;
-    },
-
-    set clippingFrame(clippingFrame) {
-        clippingFrame = util.mixin(this._clippingFrame, clippingFrame);
-
-        if (this._clippingFrame === null ||
-                !Rect.rectsEqual(clippingFrame, this._clippingFrame)) {
-            this._clippingFrame = clippingFrame;
-            this.clippingChanged();
-        }
-    },
-
     setFrame: function(frame, preventDownsize) {
         var domStyle = this.domNode.style;
         domStyle.left = frame.x + 'px';
@@ -162,7 +148,7 @@ exports.CanvasView.prototype = {
         return {
             x: x + clippingFrame.x,
             y: y + clippingFrame.y
-        }
+        };
     },
 
     /**
@@ -295,3 +281,20 @@ exports.CanvasView.prototype = {
     }
 };
 
+Object.defineProperties(exports.CanvasView.prototype, {
+    clippingFrame: {
+        get: function() {
+            return this._clippingFrame;
+        },
+
+        set: function(clippingFrame) {
+            clippingFrame = util.mixin(this._clippingFrame, clippingFrame);
+
+            if (this._clippingFrame === null ||
+                    !Rect.rectsEqual(clippingFrame, this._clippingFrame)) {
+                this._clippingFrame = clippingFrame;
+                this.clippingChanged();
+            }
+        }
+    }
+});

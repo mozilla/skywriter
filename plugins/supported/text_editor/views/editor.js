@@ -77,7 +77,7 @@ exports.EditorView.prototype = {
 
         this.scrollChanged = new Event();
 
-        var searchController = this.searchController = new EditorSearchController()
+        var searchController = this.searchController = new EditorSearchController();
 
         var gutterView = this.gutterView = new GutterView(container, this);
         var textView = this.textView = new TextView(container, this);
@@ -92,7 +92,7 @@ exports.EditorView.prototype = {
 
         this._scrollOffset = {
             x: 0, y: 0
-        }
+        };
 
         this._textViewSize = {
             width: 0,
@@ -176,60 +176,6 @@ exports.EditorView.prototype = {
         util.stopEvent(evt);
     },
 
-    get textViewPaddingFrame() {
-        var frame = util.clone(this.textView.frame);
-        var padding = this.textView.padding;
-        var charWidth = this.layoutManager.characterWidth;
-
-        frame.width -= padding.left + padding.right + charWidth;
-        frame.height -= padding.top + padding.bottom;
-        return frame;
-    },
-
-    set scrollOffset(pos) {
-        if (pos.x === undefined) pos.x = this._scrollOffset.x;
-        if (pos.y === undefined) pos.y = this._scrollOffset.y;
-
-        var frame = this.textViewPaddingFrame;
-
-        if (pos.y < 0) {
-            pos.y = 0;
-        } else if (this._textViewSize.height < frame.height) {
-            pos.y = 0;
-        } else if (pos.y + frame.height > this._textViewSize.height) {
-            pos.y = this._textViewSize.height - frame.height;
-        }
-
-        if (pos.x < 0) {
-            pos.x = 0;
-        } else if (this._textViewSize.width < frame.width) {
-            pos.x = 0;
-        } else if (pos.x + frame.width > this._textViewSize.width) {
-            pos.x = this._textViewSize.width - frame.width;
-        }
-
-        if (pos.x === this._scrollOffset.x && pos.y === this._scrollOffset.y) {
-            return;
-        }
-
-        this._scrollOffset = pos;
-
-        this.verticalScroller.value = pos.y;
-        this.horizontalScroller.value = pos.x;
-
-        this.textView.clippingFrame = {
-            x: pos.x,
-            y: pos.y
-        };
-
-        this.gutterView.clippingFrame = {
-            y: pos.y
-        };
-
-        this.gutterView.setNeedsDisplay();
-        this.textView.setNeedsDisplay();
-    },
-
     scrollTo: function(pos) {
         this.scrollOffset = pos;
     },
@@ -239,13 +185,6 @@ exports.EditorView.prototype = {
             x: this._scrollOffset.x + deltaX,
             y: this._scrollOffset.y + deltaY
         };
-    },
-
-    get frame() {
-        return {
-            width: this.container.offsetWidth,
-            height: this.container.offsetHeight
-        }
     },
 
     recomputeLayout: function() {
@@ -366,6 +305,75 @@ exports.EditorView.prototype = {
         //this.gutterView._recomputeLayout();
     }
 };
+
+Object.defineProperties(exports.EditorView.prototype, {
+    textViewPaddingFrame: {
+        get: function() {
+            var frame = util.clone(this.textView.frame);
+            var padding = this.textView.padding;
+            var charWidth = this.layoutManager.characterWidth;
+
+            frame.width -= padding.left + padding.right + charWidth;
+            frame.height -= padding.top + padding.bottom;
+            return frame;
+        }
+    },
+
+    scrollOffset: {
+        set: function(pos) {
+            if (pos.x === undefined) pos.x = this._scrollOffset.x;
+            if (pos.y === undefined) pos.y = this._scrollOffset.y;
+
+            var frame = this.textViewPaddingFrame;
+
+            if (pos.y < 0) {
+                pos.y = 0;
+            } else if (this._textViewSize.height < frame.height) {
+                pos.y = 0;
+            } else if (pos.y + frame.height > this._textViewSize.height) {
+                pos.y = this._textViewSize.height - frame.height;
+            }
+
+            if (pos.x < 0) {
+                pos.x = 0;
+            } else if (this._textViewSize.width < frame.width) {
+                pos.x = 0;
+            } else if (pos.x + frame.width > this._textViewSize.width) {
+                pos.x = this._textViewSize.width - frame.width;
+            }
+
+            if (pos.x === this._scrollOffset.x && pos.y === this._scrollOffset.y) {
+                return;
+            }
+
+            this._scrollOffset = pos;
+
+            this.verticalScroller.value = pos.y;
+            this.horizontalScroller.value = pos.x;
+
+            this.textView.clippingFrame = {
+                x: pos.x,
+                y: pos.y
+            };
+
+            this.gutterView.clippingFrame = {
+                y: pos.y
+            };
+
+            this.gutterView.setNeedsDisplay();
+            this.textView.setNeedsDisplay();
+        }
+    },
+
+    frame: {
+        get: function() {
+            return {
+                width: this.container.offsetWidth,
+                height: this.container.offsetHeight
+            };
+        }
+    }
+});
 
 // exports.EditorView = SC.View.extend(SC.Border, {
 //     _fontChanged: function() {

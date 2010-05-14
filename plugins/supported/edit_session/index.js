@@ -100,17 +100,6 @@ exports.Buffer.prototype = {
     */
     _model: null,
 
-    set model(newModel) {
-        if (this._model !== newModel) {
-            this._model = newModel;
-            this.session.bufferModelChanged(this, this._model);
-        }
-    },
-
-    get model() {
-        return this._model;
-    },
-
     /**
      * The syntax manager associated with this file.
      */
@@ -199,6 +188,20 @@ exports.Buffer.prototype = {
     }
 };
 
+Object.defineProperties(exports.Buffer.prototype, {
+    model: {
+        set: function(newModel) {
+            if (this._model !== newModel) {
+                this._model = newModel;
+                this.session.bufferModelChanged(this, this._model);
+            }
+        },
+        get: function() {
+            return this._model;
+        }
+    }
+});
+
 exports.EditSession = function() {
     this.history = new History();
 };
@@ -213,31 +216,6 @@ exports.EditSession.prototype = {
      * the focus.
      */
     _currentView: null,
-
-    set currentView(newView) {
-        var oldView = this._currentView;
-        if (newView !== oldView) {
-            if (!util.none(oldView)) {
-                oldView.removeDelegate(this);
-            }
-
-            this._currentView = newView;
-            // TODO: Add this back later again.
-            // newView.addDelegate(this);
-        }
-        
-        var layoutManager = newView.layoutManager;
-        var textStorage = layoutManager.textStorage;
-        var syntaxManager = layoutManager.syntaxManager;
-
-        var buffer = new exports.Buffer(this, textStorage, syntaxManager);
-
-        this.currentBuffer = buffer;
-    },
-
-    get currentView() {
-        return this._currentView;
-    },
 
     _updateHistoryProperty: function(key, value) {
         var file = this._currentBuffer.file;
@@ -338,6 +316,35 @@ exports.EditSession.prototype = {
         this._updateHistoryProperty('scroll', point);
     }
 };
+
+Object.defineProperties(exports.EditSession.prototype, {
+    currentView: {
+        set: function(newView) {
+            var oldView = this._currentView;
+            if (newView !== oldView) {
+                if (!util.none(oldView)) {
+                    oldView.removeDelegate(this);
+                }
+
+                this._currentView = newView;
+                // TODO: Add this back later again.
+                // newView.addDelegate(this);
+            }
+        
+            var layoutManager = newView.layoutManager;
+            var textStorage = layoutManager.textStorage;
+            var syntaxManager = layoutManager.syntaxManager;
+
+            var buffer = new exports.Buffer(this, textStorage, syntaxManager);
+
+            this.currentBuffer = buffer;
+        },
+
+        get: function() {
+            return this._currentView;
+        }
+    }
+});
 
 /*
  * set up a session based on a view. This seems a bit convoluted and is
