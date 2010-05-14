@@ -67,7 +67,7 @@ exports.LayoutManager = function(opts) {
                 {
                     start:  0,
                     end:    0,
-                    color:  this._theme.plain
+                    color:  'plain'
                 }
             ]
         }
@@ -458,14 +458,7 @@ exports.LayoutManager.prototype = {
         var theme = this._theme;
 
         for (var i = 0; i < attrs.length; i++) {
-            textLines[startRow + i].colors = attrs[i].map(function(range) {
-                var color = theme[range.tag];
-                if (util.none(color)) {
-                    color = theme.editorTextColor_plain;
-                }
-
-                return { start: range.start, end: range.end, color: color };
-            });
+            textLines[startRow + i].colors = attrs[i];
         }
     }
 };

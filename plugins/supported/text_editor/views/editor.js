@@ -420,7 +420,7 @@ exports.EditorView.prototype = {
                         this.textView._theme = value;
                         break;
                     case 'highlighter':
-                        this.layoutManager._theme = value;
+                        this.textView._themeHighlighter = value;
                     break;
                 }
             }

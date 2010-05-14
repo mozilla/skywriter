@@ -104,6 +104,9 @@ util.mixin(exports.TextView.prototype, {
     _insertionPointBlinkTimer: null,
     _insertionPointVisible: true,
 
+    _theme: null,
+    _themeHighlighter: null,
+
     // FIXME: These should be public, not private.
     _keyBuffer: '',
     _keyMetaBuffer: '',
@@ -216,7 +219,7 @@ util.mixin(exports.TextView.prototype, {
         var layoutManager = this.editor.layoutManager;
         var textLines = layoutManager.textLines;
         var lineAscent = layoutManager.lineAscent;
-        var theme = this._theme;
+        var themeHighlighter = this._themeHighlighter;
 
         context.save();
         context.font = this.editor.font;
@@ -252,7 +255,7 @@ util.mixin(exports.TextView.prototype, {
             while (col !== null && col < endColumn) {
                 var colorRange = colorRanges[colorIndex];
                 var colorRangeEnd = colorRange.end;
-                context.fillStyle = colorRange.color;
+                context.fillStyle = themeHighlighter[colorRange.tag] || 'red';
 
                 var characterRect = layoutManager.characterRectForPosition({
                     row:    row,
