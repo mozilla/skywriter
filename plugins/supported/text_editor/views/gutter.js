@@ -39,14 +39,6 @@ var util = require('bespin:util/util');
 
 var CanvasView = require('views/canvas').CanvasView;
 
-// TODO need to implement this behavior
-// _frameChanged: function() {
-//     // We have to be more aggressive than the canvas view alone would be,
-//     // because of the possibility that we will have to draw additional line
-//     // numbers in the gutter when the height of the text changes.
-//     this.setNeedsDisplay();
-// }.observes('frame')
-
 /*
  * A view that renders the gutter for the editor.
  *
@@ -57,7 +49,6 @@ exports.GutterView = function(container, editor) {
     CanvasView.call(this, container);
 
     this.editor = editor;
-    this.layoutManager = editor.layoutManager;
 
     this.padding = { left: 5, right: 10 };
 };
@@ -76,7 +67,7 @@ util.mixin(exports.GutterView.prototype, {
         var padding = this.padding;
         context.translate(padding.left, 0);
 
-        var layoutManager = this.layoutManager;
+        var layoutManager = this.editor.layoutManager;
         var range = layoutManager.characterRangeForBoundingRect(rect);
         var endRow = Math.min(range.end.row,
             layoutManager.textLines.length - 1);
@@ -100,7 +91,7 @@ util.mixin(exports.GutterView.prototype, {
 
         var lineNumberFont = this.editor.font;
 
-        var layoutManager = this.layoutManager;
+        var layoutManager = this.editor.layoutManager;
         var lineCount = layoutManager.textLines.length;
         var lineCountStr = '' + lineCount;
 

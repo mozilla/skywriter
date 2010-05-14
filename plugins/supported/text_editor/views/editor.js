@@ -47,6 +47,8 @@ var GutterView = require('views/gutter').GutterView;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var EditorSearchController = require('controllers/search').EditorSearchController;
 
+var Buffer = require('models/buffer').Buffer;
+
 var Scroller = require('views/scroller');
 var ScrollerView = Scroller.ScrollerCanvasView;
 
@@ -75,11 +77,13 @@ exports.EditorView = function() {
     container.style.overflow = 'hidden';
     container.style.position = 'relative';
 
-    var layoutManager = this.layoutManager = new LayoutManager();
-
     this.scrollChanged = new Event();
+    this.willChangeBuffer = new Event();
 
-    var searchController = this.searchController = new EditorSearchController()
+    // Create an empty buffer to make sure there is a buffer for this editor.
+    this.buffer = new Buffer(null);
+
+    var searchController = this.searchController = new EditorSearchController();
 
     var gutterView = this.gutterView = new GutterView(container, this);
     var textView = this.textView = new TextView(container, this);
@@ -103,6 +107,8 @@ exports.EditorView = function() {
         // When adding an container that is managed by FlexBox, the size is not
         // available at once. After a small delay it is.
         setTimeout(function() {
+            // Allow the layout to be recomputed.
+            this._dontRecomputeLayout = false;
             this._recomputeLayout();
         }.bind(this), 0)
 
@@ -116,8 +122,6 @@ exports.EditorView = function() {
         horizontalScroller.valueChanged.add(function(value) {
             this.scrollOffset = { x: value };
         }.bind(this));
-
-        layoutManager.sizeChanged.add(this.layoutManagerSizeChanged.bind(this));
     }.bind(this));
 };
 
@@ -129,6 +133,7 @@ exports.EditorView.prototype = {
     verticalScrollOffset: null,
 
     scrollChanged: null,
+    willChangeBuffer: null,
 
     _textViewSize: null,
 
@@ -136,6 +141,37 @@ exports.EditorView.prototype = {
     _gutterViewWidth: 0,
 
     _scrollOffset: null,
+
+    _buffer: null,
+
+
+    // for debug purpose only
+    newBuffer: function() {
+        this.buffer = new Buffer();
+    },
+
+    set buffer(newBuffer) {
+        if (newBuffer === this._buffer) {
+            return;
+        }
+
+        // In some cases the buffer is set before the UI is initialized.
+        if (this.textView) {
+            this.textView.moveCursorTo({ row: 0, col: 0 });
+            this.layoutManager.sizeChanged.remove(this);
+        }
+
+        this.willChangeBuffer(newBuffer);
+        this.layoutManager = newBuffer.layoutManager;
+        this._buffer = newBuffer;
+
+        this.layoutManager.sizeChanged.add(this,
+                                    this.layoutManagerSizeChanged.bind(this));
+    },
+
+    get buffer() {
+        return this._buffer;
+    },
 
     layoutManagerSizeChanged: function(size) {
         if (this._textLinesCount !== size.height) {

@@ -79,7 +79,7 @@ exports.Environment.prototype = {
             return [];
         }
 
-        var syntaxManager = this.view.layoutManager.syntaxManager;
+        var syntaxManager = this.view.editor.layoutManager.syntaxManager;
         var pos = this.view.getSelectedRange().start;
         return syntaxManager.contextsAtPosition(pos);
     },
@@ -92,7 +92,7 @@ exports.Environment.prototype = {
             console.error("command attempted to get buffer but there's no session");
             return undefined;
         }
-        return this.session.currentBuffer;
+        return this.view.editor.buffer;
     },
 
     /**
@@ -105,7 +105,7 @@ exports.Environment.prototype = {
             console.error('Session has no current buffer');
             return undefined;
         }
-        return this.buffer.model;
+        return this.view.editor.layoutManager.textStorage;
     },
 
     /**

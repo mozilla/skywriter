@@ -583,8 +583,8 @@ exports.mixin = function(a,b) {
                 a.__defineGetter__(i, g);
             if ( s )
                 a.__defineSetter__(i, s);
-         } else
-             a[i] = b[i];
+        } else
+            a[i] = b[i];
     }
     return a;
 };

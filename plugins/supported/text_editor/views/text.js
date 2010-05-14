@@ -55,7 +55,10 @@ exports.TextView = function(container, editor) {
     CanvasView.call(this, container);
     this.editor = editor;
 
-    var layoutManager = this.layoutManager = this.editor.layoutManager;
+    // Call this to attach the necessary events for a new buffer.
+    this.editorWillChangeBuffer(editor.buffer);
+
+    // Takes the layoutManager of the editor and uses it.
     var textInput = this.textInput = new TextInput(container, this);
 
     this._selectedRange = {
@@ -81,10 +84,10 @@ exports.TextView = function(container, editor) {
     dom.addEventListener('mousemove', this.mouseMove.bind(this), false);
     window.addEventListener('mouseup', this.mouseUp.bind(this), false);
 
-    layoutManager.invalidatedRects.add(this.layoutManagerInvalidatedRects.bind(this));
-    layoutManager.changedTextAtRow.add(this.layoutManagerChangedTextAtRow.bind(this));
+    editor.willChangeBuffer.add(this.editorWillChangeBuffer.bind(this));
 
     // Changeevents.
+    this.selectionChanged = new Event();
     this.beganChangeGroup = new Event();
     this.endedChangeGroup = new Event();
     this.willReplaceRange = new Event();
@@ -112,10 +115,25 @@ util.mixin(exports.TextView.prototype, {
     _hasFocus: false,
     _mouseIsDown: false,
 
+    selectionChanged: null,
     beganChangeGroup: null,
     endedChangeGroup: null,
     willReplaceRange: null,
     replacedCharacters: null,
+
+    editorWillChangeBuffer: function(newBuffer) {
+        // Remove events from the old layoutManager.
+        var layoutManager = this.editor.layoutManager;
+        layoutManager.invalidatedRects.remove(this);
+        layoutManager.changedTextAtRow.remove(this);
+
+        // Add the events to the new layoutManager.
+        layoutManager = newBuffer.layoutManager;
+        layoutManager.invalidatedRects.add(this,
+                                this.layoutManagerInvalidatedRects.bind(this));
+        layoutManager.changedTextAtRow.add(this,
+                                this.layoutManagerChangedTextAtRow.bind(this));
+    },
 
     set hasFocus(value) {
         if (value == this._hasFocus) {
@@ -168,7 +186,7 @@ util.mixin(exports.TextView.prototype, {
         }
 
         var range = this._selectedRange;
-        var characterRect = this.layoutManager.
+        var characterRect = this.editor.layoutManager.
             characterRectForPosition(range.start);
         var x = Math.floor(characterRect.x), y = characterRect.y;
         var width = Math.ceil(characterRect.width);
@@ -195,7 +213,7 @@ util.mixin(exports.TextView.prototype, {
     },
 
     _drawLines: function(rect, context) {
-        var layoutManager = this.layoutManager;
+        var layoutManager = this.editor.layoutManager;
         var textLines = layoutManager.textLines;
         var lineAscent = layoutManager.lineAscent;
         var theme = this._theme;
@@ -269,7 +287,7 @@ util.mixin(exports.TextView.prototype, {
         var fillStyle = this._hasFocus ?
             theme.selectedTextBackgroundColor :
             theme.unfocusedCursorBackgroundColor;
-        var layoutManager = this.layoutManager;
+        var layoutManager = this.editor.layoutManager;
 
         context.save();
 
@@ -309,7 +327,7 @@ util.mixin(exports.TextView.prototype, {
             };
         };
 
-        var layoutManager = this.layoutManager;
+        var layoutManager = this.editor.layoutManager;
         var range = Range.normalizeRange(this._selectedRange);
         if (!this._rangeIsInsertionPoint(range)) {
             var rects = layoutManager.rectsForRange(range);
@@ -325,7 +343,7 @@ util.mixin(exports.TextView.prototype, {
     },
 
     _isReadOnly: function() {
-        return this.layoutManager.textStorage.readOnly;
+        return this.editor.layoutManager.textStorage.readOnly;
     },
 
     _keymappingChanged: function() {
@@ -339,7 +357,7 @@ util.mixin(exports.TextView.prototype, {
     // }.observes('parentView'),
 
     _performVerticalKeyboardSelection: function(offset) {
-        var textStorage = this.layoutManager.textStorage;
+        var textStorage = this.editor.layoutManager.textStorage;
         var oldPosition = this._selectedRangeEndVirtual !== null ?
             this._selectedRangeEndVirtual : this._selectedRange.end;
         var newPosition = Range.addPositions(oldPosition,
@@ -370,7 +388,7 @@ util.mixin(exports.TextView.prototype, {
     // Moves the selection, if necessary, to keep all the positions pointing to
     // actual characters.
     _repositionSelection: function() {
-        var textLines = this.layoutManager.textLines;
+        var textLines = this.editor.layoutManager.textLines;
         var textLineLength = textLines.length;
 
         var range = this._selectedRange;
@@ -393,7 +411,7 @@ util.mixin(exports.TextView.prototype, {
     // TODO: Done by the editor?
     //
     // _resize: function() {
-    //     var boundingRect = this.layoutManager.boundingRect();
+    //     var boundingRect = this.editor.layoutManager.boundingRect();
     //     var padding = this.padding;
     //     var parentFrame = this.parentView.frame;
     //     this.set('layout', SC.mixin(SC.clone(this.layout), {
@@ -449,7 +467,7 @@ util.mixin(exports.TextView.prototype, {
     // Returns the character closest to the given point, obeying the selection
     // rules (including the partialFraction field).
     _selectionPositionForPoint: function(point) {
-        var position = this.layoutManager.characterAtPoint(point);
+        var position = this.editor.layoutManager.characterAtPoint(point);
         return position.partialFraction < 0.5 ? position :
             Range.addPositions(position, { row: 0, col: 1 });
     },
@@ -459,7 +477,7 @@ util.mixin(exports.TextView.prototype, {
             return;
         }
 
-        var layoutManager = this.layoutManager;
+        var layoutManager = this.editor.layoutManager;
         layoutManager.updateTextRows(startRow, endRow);
 
         layoutManager.rectsForRange({
@@ -499,7 +517,7 @@ util.mixin(exports.TextView.prototype, {
     // the end of the visible range, or within the entire visible range if the
     // row is null.
     _updateSyntax: function(row) {
-        var layoutManager = this.layoutManager;
+        var layoutManager = this.editor.layoutManager;
         var visibleRange = layoutManager.characterRangeForBoundingRect(this.
             clippingFrame);
         var startRow = visibleRange.start.row, endRow = visibleRange.end.row;
@@ -584,7 +602,7 @@ util.mixin(exports.TextView.prototype, {
      */
     getSelectedCharacters: function() {
         return this._rangeIsInsertionPoint(this._selectedRange) ? '' :
-            this.layoutManager.textStorage.getCharacters(Range.
+            this.editor.layoutManager.textStorage.getCharacters(Range.
             normalizeRange(this._selectedRange));
     },
 
@@ -638,7 +656,7 @@ util.mixin(exports.TextView.prototype, {
         }
 
         this.groupChanges(function() {
-            var textStorage = this.layoutManager.textStorage;
+            var textStorage = this.editor.layoutManager.textStorage;
             var range = Range.normalizeRange(this._selectedRange);
 
             this.replaceCharacters(range, text);
@@ -724,7 +742,7 @@ util.mixin(exports.TextView.prototype, {
         // Select the word under the cursor.
         case 2:
             var pos = this._selectionPositionForPoint(point);
-            var line = this.layoutManager.textStorage.lines[pos.row];
+            var line = this.editor.layoutManager.textStorage.lines[pos.row];
 
             // If there is nothing to select in this line, then skip.
             if (line.length === 0) {
@@ -754,7 +772,7 @@ util.mixin(exports.TextView.prototype, {
             break;
 
         case 3:
-            var lines = this.layoutManager.textStorage.lines;
+            var lines = this.editor.layoutManager.textStorage.lines;
             var pos = this._selectionPositionForPoint(point);
             this.setSelection({
                 start: {
@@ -804,7 +822,7 @@ util.mixin(exports.TextView.prototype, {
      *        moving vertically.
      */
     moveCursorTo: function(position, select, virtual) {
-        var textStorage = this.layoutManager.textStorage;
+        var textStorage = this.editor.layoutManager.textStorage;
         var positionToUse = textStorage.clampPosition(position);
 
         this.setSelection({
@@ -848,7 +866,7 @@ util.mixin(exports.TextView.prototype, {
     moveLeft: function() {
         var range = Range.normalizeRange(this._selectedRange);
         if (this._rangeIsInsertionPoint(range)) {
-            this.moveCursorTo(this.layoutManager.textStorage.
+            this.moveCursorTo(this.editor.layoutManager.textStorage.
                 displacePosition(range.start, -1));
         } else {
             this.moveCursorTo(range.start);
@@ -858,7 +876,7 @@ util.mixin(exports.TextView.prototype, {
     moveRight: function() {
         var range = Range.normalizeRange(this._selectedRange);
         if (this._rangeIsInsertionPoint(range)) {
-            this.moveCursorTo(this.layoutManager.textStorage.
+            this.moveCursorTo(this.editor.layoutManager.textStorage.
                 displacePosition(range.end, 1));
         } else {
             this.moveCursorTo(range.end);
@@ -903,7 +921,7 @@ util.mixin(exports.TextView.prototype, {
             oldRange = Range.normalizeRange(oldRange);
             this.willReplaceRange(this, oldRange);
 
-            var textStorage = this.layoutManager.textStorage;
+            var textStorage = this.editor.layoutManager.textStorage;
             textStorage.replaceCharacters(oldRange, characters);
             this.replacedCharacters(this, oldRange, characters);
         }.bind(this));
@@ -925,7 +943,7 @@ util.mixin(exports.TextView.prototype, {
             return false;
         }
 
-        var model = this.layoutManager.textStorage;
+        var model = this.editor.layoutManager.textStorage;
 
         var lines = model.lines;
         var range = this.getSelectedRange();
@@ -996,7 +1014,7 @@ util.mixin(exports.TextView.prototype, {
      * character position.
      */
     scrollToPosition: function(position) {
-        var rect = this.layoutManager.
+        var rect = this.editor.layoutManager.
             characterRectForPosition(position);
         var rectX = rect.x, rectY = rect.y;
         var rectWidth = rect.width, rectHeight = rect.height;
@@ -1029,7 +1047,7 @@ util.mixin(exports.TextView.prototype, {
      * Selects all characters in the buffer.
      */
     selectAll: function() {
-        var lines = this.layoutManager.textStorage.lines;
+        var lines = this.editor.layoutManager.textStorage.lines;
         var lastRow = lines.length - 1;
         this.setSelection({
             start:  { row: 0, col: 0 },
@@ -1042,12 +1060,12 @@ util.mixin(exports.TextView.prototype, {
     },
 
     selectLeft: function() {
-        this.moveCursorTo((this.layoutManager.textStorage.
+        this.moveCursorTo((this.editor.layoutManager.textStorage.
             displacePosition(this._selectedRange.end, -1)), true);
     },
 
     selectRight: function() {
-        this.moveCursorTo((this.layoutManager.textStorage.
+        this.moveCursorTo((this.editor.layoutManager.textStorage.
             displacePosition(this._selectedRange.end, 1)), true);
     },
 
@@ -1059,7 +1077,7 @@ util.mixin(exports.TextView.prototype, {
      * Directly replaces the current selection with a new one.
      */
     setSelection: function(newRange, ensureVisible) {
-        var textStorage = this.layoutManager.textStorage;
+        var textStorage = this.editor.layoutManager.textStorage;
 
         newRange = textStorage.clampRange(newRange);
         if (Range.equal(newRange, this._selectedRange)) {
@@ -1073,9 +1091,6 @@ util.mixin(exports.TextView.prototype, {
         this._selectedRange = textStorage.clampRange(newRange);
         this._invalidateSelection();
 
-        // TODO: add this back working over plugin boundaries.
-        // this.notifyDelegates('textViewSelectionChanged', this._selectedRange);
-
         if (this._hasFocus) {
             this._rearmInsertionPointBlinkTimer();
         }
@@ -1084,8 +1099,7 @@ util.mixin(exports.TextView.prototype, {
             this.scrollToPosition(this._selectedRange.end);
         }
 
-        // TODO: add this back working over plugin boundaries.
-        // this.notifyDelegates('textViewChangedSelection', this._selectedRange);
+        this.selectionChanged(this._selectedRange);
     },
 
     textInserted: function(text) {

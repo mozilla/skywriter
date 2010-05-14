@@ -47,7 +47,18 @@ exports.LayoutManager = function(opts) {
     this.changedTextAtRow = new Event();
     this.invalidatedRects = new Event();
 
+    // There is no setter for textStorage so we have to change it to
+    // _textStorage to make things work with util.mixin().
+    if (opts.textStorage) {
+        opts._textStorage = opts.textStorage;
+        delete opts.textStorage;
+    } else {
+        this._textStorage = new TextStorage();
+    }
+
     util.mixin(this, opts);
+
+    this._textStorage.changed.add(this.textStorageChanged.bind(this));
 
     this.textLines = [
         {
@@ -62,7 +73,6 @@ exports.LayoutManager = function(opts) {
         }
     ];
 
-    this.createTextStorage();
     this.createSyntaxManager();
 
     this._size = { width: 0, height: 0 };
@@ -91,45 +101,8 @@ exports.LayoutManager.prototype = {
         return this._size;
     },
 
-    /**
-     * @protected
-     *
-     * Instantiates the internal text storage object. The default
-     * implementation of this method simply calls create() on the internal
-     * textStorage property.
-     */
-    createTextStorage: function() {
-        this.textStorage = new TextStorage();
-    },
-
     get textStorage() {
         return this._textStorage;
-    },
-
-    set textStorage(newTextStorage) {
-        var oldTextStorage = this._textStorage;
-        this._textStorage = newTextStorage;
-
-        if (!util.none(oldTextStorage)) {
-            oldTextStorage.changed.remove(this);
-        }
-
-        newTextStorage.changed.add(this, this.textStorageChanged.bind(this));
-
-        if (this._syntaxManagerInitialized) {
-            var oldRange = oldTextStorage.range;
-            var newRange = newTextStorage.range;
-
-            if (!util.none(oldTextStorage)) {
-                this.syntaxManager.layoutManagerReplacedText(oldRange, newRange);
-            }
-
-            // During initial setup, the text storage is set before the syntax
-            // manager is. We can't recompute the layout before the syntax
-            // manager is set up, so we solve this chicken-and-egg problem by
-            // suppressing the layout.
-            this._recomputeLayoutForRanges(oldRange, newRange);
-        }
     },
 
     /**
