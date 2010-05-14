@@ -188,6 +188,8 @@ exports.EditorView.prototype = {
 
     _buffer: null,
 
+    _dontRecomputeLayout: true,
+
     themeData: null,
 
     // for debug purpose only
@@ -238,6 +240,11 @@ exports.EditorView.prototype = {
     },
 
     _updateScrollers: function() {
+        // Don't change anything on the scrollers until the layout is setup.
+        if (this._dontRecomputeLayout) {
+            return;
+        }
+
         var frame = this.textViewPaddingFrame;
         var width = this._textViewSize.width;
         var height = this._textViewSize.height;
@@ -358,6 +365,12 @@ exports.EditorView.prototype = {
     },
 
     _recomputeLayout: function() {
+        // This is necessary as _recomputeLayout is called sometimes when the
+        // size of the container is not yet ready (because of FlexBox).
+        if (this._dontRecomputeLayout) {
+            return;
+        }
+
         var width = this.container.offsetWidth;
         var height = this.container.offsetHeight;
 
@@ -393,6 +406,8 @@ exports.EditorView.prototype = {
             width: scrollerSize,
             height: height - (2 * scrollerPadding + scrollerSize)
         });
+
+        this._updateScrollers();
 
         this.gutterView.setNeedsDisplay();
         this.textView.setNeedsDisplay();
