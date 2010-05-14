@@ -86,7 +86,7 @@ CoreTest = {
   _schedule: function(pr) {
     if (arguments.length===0) {
       if (!(pr = this._scheduleTail)) {
-        pr = this._scheduleTail = Promise.create('CoreTest.head');
+        pr = this._scheduleTail = new Promise('CoreTest.head');
         tiki.ready(pr, pr.resolve);
       }
       return pr ;

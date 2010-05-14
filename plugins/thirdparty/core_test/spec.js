@@ -103,7 +103,7 @@ exports.describe = function(desc, handler, context) {
 
   if (beforeHandlers.length>0) {
     mod.setup(function(test, setupPr) {
-      var first = utils.Promise.create(),
+      var first = new utils.Promise(),
           pr    = first,
           len   = beforeHandlers.length,
           idx;

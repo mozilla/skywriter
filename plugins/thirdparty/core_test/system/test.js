@@ -7,7 +7,7 @@
 
 var utils       = require('utils'),
     Ct          = require('core'),
-    Promise     = require('promise', 'tiki'),
+    Promise     = require('promise', 'bespin').Promise,
     Assertable  = require('assert').xCoreTestAssertable;
 
 require('system/dump'); // add Ct.dump
@@ -216,10 +216,10 @@ Ct.Test = utils.extend(Assertable, {
     
     var mod     = this.module(),
         testId  = mod.name + ':' + this.name,
-        ret     = Promise.create(testId), // resolves when test has finished
-        setupPr = Promise.create(testId+'::setup'),
-        testPr  = Promise.create(testId+'::test'),
-        teardownPr = Promise.create(testId+'::teardown'),
+        ret     = new Promise(testId), // resolves when test has finished
+        setupPr = new Promise(testId+'::setup'),
+        testPr  = new Promise(testId+'::test'),
+        teardownPr = new Promise(testId+'::teardown'),
         setupHandler, teardownHandler, testHandler, breakPr;
         
     setupHandler = this._phase(Ct.SETUP_MODE, mod.setup(), setupPr);
@@ -227,7 +227,7 @@ Ct.Test = utils.extend(Assertable, {
     teardownHandler = this._phase(Ct.TEARDOWN_MODE, mod.teardown(), teardownPr);
 
     // force take a break between each test to avoid timer overruns
-    breakPr = Promise.create();
+    breakPr = new Promise();
     pr.then(function() { setTimeout(function() { breakPr.resolve(); }, 1); });
     
     breakPr.then(this, setupHandler);
