@@ -100,8 +100,10 @@ exports.EditorView = function() {
         this._fontSettingChanged();
         this._themeVariableDidChange();
 
+        // When adding an container that is managed by FlexBox, the size is not
+        // available at once. After a small delay it is.
         setTimeout(function() {
-            this.recomputeLayout();
+            this._recomputeLayout();
         }.bind(this), 0)
 
         window.addEventListener('resize', this.dimensionChanged.bind(this), false);
@@ -115,43 +117,7 @@ exports.EditorView = function() {
             this.scrollOffset = { x: value };
         }.bind(this));
 
-        layoutManager.sizeChanged.add(function(size) {
-            console.log('layoutManagerSizeChanged');
-            if (this._textLinesCount !== size.height) {
-                var gutterWidth = gutterView.computeWidth();
-                if (gutterWidth !== this._gutterViewWidth) {
-                    this.recomputeLayout();
-                } else {
-                    gutterView.setNeedsDisplay();
-                }
-                this._textLinesLength = size.height;
-            }
-
-            var frame = this.textViewPaddingFrame;
-            var width = size.width * layoutManager.characterWidth;
-            var height = size.height * layoutManager.lineHeight;
-
-            this._textViewSize = {
-                width: width,
-                height: height
-            };
-
-            if (height < frame.height) {
-                verticalScroller.isVisible = false;
-            } else {
-                verticalScroller.isVisible = true;
-                verticalScroller.proportion = frame.height / height;
-                verticalScroller.maximum = height - frame.height;
-            }
-
-            if (width < frame.width) {
-                horizontalScroller.isVisible = false;
-            } else {
-                horizontalScroller.isVisible = true;
-                horizontalScroller.proportion = frame.width / width;
-                horizontalScroller.maximum = width - frame.width;
-            }
-        }.bind(this));
+        layoutManager.sizeChanged.add(this.layoutManagerSizeChanged.bind(this));
     }.bind(this));
 };
 
@@ -170,6 +136,53 @@ exports.EditorView.prototype = {
     _gutterViewWidth: 0,
 
     _scrollOffset: null,
+
+    layoutManagerSizeChanged: function(size) {
+        if (this._textLinesCount !== size.height) {
+            var gutterWidth = this.gutterView.computeWidth();
+            if (gutterWidth !== this._gutterViewWidth) {
+                this._recomputeLayout();
+            } else {
+                this.gutterView.setNeedsDisplay();
+            }
+            this._textLinesLength = size.height;
+        }
+
+        var frame = this.textViewPaddingFrame;
+        var width = size.width * this.layoutManager.characterWidth;
+        var height = size.height * this.layoutManager.lineHeight;
+
+        this._textViewSize = {
+            width: width,
+            height: height
+        };
+
+        this._updateScrollers();
+    },
+
+    _updateScrollers: function() {
+        var frame = this.textViewPaddingFrame;
+        var width = this._textViewSize.width;
+        var height = this._textViewSize.height;
+        var verticalScroller = this.verticalScroller;
+        var horizontalScroller = this.horizontalScroller;
+
+        if (height < frame.height) {
+            verticalScroller.isVisible = false;
+        } else {
+            verticalScroller.isVisible = true;
+            verticalScroller.proportion = frame.height / height;
+            verticalScroller.maximum = height - frame.height;
+        }
+
+        if (width < frame.width) {
+            horizontalScroller.isVisible = false;
+        } else {
+            horizontalScroller.isVisible = true;
+            horizontalScroller.proportion = frame.width / width;
+            horizontalScroller.maximum = width - frame.width;
+        }
+    },
 
     onMouseWheel: function(evt) {
         var delta = 0;
@@ -267,7 +280,7 @@ exports.EditorView.prototype = {
         }
     },
 
-    recomputeLayout: function() {
+    _recomputeLayout: function() {
         var width = this.container.offsetWidth;
         var height = this.container.offsetHeight;
 
@@ -311,7 +324,7 @@ exports.EditorView.prototype = {
     },
 
     dimensionChanged: function() {
-        this.recomputeLayout();
+        this._recomputeLayout();
     },
 
     /**
