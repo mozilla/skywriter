@@ -197,10 +197,9 @@ def test_templates_in_plugin():
     plugin = plugins.lookup_plugin("plugin1", pluginpath)
     templates = plugin.templates
     assert len(templates) == 1
-    assert 'one.jsmt' in templates
-    assert 'js micro template' in templates['one.jsmt']
+    assert 'one.htmlt' in templates
+    assert 'js micro template' in templates['one.htmlt']
     
     tm = plugin.template_module
-    assert "plugin1:templates" in tm
     assert "js micro template" in tm
     

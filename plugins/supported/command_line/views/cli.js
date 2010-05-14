@@ -81,8 +81,8 @@ exports.CliInputView = function() {
     // If we discover a change in size, we need to change a few styles
     this._lastOrientation = null;
 
-    var template = require('templates').cli();
-    templater.processTemplate(template, {
+    var templates = require('templates');
+    templates.cli({
         cliInputView: this,
         imagePath: imagePath
     });

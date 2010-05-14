@@ -168,5 +168,5 @@ def combine_files(jsfile, cssfile, plugin, p,
     
     template_module = plugin.template_module
     if template_module:
-        jsfile.write(template_module)
+        jsfile.write(wrap_script(plugin, "templates", template_module))
     

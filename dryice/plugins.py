@@ -212,7 +212,7 @@ class Plugin(object):
                 return {}
 
             return dict((loc.relpathto(f), f.text("utf8")) 
-                for f in loc.walkfiles("*.jsmt"))
+                for f in loc.walkfiles("*.htmlt"))
         else:
             return {}
     
@@ -222,12 +222,11 @@ class Plugin(object):
         if not templates:
             return None
 
-        return wrap_script(self, "templates", """
-var jsmt = require('jsmt');
+        return """
+var templater = require('templater');
 
-jsmt.compileAll(%s, exports);
-
-""" % (dumps(templates)))
+templater.compileAll(%s, exports);
+""" % (dumps(templates))
         
         
     def get_script_text(self, scriptname):

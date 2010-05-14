@@ -2,7 +2,7 @@
     "description": "Identifies the user via a Bespin server",
     "dependencies": {
         "bespin_server": "0.0",
-        "jsmt": "0.0.0",
+        "templater": "0.0.0",
         "events": "0.0",
         "settings": "0.0",
         "overlay": "1.2.0",

@@ -42,6 +42,7 @@ var ServerPersister = require('bespin_server:settings').ServerPersister;
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var Promise = require("bespin:promise").Promise;
+var templates = require("templates");
 
 var $ = require("jquery").$;
 require("overlay");
@@ -82,8 +83,7 @@ exports.loginController.prototype = {
     },
 
     _showLoginForm: function(pr) {
-        var loginform = require("templates").login();
-        loginform = $(loginform)[0];
+        var loginform = templates.login();
         document.body.appendChild(loginform);
         var overlayNode = $('#bespinloginform').overlay({
             mask: {

@@ -43,9 +43,11 @@
  * Turn the template into a DOM node, resolving the ${} references to the data
  */
 exports.processTemplate = function(template, data) {
+    data = data || {};
     var parent = document.createElement('div');
     parent.innerHTML = template;
     processChildren(parent, data);
+    return parent;
 };
 
 /**
@@ -98,4 +100,39 @@ var property = function(path, data, newValue) {
     } else {
         return property(path.slice(1), value, newValue);
     }
+};
+
+// strips the extension off of a name
+var basename = function(name) {
+    var lastDot = name.lastIndexOf('.');
+    return name.substring(0, lastDot);
+};
+
+/**
+ * "compiles" a template. with the current version of templating,
+ * this just means making a function that is hanging onto the
+ * template text.
+ */
+exports.compile = function(template) {
+    return function(data) {
+        return exports.processTemplate(template, data);
+    };
+};
+
+/**
+ * Compiles a collection of templates, returning a new object.
+ * The object coming in should have keys that are the filenames of the
+ * templates (including the extension) and the values are the templates
+ * themselves. The result will have the extensions stripped off of the
+ * keys, and the values will be callable functions that render the
+ * template with the context provided.
+ */
+exports.compileAll = function(obj, mixInto) {
+    if ("undefined" === typeof(mixInto)) {
+        mixInto = {};
+    }
+    Object.keys(obj).forEach(function(name) {
+        mixInto[basename(name)] = exports.compile(obj[name]);
+    });
+    return mixInto;
 };
