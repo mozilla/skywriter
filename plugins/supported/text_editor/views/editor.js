@@ -282,13 +282,6 @@ exports.EditorView.prototype = {
         };
     },
 
-    get frame() {
-        return {
-            width: this.container.offsetWidth,
-            height: this.container.offsetHeight
-        }
-    },
-
     _recomputeLayout: function() {
         // This is necessary as _recomputeLayout is called sometimes when the
         // size of the container is not yet ready (because of FlexBox).
@@ -396,7 +389,16 @@ Object.defineProperties(exports.EditorView.prototype, {
             return this._buffer;
         }
     },
-    
+
+    frame: {
+        get: function() {
+            return {
+                width: this.container.offsetWidth,
+                height: this.container.offsetHeight
+            }
+        }
+    },
+
     textViewPaddingFrame: {
         get: function() {
             var frame = util.clone(this.textView.frame);
@@ -408,7 +410,7 @@ Object.defineProperties(exports.EditorView.prototype, {
             return frame;
         }
     },
-    
+
     scrollOffset: {
         set: function(pos) {
             if (pos.x === undefined) pos.x = this._scrollOffset.x;

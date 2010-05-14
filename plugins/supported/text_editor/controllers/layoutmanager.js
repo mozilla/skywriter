@@ -472,7 +472,7 @@ Object.defineProperties(exports.LayoutManager.prototype, {
             }
         },
         
-        get size() {
+        get: function() {
             return this._size;
         }
     },

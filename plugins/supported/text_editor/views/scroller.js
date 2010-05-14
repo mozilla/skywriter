@@ -95,51 +95,11 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
 
     _isVisible: false,
 
-    set isVisible(isVisible) {
-        if (this._isVisible === isVisible) {
-            return;
-        }
-
-        this._isVisible = isVisible;
-        this.domNode.style.display = isVisible ? 'block' : 'none';
-        if (isVisible) {
-            this.invalidate();
-        }
-    },
-
     _maximum: 0,
 
-    set maximum(maximum) {
-        if (this._value > this._maximum) {
-            this.value = this._maximum;
-        }
-
-        if (maximum === this._maximum) {
-            return;
-        }
-
-        this._maximum = maximum;
-        this.invalidate();
-    },
-
     _value: 0,
+
     valueChanged: null,
-
-    set value(value) {
-        if (value < 0) {
-            value = 0;
-        } else if (value > this._maximum) {
-            value = this._maximum;
-        }
-
-        if (value === this._value) {
-            return;
-        }
-
-        this._value = value;
-        this.valueChanged(value);
-        this.invalidate();
-    },
 
     /**
      * @property
