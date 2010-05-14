@@ -39,12 +39,30 @@ exports.Event = function() {
     var handlers = [];
     var evt = function() {
         var args = arguments;
-        handlers.forEach(function(handler) { handler.apply(null, args); });
+        handlers.forEach(function(handler) { handler.func.apply(null, args); });
     };
 
-    evt.add = function(handler) { handlers.push(handler); };
-    evt.remove = function(handler) {
-        var notEqual = function(other) { return handler !== other; };
+    /**
+     * Adds a new handler via
+     *  a) evt.add(handlerFunc)
+     *  b) evt.add(reference, handlerFunc)
+     */
+    evt.add = function() {
+        if (arguments.length == 1) {
+            handlers.push({
+                ref: arguments[0],
+                func: arguments[0]
+            });
+        } else {
+            handlers.push({
+                ref: arguments[0],
+                func: arguments[1]
+            });
+        }
+    };
+
+    evt.remove = function(ref) {
+        var notEqual = function(other) { return ref !== other.ref; };
         handlers = handlers.filter(notEqual);
     };
 

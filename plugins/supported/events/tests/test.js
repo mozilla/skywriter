@@ -63,10 +63,12 @@ exports.testAddingEvents = function() {
 
 exports.testRemovingEvents = function() {
     var evt = new Event();
+    var ref = { hello: 'world' };
     var run1 = false, run2 = false, run3 = false;
     var callback1 = function() { run1 = true; };
     var callback2 = function() { run2 = true; };
     var callback3 = function() { run3 = true; };
+
     evt.add(callback1);
     evt.add(callback2);
     evt.remove(callback1);
@@ -78,6 +80,17 @@ exports.testRemovingEvents = function() {
     evt.add(callback3);
     evt.remove(callback2);
     evt.remove(callback3);
+    evt();
+    t.equal(run1, false, "run1 handler was not run after all callbacks were " +
+        "removed");
+    t.equal(run2, false, "run2 handler was not run after all callbacks were " +
+        "removed");
+    t.equal(run3, false, "run3 handler was not run after all callbacks were " +
+        "removed");
+
+    run1 = false, run2 = false, run3 = false;
+    evt.add(ref, callback3);
+    evt.remove(ref);
     evt();
     t.equal(run1, false, "run1 handler was not run after all callbacks were " +
         "removed");

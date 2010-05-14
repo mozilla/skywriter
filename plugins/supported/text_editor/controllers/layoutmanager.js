@@ -111,10 +111,10 @@ exports.LayoutManager.prototype = {
         this._textStorage = newTextStorage;
 
         if (!util.none(oldTextStorage)) {
-            oldTextStorage.changed.remove(this.textStorageChanged);
+            oldTextStorage.changed.remove(this);
         }
 
-        newTextStorage.changed.add(this.textStorageChanged.bind(this));
+        newTextStorage.changed.add(this, this.textStorageChanged.bind(this));
 
         if (this._syntaxManagerInitialized) {
             var oldRange = oldTextStorage.range;
