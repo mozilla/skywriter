@@ -57,7 +57,7 @@ exports.GutterView.prototype = new CanvasView();
 
 util.mixin(exports.GutterView.prototype, {
     drawRect: function(rect, context) {
-        var theme = this._theme;
+        var theme = this.editor.themeData.gutter;
 
         context.fillStyle = theme.backgroundColor;
         context.fillRect(rect.x, rect.y, rect.width, rect.height);

@@ -15,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
- * Portions created by the Initial Developer are Copyright (C) 2009
+ * Portions created by the Initialal Developer are Copyright (C) 2009
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
@@ -45,6 +45,7 @@ var Rect = require('utils/rect');
 var TextInput = require('views/textinput').TextInput;
 var keyboardManager = require('keyboard:keyboard').keyboardManager;
 var settings = require('settings').settings;
+
 
 // Set this to true to outline all text ranges with a box. This may be useful
 // when optimizing syntax highlighting engines.
@@ -104,8 +105,6 @@ util.mixin(exports.TextView.prototype, {
     _insertionPointBlinkTimer: null,
     _insertionPointVisible: true,
 
-    _theme: null,
-    _themeHighlighter: null,
 
     // FIXME: These should be public, not private.
     _keyBuffer: '',
@@ -197,7 +196,7 @@ util.mixin(exports.TextView.prototype, {
 
         context.save();
 
-        var theme = this._theme;
+        var theme = this.editor.themeData.editor;
         if (this._hasFocus) {
             context.strokeStyle = theme.cursorColor;
             context.beginPath();
@@ -219,7 +218,7 @@ util.mixin(exports.TextView.prototype, {
         var layoutManager = this.editor.layoutManager;
         var textLines = layoutManager.textLines;
         var lineAscent = layoutManager.lineAscent;
-        var themeHighlighter = this._themeHighlighter;
+        var themeHighlighter = this.editor.themeData.highlighter
 
         context.save();
         context.font = this.editor.font;
@@ -286,7 +285,7 @@ util.mixin(exports.TextView.prototype, {
 
     // Draws the background highlight for selections.
     _drawSelectionHighlight: function(rect, context) {
-        var theme = this._theme;
+        var theme = this.editor.themeData.editor;
         var fillStyle = this._hasFocus ?
             theme.selectedTextBackgroundColor :
             theme.unfocusedCursorBackgroundColor;
@@ -585,7 +584,7 @@ util.mixin(exports.TextView.prototype, {
      * used to draw as little as possible.
      */
     drawRect: function(rect, context) {
-        context.fillStyle = this._theme.backgroundColor;
+        context.fillStyle = this.editor.themeData.editor.backgroundColor;
         context.fillRect(rect.x, rect.y, rect.width, rect.height);
 
         this._drawSelection(rect, context);

@@ -54,6 +54,36 @@ var ScrollerView = Scroller.ScrollerCanvasView;
 
 // var EditorUndoController = require('controllers/undo').EditorUndoController;
 
+/**
+ * Cache with all the theme data for the entire editor (gutter, editor, highlighter).
+ */
+var editorThemeData = {};
+
+var computeThemeData = function() {
+    var plugin = catalog.plugins['text_editor'];
+    var provides = plugin.provides;
+    var i = provides.length;
+
+    while (i--) {
+        if (provides[i].ep === 'themevariable') {
+            var value = provides[i].value || provides[i].defaultValue;
+
+            switch (provides[i].name) {
+                case 'gutter':
+                case 'editor':
+                case 'highlighter':
+                    editorThemeData[provides[i].name] = value;
+            }
+        }
+    }
+}
+
+// Compute the themeData to make sure there is one when the editor comes up.
+computeThemeData();
+
+catalog.registerExtension('themeChange', {
+    pointer: computeThemeData
+});
 
 /**
  * @class
@@ -63,14 +93,11 @@ var ScrollerView = Scroller.ScrollerCanvasView;
  * to change so that it's not taking the container as a parameter.
  */
 exports.EditorView = function() {
-
+    // TODO: This is for debug purpose only and should go away again.
     bespin.editor = this;
 
     this.elementAppended = new Event();
 
-
-    // On construction, only the basic div for the editor is created. The
-    // other stuff goes in here after the element has been appended to a parent.
     this.element = this.container = document.createElement("div");
 
     var container = this.container;
@@ -99,10 +126,15 @@ exports.EditorView = function() {
         height: 0
     };
 
+    this.themeData = editorThemeData;
+
     // Create all the necessary stuff once the container has been added.
     this.elementAppended.add(function() {
         this._fontSettingChanged();
-        this._themeVariableDidChange();
+
+        catalog.registerExtension('themeChange', {
+            pointer: this._themeVariableDidChange.bind(this)
+        });
 
         // When adding an container that is managed by FlexBox, the size is not
         // available at once. After a small delay it is.
@@ -144,6 +176,7 @@ exports.EditorView.prototype = {
 
     _buffer: null,
 
+    themeData: null,
 
     // for debug purpose only
     newBuffer: function() {
@@ -402,36 +435,10 @@ exports.EditorView.prototype = {
     },
 
     _themeVariableDidChange: function() {
-        var theme = {};
-
-        var plugin = catalog.plugins['text_editor'];
-        var provides = plugin.provides;
-        var i = provides.length;
-
-        while (i--) {
-            if (provides[i].ep === 'themevariable') {
-                var value = provides[i].value || provides[i].defaultValue;
-
-                switch (provides[i].name) {
-                    case 'gutter':
-                        this.gutterView._theme = value;
-                        break;
-                    case 'editor':
-                        this.textView._theme = value;
-                        break;
-                    case 'highlighter':
-                        this.textView._themeHighlighter = value;
-                    break;
-                }
-            }
-        }
-
-        var lines = this.layoutManager.textStorage.lines;
-        this.layoutManager.updateTextRows(0, lines.length - 1);
-
+        // Recompute the entire layout as the gutter now might has a different
+        // size. Just calling setNeedsDisplay() on the gutter wouldn't be enough.
+        this._recomputeLayout();
         this.textView.setNeedsDisplay();
-        // TODO: Add this back.
-        //this.gutterView._recomputeLayout();
     },
 };
 
