@@ -107,13 +107,16 @@ exports.CanvasView.prototype = {
     },
 
     setFrame: function(frame, preventDownsize) {
-        var domStyle = this.domNode.style;
+        var domNode = this.domNode;
+        var domWidth = domNode.width;
+        var domHeight = domNode.height;
+        var domStyle = domNode.style;
         domStyle.left = frame.x + 'px';
         domStyle.top = frame.y + 'px';
 
         var widthChanged, heightChanged;
-        if (frame.width !== this._frame.width) {
-            if (frame.width < this._frame.width) {
+        if (frame.width !== domWidth) {
+            if (frame.width < domWidth) {
                 if (!preventDownsize) {
                     widthChanged = true;
                 }
@@ -121,8 +124,8 @@ exports.CanvasView.prototype = {
                 widthChanged = true;
             }
         }
-        if (frame.height !== this._frame.height) {
-            if (frame.height < this._frame.height) {
+        if (frame.height !== domHeight) {
+            if (frame.height < domHeight) {
                 if (!preventDownsize) {
                     heightChanged = true;
                 }
