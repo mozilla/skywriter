@@ -366,7 +366,7 @@ exports.EditorView.prototype = {
         // size. Just calling invalidate() on the gutter wouldn't be enough.
         this._recomputeLayout();
         this.textView.invalidate();
-    },
+    }
 };
 
 Object.defineProperties(exports.EditorView.prototype, {

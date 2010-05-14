@@ -112,7 +112,7 @@ exports.normalizeConfig = function(config) {
     }
     if (!config.objects.editor) {
         config.objects.editor = {
-            factory: "text_editor",
+            factory: "text_editor"
         };
     }
     if (!config.objects.session) {
