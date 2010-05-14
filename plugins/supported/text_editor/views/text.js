@@ -53,7 +53,7 @@ var DEBUG_TEXT_RANGES = false;
 
 
 exports.TextView = function(container, editor) {
-    CanvasView.call(this, container);
+    CanvasView.call(this, container, true /* preventDownsize */ );
     this.editor = editor;
 
     // Call this to attach the necessary events for a new buffer.
@@ -334,14 +334,14 @@ util.mixin(exports.TextView.prototype, {
         if (!this._rangeIsInsertionPoint(range)) {
             var rects = layoutManager.rectsForRange(range);
             rects.forEach(function(rect) {
-                this.setNeedsDisplayInRect(adjustRect(rect));
+                this.invalidateRect(adjustRect(rect));
             }, this);
 
             return;
         }
 
         var rect = layoutManager.characterRectForPosition(range.start);
-        this.setNeedsDisplayInRect(adjustRect(rect));
+        this.invalidateRect(adjustRect(rect));
     },
 
     _isReadOnly: function() {
@@ -487,7 +487,7 @@ util.mixin(exports.TextView.prototype, {
         layoutManager.rectsForRange({
                 start:  { row: startRow, col: 0 },
                 end:    { row: endRow,   col: 0 }
-            }).forEach(this.setNeedsDisplayInRect, this);
+            }).forEach(this.invalidateRect, this);
     },
 
     // TODO: Necessary anymore?
@@ -722,7 +722,7 @@ util.mixin(exports.TextView.prototype, {
      * Marks the given rectangles as invalid.
      */
     layoutManagerInvalidatedRects: function(sender, rects) {
-        rects.forEach(this.setNeedsDisplayInRect, this);
+        rects.forEach(this.invalidateRect, this);
 
         // TODO: Do we need this anymore?
         // this._resize();

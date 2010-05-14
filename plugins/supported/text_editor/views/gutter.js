@@ -46,7 +46,7 @@ var CanvasView = require('views/canvas').CanvasView;
  * added to the document appropriately.
  */
 exports.GutterView = function(container, editor) {
-    CanvasView.call(this, container);
+    CanvasView.call(this, container, true /* preventDownsize */ );
 
     this.editor = editor;
 

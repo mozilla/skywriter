@@ -226,7 +226,7 @@ exports.EditorView.prototype = {
             if (gutterWidth !== this._gutterViewWidth) {
                 this._recomputeLayout();
             } else {
-                this.gutterView.setNeedsDisplay();
+                this.gutterView.invalidate();
             }
             this._textLinesLength = size.height;
         }
@@ -342,8 +342,8 @@ exports.EditorView.prototype = {
             y: pos.y
         };
 
-        this.gutterView.setNeedsDisplay();
-        this.textView.setNeedsDisplay();
+        this.gutterView.invalidate();
+        this.textView.invalidate();
     },
 
     scrollTo: function(pos) {
@@ -375,44 +375,44 @@ exports.EditorView.prototype = {
         var height = this.container.offsetHeight;
 
         var gutterWidth = this._gutterViewWidth = this.gutterView.computeWidth();
-        this.gutterView.setFrame({
+        this.gutterView.frame = {
             x: 0,
             y: 0,
             width: gutterWidth,
             height: height
-        }, true);
+        };
 
-        this.textView.setFrame({
+        this.textView.frame = {
             x: gutterWidth,
             y: 0,
             width: width - gutterWidth,
             height: height
-        }, true);
+        };
 
         // TODO: Get this values from the scroller theme.
         var scrollerPadding = 5;
         var scrollerSize = 17;
 
-        this.horizontalScroller.setFrame({
+        this.horizontalScroller.frame = {
             x: gutterWidth + scrollerPadding,
             y: height - (scrollerSize + scrollerPadding),
             width: width - (gutterWidth + 2 * scrollerPadding + scrollerSize),
             height: scrollerSize
-        });
+        };
 
-        this.verticalScroller.setFrame({
+        this.verticalScroller.frame = {
             x: width - (scrollerPadding + scrollerSize),
             y: scrollerPadding,
             width: scrollerSize,
             height: height - (2 * scrollerPadding + scrollerSize)
-        });
+        };
 
         this._updateScrollers();
 
-        this.gutterView.setNeedsDisplay();
-        this.textView.setNeedsDisplay();
-        this.verticalScroller.setNeedsDisplay();
-        this.horizontalScroller.setNeedsDisplay();
+        this.gutterView.invalidate();
+        this.textView.invalidate();
+        this.verticalScroller.invalidate();
+        this.horizontalScroller.invalidate();
     },
 
     dimensionChanged: function() {
@@ -433,14 +433,14 @@ exports.EditorView.prototype = {
         // Recompute the layouts.
         this.layoutManager._recalculateMaximumWidth();
         this._recomputeLayout();
-        this.textView.setNeedsDisplay();
+        this.textView.invalidate();
     },
 
     _themeVariableDidChange: function() {
         // Recompute the entire layout as the gutter now might has a different
-        // size. Just calling setNeedsDisplay() on the gutter wouldn't be enough.
+        // size. Just calling invalidate() on the gutter wouldn't be enough.
         this._recomputeLayout();
-        this.textView.setNeedsDisplay();
+        this.textView.invalidate();
     },
 };
 
@@ -467,7 +467,7 @@ exports.EditorView.prototype = {
 //         // Recompute the layouts.
 //         this.layoutManager._recomputeEntireLayout();
 //         this.gutterView._recomputeLayout();
-//         this.textView.setNeedsDisplay();
+//         this.textView.invalidate();
 //     }.observes('font'),
 //
 //     _fontSizeChanged: function() {
@@ -517,7 +517,7 @@ exports.EditorView.prototype = {
 //             var lines = this.layoutManager.textStorage.lines;
 //             this.layoutManager.updateTextRows(0, lines.length - 1);
 //
-//             this.textView.setNeedsDisplay();
+//             this.textView.invalidate();
 //             this.gutterView._recomputeLayout();
 //         }.bind(this))
 //     },

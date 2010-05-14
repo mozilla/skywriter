@@ -103,7 +103,7 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
         this._isVisible = isVisible;
         this.domNode.style.display = isVisible ? 'block' : 'none';
         if (isVisible) {
-            this.setNeedsDisplay();
+            this.invalidate();
         }
     },
 
@@ -119,7 +119,7 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
         }
 
         this._maximum = maximum;
-        this.setNeedsDisplay();
+        this.invalidate();
     },
 
     _value: 0,
@@ -138,7 +138,7 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
 
         this._value = value;
         this.valueChanged(value);
-        this.setNeedsDisplay();
+        this.invalidate();
     },
 
     /**
@@ -733,12 +733,12 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
 
     mouseEntered: function(evt) {
         this._isMouseOver = true;
-        this.setNeedsDisplay();
+        this.invalidate();
     },
 
     mouseExited: function(evt) {
         this._isMouseOver = false;
-        this.setNeedsDisplay();
+        this.invalidate();
     },
 
     mouseUp: function(evt) {
@@ -748,7 +748,7 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
             clearTimeout(this._scrollTimer);
             this._scrollTimer = null;
         }
-        this.setNeedsDisplay();
+        this.invalidate();
     }
 
     // mouseWheel: function(evt) {

@@ -54,20 +54,18 @@ var Event = require('events').Event;
  * The canvas that is created is available in the domNode attribute and should
  * be added to the document by the caller.
  */
-exports.CanvasView = function(container) {
+exports.CanvasView = function(container, preventDownsize) {
     if (!container) {
         return;
     }
 
-    this._invalidRects = [];
-    this._frame = {
+    this._preventDownsize = preventDownsize || false;
+    this._clippingFrame = this._frame = {
         x: 0,
         y: 0,
         width: 0,
         height: 0
     };
-
-    this._clippingFrame = this._frame;
 
     var canvas = document.createElement('canvas');
     canvas.setAttribute('style', 'position: absolute');
@@ -80,17 +78,19 @@ exports.CanvasView = function(container) {
 };
 
 exports.CanvasView.prototype = {
-    _canvasContext: null,
     domNode: null,
+
+    clippingChanged: null,
+
+    _canvasContext: null,
     _canvasId: null,
     _invalidRects: null,
     _lastRedrawTime: null,
     _redrawTimer: null,
     _clippingFrame: null,
+    _preventDownsize: false,
 
     _frame: null,
-
-    clippingChanged: null,
 
     get clippingFrame() {
         return this._clippingFrame;
@@ -106,8 +106,14 @@ exports.CanvasView.prototype = {
         }
     },
 
-    setFrame: function(frame, preventDownsize) {
+    get frame() {
+        return this._frame;
+    },
+
+    set frame(frame) {
         var domNode = this.domNode;
+        var domStyle = domNode.style;
+        var preventDownsize = this._preventDownsize;
         var domWidth = domNode.width;
         var domHeight = domNode.height;
         var domStyle = domNode.style;
@@ -150,10 +156,6 @@ exports.CanvasView.prototype = {
         };
     },
 
-    get frame() {
-        return this._frame;
-    },
-
     _getContext: function() {
         if (this._canvasContext === null) {
             this._canvasContext = this.domNode.getContext('2d');
@@ -183,20 +185,77 @@ exports.CanvasView.prototype = {
      * invalidates the entire visible area.
      */
     clippingFrameChanged: function() {
-        this.setNeedsDisplay();
+        this.invalidate();
     },
 
     drawRect: function(rect, context) { },
 
     /**
+     * Render the canvas. Rendering is delayed by a few ms to empty the call
+     * stack first before rendering. If the canvas was rendered in less then
+     * this.minimumRedrawDelay ms, then the next rendering will take in
+     * this.minimumRedrawDelay - now + lastRendering ms.
+     */
+    render: function() {
+         // Don't continue if there is a rendering or redraw timer already.
+        if (this._renderTimer || this._redrawTimer) {
+            return;
+        }
+
+        // Queue the redraw at the end of the current event queue to make sure
+        // everyting is done when redrawing.
+        this._renderTimer = setTimeout(this._tryRedraw.bind(this), 0);
+    },
+
+    /**
+     * Invalidates the entire visible region of the canvas.
+     */
+    invalidate: function(rect) {
+        this._invalidRects = 'all';
+        this.render();
+    },
+
+    /**
+     * Invalidates the given rect of the canvas, and schedules that portion of
+     * the canvas to be redrawn at the end of the run loop.
+     */
+    invalidateRect: function(rect) {
+        var invalidRects = this._invalidRects;
+        if (invalidRects !== 'all') {
+            invalidRects.push(rect);
+            this.render();
+        }
+    },
+
+    _tryRedraw: function(context) {
+        this._renderTimer = null;
+
+        var now = new Date().getTime();
+        var lastRedrawTime = this._lastRedrawTime;
+        var minimumRedrawDelay = this.minimumRedrawDelay;
+
+        if (lastRedrawTime === null ||
+                now - lastRedrawTime >= minimumRedrawDelay) {
+            this._redraw();
+            return;
+        }
+
+        var redrawTimer = this._redrawTimer;
+        if (redrawTimer !== null) {
+            return; // already scheduled
+        }
+
+        // TODO This is not as good as SC.Timer... Will it work?
+        this._redrawTimer = window.setTimeout(this._redraw.bind(this),
+            minimumRedrawDelay);
+    },
+
+     /**
      * Calls drawRect() on all the invalid rects to redraw the canvas contents.
      * Generally, you should not need to call this function unless you override
      * the default implementations of didCreateLayer() or render().
-     *
-     * @return True on a successful render, or false if the rendering wasn't
-     *   done because the view wasn't visible.
      */
-    redraw: function() {
+    _redraw: function() {
         var clippingFrame = this.clippingFrame;
         clippingFrame = {
             x:      Math.round(clippingFrame.x),
@@ -241,61 +300,6 @@ exports.CanvasView.prototype = {
         this._invalidRects = [];
         this._redrawTimer = null;
         this._lastRedrawTime = new Date().getTime();
-        return true;
-    },
-
-    render: function() {
-         // Don't continue if there is a rendering or redraw timer already.
-        if (this._renderTimer || this._redrawTimer) {
-            return;
-        }
-
-        // Queue the redraw at the end of the current event queue to make sure
-        // everyting is done when redrawing.
-        this._renderTimer = setTimeout(this.tryRedraw.bind(this), 0);
-    },
-
-    /**
-     * Invalidates the entire visible region of the canvas.
-     */
-    setNeedsDisplay: function(rect) {
-        this._invalidRects = 'all';
-        this.render();
-    },
-
-    /**
-     * Invalidates the given rect of the canvas, and schedules that portion of
-     * the canvas to be redrawn at the end of the run loop.
-     */
-    setNeedsDisplayInRect: function(rect) {
-        var invalidRects = this._invalidRects;
-        if (invalidRects !== 'all') {
-            invalidRects.push(rect);
-            this.render();
-        }
-    },
-
-    tryRedraw: function(context, firstTime) {
-        this._renderTimer = null;
-
-        var now = new Date().getTime();
-        var lastRedrawTime = this._lastRedrawTime;
-        var minimumRedrawDelay = this.minimumRedrawDelay;
-
-        if (lastRedrawTime === null ||
-                now - lastRedrawTime >= minimumRedrawDelay) {
-            this.redraw();
-            return;
-        }
-
-        var redrawTimer = this._redrawTimer;
-        if (redrawTimer !== null) {
-            return; // already scheduled
-        }
-
-        // TODO This is not as good as SC.Timer... Will it work?
-        this._redrawTimer = window.setTimeout(this.redraw.bind(this),
-            minimumRedrawDelay);
     }
 };
 
