@@ -73,33 +73,9 @@ To start the server execute:
 
   paver start
 
-This will start the Bespin server. You can now access the Bespin editor at http://localhost:4020/editor/ in you browser.
+This will start the Bespin server. You can now access the Bespin editor at http://localhost:8080/ in you browser.
 
 Have fun!
-
-## Run SproutCore's build server ##
-
-If you are hacking on SproutCore, you'll want to run SproutCore's build server. Additionally, you'll need:
-
-*Git 
-*Ruby 1.8 or 1.9 (1.9 is faster)
-*The following RubyGems: `rack jeweler json_pure extlib erubis thor`
-
-  <code>gem install rack jeweler json_pure extlib erubis thor</code>
-
-Optionally, you may want the thin library, which will improve performance over the default WEBrick:
-
-    gem install thin
-
-Install additional SproutCore stuff within bespinclient using:
-
-   paver install_sproutcore -g
-
-Here's how you start up:
-
-  paver server.abbot=1 start
-
-You can now access the Bespin editor at http://localhost:4020/editor/ in you browser.
 
 ## Contributing to Bespin ##
 
