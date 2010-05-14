@@ -60,49 +60,55 @@ var ScrollerView = Scroller.ScrollerCanvasView;
  * gutter view, as well as maintaining a layout manager. This really needs
  * to change so that it's not taking the container as a parameter.
  */
-exports.EditorView = function(container) {
-    if (!container) { return; }
-    this._placeEditor(container);
-};
+exports.EditorView = function() {
+
+    bespin.editor = this;
+
+    this.elementAppended = new Event();
 
 
-exports.EditorView.prototype = {
-    _placeEditor: function(container) {
-        // element is the new protocol..
-        this.element = container;
-        this.container = container;
-        container.style.overflow = 'hidden';
+    // On construction, only the basic div for the editor is created. The
+    // other stuff goes in here after the element has been appended to a parent.
+    this.element = this.container = document.createElement("div");
 
-        var layoutManager = this.layoutManager = new LayoutManager();
+    var container = this.container;
+    container.style.overflow = 'hidden';
+    container.style.position = 'relative';
 
-        this.scrollChanged = new Event();
+    var layoutManager = this.layoutManager = new LayoutManager();
 
-        var searchController = this.searchController = new EditorSearchController()
+    this.scrollChanged = new Event();
 
-        var gutterView = this.gutterView = new GutterView(container, this);
-        var textView = this.textView = new TextView(container, this);
+    var searchController = this.searchController = new EditorSearchController()
 
-        var verticalScroller = this.verticalScroller = new ScrollerView(this, Scroller.LAYOUT_VERTICAL);
-        var horizontalScroller = this.horizontalScroller = new ScrollerView(this, Scroller.LAYOUT_HORIZONTAL);
+    var gutterView = this.gutterView = new GutterView(container, this);
+    var textView = this.textView = new TextView(container, this);
+    var verticalScroller = this.verticalScroller = new ScrollerView(this, Scroller.LAYOUT_VERTICAL);
+    var horizontalScroller = this.horizontalScroller = new ScrollerView(this, Scroller.LAYOUT_HORIZONTAL);
 
+    this._scrollOffset = {
+        x: 0, y: 0
+    }
+
+    this._textViewSize = {
+        width: 0,
+        height: 0
+    };
+
+    // Create all the necessary stuff once the container has been added.
+    this.elementAppended.add(function() {
         this._fontSettingChanged();
         this._themeVariableDidChange();
 
-        this.recomputeLayout();
-
-        this._scrollOffset = {
-            x: 0, y: 0
-        }
-
-        this._textViewSize = {
-            width: 0,
-            height: 0
-        };
+        setTimeout(function() {
+            this.recomputeLayout();
+        }.bind(this), 0)
 
         window.addEventListener('resize', this.dimensionChanged.bind(this), false);
         container.addEventListener(util.isMozilla ? 'DOMMouseScroll' : 'mousewheel', this.onMouseWheel.bind(this), false);
 
         layoutManager.sizeChanged.add(function(size) {
+            console.log('layoutManagerSizeChanged');
             if (this._textLinesCount !== size.height) {
                 var gutterWidth = gutterView.computeWidth();
                 if (gutterWidth !== this._gutterViewWidth) {
@@ -138,8 +144,13 @@ exports.EditorView.prototype = {
                 horizontalScroller.maximum = width - frame.width;
             }
         }.bind(this));
-    },
-    
+    }.bind(this));
+};
+
+
+exports.EditorView.prototype = {
+    elementAppended: null,
+
     horizontalScrollOffset: null,
     verticalScrollOffset: null,
 

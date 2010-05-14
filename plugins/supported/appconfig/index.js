@@ -108,31 +108,25 @@ exports.normalizeConfig = function(config) {
             ]
         };
     }
-    // if (!config.objects.editor) {
-    //     // TODO temporary hack until the editor follows the new protocol
-    //     var editorContainer = document.createElement("div");
-    //     editorContainer.setAttribute("class", "center");
-    //     config.objects.editor = {
-    //         factory: "text_editor",
-    //         arguments: [
-    //             editorContainer
-    //         ]
-    //     };
-    // }
+    if (!config.objects.editor) {
+        config.objects.editor = {
+            factory: "text_editor",
+        };
+    }
     if (!config.objects.session) {
         config.objects.session = {
-            // arguments: [
-            //     {
-            //         _Registered_Object: "editor"
-            //     }
-            // ]
+            arguments: [
+                {
+                    _Registered_Object: "editor"
+                }
+            ]
         };
     }
     if (!config.objects.commandLine && catalog.plugins.command_line) {
         config.objects.commandLine = {
         };
     }
-    
+
     if (config.gui === undefined) {
         config.gui = {};
     }
@@ -207,6 +201,11 @@ var generateGUI = function(config) {
         } else {
             container.appendChild(element);
         }
+
+        // Call the elementAppended event if there is one.
+        if (component.elementAppended) {
+            component.elementAppended();
+        }
     }
     
     if (config.element) {
@@ -214,14 +213,6 @@ var generateGUI = function(config) {
     } else {
         document.body.appendChild(container);
     }
-    
-    var editorDiv = document.createElement("div");
-    editorDiv.setAttribute('class', "center");
-    centerContainer.appendChild(editorDiv);
-    var EditorView = require('text_editor:views/editor').EditorView;
-    var editorView = new EditorView(editorDiv);
-    catalog.instances['editor'] = editorView;
-    catalog.getObject("session").currentView = editorView.textView;
 
     // Remove the "Loading..." hint.
     $('#_bespin_loading').remove();

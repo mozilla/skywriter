@@ -69,7 +69,8 @@ exports.CanvasView = function(container) {
 
     this._clippingFrame = this._frame;
 
-    var canvas = document.createElement("canvas");
+    var canvas = document.createElement('canvas');
+    canvas.setAttribute('style', 'position: absolute');
     canvas.innerHTML = 'canvas tag not supported by your browser';
     container.appendChild(canvas);
     this.domNode = canvas;
