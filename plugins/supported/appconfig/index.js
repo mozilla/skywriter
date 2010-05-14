@@ -222,4 +222,7 @@ var generateGUI = function(config) {
     var editorView = new EditorView(editorDiv);
     catalog.instances['editor'] = editorView;
     catalog.getObject("session").currentView = editorView.textView;
+
+    // Remove the "Loading..." hint.
+    $('#_bespin_loading').remove();
 };
