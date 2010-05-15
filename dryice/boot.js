@@ -39,10 +39,14 @@
 // will be able to run it right away.
 
 bespin.useBespin = function(element, options) {
+    var baseConfig = %s;
     options = options || {};
+    for (var key in options) {
+        baseConfig[key] = options[key];
+    }
     var appconfig = bespin.tiki.require("appconfig");
-    options.element = element;
-    return appconfig.launch(options);
+    baseConfig.element = element;
+    return appconfig.launch(baseConfig);
 };
 
 document.addEventListener("DOMContentLoaded", function() {

@@ -73,7 +73,8 @@ class Manifest(object):
     def __init__(self, include_core_test=False, plugins=None,
         search_path=None, 
         output_dir="build", include_sample=False,
-        boot_file=None, unbundled_plugins=None, loader=None):
+        boot_file=None, unbundled_plugins=None, loader=None,
+        config=None):
 
         self.include_core_test = include_core_test
         plugins.insert(0, "bespin")
@@ -125,6 +126,8 @@ will be deleted before the build.""")
                 self.loader = path("lib/tiki.js")
         else:
             self.loader = path(loader)
+        
+        self.config = config if config is not None else {}
             
     @classmethod
     def from_json(cls, json_string, overrides=None):
@@ -211,7 +214,9 @@ bespin.tiki.require("bespin:plugins").catalog.loadMetadata(%s);;
 """ % (dumps(all_md)))
         
         if self.boot_file:
-            output_js.write(self.boot_file.bytes())
+            boot_text = self.boot_file.text("utf8")
+            boot_text = boot_text % (dumps(self.config),)
+            output_js.write(boot_text.encode("utf8"))
 
     def get_package_list(self):
         package_list = [self.get_package(p)
@@ -345,7 +350,7 @@ index_html = """
 <script type="text/javascript" src="BespinEmbedded.js"></script>
 </head>
 <body style="height: 100%; width: 100%; margin: 0">
-<div id="editor" class="bespin" data-bespinoptions='{ "settings": { "tabstop": 4 }, "syntax": "js", "stealFocus": true }' style="width: 100%; height: 100%">// The text of this div shows up in the editor.
+<div id="editor" class="bespin" data-bespinoptions='{ "settings": { "tabstop": 4 }, "syntax": "js", "stealFocus": true }' style="width: 500px; height: 500px">// The text of this div shows up in the editor.
 var thisCode = "what shows up in the editor";
 function editMe() {
  alert("and have fun!");

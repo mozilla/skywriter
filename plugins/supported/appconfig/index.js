@@ -132,12 +132,25 @@ exports.normalizeConfig = function(config) {
     if (config.gui === undefined) {
         config.gui = {};
     }
-    if (!config.gui.center && config.objects.editor) {
+    
+    var alreadyRegistered = {};
+    for (var key in config.gui) {
+        var desc = config.gui[key];
+        if (desc.component) {
+            alreadyRegistered[desc.component] = true;
+        }
+    }
+    console.log("AR");
+    console.log(alreadyRegistered);
+    
+    if (!config.gui.center && config.objects.editor 
+        && !alreadyRegistered.editor) {
         config.gui.center = {
             component: "editor"
         };
     }
-    if (!config.gui.south && config.objects.commandLine) {
+    if (!config.gui.south && config.objects.commandLine
+        && !alreadyRegistered.commandLine) {
         config.gui.south = {
             component: "commandLine",
             height: 300
