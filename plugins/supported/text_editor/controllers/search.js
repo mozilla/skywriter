@@ -44,10 +44,13 @@ var console = require('bespin:console').console;
  *
  * Manages the Find functionality.
  */
-exports.EditorSearchController = function() {
+exports.EditorSearchController = function(editor) {
+    this.editor = editor;
 };
 
 exports.EditorSearchController.prototype = {
+    editor: null,
+
     /**
      * This is based on the idea from:
      *      http://simonwillison.net/2006/Jan/20/escape/.
@@ -56,7 +59,7 @@ exports.EditorSearchController.prototype = {
 
     _findMatchesInString: function(str) {
         var result = [];
-        var searchRegExp = this.get('searchRegExp');
+        var searchRegExp = this.searchRegExp;
         var searchResult;
         var endIndex;
 
@@ -110,13 +113,6 @@ exports.EditorSearchController.prototype = {
     searchText: null,
 
     /**
-     * @property{TextView}
-     *
-     * The view object to search in.
-     */
-    textView: null,
-
-    /**
      * Sets the search query.
      *
      * @param text     The search query to set.
@@ -143,15 +139,14 @@ exports.EditorSearchController.prototype = {
      * @param allowFromStart True if the search is allowed to wrap.
      */
     findNext: function(startPos, allowFromStart) {
-        var searchRegExp = this.get('searchRegExp');
+        var searchRegExp = this.searchRegExp;
         if (util.none(searchRegExp)) {
             return null;
         }
 
-        var textView = this.get('textView');
-        startPos = startPos || textView.getSelectedRange().end;
+        startPos = startPos || this.editor.textView.getSelectedRange().end;
 
-        var lines = textView.layoutManager.textStorage.lines;
+        var lines = this.editor.layoutManager.textStorage.lines;
         var searchResult;
 
         searchRegExp.lastIndex = startPos.col;
@@ -186,15 +181,14 @@ exports.EditorSearchController.prototype = {
      * @param allowFromStart True if the search is allowed to wrap.
      */
     findPrevious: function(startPos, allowFromEnd) {
-        var searchRegExp = this.get('searchRegExp');
+        var searchRegExp = this.searchRegExp;
         if (util.none(searchRegExp)) {
             return null;
         }
 
-        var textView = this.get('textView');
-        startPos = startPos || textView.getSelectedRange().start;
+        startPos = startPos || this.editor.textView.getSelectedRange().start;
 
-        var lines = textView.layoutManager.textStorage.lines;
+        var lines = this.editor.buffer.layoutManager.textStorage.lines;
         var searchResults;
 
         // Treat the first line specially.

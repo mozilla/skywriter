@@ -116,7 +116,7 @@ exports.EditorView = function() {
     var horizontalScroller = this.horizontalScroller = new ScrollerView(this, Scroller.LAYOUT_HORIZONTAL);
 
     this.editorUndoController = new EditorUndoController(this);
-    this.searchController = new EditorSearchController();
+    this.searchController = new EditorSearchController(this);
 
     this._textViewSize = {
         width: 0,

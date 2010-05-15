@@ -47,7 +47,7 @@ exports.findCommand = function(env, args, request) {
         return;
     }
 
-    var view = env.view, search = view.get('searchController');
+    var view = env.view, search = view.editor.searchController;
     var sel = view.getSelectedRange();
     var output = '';
 
@@ -66,7 +66,7 @@ exports.findCommand = function(env, args, request) {
 };
 
 exports.findNextCommand = function(env, args, request) {
-    var view = env.view, search = view.get('searchController');
+    var view = env.view, search = view.editor.searchController;
     var sel = view.getSelectedRange();
     var match = search.findNext(sel.end, true);
     if (match) {
@@ -76,7 +76,7 @@ exports.findNextCommand = function(env, args, request) {
 };
 
 exports.findPrevCommand = function(env, args, request) {
-    var view = env.view, search = view.get('searchController');
+    var view = env.view, search = view.editor.searchController;
     var sel = view.getSelectedRange();
     var match = search.findPrevious(sel.start, true);
     if (match) {
