@@ -306,7 +306,7 @@ exports.EditSession.prototype = {
     }
 };
 
-Object.defineProperties(exports.EditSession, {
+Object.defineProperties(exports.EditSession.prototype, {
     currentView: {
         set: function(newView) {
             var oldView = this._currentView;
