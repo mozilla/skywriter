@@ -7,6 +7,7 @@
         "rangeutils": "0.0",
         "settings": "0.0",
         "syntax_manager" : "0.0",
+        "undomanager": "0.0",
         "traits": "0.0"
     },
     "provides":
@@ -383,6 +384,20 @@
             "description": "Change all selected text to uppercase",
             "withKey": "CMD SHIFT U",
             "pointer": "commands/editor#ucCommand"
+        },
+        {
+            "ep": "command",
+            "name": "redo",
+            "key": [ "ctrl_shift_z" ],
+            "predicates": { "isTextView": true },
+            "pointer": "controllers/undo#undoManagerCommand"
+        },
+        {
+            "ep": "command",
+            "name": "undo",
+            "key": [ "ctrl_z" ],
+            "predicates": { "isTextView": true },
+            "pointer": "controllers/undo#undoManagerCommand"
         },
         {
             "ep": "setting",

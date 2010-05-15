@@ -35,12 +35,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var util = require('bespin:util/util');
+
 /**
  * This simple undo manager coordinates undo for the app that embeds Bespin.
  * It's similar to SproutCore's UndoManager class, but it separates undo and
  * redo and correctly flushes the redo stack when an action is performed.
  */
-exports.undoManager = {
+exports.UndoManager = function() {};
+
+util.mixin(exports.UndoManager.prototype, {
     _redoStack: [],
     _undoStack: [],
 
@@ -89,11 +93,13 @@ exports.undoManager = {
     undo: function() {
         return this._undoOrRedo('undo', this._undoStack, this._redoStack);
     }
-};
+});
+
+exports.global = new exports.UndoManager();
 
 /**
  *
  */
 exports.undoManagerCommand = function(env, args, request) {
-    exports.undoManager[request.commandExt.name]();
+    exports.global[request.commandExt.name]();
 };

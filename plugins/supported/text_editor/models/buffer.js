@@ -37,6 +37,7 @@
 
 var TextStorage = require('models/textstorage').TextStorage;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
+var UndoManager = require('undomanager').UndoManager;
 
 /**
  * A Buffer connects a model and file together. It also holds the layoutManager
@@ -56,6 +57,8 @@ exports.Buffer = function(file, fileLoadedPromise) {
     this._layoutManager = new LayoutManager({
         textStorage: this._model
     });
+
+    this.undoManager = new UndoManager();
 
     // If a file is passed, then load it. This is the same as calling reload.
     if (file) {
@@ -78,6 +81,11 @@ exports.Buffer = function(file, fileLoadedPromise) {
 };
 
 exports.Buffer.prototype = {
+    /**
+     * The undoManager where the undo/redo stack is stored and handled.
+     */
+    undoManager: null,
+
     _scrollOffset: null,
     _selectedRange: null,
     _selectedRangeEndVirtual: null,

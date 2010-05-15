@@ -36,7 +36,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 var console = require('bespin:console').console;
-var undoManager = require('undomanager').undoManager;
 
 /**
  * @class
@@ -49,11 +48,9 @@ var undoManager = require('undomanager').undoManager;
  * presence of direct modification to the text storage by other objects. This
  * is important for collaboration.
  */
-exports.EditorUndoController = function(textView) {
-    this._redoStack = [];
-    this._undoStack = [];
-
-    this.textView = textView;
+exports.EditorUndoController = function(editor) {
+    this.editor = editor;
+    var textView = this.textView = editor.textView;
 
     textView.beganChangeGroup.add(function(sender, selection) {
         this._beginTransaction();
@@ -75,7 +72,7 @@ exports.EditorUndoController = function(textView) {
             oldCharacters:  this._deletedCharacters,
             oldRange:       oldRange,
             newCharacters:  characters,
-            newRange:       this.textView.layoutManager.textStorage.
+            newRange:       this.editor.layoutManager.textStorage.
                             resultingRangeForReplacement(oldRange,
                             characters.split('\n'))
         });
@@ -89,7 +86,7 @@ exports.EditorUndoController = function(textView) {
                 ' outside a transaction');
         }
 
-        this._deletedCharacters = this.textView.layoutManager.textStorage.
+        this._deletedCharacters = this.editor.layoutManager.textStorage.
                             getCharacters(oldRange);
     }.bind(this));
 };
@@ -123,14 +120,14 @@ exports.EditorUndoController.prototype = {
                 'transaction in place');
         }
 
-        undoManager.registerUndo(this, this._record);
+        this.editor.buffer.undoManager.registerUndo(this, this._record);
         this._record = null;
 
         this._inTransaction = false;
     },
 
     _tryApplyingPatches: function(patches) {
-        var textStorage = this.textView.layoutManager.textStorage;
+        var textStorage = this.editor.layoutManager.textStorage;
         patches.forEach(function(patch) {
             textStorage.replaceCharacters(patch.oldRange, patch.newCharacters);
         });
@@ -171,3 +168,7 @@ exports.EditorUndoController.prototype = {
     }
 };
 
+exports.undoManagerCommand = function(env, args, request) {
+    var editor = env.editor;
+    editor.buffer.undoManager[request.commandExt.name]()
+};

@@ -52,7 +52,7 @@ var Buffer = require('models/buffer').Buffer;
 var Scroller = require('views/scroller');
 var ScrollerView = Scroller.ScrollerCanvasView;
 
-// var EditorUndoController = require('controllers/undo').EditorUndoController;
+var EditorUndoController = require('controllers/undo').EditorUndoController;
 
 /**
  * Cache with all the theme data for the entire editor (gutter, editor, highlighter).
@@ -110,12 +110,13 @@ exports.EditorView = function() {
     // Create an empty buffer to make sure there is a buffer for this editor.
     this.buffer = new Buffer(null);
 
-    var searchController = this.searchController = new EditorSearchController();
-
     var gutterView = this.gutterView = new GutterView(container, this);
     var textView = this.textView = new TextView(container, this);
     var verticalScroller = this.verticalScroller = new ScrollerView(this, Scroller.LAYOUT_VERTICAL);
     var horizontalScroller = this.horizontalScroller = new ScrollerView(this, Scroller.LAYOUT_HORIZONTAL);
+
+    this.editorUndoController = new EditorUndoController(this);
+    this.searchController = new EditorSearchController();
 
     this._textViewSize = {
         width: 0,
