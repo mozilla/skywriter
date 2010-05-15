@@ -66,9 +66,22 @@ exports.Buffer = function(file, fileLoadedPromise) {
         });
         this._updateSyntaxManagerInitialContext();
     }
+
+    // DISCUSS: Should this be the place to lookup History?
+    this._selectedRange = {
+        start: { row: 0, col: 0 },
+        end: { row: 0, col: 0 }
+    };
+
+    // DISCUSS: Should this be the place to lookup History?
+    this._scrollOffset = { x: 0, y: 0 };
 };
 
 exports.Buffer.prototype = {
+    _scrollOffset: null,
+    _selectedRange: null,
+    _selectedRangeEndVirtual: null,
+
     /**
      * The syntax manager associated with this file.
      */
@@ -154,13 +167,13 @@ Object.defineProperties(exports.Buffer.prototype, {
             this._layoutManager.syntaxManager;
         }
     },
-    
+
     file: {
         get: function() {
             return this._file;
         }
     },
-    
+
     model: {
         get: function() {
             return this._model;

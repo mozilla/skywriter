@@ -117,10 +117,6 @@ exports.EditorView = function() {
     var verticalScroller = this.verticalScroller = new ScrollerView(this, Scroller.LAYOUT_VERTICAL);
     var horizontalScroller = this.horizontalScroller = new ScrollerView(this, Scroller.LAYOUT_HORIZONTAL);
 
-    this._scrollOffset = {
-        x: 0, y: 0
-    }
-
     this._textViewSize = {
         width: 0,
         height: 0
@@ -183,8 +179,6 @@ exports.EditorView.prototype = {
 
     _textLinesCount: 0,
     _gutterViewWidth: 0,
-
-    _scrollOffset: null,
 
     _buffer: null,
 
@@ -277,8 +271,8 @@ exports.EditorView.prototype = {
 
     scrollBy: function(deltaX, deltaY) {
         this.scrollOffset = {
-            x: this._scrollOffset.x + deltaX,
-            y: this._scrollOffset.y + deltaY
+            x: this.scrollOffset.x + deltaX,
+            y: this.scrollOffset.y + deltaY
         };
     },
 
@@ -371,7 +365,6 @@ Object.defineProperties(exports.EditorView.prototype, {
 
             // In some cases the buffer is set before the UI is initialized.
             if (this.textView) {
-                this.textView.moveCursorTo({ row: 0, col: 0 });
                 this.layoutManager.sizeChanged.remove(this);
             }
 
@@ -381,6 +374,10 @@ Object.defineProperties(exports.EditorView.prototype, {
 
             this.layoutManager.sizeChanged.add(this,
                                         this.layoutManagerSizeChanged.bind(this));
+
+            if (this.textView) {
+                this.textView.setSelection(newBuffer._selectedRange);
+            }
 
             this._recomputeLayout();
         },
@@ -413,8 +410,8 @@ Object.defineProperties(exports.EditorView.prototype, {
 
     scrollOffset: {
         set: function(pos) {
-            if (pos.x === undefined) pos.x = this._scrollOffset.x;
-            if (pos.y === undefined) pos.y = this._scrollOffset.y;
+            if (pos.x === undefined) pos.x = this.scrollOffset.x;
+            if (pos.y === undefined) pos.y = this.scrollOffset.y;
 
             var frame = this.textViewPaddingFrame;
 
@@ -434,11 +431,11 @@ Object.defineProperties(exports.EditorView.prototype, {
                 pos.x = this._textViewSize.width - frame.width;
             }
 
-            if (pos.x === this._scrollOffset.x && pos.y === this._scrollOffset.y) {
+            if (pos.x === this.scrollOffset.x && pos.y === this.scrollOffset.y) {
                 return;
             }
 
-            this._scrollOffset = pos;
+            this.buffer._scrollOffset = pos;
 
             this.verticalScroller.value = pos.y;
             this.horizontalScroller.value = pos.x;
@@ -454,6 +451,10 @@ Object.defineProperties(exports.EditorView.prototype, {
 
             this.gutterView.invalidate();
             this.textView.invalidate();
+        },
+
+        get: function() {
+            return this.buffer._scrollOffset;
         }
-    }
+    },
 });

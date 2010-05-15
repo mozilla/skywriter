@@ -60,11 +60,6 @@ exports.TextView = function(container, editor) {
     // Takes the layoutManager of the editor and uses it.
     var textInput = this.textInput = new TextInput(container, this);
 
-    this._selectedRange = {
-        start: { row: 0, col: 0 },
-        end: { row: 0, col: 0 }
-    };
-
     this.padding = {
         top: 0,
         bottom: 30,
@@ -108,9 +103,6 @@ util.mixin(exports.TextView.prototype, {
     _keyBuffer: '',
     _keyMetaBuffer: '',
     _keyState: 'start',
-
-    _selectedRange: null,
-    _selectedRangeEndVirtual: null,
 
     _hasFocus: false,
     _mouseIsDown: false,
@@ -159,7 +151,7 @@ util.mixin(exports.TextView.prototype, {
             return;
         }
 
-        var range = this._selectedRange;
+        var range = this.editor.buffer._selectedRange;
         var characterRect = this.editor.layoutManager.
             characterRectForPosition(range.start);
         var x = Math.floor(characterRect.x), y = characterRect.y;
@@ -265,7 +257,7 @@ util.mixin(exports.TextView.prototype, {
 
         context.save();
 
-        var range = Range.normalizeRange(this._selectedRange);
+        var range = Range.normalizeRange(this.editor.buffer._selectedRange);
         context.fillStyle = fillStyle;
         layoutManager.rectsForRange(range).forEach(function(rect) {
             context.fillRect(rect.x, rect.y, rect.width, rect.height);
@@ -276,7 +268,7 @@ util.mixin(exports.TextView.prototype, {
 
     // Draws either the selection or the insertion point.
     _drawSelection: function(rect, context) {
-        if (this._rangeIsInsertionPoint(this._selectedRange)) {
+        if (this._rangeIsInsertionPoint(this.editor.buffer._selectedRange)) {
             this._drawInsertionPoint(rect, context);
         } else {
             this._drawSelectionHighlight(rect, context);
@@ -284,10 +276,13 @@ util.mixin(exports.TextView.prototype, {
     },
 
     _getVirtualSelection: function(startPropertyAsWell) {
+        var selectedRange = this.editor.buffer._selectedRange;
+        var selectedRangeEndVirtual = this.editor.buffer._selectedRangeEndVirtual;
+
         return {
-            start:  startPropertyAsWell && this._selectedRangeEndVirtual ?
-                    this._selectedRangeEndVirtual : this._selectedRange.start,
-            end:    this._selectedRangeEndVirtual || this._selectedRange.end
+            start:  startPropertyAsWell && selectedRangeEndVirtual ?
+                    selectedRangeEndVirtual : selectedRange.start,
+            end:    selectedRangeEndVirtual || selectedRange.end
         };
     },
 
@@ -302,7 +297,7 @@ util.mixin(exports.TextView.prototype, {
         };
 
         var layoutManager = this.editor.layoutManager;
-        var range = Range.normalizeRange(this._selectedRange);
+        var range = Range.normalizeRange(this.editor.buffer._selectedRange);
         if (!this._rangeIsInsertionPoint(range)) {
             var rects = layoutManager.rectsForRange(range);
             rects.forEach(function(rect) {
@@ -332,8 +327,9 @@ util.mixin(exports.TextView.prototype, {
 
     _performVerticalKeyboardSelection: function(offset) {
         var textStorage = this.editor.layoutManager.textStorage;
-        var oldPosition = this._selectedRangeEndVirtual !== null ?
-            this._selectedRangeEndVirtual : this._selectedRange.end;
+        var selectedRangeEndVirtual = this.editor.buffer._selectedRangeEndVirtual;
+        var oldPosition = selectedRangeEndVirtual !== null ?
+            selectedRangeEndVirtual : this.editor.buffer._selectedRange.end;
         var newPosition = Range.addPositions(oldPosition,
             { row: offset, col: 0 });
 
@@ -365,7 +361,7 @@ util.mixin(exports.TextView.prototype, {
         var textLines = this.editor.layoutManager.textLines;
         var textLineLength = textLines.length;
 
-        var range = this._selectedRange;
+        var range = this.editor.buffer._selectedRange;
         var newStartRow = Math.min(range.start.row, textLineLength - 1);
         var newEndRow = Math.min(range.end.row, textLineLength - 1);
         var startLine = textLines[newStartRow];
@@ -577,9 +573,9 @@ util.mixin(exports.TextView.prototype, {
      * empty string if none are selected.
      */
     getSelectedCharacters: function() {
-        return this._rangeIsInsertionPoint(this._selectedRange) ? '' :
+        return this._rangeIsInsertionPoint(this.editor.buffer._selectedRange) ? '' :
             this.editor.layoutManager.textStorage.getCharacters(Range.
-            normalizeRange(this._selectedRange));
+            normalizeRange(this.editor.buffer._selectedRange));
     },
 
     /*
@@ -591,9 +587,9 @@ util.mixin(exports.TextView.prototype, {
      */
     getSelectedRange: function(raw) {
         if (!raw) {
-            return Range.normalizeRange(this._selectedRange);
+            return Range.normalizeRange(this.editor.buffer._selectedRange);
         } else {
-            return this._selectedRange;
+            return this.editor.buffer._selectedRange;
         }
     },
 
@@ -609,13 +605,13 @@ util.mixin(exports.TextView.prototype, {
         }
 
         this._inChangeGroup = true;
-        this.beganChangeGroup(this, this._selectedRange);
+        this.beganChangeGroup(this, this.editor.buffer._selectedRange);
 
         try {
             performChanges();
         } finally {
             this._inChangeGroup = false;
-            this.endedChangeGroup(this, this._selectedRange);
+            this.endedChangeGroup(this, this.editor.buffer._selectedRange);
         }
     },
 
@@ -633,7 +629,7 @@ util.mixin(exports.TextView.prototype, {
 
         this.groupChanges(function() {
             var textStorage = this.editor.layoutManager.textStorage;
-            var range = Range.normalizeRange(this._selectedRange);
+            var range = Range.normalizeRange(this.editor.buffer._selectedRange);
 
             this.replaceCharacters(range, text);
 
@@ -802,7 +798,7 @@ util.mixin(exports.TextView.prototype, {
         var positionToUse = textStorage.clampPosition(position);
 
         this.setSelection({
-            start:  select ? this._selectedRange.start : positionToUse,
+            start:  select ? this.editor.buffer._selectedRange.start : positionToUse,
             end:    positionToUse
         });
 
@@ -810,25 +806,25 @@ util.mixin(exports.TextView.prototype, {
             var lineCount = textStorage.lines.length;
             var row = position.row, col = position.col;
             if (row > 0 && row < lineCount) {
-                this._selectedRangeEndVirtual = position;
+                this.editor.buffer._selectedRangeEndVirtual = position;
             } else {
-                this._selectedRangeEndVirtual = {
+                this.editor.buffer._selectedRangeEndVirtual = {
                     row: row < 1 ? 0 : lineCount - 1,
                     col: col
                 };
             }
         } else {
-            this._selectedRangeEndVirtual = null;
+            this.editor.buffer._selectedRangeEndVirtual = null;
         }
 
-        this.scrollToPosition(this._selectedRange.end);
+        this.scrollToPosition(this.editor.buffer._selectedRange.end);
     },
 
     moveDown: function() {
         var selection = this._getVirtualSelection();
         var range = Range.normalizeRange(selection);
         var position;
-        if (this._rangeIsInsertionPoint(this._selectedRange)) {
+        if (this._rangeIsInsertionPoint(this.editor.buffer._selectedRange)) {
             position = range.end;
         } else {
             // Yes, this is actually what Cocoa does... weird, huh?
@@ -840,7 +836,7 @@ util.mixin(exports.TextView.prototype, {
     },
 
     moveLeft: function() {
-        var range = Range.normalizeRange(this._selectedRange);
+        var range = Range.normalizeRange(this.editor.buffer._selectedRange);
         if (this._rangeIsInsertionPoint(range)) {
             this.moveCursorTo(this.editor.layoutManager.textStorage.
                 displacePosition(range.start, -1));
@@ -850,7 +846,7 @@ util.mixin(exports.TextView.prototype, {
     },
 
     moveRight: function() {
-        var range = Range.normalizeRange(this._selectedRange);
+        var range = Range.normalizeRange(this.editor.buffer._selectedRange);
         if (this._rangeIsInsertionPoint(range)) {
             this.moveCursorTo(this.editor.layoutManager.textStorage.
                 displacePosition(range.end, 1));
@@ -1037,12 +1033,12 @@ util.mixin(exports.TextView.prototype, {
 
     selectLeft: function() {
         this.moveCursorTo((this.editor.layoutManager.textStorage.
-            displacePosition(this._selectedRange.end, -1)), true);
+            displacePosition(this.editor.buffer._selectedRange.end, -1)), true);
     },
 
     selectRight: function() {
         this.moveCursorTo((this.editor.layoutManager.textStorage.
-            displacePosition(this._selectedRange.end, 1)), true);
+            displacePosition(this.editor.buffer._selectedRange.end, 1)), true);
     },
 
     selectUp: function() {
@@ -1056,7 +1052,7 @@ util.mixin(exports.TextView.prototype, {
         var textStorage = this.editor.layoutManager.textStorage;
 
         newRange = textStorage.clampRange(newRange);
-        if (Range.equal(newRange, this._selectedRange)) {
+        if (Range.equal(newRange, this.editor.buffer._selectedRange)) {
             return;
         }
 
@@ -1064,7 +1060,7 @@ util.mixin(exports.TextView.prototype, {
         this._invalidateSelection();
 
         // Set the new selection and invalidate it.
-        this._selectedRange = textStorage.clampRange(newRange);
+        this.editor.buffer._selectedRange = textStorage.clampRange(newRange);
         this._invalidateSelection();
 
         if (this._hasFocus) {
@@ -1072,10 +1068,10 @@ util.mixin(exports.TextView.prototype, {
         }
 
         if (ensureVisible) {
-            this.scrollToPosition(this._selectedRange.end);
+            this.scrollToPosition(this.editor.buffer._selectedRange.end);
         }
 
-        this.selectionChanged(this._selectedRange);
+        this.selectionChanged(this.editor.buffer._selectedRange);
     },
 
     textInserted: function(text) {
@@ -1096,7 +1092,7 @@ Object.defineProperties(exports.TextView.prototype, {
         get: function() {
             return this._hasFocus;
         },
-        
+
         set: function(value) {
             if (value == this._hasFocus) {
                 return;
