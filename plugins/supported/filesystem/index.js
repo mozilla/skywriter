@@ -22,7 +22,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Trait = require('traits').Trait;
 var console = require('bespin:console').console;
 var util = require('bespin:util/util');
 var m_promise = require('bespin:promise');
@@ -106,19 +105,6 @@ exports.Filesystem.prototype = {
 
     status: exports.NEW,
     _loadingPromises: null,
-
-    init: function() {
-        var source = this.source;
-        if (typeof(source) == 'string') {
-            this.source = catalog.objectForPropertyPath(source);
-        }
-
-        if (!this.source) {
-            throw new Error('Directory must have a source.');
-        }
-
-        this._loadingPromises = [];
-    },
 
     _load: function() {
         var pr = new Promise();
