@@ -524,6 +524,18 @@ exports.Plugin.prototype = {
     }
 };
 
+var _setPath = function(root, path, value) {
+    var segments = path.split('.');
+    var current = root;
+    var top = segments.length - 1;
+    if (top > 0) {
+        for (var i = 0; i < top; i++) {
+            current = current[segments[i]];
+        }
+    }
+    current[top] = value;
+};
+
 exports.Catalog = function() {
     this.points = {};
     this.plugins = {};
@@ -549,13 +561,25 @@ exports.Catalog.prototype = {
      *                       property.
      * - arguments (optional): array that is passed in if the factory is a
      *                      function.
+     * - objects (optional): object that describes other objects that are
+     *                      required when constructing this one (see below)
      * 
-     * One special feature of arguments is that an argument can be an object
-     * that refers to another registered object. Such an object would look
-     * like this:
+     * The objects object defines objects that must be created before this
+     * one and how they should be passed in. The key defines how they
+     * are passed in, and the value is the name of the object to pass in.
+     * You define how they are passed in relative to the arguments
+     * array, using a very simple interface of dot separated keys.
+     * For example, if you have an arguments array of [null, {foo: null}, "bar"]
+     * you can have an object array like this:
      * {
-     *      "_Registered_Object": "objectname"
+     *  "0": "myCoolObject",
+     *  "1.foo": "someOtherObject"
      * }
+     * 
+     * which will result in arguments like this:
+     * [myCoolObject, {foo: someOtherObject}, "bar"]
+     * where myCoolObject and someOtherObject are the actual objects
+     * created elsewhere.
      * 
      * If the plugin containing the factory is reloaded, the object will
      * be recreated. The object will also be recreated if objects passed in
@@ -615,21 +639,19 @@ exports.Catalog.prototype = {
         }
         var factoryArguments = descriptor.arguments || [];
         var argumentPromises = [];
-        for (var i=0; i < factoryArguments.length; i++) {
-            var arg = factoryArguments[i];
-            if (typeof(arg) == "object" && 
-                arg._Registered_Object) {
-                    console.log("Need to create ", arg._Registered_Object, "first");
-                    var ropr = this.createObject(arg._Registered_Object);
-                    argumentPromises.push(ropr);
-                    // i is changing, so we can't count on using it
-                    // in the closure. we'll just save it on the
-                    // promise
-                    ropr.i = i;
-                    ropr.then(function(obj) {
-                        factoryArguments[this.i] = obj;
-                    }.bind(ropr));
-                }
+        if (descriptor.objects) {
+            var objects = descriptor.objects;
+            for (var key in objects) {
+                var objectName = objects[key];
+                var ropr = this.createObject(objectName);
+                argumentPromises.push(ropr);
+                // key is changing, so we need to hang onto the
+                // current value
+                ropr.location = key;
+                ropr.then(function(obj) {
+                    _setPath(factoryArguments, ropr.location, obj);
+                });
+            }
         }
         
         group(argumentPromises).then(function() {

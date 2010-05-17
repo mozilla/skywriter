@@ -94,20 +94,22 @@ exports.normalizeConfig = function(config) {
         config.objects.filesource = {
             factory: "bespin_filesource",
             arguments: [
-                {
-                    _Registered_Object: "server"
-                }
-            ]
+                "server"
+            ],
+            objects: {
+                "0": "server"
+            }
         };
     }
     if (!config.objects.files && catalog.plugins.filesystem &&
         config.objects.filesource) {
         config.objects.files = {
             arguments: [
-                {
-                    _Registered_Object: "filesource"
-                }
-            ]
+                "filesource"
+            ],
+            "objects": {
+                "0": "filesource"
+            }
         };
     }
     if (!config.objects.editor) {
@@ -118,10 +120,11 @@ exports.normalizeConfig = function(config) {
     if (!config.objects.session) {
         config.objects.session = {
             arguments: [
-                {
-                    _Registered_Object: "editor"
-                }
-            ]
+                "editor"
+            ],
+            "objects": {
+                "0": "editor"
+            }
         };
     }
     if (!config.objects.commandLine && catalog.plugins.command_line) {
