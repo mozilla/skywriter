@@ -71,8 +71,12 @@ input.cmd_input {
   position: absolute; height: 25px; bottom: 0px; left: 40px;
   /* why doesn't right: 0 work on an input? */
   right: 0px; width: 95%;
+  padding: 0;
+ -moz-box-shadow: none;
 }
-.cmd_input.focus { outline-width: 0px; outline: 0px; }
+input.cmd_input:focus { outline-width: 0px; outline: 0px; border: 0;
+ -moz-box-shadow: none;
+}
 
 
 /* Command line completion */
