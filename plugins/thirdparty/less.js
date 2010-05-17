@@ -1063,7 +1063,7 @@ tree.Call.prototype = {
             return tree.functions[this.name].apply(tree.functions, args).toCSS();
         } else { // 2.
             return this.name +
-                   "(" + args.map(function (a) { return a.toCSS() }).join(', ') + ")";
+                   "(" + args.map(function (a) { return a.toCSS(context, env) }).join(', ') + ")";
         }
     }
 };
