@@ -39,8 +39,51 @@
 ({});
 "end";
 
+/*
+ * This is intended to be a lightweight templating solution. It replaces
+ * John Resig's Micro-templating solution:
+ * - http://ejohn.org/blog/javascript-micro-templating/
+ * Whilst being slightly bigger it adds the ability to extract references to
+ * created element and add event handlers. It exchanges Javascript as a template
+ * language (and the <%=x%> syntax) for ${} elements.
+ *
+ * - Logical Processing -
+ * As a result of losing the Javascript base, it loses the ability to do logical
+ * constructs like if/while/for/etc. It is currently felt that the addition of
+ * event handlers and element references is more important. Should these
+ * features be required they could be added by making an element that references
+ * an array result the cloning of the element by the number of items in the
+ * array, and by making an element that references a boolean result in the
+ * stripping of the element if the boolean is false.
+ *
+ * - 2 Way Templating -
+ * As a result of functioning using DOM manipulation rather than string
+ * manipulation, we could also register javascript getters and setters on the
+ * Javascript data structures and onchange listeners on the DOM to effect
+ * 2-way templating.
+ */
+
 /**
  * Turn the template into a DOM node, resolving the ${} references to the data
+ * For example:
+ * <pre>
+ * var templ = '&lt;input value="${person.firstname} ${person.surname}" ' +
+ *     'save="${elements.input}" ' +
+ *     'onchange="${changer}" ' +
+ *     '>';
+ * var data = {
+ *   person: { firstname: "Fred", surname: "Blogs" },
+ *   elements: {},
+ *   changer: function() { console.log(data.elements.value); }
+ * };
+ * processTemplate(templ, data);
+ * </pre>
+ *
+ * <p>This gives an example of the 3 types of processing done:<ul>
+ * <li>Event listener registration for all onXXX attributes
+ * <li>Element extraction for 'save' attributes
+ * <li>Attribute value processing for other attributes.
+ * </ul>
  */
 exports.processTemplate = function(template, data) {
     data = data || {};
@@ -54,20 +97,27 @@ exports.processTemplate = function(template, data) {
  * Recursive function to walk the tree processing the attributes as it goes.
  */
 var processChildren = function(parent, data) {
+    // Process attributes
     if (parent.attributes && parent.attributes.length) {
         for (var i = 0; i < parent.attributes.length; i++) {
             var attr = parent.attributes[i];
-            var value, path;
+
             if (attr.name === 'save') {
-                path = attr.value.slice(2, -1);
-                property(path, data, parent);
+                // Save attributes are a setter using the parent node
+                checkBraces(attr.value);
+                property(attr.value.slice(2, -1), data, parent);
             } else if (attr.name.substring(0, 2) === 'on') {
-                path = attr.value.slice(2, -1);
-                value = property(path, data);
-                parent.addEventListener(attr.name.substring(2), value, true);
-                continue;
+                // Event registration relies on property doing a bind
+                checkBraces(attr.value);
+                var func = property(attr.value.slice(2, -1), data);
+                if (typeof func !== 'function') {
+                    console.error('Expected ' + attr.value +
+                            ' to resolve to a function, but got ', typeof func);
+                }
+                parent.addEventListener(attr.name.substring(2), func, true);
             } else {
-                value = attr.value.replace(/\$\{.*\}/, function(path) {
+                // Replace references in other attributes
+                var value = attr.value.replace(/\$\{[^}]*\}/, function(path) {
                     return property(path.slice(2, -1), data);
                 });
                 if (attr.value !== value) {
@@ -76,13 +126,41 @@ var processChildren = function(parent, data) {
             }
         }
     }
+
+    // Process child nodes
     for (i = 0; i < parent.childNodes.length; i++) {
         processChildren(parent.childNodes[i], data);
+    }
+
+    // TODO: process text nodes
+};
+
+/**
+ * Warn of string does not begin '${' and end '}'
+ * @param str
+ * @returns
+ */
+var checkBraces = function(str) {
+    if (!str.match(/\$\{.*\}/)) {
+        console.error('Expected ' + str + ' to match ${...}');
     }
 };
 
 /**
  * Combined getter and setter that works with a path through some data set.
+ * For example:<ul>
+ * <li>property('a.b', { a: { b: 99 }}); // returns 99
+ * <li>property('a', { a: { b: 99 }}); // returns { b: 99 }
+ * <li>property('a', { a: { b: 99 }}, 42); // returns 99 and alters the
+ * input data to be { a: { b: 42 }}
+ * </ul>
+ * @param path An array of strings indicating the path through the data, or
+ * a string to be cut into an array using <tt>split('.')</tt>
+ * @param data An object to look in for the <tt>path</tt>
+ * @param newValue (optional) If undefined, this value will replace the
+ * original value for the data at the path specified.
+ * @returns The value pointed to by <tt>path</tt> before any
+ * <tt>newValue</tt> is applied.
  */
 var property = function(path, data, newValue) {
     if (typeof path === 'string') {
@@ -97,9 +175,8 @@ var property = function(path, data, newValue) {
             return value.bind(data);
         }
         return value;
-    } else {
-        return property(path.slice(1), value, newValue);
     }
+    return property(path.slice(1), value, newValue);
 };
 
 // strips the extension off of a name

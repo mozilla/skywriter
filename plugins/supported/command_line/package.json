@@ -13,6 +13,18 @@
     "provides":
     [
         {
+            "ep": "themestyles",
+            "url": "article.less"
+        },
+        {
+            "ep": "themestyles",
+            "url": "cli.less"
+        },
+        {
+            "ep": "themestyles",
+            "url": "menu.less"
+        },
+        {
             "ep": "factory",
             "name": "commandLine",
             "action": "new",
