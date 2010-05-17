@@ -76,6 +76,7 @@ var parseExtension = function(extension, colorHeader) {
             console.log('  parsing took: ', (new Date()) - timer, 'ms');
         } catch (e) {
             console.error("Error parsing ", extension._pluginName, extension.name, e);
+            console.trace(e);
             return;
         }
 
@@ -86,7 +87,7 @@ var parseExtension = function(extension, colorHeader) {
             styleElem.appendChild(cssContentNode);
         }
     });
-}
+};
 
 // Queue with all the plugins waiting to get updated.
 var parseQueue = {};
@@ -139,7 +140,7 @@ exports.registerThemeStyles = function(extension) {
     if (!(extension.url instanceof Array)) {
         extension.url = [ extension.url ];
     }
-    
+
     var url = resourceURL + extension.url;
 
     extension.url.forEach(function(file) {
@@ -150,7 +151,7 @@ exports.registerThemeStyles = function(extension) {
                     extension._data = '';
                 }
 
-                // convert url(something) tor url(resourceURL/something).
+                // convert url(something) to url(resourceURL/something).
                 extension._data += response.replace(/url\(['"]*([^'")]*)(['"]*)\)/g, 'url(' + resourceURL + '$1)');
 
                 // parse the plugin.
@@ -159,8 +160,8 @@ exports.registerThemeStyles = function(extension) {
             error: function(err) {
                 console.error('registerLessFile: Could not load ' + url);
             }
-        })
-    })
+        });
+    });
 };
 
 exports.unregisterThemeStyles = function(extension) {
