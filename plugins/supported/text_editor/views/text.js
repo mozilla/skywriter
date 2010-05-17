@@ -385,7 +385,6 @@ util.mixin(exports.TextView.prototype, {
                     (clippingFrame.height + lineAscent) * (scrollUp ? -1 : 1));
     },
 
-	// TODO: Dragging to the left is not working.
     _scrollWhileDragging: function() {
         var point = this._dragPoint;
         var newPoint = this.computeWithClippingFrame(point.layerX, point.layerY);
@@ -958,8 +957,7 @@ util.mixin(exports.TextView.prototype, {
      * character position.
      */
     scrollToPosition: function(position) {
-        var rect = this.editor.layoutManager.
-            characterRectForPosition(position);
+        var rect = this.editor.layoutManager.characterRectForPosition(position);
         var rectX = rect.x, rectY = rect.y;
         var rectWidth = rect.width, rectHeight = rect.height;
 
@@ -971,7 +969,8 @@ util.mixin(exports.TextView.prototype, {
         var height = frame.height - padding.bottom;
 
         var x;
-        if (rectX >= frameX && rectX + rectWidth < frameX + width) {
+        if (rectX >= frameX + 30 /* This is a hack to allow dragging to the left */
+                    && rectX + rectWidth < frameX + width) {
             x = frameX;
         } else {
             x = rectX - width / 2 + rectWidth / 2;
