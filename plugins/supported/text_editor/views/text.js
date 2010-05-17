@@ -378,51 +378,23 @@ util.mixin(exports.TextView.prototype, {
         });
     },
 
-    // TODO: Done by the editor?
-    //
-    // _resize: function() {
-    //     var boundingRect = this.editor.layoutManager.boundingRect();
-    //     var padding = this.padding;
-    //     var parentFrame = this.parentView.frame;
-    //     this.set('layout', SC.mixin(SC.clone(this.layout), {
-    //         width:  Math.max(parentFrame.width,
-    //                 boundingRect.width + padding.right),
-    //         height: Math.max(parentFrame.height,
-    //                 boundingRect.height + padding.bottom)
-    //     }));
-    // },
-
-    // TODO: BRING THIS BACK!
     _scrollPage: function(scrollUp) {
-        var scrollView = this._enclosingScrollView;
-        if (util.none(scrollView)) {
-            return;
-        }
-
-        var visibleFrame = this.clippingFrame;
-        scrollView.scrollTo(visibleFrame.x, visibleFrame.y +
-            (visibleFrame.height + this._lineAscent) * (scrollUp ? -1 : 1));
+        var clippingFrame = this.clippingFrame;
+        var lineAscent = this.editor.layoutManager.fontDimension.lineAscent;
+        this.editor.scrollBy(0,
+                    (clippingFrame.height + lineAscent) * (scrollUp ? -1 : 1));
     },
 
-    // TODO: BRING THIS BACK!
+	// TODO: Dragging to the left is not working.
     _scrollWhileDragging: function() {
         var point = this._dragPoint;
-        var scroll = { x: 0, y: 0};
-
-        if (point.layerY < 100) {
-            scroll.y = point.layerY - 100;
-        }
-
-        scroll.y = (scroll.y < 0 ? -1 : 1) * scroll.y * scroll.y;
-
-        if (scroll.x === 0 && scroll.y === 0) {
-            return;
-        }
-
-        this.editor.scrollBy(scroll.x, scroll.y);
-        //this._drag();
+        var newPoint = this.computeWithClippingFrame(point.layerX, point.layerY);
+        util.mixin(this._dragPoint, newPoint);
+        this._drag();
     },
 
+	// TODO: Add this back.
+	//       Q: Why is calling _updateSyntax necessary?
     _scrolled: function() {
         var scrollView = this._enclosingScrollView;
         var x = scrollView.horizontalScrollOffset;

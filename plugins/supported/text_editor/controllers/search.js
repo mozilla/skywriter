@@ -49,6 +49,10 @@ exports.EditorSearchController = function(editor) {
 };
 
 exports.EditorSearchController.prototype = {
+
+    /**
+     * The editor holding the buffer object to search in.
+     */
     editor: null,
 
     /**
