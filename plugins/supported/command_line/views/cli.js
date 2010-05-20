@@ -50,7 +50,7 @@ var settings = require('settings').settings;
 
 var Level = require('command_line:hint').Level;
 var Input = require('command_line:input').Input;
-var templater = require('templater');
+var templates = require('command_line:templates');
 
 var imagePath = catalog.getResourceURL('command_line') + 'images';
 var diff = new diff_match_patch();
@@ -81,7 +81,6 @@ exports.CliInputView = function() {
     // If we discover a change in size, we need to change a few styles
     this._lastOrientation = null;
 
-    var templates = require('templates');
     templates.cli({
         cliInputView: this,
         imagePath: imagePath
@@ -134,7 +133,7 @@ exports.CliInputView.prototype = {
     /**
      * See note in app.js
      */
-    layout: function() {
+    elementAppended: function() {
         this.checkSize();
     },
 
