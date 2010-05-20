@@ -50,7 +50,7 @@ var Trace = require("bespin:util/stacktrace").Trace;
  *            example, most Bespin users want a text editor!)
  * - gui: instructions on how to build a GUI. Specifically, the current border
  *        layout positions will be filled in. Again this provides sane defaults.
- * - container: node to attach to (optional). If not provided a node will be 
+ * - container: node to attach to (optional). If not provided a node will be
  *              created. and added to the body.
  */
 exports.launch = function(config) {
@@ -60,7 +60,7 @@ exports.launch = function(config) {
     for (var key in objects) {
         catalog.registerObject(key, objects[key]);
     }
-    
+
     if (objects.loginController) {
         catalog.createObject("loginController").then(
             function(loginController) {
@@ -77,7 +77,7 @@ exports.launch = function(config) {
 };
 
 exports.normalizeConfig = function(config) {
-    if (config.objects === undefined) { 
+    if (config.objects === undefined) {
         config.objects = {};
     }
     if (config.autoload === undefined) {
@@ -135,7 +135,7 @@ exports.normalizeConfig = function(config) {
     if (config.gui === undefined) {
         config.gui = {};
     }
-    
+
     var alreadyRegistered = {};
     for (var key in config.gui) {
         var desc = config.gui[key];
@@ -145,8 +145,8 @@ exports.normalizeConfig = function(config) {
     }
     console.log("AR");
     console.log(alreadyRegistered);
-    
-    if (!config.gui.center && config.objects.editor 
+
+    if (!config.gui.center && config.objects.editor
         && !alreadyRegistered.editor) {
         config.gui.center = {
             component: "editor"
@@ -167,7 +167,7 @@ exports.launchEditor = function(config) {
         console.error(message);
         throw new Error(message);
     }
-    
+
     var pr = createAllObjects(config);
     pr.then(function() {
         generateGUI(config);
@@ -187,23 +187,29 @@ var createAllObjects = function(config) {
 
 var generateGUI = function(config) {
     var $ = require('jquery').$;
-    
+
     var container = document.createElement('div');
     container.setAttribute('class', 'bespin container');
-    
+
     var centerContainer = document.createElement('div');
     centerContainer.setAttribute('class', 'bespin center-container');
     container.appendChild(centerContainer);
-    
+
+    if (config.element) {
+        config.element.appendChild(container);
+    } else {
+        document.body.appendChild(container);
+    }
+
     for (var place in config.gui) {
         var descriptor = config.gui[place];
-        
+
         var component = catalog.getObject(descriptor.component);
         if (!component) {
             console.error('Cannot find object ' + descriptor.component + ' to attach to the Bespin UI');
             continue;
         }
-        
+
         // special case the editor for now, because it doesn't
         // follow the new protocol
         var element = component.element;
@@ -211,9 +217,9 @@ var generateGUI = function(config) {
             console.error('Component ' + descriptor.component + ' does not have an "element" attribute to attach to the Bespin UI');
             continue;
         }
-        
+
         $(element).addClass(place);
-        
+
         if (place == 'west' || place == 'east' || place == 'center') {
             centerContainer.appendChild(element);
         } else {
@@ -224,12 +230,6 @@ var generateGUI = function(config) {
         if (component.elementAppended) {
             component.elementAppended();
         }
-    }
-    
-    if (config.element) {
-        config.element.appendChild(container);
-    } else {
-        document.body.appendChild(container);
     }
 
     // Remove the "Loading..." hint.
