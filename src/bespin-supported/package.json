@@ -1,7 +1,0 @@
-{
-    "name": "bespin-supported",
-    "dependencies": ["narwhal", "bespin-core"],
-    "author": "Mozilla",
-    "description": "Bespin official supported editor functionality",
-    "lib": ["lib"]
-}
