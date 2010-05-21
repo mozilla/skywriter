@@ -537,9 +537,8 @@ exports.none = function(obj) {
  * @returns {Object} the cloned object
  */
 exports.clone = function(object) {
-    // TODO: delete this when SC is gone
-    if (object && object.isCopyable) {
-        return object.copy();
+    if (Array.isArray(object)) {
+        return object.slice();
     }
 
     if (typeof object === 'object') {
@@ -556,10 +555,6 @@ exports.clone = function(object) {
 
     if (object.clone && typeof(object.clone) === 'function') {
         return object.clone();
-    }
-
-    if (Array.isArray(object)) {
-        return object.slice();
     }
 
     // That leaves numbers, booleans, undefined. Doesn't it?
