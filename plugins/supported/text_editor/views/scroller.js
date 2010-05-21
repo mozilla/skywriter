@@ -118,39 +118,13 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
     _mouseEventPosition: null,
     _mouseOverHandle: false,
 
-    // TODO: Make this a real SproutCore theme (i.e. an identifier that gets
-    // prepended to CSS properties), perhaps?
-    theme: {
-        scrollerThickness: 17,
-
-        backgroundStyle: "#2A211C",
-        partialNibStyle: "rgba(100, 100, 100, 0.3)",
-        partialNibArrowStyle: "rgba(255, 255, 255, 0.3)",
-        partialNibStrokeStyle: "rgba(150, 150, 150, 0.3)",
-        fullNibStyle: "rgb(100, 100, 100)",
-        fullNibArrowStyle: "rgb(255, 255, 255)",
-        fullNibStrokeStyle: "rgb(150, 150, 150)",
-        scrollTrackFillStyle: "rgba(50, 50, 50, 0.8)",
-        scrollTrackStrokeStyle: "rgb(150, 150, 150)",
-        scrollBarFillStyle: "rgba(0, 0, 0, %a)",
-        scrollBarFillGradientTopStart: "rgba(90, 90, 90, %a)",
-        scrollBarFillGradientTopStop: "rgba(40, 40, 40, %a)",
-        scrollBarFillGradientBottomStart: "rgba(22, 22, 22, %a)",
-        scrollBarFillGradientBottomStop: "rgba(44, 44, 44, %a)"
-    },
-
-    _drawNib: function(ctx) {
-        var theme = this.theme;
+    _drawNib: function(ctx, alpha) {
+        var theme = this.editor.themeData.scroller;
         var fillStyle, arrowStyle, strokeStyle;
-        if (this._isHighlighted()) {
-            fillStyle   = theme.fullNibStyle;
-            arrowStyle  = theme.fullNibArrowStyle;
-            strokeStyle = theme.fullNibStrokeStyle;
-        } else {
-            fillStyle   = theme.partialNibStyle;
-            arrowStyle  = theme.partialNibArrowStyle;
-            strokeStyle = theme.partialNibStrokeStyle;
-        }
+
+        fillStyle   = theme.nibStyle;
+        arrowStyle  = theme.nibArrowStyle;
+        strokeStyle = theme.nibStrokeStyle;
 
         var midpoint = Math.floor(NIB_LENGTH / 2);
 
@@ -173,10 +147,10 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
         ctx.fill();
     },
 
-    _drawNibs: function(ctx) {
+    _drawNibs: function(ctx, alpha) {
         var thickness = this._getClientThickness();
         var parentView = this.parentView;
-        var value = this.value;
+        var value = this._value;
         var maximum = this._maximum;
         var highlighted = this._isHighlighted();
 
@@ -186,7 +160,7 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
             ctx.translate(NIB_PADDING, thickness / 2);
             ctx.rotate(Math.PI * 1.5);
             ctx.moveTo(0, 0);
-            this._drawNib(ctx);
+            this._drawNib(ctx, alpha);
             ctx.restore();
         }
 
@@ -197,7 +171,7 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
                 thickness / 2);
             ctx.rotate(Math.PI * 0.5);
             ctx.moveTo(0, 0);
-            this._drawNib(ctx);
+            this._drawNib(ctx, alpha);
             ctx.restore();
         }
     },
@@ -233,7 +207,7 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
     // Returns the thickness of the scroll bar, not counting any padding.
     _getClientThickness: function() {
         var padding = this.padding;
-        var scrollerThickness = this.theme.scrollerThickness;
+        var scrollerThickness = this.editor.themeData.scroller.thickness;
 
         switch (this.layoutDirection) {
         case LAYOUT_VERTICAL:
@@ -435,9 +409,9 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
             return;
         }
 
-        var alpha = (ctx.globalAlpha) ? ctx.globalAlpha : 1;
-        var theme = this.theme;
         var highlighted = this._isHighlighted();
+        var theme = this.editor.themeData.scroller;
+        var alpha = (highlighted) ? theme.fullAlpha : theme.particalAlpha;
 
         var frame = this.frame;
         ctx.clearRect(0, 0, frame.width, frame.height);
@@ -470,15 +444,15 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
             return; // Don't display the scroll bar.
         }
 
-        if (!highlighted) {
-            ctx.globalAlpha = 0.3;
-        } else {
+        ctx.globalAlpha = alpha;
+
+        if (highlighted) {
             // Draw the scroll track rectangle.
             var clientLength = this._getClientLength();
-            ctx.fillStyle = theme.scrollTrackFillStyle;
+            ctx.fillStyle = theme.trackFillStyle;
             ctx.fillRect(NIB_PADDING + 0.5, 0.5,
                 clientLength - 2*NIB_PADDING, thickness - 1);
-            ctx.strokeStyle = theme.scrollTrackStrokeStyle;
+            ctx.strokeStyle = theme.trackStrokeStyle;
             ctx.strokeRect(NIB_PADDING + 0.5, 0.5,
                 clientLength - 2*NIB_PADDING, thickness - 1);
         }
@@ -499,16 +473,11 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
         // Paint the interior of the handle path.
         var gradient = ctx.createLinearGradient(handleOffset, 0, handleOffset,
             thickness);
-        gradient.addColorStop(0,
-            theme.scrollBarFillGradientTopStart.replace(/%a/, alpha));
-        gradient.addColorStop(0.4,
-            theme.scrollBarFillGradientTopStop.replace(/%a/, alpha));
-        gradient.addColorStop(0.41,
-            theme.scrollBarFillStyle.replace(/%a/, alpha));
-        gradient.addColorStop(0.8,
-            theme.scrollBarFillGradientBottomStart.replace(/%a/, alpha));
-        gradient.addColorStop(1,
-            theme.scrollBarFillGradientBottomStop.replace(/%a/, alpha));
+        gradient.addColorStop(0, theme.barFillGradientTopStart);
+        gradient.addColorStop(0.4, theme.barFillGradientTopStop);
+        gradient.addColorStop(0.41, theme.barFillStyle);
+        gradient.addColorStop(0.8, theme.barFillGradientBottomStart);
+        gradient.addColorStop(1, theme.barFillGradientBottomStop);
         ctx.fillStyle = gradient;
         ctx.fill();
 
@@ -517,7 +486,7 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
         ctx.clip();
 
         // Draw the little shines in the handle.
-        ctx.fillStyle = theme.scrollBarFillStyle.replace(/%a/, alpha);
+        ctx.fillStyle = theme.barFillStyle;
         ctx.beginPath();
         ctx.moveTo(handleOffset + halfThickness * 0.4, halfThickness * 0.6);
         ctx.lineTo(handleOffset + halfThickness * 0.9, thickness * 0.4);
@@ -539,16 +508,12 @@ util.mixin(exports.ScrollerCanvasView.prototype, {
         // Begin handle outline context
         ctx.save();
         buildHandlePath();
-        ctx.strokeStyle = theme.scrollTrackStrokeStyle;
+        ctx.strokeStyle = theme.trackStrokeStyle;
         ctx.stroke();
         ctx.restore();
         // End handle outline context
 
-        if (!highlighted) {
-            ctx.globalAlpha = 1.0;
-        }
-
-        this._drawNibs(ctx);
+        this._drawNibs(ctx, alpha);
 
         ctx.restore();
         // End master drawing context

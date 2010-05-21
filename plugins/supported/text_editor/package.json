@@ -472,6 +472,32 @@
                 "operator":   "#88BBFF",
                 "string":     "#039A0A"
             }
+        },
+        {
+            "ep": "themevariable",
+            "name": "scroller",
+            "defaultValue": {
+                "padding": 5,
+                "thickness": 17,
+
+                "backgroundStyle": "#2A211C",
+
+                "fullAlpha": 1.0,
+                "particalAlpha": 0.3,
+
+                "nibStyle": "rgb(100, 100, 100)",
+                "nibArrowStyle": "rgb(255, 255, 255)",
+                "nibStrokeStyle": "rgb(150, 150, 150)",
+
+                "trackFillStyle": "rgba(50, 50, 50, 0.8)",
+                "trackStrokeStyle": "rgb(150, 150, 150)",
+
+                "barFillStyle": "rgb(0, 0, 0)",
+                "barFillGradientTopStart": "rgb(90, 90, 90)",
+                "barFillGradientTopStop": "rgb(40, 40, 40)",
+                "barFillGradientBottomStart": "rgb(22, 22, 22)",
+                "barFillGradientBottomStop": "rgb(44, 44, 44)"
+            }
         }
     ]
 }

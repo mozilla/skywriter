@@ -81,6 +81,7 @@ var computeThemeData = function() {
             switch (provides[i].name) {
                 case 'gutter':
                 case 'editor':
+                case 'scroller':
                 case 'highlighter':
                     editorThemeData[provides[i].name] = value;
             }
@@ -313,8 +314,8 @@ exports.EditorView.prototype = {
         };
 
         // TODO: Get this values from the scroller theme.
-        var scrollerPadding = 5;
-        var scrollerSize = 17;
+        var scrollerPadding = this.themeData.scroller.padding;
+        var scrollerSize = this.themeData.scroller.thickness;
 
         this.horizontalScroller.frame = {
             x: gutterWidth + scrollerPadding,
