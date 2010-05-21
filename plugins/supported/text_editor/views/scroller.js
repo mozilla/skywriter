@@ -774,6 +774,7 @@ Object.defineProperties(exports.ScrollerCanvasView.prototype, {
             }
 
             this._value = value;
+            this.valueChanged(value);
             this.invalidate();
         }
     }
