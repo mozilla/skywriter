@@ -49,8 +49,6 @@ exports.GutterView = function(container, editor) {
     CanvasView.call(this, container, true /* preventDownsize */ );
 
     this.editor = editor;
-
-    this.padding = { left: 5, right: 10 };
 };
 
 exports.GutterView.prototype = new CanvasView();
@@ -64,8 +62,8 @@ util.mixin(exports.GutterView.prototype, {
 
         context.save();
 
-        var padding = this.padding;
-        context.translate(padding.left, 0);
+        var paddingLeft = theme.paddingLeft;
+        context.translate(paddingLeft, 0);
 
         var layoutManager = this.editor.layoutManager;
         var range = layoutManager.characterRangeForBoundingRect(rect);
@@ -86,8 +84,8 @@ util.mixin(exports.GutterView.prototype, {
     },
 
     computeWidth: function() {
-        var padding = this.padding;
-        var paddingWidth = padding.left + padding.right;
+        var theme = this.editor.themeData.gutter;
+        var paddingWidth = theme.paddingLeft + theme.paddingRight;
 
         var lineNumberFont = this.editor.font;
 

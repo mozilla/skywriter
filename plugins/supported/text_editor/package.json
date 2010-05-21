@@ -440,7 +440,9 @@
             "name": "gutter",
             "defaultValue": {
                 "color": "#e5c138",
-                "backgroundColor": "#4c4a41"
+                "backgroundColor": "#4c4a41",
+                "paddingLeft": 5,
+                "paddingRight": 10
             }
         },
         {
