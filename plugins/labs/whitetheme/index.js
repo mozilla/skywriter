@@ -36,8 +36,14 @@
  * ***** END LICENSE BLOCK ***** */
 
 exports.whiteTheme = function() {
-
     return {
+        global: {
+            color: 'textColor',
+            background: 'blue',
+            highlighted: 'highlightedColor',
+            colorBorder: 'something'
+        },
+
         text_editor: {
             // Theme of the gutter:
             gutter: {
@@ -67,10 +73,6 @@ exports.whiteTheme = function() {
                 operator:   '#88BBFF',
                 string:     '#039A0A'
             }
-        },
-
-        command_line: {
-            background: '#706F63 + #111'
         },
 
         screen_theme: {

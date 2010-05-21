@@ -37,88 +37,88 @@
 
 var catalog = require('bespin:plugins').catalog;
 var Event = require('events').Event;
-var ThemeStyles = require('themestyles');
+var themestyles = require('themestyles');
 var settings = require('settings').settings;
 
-exports._currentThemeExtension = null;
+// The current themeExt used on the page.
+var currentThemeExt = null;
 
-exports.themeEvent = Event();
+exports.themeSettingChanged = function(settingName, themeName) {
+    console.log('themeSettingChanged', settingName, themeName);
 
-exports.themeSettingDidChanged = function(settingName, themeName) {
-    var theme = catalog.getExtensionByKey('theme', themeName);
+    // Get the themeExtensionPoint for 'themeName'
+    var themeExt = catalog.getExtensionByKey('theme', themeName);
 
-    if (themeName === 'standard') {
-        if (exports._currentThemeExtension) {
-            ThemeStyles.unregisterThemeStyles(exports._currentThemeExtension);
+    // 'themeName' === standard : Remove the current set theme.
+    // !themeName || !themeExt  : The named theme couldn't get found
+    if (themeName === 'standard' || !themeName || !themeExt) {
+        // If there is a currentTheme before switching to 'standard' which means
+        // removing the currentTheme as applied on the page.
+        if (currentThemeExt) {
+            // There might be a themeStyle file to remove.
+            themestyles.unregisterThemeStyles(currentThemeExt);
+
+            currentThemeExt = null;
+
+            // Reset the themeVariables applied by the theme.
+            themestyles.currentThemeVariables = null;
+
+            // Update the globalVariables.
+            themestyles.parseGlobalVariables();
+
+            // Reparse all the applied themeStyles.
+            themestyles.reparse();
+
+            // Publish the 'themeChange' event.
+            catalog.publish('themeChange');
         }
-
-        exports._currentThemeExtension = undefined;
-
-        var themeVariableExt = catalog.getExtensions('themevariable');
-        themeVariableExt.forEach(function(extension) {
-            if (extension.value) {
-                extension.value = undefined;
-                ThemeStyles.parsePlugin(extension.getPluginName());
-            }
-        });
-        catalog.publish('themeChange');
         return;
-    }
-
-    if (!themeName || !theme) {
-        // request.doneWithError('Couldn\'t find a theme for the name: ' + themeName);
-        return;
-    }
-
-    theme.load().then(function(extension) {
-        // Remove the former themeStyle file, if the former extension has one declaired.
-        if (exports._currentThemeExtension) {
-            ThemeStyles.unregisterThemeStyles(exports._currentThemeExtension);
-        }
-
-        var data = extension();
-        // Store the data for later use.
-        exports._currentThemeExtension = theme;
-
-        var themeVariableExt = catalog.getExtensions('themevariable');
-        var newValue;
-        themeVariableExt.forEach(function(extension) {
-            if (data[extension._pluginName] && data[extension._pluginName][extension.name]) {
-                newValue = data[extension._pluginName][extension.name];
-            } else {
-                newValue = undefined;
+    } else {
+        themeExt.load().then(function(theme) {
+            // Remove the former themeStyle file, if the former extension has
+            // one declaired.
+            if (currentThemeExt) {
+                themestyles.unregisterThemeStyles(currentThemeExt);
             }
-            if (newValue !== extension.value) {
-                extension.value = newValue;
-                ThemeStyles.parsePlugin(extension._pluginName);
+
+            // The theme is a function. Execute it to get the themeData.
+            themestyles.currentThemeVariables = theme();
+
+            // Store the data for later use.
+            currentThemeExt = themeExt;
+
+            // Update the globalVariables.
+            themestyles.parseGlobalVariables();
+
+            // Reparse all the applied themeStyles.
+            themestyles.reparse();
+
+            // If the theme has a url that points to a themeStyles file, then
+            // register it.
+            if (theme.url) {
+                themestyles.registerThemeStyles(themeExt);
             }
+
+            // Publish the 'themeChange' event.
+            catalog.publish('themeChange');
         });
-
-        catalog.publish('themeChange');
-
-        // If the theme has a url that points to a themeStyles file, then register it.
-        if (theme.url) {
-            ThemeStyles.registerThemeStyles(theme);
-        }
-    }, function(err) {
-        // request.doneWithError('Error while loading theme plugin: ' + err.message);
-    });
+    }
 };
 
 catalog.registerExtension('settingChange', {
     match: "theme",
-    pointer: exports.themeSettingDidChanged.bind(exports)
+    pointer: exports.themeSettingChanged.bind(exports)
 });
 
 exports.registerTheme = function(extension) {
     var currentThemeName = settings.get('theme');
     if (extension.name === currentThemeName) {
-        exports.themeSettingDidChanged();
+        exports.themeSettingChanged();
     }
 };
 
 exports.unregisterTheme = function(extension) {
     if (extension.name === settings.get('theme')) {
-        exports.themeSettingDidChanged('standard');
+        exports.themeSettingChanged();
     }
 };

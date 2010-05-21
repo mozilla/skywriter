@@ -5,41 +5,63 @@
         "settings": "0.0.0",
         "events": "0.0.0"
     },
-    "provides":
-    [
+    "provides": [
         {
             "ep": "extensionpoint",
-            "name": "themestyles"
-        },
-        {
-            "ep": "extensionhandler",
             "name": "themestyles",
+            "description": "(Less)files holding the CSS style information for the UI.",
+
             "register": "themestyles#registerThemeStyles",
-            "unregister": "themestyles#unregisterThemeStyles"
+            "unregister": "themestyles#unregisterThemeStyles",
+
+            "params": [
+                {
+                    "name": "url",
+                    "required": true,
+                    "description": "Name of the ThemeStylesFile - can also be an array of files."
+                }
+            ]
         },
         {
             "ep": "extensionpoint",
             "name": "themeChange",
-            "description": "A themeChange is a way to be notified of changes to a theme"
+            "description": "Event: Notify when the theme(styles) changed.",
+            "params": [
+                {
+                    "name": "pointer",
+                    "required": true,
+                    "description": "Function that is called whenever the theme is changed."
+                }
+            ]
         },
         {
             "ep": "extensionpoint",
             "name": "theme",
-            "indexOn": "name"
-        },
-        {
-            "ep": "extensionhandler",
-            "name": "theme",
+            "indexOn": "name",
+
             "register": "index#registerTheme",
-            "unregister": "index#unregisterTheme"
+            "unregister": "index#unregisterTheme",
+
+            "params": [
+                {
+                    "name": "url",
+                    "required": false,
+                    "description": "Name of a ThemeStylesFile that holds theme specific CSS rules - can also be an array of files."
+                },
+                {
+                    "name": "pointer",
+                    "required": true,
+                    "description": "Function that returns the ThemeData"
+                }
+            ]
         },
         {
             "ep": "setting",
             "name": "theme",
-            "description": "The theme to use",
             "type": "text",
-            "defaultValue": "default"
+
+            "defaultValue": "standard",
+            "description": "The theme plugin's name to use. If set to 'standard' no theme will be used"
         }
     ]
 }
-

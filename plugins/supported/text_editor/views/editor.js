@@ -54,6 +54,8 @@ var ScrollerView = Scroller.ScrollerCanvasView;
 
 var EditorUndoController = require('controllers/undo').EditorUndoController;
 
+var themestyles = require('theme_manager:themestyles');
+
 /**
  * Cache with all the theme data for the entire editor (gutter, editor, highlighter).
  */
@@ -64,9 +66,17 @@ var computeThemeData = function() {
     var provides = plugin.provides;
     var i = provides.length;
 
+    if (themestyles.currentThemeVariables &&
+            themestyles.currentThemeVariables['text_editor']) {
+        themeData = themestyles.currentThemeVariables['text_editor'];
+    } else {
+        themeData = {};
+    }
+
     while (i--) {
         if (provides[i].ep === 'themevariable') {
-            var value = provides[i].value || provides[i].defaultValue;
+            var value = util.mixin(util.clone(provides[i].defaultValue),
+                                        themeData[provides[i].name]);
 
             switch (provides[i].name) {
                 case 'gutter':
@@ -132,7 +142,7 @@ exports.EditorView = function() {
 
         // Watch out for the themeChange event to then repaint stuff.
         catalog.registerExtension('themeChange', {
-            pointer: this._themeVariableDidChange.bind(this)
+            pointer: this._themeVariableChange.bind(this)
         });
 
         // Watch out for the set fontSize/face event to repaint stuff and set
@@ -148,7 +158,7 @@ exports.EditorView = function() {
             // Allow the layout to be recomputed.
             this._dontRecomputeLayout = false;
             this._recomputeLayout();
-        }.bind(this), 0)
+        }.bind(this), 0);
 
         // Other event to listen to.
         window.addEventListener('resize', this.dimensionChanged.bind(this), false);
@@ -349,7 +359,7 @@ exports.EditorView.prototype = {
         this.textView.invalidate();
     },
 
-    _themeVariableDidChange: function() {
+    _themeVariableChange: function() {
         // Recompute the entire layout as the gutter now might has a different
         // size. Just calling invalidate() on the gutter wouldn't be enough.
         this._recomputeLayout();

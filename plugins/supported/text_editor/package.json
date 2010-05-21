@@ -8,6 +8,7 @@
         "settings": "0.0",
         "syntax_manager" : "0.0",
         "undomanager": "0.0",
+        "theme_manager": "0.0.0",
         "traits": "0.0"
     },
     "provides":

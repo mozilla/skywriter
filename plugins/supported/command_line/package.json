@@ -14,15 +14,9 @@
     [
         {
             "ep": "themestyles",
-            "url": "article.less"
-        },
-        {
-            "ep": "themestyles",
-            "url": "cli.less"
-        },
-        {
-            "ep": "themestyles",
-            "url": "menu.less"
+            "url": [
+                "article.less", "cli.less", "menu.less"
+            ]
         },
         {
             "ep": "factory",

@@ -778,7 +778,6 @@ exports.Catalog.prototype = {
                 if (!register) {
                     throw extension.name + " is not ready";
                 }
-                console.log('>>> _registerExtensionHandler', extension.name);
                 extensions.forEach(function(ext) {
                     console.log('call register on:', ext)
                     register(ext);
