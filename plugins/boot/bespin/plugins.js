@@ -563,7 +563,7 @@ exports.Catalog.prototype = {
      *                      function.
      * - objects (optional): object that describes other objects that are
      *                      required when constructing this one (see below)
-     * 
+     *
      * The objects object defines objects that must be created before this
      * one and how they should be passed in. The key defines how they
      * are passed in, and the value is the name of the object to pass in.
@@ -575,16 +575,16 @@ exports.Catalog.prototype = {
      *  "0": "myCoolObject",
      *  "1.foo": "someOtherObject"
      * }
-     * 
+     *
      * which will result in arguments like this:
      * [myCoolObject, {foo: someOtherObject}, "bar"]
      * where myCoolObject and someOtherObject are the actual objects
      * created elsewhere.
-     * 
+     *
      * If the plugin containing the factory is reloaded, the object will
      * be recreated. The object will also be recreated if objects passed in
      * are reloaded.
-     * 
+     *
      * This method returns nothing and does not actually create the objects.
      * The objects are created via the createObject method and retrieved
      * via the getObject method.
@@ -592,7 +592,7 @@ exports.Catalog.prototype = {
     registerObject: function(name, descriptor) {
         this._objectDescriptors[name] = descriptor;
     },
-    
+
     /*
      * Stores an object directly in the instance cache. This should
      * not generally be used because reloading cannot work with
@@ -601,14 +601,14 @@ exports.Catalog.prototype = {
     _setObject: function(name, obj) {
         this.instances[name] = obj;
     },
-    
+
     /*
      * Creates an object with a previously registered descriptor.
-     * 
+     *
      * Returns a promise that will be resolved (with the created object)
      * once the object has been made. The promise will be resolved
      * immediately if the instance is already there.
-     * 
+     *
      * throws an exception if the object is not registered or if
      * the factory cannot be found.
      */
@@ -616,25 +616,25 @@ exports.Catalog.prototype = {
         console.log("Creating", name);
         var instance = this.instances[name];
         var pr = new Promise();
-        
+
         if (instance !== undefined) {
             console.log("Already have one (it's very nice)");
             pr.resolve(instance);
             return pr;
         }
-        
-        
+
+
         var descriptor = this._objectDescriptors[name];
         if (descriptor === undefined) {
             throw new Error('Tried to create object "' + name +
                 '" but that object is not registered.');
         }
-        
+
         var factoryName = descriptor.factory || name;
         var ext = this.getExtensionByKey("factory", factoryName);
         if (ext === undefined) {
-            throw new Error('When creating object "' + name + 
-                '", there is no factory called "' + factoryName + 
+            throw new Error('When creating object "' + name +
+                '", there is no factory called "' + factoryName +
                 '" available."');
         }
         var factoryArguments = descriptor.arguments || [];
@@ -653,13 +653,13 @@ exports.Catalog.prototype = {
                 });
             }
         }
-        
+
         group(argumentPromises).then(function() {
             ext.load().then(function(factory) {
                 console.log("Got factory for ", name);
                 var action = ext.action;
                 var obj;
-                
+
                 if (action === "call") {
                     obj = factory.apply(factory, factoryArguments);
                 } else if (action === "new") {
@@ -680,10 +680,10 @@ exports.Catalog.prototype = {
                 pr.resolve(obj);
             }.bind(this));
         }.bind(this));
-        
+
         return pr;
     },
-    
+
     /**
      * Retrieve a registered object. Returns undefined
      * if the instance has not been created.
@@ -752,9 +752,12 @@ exports.Catalog.prototype = {
         ep.description = extension.description;
         ep._pluginName = extension._pluginName;
         ep.params = extension.params;
-        ep.handlers.push(extension);
         if (extension.indexOn) {
             ep.indexOn = extension.indexOn;
+        }
+
+        if (extension.register || extension.unregister) {
+            this._registerExtensionHandler(extension);
         }
     },
 
@@ -762,11 +765,22 @@ exports.Catalog.prototype = {
         var ep = this.getExtensionPoint(extension.name, true);
         ep.handlers.push(extension);
         if (extension.register) {
+            // Store the current extensions to this extension point. We can't
+            // use the ep.extensions array within the load-callback-function, as
+            // the array at that point in time also contains extensions that got
+            // registered by calling the handler.register function directly.
+            // As such, using the ep.extensions in the load-callback-function
+            // would result in calling the handler's register function on a few
+            // extensions twice.
+            var extensions = util.clone(ep.extensions);
+
             extension.load(function(register) {
                 if (!register) {
                     throw extension.name + " is not ready";
                 }
-                ep.extensions.forEach(function(ext) {
+                console.log('>>> _registerExtensionHandler', extension.name);
+                extensions.forEach(function(ext) {
+                    console.log('call register on:', ext)
                     register(ext);
                 });
             }, "register");
@@ -861,7 +875,6 @@ exports.Catalog.prototype = {
                     var ep = this.getExtensionPoint(extension.ep, true);
                     ep.register(extension);
                 }
-                plugin.register();
             } else {
                 md.provides = [];
             }
@@ -1175,12 +1188,6 @@ var _removeFromObject = function(regex, obj) {
             delete obj[keys[i]];
         }
     }
-};
-
-exports.startupHandler = function(ep) {
-    ep.load(function(func) {
-        func();
-    });
 };
 
 exports.getUserPlugins = function() {
