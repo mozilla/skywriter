@@ -303,8 +303,9 @@ exports.Input.prototype = {
             if (argCount !== 0) {
                 message = this._commandExt.name + ' does not take any parameters';
                 this.hints.push(new Hint(Level.Error, message));
-                return;
             }
+            this.argsPromise.resolve({});
+            return;
         }
 
         // Special case: if there is only 1 parameter, and that's of type
