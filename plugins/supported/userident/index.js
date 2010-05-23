@@ -385,12 +385,13 @@ exports.logout = function() {
             }
         }
 
+        // Reset the settings persister.
+        settings.setPersister(null);
+
         // Reset all settings.
         settings.resetAll();
 
-        exports.loginController.set('username', '');
-        exports.loginController.set('password', '');
-        exports.loginController.loggedOut();
+        // TODO: Tell appconfig to destroy everything and relunch the app.
     }, function(error) {
         displayError('Unable to log out',
             'There was a problem logging out: ' + error.message);

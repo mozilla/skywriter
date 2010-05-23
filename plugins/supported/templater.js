@@ -119,7 +119,6 @@ var processChildren = function(parent, data) {
                 }
                 parent.addEventListener(attr.name.substring(2), func, true);
 
-                console.log('== remove attr', attr.name, parent);
                 // This should work but when I remove the comments, then the obj
                 // save on the same object is not saved...huh? This seems to be
                 // only the case on firefox. Does removeAttribute do some other
