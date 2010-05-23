@@ -257,7 +257,7 @@ exports.ExtensionPoint.prototype = {
     },
 
     unregister: function(extension) {
-        this.extensions.removeObject(extension);
+        this.extensions.splice(this.extensions.indexOf(extension), 1);
         this.handlers.forEach(function(handler) {
             if (handler.unregister) {
                 handler.load(function(unregister) {
