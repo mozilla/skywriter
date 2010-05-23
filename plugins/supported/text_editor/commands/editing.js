@@ -124,7 +124,7 @@ exports.newline = function(env, args, request) {
  */
 exports.joinLines = function(env, args, request) {
     var model = env.model;
-    if (model.get('readOnly')) {
+    if (model.readOnly) {
         return;
     }
 
@@ -158,7 +158,7 @@ exports.joinLines = function(env, args, request) {
  * point there.
  */
 exports.openLine = function(env, args, request) {
-    if (env.model.get('readOnly')) {
+    if (env.model.readOnly) {
         return;
     }
 
