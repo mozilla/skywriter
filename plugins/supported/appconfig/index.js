@@ -35,6 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var $ = require('jquery').$;
 var catalog = require("bespin:plugins").catalog;
 var group = require("bespin:promise").group;
 var Promise = require("bespin:promise").Promise;
@@ -54,6 +55,9 @@ var Trace = require("bespin:util/stacktrace").Trace;
  *              created. and added to the body.
  */
 exports.launch = function(config) {
+    // Remove the "Loading..." hint.
+    $('#_bespin_loading').remove();
+
     config = config || {};
     exports.normalizeConfig(config);
     var objects = config.objects;
@@ -186,8 +190,6 @@ var createAllObjects = function(config) {
 };
 
 var generateGUI = function(config) {
-    var $ = require('jquery').$;
-
     var container = document.createElement('div');
     container.setAttribute('class', 'bespin container');
 
@@ -231,7 +233,4 @@ var generateGUI = function(config) {
             component.elementAppended();
         }
     }
-
-    // Remove the "Loading..." hint.
-    $('#_bespin_loading').remove();
 };

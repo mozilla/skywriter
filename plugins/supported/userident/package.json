@@ -6,7 +6,8 @@
         "events": "0.0",
         "settings": "0.0",
         "overlay": "1.2.0",
-        "toolbox_expose": "1.2.0"
+        "toolbox_expose": "1.2.0",
+        "jquery_ui_checkbox": "1.4.1"
     },
     "provides": [
         {

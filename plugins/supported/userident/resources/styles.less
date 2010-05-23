@@ -6,18 +6,25 @@
 
 /* ------- HTML ELEMENTS ------- */
 
-body { 
+body {
 	font-family: arial, lucida, helvetica, sans-serif;
 	background: #4f4e45;
-	padding: 0px; 
+	padding: 0px;
 	color: rgba(218,212,186,1);
 	font-size:14px;
 	margin: 0 auto;
 	
 }
 
-#commentform {font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.8em;}
-#commentform p{ margin-bottom: 6px; margin-top: 6px; text-shadow: 1px 1px rgba(0, 0, 0, 0.4);}
+#form {
+    font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.8em;
+
+    fieldset, p {
+        margin-bottom: 6px;
+        margin-top: 6px;
+        text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+    }
+}
 
 #form {
 	width: 220px;
@@ -32,9 +39,28 @@ body {
 	-moz-border-right-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
 	-moz-border-left-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
 	-moz-border-bottom-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
-    -moz-transition-property: height;
+    -moz-transition-property: all;
     -moz-transition-duration: 0.5s;
-    -webkit-transition-property: height;
+    -webkit-transition-property: all;
+    -webkit-transition-duration: 0.5s;
+}
+
+#loginForm {
+
+}
+
+#signupForm {
+    display: none;
+}
+
+#formDiv {
+    overflow: hidden;
+
+    height: 155px;
+
+    -moz-transition-property: all;
+    -moz-transition-duration: 0.5s;
+    -webkit-transition-property: all;
     -webkit-transition-duration: 0.5s;
 }
 
@@ -61,10 +87,10 @@ body {
     color: white;
 }
 
-.colorField h1{ 
-	font-family: "MuseoSans", Helvetica; 
+.colorField h1{
+	font-family: "MuseoSans", Helvetica;
 	color: rgba(255,255,255,1);
-	font-size: 2.8em; 
+	font-size: 2.8em;
 	letter-spacing: -1.25px;
 	line-height: 1.0;
 	margin-top: 0px;
@@ -136,8 +162,8 @@ textarea:focus {
 }
 
 .commentButton {
-    font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial, Helvetica, sans-serif; 
-    font-size: 14px; 
+    font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial, Helvetica, sans-serif;
+    font-size: 14px;
     text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
 
     width: 200px;
@@ -184,4 +210,75 @@ textarea:focus {
 
 #commentform {
 	text-align: left;
+}
+
+.hint {
+    color: orange;
+    float: right;
+    padding-right: 2px;
+}
+
+/*
+ * The state classes are a little bit complex, because of the doubble class bug in IE6
+ * The state class looks like this:
+ *
+ * .ui-radio-state[-checked][-disabled][-hover] or .ui-checkbox-state[-checked][-disabled][-hover]
+ *
+ * Examples:
+ *
+ * .ui-radio-state-checked (simply checked)
+ * .ui-radio-state-checked-hover (checked and hovered/focused)
+ * .ui-radio-state-hover (unchecked and hovered/focused)
+ *
+ * If you don´t have to deal with the doubble class bug of IE6 you can also use the simple ui-checkbox-checked, ui-checkbox-disabled, ui-checkbox-hover state-classnames (or: ui-radio-checked...)
+ * and the ui-radio/ui-checkbox role-classnames.
+ *
+ */
+
+
+fieldset > div {
+    height: 30px;
+}
+
+span.ui-checkbox,
+span.ui-radio {
+	display: block;
+	float: left;
+	width: 24px;
+	height: 24px;
+	background: url(images/radio-unselected.png) no-repeat;
+}
+
+span.ui-helper-hidden {
+	display: none;
+}
+
+label {
+	padding: 4px;
+	
+}
+span.ui-radio-state-hover,
+span.ui-checkbox-state-hover {
+	background: url(images/radio-unselected.png) no-repeat;
+}
+
+span.ui-checkbox-state-checked-hover,
+span.ui-checkbox-state-checked {
+	background: url(images/radio-selected.png) no-repeat;
+}
+
+span.ui-radio-state-checked-disabled-hover,
+span.ui-radio-state-checked-disabled,
+span.ui-radio-state-checked {
+	background: url(images/radio-selected.png) no-repeat;
+}
+
+
+span.ui-radio-state-checked-hover {
+	background: url(images/radio-selected.png) no-repeat;
+}
+
+.ui-helper-hidden-accessible {
+	position: absolute;
+	left: -999em;
 }

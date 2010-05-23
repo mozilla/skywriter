@@ -106,6 +106,9 @@ var processChildren = function(parent, data) {
                 // Save attributes are a setter using the parent node
                 checkBraces(attr.value);
                 property(attr.value.slice(2, -1), data, parent);
+                // This should work but when I remove the comments, the obj seems
+                // no longer to get saved...huh?
+//              parent.removeAttribute(attr.name);
             } else if (attr.name.substring(0, 2) === 'on') {
                 // Event registration relies on property doing a bind
                 checkBraces(attr.value);
@@ -115,6 +118,13 @@ var processChildren = function(parent, data) {
                             ' to resolve to a function, but got ', typeof func);
                 }
                 parent.addEventListener(attr.name.substring(2), func, true);
+
+                console.log('== remove attr', attr.name, parent);
+                // This should work but when I remove the comments, then the obj
+                // save on the same object is not saved...huh? This seems to be
+                // only the case on firefox. Does removeAttribute do some other
+                // magic beside just removing this one attribute?
+//              parent.removeAttribute(attr.name);
             } else {
                 // Replace references in other attributes
                 var value = attr.value.replace(/\$\{[^}]*\}/, function(path) {
