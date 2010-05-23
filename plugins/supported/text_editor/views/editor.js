@@ -384,11 +384,16 @@ Object.defineProperties(exports.EditorView.prototype, {
             this.layoutManager = newBuffer.layoutManager;
             this._buffer = newBuffer;
 
-            this.layoutManager.sizeChanged.add(this,
-                                        this.layoutManagerSizeChanged.bind(this));
+            this.layoutManager.
+                sizeChanged.add(this, this.layoutManagerSizeChanged.bind(this));
 
             if (this.textView) {
                 this.textView.setSelection(newBuffer._selectedRange);
+
+                // Invoke the layoutMaanger.sizeCanged event manually as not every
+                // event listener has caught the sizechanged event when creating
+                // the layoutManager.
+                this.layoutManager.sizeChanged(this.layoutManager.size);
             }
 
             this._recomputeLayout();

@@ -469,9 +469,10 @@ Object.defineProperties(exports.LayoutManager.prototype, {
         set: function(size) {
             if (size.width !== this._size.width || size.height !== this._size.height) {
                 this.sizeChanged(size);
+                this._size = size;
             }
         },
-        
+
         get: function() {
             return this._size;
         }
