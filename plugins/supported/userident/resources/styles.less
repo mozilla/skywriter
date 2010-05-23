@@ -16,25 +16,26 @@ body {
 	
 }
 
-.commentButton {font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial, Helvetica, sans-serif; font-size: 14px; text-shadow: 1px 1px rgba(0, 0, 0, 0.4);}
 #commentform {font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.8em;}
 #commentform p{ margin-bottom: 6px; margin-top: 6px; text-shadow: 1px 1px rgba(0, 0, 0, 0.4);}
 
 #form {
 	width: 220px;
 	padding: 15px 10px;
-	background: transparent url('lines.png') no-repeat top right;
+	background: transparent url(images/lines.png) no-repeat top right;
 	color: rgba(255,255,255,1);
 	margin-left: 310px;
+    border: solid 2px rgba(255,255,255,0.1);
 	-moz-border-radius: .5em;
-	border-top: 2px solid #ccc;
-	border-left: 2px solid #ccc;
-	border-right: 2px solid #ccc;
-	border-bottom: 2px solid #aaa;
+	-webkit-border-radius: .5em;
 	-moz-border-top-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
 	-moz-border-right-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
 	-moz-border-left-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
 	-moz-border-bottom-colors: rgba(0,0,0,0.2) rgba(255,255,255,0.1);
+    -moz-transition-property: height;
+    -moz-transition-duration: 0.5s;
+    -webkit-transition-property: height;
+    -webkit-transition-duration: 0.5s;
 }
 
 #welcome {
@@ -43,19 +44,21 @@ body {
 }
 
 .colorField {
-	padding: 15px 10px;
-	-moz-border-radius: .5em;
-	background: transparent url('lines.png') no-repeat top right;
-	border-top: 1px solid rgba(255,255,255,0.1);
-	border-left: 1px solid rgba(0, 0, 0, 0.1);
-	border-right: 1px solid rgba(0, 0, 0, 0.1);
-	border-bottom: 2px solid rgba(0, 0, 0, 0.1);
-	background-color: rgba(69,68,60,1);
-	-moz-box-shadow:
-		rgba(0, 0, 0, 0.1) 0px 1px 2px;
-	margin: 20px auto;
-	max-width: 560px;
-	text-align: left;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    border-left: 1px solid rgba(0, 0, 0, 0.1);
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+    background-color: rgba(69,68,60,1);
+    overflow: visible;
+    -moz-border-radius: .5em;
+    -webkit-border-radius: .5em;
+    -moz-box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px;
+    -webkit-box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px;
+    padding: 15px;
+}
+
+.colorField a {
+    color: white;
 }
 
 .colorField h1{ 
@@ -75,25 +78,37 @@ body {
 
 
 input {
-	border: 0px;
-	padding: 4px;
-	width: 200px;
-	margin-right: 10px;
-	color: rgba(225,180,31,1);
-	background: rgba(0,0,0,0.2);
+    display: block;
+    border: 0px;
+    width: 200px;
+    padding: 4px;
+    color: rgba(225,180,31,1);
+    background: rgba(0,0,0,0.2);
     border: 1px solid rgba(0,0,0,0.2);
-	-moz-border-radius: 0.25em;
-	-moz-box-shadow:
-		rgba(255,255,255,0.3) 0px 0px 2px,
-		inset rgba(0,0,0,0.3) 0px 0px 4px;
+    font-size: 8pt;
+    -moz-border-radius: 0.25em;
+    -webkit-border-radius: 0.25em;
+    box-shadow:
+        rgba(255,255,255,0.3) 0px 0px 2px,
+        inset rgba(0,0,0,0.3) 0px 0px 4px;
+    -moz-box-shadow:
+        rgba(255,255,255,0.3) 0px 0px 2px,
+        inset rgba(0,0,0,0.3) 0px 0px 4px;
+    -webkit-box-shadow:
+        rgba(255,255,255,0.3) 0px 0px 2px,
+        inset rgba(0,0,0,0.3) 0px 0px 4px;
 }
 
-input:focus {
-	color: rgba(255,150,0,1);
-	 border: 1px solid rgba(225,180,31,1);
-	 -moz-box-shadow:
-		rgba(255,150,0,0.6) 0px 0px 2px,
-		inset rgba(255,150,0,0.3) 0px 0px 6px;
+input:focus, .sc-button-view.active {
+    color: rgba(255,150,0,1);
+    border: 1px solid rgba(225,180,31,1);
+    outline: none;
+    box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
+        inset rgba(255,150,0,0.3) 0px 0px 6px;
+    -moz-box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
+        inset rgba(255,150,0,0.3) 0px 0px 6px;
+    -webkit-box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
+        inset rgba(255,150,0,0.3) 0px 0px 6px;
 }
 
 textarea {
@@ -121,16 +136,33 @@ textarea:focus {
 }
 
 .commentButton {
+    font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial, Helvetica, sans-serif; 
+    font-size: 14px; 
+    text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+
+    width: 200px;
+
 	padding: 8px 12px;
-	margin-left: 10px;
+	margin-left: 8px;
 	color: rgba(255,255,255,1);
-	-moz-border-radius: .25em;
-	border: 1px solid rgba(37,34,91,1);
-	-moz-box-shadow: 
-		inset rgba(255, 255, 255, 0.2) 0 1px 0px,
-		inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
-		rgba(0, 0, 0, 0.1) 0px 1px 2px;
-	background: transparent -moz-linear-gradient(top, rgba(62,108,185,1), rgba(56,50,146,1));
+    background: transparent -moz-linear-gradient(top, rgba(62,108,185,1), rgba(56,50,146,1));
+    background: transparent -webkit-gradient(linear, 50% 0%, 50% 100%, from(rgba(62, 108, 185, 1)), to(rgba(56, 50, 146, 1)));
+
+    border: 1px solid rgba(37,34,91,1);
+    -moz-border-radius: .25em;
+    -webkit-border-radius: .25em;
+    -moz-box-shadow:
+        inset rgba(255, 255, 255, 0.2) 0 1px 0px,
+        inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
+        rgba(0, 0, 0, 0.1) 0px 1px 2px;
+    -webkit-box-shadow:
+        inset rgba(255, 255, 255, 0.2) 0 1px 0px,
+        inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
+        rgba(0, 0, 0, 0.1) 0px 1px 2px;
+    box-shadow:
+        inset rgba(255, 255, 255, 0.2) 0 1px 0px,
+        inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
+        rgba(0, 0, 0, 0.1) 0px 1px 2px;
 }
 
 .button {
@@ -145,6 +177,9 @@ textarea:focus {
 	margin-top: 18px;
 	margin-right: -24px;
 	float: right;
+	width: 73px;
+	height: 70px;
+	background: url(images/bespin-s.png);
 }
 
 #commentform {

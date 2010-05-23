@@ -83,7 +83,9 @@ exports.loginController.prototype = {
     },
 
     _showLoginForm: function(pr) {
-        var loginform = templates.login();
+        var loginform = templates.login({
+            resourceURL: catalog.getResourceURL('userident')
+        });
         document.body.appendChild(loginform);
         var overlayNode = $('#bespinloginform').overlay({
             mask: {

@@ -2,8 +2,8 @@
 	
 	<div id="welcome">
 
-		<img class="logo" src="bespin-s.png"><h1>Welcome to Bespin</h1>
-		<p>The Bespin project is building a web-based code editor using the emerging HTML5 standard. The editor is easily extensible with JavaScript and can be used in your own applications or on our experimental hosted service.</p>
+		<img class="logo" src="${resourceURL}images/bespin-s.png"><h1>Welcome to Bespin</h1>
+		<p>The <a href="http://mozillalabs.com/bespin/" target="_blank">Bespin project</a> is building a web-based code editor using the emerging HTML5 standard. The editor is easily extensible with JavaScript and can be used in your own applications or on our experimental hosted service.</p>
 
 	</div>
 		
@@ -17,14 +17,17 @@
 			
 			<br>
 	
-			<p><input type="text" name="username" id="username" abindex="1"  />
-			<br><label for="username"><small>Username</small></label></p>
+			<p>
+			    <input type="text" name="username" id="username" tabindex="1"  />
+			    <label for="username"><small>Username</small></label>
+			</p>
 	
-			<p><input type="password" name="password" id="password"  tabindex="2"  />
-
-			<br><label for="password"><small>Password</small></label></p>
+			<p>
+			    <input type="password" name="password" id="password"  tabindex="2"  />
+                <label for="password"><small>Password</small></label>
+            </p>
 		
-			<div class="align-center button"><input class="commentButton" name="submit" type="submit" id="loginsubmit" tabindex="5" value="Log in" /></div>
+			<input class="commentButton" name="submit" type="button" id="loginsubmit" tabindex="5" value="Log in" />
 		
 		</form>	
 	

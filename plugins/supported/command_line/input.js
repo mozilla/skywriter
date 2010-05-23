@@ -304,6 +304,7 @@ exports.Input.prototype = {
                 message = this._commandExt.name + ' does not take any parameters';
                 this.hints.push(new Hint(Level.Error, message));
             }
+            
             this.argsPromise.resolve({});
             return;
         }
