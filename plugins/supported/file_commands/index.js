@@ -36,8 +36,10 @@
  * ***** END LICENSE BLOCK ***** */
 
 var catalog = require('bespin:plugins').catalog;
-
 var pathUtil = require('filesystem:path');
+
+var Buffer = require('text_editor:models/buffer').Buffer;
+var Promise = require('bespin:promise').Promise;
 
 /*
  * Creates a path based on the current open file, if there is
@@ -137,16 +139,20 @@ exports.openCommand = function(env, args, request) {
     }
 
     var files = env.files;
-    var buffer = env.buffer;
-
-    var path = args.path;
-    path = getCompletePath(env, path);
+    var editor = env.editor;
+    var path = getCompletePath(env, args.path);
 
     // TODO: handle line number in args
     request.async();
     var file = files.getFile(path);
-    buffer.changeFile(file).then(
+
+    var loadPromise = new Promise();
+    var buffer;
+
+    loadPromise.then(
         function() {
+            // Set the buffer of the current editorView after it's loaded.
+            editor.buffer = buffer;
             request.done();
         },
         function(error) {
@@ -154,6 +160,10 @@ exports.openCommand = function(env, args, request) {
                 error.message + ')');
         }
     );
+
+    // Create a new buffer based that is bound to 'file'.
+    // TODO: After editor reshape: EditorSession should track buffer instances.
+    buffer = new Buffer(file, loadPromise);
 };
 
 /**

@@ -74,6 +74,19 @@ Object.defineProperties(exports.Environment.prototype, {
     },
 
     /**
+     * Gets the currentEditor from the session.
+     */
+    editor: {
+        get: function() {
+            if (!this.session) {
+                // This can happen if the session is being reloaded.
+                return null;
+            }
+            return this.session.currentView.editor;
+        }
+    },
+
+    /**
      * Returns the currently-active syntax contexts.
      */
     contexts: {
