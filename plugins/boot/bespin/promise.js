@@ -53,6 +53,13 @@ var SUCCESS = 1;
 var _nextId = 0;
 
 /**
+ * Debugging help if 2 things try to complete the same promise.
+ * This can be slow (especially on chrome due to the stack trace unwinding) so
+ * we should leave this turned off in normal use.
+ */
+var _traceCompletion = false;
+
+/**
  * Outstanding promises. Handy list for debugging only.
  */
 exports._outstanding = [];
@@ -61,18 +68,6 @@ exports._outstanding = [];
  * Recently resolved promises. Also for debugging only.
  */
 exports._recent = [];
-
-/**
- * Remove the given {promise} from the _outstanding list, and add it to the
- * _recent list, pruning more than 20 recent promises from that list.
- */
-function complete(promise) {
-    delete exports._outstanding[promise._id];
-    exports._recent.push(promise);
-    while (exports._recent.length > 20) {
-        exports._recent.shift();
-    }
-}
 
 /**
  * Create an unfulfilled promise
@@ -95,6 +90,13 @@ exports.Promise = function () {
 exports.Promise.prototype.isPromise = true;
 
 /**
+ * Have we either been resolve()ed or reject()ed?
+ */
+exports.Promise.prototype.isComplete = function() {
+    return this._status != PENDING;
+};
+
+/**
  * Take the specified action of fulfillment of a promise, and (optionally)
  * a different action on promise rejection.
  */
@@ -106,8 +108,11 @@ exports.Promise.prototype.then = function(onSuccess, onError) {
         this._onErrorHandlers.push(onError);
     }
 
-    if (this._status !== PENDING) {
-        this._callHandlers();
+    if (this._status === SUCCESS) {
+        onSuccess.call(null, this._value);
+    }
+    if (this._status === ERROR) {
+        onError.call(null, this._value);
     }
 
     return this;
@@ -136,60 +141,60 @@ exports.Promise.prototype.chainPromise = function(onSuccess) {
  * Supply the fulfillment of a promise
  */
 exports.Promise.prototype.resolve = function(data) {
-    if (this._status != PENDING) {
-        console.group('Promise already closed');
-        console.error('Attempted resolve() with ', data);
-        console.error('Previous status = ', this._status, ', previous value = ', this._value);
-        console.trace();
-        console.groupEnd();
-    }
-    this._status = SUCCESS;
-    this._value = data;
-    this._callHandlers();
-
-    //this._completeTrace = new Trace(new Error());
-    complete(this);
-    return this;
+    return this._complete(this._onSuccessHandlers, SUCCESS, data, 'resolve');
 };
 
 /**
  * Renege on a promise
  */
-exports.Promise.prototype.reject = function(error) {
-    if (this._status != PENDING) {
-        console.group('Promise already closed');
-        console.error('Attempted reject() with ', error);
-        console.error('Previous status = ', this._status, ', previous value = ', this._value);
-        console.trace();
-        console.groupEnd();
-    }
-    this._status = ERROR;
-    this._value = error;
-    this._callHandlers();
-
-    //this._completeTrace = new Trace(new Error());
-    complete(this);
-    return this;
+exports.Promise.prototype.reject = function(data) {
+    return this._complete(this._onErrorHandlers, ERROR, data, 'reject');
 };
 
 /**
- * Internal method to be called whenever we have handlers to call.
+ * Internal method to be called on resolve() or reject().
  * @private
  */
-exports.Promise.prototype._callHandlers = function() {
-    if (this._status === PENDING) {
-        throw new Error('call handlers in pending');
-    }
-    var list = (this._status === SUCCESS) ?
-        this._onSuccessHandlers :
-        this._onErrorHandlers;
+exports.Promise.prototype._complete = function(list, status, data, name) {
+    // Complain if we've already been completed
+    if (this._status != PENDING) {
+        console.group('Promise already closed');
+        console.error('Attempted ' + name + '() with ', data);
+        console.error('Previous status = ', this._status,
+                ', previous value = ', this._value);
+        console.trace();
 
+        if (this._completeTrace) {
+            console.error('Trace of previous completion:');
+            this._completeTrace.log(5);
+        }
+        console.groupEnd();
+        return this;
+    }
+
+    if (_traceCompletion) {
+        this._completeTrace = new Trace(new Error());
+    }
+
+    this._status = status;
+    this._value = data;
+
+    // Call all the handlers, and then delete them
     list.forEach(function(handler) {
         handler.call(null, this._value);
     }, this);
-
     this._onSuccessHandlers.length = 0;
     this._onErrorHandlers.length = 0;
+
+    // Remove the given {promise} from the _outstanding list, and add it to the
+    // _recent list, pruning more than 20 recent promises from that list.
+    delete exports._outstanding[this._id];
+    exports._recent.push(this);
+    while (exports._recent.length > 20) {
+        exports._recent.shift();
+    }
+
+    return this;
 };
 
 
@@ -209,7 +214,7 @@ exports.group = function(promiseList) {
         return new exports.Promise().resolve([]);
     }
 
-    var promise = new exports.Promise();
+    var groupPromise = new exports.Promise();
     var results = [];
     var fulfilled = 0;
 
@@ -217,15 +222,20 @@ exports.group = function(promiseList) {
         return function(data) {
             results[index] = data;
             fulfilled++;
-            if (fulfilled === promiseList.length) {
-                promise.resolve(results);
+            // If the group has already failed, silently drop extra results
+            if (groupPromise._status !== ERROR) {
+                if (fulfilled === promiseList.length) {
+                    groupPromise.resolve(results);
+                }
             }
         };
     };
 
     promiseList.forEach(function(promise, index) {
-        promise.then(onSuccessFactory(index), promise.reject.bind(promise));
+        var onSuccess = onSuccessFactory(index);
+        var onError = groupPromise.reject.bind(groupPromise);
+        promise.then(onSuccess, onError);
     });
 
-    return promise;
+    return groupPromise;
 };
