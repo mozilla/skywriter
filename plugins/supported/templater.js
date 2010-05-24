@@ -99,6 +99,9 @@ exports.processTemplate = function(template, data) {
 var processChildren = function(parent, data) {
     // Process attributes
     if (parent.attributes && parent.attributes.length) {
+        // It's good to clean up the attributes when we've processed them,
+        // but if we do it straight away, we mess up the array index
+        var toRemove = [];
         for (var i = 0; i < parent.attributes.length; i++) {
             var attr = parent.attributes[i];
 
@@ -106,9 +109,7 @@ var processChildren = function(parent, data) {
                 // Save attributes are a setter using the parent node
                 checkBraces(attr.value);
                 property(attr.value.slice(2, -1), data, parent);
-                // This should work but when I remove the comments, the obj seems
-                // no longer to get saved...huh?
-//              parent.removeAttribute(attr.name);
+                toRemove.push({ parent: parent, attrName: attr.name });
             } else if (attr.name.substring(0, 2) === 'on') {
                 // Event registration relies on property doing a bind
                 checkBraces(attr.value);
@@ -117,13 +118,8 @@ var processChildren = function(parent, data) {
                     console.error('Expected ' + attr.value +
                             ' to resolve to a function, but got ', typeof func);
                 }
+                toRemove.push({ parent: parent, attrName: attr.name });
                 parent.addEventListener(attr.name.substring(2), func, true);
-
-                // This should work but when I remove the comments, then the obj
-                // save on the same object is not saved...huh? This seems to be
-                // only the case on firefox. Does removeAttribute do some other
-                // magic beside just removing this one attribute?
-//              parent.removeAttribute(attr.name);
             } else {
                 // Replace references in other attributes
                 var value = attr.value.replace(/\$\{[^}]*\}/, function(path) {
@@ -134,6 +130,9 @@ var processChildren = function(parent, data) {
                 }
             }
         }
+        toRemove.forEach(function(action) {
+            action.parent.removeAttribute(action.attrName);
+        });
     }
 
     // Process child nodes
@@ -188,7 +187,9 @@ var property = function(path, data, newValue) {
     return property(path.slice(1), value, newValue);
 };
 
-// strips the extension off of a name
+/**
+ * Strip the extension off of a name
+ */
 var basename = function(name) {
     var lastDot = name.lastIndexOf('.');
     return name.substring(0, lastDot);
