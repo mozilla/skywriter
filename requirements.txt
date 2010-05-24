@@ -3,3 +3,4 @@ PyYAML
 Jinja2
 Markdown
 Pygments
+static
