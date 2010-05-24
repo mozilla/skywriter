@@ -147,10 +147,8 @@ exports.normalizeConfig = function(config) {
             alreadyRegistered[desc.component] = true;
         }
     }
-    console.log("AR");
-    console.log(alreadyRegistered);
-
-    if (!config.gui.center && config.objects.editor
+    
+    if (!config.gui.center && config.objects.editor 
         && !alreadyRegistered.editor) {
         config.gui.center = {
             component: "editor"
