@@ -73,8 +73,8 @@ exports.CanvasView = function(container, preventDownsize) {
     container.appendChild(canvas);
     this.domNode = canvas;
 
-    this.clipping = new Event();
-    this.clipping.add(this.clippingFrameChanged.bind(this));
+    this.clippingChanged = new Event();
+    this.clippingChanged.add(this.clippingFrameChanged.bind(this));
 };
 
 exports.CanvasView.prototype = {
@@ -246,7 +246,7 @@ Object.defineProperties(exports.CanvasView.prototype, {
         },
 
         set: function(clippingFrame) {
-            clippingFrame = util.mixin(this._clippingFrame, clippingFrame);
+            clippingFrame = util.mixin(util.clone(this._clippingFrame), clippingFrame);
 
             if (this._clippingFrame === null ||
                     !Rect.rectsEqual(clippingFrame, this._clippingFrame)) {

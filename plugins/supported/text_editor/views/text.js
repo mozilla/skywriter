@@ -67,7 +67,7 @@ exports.TextView = function(container, editor) {
         right: 30
     };
 
-    this.clipping.add(this.clippingFrameChanged.bind(this));
+    this.clippingChanged.add(this.clippingFrameChanged.bind(this));
 
     // TODO: bind some UI events here:
     // 1) drag
