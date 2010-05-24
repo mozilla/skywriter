@@ -54,12 +54,13 @@ var Event = require('events').Event;
  * The canvas that is created is available in the domNode attribute and should
  * be added to the document by the caller.
  */
-exports.CanvasView = function(container, preventDownsize) {
+exports.CanvasView = function(container, preventDownsize, clearOnFullInvalid) {
     if (!container) {
         return;
     }
 
     this._preventDownsize = preventDownsize || false;
+    this._clearOnFullInvalid = clearOnFullInvalid || false;
     this._clippingFrame = this._frame = {
         x: 0,
         y: 0,
@@ -89,6 +90,7 @@ exports.CanvasView.prototype = {
     _redrawTimer: null,
     _clippingFrame: null,
     _preventDownsize: false,
+    _clearOnFullInvalid: false,
 
     _frame: null,
 
@@ -206,6 +208,9 @@ exports.CanvasView.prototype = {
 
         var invalidRects = this._invalidRects;
         if (invalidRects === 'all') {
+            if (this._clearOnFullInvalid) {
+                context.clearRect(0, 0, this.domNode.width, this.domNode.height);
+            }
             this.drawRect(clippingFrame, context);
         } else {
             Rect.merge(invalidRects).forEach(function(rect) {

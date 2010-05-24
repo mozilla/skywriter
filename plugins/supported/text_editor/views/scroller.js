@@ -54,7 +54,8 @@ var LAYOUT_HORIZONTAL = exports.LAYOUT_HORIZONTAL = 0;
 var LAYOUT_VERTICAL = exports.LAYOUT_VERTICAL = 1;
 
 exports.ScrollerCanvasView = function(editor, layoutDirection) {
-    CanvasView.call(this, editor.container);
+    CanvasView.call(this, editor.container, true /* preventDownsize */
+                                          , true /* clearOnFullInvalid */);
     this.editor = editor;
     this.layoutDirection = layoutDirection;
 
