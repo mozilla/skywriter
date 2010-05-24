@@ -1,7 +1,6 @@
 {
     "description": "Provides the command line user interface",
-    "dependencies":
-    {
+    "dependencies": {
         "canon": "0.0.0",
         "keyboard": "0.0.0",
         "types": "0.0.0",
@@ -10,13 +9,10 @@
         "matcher": "0.0.0",
         "templater": "0.0.0"
     },
-    "provides":
-    [
+    "provides": [
         {
             "ep": "themestyles",
-            "url": [
-                "article.less", "cli.less", "menu.less"
-            ]
+            "url": [ "article.less", "cli.less", "menu.less" ]
         },
         {
             "ep": "factory",
@@ -137,8 +133,7 @@
         {
             "ep": "command",
             "name": "help",
-            "params":
-            [
+            "params": [
                 {
                     "name": "search",
                     "type": "text",
@@ -152,8 +147,7 @@
         {
             "ep": "command",
             "name": "alias",
-            "params":
-            [
+            "params": [
                 {
                     "name": "alias",
                     "type": "text",
@@ -173,8 +167,7 @@
         {
             "ep": "command",
             "name": "eval",
-            "params":
-            [
+            "params": [
                 {
                     "name": "javascript",
                     "type": "text",
