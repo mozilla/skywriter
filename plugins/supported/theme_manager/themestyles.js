@@ -95,7 +95,7 @@ exports.getPluginThemeVariables = function(pluginName) {
     var plugin = catalog.plugins[pluginName];
 
     if (!plugin) {
-        return;
+        return null;
     }
 
     // Hash to look for custom theme variables.
@@ -116,7 +116,7 @@ exports.getPluginThemeVariables = function(pluginName) {
     });
 
     return themeVariables;
-}
+};
 
 /**
  * Update the globalThemeVariables. This is called whenever the theme changes.
@@ -219,7 +219,7 @@ exports.parsePlugin = function(pluginName) {
 
             // DEBUG ONLY:
             // console.log('=== Parse Plugin: ' + pluginName + ' ===');
-            var time = new Date();
+            // var time = new Date();
 
             var themeVariables = exports.getPluginThemeVariables(pluginName);
 
@@ -244,7 +244,7 @@ exports.parsePlugin = function(pluginName) {
 // Function that pocesses the loaded StyleFile content.
 var processStyleContent = function(resourceURL, pluginName, data, p) {
     // Convert url(something) to url(resourceURL/something).
-    var data = data.replace(/url\(['"]*([^'")]*)(['"]*)\)/g,
+    data = data.replace(/url\(['"]*([^'")]*)(['"]*)\)/g,
                                       'url(' + resourceURL + '$1)');
     extensionStyleData[pluginName] += data;
 
@@ -286,7 +286,8 @@ exports.registerThemeStyles = function(extension, self, register, handler) {
                     processStyleContent(resourceURL, pluginName, response, p);
                 },
                 error: function(err) {
-                    console.error('registerLessFile: Could not load ' + url);
+                    console.error('registerLessFile: Could not load ' +
+                            resourceURL + styleFile);
 
                     // The file couldn't get loaded but to make the groupPromise
                     // work we have to mark this loadPromise as resolved so that
