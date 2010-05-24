@@ -115,7 +115,7 @@ exports.EditorView = function() {
     container.style.overflow = 'hidden';
     container.style.position = 'relative';
 
-    this.scrollChanged = new Event();
+    this.scrollOffsetChanged = new Event();
     this.willChangeBuffer = new Event();
 
     // Create an empty buffer to make sure there is a buffer for this editor.
@@ -163,16 +163,20 @@ exports.EditorView = function() {
 
         // Other event to listen to.
         window.addEventListener('resize', this.dimensionChanged.bind(this), false);
-        container.addEventListener(util.isMozilla ? 'DOMMouseScroll' : 'mousewheel', this.onMouseWheel.bind(this), false);
 
         var wheelEvent = util.isMozilla ? 'DOMMouseScroll' : 'mousewheel';
         container.addEventListener(wheelEvent, this.onMouseWheel.bind(this), false);
+
         verticalScroller.valueChanged.add(function(value) {
             this.scrollOffset = { y: value };
         }.bind(this));
 
         horizontalScroller.valueChanged.add(function(value) {
             this.scrollOffset = { x: value };
+        }.bind(this));
+
+        this.scrollOffsetChanged.add(function(offset) {
+            this._updateScrollOffsetChanged(offset);
         }.bind(this));
     }.bind(this));
 };
@@ -184,7 +188,7 @@ exports.EditorView.prototype = {
     horizontalScrollOffset: null,
     verticalScrollOffset: null,
 
-    scrollChanged: null,
+    scrollOffsetChanged: null,
     willChangeBuffer: null,
 
     _textViewSize: null,
@@ -331,8 +335,11 @@ exports.EditorView.prototype = {
             height: height - (2 * scrollerPadding + scrollerSize)
         };
 
-        this._updateScrollers();
+        // Calls the setter scrollOffset which then clamps the current
+        // scrollOffset as needed.
+        this.scrollOffset = {};
 
+        this._updateScrollers();
         this.gutterView.invalidate();
         this.textView.invalidate();
         this.verticalScroller.invalidate();
@@ -365,6 +372,24 @@ exports.EditorView.prototype = {
         // size. Just calling invalidate() on the gutter wouldn't be enough.
         this._recomputeLayout();
         this.textView.invalidate();
+    },
+
+    _updateScrollOffsetChanged: function(offset) {
+        this.verticalScroller.value = offset.y;
+        this.horizontalScroller.value = offset.x;
+
+        this.textView.clippingFrame = {
+            x: offset.x,
+            y: offset.y
+        };
+
+        this.gutterView.clippingFrame = {
+            y: offset.y
+        };
+
+        this._updateScrollers();
+        this.gutterView.invalidate();
+        this.textView.invalidate();
     }
 };
 
@@ -387,6 +412,8 @@ Object.defineProperties(exports.EditorView.prototype, {
             this.layoutManager.
                 sizeChanged.add(this, this.layoutManagerSizeChanged.bind(this));
 
+            this._recomputeLayout();
+
             if (this.textView) {
                 this.textView.setSelection(newBuffer._selectedRange);
 
@@ -394,9 +421,13 @@ Object.defineProperties(exports.EditorView.prototype, {
                 // event listener has caught the sizechanged event when creating
                 // the layoutManager.
                 this.layoutManager.sizeChanged(this.layoutManager.size);
-            }
 
-            this._recomputeLayout();
+                this.scrollOffsetChanged(this.scrollOffset);
+                this._updateScrollers();
+
+                // Tell textView to recompute the syntax for the visible region.
+                this.textView.updateSyntax(null);
+            }
         },
 
         get: function() {
@@ -454,20 +485,7 @@ Object.defineProperties(exports.EditorView.prototype, {
 
             this.buffer._scrollOffset = pos;
 
-            this.verticalScroller.value = pos.y;
-            this.horizontalScroller.value = pos.x;
-
-            this.textView.clippingFrame = {
-                x: pos.x,
-                y: pos.y
-            };
-
-            this.gutterView.clippingFrame = {
-                y: pos.y
-            };
-
-            this.gutterView.invalidate();
-            this.textView.invalidate();
+            this.scrollOffsetChanged(pos);
         },
 
         get: function() {

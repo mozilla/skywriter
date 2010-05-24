@@ -404,7 +404,7 @@ util.mixin(exports.TextView.prototype, {
         //       for this. Well check back later.
         // this.notifyDelegates('textViewWasScrolled', { x: x, y: y });
 
-        this._updateSyntax(null);
+        this.updateSyntax(null);
     },
 
     // Returns the character closest to the given point, obeying the selection
@@ -459,7 +459,7 @@ util.mixin(exports.TextView.prototype, {
     // Instructs the syntax manager to begin highlighting from the given row to
     // the end of the visible range, or within the entire visible range if the
     // row is null.
-    _updateSyntax: function(row) {
+    updateSyntax: function(row) {
         var layoutManager = this.editor.layoutManager;
         var visibleRange = layoutManager.characterRangeForBoundingRect(this.
             clippingFrame);
@@ -497,7 +497,7 @@ util.mixin(exports.TextView.prototype, {
      * frame of the text view changes.
      */
     clippingFrameChanged: function() {
-        this._updateSyntax(null);
+        this.updateSyntax(null);
     },
 
     /**
@@ -653,7 +653,7 @@ util.mixin(exports.TextView.prototype, {
      * range, and repositions the selection.
      */
     layoutManagerChangedTextAtRow: function(sender, row) {
-        this._updateSyntax(row);
+        this.updateSyntax(row);
         this._repositionSelection();
     },
 
