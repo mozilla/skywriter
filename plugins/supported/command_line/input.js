@@ -55,8 +55,6 @@ var typehint = require('command_line:typehint');
 /**
  * An object used during command line parsing to hold the various intermediate
  * data steps.
- * <p>Part of the contract of Input objects is that they NOT be observed. This
- * is a temporary object and we don't want the overhead of using get() and set()
  * <p>The 'output' of the parse is held in 2 objects: input.hints which is an
  * array of hints to display to the user. In the future this will become a
  * single value.
@@ -117,7 +115,16 @@ exports.Input = function(typed, options) {
 };
 
 /**
- * Implementation of Input
+ * Implementation of Input.
+ * The majority of the functions in this class are called in sequence by the
+ * constructor. Their task is to add to <tt>hints</tt> and to resolve
+ * <tt>argsPromise</tt>.
+ * <p>The general sequence is:<ul>
+ * <li>_tokenize(): convert _typed into _parts
+ * <li>_split(): convert _parts into _commandExt and _unparsedArgs
+ * <li>_assign(): convert _unparsedArgs into _assignments
+ * <li>_convertTypes(): resolve argsPromise by converting _assignments
+ * </ul>
  */
 exports.Input.prototype = {
     /**
@@ -304,7 +311,7 @@ exports.Input.prototype = {
                 message = this._commandExt.name + ' does not take any parameters';
                 this.hints.push(new Hint(Level.Error, message));
             }
-            
+
             this.argsPromise.resolve({});
             return;
         }
