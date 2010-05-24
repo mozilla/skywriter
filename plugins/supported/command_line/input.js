@@ -110,7 +110,10 @@ exports.Input = function(typed, options) {
         console.error(ex);
         trace.log(3);
         console.groupEnd();
-        this.argsPromise.reject(ex);
+
+        if (!this.argsPromise.isComplete()) {
+            this.argsPromise.reject(ex);
+        }
     }
 };
 
@@ -137,6 +140,7 @@ exports.Input.prototype = {
             // need to find a way to only display this message once, or for
             // until the user click a 'close' button or similar
             this.hints.push(new Hint(Level.Incomplete));
+            this.argsPromise.resolve({});
             return;
         }
 
@@ -268,6 +272,7 @@ exports.Input.prototype = {
         }
 
         if (util.none(this._commandExt)) {
+            this.argsPromise.resolve({});
             return;
         }
 
@@ -327,30 +332,28 @@ exports.Input.prototype = {
                 value: unparsedArgs.length === 0 ? null : unparsedArgs.join(' '),
                 param: params[0]
             };
+        } else {
+            // The normal case where we have to assign params individually
+            var index = 0;
+            var used = [];
+            params.forEach(function(param) {
+                this._assignParam(param, index++, used);
+            }.bind(this));
 
-            // Continue to the next step;
-            this._convertTypes();
-        }
+            // Check there are no params that don't fit
+            var unparsed = false;
+            unparsedArgs.forEach(function(unparsedArg) {
+                if (used.indexOf(unparsedArg) == -1) {
+                    message = 'Parameter \'' + unparsedArg + '\' makes no sense.';
+                    this.hints.push(new Hint(Level.Error, message));
+                    unparsed = true;
+                }
+            }.bind(this));
 
-        // The normal case where we have to assign params individually
-        var index = 0;
-        var used = [];
-        params.forEach(function(param) {
-            this._assignParam(param, index++, used);
-        }.bind(this));
-
-        // Check there are no params that don't fit
-        var unparsed = false;
-        unparsedArgs.forEach(function(unparsedArg) {
-            if (used.indexOf(unparsedArg) == -1) {
-                message = 'Parameter \'' + unparsedArg + '\' makes no sense.';
-                this.hints.push(new Hint(Level.Error, message));
-                unparsed = true;
+            if (unparsed) {
+                this.argsPromise.resolve({});
+                return;
             }
-        }.bind(this));
-
-        if (unparsed) {
-            return;
         }
 
         // Show a hint for the last parameter
