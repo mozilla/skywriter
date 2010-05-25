@@ -54,6 +54,12 @@ var styleID = 1;
 // The theme variables as set by the current theme.
 exports.currentThemeVariables = null;
 
+// The plugin that should get applied before any other plugins get applied.
+exports.basePluginName = null;
+
+// If true, no less file is parsed.
+exports.preventParsing = true;
+
 // Stores the variableHeader used by every themeStyleFile for the global
 // ThemeVariables.
 var globalVariableHeader = '';
@@ -65,7 +71,8 @@ exports.globalThemeVariables = {};
 // Stores the internal styleID used with a extension.
 var extensionStyleID = {};
 
-// Stores the ThemeStyleFiles' content per plugin.
+// Stores the ThemeStyleFiles' content per plugin - somewhat like a par plugin
+// themeStyle cache.
 var extensionStyleData = {};
 
 
@@ -205,6 +212,11 @@ var parseQueue = {};
  * although not all themeVariables are available.
  */
 exports.parsePlugin = function(pluginName) {
+    // Parse only if this is permitted.
+    if (exports.preventParsing) {
+        return;
+    }
+
     var plugin = catalog.plugins[pluginName];
 
     if (!plugin) {
@@ -256,9 +268,10 @@ var processStyleContent = function(resourceURL, pluginName, data, p) {
     }
 };
 
-exports.registerThemeStyles = function(extension, self, register, handler) {
-    var pluginName = extension.getPluginName();
+var themeDataLoadPromise = null;
 
+exports.registerThemeStyles = function(extension) {
+    var pluginName = extension.getPluginName();
     var resourceURL = catalog.getResourceURL(pluginName);
 
     // Make the extension.url parameter an array if it isn't yet.
@@ -271,11 +284,13 @@ exports.registerThemeStyles = function(extension, self, register, handler) {
 
     var loadPromises = [];
 
+    var preventParsing = exports.preventParsing;
+
     // Load the StyleFiles.
     extension.url.forEach(function(styleFile) {
         if (extensionStyleBuildData[pluginName] &&
                 extensionStyleBuildData[pluginName][styleFile]) {
-            // Process the SstyleContent.
+            // Process the StyleContent.
             processStyleContent(resourceURL, pluginName,
                                 extensionStyleBuildData[pluginName][styleFile]);
         } else {
@@ -304,10 +319,18 @@ exports.registerThemeStyles = function(extension, self, register, handler) {
     if (loadPromises.length === 0) {
         exports.parsePlugin(pluginName);
     } else {
-        // After all styleFiles have been loaded, parse the plugin.
-        groupPromise(loadPromises).then(function() {
-            exports.parsePlugin(pluginName);
-        });
+        // If parsing is allowed, then wait until all the styleFiles are loaded
+        // and parse the plugin.
+        if (!preventParsing) {
+            groupPromise(loadPromises).then(function() {
+                exports.parsePlugin(pluginName);
+            });
+        }
+
+        if (themeDataLoadPromise !== null) {
+            loadPromises.push(themeDataLoadPromise);
+        }
+        themeDataLoadPromise = groupPromise(loadPromises);
     }
 };
 
@@ -315,16 +338,31 @@ exports.registerThemeStyles = function(extension, self, register, handler) {
  * Call this function to reparse all the ThemeStyles files.
  */
 exports.reparse = function() {
-    var themeStylesExt = catalog.getExtensions('themestyles');
-    var plugins = {};
+    // Reparsing makes only sense when there is a themeDataLoadPromise.
+    // If the value is null, then no styleFile was loaded and there is nothing
+    // to reparse.
+    if (themeDataLoadPromise) {
+        // When all the styleFiles are loaded.
+        themeDataLoadPromise.then(function() {
+            // Reparese all the themeStyles. Instead of loading the themeStyles
+            // again from the server, the cache extensionStyleData is used.
+            // Every plugin in this cache is reparsed.
 
-    themeStylesExt.forEach(function(themeStyleExt) {
-        plugins[themeStyleExt.getPluginName()] = true;
-    });
+            // Check if a basePlugin is set and parse this one first.
+            var basePluginName = exports.basePluginName;
+            if (basePluginName !== null && extensionStyleData[basePluginName]) {
+                exports.parsePlugin(basePluginName);
+            }
 
-    // Parse the StyleData for every plugin that has themeStyles.
-    for (pluginName in plugins) {
-        exports.parsePlugin(pluginName);
+            // Parse the other plugins.
+            for (pluginName in extensionStyleData) {
+                // Skip the basePlugin as this is already parsed.
+                if (pluginName === basePluginName) {
+                    continue;
+                }
+                exports.parsePlugin(pluginName);
+            }
+        });
     }
 };
 

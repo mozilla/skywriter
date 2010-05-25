@@ -43,15 +43,30 @@ var settings = require('settings').settings;
 // The current themeExt used on the page.
 var currentThemeExt = null;
 
-exports.themeSettingChanged = function(settingName, themeName) {
-    console.log('themeSettingChanged', settingName, themeName);
+// Name of the themePlugin that is used as standard theme. This is not the
+// base theme.
+var standardThemeName = null;
 
+// Load promise for the basePlugin.
+var basePluginLoadPromise = null;
+
+exports.themeSettingChanged = function(settingName, themeName) {
     // Get the themeExtensionPoint for 'themeName'
     var themeExt = catalog.getExtensionByKey('theme', themeName);
 
     // 'themeName' === standard : Remove the current set theme.
     // !themeName || !themeExt  : The named theme couldn't get found
     if (themeName === 'standard' || !themeName || !themeExt) {
+        themeExt = null;
+        // If a standardTheme is given, try to get it.
+        if (standardThemeName !== null) {
+            themeExt = catalog.getExtensionByKey('theme', standardThemeName);
+
+        }
+    }
+
+    // If no theme should get applied (including no standardTheme).
+    if (!themeExt) {
         // If there is a currentTheme before switching to 'standard' which means
         // removing the currentTheme as applied on the page.
         if (currentThemeExt) {
@@ -109,6 +124,50 @@ catalog.registerExtension('settingChange', {
     match: "theme",
     pointer: exports.themeSettingChanged.bind(exports)
 });
+
+/**
+ * Sets the standard theme that is used when no other theme is specified or
+ * the specified theme is not around.
+ */
+exports.setStandardTheme = function(themeName) {
+    standardThemeName = themeName;
+
+    // If the current theme is equal to themeName, then the theme is already
+    // applied. Otherwise, call themeSttingChanged which handles the standard-
+    // theme change then.
+    if (themeName !== settings.get('theme')) {
+        exports.themeSettingChanged();
+    }
+};
+
+/**
+ * Sets the plugin that should get treated as 'basePlugin'. BasePlugins contains
+ * the generic theming for buttons, inputs, panes etc.
+ */
+exports.setBasePlugin = function(pluginName) {
+    themestyles.basePluginName = pluginName;
+};
+
+/**
+ * This function has to be called to enable parsing. Before calling this
+ * function, parsing is prevented. This allows the developer to prevent parsing
+ * until certain basic theme plugins are loaded.
+ */
+exports.allowParsing = function() {
+    // Allow the parsing.
+    themestyles.preventParsing = false;
+
+    // If there is a load promise for the basePlugin, then wait for this one.
+    if (basePluginLoadPromise) {
+        basePluginLoadPromise.then(function() {
+            // Reparse all the applied themeStyles.
+            themestyles.reparse();
+        })
+    } else {
+        // Reparse all the applied themeStyles.
+        themestyles.reparse();
+    }
+};
 
 exports.registerTheme = function(extension) {
     var currentThemeName = settings.get('theme');

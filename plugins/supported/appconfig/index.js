@@ -65,6 +65,18 @@ exports.launch = function(config) {
         catalog.registerObject(key, objects[key]);
     }
 
+    // If the themeManager plugin is there, then check for theme configuration.
+    if (catalog.plugins.theme_manager) {
+        var themeManager = require('theme_manager');
+        if (config.theme.basePlugin) {
+            themeManager.setBasePlugin(config.theme.basePlugin);
+        }
+        if (config.theme.standard) {
+            themeManager.setStandardTheme(config.theme.standard);
+        }
+        themeManager.allowParsing();
+    }
+
     if (objects.loginController) {
         catalog.createObject("loginController").then(
             function(loginController) {
@@ -86,6 +98,12 @@ exports.normalizeConfig = function(config) {
     }
     if (config.autoload === undefined) {
         config.autoload = [];
+    }
+    if (config.theme === undefined) {
+        config.theme = {};
+    }
+    if (!config.theme.basePlugin && catalog.plugins.screen_theme) {
+        config.theme.basePlugin = 'screen_theme';
     }
     if (!config.objects.loginController && catalog.plugins.userident) {
         config.objects.loginController = {
@@ -147,8 +165,8 @@ exports.normalizeConfig = function(config) {
             alreadyRegistered[desc.component] = true;
         }
     }
-    
-    if (!config.gui.center && config.objects.editor 
+
+    if (!config.gui.center && config.objects.editor
         && !alreadyRegistered.editor) {
         config.gui.center = {
             component: "editor"

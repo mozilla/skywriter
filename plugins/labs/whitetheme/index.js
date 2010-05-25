@@ -76,11 +76,7 @@ exports.whiteTheme = function() {
         },
 
         screen_theme: {
-            scollerButtonColor: 'rgb(100, 100, 100)',
-            scrollerThumbColor: 'orange',
-            scrollerButtonThumbOutline: 'rgb(150, 150, 150)',
-            scrollerTrackBackgroundColor: '#DDD',
-            scrollerTrackBorderColor: 'rgb(160, 160, 160)',
+            pane_bg: 'red'
         }
     }
 };
