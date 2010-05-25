@@ -11,28 +11,128 @@
         },
         {
             "ep": "themevariable",
-            "name": "scollerButtonColor",
-            "defaultValue": "rgb(100, 100, 100)"
+            "name": "pane_bg",
+            "defaultValue": "#45443C"
         },
         {
             "ep": "themevariable",
-            "name": "scrollerThumbColor",
-            "defaultValue": "black"
+            "name": "pane_border_radius",
+            "defaultValue": ".5em"
         },
         {
             "ep": "themevariable",
-            "name": "scrollerButtonThumbOutline",
-            "defaultValue": "rgb(150, 150, 150)"
+            "name": "form_font",
+            "defaultValue": "'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial, Helvetica, sans-serif"
         },
         {
             "ep": "themevariable",
-            "name": "scrollerTrackBackgroundColor",
-            "defaultValue": "rgb(60, 60, 60)"
+            "name": "form_font_size",
+            "defaultValue": "@font_size"
         },
         {
             "ep": "themevariable",
-            "name": "scrollerTrackBorderColor",
-            "defaultValue": "rgb(60, 60, 60)"
+            "name": "form_line_height",
+            "defaultValue": "1.8em"
+        },
+        {
+            "ep": "themevariable",
+            "name": "form_color",
+            "defaultValue": "#FFF"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_a_color",
+            "defaultValue": "white"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_color",
+            "defaultValue": "white"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_font",
+            "defaultValue": "arial, lucida, helvetica, sans-serif"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_font_size",
+            "defaultValue": "@font_size"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_h1_font",
+            "defaultValue": "'MuseoSans', Helvetica"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_h1_font_size",
+            "defaultValue": "2.8em"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_p_line_height",
+            "defaultValue": "@font_size * 1.8"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_p_color",
+            "defaultValue": "#DAD4BA"
+        },
+        {
+            "ep": "themevariable",
+            "name": "control_border_radius",
+            "defaultValue": ".25em"
+        },
+        {
+            "ep": "themevariable",
+            "name": "button_font",
+            "defaultValue": "@font"
+        },
+        {
+            "ep": "themevariable",
+            "name": "button_font_size",
+            "defaultValue": "@font_size"
+        },
+        {
+            "ep": "themevariable",
+            "name": "button_bg",
+            "defaultValue": "#3E6CB9"
+        },
+        {
+            "ep": "themevariable",
+            "name": "button_bg2",
+            "defaultValue": "@button_bg - #063A27"
+        },
+        {
+            "ep": "themevariable",
+            "name": "button_border",
+            "defaultValue": "@button_bg - #194A5E"
+        },
+        {
+            "ep": "themevariable",
+            "name": "button_padding",
+            "defaultValue": "8px 12px"
+        },
+        {
+            "ep": "themevariable",
+            "name": "control_bg",
+            "defaultValue": "rgba(0,0,0,0.2)"
+        },
+        {
+            "ep": "themevariable",
+            "name": "control_color",
+            "defaultValue": "#E1B41F"
+        },
+        {
+            "ep": "themevariable",
+            "name": "control_active_color",
+            "defaultValue": "@control_color + #1E0000"
+        },
+        {
+            "ep": "themevariable",
+            "name": "control_active_border",
+            "defaultValue": "@control_color"
         }
     ]
 }

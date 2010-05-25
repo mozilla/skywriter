@@ -300,7 +300,7 @@ exports.loginController.prototype = {
 
         // Create the UI radioboxes and add an 'change' event listener that
         // is fired whenever the radio selection changes.
-        $('#form input[type=radio]').checkBox({
+        $('#bespinloginform input[type=radio]').checkBox({
             change: function(e, ui){
                 if (ui.checked) {
                     radioItem.hide();
@@ -324,15 +324,15 @@ exports.loginController.prototype = {
         }
 
         // Mark the radio item as selected.
-        $('#form input[type=radio]:eq(' + selectedRadio + ')')
+        $('#bespinloginform input[type=radio]:eq(' + selectedRadio + ')')
             .checkBox('changeCheckStatus', true);
 
         // Create the overlay.
         var overlayNode = $('#bespinloginform').overlay({
             mask: {
-                color: '#fff',
+                color: '#4E4D45',
                 loadSpeed: 200,
-                opacity: 0.5
+                opacity: 1
             },
             closeOnClick: false,
             closeOnEsc: false,

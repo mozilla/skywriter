@@ -79,10 +79,9 @@ var extensionStyleBuildData = {};
 // Stores the default globalTheme ThemeVariables, that are available to every
 // ThemeStyleFile.
 var defaultGlobalTheme = {
-    color:          'red',  // The default text color
-    background:     'red',  // The default background color
-    highlighted:    'red',  // The default highlighted-text color
-    colorBorder:    'red'   // The default border color
+    font:           '\'Lucida Grande\', \'Lucida Sans Unicode\',' +
+                        ' Lucida, Arial, Helvetica, sans-serif',
+    font_size:      '14px'
 };
 
 // END: THIS PART IS OVERRIDEN BY dryice

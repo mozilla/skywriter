@@ -94,5 +94,176 @@
         -moz-box-ordinal-group: 3;
         -webkit-box-ordinal-group: 3;
     }
+
+    input, textarea {
+        display: block;
+        border: 0px;
+        width: 200px;
+        padding: 4px;
+        color: @control_color;
+        background: @control_bg;
+        border: 1px solid rgba(0,0,0,0.2);
+        font-size: 8pt;
+        -moz-border-radius: @control_border_radius;
+        -webkit-border-radius: @control_border_radius;
+        box-shadow:
+            rgba(255,255,255,0.3) 0px 0px 2px,
+            inset rgba(0,0,0,0.3) 0px 0px 4px;
+        -moz-box-shadow:
+            rgba(255,255,255,0.3) 0px 0px 2px,
+            inset rgba(0,0,0,0.3) 0px 0px 4px;
+        -webkit-box-shadow:
+            rgba(255,255,255,0.3) 0px 0px 2px,
+            inset rgba(0,0,0,0.3) 0px 0px 4px;
+    }
+
+    input:focus, textarea:focus {
+        color: @control_active_color;
+        border: 1px solid @control_active_border;
+        outline: none;
+        box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
+            inset rgba(255,150,0,0.3) 0px 0px 6px;
+        -moz-box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
+            inset rgba(255,150,0,0.3) 0px 0px 6px;
+        -webkit-box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
+            inset rgba(255,150,0,0.3) 0px 0px 6px;
+    }
+
+    input[type=submit], input[type=button] {
+        font-family: @button_font;
+        font-size: @button_font_size;
+        text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+
+        width: 200px;
+
+        padding: @button_padding;
+        margin-left: 8px;
+        color: rgba(255,255,255,1);
+        background: transparent -moz-linear-gradient(top, @button_bg, @button_bg2);
+        background: transparent -webkit-gradient(linear, 50% 0%, 50% 100%, from(@button_bg), to(@button_bg2));
+
+        border: 1px solid @button_border;
+        -moz-border-radius: @control_border_radius;
+        -webkit-border-radius: @control_border_radius;
+        -moz-box-shadow:
+            inset rgba(255, 255, 255, 0.2) 0 1px 0px,
+            inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
+            rgba(0, 0, 0, 0.1) 0px 1px 2px;
+        -webkit-box-shadow:
+            inset rgba(255, 255, 255, 0.2) 0 1px 0px,
+            inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
+            rgba(0, 0, 0, 0.1) 0px 1px 2px;
+        box-shadow:
+            inset rgba(255, 255, 255, 0.2) 0 1px 0px,
+            inset rgba(0, 0, 0, 0.2) 0 -1px 0px,
+            rgba(0, 0, 0, 0.1) 0px 1px 2px;
+    }
+
+    .pane {
+        color: @pane_color;
+        font-size: @pane_font_size;
+        font-family: @pane_font;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        border-left: 1px solid rgba(0, 0, 0, 0.1);
+        border-right: 1px solid rgba(0, 0, 0, 0.1);
+        border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+        background-color: @pane_bg;
+        overflow: visible;
+        padding: 15px;
+
+        -moz-border-radius: @pane_border_radius;
+        -webkit-border-radius: @pane_border_radius;
+        -moz-box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px;
+        -webkit-box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px;
+
+        a {
+            color: @pane_a_color;
+        }
+
+        h1 {
+            font-family: @pane_h1_font;
+            font-size: @pane_h1_font_size;
+            letter-spacing: -1.25px;
+            line-height: 1.0;
+            margin-top: 0px;
+            margin-left: 10px;
+            margin-bottom: 25px;
+            margin-top: 10px;
+            text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+        }
+
+        p {
+            color: @pane_p_color;
+            line-height: @pane_p_line_height;
+            margin-left: 10px;
+            margin-bottom: 6px;
+            margin-top: 6px;
+            text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+        }
+    }
+
+
+    .form {
+        font-family: @form_font;
+        font-size: @form_font_size;
+        line-height: @form_line_height;
+        color: @form_color;
+
+        fieldset, p {
+            color: @form_color;
+            margin-bottom: 6px;
+            margin-top: 6px;
+            text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+        }
+    }
+
+    /*
+     * The state classes are a little bit complex, because of the doubble class bug in IE6
+     * The state class looks like this:
+     *
+     * .ui-radio-state[-checked][-disabled][-hover] or .ui-checkbox-state[-checked][-disabled][-hover]
+     *
+     * Examples:
+     *
+     * .ui-radio-state-checked (simply checked)
+     * .ui-radio-state-checked-hover (checked and hovered/focused)
+     * .ui-radio-state-hover (unchecked and hovered/focused)
+     *
+     * If you don´t have to deal with the doubble class bug of IE6 you can also use the simple ui-checkbox-checked, ui-checkbox-disabled, ui-checkbox-hover state-classnames (or: ui-radio-checked...)
+     * and the ui-radio/ui-checkbox role-classnames.
+     *
+     */
+
+    span.ui-checkbox,
+    span.ui-radio {
+        display: block;
+        float: left;
+        width: 24px;
+        height: 24px;
+        background: url(images/radio-unselected.png) no-repeat;
+    }
+
+    span.ui-checkbox {
+        background: url(images/check-unselected.png) no-repeat;
+    }
+
+    span.ui-helper-hidden {
+        display: none;
+    }
+
+    span.ui-checkbox-state-checked,
+    span.ui-checkbox-state-checked-hover {
+        background: url(images/check-selected.png) no-repeat;
+    }
+
+    span.ui-radio-state-checked,
+    span.ui-radio-state-checked-hover {
+        background: url(images/radio-selected.png) no-repeat;
+    }
+
+    .ui-helper-hidden-accessible {
+        position: absolute;
+        left: -999em;
+    }
 }
 

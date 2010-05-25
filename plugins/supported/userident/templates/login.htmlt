@@ -1,10 +1,10 @@
-<div id="bespinloginform" class="colorField" style="display:none">
+<div id="bespinloginform" class="pane" style="display:none">
 	<div id="welcome">
 		<img class="logo" src="${resourceURL}images/bespin-s.png"><h1>Welcome to Bespin</h1>
 		<p>The <a href="http://mozillalabs.com/bespin/" target="_blank">Bespin project</a> is building a web-based code editor using the emerging HTML5 standard. The editor is easily extensible with JavaScript and can be used in your own applications or on our experimental hosted service.</p>
 	</div>
 	
-	<div id="form">
+	<div class="form">
 		<fieldset style="border-width: 0px">
 			<div>
 			    <input name="radio" id="useridenRadioLogin" type="radio" radioFor="loginForm"/>
