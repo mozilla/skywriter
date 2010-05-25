@@ -11,6 +11,21 @@
         },
         {
             "ep": "themevariable",
+            "name": "container_bg",
+            "defaultValue": "#706f63"
+        },
+        {
+            "ep": "themevariable",
+            "name": "container_color",
+            "defaultValue": "@color"
+        },
+        {
+            "ep": "themevariable",
+            "name": "container_line_height",
+            "defaultValue": "@line_height"
+        },
+        {
+            "ep": "themevariable",
             "name": "pane_bg",
             "defaultValue": "#45443C"
         },
@@ -32,7 +47,7 @@
         {
             "ep": "themevariable",
             "name": "form_line_height",
-            "defaultValue": "1.8em"
+            "defaultValue": "@line_height"
         },
         {
             "ep": "themevariable",
@@ -77,7 +92,7 @@
         {
             "ep": "themevariable",
             "name": "pane_p_color",
-            "defaultValue": "#DAD4BA"
+            "defaultValue": "@color"
         },
         {
             "ep": "themevariable",

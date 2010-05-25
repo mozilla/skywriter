@@ -77,7 +77,7 @@
         {
             "ep": "themevariable",
             "name": "cli_error_text",
-            "defaultValue": "#F99"
+            "defaultValue": "@error_color"
         },
         {
             "ep": "themevariable",

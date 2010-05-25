@@ -81,7 +81,10 @@ var extensionStyleBuildData = {};
 var defaultGlobalTheme = {
     font:           '\'Lucida Grande\', \'Lucida Sans Unicode\',' +
                         ' Lucida, Arial, Helvetica, sans-serif',
-    font_size:      '14px'
+    font_size:      '14px',
+    line_height:    '1.8em',
+    color:          '#DAD4BA',
+    error_color:    '#F99'
 };
 
 // END: THIS PART IS OVERRIDEN BY dryice

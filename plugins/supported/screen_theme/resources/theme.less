@@ -36,18 +36,14 @@
  * ***** END LICENSE BLOCK ***** */
 
 .bespin {
-    body {
-        background: #706f63;
-        font-family: 'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial,
-            Helvetica, sans-serif;
-        background: transparent;
-        padding: 0px;
-        color: rgba(218,212,186,1);
-        font-size:14px;
-        line-height: 1.8em;
-    }
-
     .container {
+        font-family: @font;
+        font-size: @font_size;
+
+        color: @container_color;
+        background: @container_bg;
+        line-height: @container_line_height;
+
         display: -moz-box;
         -moz-box-orient: vertical;
         display: -webkit-box;
