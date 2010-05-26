@@ -35,6 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var util = require("util/util");
 
 /**
  * This object represents a "safe console" object that forwards debugging
@@ -49,7 +50,7 @@
 var noop = function() {
 };
 
-if (window.console && window.console.markTimeline) {
+if (util.isSafari) {
     // Webkit's output functions are bizarre because they get confused if 'this'
     // is not window.console, so we just copy it all across
     exports.console = window.console;
