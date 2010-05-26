@@ -67,6 +67,7 @@ exports.CanvasView = function(container, preventDownsize, clearOnFullInvalid) {
         width: 0,
         height: 0
     };
+    this._invalidRects = [];
 
     var canvas = document.createElement('canvas');
     canvas.setAttribute('style', 'position: absolute');
