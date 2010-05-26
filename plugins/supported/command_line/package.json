@@ -12,7 +12,7 @@
     "provides": [
         {
             "ep": "themestyles",
-            "url": [ "article.less", "cli.less", "menu.less" ]
+            "url": [ "article.less", "cli.less", "menu.less", "requestOutput.less" ]
         },
         {
             "ep": "themevariable",

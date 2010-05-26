@@ -37,7 +37,6 @@
 
 var diff_match_patch = require('diff').diff_match_patch;
 
-var env = require('canon:environment').global;
 var util = require('bespin:util/util');
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
@@ -55,11 +54,6 @@ var templates = require('command_line:templates');
 
 var imagePath = catalog.getResourceURL('command_line') + 'images';
 var diff = new diff_match_patch();
-
-/**
- * The height of the input area that is always visible.
- */
-var inputHeight = 25;
 
 /**
  * A view designed to dock in the bottom of the editor, holding the command
@@ -187,32 +181,15 @@ exports.CliInputView.prototype = {
      */
     checkSize: function() {
         var orientation = this.getOrientation();
-        if (orientation === this._lastOrientation) {
-            if (orientation === 'north' || orientation === 'south') {
-                // We've changed to vertical orientation (east/west)
-                this.element.style.height = '100%';
-                // Width also calculated when orientation is unchanged (below)
-            } else {
-                // We've changed to horizontal orientation (north/south)
-                // Height also calculated when orientation is unchanged (below)
-                this.element.style.width = '100%';
-            }
-        }
 
         if (orientation === 'north' || orientation === 'south') {
             var height = settings.get('minConsoleHeight');
             if (this._pinned || this._hasFocus) {
                 height = settings.get('maxConsoleHeight');
             }
-            height += inputHeight;
 
             this.element.style.height = height + 'px';
             catalog.publish('dimensionsChanged');
-        }
-
-        if (orientation === 'east' || orientation === 'west') {
-            // TODO - setting?
-            this.element.style.width = '400px';
         }
     },
 
@@ -328,115 +305,75 @@ exports.CliInputView.prototype = {
      * Adds a row to the CLI output display
      */
     addedRequestOutput: function(key, request) {
-        request.hideOutput = false;
+        var actions = {
+            request: request,
+            cliInputView: this,
 
-        // The div for the input (i.e. what was typed)
-        var rowin = document.createElement('div');
-        rowin.className = 'cmd_rowin';
-        // A single click on an invocation line in the console
-        // copies the command to the command line
-        rowin.onclick = function() {
-            this.setInput(request.typed);
-        }.bind(this);
-        // A double click on an invocation line in the console
-        // executes the command
-        rowin.ondblclick = function() {
-            // TODO: This is a hack... how to do it right?
-            environment.commandLine = this;
+            // A single click on an invocation line in the console
+            // copies the command to the command line
+            copyToInput: function() {
+                cliInputView.setInput(request.typed);
+            },
 
-            this._input = new Input(request.typed);
-            this._input.execute();
-        };
-        this._table.appendChild(rowin);
+            // A double click on an invocation line in the console
+            // executes the command
+            executeRequest: function() {
+                // TODO: This is a hack... how to do it right?
+                environment.commandLine = this.cliInputView;
+                this.cliInputView._input = new Input(this.request.typed);
+                this.cliInputView._input.execute();
+            },
 
-        // The execution time
-        var hover = document.createElement('div');
-        hover.className = 'cmd_hover';
-        rowin.appendChild(hover);
+            hideOutput: function() {
+                this.outputEle.style.display = 'block';
+                this.hideOutputEle.style.display = 'none';
+                this.showOutputEle.style.display = 'block';
+            },
 
-        var durationEle = document.createElement('span');
-        durationEle.className = 'cmd_duration';
-        hover.appendChild(durationEle);
+            showOutput: function() {
+                this.outputEle.style.display = 'none';
+                this.hideOutputEle.style.display = 'block';
+                this.showOutputEle.style.display = 'none';
+            },
 
-        // Toggle output display
-        var hideOutputEle = document.createElement('img');
-        hideOutputEle.onclick = function() {
-            request.hideOutput = !request.hideOutput;
-        };
-        hideOutputEle.style.verticalAlign = 'middle';
-        hideOutputEle.style.padding = '2px';
-        hover.appendChild(hideOutputEle);
+            remove: function() {
+                history.history.remove(this.request);
+            },
 
-        // Open/close output
-        var closeEle = document.createElement('img');
-        closeEle.src = imagePath + '/closer.png';
-        closeEle.alt = 'Remove this command from the history';
-        closeEle.title = closeEle.alt;
-        closeEle.onclick = function() {
-            history.history.remove(request);
-        };
-        closeEle.style.verticalAlign = 'middle';
-        closeEle.style.padding = '2px';
-        hover.appendChild(closeEle);
+            onRequestChange: function() {
+                this.durationEle.innerHTML = this.request.duration ?
+                    'completed in ' + (this.request.duration / 1000) + ' sec ' :
+                    '';
 
-        // What the user actually typed
-        var prompt = document.createElement('span');
-        prompt.className = 'cmd_gt';
-        prompt.innerHTML = '&gt; ';
-        rowin.appendChild(prompt);
+                this.typedEle.innerHTML = this.request.typed;
 
-        var typedEle = document.createElement('span');
-        typedEle.className = 'cmd_typed';
-        rowin.appendChild(typedEle);
+                this.outputEle.innerHTML = '';
+                this.request.outputs.forEach(function(output) {
+                    var node;
+                    if (typeof output == 'string') {
+                        node = document.createElement('p');
+                        node.innerHTML = output;
+                    } else {
+                        node = output;
+                    }
+                    this.outputEle.appendChild(node);
+                }, this);
+                this.cliInputView.scrollToBottom();
 
-        var rowout = document.createElement('div');
-        rowout.className = 'cmd_rowout';
-        this._table.appendChild(rowout);
+                util.setClass(this.outputEle, 'cmd_error', this.request.error);
 
-        var outputEle = document.createElement('div');
-        outputEle.className = 'cmd_output';
-        rowout.appendChild(outputEle);
-
-        var throbEle = document.createElement('img');
-        throbEle.src = imagePath + '/throbber.gif';
-        rowout.appendChild(throbEle);
-
-        request.changed.add(function() {
-            durationEle.innerHTML = request.duration ?
-                'completed in ' + (request.duration / 1000) + ' sec ' :
-                '';
-
-            if (request.hideOutput) {
-                hideOutputEle.src = imagePath + '/plus.png';
-                hideOutputEle.alt = 'Show command output';
-                hideOutputEle.title = 'Show command output';
-                outputEle.style.display = 'none';
-            } else {
-                hideOutputEle.src = imagePath + '/minus.png';
-                hideOutputEle.alt = 'Hide command output';
-                hideOutputEle.title = 'Hide command output';
-                outputEle.style.display = 'block';
+                this.throbEle.style.display = this.request.completed ? 'none' : 'block';
             }
+        };
 
-            typedEle.innerHTML = request.typed;
+        templates.requestOutput({
+            actions: actions,
+            imagePath: imagePath
+        });
 
-            outputEle.innerHTML = '';
-            request.outputs.forEach(function(output) {
-                var node;
-                if (typeof output == 'string') {
-                    node = document.createElement('p');
-                    node.innerHTML = output;
-                } else {
-                    node = output;
-                }
-                outputEle.appendChild(node);
-            });
-            this.scrollToBottom();
-
-            outputEle.className = 'cmd_output' + (request.error ? ' cmd_error' : '');
-
-            throbEle.style.display = request.completed ? 'none' : 'block';
-        }.bind(this));
+        this._table.appendChild(actions.rowin);
+        this._table.appendChild(actions.rowout);
+        request.changed.add(actions.onRequestChange.bind(actions));
     },
 
     /**
@@ -445,8 +382,8 @@ exports.CliInputView.prototype = {
     scrollToBottom: function() {
         // certain browsers have a bug such that scrollHeight is too small
         // when content does not fill the client area of the element
-        var scrollHeight = Math.max(this._table.scrollHeight, this._table.clientHeight);
-        this._table.scrollTop = scrollHeight - this._table.clientHeight;
+        //var scrollHeight = Math.max(this._table.scrollHeight, this._table.clientHeight);
+        //this._table.scrollTop = scrollHeight - this._table.clientHeight;
     },
 
     /**
