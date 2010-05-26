@@ -444,9 +444,8 @@ Object.defineProperties(exports.EditorView.prototype, {
         get: function() {
             var frame = util.clone(this.textView.frame);
             var padding = this.textView.padding;
-            var charWidth = this.layoutManager.fontDimension.characterWidth;
 
-            frame.width -= padding.left + padding.right + charWidth;
+            frame.width -= padding.left + padding.right;
             frame.height -= padding.top + padding.bottom;
             return frame;
         }
