@@ -37,31 +37,31 @@
 div.cmd_menu {
   display: inline-block;
   margin-bottom: -2px;
-  color: @cli_hi_text;
+  color: @hi_text;
   padding: 8px;
-  border: 2px @cli_border_bg solid;
+  border: 2px @border_bg solid;
   border-bottom: 0;
   -moz-border-radius-topleft: 10px;
   -moz-border-radius-topright: 10px;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
-  background: @cli_input_bg2;
-  background: -moz-linear-gradient(top, @cli_input_bg_light, @cli_input_bg);
-  background: -webkit-gradient(linear, left top, left bottom, from(@cli_input_bg_light), to(@cli_input_bg));
-  -moz-border-top-colors: @cli_border_bg @cli_border_fg;
-  -moz-border-left-colors: @cli_border_bg @cli_border_fg;
-  -moz-border-right-colors: @cli_border_bg @cli_bg;
+  background: @input_bg2;
+  background: -moz-linear-gradient(top, @input_bg_light, @input_bg);
+  background: -webkit-gradient(linear, left top, left bottom, from(@input_bg_light), to(@input_bg));
+  -moz-border-top-colors: @border_bg @border_fg;
+  -moz-border-left-colors: @border_bg @border_fg;
+  -moz-border-right-colors: @border_bg @bg;
   -webkit-box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 10px 3px;
   -moz-box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 10px 3px;
 }
 
 div.cmd_menu .cmd_title {
   margin-bottom: 2px;
-  border-bottom: 2px @cli_border_bg solid;
-  -moz-border-bottom-colors: @cli_border_fg @cli_border_bg;
+  border-bottom: 2px @border_bg solid;
+  -moz-border-bottom-colors: @border_fg @border_bg;
 }
 
-div.cmd_menu .cmd_error { color: @cli_error_text; }
+div.cmd_menu .cmd_error { color: @error_text; }
 div.cmd_menu ul { margin: 0; padding: 0; }
 
 div.cmd_menu li {
@@ -70,49 +70,49 @@ div.cmd_menu li {
 }
 
 div.cmd_menu li:hover, .cmd_hi {
-  color: @cli_border_bg;
-  background: @cli_theme_text -moz-linear-gradient(top, @cli_theme_text, @cli_theme_text_dark);
-  background: -webkit-gradient(linear, left top, left bottom, from(@cli_theme_text), to(@cli_theme_text_dark));
+  color: @border_bg;
+  background: @theme_text -moz-linear-gradient(top, @theme_text, @theme_text_dark);
+  background: -webkit-gradient(linear, left top, left bottom, from(@theme_text), to(@theme_text_dark));
   cursor: pointer;
 }
 
 div.cmd_ex div.cmd_menu dfn {
   font-size: 80%;
-  color: @cli_lo_text;
+  color: @lo_text;
   padding: 0 5px;
   font-style: inherit;
 }
 
 div.cmd_menu em {
-  color: @cli_theme_text;
+  color: @theme_text;
   font-style: inherit;
 }
 
 div.cmd_menu li:hover em,
-div.cmd_menu li:hover dfn { color: @cli_border_bg; }
+div.cmd_menu li:hover dfn { color: @border_bg; }
 
 div.cmd_menu .cmd_sub:after {
   padding-left: 5px;
   content: "\u27a4";
   float: right;
-  color: @cli_input_submenu;
+  color: @input_submenu;
   font-size: 80%;
 }
 
-div.cmd_menu li:hover.cmd_sub:after { color: @cli_theme_text_light; }
+div.cmd_menu li:hover.cmd_sub:after { color: @theme_text_light; }
 
 div.cmd_menu .cmd_sep {
   margin-top: 2px;
-  border-top: 2px @cli_border_bg solid;
-  -moz-border-top-colors: @cli_border_bg @cli_border_fg;
+  border-top: 2px @border_bg solid;
+  -moz-border-top-colors: @border_bg @border_fg;
 }
 
-div.cmd_menu .cmd_error { color: @cli_error_text; }
+div.cmd_menu .cmd_error { color: @error_text; }
 
 div.cmd_menu abbr {
   display: block;
   float: right;
-  color: @cli_theme_text_dark2;
+  color: @theme_text_dark2;
   cursor: pointer;
   font-size: 75%;
   margin-left: 5px;

@@ -35,25 +35,25 @@
 * ***** END LICENSE BLOCK ***** */
 
 /* Global styles */
-.cmd_line { background: @cli_bg; color: @cli_text;
-  font-family: @cli_fonts; font-size: 90%;
+.cmd_line { background: @bg; color: @text;
+  font-family: @fonts; font-size: 90%;
   /* position: absolute; height: 300px; bottom: 0; left: 0; right: 0; */
   overflow-x: hidden;
 }
-.cmd_error { color: @cli_error_text; }
+.cmd_error { color: @error_text; }
 
 
 /* The prompt */
 .cmd_prompt {
   position: absolute; height: 25px; bottom: 0; left: 5px; width: 40px;
 }
-.cmd_brackets { color: @cli_hi_text; }
-.cmd_gt { color: @cli_theme_text; font-weight: bold; font-size: 120%; }
+.cmd_brackets { color: @hi_text; }
+.cmd_gt { color: @theme_text; font-weight: bold; font-size: 120%; }
 
 /* The input area */
 /* When we lose the SC CSS we can drop the .cmd_line specificity trump card */
 input.cmd_input {
-  color: @cli_hi_text; font-size: 110%; font-family: @cli_fonts; 
+  color: @hi_text; font-size: 110%; font-family: @fonts;
   background: transparent;
   -webkit-box-shadow: none; outline: none; border: 0;
   position: absolute; height: 25px; bottom: 0px; left: 40px;
@@ -69,10 +69,10 @@ input.cmd_input:focus { outline-width: 0px; outline: 0px; border: 0;
 
 /* Command line completion */
 .cmd_completion {
-  color: @cli_lo_text2; font-size: 110%; font-family: @cli_fonts; 
+  color: @lo_text2; font-size: 110%; font-family: @fonts;
   position: absolute; height: 18px; bottom: 6px; left: 43px; right: 0;
 }
-.cmd_existing { color: @cli_input_bg; text-shadow: none; }
+.cmd_existing { color: @input_bg; text-shadow: none; }
 .cmd_extension { margin-left: 30px; }
 .cmd_extension: before { content: "\2794\00a0 "; }
 .cmd_char { letter-spacing: -0.2ex; font-weight: bold; }
@@ -90,8 +90,8 @@ input.cmd_input:focus { outline-width: 0px; outline: 0px; border: 0;
 }
 
 .cmd_rowin {
-  font-size: 110%; font-weight: bold; color: @cli_hi_text;
-  background-color: @cli_input_bg;
+  font-size: 110%; font-weight: bold; color: @hi_text;
+  background-color: @input_bg;
 }
 .cmd_rowin > img { cursor: pointer; }
 .cmd_rowin:hover > .cmd_hover { display: block; }
@@ -100,7 +100,7 @@ input.cmd_input:focus { outline-width: 0px; outline: 0px; border: 0;
 
 .cmd_hover {
   float: right; height: 100%; display: none;
-  font-weight: normal; color: @cli_text; text-align: right;
+  font-weight: normal; color: @text; text-align: right;
 }
 /* WARNING: this selector is SLLLOOOOWWW. */
 .cmd_hover * {
@@ -116,17 +116,17 @@ input.cmd_input:focus { outline-width: 0px; outline: 0px; border: 0;
 .cmd_output th,
 .cmd_output h1,
 .cmd_output h2,
-.cmd_output h3 { color: @cli_hi_text; }
+.cmd_output h3 { color: @hi_text; }
 .cmd_output a {
   font-weight: bold;
-  color: @cli_link_text;
+  color: @link_text;
   text-decoration: none;
 }
 .cmd_output a: hover { text-decoration: underline; cursor: pointer; }
 .cmd_output input[type=password],
 .cmd_output input[type=text],
 .cmd_output textarea {
-  color: @cli_hi_text; font-size: 120%;
+  color: @hi_text; font-size: 120%;
   background: transparent; padding: 3px;
   border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
 }
@@ -140,10 +140,10 @@ input.cmd_input:focus { outline-width: 0px; outline: 0px; border: 0;
 }
 
 .cmd_line > kbd {
-  border-top: 2px solid @cli_border_bg;
-  -moz-border-top-colors: @cli_border_bg @cli_bg;
-  background: @cli_input_bg;
-  background: -moz-linear-gradient(top, @cli_input_bg, @cli_input_bg2);
-  background: -webkit-gradient(linear, left top, left bottom, from(@cli_input_bg), to(@cli_input_bg2));
+  border-top: 2px solid @border_bg;
+  -moz-border-top-colors: @border_bg @bg;
+  background: @input_bg;
+  background: -moz-linear-gradient(top, @input_bg, @input_bg2);
+  background: -webkit-gradient(linear, left top, left bottom, from(@input_bg), to(@input_bg2));
   position: absolute; height: 25px; bottom: 0; left: 0; right: 0;
 }

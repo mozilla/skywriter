@@ -17,12 +17,12 @@
         {
             "ep": "themevariable",
             "name": "container_color",
-            "defaultValue": "@color"
+            "defaultValue": "@global_color"
         },
         {
             "ep": "themevariable",
             "name": "container_line_height",
-            "defaultValue": "@line_height"
+            "defaultValue": "@global_line_height"
         },
         {
             "ep": "themevariable",
@@ -42,12 +42,12 @@
         {
             "ep": "themevariable",
             "name": "form_font_size",
-            "defaultValue": "@font_size"
+            "defaultValue": "@global_font_size"
         },
         {
             "ep": "themevariable",
             "name": "form_line_height",
-            "defaultValue": "@line_height"
+            "defaultValue": "@global_line_height"
         },
         {
             "ep": "themevariable",
@@ -72,7 +72,7 @@
         {
             "ep": "themevariable",
             "name": "pane_font_size",
-            "defaultValue": "@font_size"
+            "defaultValue": "@global_font_size"
         },
         {
             "ep": "themevariable",
@@ -87,12 +87,12 @@
         {
             "ep": "themevariable",
             "name": "pane_p_line_height",
-            "defaultValue": "@font_size * 1.8"
+            "defaultValue": "@global_font_size * 1.8"
         },
         {
             "ep": "themevariable",
             "name": "pane_p_color",
-            "defaultValue": "@color"
+            "defaultValue": "@global_color"
         },
         {
             "ep": "themevariable",
@@ -102,12 +102,12 @@
         {
             "ep": "themevariable",
             "name": "button_font",
-            "defaultValue": "@font"
+            "defaultValue": "@global_font"
         },
         {
             "ep": "themevariable",
             "name": "button_font_size",
-            "defaultValue": "@font_size"
+            "defaultValue": "@global_font_size"
         },
         {
             "ep": "themevariable",

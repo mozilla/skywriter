@@ -86,12 +86,12 @@ var extensionStyleBuildData = {};
 // Stores the default globalTheme ThemeVariables, that are available to every
 // ThemeStyleFile.
 var defaultGlobalTheme = {
-    font:           '\'Lucida Grande\', \'Lucida Sans Unicode\',' +
-                        ' Lucida, Arial, Helvetica, sans-serif',
-    font_size:      '14px',
-    line_height:    '1.8em',
-    color:          '#DAD4BA',
-    error_color:    '#F99'
+    global_font:            '\'Lucida Grande\', \'Lucida Sans Unicode\',' +
+                                ' Lucida, Arial, Helvetica, sans-serif',
+    global_font_size:      '14px',
+    global_line_height:    '1.8em',
+    global_color:          '#DAD4BA',
+    global_error_color:    '#F99'
 };
 
 // END: THIS PART IS OVERRIDEN BY dryice

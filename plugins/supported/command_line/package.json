@@ -16,102 +16,102 @@
         },
         {
             "ep": "themevariable",
-            "name": "cli_bg",
+            "name": "bg",
             "defaultValue": "rgb(30,25,22)",
             "comment": "#1E1916"
         },
         {
             "ep": "themevariable",
-            "name": "cli_input_bg_light",
+            "name": "input_bg_light",
             "defaultValue": "rgb(39,33,29)",
             "comment": "#27211D"
         },
         {
             "ep": "themevariable",
-            "name": "cli_input_bg",
+            "name": "input_bg",
             "defaultValue": "rgb(27,22,19)",
             "comment": "#1B1613"
         },
         {
             "ep": "themevariable",
-            "name": "cli_input_bg2",
+            "name": "input_bg2",
             "defaultValue": "rgb(25,20,16)",
             "comment": "#191410"
         },
         {
             "ep": "themevariable",
-            "name": "cli_border_fg",
+            "name": "border_fg",
             "defaultValue": "rgb(62,57,54)",
             "comment": "#3E3936"
         },
         {
             "ep": "themevariable",
-            "name": "cli_border_bg",
+            "name": "border_bg",
             "defaultValue": "#000"
         },
         {
             "ep": "themevariable",
-            "name": "cli_text",
+            "name": "text",
             "defaultValue": "#AAA"
         },
         {
             "ep": "themevariable",
-            "name": "cli_hi_text",
+            "name": "hi_text",
             "defaultValue": "#FFF"
         },
         {
             "ep": "themevariable",
-            "name": "cli_lo_text",
+            "name": "lo_text",
             "defaultValue": "#888"
         },
         {
             "ep": "themevariable",
-            "name": "cli_lo_text2",
+            "name": "lo_text2",
             "defaultValue": "#443"
         },
         {
             "ep": "themevariable",
-            "name": "cli_link_text",
+            "name": "link_text",
             "defaultValue": "#ACF"
         },
         {
             "ep": "themevariable",
-            "name": "cli_error_text",
-            "defaultValue": "@error_color"
+            "name": "error_text",
+            "defaultValue": "@global_error_color"
         },
         {
             "ep": "themevariable",
-            "name": "cli_theme_text",
+            "name": "theme_text",
             "defaultValue": "rgb(255,142,0)",
             "comment": "#FF8E00"
         },
         {
             "ep": "themevariable",
-            "name": "cli_theme_text_light",
+            "name": "theme_text_light",
             "defaultValue": "rgb(255,206,0)",
             "comment": "#FFCE00"
         },
         {
             "ep": "themevariable",
-            "name": "cli_theme_text_dark",
+            "name": "theme_text_dark",
             "defaultValue": "rgb(221,110,0)",
             "comment": "#DD6E00"
         },
         {
             "ep": "themevariable",
-            "name": "cli_theme_text_dark2",
+            "name": "theme_text_dark2",
             "defaultValue": "rgb(153,102,51)",
             "comment": "#996633"
         },
         {
             "ep": "themevariable",
-            "name": "cli_input_submenu",
+            "name": "input_submenu",
             "defaultValue": "rgb(14,9,6)",
             "comment": "#0E0906"
         },
         {
             "ep": "themevariable",
-            "name": "cli_fonts",
+            "name": "fonts",
             "defaultValue": "Calibri,Arial,sans-serif"
         },
         {
