@@ -164,10 +164,10 @@ exports.loginController.prototype = {
         var email = formObj.email.value;
         var emailError = '';
         if (email === '') {
-            emailError = 'Required field'
+            emailError = 'Required field';
             isValid = false;
         } else if (email.match(/.+@.+\...+/) === null) {
-            emailError = 'Not a valid format'
+            emailError = 'Not a valid format';
             isValid = false;
         }
 
@@ -180,7 +180,7 @@ exports.loginController.prototype = {
         exports.login(username, password).then(function(data) {
             pr.resolve(username);
         }, function() {
-            alert('Your Username or Password was not recognized.');
+            alert('Your username or password was not recognized.');
         });
     },
 
@@ -215,9 +215,9 @@ exports.loginController.prototype = {
                         exports.lostPassword({
                             username: obj.lostForm.input.value
                         }).then(function() {
-                            alert('Reset Password: Confirmation email sent - check your mail and follow the link');
+                            alert('Reset Password: confirmation email sent - check your mail and follow the link');
                         }, function() {
-                            alert('Reset Password: Your Username or Email is unkown.');
+                            alert('Reset Password: Your username or email is unknown.');
                         });
                     }
                     // Stop the event.
@@ -232,9 +232,9 @@ exports.loginController.prototype = {
 
                     var len = password.length;
                     if (len < 6 || len > 20) {
-                        alert('Reset Password: The password has to be at least 6 and maximum 20 characters.');
+                        alert('Reset Password: The password has to be at least 6 and at most 20 characters.');
                     } else if (this.get('password1') !== this.get('password2')) {
-                        alert ('Reset Password: The typed passwords do not match.');
+                        alert('Reset Password: The typed passwords do not match.');
                     } else {
                         var data = searchQuery.pwchange.split(';');
                         var usename = data[0];
@@ -292,7 +292,7 @@ exports.loginController.prototype = {
                 $(obj.formDiv).height(visibleForm.height() + 10);
 
             }, 0);
-        }
+        };
         updateFromDiv();
 
         // One jQuery object that holds all the forms.
