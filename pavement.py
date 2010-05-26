@@ -601,4 +601,14 @@ def docs(options):
     if not docdir.exists():
         call_task("build_docs")
     webbrowser.open("file:///%s/index.html" % docdir.abspath())
-    
+
+@task
+def tags(options):
+    """Generates tags for Bespin using jsctags."""
+    args = [ "jsctags" ]
+    for dir in path("plugins").dirs():
+        args += [ "-L", dir, dir ]
+    for file in path("static").files("*.js"):
+        args.append(file)
+    sh(" ".join(args))
+
