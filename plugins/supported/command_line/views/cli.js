@@ -37,6 +37,7 @@
 
 var diff_match_patch = require('diff').diff_match_patch;
 
+var env = require('canon:environment').global;
 var util = require('bespin:util/util');
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
@@ -206,6 +207,7 @@ exports.CliInputView.prototype = {
             height += inputHeight;
 
             this.element.style.height = height + 'px';
+            env.sizeChanged();
         }
 
         if (orientation === 'east' || orientation === 'west') {

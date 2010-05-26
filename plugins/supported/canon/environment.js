@@ -38,6 +38,8 @@
 var console = require('bespin:console').console;
 var catalog = require("bespin:plugins").catalog;
 
+var Event = require('events').Event;
+
 /**
  * The environment plays a similar role to the environment under unix.
  * Bespin does not currently have a concept of variables, (i.e. things the user
@@ -48,9 +50,21 @@ var catalog = require("bespin:plugins").catalog;
 exports.Environment = function() {
     // The current command line pushes this value into here
     this.commandLine = null;
+
+    // Size event. Required for the canvas based editor, as canvas is not
+    // working with FlexBox. Whenever one of the elements on the page or the
+    // entire window is resized, this event has to be fired.
+    this.sizeChanged = new Event();
+
+    // Fire the sizeChanged event when the window is resized.
+    window.addEventListener('resize', this.sizeChanged, false);
 };
 
 Object.defineProperties(exports.Environment.prototype, {
+    sizeChanged: {
+        value: null
+    },
+
     /**
      * Retrieves the EditSession
      */

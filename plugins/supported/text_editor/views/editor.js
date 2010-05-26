@@ -37,6 +37,7 @@
 
 var util = require('bespin:util/util');
 
+var env = require('canon:environment').global;
 var catalog = require('bespin:plugins').catalog;
 var Event = require('events').Event;
 var settings = require('settings').settings;
@@ -161,8 +162,7 @@ exports.EditorView = function() {
             this._recomputeLayout();
         }.bind(this), 0);
 
-        // Other event to listen to.
-        window.addEventListener('resize', this.dimensionChanged.bind(this), false);
+        env.sizeChanged.add(this, this.dimensionChanged.bind(this));
 
         var wheelEvent = util.isMozilla ? 'DOMMouseScroll' : 'mousewheel';
         container.addEventListener(wheelEvent, this.onMouseWheel.bind(this), false);
