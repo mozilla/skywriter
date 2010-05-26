@@ -154,13 +154,9 @@ exports.EditorView = function() {
             pointer: this._fontSettingChanged.bind(this)
         });
 
-        // When adding an container that is managed by FlexBox, the size is not
-        // available at once. After a small delay it is.
-        setTimeout(function() {
-            // Allow the layout to be recomputed.
-            this._dontRecomputeLayout = false;
-            this._recomputeLayout();
-        }.bind(this), 0);
+        // Allow the layout to be recomputed.
+        this._dontRecomputeLayout = false;
+        this._recomputeLayout();
 
         env.sizeChanged.add(this, this.dimensionChanged.bind(this));
 
