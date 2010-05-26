@@ -39,7 +39,7 @@ var util = require('bespin:util/util');
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var Promise = require('bespin:promise').Promise;
-var groupPromise = require('bespin:promise').group;
+var group = require('bespin:promise').group;
 
 var $ = require("jquery").$;
 
@@ -156,7 +156,7 @@ exports.parseGlobalVariables();
 /**
  * Parse one less files.
  */
-var parseLess = function(pluginName, variableHeader) {
+var parseLess = function(pr, pluginName, variableHeader) {
     // Use already existing DOM style element or create a new one on the page.
     if (extensionStyleID[pluginName]) {
         styleElem = document.getElementById('_bespin_theme_style_' +
@@ -178,7 +178,9 @@ var parseLess = function(pluginName, variableHeader) {
                             extensionStyleData[pluginName]; // and the data
     lessParser.parse(dataToParse, function(e, tree) {
         if (e) {
-            console.error("Error less parsing ", pluginName, e.message);
+            var errMsg = 'Error less parsing ' +  pluginName + ' ' +  e.message;
+            console.error(errMsg);
+            pr.reject(errMsg);
             return;
         }
 
@@ -188,8 +190,9 @@ var parseLess = function(pluginName, variableHeader) {
             // DEBUG ONLY.
             // console.log('  parsing took: ', (new Date()) - timer, 'ms');
         } catch (e) {
-            console.error("Error less parsing ", pluginName, e);
-            console.trace(e);
+            var errMsg = 'Error less parsing ' + pluginName + ' ' + e;
+            console.error(errMsg);
+            pr.reject(errMsg);
             return;
         }
 
@@ -200,6 +203,7 @@ var parseLess = function(pluginName, variableHeader) {
             var cssContentNode = document.createTextNode(css);
             styleElem.appendChild(cssContentNode);
         }
+        pr.resolve();
     });
 };
 
@@ -210,10 +214,15 @@ var parseQueue = {};
  * Parse the less files for a entire plugin. The plugin is not parsed directly,
  * but with a small delay. Otherwise it could happen that the plugin is parsed
  * although not all themeVariables are available.
+ * Returns a promise that is resolved after the plugin is successfully parsed.
+ * An error during parsing rejects the promise.
  */
 exports.parsePlugin = function(pluginName) {
+    var pr = new Promise();
+
     // Parse only if this is permitted.
     if (exports.preventParsing) {
+        pr.resolve();
         return;
     }
 
@@ -247,12 +256,14 @@ exports.parsePlugin = function(pluginName) {
             // DEBUG ONLY:
             // console.log('  variables: ', variableHeader, globalVariableHeader);
 
-            parseLess(pluginName, variableHeader);
+            parseLess(pr, pluginName, variableHeader);
 
             // DEBUG ONLY:
             // console.log('everything took: ', (new Date()) - time, 'ms');
         }.bind(plugin), 0);
     }
+
+    return pr;
 };
 
 // Function that pocesses the loaded StyleFile content.
@@ -306,7 +317,7 @@ exports.registerThemeStyles = function(extension) {
                     console.error('registerLessFile: Could not load ' +
                             resourceURL + styleFile);
 
-                    // The file couldn't get loaded but to make the groupPromise
+                    // The file couldn't get loaded but to make the group
                     // work we have to mark this loadPromise as resolved so that
                     // at least the other sucessfully loaded files can get
                     // proceeded.
@@ -322,7 +333,7 @@ exports.registerThemeStyles = function(extension) {
         // If parsing is allowed, then wait until all the styleFiles are loaded
         // and parse the plugin.
         if (!preventParsing) {
-            groupPromise(loadPromises).then(function() {
+            group(loadPromises).then(function() {
                 exports.parsePlugin(pluginName);
             });
         }
@@ -330,20 +341,24 @@ exports.registerThemeStyles = function(extension) {
         if (themeDataLoadPromise !== null) {
             loadPromises.push(themeDataLoadPromise);
         }
-        themeDataLoadPromise = groupPromise(loadPromises);
+        themeDataLoadPromise = group(loadPromises);
     }
 };
 
 /**
  * Call this function to reparse all the ThemeStyles files.
+ * Returns a promise. The promise is resolved after all themeStyles are reparsed.
  */
 exports.reparse = function() {
+    var pr = new Promise();
     // Reparsing makes only sense when there is a themeDataLoadPromise.
     // If the value is null, then no styleFile was loaded and there is nothing
     // to reparse.
     if (themeDataLoadPromise) {
         // When all the styleFiles are loaded.
         themeDataLoadPromise.then(function() {
+            var parsePromises = [];
+
             // Reparese all the themeStyles. Instead of loading the themeStyles
             // again from the server, the cache extensionStyleData is used.
             // Every plugin in this cache is reparsed.
@@ -351,7 +366,7 @@ exports.reparse = function() {
             // Check if a basePlugin is set and parse this one first.
             var basePluginName = exports.basePluginName;
             if (basePluginName !== null && extensionStyleData[basePluginName]) {
-                exports.parsePlugin(basePluginName);
+                parsePromises.push(exports.parsePlugin(basePluginName));
             }
 
             // Parse the other plugins.
@@ -360,10 +375,16 @@ exports.reparse = function() {
                 if (pluginName === basePluginName) {
                     continue;
                 }
-                exports.parsePlugin(pluginName);
+                parsePromises.push(exports.parsePlugin(pluginName));
             }
+
+            // After all themeStyles are parsed, resolve the returned promise.
+            group(parsePromises).then(pr.resolve.bind(pr), pr.reject.bind(pr));
         });
+    } else {
+        pr.resolve()
     }
+    return pr;
 };
 
 /**

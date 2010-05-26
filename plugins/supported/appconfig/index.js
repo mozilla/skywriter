@@ -65,6 +65,24 @@ exports.launch = function(config) {
         catalog.registerObject(key, objects[key]);
     }
 
+    var themeLoadingPromise = new Promise();
+
+    themeLoadingPromise.then(function() {
+        if (objects.loginController) {
+            catalog.createObject("loginController").then(
+                function(loginController) {
+                    var pr = loginController.showLogin();
+                    pr.then(function() {
+                        exports.launchEditor(config);
+                    });
+                });
+        } else {
+            exports.launchEditor(config);
+        }
+    }, function(error) {
+        throw new Error('Lunch failed: ' + error);
+    });
+
     // If the themeManager plugin is there, then check for theme configuration.
     if (catalog.plugins.theme_manager) {
         var themeManager = require('theme_manager');
@@ -74,20 +92,15 @@ exports.launch = function(config) {
         if (config.theme.standard) {
             themeManager.setStandardTheme(config.theme.standard);
         }
-        themeManager.allowParsing();
+        themeManager.startParsing().then(function() {
+            themeLoadingPromise.resolve();
+        }, function(error) {
+            themeLoadingPromise.reject(error);
+        })
+    } else {
+        themeLoadingPromise.resolve();
     }
 
-    if (objects.loginController) {
-        catalog.createObject("loginController").then(
-            function(loginController) {
-                var pr = loginController.showLogin();
-                pr.then(function() {
-                    exports.launchEditor(config);
-                });
-            });
-    } else {
-        exports.launchEditor(config);
-    }
     var env = require("canon:environment").global;
     return env;
 };

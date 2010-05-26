@@ -35,6 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var Promise = require('bespin:promise').Promise;
 var catalog = require('bespin:plugins').catalog;
 var Event = require('events').Event;
 var themestyles = require('themestyles');
@@ -145,6 +146,7 @@ exports.setStandardTheme = function(themeName) {
  * the generic theming for buttons, inputs, panes etc.
  */
 exports.setBasePlugin = function(pluginName) {
+    // Set the basePlugin.
     themestyles.basePluginName = pluginName;
 };
 
@@ -152,21 +154,19 @@ exports.setBasePlugin = function(pluginName) {
  * This function has to be called to enable parsing. Before calling this
  * function, parsing is prevented. This allows the developer to prevent parsing
  * until certain basic theme plugins are loaded.
+ * Returns a promise that is resolved after all currently applied themeStyles
+ * are parsed.
  */
-exports.allowParsing = function() {
+exports.startParsing = function() {
+    var pr = new Promise();
+
     // Allow the parsing.
     themestyles.preventParsing = false;
 
-    // If there is a load promise for the basePlugin, then wait for this one.
-    if (basePluginLoadPromise) {
-        basePluginLoadPromise.then(function() {
-            // Reparse all the applied themeStyles.
-            themestyles.reparse();
-        })
-    } else {
-        // Reparse all the applied themeStyles.
-        themestyles.reparse();
-    }
+    // Reparse all the applied themeStyles.
+    themestyles.reparse().then(pr.resolve.bind(pr), pr.reject.bind(pr));
+
+    return pr;
 };
 
 exports.registerTheme = function(extension) {
