@@ -330,8 +330,8 @@ exports.slowCommand = function(env, args, request) {
     tick.setAttribute('src', 'https://bespin.mozillalabs.com/images/splash_icn_register.png');
 
     var interval = setInterval(function() {
-        var interval = (new Date().getTime() - start) / 1000;
-        var percent = interval * 100 / seconds;
+        var actual = (new Date().getTime() - start) / 1000;
+        var percent = actual * 100 / seconds;
         counter.innerHTML = '' + Math.round(percent);
     }, 100);
 
