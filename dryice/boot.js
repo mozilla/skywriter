@@ -50,15 +50,33 @@ bespin.useBespin = function(element, options) {
 };
 
 document.addEventListener("DOMContentLoaded", function() {
+    // Holds the lauch promises of all launched Bespins.
+    var launchBespinPromises = [];
+
     var nodes = document.querySelectorAll(".bespin");
     for (var i = 0; i < nodes.length; i++) {
         var node = nodes[i];
         var options = node.getAttribute('data-bespinoptions');
-        node.bespin = bespin.useBespin(node, JSON.parse(options));
+        var pr = bespin.useBespin(node, JSON.parse(options));
+        pr.then(function(env) {
+            node.bespin = env;
+        }, function(error) {
+            throw new Error('Launch failed: ' + error);
+        });
+        launchBespinPromises.push(pr);
     }
 
     // If users want a custom startup
     if (window.onBespinLoad) {
-        window.onBespinLoad();
+        // group-promise function.
+        var group = bespin.tiki.require("bespin:promise").group;
+
+        // Call the window.onBespinLoad() function after all launched Bespins
+        // are ready or throw an error otherwise.
+        group(launchBespinPromises).then(function() {
+            window.onBespinLoad();
+        }, function() {
+            throw new Error('At least one Bespin failed to launch!');
+        });
     }
 }, false);
