@@ -45,7 +45,11 @@ bespin.tiki.require.ensurePackage("::bespin", function() {
         // The "hosted" plugin sets up the environment
         bespin.tiki.require.ensurePackage("::appconfig", function() {
             var appconfig = require("appconfig");
-            appconfig.launch();
+            appconfig.launch().then(function(env) {
+                // Empty function.
+            }, function(error) {
+                console.error('Error during launch: ' + error);
+            });
         });
     }, function(error) {
         console.log("Unable to load metadata: ", error);

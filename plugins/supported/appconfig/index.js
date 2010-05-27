@@ -45,6 +45,9 @@ var Trace = require("bespin:util/stacktrace").Trace;
 /*
  * launch Bespin with the configuration provided. The configuration is
  * an object with the following properties:
+ * - theme: an object with the basePlugin as string and the standardTheme as
+ *          string. Both are optional. If no basePlugin is given, screen_theme
+ *          is used if this exists.
  * - objects: an object with a collection of named objects that will be
  *            registered with the plugin catalog (see PluginCatalog.registerObject)
  *            This will automatically be augmented with sane defaults (for
@@ -55,6 +58,8 @@ var Trace = require("bespin:util/stacktrace").Trace;
  *              created. and added to the body.
  */
 exports.launch = function(config) {
+    var launchPromise = new Promise();
+
     // Remove the "Loading..." hint.
     $('#_bespin_loading').remove();
 
@@ -65,6 +70,12 @@ exports.launch = function(config) {
         catalog.registerObject(key, objects[key]);
     }
 
+    // Resolve the launchPromise and pass the env variable along.
+    var resolveLaunchPromise = function() {
+        var env = require("canon:environment").global;
+        launchPromise.resolve(env);
+    };
+
     var themeLoadingPromise = new Promise();
 
     themeLoadingPromise.then(function() {
@@ -73,14 +84,16 @@ exports.launch = function(config) {
                 function(loginController) {
                     var pr = loginController.showLogin();
                     pr.then(function() {
-                        exports.launchEditor(config);
+                        exports.launchEditor(config).then(resolveLaunchPromise,
+                                        launchPromise.reject.bind(launchPromise));
                     });
                 });
         } else {
-            exports.launchEditor(config);
+            exports.launchEditor(config).then(resolveLaunchPromise,
+                                        launchPromise.reject.bind(launchPromise));
         }
     }, function(error) {
-        throw new Error('Lunch failed: ' + error);
+        launchPromise.reject(error);
     });
 
     // If the themeManager plugin is there, then check for theme configuration.
@@ -96,13 +109,12 @@ exports.launch = function(config) {
             themeLoadingPromise.resolve();
         }, function(error) {
             themeLoadingPromise.reject(error);
-        })
+        });
     } else {
         themeLoadingPromise.resolve();
     }
 
-    var env = require("canon:environment").global;
-    return env;
+    return launchPromise;
 };
 
 exports.normalizeConfig = function(config) {
@@ -195,19 +207,25 @@ exports.normalizeConfig = function(config) {
 };
 
 exports.launchEditor = function(config) {
+    var retPr = new Promise();
+
     if (config === null) {
         var message = 'Cannot start editor without a configuration!';
         console.error(message);
-        throw new Error(message);
+        retPr.reject(messsage);
+        return;
     }
 
     var pr = createAllObjects(config);
     pr.then(function() {
-        generateGUI(config);
+        generateGUI(config, retPr);
     }, function(error) {
-        console.log('Error while creating objects');
+        console.error('Error while creating objects');
         new Trace(error).log();
+        retPr.reject(error);
     });
+
+    return retPr;
 };
 
 var createAllObjects = function(config) {
@@ -218,7 +236,7 @@ var createAllObjects = function(config) {
     return group(promises);
 };
 
-var generateGUI = function(config) {
+var generateGUI = function(config, pr) {
     var container = document.createElement('div');
     container.setAttribute('class', 'bespin container');
 
@@ -237,16 +255,22 @@ var generateGUI = function(config) {
 
         var component = catalog.getObject(descriptor.component);
         if (!component) {
-            console.error('Cannot find object ' + descriptor.component + ' to attach to the Bespin UI');
-            continue;
+            var error = 'Cannot find object ' + descriptor.component +
+                            ' to attach to the Bespin UI';
+            console.error(error);
+            pr.reject(error);
+            return;
         }
 
         // special case the editor for now, because it doesn't
         // follow the new protocol
         var element = component.element;
         if (!element) {
-            console.error('Component ' + descriptor.component + ' does not have an "element" attribute to attach to the Bespin UI');
-            continue;
+            var error = 'Component ' + descriptor.component + ' does not have' +
+                          ' an "element" attribute to attach to the Bespin UI';
+            console.error(error);
+            pr.reject(error);
+            return;
         }
 
         $(element).addClass(place);
@@ -262,4 +286,6 @@ var generateGUI = function(config) {
             component.elementAppended();
         }
     }
+
+    pr.resolve();
 };
