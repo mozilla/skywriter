@@ -50,7 +50,7 @@ var util = require("util/util");
 var noop = function() {
 };
 
-if (util.isSafari) {
+if (util.isSafari || util.isChrome) {
     // Webkit's output functions are bizarre because they get confused if 'this'
     // is not window.console, so we just copy it all across
     exports.console = window.console;
