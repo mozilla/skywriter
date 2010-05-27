@@ -20,8 +20,8 @@
         },
         {
             "ep": "extensionpoint",
-            "name": "dimensionChanged",
-            "description": "A dimensionChanged is a way to be notified of changes to the dimension of Bespin"
+            "name": "dimensionsChanged",
+            "description": "A dimensionsChanged is a way to be notified of changes to the dimension of Bespin"
         },
         {
             "ep": "setting",

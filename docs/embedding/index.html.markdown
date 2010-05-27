@@ -199,6 +199,6 @@ elements) it's necessary to tell Bespin that its container dimension changed.
 You can do this by:
 
     :::js
-    env.dimensionChanged();
+    env.dimensionsChanged();
 
 Where `env` is the environment variable of the Bespin that container's size changed.

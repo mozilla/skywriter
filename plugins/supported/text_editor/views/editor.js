@@ -159,8 +159,8 @@ exports.EditorView = function(initialContent) {
             pointer: this._fontSettingChanged.bind(this)
         });
 
-        catalog.registerExtension('dimensionChanged', {
-            pointer: this.dimensionChanged.bind(this)
+        catalog.registerExtension('dimensionsChanged', {
+            pointer: this.dimensionsChanged.bind(this)
         });
 
         // Allow the layout to be recomputed.
@@ -351,7 +351,7 @@ exports.EditorView.prototype = {
         this.horizontalScroller.invalidate();
     },
 
-    dimensionChanged: function() {
+    dimensionsChanged: function() {
         this._recomputeLayout();
     },
 

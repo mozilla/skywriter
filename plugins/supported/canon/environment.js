@@ -51,14 +51,14 @@ exports.Environment = function() {
     this.commandLine = null;
 
     // Fire the sizeChanged event when the window is resized.
-    window.addEventListener('resize', this.dimensionChanged.bind(this), false);
+    window.addEventListener('resize', this.dimensionsChanged.bind(this), false);
 };
 
 Object.defineProperties(exports.Environment.prototype, {
 
-    dimensionChanged: {
+    dimensionsChanged: {
         value: function() {
-            catalog.publish('dimensionChanged');
+            catalog.publish('dimensionsChanged');
         }
     },
 
