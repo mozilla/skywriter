@@ -35,8 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// This module is set up to be dependency-less so that Narwhal
-// will be able to run it right away.
+// This module depends only on Tiki.
 
 bespin.useBespin = function(element, options) {
     var util = bespin.tiki.require('bespin:util/util');
