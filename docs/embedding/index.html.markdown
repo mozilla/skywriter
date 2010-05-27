@@ -14,7 +14,7 @@ at this stage, and will be noted in the release notes for each release.
 The Two Flavors of Bespin Embedded
 ==================================
 
-Bespin is designed to scale up from simple text area replacement to a 
+Bespin is designed to scale up from simple text area replacement to a
 full-blown, powerful editing environment. This is accomplished through
 plugins. The Bespin Embedded package comes in two flavors:
 
@@ -27,9 +27,9 @@ include on your server simply. You don't need anything else to use it.
 With the Customizable flavor, you are able to tailor which plugins are
 installed for use with your Bespin.
 
-The instructions on this page tell you how to deploy Bespin on your site, and 
+The instructions on this page tell you how to deploy Bespin on your site, and
 apply regardless of which flavor of Bespin Embedded you're using. If you are
-using the Customizable flavor, you can take a look at the 
+using the Customizable flavor, you can take a look at the
 [building instructions](building.html) for information on how to change
 what is built into your Bespin.
 
@@ -92,7 +92,7 @@ issue that other element types such as textarea are not working right now.
 
 The [Bespin startup options][2] are documented elsewhere.
 
-Bespin does not allow multiple elements in a page to become Bespin editors - 
+Bespin does not allow multiple elements in a page to become Bespin editors -
 there can only be one.
 
 [1]: http://json.org/ "The JSON Spec"
@@ -104,15 +104,14 @@ Level 2: Manual Upgrade
 
 Sometimes the element to upgrade might be dynamically created, or you might want
 to have Bespin as an option that is only loaded when the user selects a 'Use
-Bespin' option. In this case just inserting `class="bespin` after page load
+Bespin' option. In this case just inserting `class="bespin"` after page load
 won't work, and you'll need to tell Bespin to use an element:
 
     :::html
     <script src="/path/to/BespinEmbedded.js"><script>
     <script>
-    var embed = tiki.require("embedded");
-    var node = document.getElementById("edit");
-    var bespin = embed.useBespin(node);
+        var node = document.getElementById("edit");
+        bespin.useBespin(node);
     </script>
 
     <textarea id="edit">Initial contents</textarea>
@@ -121,12 +120,12 @@ Rather than passing in a node, you can also simply pass in an string identifier
 as follows:
 
     :::js
-    tiki.require("embedded").useBespin("edit");
+    bespin.useBespin("edit");
 
 And as with level 1 above, you can also use options to customize the display:
 
     :::js
-    tiki.require("embedded").useBespin("edit", {
+    bespin.useBespin("edit", {
         stealFocus: true
     });
 
@@ -134,169 +133,72 @@ Because this is JavaScript, the strict demands of JSON are not applicable here,
 where they are when using data-bespinoptions.
 
 
-The Embedded API
-----------------
+Interaction
+-----------
 
 It is possible to interact with a Bespin instance on a page, to alter contents
 for example.
 
 When using manual upgrade of an element, the `useBespin()` function returns a
-bespin object which can be manipulated as follows:
+promise. The resolved promise has as first argument the _environment_ variable:
 
     :::js
-    var bespin = embed.useBespin("edit");
-    bespin.value = "Initial Content\nWith 2 lines";
-    bespin.setLineNumber(2);
+    var pr = bespin.useBespin("edit");
+    pr.then(function(env) {
+        // Get the editor.
+        var editor = env.editor;
+        // Change the value and move to the secound lien.
+        editor.value = "Initial Content\nWith 2 lines";
+        editor.setLineNumber(2);
+    }, function(error) {
+        throw new Error("Launch failed: " + error);
+    });
 
+When the Bespin was created dynamically (using a div with `class="bespin"`), you
+can get the Bespin instance from the DOM node.
+
+Creating the Bespin dynamically takes some time and the Bespin might not be ready
+when the page fires the `onLoad` event. Accessing the dynamically created Bespin
+is save after the onBespinLoad event is fired:
+
+    ::::js
+    window.onBespinLoad = function() {
+        var edit = document.getElementById("edit");
+        // Get the environment variable.
+        var env = edit.bespin;
+        // Get the editor.
+        var editor = env.editor;
+        // Change the value and move to the secound lien.
+        editor.value = "Initial Content\nWith 2 lines";
+        editor.setLineNumber(2);
+    };
 
 It's possible to change any settings (as in those defined by the 'set' command
 where the command line is available). Note that the same settings apply to
 all editors on the page. To change a setting use:
 
     :::js
-    bespin.setSetting("fontsize", 10);
+    env.editor.setSetting("fontsize", 10);
 
 
 To change the initial context for the syntax highlighter run:
 
     :::js
-    bespin.setSyntax("html");
+    env.editor.syntax = "html";
 
+The complete [Bespin editor API][3] is documented elsewhere.
 
-When using element upgrading (with the `class="bespin"` attribute), you don't
-instantly have access to the Bespin Component. Fortunately, you can get access
-to it fairly easily:
-
-    :::html
-    <div id="edit" class="bespin">Initial contents</div>
-    <script>
-        var bespin = document.getElementById("edit").bespin;
-        bespin.value = "Hello, World!";
-    </script>
-
-The DOM node that contains the editor gets a "bespin" property on it with
-the embedded editor convenience API.
-
-There are a handful of other convenient functions you can use:
-
-getSelection()
-:   returns the currently selected range
-
-getSelectedText()
-:   returns the currently selected text
-
-getText(range)
-:   returns the text within the provided range
-
-getValue()
-:   returns the whole document
-
-setValue(newText)
-:   replaces the document text with newText and moves the cursor to the beginning
-
-replace(range, newText, keepSelection)
-:   replaces the range of text with newText. If keepSelection is true, the
-    current selection is maintained
-
-replaceSelection(newText)
-:   replaces the currently selected text with the newText
-
-setCursor(newPosition)
-:   moves the cursor to newPosition
-
-setFocus(makeFocused)
-:   focuses or unfocuses the editor
-
-setLineNumber(lineNumber)
-:   scrolls and moves the cursor to the given line number
-
-setSelection(range)
-:   selects the given range of text
-
-setSyntax(syntax)
-:   sets the syntax highlighting to the chosen syntax ("html", for example)
-
+[3]: ../pluginguide/editorapi.html "Editor API"
 
 Dimensions
 ----------
 
-Bespin always has to know the absolute position and size of the element it's
-contained in. The Bespin code will try to figure out the position of the element
-and keep it updated whenever the window size changes, so normally this all
-occurs behind the scenes and you don't need to worry about it. However, if
-you're altering elements in the DOM through JavaScript in ways that might cause
-the Bespin editor to move around, then you'll need to let Bespin know that its
-position might have changed. You can use the `dimensionsChanged()` function to
-do this. Pass in the editor object that you received from the `useBespin()` call
-whenever you programmatically update the absolute position of the editor on the
-page, whether directly (through altering the style of the Bespin element itself)
-or indirectly (through altering the style of some other element that triggers a
-reflow). For example, suppose we have this page:
-
-    :::html
-    <div id="box" style="display: inline-block; width: 100px;">Hello</div>
-    <div id="bespin"
-        style="display: inline-block; width: 640px; height: 480px;">Bespin</div>
-
-And this JavaScript:
+Bespin always has to know the absolute size of the element it's contained in.
+Because parts of Bespin depend on absolute position and size (mainly the canvas
+elements) it's necessary to tell Bespin that its container dimension changed.
+You can do this by:
 
     :::js
-    bespin = embed.useBespin("bespin");
+    env.dimensionChanged();
 
-Notice that the position of the Bespin editor on the page is determined by the
-width of the box next to it, since both elements have _inline-block_ layout.
-So, if the width of the adjacent box ever changes, `dimensionsChanged()` will
-need to be called. For example:
-
-    :::js
-    var box = document.getElementById('box');
-    box.style.width = '200px';                  // will cause Bespin to move
-    bespin.dimensionsChanged();                 // tell Bespin
-
-
-Development Mode and onBespinLoad
----------------------------------
-
-When you use a simple &lt;script&gt; tag to include the Bespin components, you can be
-sure that Bespin is ready for action on page load. However, what happens if you
-are in development mode where the components are loaded asynchronously? Then,
-it's hard to know when Bespin is ready for action. Bespin fires an
-onBespinLoad event when it is ready for action.
-
-For example:
-
-    :::html
-    <script>
-    window.onBespinLoad = function() {
-        bespin = document.getElementById("editor").bespin;
-    };
-    <input type="button" value="Clear Bespin" 
-        onclick="bespin.value='';">
-    </script>
-
-If you are using Bespin via a normal script tag, then you don't need to use the
-onBespinLoad() function.
-
-Events
-======
-
-Often, you'll want to execute some code whenever the user interacts with Bespin
-in some way; for example, whenever the text is changed. Bespin's API is designed
-to resemble the standard DOM Events API, so it's easy to pick up.
-
-To add an event handler, use `addEventListener()` as though Bespin were a DOM
-object:
-
-    :::js
-    bespin.addEventListener('textChange', function() {
-        alert("The text changed!");
-    });
-
-The available events are as follows:
-
-* `select`: Called whenever the selection changes.
-* `textChange`: Called whenever the text changes, either from user input or
-commands such as Undo.
-
-There is a `removeEventListener` function as a companion to `addEventListener`,
-should you need to remove a listener from Bespin.
+Where `env` is the environment variable of the Bespin that container's size changed.

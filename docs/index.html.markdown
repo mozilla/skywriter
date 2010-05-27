@@ -23,6 +23,7 @@ Plugin Author Guide
 * [Distributing Plugins](pluginguide/distributing.html)
 * [Syntax Highlighting](pluginguide/syntax.html)
 * [Keymapping](pluginguide/keymapping.html)
+* [Editor API](pluginguide/editorapi.html)
 * [Automated Testing](devguide/testing.html)
 
 
