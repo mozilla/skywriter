@@ -35,10 +35,11 @@
 * ***** END LICENSE BLOCK ***** */
 
 /* Global styles */
-.cmd_line { background: @bg; color: @text;
+.cmd_line {
+  background: @bg; color: @text;
   font-family: @fonts; font-size: 90%;
-  /* position: absolute; height: 300px; bottom: 0; left: 0; right: 0; */
-  overflow-x: hidden;
+  overflow: hidden;
+  position: relative;
 }
 .cmd_error { color: @error_text; }
 
@@ -84,9 +85,10 @@ input.cmd_input:focus { outline-width: 0px; outline: 0px; border: 0;
 
 
 /* Command Output */
-.cmd_view {
+.cmd_table {
   overflow-y: auto; overflow-x: hidden;
   top: 0; bottom: 27px; left: 30px; right: 0;
+  position: absolute;
 }
 
 .cmd_rowin {
@@ -135,7 +137,7 @@ input.cmd_input:focus { outline-width: 0px; outline: 0px; border: 0;
 .cmd_output th { border: 0; padding: 0 2px; }
 .cmd_output .right { text-align: right; }
 
-.cmd_line > .cmd_ex {
+.cmd_line > .cmd_hints {
   position: absolute; bottom: 27px; z-index: 1; line-height: 1.2em;
 }
 

@@ -77,6 +77,13 @@ exports.CliInputView = function() {
     // If we discover a change in size, we need to change a few styles
     this._lastOrientation = null;
 
+    // Elements attached to this by the templater. For info only
+    this.element = null;
+    this._hints = null;
+    this._table = null;
+    this._completer = null;
+    this._inputer = null;
+
     templates.cli({
         cliInputView: this,
         imagePath: imagePath
@@ -113,7 +120,7 @@ exports.CliInputView = function() {
     }.bind(this), true);
 
     catalog.registerExtension('settingChange', {
-        match: "[min|max]ConsoleHeight",
+        match: '[min|max]ConsoleHeight',
         pointer: this.checkSize.bind(this)
     });
 
@@ -248,8 +255,8 @@ exports.CliInputView.prototype = {
      */
     hintUpdated: function() {
         var hints = this._input.hints;
-        while (this._ex.firstChild) {
-            this._ex.removeChild(this._ex.firstChild);
+        while (this._hints.firstChild) {
+            this._hints.removeChild(this._hints.firstChild);
         }
 
         var level = Level.Info;
@@ -295,7 +302,7 @@ exports.CliInputView.prototype = {
         }.bind(this);
 
         hints.forEach(function(hint) {
-            addHint(this._ex, hint);
+            addHint(this._hints, hint);
         }.bind(this));
 
         util.setClass(this._inputer, 'cmd_error', level == Level.Error);

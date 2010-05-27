@@ -6,13 +6,13 @@
     >
 
   <!-- A div to hang hints on -->
-  <div class="cmd_ex" save="${cliInputView._ex}"></div>
+  <div class="cmd_hints" save="${cliInputView._hints}"></div>
 
   <!-- Used as something to hang styles off for input area -->
   <kbd></kbd>
 
   <!-- CLI output table -->
-  <div class="cmd_view" save="${cliInputView._table}"></div>
+  <div class="cmd_table" save="${cliInputView._table}"></div>
 
   <div class="cmd_toolbar">
     <img src="${imagePath}/pinout.png" alt="Pin/Unpin the console output"
@@ -26,6 +26,6 @@
 
   <div class="cmd_completion" save="${cliInputView._completer}"></div>
 
-  <input type="text" class="cmd_input" save="${cliInputView._inputer}">
+  <input class="cmd_input" save="${cliInputView._inputer}" type="text">
 
 </div>

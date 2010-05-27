@@ -53,7 +53,7 @@ exports.RequestOutput = function(request, cliInputView) {
     this.request = request;
     this.cliInputView = cliInputView;
 
-    // Elements attached to this by the templater
+    // Elements attached to this by the templater. For info only
     this.rowin = null;
     this.rowout = null;
     this.outputEle = null;
