@@ -370,7 +370,7 @@ exports.reparse = function() {
             }
 
             // Parse the other plugins.
-            for (pluginName in extensionStyleData) {
+            for (var pluginName in extensionStyleData) {
                 // Skip the basePlugin as this is already parsed.
                 if (pluginName === basePluginName) {
                     continue;

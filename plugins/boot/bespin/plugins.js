@@ -818,7 +818,7 @@ exports.Catalog.prototype = {
     loadMetadata: function(metadata) {
         var plugins = this.plugins;
 
-        for (pluginName in metadata) {
+        for (var pluginName in metadata) {
             // Skip if the plugin is not activated.
             if (this.deactivatedPlugins[pluginName]) {
                 continue;
@@ -879,7 +879,7 @@ exports.Catalog.prototype = {
             }
         }, this);
 
-        for (pluginName in metadata) {
+        for (var pluginName in metadata) {
             this._checkLoops(pluginName, plugins, []);
         }
 

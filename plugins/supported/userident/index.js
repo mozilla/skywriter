@@ -91,7 +91,7 @@ exports.loginController.prototype = {
                     deactivatePlugins = pluginInfo.metadata;
                 }
 
-                for (pluginName in deactivatePlugins) {
+                for (var pluginName in deactivatePlugins) {
                     catalog.deactivatePlugin(pluginName);
                 }
 
@@ -379,7 +379,7 @@ exports.logout = function() {
         log: 'Logout complete.'
     }).then(function() {
         // Remove all user plugins.
-        for (pluginName in catalog.plugins) {
+        for (var pluginName in catalog.plugins) {
             if (catalog.plugins[pluginName].type === 'user') {
                 catalog.removePlugin(pluginName);
             }
