@@ -19,6 +19,11 @@
             "description": "An extension point to be called whenever a new command begins output."
         },
         {
+            "ep": "extensionpoint",
+            "name": "dimensionChanged",
+            "description": "A dimensionChanged is a way to be notified of changes to the dimension of Bespin"
+        },
+        {
             "ep": "setting",
             "name": "historyLength",
             "description": "How many typed commands do we recall for reference?",

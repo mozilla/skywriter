@@ -159,11 +159,13 @@ exports.EditorView = function(initialContent) {
             pointer: this._fontSettingChanged.bind(this)
         });
 
+        catalog.registerExtension('dimensionChanged', {
+            pointer: this.dimensionChanged.bind(this)
+        });
+
         // Allow the layout to be recomputed.
         this._dontRecomputeLayout = false;
         this._recomputeLayout();
-
-        env.sizeChanged.add(this, this.dimensionChanged.bind(this));
 
         var wheelEvent = util.isMozilla ? 'DOMMouseScroll' : 'mousewheel';
         container.addEventListener(wheelEvent, this._onMouseWheel.bind(this), false);

@@ -207,7 +207,7 @@ exports.CliInputView.prototype = {
             height += inputHeight;
 
             this.element.style.height = height + 'px';
-            env.sizeChanged();
+            catalog.publish('dimensionChanged');
         }
 
         if (orientation === 'east' || orientation === 'west') {

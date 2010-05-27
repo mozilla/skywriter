@@ -35,14 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('bespin:util/util');
 var console = require('bespin:console').console;
 var catalog = require("bespin:plugins").catalog;
 var settings = require('settings').settings;
-
-var Event = require('events').Event;
-
-var m_range = require('rangeutils:utils/range');
 
 /**
  * The environment plays a similar role to the environment under unix.
@@ -55,20 +50,17 @@ exports.Environment = function() {
     // The current command line pushes this value into here
     this.commandLine = null;
 
-    // Size event. Required for the canvas based editor, as canvas is not
-    // working with FlexBox. Whenever one of the elements on the page or the
-    // entire window is resized, this event has to be fired.
-    this.sizeChanged = new Event();
-
     // Fire the sizeChanged event when the window is resized.
-    window.addEventListener('resize', this.sizeChanged, false);
+    window.addEventListener('resize', this.dimensionChanged.bind(this), false);
 };
 
-util.mixin(exports.Environment.prototype, {
-    sizeChanged: null,
-});
-
 Object.defineProperties(exports.Environment.prototype, {
+
+    dimensionChanged: {
+        value: function() {
+            catalog.publish('dimensionChanged');
+        }
+    },
 
     /**
      * Retrieves the EditSession
