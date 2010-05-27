@@ -39,13 +39,19 @@
 // will be able to run it right away.
 
 bespin.useBespin = function(element, options) {
+    var util = bespin.tiki.require('bespin:util/util');
+
     var baseConfig = %s;
     options = options || {};
     for (var key in options) {
         baseConfig[key] = options[key];
     }
     var appconfig = bespin.tiki.require("appconfig");
-    baseConfig.element = element;
+    if (util.isString(elment)) {
+        baseConfig.element = document.getElementById(element);
+    } else {
+        baseConfig.element = element;
+    }
     return appconfig.launch(baseConfig);
 };
 
