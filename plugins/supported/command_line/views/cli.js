@@ -51,6 +51,7 @@ var settings = require('settings').settings;
 var Level = require('command_line:hint').Level;
 var Input = require('command_line:input').Input;
 var templates = require('command_line:templates');
+var requestOutput = require('command_line:views/requestOutput');
 
 var imagePath = catalog.getResourceURL('command_line') + 'images';
 var diff = new diff_match_patch();
@@ -116,9 +117,8 @@ exports.CliInputView = function() {
         pointer: this.checkSize.bind(this)
     });
 
-    catalog.registerExtension('addedRequestOutput', {
-        pointer: this.addedRequestOutput.bind(this)
-    });
+    var requestOutputHandler = requestOutput.createHandler(this);
+    catalog.registerExtension('addedRequestOutput', requestOutputHandler);
 };
 
 /**
@@ -302,81 +302,6 @@ exports.CliInputView.prototype = {
     },
 
     /**
-     * Adds a row to the CLI output display
-     */
-    addedRequestOutput: function(key, request) {
-        var actions = {
-            request: request,
-            cliInputView: this,
-
-            // A single click on an invocation line in the console
-            // copies the command to the command line
-            copyToInput: function() {
-                cliInputView.setInput(request.typed);
-            },
-
-            // A double click on an invocation line in the console
-            // executes the command
-            executeRequest: function() {
-                // TODO: This is a hack... how to do it right?
-                environment.commandLine = this.cliInputView;
-                this.cliInputView._input = new Input(this.request.typed);
-                this.cliInputView._input.execute();
-            },
-
-            hideOutput: function() {
-                this.outputEle.style.display = 'block';
-                this.hideOutputEle.style.display = 'none';
-                this.showOutputEle.style.display = 'block';
-            },
-
-            showOutput: function() {
-                this.outputEle.style.display = 'none';
-                this.hideOutputEle.style.display = 'block';
-                this.showOutputEle.style.display = 'none';
-            },
-
-            remove: function() {
-                history.history.remove(this.request);
-            },
-
-            onRequestChange: function() {
-                this.durationEle.innerHTML = this.request.duration ?
-                    'completed in ' + (this.request.duration / 1000) + ' sec ' :
-                    '';
-
-                this.typedEle.innerHTML = this.request.typed;
-
-                this.outputEle.innerHTML = '';
-                this.request.outputs.forEach(function(output) {
-                    var node;
-                    if (typeof output == 'string') {
-                        node = document.createElement('p');
-                        node.innerHTML = output;
-                    } else {
-                        node = output;
-                    }
-                    this.outputEle.appendChild(node);
-                }, this);
-                this.cliInputView.scrollToBottom();
-
-                util.setClass(this.outputEle, 'cmd_error', this.request.error);
-
-                this.throbEle.style.display = this.request.completed ? 'none' : 'block';
-            }
-        };
-
-        templates.requestOutput({
-            actions: actions,
-            imagePath: imagePath
-        });
-
-        this._table.appendChild(actions.rowin);
-        this._table.appendChild(actions.rowout);
-        request.changed.add(actions.onRequestChange.bind(actions));
-    },
-
-    /**
      * Scroll the output area to the bottom
      */
     scrollToBottom: function() {
@@ -455,19 +380,4 @@ exports.CliInputView.prototype = {
 
         this._completer.innerHTML = val;
     }
-};
-
-/**
- * Quick utility to format the elapsed time for display as hh:mm:ss
- */
-var formatTime = function(date) {
-    var mins = '0' + date.getMinutes();
-    if (mins.length > 2) {
-        mins = mins.slice(mins.length - 2);
-    }
-    var secs = '0' + date.getSeconds();
-    if (secs.length > 2) {
-        secs = secs.slice(secs.length - 2);
-    }
-    return date.getHours() + ':' + mins + ':' + secs;
 };
