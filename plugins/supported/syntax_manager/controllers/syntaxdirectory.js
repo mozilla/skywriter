@@ -96,5 +96,14 @@ exports.syntaxDirectory = {
     syntaxForFileExt: function(fileExt) {
         var syntax = this._fileExts[fileExt.toLowerCase()];
         return util.none(syntax) ? 'plain' : syntax;
+    },
+
+    hasSyntax: function(syntax) {
+        for (aSyntax in this._syntaxInfo) {
+            if (syntax === aSyntax) {
+                return true;
+            }
+        }
+        return false;
     }
 };

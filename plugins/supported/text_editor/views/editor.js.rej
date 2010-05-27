@@ -1,0 +1,265 @@
+--- editor.js
++++ editor.js
+@@ -114,34 +115,37 @@ exports.EditorView = function() {
+
+     var container = this.container;
+     container.style.overflow = 'hidden';
+     container.style.position = 'relative';
+
+     this.scrollOffsetChanged = new Event();
+     this.willChangeBuffer = new Event();
+
+-    // Create an empty buffer to make sure there is a buffer for this editor.
+-    this.buffer = new Buffer(null);
++    this.selectionChanged = new Event();
++    this.textChanged = new Event();
+
+     var gutterView = this.gutterView = new GutterView(container, this);
+     var textView = this.textView = new TextView(container, this);
+     var verticalScroller = this.verticalScroller = new ScrollerView(this, Scroller.LAYOUT_VERTICAL);
+     var horizontalScroller = this.horizontalScroller = new ScrollerView(this, Scroller.LAYOUT_HORIZONTAL);
+
+     this.editorUndoController = new EditorUndoController(this);
+     this.searchController = new EditorSearchController(this);
+
+     this._textViewSize = {
+         width: 0,
+         height: 0
+     };
+
+     this.themeData = editorThemeData;
+
++    // Create an empty buffer to make sure there is a buffer for this editor.
++    this.buffer = new Buffer(null);
++
+     // Create all the necessary stuff once the container has been added.
+     this.elementAppended.add(function() {
+         // Set the font property.
+         this.font = settings.get('fontsize') + 'px ' + settings.get('fontface');
+
+         // Watch out for the themeChange event to then repaint stuff.
+         catalog.registerExtension('themeChange', {
+             pointer: this._themeVariableChange.bind(this)
+@@ -201,31 +208,33 @@ exports.EditorView.prototype = {
+     // for debug purpose only
+     newBuffer: function() {
+         var oldBuffer = this.buffer;
+         this.buffer = new Buffer();
+         return oldBuffer;
+     },
+
+     layoutManagerSizeChanged: function(size) {
++        this._textViewSize = {
++            width: size.width * this.layoutManager.fontDimension.characterWidth,
++            height: size.height * this.layoutManager.fontDimension.lineHeight
++        };
++
+         if (this._textLinesCount !== size.height) {
+             var gutterWidth = this.gutterView.computeWidth();
+             if (gutterWidth !== this._gutterViewWidth) {
+                 this._recomputeLayout();
+             } else {
+                 this.gutterView.invalidate();
+             }
+             this._textLinesLength = size.height;
+         }
+
+-        this._textViewSize = {
+-            width: size.width * this.layoutManager.fontDimension.characterWidth,
+-            height: size.height * this.layoutManager.fontDimension.lineHeight
+-        };
+-
++        // Clamp the current scrollOffset position.
++        this.scrollOffset = {};
+         this._updateScrollers();
+     },
+
+     _updateScrollers: function() {
+         // Don't change anything on the scrollers until the layout is setup.
+         if (this._dontRecomputeLayout) {
+             return;
+         }
+@@ -381,67 +390,167 @@ exports.EditorView.prototype = {
+
+         this.gutterView.clippingFrame = {
+             y: offset.y
+         };
+
+         this._updateScrollers();
+         this.gutterView.invalidate();
+         this.textView.invalidate();
++    },
++
++    // -------------------------------------------------------------------------
++    // Helper API:
++
++    /**
++     * Replaces the text within a range, as an undoable action.
++     *
++     * @param {Range} range The range to replace.
++     * @param {string} newText The text to insert.
++     * @param {boolean} keepSelection True if the selection should be
++     *     be preserved, false otherwise.
++     */
++    replace: function(range, newText, keepSelection) {
++        if (!m_range.isRange(range)) {
++            throw new Error('replace(): expected range but found "' + range +
++                "'");
++        }
++        if (!util.isString(newText)) {
++            throw new Error('replace(): expected text string but found "' +
++                text + '"');
++        }
++
++        var normalized = m_range.normalizeRange(range);
++
++        var view = this.textView;
++        var oldSelection = view.getSelectedRange(false);
++        view.groupChanges(function() {
++            view.replaceCharacters(normalized, newText);
++            if (keepSelection) {
++                view.setSelection(oldSelection);
++            } else {
++                view.moveCursorTo(range.start);
++            }
++        });
++    },
++
++    /** Changes a setting. */
++    setSetting: function(key, value) {
++        if (util.none(key)) {
++            throw new Error('setSetting(): key must be supplied');
++        }
++        if (util.none(value)) {
++            throw new Error('setSetting(): value must be supplied');
++        }
++
++        settings.set(key, value);
++    },
++
++    /** Returns a setting. */
++    getSetting: function(key) {
++        if (util.none(key)) {
++            throw new Error('getSetting(): key must be supplied');
++        }
++        return settings.get(key);
++    },
++
++    getText: function(range) {
++        if (!m_range.isRange(range)) {
++            throw new Error('getText(): expected range but found "' +
++                                range + '"');
++        }
++
++        var textStorage = this.layoutManager.textStorage;
++        return textStorage.getCharacters(m_range.normalizeRange(range));
++    },
++
++    /** Scrolls and moves the insertion point to the given line number. */
++    setLineNumber: function(lineNumber) {
++        if (!util.isNumber(lineNumber)) {
++            throw new Error('setLineNumber(): lineNumber must be a number');
++        }
++
++        var newPosition = { row: lineNumber - 1, col: 0 };
++        this.textView.moveCursorTo(newPosition);
++    },
++
++    /** Sets the position of the cursor. */
++    setCursor: function(newPosition) {
++        if (!m_range.isPosition(newPosition)) {
++            throw new Error('setCursor(): expected position but found "' +
++                newPosition + '"');
++        }
++
++        this.textView.moveCursorTo(newPosition);
++    },
++
++    /** Group changes so that they are only one undo/redo step. */
++    changeGroup: function(func) {
++        this.textView.groupChanges(function() {
++            func(this);
++        });
+     }
+ };
+
+ Object.defineProperties(exports.EditorView.prototype, {
+     buffer: {
+         set: function(newBuffer) {
+             if (newBuffer === this._buffer) {
+                 return;
+             }
+
+-            // In some cases the buffer is set before the UI is initialized.
+-            if (this.textView) {
++            // Was there a former buffer? If yes, then remove some events.
++            if (this._buffer !== null) {
+                 this.layoutManager.sizeChanged.remove(this);
++                this.layoutManager.textStorage.changed.remove(this);
++                this.textView.selectionChanged.remove(this);
+             }
+
+             this.willChangeBuffer(newBuffer);
+             this.layoutManager = newBuffer.layoutManager;
+             this._buffer = newBuffer;
+
+-            this.layoutManager.
+-                sizeChanged.add(this, this.layoutManagerSizeChanged.bind(this));
++            var lm = this.layoutManager;
++            var tv = this.textView;
++
++            // Watch out for changes to the layoutManager's internal size.
++            lm.sizeChanged.add(this, this.layoutManagerSizeChanged.bind(this));
++
++            // The layoutManager changed and its size as well. Call the
++            // layoutManager.sizeChanged event manually.
++            this.layoutManager.sizeChanged(this.layoutManager.size);
+
+             this._recomputeLayout();
+
+-            if (this.textView) {
+-                this.textView.setSelection(newBuffer._selectedRange);
++            // Map internal events so that developers can listen much easier.
++            lm.textStorage.changed.add(this, this.textChanged.bind(this));
++            tv.selectionChanged.add(this, this.selectionChanged.bind(this));
+
+-                // Invoke the layoutMaanger.sizeCanged event manually as not every
+-                // event listener has caught the sizechanged event when creating
+-                // the layoutManager.
+-                this.layoutManager.sizeChanged(this.layoutManager.size);
++            // Restore selection.
++            this.textView.setSelection(newBuffer._selectedRange, false);
+
+-                this.scrollOffsetChanged(this.scrollOffset);
+-                this._updateScrollers();
++            // Restore scrollOffset.
++            this.scrollOffsetChanged(this.scrollOffset);
++            this._updateScrollers();
+
+-                // Tell textView to recompute the syntax for the visible region.
+-                this.textView.updateSyntax(null);
+-            }
++            // Tell textView to recompute the syntax for the visible region.
++            this.textView.updateSyntax(null);
+         },
+
+         get: function() {
+             return this._buffer;
+         }
+     },
+
+     frame: {
+         get: function() {
+             return {
+                 width: this.container.offsetWidth,
+                 height: this.container.offsetHeight
+-            }
++            };
+         }
+     },
+
+     textViewPaddingFrame: {
+         get: function() {
+             var frame = util.clone(this.textView.frame);
+             var padding = this.textView.padding;
+

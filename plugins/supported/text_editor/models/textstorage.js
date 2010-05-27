@@ -213,7 +213,7 @@ TextStorage.prototype = {
 
         this._lines = util.replace(lines, oldStartRow, oldEndRow - oldStartRow + 1, addedLines);
 
-        this.changed(oldRange, newRange);
+        this.changed(oldRange, newRange, characters);
     },
 
     /**

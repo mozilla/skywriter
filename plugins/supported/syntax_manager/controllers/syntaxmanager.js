@@ -601,6 +601,24 @@ exports.SyntaxManager.prototype = {
     },
 
     /**
+     * Sets the initial context to the syntax highlighter or to 'plain' if the
+     * syntax is not defined.
+     */
+    setInitialContext: function(syntax) {
+        var ret = true;
+        if (!syntaxDirectory.hasSyntax(syntax)) {
+            ret = false;
+            syntax = 'plain';
+        }
+
+        this.initialContext = syntax;
+        this._reset();
+        this.invalidatedSyntax();
+        return ret;
+    },
+
+
+    /**
      * Returns a string representation of the internal structure of the syntax
      * manager, for debugging purposes.
      */

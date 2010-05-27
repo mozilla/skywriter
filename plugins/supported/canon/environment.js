@@ -35,10 +35,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var util = require('bespin:util/util');
 var console = require('bespin:console').console;
 var catalog = require("bespin:plugins").catalog;
+var settings = require('settings').settings;
 
 var Event = require('events').Event;
+
+var m_range = require('rangeutils:utils/range');
 
 /**
  * The environment plays a similar role to the environment under unix.
@@ -60,10 +64,11 @@ exports.Environment = function() {
     window.addEventListener('resize', this.sizeChanged, false);
 };
 
+util.mixin(exports.Environment.prototype, {
+    sizeChanged: null,
+});
+
 Object.defineProperties(exports.Environment.prototype, {
-    sizeChanged: {
-        value: null
-    },
 
     /**
      * Retrieves the EditSession

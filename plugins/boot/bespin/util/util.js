@@ -146,6 +146,20 @@ exports.isString = function(it) {
 };
 
 /**
+ * Returns true if it is a Boolean.
+ */
+exports.isBoolean = function(it) {
+    return (typeof it == 'boolean');
+}
+
+/**
+ * Returns true if it is a Number.
+ */
+exports.isNumber = function(it) {
+    return (typeof it == 'number' && isFinite(it));
+}
+
+/**
  * Hack copied from dojo.
  */
 exports.isObject = function(it) {

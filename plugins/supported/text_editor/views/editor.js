@@ -42,6 +42,7 @@ var catalog = require('bespin:plugins').catalog;
 var Event = require('events').Event;
 var settings = require('settings').settings;
 var m_scratchcanvas = require('bespin:util/scratchcanvas');
+var rangeutils = require('rangeutils:utils/range');
 
 var TextView = require('views/text').TextView;
 var GutterView = require('views/gutter').GutterView;
@@ -88,7 +89,7 @@ var computeThemeData = function() {
             }
         }
     }
-}
+};
 
 // Compute the themeData to make sure there is one when the editor comes up.
 computeThemeData();
@@ -118,6 +119,9 @@ exports.EditorView = function() {
 
     this.scrollOffsetChanged = new Event();
     this.willChangeBuffer = new Event();
+
+    this.selectionChanged = new Event();
+    this.textChanged = new Event();
 
     var gutterView = this.gutterView = new GutterView(container, this);
     var textView = this.textView = new TextView(container, this);
@@ -183,6 +187,9 @@ exports.EditorView.prototype = {
 
     horizontalScrollOffset: null,
     verticalScrollOffset: null,
+
+    textChanged: null,
+    selectionChanged: null,
 
     scrollOffsetChanged: null,
     willChangeBuffer: null,
@@ -388,6 +395,111 @@ exports.EditorView.prototype = {
         this._updateScrollers();
         this.gutterView.invalidate();
         this.textView.invalidate();
+    },
+
+    // -------------------------------------------------------------------------
+    // Helper API:
+
+    /**
+     * Replaces the text within a range, as an undoable action.
+     *
+     * @param {Range} range The range to replace.
+     * @param {string} newText The text to insert.
+     * @param {boolean} keepSelection True if the selection should be
+     *     be preserved, otherwise the cursor is set after newText.
+     *
+     */
+    replace: function(range, newText, keepSelection) {
+        if (!rangeutils.isRange(range)) {
+            throw new Error('replace(): expected range but found "' + range +
+                "'");
+        }
+        if (!util.isString(newText)) {
+            throw new Error('replace(): expected text string but found "' +
+                text + '"');
+        }
+
+        var normalized = rangeutils.normalizeRange(range);
+
+        var view = this.textView;
+        var oldSelection = view.getSelectedRange(false);
+        view.groupChanges(function() {
+            view.replaceCharacters(normalized, newText);
+            if (keepSelection) {
+                view.setSelection(oldSelection);
+            } else {
+                var lines = newText.split('\n');
+
+                var destPosition;
+                if (lines.length > 1) {
+                    destPosition = {
+                        row:    range.start.row + lines.length - 1,
+                        col: lines[lines.length - 1].length
+                    };
+                } else {
+                    destPosition = rangeutils.addPositions(range.start,
+                        { row: 0, col: newText.length });
+                }
+                view.moveCursorTo(destPosition)
+            }
+        });
+    },
+
+    /** Changes a setting. */
+    setSetting: function(key, value) {
+        if (util.none(key)) {
+            throw new Error('setSetting(): key must be supplied');
+        }
+        if (util.none(value)) {
+            throw new Error('setSetting(): value must be supplied');
+        }
+
+        settings.set(key, value);
+    },
+
+    /** Returns a setting. */
+    getSetting: function(key) {
+        if (util.none(key)) {
+            throw new Error('getSetting(): key must be supplied');
+        }
+        return settings.get(key);
+    },
+
+    getText: function(range) {
+        if (!rangeutils.isRange(range)) {
+            throw new Error('getText(): expected range but found "' +
+                                range + '"');
+        }
+
+        var textStorage = this.layoutManager.textStorage;
+        return textStorage.getCharacters(rangeutils.normalizeRange(range));
+    },
+
+    /** Scrolls and moves the insertion point to the given line number. */
+    setLineNumber: function(lineNumber) {
+        if (!util.isNumber(lineNumber)) {
+            throw new Error('setLineNumber(): lineNumber must be a number');
+        }
+
+        var newPosition = { row: lineNumber - 1, col: 0 };
+        this.textView.moveCursorTo(newPosition);
+    },
+
+    /** Sets the position of the cursor. */
+    setCursor: function(newPosition) {
+        if (!rangeutils.isPosition(newPosition)) {
+            throw new Error('setCursor(): expected position but found "' +
+                newPosition + '"');
+        }
+
+        this.textView.moveCursorTo(newPosition);
+    },
+
+    /** Group changes so that they are only one undo/redo step. */
+    changeGroup: function(func) {
+        this.textView.groupChanges(function() {
+            func(this);
+        }.bind(this));
     }
 };
 
@@ -401,6 +513,8 @@ Object.defineProperties(exports.EditorView.prototype, {
             // Was there a former buffer? If yes, then remove some events.
             if (this._buffer !== null) {
                 this.layoutManager.sizeChanged.remove(this);
+                this.layoutManager.textStorage.changed.remove(this);
+                this.textView.selectionChanged.remove(this);
             }
 
             this.willChangeBuffer(newBuffer);
@@ -418,6 +532,10 @@ Object.defineProperties(exports.EditorView.prototype, {
             this.layoutManager.sizeChanged(this.layoutManager.size);
 
             this._recomputeLayout();
+
+            // Map internal events so that developers can listen much easier.
+            lm.textStorage.changed.add(this, this.textChanged.bind(this));
+            tv.selectionChanged.add(this, this.selectionChanged.bind(this));
 
             // Restore selection.
             this.textView.setSelection(newBuffer._selectedRange, false);
@@ -440,7 +558,7 @@ Object.defineProperties(exports.EditorView.prototype, {
             return {
                 width: this.container.offsetWidth,
                 height: this.container.offsetHeight
-            }
+            };
         }
     },
 
@@ -491,4 +609,91 @@ Object.defineProperties(exports.EditorView.prototype, {
             return this.buffer._scrollOffset;
         }
     },
+
+    // -------------------------------------------------------------------------
+    // Helper API:
+
+    focus: {
+        get: function() {
+            return this.textView.hasFocus;
+        },
+
+        set: function(setFocus) {
+            if (!util.isBoolean(setFocus)) {
+                throw new Error('set focus: expected boolean but found "' +
+                                    setFocus + '"');
+            }
+            this.textView.hasFocus = setFocus;
+        }
+    },
+
+    selection: {
+        /** Returns the currently-selected range. */
+        get: function() {
+            return util.clone(this.textView.getSelectedRange(false));
+        },
+
+        /** Alters the selection. */
+        set: function(newSelection) {
+            if (!rangeutils.isRange(newSelection)) {
+                throw new Error('set selection: position/selection' +
+                                    ' must be supplied');
+            }
+
+            this.textView.setSelection(newSelection);
+        }
+    },
+
+    selectedText: {
+        /** Returns the text within the given range. */
+        get: function() {
+            return this.getText(this.selection);
+        },
+
+        /** Replaces the current text selection with the given text. */
+        set: function(newText) {
+            if (!util.isString(newText)) {
+                throw new Error('set selectedText: expected string but' +
+                    ' found "' + newText + '"');
+            }
+
+            this.replace(this.selection, newText);
+        }
+    },
+
+    value: {
+        /** Returns the current text. */
+        get: function() {
+            return this.layoutManager.textStorage.value;
+        },
+
+        set: function(newValue) {
+            if (!util.isString(newValue)) {
+                throw new Error('set value: expected string but found "' +
+                                        newValue + '"');
+            }
+
+            // Use the replace function and not this.model.value = newValue
+            // directly as this wouldn't create a new undoable action.
+            this.replace(this.layoutManager.textStorage.range, newValue, false);
+        }
+    },
+
+    syntax: {
+        /** Returns the initial syntax highlighting context (i.e. the language). */
+        get: function(newSyntax) {
+            return this.layoutManager.syntaxManager.initialContext;
+        },
+
+        /** Sets the initial syntax highlighting context (i.e. the language). */
+        set: function(newSyntax) {
+            if (!util.isString(newSyntax)) {
+                throw new Error('set syntax: expected string but found "' +
+                                        newValue + '"');
+            }
+
+            return this.layoutManager.syntaxManager.
+                                setInitialContext(newSyntax);
+        }
+    }
 });
