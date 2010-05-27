@@ -88,6 +88,10 @@ exports.launch = function(config) {
                 editor.focus = true;
             }
         }
+        var commandLine = catalog.getObject('commandLine');
+        if (commandLine) {
+            env.commandLine = commandLine;
+        }
 
         launchPromise.resolve(env);
     };
