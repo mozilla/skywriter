@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var $ = require('jquery').$;
+var settings = require('settings').settings;
 var catalog = require("bespin:plugins").catalog;
 var group = require("bespin:promise").group;
 var Promise = require("bespin:promise").Promise;
@@ -70,9 +71,24 @@ exports.launch = function(config) {
         catalog.registerObject(key, objects[key]);
     }
 
+    for (var setting in config.settings) {
+        settings.set(settings, config.settings[setting]);
+    }
+
     // Resolve the launchPromise and pass the env variable along.
     var resolveLaunchPromise = function() {
         var env = require("canon:environment").global;
+
+        var editor = env.editor;
+        if (editor) {
+            if (config.lineNumber) {
+                editor.setLineNumber(config.lineNumber);
+            }
+            if (config.stealFocus) {
+                editor.focus = true;
+            }
+        }
+
         launchPromise.resolve(env);
     };
 
@@ -130,6 +146,12 @@ exports.normalizeConfig = function(config) {
     if (!config.theme.basePlugin && catalog.plugins.screen_theme) {
         config.theme.basePlugin = 'screen_theme';
     }
+    if (!config.initialContent) {
+        config.initialContent = '';
+    }
+    if (!config.settings) {
+        config.settings = {};
+    }
     if (!config.objects.loginController && catalog.plugins.userident) {
         config.objects.loginController = {
         };
@@ -161,7 +183,10 @@ exports.normalizeConfig = function(config) {
     }
     if (!config.objects.editor) {
         config.objects.editor = {
-            factory: "text_editor"
+            factory: "text_editor",
+            arguments: [
+                config.initialContent
+            ]
         };
     }
     if (!config.objects.session) {

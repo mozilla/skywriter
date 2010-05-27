@@ -53,9 +53,9 @@ var UndoManager = require('undomanager').UndoManager;
  * To create a buffer that is (not yet) bound to a file, just create the Buffer
  * without a file passed.
  */
-exports.Buffer = function(file, fileLoadedPromise) {
+exports.Buffer = function(file, fileLoadedPromise, initialContent) {
     this._file = file;
-    this._model = new TextStorage;
+    this._model = new TextStorage(initialContent);
     this._layoutManager = new LayoutManager({
         textStorage: this._model
     });

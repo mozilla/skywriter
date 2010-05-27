@@ -105,7 +105,7 @@ catalog.registerExtension('themeChange', {
  * gutter view, as well as maintaining a layout manager. This really needs
  * to change so that it's not taking the container as a parameter.
  */
-exports.EditorView = function() {
+exports.EditorView = function(initialContent) {
     // TODO: This is for debug purpose only and should go away again.
     bespin.editor = this;
 
@@ -138,8 +138,9 @@ exports.EditorView = function() {
 
     this._themeData = editorThemeData;
 
-    // Create an empty buffer to make sure there is a buffer for this editor.
-    this.buffer = new Buffer(null);
+    // Create a buffer for the editor and use initialContent as intialContent for
+    // the textStorage object.
+    this.buffer = new Buffer(null, null, initialContent);
 
     // Create all the necessary stuff once the container has been added.
     this.elementAppended.add(function() {
