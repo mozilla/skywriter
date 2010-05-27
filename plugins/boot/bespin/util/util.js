@@ -417,14 +417,16 @@ exports.getOS = function() {
     }
 };
 
-/**
- * Return true if with contains(a, b) the element b exists within the element a
- */
-exports.contains = document.compareDocumentPosition ? function(a, b) {
-    return a.compareDocumentPosition(b) & 16;
-} : function(a, b) {
-    return a !== b && (a.contains ? a.contains(b) : true);
-};
+/** Returns true if the DOM element "b" is inside the element "a". */
+if (typeof(document) !== 'undefined' && document.compareDocumentPosition) {
+    exports.contains = function(a, b) {
+        return a.compareDocumentPosition(b) & 16;
+    };
+} else {
+    exports.contains = function(a, b) {
+        return a !== b && (a.contains ? a.contains(b) : true);
+    };
+}
 
 /**
  * Prevents propagation and clobbers the default action of the passed event

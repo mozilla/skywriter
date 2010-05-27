@@ -5,6 +5,7 @@
         "canon": "0.0",
         "keyboard": "0.0"
     },
+    "environments": { "main": true, "worker": false },
     "provides":
     [
         {
