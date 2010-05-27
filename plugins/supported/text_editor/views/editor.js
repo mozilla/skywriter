@@ -136,7 +136,7 @@ exports.EditorView = function() {
         height: 0
     };
 
-    this.themeData = editorThemeData;
+    this._themeData = editorThemeData;
 
     // Create an empty buffer to make sure there is a buffer for this editor.
     this.buffer = new Buffer(null);
@@ -144,7 +144,7 @@ exports.EditorView = function() {
     // Create all the necessary stuff once the container has been added.
     this.elementAppended.add(function() {
         // Set the font property.
-        this.font = settings.get('fontsize') + 'px ' + settings.get('fontface');
+        this._font = settings.get('fontsize') + 'px ' + settings.get('fontface');
 
         // Watch out for the themeChange event to then repaint stuff.
         catalog.registerExtension('themeChange', {
@@ -165,7 +165,7 @@ exports.EditorView = function() {
         env.sizeChanged.add(this, this.dimensionChanged.bind(this));
 
         var wheelEvent = util.isMozilla ? 'DOMMouseScroll' : 'mousewheel';
-        container.addEventListener(wheelEvent, this.onMouseWheel.bind(this), false);
+        container.addEventListener(wheelEvent, this._onMouseWheel.bind(this), false);
 
         verticalScroller.valueChanged.add(function(value) {
             this.scrollOffset = { y: value };
@@ -185,9 +185,6 @@ exports.EditorView = function() {
 exports.EditorView.prototype = {
     elementAppended: null,
 
-    horizontalScrollOffset: null,
-    verticalScrollOffset: null,
-
     textChanged: null,
     selectionChanged: null,
 
@@ -203,7 +200,7 @@ exports.EditorView.prototype = {
 
     _dontRecomputeLayout: true,
 
-    themeData: null,
+    _themeData: null,
 
     // for debug purpose only
     newBuffer: function() {
@@ -212,7 +209,7 @@ exports.EditorView.prototype = {
         return oldBuffer;
     },
 
-    layoutManagerSizeChanged: function(size) {
+    _layoutManagerSizeChanged: function(size) {
         this._textViewSize = {
             width: size.width * this.layoutManager.fontDimension.characterWidth,
             height: size.height * this.layoutManager.fontDimension.lineHeight
@@ -262,7 +259,7 @@ exports.EditorView.prototype = {
         }
     },
 
-    onMouseWheel: function(evt) {
+    _onMouseWheel: function(evt) {
         var delta = 0;
         if (evt.wheelDelta) {
             delta = -evt.wheelDelta;
@@ -323,8 +320,8 @@ exports.EditorView.prototype = {
         };
 
         // TODO: Get this values from the scroller theme.
-        var scrollerPadding = this.themeData.scroller.padding;
-        var scrollerSize = this.themeData.scroller.thickness;
+        var scrollerPadding = this._themeData.scroller.padding;
+        var scrollerSize = this._themeData.scroller.thickness;
 
         this.horizontalScroller.frame = {
             x: gutterWidth + scrollerPadding,
@@ -361,10 +358,10 @@ exports.EditorView.prototype = {
      * The font to use for the text view and the gutter view. Typically, this
      * value is set via the font settings.
      */
-    font: null,
+    _font: null,
 
     _fontSettingChanged: function() {
-        this.font = settings.get('fontsize') + 'px ' + settings.get('fontface');
+        this._font = settings.get('fontsize') + 'px ' + settings.get('fontface');
 
         // Recompute the layouts.
         this.layoutManager._recalculateMaximumWidth();
@@ -504,6 +501,28 @@ exports.EditorView.prototype = {
 };
 
 Object.defineProperties(exports.EditorView.prototype, {
+    themeData: {
+        get: function() {
+            return this._themeData;
+        },
+
+        set: function() {
+            throw new Error('themeData can\'t be changed directly.' +
+                                ' Use themeManager.');
+        }
+    },
+
+    font: {
+        get: function() {
+            return this._font;
+        },
+
+        set: function() {
+            throw new Error('font can\'t be changed directly.' +
+                    ' Use settings fontsize and fontface.');
+        }
+    },
+
     buffer: {
         set: function(newBuffer) {
             if (newBuffer === this._buffer) {
@@ -525,7 +544,7 @@ Object.defineProperties(exports.EditorView.prototype, {
             var tv = this.textView;
 
             // Watch out for changes to the layoutManager's internal size.
-            lm.sizeChanged.add(this, this.layoutManagerSizeChanged.bind(this));
+            lm.sizeChanged.add(this, this._layoutManagerSizeChanged.bind(this));
 
             // The layoutManager changed and its size as well. Call the
             // layoutManager.sizeChanged event manually.
