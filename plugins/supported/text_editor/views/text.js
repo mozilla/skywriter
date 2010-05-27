@@ -54,9 +54,6 @@ exports.TextView = function(container, editor) {
     CanvasView.call(this, container, true /* preventDownsize */ );
     this.editor = editor;
 
-    // Call this to attach the necessary events for a new buffer.
-    this.editorWillChangeBuffer(editor.buffer);
-
     // Takes the layoutManager of the editor and uses it.
     var textInput = this.textInput = new TextInput(container, this);
 
@@ -114,10 +111,12 @@ util.mixin(exports.TextView.prototype, {
     replacedCharacters: null,
 
     editorWillChangeBuffer: function(newBuffer) {
-        // Remove events from the old layoutManager.
-        var layoutManager = this.editor.layoutManager;
-        layoutManager.invalidatedRects.remove(this);
-        layoutManager.changedTextAtRow.remove(this);
+        if (this.editor.layoutManager) {
+            // Remove events from the old layoutManager.
+            var layoutManager = this.editor.layoutManager;
+            layoutManager.invalidatedRects.remove(this);
+            layoutManager.changedTextAtRow.remove(this);
+        }
 
         // Add the events to the new layoutManager.
         layoutManager = newBuffer.layoutManager;

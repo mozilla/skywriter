@@ -119,9 +119,6 @@ exports.EditorView = function() {
     this.scrollOffsetChanged = new Event();
     this.willChangeBuffer = new Event();
 
-    // Create an empty buffer to make sure there is a buffer for this editor.
-    this.buffer = new Buffer(null);
-
     var gutterView = this.gutterView = new GutterView(container, this);
     var textView = this.textView = new TextView(container, this);
     var verticalScroller = this.verticalScroller = new ScrollerView(this, Scroller.LAYOUT_VERTICAL);
@@ -136,6 +133,9 @@ exports.EditorView = function() {
     };
 
     this.themeData = editorThemeData;
+
+    // Create an empty buffer to make sure there is a buffer for this editor.
+    this.buffer = new Buffer(null);
 
     // Create all the necessary stuff once the container has been added.
     this.elementAppended.add(function() {
@@ -206,6 +206,11 @@ exports.EditorView.prototype = {
     },
 
     layoutManagerSizeChanged: function(size) {
+        this._textViewSize = {
+            width: size.width * this.layoutManager.fontDimension.characterWidth,
+            height: size.height * this.layoutManager.fontDimension.lineHeight
+        };
+
         if (this._textLinesCount !== size.height) {
             var gutterWidth = this.gutterView.computeWidth();
             if (gutterWidth !== this._gutterViewWidth) {
@@ -216,11 +221,8 @@ exports.EditorView.prototype = {
             this._textLinesLength = size.height;
         }
 
-        this._textViewSize = {
-            width: size.width * this.layoutManager.fontDimension.characterWidth,
-            height: size.height * this.layoutManager.fontDimension.lineHeight
-        };
-
+        // Clamp the current scrollOffset position.
+        this.scrollOffset = {};
         this._updateScrollers();
     },
 
@@ -396,8 +398,8 @@ Object.defineProperties(exports.EditorView.prototype, {
                 return;
             }
 
-            // In some cases the buffer is set before the UI is initialized.
-            if (this.textView) {
+            // Was there a former buffer? If yes, then remove some events.
+            if (this._buffer !== null) {
                 this.layoutManager.sizeChanged.remove(this);
             }
 
@@ -405,25 +407,27 @@ Object.defineProperties(exports.EditorView.prototype, {
             this.layoutManager = newBuffer.layoutManager;
             this._buffer = newBuffer;
 
-            this.layoutManager.
-                sizeChanged.add(this, this.layoutManagerSizeChanged.bind(this));
+            var lm = this.layoutManager;
+            var tv = this.textView;
+
+            // Watch out for changes to the layoutManager's internal size.
+            lm.sizeChanged.add(this, this.layoutManagerSizeChanged.bind(this));
+
+            // The layoutManager changed and its size as well. Call the
+            // layoutManager.sizeChanged event manually.
+            this.layoutManager.sizeChanged(this.layoutManager.size);
 
             this._recomputeLayout();
 
-            if (this.textView) {
-                this.textView.setSelection(newBuffer._selectedRange);
+            // Restore selection.
+            this.textView.setSelection(newBuffer._selectedRange, false);
 
-                // Invoke the layoutMaanger.sizeCanged event manually as not every
-                // event listener has caught the sizechanged event when creating
-                // the layoutManager.
-                this.layoutManager.sizeChanged(this.layoutManager.size);
+            // Restore scrollOffset.
+            this.scrollOffsetChanged(this.scrollOffset);
+            this._updateScrollers();
 
-                this.scrollOffsetChanged(this.scrollOffset);
-                this._updateScrollers();
-
-                // Tell textView to recompute the syntax for the visible region.
-                this.textView.updateSyntax(null);
-            }
+            // Tell textView to recompute the syntax for the visible region.
+            this.textView.updateSyntax(null);
         },
 
         get: function() {
