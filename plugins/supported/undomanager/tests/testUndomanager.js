@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var UndoManager = require('controllers/undomanager').UndoManager;
+var UndoManager = require('index').UndoManager;
 var t = require('plugindev');
 
 exports.testUndoAndRedo = function() {
