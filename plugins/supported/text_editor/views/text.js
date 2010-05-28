@@ -126,12 +126,22 @@ util.mixin(exports.TextView.prototype, {
                                 this.layoutManagerChangedTextAtRow.bind(this));
     },
 
+    /**
+     * Called by the textInput whenever the textInput gained the focus.
+     */
     didFocus: function() {
-        this.hasFocus = true;
+        // Call _setFocus and not this.hasFocus as we have to pass the
+        // 'isFromTextInput' flag.
+        this._setFocus(true, true /* fromTextInput */);
     },
 
+    /**
+     * Called by the textInput whenever the textinput lost the focus.
+     */
     didBlur: function() {
-        this.hasFocus = false;
+        // Call _setFocus and not this.hasFocus as we have to pass the
+        // 'isFromTextInput' flag.
+        this._setFocus(false, true /* fromTextInput */);
     },
 
     _drag: function() {
@@ -1054,6 +1064,41 @@ util.mixin(exports.TextView.prototype, {
             this.insertText(text);
             this.resetKeyBuffers();
         }
+    },
+
+    /**
+     * Changes the internal hasFocus flag if the current hasFocus value is not
+     * equal to the parameter 'value'. If 'fromTextInput' is true, then
+     * the textInput.focus() and textInput.blur() is not called. This is
+     * necessary as otherwise the textInput detects the blur event, calls
+     * hasFocus = false and the _setFocus function calls textInput.blur() again.
+     * If the textInput was blured, because the entire page lost the focus, then
+     * the foucs is not reset to the textInput when the page gains the focus again.
+     */
+    _setFocus: function(value, fromTextInput) {
+        if (value == this._hasFocus) {
+            return;
+        }
+
+        this._hasFocus = value;
+
+        if (this._hasFocus) {
+            this._rearmInsertionPointBlinkTimer();
+            this._invalidateSelection();
+            if (!fromTextInput) {
+                 this.textInput.focus();
+            }
+        } else {
+            if (this._insertionPointBlinkTimer) {
+                clearInterval(this._insertionPointBlinkTimer);
+                this._insertionPointBlinkTimer = null;
+            }
+            this._insertionPointVisible = true;
+            this._invalidateSelection();
+            if (!fromTextInput) {
+                 this.textInput.blur();
+            }
+        }
     }
 });
 
@@ -1064,25 +1109,7 @@ Object.defineProperties(exports.TextView.prototype, {
         },
 
         set: function(value) {
-            if (value == this._hasFocus) {
-                return;
-            }
-
-            this._hasFocus = value;
-
-            if (this._hasFocus) {
-                this._rearmInsertionPointBlinkTimer();
-                this._invalidateSelection();
-                this.textInput.focus();
-            } else {
-                if (this._insertionPointBlinkTimer) {
-                    clearInterval(this._insertionPointBlinkTimer);
-                    this._insertionPointBlinkTimer = null;
-                }
-                this._insertionPointVisible = true;
-                this._invalidateSelection();
-                this.textInput.blur();
-            }
+            this._setFocus(value, false /* fromTextInput*/);
         }
     }
 });
