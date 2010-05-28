@@ -35,22 +35,30 @@
 * ***** END LICENSE BLOCK ***** */
 
 .cmd_rowin {
-  font-size: 110%; font-weight: bold; color: @hi_text;
+  display: box; display: -moz-box; display: -webkit-box;
+  box-orient: horizontal; -moz-box-orient: horizontal; -webkit-box-orient: horizontal;
+  box-align: center; -moz-box-align: center; -webkit-box-align: center;
+
+  color: @text;
   background-color: @input_bg;
+  width: 100%;
 }
-.cmd_rowin > img { cursor: pointer; }
+
+.cmd_rowin > * {
+  padding-left: 2px; padding-right: 2px;
+}
+.cmd_hover {
+  display: none;
+}
 .cmd_rowin:hover > .cmd_hover { display: block; }
 
-.cmd_typed { padding-left: 5px; }
+.cmd_rowin > img { cursor: pointer; }
 
-.cmd_hover {
-  float: right; height: 100%; display: none;
-  font-weight: normal; color: @text; text-align: right;
+.cmd_typed {
+  box-flex: 1; -moz-box-flex: 1; -webkit-box-flex: 1;
+  font-weight: bold; color: @hi_text; font-size: 120%;
 }
-/* WARNING: this selector is SLLLOOOOWWW. */
-.cmd_hover * { vertical-align: middle; padding-left: 3px; padding-right: 3px; }
-.cmd_hover > img { vertical-align: middle; padding: 2px; }
-.cmd_duration { float: left; padding-top: 2px; }
+
 
 .cmd_output { padding-left: 10px; line-height: 1.2em; }
 .cmd_output strong,
@@ -76,4 +84,3 @@
 .cmd_output td,
 .cmd_output th { border: 0; padding: 0 2px; }
 .cmd_output .right { text-align: right; }
-

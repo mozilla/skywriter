@@ -5,27 +5,39 @@
     onblur="${cliInputView._focusCheck}"
     >
 
-  <!-- A div to hang hints on -->
-  <div class="cmd_hints" save="${cliInputView._hints}"></div>
+  <!-- The output area that changes height -->
+  <div class="cmd_top" save="${cliInputView._top}">
 
-  <!-- Used as something to hang styles off for input area -->
-  <kbd></kbd>
+    <!-- Side toolbar -->
+    <div class="cmd_toolbar">
+      <img src="${imagePath}/pinout.png" alt="Pin/Unpin the console output"
+          onclick="${cliInputView._togglePin}"/>
+    </div>
 
-  <!-- CLI output table -->
-  <div class="cmd_table" save="${cliInputView._table}"></div>
+    <!-- CLI output table -->
+    <div class="cmd_table" save="${cliInputView._table}"></div>
 
-  <div class="cmd_toolbar">
-    <img src="${imagePath}/pinout.png" alt="Pin/Unpin the console output"
-        onclick="${cliInputView._togglePin}"/>
   </div>
 
-  <!-- The prompt -->
-  <div class="cmd_prompt cmd_gt">
-    <span class="cmd_brackets">{ }</span> &gt;
+  <!-- The input area, with fixed height -->
+  <div class="cmd_cli">
+
+    <!-- The prompt -->
+    <div class="cmd_prompt cmd_gt">
+      <span class="cmd_brackets">{ }</span> &gt;
+    </div>
+
+    <!-- Where you type commands -->
+    <div class="cmd_kbd stack_children">
+      <div class="cmd_completion" save="${cliInputView._completer}"></div>
+      <div>
+        <input class="cmd_input" type="text" save="${cliInputView._inputer}">
+      </div>
+    </div>
+
   </div>
-
-  <div class="cmd_completion" save="${cliInputView._completer}"></div>
-
-  <input class="cmd_input" save="${cliInputView._inputer}" type="text">
 
 </div>
+
+    <!-- A div to hang hints on -->
+    <div class="cmd_hints" save="${cliInputView._hints}"></div>

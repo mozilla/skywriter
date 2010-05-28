@@ -195,7 +195,9 @@ exports.CliInputView.prototype = {
                 height = settings.get('maxConsoleHeight');
             }
 
-            this.element.style.height = height + 'px';
+            this._table.style.height = height + 'px';
+            this._top.style.height = height + 'px';
+
             catalog.publish(this, 'dimensionsChanged');
         }
     },
