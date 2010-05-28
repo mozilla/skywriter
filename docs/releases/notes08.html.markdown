@@ -32,6 +32,7 @@ For *Bespin Server*:
 Features
 --------
 
+* Bespin now supports themes via theme plugins
 * Embedded builds are now much smaller (less than half their previous size).
 * dryice now includes a simple server that you can run with the "-s" option.
   `dryice -s 9090 foo.json` will start a server on port 9090 that will
@@ -39,3 +40,4 @@ Features
   load of the main page.
 * Plugins can include templates in a `templates` directory. These templates
   are automatically made available via a "templates" module in the plugin.
+* The command line can now be included in embedded builds. (bug 551546)
