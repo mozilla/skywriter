@@ -70,15 +70,16 @@ class Manifest(object):
     
     unbundled_plugins = None
     
-    def __init__(self, include_core_test=False, plugins=None,
-        search_path=None, 
+    def __init__(self, include_core_test=False, static_plugins=None,
+        dynamic_plugins=None, search_path=None,
         output_dir="build", include_sample=False,
-        boot_file=None, unbundled_plugins=None, loader=None,
+        boot_file=None, unbundled_plugins=None, preamble=None, loader=None,
         config=None):
 
         self.include_core_test = include_core_test
-        plugins.insert(0, "bespin")
-        self.plugins = plugins
+        static_plugins.insert(0, "bespin")
+        self.static_plugins = static_plugins
+        self.dynamic_plugins = dynamic_plugins
 
         if search_path is not None:
             for i in range(0, len(search_path)):
@@ -119,13 +120,16 @@ will be deleted before the build.""")
         
         if unbundled_plugins:
             self.unbundled_plugins = path(unbundled_plugins).abspath()
-        
-        if loader is None:
-            self.loader = path("static/tiki.js")
-            if not self.loader.exists():
-                self.loader = path("lib/tiki.js")
-        else:
-            self.loader = path(loader)
+
+        self.preamble = path("dryice/preamble.js")
+
+        def location_of(file, default_location):
+            if default_location is not None:
+                return path(default_location)
+            static_path = path("static") / file
+            return static_path if static_path.exists() else path("lib") / file
+
+        self.loader = location_of("tiki.js", loader)
         
         self.config = config if config is not None else {}
             
@@ -156,7 +160,7 @@ will be deleted before the build.""")
 
             errors = []
 
-            for plugin in self.plugins:
+            for plugin in self.static_plugins + self.dynamic_plugins:
                 if not plugin in self._plugin_catalog:
                     errors.append("Plugin %s not found" % plugin)
 
@@ -172,7 +176,8 @@ will be deleted before the build.""")
         plugin = self.get_plugin(name)
         return combiner.Package(plugin.name, plugin.dependencies)
 
-    def generate_output_files(self, output_js, output_css, package_list=None):
+    def generate_output_files(self, output_js, output_css,
+            static_packages=None, dynamic_packages=None):
         """Generates the combined JavaScript file, putting the
         output into output_file."""
         output_dir = self.output_dir
@@ -180,6 +185,7 @@ will be deleted before the build.""")
         if self.errors:
             raise BuildError("Errors found, stopping...", self.errors)
 
+        output_js.write(self.preamble.bytes())
         output_js.write(self.loader.bytes())
 
         # include Bespin core code
@@ -187,16 +193,39 @@ will be deleted before the build.""")
 
         # finally, package up the plugins
 
-        if package_list is None:
-            package_list = self.get_package_list()
+        if static_packages is None or dynamic_packages is None:
+            dynamic_packages, static_packages = self.get_package_lists()
 
-        for package in package_list:
+        def process(package, dynamic):
             plugin = self.get_plugin(package.name)
-            combiner.combine_files(output_js, output_css, plugin,
+            if dynamic:
+                plugin_subdir = path("plugins")
+                plugin_dir = output_dir / plugin_subdir
+                if not plugin_dir.isdir():
+                    plugin_dir.makedirs()
+                plugin_filename = package.name + ".js"
+                plugin_location = plugin_subdir / plugin_filename
+                combine_output_path = plugin_dir / plugin_filename
+                combine_output = combine_output_path.open("w")
+            else:
+                plugin_location = None
+                combine_output = output_js
+
+            combiner.write_metadata(output_js, plugin, plugin_location)
+
+            combiner.combine_files(combine_output, output_css, plugin,
                                    plugin.location,
                                    exclude_tests=exclude_tests,
                                    image_path_prepend="resources/%s/"
                                                       % plugin.name)
+            if dynamic:
+                combine_output.write("bespin.tiki.script(%s);" %
+                    dumps(plugin_filename))
+
+        for package in dynamic_packages:
+            process(package, True)
+        for package in static_packages:
+            process(package, False)
 
         # include plugin metadata
         # this comes after the plugins, because some plugins
@@ -204,7 +233,7 @@ will be deleted before the build.""")
         # becomes available.
         all_md = dict()
         bundled_plugins = self.bundled_plugins = set()
-        for p in package_list:
+        for p in static_packages + dynamic_packages:
             plugin = self.get_plugin(p.name)
             all_md[plugin.name] = plugin.metadata
             bundled_plugins.add(plugin.name)
@@ -218,12 +247,48 @@ bespin.tiki.require("bespin:plugins").catalog.loadMetadata(%s);;
             boot_text = boot_text % (dumps(self.config),)
             output_js.write(boot_text.encode("utf8"))
 
-    def get_package_list(self):
-        package_list = [self.get_package(p)
-            for p in self.plugins]
-        package_list = combiner.toposort(package_list,
-            package_factory=self.get_package)
-        return package_list
+    def get_dependencies(self, packages, root_names):
+        """Given a dictionary of package names to packages, returns the list of
+        root packages and all their dependencies, topologically sorted."""
+        visited = set()
+        result = []
+        def visit(name):
+            if name in visited:
+                return
+            visited.add(name)
+
+            pkg = packages[name]
+            for dep_name in pkg.dependencies:
+                visit(dep_name)
+            result.append(pkg)
+
+        for name in root_names:
+            visit(name)
+
+        return result
+
+    def get_package_lists(self):
+        """Returns a pair consisting of the dynamic plugins and their
+        dependencies, followed by the static plugins and their dependencies."""
+        # Filter the packages into static and dynamic parts. If a package is
+        # dynamically loaded, all of its dependencies must also be dynamically
+        # loaded.
+        to_visit = self.dynamic_plugins + self.static_plugins
+        pkgs = {}
+        for name in to_visit:
+            if name in pkgs:
+                continue
+            pkg = self.get_package(name)
+            pkgs[name] = pkg
+            to_visit += pkg.dependencies
+
+        dynamic_packages = self.get_dependencies(pkgs, self.dynamic_plugins)
+        dynamic_names = set([ pkg.name for pkg in dynamic_packages ])
+
+        deps = self.get_dependencies(pkgs, self.static_plugins)
+        static_packages = [ p for p in deps if p.name not in dynamic_names ]
+
+        return dynamic_packages, static_packages
         
     def _output_unbundled_plugins(self, output_dir):
         if not output_dir.exists():
@@ -257,26 +322,26 @@ bespin.tiki.require("bespin:plugins").catalog.loadMetadata(%s);;
 
         output_dir.makedirs()
 
-        package_list = self.get_package_list()
+        dynamic_packages, static_packages = self.get_package_lists()
         
         jsfilename = output_dir / "BespinEmbedded.js"
         cssfilename = output_dir / "BespinEmbedded.css"
         jsfile = jsfilename.open("w")
         cssfile = cssfilename.open("w")
-        self.generate_output_files(jsfile, cssfile, package_list)
+        self.generate_output_files(jsfile, cssfile, static_packages,
+            dynamic_packages)
         jsfile.close()
         cssfile.close()
         
         if self.unbundled_plugins:
             self._output_unbundled_plugins(self.unbundled_plugins)
 
-        for package in package_list:
+        for package in static_packages + dynamic_packages:
             plugin = self.get_plugin(package.name)
             resources = plugin.location / "resources"
             if resources.exists() and resources.isdir():
                 resources.copytree(output_dir / "resources" / plugin.name,
                     ignore=ignore_css)
-
 
         if self.include_sample:
             sample_dir.copytree(output_dir / "samples")

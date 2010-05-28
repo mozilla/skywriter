@@ -39,12 +39,12 @@
 
 import re
 
-try:
-    from json import loads, dumps
-except ImportError:
-    from simplejson import loads, dumps
-
 from dryice.plugins import wrap_script
+
+try:
+    from json import dumps
+except ImportError:
+    from simplejson import dumps
 
 class Package(object):
     visited = False
@@ -63,75 +63,60 @@ class NullOutput(object):
 class CombinerError(Exception):
     pass
 
-def toposort(unsorted, package_factory=None, reset_first=False):
-    """Topologically sorts Packages. This algorithm is the
-    depth-first version from Wikipedia:
-    http://en.wikipedia.org/wiki/Topological_sorting
-    """
-    if reset_first:
-        for package in unsorted:
-            package.visited = False
-            
-    mapping = dict((package.name, package) for package in unsorted)
-    l = []
-    
-    def visit(p):
-        if not p.visited:
-            p.visited = True
-            for dependency in p.dependencies:
-                # core_test is a special case... that's not a true
-                # Bespin plugin, but rather a SproutCore package.
-                if dependency == "core_test":
-                    continue
-                try:
-                    visit(mapping[dependency])
-                except KeyError:
-                    if not package_factory:
-                        raise CombinerError("Dependency %s for package %s not found, no package factory available (mapping: %r)" % (dependency, p.name, mapping))
-                    try:
-                        new_package = package_factory(dependency)
-                    except KeyError, e:
-                        raise CombinerError("Dependency %s for package %s not found (mapping: %r)" % (dependency, p.name, mapping))
-                    mapping[new_package.name] = new_package
-                    visit(new_package)
-            l.append(p)
-        
-    for package in unsorted:
-        visit(package)
-        
-    return l
-
 _css_images_url = re.compile(r'url\(\s*([\'"]*)images/')
 
-def combine_files(jsfile, cssfile, plugin, p, 
-                  exclude_tests=True, image_path_prepend=None):
-    """Combines the files in an app into a single .js, with all
-    of the proper information for Tiki.
+def write_metadata(jsfile, plugin, plugin_location=None):
+    """Writes the "tiki.register" line for a plugin to a file. If
+    "plugin_location" is specified, this describes a dynamic plugin that will
+    be fetched from that URL. Otherwise, this "tiki.register" line describes
+    a plugin defined within "jsfile"."""
+    name, deps = plugin.name, plugin.dependencies
+
+    jsfilename = name + ".js"
+    deps_js = ", ".join([ '%s: "0.0.0"' % dumps(dep) for dep in deps ])
+
+    if plugin_location is None:
+        resources_js = ""
+    else:
+        resources_js = """,
+    'tiki:resources': [
+        {
+            url: bespin.base + %s,
+            type: 'script',
+            id: %s,
+            name: %s
+        }
+    ]""" \
+            % (dumps(plugin_location), dumps(jsfilename), dumps(jsfilename))
+
+
+    jsfile.write(""";bespin.tiki.register(%s, {
+    name: %s,
+    dependencies: { %s }%s
+});""" \
+        % (dumps("::"+name), dumps(name), deps_js, resources_js))
+
+def combine_files(jsfile, cssfile, plugin, p,
+        exclude_tests=True, image_path_prepend=None):
+    """Combines the files in an plugin into a single .js and .css file, wrapped
+    appropriately for Tiki.
     
     Arguments:
     jsfile: file object to write combined JavaScript to
     cssfile: file object to write combined CSS to (may be None if 
         there is no CSS)
-    name: application name (will become Tiki package name)
+    plugin: the plugin object
     p: path object pointing to the app's directory
     exclude_tests: should contents of tests directories be included in the
         combined output?
     """
     name = plugin.name
-    
+
     if cssfile is None:
         cssfile = NullOutput()
-        
-    mini_md = {
-        "name": plugin.name,
-        "dependencies": plugin.dependencies
-    }
-    
-    jsfile.write(""";bespin.tiki.register("::%s",%s);""" % (name,
-        dumps(mini_md)))
-    
+
     has_index = False
-    
+
     if p.isdir():
         for f in p.walkfiles("*.css"):
             if image_path_prepend:
@@ -169,4 +154,4 @@ def combine_files(jsfile, cssfile, plugin, p,
     template_module = plugin.template_module
     if template_module:
         jsfile.write(wrap_script(plugin, "templates", template_module))
-    
+

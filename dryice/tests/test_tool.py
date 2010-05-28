@@ -185,3 +185,28 @@ def test_image_copying():
     promptfile = plugin_image_dir / "prompt1.png"
     assert promptfile.exists()
 
+def test_get_dependencies():
+    class MockPackage:
+        name = None
+        dependencies = None
+        def __init__(name, deps):
+            self.name = name
+            self.dependencies = deps
+
+    a = MockPackage('a', [])
+    b = MockPackage('b', [])
+    c = MockPackage('c', [ 'a', 'b' ])
+    d = MockPackage('d', [ 'b' ])
+    e = MockPackage('e', [ 'd' ])
+    pkgs = { 'a': a, 'b': b, 'c': c, 'd': d, 'e': e }
+
+    manifest = tool.Manifest(plugins=list("abcde"))
+    l = manifest.get_dependencies(pkgs, list("abc"))
+    assert l == [a,b,c] or l == [b,a,c]
+
+    l = manifest.get_dependencies(pkgs, list("bca"))
+    assert l == [a,b,c] or l == [b,a,c]
+
+    l = manifest.get_dependencies(pkgs, list("ceabd"))
+    assert l == [a,b,c,d,e]
+

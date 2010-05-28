@@ -45,13 +45,24 @@ bespin.useBespin = function(element, options) {
     for (var key in options) {
         baseConfig[key] = options[key];
     }
-    var appconfig = bespin.tiki.require("appconfig");
-    if (util.isString(element)) {
-        baseConfig.element = document.getElementById(element);
-    } else {
-        baseConfig.element = element;
-    }
-    return appconfig.launch(baseConfig);
+
+    var Promise = bespin.tiki.require('bespin:promise').Promise;
+    var pr = new Promise();
+
+    bespin.tiki.require.ensurePackage("::appconfig", function() {
+        var appconfig = bespin.tiki.require("appconfig");
+        if (util.isString(element)) {
+            baseConfig.element = document.getElementById(element);
+        } else {
+            baseConfig.element = element;
+        }
+
+        appconfig.launch(baseConfig).then(function(result) {
+            pr.resolve(result);
+        });
+    });
+
+    return pr;
 };
 
 document.addEventListener("DOMContentLoaded", function() {
