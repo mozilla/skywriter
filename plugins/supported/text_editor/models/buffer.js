@@ -37,6 +37,7 @@
 
 var util = require('bespin:util/util');
 
+var Promise = require('bespin:promise').Promise;
 var TextStorage = require('models/textstorage').TextStorage;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var UndoManager = require('undomanager').UndoManager;
