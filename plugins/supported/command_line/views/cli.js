@@ -79,6 +79,7 @@ exports.CliInputView = function() {
 
     // Elements attached to this by the templater. For info only
     this.element = null;
+    this._top = null;
     this._hints = null;
     this._table = null;
     this._completer = null;
@@ -164,23 +165,6 @@ exports.CliInputView.prototype = {
 
         throw new Error('Ambiguous orientation: north=' + north +
                 ', south=' + south + ', east=' + east + ', west=' + west);
-    },
-
-    /**
-     *
-     */
-    _focusCheck: function(ev) {
-        this._hasFocus = (ev.type == 'focus');
-        this.checkSize();
-    },
-
-    /**
-     * onClick for the pin button in the toolbar
-     */
-    _togglePin: function() {
-        // TODO: change the image
-        this._pinned = !this._pinned;
-        this.checkSize();
     },
 
     /**
@@ -318,6 +302,30 @@ exports.CliInputView.prototype = {
         // when content does not fill the client area of the element
         var scrollHeight = Math.max(this._table.scrollHeight, this._table.clientHeight);
         this._table.scrollTop = scrollHeight - this._table.clientHeight;
+    },
+
+    /**
+     *
+     */
+    _focusCheck: function(ev) {
+        var newTarget = ev.explicitOriginalTarget;
+        if (newTarget) {
+            this._hasFocus = this.element == newTarget ||
+                Boolean(this.element.compareDocumentPosition(newTarget) & 16);
+        } else {
+            this._hasFocus = (ev.type == 'focus');
+        }
+console.log('_focusCheck', ev, this._hasFocus);
+        this.checkSize();
+    },
+
+    /**
+     * onClick for the pin button in the toolbar
+     */
+    _togglePin: function() {
+        // TODO: change the image
+        this._pinned = !this._pinned;
+        this.checkSize();
     },
 
     /**
