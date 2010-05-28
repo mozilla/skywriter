@@ -150,14 +150,14 @@ exports.isString = function(it) {
  */
 exports.isBoolean = function(it) {
     return (typeof it == 'boolean');
-}
+};
 
 /**
  * Returns true if it is a Number.
  */
 exports.isNumber = function(it) {
     return (typeof it == 'number' && isFinite(it));
-}
+};
 
 /**
  * Hack copied from dojo.
@@ -590,12 +590,9 @@ exports.mixin = function(a,b) {
         var g = b.__lookupGetter__(i), s = b.__lookupSetter__(i);
 
         if ( g || s ) {
-            if ( g )
-                a.__defineGetter__(i, g);
-            if ( s )
-                a.__defineSetter__(i, s);
-        } else
-            a[i] = b[i];
+            if ( g ){a.__defineGetter__(i, g);}
+            if ( s ){a.__defineSetter__(i, s);}
+        } else {a[i] = b[i];}
     }
     return a;
 };
