@@ -314,10 +314,10 @@ exports.CliInputView.prototype = {
      * Scroll the output area to the bottom
      */
     scrollToBottom: function() {
-        // certain browsers have a bug such that scrollHeight is too small
+        // Certain browsers have a bug such that scrollHeight is too small
         // when content does not fill the client area of the element
-        //var scrollHeight = Math.max(this._table.scrollHeight, this._table.clientHeight);
-        //this._table.scrollTop = scrollHeight - this._table.clientHeight;
+        var scrollHeight = Math.max(this._table.scrollHeight, this._table.clientHeight);
+        this._table.scrollTop = scrollHeight - this._table.clientHeight;
     },
 
     /**
