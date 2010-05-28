@@ -230,10 +230,10 @@ Ct.Test = utils.extend(Assertable, {
     breakPr = new Promise();
     pr.then(function() { setTimeout(function() { breakPr.resolve(); }, 1); });
     
-    breakPr.then(this, setupHandler);
-    setupPr.then(this, testHandler, teardownHandler);
-    testPr.then(this, teardownHandler, teardownHandler);
-    teardownPr.then(ret, ret.resolve, ret.resolve);
+    breakPr.then(setupHandler.bind(this));
+    setupPr.then(testHandler.bind(this), teardownHandler.bind(this));
+    testPr.then(teardownHandler.bind(this), teardownHandler.bind(this));
+    teardownPr.then(ret.resolve.bind(ret), ret.resolve.bind(ret));
     return ret ;
   },
   
@@ -295,7 +295,6 @@ Ct.Test = utils.extend(Assertable, {
       } catch(e) {
         this.error(e);
         this.didFail = true;
-        pr.cancel();
       }
 
       // treat async if a promise was returned.  schedule followups
@@ -305,7 +304,7 @@ Ct.Test = utils.extend(Assertable, {
         if (!this.didFail) this._verifyAsserts(); 
         this.mode = Ct.PLANNING_MODE;
         Ct.currentTest = null;
-        if (this.didFail) pr.cancel(); else pr.resolve();
+        if (this.didFail) pr.reject(); else pr.resolve();
       }
     };
   },
@@ -331,7 +330,7 @@ Ct.Test = utils.extend(Assertable, {
     var cancel = this._bind(function() {
       this.mode = Ct.PLANNING_MODE;
       Ct.currentTest = null;
-      pr.cancel();
+      pr.reject();
     });
     
     hpr.then(ok, cancel);

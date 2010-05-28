@@ -57,7 +57,7 @@ var state = {
 };
 
 function _cancel(v, pr) {
-  pr.cancel();
+  pr.reject();
 }
 
 function _resolve() {
@@ -109,7 +109,7 @@ exports.describe = function(desc, handler, context) {
           idx;
           
       for(idx=0;idx<len;idx++) {
-        pr = pr.then(test, _resolve(beforeHandlers[idx]), _cancel);
+        pr = pr.chainPromise(_resolve(beforeHandlers[idx]).bind(test), _cancel.bind(test));
       }
     }, true);
   }

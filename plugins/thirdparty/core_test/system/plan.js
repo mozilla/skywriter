@@ -192,9 +192,9 @@ Ct.Plan = utils.extend({
         
     if (len<=0) return pr; // nothing to do
     
-    pr = pr.then(this, this._begin, this._begin);
+    pr = pr.chainPromise(this._begin.bind(this), this._begin.bind(this));
     for(idx=0;idx<len;idx++) pr = modules[idx].schedule(pr, filter);
-    pr = pr.then(this, this._end, this._end);
+    pr = pr.chainPromise(this._end.bind(this), this._end.bind(this));
     
     return pr;
   },

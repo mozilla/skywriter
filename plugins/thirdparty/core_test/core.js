@@ -92,6 +92,10 @@ CoreTest = {
         // see if this is even necessary with the current code.
         // kdangoor 2010/05/14
         // tiki.ready(pr, pr.resolve);
+
+        // Seems like we have to resolve the promise, to tell Ct that a new
+        // task can get executed. jviereck 2010/05/27
+        pr.resolve();
       }
       return pr ;
     } else {
@@ -160,7 +164,7 @@ CoreTest = {
     if (!cancelHandler) cancelHandler = successHandler;
     
     var pr = this._schedule();
-    pr = pr.then(context, successHandler, cancelHandler);
+    pr = pr.chainPromise(successHandler.bind(context), cancelHandler.bind(context));
     this._schedule(pr);
     
     return pr ;
