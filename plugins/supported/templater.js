@@ -119,7 +119,7 @@ var processChildren = function(parent, data) {
                             ' to resolve to a function, but got ', typeof func);
                 }
                 toRemove.push({ parent: parent, attrName: attr.name });
-                parent.addEventListener(attr.name.substring(2), func, true);
+                parent.addEventListener(attr.name.substring(2), func, false);
             } else {
                 // Replace references in other attributes
                 var value = attr.value.replace(/\$\{[^}]*\}/, function(path) {
