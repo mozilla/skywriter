@@ -579,27 +579,33 @@ exports.clone = function(object) {
 
 
 /**
- * Taken from John Resig, http://ejohn.org/blog/javascript-getters-and-setters/.
- *
+ * Helper method for extending one object with another
  * Copies all properties from source to target. Returns the extended target
  * object.
+ * Taken from John Resig, http://ejohn.org/blog/javascript-getters-and-setters/.
  */
-// Helper method for extending one object with another
-exports.mixin = function(a,b) {
-    for ( var i in b ) {
-        var g = b.__lookupGetter__(i), s = b.__lookupSetter__(i);
+exports.mixin = function(a, b) {
+    for (var i in b) {
+        var g = b.__lookupGetter__(i);
+        var s = b.__lookupSetter__(i);
 
-        if ( g || s ) {
-            if ( g ){a.__defineGetter__(i, g);}
-            if ( s ){a.__defineSetter__(i, s);}
-        } else {a[i] = b[i];}
+        if (g || s) {
+            if (g) {
+                a.__defineGetter__(i, g);
+            }
+            if (s) {
+                a.__defineSetter__(i, s);
+            }
+        } else {
+            a[i] = b[i];
+        }
     }
+
     return a;
 };
 
 /**
  * Basically taken from Sproutcore.
- *
  * Replaces the count items from idx with objects.
  */
 exports.replace = function(arr, idx, amt, objects) {
