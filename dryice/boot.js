@@ -46,7 +46,7 @@ bespin.useBespin = function(element, options) {
         baseConfig[key] = options[key];
     }
     var appconfig = bespin.tiki.require("appconfig");
-    if (util.isString(elment)) {
+    if (util.isString(element)) {
         baseConfig.element = document.getElementById(element);
     } else {
         baseConfig.element = element;
