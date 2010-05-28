@@ -379,7 +379,7 @@ console.log('_focusCheck', ev, this._hasFocus);
      * @param completion {string} The full completion value
      */
     setCompletion: function(completion) {
-        this._completion = completion;
+        this._completion = completion || '';
         var current = this._inputer.value;
 
         var val;
