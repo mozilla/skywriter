@@ -1,7 +1,0 @@
-{
-    "description": "Absolute simple UI components.",
-    "dependencies": {
-        "events": "0.0.0"
-    },
-    "provides":   [ ]
-}
