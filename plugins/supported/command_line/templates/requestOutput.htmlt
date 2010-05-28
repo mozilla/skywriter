@@ -12,9 +12,8 @@
   <div class="cmd_duration cmd_hover" save="${actions.duration}"></div>
   <img class="cmd_hover" onclick="${actions.hideOutput}" save="${actions.hide}"
       alt="Hide command output" src="${imagePath}/minus.png">
-  <img class="cmd_hover" onclick="${actions.showOutput}" save="${actions.show}"
-      alt="Show command output" src="${imagePath}/plus.png"
-      style="display:none;">
+  <img class="cmd_hover cmd_hidden" onclick="${actions.showOutput}" save="${actions.show}"
+      alt="Show command output" src="${imagePath}/plus.png">
   <img class="cmd_hover" onclick="${actions.remove}"
       alt="Remove this command from the history" src="${imagePath}/closer.png">
 

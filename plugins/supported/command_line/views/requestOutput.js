@@ -94,15 +94,17 @@ exports.RequestOutput.prototype = {
 
     hideOutput: function(ev) {
         this.output.style.display = 'none';
-        this.hide.style.display = 'none';
-        this.show.style.display = 'block';
+        util.addClass(this.hide, 'cmd_hidden');
+        util.removeClass(this.show, 'cmd_hidden');
+
         ev.stopPropagation();
     },
 
     showOutput: function(ev) {
         this.output.style.display = 'block';
-        this.hide.style.display = 'block';
-        this.show.style.display = 'none';
+        util.removeClass(this.hide, 'cmd_hidden');
+        util.addClass(this.show, 'cmd_hidden');
+
         ev.stopPropagation();
     },
 
