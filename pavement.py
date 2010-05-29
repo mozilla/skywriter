@@ -173,7 +173,7 @@ def install_tiki(options):
 @task
 @cmdopts([('force', 'f', 'force download of snapshot')])
 def install_jquery(options):
-    destination = path("plugins/boot/jquery.js")
+    destination = path("plugins/thirdparty/jquery.js")
     if destination.exists() and not options.force:
         info("jquery already installed")
         return

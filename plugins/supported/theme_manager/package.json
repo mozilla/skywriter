@@ -1,6 +1,7 @@
 {
     "description": "Handles colors in Bespin",
     "dependencies": {
+        "jquery": "0.0.0",
         "less": "0.0.0",
         "settings": "0.0.0",
         "events": "0.0.0"

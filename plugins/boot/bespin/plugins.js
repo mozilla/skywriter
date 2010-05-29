@@ -42,7 +42,6 @@ var group = require("promise").group;
 var builtins = require("builtins");
 var console = require("console").console;
 var util = require("util/util");
-var $ = require("jquery").$;
 var Trace = require("util/stacktrace").Trace;
 
 var r = require;
@@ -907,18 +906,25 @@ exports.Catalog.prototype = {
      */
     loadMetadataFromURL: function(url, type) {
         var pr = new Promise();
-        $.ajax({
-            url: url,
-            type: type || "GET",
-            dataType: "json",
-            success: function(data, textStatus, xhr) {
-                this.loadMetadata(data);
-                pr.resolve();
-            }.bind(this),
-            error: function(xhr, textStatus, errorThrown) {
-                pr.reject(errorThrown);
+        var req = new XMLHttpRequest();
+        req.onreadystatechange = function() {
+            if (req.readyState !== 4) {
+                return;
             }
-        });
+
+            var status = req.status;
+            if (status !== 0 && status !== 200) {
+                pr.reject("XHR error: " + req.statusText);
+                return;
+            }
+
+            this.loadMetadata(JSON.parse(req.responseText));
+            pr.resolve();
+        }.bind(this);
+
+        req.open("GET", url, true);
+        req.send();
+
         return pr;
     },
 
