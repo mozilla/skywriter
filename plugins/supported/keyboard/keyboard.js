@@ -35,8 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Trait = require('traits').Trait;
-
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var Trace = require('bespin:util/stacktrace').Trace;
@@ -81,7 +79,9 @@ exports.buildFlags = function(env, flags) {
  * events and dispatch command messages to targets.
  * @class
  */
-var KeyboardManagerTrait = Trait({
+var KeyboardManager = function() { };
+
+util.mixin(KeyboardManager.prototype, {
     _customKeymappingCache: { states: {} },
 
     /**
@@ -422,4 +422,4 @@ exports.flagsMatch = function(predicates, flags) {
 /**
  * The global exported KeyboardManager
  */
-exports.keyboardManager = Trait.create(Object.prototype, KeyboardManagerTrait);
+exports.keyboardManager = new KeyboardManager();
