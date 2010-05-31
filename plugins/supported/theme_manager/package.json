@@ -39,6 +39,7 @@
             "ep": "extensionpoint",
             "name": "theme",
             "indexOn": "name",
+            "description": "A theme is a way change the look of the application.",
 
             "register": "index#registerTheme",
             "unregister": "index#unregisterTheme",

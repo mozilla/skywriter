@@ -8,6 +8,11 @@
     "provides":
     [
         {
+            "ep": "extensionpoint",
+            "name": "keymapping",
+            "description": "A keymapping defines how keystrokes are interpreted."
+        },
+        {
             "ep": "settingChanged",
             "key": "customKeymapping",
             "pointer": "keyboard#keyboardManager._customKeymappingChanged"
