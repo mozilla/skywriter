@@ -381,8 +381,37 @@ exports.Plugin.prototype = {
             }
         });
 
-        // remove all traces of the plugin
-        // TODO
+        // Remove all traces of the plugin.
+        var pluginName = this.name;
+
+        var nameMatch = new RegExp("^" + pluginName + '$');
+        var moduleMatch = new RegExp('^::' + pluginName + ':');
+        var packageMatch = new RegExp("^::" + pluginName + '$');
+
+        var sandbox = require.sandbox;
+        var loader = require.loader;
+        var source = browser;
+
+        // Clear the loader.
+        _removeFromObject(moduleMatch, loader.factories);
+        _removeFromObject(packageMatch, loader.canonicalIds);
+        _removeFromObject(packageMatch, loader.canonicalPackageIds);
+        _removeFromObject(packageMatch, loader.packageSources);
+        _removeFromObject(packageMatch, loader.packages);
+
+        // Clear the sandbox.
+        _removeFromObject(moduleMatch, sandbox.exports);
+        _removeFromObject(moduleMatch, sandbox.modules);
+        _removeFromObject(moduleMatch, sandbox.usedExports);
+
+        // Clear the source.
+        _removeFromObject(nameMatch, source.packageInfoByName);
+        _removeFromObject(moduleMatch, source.factories);
+        _removeFromObject(moduleMatch, source.scriptActions);
+        _removeFromObject(moduleMatch, source.stylesheetActions);
+        _removeFromObject(packageMatch, source.packages);
+        _removeFromObject(packageMatch, source.ensureActions);
+        _removeFromObject(packageMatch, source.packageInfoById);
     },
 
     /**
@@ -447,22 +476,23 @@ exports.Plugin.prototype = {
 
         // clear the sandbox of modules from all of the dependent plugins
         var fullModList = [];
-        var sandbox = tiki.sandbox;
+        var sandbox = require.sandbox;
 
-        var i = sandbox.modules.length;
+        var modulesKey = Object.keys(sandbox.modules);
+        var i = modulesKey.length;
         var dependRegexes = [];
         for (dependName in dependents) {
             // check to see if the module stated that it shouldn't be
             // refreshed
             if (!dependents[dependName].keepModule) {
-                dependRegexes.push(new RegExp("^" + dependName + ":"));
+                dependRegexes.push(new RegExp("^::" + dependName + ":"));
             }
         }
 
-        var nameMatch = new RegExp("^" + this.name + ":");
+        var nameMatch = new RegExp("^::" + this.name + ":");
 
         while (--i >= 0) {
-            var item = sandbox.modules[i];
+            var item = modulesKey[i];
             if (nameMatch.exec(item)) {
                 fullModList.push(item);
             } else {
@@ -476,20 +506,18 @@ exports.Plugin.prototype = {
             }
         }
 
-        // make a private Tiki call that clears these
-        // modules from the module cache in the sandbox.
-        // the guard below is very important. If it is
-        // omitted and there are no modules that need
-        // clearing, the entire sandbox is cleared.
-        if (fullModList.length > 0) {
-            sandbox.clear.apply(sandbox, fullModList);
-        }
+        // Remove the modules of the dependent plugins from the sandbox.
+        fullModList.forEach(function(item) {
+            delete sandbox.exports[item];
+            delete sandbox.modules[item];
+            delete sandbox.usedExports[item];
+        })
 
         // reload the plugin metadata
         var onLoad = function() {
             // actually load the plugin, so that it's ready
             // for any dependent plugins
-            tiki.async(this.name).then(function() {
+            this.catalog.loadPlugin(this.name).then(function() {
                 // re-register all of the dependent plugins
                 for (dependName in dependents) {
                     this.catalog.plugins[dependName].register();
@@ -510,7 +538,7 @@ exports.Plugin.prototype = {
                     // at long last, reloading is done.
                     callback();
                 }
-            });
+            }.bind(this));
         }.bind(this);
 
         // TODO: There should be more error handling then just logging
