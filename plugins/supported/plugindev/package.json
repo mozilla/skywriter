@@ -12,7 +12,10 @@
             "params": [
                 {
                     "name": "plugin",
-                    "type": "text"
+                    "type": {
+                        "name": "selection",
+                        "pointer": "plugindev:index#getPlugins"
+                    }
                 }
             ],
             "description": "Reload the named plugin.",
@@ -47,7 +50,8 @@
             "params": [
                 {
                     "name": "path",
-                    "type": "text"
+                    "type": "text",
+                    "description": "Path to a file or directory."
                 }
             ],
             "pointer": "commands#add"
@@ -65,8 +69,7 @@
             "params": [
                 {
                     "name": "plugin",
-                    "type":
-                    {
+                    "type": {
                         "name": "selection",
                         "pointer": "bespin:plugins#getUserPlugins"
                     }
