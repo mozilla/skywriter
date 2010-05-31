@@ -42,6 +42,7 @@ var group = require("bespin:promise").group;
 var Promise = require("bespin:promise").Promise;
 var console = require("bespin:console").console;
 var Trace = require("bespin:util/stacktrace").Trace;
+var util = require('bespin:util/util');
 
 /*
  * launch Bespin with the configuration provided. The configuration is
