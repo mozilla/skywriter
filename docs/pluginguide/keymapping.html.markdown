@@ -27,7 +27,7 @@ In the simplest case, a keymapping plugin looks something like this:
             {
                 "ep": "command",
                 "name": "alert",
-                "key": "ctrl_a",
+                "key": "ctrl_i",
                 "pointer": "#showMessage"
             }
         ]
@@ -38,7 +38,7 @@ In the simplest case, a keymapping plugin looks something like this:
         alert("Greetings from the cloud!");
     };
 
-When this plugin is loaded and the user presses *Ctrl+A* on the keyboard, then
+When this plugin is loaded and the user presses *Ctrl+I* on the keyboard, then
 the command `showMessage` is executed.
 
 For most use cases, this is all that is needed. For those interested in adding

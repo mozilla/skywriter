@@ -86,7 +86,7 @@ in the MyPlugins directory that you just created.
             {
                 "ep": "command",
                 "name": "alert",
-                "key": "ctrl_a",
+                "key": "ctrl_i",
                 "pointer": "#showMessage"
             }
         ]
@@ -108,7 +108,7 @@ run:
 If you look at the files in your tmp directory, you'll see a fresh
 BespinEmbedded.js. That one will actually include your plugin! Open the
 sample.html file in your web browser, click on the editor and press
-cmd-A (probably alt-A on Windows) and you'll see your alert pop up.
+cmd-I (ctrl-I on Windows) and you'll see your alert pop up.
 
 ## Building ##
 
