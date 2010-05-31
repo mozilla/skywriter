@@ -61,7 +61,7 @@ var changePluginInfo = function(env, request) {
     prChangeDone.then(function(prSaveDone) {
         pluginConfigFile.saveContents(JSON.stringify(pluginConfig)).then(
             function() {
-                if (typeOf(prSaveDone) == 'string') {
+                if (typeof(prSaveDone) == 'string') {
                     request.done(prSaveDone);
                 } else if (!util.none(prSaveDone)) {
                     prSaveDone.resolve();
@@ -216,7 +216,7 @@ exports.list = function(env, args, request) {
  */
 exports.remove = function(env, args, request) {
     var pluginName = args.plugin;
-    var plugin = catalog.get('plugins')[pluginName];
+    var plugin = catalog.plugins[pluginName];
     if (!plugin) {
         request.doneWithError('Plugin ' + pluginName + ' not found.');
         return;
