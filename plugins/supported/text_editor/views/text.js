@@ -179,7 +179,7 @@ util.mixin(exports.TextView.prototype, {
             context.stroke();
         } else {
             context.fillStyle = theme.unfocusedCursorBackgroundColor;
-            context.fillRect(x + 0.5, y, width, height);
+            context.fillRect(x + 0.5, y, width - 0.5, height);
             context.strokeStyle = theme.unfocusedCursorColor;
             context.strokeRect(x + 0.5, y + 0.5, width - 1, height - 1);
         }

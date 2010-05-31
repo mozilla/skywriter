@@ -411,7 +411,7 @@ exports.LayoutManager.prototype = {
             rects.push({
                 x:      margin.left + characterWidth * startColumn,
                 y:      margin.top + lineHeight * startRow,
-                width:  characterWidth * (maximumWidth - startColumn),
+                width:  99999, // < Number.MAX_VALUE is not working here.
                 height: lineHeight
             });
         }
@@ -436,7 +436,7 @@ exports.LayoutManager.prototype = {
         rects.push({
             x:      margin.left,
             y:      margin.top + lineHeight * middleStartRow,
-            width:  characterWidth * maximumWidth,
+            width:  99999, // < Number.MAX_VALUE is not working here.
             height: lineHeight * (middleEndRow - middleStartRow + 1)
         });
 
