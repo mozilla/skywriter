@@ -177,7 +177,7 @@ exports.moveLeft = function(env, args) {
 
 exports.moveRight = function(env, args) {
     var view = env.view;
-    var lines = env.model.get('lines');
+    var lines = env.model.lines;
     var range = view.getSelectedRange();
     var lineLength = lines[range.start.row].length
 
