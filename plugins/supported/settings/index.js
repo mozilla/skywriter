@@ -223,7 +223,7 @@ exports.MemorySettings = Trait({
                 this._values[key] = converted;
 
                 // Inform subscriptions of the change
-                catalog.publish('settingChange', key, converted);
+                catalog.publish(this, 'settingChange', key, converted);
             }.bind(this), function(ex) {
                 console.error('Error setting', key, ': ', ex);
             });

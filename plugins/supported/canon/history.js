@@ -75,7 +75,7 @@ exports.addRequestOutput = function(request) {
         exports.requests.shiftObject();
     }
 
-    catalog.publish('addedRequestOutput', null, request);
+    catalog.publish(this, 'addedRequestOutput', null, request);
 };
 
 /**

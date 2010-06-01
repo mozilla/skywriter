@@ -146,7 +146,7 @@ exports.RequestOutput.prototype = {
  */
 exports.createHandler = function(cliInputView) {
     return {
-        pointer: function(key, request) {
+        pointer: function(source, key, request) {
             new exports.RequestOutput(request, cliInputView);
         }
     };

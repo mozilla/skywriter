@@ -210,7 +210,7 @@ var _updateHistoryProperty = function(valueObj, file, atOnce) {
     }
 };
 
-exports.handleEditorChange = function(key, value, editor) {
+exports.handleEditorChange = function(editor, key, value) {
     if (!env.session.history || !editor.buffer.file) {
         return;
     }

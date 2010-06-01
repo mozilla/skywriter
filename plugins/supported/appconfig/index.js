@@ -94,9 +94,9 @@ exports.launch = function(config) {
             env.commandLine = commandLine;
         }
 
-        catalog.publish('appLaunched');
+        catalog.publish(this, 'appLaunched');
         launchPromise.resolve(env);
-    };
+    }.bind(this);
 
     var themeLoadingPromise = new Promise();
 

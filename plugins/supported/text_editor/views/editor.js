@@ -547,7 +547,7 @@ Object.defineProperties(exports.EditorView.prototype, {
             }
 
             this.willChangeBuffer(newBuffer);
-            catalog.publish('editorChange', 'buffer', newBuffer, this);
+            catalog.publish(this, 'editorChange', 'buffer', newBuffer);
 
             this.layoutManager = newBuffer.layoutManager;
             this._buffer = newBuffer;
@@ -630,7 +630,7 @@ Object.defineProperties(exports.EditorView.prototype, {
             this.buffer._scrollOffset = pos;
 
             this.scrollOffsetChanged(pos);
-            catalog.publish('editorChange', 'scrollOffset', pos, this);
+            catalog.publish(this, 'editorChange', 'scrollOffset', pos);
         },
 
         get: function() {

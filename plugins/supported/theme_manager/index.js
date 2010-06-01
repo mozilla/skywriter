@@ -51,7 +51,7 @@ var standardThemeName = null;
 // Load promise for the basePlugin.
 var basePluginLoadPromise = null;
 
-exports.themeSettingChanged = function(settingName, themeName) {
+exports.themeSettingChanged = function(source, settingName, themeName) {
     // Get the themeExtensionPoint for 'themeName'
     var themeExt = catalog.getExtensionByKey('theme', themeName);
 
@@ -86,7 +86,7 @@ exports.themeSettingChanged = function(settingName, themeName) {
             themestyles.reparse();
 
             // Publish the 'themeChange' event.
-            catalog.publish('themeChange');
+            catalog.publish(this, 'themeChange');
         }
         return;
     } else {
@@ -116,7 +116,7 @@ exports.themeSettingChanged = function(settingName, themeName) {
             }
 
             // Publish the 'themeChange' event.
-            catalog.publish('themeChange');
+            catalog.publish(this, 'themeChange');
         });
     }
 };
@@ -137,7 +137,7 @@ exports.setStandardTheme = function(themeName) {
     // applied. Otherwise, call themeSttingChanged which handles the standard-
     // theme change then.
     if (themeName !== settings.get('theme')) {
-        exports.themeSettingChanged();
+        exports.themeSettingChanged(this);
     }
 };
 
@@ -172,12 +172,12 @@ exports.startParsing = function() {
 exports.registerTheme = function(extension) {
     var currentThemeName = settings.get('theme');
     if (extension.name === currentThemeName) {
-        exports.themeSettingChanged();
+        exports.themeSettingChanged(this);
     }
 };
 
 exports.unregisterTheme = function(extension) {
     if (extension.name === settings.get('theme')) {
-        exports.themeSettingChanged();
+        exports.themeSettingChanged(this);
     }
 };

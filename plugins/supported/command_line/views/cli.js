@@ -196,7 +196,7 @@ exports.CliInputView.prototype = {
             }
 
             this.element.style.height = height + 'px';
-            catalog.publish('dimensionsChanged');
+            catalog.publish(this, 'dimensionsChanged');
         }
     },
 

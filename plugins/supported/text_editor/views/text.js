@@ -1055,7 +1055,7 @@ util.mixin(exports.TextView.prototype, {
         }
 
         this.selectionChanged(newRange._selectedRange);
-        catalog.publish('editorChange', 'selection', newRange, this.editor);
+        catalog.publish(this.editor, 'editorChange', 'selection', newRange);
     },
 
     textInserted: function(text) {

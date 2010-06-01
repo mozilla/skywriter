@@ -58,7 +58,7 @@ Object.defineProperties(exports.Environment.prototype, {
 
     dimensionsChanged: {
         value: function() {
-            catalog.publish('dimensionsChanged');
+            catalog.publish(this, 'dimensionsChanged');
         }
     },
 
