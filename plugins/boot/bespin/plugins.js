@@ -1158,8 +1158,9 @@ exports.Catalog.prototype = {
      * @param key {string} A key to which we publish (linearly searched, allowing
      * for regex matching).
      * @param value {object} The data to be passed to the subscribing function.
+     * @param sender {object} The sender calling the publish function.
      */
-    publish: function(ep, key, value) {
+    publish: function(ep, key, value, sender) {
         var subscriptions = this.getExtensions(ep);
         subscriptions.forEach(function(sub) {
             // compile regexes only once
@@ -1170,7 +1171,7 @@ exports.Catalog.prototype = {
                     || sub.key === key
                     || (util.none(sub.key) && util.none(key))) {
                 sub.load().then(function(handler) {
-                    handler(key, value);
+                    handler(key, value, sender);
                 });
             }
         });
