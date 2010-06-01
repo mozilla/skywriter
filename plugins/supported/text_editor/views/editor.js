@@ -37,7 +37,6 @@
 
 var util = require('bespin:util/util');
 
-var env = require('canon:environment').global;
 var catalog = require('bespin:plugins').catalog;
 var Event = require('events').Event;
 var settings = require('settings').settings;
@@ -540,6 +539,8 @@ Object.defineProperties(exports.EditorView.prototype, {
             }
 
             this.willChangeBuffer(newBuffer);
+            catalog.publish('editorChange', 'buffer', newBuffer, this);
+
             this.layoutManager = newBuffer.layoutManager;
             this._buffer = newBuffer;
 
@@ -549,22 +550,18 @@ Object.defineProperties(exports.EditorView.prototype, {
             // Watch out for changes to the layoutManager's internal size.
             lm.sizeChanged.add(this, this._layoutManagerSizeChanged.bind(this));
 
+            // Map internal events so that developers can listen much easier.
+            lm.textStorage.changed.add(this, this.textChanged.bind(this));
+            tv.selectionChanged.add(this, this.selectionChanged.bind(this));
+
+            this.textView.setSelection(newBuffer._selectedRange, false);
+            this.scrollOffsetChanged(newBuffer._scrollOffset);
+
             // The layoutManager changed and its size as well. Call the
             // layoutManager.sizeChanged event manually.
             this.layoutManager.sizeChanged(this.layoutManager.size);
 
             this._recomputeLayout();
-
-            // Map internal events so that developers can listen much easier.
-            lm.textStorage.changed.add(this, this.textChanged.bind(this));
-            tv.selectionChanged.add(this, this.selectionChanged.bind(this));
-
-            // Restore selection.
-            this.textView.setSelection(newBuffer._selectedRange, false);
-
-            // Restore scrollOffset.
-            this.scrollOffsetChanged(this.scrollOffset);
-            this._updateScrollers();
 
             // Tell textView to recompute the syntax for the visible region.
             this.textView.updateSyntax(null);
@@ -625,6 +622,7 @@ Object.defineProperties(exports.EditorView.prototype, {
             this.buffer._scrollOffset = pos;
 
             this.scrollOffsetChanged(pos);
+            catalog.publish('editorChange', 'scrollOffset', pos, this);
         },
 
         get: function() {

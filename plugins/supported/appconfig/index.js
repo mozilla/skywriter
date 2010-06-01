@@ -165,6 +165,11 @@ exports.normalizeConfig = function(config) {
         config.objects.loginController = {
         };
     }
+    if (!config.objects.fileHistory && catalog.plugins.file_history) {
+        config.objects.fileHistory = {
+            factory: 'file_history'
+        };
+    }
     if (!config.objects.server && catalog.plugins.bespin_server) {
         config.objects.server = {
             factory: "bespin_server"

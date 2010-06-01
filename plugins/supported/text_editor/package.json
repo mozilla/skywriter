@@ -6,6 +6,7 @@
         "keyboard": "0.0",
         "rangeutils": "0.0",
         "settings": "0.0",
+        "edit_session": "0.0",
         "syntax_manager" : "0.0",
         "undomanager": "0.0",
         "theme_manager": "0.0.0",
@@ -498,6 +499,18 @@
                 "barFillGradientBottomStart": "rgb(22, 22, 22)",
                 "barFillGradientBottomStop": "rgb(44, 44, 44)"
             }
+        },
+        {
+            "ep": "extensionpoint",
+            "name": "editorChange",
+            "description": "Event: Notify when something within the editor changed.",
+            "params": [
+                {
+                    "name": "pointer",
+                    "required": true,
+                    "description": "Function that is called whenever a change happened."
+                }
+            ]
         }
     ]
 }

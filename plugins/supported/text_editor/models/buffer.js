@@ -35,6 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var env = require('canon:environment').global;
+
 var util = require('bespin:util/util');
 
 var Promise = require('bespin:promise').Promise;
@@ -73,14 +75,31 @@ exports.Buffer = function(file, fileLoadedPromise, initialContent) {
         this._updateSyntaxManagerInitialContext();
     }
 
-    // DISCUSS: Should this be the place to lookup History?
-    this._selectedRange = {
+    // Restore the state of the buffer (selection + scrollOffset).
+    // TODO: Refactor this code into the ViewState.
+    var history = (env.session ? env.session.history : null);
+    var item, selection, scrollOffset;
+
+    // If
+    //  1.  Check if a history exists and the buffer has a file (-> path)
+    //  2.  Ask the history object for the history for the current file.
+    //      If no history is found, null is returned.
+    if (history && file &&                                  // 1.
+            (item = history.getHistoryForPath(file.path))   // 2.
+    ) {
+        // There is no state saved in the buffer and the history object
+        // has a state saved.
+        selection = item.selection;
+        scrollOffset = item.scroll;
+    }
+
+    // Use the saved values from the history or the default values.
+    this._selectedRange = selection || {
         start: { row: 0, col: 0 },
         end: { row: 0, col: 0 }
     };
 
-    // DISCUSS: Should this be the place to lookup History?
-    this._scrollOffset = { x: 0, y: 0 };
+    this._scrollOffset = scrollOffset || { x: 0, y: 0 };
 };
 
 exports.Buffer.prototype = {

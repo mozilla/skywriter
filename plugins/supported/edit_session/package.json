@@ -1,8 +1,7 @@
 {
     "description": "Ties together the files being edited with the views on screen",
     "dependencies": {
-        "text_editor": "0.0",
-        "filesystem": "0.0"
+        "events": "0.0.0"
     },
     "provides": [
         {

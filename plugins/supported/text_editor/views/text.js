@@ -35,7 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var catalog = require('bespin:plugins').catalog;
 var util = require('bespin:util/util');
+
 var Event = require('events').Event;
 var CanvasView = require('views/canvas').CanvasView;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
@@ -1040,7 +1042,8 @@ util.mixin(exports.TextView.prototype, {
         this._invalidateSelection();
 
         // Set the new selection and invalidate it.
-        this.editor.buffer._selectedRange = textStorage.clampRange(newRange);
+        this.editor.buffer._selectedRange = newRange =
+                                                textStorage.clampRange(newRange);
         this._invalidateSelection();
 
         if (this._hasFocus) {
@@ -1048,10 +1051,11 @@ util.mixin(exports.TextView.prototype, {
         }
 
         if (ensureVisible) {
-            this.scrollToPosition(this.editor.buffer._selectedRange.end);
+            this.scrollToPosition(newRange.end);
         }
 
-        this.selectionChanged(this.editor.buffer._selectedRange);
+        this.selectionChanged(newRange._selectedRange);
+        catalog.publish('editorChange', 'selection', newRange, this.editor);
     },
 
     textInserted: function(text) {
