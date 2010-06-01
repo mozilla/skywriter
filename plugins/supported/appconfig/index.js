@@ -235,16 +235,11 @@ exports.normalizeConfig = function(config) {
 
     if (!config.gui.center && config.objects.editor
         && !alreadyRegistered.editor) {
-        config.gui.center = {
-            component: "editor"
-        };
+        config.gui.center = { component: "editor" };
     }
     if (!config.gui.south && config.objects.commandLine
         && !alreadyRegistered.commandLine) {
-        config.gui.south = {
-            component: "commandLine",
-            height: 300
-        };
+        config.gui.south = { component: "commandLine" };
     }
 };
 
@@ -254,7 +249,7 @@ exports.launchEditor = function(config) {
     if (config === null) {
         var message = 'Cannot start editor without a configuration!';
         console.error(message);
-        retPr.reject(messsage);
+        retPr.reject(message);
         return;
     }
 
