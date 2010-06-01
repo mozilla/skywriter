@@ -331,11 +331,6 @@ util.mixin(exports.TextView.prototype, {
         this._keyState = 'start';
     },
 
-    // TODO: Do we need this anymore?
-    // _parentViewChanged: function() {
-    //     this._updateEnclosingScrollView();
-    // }.observes('parentView'),
-
     _performVerticalKeyboardSelection: function(offset) {
         var textStorage = this.editor.layoutManager.textStorage;
         var selectedRangeEndVirtual = this.editor.buffer._selectedRangeEndVirtual;
