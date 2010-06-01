@@ -10,7 +10,15 @@
         {
             "ep": "extensionpoint",
             "name": "keymapping",
-            "description": "A keymapping defines how keystrokes are interpreted."
+            "description": "A keymapping defines how keystrokes are interpreted.",
+
+            "params": [
+                {
+                    "name": "states",
+                    "required": true,
+                    "description": "Holds the states and all the informations about the keymapping. See docs: pluginguide/keymapping"
+                }
+            ]
         },
         {
             "ep": "settingChanged",
