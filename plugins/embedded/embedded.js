@@ -387,6 +387,10 @@ var embeddedEditor = Trait.object({
             }
             break;
 
+        case 'readOnly':
+            this._getTextStorage().readOnly = value;
+            break;
+
         case 'settings':
             for (var settingName in value) {
                 this.setSetting(settingName, value[settingName]);
