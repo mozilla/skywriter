@@ -139,7 +139,7 @@ exports.EditorView = function(initialContent) {
 
     // Create a buffer for the editor and use initialContent as intialContent for
     // the textStorage object.
-    this.buffer = new Buffer(null, null, initialContent);
+    this.buffer = new Buffer(null, initialContent);
 
     // Create all the necessary stuff once the container has been added.
     this.elementAppended.add(function() {
@@ -526,9 +526,17 @@ Object.defineProperties(exports.EditorView.prototype, {
     },
 
     buffer: {
+        /**
+         * Sets a new buffer.
+         * The buffer's file has to be loaded when passing to this setter.
+         */
         set: function(newBuffer) {
             if (newBuffer === this._buffer) {
                 return;
+            }
+
+            if (!newBuffer.loadPromise.isResolved()) {
+                throw new Error('set bufffer: the newBuffer has to be loaded!');
             }
 
             // Was there a former buffer? If yes, then remove some events.

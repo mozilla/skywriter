@@ -37,6 +37,7 @@
 
 var env = require('canon:environment').global;
 var util = require('bespin:util/util');
+var console = require('bespin:console').console;
 
 var Buffer = require('text_editor:models/buffer').Buffer;
 
@@ -256,5 +257,10 @@ exports.loadMostRecent = function() {
     var recent = recents[0];
     var file = env.files.getFile(recent.path);
 
-    env.editor.buffer = new Buffer(file);
+    var buffer = new Buffer(file);
+    buffer.loadPromise.then(function() {
+        env.editor.buffer = buffer;
+    }, function(error) {
+        console.error('Failed to load recentFile (', recent.path, '): ' + error);
+    })
 }

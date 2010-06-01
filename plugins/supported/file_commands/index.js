@@ -149,7 +149,10 @@ exports.openCommand = function(env, args, request) {
     var loadPromise = new Promise();
     var buffer;
 
-    loadPromise.then(
+    // Create a new buffer based that is bound to 'file'.
+    // TODO: After editor reshape: EditorSession should track buffer instances.
+    buffer = new Buffer(file);
+    buffer.loadPromise.then(
         function() {
             // Set the buffer of the current editorView after it's loaded.
             editor.buffer = buffer;
@@ -160,10 +163,6 @@ exports.openCommand = function(env, args, request) {
                 error.message + ')');
         }
     );
-
-    // Create a new buffer based that is bound to 'file'.
-    // TODO: After editor reshape: EditorSession should track buffer instances.
-    buffer = new Buffer(file, loadPromise);
 };
 
 /**

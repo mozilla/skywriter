@@ -56,7 +56,7 @@ var UndoManager = require('undomanager').UndoManager;
  * To create a buffer that is (not yet) bound to a file, just create the Buffer
  * without a file passed.
  */
-exports.Buffer = function(file, fileLoadedPromise, initialContent) {
+exports.Buffer = function(file, initialContent) {
     this._file = file;
     this._model = new TextStorage(initialContent);
     this._layoutManager = new LayoutManager({
@@ -68,11 +68,11 @@ exports.Buffer = function(file, fileLoadedPromise, initialContent) {
     // If a file is passed, then load it. This is the same as calling reload.
     if (file) {
         this.reload().then(function() {
-            if (fileLoadedPromise) fileLoadedPromise.resolve();
-        }, function() {
-            if (fileLoadedPromise) fileLoadedPromise.reject();
-        });
-        this._updateSyntaxManagerInitialContext();
+            this._updateSyntaxManagerInitialContext();
+        }.bind(this));
+    } else {
+        this.loadPromise = new Promise();
+        this.loadPromise.resolve();
     }
 
     // Restore the state of the buffer (selection + scrollOffset).
@@ -107,6 +107,8 @@ exports.Buffer.prototype = {
      * The undoManager where the undo/redo stack is stored and handled.
      */
     undoManager: null,
+
+    loadPromise: null,
 
     _scrollOffset: null,
     _selectedRange: null,
@@ -165,9 +167,12 @@ exports.Buffer.prototype = {
         var file = this._file;
         var self = this;
 
-        return file.loadContents().then(function(contents) {
+        var pr;
+        pr =  file.loadContents().then(function(contents) {
             self._model.value = contents;
         });
+        this.loadPromise = pr;
+        return pr;
     },
 
     _updateSyntaxManagerInitialContext: function() {
