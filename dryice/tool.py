@@ -239,7 +239,9 @@ will be deleted before the build.""")
             bundled_plugins.add(plugin.name)
             
         output_js.write("""
-bespin.tiki.require("bespin:plugins").catalog.loadMetadata(%s);;
+document.addEventListener("DOMContentLoaded", function() {
+    bespin.tiki.require("bespin:plugins").catalog.loadMetadata(%s);;
+}, false);
 """ % (dumps(all_md)))
         
         if self.boot_file:
