@@ -97,6 +97,20 @@ exports.Promise.prototype.isComplete = function() {
 };
 
 /**
+ * Have we resolve()ed?
+ */
+exports.Promise.prototype.isResolved = function() {
+    return this._status == SUCCESS;
+};
+
+/**
+ * Have we reject()ed?
+ */
+exports.Promise.prototype.isRejected = function() {
+    return this._status == ERROR;
+};
+
+/**
  * Take the specified action of fulfillment of a promise, and (optionally)
  * a different action on promise rejection.
  */
