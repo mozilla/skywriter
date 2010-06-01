@@ -68,14 +68,15 @@ div.cmd_menu li {
   list-style: none;
 }
 
-div.cmd_menu li:hover, .cmd_hi {
+div.cmd_menu li:hover,
+div.cmd_menu .cmd_hi {
   color: @border_bg;
   background: @theme_text -moz-linear-gradient(top, @theme_text, @theme_text_dark);
   background: -webkit-gradient(linear, left top, left bottom, from(@theme_text), to(@theme_text_dark));
   cursor: pointer;
 }
 
-div.cmd_hints div.cmd_menu dfn {
+div.cmd_menu dfn {
   font-size: 80%;
   color: @lo_text;
   padding: 0 5px;
