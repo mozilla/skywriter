@@ -59,6 +59,8 @@ var diff = new diff_match_patch();
 /**
  * A view designed to dock in the bottom of the editor, holding the command
  * line input.
+ * TODO: If you click on the console output, and then on the editor, we don't
+ * shrink the console because we don't have right event. fix it
  */
 exports.CliInputView = function() {
     // Used to track if we have focus, and therefore should the CLI be expanded
@@ -79,7 +81,7 @@ exports.CliInputView = function() {
 
     // Elements attached to this by the templater. For info only
     this.element = null;
-    this._top = null;
+    this._tog = null;
     this._hints = null;
     this._table = null;
     this._completer = null;
@@ -180,7 +182,7 @@ exports.CliInputView.prototype = {
             }
 
             this._table.style.height = height + 'px';
-            this._top.style.height = height + 'px';
+            this._tog.style.height = height + 'px';
 
             catalog.publish(this, 'dimensionsChanged');
         }
@@ -315,7 +317,6 @@ exports.CliInputView.prototype = {
         } else {
             this._hasFocus = (ev.type == 'focus');
         }
-console.log('_focusCheck', ev, this._hasFocus);
         this.checkSize();
     },
 
@@ -326,51 +327,6 @@ console.log('_focusCheck', ev, this._hasFocus);
         // TODO: change the image
         this._pinned = !this._pinned;
         this.checkSize();
-    },
-
-    /**
-     * We can't know where the focus is going to (willLoseKeyResponderTo only
-     * reports when the destination focus is a sproutcore component that will
-     * accept keyboard input - we sometimes lose focus to elements that do not
-     * take input)
-     */
-    checkfocus: function(source, event) {
-        // We don't want old blurs to happen whatever
-        this._cancelBlur('focus event');
-
-        var focus = source[event];
-        if (focus) {
-            // Make sure that something isn't going to undo the hasFocus=true
-            this._hasFocus = true;
-        } else {
-            // The current element has lost focus, but does that mean that the
-            // whole CliInputView has lost focus? We delay setting hasFocus to
-            // false to see if anything grabs the focus
-
-            // We rely on something canceling this if we're not to lose focus
-            this._blurTimeout = window.setTimeout(function() {
-                //console.log('_blurTimeout', arguments);
-                this._hasFocus = false;
-            }.bind(this), 1);
-        }
-    },
-
-    /**
-     * We need to know if blur events from the input really matter (i.e. are
-     * they going to the editor or another view, or just to another part of
-     * this view) so we listen for clicks in this view.
-     * This allows us to cancel the effects of a blur
-     *
-     * We have reason to believe that a blur event shouldn't happen
-     * @param {String} reason For debugging we (where we can) declare why we
-     * are canceling the blur action
-     */
-    _cancelBlur: function(reason) {
-        // console.log('_cancelBlur', arguments);
-        if (this._blurTimeout) {
-            window.clearTimeout(this._blurTimeout);
-            this._blurTimeout = null;
-        }
     },
 
     /**

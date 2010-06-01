@@ -52,14 +52,16 @@
 .cmd_line {
   background: @bg; color: @text;
   font-family: @fonts; font-size: 90%;
-  overflow-x: hidden;
+  overflow: hidden;
   display: box; display: -moz-box; display: -webkit-box;
   box-orient: vertical; -moz-box-orient: vertical; -webkit-box-orient: vertical;
 }
 
-.cmd_top {
+.cmd_tog {
   box-flex: 1; -moz-box-flex: 1; -webkit-box-flex: 1;
- 
+}
+
+.cmd_top {
   display: box; display: -moz-box; display: -webkit-box;
   box-orient: horizontal; -moz-box-orient: horizontal; -webkit-box-orient: horizontal;
 }
@@ -70,7 +72,14 @@ TODO: Consider taking them out of the cmd_line and attaching to the page
 directly. This way they could vertically occupy more space than the command line
 and even bespin. Also the more complex layouts could be cached
 */
-.cmd_hints { line-height: 1.2em; }
+.cmd_hints {
+  line-height: 1.2em;
+  margin-left: 30px;
+  display: box; display: -moz-box; display: -webkit-box;
+  box-orient: vertical; -moz-box-orient: vertical; -webkit-box-orient: vertical;
+  box-pack: end; -moz-box-pack: end; -webkit-box-pack: end;
+  box-align: start; -moz-box-align: start; -webkit-box-align: start;
+}
 
 .cmd_toolbar {
   width: 30px;
@@ -108,22 +117,23 @@ and even bespin. Also the more complex layouts could be cached
   box-flex: 1; -moz-box-flex: 1; -webkit-box-flex: 1;
 }
 
-input.cmd_input {
-  color: @hi_text; font-size: 110%; font-family: @fonts; 
+.cmd_line input.cmd_input {
+  color: @hi_text; font-size: 120%; font-family: @fonts; 
   background: transparent;
   outline: none; border: 0;
   box-shadow: none; -moz-box-shadow: none; -webkit-box-shadow: none;
   padding: 0;
   width: 100%;
 }
-input.cmd_input:focus {
+.cmd_line input.cmd_input:focus {
   outline: none; border: 0;
   box-shadow: none; -moz-box-shadow: none; -webkit-box-shadow: none;
 }
 
 /* Command line completion */
 .cmd_completion {
-  color: @lo_text2; font-size: 110%; font-family: @fonts;
+  color: @lo_text2; font-size: 120%; font-family: @fonts;
+  padding: 0 0 5px 2px;
 }
 .cmd_existing { color: @input_bg; text-shadow: none; }
 .cmd_extension { margin-left: 30px; }
