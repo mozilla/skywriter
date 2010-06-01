@@ -94,6 +94,7 @@ exports.launch = function(config) {
             env.commandLine = commandLine;
         }
 
+        catalog.publish('appLaunched');
         launchPromise.resolve(env);
     };
 
@@ -104,7 +105,10 @@ exports.launch = function(config) {
             catalog.createObject("loginController").then(
                 function(loginController) {
                     var pr = loginController.showLogin();
-                    pr.then(function() {
+                    pr.then(function(username) {
+                        // Add the username as constructor argument.
+                        config.objects.session.arguments.push(username);
+
                         exports.launchEditor(config).then(resolveLaunchPromise,
                                         launchPromise.reject.bind(launchPromise));
                     });

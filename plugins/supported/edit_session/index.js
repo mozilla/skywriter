@@ -325,11 +325,13 @@ Object.defineProperties(exports.EditSession.prototype, {
  * set up a session based on a view. This seems a bit convoluted and is
  * likely to change.
  */
-exports.createSession = function(view) {
+exports.createSession = function(view, user) {
     var session = new exports.EditSession();
     if (view) {
         session.currentView = view.textView;
     }
+    if (user) {
+        session.currentUser = user;
+    }
     return session;
 };
-
