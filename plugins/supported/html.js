@@ -46,7 +46,8 @@
             "ep": "syntax",
             "name": "html",
             "pointer": "#HTMLSyntax",
-            "fileexts": [ "htm", "html" ]
+            "fileexts": [ "htm", "html" ],
+            "subsyntaxes": [ "js" ]
         }
     ]
 });
