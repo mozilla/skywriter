@@ -97,6 +97,12 @@ WorkerManager.prototype = {
 
     /** Terminates the worker. After this call, the worker manager is dead. */
     kill: function() {
+        var oldPromise = this._promise;
+        if (oldPromise != null) {
+            oldPromise.reject("killed");
+            this._promise = null;
+        }
+
         this._worker.terminate();
         this._worker = null;
     },
