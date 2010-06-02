@@ -1057,7 +1057,7 @@ util.mixin(exports.TextView.prototype, {
             this.scrollToPosition(newRange.end);
         }
 
-        this.selectionChanged(newRange._selectedRange);
+        this.selectionChanged(newRange);
         catalog.publish(this.editor, 'editorChange', 'selection', newRange);
     },
 

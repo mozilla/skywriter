@@ -57,6 +57,12 @@ bespin.useBespin = function(element, options) {
             baseConfig.element = element;
         }
 
+        if (util.none(baseConfig.initialContent)) {
+            baseConfig.initialContent = baseConfig.element.innerHTML;
+        }
+
+        baseConfig.element.innerHTML = '';
+
         appconfig.launch(baseConfig).then(function(result) {
             pr.resolve(result);
         });

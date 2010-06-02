@@ -49,45 +49,54 @@
   .displaybutton { margin-top: 1em; }
 </style>
 <script>
-window.onBespinLoad = function() {
-    var console = bespin.tiki.require('bespin:console').console;
-    var Range = bespin.tiki.require('rangeutils:utils/range');
+    // The editor is set within the window.onBespinLoad function.
+    var editor;
 
-    console.log("this is called when Bespin is loaded");
-    window.bespin = document.getElementById("editor").bespin;
+    window.onBespinLoad = function() {
+        var console = bespin.tiki.require('bespin:console').console;
+        var Range = bespin.tiki.require('rangeutils:utils/range');
 
-    // Bespin event handler:
-    var preChange = document.getElementById('change');
-    // window.bespin.addEventListener('textChange', function(evt) {
-    //     preChange.innerHTML = 'Change: at ' + Range.toString(evt.oldRange) +
-    //                             ' to \'' + evt.newValue + '\' at ' +
-    //                                 Range.toString(evt.newRange);
-    // });
+        console.log("this is called when Bespin is loaded");
 
-    var preSelection = document.getElementById('selection');
-    // window.bespin.addEventListener('select', function(evt) {
-    //     preSelection.innerHTML = 'Selection: ' + Range.toString(evt.selection);
-    // });
-};
+        // Get the Bespin editor.
+        editor = document.getElementById("editor").bespin.editor;
 
-function showContents() {
-  // Just like a textarea, you can get/set value on the bespin object
-  document.getElementById("copiedcontents").innerHTML = window.bespin.value.replace("<", "&lt;");
-};
+        // Bespin event handler:
+        var preChange = document.getElementById('change');
+        editor.textChanged.add(function(oldRange, newRange, newValue) {
+            preChange.innerHTML = 'Change: at ' + Range.toString(oldRange) +
+                                        ' to \'' + newValue + '\' at ' +
+                                            Range.toString(newRange);
+        });
 
-function showSelectedContents() {
-  document.getElementById('copiedcontents').innerHTML = window.bespin.getSelectedText().replace('<', '&lt;');
-};
+        var preSelection = document.getElementById('selection');
+        editor.selectionChanged.add(function(selection) {
+            preSelection.innerHTML = 'Selection: ' + Range.toString(selection);
+        });
+    };
 
-function goToFirstLine() {
-  window.bespin.setLineNumber(1);
-};
+    function showContents() {
+      // Just like a textarea, you can get/set value on the bespin object
+      document.getElementById("copiedcontents").innerHTML = editor.value.replace("<", "&lt;");
+    };
+
+    function showSelectedContents() {
+      document.getElementById('copiedcontents').innerHTML = editor.selectedText.replace("<", "&lt;");
+    };
+
+    function goToFirstLine() {
+      editor.setLineNumber(1);
+    };
+
+    function toggleReadOnly() {
+      editor.readOnly = !editor.readOnly;
+    };
 </script>
 </head>
 <body>
 
 <h1>Sample Editor as a Component</h1>
-<div id="editor" class="bespin" data-bespinoptions='{ "settings": { "tabstop": 4 }, "syntax": "js", "stealFocus": true }'>// The text of this div shows up in the editor.
+<div id="editor" class="bespin" data-bespinoptions='{ "settings": { "tabstop": 4 }, "syntax": "javascript", "stealFocus": true }'>// The text of this div shows up in the editor.
 var thisCode = "what shows up in the editor";
 function editMe() {
  alert("and have fun!");
@@ -101,6 +110,7 @@ function editMe() {
   <input type="button" value="Show Contents Below" onclick="showContents()">
   <input type="button" value="Show Selected Contents Below" onclick="showSelectedContents()">
   <input type="button" value="Go to First Line" onclick="goToFirstLine()">
+  <input type="button" value="Toogle readOnly" onclick="toggleReadOnly()">
 </div>
 <pre id="copiedcontents"></pre>
 
