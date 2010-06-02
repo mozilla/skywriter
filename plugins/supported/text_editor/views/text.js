@@ -576,9 +576,13 @@ util.mixin(exports.TextView.prototype, {
      * the entire group of changes.
      */
     groupChanges: function(performChanges) {
+        if (this._isReadOnly()) {
+            return false;
+        }
+
         if (this._inChangeGroup) {
             performChanges();
-            return;
+            return true;
         }
 
         this._inChangeGroup = true;
@@ -586,9 +590,13 @@ util.mixin(exports.TextView.prototype, {
 
         try {
             performChanges();
+        } catch (e) {
+            throw new Error('Error in groupChanges(): ' + e);
+            return false;
         } finally {
             this._inChangeGroup = false;
             this.endedChangeGroup(this, this.editor.buffer._selectedRange);
+            return true;
         }
     },
 

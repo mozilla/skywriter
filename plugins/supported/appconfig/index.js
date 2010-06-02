@@ -88,6 +88,9 @@ exports.launch = function(config) {
             if (config.stealFocus) {
                 editor.focus = true;
             }
+            if (config.readOnly) {
+                editor.readOnly = config.readOnly;
+            }
         }
         var commandLine = catalog.getObject('commandLine');
         if (commandLine) {
