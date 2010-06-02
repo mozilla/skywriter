@@ -70,12 +70,24 @@ class Manifest(object):
     
     unbundled_plugins = None
     
-    def __init__(self, include_core_test=False, static_plugins=None,
+    def __init__(self, include_core_test=False, plugins=None, static_plugins=None,
         dynamic_plugins=None, search_path=None,
         output_dir="build", include_sample=False,
         boot_file=None, unbundled_plugins=None, preamble=None, loader=None,
         config=None):
-
+        
+        # backwards compatibility for "plugins"
+        if plugins is None:
+            plugins = []
+        
+        if static_plugins is not None:
+            plugins.extend(static_plugins)
+        
+        static_plugins = plugins
+        
+        if dynamic_plugins is None:
+            dynamic_plugins = []
+            
         self.include_core_test = include_core_test
         static_plugins.insert(0, "bespin")
         self.static_plugins = static_plugins
@@ -121,7 +133,7 @@ will be deleted before the build.""")
         if unbundled_plugins:
             self.unbundled_plugins = path(unbundled_plugins).abspath()
 
-        self.preamble = path("dryice/preamble.js")
+        self.preamble = path(__file__).dirname() / "preamble.js"
 
         def location_of(file, default_location):
             if default_location is not None:

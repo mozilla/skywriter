@@ -189,7 +189,7 @@ def test_get_dependencies():
     class MockPackage:
         name = None
         dependencies = None
-        def __init__(name, deps):
+        def __init__(self, name, deps):
             self.name = name
             self.dependencies = deps
 
