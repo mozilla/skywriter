@@ -34,22 +34,40 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
+/*
+We would like to be using flexbox here, however flexbox on Moz is way too buggy
+so we're stuck with absolute positioning. The flexbox layout is commented out
+for when the bugs are fixed.
+*/
+
 /* Layout */
 .cmd_line {
   background: @bg; color: @text;
   font-family: @fonts; font-size: 90%;
   overflow: hidden;
+
+  /* FLEXBOX
   display: box; display: -moz-box; display: -webkit-box;
   box-orient: vertical; -moz-box-orient: vertical; -webkit-box-orient: vertical;
+  */
+  /* ABSOLUTE */
+  position: relative;
+  height: 325px;
 }
 
 .cmd_tog {
+  /* FLEXBOX
   box-flex: 1; -moz-box-flex: 1; -webkit-box-flex: 1;
+  */
+  /* ABSOLUTE */
+  top: 0; right: 0; bottom: 25px; left: 0;
 }
 
 .cmd_top {
+  /* FLEXBOX
   display: box; display: -moz-box; display: -webkit-box;
   box-orient: horizontal; -moz-box-orient: horizontal; -webkit-box-orient: horizontal;
+  */
 }
 
 /*
@@ -58,27 +76,41 @@ TODO: Consider taking them out of the cmd_line and attaching to the page
 directly. This way they could vertically occupy more space than the command line
 and even bespin. Also the more complex layouts could be cached
 */
-.cmd_hints {
+.cmd_line div.cmd_hints {
   line-height: 1.2em;
   padding-left: 30px;
+
+  /* FLEXBOX
   display: box; display: -moz-box; display: -webkit-box;
   box-orient: vertical; -moz-box-orient: vertical; -webkit-box-orient: vertical;
   box-pack: end; -moz-box-pack: end; -webkit-box-pack: end;
   box-align: start; -moz-box-align: start; -webkit-box-align: start;
+  */
+  /* ABSOLUTE */
+  position: absolute;
+  top: auto; right: auto; bottom: 0; left: 0; height: auto; width: auto;
 }
 
 .cmd_toolbar {
+  /* FLEXBOX
   width: 30px;
-
   display: box; display: -moz-box; display: -webkit-box;
   box-orient: vertical; -moz-box-orient: vertical; -webkit-box-orient: vertical;
   box-align: center; -moz-box-align: center; -webkit-box-align: center;
+  */
+  /* ABSOLUTE */
+  position: absolute;
+  top: 0; width: 30px; bottom: 0; left: 0;
 }
-.cmd_toolbar > * { }
 
 .cmd_table {
-  box-flex: 1; -moz-box-flex: 1; -webkit-box-flex: 1;
   overflow-y: auto; overflow-x: hidden;
+  /* FLEXBOX
+  box-flex: 1; -moz-box-flex: 1; -webkit-box-flex: 1;
+  */
+  /* ABSOLUTE */
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 30px;
 }
 
 
@@ -90,17 +122,30 @@ and even bespin. Also the more complex layouts could be cached
   background: -moz-linear-gradient(top, @input_bg, @input_bg2);
   background: -webkit-gradient(linear, left top, left bottom, from(@input_bg), to(@input_bg2));
 
+  /* FLEXBOX
   height: 25px;
   display: box; display: -moz-box; display: -webkit-box;
   box-orient: horizontal; -moz-box-orient: horizontal; -webkit-box-orient: horizontal;
+  */
+  /* ABSOLUTE */
+  position: absolute;
+  height: 25px; right: 0; bottom: 0; left: 0;
 }
 
 .cmd_prompt {
   width: 40px; padding-left: 5px;
+  /* ABSOLUTE */
+  position: absolute;
+  top: 0; width: 40px; bottom: 0; left: 0;
 }
 
 .cmd_kbd {
+  /* FLEXBOX
   box-flex: 1; -moz-box-flex: 1; -webkit-box-flex: 1;
+  */
+  /* ABSOLUTE */
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 40px;  
 }
 
 .cmd_line input.cmd_input {
