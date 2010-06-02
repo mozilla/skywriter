@@ -56,6 +56,8 @@ var requestOutput = require('command_line:views/requestOutput');
 var imagePath = catalog.getResourceURL('command_line') + 'images';
 var diff = new diff_match_patch();
 
+var cliHeight = 25;
+
 /**
  * A view designed to dock in the bottom of the editor, holding the command
  * line input.
@@ -183,6 +185,7 @@ exports.CliInputView.prototype = {
 
             this._table.style.height = height + 'px';
             this._tog.style.height = height + 'px';
+            this.element.style.height = (height + cliHeight) + 'px';
 
             catalog.publish(this, 'dimensionsChanged');
         }
@@ -310,13 +313,14 @@ exports.CliInputView.prototype = {
      *
      */
     _focusCheck: function(ev) {
-        var newTarget = ev.explicitOriginalTarget;
+        var newTarget = ev.explicitOriginalTarget || ev.target;
         if (newTarget) {
             this._hasFocus = this.element == newTarget ||
                 Boolean(this.element.compareDocumentPosition(newTarget) & 16);
         } else {
             this._hasFocus = (ev.type == 'focus');
         }
+        console.log('_focusCheck', ev.type, this._hasFocus, newTarget, ev);
         this.checkSize();
     },
 
