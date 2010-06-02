@@ -228,8 +228,8 @@ exports.EditorView.prototype = {
         }
 
         // Clamp the current scrollOffset position.
-        this.scrollOffset = {};
         this._updateScrollers();
+        this.scrollOffset = {};
     },
 
     _updateScrollers: function() {
@@ -241,6 +241,7 @@ exports.EditorView.prototype = {
         var frame = this.textViewPaddingFrame;
         var width = this._textViewSize.width;
         var height = this._textViewSize.height;
+        var scrollOffset = this.scrollOffset;
         var verticalScroller = this.verticalScroller;
         var horizontalScroller = this.horizontalScroller;
 
@@ -250,6 +251,7 @@ exports.EditorView.prototype = {
             verticalScroller.isVisible = true;
             verticalScroller.proportion = frame.height / height;
             verticalScroller.maximum = height - frame.height;
+            verticalScroller.value = scrollOffset.y;
         }
 
         if (width < frame.width) {
@@ -258,6 +260,7 @@ exports.EditorView.prototype = {
             horizontalScroller.isVisible = true;
             horizontalScroller.proportion = frame.width / width;
             horizontalScroller.maximum = width - frame.width;
+            horizontalScroller.value = scrollOffset.x;
         }
     },
 
@@ -367,7 +370,7 @@ exports.EditorView.prototype = {
 
         // Recompute the layouts.
         this.layoutManager._recalculateMaximumWidth();
-        this._recomputeLayout();
+        this._layoutManagerSizeChanged(this.layoutManager.size);
         this.textView.invalidate();
     },
 
