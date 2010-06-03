@@ -698,3 +698,5 @@
   };
 
 })();
+
+exports._.noConflict();
