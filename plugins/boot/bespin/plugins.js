@@ -579,7 +579,7 @@ exports.Catalog = function() {
 };
 
 exports.Catalog.prototype = {
-    /*
+    /**
      * Registers information about an instance that will be tracked
      * by the catalog. The first parameter is the name used for looking up
      * the object. The descriptor should contain:
@@ -620,7 +620,7 @@ exports.Catalog.prototype = {
         this._objectDescriptors[name] = descriptor;
     },
 
-    /*
+    /**
      * Stores an object directly in the instance cache. This should
      * not generally be used because reloading cannot work with
      * these objects.
@@ -629,7 +629,7 @@ exports.Catalog.prototype = {
         this.instances[name] = obj;
     },
 
-    /*
+    /**
      * Creates an object with a previously registered descriptor.
      *
      * Returns a promise that will be resolved (with the created object)
