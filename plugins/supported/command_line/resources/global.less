@@ -40,6 +40,7 @@
 .cmd_gt { color: @theme_text; font-weight: bold; font-size: 120%; }
 .cmd_char { letter-spacing: -0.2ex; font-weight: bold; }
 
+/* Use absolute positioning to put all children 100%x100% */
 .stack_children {
   position: relative;
 }
@@ -47,3 +48,9 @@
   position: absolute;
   top: 0; height: 100%; bottom: 0; left: 0; width: 100%; right: 0;
 }
+
+/* Check box styles - assumes 3 16x16 icons all in same png */
+.check { background-position: 0 0; overflow: hidden; }
+.check:hover { background-position: 16px 0; }
+.check.checked { background-position: 32px 0; }
+.check.checked:hover { background-position: 16px 0; }
