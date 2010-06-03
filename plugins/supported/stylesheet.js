@@ -60,7 +60,7 @@ var states = {
     start: [
         {
             //tags
-            regex:  /^(html|body|table|thead|tbody|tr|th|td|div|span|p|ul|li|a)(?![a-zA-Z0-9_:]),*?(?=.*{*?)/,  
+            regex:  /^([\w]+)(?![a-zA-Z0-9_:])([,|{]*?)(?!;)(?!(;|%))/gm,  
             tag:    'keyword'
         },
         {
