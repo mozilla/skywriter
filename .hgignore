@@ -19,12 +19,11 @@
 ^src/bespin/tmp
 ^src/growl
 ^docs/_site
-^frameworks/sproutcore
-^frameworks/tiki
-^frameworks/core_test
 ^external
 ^dryice.egg-info
 ^dist
 ^setup\.py
 ^static/tiki.js
-^plugins/boot/jquery.js
+^plugins/thirdparty/jquery.js
+^frameworks/tiki
+
