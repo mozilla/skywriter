@@ -640,12 +640,12 @@ exports.Catalog.prototype = {
      * the factory cannot be found.
      */
     createObject: function(name) {
-        console.log("Creating", name);
+        // console.log("Creating", name);
         var instance = this.instances[name];
         var pr = new Promise();
 
         if (instance !== undefined) {
-            console.log("Already have one (it's very nice)");
+            // console.log("Already have one (it's very nice)");
             pr.resolve(instance);
             return pr;
         }
@@ -683,7 +683,7 @@ exports.Catalog.prototype = {
 
         group(argumentPromises).then(function() {
             ext.load().then(function(factory) {
-                console.log("Got factory for ", name);
+                // console.log("Got factory for ", name);
                 var action = ext.action;
                 var obj;
 
