@@ -46,7 +46,7 @@
             "ep": "syntax",
             "name": "css",
             "pointer": "#CSSSyntax",
-            "fileexts": [ "css" ]
+            "fileexts": [ "css", "less" ]
         }
     ]
 });

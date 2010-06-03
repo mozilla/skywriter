@@ -41,3 +41,4 @@ Features
 * Plugins can include templates in a `templates` directory. These templates
   are automatically made available via a "templates" module in the plugin.
 * The command line can now be included in embedded builds. (bug 551546)
+* The start of a CSS syntax highlighter (bug 547272, thanks to Cody Marquart)
