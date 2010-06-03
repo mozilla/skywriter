@@ -35,6 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var getCompletePath = require('index').getCompletePath;
 var QuickMatcher = require('matcher:quick').QuickMatcher;
 var MatcherMenu = require('command_line:views/menu').MatcherMenu;
 
@@ -46,19 +47,31 @@ exports.existingFileHint = {
         var matcher = new QuickMatcher(assignment.value || '');
         var menu = new MatcherMenu(input, assignment, matcher);
 
+        var env = input.env;
+        var typed = assignment.value;
+        typed = typed.substring(0, typed.lastIndexOf('/') + 1);
+
+        var currentDir = getCompletePath(env, typed);
+        currentDir = currentDir.substring(0, currentDir.lastIndexOf('/') + 1);
+
         var files = input.env.files;
         files.listAll().then(function(fileList) {
-            matcher.addItems(fileList.map(function(item) {
+            var matchRegExp = new RegExp('^' + currentDir);
+
+            matcher.addItems(fileList.filter(function(item){
+                return matchRegExp.test(item);
+            }).map(function(item) {
+                item = item.substring(currentDir.length);
                 var lastSep = item.lastIndexOf('/');
                 if (lastSep === -1) {
                     return {
                         name: item,
-                        path: '/'
+                        path: typed
                     };
                 }
                 return {
                     name: item.substring(lastSep + 1),
-                    path: '/' + item.substring(0, lastSep + 1)
+                    path: typed + item.substring(0, lastSep + 1)
                 };
             }));
         });

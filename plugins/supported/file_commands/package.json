@@ -118,6 +118,26 @@
         },
         {
             "ep": "command",
+            "name": "cd",
+            "params":
+            [
+                {
+                    "name": "workingDir",
+                    "type": "text",
+                    "description": "Directory as working directory"
+                }
+            ],
+            "description": "change working directory",
+            "pointer": "#cdCommand"
+        },
+        {
+            "ep": "command",
+            "name": "pwd",
+            "description": "show the current working directory",
+            "pointer": "#pwdCommand"
+        },
+        {
+            "ep": "command",
             "name": "revert",
             "description": "revert the current buffer to the last saved version",
             "pointer": "#revertCommand"

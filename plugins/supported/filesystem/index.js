@@ -293,7 +293,7 @@ exports.Filesystem.prototype = {
         var self = this;
         var pr = new Promise();
         this._load().then(function() {
-            var source = self.get('source');
+            var source = self.source;
             source.makeDirectory(path).then(function() {
                 self._files.push(path);
                 // O(n log n), eh? but all in C so it's possible

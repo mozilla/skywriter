@@ -42,12 +42,41 @@ var Buffer = require('text_editor:models/buffer').Buffer;
 var Promise = require('bespin:promise').Promise;
 
 /*
- * Creates a path based on the current open file, if there is
- * no leading slash.
+ * Creates a path based on the current working directory and the passed 'path'.
+ * This is also deals with '..' within the path and '/' at the beginning.
  */
-var getCompletePath = function(env, path) {
-    var session = env.session;
-    return session.getCompletePath(path);
+exports.getCompletePath = function(env, path) {
+    var ret;
+    path = path || '';
+
+    if (path[0] == '/') {
+        ret = path.substring(1);
+    } else {
+        ret = (env.workingDir || '') + (path || '');
+    }
+
+    // If the path ends with '..', then add a / at the end
+    if (ret.substr(-2) == '..') {
+        ret += '/';
+    }
+
+    // Replace the '..' parts
+    var parts = ret.split('/');
+    var i = 0;
+    while (i < parts.length) {
+        if (parts[i] == '..') {
+            if (i != 0) {
+                parts.splice(i - 1, 2);
+                i -= 2;
+            } else {
+                parts.splice(0, 1);
+            }
+        } else {
+            i ++;
+        }
+    }
+
+    return parts.join('/');
 };
 
 /**
@@ -56,7 +85,7 @@ var getCompletePath = function(env, path) {
 exports.filesCommand = function(env, args, request) {
     var path = args.path;
 
-    path = getCompletePath(env, path);
+    path = exports.getCompletePath(env, path);
 
     if (path && !pathUtil.isDir(path)) {
         path += '/';
@@ -81,7 +110,7 @@ exports.filesCommand = function(env, args, request) {
 exports.mkdirCommand = function(env, args, request) {
     var path = args.path;
 
-    path = getCompletePath(env, path);
+    path = exports.getCompletePath(env, path);
     request.async();
 
     var files = env.files;
@@ -117,7 +146,7 @@ exports.saveCommand = function(env, args, request) {
  */
 exports.saveAsCommand = function(env, args, request) {
     var files = env.files;
-    var path = getCompletePath(env, args.path).substring(1);
+    var path = exports.getCompletePath(env, args.path);
 
     var newFile = files.getFile(path);
     env.buffer.saveAs(newFile).then(function() {
@@ -140,7 +169,7 @@ exports.openCommand = function(env, args, request) {
 
     var files = env.files;
     var editor = env.editor;
-    var path = getCompletePath(env, args.path);
+    var path = exports.getCompletePath(env, args.path);
 
     // TODO: handle line number in args
     request.async();
@@ -178,6 +207,9 @@ exports.revertCommand = function(env, args, request) {
     });
 };
 
+/**
+ * 'newfile' command
+ */
 exports.newfileCommand = function(env, args, request) {
     var buffer = env.buffer;
     buffer.set('file', null);
@@ -191,7 +223,7 @@ exports.rmCommand = function(env, args, request) {
     var buffer = env.buffer;
 
     var path = args.path;
-    path = getCompletePath(env, path);
+    path = exports.getCompletePath(env, path);
 
     files.remove(path).then(function() {
         request.done(path + ' deleted.');
@@ -200,3 +232,22 @@ exports.rmCommand = function(env, args, request) {
     });
     request.async();
 };
+
+/**
+ * 'cd' command
+ */
+exports.cdCommand = function(env, args, request) {
+    var workingDir = args.workingDir || '';
+    if (workingDir != '' && workingDir.substr(-1) != '/') {
+        workingDir += '/';
+    }
+    env.workingDir = exports.getCompletePath(env, workingDir);
+    request.done('/' + env.workingDir);
+}
+
+/**
+ * 'pwd' command
+ */
+exports.pwdCommand = function(env, args, request) {
+    request.done('/' + (env.workingDir || ''));
+}
