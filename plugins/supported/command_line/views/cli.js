@@ -313,15 +313,23 @@ exports.CliInputView.prototype = {
      *
      */
     _focusCheck: function(ev) {
-        var newTarget = ev.explicitOriginalTarget || ev.target;
-        if (newTarget) {
-            this._hasFocus = this.element == newTarget ||
-                Boolean(this.element.compareDocumentPosition(newTarget) & 16);
-        } else {
-            this._hasFocus = (ev.type == 'focus');
-        }
-        console.log('_focusCheck', ev.type, this._hasFocus, newTarget, ev);
+        this._hasFocus = (ev.type == 'focus');
+        console.log('_focusCheck', ev.type, this._hasFocus, ev);
         this.checkSize();
+    },
+
+    /**
+     * Calls checkSize(), but only after a delay to allow all the focus/blur
+     * events to finish propagating.
+     */
+    _delayedCheckSize: function() {
+        if (this._checkSizeTimeout) {
+            this._checkSizeTimeout.cancel();
+            this._checkSizeTimeout = null;
+        }
+        this._checkSizeTimeout = window.setTimeout(function() {
+            this.checkSize();
+        }.bind(this), 10);
     },
 
     /**
