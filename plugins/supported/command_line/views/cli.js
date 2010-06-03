@@ -314,7 +314,6 @@ exports.CliInputView.prototype = {
      */
     _focusCheck: function(ev) {
         this._hasFocus = (ev.type == 'focus');
-        console.log('_focusCheck', ev.type, this._hasFocus, ev);
         this.checkSize();
     },
 
@@ -324,7 +323,7 @@ exports.CliInputView.prototype = {
      */
     _delayedCheckSize: function() {
         if (this._checkSizeTimeout) {
-            this._checkSizeTimeout.cancel();
+            window.clearTimeout(this._checkSizeTimeout);
             this._checkSizeTimeout = null;
         }
         this._checkSizeTimeout = window.setTimeout(function() {
@@ -335,10 +334,17 @@ exports.CliInputView.prototype = {
     /**
      * onClick for the pin button in the toolbar
      */
-    _togglePin: function() {
-        // TODO: change the image
-        this._pinned = !this._pinned;
-        this.checkSize();
+    _togglePin: function(ev) {
+        var checked = /\bchecked\b/.test(ev.target.className);
+        if (checked) {
+            util.removeClass(ev.target, 'checked');
+            this._pinned = false;
+        } else {
+            util.addClass(ev.target, 'checked');
+            this._pinned = true;
+        }
+
+        this._delayedCheckSize();
     },
 
     /**

@@ -9,7 +9,8 @@
     <div class="cmd_top">
       <!-- Side toolbar -->
       <div class="cmd_toolbar">
-        <img src="${imagePath}/pinout.png" alt="Pin/Unpin the console output"
+        <img src="${imagePath}/dot_clear.gif" class="cmd_pin check"
+            alt="Pin/Unpin the console output"
             onclick="${cliInputView._togglePin}"/>
       </div>
   

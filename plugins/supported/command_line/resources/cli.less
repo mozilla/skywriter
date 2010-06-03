@@ -101,6 +101,9 @@ and even bespin. Also the more complex layouts could be cached
   position: absolute;
   top: 0; width: 30px; bottom: 0; left: 0;
 }
+.cmd_toolbar > * {
+  height: 16px; width: 16px; margin: 5px 7px;
+}
 
 .cmd_table {
   overflow-y: auto; overflow-x: hidden;
@@ -168,3 +171,5 @@ and even bespin. Also the more complex layouts could be cached
 .cmd_existing { color: @input_bg; text-shadow: none; }
 .cmd_extension { margin-left: 30px; }
 .cmd_extension: before { content: "\2794\00a0 "; }
+
+.cmd_pin { background-image: url(images/pins.png); }
