@@ -59,20 +59,24 @@ var StandardSyntax = require('syntax_manager:controllers/standardsyntax').
 var states = {
     start: [
         {
-            regex:  /^(?:html|body|table|thead|tbody|tr|th|td|div|span|p|ul|li|a)(?![a-zA-Z0-9_:]),*?(?=.*{)/,
+            //tags
+            regex:  /^(html|body|table|thead|tbody|tr|th|td|div|span|p|ul|li|a)(?![a-zA-Z0-9_:]),*?(?=.*{*?)/,  
             tag:    'keyword'
         },
         {
-            regex:  /^#([a-zA-Z]*)(?=.*{)/,
+            //id
+            regex:  /^#([a-zA-Z]*)(?=.*{*?)/,
             tag:    'error'
         },
         {
-            regex:  /^\.([a-zA-Z]*)(?=.*{)/,
+            //classes
+            regex:  /^\.([a-zA-Z]*)(?=.*{*?)/,
             tag:    'string'
         },
         {
-			regex: 	/^([a-zA-Z]*):/,
-			tag:	'directive'
+            //style names
+			      regex: 	/^([a-zA-Z-]*)(?:\:)/,
+			      tag:	'directive'
         },
         {
             regex:  /^\/\/.*/,
@@ -86,30 +90,6 @@ var states = {
         {
             regex:  /^./,
             tag:    'plain'
-        }
-    ],
-
-    qstring: [
-        {
-            regex:  /^'/,
-            tag:    'string',
-            then:   'start'
-        },
-        {
-            regex:  /^(?:\\.|[^'\\])+/,
-            tag:    'string'
-        }
-    ],
-
-    qqstring: [
-        {
-            regex:  /^"/,
-            tag:    'string',
-            then:   'start'
-        },
-        {
-            regex:  /^(?:\\.|[^"\\])+/,
-            tag:    'string'
         }
     ],
 
