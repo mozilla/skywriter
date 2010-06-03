@@ -4,26 +4,23 @@
     onclick="${actions.copyToInput}"
     ondblclick="${actions.executeRequest}">
 
-  <!-- The extra details that appear on hover -->
-  <div class="cmd_hover">
-    <span class="cmd_duration" save="${actions.durationEle}"></span>
-    <img onclick="${actions.hideOutput}" alt="Hide command output"
-        src="${imagePath}/minus.png" save="${actions.hideOutputEle}">
-    <img onclick="${actions.showOutput}" alt="Show command output"
-        src="${imagePath}/plus.png" save="${actions.showOutputEle}"
-        style="display:none;">
-    <img onclick="${actions.remove}" src="${imagePath}/closer.png"
-        alt="Remove this command from the history">
-  </div>
-
   <!-- What the user actually typed -->
-  <span class="cmd_gt">&gt; </span>
-  <span class="cmd_typed" save="${actions.typedEle}"></span>
+  <div class="cmd_gt">&gt; </div>
+  <div class="cmd_typed" save="${actions.typed}"></div>
+
+  <!-- The extra details that appear on hover -->
+  <div class="cmd_duration cmd_hover" save="${actions.duration}"></div>
+  <img class="cmd_hover" onclick="${actions.hideOutput}" save="${actions.hide}"
+      alt="Hide command output" src="${imagePath}/minus.png">
+  <img class="cmd_hover cmd_hidden" onclick="${actions.showOutput}" save="${actions.show}"
+      alt="Show command output" src="${imagePath}/plus.png">
+  <img class="cmd_hover" onclick="${actions.remove}"
+      alt="Remove this command from the history" src="${imagePath}/closer.png">
 
 </div>
 
 <!-- The div for the command output -->
 <div class="cmd_rowout" save="${actions.rowout}">
-  <div class="cmd_output" save="${actions.outputEle}"></div>
-  <img src="${imagePath}/throbber.gif" save="${actions.throbEle}"/>
+  <div class="cmd_output" save="${actions.output}"></div>
+  <img src="${imagePath}/throbber.gif" save="${actions.throb}"/>
 </div>

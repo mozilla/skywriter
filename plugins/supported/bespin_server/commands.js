@@ -121,3 +121,15 @@ exports.preview = function(env, args, request) {
 
     request.async();
 };
+
+/*
+ * 'export' command to export a project
+ */
+exports.exportCommand = function(env, args, request) {
+    var iframe = document.createElement("iframe");
+    iframe.src = server.base_url + '/project/export/' +  args.project + "." + args.archivetype;
+    iframe.style.display = 'none';
+    iframe.style.height = iframe.style.width = "0";
+    document.getElementsByTagName("body")[0].appendChild(iframe);
+    request.done("Exporting...");
+};

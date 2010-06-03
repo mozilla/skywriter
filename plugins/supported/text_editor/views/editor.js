@@ -228,8 +228,8 @@ exports.EditorView.prototype = {
         }
 
         // Clamp the current scrollOffset position.
-        this.scrollOffset = {};
         this._updateScrollers();
+        this.scrollOffset = {};
     },
 
     _updateScrollers: function() {
@@ -241,6 +241,7 @@ exports.EditorView.prototype = {
         var frame = this.textViewPaddingFrame;
         var width = this._textViewSize.width;
         var height = this._textViewSize.height;
+        var scrollOffset = this.scrollOffset;
         var verticalScroller = this.verticalScroller;
         var horizontalScroller = this.horizontalScroller;
 
@@ -250,6 +251,7 @@ exports.EditorView.prototype = {
             verticalScroller.isVisible = true;
             verticalScroller.proportion = frame.height / height;
             verticalScroller.maximum = height - frame.height;
+            verticalScroller.value = scrollOffset.y;
         }
 
         if (width < frame.width) {
@@ -258,6 +260,7 @@ exports.EditorView.prototype = {
             horizontalScroller.isVisible = true;
             horizontalScroller.proportion = frame.width / width;
             horizontalScroller.maximum = width - frame.width;
+            horizontalScroller.value = scrollOffset.x;
         }
     },
 
@@ -367,7 +370,7 @@ exports.EditorView.prototype = {
 
         // Recompute the layouts.
         this.layoutManager._recalculateMaximumWidth();
-        this._recomputeLayout();
+        this._layoutManagerSizeChanged(this.layoutManager.size);
         this.textView.invalidate();
     },
 
@@ -406,7 +409,7 @@ exports.EditorView.prototype = {
      * @param {string} newText The text to insert.
      * @param {boolean} keepSelection True if the selection should be
      *     be preserved, otherwise the cursor is set after newText.
-     *
+     * @return Returns true if the replacement as successfully, otherwise false.
      */
     replace: function(range, newText, keepSelection) {
         if (!rangeutils.isRange(range)) {
@@ -422,7 +425,7 @@ exports.EditorView.prototype = {
 
         var view = this.textView;
         var oldSelection = view.getSelectedRange(false);
-        view.groupChanges(function() {
+        return view.groupChanges(function() {
             view.replaceCharacters(normalized, newText);
             if (keepSelection) {
                 view.setSelection(oldSelection);
@@ -494,9 +497,12 @@ exports.EditorView.prototype = {
         this.textView.moveCursorTo(newPosition);
     },
 
-    /** Group changes so that they are only one undo/redo step. */
+    /**
+     * Group changes so that they are only one undo/redo step.
+     * Returns true if the changes where done successfully.
+     */
     changeGroup: function(func) {
-        this.textView.groupChanges(function() {
+        return this.textView.groupChanges(function() {
             func(this);
         }.bind(this));
     }
@@ -641,6 +647,16 @@ Object.defineProperties(exports.EditorView.prototype, {
     // -------------------------------------------------------------------------
     // Helper API:
 
+    readOnly: {
+        get: function() {
+            return this._buffer.model.readOnly;
+        },
+
+        set: function(newValue) {
+            this._buffer.model.readOnly = newValue;
+        }
+    },
+
     focus: {
         get: function() {
             return this.textView.hasFocus;
@@ -685,7 +701,7 @@ Object.defineProperties(exports.EditorView.prototype, {
                     ' found "' + newText + '"');
             }
 
-            this.replace(this.selection, newText);
+            return this.replace(this.selection, newText);
         }
     },
 
@@ -703,7 +719,8 @@ Object.defineProperties(exports.EditorView.prototype, {
 
             // Use the replace function and not this.model.value = newValue
             // directly as this wouldn't create a new undoable action.
-            this.replace(this.layoutManager.textStorage.range, newValue, false);
+            return this.replace(this.layoutManager.textStorage.range,
+                                        newValue, false);
         }
     },
 

@@ -56,6 +56,27 @@
             "key": "ctrl_p",
             "description": "Preview the current file.",
             "pointer": "commands#preview"
+        },
+        {
+            "ep": "command",
+            "name": "export",
+            "description": "export a project (top-level directory)",
+            "pointer": "commands#exportCommand",
+            "params": [
+                {
+                    "name": "project",
+                    "type": "text",
+                    "description": "Project (top-level directory) to export"
+                },
+                {
+                    "name": "archivetype",
+                    "type": {
+                        "name": "selection",
+                        "data": ["zip", "tgz", "tar.gz"]
+                    },
+                    "description": "Type of archive to generate"
+                }
+            ]
         }
     ]
 }

@@ -84,6 +84,20 @@
  * <li>Element extraction for 'save' attributes
  * <li>Attribute value processing for other attributes.
  * </ul>
+ *
+ * <p>For event listener registration there are 2 things to look out for:<ul>
+ * <li>Although it looks like we are using DOM level 0 event registration (i.e.
+ * element.onfoo = somefunc) we are actually using DOM level 2, by stripping
+ * off the 'on' prefix and then using addEventListener('foo', ...). Watch out
+ * for case sensitivity, and if you successfully use an event like DOMFocusIn
+ * then consider updating these docs or the code.
+ * <li>Sometimes we might need to use the capture phase of an event (for example
+ * when processing mouse or focus events). The way to do that is as follows:
+ * <tt>onfocus="${object.handler [useCapture:true]}"</tt>. Currently the only
+ * supported option is useCapture, and it must be specified EXACTLY as the
+ * example. In the future we might add other options, or make the syntax
+ * simpler.
+ * </ul>
  */
 exports.processTemplate = function(template, data) {
     data = data || {};
@@ -104,29 +118,37 @@ var processChildren = function(parent, data) {
         var toRemove = [];
         for (var i = 0; i < parent.attributes.length; i++) {
             var attr = parent.attributes[i];
+            var value = attr.value;
 
             if (attr.name === 'save') {
                 // Save attributes are a setter using the parent node
-                checkBraces(attr.value);
-                property(attr.value.slice(2, -1), data, parent);
+                checkBraces(value);
+                property(value.slice(2, -1), data, parent);
                 toRemove.push({ parent: parent, attrName: attr.name });
             } else if (attr.name.substring(0, 2) === 'on') {
                 // Event registration relies on property doing a bind
-                checkBraces(attr.value);
-                var func = property(attr.value.slice(2, -1), data);
+                checkBraces(value);
+                var useCapture = false;
+                value = value.slice(2, -1);
+                value = value.replace(/\s*\[useCapture:true\]$/, function(path) {
+                    // TODO: Don't assume useCapture:true
+                    useCapture = true;
+                    return '';
+                });
+                var func = property(value, data);
                 if (typeof func !== 'function') {
-                    console.error('Expected ' + attr.value +
+                    console.error('Expected ' + value +
                             ' to resolve to a function, but got ', typeof func);
                 }
                 toRemove.push({ parent: parent, attrName: attr.name });
-                parent.addEventListener(attr.name.substring(2), func, true);
+                parent.addEventListener(attr.name.substring(2), func, useCapture);
             } else {
                 // Replace references in other attributes
-                var value = attr.value.replace(/\$\{[^}]*\}/, function(path) {
+                var newValue = value.replace(/\$\{[^}]*\}/, function(path) {
                     return property(path.slice(2, -1), data);
                 });
-                if (attr.value !== value) {
-                    attr.value = value;
+                if (attr.value !== newValue) {
+                    attr.value = newValue;
                 }
             }
         }

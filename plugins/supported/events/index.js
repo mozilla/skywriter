@@ -66,6 +66,10 @@ exports.Event = function() {
         handlers = handlers.filter(notEqual);
     };
 
+    evt.removeAll = function() {
+        handlers = [];
+    };
+
     return evt;
 };
 

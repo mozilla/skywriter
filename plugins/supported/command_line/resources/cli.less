@@ -34,117 +34,137 @@
 *
 * ***** END LICENSE BLOCK ***** */
 
-/* Global styles */
+/*
+We would like to be using flexbox here, however flexbox on Moz is way too buggy
+so we're stuck with absolute positioning. The flexbox layout is commented out
+for when the bugs are fixed.
+*/
+
+/* Layout */
 .cmd_line {
   background: @bg; color: @text;
   font-family: @fonts; font-size: 90%;
   overflow: hidden;
+
+  /* FLEXBOX
+  display: box; display: -moz-box; display: -webkit-box;
+  box-orient: vertical; -moz-box-orient: vertical; -webkit-box-orient: vertical;
+  */
+  /* ABSOLUTE */
   position: relative;
 }
-.cmd_error { color: @error_text; }
 
-
-/* The prompt */
-.cmd_prompt {
-  position: absolute; height: 25px; bottom: 0; left: 5px; width: 40px;
-}
-.cmd_brackets { color: @hi_text; }
-.cmd_gt { color: @theme_text; font-weight: bold; font-size: 120%; }
-
-/* The input area */
-input.cmd_input {
-  color: @hi_text; font-size: 110%; font-family: @fonts;
-  background: transparent;
-  -webkit-box-shadow: none; outline: none; border: 0;
-  position: absolute; height: 25px; bottom: 0px; left: 40px;
-  /* why doesn't right: 0 work on an input? */
-  right: 0px; width: 95%;
-  padding: 0;
- -moz-box-shadow: none;
-}
-input.cmd_input:focus { outline-width: 0px; outline: 0px; border: 0;
- -moz-box-shadow: none;
+.cmd_tog {
+  /* FLEXBOX
+  box-flex: 1; -moz-box-flex: 1; -webkit-box-flex: 1;
+  */
+  /* ABSOLUTE */
+  top: 0; right: 0; bottom: 25px; left: 0;
 }
 
-
-/* Command line completion */
-.cmd_completion {
-  color: @lo_text2; font-size: 110%; font-family: @fonts;
-  position: absolute; height: 18px; bottom: 6px; left: 43px; right: 0;
+.cmd_top {
+  /* FLEXBOX
+  display: box; display: -moz-box; display: -webkit-box;
+  box-orient: horizontal; -moz-box-orient: horizontal; -webkit-box-orient: horizontal;
+  */
 }
-.cmd_existing { color: @input_bg; text-shadow: none; }
-.cmd_extension { margin-left: 30px; }
-.cmd_extension: before { content: "\2794\00a0 "; }
-.cmd_char { letter-spacing: -0.2ex; font-weight: bold; }
+
+/*
+Where the popup menus are displayed.
+TODO: Consider taking them out of the cmd_line and attaching to the page
+directly. This way they could vertically occupy more space than the command line
+and even bespin. Also the more complex layouts could be cached
+*/
+.cmd_line div.cmd_hints {
+  line-height: 1.2em;
+  padding-left: 30px;
+
+  /* FLEXBOX
+  display: box; display: -moz-box; display: -webkit-box;
+  box-orient: vertical; -moz-box-orient: vertical; -webkit-box-orient: vertical;
+  box-pack: end; -moz-box-pack: end; -webkit-box-pack: end;
+  box-align: start; -moz-box-align: start; -webkit-box-align: start;
+  */
+  /* ABSOLUTE */
+  position: absolute;
+  top: auto; right: auto; bottom: 0; left: 0; height: auto; width: auto;
+}
 
 .cmd_toolbar {
-  position: absolute; top: 0; bottom: 27px; left: 0; width: 30px;
+  /* FLEXBOX
+  width: 30px;
+  display: box; display: -moz-box; display: -webkit-box;
+  box-orient: vertical; -moz-box-orient: vertical; -webkit-box-orient: vertical;
+  box-align: center; -moz-box-align: center; -webkit-box-align: center;
+  */
+  /* ABSOLUTE */
+  position: absolute;
+  top: 0; width: 30px; bottom: 0; left: 0;
 }
-.cmd_toolbar img { height: 16px; width: 16px; }
 
-
-/* Command Output */
 .cmd_table {
   overflow-y: auto; overflow-x: hidden;
-  top: 0; bottom: 27px; left: 30px; right: 0;
+  /* FLEXBOX
+  box-flex: 1; -moz-box-flex: 1; -webkit-box-flex: 1;
+  */
+  /* ABSOLUTE */
   position: absolute;
+  top: 0; right: 0; bottom: 0; left: 30px;
 }
 
-.cmd_rowin {
-  font-size: 110%; font-weight: bold; color: @hi_text;
-  background-color: @input_bg;
-}
-.cmd_rowin > img { cursor: pointer; }
-.cmd_rowin:hover > .cmd_hover { display: block; }
 
-.cmd_typed { padding-left: 5px; }
-
-.cmd_hover {
-  float: right; height: 100%; display: none;
-  font-weight: normal; color: @text; text-align: right;
-}
-/* WARNING: this selector is SLLLOOOOWWW. */
-.cmd_hover * {
-  vertical-align: middle; padding-left: 3px; padding-right: 3px;
-}
-.cmd_duration {
-  float: left; padding-top: 2px;
-}
-
-.cmd_output { padding-left: 10px; line-height: 1.2em; }
-.cmd_output strong,
-.cmd_output b,
-.cmd_output th,
-.cmd_output h1,
-.cmd_output h2,
-.cmd_output h3 { color: @hi_text; }
-.cmd_output a {
-  font-weight: bold;
-  color: @link_text;
-  text-decoration: none;
-}
-.cmd_output a: hover { text-decoration: underline; cursor: pointer; }
-.cmd_output input[type=password],
-.cmd_output input[type=text],
-.cmd_output textarea {
-  color: @hi_text; font-size: 120%;
-  background: transparent; padding: 3px;
-  border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
-}
-.cmd_output table,
-.cmd_output td,
-.cmd_output th { border: 0; padding: 0 2px; }
-.cmd_output .right { text-align: right; }
-
-.cmd_line > .cmd_hints {
-  position: absolute; bottom: 27px; z-index: 1; line-height: 1.2em;
-}
-
-.cmd_line > kbd {
+/* The input area */
+.cmd_cli {
   border-top: 2px solid @border_bg;
   -moz-border-top-colors: @border_bg @bg;
   background: @input_bg;
   background: -moz-linear-gradient(top, @input_bg, @input_bg2);
   background: -webkit-gradient(linear, left top, left bottom, from(@input_bg), to(@input_bg2));
-  position: absolute; height: 25px; bottom: 0; left: 0; right: 0;
+
+  /* FLEXBOX
+  height: 25px;
+  display: box; display: -moz-box; display: -webkit-box;
+  box-orient: horizontal; -moz-box-orient: horizontal; -webkit-box-orient: horizontal;
+  */
+  /* ABSOLUTE */
+  position: absolute;
+  height: 25px; right: 0; bottom: 0; left: 0;
 }
+
+.cmd_prompt {
+  width: 40px; padding-left: 5px;
+  /* ABSOLUTE */
+  position: absolute;
+  top: 0; width: 40px; bottom: 0; left: 0;
+}
+
+.cmd_kbd {
+  /* FLEXBOX
+  box-flex: 1; -moz-box-flex: 1; -webkit-box-flex: 1;
+  */
+  /* ABSOLUTE */
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 40px;  
+}
+
+.cmd_line input.cmd_input {
+  color: @hi_text; font-size: 120%; font-family: @fonts; 
+  background: transparent;
+  outline: none; border: 0;
+  box-shadow: none; -moz-box-shadow: none; -webkit-box-shadow: none;
+  padding: 0;
+  width: 100%;
+}
+.cmd_line input.cmd_input:focus {
+  outline: none; border: 0;
+  box-shadow: none; -moz-box-shadow: none; -webkit-box-shadow: none;
+}
+
+/* Command line completion */
+.cmd_completion {
+  color: @lo_text2; font-size: 120%; font-family: @fonts;
+  padding: 0 0 5px 2px;
+}
+.cmd_existing { color: @input_bg; text-shadow: none; }
+.cmd_extension { margin-left: 30px; }
+.cmd_extension: before { content: "\2794\00a0 "; }

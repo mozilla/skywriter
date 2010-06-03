@@ -35,7 +35,6 @@
 * ***** END LICENSE BLOCK ***** */
 
 div.cmd_menu {
-  display: inline-block;
   margin-bottom: -2px;
   color: @hi_text;
   padding: 8px;
@@ -51,8 +50,7 @@ div.cmd_menu {
   -moz-border-top-colors: @border_bg @border_fg;
   -moz-border-left-colors: @border_bg @border_fg;
   -moz-border-right-colors: @border_bg @bg;
-  -webkit-box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 10px 3px;
-  -moz-box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 10px 3px;
+  box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 10px 3px; -moz-box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 10px 3px; -webkit-box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 10px 3px;
 }
 
 div.cmd_menu .cmd_title {
@@ -69,14 +67,15 @@ div.cmd_menu li {
   list-style: none;
 }
 
-div.cmd_menu li:hover, .cmd_hi {
+div.cmd_menu li:hover,
+div.cmd_menu .cmd_hi {
   color: @border_bg;
   background: @theme_text -moz-linear-gradient(top, @theme_text, @theme_text_dark);
   background: -webkit-gradient(linear, left top, left bottom, from(@theme_text), to(@theme_text_dark));
   cursor: pointer;
 }
 
-div.cmd_hints div.cmd_menu dfn {
+div.cmd_menu dfn {
   font-size: 80%;
   color: @lo_text;
   padding: 0 5px;
@@ -118,7 +117,5 @@ div.cmd_menu abbr {
   margin-left: 5px;
   border: 0;
   text-decoration: none;
-  -moz-transform: scaleX(0.8);
-  -webkit-transform: scaleX(0.8);
-  transform: scaleX(0.8);
+  transform: scaleX(0.8); -moz-transform: scaleX(0.8); -webkit-transform: scaleX(0.8);
 }

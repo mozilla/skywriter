@@ -88,6 +88,9 @@ exports.launch = function(config) {
             if (config.stealFocus) {
                 editor.focus = true;
             }
+            if (config.readOnly) {
+                editor.readOnly = config.readOnly;
+            }
         }
         var commandLine = catalog.getObject('commandLine');
         if (commandLine) {
@@ -232,16 +235,11 @@ exports.normalizeConfig = function(config) {
 
     if (!config.gui.center && config.objects.editor
         && !alreadyRegistered.editor) {
-        config.gui.center = {
-            component: "editor"
-        };
+        config.gui.center = { component: "editor" };
     }
     if (!config.gui.south && config.objects.commandLine
         && !alreadyRegistered.commandLine) {
-        config.gui.south = {
-            component: "commandLine",
-            height: 300
-        };
+        config.gui.south = { component: "commandLine" };
     }
 };
 
@@ -251,7 +249,7 @@ exports.launchEditor = function(config) {
     if (config === null) {
         var message = 'Cannot start editor without a configuration!';
         console.error(message);
-        retPr.reject(messsage);
+        retPr.reject(message);
         return;
     }
 
@@ -277,17 +275,16 @@ var createAllObjects = function(config) {
 
 var generateGUI = function(config, pr) {
     var container = document.createElement('div');
-    container.setAttribute('class', 'bespin container');
+    container.setAttribute('class', 'container');
 
     var centerContainer = document.createElement('div');
-    centerContainer.setAttribute('class', 'bespin center-container');
+    centerContainer.setAttribute('class', 'center-container');
     container.appendChild(centerContainer);
 
-    if (config.element) {
-        config.element.appendChild(container);
-    } else {
-        document.body.appendChild(container);
-    }
+    var element = config.element || document.body;
+    // Add the 'bespin' class to the element in case it doesn't have this already.
+    util.addClass(element, 'bespin');
+    element.appendChild(container);
 
     for (var place in config.gui) {
         var descriptor = config.gui[place];

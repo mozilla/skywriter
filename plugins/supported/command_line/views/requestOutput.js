@@ -39,7 +39,6 @@ var util = require('bespin:util/util');
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 
-var history = require('canon:history');
 var environment = require('canon:environment').global;
 
 var templates = require('command_line:templates');
@@ -56,12 +55,12 @@ exports.RequestOutput = function(request, cliInputView) {
     // Elements attached to this by the templater. For info only
     this.rowin = null;
     this.rowout = null;
-    this.outputEle = null;
-    this.hideOutputEle = null;
-    this.showOutputEle = null;
-    this.durationEle = null;
-    this.typedEle = null;
-    this.throbEle = null;
+    this.output = null;
+    this.hide = null;
+    this.show = null;
+    this.duration = null;
+    this.typed = null;
+    this.throb = null;
 
     templates.requestOutput({
         actions: this,
@@ -86,37 +85,43 @@ exports.RequestOutput.prototype = {
     /**
      * A double click on an invocation line in the console executes the command
      */
-    executeRequest: function() {
+    executeRequest: function(ev) {
         // TODO: This is a hack... how to do it right?
         environment.commandLine = this.cliInputView;
         this.cliInputView._input = new Input(this.request.typed);
         this.cliInputView._input.execute();
     },
 
-    hideOutput: function() {
-        this.outputEle.style.display = 'block';
-        this.hideOutputEle.style.display = 'none';
-        this.showOutputEle.style.display = 'block';
+    hideOutput: function(ev) {
+        this.output.style.display = 'none';
+        util.addClass(this.hide, 'cmd_hidden');
+        util.removeClass(this.show, 'cmd_hidden');
+
+        ev.stopPropagation();
     },
 
-    showOutput: function() {
-        this.outputEle.style.display = 'none';
-        this.hideOutputEle.style.display = 'block';
-        this.showOutputEle.style.display = 'none';
+    showOutput: function(ev) {
+        this.output.style.display = 'block';
+        util.removeClass(this.hide, 'cmd_hidden');
+        util.addClass(this.show, 'cmd_hidden');
+
+        ev.stopPropagation();
     },
 
-    remove: function() {
-        history.history.remove(this.request);
+    remove: function(ev) {
+        this.cliInputView._table.removeChild(this.rowin);
+        this.cliInputView._table.removeChild(this.rowout);
+        ev.stopPropagation();
     },
 
-    onRequestChange: function() {
-        this.durationEle.innerHTML = this.request.duration ?
+    onRequestChange: function(ev) {
+        this.duration.innerHTML = this.request.duration ?
             'completed in ' + (this.request.duration / 1000) + ' sec ' :
             '';
 
-        this.typedEle.innerHTML = this.request.typed;
+        this.typed.innerHTML = this.request.typed;
 
-        this.outputEle.innerHTML = '';
+        this.output.innerHTML = '';
         this.request.outputs.forEach(function(output) {
             var node;
             if (typeof output == 'string') {
@@ -125,13 +130,13 @@ exports.RequestOutput.prototype = {
             } else {
                 node = output;
             }
-            this.outputEle.appendChild(node);
+            this.output.appendChild(node);
         }, this);
         this.cliInputView.scrollToBottom();
 
-        util.setClass(this.outputEle, 'cmd_error', this.request.error);
+        util.setClass(this.output, 'cmd_error', this.request.error);
 
-        this.throbEle.style.display = this.request.completed ? 'none' : 'block';
+        this.throb.style.display = this.request.completed ? 'none' : 'block';
     }
 };
 
