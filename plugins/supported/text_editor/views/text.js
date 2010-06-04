@@ -38,6 +38,8 @@
 var catalog = require('bespin:plugins').catalog;
 var util = require('bespin:util/util');
 
+var $ = require("jquery").$;
+
 var Event = require('events').Event;
 var CanvasView = require('views/canvas').CanvasView;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
@@ -73,6 +75,7 @@ exports.TextView = function(container, editor) {
     // 2) mouse events
     // etc...
     var dom = this.domNode;
+    $(dom).css("cursor", "text");
     dom.addEventListener('mousedown', this.mouseDown.bind(this), false);
     dom.addEventListener('mousemove', this.mouseMove.bind(this), false);
     window.addEventListener('mouseup', this.mouseUp.bind(this), false);
