@@ -211,8 +211,7 @@ exports.revertCommand = function(env, args, request) {
  * 'newfile' command
  */
 exports.newfileCommand = function(env, args, request) {
-    var buffer = env.buffer;
-    buffer.set('file', null);
+    env.editor.buffer = new Buffer();
 };
 
 /**
