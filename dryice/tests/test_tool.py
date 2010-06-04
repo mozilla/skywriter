@@ -45,12 +45,12 @@ pluginpath = [dict(name="pl", path=plugindir)]
 def test_manifest_creation():
     sample = """
     {
-        "include_core_test": true,
+        "include_tests": true,
         "plugins": ["text_editor"]
     }
 """
     manifest = tool.Manifest.from_json(sample)
-    assert manifest.include_core_test
+    assert manifest.include_tests
     errors = manifest.errors
     assert errors == []
 
@@ -102,7 +102,7 @@ def find_with_context(s, substr):
 
 def test_js_creation():
     manifest = tool.Manifest(plugins=["plugin1"],
-        search_path=pluginpath, include_core_test=True)
+        search_path=pluginpath, include_tests=True)
     output = StringIO()
     manifest.generate_output_files(output, StringIO())
     output = output.getvalue()
@@ -116,7 +116,7 @@ def test_js_creation():
 
 def test_single_file_plugin_handling():
     manifest = tool.Manifest(plugins=["SingleFilePlugin1"],
-        search_path=pluginpath, include_core_test=True)
+        search_path=pluginpath, include_tests=True)
     output = StringIO()
     manifest.generate_output_files(output, StringIO())
     output = output.getvalue()
@@ -128,7 +128,7 @@ def test_single_file_plugin_handling():
 def test_js_creation_with_core_test():
     sample = """
 {
-    "include_core_test": true,
+    "include_tests": true,
     "plugins": ["text_editor"]
 }
 """
@@ -156,7 +156,7 @@ def test_js_creation_without_core_test():
 
 def test_css_creation():
     manifest = tool.Manifest(plugins=["plugin1"],
-        search_path=pluginpath, include_core_test=True)
+        search_path=pluginpath, include_tests=True)
     output_js = StringIO()
     output_css = StringIO()
     manifest.generate_output_files(output_js, output_css)
@@ -177,7 +177,7 @@ def test_full_output():
 def test_image_copying():
     tmppath = path.getcwd() / "tmp" / "testoutput"
     manifest = tool.Manifest(plugins=["plugin1"],
-        search_path=pluginpath, include_core_test=True,
+        search_path=pluginpath, include_tests=True,
         output_dir=tmppath)
     manifest.build()
 
@@ -210,3 +210,13 @@ def test_get_dependencies():
     l = manifest.get_dependencies(pkgs, list("ceabd"))
     assert l == [a,b,c,d,e]
 
+def test_global_jquery_use():
+    tmppath = path.getcwd() / "tmp" / "testoutput"
+    manifest = tool.Manifest(plugins=["plugin1"],
+        search_path=pluginpath, jquery="global",
+        output_dir=tmppath)
+    manifest.build()
+    jsfile = tmppath / "BespinEmbedded.js"
+    output = jsfile.text("utf8")
+    assert "exports.$ = window.$;" in output
+    

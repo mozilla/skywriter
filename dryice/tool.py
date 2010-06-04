@@ -70,8 +70,8 @@ class Manifest(object):
     
     unbundled_plugins = None
     
-    def __init__(self, include_core_test=False, plugins=None, static_plugins=None,
-        dynamic_plugins=None, search_path=None,
+    def __init__(self, include_tests=False, plugins=None, static_plugins=None,
+        dynamic_plugins=None, jquery="builtin", search_path=None,
         output_dir="build", include_sample=False,
         boot_file=None, unbundled_plugins=None, preamble=None, loader=None,
         config=None):
@@ -88,10 +88,12 @@ class Manifest(object):
         if dynamic_plugins is None:
             dynamic_plugins = []
             
-        self.include_core_test = include_core_test
+        self.include_tests = include_tests
         static_plugins.insert(0, "bespin")
         self.static_plugins = static_plugins
         self.dynamic_plugins = dynamic_plugins
+        
+        self.jquery = jquery
 
         if search_path is not None:
             for i in range(0, len(search_path)):
@@ -162,21 +164,29 @@ will be deleted before the build.""")
             scrubbed_data.update(overrides)
 
         return cls(**scrubbed_data)
+    
+    def _find_plugins(self):
+        self._plugin_catalog = dict((p.name, p) for p in plugins.find_plugins(self.search_path))
+        
+        if self.jquery == "global":
+            self._plugin_catalog['jquery'] = plugins.Plugin("jquery",
+                path(__file__).dirname() / "globaljquery.js",
+                dict(name="thirdparty"))
+
+        errors = []
+
+        for plugin in self.static_plugins + self.dynamic_plugins:
+            if not plugin in self._plugin_catalog:
+                errors.append("Plugin %s not found" % plugin)
+
+        return errors
 
     @property
     def errors(self):
         try:
             return self._errors
         except AttributeError:
-            self._plugin_catalog = dict((p.name, p) for p in plugins.find_plugins(self.search_path))
-
-            errors = []
-
-            for plugin in self.static_plugins + self.dynamic_plugins:
-                if not plugin in self._plugin_catalog:
-                    errors.append("Plugin %s not found" % plugin)
-
-            self._errors = errors
+            self._errors = self._find_plugins()
             return self._errors
 
     def get_plugin(self, name):
@@ -200,8 +210,7 @@ will be deleted before the build.""")
         output_js.write(self.preamble.bytes())
         output_js.write(self.loader.bytes())
 
-        # include Bespin core code
-        exclude_tests = not self.include_core_test
+        exclude_tests = not self.include_tests
 
         # finally, package up the plugins
 

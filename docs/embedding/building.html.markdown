@@ -32,13 +32,19 @@ for example, just lists the "Embedded" plugin and that's all it needs.
 
 ## Manifest Options ##
 
-include\_core_test
-:   should the output include SproutCore's CoreTest unit testing framework?
+include\_tests
+:   should the output include Bespin's test suite?
     This is useful if you're doing Bespin development in Bespin.
 
 include_sample
 :   should the final output directory include a `samples` directory that
     contains HTML files that show off the editor?
+
+jquery
+:   Bespin uses jQuery for its utility functions. By default, Bespin will
+    use its own private copy of jQuery. The jquery build option can be
+    set to either "global" or "builtin". When jquery="global", Bespin
+    will use the jQuery that is on "window".
 
 output_dir
 :   directory where the finished files should be placed. Note that this
@@ -54,6 +60,18 @@ search_path
     to search for plugins. These paths are added to the beginning of the
     search path. The directories within the "plugins" directory in the current
     directory are automatically added to the end of the search path.
+
+## Using Bespin with your own jQuery ##
+
+Bespin uses jQuery for utility functions. Additionally, some Bespin plugins use
+various jQuery plugins for higher-level user interface widgets. If you are 
+already using jQuery on your page, you can set jquery="global" in your manifest
+file, and you will end up with a smaller Bespin build that does not include
+jQuery.
+
+*Important Note*: you should ensure that the Bespin plugins that use jQuery
+plugins do not interfere with jQuery plugins that you are using elsewhere
+on your page.
 
 ## Writing Your Own Plugins ##
 
