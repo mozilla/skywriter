@@ -230,6 +230,9 @@ exports.EditorView.prototype = {
         // Clamp the current scrollOffset position.
         this._updateScrollers();
         this.scrollOffset = {};
+
+        // Tell textView to recompute the syntax for the visible region.
+        this.textView.updateSyntax(null);
     },
 
     _updateScrollers: function() {
@@ -576,9 +579,6 @@ Object.defineProperties(exports.EditorView.prototype, {
             this.layoutManager.sizeChanged(this.layoutManager.size);
 
             this._recomputeLayout();
-
-            // Tell textView to recompute the syntax for the visible region.
-            this.textView.updateSyntax(null);
         },
 
         get: function() {
