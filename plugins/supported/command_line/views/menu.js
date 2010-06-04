@@ -188,7 +188,10 @@ exports.Menu.prototype.addItems = function(items) {
 
             link.addEventListener('mousedown', function(ev) {
                 var str = this._prefix + this._getFullName(item);
-                this.input.env.execute.setInput('input', str);
+                this.input.env.commandLine.setInput(str);
+                // Prevent the mousedown event. Otherwise the focused commandLine
+                // is blured.
+                ev.preventDefault();
             }.bind(this), false);
         }
 
