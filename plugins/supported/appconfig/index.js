@@ -91,6 +91,9 @@ exports.launch = function(config) {
             if (config.readOnly) {
                 editor.readOnly = config.readOnly;
             }
+            if (config.syntax) {
+                editor.syntax = config.syntax;
+            }
         }
         var commandLine = catalog.getObject('commandLine');
         if (commandLine) {
