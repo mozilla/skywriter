@@ -47,11 +47,21 @@ if (window == null) {
         'browser, not a web worker. Use "worker" instead.');
 }
 
+var plugins = require('bespin:plugins');
 var console = require('bespin:console').console;
 var Event = require('events').Event;
 var Promise = require('bespin:promise').Promise;
 
-function WorkerManager(packageId, moduleId, target) {
+function WorkerManager(pointer) {
+    var m = /^([^#:]+)(?::([^#:]+))?#([^#:]+)$/.exec(pointer);
+    if (m == null) {
+        throw new Error('WorkerManager: invalid pointer specification: "' +
+            pointer + '"');
+    }
+
+    var packageId = m[1], target = m[3];
+    var moduleId = packageId + ":" + (m[2] != null ? m[2] : "index")
+
     var base = bespin != null && bespin.base != null ? bespin.base : "";
     var worker = new Worker(base + "worker.js");
 
