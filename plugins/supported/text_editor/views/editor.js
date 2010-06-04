@@ -130,7 +130,7 @@ exports.EditorView = function(initialContent) {
     this.editorUndoController = new EditorUndoController(this);
     this.searchController = new EditorSearchController(this);
 
-    this._textViewSize = {
+    this._textViewSize = this._oldSize = {
         width: 0,
         height: 0
     };
@@ -197,6 +197,7 @@ exports.EditorView.prototype = {
 
     _textLinesCount: 0,
     _gutterViewWidth: 0,
+    _oldSize: null,
 
     _buffer: null,
 
@@ -220,7 +221,7 @@ exports.EditorView.prototype = {
         if (this._textLinesCount !== size.height) {
             var gutterWidth = this.gutterView.computeWidth();
             if (gutterWidth !== this._gutterViewWidth) {
-                this._recomputeLayout();
+                this._recomputeLayout(true /* force layout update */);
             } else {
                 this.gutterView.invalidate();
             }
@@ -302,7 +303,7 @@ exports.EditorView.prototype = {
         };
     },
 
-    _recomputeLayout: function() {
+    _recomputeLayout: function(forceLayout) {
         // This is necessary as _recomputeLayout is called sometimes when the
         // size of the container is not yet ready (because of FlexBox).
         if (this._dontRecomputeLayout) {
@@ -311,6 +312,17 @@ exports.EditorView.prototype = {
 
         var width = this.container.offsetWidth;
         var height = this.container.offsetHeight;
+
+        // Check if the size changed. If it stayed the same, then we can quite.
+        if (!forceLayout && width == this._oldSize.width
+                                    && height == this._oldSize.height) {
+            return;
+        }
+
+        this._oldSize = {
+            width: width,
+            height: height
+        };
 
         var gutterWidth = this._gutterViewWidth = this.gutterView.computeWidth();
         this.gutterView.frame = {
