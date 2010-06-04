@@ -173,7 +173,13 @@ exports.normalizeConfig = function(config) {
     }
     if (!config.objects.fileHistory && catalog.plugins.file_history) {
         config.objects.fileHistory = {
-            factory: 'file_history'
+            factory: 'file_history',
+            arguments: [
+                "session"
+            ],
+            objects: {
+                "0": "session"
+            }
         };
     }
     if (!config.objects.server && catalog.plugins.bespin_server) {

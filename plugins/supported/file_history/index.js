@@ -48,7 +48,7 @@ var MAX_HISTORY_SIZE = 30;
  *
  * A list of recently opened files.
  */
-exports.FileHistory = function(storage) {
+exports.FileHistory = function(session, storage) {
     // The detection code was taken from: http://diveintohtml5.org/everything.html
     var hasLocalStorage = ('localStorage' in window) &&
                                 window['localStorage'] !== null;
@@ -60,10 +60,13 @@ exports.FileHistory = function(storage) {
 
     this.storage = storage || window.localStorage;
 
-    env.session.history = this;
+    this.session = session;
+    session.history = this;
 };
 
 exports.FileHistory.prototype = {
+    /** The edit session, supplied by the app config. */
+    session: null,
 
     /**
      * @property{LocalStorage}
@@ -73,7 +76,7 @@ exports.FileHistory.prototype = {
     storage: null,
 
     _getStorageName: function() {
-        var user = env.session.currentUser;
+        var user = this.session.currentUser;
         return 'bespin.history.' + user;
     },
 
@@ -175,6 +178,10 @@ Object.defineProperties(exports.FileHistory.prototype, {
     }
 });
 
+exports.createFileHistory = function(session) {
+    return new FileHistory(session);
+};
+
 // Timeout for saving changes to the history.
 var UPDATE_TIMEOUT = 1000;
 
@@ -189,6 +196,7 @@ var _updateHistoryProperty = function(valueObj, file, atOnce) {
     // If there is no timeout, then update the value directly and set a new
     // timeout.
     if (util.none(updateTimer[path]) || atOnce) {
+        // FIXME: Ensure that the session actually exists!
         env.session.history.update(path, valueObj);
 
         updateTimer[path] = setTimeout(function() {
@@ -211,6 +219,7 @@ var _updateHistoryProperty = function(valueObj, file, atOnce) {
 };
 
 exports.handleEditorChange = function(editor, key, value) {
+    // FIXME: Ensure that the session actually exists!
     if (!env.session.history || !editor.buffer.file) {
         return;
     }
@@ -245,6 +254,7 @@ exports.handleEditorChange = function(editor, key, value) {
 };
 
 exports.loadMostRecent = function() {
+    // FIXME: Ensure that the session actually exists!
     if (!env.session.history) {
         return;
     }
