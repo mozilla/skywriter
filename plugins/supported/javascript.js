@@ -44,7 +44,7 @@
             "ep": "syntax",
             "name": "js",
             "pointer": "#JSSyntax",
-            "fileexts": [ "js" ]
+            "fileexts": [ "js", "json" ]
         }
     ]
 });
