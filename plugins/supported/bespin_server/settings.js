@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Trait = require('traits').Trait;
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var Trace = require('bespin:util/stacktrace').Trace;
@@ -45,7 +44,10 @@ var Trace = require('bespin:util/stacktrace').Trace;
  * This code has not been tested since reboot
  * @class
  */
-var ServerPersisterTrait = Trait({
+exports.ServerPersister = function() {
+};
+
+exports.ServerPersister.prototype = {
     _loading: false,
 
     loadInitialValues: function(settings) {
@@ -98,11 +100,5 @@ var ServerPersisterTrait = Trait({
         // Send it to the server
         catalog.getObject("files").saveContents('BespinSettings/settings', settingsString);
     }
-});
+};
 
-exports.ServerPersister = {
-    create: function() {
-        return Trait.create(Object.prototype, ServerPersisterTrait);
-    },
-    trait: ServerPersisterTrait
-}

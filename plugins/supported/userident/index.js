@@ -99,13 +99,13 @@ exports.loginController.prototype = {
                 catalog.orderExtensions(pluginInfo.ordering);
 
                 // Init the settings after all the plugin data is loaded.
-                settings.setPersister(ServerPersister.create());
+                settings.setPersister(new ServerPersister());
             }, function(error) {
                 if (!error.xhr || error.xhr.status != 404) {
                     displayError('Register User Plugins',
                             'Failed to load user\'s pluginInfo.json: ' + error.message);
                 }
-                settings.setPersister(ServerPersister.create());
+                settings.setPersister(new ServerPersister);
             });
         });
 

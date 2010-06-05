@@ -99,8 +99,6 @@ var console = require('bespin:console').console;
 var Promise = require('bespin:promise').Promise;
 var groupPromises = require('bespin:promise').group;
 
-var Trait = require('traits').Trait;
-
 var types = require('types:types');
 
 /**
@@ -167,7 +165,10 @@ exports.getTypeSpecFromAssignment = function(typeSpec) {
  * </pre>
  * @class
  */
-exports.MemorySettings = Trait({
+exports.MemorySettings = function() {
+};
+
+exports.MemorySettings.prototype = {
     /**
      * Storage for the setting values
      */
@@ -427,6 +428,6 @@ exports.MemorySettings = Trait({
         });
         return defaultValues;
     }
-});
+};
 
-exports.settings = Trait.create(Object.prototype, exports.MemorySettings);
+exports.settings = new exports.MemorySettings();

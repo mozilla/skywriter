@@ -35,8 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Trait = require('traits').Trait;
-
 var bespin = require('bespin');
 var console = require('bespin:console').console;
 var Promise = require('bespin:promise').Promise;
