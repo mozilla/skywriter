@@ -171,7 +171,7 @@ exports.Menu.prototype.addItems = function(items) {
 
             this._itemActions[i] = function(ev) {
                 var str = this._prefix + this._getFullName(item);
-                this.input.env.execute(str);
+                this.input.env.commandLine.setInput(str);
             }.bind(this);
 
             if (i < accelerators.length) {
