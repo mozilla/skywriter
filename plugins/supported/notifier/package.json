@@ -5,48 +5,86 @@
     [
         {
             "ep": "extensionpoint",
-            "name": "notificationHandler",
-            "description": "A function to which notifications will be reported",
-            "indexOn": "name"
-        },
-        {
-            "ep": "command",
-            "name": "notify",
-            "params":
-            [
+            "name": "notification",
+            "description": "tells the notifier about a kind of notification that may be presented to the user. This will be used in a notification configuration user interface, for example.",
+            "indexOn": "name",
+            "params": [
                 {
-                    "name": "title",
-                    "type": "text",
-                    "description": "The string to pass to the notification system"
+                    "name": "name",
+                    "description": "name of the notification type. This should start with the plugin name to ensure uniqueness.",
+                    "type": "string",
+                    "required": true
                 },
                 {
-                    "name": "body",
-                    "type": "text",
-                    "description": "Detailed text behind the message",
-                    "defaultValue": null
+                    "name": "description",
+                    "description": "The more human-readable form of the notification name that will be presented to the user.",
+                    "type": "string"
+                },
+                {
+                    "name": "level",
+                    "description": "default level for these notifications. Value should be 'error', 'info' or 'debug'.",
+                    "type": "string"
+                },
+                {
+                    "name": "onclick",
+                    "description": "function that should be called if one of these notifications is clicked on. Will be passed the message object.",
+                    "type": "pointer"
                 },
                 {
                     "name": "iconUrl",
-                    "type": "text",
-                    "description": "URL to an Icon to display with the message",
-                    "defaultValue": null
+                    "description": "custom icon for this notification. looked up relative to the plugins resources directory.",
+                    "type": "resourceUrl"
                 }
-            ],
-            "hidden": true,
-            "description": "Inject a notification into the notify system",
-            "pointer": "commands#notifyCommand"
+            ]
+        },
+        {
+            "ep": "notification",
+            "name": "debug",
+            "description": "Debugging Messages",
+            "level": "debug"
+        },
+        {
+            "ep": "extensionpoint",
+            "name": "notificationHandler",
+            "description": "A function that is called with message objects whenever appropriate notifications are published.",
+            "indexOn": "name",
+            "params": [
+                {
+                    "name": "name",
+                    "description": "convenient name for the handler (used in configuration)",
+                    "type": "string",
+                    "required": true
+                },
+                {
+                    "name": "description",
+                    "description": "Longer, more human-readable description of the handler",
+                    "type": "string"
+                },
+                {
+                    "name": "pointer",
+                    "description": "function that will be called with the message",
+                    "required": true
+                }
+            ]
         },
         {
             "ep": "notificationHandler",
-            "name": "consoleNotificationHandler",
-            "pointer": "console#handler"
+            "name": "console",
+            "description": "Logs to the browser console",
+            "pointer": "handlers#console"
+        },
+        {
+            "ep": "notificationHandler",
+            "name": "alert",
+            "description": "Displays in browser alerts",
+            "pointer": "handlers#alert"
         },
         {
             "ep": "setting",
-            "name": "notifyToConsole",
-            "description": "Do we display notifications to the console?",
-            "type": "boolean",
-            "defaultValue": false
+            "name": "notifications",
+            "description": "JSON array of objects describing how notifications are configured",
+            "type": "object",
+            "defaultValue": "[]"
         }
     ]
 }

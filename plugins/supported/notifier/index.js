@@ -36,144 +36,170 @@
  * ***** END LICENSE BLOCK ***** */
 
 var catalog = require('bespin:plugins').catalog;
+var settings = require('settings').settings;
+var console = require('bespin:console').console;
 
-/**
- * This API follows the broad principles of the Gears notification API in the
- * hope that a future HTML spec might.
- */
-var Notification = function(iconUrl, title, body) {
-    this.iconUrl = iconUrl;
-    this.title = title;
-    this.body = body;
+exports.Notifier = function() {};
+
+var levels = {
+    // Level definitions
+    DEBUG: 1,
+    INFO: 2,
+    ERROR: 3
 };
 
-Notification.prototype = {
-    /**
-     * Causes the notification to displayed to the user. This may or may not
-     * happen immediately, depending on the constraints of the presentation
-     * method.
-     */
-    show: function() {
-        var handlerExts = catalog.getExtensions('notificationHandler');
-        handlerExts.forEach(function(handlerExt) {
-            try {
-                handlerExt.load(function(handler) {
-                    handler.showNotification(this);
-                }.bind(this));
-            } catch (ex) {
-                console.error(ex);
-            }
-        }, this);
-    },
-
-    /**
-     * Causes the notification to not be displayed.
-     * If the notification has been displayed already, it must be closed.
-     * If it has not yet been displayed, it must be removed from the set of
-     * pending notifications.
-     */
-    cancel: function() {
-        var handlerExts = catalog.getExtensions('notificationHandler');
-        handlerExts.forEach(function(handlerExt) {
-            try {
-                handlerExt.load(function(handler) {
-                    handler.cancelNotification(this);
-                });
-            } catch (ex) {
-                console.error(ex);
-            }
-        }, this);
-    },
-
-    /**
-     * Event listener function corresponding to event type "display".
-     * This listener must be called when the notification is displayed to the
-     * user, which need not be immediately when show() is called.
-     */
-    ondisplay: null,
-
-    /**
-     * Event listener function corresponding to event type "error".
-     * This listener must be called when the notification cannot be displayed to
-     * the user because of an error.
-     */
-    onerror: null,
-
-    /**
-     * Event listener function corresponding to event type "close".
-     * This listener must be called when the notification is closed by the user.
-     * This event must not occur until the "display" event.
-     */
-    onclose: null
-};
-
-/**
- * Creates a new notification object with the provided content.
- * <p>If the origin of the script which executes this method does not have
- * permission level PERMISSION_ALLOWED, this method will throw a security
- * exception.
- * @param iconUrl {string} contains the URL of an image resource to be shown
- * with the notification;
- * @param title {string} contains a string which is the primary text of the
- * notification;
- * @param body {string} contains a string which is secondary text for the
- * notification.
- * @return Notification
- */
-exports.createNotification = function(iconUrl, title, body) {
-    return new Notification(iconUrl, title, body);
-};
+var levelNames = [null, "debug", "info", "error"];
 
 /*
- * For Bespin it is likely that the content will be already on the server so
- * it makes more sense to do this with some local URL only? Since this function
- * is optional, we are excluding it until we know the best way to handle it.
- * <p>User agents with the ability to present notifications with HTML contents
- * should implement this method; user agents without that ability may only
- * implement createNotification.
- * @param url {string} contains the URL of a resource which contains HTML
- * content to be shown as the content of the notification.
- * If the origin of the script which executes this method does not have
- * permission level PERMISSION_ALLOWED, this method will throw a security
- * exception.
- * @return Notification
+ * Normalizes and converts a level to an integer value.
  *
-exports.createHTMLNotification = function(url) {
-};
-*/
-
-/**
- * Indicates that the user has granted permission to scripts with this origin to
- * show notifications.
+ * @param level {string|int} level to convert
+ * @return {int} level or null if the level is not properly defined
  */
-exports.PERMISSION_ALLOWED = 0;
-
-/**
- * Indicates that the user has not taken an action regarding notifications for
- * scripts from this origin.
- */
-exports.PERMISSION_NOT_ALLOWED = 1;
-
-/**
- * Indicates that the user has explicitly blocked scripts with this origin from
- * showing notifications.
- */
-exports.PERMISSION_DENIED = 2;
-
-/**
- * For Bespin, since there will be a number of ways of notifying the user
- * some of which will not require permission, this function will always return
- * PERMISSION_ALLOWED.
- * @return {number} PERMISSION_ALLOWED
- */
-exports.checkPermission = function() {
-    return exports.PERMISSION_ALLOWED;
+var _convertLevel = function(level) {
+    if (typeof(level) === "number") {
+        if (level == 1 || level == 2 || level == 3) {
+            return level;
+        }
+        return null;
+    }
+    if (level === undefined || level === null) {
+        return null;
+    }
+    if (typeof(level) === "string") {
+        level = level.toUpperCase();
+        level = levels[level];
+        if (level === undefined) {
+            return null;
+        }
+    }
+    return level;
 };
 
-/**
- * Since Bespin handles permissions for notifications, this method will always
- * call callback quickly.
- */
-exports.requestPermission = function(callback) {
-    window.setTimeout(callback, 1);
+exports.Notifier.prototype = {
+    DEBUG: levels.DEBUG,
+    INFO: levels.INFO,
+    ERROR: levels.ERROR,
+    
+    /*
+     * Decides which handlers should receive the given message.
+     * 
+     * @param message {object} the message for which to decide on handlers
+     * @param notification {object} extension that defines the notification
+     * @param handlers {array} list of available handlers (usually taken from the catalog)
+     * @param config {array} list of handler configurations (usually from the "notifications" setting
+     * @return an array of handler names
+     */
+    _chooseHandlers: function(message, notification, handlers, config) {
+        var level = message.level;
+        level = _convertLevel(level);
+        if (level === null) {
+            level = notification.level;
+            level = _convertLevel(level);
+            if (level === null) {
+                level = this.INFO;
+            }
+        }
+        message.level = level;
+        message.levelName = levelNames[level];
+        
+        var plugin = message.plugin;
+        
+        if (!config) {
+            config = [];
+        }
+        
+        var result = {};
+        var seenHandlers = {};
+        config.forEach(function(item) {
+            var handler = item.handler;
+            if (!handler) {
+                return;
+            }
+            // even if this handler isn't going to be used,
+            // we keep track of its presence
+            seenHandlers[handler] = true;
+            
+            var configLevel = _convertLevel(item.level);
+            if (configLevel && level < configLevel) {
+                return;
+            }
+            
+            if (plugin && item.plugin && item.plugin !== plugin) {
+                return;
+            }
+            result[handler] = true;
+        });
+        
+        // take note of handlers that are installed but not explicitly configured.
+        handlers.forEach(function(handler) {
+            var handlerLevel = _convertLevel(handler.level);
+            if (!handlerLevel || level < handlerLevel || seenHandlers[handler.name]) {
+                return;
+            }
+            result[handler.name] = true;
+        });
+        
+        result = Object.keys(result);
+        if (level === levels.ERROR && result.length == 0 && config.length == 0) {
+            result.push('alert');
+        }
+        
+        return result;
+    },
+    
+    /*
+     * Publishes a notification to the configured handlers. The message object can contain
+     * the following:
+     * - plugin (required): the name of the plugin sending the message
+     * - notification (required): the name of the notification type. This should be defined in the
+     *                                plugin metadata
+     * - level: overrides the default level for this notification type. should be one of
+     *          notifier.ERROR, notifier.INFO, notifier.DEBUG
+     * - body (required): main message text (plain text)
+     * - title
+     * - iconUrl (this will likely have a default for some handlers based on the level)
+     * - onclick: called if the user clicks on the notification in a handler that supports clicking on
+     *            notifications. It is passed the "message" object (you can place anything
+     *            you want in the message to allow proper handling of the click)
+     */
+    notify: function(message) {
+        if (!message.plugin || !message.notification || !message.body) {
+            console.error('Received an invalid notification (plugin, notification and body are required)', message);
+            return;
+        }
+        var notification = catalog.getExtensionByKey('notification', message.notification);
+        if (!notification) {
+            console.error('Notification message has an unknown notification type:', notification);
+            return;
+        }
+        var handlers = catalog.getExtensions('notificationHandler');
+        var config = settings.get('notifications');
+        var publishTo = this._chooseHandlers(message, notification, handlers, config);
+        publishTo.forEach(function(handlerName) {
+            var handler = catalog.getExtensionByKey('notificationHandler', handlerName);
+            if (!handler) {
+                return;
+            }
+            handler.load().then(function(handlerFunction) {
+                handlerFunction(message);
+            });
+        });
+    },
+    
+    /*
+     * convenience function that is equivalent to
+     * notify({
+     *  plugin: plugin,
+     *  body: body,
+     *  notification: "debug"
+     * })
+     */
+    debug: function(plugin, body) {
+        this.notify({
+            plugin: plugin,
+            body: body,
+            notification: 'debug'
+        });
+    }
 };

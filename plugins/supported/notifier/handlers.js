@@ -6,7 +6,7 @@
  * the License. You may obtain a copy of the License at
  * http://www.mozilla.org/MPL/
  *
- * Software distributed under the License is distributed on an "AS IS" basis,
+ * Software distributed under the License is distributed on an 'AS IS' basis,
  * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
  * License.
@@ -35,26 +35,25 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var settings = require('settings').settings;
+var console = require('bespin:console').console;
 
-/**
- * A very quick rough and ready notificationHandler that just writes to the
- * console if configured.
- */
-exports.handler = {
-    showNotification: function(notification) {
-        if (settings.get('notifyToConsole')) {
-            if (notification.body) {
-                console.group(notification.title);
-                console.log(notification.body);
-                console.groupEnd();
-            } else {
-                console.log(notification.title);
-            }
-        }
-    },
-
-    cancelNotification: function(notification) {
+var getMessageText = function(message) {
+    var text = '';
+    if (message.title) {
+        text = message.title + '\n';
     }
+    if (message.body) {
+        text += message.body;
+    }
+    return text;
 };
 
+exports.console = function(message) {
+    var text = getMessageText(message);
+    console[message.level](text);
+};
+
+exports.alert = function(message) {
+    var text = getMessageText(message);
+    alert(text);
+};
