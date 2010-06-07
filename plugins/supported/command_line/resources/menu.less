@@ -44,12 +44,11 @@ div.cmd_menu {
   -moz-border-radius-topright: 10px;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
-  background: @input_bg2;
   background: -moz-linear-gradient(top, @input_bg_light, @input_bg);
   background: -webkit-gradient(linear, left top, left bottom, from(@input_bg_light), to(@input_bg));
   -moz-border-top-colors: @border_bg @border_fg;
   -moz-border-left-colors: @border_bg @border_fg;
-  -moz-border-right-colors: @border_bg @bg;
+  -moz-border-right-colors: @border_bg @border_fg2;
   box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 10px 3px; -moz-box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 10px 3px; -webkit-box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 10px 3px;
 }
 
@@ -69,7 +68,7 @@ div.cmd_menu li {
 
 div.cmd_menu li:hover,
 div.cmd_menu .cmd_hi {
-  color: @border_bg;
+  color: @li_hover_color;
   background: @theme_text -moz-linear-gradient(top, @theme_text, @theme_text_dark);
   background: -webkit-gradient(linear, left top, left bottom, from(@theme_text), to(@theme_text_dark));
   cursor: pointer;
@@ -88,7 +87,7 @@ div.cmd_menu em {
 }
 
 div.cmd_menu li:hover em,
-div.cmd_menu li:hover dfn { color: @border_bg; }
+div.cmd_menu li:hover dfn { color: @li_hint_hover_color; }
 
 div.cmd_menu .cmd_sub:after {
   padding-left: 5px;
@@ -118,4 +117,8 @@ div.cmd_menu abbr {
   border: 0;
   text-decoration: none;
   transform: scaleX(0.8); -moz-transform: scaleX(0.8); -webkit-transform: scaleX(0.8);
+}
+
+div.cmd_menu  li:hover abbr {
+    color: @li_accelerator_hover_color;
 }

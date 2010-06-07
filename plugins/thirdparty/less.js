@@ -959,6 +959,9 @@ tree.functions = {
             else                return m1;
         }
     },
+    blur: function(color, amount) {
+        return new(tree.Color)(color.rgb, number(amount));
+    },
     saturate: function (color, amount) {
         var hsl = color.toHSL();
 

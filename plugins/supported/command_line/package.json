@@ -23,62 +23,67 @@
         {
             "ep": "themevariable",
             "name": "bg",
-            "defaultValue": "rgb(30,25,22)",
-            "comment": "#1E1916"
+            "defaultValue": "@global_container_background"
         },
         {
             "ep": "themevariable",
             "name": "input_bg_light",
-            "defaultValue": "rgb(39,33,29)",
-            "comment": "#27211D"
+            "defaultValue": "@global_container_background + #090807"
         },
         {
             "ep": "themevariable",
             "name": "input_bg",
-            "defaultValue": "rgb(27,22,19)",
-            "comment": "#1B1613"
+            "defaultValue": "@global_container_background - #030303"
         },
         {
             "ep": "themevariable",
             "name": "input_bg2",
-            "defaultValue": "rgb(25,20,16)",
-            "comment": "#191410"
+            "defaultValue": "@global_container_background - #050506"
         },
         {
             "ep": "themevariable",
             "name": "border_fg",
-            "defaultValue": "rgb(62,57,54)",
-            "comment": "#3E3936"
+            "defaultValue": "@global_menu_inset_color_top_left"
+        },
+        {
+            "ep": "themevariable",
+            "name": "border_fg2",
+            "defaultValue": "@global_menu_inset_color_right"
+        },
+        {
+            "ep": "themevariable",
+            "name": "menu_bg",
+            "defaultValue": "@global_menu_background"
         },
         {
             "ep": "themevariable",
             "name": "border_bg",
-            "defaultValue": "#000"
+            "defaultValue": "@global_menu_border_color"
         },
         {
             "ep": "themevariable",
             "name": "text",
-            "defaultValue": "#AAA"
+            "defaultValue": "@global_color"
         },
         {
             "ep": "themevariable",
             "name": "hi_text",
-            "defaultValue": "#FFF"
+            "defaultValue": "@global_header_color"
         },
         {
             "ep": "themevariable",
             "name": "lo_text",
-            "defaultValue": "#888"
+            "defaultValue": "@global_hint_color"
         },
         {
             "ep": "themevariable",
             "name": "lo_text2",
-            "defaultValue": "#443"
+            "defaultValue": "@global_hint_color"
         },
         {
             "ep": "themevariable",
             "name": "link_text",
-            "defaultValue": "#ACF"
+            "defaultValue": "@global_link_color"
         },
         {
             "ep": "themevariable",
@@ -88,8 +93,7 @@
         {
             "ep": "themevariable",
             "name": "theme_text",
-            "defaultValue": "rgb(255,142,0)",
-            "comment": "#FF8E00"
+            "defaultValue": "@global_selectable_hover_background"
         },
         {
             "ep": "themevariable",
@@ -100,14 +104,12 @@
         {
             "ep": "themevariable",
             "name": "theme_text_dark",
-            "defaultValue": "rgb(221,110,0)",
-            "comment": "#DD6E00"
+            "defaultValue": "@global_selectable_hover_background - #222000"
         },
         {
             "ep": "themevariable",
             "name": "theme_text_dark2",
-            "defaultValue": "rgb(153,102,51)",
-            "comment": "#996633"
+            "defaultValue": "@global_accelerator_color"
         },
         {
             "ep": "themevariable",
@@ -118,7 +120,22 @@
         {
             "ep": "themevariable",
             "name": "fonts",
-            "defaultValue": "Calibri,Arial,sans-serif"
+            "defaultValue": "@global_font"
+        },
+        {
+            "ep": "themevariable",
+            "name": "li_hover_color",
+            "defaultValue": "@global_selectable_hover_color"
+        },
+        {
+            "ep": "themevariable",
+            "name": "li_hint_hover_color",
+            "defaultValue": "@global_hint_hover_color"
+        },
+        {
+            "ep": "themevariable",
+            "name": "li_accelerator_hover_color",
+            "defaultValue": "@global_accelerator_hover_color"
         },
         {
             "ep": "factory",

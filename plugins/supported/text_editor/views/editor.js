@@ -392,8 +392,10 @@ exports.EditorView.prototype = {
     _themeVariableChange: function() {
         // Recompute the entire layout as the gutter now might has a different
         // size. Just calling invalidate() on the gutter wouldn't be enough.
-        this._recomputeLayout();
-        this.textView.invalidate();
+        this._recomputeLayout(true);
+
+        // Tell textView to recompute the syntax for the visible region.
+        this.textView.updateSyntax(null);
     },
 
     _updateScrollOffsetChanged: function(offset) {

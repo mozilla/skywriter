@@ -75,6 +75,35 @@ var extensionStyleID = {};
 // themeStyle cache.
 var extensionStyleData = {};
 
+// Takes an JS object that and makes it 'linear'. Every item gets prefixed with
+// 'global':
+//
+//      globalValues = {
+//          a: {
+//              b: 'test'
+//          }
+//      }
+//
+//      returns: { 'global_a_b': 'test' }
+var parseGlobalThemeVariables = function(globalValues) {
+    var ret = {};
+    var nameStack = [];
+
+    var parseSub = function(name, key) {
+        nameStack.push(name);
+        if (typeof key != 'object') {
+            ret[nameStack.join('_')] = key;
+        } else {
+            for (prop in key) {
+                parseSub(prop, key[prop]);
+            }
+        }
+        nameStack.pop();
+    }
+
+    parseSub('global', globalValues);
+    return ret;
+};
 
 //------------------------------------------------------------------------------
 // BEGIN: THIS PART IS OVERRIDEN BY dryice
@@ -86,13 +115,128 @@ var extensionStyleBuildData = {};
 // Stores the default globalTheme ThemeVariables, that are available to every
 // ThemeStyleFile.
 var defaultGlobalTheme = {
-    global_font:            '\'Lucida Grande\', \'Lucida Sans Unicode\',' +
-                                ' Lucida, Arial, Helvetica, sans-serif',
-    global_font_size:      '14px',
-    global_line_height:    '1.8em',
-    global_color:          '#DAD4BA',
-    global_error_color:    '#F99'
+    // standard font.
+    font:           'arial, lucida, helvetica, sans-serif',
+    // standard font size.
+    font_size:      '14px',
+    // standard line_height.
+    line_height:    '1.8em',
+    // text color.
+    color:          '#DAD4BA',
+
+    text_shadow:    '1px 1px rgba(0, 0, 0, 0.4)',
+    // text error color.
+    error_color:    '#F99',
+    // the color for headers (<h1> etc).
+    header_color:   'white',
+    // the color for links.
+    link_color:     '#ACF',
+
+    // Basic colors for a controller: textInput, tree etc.
+    control: {
+        color:          '#E1B41F',
+        border:         '1px solid rgba(0, 0, 0, 0.2)',
+        border_radius:  '0.25em',
+        background:     'rgba(0, 0, 0, 0.2)',
+
+        active: {
+            color:          '#FF9600',
+            border:         '1px solid #E1B41F',
+            inset_color:    '#ff9600',
+            background:     'rgba(0, 0, 0, 0.2)'
+        }
+    },
+
+    pane: {
+        h1: {
+           font:        "'MuseoSans', Helvetica",
+           font_size:   '2.8em',
+           color:       "white",
+        },
+
+        color:          '#DAD4BA',
+        text_shadow:    '1px 1px rgba(0, 0, 0, 0.4)',
+
+        link_color:     'white',
+
+        background:     '#45443C',
+        border_radius:  '.5em'
+    },
+
+    form: {
+        color: 'white',
+        text_shadow: '1px 1px rgba(0, 0, 0, 0.4)',
+
+        font: "'Lucida Sans','Lucida Grande',Verdana,Arial,sans-serif",
+        font_size: '@global_font_size',
+        line_height: '@global_line_height',
+    },
+
+    button: {
+        color: 'white',
+        background: '#3E6CB9'
+    },
+
+    container: {
+        background:     '#1E1916',
+        border:         '1px solid black' ,
+    },
+
+    // The items in the command line menu or something else,
+    // that can get selected.
+    selectable: {
+        color:          'white',
+        border:         '0px solid transparent',
+        background:     'transparent',
+
+        active: {
+            color:          'black',
+            border:         '0px solid transparent',
+            background:     '#FF8E00'
+        },
+
+        hover: {
+            color:          'black',
+            border:         '0px solid transparent',
+            background:     '#FF8E00'
+        }
+    },
+
+    // A small hint text.
+    hint: {
+        color:          '#AAA',
+
+        active: {
+            color:      'black',
+        },
+
+        hover: {
+            color:      'black',
+        }
+    },
+
+    // E.g. in the command line menu, the 'ALT+2'.
+    accelerator: {
+        color:          '#996633',
+
+        active: {
+            color:      'black',
+        },
+
+        hover: {
+            color:      'black',
+        }
+    },
+
+    menu: {
+        border_color:           'black',
+        inset_color_right:      '#1E1916',
+        inset_color_top_left:   '#3E3936',
+        background:             'transparent'
+    }
 };
+
+defaultGlobalTheme = parseGlobalThemeVariables(defaultGlobalTheme);
 
 // END: THIS PART IS OVERRIDEN BY dryice
 //------------------------------------------------------------------------------
@@ -138,7 +282,8 @@ exports.parseGlobalVariables = function() {
     util.mixin(globalObj, defaultGlobalTheme);
 
     if (currentThemeVariables  && currentThemeVariables['global']) {
-        util.mixin(globalObj, currentThemeVariables['global']);
+        util.mixin(globalObj,
+                    parseGlobalThemeVariables(currentThemeVariables['global']));
     }
 
     exports.globalThemeVariables = globalObj;

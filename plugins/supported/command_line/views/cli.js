@@ -56,7 +56,7 @@ var requestOutput = require('command_line:views/requestOutput');
 var imagePath = catalog.getResourceURL('command_line') + 'images';
 var diff = new diff_match_patch();
 
-var cliHeight = 25;
+var cliHeight = 26;
 
 /**
  * A view designed to dock in the bottom of the editor, holding the command

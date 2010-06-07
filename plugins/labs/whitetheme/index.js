@@ -38,10 +38,126 @@
 exports.whiteTheme = function() {
     return {
         global: {
-            color: 'textColor',
-            background: 'blue',
-            highlighted: 'highlightedColor',
-            colorBorder: 'something'
+            // standard font.
+            font:           'arial, lucida, helvetica, sans-serif',
+            // standard font size.
+            font_size:      '14px',
+            // standard line_height.
+            line_height:    '1.8em',
+            // text color.
+            color:          '#2E2E3D',
+
+            text_shadow:    '1px 1px white',
+            // text error color.
+            error_color:    '#C03A38',
+            // the color for headers (<h1> etc).
+            header_color:   '#222222',
+            // the color for links.
+            link_color:     '#597BAC',
+
+            pane: {
+                h1: {
+                   font:        "'MuseoSans', Helvetica",
+                   font_size:   '2.8em',
+                   color:       "#2C3480",
+                },
+
+                link_color:     '@global_link_color',
+
+                background:     '#DFDFDF',
+                border_radius:  '.5em',
+
+                color:          '#2E2E3D',
+                text_shadow:    '1px 1px #DDD'
+            },
+
+            form: {
+                font: "@global_font",
+                font_size: '@global_font_size',
+                line_height: '@global_line_height',
+
+                color: 'black',
+                text_shadow: '0px 0px transparent'
+            },
+
+            // Basic colors for a controller: textInput, tree etc.
+            control: {
+                color:          '#222',
+                border:         '1px solid rgba(0, 0, 0, 0.2)',
+                border_radius:  '0.25em',
+                background:     'rgba(0, 0, 0, 0.1)',
+
+                active: {
+                    color:          '#000',
+                    border:         '1px solid #597BAC',
+                    inset_color:    '#597BAC',
+                    background:     'rgba(0, 0, 0, 0.1)'
+                }
+            },
+
+            button: {
+                color: 'white',
+                background: '#3E6CB9'
+            },
+
+            // Every UI element lives inside of a container. The command line,
+            // file tree etc.
+            container: {
+                background:     '#F8F8F8',
+                border:         '1px solid black',
+            },
+
+            // The items in the cl menu or something else, that can get selected.
+            selectable: {
+                color:          'black',
+                border:         '0px solid transparent',
+                background:     'transparent',
+
+                active: {
+                    color:          'white',
+                    border:         '0px solid transparent',
+                    background:     '#6780E4'
+                },
+
+                hover: {
+                    color:          'white',
+                    border:         '0px solid transparent',
+                    background:     '#6780E4'
+                }
+            },
+
+            // A small hint text.
+            hint: {
+                color:          '#78788D',
+
+                active: {
+                    color:      'white',
+                },
+
+                hover: {
+                    color:      'white',
+                }
+            },
+
+            // E.g. the small 'ATL-2' for selecting an item from the
+            // command line menu when you execute 'open '.
+            accelerator: {
+                color:          '#344DB1',
+
+                active: {
+                    color:      'white',
+                },
+
+                hover: {
+                    color:      'white',
+                }
+            },
+
+            menu: {
+                border_color:   'black',
+                inset_color:    '#999',
+                background:     'transparent'
+            }
         },
 
         text_editor: {
@@ -54,7 +170,7 @@ exports.whiteTheme = function() {
             // Theme of the editor:
             editor: {
                 color: '#3D3D3D',
-                backgroundColor: '#FFFFFF',
+                backgroundColor: '#ffffff',
 
                 cursorColor: '#000000',
                 selectedTextBackgroundColor: '#BDD9FC',
@@ -72,11 +188,30 @@ exports.whiteTheme = function() {
                 keyword:    '#0000ff',
                 operator:   '#88BBFF',
                 string:     '#039A0A'
-            }
-        },
+            },
 
-        screen_theme: {
-            pane_bg: 'red'
+            scroller: {
+                padding: 5,
+                thickness: 17,
+
+                backgroundStyle: "#2A211C",
+
+                fullAlpha: 1.0,
+                particalAlpha: 0.3,
+
+                nibStyle: "rgb(150, 150, 150)",
+                nibArrowStyle: "rgb(255, 255, 255)",
+                nibStrokeStyle: "white",
+
+                trackFillStyle: "rgba(50, 50, 50, 0.2)",
+                trackStrokeStyle: "rgb(150, 150, 150)",
+
+                barFillStyle: "rgb(60, 60, 60)",
+                barFillGradientTopStart: "rgb(150, 150, 150)",
+                barFillGradientTopStop: "rgb(100, 100, 100)",
+                barFillGradientBottomStart: "rgb(82, 82, 82)",
+                barFillGradientBottomStop: "rgb(104, 104, 104)"
+            }
         }
     }
 };

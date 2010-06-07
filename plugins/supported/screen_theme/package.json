@@ -11,8 +11,18 @@
         },
         {
             "ep": "themevariable",
+            "name": "container_font",
+            "defaultValue": "@global_font"
+        },
+        {
+            "ep": "themevariable",
+            "name": "container_font_size",
+            "defaultValue": "@global_font_size"
+        },
+        {
+            "ep": "themevariable",
             "name": "container_bg",
-            "defaultValue": "#706f63"
+            "defaultValue": "@global_container_background"
         },
         {
             "ep": "themevariable",
@@ -27,47 +37,47 @@
         {
             "ep": "themevariable",
             "name": "pane_bg",
-            "defaultValue": "#45443C"
+            "defaultValue": "@global_pane_background"
         },
         {
             "ep": "themevariable",
             "name": "pane_border_radius",
-            "defaultValue": ".5em"
+            "defaultValue": "@global_pane_border_radius"
         },
         {
             "ep": "themevariable",
             "name": "form_font",
-            "defaultValue": "'Lucida Grande', 'Lucida Sans Unicode', Lucida, Arial, Helvetica, sans-serif"
+            "defaultValue": "@global_form_font"
         },
         {
             "ep": "themevariable",
             "name": "form_font_size",
-            "defaultValue": "@global_font_size"
+            "defaultValue": "@global_form_font_size"
         },
         {
             "ep": "themevariable",
             "name": "form_line_height",
-            "defaultValue": "@global_line_height"
+            "defaultValue": "@global_form_line_height"
         },
         {
             "ep": "themevariable",
             "name": "form_color",
-            "defaultValue": "#FFF"
+            "defaultValue": "@global_form_color"
+        },
+        {
+            "ep": "themevariable",
+            "name": "form_text_shadow",
+            "defaultValue": "@global_form_text_shadow"
         },
         {
             "ep": "themevariable",
             "name": "pane_a_color",
-            "defaultValue": "white"
-        },
-        {
-            "ep": "themevariable",
-            "name": "pane_color",
-            "defaultValue": "white"
+            "defaultValue": "@global_pane_link_color"
         },
         {
             "ep": "themevariable",
             "name": "pane_font",
-            "defaultValue": "arial, lucida, helvetica, sans-serif"
+            "defaultValue": "@global_font"
         },
         {
             "ep": "themevariable",
@@ -76,28 +86,38 @@
         },
         {
             "ep": "themevariable",
+            "name": "pane_text_shadow",
+            "defaultValue": "@global_pane_text_shadow"
+        },
+        {
+            "ep": "themevariable",
             "name": "pane_h1_font",
-            "defaultValue": "'MuseoSans', Helvetica"
+            "defaultValue": "@global_pane_h1_font"
         },
         {
             "ep": "themevariable",
             "name": "pane_h1_font_size",
-            "defaultValue": "2.8em"
+            "defaultValue": "@global_pane_h1_font_size"
         },
         {
             "ep": "themevariable",
-            "name": "pane_p_line_height",
+            "name": "pane_h1_color",
+            "defaultValue": "@global_pane_h1_color"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_line_height",
             "defaultValue": "@global_font_size * 1.8"
         },
         {
             "ep": "themevariable",
-            "name": "pane_p_color",
-            "defaultValue": "@global_color"
+            "name": "pane_color",
+            "defaultValue": "@global_pane_color"
         },
         {
             "ep": "themevariable",
-            "name": "control_border_radius",
-            "defaultValue": ".25em"
+            "name": "pane_text_shadow",
+            "defaultValue": "@global_text_shadow"
         },
         {
             "ep": "themevariable",
@@ -111,8 +131,13 @@
         },
         {
             "ep": "themevariable",
+            "name": "button_color",
+            "defaultValue": "@global_button_color"
+        },
+        {
+            "ep": "themevariable",
             "name": "button_bg",
-            "defaultValue": "#3E6CB9"
+            "defaultValue": "@global_button_background"
         },
         {
             "ep": "themevariable",
@@ -126,28 +151,43 @@
         },
         {
             "ep": "themevariable",
-            "name": "button_padding",
-            "defaultValue": "8px 12px"
-        },
-        {
-            "ep": "themevariable",
             "name": "control_bg",
-            "defaultValue": "rgba(0,0,0,0.2)"
+            "defaultValue": "@global_control_background"
         },
         {
             "ep": "themevariable",
             "name": "control_color",
-            "defaultValue": "#E1B41F"
+            "defaultValue": "@global_control_color"
         },
         {
             "ep": "themevariable",
-            "name": "control_active_color",
-            "defaultValue": "@control_color + #1E0000"
+            "name": "control_border",
+            "defaultValue": "@global_control_border"
+        },
+        {
+            "ep": "themevariable",
+            "name": "control_border_radius",
+            "defaultValue": "@global_control_border_radius"
+        },
+        {
+            "ep": "themevariable",
+            "name": "control_active_bg",
+            "defaultValue": "@global_control_active_background"
         },
         {
             "ep": "themevariable",
             "name": "control_active_border",
-            "defaultValue": "@control_color"
+            "defaultValue": "@global_control_active_border"
+        },
+        {
+            "ep": "themevariable",
+            "name": "control_active_color",
+            "defaultValue": "@global_control_active_color"
+        },
+        {
+            "ep": "themevariable",
+            "name": "control_active_inset_color",
+            "defaultValue": "@global_control_active_inset_color"
         }
     ]
 }

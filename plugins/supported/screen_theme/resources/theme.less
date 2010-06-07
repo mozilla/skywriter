@@ -37,8 +37,8 @@
 
 .bespin {
     .container {
-        font-family: @global_font;
-        font-size: @global_font_size;
+        font-family: @container_font;
+        font-size: @container_font_size;
 
         color: @container_color;
         background: @container_bg;
@@ -98,7 +98,7 @@
         padding: 4px;
         color: @control_color;
         background: @control_bg;
-        border: 1px solid rgba(0,0,0,0.2);
+        border: @control_border;
         font-size: 8pt;
         -moz-border-radius: @control_border_radius;
         -webkit-border-radius: @control_border_radius;
@@ -115,14 +115,15 @@
 
     input:focus, textarea:focus {
         color: @control_active_color;
-        border: 1px solid @control_active_border;
+        border: @control_active_border;
+        background: @control_active_bg;
         outline: none;
-        box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
-            inset rgba(255,150,0,0.3) 0px 0px 6px;
-        -moz-box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
-            inset rgba(255,150,0,0.3) 0px 0px 6px;
-        -webkit-box-shadow: rgba(255,150,0,0.6) 0px 0px 2px,
-            inset rgba(255,150,0,0.3) 0px 0px 6px;
+        box-shadow: blur(@control_active_inset_color, 0.6) 0px 0px 2px,
+            inset blur(@control_active_inset_color, 0.3) 0px 0px 6px;
+        -moz-box-shadow: blur(@control_active_inset_color, 0.6) 0px 0px 2px,
+            inset blur(@control_active_inset_color, 0.3) 0px 0px 6px;
+        -webkit-box-shadow: blur(@control_active_inset_color, 0.6) 0px 0px 2px,
+            inset blur(@control_active_inset_color, 0.3) 0px 0px 6px;
     }
 
     input[type=submit], input[type=button] {
@@ -130,11 +131,9 @@
         font-size: @button_font_size;
         text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
 
-        width: 200px;
-
-        padding: @button_padding;
+        padding: 8px 12px;
         margin-left: 8px;
-        color: rgba(255,255,255,1);
+        color: @button_color;
         background: transparent -moz-linear-gradient(top, @button_bg, @button_bg2);
         background: transparent -webkit-gradient(linear, 50% 0%, 50% 100%, from(@button_bg), to(@button_bg2));
 
@@ -156,7 +155,6 @@
     }
 
     .pane {
-        color: @pane_color;
         font-size: @pane_font_size;
         font-family: @pane_font;
         border-top: 1px solid rgba(255,255,255,0.1);
@@ -166,6 +164,13 @@
         background-color: @pane_bg;
         overflow: visible;
         padding: 15px;
+
+        color:  @pane_color;
+        line-height: @pane_line_height;
+
+        margin-bottom: 6px;
+        margin-top: 6px;
+        text-shadow: @pane_text_shadow;
 
         -moz-border-radius: @pane_border_radius;
         -webkit-border-radius: @pane_border_radius;
@@ -179,22 +184,19 @@
         h1 {
             font-family: @pane_h1_font;
             font-size: @pane_h1_font_size;
+            color: @pane_h1_color;
+
             letter-spacing: -1.25px;
             line-height: 1.0;
             margin-top: 0px;
             margin-left: 10px;
             margin-bottom: 25px;
             margin-top: 10px;
-            text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+            text-shadow: @pane_text_shadow;
         }
 
         p {
-            color: @pane_p_color;
-            line-height: @pane_p_line_height;
             margin-left: 10px;
-            margin-bottom: 6px;
-            margin-top: 6px;
-            text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
         }
     }
 
@@ -204,12 +206,13 @@
         font-size: @form_font_size;
         line-height: @form_line_height;
         color: @form_color;
+        text-shadow: @form_text_shadow;
 
         fieldset, p {
             color: @form_color;
             margin-bottom: 6px;
             margin-top: 6px;
-            text-shadow: 1px 1px rgba(0, 0, 0, 0.4);
+            text-shadow: form_text_shadow;
         }
     }
 

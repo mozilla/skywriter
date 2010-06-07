@@ -172,7 +172,7 @@ exports.startParsing = function() {
 exports.registerTheme = function(extension) {
     var currentThemeName = settings.get('theme');
     if (extension.name === currentThemeName) {
-        exports.themeSettingChanged(this);
+        exports.themeSettingChanged(this, 'theme', extension.name);
     }
 };
 
