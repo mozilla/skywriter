@@ -50,7 +50,7 @@
             "ep": "command",
             "name": "jump-editor",
             "key": "ctrl_j",
-            "predicates": {"isCommandLine": true},
+            "predicates": {"isCommandLine": true, "isKeyUp": false},
             "pointer": "#jumpEditor"
         }
     ]
