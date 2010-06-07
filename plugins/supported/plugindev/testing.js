@@ -127,7 +127,7 @@ TestEntry.prototype = {
         '<div class="plugindev_test %@1">' +
             '<div class="header">' +
                 '<span class="name">' +
-                    '<a onclick="document.getElementById(\'_testEntryAssertions_%@8\').style.display = \'block\'"">%@2</a>' +
+                    '<a href="javascript:document.getElementById(\'_testEntryAssertions_%@8\').style.display = \'block\'"">%@2</a>' +
                 '</span>' +
                 '<span class="status">' +
                     '<span class="passed">%@4</span>' +
