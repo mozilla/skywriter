@@ -75,11 +75,20 @@ function pump() {
         break;
 
     case 'invoke':
-        var res = target[msg.method].apply(target, msg.args);
-        postMessage(JSON.stringify({ op: 'finish', id: msg.id, result: res }));
+        function finish(result) {
+            var resp = { op: 'finish', id: msg.id, result: result };
+            postMessage(JSON.stringify(resp));
+            messageQueue.shift();
+            pump();
+        }
 
-        messageQueue.shift();
-        pump();
+        var rv = target[msg.method].apply(target, msg.args);
+        if (typeof(rv) === 'object' && rv.isPromise) {
+            rv.then(finish, function(e) { throw e; });
+        } else {
+            finish(rv);
+        }
+
         break;
     }
 }
