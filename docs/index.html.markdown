@@ -33,6 +33,7 @@ Embedder's Guide
 * [Introduction](embedding/index.html)
 * [Creating a custom, embedded Bespin](embedding/building.html)
 * [Bespin Startup Options](embedding/bespinoptions.html)
+* [New Stuff](embedding/newstuff.html)
 
 
 Developer's Guide

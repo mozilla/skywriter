@@ -168,7 +168,7 @@ is save after the onBespinLoad event is fired:
         var env = edit.bespin;
         // Get the editor.
         var editor = env.editor;
-        // Change the value and move to the secound lien.
+        // Change the value and move to the secound line.
         editor.value = "Initial Content\nWith 2 lines";
         editor.setLineNumber(2);
     };

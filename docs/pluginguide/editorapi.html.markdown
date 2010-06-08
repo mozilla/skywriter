@@ -55,7 +55,7 @@ get editor.value
 
 set editor.value = `newValue`
 :   sets the value of the current text. Returns true if the change was performed,
-otherwise false.
+    otherwise false.
 
 get editor.syntax
 :   returns the initial syntax highlighting context (i.e. the language).
@@ -102,7 +102,7 @@ These are two performed actions, but as they are grouped as one change and
 are one change in the undo/redo manager.
 
 ## Events ##
-Listening to an event work like this:
+Listening to events work like this:
 
     :::js
     editor.selectionChanged.add(function(newSelection) {
