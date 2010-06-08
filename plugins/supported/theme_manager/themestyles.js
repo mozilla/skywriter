@@ -484,7 +484,7 @@ exports.registerThemeStyles = function(extension) {
         }
 
         if (themeDataLoadPromise !== null) {
-            loadPromises.push(themeDataLoadPromise);
+            loadPromises = loadPromises.concat(themeDataLoadPromise);
         }
         themeDataLoadPromise = group(loadPromises);
     }
