@@ -186,12 +186,11 @@ exports.list = function(env, args, request) {
             lastPluginType = plugin.type;
         }
 
+        output.push('<tr><th class="right">' + plugin.name);
+
         if (deactivatedPlugins[plugin.name]) {
-            output.push('<tr class="deactivated"><th>');
-        } else {
-            output.push('<tr><th>');
+            output.push(' (deactivated):');
         }
-        output.push(plugin.name);
 
         output.push('</th><td>');
 
@@ -494,12 +493,11 @@ exports.ep = function(env, args, request) {
             output += '<h3>Parameters:</h3>';
             output += '<table class="params"><tbody>';
             ep.params.forEach(function(param) {
+                output += '<td><th>' + param.name
                 if (param.required) {
-                    output += '<tr class="required">';
-                } else {
-                    output += '<tr>';
+                    output += ' (required)';
                 }
-                output += '<td><span class="name">' + param.name + '</span>';
+                output += ':</th>';
                 if (param.type) {
                     output += ' (';
                     output += param.type;

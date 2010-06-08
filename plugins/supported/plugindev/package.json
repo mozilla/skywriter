@@ -7,6 +7,10 @@
     },
     "provides": [
         {
+            "ep": "themestyles",
+            "url": "plugindev.less"
+        },
+        {
             "ep": "command",
             "name": "plugin reload",
             "params": [
