@@ -314,7 +314,7 @@ exports.CliInputView.prototype = {
      */
     _focusCheck: function(ev) {
         this._hasFocus = (ev.type == 'focus');
-        this.checkSize();
+        this._delayedCheckSize();
     },
 
     /**
@@ -328,7 +328,7 @@ exports.CliInputView.prototype = {
         }
         this._checkSizeTimeout = window.setTimeout(function() {
             this.checkSize();
-        }.bind(this), 10);
+        }.bind(this), 100);
     },
 
     /**
