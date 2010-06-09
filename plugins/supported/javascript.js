@@ -38,9 +38,7 @@
 "define metadata";
 ({
     "description": "JavaScript syntax highlighter",
-    "dependencies": {
-        "syntax_manager": "0.0"
-    },
+    "dependencies": { "standard_syntax": "0.0.0" },
     "provides": [
         {
             "ep": "syntax",
@@ -53,8 +51,7 @@
 "end";
 
 var Promise = require('bespin:promise').Promise;
-var StandardSyntax = require('syntax_manager:controllers/standardsyntax').
-    StandardSyntax;
+var StandardSyntax = require('standard_syntax').StandardSyntax;
 
 var states = {
     start: [

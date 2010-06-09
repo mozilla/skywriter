@@ -35,24 +35,67 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var ArrayUtils = require('utils/array');
-var t = require('plugindev');
+"define metadata";
+({
+    "description": "Catalogs the available syntax engines",
+    "dependencies": {},
+    "environments": { "main": true, "worker": true },
+    "provides": [
+        {
+            "ep": "extensionhandler",
+            "name": "syntax",
+            "register": "#discoveredNewSyntax"
+        }
+    ]
+});
+"end";
 
-exports.testBinarySearch = function() {
-    var compare = function(a, b) { return a - b; };
-    t.equal(ArrayUtils.binarySearch([ 1, 2, 3, 4, 5 ], 0, compare), null,
-        'the result of searching for 0 in [1..5] and null');
-    t.equal(ArrayUtils.binarySearch([ 1, 2, 3, 4, 5 ], 1, compare), 0,
-        'the result of searching for 1 in [1..5] and 0');
-    t.equal(ArrayUtils.binarySearch([ 1, 2, 3, 4, 5 ], 2, compare), 1,
-        'the result of searching for 2 in [1..5] and 1');
-    t.equal(ArrayUtils.binarySearch([ 1, 2, 3, 4, 5 ], 3, compare), 2,
-        'the result of searching for 3 in [1..5] and 2');
-    t.equal(ArrayUtils.binarySearch([ 1, 2, 3, 4, 5 ], 4, compare), 3,
-        'the result of searching for 4 in [1..5] and 3');
-    t.equal(ArrayUtils.binarySearch([ 1, 2, 3, 4, 5 ], 5, compare), 4,
-        'the result of searching for 5 in [1..5] and 4');
-    t.equal(ArrayUtils.binarySearch([ 1, 2, 3, 4, 5 ], 6, compare), null,
-        'the result of searching for 6 in [1..5] and null');
+var plugins = require("bespin:plugins");
+
+function SyntaxInfo(ext) {
+    this.extension = ext;
+    this.name = ext.name;
+    this.fileExts = ext.hasOwnProperty('fileexts') ? ext.fileexts : [];
+}
+
+/**
+ * Stores metadata for all of the syntax plugins.
+ *
+ * @exports syntaxDirectory as syntax_directory:syntaxDirectory
+ */
+var syntaxDirectory = {
+    _fileExts: {},
+    _syntaxInfo: {},
+
+    get: function(syntaxName) {
+        return this._syntaxInfo[syntaxName];
+    },
+
+    hasSyntax: function(syntax) {
+        return this._syntaxInfo.hasOwnProperty(syntax);
+    },
+
+    register: function(extension) {
+        var syntaxInfo = new SyntaxInfo(extension);
+        this._syntaxInfo[syntaxInfo.name] = syntaxInfo;
+
+        var fileExts = this._fileExts;
+        syntaxInfo.fileExts.forEach(function(fileExt) {
+            fileExts[fileExt] = syntaxInfo.name;
+        });
+    },
+
+    syntaxForFileExt: function(fileExt) {
+        fileExt = fileExt.toLowerCase();
+        var fileExts = this._fileExts;
+        return fileExts.hasOwnProperty(fileExt) ? fileExts[fileExt] : 'plain';
+    }
 };
+
+function discoveredNewSyntax(syntaxExtension) {
+    syntaxDirectory.register(syntaxExtension);
+}
+
+exports.syntaxDirectory = syntaxDirectory;
+exports.discoveredNewSyntax = discoveredNewSyntax;
 

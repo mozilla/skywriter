@@ -38,23 +38,19 @@
 "define metadata";
 ({
     "description": "HTML syntax highlighter",
-    "dependencies": {
-        "syntax_manager": "0.0"
-    },
+    "dependencies": { "standard_syntax": "0.0.0" },
     "provides": [
         {
             "ep": "syntax",
             "name": "html",
             "pointer": "#HTMLSyntax",
-            "fileexts": [ "htm", "html" ],
-            "subsyntaxes": [ "js" ]
+            "fileexts": [ "htm", "html" ]
         }
     ]
 });
 "end";
 
-var StandardSyntax = require('syntax_manager:controllers/standardsyntax').
-    StandardSyntax;
+var StandardSyntax = require('standard_syntax').StandardSyntax;
 
 var states = {};
 
@@ -316,7 +312,7 @@ states = {
         {
             regex:  /^<(?=\/script>)/i,
             tag:    'operator',
-            then:   'tagOpen stop:js'
+            then:   'tagOpen'
         },
         {
             regex:  /^[^<]+/,
@@ -762,10 +758,11 @@ states = {
 };
 
 createTagStates('normal', 'start');
-createTagStates('script', 'scriptData start:js');
+createTagStates('script', 'start js:start:</script>');
 
 /**
  * This syntax engine exposes an HTML parser modeled on the WHATWG HTML 5
  * specification.
  */
-exports.HTMLSyntax = new StandardSyntax(states);
+exports.HTMLSyntax = new StandardSyntax(states, [ 'js' ]);
+

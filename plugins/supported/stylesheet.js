@@ -39,7 +39,7 @@
 ({
     "description": "CSS syntax highlighter",
     "dependencies": {
-        "syntax_manager": "0.0"
+        "standard_syntax": "0.0.0"
     },
     "provides": [
         {
@@ -53,8 +53,7 @@
 "end";
 
 var Promise = require('bespin:promise').Promise;
-var StandardSyntax = require('syntax_manager:controllers/standardsyntax').
-    StandardSyntax;
+var StandardSyntax = require('standardsyntax').StandardSyntax;
 
 var states = {
     start: [

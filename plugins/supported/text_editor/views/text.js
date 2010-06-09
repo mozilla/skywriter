@@ -45,6 +45,7 @@ var Range = require('rangeutils:utils/range');
 var Rect = require('utils/rect');
 var TextInput = require('views/textinput').TextInput;
 var keyboardManager = require('keyboard:keyboard').keyboardManager;
+var console = require('bespin:console').console;
 var settings = require('settings').settings;
 
 // Set this to true to outline all text ranges with a box. This may be useful
@@ -208,7 +209,7 @@ util.mixin(exports.TextView.prototype, {
                 continue;
             }
 
-            // Clamp the start col and end col to fit within the line
+            // Clamp the start column and end column to fit within the line
             // text.
             var characters = textLine.characters;
             var length = characters.length;
@@ -227,13 +228,13 @@ util.mixin(exports.TextView.prototype, {
 
             // And finally draw the line.
             var col = colorRanges[colorIndex].start;
-            while (col !== null && col < endColumn) {
+            while (col < endColumn) {
                 var colorRange = colorRanges[colorIndex];
                 var colorRangeEnd = colorRange.end;
                 context.fillStyle = themeHighlighter[colorRange.tag] || 'red';
 
                 var characterRect = layoutManager.characterRectForPosition({
-                    row:    row,
+                    row: row,
                     col: col
                 });
 
@@ -400,7 +401,6 @@ util.mixin(exports.TextView.prototype, {
     },
 
 	// TODO: Add this back.
-	//       Q: Why is calling _updateSyntax necessary?
     _scrolled: function() {
         var scrollView = this._enclosingScrollView;
         var x = scrollView.horizontalScrollOffset;
@@ -410,8 +410,6 @@ util.mixin(exports.TextView.prototype, {
         //       As EditSession is within another plugin, we can't use events
         //       for this. Well check back later.
         // this.notifyDelegates('textViewWasScrolled', { x: x, y: y });
-
-        this.updateSyntax(null);
     },
 
     // Returns the character closest to the given point, obeying the selection
@@ -463,48 +461,12 @@ util.mixin(exports.TextView.prototype, {
     //     view.addObserver('verticalScrollOffset', this, this._scrolled);
     // },
 
-    // Instructs the syntax manager to begin highlighting from the given row to
-    // the end of the visible range, or within the entire visible range if the
-    // row is null.
-    updateSyntax: function(row) {
-        var layoutManager = this.editor.layoutManager;
-        var visibleRange = layoutManager.characterRangeForBoundingRect(this.
-            clippingFrame);
-        var startRow = visibleRange.start.row, endRow = visibleRange.end.row;
-
-        if (row !== null) {
-            if (row < startRow || row > endRow) {
-                return; // Outside the visible range; nothing to do.
-            }
-
-            startRow = row;
-        }
-
-        var self = this;
-        var lines = layoutManager.textStorage.lines;
-        var syntaxManager = layoutManager.syntaxManager;
-        var lastRow = Math.min(lines.length, endRow + 1);
-        syntaxManager.updateSyntaxForRows(startRow, lastRow).
-            then(function(result) {
-                self._syntaxManagerUpdatedSyntaxForRows(result.startRow,
-                    result.endRow);
-            });
-    },
-
     /**
      * Toggles the visible state of the insertion point.
      */
     blinkInsertionPoint: function() {
         this._insertionPointVisible = !this._insertionPointVisible;
         this._invalidateSelection();
-    },
-
-    /**
-     * Updates the syntax information. Automatically called when the clipping
-     * frame of the text view changes.
-     */
-    clippingFrameChanged: function() {
-        this.updateSyntax(null);
     },
 
     /**
@@ -592,7 +554,9 @@ util.mixin(exports.TextView.prototype, {
         try {
             performChanges();
         } catch (e) {
-            throw new Error('Error in groupChanges(): ' + e);
+            console.error("Error in groupChanges(): " + e);
+            this._inChangeGroup = false;
+            this.endedChangeGroup(this, this.editor.buffer._selectedRange);
             return false;
         } finally {
             this._inChangeGroup = false;
@@ -668,7 +632,6 @@ util.mixin(exports.TextView.prototype, {
      * range, and repositions the selection.
      */
     layoutManagerChangedTextAtRow: function(sender, row) {
-        this.updateSyntax(row);
         this._repositionSelection();
     },
 

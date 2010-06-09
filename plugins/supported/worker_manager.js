@@ -92,8 +92,14 @@ WorkerManager.prototype = {
         switch (msg.op) {
         case 'finish':
             if (msg.id === this._currentId) {
-                this._promise.resolve(msg.result);
+                var promise = this._promise;
+
+                // We have to set the promise to null first, in case the user's
+                // then() handler on the promise decides to send another
+                // message to the object.
                 this._promise = null;
+
+                promise.resolve(msg.result);
             }
             break;
 

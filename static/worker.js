@@ -82,6 +82,10 @@ function pump() {
             pump();
         }
 
+        if (!target.hasOwnProperty(msg.method)) {
+            throw new Error("No such method: " + msg.method);
+        }
+
         var rv = target[msg.method].apply(target, msg.args);
         if (typeof(rv) === 'object' && rv.isPromise) {
             rv.then(finish, function(e) { throw e; });

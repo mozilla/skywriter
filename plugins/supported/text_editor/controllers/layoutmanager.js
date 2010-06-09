@@ -38,8 +38,7 @@
 var util = require('bespin:util/util');
 var Event = require("events").Event;
 var Range = require('rangeutils:utils/range');
-var SyntaxManager = require('syntax_manager:controllers/syntaxmanager').
-    SyntaxManager;
+var SyntaxManager = require('syntax_manager').SyntaxManager;
 var TextStorage = require('models/textstorage').TextStorage;
 var catalog = require('bespin:plugins').catalog;
 var settings = require('settings').settings;
@@ -109,10 +108,14 @@ exports.LayoutManager = function(opts) {
         }
     ];
 
-    this.createSyntaxManager();
+    var syntaxManager = new SyntaxManager(this);
+    this.syntaxManager = syntaxManager;
+    syntaxManager.syntaxChanged.add(this._syntaxChanged.bind(this));
 
     this._size = { width: 0, height: 0 };
     this.sizeChanged = new Event();
+
+    this._height = 0;
 
     // Now that the syntax manager is set up, we can recompute the layout.
     // (See comments in _textStorageChanged().)
@@ -121,7 +124,6 @@ exports.LayoutManager = function(opts) {
 
 exports.LayoutManager.prototype = {
     _maximumWidth: 0,
-    _syntaxManagerInitialized: false,
     _textStorage: null,
 
     _size: null,
@@ -152,12 +154,8 @@ exports.LayoutManager.prototype = {
      */
     pluginCatalog: catalog,
 
-    /**
-     * @property{SyntaxManager}
-     *
-     * The syntax manager class to use.
-     */
-    syntaxManager: SyntaxManager,
+    /** The syntax manager in use. */
+    syntaxManager: null,
 
     /**
      * @property{Array<object>}
@@ -241,12 +239,33 @@ exports.LayoutManager.prototype = {
                                 oldEndRow - oldStartRow + 1, newTextLines);
         this._recalculateMaximumWidth();
 
+        // Resize if necessary.
+        var newHeight = this.textLines.length;
+        var syntaxManager = this.syntaxManager;
+        if (this._height !== newHeight) {
+            this._height = newHeight;
+        }
+
+        // Invalidate the start row (starting the syntax highlighting).
+        syntaxManager.invalidateRow(oldStartRow);
+
         // Take the cached attributes from the syntax manager.
         this.updateTextRows(oldStartRow, newEndRow + 1);
 
         this.changedTextAtRow(this, oldStartRow);
 
         var invalidRects = this._computeInvalidRects(oldRange, newRange);
+        this.invalidatedRects(this, invalidRects);
+    },
+
+    _syntaxChanged: function(startRow, endRow) {
+        this.updateTextRows(startRow, endRow);
+
+        var invalidRects = this.rectsForRange({
+            start:  { row: startRow, col: 0 },
+            end:    { row: endRow, col: 0 }
+        });
+
         this.invalidatedRects(this, invalidRects);
     },
 
@@ -333,22 +352,6 @@ exports.LayoutManager.prototype = {
             start:  position,
             end:    { row: position.row, col: position.col + 1 }
         })[0];
-    },
-
-    /**
-     * @protected
-     *
-     * Instantiates the internal syntax manager object. The default
-     * implementation of this method simply calls create() on the internal
-     * syntaxManager property.
-     */
-    createSyntaxManager: function() {
-        this.syntaxManager = new this.syntaxManager(this);
-
-        var boundRecompute = this._recomputeEntireLayout.bind(this);
-        this.syntaxManager.invalidatedSyntax.add(boundRecompute);
-
-        this._syntaxManagerInitialized = true;
     },
 
     /**
@@ -444,7 +447,6 @@ exports.LayoutManager.prototype = {
     },
 
     textStorageChanged: function(oldRange, newRange) {
-        this.syntaxManager.layoutManagerReplacedText(oldRange, newRange);
         this._recomputeLayoutForRanges(oldRange, newRange);
     },
 
@@ -455,7 +457,7 @@ exports.LayoutManager.prototype = {
      */
     updateTextRows: function(startRow, endRow) {
         var textLines = this.textLines;
-        var attrs = this.syntaxManager.attrsForRows(startRow, endRow);
+        var attrs = this.syntaxManager.getAttrsForRows(startRow, endRow);
         var theme = this._theme;
 
         for (var i = 0; i < attrs.length; i++) {

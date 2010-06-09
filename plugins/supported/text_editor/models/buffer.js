@@ -178,7 +178,7 @@ exports.Buffer.prototype = {
     _updateSyntaxManagerInitialContext: function() {
         var ext = this._file.extension();
         var syntaxManager = this._layoutManager.syntaxManager;
-        syntaxManager.setInitialContextFromExt(ext === null ? '' : ext);
+        syntaxManager.setSyntaxFromFileExt(ext === null ? '' : ext);
     },
 
     /**
