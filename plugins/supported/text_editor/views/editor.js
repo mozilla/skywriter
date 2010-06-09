@@ -55,23 +55,26 @@ var ScrollerView = Scroller.ScrollerCanvasView;
 
 var EditorUndoController = require('controllers/undo').EditorUndoController;
 
-var themestyles = require('theme_manager:themestyles');
-
 /**
  * Cache with all the theme data for the entire editor (gutter, editor, highlighter).
  */
 var editorThemeData = {};
 
-var computeThemeData = function() {
+var computeThemeData = function(themeManager) {
     var plugin = catalog.plugins['text_editor'];
     var provides = plugin.provides;
     var i = provides.length;
+    var themeData = {};
 
-    if (themestyles.currentThemeVariables &&
-            themestyles.currentThemeVariables['text_editor']) {
-        themeData = themestyles.currentThemeVariables['text_editor'];
-    } else {
-        themeData = {};
+    // If a themeManager was passed, try to access the themeData for the
+    // `text_editor` plugin.
+    if (themeManager) {
+        var themestyles = themeManager.themestyles;
+
+        if (themestyles.currentThemeVariables &&
+                themestyles.currentThemeVariables['text_editor']) {
+            themeData = themestyles.currentThemeVariables['text_editor'];
+        }
     }
 
     while (i--) {

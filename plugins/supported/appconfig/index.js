@@ -129,17 +129,19 @@ exports.launch = function(config) {
 
     // If the themeManager plugin is there, then check for theme configuration.
     if (catalog.plugins.theme_manager) {
-        var themeManager = require('theme_manager');
-        if (config.theme.basePlugin) {
-            themeManager.setBasePlugin(config.theme.basePlugin);
-        }
-        if (config.theme.standard) {
-            themeManager.setStandardTheme(config.theme.standard);
-        }
-        themeManager.startParsing().then(function() {
-            themeLoadingPromise.resolve();
-        }, function(error) {
-            themeLoadingPromise.reject(error);
+        bespin.tiki.require.ensurePackage('::theme_manager', function() {
+            var themeManager = require('theme_manager');
+            if (config.theme.basePlugin) {
+                themeManager.setBasePlugin(config.theme.basePlugin);
+            }
+            if (config.theme.standard) {
+                themeManager.setStandardTheme(config.theme.standard);
+            }
+            themeManager.startParsing().then(function() {
+                themeLoadingPromise.resolve();
+            }, function(error) {
+                themeLoadingPromise.reject(error);
+            });
         });
     } else {
         themeLoadingPromise.resolve();

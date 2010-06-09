@@ -51,6 +51,10 @@ var standardThemeName = null;
 // Load promise for the basePlugin.
 var basePluginLoadPromise = null;
 
+// Export the themeStyles object. This is necessary, as in some cases you want
+// to access the themeStyles object when the `themeChange` event was fired.
+exports.themestyles = themestyles;
+
 exports.themeSettingChanged = function(source, settingName, themeName) {
     // Get the themeExtensionPoint for 'themeName'
     var themeExt = catalog.getExtensionByKey('theme', themeName);
@@ -116,7 +120,7 @@ exports.themeSettingChanged = function(source, settingName, themeName) {
             }
 
             // Publish the 'themeChange' event.
-            catalog.publish(this, 'themeChange');
+            catalog.publish(exports, 'themeChange');
         });
     }
 };
@@ -180,4 +184,11 @@ exports.unregisterTheme = function(extension) {
     if (extension.name === settings.get('theme')) {
         exports.themeSettingChanged(this);
     }
+};
+
+// Called when the app is launched.
+exports.appLaunched = function() {
+    // Fire the `themeChange` event as some plugins might haven't triggered it
+    // during the launch of the app.
+    catalog.publish(exports, 'themeChange');
 };

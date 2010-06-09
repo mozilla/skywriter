@@ -65,6 +65,10 @@
 
             "defaultValue": "standard",
             "description": "The theme plugin's name to use. If set to 'standard' no theme will be used"
+        },
+        {
+            "ep": "appLaunched",
+            "pointer": "#appLaunched"
         }
     ]
 }

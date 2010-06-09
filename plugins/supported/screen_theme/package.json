@@ -1,7 +1,6 @@
 {
-    "dependencies": {
-        "theme_manager": "0.0"
-    },
+    "description": "Bespins standard theme basePlugin",
+    "dependencies": {},
     "provides": [
         {
             "ep": "themestyles",
