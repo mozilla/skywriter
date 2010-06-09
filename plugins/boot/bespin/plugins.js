@@ -569,6 +569,7 @@ exports.Catalog = function() {
     this.deactivatedPlugins = {};
     this._extensionsOrdering = [];
     this.instances = {};
+    this.instancesLoadPromises = {};
     this._objectDescriptors = {};
 
     // set up the "extensionpoint" extension point.
@@ -641,15 +642,16 @@ exports.Catalog.prototype = {
      */
     createObject: function(name) {
         // console.log("Creating", name);
-        var instance = this.instances[name];
-        var pr = new Promise();
 
-        if (instance !== undefined) {
+        // If there is already a loading promise for this instance, then
+        // return this one.
+        if (this.instancesLoadPromises[name] !== undefined) {
             // console.log("Already have one (it's very nice)");
-            pr.resolve(instance);
-            return pr;
+            return this.instancesLoadPromises[name];
         }
-
+        // Otherwise create a new loading promise (which is returned at the
+        // end of the function) and create the instance.
+        var pr = this.instancesLoadPromises[name] = new Promise();
 
         var descriptor = this._objectDescriptors[name];
         if (descriptor === undefined) {
