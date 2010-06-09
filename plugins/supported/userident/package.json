@@ -10,6 +10,7 @@
         "toolbox_expose": "1.2.0",
         "jquery_ui_checkbox": "1.4.1"
     },
+    "objects": ["notifier"],
     "provides": [
         {
             "ep": "factory",
@@ -49,6 +50,18 @@
             "name": "keychain forget",
             "description": "forget the keychain password that is temporarily saved in your browser",
             "pointer": "kc#forget"
+        },
+        {
+            "ep": "notification",
+            "name": "loginerror",
+            "level": "error",
+            "description": "Problems logging in to Bespin"
+        },
+        {
+            "ep": "notification",
+            "name": "reset",
+            "level": "info",
+            "description": "Password Reset"
         }
     ]
 }

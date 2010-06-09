@@ -180,7 +180,12 @@ exports.loginController.prototype = {
         exports.login(username, password).then(function(data) {
             pr.resolve(username);
         }, function() {
-            alert('Your username or password was not recognized.');
+            var notifier = catalog.getObject('notifier');
+            notifier.notify({
+                plugin: 'userident',
+                notification: 'loginerror',
+                body: 'Your username or password was not recognized.'
+            });
         });
     },
 
@@ -210,14 +215,30 @@ exports.loginController.prototype = {
             lostForm: {
                 submit: function(evt) {
                     if (obj.lostForm.input.length < 4) {
-                        alert('The username is at least 4 characters.');
+                        var notifier = catalog.getObject('notifier');
+                        notifier.notify({
+                            plugin: 'userident',
+                            notification: 'loginerror',
+                            body: 'The username is at least 4 characters.'
+                        });
                     } else {
                         exports.lostPassword({
                             username: obj.lostForm.input.value
                         }).then(function() {
-                            alert('Reset Password: confirmation email sent - check your mail and follow the link');
+                            var notifier = catalog.getObject('notifier');
+                            notifier.notify({
+                                plugin: 'userident',
+                                notification: 'reset',
+                                title: 'Reset Password',
+                                body: 'confirmation email sent - check your mail and follow the link'
+                            });
                         }, function() {
-                            alert('Reset Password: Your username or email is unknown.');
+                            var notifier = catalog.getObject('notifier');
+                            notifier.notify({
+                                plugin: 'userident',
+                                notification: 'loginerror',
+                                body: 'Reset Password: Your username or email is unknown.'
+                            });
                         });
                     }
                     // Stop the event.
@@ -230,11 +251,22 @@ exports.loginController.prototype = {
                     var password = obj.resetForm.password.value;
                     var password2 = obj.resetForm.password2.value;
 
+                    var notifier = catalog.getObject('notifier');
                     var len = password.length;
                     if (len < 6 || len > 20) {
-                        alert('Reset Password: The password has to be at least 6 and at most 20 characters.');
+                        notifier.notify({
+                            plugin: 'userident',
+                            notification: 'loginerror',
+                            title: 'Reset Password',
+                            body: 'The password has to be at least 6 and at most 20 characters.'
+                        });
                     } else if (this.get('password1') !== this.get('password2')) {
-                        alert('Reset Password: The typed passwords do not match.');
+                        notifier.notify({
+                            plugin: 'userident',
+                            notification: 'loginerror',
+                            title: 'Reset Password',
+                            body: 'The typed passwords do not match.'
+                        });
                     } else {
                         var data = searchQuery.pwchange.split(';');
                         var usename = data[0];
@@ -246,7 +278,12 @@ exports.loginController.prototype = {
                             // Password sucessfully changed. Log the user in.
                             self._doLogin(pr, username, password);
                         }, function(error) {
-                            alert('Reset Password Failed: Reason: ' + error.message);
+                            notifier.notify({
+                                plugin: 'userident',
+                                notification: 'loginerror',
+                                title: 'Reset Password',
+                                body: 'Password reset failed because: ' + error.message
+                            });
                         });
                     }
 
@@ -259,7 +296,13 @@ exports.loginController.prototype = {
                 submit: function(evt) {
                     var signupForm = obj.signupForm;
                     if (!self._validSignupForm(signupForm)) {
-                        alert('Please correct your signup information.');
+                        var notifier = catalog.getObject('notifier');
+                        notifier.notify({
+                            plugin: 'userident',
+                            notification: 'loginerror',
+                            title: 'Signup Problem',
+                            body: 'Please correct your signup information.'
+                        });
                     } else {
                         var username = signupForm.username.value;
                         var password = signupForm.password.value;
@@ -267,7 +310,13 @@ exports.loginController.prototype = {
                         exports.signup(username, password, email).then(function(data) {
                             pr.resolve(username);
                         }, function(xhr) {
-                            alert('Signup Failed:' + xhr.responseText);
+                            var notifier = catalog.getObject('notifier');
+                            notifier.notify({
+                                plugin: 'userident',
+                                notification: 'loginerror',
+                                title: 'Signup Problem',
+                                body: 'Signup failed because:' + xhr.responseText
+                            });
                         });
                     }
                     // Stop the event.

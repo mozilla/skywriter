@@ -169,6 +169,12 @@ exports.normalizeConfig = function(config) {
     if (!config.settings) {
         config.settings = {};
     }
+    
+    if (!config.objects.notifier && catalog.plugins.notifier) {
+        config.objects.notifier = {
+        };
+    }
+    
     if (!config.objects.loginController && catalog.plugins.userident) {
         config.objects.loginController = {
         };

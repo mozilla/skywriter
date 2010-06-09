@@ -89,7 +89,7 @@ var _retrieveObject = function(pointerObj) {
  * @constructor
  */
 exports.Extension = function(metadata) {
-    this._pluginName = null;
+    this.pluginName = null;
 
     for (property in metadata) {
         if (metadata.hasOwnProperty(property)) {
@@ -124,7 +124,7 @@ exports.Extension.prototype = {
             return promise;
         }
 
-        var pointerObj = _splitPointer(this._pluginName, pointerVal);
+        var pointerObj = _splitPointer(this.pluginName, pointerVal);
 
         if (!pointerObj) {
             console.error('Extension cannot be loaded because it has no \'pointer\'');
@@ -133,8 +133,8 @@ exports.Extension.prototype = {
             promise.reject(new Error('Extension has no \'pointer\' to call'));
             return promise;
         }
-
-        require.ensurePackage(this._pluginName, function() {
+        
+        exports.catalog.loadPlugin(this.pluginName).then(function() {
             require.ensure(pointerObj.modName, function() {
                 var func = _retrieveObject(pointerObj);
                 onComplete(func);
@@ -168,7 +168,7 @@ exports.Extension.prototype = {
      * Returns the name of the plugin that provides this extension.
      */
     getPluginName: function() {
-        return this._pluginName;
+        return this.pluginName;
     },
 
     /**
@@ -189,7 +189,7 @@ exports.ExtensionPoint = function(name, catalog) {
     this.name = name;
     this.catalog = catalog;
 
-    this._pluginName = undefined;
+    this.pluginName = undefined;
     this.indexOn = undefined;
 
     this.extensions = [];
@@ -207,7 +207,7 @@ exports.ExtensionPoint.prototype = {
     getImplementingPlugins: function() {
         var pluginSet = {};
         this.extensions.forEach(function(ext) {
-            pluginSet[ext._pluginName] = true;
+            pluginSet[ext.pluginName] = true;
         });
         var matches = Object.keys(pluginSet);
         matches.sort();
@@ -218,7 +218,7 @@ exports.ExtensionPoint.prototype = {
      * Get the name of the plugin that defines this extension point.
      */
     getDefiningPluginName: function() {
-        return this._pluginName;
+        return this.pluginName;
     },
 
     /**
@@ -246,7 +246,7 @@ exports.ExtensionPoint.prototype = {
             if (handler.register) {
                 handler.load(function(register) {
                     if (!register) {
-                        console.error('missing register function for pluginName=', extension._pluginName, ", extension=", extension.name);
+                        console.error('missing register function for pluginName=', extension.pluginName, ", extension=", extension.name);
                     } else {
                          register(extension);
                     }
@@ -261,7 +261,7 @@ exports.ExtensionPoint.prototype = {
             if (handler.unregister) {
                 handler.load(function(unregister) {
                     if (!unregister) {
-                        console.error('missing unregister function for pluginName=', extension._pluginName, ", extension=", extension.name);
+                        console.error('missing unregister function for pluginName=', extension.pluginName, ", extension=", extension.name);
                     } else {
                          unregister(extension);
                     }
@@ -279,7 +279,7 @@ exports.ExtensionPoint.prototype = {
         for (var i = 0; i < pluginOrder.length; i++) {
             var n = 0;
             while (n != this.extensions.length) {
-                if (this.extensions[n]._pluginName === pluginOrder[i]) {
+                if (this.extensions[n].pluginName === pluginOrder[i]) {
                     orderedExt.push(this.extensions[n]);
                     this.extensions.splice(n, 1);
                 } else {
@@ -511,7 +511,7 @@ exports.Plugin.prototype = {
             delete sandbox.exports[item];
             delete sandbox.modules[item];
             delete sandbox.usedExports[item];
-        })
+        });
 
         // reload the plugin metadata
         var onLoad = function() {
@@ -779,7 +779,7 @@ exports.Catalog.prototype = {
     _registerExtensionPoint: function(extension) {
         var ep = this.getExtensionPoint(extension.name, true);
         ep.description = extension.description;
-        ep._pluginName = extension._pluginName;
+        ep.pluginName = extension.pluginName;
         ep.params = extension.params;
         if (extension.indexOn) {
             ep.indexOn = extension.indexOn;
@@ -846,8 +846,10 @@ exports.Catalog.prototype = {
 
     loadMetadata: function(metadata) {
         var plugins = this.plugins;
+        
+        var pluginName;
 
-        for (var pluginName in metadata) {
+        for (pluginName in metadata) {
             // Skip if the plugin is not activated.
             if (this.deactivatedPlugins[pluginName]) {
                 continue;
@@ -892,7 +894,7 @@ exports.Catalog.prototype = {
                 var provides = md.provides;
                 for (var i = 0; i < provides.length; i++) {
                     var extension = new exports.Extension(provides[i]);
-                    extension._pluginName = name;
+                    extension.pluginName = name;
                     provides[i] = extension;
                     var epname = extension.ep;
                     if (epname == "extensionpoint") {
@@ -908,7 +910,7 @@ exports.Catalog.prototype = {
             }
         }, this);
 
-        for (var pluginName in metadata) {
+        for (pluginName in metadata) {
             this._checkLoops(pluginName, plugins, []);
         }
 
@@ -924,9 +926,22 @@ exports.Catalog.prototype = {
      */
     loadPlugin: function(pluginName) {
         var pr = new Promise();
-        require.ensurePackage(pluginName, function() {
-            pr.resolve();
-        });
+        var plugin = this.plugins[pluginName];
+        if (plugin.objects) {
+            var objectPromises = [];
+            plugin.objects.forEach(function(objectName) {
+                objectPromises.push(this.createObject(objectName));
+            }.bind(this));
+            group(objectPromises).then(function() {
+                require.ensurePackage(pluginName, function() {
+                    pr.resolve();
+                });
+            });
+        } else {
+            require.ensurePackage(pluginName, function() {
+                pr.resolve();
+            });
+        }
         return pr;
     },
 
@@ -1195,7 +1210,7 @@ exports.Catalog.prototype = {
      */
     registerExtension: function(ep, metadata) {
         var extension = new exports.Extension(metadata);
-        extension._pluginName = '__dynamic';
+        extension.pluginName = '__dynamic';
         this.getExtensionPoint(ep).register(extension);
     }
 };

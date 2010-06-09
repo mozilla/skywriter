@@ -50,6 +50,18 @@ var levels = {
 
 var levelNames = [null, "debug", "info", "error"];
 
+exports._notifications = {};
+
+exports.registerNotification = function(ext) {
+    exports._notifications[ext.pluginName + '_' + ext.name] = ext;
+};
+
+exports.unregisterNotification = function(ext) {
+    delete exports._notifications[ext.pluginName + '_' + ext.name];
+};
+
+
+
 /*
  * Normalizes and converts a level to an integer value.
  *
@@ -168,13 +180,20 @@ exports.Notifier.prototype = {
             console.error('Received an invalid notification (plugin, notification and body are required)', message);
             return;
         }
-        var notification = catalog.getExtensionByKey('notification', message.notification);
+        var notification = exports._notifications[message.plugin + '_' + message.notification];
         if (!notification) {
             console.error('Notification message has an unknown notification type:', notification);
             return;
         }
         var handlers = catalog.getExtensions('notificationHandler');
         var config = settings.get('notifications');
+        
+        try {
+            config = JSON.parse(config);
+        } catch(e) {
+            config = [];
+        }
+        
         var publishTo = this._chooseHandlers(message, notification, handlers, config);
         publishTo.forEach(function(handlerName) {
             var handler = catalog.getExtensionByKey('notificationHandler', handlerName);

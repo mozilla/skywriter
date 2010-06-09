@@ -226,13 +226,13 @@ exports.Input.prototype = {
                     loadPromise.resolve(null);
                 } else {
                     message = 'Failed to load command ' + commandExt.name +
-                            ': Pointer ' + commandExt._pluginName +
+                            ': Pointer ' + commandExt.pluginName +
                             ':' + commandExt.pointer + ' is null.';
                     loadPromise.resolve(new Hint(Level.Error, message));
                 }
             }, function(ex) {
                 message = 'Failed to load command ' + commandExt.name +
-                        ': Pointer ' + commandExt._pluginName +
+                        ': Pointer ' + commandExt.pluginName +
                         ':' + commandExt.pointer + ' failed to load.' + ex;
                 loadPromise.resolve(new Hint(Level.Error, message));
             });

@@ -4,14 +4,21 @@
     "provides":
     [
         {
+            "ep": "factory",
+            "name": "notifier",
+            "action": "new",
+            "pointer": "#Notifier"
+        },
+        {
             "ep": "extensionpoint",
             "name": "notification",
             "description": "tells the notifier about a kind of notification that may be presented to the user. This will be used in a notification configuration user interface, for example.",
-            "indexOn": "name",
+            "register": "#registerNotification",
+            "unregister": "#unregisterNotification",
             "params": [
                 {
                     "name": "name",
-                    "description": "name of the notification type. This should start with the plugin name to ensure uniqueness.",
+                    "description": "name of the notification type. Notifications are identified by the combination of pluginName_notificationName, so you don't need to worry about making this unique across Bespin.",
                     "type": "string",
                     "required": true
                 },
@@ -83,7 +90,7 @@
             "ep": "setting",
             "name": "notifications",
             "description": "JSON array of objects describing how notifications are configured",
-            "type": "object",
+            "type": "text",
             "defaultValue": "[]"
         }
     ]
