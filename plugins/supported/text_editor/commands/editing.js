@@ -69,14 +69,35 @@ exports.deleteLines = function(env, args, request) {
         return;
     }
 
-    var view = env.view;
-    var range = view.getSelectedRange();
+    // In the case of just one line, do nothing.
+    if (env.model.lines.length == 1) {
+        return;
+    }
 
+    var view = env.view;
     view.groupChanges(function() {
-        var startPos = { col: 0, row: range.start.row };
+        var range = view.getSelectedRange();
+        var lines = env.model.lines;
+        var lastLine = lines.length - 1;
+        var startPos, endPos;
+
+        // Last row gets special treatment.
+        if (range.start.row == lastLine) {
+            startPos = { col: lines[lastLine - 1].length, row: lastLine - 1 };
+        } else {
+            startPos = { col: 0, row: range.start.row };
+        }
+
+        // Last row gets special treatment.
+        if (range.end.row == lastLine) {
+            endPos = { col: lines[lastLine].length, row: lastLine};
+        } else {
+            endPos = { col: 0, row: range.end.row + 1 };
+        }
+
         view.replaceCharacters({
             start: startPos,
-            end: { col: 0, row: range.end.row + 1 }
+            end:   endPos
         }, '');
 
         view.moveCursorTo(startPos);
