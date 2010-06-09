@@ -390,9 +390,6 @@ exports.EditorView.prototype = {
         // Recompute the entire layout as the gutter now might has a different
         // size. Just calling invalidate() on the gutter wouldn't be enough.
         this._recomputeLayout(true);
-
-        // Tell textView to recompute the syntax for the visible region.
-        this.textView.updateSyntax(null);
     },
 
     _updateScrollOffsetChanged: function(offset) {
@@ -456,7 +453,7 @@ exports.EditorView.prototype = {
                     destPosition = rangeutils.addPositions(range.start,
                         { row: 0, col: newText.length });
                 }
-                view.moveCursorTo(destPosition)
+                view.moveCursorTo(destPosition);
             }
         });
     },

@@ -69,10 +69,6 @@ exports.TextView = function(container, editor) {
 
     this.clippingChanged.add(this.clippingFrameChanged.bind(this));
 
-    // TODO: bind some UI events here:
-    // 1) drag
-    // 2) mouse events
-    // etc...
     var dom = this.domNode;
     dom.style.cursor = "text";
     dom.addEventListener('mousedown', this.mouseDown.bind(this), false);
@@ -400,18 +396,6 @@ util.mixin(exports.TextView.prototype, {
         this._drag();
     },
 
-	// TODO: Add this back.
-    _scrolled: function() {
-        var scrollView = this._enclosingScrollView;
-        var x = scrollView.horizontalScrollOffset;
-        var y = scrollView.verticalScrollOffset;
-
-        // TODO: There is only one delegate for this in EditSession.
-        //       As EditSession is within another plugin, we can't use events
-        //       for this. Well check back later.
-        // this.notifyDelegates('textViewWasScrolled', { x: x, y: y });
-    },
-
     // Returns the character closest to the given point, obeying the selection
     // rules (including the partialFraction field).
     _selectionPositionForPoint: function(point) {
@@ -433,33 +417,6 @@ util.mixin(exports.TextView.prototype, {
                 end:    { row: endRow,   col: 0 }
             }).forEach(this.invalidateRect, this);
     },
-
-    // TODO: Necessary anymore?
-    // // Updates the _enclosingScrollView instance member and (re-)registers
-    // // observers appropriately.
-    // _updateEnclosingScrollView: function() {
-    //     if (!util.none(this._enclosingScrollView)) {
-    //         var enclosingScrollView = this._enclosingScrollView;
-    //         enclosingScrollView.removeObserver('horizontalScrollOffset', this,
-    //             this._scrolled);
-    //         enclosingScrollView.removeObserver('verticalScrollOffset', this,
-    //             this._scrolled);
-    //     }
-    //
-    //     var view = this.parentView;
-    //     while (!util.none(view) && !view.isScrollable) {
-    //         view = view.parentView;
-    //     }
-    //
-    //     this._enclosingScrollView = view;
-    //
-    //     if (util.none(view)) {
-    //         return;
-    //     }
-    //
-    //     view.addObserver('horizontalScrollOffset', this, this._scrolled);
-    //     view.addObserver('verticalScrollOffset', this, this._scrolled);
-    // },
 
     /**
      * Toggles the visible state of the insertion point.
@@ -606,8 +563,6 @@ util.mixin(exports.TextView.prototype, {
 
     /**
      * Returns true if the given character is a word separator.
-     *
-     * TODO: Should this be moved out of the text view?
      */
     isDelimiter: function(character) {
         return '"\',;.!~@#$%^&*?[]<>():/\\-+ \t'.indexOf(character) !== -1;
@@ -640,9 +595,6 @@ util.mixin(exports.TextView.prototype, {
      */
     layoutManagerInvalidatedRects: function(sender, rects) {
         rects.forEach(this.invalidateRect, this);
-
-        // TODO: Do we need this anymore?
-        // this._resize();
     },
 
     mouseDown: function(evt) {
