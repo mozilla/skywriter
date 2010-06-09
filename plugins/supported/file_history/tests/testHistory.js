@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var t = require('plugindev');
-var History = require('edit_session:history').History;
+var History = require('file_history').FileHistory;
 
 exports.testHistory = function() {
     var mockStorage = {};
