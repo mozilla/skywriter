@@ -115,7 +115,7 @@ exports.themeSettingChanged = function(source, settingName, themeName) {
 
             // If the theme has a url that points to a themeStyles file, then
             // register it.
-            if (theme.url) {
+            if (themeExt.url) {
                 themestyles.registerThemeStyles(themeExt);
             }
 

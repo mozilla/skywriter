@@ -5,7 +5,9 @@
             "ep": "theme",
             "name": "white",
             "description": "A basic white theme",
-            "url": "theme.less",
+            "url": [
+                "theme.less"
+            ],
             "pointer": "index#whiteTheme"
        }
     ]
