@@ -808,7 +808,7 @@ exports.Catalog.prototype = {
                     throw extension.name + " is not ready";
                 }
                 extensions.forEach(function(ext) {
-                    console.log('call register on:', ext)
+                    // console.log('call register on:', ext)
                     register(ext);
                 });
             }, "register");
