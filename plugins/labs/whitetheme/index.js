@@ -38,23 +38,24 @@
 exports.whiteTheme = function() {
     return {
         global: {
-            // standard font.
+            // Standard font.
             font:           'arial, lucida, helvetica, sans-serif',
-            // standard font size.
+            // Standard font size.
             font_size:      '14px',
-            // standard line_height.
+            // Standard line_height.
             line_height:    '1.8em',
-            // text color.
+            // Text color.
             color:          '#2E2E3D',
-
+            // Text shadow css attribute.
             text_shadow:    '1px 1px white',
-            // text error color.
+            // Text error color.
             error_color:    '#C03A38',
-            // the color for headers (<h1> etc).
+            // The color for headers (<h1> etc).
             header_color:   '#222222',
-            // the color for links.
+            // The color for links.
             link_color:     '#597BAC',
 
+            // Variables for a pane - e.g. the login pane.
             pane: {
                 h1: {
                    font:        "'MuseoSans', Helvetica",
@@ -71,6 +72,7 @@ exports.whiteTheme = function() {
                 text_shadow:    '1px 1px #DDD'
             },
 
+            // Variables for a html form.
             form: {
                 font: "@global_font",
                 font_size: '@global_font_size',
@@ -80,7 +82,7 @@ exports.whiteTheme = function() {
                 text_shadow: '0px 0px transparent'
             },
 
-            // Basic colors for a controller: textInput, tree etc.
+            // Variables for a controller: textInput, tree etc.
             control: {
                 color:          '#222',
                 border:         '1px solid rgba(0, 0, 0, 0.2)',
@@ -95,19 +97,27 @@ exports.whiteTheme = function() {
                 }
             },
 
+            // Variables for html buttons.
             button: {
                 color: 'white',
                 background: '#3E6CB9'
             },
 
-            // Every UI element lives inside of a container. The command line,
-            // file tree etc.
+            // Variables for the containers.
             container: {
                 background:     '#F8F8F8',
                 border:         '1px solid black',
             },
 
-            // The items in the cl menu or something else, that can get selected.
+            // Variables for a menu - e.g. the command line menu.
+            menu: {
+                border_color:   'black',
+                inset_color:    '#999',
+                background:     'transparent'
+            },
+
+            // Variables for elements that can get selected - e.g. the items
+            // in the command line menu.
             selectable: {
                 color:          'black',
                 border:         '0px solid transparent',
@@ -126,7 +136,7 @@ exports.whiteTheme = function() {
                 }
             },
 
-            // A small hint text.
+            // Variables for hint text.
             hint: {
                 color:          '#78788D',
 
@@ -139,8 +149,8 @@ exports.whiteTheme = function() {
                 }
             },
 
-            // E.g. the small 'ATL-2' for selecting an item from the
-            // command line menu when you execute 'open '.
+            // Variables for accelerator (the text that holds the key short cuts
+            // like ALT+2).
             accelerator: {
                 color:          '#344DB1',
 
@@ -151,23 +161,17 @@ exports.whiteTheme = function() {
                 hover: {
                     color:      'white',
                 }
-            },
-
-            menu: {
-                border_color:   'black',
-                inset_color:    '#999',
-                background:     'transparent'
             }
         },
 
         text_editor: {
-            // Theme of the gutter:
+            // Variables for the gutter.
             gutter: {
                 color: '#888888',
                 backgroundColor: '#d2d2d2'
             },
 
-            // Theme of the editor:
+            // Variables for the editor.
             editor: {
                 color: '#3D3D3D',
                 backgroundColor: '#ffffff',
@@ -179,6 +183,7 @@ exports.whiteTheme = function() {
                 unfocusedCursorBackgroundColor: '#D9E9FC'
             },
 
+            // Variables for the syntax highlighter.
             highlighter: {
                 plain:     '#3D3D3D',
                 comment:   '#A8A8A8',
@@ -190,6 +195,7 @@ exports.whiteTheme = function() {
                 string:     '#039A0A'
             },
 
+            // Variables for the scrollers.
             scroller: {
                 padding: 5,
                 thickness: 17,

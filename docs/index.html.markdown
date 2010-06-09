@@ -25,7 +25,7 @@ Plugin Author Guide
 * [Keymapping](pluginguide/keymapping.html)
 * [Editor API](pluginguide/editorapi.html)
 * [Automated Testing](devguide/testing.html)
-
+* [Themes](pluginguide/theme.html)
 
 Embedder's Guide
 ----------------
