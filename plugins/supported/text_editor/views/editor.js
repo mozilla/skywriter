@@ -109,7 +109,7 @@ catalog.registerExtension('themeChange', {
  */
 exports.EditorView = function(initialContent) {
     // TODO: This is for debug purpose only and should go away again.
-    bespin.editor = this;
+    // bespin.editor = this;
 
     this.elementAppended = new Event();
 
@@ -209,11 +209,11 @@ exports.EditorView.prototype = {
     _themeData: null,
 
     // for debug purpose only
-    newBuffer: function() {
-        var oldBuffer = this.buffer;
-        this.buffer = new Buffer();
-        return oldBuffer;
-    },
+    // newBuffer: function() {
+    //     var oldBuffer = this.buffer;
+    //     this.buffer = new Buffer();
+    //     return oldBuffer;
+    // },
 
     _layoutManagerSizeChanged: function(size) {
         this._textViewSize = {
