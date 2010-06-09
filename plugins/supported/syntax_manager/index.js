@@ -276,6 +276,13 @@ SyntaxManager.prototype = {
         this._reset();
     },
 
+    /**
+     * Return the current syntax.
+     */
+    getSyntax: function() {
+        return this._syntax;
+    },
+
     /** Sets the syntax appropriately for a file extension. */
     setSyntaxFromFileExt: function(fileExt) {
         return this.setSyntax(syntaxDirectory.syntaxForFileExt(fileExt));

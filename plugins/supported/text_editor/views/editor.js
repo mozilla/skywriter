@@ -738,7 +738,7 @@ Object.defineProperties(exports.EditorView.prototype, {
     syntax: {
         /** Returns the initial syntax highlighting context (i.e. the language). */
         get: function(newSyntax) {
-            return this.layoutManager.syntaxManager.initialContext;
+            return this.layoutManager.syntaxManager.getSyntax();
         },
 
         /** Sets the initial syntax highlighting context (i.e. the language). */
@@ -748,8 +748,7 @@ Object.defineProperties(exports.EditorView.prototype, {
                                         newValue + '"');
             }
 
-            return this.layoutManager.syntaxManager.
-                                setInitialContext(newSyntax);
+            return this.layoutManager.syntaxManager.setSyntax(newSyntax);
         }
     }
 });
