@@ -84,6 +84,7 @@ var tokens = [
     "else", "enum",
     "false", "finally", "for", "function",
     "if", "in", "instanceof",
+    "let", 
     "new", "null",
     "return",
     "switch",
@@ -141,25 +142,30 @@ var opTypeNames = {
 // avoid toString, etc. namespace pollution.
 var keywords = {__proto__: null};
 
-// Define const END, etc., based on the token names.  Also map name to index.
+// Map name to index.
 var tokenIds = {};
-var consts = "const ";
 for (var i = 0, j = tokens.length; i < j; i++) {
-    if (i > 0)
-        consts += ", ";
     var t = tokens[i];
     var name;
     if (/^[a-z]/.test(t)) {
         name = t.toUpperCase();
-        keywords[t] = i;
+        keywords[t] = i; 
     } else {
         name = (/^\W/.test(t) ? opTypeNames[t] : t);
     }
-    consts += name + " = " + i;
     tokenIds[name] = i;
-    tokens[t] = i;
+    tokens[t] = i; 
 }
-eval(consts + ";");
+
+// Define const END, etc., based on the token names.
+// Returns a string to be called later using eval.
+var defineTokenConstants = function() {
+    var consts = [];
+    for (name in tokenIds) {
+        consts.push(name + " = " + tokenIds[name]);
+    }
+    return "const " + consts.join(", ") + ";";
+};
 
 // Map assignment operators to their indexes in the tokens array.
 var assignOps = ['|', '^', '&', '<<', '>>', '>>>', '+', '-', '*', '/', '%'];
@@ -168,3 +174,11 @@ for (i = 0, j = assignOps.length; i < j; i++) {
     t = assignOps[i];
     assignOps[t] = tokens[t];
 }
+
+exports.assignOps = assignOps;
+exports.defineTokenConstants = defineTokenConstants;
+exports.keywords = keywords;
+exports.opTypeNames = opTypeNames;
+exports.tokenIds = tokenIds;
+exports.tokens = tokens;
+

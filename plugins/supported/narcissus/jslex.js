@@ -41,6 +41,15 @@
  * Lexical scanner.
  */
 
+const m_jsdefs = require('./jsdefs');
+const assignOps = m_jsdefs.assignOps;
+const keywords = m_jsdefs.keywords;
+const opTypeNames = m_jsdefs.opTypeNames;
+const tokenIds = m_jsdefs.tokenIds;
+const tokens = m_jsdefs.tokens;
+
+eval(m_jsdefs.defineTokenConstants());
+
 // Build up a trie of operator tokens.
 var opTokens = {};
 for (var op in opTypeNames) {
@@ -57,9 +66,10 @@ for (var op in opTypeNames) {
     }
 }
 
-function Tokenizer(s, f, l) {
-    this.cursor = 0;
-    this.source = typeof(s) === 'string' ? s.split("\n") : s;
+// file ptr, path to file, line number -> node
+exports.Tokenizer = function(s, f, l) {
+    this.cursor = 0; 
+    this.source = String(s); 
     this.tokens = [];
     this.tokenIndex = 0;
     this.lookahead = 0;
@@ -69,7 +79,15 @@ function Tokenizer(s, f, l) {
     this.lineno = l || 1;
 }
 
-Tokenizer.prototype = {
+exports.Tokenizer.prototype = {
+    get done() {
+        return this.peek() == END;
+    },
+
+    get token() {
+        return this.tokens[this.tokenIndex];
+    },
+
     match: function (tt) {
         return this.get() == tt || this.unget();
     },
@@ -84,10 +102,9 @@ Tokenizer.prototype = {
         var tt, next;
         if (this.lookahead) {
             next = this.tokens[(this.tokenIndex + this.lookahead) & 3];
-            if (this.scanNewlines && next.lineno != this.lineno)
-                tt = NEWLINE;
-            else
-                tt = next.type;
+            tt = (this.scanNewlines && next.lineno != this.lineno)
+                 ? NEWLINE
+                 : next.type;
         } else {
             tt = this.get();
             this.unget();
@@ -102,34 +119,22 @@ Tokenizer.prototype = {
         return tt;
     },
 
-    wrap: function () {
-        if (this.lineno === this.source.length)
-            return undefined;
-
-        this.cursor = 0;
-        return '\n';
-    },
-
     // Eats comments and whitespace.
     skip: function () {
-        var input = this.input;
+        var input = this.source;
         for (;;) {
-            var ch;
-            if ((ch = input[this.cursor++]) === undefined)
-                ch = this.wrap();
-
+            var ch = input[this.cursor++];
             var next = input[this.cursor];
             if (ch === '\n' && !this.scanNewlines) {
                 this.lineno++;
             } else if (ch === '/' && next === '*') {
                 this.cursor++;
                 for (;;) {
-                    if ((ch = input[this.cursor++]) === undefined)
-                        ch = this.wrap();
-
-                    if (ch === undefined) {
+                    ch = input[this.cursor++];
+                    if (ch === undefined)
                         throw this.newSyntaxError("Unterminated comment");
-                    } else if (ch === '*') {
+
+                    if (ch === '*') {
                         next = input[this.cursor];
                         if (next === '/') {
                             this.cursor++;
@@ -142,17 +147,16 @@ Tokenizer.prototype = {
             } else if (ch === '/' && next === '/') {
                 this.cursor++;
                 for (;;) {
-                    if ((ch = input[this.cursor++]) === undefined)
-                        ch = this.wrap();
-
-                    if (ch === undefined) {
+                    ch = input[this.cursor++];
+                    if (ch === undefined)
                         return;
-                    } else if (ch === '\n') {
+
+                    if (ch === '\n') {
                         this.lineno++;
                         break;
                     }
                 }
-            } else if (ch !== ' ' && ch !== '\t') {
+            } else if (ch !== ' ' && ch !== '\t' && ch !== '\r') {
                 this.cursor--;
                 return;
             }
@@ -162,7 +166,7 @@ Tokenizer.prototype = {
     // Lexes the exponential part of a number, if present. Returns true iff an
     // exponential part was found.
     lexExponent: function() {
-        var input = this.input;
+        var input = this.source;
         var next = input[this.cursor];
         if (next === 'e' || next === 'E') {
             this.cursor++;
@@ -173,9 +177,9 @@ Tokenizer.prototype = {
             if (ch < '0' || ch > '9')
                 throw this.newSyntaxError("Missing exponent");
 
-            do
+            do {
                 ch = input[this.cursor++];
-            while (ch >= '0' && ch <= '9');
+            } while (ch >= '0' && ch <= '9');
             this.cursor--;
 
             return true;
@@ -190,30 +194,28 @@ Tokenizer.prototype = {
 
         ch = input[this.cursor++];
         if (ch === '.') {
-            do
+            do {
                 ch = input[this.cursor++];
-            while (ch >= '0' && ch <= '9');
+            } while (ch >= '0' && ch <= '9');
             this.cursor--;
 
             this.lexExponent();
             token.value = parseFloat(token.start, this.cursor);
         } else if (ch === 'x' || ch === 'X') {
-            do
+            do {
                 ch = input[this.cursor++];
-            while ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') ||
-                    (ch >= 'A' && ch <= 'F'));
+            } while ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') ||
+                     (ch >= 'A' && ch <= 'F'));
             this.cursor--;
 
-            token.value = parseInt(input.substring(token.start,
-                this.cursor));
+            token.value = parseInt(input.substring(token.start, this.cursor));
         } else if (ch >= '0' && ch <= '7') {
-            do
+            do {
                 ch = input[this.cursor++];
-            while (ch >= '0' && ch <= '7');
+            } while (ch >= '0' && ch <= '7');
             this.cursor--;
 
-            token.value = parseInt(input.substring(token.start,
-                this.cursor));
+            token.value = parseInt(input.substring(token.start, this.cursor));
         } else {
             this.cursor--;
             this.lexExponent();     // 0E1, &c.
@@ -240,19 +242,16 @@ Tokenizer.prototype = {
         floating = floating || exponent;
 
         var str = input.substring(token.start, this.cursor);
-        if (floating)
-            token.value = parseFloat(str);
-        else
-            token.value = parseInt(str);
+        token.value = floating ? parseFloat(str) : parseInt(str);
     },
 
     lexDot: function (ch) {
         var token = this.token, input = this.source;
         var next = input[this.cursor];
         if (next >= '0' && next <= '9') {
-            do
+            do {
                 ch = input[this.cursor++];
-            while (ch >= '0' && ch <= '9');
+            } while (ch >= '0' && ch <= '9');
             this.cursor--;
 
             this.lexExponent();
@@ -281,12 +280,9 @@ Tokenizer.prototype = {
             ch = input[this.cursor++];
         }
 
-        if (hasEscapes) {
-            var str = input.substring(token.start, this.cursor);
-            token.value = eval(str);
-        } else {
-            token.value = input.substring(token.start + 1, this.cursor - 1);
-        }
+        token.value = (hasEscapes)
+                      ? eval(input.substring(token.start, this.cursor))
+                      : input.substring(token.start + 1, this.cursor - 1);
     },
 
     lexRegExp: function (ch) {
@@ -299,12 +295,11 @@ Tokenizer.prototype = {
                 this.cursor++;
             } else if (ch === '[') {
                 do {
-                    if (ch === undefined) {
-                        throw this.newSyntaxError("Unterminated " +
-                            "character class");
-                    } else if (ch === '\\') {
+                    if (ch === undefined)
+                        throw this.newSyntaxError("Unterminated character class");
+
+                    if (ch === '\\')
                         this.cursor++;
-                    }
 
                     ch = input[this.cursor++];
                 } while (ch !== ']');
@@ -313,9 +308,9 @@ Tokenizer.prototype = {
             }
         } while (ch !== '/');
 
-        do
+        do {
             ch = input[this.cursor++];
-        while (ch >= 'a' && ch <= 'z');
+        } while (ch >= 'a' && ch <= 'z');
 
         this.cursor--;
 
@@ -325,8 +320,8 @@ Tokenizer.prototype = {
     lexOp: function (ch) {
         var token = this.token, input = this.source;
 
-        // A bit ugly, but it seems wasteful to write a trie lookup routine
-        // for only 3 characters...
+        // A bit ugly, but it seems wasteful to write a trie lookup routine for
+        // only 3 characters...
         var node = opTokens[ch];
         var next = input[this.cursor];
         if (next in node) {
@@ -350,8 +345,8 @@ Tokenizer.prototype = {
             token.type = tokenIds[opTypeNames[op]];
             if (this.scanOperand) {
                 switch (token.type) {
-                case PLUS:  token.type = UNARY_PLUS;    break;
-                case MINUS: token.type = UNARY_MINUS;   break;
+                  case PLUS:    token.type = UNARY_PLUS;    break;
+                  case MINUS:   token.type = UNARY_MINUS;   break;
                 }
             }
 
@@ -369,15 +364,18 @@ Tokenizer.prototype = {
         do {
             ch = input[this.cursor++];
         } while ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
-            (ch >= '0' && ch <= '9') || ch === '$' || ch === '_');
+                 (ch >= '0' && ch <= '9') || ch === '$' || ch === '_');
 
-        this.cursor--;  // put the non-word character back
+        this.cursor--;  // Put the non-word character back.
 
         var id = input.substring(token.start, this.cursor);
         token.type = keywords[id] || IDENTIFIER;
         token.value = id;
     },
 
+    // void -> token type
+    // It consumes input *only* if there is no lookahead.
+    // Dispatch to the appropriate lexing function depending on the input.
     get: function () {
         var token;
         while (this.lookahead) {
@@ -396,16 +394,13 @@ Tokenizer.prototype = {
             this.tokens[this.tokenIndex] = token = {};
 
         var input = this.source;
-        if (this.cursor === input.length)
+        if (this.cursor >= input.length)
             return token.type = END;
 
         token.start = this.cursor;
         token.lineno = this.lineno;
 
-        var ch;
-        if ((ch = input[this.cursor++]) === undefined)
-            ch = this.wrap();
-
+        var ch = input[this.cursor++];
         if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
                 ch === '$' || ch === '_') {
             this.lexIdent(ch);
@@ -426,13 +421,15 @@ Tokenizer.prototype = {
             token.value = '\n';
             this.lineno++;
         } else {
-            throw this.newSyntaxError("Illegal token");
+            throw this.newSyntaxError("Illegal character " + ch.charCodeAt(0));
         }
 
         token.end = this.cursor;
         return token.type;
     },
 
+    // void -> undefined
+    // match depends on unget returning undefined.
     unget: function () {
         if (++this.lookahead == 4) throw "PANIC: too much lookahead!";
         this.tokenIndex = (this.tokenIndex - 1) & 3;
@@ -442,26 +439,9 @@ Tokenizer.prototype = {
         var e = new SyntaxError(m, this.filename, this.lineno);
         e.source = this.source;
         e.cursor = this.cursor;
+        e.fileName = this.filename;
+        e.lineNumber = this.lineno;
         return e;
     }
 };
 
-Object.defineProperties(Tokenizer.prototype, {
-    done: {
-        get: function() {
-            return this.peek() == END;
-        }
-    },
-
-    token: {
-        get: function() {
-            return this.tokens[this.tokenIndex];
-        }
-    },
-
-    input: {
-        get: function() {
-            return this.source[this.lineno - 1];
-        }
-    }
-});
