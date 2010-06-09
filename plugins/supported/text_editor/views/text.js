@@ -209,46 +209,55 @@ util.mixin(exports.TextView.prototype, {
             // text.
             var characters = textLine.characters;
             var length = characters.length;
-            var endColumn = Math.min(rangeEnd.col, length);
-            var startColumn = rangeStart.col;
-            if (startColumn >= length) {
+            var endCol = Math.min(rangeEnd.col, length);
+            var startCol = rangeStart.col;
+            if (startCol >= length) {
                 continue;
             }
 
-            // Figure out which color range to start in.
+            // Get the color ranges, or synthesize one if it doesn't exist. We
+            // have to be tolerant of bad data, because we may be drawing ahead
+            // of the syntax highlighter.
             var colorRanges = textLine.colors;
+            if (colorRanges == null) {
+                colorRanges = [];
+            }
+
+            // Figure out which color range to start in.
             var colorIndex = 0;
-            while (startColumn < colorRanges[colorIndex].start) {
+            while (colorIndex < colorRanges.length &&
+                    startCol < colorRanges[colorIndex].start) {
                 colorIndex++;
             }
 
+            var col = (colorIndex < colorRanges.length)
+                      ? colorRanges[colorIndex].start
+                      : startCol;
+
             // And finally draw the line.
-            var col = colorRanges[colorIndex].start;
-            while (col < endColumn) {
+            while (col < endCol) {
                 var colorRange = colorRanges[colorIndex];
-                var colorRangeEnd = colorRange.end;
-                context.fillStyle = themeHighlighter[colorRange.tag] || 'red';
+                var end = colorRange != null ? colorRange.end : endCol;
+                var tag = colorRange != null ? colorRange.tag : 'plain';
 
-                var characterRect = layoutManager.characterRectForPosition({
-                    row: row,
-                    col: col
-                });
+                var color = themeHighlighter.hasOwnProperty(tag)
+                            ? themeHighlighter[tag]
+                            : 'red';
+                context.fillStyle = color;
 
-                var snippet = colorRangeEnd === null ?
-                    characters.substring(col) :
-                    characters.substring(col, colorRangeEnd);
-                context.fillText(snippet, characterRect.x,
-                    characterRect.y + lineAscent);
+                var pos = { row: row, col: col };
+                var rect = layoutManager.characterRectForPosition(pos);
+
+                var snippet = characters.substring(col, end);
+                context.fillText(snippet, rect.x, rect.y + lineAscent);
 
                 if (DEBUG_TEXT_RANGES) {
-                    context.strokeStyle = colorRange.color;
-                    context.strokeRect(characterRect.x + 0.5,
-                        characterRect.y + 0.5,
-                        characterRect.width * snippet.length - 1,
-                        characterRect.height - 1);
+                    context.strokeStyle = color;
+                    context.strokeRect(rect.x + 0.5, rect.y + 0.5,
+                        rect.width * snippet.length - 1, rect.height - 1);
                 }
 
-                col = colorRangeEnd;
+                col = end;
                 colorIndex++;
             }
         }

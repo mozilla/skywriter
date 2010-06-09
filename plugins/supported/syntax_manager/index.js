@@ -67,16 +67,6 @@ function Context(syntaxInfo, syntaxManager) {
 }
 
 Context.prototype = {
-    _annotatePlainly: function() {
-        var row = this._invalidRow, syntaxManager = this._syntaxManager;
-        var lines = syntaxManager.getTextLines();
-        var attrs = [];
-        for (var i = row; i < lines.length; i++) {
-            attrs.push([ { start: 0, end: lines[i].length, tag: 'plain' } ]);
-        }
-        syntaxManager.mergeAttrs(row, attrs);
-    },
-
     _annotationFinished: function(row, lastRow, result) {
         if (!this._active) {
             return;
@@ -116,8 +106,6 @@ Context.prototype = {
         if (this._invalidRow == null) {
             throw new Error("Attempt to annotate without any invalid row");
         }
-
-        this._annotatePlainly();
 
         if (this._worker == null) {
             if (!this._createWorker()) {
