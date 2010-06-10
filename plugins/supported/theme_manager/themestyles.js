@@ -99,7 +99,7 @@ var parseGlobalThemeVariables = function(globalValues) {
             }
         }
         nameStack.pop();
-    }
+    };
 
     parseSub('global', globalValues);
     return ret;
@@ -151,7 +151,7 @@ var defaultGlobalTheme = {
         h1: {
            font:        "'MuseoSans', Helvetica",
            font_size:   '2.8em',
-           color:       "white",
+           color:       "white"
         },
 
         color:          '#DAD4BA',
@@ -169,7 +169,7 @@ var defaultGlobalTheme = {
 
         font: "'Lucida Sans','Lucida Grande',Verdana,Arial,sans-serif",
         font_size: '@global_font_size',
-        line_height: '@global_line_height',
+        line_height: '@global_line_height'
     },
 
     button: {
@@ -179,7 +179,7 @@ var defaultGlobalTheme = {
 
     container: {
         background:     '#1E1916',
-        border:         '1px solid black' ,
+        border:         '1px solid black' 
     },
 
     // The items in the command line menu or something else,
@@ -207,11 +207,11 @@ var defaultGlobalTheme = {
         color:          '#AAA',
 
         active: {
-            color:      'black',
+            color:      'black'
         },
 
         hover: {
-            color:      'black',
+            color:      'black'
         }
     },
 
@@ -220,11 +220,11 @@ var defaultGlobalTheme = {
         color:          '#996633',
 
         active: {
-            color:      'black',
+            color:      'black'
         },
 
         hover: {
-            color:      'black',
+            color:      'black'
         }
     },
 
@@ -322,8 +322,9 @@ var parseLess = function(pr, pluginName, variableHeader) {
                             variableHeader + // plugin specific ThemeVariables
                             extensionStyleData[pluginName]; // and the data
     lessParser.parse(dataToParse, function(e, tree) {
+        var errMsg;
         if (e) {
-            var errMsg = 'Error less parsing ' +  pluginName + ' ' +  e.message;
+            errMsg = 'Error less parsing ' +  pluginName + ' ' +  e.message;
             console.error(errMsg);
             pr.reject(errMsg);
             return;
@@ -335,7 +336,7 @@ var parseLess = function(pr, pluginName, variableHeader) {
             // DEBUG ONLY.
             // console.log('  parsing took: ', (new Date()) - timer, 'ms');
         } catch (e) {
-            var errMsg = 'Error less parsing ' + pluginName + ' ' + e;
+            errMsg = 'Error less parsing ' + pluginName + ' ' + e;
             console.error(errMsg);
             pr.reject(errMsg);
             return;
@@ -368,7 +369,7 @@ exports.parsePlugin = function(pluginName) {
     // Parse only if this is permitted.
     if (exports.preventParsing) {
         pr.resolve();
-        return;
+        return pr;
     }
 
     var plugin = catalog.plugins[pluginName];
@@ -527,7 +528,7 @@ exports.reparse = function() {
             group(parsePromises).then(pr.resolve.bind(pr), pr.reject.bind(pr));
         });
     } else {
-        pr.resolve()
+        pr.resolve();
     }
     return pr;
 };

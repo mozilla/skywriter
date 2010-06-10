@@ -60,7 +60,7 @@ function WorkerManager(pointer) {
     }
 
     var packageId = m[1], target = m[3];
-    var moduleId = packageId + ":" + (m[2] != null ? m[2] : "index")
+    var moduleId = packageId + ":" + (m[2] != null ? m[2] : "index");
 
     var base = bespin != null && bespin.base != null ? bespin.base : "";
     var worker = new Worker(base + "worker.js");
@@ -138,7 +138,7 @@ WorkerManager.prototype = {
         this._worker.postMessage(JSON.stringify(msg));
 
         return promise;
-    },
+    }
 };
 
 exports.WorkerManager = WorkerManager;
