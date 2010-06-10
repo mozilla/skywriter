@@ -39,6 +39,8 @@
 ({});
 "end";
 
+// WARNING: do not 'use_strict' without reading the notes in environmentEval;
+
 /*
  * This is intended to be a lightweight templating solution. It replaces
  * John Resig's Micro-templating solution:
@@ -103,77 +105,96 @@ exports.processTemplate = function(template, data) {
     data = data || {};
     var parent = document.createElement('div');
     parent.innerHTML = template;
-    processChildren(parent, data);
+    processNode(parent, data);
     return parent;
 };
 
 /**
  * Recursive function to walk the tree processing the attributes as it goes.
  */
-var processChildren = function(parent, data) {
+var processNode = function(node, data) {
     // Process attributes
-    if (parent.attributes && parent.attributes.length) {
+    if (node.attributes && node.attributes.length) {
         // It's good to clean up the attributes when we've processed them,
         // but if we do it straight away, we mess up the array index
-        var toRemove = [];
-        for (var i = 0; i < parent.attributes.length; i++) {
-            var attr = parent.attributes[i];
-            var value = attr.value;
+        var attrs = Array.prototype.slice.call(node.attributes);
+        for (var i = 0; i < attrs.length; i++) {
+            var value = attrs[i].value;
+            var name = attrs[i].name;
 
-            if (attr.name === 'save') {
-                // Save attributes are a setter using the parent node
-                checkBraces(value);
-                property(value.slice(2, -1), data, parent);
-                toRemove.push({ parent: parent, attrName: attr.name });
-            } else if (attr.name.substring(0, 2) === 'on') {
+            if (name === 'save') {
+                // Save attributes are a setter using the node
+                value = stripBraces(value);
+                property(value, data, node);
+                node.removeAttribute(name);
+            } else if (name.substring(0, 2) === 'on') {
                 // Event registration relies on property doing a bind
-                checkBraces(value);
+                value = stripBraces(value);
                 var useCapture = false;
-                value = value.slice(2, -1);
                 value = value.replace(/\s*\[useCapture:true\]$/, function(path) {
                     // TODO: Don't assume useCapture:true
                     useCapture = true;
                     return '';
                 });
-                var func = property(value, data);
+                var func = environmentEval(value, data);
                 if (typeof func !== 'function') {
                     console.error('Expected ' + value +
                             ' to resolve to a function, but got ', typeof func);
                 }
-                toRemove.push({ parent: parent, attrName: attr.name });
-                parent.addEventListener(attr.name.substring(2), func, useCapture);
+                node.removeAttribute(name);
+                node.addEventListener(name.substring(2), func, useCapture);
             } else {
                 // Replace references in other attributes
                 var newValue = value.replace(/\$\{[^}]*\}/, function(path) {
-                    return property(path.slice(2, -1), data);
+                    return environmentEval(path.slice(2, -1), data);
                 });
-                if (attr.value !== newValue) {
-                    attr.value = newValue;
+                if (value !== newValue) {
+                    attrs[i].value = newValue;
                 }
             }
         }
-        toRemove.forEach(function(action) {
-            action.parent.removeAttribute(action.attrName);
-        });
     }
 
     // Process child nodes
-    for (i = 0; i < parent.childNodes.length; i++) {
-        processChildren(parent.childNodes[i], data);
-    }
+    processChildren(node, data);
 
-    // TODO: process text nodes
+    // Process TextNodes
+    if (node.nodeType === 3) {
+        // Replace references in other attributes
+        value = node.textContent;
+        newValue = value.replace(/\$\{[^}]*\}/, function(path) {
+            return environmentEval(path.slice(2, -1), data);
+        });
+        if (value !== newValue) {
+            node.textContent = newValue;
+        }
+    }
 };
 
 /**
- * Warn of string does not begin '${' and end '}'
- * @param str
- * @returns
+ * Loop through the child nodes of the given node, calling processNode on them
+ * all. Note this first clones the set of nodes, so the set of nodes that we
+ * visit will be unaffected by additions or removals.
+ * @param node The node from which to find children to visit.
+ * @param data The data to pass to processNode
  */
-var checkBraces = function(str) {
+function processChildren(node, data) {
+    var children = Array.prototype.slice.call(node.childNodes);
+    for (var i = 0; i < children.length; i++) {
+        processNode(children[i], data);
+    }
+}
+
+/**
+ * Warn of string does not begin '${' and end '}'
+ * @return The string stripped of ${ and }, or untouched if it does not match
+ */
+var stripBraces = function(str) {
     if (!str.match(/\$\{.*\}/)) {
         console.error('Expected ' + str + ' to match ${...}');
+        return str;
     }
+    return str.slice(2, -1);
 };
 
 /**
@@ -192,7 +213,7 @@ var checkBraces = function(str) {
  * @returns The value pointed to by <tt>path</tt> before any
  * <tt>newValue</tt> is applied.
  */
-var property = function(path, data, newValue) {
+function property(path, data, newValue) {
     if (typeof path === 'string') {
         path = path.split('.');
     }
@@ -206,8 +227,29 @@ var property = function(path, data, newValue) {
         }
         return value;
     }
+    if (!value) {
+        console.error('Can\'t find path=', path, " in data=", data);
+        return null;
+    }
     return property(path.slice(1), value, newValue);
-};
+}
+
+/**
+ * Like eval, but that creates a context of the variables in <tt>env</tt> in
+ * which the script is evaluated.
+ * WARNING: This script uses 'with' which is generally regarded to be evil.
+ * The alternative is to create a Function at runtime that takes X parameters
+ * according to the X keys in the env object, and then call that function using
+ * the values in the env object. This is likely to be slow, but workable.
+ * @param script The string to be evaluated
+ * @param env The environment in which to eval the script.
+ * @returns The return value of the script
+ */
+function environmentEval(script, env) {
+    with (env) {
+        return eval(script);
+    }
+}
 
 /**
  * Strip the extension off of a name
