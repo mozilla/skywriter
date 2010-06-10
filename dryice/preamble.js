@@ -42,7 +42,7 @@ if (bespin == null) {
 var link = document.getElementById("bespin_base");
 if (link) {
     var href = link.href;
-    bespin.base = href.substring(href.length - 1) === "/" ? href + "/" : href;
+    bespin.base = href.substring(href.length - 1) !== "/" ? href + "/" : href;
 } else {
     bespin.base = "";
 }
