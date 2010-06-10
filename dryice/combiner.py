@@ -96,6 +96,11 @@ def write_metadata(jsfile, plugin, plugin_location=None):
 });""" \
         % (dumps("::"+name), dumps(name), deps_js, resources_js))
 
+    # Hack so that web workers can determine whether they need to load the boot
+    # plugin metadata.
+    if name == "bespin":
+        jsfile.write("""bespin.bootLoaded = true;""");
+
 def combine_files(jsfile, cssfile, plugin, p,
         exclude_tests=True, image_path_prepend=None):
     """Combines the files in an plugin into a single .js and .css file, wrapped
@@ -123,7 +128,7 @@ def combine_files(jsfile, cssfile, plugin, p,
                 content = _css_images_url.sub("url(\\1%simages/" % (image_path_prepend), f.text())
                 cssfile.write(content)
             else:
-                cssfile.write(f.bytes())
+                cssfile.write(f.text('utf8'))
             
         filelist = p.walkfiles("*.js")
         single_file = False
@@ -146,7 +151,7 @@ def combine_files(jsfile, cssfile, plugin, p,
         if modname == "index":
             has_index = True
         
-        jsfile.write(wrap_script(plugin, modname, f.bytes()))
+        jsfile.write(wrap_script(plugin, modname, f.text('utf8')))
     
     if not has_index:
         jsfile.write(wrap_script(plugin, "index", ""))

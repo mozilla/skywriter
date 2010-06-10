@@ -44,5 +44,6 @@ exports.versionCodename = 'DEVELOPMENT MODE';
 
 /** The version number of the API (to ensure that the client and server are talking the same language) */
 exports.apiVersion = 'dev';
+
 // END VERSION BLOCK
 

@@ -43,7 +43,9 @@ if (typeof(window) !== 'undefined') {
 var messageQueue = [];
 var target = null;
 
-bespin = {};
+if (typeof(bespin) === 'undefined') {
+    bespin = {};
+}
 
 function pump() {
     if (messageQueue.length === 0) {
@@ -55,14 +57,29 @@ function pump() {
     case 'load':
         var base = msg.base;
         bespin.base = base;
-        importScripts(base + "tiki.js");
-        importScripts(base + "plugin/register/boot");
+        if (!bespin.hasOwnProperty('tiki')) {
+            importScripts(base + "tiki.js");
+        }
+        if (!bespin.bootLoaded) {
+            importScripts(base + "plugin/register/boot");
+            bespin.bootLoaded = true;
+        }
 
         var require = bespin.tiki.require;
         require.loader.sources[0].xhr = true;
         require.ensurePackage('::bespin', function() {
             var catalog = require('bespin:plugins').catalog;
-            var pr = catalog.loadMetadataFromURL("plugin/register/worker");
+            var Promise = require('bespin:promise').Promise;
+
+            var pr;
+            if (!bespin.hasOwnProperty('metadata')) {
+                pr = catalog.loadMetadataFromURL("plugin/register/worker");
+            } else {
+                catalog.loadMetadata(bespin.metadata);
+                pr = new Promise();
+                pr.resolve();
+            }
+
             pr.then(function() {
                 require.ensurePackage(msg.pkg, function() {
                     var module = require(msg.module);

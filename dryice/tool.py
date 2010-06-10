@@ -39,6 +39,7 @@ import sys
 import os
 import optparse
 import subprocess
+import codecs
 from wsgiref.simple_server import make_server
 
 try:
@@ -71,10 +72,10 @@ class Manifest(object):
     unbundled_plugins = None
     
     def __init__(self, include_tests=False, plugins=None, static_plugins=None,
-        dynamic_plugins=None, jquery="builtin", search_path=None,
-        output_dir="build", include_sample=False,
+        dynamic_plugins=None, worker_plugins=None, jquery="builtin",
+        search_path=None, output_dir="build", include_sample=False,
         boot_file=None, unbundled_plugins=None, preamble=None, loader=None,
-        config=None):
+        worker=None, config=None):
         
         # backwards compatibility for "plugins"
         if plugins is None:
@@ -87,11 +88,16 @@ class Manifest(object):
         
         if dynamic_plugins is None:
             dynamic_plugins = []
+
+        if worker_plugins is None:
+            worker_plugins = []
             
         self.include_tests = include_tests
         static_plugins.insert(0, "bespin")
         self.static_plugins = static_plugins
         self.dynamic_plugins = dynamic_plugins
+        worker_plugins.insert(0, "bespin")
+        self.worker_plugins = worker_plugins
         
         self.jquery = jquery
 
@@ -144,6 +150,7 @@ will be deleted before the build.""")
             return static_path if static_path.exists() else path("lib") / file
 
         self.loader = location_of("tiki.js", loader)
+        self.worker = location_of("worker.js", worker)
         
         self.config = config if config is not None else {}
             
@@ -198,8 +205,8 @@ will be deleted before the build.""")
         plugin = self.get_plugin(name)
         return combiner.Package(plugin.name, plugin.dependencies)
 
-    def generate_output_files(self, output_js, output_css,
-            static_packages=None, dynamic_packages=None):
+    def generate_output_files(self, output_js, output_css, output_worker_js,
+            static_packages=None, dynamic_packages=None, worker_packages=None):
         """Generates the combined JavaScript file, putting the
         output into output_file."""
         output_dir = self.output_dir
@@ -207,17 +214,19 @@ will be deleted before the build.""")
         if self.errors:
             raise BuildError("Errors found, stopping...", self.errors)
 
-        output_js.write(self.preamble.bytes())
-        output_js.write(self.loader.bytes())
+        output_js.write(self.preamble.text('utf8'))
+        output_js.write(self.loader.text('utf8'))
 
         exclude_tests = not self.include_tests
 
         # finally, package up the plugins
 
-        if static_packages is None or dynamic_packages is None:
-            dynamic_packages, static_packages = self.get_package_lists()
+        if static_packages is None or dynamic_packages is None or \
+                worker_packages is None:
+            dynamic_packages, static_packages, worker_packages = \
+                self.get_package_lists()
 
-        def process(package, dynamic):
+        def process(package, output, dynamic):
             plugin = self.get_plugin(package.name)
             if dynamic:
                 plugin_subdir = path("plugins")
@@ -230,9 +239,9 @@ will be deleted before the build.""")
                 combine_output = combine_output_path.open("w")
             else:
                 plugin_location = None
-                combine_output = output_js
+                combine_output = output
 
-            combiner.write_metadata(output_js, plugin, plugin_location)
+            combiner.write_metadata(output, plugin, plugin_location)
 
             combiner.combine_files(combine_output, output_css, plugin,
                                    plugin.location,
@@ -244,31 +253,47 @@ will be deleted before the build.""")
                     dumps(plugin_filename))
 
         for package in dynamic_packages:
-            process(package, True)
+            process(package, output_js, True)
         for package in static_packages:
-            process(package, False)
+            process(package, output_js, False)
+
+        def make_plugin_metadata(packages):
+            md = dict()
+            for p in packages:
+                plugin = self.get_plugin(p.name)
+                md[plugin.name] = plugin.metadata
+            return dumps(md)
 
         # include plugin metadata
         # this comes after the plugins, because some plugins
         # may need to be importable at the time the metadata
         # becomes available.
-        all_md = dict()
-        bundled_plugins = self.bundled_plugins = set()
-        for p in static_packages + dynamic_packages:
-            plugin = self.get_plugin(p.name)
-            all_md[plugin.name] = plugin.metadata
-            bundled_plugins.add(plugin.name)
-            
+        all_packages = static_packages + dynamic_packages + worker_packages
+        all_md = make_plugin_metadata(all_packages)
+        bundled_plugins = set([ p.name for p in all_packages ])
+        self.bundled_plugins = bundled_plugins
+
         output_js.write("""
 document.addEventListener("DOMContentLoaded", function() {
     bespin.tiki.require("bespin:plugins").catalog.loadMetadata(%s);;
 }, false);
-""" % (dumps(all_md)))
+""" % all_md)
         
         if self.boot_file:
             boot_text = self.boot_file.text("utf8")
             boot_text = boot_text % (dumps(self.config),)
             output_js.write(boot_text.encode("utf8"))
+
+        output_worker_js.write("bespin = {};\n")
+        output_worker_js.write(self.loader.text("utf8"))
+
+        for package in worker_packages:
+            process(package, output_worker_js, False)
+
+        worker_md = make_plugin_metadata(worker_packages)
+        output_worker_js.write("bespin.metadata = %s;" % worker_md)
+
+        output_worker_js.write(self.worker.text("utf8"))
 
     def get_dependencies(self, packages, root_names):
         """Given a dictionary of package names to packages, returns the list of
@@ -291,27 +316,34 @@ document.addEventListener("DOMContentLoaded", function() {
         return result
 
     def get_package_lists(self):
-        """Returns a pair consisting of the dynamic plugins and their
-        dependencies, followed by the static plugins and their dependencies."""
+        """Returns a tuple consisting of the dynamic plugins, the static
+        plugins, and the worker plugins, in that order, along with all of their
+        dependencies."""
         # Filter the packages into static and dynamic parts. If a package is
         # dynamically loaded, all of its dependencies must also be dynamically
         # loaded.
-        to_visit = self.dynamic_plugins + self.static_plugins
-        pkgs = {}
-        for name in to_visit:
-            if name in pkgs:
-                continue
-            pkg = self.get_package(name)
-            pkgs[name] = pkg
-            to_visit += pkg.dependencies
+        def closure(plugins):
+            to_visit = plugins
+            pkgs = {}
+            for name in to_visit:
+                if name in pkgs:
+                    continue
+                pkg = self.get_package(name)
+                pkgs[name] = pkg
+                to_visit += pkg.dependencies
+            return pkgs
 
+        pkgs = closure(self.dynamic_plugins + self.static_plugins)
         dynamic_packages = self.get_dependencies(pkgs, self.dynamic_plugins)
         dynamic_names = set([ pkg.name for pkg in dynamic_packages ])
 
         deps = self.get_dependencies(pkgs, self.static_plugins)
         static_packages = [ p for p in deps if p.name not in dynamic_names ]
 
-        return dynamic_packages, static_packages
+        pkgs = closure(self.worker_plugins)
+        worker_packages = self.get_dependencies(pkgs, self.worker_plugins)
+
+        return dynamic_packages, static_packages, worker_packages
         
     def _output_unbundled_plugins(self, output_dir):
         if not output_dir.exists():
@@ -345,21 +377,24 @@ document.addEventListener("DOMContentLoaded", function() {
 
         output_dir.makedirs()
 
-        dynamic_packages, static_packages = self.get_package_lists()
-        
-        jsfilename = output_dir / "BespinEmbedded.js"
-        cssfilename = output_dir / "BespinEmbedded.css"
-        jsfile = jsfilename.open("w")
-        cssfile = cssfilename.open("w")
-        self.generate_output_files(jsfile, cssfile, static_packages,
-            dynamic_packages)
-        jsfile.close()
-        cssfile.close()
+        dynamic_packages, static_packages, worker_packages = \
+            self.get_package_lists()
+
+        filenames = [
+            output_dir / f for f in
+            ("BespinEmbedded.js", "BespinEmbedded.css", "worker.js")
+        ]
+        files = [ codecs.open(f, 'w', 'utf8') for f in filenames ]
+        [ jsfile, cssfile, workerfile ] = files
+        self.generate_output_files(jsfile, cssfile, workerfile,
+            static_packages, dynamic_packages, worker_packages)
+        for f in files:
+            f.close()
         
         if self.unbundled_plugins:
             self._output_unbundled_plugins(self.unbundled_plugins)
 
-        for package in static_packages + dynamic_packages:
+        for package in static_packages + dynamic_packages + worker_packages:
             plugin = self.get_plugin(package.name)
             resources = plugin.location / "resources"
             if resources.exists() and resources.isdir():
