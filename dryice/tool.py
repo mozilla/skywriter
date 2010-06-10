@@ -371,13 +371,35 @@ document.addEventListener("DOMContentLoaded", function() {
 
     def compress_js(self, compressor):
         """Compress the output using Closure Compiler."""
-        print "Compressing JavaScript with Closure Compiler"
+        print "Compressing BespinEmbedded"
         compressor = path(compressor).abspath()
         subprocess.call("java -jar %s "
             "--js=BespinEmbedded.js"
             " --js_output_file=BespinEmbedded.compressed.js"
             " --warning_level=QUIET" % compressor,
             shell=True, cwd=self.output_dir)
+        
+        compressed = self.output_dir / "BespinEmbedded.compressed.js"
+        if compressed.size == 0:
+            raise BuildError("BespinEmbedded.js did not compile correctly. Check for errors.")
+        
+        plugin_dir = self.output_dir / "plugins"
+        if not plugin_dir.exists() or not plugin_dir.isdir():
+            return
+        
+        for f in plugin_dir.walkfiles("*.js"):
+            print "Compressing %s" % (f)
+            compressed = f + ".compressed"
+            subprocess.call("java -jar %s "
+                "--js=%s"
+                " --js_output_file=%s"
+                " --warning_level=QUIET" % (compressor, f, f + ".compressed"),
+                shell=True)
+            if compressed.size == 0:
+                raise BuildError("File %s did not compile correctly. Check for errors." % (f))
+            f.unlink()
+            compressed.rename(f)
+            
 
     def compress_css(self, compressor):
         """Compress the CSS using YUI Compressor."""
