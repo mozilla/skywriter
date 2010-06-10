@@ -1,5 +1,5 @@
 {
-    "static_plugins": ["appconfig", "edit_session", "screen_theme", "text_editor"],
+    "plugins": ["embedded"],
     "dynamic_plugins": ["html", "javascript"],
     "output_dir": "tmp/BespinDropIn",
     "include_sample": true
