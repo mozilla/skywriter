@@ -2,11 +2,14 @@
 \.swp$
 \.swo$
 \.pyc$
+\.swn$
 
 ^.Python
 ^.project
 ^.settings
 ^.pydevproject
+^.idea/
+^plugins/environment.js$
 
 ^bin
 ^lib
