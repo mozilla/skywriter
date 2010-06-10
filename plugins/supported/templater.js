@@ -41,65 +41,10 @@
 
 // WARNING: do not 'use_strict' without reading the notes in environmentEval;
 
-/*
- * This is intended to be a lightweight templating solution. It replaces
- * John Resig's Micro-templating solution:
- * - http://ejohn.org/blog/javascript-micro-templating/
- * Whilst being slightly bigger it adds the ability to extract references to
- * created element and add event handlers. It exchanges Javascript as a template
- * language (and the <%=x%> syntax) for ${} elements.
- *
- * - Logical Processing -
- * As a result of losing the Javascript base, it loses the ability to do logical
- * constructs like if/while/for/etc. It is currently felt that the addition of
- * event handlers and element references is more important. Should these
- * features be required they could be added by making an element that references
- * an array result the cloning of the element by the number of items in the
- * array, and by making an element that references a boolean result in the
- * stripping of the element if the boolean is false.
- *
- * - 2 Way Templating -
- * As a result of functioning using DOM manipulation rather than string
- * manipulation, we could also register javascript getters and setters on the
- * Javascript data structures and onchange listeners on the DOM to effect
- * 2-way templating.
- */
-
 /**
- * Turn the template into a DOM node, resolving the ${} references to the data
- * For example:
- * <pre>
- * var templ = '&lt;input value="${person.firstname} ${person.surname}" ' +
- *     'save="${elements.input}" ' +
- *     'onchange="${changer}" ' +
- *     '>';
- * var data = {
- *   person: { firstname: "Fred", surname: "Blogs" },
- *   elements: {},
- *   changer: function() { console.log(data.elements.value); }
- * };
- * processTemplate(templ, data);
- * </pre>
- *
- * <p>This gives an example of the 3 types of processing done:<ul>
- * <li>Event listener registration for all onXXX attributes
- * <li>Element extraction for 'save' attributes
- * <li>Attribute value processing for other attributes.
- * </ul>
- *
- * <p>For event listener registration there are 2 things to look out for:<ul>
- * <li>Although it looks like we are using DOM level 0 event registration (i.e.
- * element.onfoo = somefunc) we are actually using DOM level 2, by stripping
- * off the 'on' prefix and then using addEventListener('foo', ...). Watch out
- * for case sensitivity, and if you successfully use an event like DOMFocusIn
- * then consider updating these docs or the code.
- * <li>Sometimes we might need to use the capture phase of an event (for example
- * when processing mouse or focus events). The way to do that is as follows:
- * <tt>onfocus="${object.handler [useCapture:true]}"</tt>. Currently the only
- * supported option is useCapture, and it must be specified EXACTLY as the
- * example. In the future we might add other options, or make the syntax
- * simpler.
- * </ul>
+ * Turn the template into a DOM node, resolving the ${} references to the data.
+ * See docs/devguide/template.html.markdown for instructions on writing
+ * templates.
  */
 exports.processTemplate = function(template, data) {
     data = data || {};
@@ -112,7 +57,8 @@ exports.processTemplate = function(template, data) {
 /**
  * Recursive function to walk the tree processing the attributes as it goes.
  */
-var processNode = function(node, data) {
+function processNode(node, data) {
+    var recurse = true;
     // Process attributes
     if (node.attributes && node.attributes.length) {
         // It's good to clean up the attributes when we've processed them,
@@ -127,28 +73,59 @@ var processNode = function(node, data) {
                 value = stripBraces(value);
                 property(value, data, node);
                 node.removeAttribute(name);
+            } else if (name === 'if') {
+                value = stripBraces(value);
+                try {
+                    var reply = environmentEval(value, data);
+                    recurse = !!reply;
+                } catch (ex) {
+                    console.error('Error with \'', value, '\'', ex);
+                    recurse = false;
+                }
+                if (!recurse) {
+                    node.parentNode.removeChild(node);
+                }
+                node.removeAttribute(name);
+            } else if (name === 'foreach') {
+                value = stripBraces(value);
+                recurse = false;
+                try {
+                    var array = environmentEval(value, data);
+                    array.forEach(function(param) {
+                        var clone = node.cloneNode(true);
+                        node.parentNode.insertBefore(clone, node);
+                        data.param = param;
+                        processChildren(clone, data);
+                        delete data.param;
+                    });
+                    node.parentNode.removeChild(node);
+                } catch (ex) {
+                    console.error('Error with \'', value, '\'', ex);
+                    recurse = false;
+                }
+                node.removeAttribute(name);
             } else if (name.substring(0, 2) === 'on') {
                 // Event registration relies on property doing a bind
                 value = stripBraces(value);
-                var useCapture = false;
-                value = value.replace(/\s*\[useCapture:true\]$/, function(path) {
-                    // TODO: Don't assume useCapture:true
-                    useCapture = true;
-                    return '';
-                });
                 var func = property(value, data);
                 if (typeof func !== 'function') {
                     console.error('Expected ' + value +
                             ' to resolve to a function, but got ', typeof func);
                 }
                 node.removeAttribute(name);
-                node.addEventListener(name.substring(2), func, useCapture);
+                var capture = node.hasAttribute('capture' + name.substring(2));
+                node.addEventListener(name.substring(2), func, capture);
             } else {
                 // Replace references in other attributes
                 var newValue = value.replace(/\$\{[^}]*\}/, function(path) {
                     return environmentEval(path.slice(2, -1), data);
                 });
-                if (value !== newValue) {
+                // Remove '_' prefix of attribute names so the DOM won't try
+                // to use them before we've processed the template
+                if (name.indexOf('_') === 0) {
+                    node.removeAttribute(name);
+                    node.setAttribute(name.substring(1), newValue);
+                } else if (value !== newValue) {
                     attrs[i].value = newValue;
                 }
             }
@@ -156,12 +133,40 @@ var processNode = function(node, data) {
     }
 
     // Process child nodes
-    processChildren(node, data);
+    if (recurse) {
+        processChildren(node, data);
+    }
 
     // Process TextNodes
     if (node.nodeType === 3) {
         // Replace references in other attributes
         value = node.textContent;
+        // We can't use the string.replace() with function trick because we need
+        // to support functions that return DOM nodes, so we can't have the
+        // conversion to a string.
+        // Instead we process the string as an array of parts. In order to split
+        // the string up, we first replace ${ with \uF001$ and } with \uF002
+        // We can then split using \uF001 or \uF002 to get an array of strings
+        // where scripts are prefixed with $.
+        // \uF001 and \uF002 are just unicode chars reserved for private use.
+        value = value.replace(/\$\{([^}]*)\}/, '\uF001$$$1\uF002');
+        var parts = value.split(/\uF001|\uF002/);
+        if (parts.length > 1) {
+            parts.forEach(function(part) {
+                if (!part || part === '') {
+                    return;
+                }
+                if (part.charAt(0) === '$') {
+                    part = environmentEval(part.slice(1), data);
+                }
+                // Hmmm isDOMElement ...
+                if (typeof part.cloneNode !== 'function') {
+                    part = document.createTextNode(part.toString());
+                }
+                node.parentNode.insertBefore(part, node);
+            });
+            node.parentNode.removeChild(node);
+        }
         newValue = value.replace(/\$\{[^}]*\}/, function(path) {
             return environmentEval(path.slice(2, -1), data);
         });
@@ -189,13 +194,13 @@ function processChildren(node, data) {
  * Warn of string does not begin '${' and end '}'
  * @return The string stripped of ${ and }, or untouched if it does not match
  */
-var stripBraces = function(str) {
+function stripBraces(str) {
     if (!str.match(/\$\{.*\}/)) {
         console.error('Expected ' + str + ' to match ${...}');
         return str;
     }
     return str.slice(2, -1);
-};
+}
 
 /**
  * Combined getter and setter that works with a path through some data set.
@@ -254,10 +259,10 @@ function environmentEval(script, env) {
 /**
  * Strip the extension off of a name
  */
-var basename = function(name) {
+function basename(name) {
     var lastDot = name.lastIndexOf('.');
     return name.substring(0, lastDot);
-};
+}
 
 /**
  * "compiles" a template. with the current version of templating,

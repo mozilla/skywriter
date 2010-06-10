@@ -42,20 +42,28 @@ This would then be used as follows:
     console.log(this.element.id);         // hello
     console.log(this.element.innerHTML);  // world
 
-${...} in General Attributes
-----------------------------
+${...} in Attributes and Content
+--------------------------------
 
 Any ${} element will be processed as a portion of Javascript, in the context of
-the object passed to the templates.name function (i.e. templates.bar in the
-example above)
+the first object passed to the templating function (In the example above the
+context would be `{ parent: this, contents: "world" }`)
 
-The 'save' attribute is a special attribute to record the current element. See
-below for more details.
+The `save`/`if`/`foreach` attributes have special meanings. See below for more
+details.
 
-${...} can show up in elements and in text nodes, and will be processed
-accordingly. A ${...} block contains arbitrary Javascript, but should return
-something. Generally however it is recommended to stick to a dot path from
-an attribute passed to the template.
+`${...}` can show up in elements and in HTML content. A `${...}` block contains
+arbitrary Javascript. Generally however it is recommended to stick to a dot path
+from an attribute passed to the template.
+
+It expected that `${...}` blocks will return strings when used in an attribute.
+When used in HTML content, `${...}` blocks can return either strings (which will
+be added to the DOM inside a TextNode (i.e. with HTML escaped) or they can
+return DOM elements, in which case the DOM element will be added to the tree.
+
+The following is not recommended (try to keep logic separate from content)
+however it should work:
+    <div>${document.createTextNode('BANG!')}</div>
 
 save="${...}" Attributes
 ------------------------
@@ -104,17 +112,81 @@ For event listener registration there are 2 things to look out for:
 
 It is very likely that the useCapture syntax will change in the future, probably
 to something that does not invade the ${...} space possibly something more like
-`onfocus="${object.handler}" onfocususecapture="true"`
+`onfocus="${object.handler}" captureonfocus="true"`
 
-Future
-------
+_***="${...}" Attributes
+------------------------
 
-2 future directions are being considered for this template:
-* if="${some_boolean}" and loopFor="${some_array}" attributes. The former allows
-  the template to prune some part of the output unless a condition is met. The
-  latter allows a node to be repeated a number of times with different values
-  for each member of the array.
+The Bespin Template engine uses the web browsers parser to interpret .htmlt
+file before we process the templates. This has a number of advantages in
+simplicity and the ability to work with the resulting DOM, however one drawback
+is that the browser may try to process certain elements before they are ready.
+For example:
+
+  <img src="${path}/thing.png"/>
+
+This will the processed, and (assuming 'path' is correctly set) the right image
+will be displayed, however you may notice your browser giving a 404 message from
+${path}/thing.png as it has attempted to retrieve the image before the template
+process had a chance to substitute the correct path.
+
+The solution is to prefix the attribute name with an underscore ('_'). The
+template engine will remove the underscore automatically. For example:
+
+  <img _src="${path}/thing.png"/>
+
+Should you wish to have an attribute in the resulting document prefixed with an
+underscore, simply begin your attribute name with 2 underscores. (Is this a
+common scenario? If you know of another scenario where attribute names are
+prefixed with _, please inform the Bespin-Core mailing list using
+[bespin-core at googlegroups dot com].
+
+if="${some_boolean}" Attributes
+-------------------------------
+
+If an element contains an 'if' attribute, then its value will be evaluated and
+if the result is 'falsey', then the entire element will be removed from the
+tree. This allows simple if statements.
+
+Example:
+
+    <div>
+    <p if="${name !== null}>Hello, ${name}</p>
+    </div>
+
+    templates.example({ name: 'Fred' }); // <div><p>Hello, Fred</p></div>
+    templates.example({ });              // <div></div>
+
+In the second example, the entire 'p' element has been removed by processing
+the if attribute.
+
+foreach="${some_array} Attributes
+---------------------------------
+
+If an element contains a foreach attribute, then that element will be repeated
+in the final document once for each member of the array returned by the
+attribute value. The 'param' variable will be available, and set to the
+corresponding array member during the evaluation.
+
+Example:
+
+    <div foreach="${[ 1, 2, 3 ]}">${param}</div>
+    templates.example({ }); // <div>1</div><div>2</div><div>3</div>
+
+A future version of the template engine will likely allow you to alter the
+name of the variable to which array members are set, from the default 'param'.
+This will allow greater flexibility in processing nested loops.
+A natural syntax could be:
+    <div foreach="number in ${[ 1, 2, 3 ]}">${number}</div>
+
+Future and Questions
+--------------------
+* Should we have a way to recognize attributes that are special to the template
+  engine? What if a future HTML standard introduces an element with
+  if/save/foreach attributes?
 * 2-way templating. For form fill applications, it can be useful to allow
   changes to input elements to be automatically reflected in the original
   structure, or even for changes in the original structure to be reflected in
-  the HTML. This last example is probably too complex for our purposes however.
+  the HTML. It could be managed using #{} references rather then ${}. The
+  difficulty is in recognizing changes to DOM elements on all browsers.
+  This last example is probably too complex for our purposes however.
