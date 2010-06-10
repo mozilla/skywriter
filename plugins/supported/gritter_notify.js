@@ -45,7 +45,7 @@
             "ep": "notificationHandler",
             "name": "gritter",
             "description": "Produces Growl-like notifications using the jQuery Gritter plugin.",
-            "level": "error",
+            "level": "info",
             "pointer": "#gritter"
         }
     ]
