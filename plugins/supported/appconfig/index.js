@@ -73,7 +73,7 @@ exports.launch = function(config) {
     }
 
     for (var setting in config.settings) {
-        settings.set(settings, config.settings[setting]);
+        settings.set(setting, config.settings[setting]);
     }
 
     // Resolve the launchPromise and pass the env variable along.

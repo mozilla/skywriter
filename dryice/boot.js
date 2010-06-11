@@ -41,9 +41,20 @@ bespin.useBespin = function(element, options) {
     var util = bespin.tiki.require('bespin:util/util');
 
     var baseConfig = %s;
+    var baseSettings = baseConfig.settings;
     options = options || {};
     for (var key in options) {
         baseConfig[key] = options[key];
+    }
+    
+    // we need to separately merge the configured settings
+    var configSettings = baseConfig.settings;
+    if (baseSettings !== undefined) {
+        for (key in baseSettings) {
+            if (configSettings[key] === undefined) {
+                baseConfig.settings[key] = baseSettings[key];
+            }
+        }
     }
 
     var Promise = bespin.tiki.require('bespin:promise').Promise;
