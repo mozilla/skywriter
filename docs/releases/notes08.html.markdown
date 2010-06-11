@@ -59,6 +59,8 @@ Features
 * If jQuery is present on a page, Bespin can use it rather than the
   one that Bespin normally bundles. (bug 568815)
 * Plugins can be dynamically loaded in embedded builds.
+* Commands and embedded users have the same convenient APIs now for
+  manipulating the editor (bug 568217)
 
 Fixes
 -----

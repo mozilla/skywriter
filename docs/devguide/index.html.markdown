@@ -7,6 +7,11 @@ layout: default
 Installing the Bespin Server
 ----------------------------
 
+Important note: The Bespin Server is going to undergo a complete rework.
+You can read more about this in the [Bespin Server Roadmap](http://groups.google.com/group/bespin/browse_thread/thread/6de8c718d64232a0)
+that was posted to the mailing list.
+
+
 To work on Bespin, you'll need to install the Bespin server on your local computer.
 
 You can easily get Bespin's Python server running on your local Mac or Linux machine (see note about Windows below).

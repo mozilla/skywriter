@@ -12,13 +12,9 @@ reasons:
    things *look* right
 3. The docs still need to be reviewed.
 
-## Plugin System Tests ##
+## Automated Tests ##
 
-The plugin system can't use the PluginDev test infrastructure, since PluginDev
-itself is a plugin. To run the plugin system tests, you need to fire up
-the server and go to:
-
-http://localhost:4020/static/bespin/en/current/tests/plugins.html
+Within Bespin, you can use the "test" command to run the tests for plugins.
 
 ## Browsers To Test In ##
 
