@@ -1,5 +1,5 @@
 {
     "description": "Reads and writes tag files",
-    "dependencies": {}
+    "dependencies": { "underscore": "0.0.0" }
 }
 
