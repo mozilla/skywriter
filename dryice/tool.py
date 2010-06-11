@@ -235,6 +235,7 @@ will be deleted before the build.""")
                     plugin_dir.makedirs()
                 plugin_filename = package.name + ".js"
                 plugin_location = plugin_subdir / plugin_filename
+                self._created_javascript.add(plugin_location)
                 combine_output_path = plugin_dir / plugin_filename
                 combine_output = combine_output_path.open("w")
             else:
@@ -369,7 +370,7 @@ document.addEventListener("DOMContentLoaded", function() {
         """
         if self.errors:
             raise BuildError("Errors found, stopping...", self.errors)
-
+        
         output_dir = self.output_dir
         print "Placing output in %s" % output_dir
         if output_dir.exists():
@@ -379,11 +380,17 @@ document.addEventListener("DOMContentLoaded", function() {
 
         dynamic_packages, static_packages, worker_packages = \
             self.get_package_lists()
+        
+        self._created_javascript = set()
 
         filenames = [
             output_dir / f for f in
             ("BespinEmbedded.js", "BespinEmbedded.css", "worker.js")
         ]
+        
+        self._created_javascript.add(filenames[0])
+        self._created_javascript.add(filenames[2])
+        
         files = [ codecs.open(f, 'w', 'utf8') for f in filenames ]
         [ jsfile, cssfile, workerfile ] = files
         self.generate_output_files(jsfile, cssfile, workerfile,
@@ -406,23 +413,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     def compress_js(self, compressor):
         """Compress the output using Closure Compiler."""
-        print "Compressing BespinEmbedded"
-        compressor = path(compressor).abspath()
-        subprocess.call("java -jar %s "
-            "--js=BespinEmbedded.js"
-            " --js_output_file=BespinEmbedded.compressed.js"
-            " --warning_level=QUIET" % compressor,
-            shell=True, cwd=self.output_dir)
-        
-        compressed = self.output_dir / "BespinEmbedded.compressed.js"
-        if compressed.size == 0:
-            raise BuildError("BespinEmbedded.js did not compile correctly. Check for errors.")
-        
-        plugin_dir = self.output_dir / "plugins"
-        if not plugin_dir.exists() or not plugin_dir.isdir():
-            return
-        
-        for f in plugin_dir.walkfiles("*.js"):
+        for f in self._created_javascript:
             print "Compressing %s" % (f)
             compressed = f + ".compressed"
             subprocess.call("java -jar %s "
@@ -432,7 +423,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 shell=True)
             if compressed.size == 0:
                 raise BuildError("File %s did not compile correctly. Check for errors." % (f))
-            f.unlink()
+            newname = f.splitext()[0] + ".uncompressed.js"
+            f.rename(newname)
             compressed.rename(f)
             
 
