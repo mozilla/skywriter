@@ -136,7 +136,7 @@ var processNode = function(node, data) {
                     useCapture = true;
                     return '';
                 });
-                var func = environmentEval(value, data);
+                var func = property(value, data);
                 if (typeof func !== 'function') {
                     console.error('Expected ' + value +
                             ' to resolve to a function, but got ', typeof func);
