@@ -267,7 +267,7 @@ exports.launchEditor = function(config) {
         var message = 'Cannot start editor without a configuration!';
         console.error(message);
         retPr.reject(message);
-        return;
+        return retPr;
     }
 
     var pr = createAllObjects(config);
@@ -291,6 +291,8 @@ var createAllObjects = function(config) {
 };
 
 var generateGUI = function(config, pr) {
+    var error;
+    
     var container = document.createElement('div');
     container.setAttribute('class', 'container');
 
@@ -308,18 +310,16 @@ var generateGUI = function(config, pr) {
 
         var component = catalog.getObject(descriptor.component);
         if (!component) {
-            var error = 'Cannot find object ' + descriptor.component +
+            error = 'Cannot find object ' + descriptor.component +
                             ' to attach to the Bespin UI';
             console.error(error);
             pr.reject(error);
             return;
         }
 
-        // special case the editor for now, because it doesn't
-        // follow the new protocol
-        var element = component.element;
+        element = component.element;
         if (!element) {
-            var error = 'Component ' + descriptor.component + ' does not have' +
+            error = 'Component ' + descriptor.component + ' does not have' +
                           ' an "element" attribute to attach to the Bespin UI';
             console.error(error);
             pr.reject(error);
