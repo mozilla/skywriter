@@ -48,6 +48,24 @@ exports.Tags = function() {
 };
 
 exports.Tags.prototype = Object.create(Object.prototype, Trait.compose(Trait({
+    _search: function(id, pred) {
+        var shadowTag = { name: id };
+        var tags = this.tags;
+        var index = _(tags).sortedIndex(shadowTag, function(tag) {
+            return tag.name;
+        });
+
+        var start = index, end = index;
+        while (start > 0 && start < tags.length && pred(tags[start])) {
+            start--;
+        }
+        while (end > 0 && end < tags.length && pred(tags[end])) {
+            end++;
+        }
+
+        return tags.slice(start + 1, end);
+    },
+
     add: function(src, file, opts) {
         if (opts === null || opts === undefined) {
             opts = {};
@@ -63,21 +81,15 @@ exports.Tags.prototype = Object.create(Object.prototype, Trait.compose(Trait({
 
     /** Returns all the tags that match the given identifier. */
     get: function(id) {
-        var shadowTag = { name: id };
-        var tags = this.tags;
-        var index = _(tags).sortedIndex(shadowTag, function(tag) {
-            return tag.name;
+        return this._search(id, function(tag) { return tag.name === id; });
+    },
+
+    /** Returns all the tags that begin with the given prefix. */
+    stem: function(prefix) {
+        var len = prefix.length;
+        return this._search(prefix, function(tag) {
+            return tag.name.substring(0, len) === prefix;
         });
-
-        var start = index, end = index;
-        while (start > 0 && start < tags.length && tags[start].name === id) {
-            start--;
-        }
-        while (end > 0 && end < tags.length && tags[end].name === id) {
-            end++;
-        }
-
-        return tags.slice(start + 1, end);
     }
 }), TagReader, TagWriter));
 
