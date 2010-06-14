@@ -497,7 +497,7 @@ exports.registerThemeStyles = function(extension) {
  */
 exports.reparse = function() {
     var pr = new Promise();
-    // Reparsing makes only sense when there is a themeDataLoadPromise.
+    // Reparsing makes only sense if there is a themeDataLoadPromise.
     // If the value is null, then no styleFile was loaded and there is nothing
     // to reparse.
     if (themeDataLoadPromise) {
@@ -548,6 +548,8 @@ exports.unregisterThemeStyles = function(extension) {
     var styleElement = document.getElementById(styleID);
     styleElement.parentNode.removeChild(styleElement);
 
-    // Mark that the style element for this plugin is now gone.
-    extensionStyleID[pluginName] = null;
+    // Remove the style reference.
+    delete extensionStyleID[pluginName];
+    // Remove the themeStyle cache.
+    delete extensionStyleData[pluginName];
 };
