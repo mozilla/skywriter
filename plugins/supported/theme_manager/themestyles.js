@@ -501,6 +501,12 @@ exports.registerThemeStyles = function(extension) {
  */
 exports.reparse = function() {
     var pr = new Promise();
+
+    // Reparse only if this is permitted.
+    if (exports.preventParsing) {
+        return pr.resolve();
+    }
+
     // Reparsing makes only sense if there is a themeDataLoadPromise.
     // If the value is null, then no styleFile was loaded and there is nothing
     // to reparse.
@@ -530,6 +536,8 @@ exports.reparse = function() {
 
             // After all themeStyles are parsed, resolve the returned promise.
             group(parsePromises).then(pr.resolve.bind(pr), pr.reject.bind(pr));
+        }, function(err) {
+            pr.reject(err);
         });
     } else {
         pr.resolve();
