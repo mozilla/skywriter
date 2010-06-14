@@ -35,6 +35,7 @@
 # ***** END LICENSE BLOCK *****
 
 from cStringIO import StringIO
+import codecs
 
 from dryice import tool
 from dryice.path import path
@@ -100,11 +101,15 @@ def find_with_context(s, substr):
         context_end = -1
     return s[context_begin:context_end]
 
+def encsio():
+    Writer = codecs.getwriter("utf8")
+    return Writer(StringIO())
+
 def test_js_creation():
     manifest = tool.Manifest(plugins=["plugin1"],
         search_path=pluginpath, include_tests=True)
-    output = StringIO()
-    manifest.generate_output_files(output, StringIO())
+    output = encsio()
+    manifest.generate_output_files(output, encsio(), encsio())
     output = output.getvalue()
     assert "var tiki =" in output
     assert """tiki.register("::plugin1",""" in output
@@ -117,8 +122,8 @@ def test_js_creation():
 def test_single_file_plugin_handling():
     manifest = tool.Manifest(plugins=["SingleFilePlugin1"],
         search_path=pluginpath, include_tests=True)
-    output = StringIO()
-    manifest.generate_output_files(output, StringIO())
+    output = encsio()
+    manifest.generate_output_files(output, encsio(), encsio())
     output = output.getvalue()
     assert "exports.someFunction" in output
     assert "SingleFilePlugin1:index" in output
@@ -133,8 +138,8 @@ def test_js_creation_with_core_test():
 }
 """
     manifest = tool.Manifest.from_json(sample)
-    output = StringIO()
-    manifest.generate_output_files(output, StringIO())
+    output = encsio()
+    manifest.generate_output_files(output, encsio(), encsio())
     output = output.getvalue()
     assert "core_test" in output
     assert "var tiki =" in output
@@ -147,8 +152,8 @@ def test_js_creation_without_core_test():
 }
 """
     manifest = tool.Manifest.from_json(sample)
-    output = StringIO()
-    manifest.generate_output_files(output, StringIO())
+    output = encsio()
+    manifest.generate_output_files(output, encsio(), encsio())
     output = output.getvalue()
     assert "var tiki =" in output
     assert "plugindev" not in output
@@ -157,9 +162,9 @@ def test_js_creation_without_core_test():
 def test_css_creation():
     manifest = tool.Manifest(plugins=["plugin1"],
         search_path=pluginpath, include_tests=True)
-    output_js = StringIO()
-    output_css = StringIO()
-    manifest.generate_output_files(output_js, output_css)
+    output_js = encsio()
+    output_css = encsio()
+    manifest.generate_output_files(output_js, output_css, encsio())
     output_css = output_css.getvalue()
     assert "color: white" in output_css
     assert "background-image: url(resources/plugin1/images/prompt1.png);" in output_css

@@ -72,7 +72,7 @@ class Manifest(object):
     unbundled_plugins = None
     
     def __init__(self, include_tests=False, plugins=None, static_plugins=None,
-        dynamic_plugins=None, worker_plugins=None, jquery="builtin",
+        dynamic_plugins=None, jquery="builtin",
         search_path=None, output_dir="build", include_sample=False,
         boot_file=None, unbundled_plugins=None, preamble=None, loader=None,
         worker=None, config=None):
@@ -89,15 +89,10 @@ class Manifest(object):
         if dynamic_plugins is None:
             dynamic_plugins = []
 
-        if worker_plugins is None:
-            worker_plugins = []
-            
         self.include_tests = include_tests
         static_plugins.insert(0, "bespin")
         self.static_plugins = static_plugins
         self.dynamic_plugins = dynamic_plugins
-        worker_plugins.insert(0, "bespin")
-        self.worker_plugins = worker_plugins
         
         self.jquery = jquery
 
@@ -341,8 +336,9 @@ document.addEventListener("DOMContentLoaded", function() {
         deps = self.get_dependencies(pkgs, self.static_plugins)
         static_packages = [ p for p in deps if p.name not in dynamic_names ]
 
-        pkgs = closure(self.worker_plugins)
-        worker_packages = self.get_dependencies(pkgs, self.worker_plugins)
+        # pkgs = closure(self.worker_plugins)
+        # worker_packages = self.get_dependencies(pkgs, self.worker_plugins)
+        worker_packages = []
 
         return dynamic_packages, static_packages, worker_packages
         
