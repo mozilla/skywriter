@@ -74,3 +74,5 @@ Fixes
   jQuery.
 * Sample custom plugin no longer uses alt-A, which is bound to select all
   (bug 564789)
+* Document scrolled to the top when entering text in the editor
+  (bug 565333)
