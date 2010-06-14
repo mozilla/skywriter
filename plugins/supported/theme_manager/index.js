@@ -162,15 +162,11 @@ exports.setBasePlugin = function(pluginName) {
  * are parsed.
  */
 exports.startParsing = function() {
-    var pr = new Promise();
-
     // Allow the parsing.
     themestyles.preventParsing = false;
 
     // Reparse all the applied themeStyles.
-    themestyles.reparse().then(pr.resolve.bind(pr), pr.reject.bind(pr));
-
-    return pr;
+    return themestyles.reparse();
 };
 
 exports.registerTheme = function(extension) {

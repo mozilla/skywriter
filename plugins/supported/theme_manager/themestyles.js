@@ -364,12 +364,9 @@ var parseQueue = {};
  * An error during parsing rejects the promise.
  */
 exports.parsePlugin = function(pluginName) {
-    var pr = new Promise();
-
     // Parse only if this is permitted.
     if (exports.preventParsing) {
-        pr.resolve();
-        return pr;
+        return (new Promise).resolve();
     }
 
     var plugin = catalog.plugins[pluginName];
@@ -378,14 +375,12 @@ exports.parsePlugin = function(pluginName) {
         throw "reparsePlugin: plugin " + pluginName + " is not defined!";
     }
 
-    // Only continue if there is no parse queue for this plugin yet.
+    // Start parsing only if it isn't started already.
     if (!parseQueue[pluginName]) {
         // Mark that the plugin is queued.
-        parseQueue[pluginName] = true;
-        setTimeout(function() {
-            // We handle the plugin parsing here, so put it off the queue.
-            parseQueue[this.name] = false;
+        parseQueue[pluginName] = new Promise();
 
+        setTimeout(function() {
             // DEBUG ONLY:
             // console.log('=== Parse Plugin: ' + pluginName + ' ===');
             // var time = new Date();
@@ -402,14 +397,23 @@ exports.parsePlugin = function(pluginName) {
             // DEBUG ONLY:
             // console.log('  variables: ', variableHeader, globalVariableHeader);
 
-            parseLess(pr, pluginName, variableHeader);
+            var parsePr = new Promise;
+            parsePr.then(function(data) {
+                parseQueue[this.name].resolve(data);
+                parseQueue[this.name] = null;
+            }.bind(this), function() {
+                parseQueue[this.name].reject(data);
+                parseQueue[this.name] = null;
+            }.bind(this))
+
+            parseLess(parsePr, pluginName, variableHeader);
 
             // DEBUG ONLY:
             // console.log('everything took: ', (new Date()) - time, 'ms');
         }.bind(plugin), 0);
     }
 
-    return pr;
+    return parseQueue[pluginName];
 };
 
 // Function that pocesses the loaded StyleFile content.
