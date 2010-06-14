@@ -39,7 +39,7 @@
 ({
     "description": "Catalogs the available syntax engines",
     "dependencies": {},
-    "environments": { "main": true },
+    "environments": { "main": true, "worker": true },
     "provides": [
         {
             "ep": "extensionhandler",
