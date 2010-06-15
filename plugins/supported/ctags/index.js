@@ -52,14 +52,20 @@ exports.Tags.prototype = Object.create(Object.prototype, Trait.compose(Trait({
         });
 
         var start = index, end = index;
-        while (start > 0 && start < tags.length && pred(tags[start])) {
+        while (start >= 0 && start < tags.length && pred(tags[start])) {
             start--;
         }
-        while (end > 0 && end < tags.length && pred(tags[end])) {
+        while (end >= 0 && end < tags.length && pred(tags[end])) {
             end++;
         }
 
         return tags.slice(start + 1, end);
+    },
+
+    add: function(newTags) {
+        var tags = this.tags;
+        Array.prototype.push.apply(tags, newTags);
+        tags.sort(function(a, b) { return a.name.localeCompare(b.name); });
     },
 
     /** Returns all the tags that match the given identifier. */
