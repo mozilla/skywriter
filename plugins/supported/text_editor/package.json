@@ -92,6 +92,13 @@
         },
         {
             "ep": "command",
+            "name": "untab",
+            "key": "shift_tab",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/editing#untab"
+        },
+        {
+            "ep": "command",
             "name": "move",
             "predicates": {"isTextView": true}
         },

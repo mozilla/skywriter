@@ -193,28 +193,26 @@ exports.openLine = function(env, args, request) {
     newline(model, view);
 };
 
+/**
+ * Inserts a new tab. This is smart about the current inserted whitespaces and
+ * the current position of the cursor. If some text is selected, the selected
+ * lines will be indented by tabstop spaces.
+ */
 exports.tab = function(env, args, request) {
     var view = env.view;
-    var tabstop = settings.get('tabstop');
-    var selection = view.getSelectedRange();
-    
-    var count = 0;
-    var str = '';
-    var line = '';
-    var leadspaces = '';
- 
+
     view.groupChanges(function() {
+        var tabstop = settings.get('tabstop');
+        var selection = view.getSelectedRange();
+        var str = '';
+
         if (m_range.isZeroLength(selection)){
-            line = view.getPath('layoutManager.textStorage').lines[selection.start.row];         
-            leadspaces = line.slice(selection.start.col,line.length).
-                                                 match(/^\s*/)[0].length;
+            var line = env.model.lines[selection.start.row];
+            var trailspaces = line.substring(selection.start.col).
+                                            match(/^\s*/)[0].length;
+            var count = tabstop - (selection.start.col + trailspaces) % tabstop;
 
-            count = tabstop - selection.start.col % tabstop;
-            if ((count - leadspaces) <=0) {
-                count = tabstop + leadspaces;
-            }
-
-            for (var i = 0; i < count - leadspaces; i++) {
+            for (var i = 0; i < count; i++) {
                 str += ' ';
             }
 
@@ -223,90 +221,89 @@ exports.tab = function(env, args, request) {
                  end:   selection.start
              }, str);
 
-            view.moveCursorTo({ row: selection.end.row, col: selection.end.col + count});
+            view.moveCursorTo({
+                col: selection.start.col + count + trailspaces,
+                row: selection.end.row
+            });
         } else {
-            count = tabstop;
-            for (var i = 0; i < count; i++) {
+            for (var i = 0; i < tabstop; i++) {
                 str += ' ';
             }
 
-            view.replaceCharacters({
-                start: selection.start,
-                end: selection.start
-            }, str);
+            var startCol;
+            var row = selection.start.row - 1;
+            while (row++ < selection.end.row) {
+                startCol = row == selection.start.row ? selection.start.col : 0;
 
-            for (var row = selection.start.row + 1; row <= selection.end.row; row++) {
                 view.replaceCharacters({
-                    start: { row:  row, col: 0},
-                    end:   { row:  row, col: 0}
+                    start: { row:  row, col: startCol},
+                    end:   { row:  row, col: startCol}
                 }, str);
             }
 
             view.setSelection({
-                start: { row:  selection.start.row, col: selection.start.col},
-                end:   { row:  selection.end.row, col: selection.end.col + count}
+                start: selection.start,
+                end: {
+                    col: selection.end.col + tabstop,
+                    row:  selection.end.row
+                }
             });
         }
     }.bind(this));
 };
 
+/**
+ * Removes a tab of whitespaces. If there is no selection, whitespaces in front
+ * of the cursor will be removed. The number of removed whitespaces depends on
+ * the setting tabstop and the current cursor position. If there is a selection,
+ * then the selected lines are unindented by tabstop spaces.
+ */
 exports.untab = function(env, args, request) {
-    var view = env.get('view');
-    var tabstop = settings.get('tabstop');
-    var selection = view.getSelectedRange();
-    var count = 0;
-    var str = '';
-    var trailspaces = 0;
-    var leadspaces = 0;
-    var line = '';
-    
+    var view = env.view;
+
     view.groupChanges(function() {
+        var tabstop = settings.get('tabstop');
+        var selection = view.getSelectedRange();
+        var lines = env.model.lines;
+        var count = 0;
+
         if (m_range.isZeroLength(selection)){
-            line = view.getPath('layoutManager.textStorage').lines[selection.start.row];
+            count = Math.min(
+                lines[selection.start.row].substring(0, selection.start.col).
+                                                    match(/\s*$/)[0].length,
+                (selection.start.col - tabstop) % tabstop || tabstop);
 
-            for (var i = selection.start.col - 1; i >= 0 && trailspaces < 8; i--){
-                if (line.charAt(i) == ' ') {
-                    trailspaces++;
-                }
-                else {
-                    break;
-                }
-            }
+            view.replaceCharacters({
+                start: {
+                    col: selection.start.col - count,
+                    row: selection.start.row
+                },
+                end: selection.start
+            }, '');
 
-            count = tabstop -(selection.start.col - trailspaces) % tabstop;
-            if (count == trailspaces){
-                view.replaceCharacters({
-                    start: { row : selection.start.row, col: selection.start.col - trailspaces}, 
-                    end:   { row: selection.end.row, col: selection.end.col + leadspaces}
-                }, str);
-
-                view.moveCursorTo({ row: selection.end.row, col: selection.end.col - trailspaces});                 
-            }
+            view.moveCursorTo({
+                row:  selection.start.row,
+                col: selection.end.col - count
+            });
         } else {
-             count = tabstop;
-             line = view.getPath('layoutManager.textStorage').lines[selection.start.row];
+            var startCol;
+            var row = selection.start.row - 1;
+            while (row++ < selection.end.row) {
+                startCol = row == selection.start.row ? selection.start.col : 0;
 
-             if(line.slice(selection.start.col,line.length).match(/^\s*/)[0].length >= tabstop){ 
-                 view.replaceCharacters({
-                     start: { row : selection.start.row, col: selection.start.col}, 
-                     end:   { row: selection.start.row, col: selection.start.col + count}
-                 }, str)
-              }
+                count = Math.min(
+                    lines[row].substring(startCol).match(/^\s*/)[0].length,
+                    tabstop);
 
-             for (var row = selection.start.row + 1; row <= selection.end.row; row++) {
-                 line = view.getPath('layoutManager.textStorage').lines[row];
+                view.replaceCharacters({
+                     start: { row: row, col: startCol},
+                     end:   { row: row, col: startCol + count}
+                 }, '');
+            }
 
-                 if(line.slice(0,line.length).match(/^\s*/)[0].length >= tabstop){                                                                   
-                     view.replaceCharacters({
-                         start: { row : row, col: 0}, 
-                         end:   { row: row, col: count}
-                     }, str);
-                 }
-             }
-           
              view.setSelection({
                  start: { row:  selection.start.row, col: selection.start.col},
-                 end:   { row:  selection.end.row, col: selection.end.col}
+                 end:   { row:  selection.end.row, col: selection.end.col - count}
              })
        }
     }.bind(this));
