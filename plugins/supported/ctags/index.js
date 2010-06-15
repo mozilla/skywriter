@@ -35,16 +35,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var parse = require('narcissus').parse;
 var _ = require('underscore')._;
-var Interpreter = require('./interp').Interpreter;
 var TagReader = require('./reader').TagReader;
-var TagWriter = require('./writer').TagWriter;
 var Trait = require('traits').Trait;
 
 exports.Tags = function() {
     this.tags = [];
-    this.init();
 };
 
 exports.Tags.prototype = Object.create(Object.prototype, Trait.compose(Trait({
@@ -66,19 +62,6 @@ exports.Tags.prototype = Object.create(Object.prototype, Trait.compose(Trait({
         return tags.slice(start + 1, end);
     },
 
-    add: function(src, file, opts) {
-        if (opts === null || opts === undefined) {
-            opts = {};
-        }
-
-        var lines = src.split("\n");
-        var ast = parse(src, file, 1);
-
-        var interp = new Interpreter(ast, file, lines, opts);
-        interp.interpret();
-        Array.prototype.push.apply(this.tags, interp.tags);
-    },
-
     /** Returns all the tags that match the given identifier. */
     get: function(id) {
         return this._search(id, function(tag) { return tag.name === id; });
@@ -91,5 +74,5 @@ exports.Tags.prototype = Object.create(Object.prototype, Trait.compose(Trait({
             return tag.name.substring(0, len) === prefix;
         });
     }
-}), TagReader, TagWriter));
+}), TagReader));
 
