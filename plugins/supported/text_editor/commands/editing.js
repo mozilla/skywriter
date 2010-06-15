@@ -197,13 +197,117 @@ exports.tab = function(env, args, request) {
     var view = env.view;
     var tabstop = settings.get('tabstop');
     var selection = view.getSelectedRange();
-    var count = tabstop - selection.start.col % tabstop;
-
+    
+    var count = 0;
     var str = '';
-    for (var i = 0; i < count; i++) {
-        str += ' ';
-    }
+    var line = '';
+    var leadspaces = '';
+ 
+    view.groupChanges(function() {
+        if (m_range.isZeroLength(selection)){
+            line = view.getPath('layoutManager.textStorage').lines[selection.start.row];         
+            leadspaces = line.slice(selection.start.col,line.length).
+                                                 match(/^\s*/)[0].length;
 
-    view.insertText(str);
+            count = tabstop - selection.start.col % tabstop;
+            if ((count - leadspaces) <=0) {
+                count = tabstop + leadspaces;
+            }
+
+            for (var i = 0; i < count - leadspaces; i++) {
+                str += ' ';
+            }
+
+            view.replaceCharacters({
+                 start: selection.start,
+                 end:   selection.start
+             }, str);
+
+            view.moveCursorTo({ row: selection.end.row, col: selection.end.col + count});
+        } else {
+            count = tabstop;
+            for (var i = 0; i < count; i++) {
+                str += ' ';
+            }
+
+            view.replaceCharacters({
+                start: selection.start,
+                end: selection.start
+            }, str);
+
+            for (var row = selection.start.row + 1; row <= selection.end.row; row++) {
+                view.replaceCharacters({
+                    start: { row:  row, col: 0},
+                    end:   { row:  row, col: 0}
+                }, str);
+            }
+
+            view.setSelection({
+                start: { row:  selection.start.row, col: selection.start.col},
+                end:   { row:  selection.end.row, col: selection.end.col + count}
+            });
+        }
+    }.bind(this));
 };
 
+exports.untab = function(env, args, request) {
+    var view = env.get('view');
+    var tabstop = settings.get('tabstop');
+    var selection = view.getSelectedRange();
+    var count = 0;
+    var str = '';
+    var trailspaces = 0;
+    var leadspaces = 0;
+    var line = '';
+    
+    view.groupChanges(function() {
+        if (m_range.isZeroLength(selection)){
+            line = view.getPath('layoutManager.textStorage').lines[selection.start.row];
+
+            for (var i = selection.start.col - 1; i >= 0 && trailspaces < 8; i--){
+                if (line.charAt(i) == ' ') {
+                    trailspaces++;
+                }
+                else {
+                    break;
+                }
+            }
+
+            count = tabstop -(selection.start.col - trailspaces) % tabstop;
+            if (count == trailspaces){
+                view.replaceCharacters({
+                    start: { row : selection.start.row, col: selection.start.col - trailspaces}, 
+                    end:   { row: selection.end.row, col: selection.end.col + leadspaces}
+                }, str);
+
+                view.moveCursorTo({ row: selection.end.row, col: selection.end.col - trailspaces});                 
+            }
+        } else {
+             count = tabstop;
+             line = view.getPath('layoutManager.textStorage').lines[selection.start.row];
+
+             if(line.slice(selection.start.col,line.length).match(/^\s*/)[0].length >= tabstop){ 
+                 view.replaceCharacters({
+                     start: { row : selection.start.row, col: selection.start.col}, 
+                     end:   { row: selection.start.row, col: selection.start.col + count}
+                 }, str)
+              }
+
+             for (var row = selection.start.row + 1; row <= selection.end.row; row++) {
+                 line = view.getPath('layoutManager.textStorage').lines[row];
+
+                 if(line.slice(0,line.length).match(/^\s*/)[0].length >= tabstop){                                                                   
+                     view.replaceCharacters({
+                         start: { row : row, col: 0}, 
+                         end:   { row: row, col: count}
+                     }, str);
+                 }
+             }
+           
+             view.setSelection({
+                 start: { row:  selection.start.row, col: selection.start.col},
+                 end:   { row:  selection.end.row, col: selection.end.col}
+             })
+       }
+    }.bind(this));
+};
