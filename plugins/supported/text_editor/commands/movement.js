@@ -97,7 +97,7 @@ exports.selectUp = function(env, args, request) {
 var moveOrSelectEnd = function(env, shift, inLine) {
     var view = env.view, model = env.model;
     var lines = model.lines;
-    var selectedRange = view.getSelectedRange();
+    var selectedRange = view.getSelectedRange(true);
     var row = inLine ? selectedRange.end.row : lines.length - 1;
     view.moveCursorTo({ row: row, col: lines[row].length }, shift);
 };
@@ -124,7 +124,7 @@ exports.selectDocEnd = function(env, args, request) {
 
 var moveOrSelectStart = function(env, shift, inLine) {
     var view = env.view;
-    var range = view.getSelectedRange();
+    var range = view.getSelectedRange(true);
     var row = inLine ? range.end.row : 0;
     var position = { row: row, col: 0 };
     view.moveCursorTo(position, shift);
