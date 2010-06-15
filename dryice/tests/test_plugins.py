@@ -100,7 +100,7 @@ var metadata = {"foo": 1};
 
 def test_plugin_metadata():
     plugin_list = list(plugins.find_plugins(pluginpath))
-    assert len(plugin_list) == 5
+    assert len(plugin_list) == 6
     p = plugin_list[0]
     assert p.name == "plugin1"
     assert p.location_name == "testplugins"
@@ -179,8 +179,8 @@ def test_single_plugin_in_path():
     assert not errors
     
     plugin_list = plugins.find_plugins(temppath)
-    assert len(plugin_list) == 6
-    p = plugin_list[5]
+    assert len(plugin_list) == 7
+    p = plugin_list[6]
     assert p.name == "SinglePlugin"
     plugin_type = p.metadata['type']
     assert plugin_type == "user"

@@ -86,6 +86,15 @@ def test_manifest_errors():
     errors = manifest.errors
     assert errors
 
+def test_worker_in_manifest():
+    manifest = tool.Manifest(plugins=["plugin1", "WorkerPlugin"],
+        search_path = pluginpath)
+    errors = manifest.errors
+    plugins = manifest.plugins
+    assert "WorkerPlugin" not in plugins
+    wp = manifest.worker_plugins
+    assert "WorkerPlugin" in wp
+
 def find_with_context(s, substr):
     """Searches for substr in s, if it's not there returns None.
     If it's there, it returns a string with context.
@@ -108,23 +117,51 @@ def encsio():
 def test_js_creation():
     manifest = tool.Manifest(plugins=["plugin1"],
         search_path=pluginpath, include_tests=True)
-    output = encsio()
-    manifest.generate_output_files(output, encsio(), encsio())
-    output = output.getvalue()
+    shared_js = encsio()
+    main_js = encsio()
+    manifest.generate_output_files(shared_js, main_js, encsio(), encsio())
+    output = shared_js.getvalue()
     assert "var tiki =" in output
+    assert '"dependencies": {"plugin2": "0.0"}' in output
+    
+    output = main_js.getvalue()
     assert """tiki.register("::plugin1",""" in output
     assert """tiki.register("::plugin2",""" in output
     assert """tiki.module("plugin2:mycode",""" in output
     assert """exports.plugin2func = function""" in output
     assert "exports.Plugin = function" in output
+
+def test_js_worker_creation():
+    manifest = tool.Manifest(plugins=["WorkerPlugin"],
+        search_path=pluginpath)
+    shared_js = encsio()
+    main_js = encsio()
+    worker_js = encsio()
+    manifest.generate_output_files(shared_js, main_js, worker_js, encsio())
+    output = shared_js.getvalue()
+    assert "var tiki =" in output
+    assert "WorkerPlugin" not in output
+    assert '"dependencies": {"plugin2": "0.0"}' not in output
+    
+    output = main_js.getvalue()
+    assert "plugin2" not in output
+    assert "WorkerPlugin" not in output
+    
+    output = worker_js.getvalue()
     assert '"dependencies": {"plugin2": "0.0"}' in output
+    assert "WorkerPlugin" in output
+
+def test_js_worker_and_shared_creation():
+    manifest = tool.Manifest(plugins=["plugin1", "WorkerPlugin"],
+        search_path=pluginpath)
 
 def test_single_file_plugin_handling():
     manifest = tool.Manifest(plugins=["SingleFilePlugin1"],
         search_path=pluginpath, include_tests=True)
     output = encsio()
-    manifest.generate_output_files(output, encsio(), encsio())
-    output = output.getvalue()
+    main_js = encsio()
+    manifest.generate_output_files(output, main_js, encsio(), encsio())
+    output = main_js.getvalue()
     assert "exports.someFunction" in output
     assert "SingleFilePlugin1:index" in output
     match = find_with_context(output, 'tiki.module("SingleFilePlugin1:../')
@@ -139,10 +176,13 @@ def test_js_creation_with_core_test():
 """
     manifest = tool.Manifest.from_json(sample)
     output = encsio()
-    manifest.generate_output_files(output, encsio(), encsio())
+    main_js = encsio()
+    manifest.generate_output_files(output, main_js, encsio(), encsio())
     output = output.getvalue()
     assert "core_test" in output
     assert "var tiki =" in output
+    
+    output = main_js.getvalue()
     assert "plugindev" in output
 
 def test_js_creation_without_core_test():
@@ -153,7 +193,8 @@ def test_js_creation_without_core_test():
 """
     manifest = tool.Manifest.from_json(sample)
     output = encsio()
-    manifest.generate_output_files(output, encsio(), encsio())
+    main_js = encsio()
+    manifest.generate_output_files(output, main_js, encsio(), encsio())
     output = output.getvalue()
     assert "var tiki =" in output
     assert "plugindev" not in output
@@ -164,7 +205,7 @@ def test_css_creation():
         search_path=pluginpath, include_tests=True)
     output_js = encsio()
     output_css = encsio()
-    manifest.generate_output_files(output_js, output_css, encsio())
+    manifest.generate_output_files(output_js, encsio(), encsio(), output_css)
     output_css = output_css.getvalue()
     assert "color: white" in output_css
     assert "background-image: url(resources/plugin1/images/prompt1.png);" in output_css
@@ -221,7 +262,7 @@ def test_global_jquery_use():
         search_path=pluginpath, jquery="global",
         output_dir=tmppath)
     manifest.build()
-    jsfile = tmppath / "BespinEmbedded.js"
+    jsfile = tmppath / "BespinMain.js"
     output = jsfile.text("utf8")
     assert "exports.$ = window.$;" in output
     

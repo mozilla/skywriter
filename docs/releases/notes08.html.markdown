@@ -13,8 +13,6 @@ and APIs are subject to change.
 
 For *Bespin Embedded*:
 
-* Bespin Embedded does not attach correctly to a textarea (bug 535819;
-  workaround: change the textarea to a div first)
 * The editor does not yet support tab characters (bug 543999)
 
 For *Bespin Server*:
@@ -37,6 +35,7 @@ Features
   http://lesscss.org/ for more information)
 * Bespin includes a "white" theme plugin.
 * Embedded builds are now much smaller (less than half their previous size).
+* Bespin Embedded can now replace a textarea (bug 535819)
 * dryice now includes a simple server that you can run with the "-s" option.
   `dryice -s 9090 foo.json` will start a server on port 9090 that will
   rebuild the embedded editor (using the foo.json manifest) with each 
