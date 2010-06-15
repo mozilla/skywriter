@@ -828,34 +828,35 @@ util.mixin(exports.TextView.prototype, {
         var model = this.editor.layoutManager.textStorage;
 
         var lines = model.lines;
+        var line = '', count = 0;
+        var tabstop = settings.get('tabstop');
         var range = this.getSelectedRange();
 
         if (Range.isZeroLength(range)) {
             if (isBackspace) {
                 var start = range.start;
-                var tabstop = settings.get('tabstop');
-                var row = start.row, col = start.col;
-                var line = lines[row];
+                line = lines[start.row];
 
-                if (col > 0 && col % tabstop === 0 &&
-                        new RegExp('^\\s{' + col + '}').test(line)) {
-                    // 'Smart tab' behavior: delete a tab worth of whitespace.
-                    range = {
-                        start:  { row: row, col: col - tabstop },
-                        end:    range.end
-                    };
-                } else {
-                    // Just one character.
-                    range = {
-                        start:  model.displacePosition(range.start, -1),
-                        end:    range.end
-                    };
-                }
+                count = Math.min(
+                        line.substring(0, start.col).match(/\s*$/)[0].length,
+                        (start.col - tabstop) % tabstop || tabstop);
+                count = Math.max(count, 1) * -1;
+
+                range = {
+                    start:  model.displacePosition(start, count),
+                    end:    range.end
+                };
             } else {
-                // Extend the selection forward by one character.
+                var end = range.end;
+                line = lines[end.row];
+                count = Math.min(
+                        line.substring(end.col).match(/^\s*/)[0].length,
+                        tabstop);
+                count = Math.max(count, 1);
+
                 range = {
                     start:  range.start,
-                    end:    model.displacePosition(range.end, 1)
+                    end:    model.displacePosition(range.end, count)
                 };
             }
         }
