@@ -1,6 +1,8 @@
 {
     "description": "Provides a way to un-obtrusively notify users of asynchronous events",
-    "dependencies": { },
+    "dependencies": {
+        "settings": "0.0.0"
+    },
     "provides":
     [
         {
