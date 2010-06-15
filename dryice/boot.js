@@ -183,6 +183,12 @@ bespin.useBespin = function(element, options) {
 
             // The div container is the new element that is passed to appconfig.
             baseConfig.element = container;
+
+            // Check if the textarea has the 'readonly' flag and set it
+            // on the config object so that the editor is readonly.
+            if (!util.none(element.getAttribute('readonly'))) {
+                baseConfig.readOnly = true;
+            }
         } else {
             baseConfig.element = element;
         }
