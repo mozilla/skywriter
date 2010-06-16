@@ -142,7 +142,9 @@ will be deleted before the build.""")
         self.worker = location_of("worker.js", worker)
         
         self.config = config if config is not None else {}
-            
+        self._created_javascript = set()
+        self._set_package_lists()
+
     @classmethod
     def from_json(cls, json_string, overrides=None):
         """Takes a JSON string and creates a Manifest object from it."""
@@ -210,11 +212,14 @@ will be deleted before the build.""")
         return combiner.Package(plugin.name, plugin.dependencies)
 
     def generate_output_files(self, shared_js_file, main_js_file, 
-            worker_js_file, css_file,
-            static_packages=None, dynamic_packages=None, worker_packages=None):
+            worker_js_file, css_file):
         """Generates the combined JavaScript file, putting the
         output into output_file."""
         output_dir = self.output_dir
+        shared_packages = self.shared_packages
+        static_packages = self.static_packages
+        worker_packages = self.worker_packages
+        dynamic_packages = self.dynamic_packages
 
         if self.errors:
             raise BuildError("Errors found, stopping...", self.errors)
@@ -225,11 +230,6 @@ will be deleted before the build.""")
         exclude_tests = not self.include_tests
 
         # finally, package up the plugins
-
-        if static_packages is None or dynamic_packages is None or \
-                worker_packages is None:
-            dynamic_packages, static_packages, worker_packages = \
-                self.get_package_lists()
 
         def process(package, output, dynamic):
             plugin = self.get_plugin(package.name)
@@ -257,7 +257,9 @@ will be deleted before the build.""")
             if dynamic:
                 combine_output.write("bespin.tiki.script(%s);" %
                     dumps(plugin_filename))
-
+        
+        for package in shared_packages:
+            process(package, shared_js_file, False)
         for package in dynamic_packages:
             process(package, main_js_file, True)
         for package in static_packages:
@@ -279,7 +281,7 @@ will be deleted before the build.""")
         bundled_plugins = set([ p.name for p in all_packages ])
         self.bundled_plugins = bundled_plugins
 
-        shared_js_file.write("""
+        main_js_file.write("""
 document.addEventListener("DOMContentLoaded", function() {
     bespin.tiki.require("bespin:plugins").catalog.loadMetadata(%s);;
 }, false);
@@ -321,10 +323,18 @@ document.addEventListener("DOMContentLoaded", function() {
 
         return result
 
-    def get_package_lists(self):
+    def _set_package_lists(self):
         """Returns a tuple consisting of the dynamic plugins, the static
         plugins, and the worker plugins, in that order, along with all of their
         dependencies."""
+        if self.errors:
+            return
+            
+        plugins = self.plugins
+        worker_plugins = self.worker_plugins
+        dynamic_plugins = self.dynamic_plugins
+        
+        
         # Filter the packages into static and dynamic parts. If a package is
         # dynamically loaded, all of its dependencies must also be dynamically
         # loaded.
@@ -339,17 +349,26 @@ document.addEventListener("DOMContentLoaded", function() {
                 to_visit += pkg.dependencies
             return pkgs
 
-        pkgs = closure(self.dynamic_plugins + self.plugins)
-        dynamic_packages = self.get_dependencies(pkgs, self.dynamic_plugins)
+        pkgs = closure(dynamic_plugins + plugins)
+        dynamic_packages = self.get_dependencies(pkgs, dynamic_plugins)
         dynamic_names = set([ pkg.name for pkg in dynamic_packages ])
 
-        deps = self.get_dependencies(pkgs, self.plugins)
+        deps = self.get_dependencies(pkgs, plugins)
         static_packages = [ p for p in deps if p.name not in dynamic_names ]
 
-        pkgs = closure(self.worker_plugins)
-        worker_packages = self.get_dependencies(pkgs, self.worker_plugins)
-
-        return dynamic_packages, static_packages, worker_packages
+        pkgs = closure(worker_plugins)
+        worker_packages = self.get_dependencies(pkgs, worker_plugins)
+        
+        static_set = set(static_packages)
+        worker_set = set(worker_packages)
+        shared_set = static_set.intersection(worker_set)
+        worker_set.difference_update(shared_set)
+        static_set.difference_update(shared_set)
+        
+        self.shared_packages = list(shared_set)
+        self.static_packages = list(static_set)
+        self.worker_packages = list(worker_set)
+        self.dynamic_packages = dynamic_packages
         
     def _output_unbundled_plugins(self, output_dir):
         if not output_dir.exists():
@@ -383,11 +402,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
         output_dir.makedirs()
 
-        dynamic_packages, static_packages, worker_packages = \
-            self.get_package_lists()
-        
-        self._created_javascript = set()
-
         filenames = [
             output_dir / f for f in
             ("BespinEmbedded.js", "BespinMain.js", "BespinWorker.js", "BespinEmbedded.css")
@@ -399,15 +413,14 @@ document.addEventListener("DOMContentLoaded", function() {
         
         files = [ codecs.open(f, 'w', 'utf8') for f in filenames ]
         [ jsfile, mainfile, workerfile, cssfile ] = files
-        self.generate_output_files(jsfile, mainfile, workerfile, cssfile,
-            static_packages, dynamic_packages, worker_packages)
+        self.generate_output_files(jsfile, mainfile, workerfile, cssfile)
         for f in files:
             f.close()
         
         if self.unbundled_plugins:
             self._output_unbundled_plugins(self.unbundled_plugins)
 
-        for package in static_packages + dynamic_packages + worker_packages:
+        for package in self.static_packages + self.dynamic_packages + self.worker_packages + self.shared_packages:
             plugin = self.get_plugin(package.name)
             resources = plugin.location / "resources"
             if resources.exists() and resources.isdir():

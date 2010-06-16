@@ -122,9 +122,9 @@ def test_js_creation():
     manifest.generate_output_files(shared_js, main_js, encsio(), encsio())
     output = shared_js.getvalue()
     assert "var tiki =" in output
-    assert '"dependencies": {"plugin2": "0.0"}' in output
     
     output = main_js.getvalue()
+    assert '"dependencies": {"plugin2": "0.0"}' in output
     assert """tiki.register("::plugin1",""" in output
     assert """tiki.register("::plugin2",""" in output
     assert """tiki.module("plugin2:mycode",""" in output
@@ -134,6 +134,11 @@ def test_js_creation():
 def test_js_worker_creation():
     manifest = tool.Manifest(plugins=["WorkerPlugin"],
         search_path=pluginpath)
+    
+    worker_names = [package.name for package in manifest.worker_packages]
+    assert "WorkerPlugin" in worker_names
+    assert "plugin2" in worker_names
+    
     shared_js = encsio()
     main_js = encsio()
     worker_js = encsio()
@@ -150,10 +155,47 @@ def test_js_worker_creation():
     output = worker_js.getvalue()
     assert '"dependencies": {"plugin2": "0.0"}' in output
     assert "WorkerPlugin" in output
+    assert """tiki.module("plugin2""" in output
 
 def test_js_worker_and_shared_creation():
     manifest = tool.Manifest(plugins=["plugin1", "WorkerPlugin"],
         search_path=pluginpath)
+    
+    worker_names = [package.name for package in manifest.worker_packages]
+    assert "WorkerPlugin" in worker_names
+    assert "plugin2" not in worker_names
+    
+    shared_names = [package.name for package in manifest.shared_packages]
+    assert "plugin2" in shared_names
+    
+    main_names = [package.name for package in manifest.static_packages]
+    assert "plugin1" in main_names
+    assert "plugin2" not in main_names
+    assert "WorkerPlugin" not in main_names
+    
+    shared_js = encsio()
+    main_js = encsio()
+    worker_js = encsio()
+    manifest.generate_output_files(shared_js, main_js, worker_js, encsio())
+    output = shared_js.getvalue()
+    
+    assert "var tiki =" in output
+    assert "WorkerPlugin" not in output
+    assert "plugin1" not in output
+    assert """tiki.module("plugin2""" in output
+    
+    output = main_js.getvalue()
+    print "OP", output
+    assert "plugin1" in output
+    assert "WorkerPlugin" not in output
+    assert """tiki.module("plugin2""" not in output
+    assert '"dependencies": {"plugin2": "0.0"}' in output
+    
+    output = worker_js.getvalue()
+    assert '"dependencies": {"plugin2": "0.0"}' in output
+    assert "WorkerPlugin" in output
+    assert """tiki.module("plugin2""" not in output
+    
 
 def test_single_file_plugin_handling():
     manifest = tool.Manifest(plugins=["SingleFilePlugin1"],

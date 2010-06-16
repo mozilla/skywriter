@@ -60,6 +60,7 @@ Features
 * Plugins can be dynamically loaded in embedded builds.
 * Commands and embedded users have the same convenient APIs now for
   manipulating the editor (bug 568217)
+* Added indent/unindent functionality (select a block, press tab)
 
 Fixes
 -----
