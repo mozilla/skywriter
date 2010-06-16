@@ -60,7 +60,7 @@ exports.whiteTheme = function() {
                 h1: {
                    font:        "'MuseoSans', Helvetica",
                    font_size:   '2.8em',
-                   color:       "#2C3480",
+                   color:       "#2C3480"
                 },
 
                 link_color:     '@global_link_color',
@@ -106,7 +106,7 @@ exports.whiteTheme = function() {
             // Variables for the containers.
             container: {
                 background:     '#F8F8F8',
-                border:         '1px solid black',
+                border:         '1px solid black'
             },
 
             // Variables for a menu - e.g. the command line menu.
@@ -141,11 +141,11 @@ exports.whiteTheme = function() {
                 color:          '#78788D',
 
                 active: {
-                    color:      'white',
+                    color:      'white'
                 },
 
                 hover: {
-                    color:      'white',
+                    color:      'white'
                 }
             },
 
@@ -155,11 +155,11 @@ exports.whiteTheme = function() {
                 color:          '#344DB1',
 
                 active: {
-                    color:      'white',
+                    color:      'white'
                 },
 
                 hover: {
-                    color:      'white',
+                    color:      'white'
                 }
             }
         },
@@ -219,5 +219,5 @@ exports.whiteTheme = function() {
                 barFillGradientBottomStop: "rgb(104, 104, 104)"
             }
         }
-    }
+    };
 };

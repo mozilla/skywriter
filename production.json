@@ -1,7 +1,6 @@
 {
-    "plugins": ["hosted", "screen_theme", "plugindev", "uicommands"],
+    "plugins": ["embedded", "screen_theme", "whitetheme", "plugindev", "uicommands"],
     "output_dir": "tmp/BespinServer/static",
-    "include_core_test": true,
-    "boot_file": "tmp/static/editor/editor.js",
+    "include_tests": true,
     "unbundled_plugins": "tmp/BespinServer/plugins"
 }

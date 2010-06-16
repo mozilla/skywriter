@@ -421,7 +421,7 @@ def dist(options):
     sdist = path("dist") / ("dryice-%s.tar.gz" % (options.version.number))
     sdist.copy(output_dir / "libs")
     
-    yui_compressor = path("abbot/vendor/yui-compressor/yuicompressor-2.4.2.jar")
+    yui_compressor = path("external/yui_compressor/build/yuicompressor-2.4.2.jar")
     closure_compiler = options.fetch_compiler.dest_dir / "compiler.jar"
     
     replaced_lines = update_javascript_version()

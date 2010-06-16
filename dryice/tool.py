@@ -461,6 +461,12 @@ bespin.tiki.require("bespin:plugins").catalog.loadMetadata(%s);
             " --type css -o BespinEmbedded.compressed.css"
             " BespinEmbedded.css" % compressor, shell=True,
             cwd=self.output_dir)
+        uncompressed = self.output_dir / "BespinEmbedded.css"
+        compressed = self.output_dir / "BespinEmbedded.compressed.css"
+        if not compressed.exists():
+            raise BuildError("Unable to compress the css file at " + uncompressed)
+        uncompressed.rename(self.output_dir / "BespinEmbedded.uncompressed.css")
+        compressed.rename(uncompressed)
 
 
 def main(args=None):
