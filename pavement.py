@@ -94,9 +94,6 @@ options(
 )
 
 TIKI_TEMPLATE = u"""
-if ("undefined" === typeof bespin) {
-    var bespin = {};
-}
 (function() {
 %(preamble)s
 tiki.register('%(package_id)s', {

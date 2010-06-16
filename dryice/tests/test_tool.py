@@ -122,6 +122,11 @@ def test_js_creation():
     manifest.generate_output_files(shared_js, main_js, encsio(), encsio())
     output = shared_js.getvalue()
     assert "var tiki =" in output
+    assert "exports.Plugin = function" in output
+    # confirm that boot in not in the shared script
+    assert "bespin.useBespin" not in output
+    # confirm that script2loader is in the shared script
+    assert "importScript" in output
     
     output = main_js.getvalue()
     assert '"dependencies": {"plugin2": "0.0"}' in output
@@ -129,7 +134,7 @@ def test_js_creation():
     assert """tiki.register("::plugin2",""" in output
     assert """tiki.module("plugin2:mycode",""" in output
     assert """exports.plugin2func = function""" in output
-    assert "exports.Plugin = function" in output
+    assert "bespin.useBespin" in output
 
 def test_js_worker_creation():
     manifest = tool.Manifest(plugins=["WorkerPlugin"],
@@ -167,6 +172,7 @@ def test_js_worker_and_shared_creation():
     
     shared_names = [package.name for package in manifest.shared_packages]
     assert "plugin2" in shared_names
+    assert "bespin" in shared_names
     
     main_names = [package.name for package in manifest.static_packages]
     assert "plugin1" in main_names
@@ -304,7 +310,7 @@ def test_global_jquery_use():
         search_path=pluginpath, jquery="global",
         output_dir=tmppath)
     manifest.build()
-    jsfile = tmppath / "BespinMain.js"
+    jsfile = tmppath / "BespinEmbedded.js"
     output = jsfile.text("utf8")
     assert "exports.$ = window.$;" in output
     

@@ -1,5 +1,8 @@
 {
     "name": "bespin",
+    "environments": {
+        "main": true, "worker": true
+    },
     "dependencies": {
         "jquery": "1.4.0"
     }

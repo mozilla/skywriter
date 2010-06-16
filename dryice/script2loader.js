@@ -35,15 +35,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-if (typeof(bespin) === "undefined") {
-    bespin = {};
-}
+// Responsible for loading the second script (BespinMain 
+// or BespinWorker)
 
-var link = document.getElementById("bespin_base");
-if (link) {
-    var href = link.href;
-    bespin.base = href.substring(href.length - 1) !== "/" ? href + "/" : href;
+// check to see if we're in a worker
+if (typeof(window) === "undefined") {
+    importScripts("BespinWorker.js");
 } else {
-    bespin.base = "";
+    (function() {
+        var mainscript = document.createElement("script");
+        mainscript.setAttribute("src", bespin.base + "BespinMain.js");
+        var head = document.getElementsByTagName("head")[0];
+        head.appendChild(mainscript);
+    })();
 }
-

@@ -62,6 +62,7 @@ class BuildError(Exception):
 
 sample_dir = path(__file__).dirname() / "samples"
 _boot_file = path(__file__).dirname() / "boot.js"
+_script2loader = path(__file__).dirname() / "script2loader.js"
 
 def ignore_css(src, names):
     return [name for name in names if name.endswith(".css")]
@@ -139,7 +140,7 @@ will be deleted before the build.""")
             return static_path if static_path.exists() else path("lib") / file
 
         self.loader = location_of("tiki.js", loader)
-        self.worker = location_of("worker.js", worker)
+        self.worker = location_of("BespinEmbedded.js", worker)
         
         self.config = config if config is not None else {}
         self._created_javascript = set()
@@ -286,11 +287,19 @@ document.addEventListener("DOMContentLoaded", function() {
     bespin.tiki.require("bespin:plugins").catalog.loadMetadata(%s);;
 }, false);
 """ % all_md)
-
+        
+        
+        shared_md = make_plugin_metadata(shared_packages)
+        shared_js_file.write("""
+bespin.tiki.require("bespin:plugins").catalog.loadMetadata(%s);
+""" % shared_md)
+        
+        shared_js_file.write(_script2loader.text("utf8").encode("utf8"))
+        
         if self.boot_file:
             boot_text = self.boot_file.text("utf8")
             boot_text = boot_text % (dumps(self.config),)
-            shared_js_file.write(boot_text.encode("utf8"))
+            main_js_file.write(boot_text.encode("utf8"))
 
         worker_js_file.write("bespin = {};\n")
         worker_js_file.write(self.loader.text("utf8"))

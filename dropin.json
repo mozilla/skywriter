@@ -1,6 +1,5 @@
 {
-    "plugins": ["embedded"],
-    "worker_plugins": ["html", "javascript", "syntax_worker"],
+    "plugins": ["embedded", "html", "javascript", "syntax_worker"],
     "output_dir": "tmp/BespinDropIn",
     "include_sample": true
 }

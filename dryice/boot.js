@@ -35,7 +35,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// This script appears at the end of BespinEmbeddedMain and is responsible
+// for firing up Bespin on the page.
 // This module depends only on Tiki.
+
 
 (function() {
 /**
