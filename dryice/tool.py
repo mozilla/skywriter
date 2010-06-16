@@ -277,7 +277,7 @@ will be deleted before the build.""")
         # this comes after the plugins, because some plugins
         # may need to be importable at the time the metadata
         # becomes available.
-        all_packages = static_packages + dynamic_packages
+        all_packages = static_packages + dynamic_packages + worker_packages
         all_md = make_plugin_metadata(all_packages)
         bundled_plugins = set([ p.name for p in all_packages ])
         self.bundled_plugins = bundled_plugins
@@ -300,9 +300,6 @@ bespin.tiki.require("bespin:plugins").catalog.loadMetadata(%s);
             boot_text = self.boot_file.text("utf8")
             boot_text = boot_text % (dumps(self.config),)
             main_js_file.write(boot_text.encode("utf8"))
-
-        worker_js_file.write("bespin = {};\n")
-        worker_js_file.write(self.loader.text("utf8"))
 
         for package in worker_packages:
             process(package, worker_js_file, False)

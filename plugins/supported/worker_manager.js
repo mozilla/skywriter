@@ -63,7 +63,6 @@ function WorkerManager(pointer) {
     var moduleId = packageId + ":" + (m[2] != null ? m[2] : "index");
 
     var base = bespin != null && bespin.base != null ? bespin.base : "";
-    console.log("Going to load up the worker: ", base + "BespinEmbedded.js");
     var worker = new Worker(base + "BespinEmbedded.js");
 
     worker.onmessage = this._onMessage.bind(this);

@@ -38,7 +38,12 @@
 "define metadata";
 ({
     "description": "Easy-to-use basis for syntax engines",
-    "dependencies": { "syntax_directory": "0.0.0", "underscore": "0.0.0" }
+    "environments": { "worker": true },
+    "dependencies": { 
+        "syntax_directory": "0.0.0", 
+        "underscore": "0.0.0",
+        "syntax_worker": "0.0.0"
+    }
 });
 "end";
 

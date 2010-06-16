@@ -38,6 +38,7 @@
 "define metadata";
 ({
     "description": "Coordinates multiple syntax engines",
+    "environments": { "worker": true },
     "dependencies": { "syntax_directory": "0.0.0", "underscore": "0.0.0" }
 });
 "end";

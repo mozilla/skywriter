@@ -154,8 +154,8 @@ def test_js_worker_creation():
     assert '"dependencies": {"plugin2": "0.0"}' not in output
     
     output = main_js.getvalue()
-    assert "plugin2" not in output
-    assert "WorkerPlugin" not in output
+    assert "plugin2func" not in output
+    assert "exports.inAWorker" not in output
     
     output = worker_js.getvalue()
     assert '"dependencies": {"plugin2": "0.0"}' in output
@@ -191,9 +191,8 @@ def test_js_worker_and_shared_creation():
     assert """tiki.module("plugin2""" in output
     
     output = main_js.getvalue()
-    print "OP", output
     assert "plugin1" in output
-    assert "WorkerPlugin" not in output
+    assert "exports.inAWorker" not in output
     assert """tiki.module("plugin2""" not in output
     assert '"dependencies": {"plugin2": "0.0"}' in output
     
