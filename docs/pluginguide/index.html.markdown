@@ -38,22 +38,25 @@ plugin do something is to define the appropriate metadata.
 
 Bespin plugins feature *extensions* that plug into *extension points*. As an
 example of this, the simple syntax highlighter defines an extension point
-called "syntax.simple.highlighter". The JavaScript highlighter is one extension
+called "syntax". The JavaScript highlighter is one extension
 that plugs into that extension point. The metadata for the JavaScript
 highlighter looks like this:
 
     :::js
     {
-        "depends": [ "SyntaxManager" ],
+        "description": "JavaScript syntax highlighter",
+        "dependencies": { "standard_syntax": "0.0.0" },
+        "environments": { "worker": true },
         "provides": [
             {
                 "ep": "syntax",
                 "name": "js",
-                "pointer": "#JSSyntax"
+                "pointer": "#JSSyntax",
+                "fileexts": [ "js", "json" ]
             }
         ]
     }
-
+    
 The metadata is an object specified in JSON format. `provides` is a list of
 extensions that are provided by this plugin. Each one of the extensions is
 given as an object with one attribute that is always there: "ep". `ep` is the
@@ -117,14 +120,43 @@ the plugin is to be reloaded. Here's an example:
         // remove the UI from the DOM, parent view, etc.
     };
 
-## CSS, Images and Other Files ##
+## Stylesheets ##
 
-Without any additional configuration, you can include CSS files the provide styles for the UI elements in your plugins. To do so, you create a resources directory with the CSS files at the top level of that directory.
+If your plugin provides a user interface, you will want to use a stylesheet to
+determine how the user interface will look. Bespin uses [LESS](http://lesscss.org)
+files with themeVariables to allow user interface components to be changed
+globally based on themes. For example, if you make a dialog box that dialog
+could have its background and foreground colors adjusted by the theme.
 
-You can also include images in your plugins. Create an images directory under resources and put your images in there. In your CSS file, you can use relative links to refer to the images. For example, if you have a directory structure like this:
+If you have stylesheets that need to be loaded, you will tell Bespin's
+theme_manager about them through the `themestyles` extension point. Here's
+an example:
+
+    :::js
+    {
+        "ep": "themestyles",
+        "url": [
+            "article.less",
+            "cli.less",
+            "menu.less",
+            "requestOutput.less",
+            "global.less"
+        ]
+    }
+
+The URLs are all relative to the resources directory (see the next section).
+
+Themes are covered [elsewhere in the Plugin Guide](theme.html).
+
+## Images and Other Files ##
+
+You can include images in your plugins. Create an images directory under 
+resources and put your images in there. In your CSS file, you can use relative
+links to refer to the images. For example, if you have a directory structure 
+like this:
 
     resources/
-        mystyles.css
+        mystyles.less
         images/
             bg.png
         data/

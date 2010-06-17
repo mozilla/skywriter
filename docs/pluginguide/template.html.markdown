@@ -17,7 +17,7 @@ like easy to use etc, but specifically:
 Creating a Template
 -------------------
 
-Create a file called `plugins/<section>/<plugin>/templates/whatever.htmlt`. The
+Create a file called `templates/whatever.htmlt` in your plugin. The
 important parts are that the file is in a templates directory at in the root of
 you plugin, and called `*.htmlt`.
 
