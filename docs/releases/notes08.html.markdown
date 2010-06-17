@@ -5,6 +5,12 @@ title: Bespin 0.8 ("Cheviot") Release Notes
 
 [Up](index.html) - Next Release - [Previous Release](notes073.html)
 
+Important Changes
+-----------------
+
+Note that there have been some significant changes to the embedded API
+between Bespin 0.7 and 0.8. See the "Upgrade Notes" section below.
+
 Known Issues
 ------------
 
@@ -61,6 +67,7 @@ Features
 * Commands and embedded users have the same convenient APIs now for
   manipulating the editor (bug 568217)
 * Added indent/unindent functionality (select a block, press tab)
+* The only name exposed to the page in embedded builds is "bespin".
 
 Fixes
 -----
@@ -76,3 +83,112 @@ Fixes
   (bug 564789)
 * Document scrolled to the top when entering text in the editor
   (bug 565333)
+
+Upgrade Notes
+-------------
+
+Before Bespin 0.8, the booting code for the 'embedded' and the 'server' versions
+of Bespin was different. Because of this, a few plugins available to the 'server'
+version couldn't be used in the 'embedded' case and the API offered in the 'embedded'
+case was not available in the 'server' version of Bespin. Starting with Bespin 0.8,
+the 'embedded' and 'server' versions use the same codebase.
+
+This together with a few other modifications and improvements requires that
+you change the way you create a new Bespin instance. Before, things looked like this:
+
+    :::js
+    // Get the embedded plugin.
+    var embedded = tiki.require("embedded");
+    // Create a new Bespin instance.
+    var bespin = embedded.useBespin("edit");
+    // Change the value.
+    bespin.value = 'Hello world!';
+
+As with Bespin 0.8:
+
+    :::js
+    // Create a new Bespin instance.
+    // This returns a promise which is resolved when the Bespin is ready.
+    bespin.useBespin("edit").then(function(env) {
+        // Get the editor.
+        var editor = env.editor;
+        // Change the value.
+        editor.value = 'Hello world!';
+    }, function(error) {
+        throw new Error("Launch failed: " + error);
+    });
+
+Let's take a closer look:
+
+* The _embedded_ plugin is gone. Instead, you call the `useBespin` function from
+  the `bespin` object. If you need to get at tiki to load a module, you can find it
+  at `bespin.tiki`.
+* `bespin.useBespin(...)` can't return the Bespin instance directly any more.
+  This is related to a few new features that we introduced with 0.8. For example, the
+  _theme\_manager_ plugin loads all the styleFiles from the server and Bespin can't
+  continue launching until some basic parts are there. At the same time, we
+  don't want to block the main thread until this is done. Instead, the
+  useBespin() function returns a _promise_, that is resolved after the Bespin instance
+  is ready to be used and rejects the promise if something went wrong.
+* Your callback function for the promise (the function that is passed to "then")
+  is passed one argument: `env`. `env` is the Bespin enviroment
+  for your newly created Bespin. You get the Bespin code editor object by executing
+  `env.editor`. This is the same `env` object that is passed to commands
+  that you create.
+* Once you have the editor object, you can use the what we call the _Editor API_
+  to interact with it. You find the complete [API here][1].
+  Many function calls in the 0.7 API have been replaced 
+  with getters and setters in 0.8, which makes the code more readable. 
+  Imagine you want to make the current selected text upper case. 
+  Before, you had to write:
+
+    :::js
+    // This holds the Bespin editor;
+    var editor;
+    // Make the current selected text upper case.
+    editor.replaceSelection(editor.getSelectedText().toUpperCase());
+
+With the new _Editor API_ this changed to:
+
+    :::js
+    // This holds the Bespin editor;
+    var editor;
+    // Make the current selected text upper case.
+    editor.selectedText = editor.selectedText.toUpperCase();
+
+* If you change the size of the Bespin container, you have to call the
+  `dimensionsChanged` function, which is now on the `env` object. When the window
+  resizes, this event is fired automatically:
+
+    :::js
+    // Tell Bespin that the container size changed.
+    env.dimensionsChanged();
+
+
+* You can still dynamically initialize Bespin on your page. The
+  `bespin` property on the DOM node is now the `env` (environment) variable
+  described above:
+
+    :::html
+    <div id='edit' class='bespin'>Bespin editor goes here!</div>
+
+    <script>
+        // This function is called when all Bespin instances on the page were
+        // initialized.
+        //
+        // Make sure you access the Bespin instance *AFTER* the window.onBespinLoad
+        // function was called.
+        window.onBespinLoad = function() {
+            // Get the DOM node with the Bespin instance inside
+            var edit = document.getElementById("edit");
+            // Get the environment variable.
+            var env = edit.bespin;
+            // Get the editor.
+            var editor = env.editor;
+            // Change the value and move to the secound line.
+            editor.value = "Initial Content\nWith 2 lines";
+            editor.setLineNumber(2);
+        };
+    </script>
+
+[1]: ../pluginguide/editorapi.html "Editor API"

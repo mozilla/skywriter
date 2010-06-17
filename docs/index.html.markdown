@@ -7,7 +7,7 @@ subtitle: Using and Extending Bespin
 [The Glossary](glossary.html) will clear up any questions you have about terminology used on the project.
 
 Find out what's new, in the
-[Bespin 0.7.3 Release Notes](releases/notes073.html).
+[Bespin 0.8 Release Notes](releases/notes08.html).
 
 User's Guide
 ------------
@@ -19,13 +19,13 @@ Plugin Author Guide
 -------------------
 
 * [Introduction](pluginguide/index.html)
-* [Built-in Extension Points](pluginguide/extpoints.html)
 * [Distributing Plugins](pluginguide/distributing.html)
+* [Editor API](pluginguide/editorapi.html)
+* [Automated Testing](pluginguide/testing.html)
+* [Templates](pluginguide/template.html)
+* [Themes](pluginguide/theme.html)
 * [Syntax Highlighting](pluginguide/syntax.html)
 * [Keymapping](pluginguide/keymapping.html)
-* [Editor API](pluginguide/editorapi.html)
-* [Automated Testing](devguide/testing.html)
-* [Themes](pluginguide/theme.html)
 
 Embedder's Guide
 ----------------
@@ -33,7 +33,6 @@ Embedder's Guide
 * [Introduction](embedding/index.html)
 * [Creating a custom, embedded Bespin](embedding/building.html)
 * [Bespin Startup Options](embedding/bespinoptions.html)
-* [New Stuff](embedding/newstuff.html)
 
 
 Developer's Guide
