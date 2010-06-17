@@ -94,11 +94,13 @@ Working with Files
 ------------------
 
 Bespin supports a filesystem of files and directories, just like any other
-editor. When you're entering a command that uses a file or directory in 
-Bespin, the file that you specify on the command line is taken to be
-relative to the file that is currently open in the editor. The `ls` command lists the files. So, `ls` alone gives you the files in the directory that the currently opened file is in. `ls /` gives you the files at the root.
+editor. You can use the `cd` command to change the current working directory
+and display this one by executing `pwd`. All file commands like `ls` to display
+a list of files in the current directory or `open` to open a file work hand
+in hand with the current working directory. You can also address files from the
+root like `open /foo/bar.js`.
 
-The `newfile` command gives you a blank buffer to start coding in. You then use `saveas` to put that newfile in it's place. Note that when you do so, you'll need to provide an absolute path to where the file should go.
+The `newfile` command gives you a blank buffer to start coding in. You then use `saveas` to put that newfile in it's place. 
 
 You can delete a file or directory with the `rm` command. You should add a 
 trailing "/" whenever you want to work with a directory.
@@ -110,8 +112,8 @@ Settings
 --------
 
 Our plan is to make Bespin a very configurable editor. You can see the list
-of available settings and change them by using the `set` command.
-
+of available settings and change them by using the `set` command. It's important,
+that settings are used the same on all instances of Bespin.
 
 Bespin's History
 ----------------
