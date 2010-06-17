@@ -20,15 +20,15 @@ Here is a simple manifest:
 
     :::js
     {
-        "include_core_test": true,
-        "plugins": ["Editor", "CommandLine"]
+        "include_tests": true,
+        "plugins": ["embedded", "command_line"]
     }
 
-You'll want the Editor plugin, to be sure. Embedded builds will usually use
-the Embedded plugin, which depends on the Editor plugin. When you list a 
+You'll want the `embedded` plugin, to be sure. This plugin actually does 
+nothing other than include a collection of plugins that are required to make
+the editor work. When you list a 
 plugin in the manifest, the plugin and all of its dependencies will be
-incorporated into the final build. The manifest for the Drop In package,
-for example, just lists the "Embedded" plugin and that's all it needs.
+incorporated into the final build.
 
 ## Manifest Options ##
 
@@ -55,11 +55,19 @@ plugins
 :   list of plugins (but you don't need to list their dependencies) to include
     in the build output
 
+dynamic_plugins
+:   list of plugins that should be available for dynamic loading. These will
+    end up in a "plugins" directory and their metadata will be available to
+    your Embedded Bespin plugin system
+
 search_path
 :   provide a list of relative (to the current directory) or absolute paths
     to search for plugins. These paths are added to the beginning of the
     search path. The directories within the "plugins" directory in the current
     directory are automatically added to the end of the search path.
+
+config
+:   the default [appconfig](appconfig.html) to use in the build
 
 ## Using Bespin with your own jQuery ##
 
@@ -90,12 +98,12 @@ manifest that looks like this:
 
     {
         "output_dir": "tmp",
-        "plugins": ["Embedded", "HelloWorld"],
+        "plugins": ["embedded", "hello_world"],
         "include_sample": true,
         "search_path": ["../MyPlugins"]
     }
 
-Finally, we create the plugin itself. This is a file called HelloWorld.js
+Finally, we create the plugin itself. This is a file called hello\_world.js
 in the MyPlugins directory that you just created.
 
     "define metadata";
@@ -128,6 +136,20 @@ BespinEmbedded.js. That one will actually include your plugin! Open the
 sample.html file in your web browser, click on the editor and press
 cmd-I (ctrl-I on Windows) and you'll see your alert pop up.
 
+## The dryice Server ##
+
+If you're hacking on plugins purely with the Bespin Embedded Customizable
+package, it gets annoying to have to re-run dryice every time you make a
+change. For this reason, dryice has a simple server that you can run. The
+simplest way to get going is:
+
+    python dryice.py -s 8080 ../mybespin.json
+
+This will start the server on port 8080, using the manifest file that
+we created in the previous section. Just point your browser to
+[http://localhost:8080/]() and you should see your custom Bespin build!
+It will be rebuilt each time you reload the page.
+
 ## Building ##
 
 Use the "dryice" command line tool to build according to the manifest.
@@ -157,13 +179,3 @@ a string, it should be enclosed in quotes. Reminder: in many Unix shells
 you'll need to put a backslash before the " character so that the shell knows
 that you want to include that literally in the parameter to the command.
 
-## Bespin Server ##
-
-It is not necessary to use the Bespin Server when you're working with Bespin
-Embedded. However, it may be useful to do so if you're developing your own
-custom behavior for Bespin. The Bespin Server has the ability to dynamically
-load plugins, whereas the Bespin Embedded package does not -- the plugins
-are baked right into the .js file. You would find yourself running dryice
-an awful lot to develop your own plugins. A better way to go would be to
-develop your custom plugins using the Bespin Server and then run dryice
-only when you're done.

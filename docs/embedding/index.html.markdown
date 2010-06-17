@@ -21,7 +21,7 @@ plugins. The Bespin Embedded package comes in two flavors:
 * Drop In
 * Customizable
 
-With the Drop In flavor, you get a single .js and a single .css file that you can
+With the Drop In flavor, you get a few files that you can
 include on your server simply. You don't need anything else to use it.
 
 With the Customizable flavor, you are able to tailor which plugins are
@@ -42,8 +42,8 @@ JavaScript because it is *much* smaller than the uncompressed version.
 If you are trying to troubleshoot a problem, you should use the uncompressed
 version.
 
-`BespinEmbedded.js` is uncompressed. `BespinEmbedded.compressed.js` is,
-unsurprisingly, compressed.
+`BespinEmbedded.uncompressed.js` is uncompressed. `BespinEmbedded.js` 
+is compressed.
 
 I suggest that you have your HTML refer to BespinEmbedded.js and just put
 the version of the file you need in place at that URL. The examples that
@@ -90,13 +90,10 @@ about escaping strings).
 The element to be upgraded does not have to be a div, though there is a known
 issue that other element types such as textarea are not working right now.
 
-The [Bespin startup options][2] are documented elsewhere.
-
 Bespin does not allow multiple elements in a page to become Bespin editors -
 there can only be one.
 
 [1]: http://json.org/ "The JSON Spec"
-[2]: bespinoptions.html "Start-up option documentation"
 
 
 Level 2: Manual Upgrade
@@ -143,8 +140,7 @@ When using manual upgrade of an element, the `useBespin()` function returns a
 promise. The resolved promise has as first argument the _environment_ variable:
 
     :::js
-    var pr = bespin.useBespin("edit");
-    pr.then(function(env) {
+    bespin.useBespin("edit").then(function(env) {
         // Get the editor.
         var editor = env.editor;
         // Change the value and move to the secound lien.
@@ -155,7 +151,8 @@ promise. The resolved promise has as first argument the _environment_ variable:
     });
 
 When the Bespin was created dynamically (using a div with `class="bespin"`), you
-can get the Bespin instance from the DOM node.
+can get the Bespin `environment` instance from the DOM node as the `bespin` 
+variable on the node.
 
 Creating the Bespin dynamically takes some time and the Bespin might not be ready
 when the page fires the `onLoad` event. Accessing the dynamically created Bespin

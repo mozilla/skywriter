@@ -87,6 +87,11 @@ Fixes
 Upgrade Notes
 -------------
 
+For Embedded builds, BespinEmbedded.js now refers to the compressed version. BespinEmbedded.uncompressed.js is the uncompressed version. Also noteworthy:
+the BespinEmbedded.css file is no longer required. Finally, builds now
+produce three .js files (BespinEmbedded.js, BespinMain.js, BespinWorker.js).
+You only need to refer to BespinEmbedded.js on your page.
+
 Before Bespin 0.8, the booting code for the 'embedded' and the 'server' versions
 of Bespin was different. Because of this, a few plugins available to the 'server'
 version couldn't be used in the 'embedded' case and the API offered in the 'embedded'
