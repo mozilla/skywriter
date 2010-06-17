@@ -49,6 +49,7 @@
 // OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 var util = require('bespin:util/util');
+var console = require("bespin:console").console;
 
 /**
  * Different browsers create stack traces in different ways.
