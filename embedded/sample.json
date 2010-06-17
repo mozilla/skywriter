@@ -1,6 +1,5 @@
 {
     "output_dir": "tmp",
-    "plugins": ["embedded"],
-    "dynamic_plugins": ["html", "javascript"],
+    "plugins": ["embedded", "html", "javascript"],
     "include_sample": true
 }

@@ -509,6 +509,7 @@ def release_embed(options):
     static_library.copy(libdir / "static.py")
     
     path("static/tiki.js").copy(libdir / "tiki.js")
+    path("static/BespinEmbedded.js").copy(libdir / "worker.js")
         
     path("embedded/dryice.py").copy(outputdir / "dryice.py")
     path("plugins").copytree(outputdir / "plugins")

@@ -142,6 +142,14 @@ will be deleted before the build.""")
         self.loader = location_of("tiki.js", loader)
         self.worker = location_of("BespinEmbedded.js", worker)
         
+        # this is a bit hacky. Because of the way worker_manager works,
+        # the server version of Bespin calls it "BespinEmbedded.js"
+        # and the embedded customizable version has a script called
+        # (more appropriately) worker.js
+        # hopefully, this will clear up in the move to JavaScript tooling
+        if not self.worker.exists():
+            self.worker = path("lib") / "worker.js"
+        
         self.config = config if config is not None else {}
         self._created_javascript = set()
         self._set_package_lists()
@@ -176,7 +184,16 @@ will be deleted before the build.""")
         
         worker_plugins = []
         
-        for plugin in self.plugins + self.dynamic_plugins:
+        for plugin in self.dynamic_plugins:
+            try:
+                plugin_obj = self.get_plugin(plugin)
+            except KeyError:
+                errors.append("Plugin %s not found" % plugin)
+                continue
+        
+        # note that we need to copy self.plugins because
+        # we're going to be removing items from the list
+        for plugin in list(self.plugins):
             try:
                 plugin_obj = self.get_plugin(plugin)
             except KeyError:
