@@ -139,7 +139,7 @@ Within the `command_line`'s metadata the `link_text` is defined as:
 
 Every defined `themeVariable` has a `defaultValue`. This value is used
 if no other value is specified. In the case of the _demoTheme_, the value for
-the comamnd\_line's  `link_text` will be _red_. If we hadn't declared this, the
+the command\_line's  `link_text` will be _red_. If we hadn't declared this, the
 defaultValue will be used. As this value is equal to the global `link_color`, the
 value is then _blue_.
 

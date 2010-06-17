@@ -34,7 +34,9 @@ plugins at the `syntax` extension point like so:
 
     :::js
     {
-        "depends": [ "SyntaxManager" ],
+        "description": "HTML syntax highlighter",
+        "dependencies": { "standard_syntax": "0.0.0" },
+        "environments": { "worker": true },
         "provides": [
             {
                 "ep": "syntax",

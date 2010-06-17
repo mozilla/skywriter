@@ -56,7 +56,7 @@
 "end";
 
 var Promise = require('bespin:promise').Promise;
-var StandardSyntax = require('standardsyntax').StandardSyntax;
+var StandardSyntax = require('standard_syntax').StandardSyntax;
 
 var states = {
     start: [

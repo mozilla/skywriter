@@ -79,12 +79,6 @@ editor.setLineNumber(`lineNumber`)
 editor.getText(`range`)
 :   returns the text within `range`.
 
-editor.setSetting(`key`, `newValue`)
-:   changes the setting `key` to value `newValue`.
-
-editor.getSetting(`key`)
-:   returns the value of the setting `key`.
-
 editor.changeGroup(`func`)
 :   performs `func` within one change group. This means, that all the actions
     performed by `func` result in one undo/redo action. Returns true if the change

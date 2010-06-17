@@ -461,26 +461,6 @@ exports.EditorView.prototype = {
         });
     },
 
-    /** Changes a setting. */
-    setSetting: function(key, value) {
-        if (util.none(key)) {
-            throw new Error('setSetting(): key must be supplied');
-        }
-        if (util.none(value)) {
-            throw new Error('setSetting(): value must be supplied');
-        }
-
-        settings.set(key, value);
-    },
-
-    /** Returns a setting. */
-    getSetting: function(key) {
-        if (util.none(key)) {
-            throw new Error('getSetting(): key must be supplied');
-        }
-        return settings.get(key);
-    },
-
     getText: function(range) {
         if (!rangeutils.isRange(range)) {
             throw new Error('getText(): expected range but found "' +

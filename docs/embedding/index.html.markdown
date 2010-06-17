@@ -175,8 +175,9 @@ where the command line is available). Note that the same settings apply to
 all editors on the page. To change a setting use:
 
     :::js
-    env.editor.setSetting("fontsize", 10);
+    env.setSetting("fontsize", 10);
 
+Note that the same settings are used for every instance of Bespin on the page.
 
 To change the initial context for the syntax highlighter run:
 
