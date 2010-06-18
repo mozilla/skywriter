@@ -58,6 +58,7 @@ var util = require('bespin:util/util');
  *        layout positions will be filled in. Again this provides sane defaults.
  * - container: node to attach to (optional). If not provided a node will be
  *              created. and added to the body.
+ * - settings: settings to preconfigure
  */
 exports.launch = function(config) {
     var launchPromise = new Promise();

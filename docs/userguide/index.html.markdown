@@ -95,7 +95,7 @@ Working with Files
 
 Bespin supports a filesystem of files and directories, just like any other
 editor. You can use the `cd` command to change the current working directory
-and display this one by executing `pwd`. All file commands like `ls` to display
+and display the current directory with `pwd`. All file commands like `ls` to display
 a list of files in the current directory or `open` to open a file work hand
 in hand with the current working directory. You can also address files from the
 root like `open /foo/bar.js`.
@@ -106,7 +106,8 @@ You can delete a file or directory with the `rm` command. You should add a
 trailing "/" whenever you want to work with a directory.
 
 Use the `open` command to open a file. `open` features powerful completion 
-that works across all of your Bespin files to find the best match.
+that works across all of your Bespin files (under the current working
+directory) to find the best match.
 
 Settings
 --------
