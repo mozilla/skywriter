@@ -99,3 +99,36 @@ object will be passed the `filesource` object that is created. Through
 this mechanism, it's very easy to configure Bespin to use a file source
 other than the Bespin server.
 
+gui
+---
+Bespin's graphical user interface is wired up by plugging GUI components
+into a "border-style" layout. There are presently 5 zones: north, east,
+south, west and center. Generally, you'd stick the editor in the center.
+The GUI components are objects that are created via the config.objects
+mechanism described in the previous section.
+
+By default, if there's an `editor` object available and there's nothing
+explicitly placed in the center, then the editor is placed there. Here's
+what that line of code looks like:
+    
+    :::js
+    config.gui.center = { component: "editor" };
+
+Setting up the GUI is as simple as that. `config.gui.`_location_ is
+an object that specifies a component. The component value is the
+object name that is looked up.
+
+A component is an object that has an `element` defined on it. That is
+the DOM element that will be plugged into the overall layout.
+
+Speaking of layout, it's worth noting that the border layout is built
+upon the CSS3 Flexible Box Model and the component elements are
+placed into the GUI by just adding a class name matching the
+zone (for example, "north"). It should be possible for a theme to change
+the way these are laid out.
+
+settings
+--------
+
+You can also set settings (such as tabstop or theme) by adding a settings
+object to the config.

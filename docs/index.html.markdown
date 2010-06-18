@@ -12,6 +12,7 @@ Find out what's new, in the
 User's Guide
 ------------
 
+* *Important* [Bespin Server Roadmap](userguide/server_roadmap.html)
 * [Introduction](userguide/index.html)
 * [Version Control Systems](userguide/vcs.html)
 
@@ -32,7 +33,7 @@ Embedder's Guide
 
 * [Introduction](embedding/index.html)
 * [Creating a custom, embedded Bespin](embedding/building.html)
-* [Bespin Startup Options](embedding/bespinoptions.html)
+* [Application Configuration (Gluing Bespin Together)](embedding/appconfig.html)
 
 
 Developer's Guide
