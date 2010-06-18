@@ -300,9 +300,12 @@ will be deleted before the build.""")
         self.bundled_plugins = bundled_plugins
 
         main_js_file.write("""
-document.addEventListener("DOMContentLoaded", function() {
+(function() {
+var $ = bespin.tiki.require("jquery").$;
+$(document).ready(function() {
     bespin.tiki.require("bespin:plugins").catalog.loadMetadata(%s);;
-}, false);
+});
+})();
 """ % all_md)
         
         

@@ -41,6 +41,8 @@
 
 
 (function() {
+
+var $ = bespin.tiki.require("jquery").$;
 /**
  * Returns the CSS property of element.
  *   1) If the CSS property is on the style object of the element, use it, OR
@@ -59,7 +61,7 @@ var getCSSProperty = function(element, container, property) {
         ret = container.style[property];
     }
     return ret;
-}
+};
 
 bespin.useBespin = function(element, options) {
     var util = bespin.tiki.require('bespin:util/util');
@@ -205,7 +207,7 @@ bespin.useBespin = function(element, options) {
     return pr;
 };
 
-document.addEventListener("DOMContentLoaded", function() {
+$(document).ready(function() {
     // Holds the lauch promises of all launched Bespins.
     var launchBespinPromises = [];
 
@@ -235,6 +237,6 @@ document.addEventListener("DOMContentLoaded", function() {
             throw new Error('At least one Bespin failed to launch!');
         });
     }
-}, false);
+});
 
 })();

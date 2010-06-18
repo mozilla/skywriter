@@ -11,33 +11,16 @@
     
   </head>
     
-  <body style="overflow:hidden;">  
+  <body class="bespin" style="overflow:hidden;">  
 
-<div id="loading">
+<div id="_bespin_loading">
 <p class="loading">Loading...<p>
-
-
 </div>
 <script type="text/javascript">
 bespin.tiki.require.ensurePackage("::bespin", function() {
     var require = bespin.tiki.require;
     var plugins = require("bespin:plugins");
     var pr = plugins.catalog.loadMetadataFromURL("plugin/register/defaults");
-    pr.then(function() {
-        // The "hosted" plugin sets up the environment
-        bespin.tiki.require.ensurePackage("::appconfig", function() {
-            var appconfig = require("appconfig");
-            appconfig.launch({
-                stealFocus: true
-            }).then(function(env) {
-                // Empty function.
-            }, function(error) {
-                console.error('Error during launch: ' + error);
-            });
-        });
-    }, function(error) {
-        console.log("Unable to load metadata: ", error);
-    });
 });
 </script>
 	</body>
