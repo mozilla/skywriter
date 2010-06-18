@@ -441,6 +441,7 @@ exports.logout = function() {
         settings.resetAll();
 
         // TODO: Tell appconfig to destroy everything and relunch the app.
+        window.location.reload();
     }, function(error) {
         displayError('Unable to log out',
             'There was a problem logging out: ' + error.message);
