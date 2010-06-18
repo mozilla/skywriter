@@ -86,7 +86,7 @@ var states = {
         {
             //style names
             regex:  /^([a-zA-Z-\s]*)(?:\:)/,
-            tag:    'directive',
+            tag:    'identifier',
             then:   'style'
         },
         {
@@ -135,7 +135,11 @@ var states = {
 
     style: [
         {
-            regex:  /^[^;|\/\/|\/\*]*/,
+            regex:  /^[^;|}|\/\/|\/\*]+/,
+            tag:    'plain'
+        },
+        {
+            regex:  /^;|}/,
             tag:    'plain',
             then:   'start'
         },

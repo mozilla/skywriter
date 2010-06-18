@@ -475,7 +475,7 @@
                 "comment":    "#666666",
                 "directive":  "#999999",
                 "error":      "#ff0000",
-                "identifier": "#e6e6e6",
+                "identifier": "#D841FF",
                 "keyword":    "#42A8ED",
                 "operator":   "#88BBFF",
                 "string":     "#039A0A"

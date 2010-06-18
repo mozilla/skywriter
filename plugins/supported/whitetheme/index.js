@@ -189,7 +189,7 @@ exports.whiteTheme = function() {
                 comment:   '#A8A8A8',
                 directive: '#999999',
                 error:      '#ff0000',
-                identifier: '#000000',
+                identifier: '#9700CC',
                 keyword:    '#0000ff',
                 operator:   '#88BBFF',
                 string:     '#039A0A'
