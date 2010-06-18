@@ -62,7 +62,7 @@ var states = {
         },
         {
             regex:  /^[A-Za-z_][A-Za-z0-9_]*/,
-            tag:    'identifier'
+            tag:    'plain'
         },
         {
             regex:  /^[^'"\/ \tA-Za-z0-9_]+/,
