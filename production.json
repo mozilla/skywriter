@@ -1,7 +1,10 @@
 {
     "plugins": ["embedded", "screen_theme", 
         "userident", "bespin_server", "whitetheme", "plugindev", "uicommands",
-        "notifier", "settings", "gritter", "gritter_notify", "command_line"],
+        "notifier", "settings", "gritter", "gritter_notify", "command_line",
+        "syntax_worker", "javascript", "html", "stylesheet", "filesystem",
+        "file_history", "syntax_directory", "underscore",
+        "file_commands"],
     "output_dir": "tmp/BespinServer/static",
     "include_tests": true,
     "unbundled_plugins": "tmp/BespinServer/plugins"
