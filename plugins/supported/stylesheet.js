@@ -58,32 +58,56 @@
 var Promise = require('bespin:promise').Promise;
 var StandardSyntax = require('standard_syntax').StandardSyntax;
 
+var COMMENT_REGEXP = {
+    regex:  /^\/\/.*/,
+    tag:    'comment'
+};
+
+var createCommentState = function(jumpBackState) {
+    return [
+        {
+            regex:  /^[^*\/]+/,
+            tag:    'comment'
+        },
+        {
+            regex:  /^\*\//,
+            tag:    'comment',
+            then:   jumpBackState
+        },
+        {
+            regex:  /^[*\/]/,
+            tag:    'comment'
+        }
+    ];
+};
+
 var states = {
     start: [
         {
+            //style names
+            regex:  /^([a-zA-Z-\s]*)(?:\:)/,
+            tag:    'directive',
+            then:   'style'
+        },
+        {
             //tags
-            regex:  /^([\w]+)(?![a-zA-Z0-9_:])([,|{]*?)(?!;)(?!(;|%))/,  
-            tag:    'keyword'
+            regex:  /^([\w]+)(?![a-zA-Z0-9_:])([,|{]*?)(?!;)(?!(;|%))/,
+            tag:    'keyword',
+            then:   'header'
         },
         {
             //id
             regex:  /^#([a-zA-Z]*)(?=.*{*?)/,
-            tag:    'error'
+            tag:    'keyword',
+            then:   'header'
         },
         {
             //classes
             regex:  /^\.([a-zA-Z]*)(?=.*{*?)/,
-            tag:    'string'
+            tag:    'keyword',
+            then:   'header'
         },
-        {
-            //style names
-			      regex: 	/^([a-zA-Z-]*)(?:\:)/,
-			      tag:	'directive'
-        },
-        {
-            regex:  /^\/\/.*/,
-            tag:    'comment'
-        },
+            COMMENT_REGEXP,
         {
             regex:  /^\/\*/,
             tag:    'comment',
@@ -95,21 +119,37 @@ var states = {
         }
     ],
 
-    comment: [
+    header: [
         {
-            regex:  /^[^*\/]+/,
-            tag:    'comment'
-        },
-        {
-            regex:  /^\*\//,
-            tag:    'comment',
+            regex:  /^[^{|\/\/|\/\*]*/,
+            tag:    'keyword',
             then:   'start'
         },
+            COMMENT_REGEXP,
         {
-            regex:  /^[*\/]/,
-            tag:    'comment'
+            regex:  /^\/\*/,
+            tag:    'comment',
+            then:   'comment_header'
         }
-    ]
+    ],
+
+    style: [
+        {
+            regex:  /^[^;|\/\/|\/\*]*/,
+            tag:    'plain',
+            then:   'start'
+        },
+            COMMENT_REGEXP,
+        {
+            regex:  /^\/\*/,
+            tag:    'comment',
+            then:   'comment_style'
+        }
+    ],
+
+    comment:        createCommentState('start'),
+    comment_header: createCommentState('header'),
+    comment_style:  createCommentState('style')
 };
 
 exports.CSSSyntax = new StandardSyntax(states);
