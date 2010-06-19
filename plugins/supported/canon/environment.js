@@ -35,6 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var util = require('bespin:util/util');
 var console = require('bespin:console').console;
 var catalog = require("bespin:plugins").catalog;
 var settings = require('settings').settings;
