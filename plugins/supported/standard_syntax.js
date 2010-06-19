@@ -88,6 +88,9 @@ exports.StandardSyntax.prototype = {
                 if (then.length > 1) {
                     newContext = then[1].split(":");
                 }
+            } else if (len === 0) {
+                throw new Error("StandardSyntax: Infinite loop detected: " +
+                    "zero-length match that didn't change state");
             } else {
                 nextState = fullState;
             }
