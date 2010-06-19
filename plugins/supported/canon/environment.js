@@ -57,27 +57,28 @@ exports.Environment = function() {
 
 Object.defineProperties(exports.Environment.prototype, {
 
-    /** Changes a setting. */
-    setSetting: {
-        value: function(key, value) {
-            if (util.none(key)) {
-                throw new Error('setSetting(): key must be supplied');
-            }
-            if (util.none(value)) {
-                throw new Error('setSetting(): value must be supplied');
-            }
+    /**
+     * Provides a get() and set() function to set and get settings.
+     */
+    settings: {
+        value: {
+            set: function(key, value) {
+                if (util.none(key)) {
+                    throw new Error('setSetting(): key must be supplied');
+                }
+                if (util.none(value)) {
+                    throw new Error('setSetting(): value must be supplied');
+                }
 
-            settings.set(key, value);
-        }
-    },
-
-    /** Returns a setting. */
-    getSetting: {
-        value: function(key) {
-            if (util.none(key)) {
-                throw new Error('getSetting(): key must be supplied');
+                settings.set(key, value);
+            },
+            
+            get: function(key) {
+                if (util.none(key)) {
+                    throw new Error('getSetting(): key must be supplied');
+                }
+                return settings.get(key);
             }
-            return settings.get(key);
         }
     },
 
