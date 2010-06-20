@@ -836,23 +836,38 @@ util.mixin(exports.TextView.prototype, {
             if (isBackspace) {
                 var start = range.start;
                 line = lines[start.row];
+                var preWhitespaces = line.substring(0, start.col).
+                                                    match(/\s*$/)[0].length;
 
-                count = Math.min(
-                        line.substring(0, start.col).match(/\s*$/)[0].length,
-                        (start.col - tabstop) % tabstop || tabstop);
-                count = Math.max(count, 1) * -1;
+                // If there are less then n-tabstop whitespaces in front, OR
+                // the current cursor position is not n times tabstop, THEN
+                // delete only 1 character.
+                if (preWhitespaces < tabstop
+                        || (start.col - tabstop) % tabstop != 0) {
+                    count = 1;
+                } else {
+                    // Otherwise delete tabstop whitespaces.
+                    count = tabstop;
+                }
 
                 range = {
-                    start:  model.displacePosition(start, count),
+                    start:  model.displacePosition(start, count * -1),
                     end:    range.end
                 };
             } else {
                 var end = range.end;
                 line = lines[end.row];
-                count = Math.min(
-                        line.substring(end.col).match(/^\s*/)[0].length,
-                        tabstop);
-                count = Math.max(count, 1);
+                var trailingWhitespaces = line.substring(end.col).
+                                                    match(/^\s*/)[0].length;
+
+                // If there are less then n-tabstop whitespaces after the cursor
+                // position, then delete only 1 character. Otherwise delete
+                // tabstop whitespaces.
+                if (trailingWhitespaces < tabstop) {
+                    count = 1;
+                } else {
+                    count = tabstop;
+                }
 
                 range = {
                     start:  range.start,
