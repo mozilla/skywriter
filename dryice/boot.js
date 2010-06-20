@@ -63,6 +63,29 @@ var getCSSProperty = function(element, container, property) {
     return ret;
 };
 
+/**
+ * Returns the sum of all passed property values. Calls internal getCSSProperty
+ * to get the value of the individual peroperties.
+  */
+// var sumCSSProperties = function(element, container, props) {
+//     var ret = document.defaultView.getComputedStyle(element, '').
+//                                         getPropertyValue(props[0]);
+//
+//     if (!ret || ret == 'auto' || ret == 'intrinsic') {
+//         return container.style[props[0]];
+//     }
+//
+//     var sum = props.map(function(item) {
+//         var cssProp = getCSSProperty(element, container, item);
+//         // Remove the 'px; and parse the property to a floating point.
+//         return parseFloat(cssProp.replace('px', ''));
+//     }).reduce(function(a, b) {
+//         return a + b;
+//     });
+//
+//     return sum;
+// };
+
 bespin.useBespin = function(element, options) {
     var util = bespin.tiki.require('bespin:util/util');
 
@@ -94,7 +117,7 @@ bespin.useBespin = function(element, options) {
         }
 
         if (util.none(baseConfig.initialContent)) {
-            baseConfig.initialContent = element.innerHTML;
+            baseConfig.initialContent = element.value || element.innerHTML;
         }
 
         element.innerHTML = '';
@@ -116,13 +139,42 @@ bespin.useBespin = function(element, options) {
             // recomputed to get the new/true pixels.
             var resizeEvent = function() {
                 var style = 'position:relative;';
-                [   'width', 'height',
-                    'margin-top', 'margin-left', 'margin-right', 'margin-bottom',
-                    'padding-top', 'padding-bottom', 'padding-left', 'padding-right'
+                [
+                    'margin-top', 'margin-left', 'margin-right', 'margin-bottom'
                 ].forEach(function(item) {
                     style += item + ':' +
                                 getCSSProperty(element, container, item) + ';';
                 });
+
+                // Calculating the width/height of the textarea is somewhat
+                // tricky. To do it right, you have to include the paddings
+                // to the sides as well (eg. width = width + padding-left, -right).
+                // This works well, as long as the width of the element is not
+                // set or given in pixels. In this case and after the textarea
+                // is hidden, getCSSProperty(element, container, 'width') will
+                // still return pixel value. If the element has realtiv dimensions
+                // (e.g. width='95<percent>') getCSSProperty(...) will return pixel values
+                // only as long as the textarea is visible. After it is hidden
+                // getCSSProperty will return the relativ dimensions as they
+                // are set on the element (in the case of width, 95<percent>).
+                // Making the sum of pixel vaules (e.g. padding) and realtive
+                // values (e.g. <percent>) is not possible. As such the padding styles
+                // are ignored.
+
+                // The complete width is the width of the textarea + the padding
+                // to the left and right.
+                // var width = sumCSSProperties(element, container, [
+                //     'width', 'padding-left', 'padding-right'
+                // ]) + 'px';
+                // var height = sumCSSProperties(element, container, [
+                //     'height', 'padding-top', 'padding-bottom'
+                // ]) + 'px';
+                var width = getCSSProperty(element, container, 'width');
+                var height = getCSSProperty(element, container, 'height');
+                style += 'height:' + height + ';width:' + width + ';';
+
+                // Set the display property to 'inline-block'.
+                style += 'display:inline-block;';
                 container.setAttribute('style', style);
             };
             window.addEventListener('resize', resizeEvent, false);
@@ -138,40 +190,15 @@ bespin.useBespin = function(element, options) {
                 parentNode.appendChild(container);
             }
 
-            // Define setter and getter on the textarea. Forwards set value
-            // and get value to the editor.
-            element.__defineGetter__('value', function() {
-                // If there is a prEnv (holds the env passed by the resolved
-                // promise), then access the editor directly, otherwise
-                // use the init value;
-                if (prEnv) {
-                    return prEnv.editor.value;
-                } else {
-                    return baseConfig.initialContent;
-                }
-            });
-            element.__defineSetter__('value', function(value) {
-                // If there is already an environment, ten set the value
-                // directly, otherwise set the value to the baseConfig obj
-                // and set the value after the app is launched.
-                if (prEnv) {
-                    prEnv.editor.value = value;
-                } else {
-                    baseConfig.initialContent = value;
-                    pr.then(function(env) {
-                        env.editor.value = value;
-                    });
-                }
-            });
-
-            // Override the forms onsubmit function. Set the innerHTML of the
-            // textarea before submitting.
+            // Override the forms onsubmit function. Set the innerHTML and value
+            // of the textarea before submitting.
             while (parentNode.tagName != 'BODY') {
                 if (parentNode.tagName == 'FORM') {
                     var oldSumit = parentNode.onsubmit;
                     // Override the onsubmit function of the form.
                     parentNode.onsubmit = function(evt) {
-                        element.innerHTML = element.value;
+                        element.value = prEnv.editor.value;
+                        element.innerHTML = prEnv.editor.value;
                         // If there is a onsubmit function already, then call
                         // it with the current context and pass the event.
                         if (oldSumit) {
