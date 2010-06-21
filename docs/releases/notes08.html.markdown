@@ -147,6 +147,8 @@ Let's take a closer look:
   Imagine you want to make the current selected text upper case. 
   Before, you had to write:
 
+How selected text replacement worked before:
+
     :::js
     // This holds the Bespin editor;
     var editor;
@@ -165,6 +167,8 @@ With the new _Editor API_ this changed to:
   `dimensionsChanged` function, which is now on the `env` object. When the window
   resizes, this event is fired automatically:
 
+How to register a size change:
+
     :::js
     // Tell Bespin that the container size changed.
     env.dimensionsChanged();
@@ -173,6 +177,8 @@ With the new _Editor API_ this changed to:
 * You can still dynamically initialize Bespin on your page. The
   `bespin` property on the DOM node is now the `env` (environment) variable
   described above:
+
+Example of using the "env" variable from the DOM node:
 
     :::html
     <div id='edit' class='bespin'>Bespin editor goes here!</div>
