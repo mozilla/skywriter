@@ -35,32 +35,28 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var rangeutils = require('rangeutils:utils/range');
+var scroller = require('views/scroller');
 var util = require('bespin:util/util');
 
-var catalog = require('bespin:plugins').catalog;
+var Buffer = require('models/buffer').Buffer;
+var EditorSearchController = require('controllers/search').
+    EditorSearchController;
+var EditorUndoController = require('controllers/undo').EditorUndoController;
 var Event = require('events').Event;
-var settings = require('settings').settings;
-var m_scratchcanvas = require('bespin:util/scratchcanvas');
-var rangeutils = require('rangeutils:utils/range');
-
-var TextView = require('views/text').TextView;
 var GutterView = require('views/gutter').GutterView;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
-var EditorSearchController = require('controllers/search').EditorSearchController;
+var ScrollerView = scroller.ScrollerCanvasView;
+var TextView = require('views/text').TextView;
 
-var Buffer = require('models/buffer').Buffer;
+var catalog = require('bespin:plugins').catalog;
+var settings = require('settings').settings;
 
-var Scroller = require('views/scroller');
-var ScrollerView = Scroller.ScrollerCanvasView;
-
-var EditorUndoController = require('controllers/undo').EditorUndoController;
-
-/**
- * Cache with all the theme data for the entire editor (gutter, editor, highlighter).
- */
+// Caches the theme data for the entire editor (editor, highlighter, and
+// gutter).
 var editorThemeData = {};
 
-var computeThemeData = function(themeManager) {
+function computeThemeData(themeManager) {
     var plugin = catalog.plugins['text_editor'];
     var provides = plugin.provides;
     var i = provides.length;
@@ -91,7 +87,7 @@ var computeThemeData = function(themeManager) {
             }
         }
     }
-};
+}
 
 // Compute the themeData to make sure there is one when the editor comes up.
 computeThemeData();
@@ -104,13 +100,9 @@ catalog.registerExtension('themeChange', {
  * @class
  *
  * A view responsible for laying out a scrollable text view and its associated
- * gutter view, as well as maintaining a layout manager. This really needs
- * to change so that it's not taking the container as a parameter.
+ * gutter view, as well as maintaining a layout manager.
  */
 exports.EditorView = function(initialContent) {
-    // TODO: This is for debug purpose only and should go away again.
-    // bespin.editor = this;
-
     this.elementAppended = new Event();
 
     this.element = this.container = document.createElement("div");
@@ -127,40 +119,42 @@ exports.EditorView = function(initialContent) {
 
     var gutterView = this.gutterView = new GutterView(container, this);
     var textView = this.textView = new TextView(container, this);
-    var verticalScroller = this.verticalScroller = new ScrollerView(this, Scroller.LAYOUT_VERTICAL);
-    var horizontalScroller = this.horizontalScroller = new ScrollerView(this, Scroller.LAYOUT_HORIZONTAL);
+    var verticalScroller = new ScrollerView(this, scroller.LAYOUT_VERTICAL);
+    var horizontalScroller = new ScrollerView(this,
+        scroller.LAYOUT_HORIZONTAL);
+    this.verticalScroller = verticalScroller;
+    this.horizontalScroller = horizontalScroller;
 
     this.editorUndoController = new EditorUndoController(this);
     this.searchController = new EditorSearchController(this);
 
-    this._textViewSize = this._oldSize = {
-        width: 0,
-        height: 0
-    };
+    this._textViewSize = this._oldSize = { width: 0, height: 0 };
 
     this._themeData = editorThemeData;
 
-    // Create a buffer for the editor and use initialContent as intialContent for
-    // the textStorage object.
+    // Create a buffer for the editor and use initialContent as the initial
+    // content for the textStorage object.
     this.buffer = new Buffer(null, initialContent);
 
     // Create all the necessary stuff once the container has been added.
     this.elementAppended.add(function() {
         // Set the font property.
-        this._font = settings.get('fontsize') + 'px ' + settings.get('fontface');
+        var fontSize = settings.get('fontsize');
+        var fontFace = settings.get('fontface');
+        this._font = fontSize + 'px ' + fontFace;
 
-        // Watch out for the themeChange event to then repaint stuff.
+        // Repaint when the theme changes.
         catalog.registerExtension('themeChange', {
             pointer: this._themeVariableChange.bind(this)
         });
 
-        // Watch out for the set fontSize/face event to repaint stuff and set
-        // the font property on the editor.
+        // When the font changes, set our local font property, and repaint.
         catalog.registerExtension('settingChange', {
             match: "font[size|face]",
             pointer: this._fontSettingChanged.bind(this)
         });
 
+        // Likewise when the dimensions change.
         catalog.registerExtension('dimensionsChanged', {
             pointer: this.dimensionsChanged.bind(this)
         });
@@ -170,7 +164,8 @@ exports.EditorView = function(initialContent) {
         this._recomputeLayout();
 
         var wheelEvent = util.isMozilla ? 'DOMMouseScroll' : 'mousewheel';
-        container.addEventListener(wheelEvent, this._onMouseWheel.bind(this), false);
+        container.addEventListener(wheelEvent, this._onMouseWheel.bind(this),
+            false);
 
         verticalScroller.valueChanged.add(function(value) {
             this.scrollOffset = { y: value };
@@ -208,17 +203,11 @@ exports.EditorView.prototype = {
 
     _themeData: null,
 
-    // for debug purpose only
-    // newBuffer: function() {
-    //     var oldBuffer = this.buffer;
-    //     this.buffer = new Buffer();
-    //     return oldBuffer;
-    // },
-
     _layoutManagerSizeChanged: function(size) {
+        var fontDimension = this.layoutManager.fontDimension;
         this._textViewSize = {
-            width: size.width * this.layoutManager.fontDimension.characterWidth,
-            height: size.height * this.layoutManager.fontDimension.lineHeight
+            width: size.width * fontDimension.characterWidth,
+            height: size.height * fontDimension.lineHeight
         };
 
         if (this._textLinesCount !== size.height) {
@@ -313,7 +302,7 @@ exports.EditorView.prototype = {
         var width = this.container.offsetWidth;
         var height = this.container.offsetHeight;
 
-        // Check if the size changed. If it stayed the same, then we can quite.
+        // Don't recompute unless the size actually changed.
         if (!forceLayout && width == this._oldSize.width
                                     && height == this._oldSize.height) {
             return;
@@ -324,7 +313,9 @@ exports.EditorView.prototype = {
             height: height
         };
 
-        var gutterWidth = this._gutterViewWidth = this.gutterView.computeWidth();
+        var gutterWidth = this.gutterView.computeWidth();
+        this._gutterViewWidth = gutterWidth;
+
         this.gutterView.frame = {
             x: 0,
             y: 0,
@@ -339,7 +330,7 @@ exports.EditorView.prototype = {
             height: height
         };
 
-        // TODO: Get this values from the scroller theme.
+        // TODO: Get these values from the scroller theme.
         var scrollerPadding = this._themeData.scroller.padding;
         var scrollerSize = this._themeData.scroller.thickness;
 
@@ -381,7 +372,9 @@ exports.EditorView.prototype = {
     _font: null,
 
     _fontSettingChanged: function() {
-        this._font = settings.get('fontsize') + 'px ' + settings.get('fontface');
+        var fontSize = settings.get('fontsize');
+        var fontFace = settings.get('fontface');
+        this._font = fontsize + 'px ' + fontface;
 
         // Recompute the layouts.
         this.layoutManager._recalculateMaximumWidth();
@@ -390,7 +383,7 @@ exports.EditorView.prototype = {
     },
 
     _themeVariableChange: function() {
-        // Recompute the entire layout as the gutter now might has a different
+        // Recompute the entire layout as the gutter might now have a different
         // size. Just calling invalidate() on the gutter wouldn't be enough.
         this._recomputeLayout(true);
     },
@@ -399,21 +392,16 @@ exports.EditorView.prototype = {
         this.verticalScroller.value = offset.y;
         this.horizontalScroller.value = offset.x;
 
-        this.textView.clippingFrame = {
-            x: offset.x,
-            y: offset.y
-        };
+        this.textView.clippingFrame = { x: offset.x, y: offset.y };
 
-        this.gutterView.clippingFrame = {
-            y: offset.y
-        };
+        this.gutterView.clippingFrame = { y: offset.y };
 
         this._updateScrollers();
         this.gutterView.invalidate();
         this.textView.invalidate();
     },
 
-    // -------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
     // Helper API:
 
     /**
@@ -423,7 +411,8 @@ exports.EditorView.prototype = {
      * @param {string} newText The text to insert.
      * @param {boolean} keepSelection True if the selection should be
      *     be preserved, otherwise the cursor is set after newText.
-     * @return Returns true if the replacement as successfully, otherwise false.
+     * @return Returns true if the replacement completed successfully,
+     *     otherwise returns false.
      */
     replace: function(range, newText, keepSelection) {
         if (!rangeutils.isRange(range)) {
@@ -449,7 +438,7 @@ exports.EditorView.prototype = {
                 var destPosition;
                 if (lines.length > 1) {
                     destPosition = {
-                        row:    range.start.row + lines.length - 1,
+                        row: range.start.row + lines.length - 1,
                         col: lines[lines.length - 1].length
                     };
                 } else {
@@ -463,8 +452,8 @@ exports.EditorView.prototype = {
 
     getText: function(range) {
         if (!rangeutils.isRange(range)) {
-            throw new Error('getText(): expected range but found "' +
-                                range + '"');
+            throw new Error('getText(): expected range but found "' + range +
+                '"');
         }
 
         var textStorage = this.layoutManager.textStorage;
@@ -493,7 +482,7 @@ exports.EditorView.prototype = {
 
     /**
      * Group changes so that they are only one undo/redo step.
-     * Returns true if the changes where done successfully.
+     * Returns true if the changes were successful.
      */
     changeGroup: function(func) {
         return this.textView.groupChanges(function() {
@@ -536,7 +525,8 @@ Object.defineProperties(exports.EditorView.prototype, {
             }
 
             if (!newBuffer.loadPromise.isResolved()) {
-                throw new Error('set bufffer: the newBuffer has to be loaded!');
+                throw new Error('buffer.set(): the new buffer must first be ' +
+                    'loaded!');
             }
 
             // Was there a former buffer? If yes, then remove some events.
@@ -556,7 +546,8 @@ Object.defineProperties(exports.EditorView.prototype, {
             var tv = this.textView;
 
             // Watch out for changes to the layoutManager's internal size.
-            lm.sizeChanged.add(this, this._layoutManagerSizeChanged.bind(this));
+            lm.sizeChanged.add(this,
+                this._layoutManagerSizeChanged.bind(this));
 
             // Map internal events so that developers can listen much easier.
             lm.textStorage.changed.add(this, this.textChanged.bind(this));
@@ -716,12 +707,16 @@ Object.defineProperties(exports.EditorView.prototype, {
     },
 
     syntax: {
-        /** Returns the initial syntax highlighting context (i.e. the language). */
+        /**
+         * Returns the initial syntax highlighting context (i.e. the language).
+         */
         get: function(newSyntax) {
             return this.layoutManager.syntaxManager.getSyntax();
         },
 
-        /** Sets the initial syntax highlighting context (i.e. the language). */
+        /**
+         * Sets the initial syntax highlighting context (i.e. the language).
+         */
         set: function(newSyntax) {
             if (!util.isString(newSyntax)) {
                 throw new Error('set syntax: expected string but found "' +
