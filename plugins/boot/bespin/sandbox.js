@@ -59,7 +59,7 @@ var Sandbox = function() {
     sandboxCatalog._extensionsOrdering = catalog._extensionsOrdering;
 
     // Register the metadata from the master catalog.
-    sandboxCatalog.registerMetadata(catalog.metadata);
+    sandboxCatalog._registerMetadata(catalog.metadata);
 };
 
 Sandbox.prototype = new tiki.Sandbox();

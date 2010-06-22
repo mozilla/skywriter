@@ -581,6 +581,7 @@ exports.Catalog = function() {
     this.instancesLoadPromises = {};
     this._objectDescriptors = {};
 
+    // Stores the child catalogs.
     this.children = [];
 
     // set up the "extensionpoint" extension point.
@@ -603,6 +604,14 @@ exports.Catalog.prototype = {
 
     shareExtension: function(ext) {
         return this.plugins[ext.pluginName].share;
+    },
+
+    isPluginLoaded: function(pluginName) {
+        var usedExports = Object.keys(require.sandbox.usedExports);
+
+        return usedExports.some(function(item) {
+            return item.indexOf('::' + pluginName + ':') == 0;
+        });
     },
 
     /**
@@ -838,47 +847,80 @@ exports.Catalog.prototype = {
     },
 
     registerMetadata: function(metadata) {
-        var pluginName;
+        // If we are the master catalog, then store the metadata.
+        if (this.parent) {
+            this.parent.registerMetadata(metadata);
+        } else {
+            for (var pluginName in metadata) {
+                var md = metadata[pluginName];
+                if (md.errors) {
+                    console.error("Plugin ", pluginName, " has errors:");
+                    md.errors.forEach(function(error) {
+                        console.error(error);
+                    });
+                    delete metadata[pluginName];
+                    continue;
+                }
+
+                if (md.dependencies) {
+                    md.depends = Object.keys(md.dependencies);
+                }
+
+                md.name = pluginName;
+                md.version = null;
+
+                var packageId = browser.canonicalPackageId(pluginName);
+                if (packageId === null) {
+                    browser.register('::' + pluginName, md);
+                    continue;
+                }
+            }
+
+            // Save the new metadata.
+            util.mixin(this.metadata, util.clone(metadata, true));
+
+            // Tell every child about the new metadata.
+            this.children.forEach(function(child) {
+                child._registerMetadata(metadata);
+            });
+            // Register the metadata in the master catalog as well.
+            this._registerMetadata(metadata);
+        }
+    },
+
+    _registerMetadata: function(metadata) {
+        var pluginName, plugin;
         var plugins = this.plugins;
 
-        // If we are the master catalog, then store the metadata.
-        if (!this.parent) {
-            util.mixin(this.metadata, util.clone(metadata, true));
-        }
-
-        for (pluginName in metadata) {
-            var md = metadata[pluginName];
-            if (md.errors) {
-                console.error("Plugin ", pluginName, " has errors:");
-                md.errors.forEach(function(error) {
-                    console.error(error);
-                });
-                delete metadata[pluginName];
-                continue;
-            }
-
-            if (md.dependencies) {
-                md.depends = Object.keys(md.dependencies);
-            }
-
-            md.name = pluginName;
-            md.version = null;
-            // console.log("loading metadata for", pluginName, " -> ", md);
-
-            var packageId = browser.canonicalPackageId(pluginName);
-            if (packageId === null) {
-                browser.register('::' + pluginName, md);
-                continue;
-            }
-        }
-
         this._toposort(metadata).forEach(function(name) {
+            // If the plugin is already registered.
+            if (this.plugins[name]) {
+                // Check if the plugin is loaded.
+                if (this.isPluginLoaded(name)) {
+                    // If the plugin is loaded, then the metadata/plugin/extensions
+                    // have to stay the way they are at the moment.
+                    return;
+                } else {
+                    // If the plugin is not loaded and the plugin is already
+                    // registerd, then remove the plugin.
+                    //
+                    // Reason: As new metadata arrives, this might also mean,
+                    // that the factory in the tiki.loader has changed. If the
+                    // old plugins/extensions would stay, they might not fit to
+                    // the new factory. As such, the plugin has to be updated,
+                    // which is achieved by unregister the plugin and then add it
+                    // later in this function again.
+                    var plugin = this.plugins[name];
+                    plugin.unregister();
+                }
+            }
+
             var md = metadata[name];
             var activated = !(this.deactivatedPlugins[name]);
 
             md.catalog = this;
             md.name = name;
-            var plugin = new exports.Plugin(md);
+            plugin = new exports.Plugin(md);
             plugins[name] = plugin;
 
             // Skip if the plugin is not activated.
@@ -1300,8 +1342,11 @@ exports.registerExtensionHandler = function(extension, catalog) {
 
 
 exports.unregisterExtensionPoint = function(extension, catalog) {
-    var ep = catalog.getExtensionPoint(extension.name, true);
-
+    // Note: When an extensionPoint is unregistered, the extension point itself
+    // stays but the handler goes away.
+    // DISCUSS: Is this alright? The other option is to remove the ep completly.
+    // The downside of this is, that when the ep arrives later again, it has
+    // to look for extension handlers bound to this ep and add them all again.
     if (extension.register || extension.unregister) {
         exports.unregisterExtensionHandler(extension);
     }
