@@ -395,19 +395,10 @@ exports.activate = function(env, args, request) {
     // Activae/reload plugins.
     pluginNames.forEach(function(pluginName) {
         if (catalog.deactivatedPlugins[pluginName]) {
-            delete catalog.deactivatedPlugins[pluginName];
-
             pluginsActivated.push(pluginName);
+            catalog.activatePlugin(pluginName);
 
-            prReloadList.push(
-                catalog.loadMetadataFromURL(
-                    server.base_url + '/plugin/reload/' + pluginName
-                ).then(function() {
-                    output.push('Plugin activated: ' + pluginName);
-                }, function(error) {
-                    output.push('FAILED to activate plugin: ' + pluginName);
-                })
-            );
+            output.push('Plugin activated: ' + pluginName);
         } else {
             output.push('Plugin already activated: ' + pluginName);
         }

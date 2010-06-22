@@ -369,7 +369,7 @@ exports.Plugin.prototype = {
     /**
      * removes the plugin from Tiki's registries.
      */
-    _cleanup: function() {
+    _cleanup: function(leaveLoader) {
         // Remove the css files.
         this.stylesheets.forEach(function(stylesheet) {
             var links = document.getElementsByTagName('link');
@@ -392,12 +392,14 @@ exports.Plugin.prototype = {
         var loader = require.loader;
         var source = browser;
 
-        // Clear the loader.
-        _removeFromObject(moduleMatch, loader.factories);
-        _removeFromObject(packageMatch, loader.canonicalIds);
-        _removeFromObject(packageMatch, loader.canonicalPackageIds);
-        _removeFromObject(packageMatch, loader.packageSources);
-        _removeFromObject(packageMatch, loader.packages);
+        if (!leaveLoader) {
+            // Clear the loader.
+            _removeFromObject(moduleMatch, loader.factories);
+            _removeFromObject(packageMatch, loader.canonicalIds);
+            _removeFromObject(packageMatch, loader.canonicalPackageIds);
+            _removeFromObject(packageMatch, loader.packageSources);
+            _removeFromObject(packageMatch, loader.packages);
+        }
 
         // Clear the sandbox.
         _removeFromObject(moduleMatch, sandbox.exports);
@@ -882,7 +884,7 @@ exports.Catalog.prototype = {
 
         // If we are the master catalog, then store the metadata.
         if (!this.parent) {
-            util.mixin(this.metadata, util.clone(metadata));
+            util.mixin(this.metadata, util.clone(metadata, true));
         }
 
         for (pluginName in metadata) {
@@ -926,20 +928,26 @@ exports.Catalog.prototype = {
             plugins[name] = plugin;
 
             // Skip if the plugin is not activated.
-            if (md.provides && activated) {
+            if (md.provides) {
                 var provides = md.provides;
                 for (var i = 0; i < provides.length; i++) {
                     var extension = new exports.Extension(provides[i]);
                     extension.pluginName = name;
                     provides[i] = extension;
+
                     var epname = extension.ep;
                     if (epname == "extensionpoint") {
                         this._registerExtensionPoint(extension);
                     } else if (epname == "extensionhandler") {
                         this._registerExtensionHandler(extension);
                     }
-                    var ep = this.getExtensionPoint(extension.ep, true);
-                    ep.register(extension);
+
+                    // Only register the extension if the plugin is activated.
+                    // TODO: This should handle extension points and
+                    if (activated) {
+                        var ep = this.getExtensionPoint(extension.ep, true);
+                        ep.register(extension);
+                    }
                 }
             } else {
                 md.provides = [];
@@ -1015,12 +1023,20 @@ exports.Catalog.prototype = {
 
     deactivatePlugin: function(pluginName) {
         var plugin = this.plugins[pluginName];
-        if (plugin !== undefined) {
+        if (plugin !== undefined && !this.deactivatedPlugins[pluginName]) {
             plugin.unregister();
-            plugin._cleanup();
-        }
 
-        this.deactivatedPlugins[pluginName] = true;
+            this.deactivatedPlugins[pluginName] = true;
+        }
+    },
+
+    activatePlugin: function(pluginName) {
+        if (this.deactivatedPlugins[pluginName]) {
+            var plugin = this.plugins[pluginName];
+            plugin.register();
+
+            delete this.deactivatedPlugins[pluginName];
+        }
     },
 
     /**

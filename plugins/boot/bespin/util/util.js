@@ -552,7 +552,7 @@ exports.none = function(obj) {
  * @param object {Object} the object to clone
  * @returns {Object} the cloned object
  */
-exports.clone = function(object) {
+exports.clone = function(object, deep) {
     if (Array.isArray(object)) {
         return object.slice();
     }
@@ -564,7 +564,12 @@ exports.clone = function(object) {
 
         var reply = {};
         for (var key in object) {
-            reply[key] = object[key];
+            if (deep && (typeof object[key] === 'object'
+                            || Array.isArray(object[key]))) {
+                reply[key] = exports.clone(object[key], true);
+            } else {
+                 reply[key] = object[key];
+            }
         }
         return reply;
     }
