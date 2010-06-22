@@ -95,7 +95,7 @@ exports.loginController.prototype = {
                     catalog.deactivatePlugin(pluginName);
                 }
 
-                catalog.loadMetadata(pluginInfo.metadata);
+                catalog.registerMetadata(pluginInfo.metadata);
                 catalog.orderExtensions(pluginInfo.ordering);
 
                 // Init the settings after all the plugin data is loaded.

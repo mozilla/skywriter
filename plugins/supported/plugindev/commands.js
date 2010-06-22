@@ -297,7 +297,7 @@ exports.install = function(env, args, request) {
     });
 
     pr.then(function(metadata) {
-        catalog.loadMetadata(metadata);
+        catalog.registerMetadata(metadata);
         request.done('Plugin installed');
     }, function(error) {
         request.doneWithError('Plugin installation failed: ' + error.message);

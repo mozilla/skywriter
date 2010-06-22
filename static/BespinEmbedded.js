@@ -75,7 +75,7 @@ function pump() {
             if (!bespin.hasOwnProperty('metadata')) {
                 pr = catalog.loadMetadataFromURL("plugin/register/worker");
             } else {
-                catalog.loadMetadata(bespin.metadata);
+                catalog.registerMetadata(bespin.metadata);
                 pr = new Promise();
                 pr.resolve();
             }

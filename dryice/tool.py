@@ -303,7 +303,7 @@ will be deleted before the build.""")
 (function() {
 var $ = bespin.tiki.require("jquery").$;
 $(document).ready(function() {
-    bespin.tiki.require("bespin:plugins").catalog.loadMetadata(%s);;
+    bespin.tiki.require("bespin:plugins").catalog.registerMetadata(%s);;
 });
 })();
 """ % all_md)
@@ -311,7 +311,7 @@ $(document).ready(function() {
         
         shared_md = make_plugin_metadata(shared_packages)
         shared_js_file.write("""
-bespin.tiki.require("bespin:plugins").catalog.loadMetadata(%s);
+bespin.tiki.require("bespin:plugins").catalog.registerMetadata(%s);
 """ % shared_md)
         
         shared_js_file.write(_script2loader.text("utf8").encode("utf8"))

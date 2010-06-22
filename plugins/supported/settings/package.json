@@ -3,6 +3,7 @@
     "dependencies": {
         "types": "0.0"
     },
+    "share": true,
     "provides":
     [
         {

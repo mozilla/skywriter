@@ -133,7 +133,7 @@ exports.Extension.prototype = {
             promise.reject(new Error('Extension has no \'pointer\' to call'));
             return promise;
         }
-        
+
         exports.catalog.loadPlugin(this.pluginName).then(function() {
             require.ensure(pointerObj.modName, function() {
                 var func = _retrieveObject(pointerObj);
@@ -576,7 +576,7 @@ exports.Catalog = function() {
     // it indexes on name.
     var ep = this.getExtensionPoint("extensionpoint", true);
     ep.indexOn = "name";
-    this.loadMetadata(builtins.metadata);
+    this.registerMetadata(builtins.metadata);
 };
 
 exports.Catalog.prototype = {
@@ -844,9 +844,9 @@ exports.Catalog.prototype = {
         return sorted;
     },
 
-    loadMetadata: function(metadata) {
+    registerMetadata: function(metadata) {
         var plugins = this.plugins;
-        
+
         var pluginName;
 
         for (pluginName in metadata) {
@@ -938,8 +938,12 @@ exports.Catalog.prototype = {
                 });
             });
         } else {
-            require.ensurePackage(pluginName, function() {
-                pr.resolve();
+            require.ensurePackage(pluginName, function(err) {
+                if (err) {
+                    pr.reject(err);
+                } else {
+                    pr.resolve();
+                }
             });
         }
         return pr;
@@ -963,7 +967,7 @@ exports.Catalog.prototype = {
                 return;
             }
 
-            this.loadMetadata(JSON.parse(req.responseText));
+            this.registerMetadata(JSON.parse(req.responseText));
             pr.resolve();
         }.bind(this);
 
