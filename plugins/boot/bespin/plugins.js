@@ -379,7 +379,7 @@ exports.Plugin.prototype = {
      * Removes the plugin from Tiki's registries.
      * As with the new multiple Bespins, this only clears the current sandbox.
      */
-    _cleanup: function() {
+    _cleanup: function(leaveLoader) {
         // Remove the css files.
         this.stylesheets.forEach(function(stylesheet) {
             var links = document.getElementsByTagName('link');
@@ -402,26 +402,28 @@ exports.Plugin.prototype = {
         var loader = require.loader;
         var source = browser;
 
-        // Clear the loader.
-        _removeFromObject(moduleMatch, loader.factories);
-        _removeFromObject(packageMatch, loader.canonicalIds);
-        _removeFromObject(packageMatch, loader.canonicalPackageIds);
-        _removeFromObject(packageMatch, loader.packageSources);
-        _removeFromObject(packageMatch, loader.packages);
+        if (!leaveLoader) {
+            // Clear the loader.
+            _removeFromObject(moduleMatch, loader.factories);
+            _removeFromObject(packageMatch, loader.canonicalIds);
+            _removeFromObject(packageMatch, loader.canonicalPackageIds);
+            _removeFromObject(packageMatch, loader.packageSources);
+            _removeFromObject(packageMatch, loader.packages);
+
+            // Clear the source.
+            _removeFromObject(nameMatch, source.packageInfoByName);
+            _removeFromObject(moduleMatch, source.factories);
+            _removeFromObject(moduleMatch, source.scriptActions);
+            _removeFromObject(moduleMatch, source.stylesheetActions);
+            _removeFromObject(packageMatch, source.packages);
+            _removeFromObject(packageMatch, source.ensureActions);
+            _removeFromObject(packageMatch, source.packageInfoById);
+        }
 
         // Clear the sandbox.
         _removeFromObject(moduleMatch, sandbox.exports);
         _removeFromObject(moduleMatch, sandbox.modules);
         _removeFromObject(moduleMatch, sandbox.usedExports);
-
-        // Clear the source.
-        _removeFromObject(nameMatch, source.packageInfoByName);
-        _removeFromObject(moduleMatch, source.factories);
-        _removeFromObject(moduleMatch, source.scriptActions);
-        _removeFromObject(moduleMatch, source.stylesheetActions);
-        _removeFromObject(packageMatch, source.packages);
-        _removeFromObject(packageMatch, source.ensureActions);
-        _removeFromObject(packageMatch, source.packageInfoById);
     },
 
     /**
@@ -1156,7 +1158,7 @@ exports.Catalog.prototype = {
         }
 
         plugin.unregister();
-        // plugin._cleanup();
+        plugin._cleanup(true /* leaveLoader */);
         delete this.metadata[pluginName];
         delete this.plugins[pluginName];
     },
