@@ -2,15 +2,16 @@
     "description": "Canvas-based text editor component and many common editing commands",
     "dependencies":
     {
-        "canon": "0.0",
-        "keyboard": "0.0",
-        "rangeutils": "0.0",
-        "settings": "0.0",
-        "edit_session": "0.0",
-        "syntax_manager" : "0.0",
+        "canon": "0.0.0",
+        "keyboard": "0.0.0",
+        "rangeutils": "0.0.0",
+        "settings": "0.0.0",
+        "edit_session": "0.0.0",
+        "syntax_manager" : "0.0.0",
         "theme_manager": "0.0.0",
-        "undomanager": "0.0",
-        "traits": "0.0"
+        "undomanager": "0.0.0",
+        "traits": "0.0.0",
+        "completion": "0.0.0"
     },
     "provides":
     [
@@ -80,14 +81,14 @@
             "ep": "command",
             "name": "newline",
             "key": "return",
-            "predicates": { "isTextView": true },
+            "predicates": { "isTextView": true, "completing": false },
             "pointer": "commands/editing#newline"
         },
         {
             "ep": "command",
             "name": "tab",
             "key": "tab",
-            "predicates": { "isTextView": true },
+            "predicates": { "isTextView": true, "completing": false },
             "pointer": "commands/editing#tab"
         },
         {
@@ -135,7 +136,7 @@
             "ep": "command",
             "name": "move down",
             "key": "down",
-            "predicates": {"isTextView": true},
+            "predicates": { "isTextView": true, "completing": false },
             "pointer": "commands/movement#moveDown"
         },
         {
@@ -156,7 +157,7 @@
             "ep": "command",
             "name": "move up",
             "key": "up",
-            "predicates": { "isTextView": true },
+            "predicates": { "isTextView": true, "completing": false },
             "pointer": "commands/movement#moveUp"
         },
         {

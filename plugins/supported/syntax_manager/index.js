@@ -183,7 +183,10 @@ Context.prototype = {
 function SyntaxManager(layoutManager) {
     this.layoutManager = layoutManager;
 
-    /** Called whenever the syntax has been updated. */
+    /** Called whenever the attributes have been updated. */
+    this.attrsChanged = new Event;
+
+    /** Called whenever the syntax (file type) has been changed. */
     this.syntaxChanged = new Event;
 
     this._context = null;
@@ -218,6 +221,7 @@ SyntaxManager.prototype = {
         ctx.annotate();
     },
 
+    attrsChanged: null,
     syntaxChanged: null,
 
     /** Returns the contexts that are active at the position pos. */
@@ -232,6 +236,11 @@ SyntaxManager.prototype = {
      */
     getAttrsForRows: function(startRow, endRow) {
         return this._attrs.slice(startRow, endRow);
+    },
+
+    /** Returns the current syntax. */
+    getSyntax: function() {
+        return this._syntax;
     },
 
     /** A convenience function to return the lines from the text storage. */
@@ -252,7 +261,7 @@ SyntaxManager.prototype = {
      */
     mergeAttrs: function(startRow, newAttrs) {
         replace(this._attrs, startRow, newAttrs, []);
-        this.syntaxChanged(startRow, startRow + newAttrs.length);
+        this.attrsChanged(startRow, startRow + newAttrs.length);
     },
 
     /**
@@ -261,14 +270,8 @@ SyntaxManager.prototype = {
      */
     setSyntax: function(syntax) {
         this._syntax = syntaxDirectory.hasSyntax(syntax) ? syntax : 'plain';
+        this.syntaxChanged(syntax);
         this._reset();
-    },
-
-    /**
-     * Return the current syntax.
-     */
-    getSyntax: function() {
-        return this._syntax;
     },
 
     /** Sets the syntax appropriately for a file extension. */

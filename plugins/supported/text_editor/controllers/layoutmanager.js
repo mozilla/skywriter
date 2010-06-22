@@ -110,7 +110,7 @@ exports.LayoutManager = function(opts) {
 
     var syntaxManager = new SyntaxManager(this);
     this.syntaxManager = syntaxManager;
-    syntaxManager.syntaxChanged.add(this._syntaxChanged.bind(this));
+    syntaxManager.attrsChanged.add(this._attrsChanged.bind(this));
 
     this._size = { width: 0, height: 0 };
     this.sizeChanged = new Event();
@@ -164,6 +164,19 @@ exports.LayoutManager.prototype = {
      * 'colors', and 'lineHeight'.
      */
     textLines: null,
+
+    // Called whenever the text attributes (which usually consist of syntax
+    // highlighting) change.
+    _attrsChanged: function(startRow, endRow) {
+        this.updateTextRows(startRow, endRow);
+
+        var invalidRects = this.rectsForRange({
+            start:  { row: startRow, col: 0 },
+            end:    { row: endRow, col: 0 }
+        });
+
+        this.invalidatedRects(this, invalidRects);
+    },
 
     _computeInvalidRects: function(oldRange, newRange) {
         var startRect = this.characterRectForPosition(oldRange.start);
@@ -255,17 +268,6 @@ exports.LayoutManager.prototype = {
         this.changedTextAtRow(this, oldStartRow);
 
         var invalidRects = this._computeInvalidRects(oldRange, newRange);
-        this.invalidatedRects(this, invalidRects);
-    },
-
-    _syntaxChanged: function(startRow, endRow) {
-        this.updateTextRows(startRow, endRow);
-
-        var invalidRects = this.rectsForRange({
-            start:  { row: startRow, col: 0 },
-            end:    { row: endRow, col: 0 }
-        });
-
         this.invalidatedRects(this, invalidRects);
     },
 

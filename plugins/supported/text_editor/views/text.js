@@ -473,6 +473,14 @@ util.mixin(exports.TextView.prototype, {
         this.textInput.focus();
     },
 
+    /** Returns the location of the insertion point in pixels. */
+    getInsertionPointPosition: function() {
+        var editor = this.editor;
+        var range = editor.buffer._selectedRange;
+        var rect = editor.layoutManager.characterRectForPosition(range.start);
+        return { x: rect.x, y: rect.y };
+    },
+
     /**
      * Returns the characters that are currently selected as a string, or the
      * empty string if none are selected.

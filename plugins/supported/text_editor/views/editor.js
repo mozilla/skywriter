@@ -40,6 +40,8 @@ var scroller = require('views/scroller');
 var util = require('bespin:util/util');
 
 var Buffer = require('models/buffer').Buffer;
+var CompletionController = require('completion:controller').
+    CompletionController;
 var EditorSearchController = require('controllers/search').
     EditorSearchController;
 var EditorUndoController = require('controllers/undo').EditorUndoController;
@@ -110,7 +112,7 @@ exports.EditorView = function(initialContent) {
     this.element = this.container = document.createElement("div");
 
     var container = this.container;
-    container.style.overflow = 'hidden';
+    container.style.overflow = 'visible';
     container.style.position = 'relative';
 
     this.scrollOffsetChanged = new Event();
@@ -127,6 +129,7 @@ exports.EditorView = function(initialContent) {
     this.verticalScroller = verticalScroller;
     this.horizontalScroller = horizontalScroller;
 
+    this.completionController = new CompletionController(this);
     this.editorUndoController = new EditorUndoController(this);
     this.searchController = new EditorSearchController(this);
 
@@ -410,7 +413,21 @@ exports.EditorView.prototype = {
      */
     processKeyEvent: function(evt, sender, preds) {
         preds = _(preds).clone();
+        preds.completing = this.completionController.isCompleting();
         return keyboardManager.processKeyEvent(evt, sender, preds);
+    },
+
+    /**
+     * Converts a point in the coordinate system of the document being edited
+     * (i.e. of the text view) to the coordinate system of the editor (i.e. of
+     * the DOM component containing Bespin).
+     */
+    convertTextViewPoint: function(pt) {
+        var scrollOffset = this.scrollOffset;
+        return {
+            x: pt.x - scrollOffset.x + this._gutterViewWidth,
+            y: pt.y - scrollOffset.y
+        };
     },
 
     // ------------------------------------------------------------------------
@@ -500,6 +517,13 @@ exports.EditorView.prototype = {
         return this.textView.groupChanges(function() {
             func(this);
         }.bind(this));
+    },
+
+    /**
+     * Adds the supplied tags to the completion manager.
+     */
+    addTags: function(newTags) {
+        this.completionController.tags.add(newTags);
     }
 };
 
