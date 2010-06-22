@@ -49,7 +49,9 @@ var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var ScrollerView = scroller.ScrollerCanvasView;
 var TextView = require('views/text').TextView;
 
+var _ = require('underscore')._;
 var catalog = require('bespin:plugins').catalog;
+var keyboardManager = require('keyboard:keyboard').keyboardManager;
 var settings = require('settings').settings;
 
 // Caches the theme data for the entire editor (editor, highlighter, and
@@ -399,6 +401,16 @@ exports.EditorView.prototype = {
         this._updateScrollers();
         this.gutterView.invalidate();
         this.textView.invalidate();
+    },
+
+    /**
+     * The text view uses this function to forward key events to the keyboard
+     * manager. The editor view is used as a middleman so that it can append
+     * predicates as necessary.
+     */
+    processKeyEvent: function(evt, sender, preds) {
+        preds = _(preds).clone();
+        return keyboardManager.processKeyEvent(evt, sender, preds);
     },
 
     // ------------------------------------------------------------------------

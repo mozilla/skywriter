@@ -111,11 +111,6 @@ util.mixin(KeyboardManager.prototype, {
         return this._matchCommand(symbolicName, sender, flags);
     },
 
-    processKeyInput: function(text, sender, flags) {
-        flags.isCommandKey = false;
-        return this._matchCommand(text, sender, flags);
-    },
-
     _matchCommand: function(symbolicName, sender, flags) {
         var match = this._findCommandExtension(symbolicName, sender, flags);
         if (match && match.commandExt !== 'no command') {

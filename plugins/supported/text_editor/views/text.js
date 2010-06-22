@@ -44,7 +44,6 @@ var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var Range = require('rangeutils:utils/range');
 var Rect = require('utils/rect');
 var TextInput = require('views/textinput').TextInput;
-var keyboardManager = require('keyboard:keyboard').keyboardManager;
 var console = require('bespin:console').console;
 var settings = require('settings').settings;
 
@@ -578,9 +577,9 @@ util.mixin(exports.TextView.prototype, {
     },
 
     keyDown: function(evt) {
-        if (evt.charCode === 0 || evt._charCode === 0 /* This is a hack for FF*/) {
-            return keyboardManager.processKeyEvent(evt, this,
-                { isTextView: true });
+        if (evt.charCode === 0 || evt._charCode === 0) {    // hack for Fx
+            var preds = { isTextView: true };
+            return this.editor.processKeyEvent(evt, this, preds);
         } else if (evt.keyCode === 9) {
             // Stops the tab. Otherwise the editor can lose focus.
             evt.preventDefault();
@@ -1007,8 +1006,9 @@ util.mixin(exports.TextView.prototype, {
         if (text === '\n') {
             return;
         }
-        if (!keyboardManager.processKeyInput(text, this,
-                { isTextView: true, isCommandKey: false })) {
+
+        var preds = { isTextView: true, isCommandKey: false };
+        if (!this.editor.processKeyEvent(text, this, preds)) {
             this.insertText(text);
             this.resetKeyBuffers();
         }
