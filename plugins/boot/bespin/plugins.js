@@ -373,9 +373,10 @@ exports.Plugin.prototype = {
     },
 
     /**
-     * removes the plugin from Tiki's registries.
+     * Removes the plugin from Tiki's registries.
+     * As with the new multiple Bespins, this only clears the current sandbox.
      */
-    _cleanup: function(leaveLoader) {
+    _cleanup: function() {
         // Remove the css files.
         this.stylesheets.forEach(function(stylesheet) {
             var links = document.getElementsByTagName('link');
@@ -398,14 +399,12 @@ exports.Plugin.prototype = {
         var loader = require.loader;
         var source = browser;
 
-        if (!leaveLoader) {
-            // Clear the loader.
-            _removeFromObject(moduleMatch, loader.factories);
-            _removeFromObject(packageMatch, loader.canonicalIds);
-            _removeFromObject(packageMatch, loader.canonicalPackageIds);
-            _removeFromObject(packageMatch, loader.packageSources);
-            _removeFromObject(packageMatch, loader.packages);
-        }
+        // Clear the loader.
+        _removeFromObject(moduleMatch, loader.factories);
+        _removeFromObject(packageMatch, loader.canonicalIds);
+        _removeFromObject(packageMatch, loader.canonicalPackageIds);
+        _removeFromObject(packageMatch, loader.packageSources);
+        _removeFromObject(packageMatch, loader.packages);
 
         // Clear the sandbox.
         _removeFromObject(moduleMatch, sandbox.exports);
@@ -881,10 +880,10 @@ exports.Catalog.prototype = {
 
             // Tell every child about the new metadata.
             this.children.forEach(function(child) {
-                child._registerMetadata(metadata);
+                child._registerMetadata(util.clone(metadata, true));
             });
             // Register the metadata in the master catalog as well.
-            this._registerMetadata(metadata);
+            this._registerMetadata(util.clone(metadata, true));
         }
     },
 
@@ -1028,20 +1027,21 @@ exports.Catalog.prototype = {
 
     deactivatePlugin: function(pluginName) {
         var plugin = this.plugins[pluginName];
-        if (plugin !== undefined && !this.deactivatedPlugins[pluginName]) {
+        if (plugin && !this.deactivatedPlugins[pluginName]) {
             plugin.unregister();
-
-            this.deactivatedPlugins[pluginName] = true;
+            this.orderExtensions();
         }
+
+        this.deactivatedPlugins[pluginName] = true;
     },
 
     activatePlugin: function(pluginName) {
-        if (this.deactivatedPlugins[pluginName]) {
-            var plugin = this.plugins[pluginName];
+        var plugin = this.plugins[pluginName];
+        if (plugin && this.deactivatedPlugins[pluginName]) {
             plugin.register();
-
-            delete this.deactivatedPlugins[pluginName];
+            this.orderExtensions();
         }
+        delete this.deactivatedPlugins[pluginName];
     },
 
     /**
@@ -1055,7 +1055,7 @@ exports.Catalog.prototype = {
         }
 
         plugin.unregister();
-        plugin._cleanup();
+        // plugin._cleanup();
         delete this.metadata[pluginName];
         delete this.plugins[pluginName];
     },

@@ -65,12 +65,30 @@ var _getCurrentUser = function(server) {
     return server.request('GET', USER_INFO_URL, null, { evalJSON: true });
 };
 
+var loginPromise = null;
 
 exports.loginController = function() {};
 
 exports.loginController.prototype = {
     showLogin: function() {
-        var pr = new Promise();
+        // If there is already a login promise, then return it.
+        if (loginPromise) {
+            return loginPromise;
+        }
+
+        // Otherwise create a new login promise and return it at the end of
+        // the function call.
+        var pr = loginPromise = new Promise();
+
+        catalog.createObject("server").then(function(server) {
+            var prAlreadyLoggedIn = _getCurrentUser(server);
+            prAlreadyLoggedIn.then(function(data) {
+                pr.resolve(data.username);
+            }, function() {
+                this._showLoginForm(pr);
+            }.bind(this));
+        }.bind(this));
+
 
         // After the user logged in, load user specific data (settings, plugins).
         pr.then(function(username) {
@@ -108,15 +126,6 @@ exports.loginController.prototype = {
                 settings.setPersister(new ServerPersister);
             });
         });
-
-        catalog.createObject("server").then(function(server) {
-            var prAlreadyLoggedIn = _getCurrentUser(server);
-            prAlreadyLoggedIn.then(function(data) {
-                pr.resolve(data.username);
-            }, function() {
-                    this._showLoginForm(pr);
-                }.bind(this));
-        }.bind(this));
 
         return pr;
     },
@@ -427,6 +436,9 @@ exports.logout = function() {
     return server.request('POST', url, null, {
         log: 'Logout complete.'
     }).then(function() {
+        // Reset the login promise;
+        loginPromise = null;
+
         // Remove all user plugins.
         for (var pluginName in catalog.plugins) {
             if (catalog.plugins[pluginName].type === 'user') {

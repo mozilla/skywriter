@@ -131,7 +131,8 @@ exports.launch = function(config) {
         // TODO: Remove before shipping.
         bespin.instance.push({
             env: env,
-            require: require
+            require: require,
+            catalog: catalog
         });
 
         launchPromise.resolve(env);
