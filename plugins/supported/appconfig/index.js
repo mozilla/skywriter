@@ -37,12 +37,16 @@
 
 var $ = require('jquery').$;
 var settings = require('settings').settings;
-var catalog = require("bespin:plugins").catalog;
 var group = require("bespin:promise").group;
 var Promise = require("bespin:promise").Promise;
 var console = require("bespin:console").console;
 var Trace = require("bespin:util/stacktrace").Trace;
 var util = require('bespin:util/util');
+
+var firstBespin = true;
+
+// TODO: Remove this when shipping.
+bespin.instance = [];
 
 /*
  * launch Bespin with the configuration provided. The configuration is
@@ -66,8 +70,29 @@ exports.launch = function(config) {
     // Remove the "Loading..." hint.
     $('#_bespin_loading').remove();
 
+    // This will hold the require function to get the catalog.
+    var require;
+
+    // Is this the fist Bespin?
+    if (firstBespin) {
+        // Use the global require.
+        require = bespin.tiki.require;
+        firstBespin = false;
+    } else {
+        // Otherwise create a new tiki-bespin sandbox and a new require function.
+        var sandbox = new (bespin.tiki.require('bespin:sandbox').Sandbox);
+        require = sandbox.createRequire({
+            id: 'index',
+            ownerPackage: bespin.tiki.loader.anonymousPackage
+        });
+    }
+
+    // Here we go: Require the catalog that is used for this Bespin instance.
+    var catalog = require('bespin:plugins').catalog;
+
+    // Launch Bespin!
     config = config || {};
-    exports.normalizeConfig(config);
+    exports.normalizeConfig(catalog, config);
     var objects = config.objects;
     for (var key in objects) {
         catalog.registerObject(key, objects[key]);
@@ -102,6 +127,13 @@ exports.launch = function(config) {
         }
 
         catalog.publish(this, 'appLaunched');
+
+        // TODO: Remove before shipping.
+        bespin.instance.push({
+            env: env,
+            require: require
+        });
+
         launchPromise.resolve(env);
     }.bind(this);
 
@@ -116,12 +148,12 @@ exports.launch = function(config) {
                         // Add the username as constructor argument.
                         config.objects.session.arguments.push(username);
 
-                        exports.launchEditor(config).then(resolveLaunchPromise,
+                        exports.launchEditor(catalog, config).then(resolveLaunchPromise,
                                         launchPromise.reject.bind(launchPromise));
                     });
                 });
         } else {
-            exports.launchEditor(config).then(resolveLaunchPromise,
+            exports.launchEditor(catalog, config).then(resolveLaunchPromise,
                                         launchPromise.reject.bind(launchPromise));
         }
     }, function(error) {
@@ -151,7 +183,7 @@ exports.launch = function(config) {
     return launchPromise;
 };
 
-exports.normalizeConfig = function(config) {
+exports.normalizeConfig = function(catalog, config) {
     if (config.objects === undefined) {
         config.objects = {};
     }
@@ -170,12 +202,12 @@ exports.normalizeConfig = function(config) {
     if (!config.settings) {
         config.settings = {};
     }
-    
+
     if (!config.objects.notifier && catalog.plugins.notifier) {
         config.objects.notifier = {
         };
     }
-    
+
     if (!config.objects.loginController && catalog.plugins.userident) {
         config.objects.loginController = {
         };
@@ -261,7 +293,7 @@ exports.normalizeConfig = function(config) {
     }
 };
 
-exports.launchEditor = function(config) {
+exports.launchEditor = function(catalog, config) {
     var retPr = new Promise();
 
     if (config === null) {
@@ -271,9 +303,9 @@ exports.launchEditor = function(config) {
         return retPr;
     }
 
-    var pr = createAllObjects(config);
+    var pr = createAllObjects(catalog, config);
     pr.then(function() {
-        generateGUI(config, retPr);
+        generateGUI(catalog, config, retPr);
     }, function(error) {
         console.error('Error while creating objects');
         new Trace(error).log();
@@ -283,7 +315,7 @@ exports.launchEditor = function(config) {
     return retPr;
 };
 
-var createAllObjects = function(config) {
+var createAllObjects = function(catalog, config) {
     var promises = [];
     for (var objectName in config.objects) {
         promises.push(catalog.createObject(objectName));
@@ -291,9 +323,9 @@ var createAllObjects = function(config) {
     return group(promises);
 };
 
-var generateGUI = function(config, pr) {
+var generateGUI = function(catalog, config, pr) {
     var error;
-    
+
     var container = document.createElement('div');
     container.setAttribute('class', 'container');
 
