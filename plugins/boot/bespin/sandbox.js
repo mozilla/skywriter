@@ -39,10 +39,18 @@ var tiki = require('tiki');
 var util = require('bespin:util/util');
 var catalog = require('bespin:plugins').catalog;
 
+/**
+ * A sandbox can only be used from inside of the `master` catalog.
+ */
 if (catalog.parent) {
     throw new Error('The sandbox module can\'t be used inside of a slave catalog!');
 }
 
+/**
+ * A special Bespin subclass of the tiki sandbox class. When the sandbox is
+ * created, the catalog for the new sandbox is setup based on the catalog
+ * data that is already in the so called `master` catalog.
+ */
 var Sandbox = function() {
     // Call the default constructor. This creates a new tiki sandbox.
     tiki.Sandbox.call(this, bespin.tiki.require.loader, {}, []);
@@ -52,11 +60,12 @@ var Sandbox = function() {
 
     // Set the parent catalog for the sandbox catalog. This makes the sandbox
     // be a slave catalog of the master catalog.
-    catalog.addChild(sandboxCatalog);
+    sandboxCatalog.parent = catalog;
+    catalog.children.push(sandboxCatalog);
 
     // Copy over a few things from the master catalog.
     sandboxCatalog.deactivatePlugin = util.clone(catalog.deactivatePlugin);
-    sandboxCatalog._extensionsOrdering = catalog._extensionsOrdering;
+    sandboxCatalog._extensionsOrdering = util.clone(catalog._extensionsOrdering);
 
     // Register the metadata from the master catalog.
     sandboxCatalog._registerMetadata(util.clone(catalog.metadata, true));
@@ -64,6 +73,12 @@ var Sandbox = function() {
 
 Sandbox.prototype = new tiki.Sandbox();
 
+/**
+ * Overrides the standard tiki.Sandbox.require function. If the requested
+ * module/plugin is shared between the sandboxes, then the require function
+ * on the `master` sandbox is called. Otherwise it calls the overridden require
+ * function.
+ */
 Sandbox.prototype.require = function(moduleId, curModuleId, workingPackage) {
     // assume canonical() will normalize params
     var canonicalId = this.loader.canonical(moduleId, curModuleId, workingPackage);
@@ -81,4 +96,5 @@ Sandbox.prototype.require = function(moduleId, curModuleId, workingPackage) {
     }
 }
 
+// Expose the sandbox.
 exports.Sandbox = Sandbox;

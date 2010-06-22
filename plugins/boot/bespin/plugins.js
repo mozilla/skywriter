@@ -579,6 +579,10 @@ exports.Catalog = function() {
     this.points = {};
     this.plugins = {};
     this.metadata = {};
+
+    // Stores the deactivated plugins. Plugins deactivated by the user have the
+    // value 'true'. If a plugin is deactivated because a required plugin is
+    // deactivated, then the value is a string.
     this.deactivatedPlugins = {};
     this._extensionsOrdering = [];
     this.instances = {};
@@ -597,19 +601,17 @@ exports.Catalog = function() {
 
 exports.Catalog.prototype = {
 
-    addChild: function(catalog) {
-        catalog.parent = this;
-        this.children.push(catalog);
-    },
-
-    sharedPlugin: function(pluginName) {
-        return this.plugins[pluginName].share;
-    },
-
+    /**
+     * Returns true if the extension is shared.
+     */
     shareExtension: function(ext) {
         return this.plugins[ext.pluginName].share;
     },
 
+    /**
+     * Returns true, if the plugin is loaded (checks if there is a module in the
+     * current sandbox).
+     */
     isPluginLoaded: function(pluginName) {
         var usedExports = Object.keys(require.sandbox.usedExports);
 
@@ -850,6 +852,13 @@ exports.Catalog.prototype = {
         return sorted;
     },
 
+    /**
+     * Register new metadata. If the current catalog is not the master catalog,
+     * then the master catalog registerMetadata function is called. The master
+     * catalog then makes some basic operations on the metadata and calls the
+     * _registerMetadata function on all the child catalogs and for itself as
+     * well.
+     */
     registerMetadata: function(metadata) {
         // If we are the master catalog, then store the metadata.
         if (this.parent) {
@@ -892,6 +901,9 @@ exports.Catalog.prototype = {
         }
     },
 
+    /**
+     * Registers plugin metadata. See comments inside of the function.
+     */
     _registerMetadata: function(metadata) {
         var pluginName, plugin;
         var plugins = this.plugins;
@@ -1043,6 +1055,16 @@ exports.Catalog.prototype = {
         return pr;
     },
 
+    /**
+     * Dactivates a plugin. If no plugin was deactivated, then a string is
+     * returned which contains the reason why deactivating was not possible.
+     * Otherwise the plugin is deactivated as well as all plugins that depend on
+     * this plugin and a array is returned holding all depending plugins that were
+     * deactivated.
+     *
+     * @param pluginName string Name of the plugin to deactivate
+     * @param dependPlugin string Is set when the function is called recursively
+     */
     deactivatePlugin: function(pluginName, dependPlugin) {
         var plugin = this.plugins[pluginName];
         if (!plugin) {
@@ -1092,6 +1114,17 @@ exports.Catalog.prototype = {
         return deactivated;
     },
 
+    /**
+     * Activates a plugin. If the plugin can't be activated a string is returned
+     * explaining why. Otherwise the plugin is activated, all plugins that depend
+     * on this plugin are tried to activated and an array with all the activated
+     * depending plugins is returned.
+     * Note: Depending plugins are not activated if they user called
+     * deactivatePlugin on them to deactivate them explicit.
+     *
+     * @param pluginName string Name of the plugin to activate.
+     * @param dependPlugin string Is set when the function is called recursively
+     */
     activatePlugin: function(pluginName, dependPlugin) {
         var plugin = this.plugins[pluginName];
         if (!plugin) {
@@ -1397,6 +1430,11 @@ exports.Catalog.prototype = {
     }
 };
 
+/**
+ * Register handler for extension points.
+ * The argument `deactivated` is set to true or false when this method is called
+ * by the _registerMetadata function.
+ */
 exports.registerExtensionPoint = function(extension, catalog, deactivated) {
     var ep = catalog.getExtensionPoint(extension.name, true);
     ep.description = extension.description;
@@ -1411,6 +1449,9 @@ exports.registerExtensionPoint = function(extension, catalog, deactivated) {
     }
 };
 
+/**
+ * Register handler for extension handler.
+ */
 exports.registerExtensionHandler = function(extension, catalog) {
     // Don't add the extension handler if there is a master/partent catalog
     // and this plugin is shared. The extension handlers are only added
@@ -1443,7 +1484,9 @@ exports.registerExtensionHandler = function(extension, catalog) {
     }
 };
 
-
+/**
+ * Unregister handler for extension point.
+ */
 exports.unregisterExtensionPoint = function(extension, catalog) {
     // Note: When an extensionPoint is unregistered, the extension point itself
     // stays but the handler goes away.
@@ -1455,6 +1498,9 @@ exports.unregisterExtensionPoint = function(extension, catalog) {
     }
 };
 
+/**
+ * Unregister handler for extension handler.
+ */
 exports.unregisterExtensionHandler = function(extension, catalog) {
     // Don't remove the extension handler if there is a master/partent catalog
     // and this plugin is shared. The extension handlers are only added
