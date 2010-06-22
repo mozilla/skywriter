@@ -66,8 +66,7 @@ var KeyUtil = require('keyboard:keyutil');
 exports.TextInput = function(container, delegate) {
     var domNode = this.domNode = document.createElement('textarea');
     domNode.setAttribute('style', 'position: absolute; ' +
-        'z-index: -99999; top: -999px; left: -999px; width: 0px; ' +
-        'height: 0px');
+        'z-index: -99999; width: 0px; height: 0px; margin: 0px; border: 0px');
          // 'z-index: 100; top: 20px; left: 20px; width: 50px; ' +
          // 'height: 50px');
 
