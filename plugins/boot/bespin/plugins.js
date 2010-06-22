@@ -572,6 +572,8 @@ exports.Catalog = function() {
     this.instancesLoadPromises = {};
     this._objectDescriptors = {};
 
+    this.children = [];
+
     // set up the "extensionpoint" extension point.
     // it indexes on name.
     var ep = this.getExtensionPoint("extensionpoint", true);
@@ -580,6 +582,20 @@ exports.Catalog = function() {
 };
 
 exports.Catalog.prototype = {
+
+    addChild: function(catalog) {
+        catalog.parent = this;
+        this.children.push(catalog);
+    },
+
+    sharedPlugin: function(pluginName) {
+        return this.plugins[pluginName].share;
+    },
+
+    shareExtension: function(ext) {
+        return this.plugins[ext.pluginName].share;
+    },
+
     /**
      * Registers information about an instance that will be tracked
      * by the catalog. The first parameter is the name used for looking up
@@ -649,9 +665,6 @@ exports.Catalog.prototype = {
             // console.log("Already have one (it's very nice)");
             return this.instancesLoadPromises[name];
         }
-        // Otherwise create a new loading promise (which is returned at the
-        // end of the function) and create the instance.
-        var pr = this.instancesLoadPromises[name] = new Promise();
 
         var descriptor = this._objectDescriptors[name];
         if (descriptor === undefined) {
@@ -666,6 +679,17 @@ exports.Catalog.prototype = {
                 '", there is no factory called "' + factoryName +
                 '" available."');
         }
+
+        // If this is a child catalog and the extension is shared, then
+        // as the master/parent catalog to create the object.
+        if (this.parent && this.shareExtension(ext)) {
+            return this.instancesLoadPromises[name] = this.parent.createObject(name);
+        }
+
+        // Otherwise create a new loading promise (which is returned at the
+        // end of the function) and create the instance.
+        var pr = this.instancesLoadPromises[name] = new Promise();
+
         var factoryArguments = descriptor.arguments || [];
         var argumentPromises = [];
         if (descriptor.objects) {
@@ -718,7 +742,7 @@ exports.Catalog.prototype = {
      * if the instance has not been created.
      */
     getObject: function(name) {
-        return this.instances[name];
+        return this.instances[name] || (this.parent ? this.parent.getObject(name) : undefined);
     },
 
     /** Retrieve an extension point object by name, optionally creating it if it
@@ -791,6 +815,13 @@ exports.Catalog.prototype = {
     },
 
     _registerExtensionHandler: function(extension) {
+        // Don't add the extension handler if there is a master/partent catalog
+        // and this plugin is shared. The extension handlers are only added
+        // inside of the master catalog.
+        if (this.parent && this.shareExtension(extension)) {
+            return;
+        }
+
         var ep = this.getExtensionPoint(extension.name, true);
         ep.handlers.push(extension);
         if (extension.register) {
@@ -1175,14 +1206,31 @@ exports.Catalog.prototype = {
      * Publish <tt>value</tt> to all plugins that match both <tt>ep</tt> and
      * <tt>key</tt>.
      * @param source {object} The source calling the publish function.
-     * @param ep {string} An extension point (indexed by the catalog) to which
+     * @param epName {string} An extension point (indexed by the catalog) to which
      * we publish the information.
      * @param key {string} A key to which we publish (linearly searched, allowing
      * for regex matching).
      * @param value {object} The data to be passed to the subscribing function.
      */
-    publish: function(source, ep, key, value) {
-        var subscriptions = this.getExtensions(ep);
+    publish: function(source, epName, key, value) {
+        var ep = this.getExtensionPoint(epName);
+
+        if (this.shareExtension(ep)) {
+            if (this.parent) {
+                this.parent.publish(source, epName, key, value);
+            } else {
+                this.children.forEach(function(child) {
+                    child._publish(source, epName, key, value);
+                });
+                this._publish(source, epName, key, value);
+            }
+        } else {
+            this._publish(source, epName, key, value);
+        }
+    },
+
+    _publish: function(source, epName, key, value) {
+        var subscriptions = this.getExtensions(epName);
         subscriptions.forEach(function(sub) {
             // compile regexes only once
             if (sub.match && !sub.regexp) {

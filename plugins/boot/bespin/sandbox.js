@@ -39,16 +39,30 @@ var tiki = require('tiki');
 var util = require('bespin:util/util');
 var catalog = require('bespin:plugins').catalog;
 
+if (catalog.parent) {
+    throw new Error('The sandbox module can\'t be used inside of a slave catalog!');
+}
+
 var Sandbox = function() {
     // Call the default constructor. This creates a new tiki sandbox.
     tiki.Sandbox.call(this, bespin.tiki.require.loader, {}, []);
 
     // Register the plugins from the main catalog in the sandbox catalog.
     var sandboxCatalog = this.require('bespin:plugins').catalog;
+
+    // Set the parent catalog for the sandbox catalog. This makes the sandbox
+    // be a slave catalog of the master catalog.
+    catalog.addChild(sandboxCatalog);
+
+    // Copy over a few things from the master catalog.
+    sandboxCatalog.deactivatePlugin = catalog.deactivatePlugin;
+    sandboxCatalog._extensionsOrdering = catalog._extensionsOrdering;
+
+    // The sandbox catalog uses the same metadata as the master catalog. We clone
+    // it and remove the 'bespin' plugin as this is already in the sandbox catalog.
     var pluginsMetadata = util.clone(catalog.plugins);
-    // Remove the 'bespin' plugin - this one is already registered in the
-    // catalog.
     delete pluginsMetadata.bespin;
+
     // The registration call.
     sandboxCatalog.registerMetadata(pluginsMetadata);
 };
@@ -56,15 +70,12 @@ var Sandbox = function() {
 Sandbox.prototype = new tiki.Sandbox();
 
 Sandbox.prototype.require = function(moduleId, curModuleId, workingPackage) {
-    console.log('customRequire', moduleId, curModuleId, workingPackage);
-
-    var canonicalId;
-
     // assume canonical() will normalize params
-    canonicalId = this.loader.canonical(moduleId, curModuleId, workingPackage);
+    var canonicalId = this.loader.canonical(moduleId, curModuleId, workingPackage);
+    // Get the plugin name.
     var pluginName = canonicalId.substring(2).split(':')[0];
 
-    // check if this module should be shared
+    // Check if this module should be shared.
     if (catalog.plugins[pluginName].share) {
         // The module is shared, so require it from the main sandbox.
         return bespin.tiki.sandbox.require(moduleId, curModuleId, workingPackage);
