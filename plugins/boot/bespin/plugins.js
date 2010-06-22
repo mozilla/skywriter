@@ -108,7 +108,8 @@ exports.Extension.prototype = {
      * @returns A promise to be fulfilled on completion. Preferred over using the
      * <tt>callback</tt> parameter.
      */
-    load: function(callback, property) {
+    load: function(callback, property, catalog) {
+        catalog = catalog || exports.catalog;
         var promise = new Promise();
 
         var onComplete = function(func) {
@@ -135,7 +136,7 @@ exports.Extension.prototype = {
         }
 
         var pluginName = this.pluginName;
-        exports.catalog.loadPlugin(pluginName).then(function() {
+        catalog.loadPlugin(pluginName).then(function() {
             require.ensure(pointerObj.modName, function() {
                 var func = _retrieveObject(pointerObj);
                 onComplete(func);
@@ -254,7 +255,7 @@ exports.ExtensionPoint.prototype = {
                     } else {
                          register(extension, catalog);
                     }
-                }, "register");
+                }, "register", catalog);
             }
         });
     },
@@ -270,7 +271,7 @@ exports.ExtensionPoint.prototype = {
                     } else {
                          unregister(extension, catalog);
                     }
-                }, "unregister");
+                }, "unregister", catalog);
             }
         });
     },
@@ -808,52 +809,6 @@ exports.Catalog.prototype = {
         return ep.getByKey(key);
     },
 
-    _registerExtensionPoint: function(extension, activated) {
-        var ep = this.getExtensionPoint(extension.name, true);
-        ep.description = extension.description;
-        ep.pluginName = extension.pluginName;
-        ep.params = extension.params;
-        if (extension.indexOn) {
-            ep.indexOn = extension.indexOn;
-        }
-
-        if (activated && (extension.register || extension.unregister)) {
-            this._registerExtensionHandler(extension);
-        }
-    },
-
-    _registerExtensionHandler: function(extension) {
-        // Don't add the extension handler if there is a master/partent catalog
-        // and this plugin is shared. The extension handlers are only added
-        // inside of the master catalog.
-        if (this.parent && this.shareExtension(extension)) {
-            return;
-        }
-
-        var ep = this.getExtensionPoint(extension.name, true);
-        ep.handlers.push(extension);
-        if (extension.register) {
-            // Store the current extensions to this extension point. We can't
-            // use the ep.extensions array within the load-callback-function, as
-            // the array at that point in time also contains extensions that got
-            // registered by calling the handler.register function directly.
-            // As such, using the ep.extensions in the load-callback-function
-            // would result in calling the handler's register function on a few
-            // extensions twice.
-            var extensions = util.clone(ep.extensions);
-
-            extension.load(function(register) {
-                if (!register) {
-                    throw extension.name + " is not ready";
-                }
-                extensions.forEach(function(ext) {
-                    // console.log('call register on:', ext)
-                    register(ext);
-                });
-            }, "register");
-        }
-    },
-
     // Topological sort algorithm from Wikipedia, credited to Tarjan 1976.
     //     http://en.wikipedia.org/wiki/Topological_sort
     _toposort: function(metadata) {
@@ -935,19 +890,26 @@ exports.Catalog.prototype = {
                     provides[i] = extension;
 
                     var epname = extension.ep;
-                    if (epname == "extensionpoint") {
-                        this._registerExtensionPoint(extension, activated);
-                    }
+                    // This special treatment is required for the extension point
+                    // definition. TODO: Refactor the code so that this is no
+                    // longer necessary.
+                    if (epname == "extensionpoint" && extension.name == 'extensionpoint') {
+                        exports.registerExtensionPoint(extension, this, false);
+                    } else {
+                        // Only register the extension if the plugin is activated.
+                        // TODO: This should handle extension points and
+                        if (activated) {
+                            var ep = this.getExtensionPoint(extension.ep, true);
+                            ep.register(extension);
 
-                    // Only register the extension if the plugin is activated.
-                    // TODO: This should handle extension points and
-                    if (activated) {
-                        if (epname == "extensionhandler") {
-                            this._registerExtensionHandler(extension);
+                        // Even if the plugin is deactivated, the ep need to
+                        // be registered. Call the registerExtensionPoint
+                        // function manually, but pass as third argument 'true'
+                        // which indicates, that the plugin is deactivated and
+                        // prevents the handlers on the ep to get registered.
+                        } else if (epname == "extensionpoint") {
+                            exports.registerExtensionPoint(extension, this, true);
                         }
-
-                        var ep = this.getExtensionPoint(extension.ep, true);
-                        ep.register(extension);
                     }
                 }
             } else {
@@ -1289,6 +1251,53 @@ exports.Catalog.prototype = {
         this.getExtensionPoint(ep).register(extension);
     }
 };
+
+exports.registerExtensionPoint = function(extension, catalog, deactivated) {
+    var ep = catalog.getExtensionPoint(extension.name, true);
+    ep.description = extension.description;
+    ep.pluginName = extension.pluginName;
+    ep.params = extension.params;
+    if (extension.indexOn) {
+        ep.indexOn = extension.indexOn;
+    }
+
+    if (!deactivated && (extension.register || extension.unregister)) {
+        exports.registerExtensionHandler(extension, catalog);
+    }
+};
+
+exports.registerExtensionHandler = function(extension, catalog) {
+    // Don't add the extension handler if there is a master/partent catalog
+    // and this plugin is shared. The extension handlers are only added
+    // inside of the master catalog.
+    if (catalog.parent && catalog.shareExtension(extension)) {
+        return;
+    }
+
+    var ep = catalog.getExtensionPoint(extension.name, true);
+    ep.handlers.push(extension);
+    if (extension.register) {
+        // Store the current extensions to this extension point. We can't
+        // use the ep.extensions array within the load-callback-function, as
+        // the array at that point in time also contains extensions that got
+        // registered by calling the handler.register function directly.
+        // As such, using the ep.extensions in the load-callback-function
+        // would result in calling the handler's register function on a few
+        // extensions twice.
+        var extensions = util.clone(ep.extensions);
+
+        extension.load(function(register) {
+            if (!register) {
+                throw extension.name + " is not ready";
+            }
+            extensions.forEach(function(ext) {
+                // console.log('call register on:', ext)
+                register(ext, catalog);
+            });
+        }, "register", catalog);
+    }
+};
+
 
 exports.unregisterExtensionPoint = function(extension, catalog) {
     var ep = catalog.getExtensionPoint(extension.name, true);
