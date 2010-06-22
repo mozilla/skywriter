@@ -134,7 +134,8 @@ exports.Extension.prototype = {
             return promise;
         }
 
-        exports.catalog.loadPlugin(this.pluginName).then(function() {
+        var pluginName = this.pluginName;
+        exports.catalog.loadPlugin(pluginName).then(function() {
             require.ensure(pointerObj.modName, function() {
                 var func = _retrieveObject(pointerObj);
                 onComplete(func);
@@ -142,6 +143,8 @@ exports.Extension.prototype = {
                 // TODO: consider caching 'func' to save looking it up again
                 // Something like: this._setPointer(property, data);
             });
+        }, function(err) {
+            console.error('Failed to load plugin ', pluginName, err);
         });
 
         return promise;
@@ -241,6 +244,7 @@ exports.ExtensionPoint.prototype = {
     },
 
     register: function(extension) {
+        var catalog = this.catalog;
         this.extensions.push(extension);
         this.handlers.forEach(function(handler) {
             if (handler.register) {
@@ -248,7 +252,7 @@ exports.ExtensionPoint.prototype = {
                     if (!register) {
                         console.error('missing register function for pluginName=', extension.pluginName, ", extension=", extension.name);
                     } else {
-                         register(extension);
+                         register(extension, catalog);
                     }
                 }, "register");
             }
@@ -256,6 +260,7 @@ exports.ExtensionPoint.prototype = {
     },
 
     unregister: function(extension) {
+        var catalog = this.catalog;
         this.extensions.splice(this.extensions.indexOf(extension), 1);
         this.handlers.forEach(function(handler) {
             if (handler.unregister) {
@@ -263,7 +268,7 @@ exports.ExtensionPoint.prototype = {
                     if (!unregister) {
                         console.error('missing unregister function for pluginName=', extension.pluginName, ", extension=", extension.name);
                     } else {
-                         unregister(extension);
+                         unregister(extension, catalog);
                     }
                 }, "unregister");
             }
@@ -803,7 +808,7 @@ exports.Catalog.prototype = {
         return ep.getByKey(key);
     },
 
-    _registerExtensionPoint: function(extension) {
+    _registerExtensionPoint: function(extension, activated) {
         var ep = this.getExtensionPoint(extension.name, true);
         ep.description = extension.description;
         ep.pluginName = extension.pluginName;
@@ -812,7 +817,7 @@ exports.Catalog.prototype = {
             ep.indexOn = extension.indexOn;
         }
 
-        if (extension.register || extension.unregister) {
+        if (activated && (extension.register || extension.unregister)) {
             this._registerExtensionHandler(extension);
         }
     },
@@ -847,7 +852,6 @@ exports.Catalog.prototype = {
                 });
             }, "register");
         }
-
     },
 
     // Topological sort algorithm from Wikipedia, credited to Tarjan 1976.
@@ -888,11 +892,6 @@ exports.Catalog.prototype = {
         }
 
         for (pluginName in metadata) {
-            // Skip if the plugin is not activated.
-            if (this.deactivatedPlugins[pluginName]) {
-                continue;
-            }
-
             var md = metadata[pluginName];
             if (md.errors) {
                 console.error("Plugin ", pluginName, " has errors:");
@@ -937,14 +936,16 @@ exports.Catalog.prototype = {
 
                     var epname = extension.ep;
                     if (epname == "extensionpoint") {
-                        this._registerExtensionPoint(extension);
-                    } else if (epname == "extensionhandler") {
-                        this._registerExtensionHandler(extension);
+                        this._registerExtensionPoint(extension, activated);
                     }
 
                     // Only register the extension if the plugin is activated.
                     // TODO: This should handle extension points and
                     if (activated) {
+                        if (epname == "extensionhandler") {
+                            this._registerExtensionHandler(extension);
+                        }
+
                         var ep = this.getExtensionPoint(extension.ep, true);
                         ep.register(extension);
                     }
@@ -1286,6 +1287,49 @@ exports.Catalog.prototype = {
         var extension = new exports.Extension(metadata);
         extension.pluginName = '__dynamic';
         this.getExtensionPoint(ep).register(extension);
+    }
+};
+
+exports.unregisterExtensionPoint = function(extension, catalog) {
+    var ep = catalog.getExtensionPoint(extension.name, true);
+
+    if (extension.register || extension.unregister) {
+        exports.unregisterExtensionHandler(extension);
+    }
+};
+
+exports.unregisterExtensionHandler = function(extension, catalog) {
+    // Don't remove the extension handler if there is a master/partent catalog
+    // and this plugin is shared. The extension handlers are only added
+    // inside of the master catalog.
+    if (catalog.parent && catalog.shareExtension(extension)) {
+        return;
+    }
+
+    var ep = catalog.getExtensionPoint(extension.name, true);
+    if (ep.handlers.indexOf(extension) == -1) {
+        return;
+    }
+    ep.handlers.splice(ep.handlers.indexOf(extension), 1);
+    if (extension.unregister) {
+        // Store the current extensions to this extension point. We can't
+        // use the ep.extensions array within the load-callback-function, as
+        // the array at that point in time also contains extensions that got
+        // registered by calling the handler.register function directly.
+        // As such, using the ep.extensions in the load-callback-function
+        // would result in calling the handler's register function on a few
+        // extensions twice.
+        var extensions = util.clone(ep.extensions);
+
+        extension.load(function(unregister) {
+            if (!unregister) {
+                throw extension.name + " is not ready";
+            }
+            extensions.forEach(function(ext) {
+                // console.log('call register on:', ext)
+                unregister(ext);
+            });
+        }, "unregister");
     }
 };
 

@@ -44,6 +44,7 @@ exports.metadata =
             {
                 "ep": "extensionpoint",
                 "name": "extensionpoint",
+                "unregister": "plugins#unregisterExtensionPoint",
                 "description": "Defines a new extension point",
                 "params": [
                     {
@@ -82,6 +83,7 @@ exports.metadata =
             {
                 "ep": "extensionpoint",
                 "name": "extensionhandler",
+                "unregister": "plugins#unregisterExtensionHandler",
                 "description": "Used to attach listeners ",
                 "params": [
                     {
