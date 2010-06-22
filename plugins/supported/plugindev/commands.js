@@ -188,9 +188,10 @@ exports.list = function(env, args, request) {
 
         output.push('<tr><th class="right">' + plugin.name);
 
-        if (deactivatedPlugins[plugin.name] === true) {
+        var deactivated = deactivatedPlugins[plugin.name];
+        if (deactivated === catalog.USER_DEACTIVATED) {
             output.push(' (deactivated):');
-        } else if (deactivatedPlugins[plugin.name]){
+        } else if (deactivated === catalog.DEPENDS_DEACTIVATED){
             output.push(' (deact/dept):');
         }
 
@@ -379,7 +380,8 @@ exports.deactivate = function(env, args, request) {
         var ret = catalog.deactivatePlugin(pluginName);
         if (Array.isArray(ret)) {
             pluginsDeactivated.push(pluginName);
-            output.push('Plugin deactivated: ' + pluginName + ' + dependent plugins: ' + ret.join(', '));
+            output.push('Plugin deactivated: ' + pluginName +
+                              ' + dependent plugins: ' + ret.join(', '));
         } else {
             output.push('<span class="cmd_error">' + ret + '</span>');
         }
@@ -388,18 +390,20 @@ exports.deactivate = function(env, args, request) {
     changePluginInfo(env, request).then(function(data) {
         var deactivated = {};
         for (plugin in catalog.deactivatedPlugins) {
-            if (catalog.deactivatedPlugins[plugin] === true) {
+            if (catalog.deactivatedPlugins[plugin] === catalog.USER_DEACTIVATED) {
                 deactivated[plugin] = true;
             }
         }
         data.pluginConfig.deactivated = deactivated;
 
         output.push('Deactivated plugins saved.');
-        data.prChangeDone.resolve('Finished with following messages: <UL><LI>' + output.join('<LI>') + '<UL>');
+        data.prChangeDone.resolve('Finished with following messages: <UL><LI>' +
+                              output.join('<LI>') + '<UL>');
+        request.async();
     }, function(err) {
-        request.error('Failed to save the new deactivated plugins: ' + err.message);
+        request.error('Failed to save the new deactivated plugins: ' +
+                              err.message);
     });
-
     request.async();
 };
 
@@ -415,31 +419,30 @@ exports.activate = function(env, args, request) {
         var ret = catalog.activatePlugin(pluginName);
         if (Array.isArray(ret)) {
             pluginsActivated.push(pluginName);
-            output.push('Plugin activated: ' + pluginName + ' + dependent plugins: ' + ret.join(', '));
+            output.push('Plugin activated: ' + pluginName +
+                            ' + dependent plugins: ' + ret.join(', '));
         } else {
             output.push('<span class="cmd_error">' + ret + '</span>');
         }
     });
 
-    if (pluginsActivated.length != 0) {
-        changePluginInfo(env, request).then(function(data) {
-            var deactivated = {};
-            for (plugin in catalog.deactivatedPlugins) {
-                if (catalog.deactivatedPlugins[plugin] === true) {
-                    deactivated[plugin] = true;
-                }
+    changePluginInfo(env, request).then(function(data) {
+        var deactivated = {};
+        for (plugin in catalog.deactivatedPlugins) {
+        if (catalog.deactivatedPlugins[plugin] === catalog.USER_DEACTIVATED) {
+                deactivated[plugin] = true;
             }
-            data.pluginConfig.deactivated = deactivated;
+        }
+        data.pluginConfig.deactivated = deactivated;
 
-            output.push('Activated plugins saved.');
-            data.prChangeDone.resolve('Finished with following messages: <UL><LI>' + output.join('<LI>') + '<UL>');
-        }, function(err) {
-            request.error('Failed to save the new activated plugins: ' + err.message);
-        });
-    } else {
-        output.push('No plugin got activated - pluginInfo was not saved.');
-    }
-
+        output.push('Activated plugins saved.');
+        data.prChangeDone.resolve('Finished with following messages: ' +
+                                      '<UL><LI>' + output.join('<LI>') +
+                                      '<UL>');
+    }, function(err) {
+        request.error('Failed to save the new activated plugins: ' +
+                        err.message);
+    });
     request.async();
 };
 

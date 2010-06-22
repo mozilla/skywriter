@@ -49,6 +49,9 @@ var r = require;
 var loader = require.loader;
 var browser = loader.sources[0];
 
+var USER_DEACTIVATED    = 'USER';
+var DEPENDS_DEACTIVATED = 'DEPENDS';
+
 /**
  * Split an extension pointer from module/path#objectName into an object of the
  * type { modName:"module/path", objName:"objectName" } using a pluginName
@@ -580,9 +583,12 @@ exports.Catalog = function() {
     this.plugins = {};
     this.metadata = {};
 
+    this.USER_DEACTIVATED = USER_DEACTIVATED;
+    this.DEPENDS_DEACTIVATED = DEPENDS_DEACTIVATED;
+
     // Stores the deactivated plugins. Plugins deactivated by the user have the
-    // value 'true'. If a plugin is deactivated because a required plugin is
-    // deactivated, then the value is a string.
+    // value USER_DEACTIVATED. If a plugin is deactivated because a required
+    // plugin is deactivated, then the value is a DEPENDS_DEACTIVATED.
     this.deactivatedPlugins = {};
     this._extensionsOrdering = [];
     this.instances = {};
@@ -942,7 +948,7 @@ exports.Catalog.prototype = {
                 // At least one depending plugin is not activated -> this plugin
                 // can't be activated. Mark this plugin as deactivated.
                 if (!works) {
-                    this.deactivatedPlugins[name] = 'somePlugin';
+                    this.deactivatedPlugins[name] = DEPENDS_DEACTIVATED;
                     activated = false;
                 }
             }
@@ -1063,16 +1069,14 @@ exports.Catalog.prototype = {
      * deactivated.
      *
      * @param pluginName string Name of the plugin to deactivate
-     * @param dependPlugin string Is set when the function is called recursively
+     * @param recursion boolean True if the funciton is called recursive.
      */
-    deactivatePlugin: function(pluginName, dependPlugin) {
+    deactivatePlugin: function(pluginName, recursion) {
         var plugin = this.plugins[pluginName];
         if (!plugin) {
-            // Deactivate the plugin only in the case when the user does this
-            // explicip (by calling the deactivatePlugin func directly and not
-            // passing in the dependPlugin argument).
-            if (!dependPlugin) {
-                this.deactivatedPlugins[pluginName] = true;
+            // Deactivate the plugin only if the user called the function.
+            if (!recursion) {
+                this.deactivatedPlugins[pluginName] = USER_DEACTIVATED;
             }
             return 'There is no plugin named "' + pluginName + '" in this catalog.';
         }
@@ -1080,16 +1084,16 @@ exports.Catalog.prototype = {
         if (this.deactivatedPlugins[pluginName]) {
             // If the plugin is already deactivated but the user explicip wants
             // to deactivate the plugin, then store true as deactivation reason.
-            if (!dependPlugin) {
-                this.deactivatedPlugins[pluginName] = true;
+            if (!recursion) {
+                this.deactivatedPlugins[pluginName] = USER_DEACTIVATED;
             }
             return 'The plugin "' + pluginName + '" is already deactivated';
         }
 
-        // Store the name of the plugin that was deactivated and caused this
-        // plugin to get activated or true if the developer deactivated the
-        // plugin itself.
-        this.deactivatedPlugins[pluginName] = dependPlugin || true;
+        // If the function is called within a recursion, then mark the plugin
+        // as DEPENDS_DEACTIVATED otherwise as USER_DEACTIVATED.
+        this.deactivatedPlugins[pluginName] = (recursion ? DEPENDS_DEACTIVATED
+                                                          : USER_DEACTIVATED);
 
         // Get all plugins that depend on this plugin.
         var dependents = {};
@@ -1098,7 +1102,7 @@ exports.Catalog.prototype = {
 
         // Deactivate all dependent plugins.
         Object.keys(dependents).forEach(function(plugin) {
-            var ret = this.deactivatePlugin(plugin, pluginName);
+            var ret = this.deactivatePlugin(plugin, true);
             if (Array.isArray(ret)) {
                 deactivated = deactivated.concat(ret);
             }
@@ -1107,7 +1111,7 @@ exports.Catalog.prototype = {
         // Deactivate this plugin.
         plugin.unregister();
 
-        if (dependPlugin) {
+        if (recursion) {
             deactivated.push(pluginName);
         }
 
@@ -1123,9 +1127,9 @@ exports.Catalog.prototype = {
      * deactivatePlugin on them to deactivate them explicit.
      *
      * @param pluginName string Name of the plugin to activate.
-     * @param dependPlugin string Is set when the function is called recursively
+     * @param recursion boolean True if the funciton is called recursive.
      */
-    activatePlugin: function(pluginName, dependPlugin) {
+    activatePlugin: function(pluginName, recursion) {
         var plugin = this.plugins[pluginName];
         if (!plugin) {
             return 'There is no plugin named "' + pluginName + '" in this catalog.';
@@ -1138,7 +1142,7 @@ exports.Catalog.prototype = {
         // Don't activate this plugin if the user explicip deactivated this one
         // and the plugin activation call is called beacuse another plugin
         // this one depended on was activated.
-        if (dependPlugin && this.deactivatedPlugins[pluginName] === true) {
+        if (recursion && this.deactivatedPlugins[pluginName] === USER_DEACTIVATED) {
             return;
         }
 
@@ -1149,11 +1153,12 @@ exports.Catalog.prototype = {
             }, this);
 
             if (!works) {
-                // Update the deactivatedPlugin reason from true to some other
-                // value. When the dependet plugins are activated, this plugin
-                // will get activated then as well.
-                this.deactivatedPlugins[pluginName] = 'somePlugin';
-                return 'Can not activate plugin "' + pluginName + '" as some of its dependent plugins are not activated';
+                // The user activated the plugin but some of the dependent
+                // plugins are still deactivated. Change the deactivation reason
+                // to DEPENDS_DEACTIVATED.
+                this.deactivatedPlugins[pluginName] = DEPENDS_DEACTIVATED;
+                return 'Can not activate plugin "' + pluginName +
+                        '" as some of its dependent plugins are not activated';
             }
         }
 
@@ -1173,7 +1178,7 @@ exports.Catalog.prototype = {
             }
         }, this);
 
-        if (dependPlugin) {
+        if (recursion) {
             activated.push(pluginName);
         }
 
