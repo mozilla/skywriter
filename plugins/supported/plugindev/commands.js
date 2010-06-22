@@ -188,8 +188,10 @@ exports.list = function(env, args, request) {
 
         output.push('<tr><th class="right">' + plugin.name);
 
-        if (deactivatedPlugins[plugin.name]) {
+        if (deactivatedPlugins[plugin.name] === true) {
             output.push(' (deactivated):');
+        } else if (deactivatedPlugins[plugin.name]){
+            output.push(' (deact/dept):');
         }
 
         output.push('</th><td>');
@@ -371,15 +373,31 @@ exports.order = function(env, args, request) {
 
 exports.deactivate = function(env, args, request) {
     var pluginNames = args.pluginNames.split(' ');
+    var pluginsDeactivated = [], output = [];
 
     pluginNames.forEach(function(pluginName) {
-        catalog.deactivatePlugin(pluginName);
+        var ret = catalog.deactivatePlugin(pluginName);
+        if (Array.isArray(ret)) {
+            pluginsDeactivated.push(pluginName);
+            output.push('Plugin deactivated: ' + pluginName + ' + dependent plugins: ' + ret.join(', '));
+        } else {
+            output.push('<span class="cmd_error">' + ret + '</span>');
+        }
     });
 
     changePluginInfo(env, request).then(function(data) {
-        data.pluginConfig.deactivated = catalog.deactivatedPlugins;
+        var deactivated = {};
+        for (plugin in catalog.deactivatedPlugins) {
+            if (catalog.deactivatedPlugins[plugin] === true) {
+                deactivated[plugin] = true;
+            }
+        }
+        data.pluginConfig.deactivated = deactivated;
 
-        data.prChangeDone.resolve("Deactivated plugins: " + pluginNames.join(', '));
+        output.push('Deactivated plugins saved.');
+        data.prChangeDone.resolve('Finished with following messages: <UL><LI>' + output.join('<LI>') + '<UL>');
+    }, function(err) {
+        request.error('Failed to save the new deactivated plugins: ' + err.message);
     });
 
     request.async();
@@ -394,41 +412,33 @@ exports.activate = function(env, args, request) {
 
     // Activae/reload plugins.
     pluginNames.forEach(function(pluginName) {
-        if (catalog.deactivatedPlugins[pluginName]) {
+        var ret = catalog.activatePlugin(pluginName);
+        if (Array.isArray(ret)) {
             pluginsActivated.push(pluginName);
-            catalog.activatePlugin(pluginName);
-
-            output.push('Plugin activated: ' + pluginName);
+            output.push('Plugin activated: ' + pluginName + ' + dependent plugins: ' + ret.join(', '));
         } else {
-            output.push('Plugin already activated: ' + pluginName);
+            output.push('<span class="cmd_error">' + ret + '</span>');
         }
     });
 
     if (pluginsActivated.length != 0) {
-        // Remove the now activated plugins from the deactivated list.
-        var prPluginInfoSaveDone = new Promise();
-        prReloadList.push(prPluginInfoSaveDone);
-
-        prPluginInfoSaveDone.then(function() {
-            output.push('Activated plugins saved.');
-        }, function(err) {
-            output.push('FAILED to save the new activated plugins: ' + err.message);
-        });
-
         changePluginInfo(env, request).then(function(data) {
-            data.pluginConfig.deactivated = catalog.deactivatedPlugins;
+            var deactivated = {};
+            for (plugin in catalog.deactivatedPlugins) {
+                if (catalog.deactivatedPlugins[plugin] === true) {
+                    deactivated[plugin] = true;
+                }
+            }
+            data.pluginConfig.deactivated = deactivated;
 
-            data.prChangeDone.resolve(prPluginInfoSaveDone);
-        }, function() {
-            prPluginInfoSaveDone.reject();
+            output.push('Activated plugins saved.');
+            data.prChangeDone.resolve('Finished with following messages: <UL><LI>' + output.join('<LI>') + '<UL>');
+        }, function(err) {
+            request.error('Failed to save the new activated plugins: ' + err.message);
         });
     } else {
         output.push('No plugin got activated - pluginInfo was not saved.');
     }
-    // Output the messages after all promises are done.
-    groupPromises(prReloadList).then(function() {
-        request.done('Finished with following messages: <UL><LI>' + output.join('<LI>') + '<UL>');
-    });
 
     request.async();
 };

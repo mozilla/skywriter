@@ -55,7 +55,7 @@ var Sandbox = function() {
     catalog.addChild(sandboxCatalog);
 
     // Copy over a few things from the master catalog.
-    sandboxCatalog.deactivatePlugin = catalog.deactivatePlugin;
+    sandboxCatalog.deactivatePlugin = util.clone(catalog.deactivatePlugin);
     sandboxCatalog._extensionsOrdering = catalog._extensionsOrdering;
 
     // Register the metadata from the master catalog.

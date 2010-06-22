@@ -350,8 +350,9 @@ exports.Plugin.prototype = {
      * Figure out which plugins depend on a given plugin. This
      * will allow the reload behavior to unregister/reregister
      * all of the plugins that depend on the one being reloaded.
+     * If firstLevelOnly is true, only direct dependent plugins are listed.
      */
-    _findDependents: function(pluginList, dependents) {
+    _findDependents: function(pluginList, dependents, firstLevelOnly) {
         var pluginName = this.name;
         var self = this;
         pluginList.forEach(function(testPluginName) {
@@ -365,7 +366,9 @@ exports.Plugin.prototype = {
                         dependents[testPluginName] = {
                             keepModule: false
                         };
-                        plugin._findDependents(pluginList, dependents);
+                        if (!firstLevelOnly) {
+                            plugin._findDependents(pluginList, dependents);
+                        }
                     }
                 }
             }
@@ -917,6 +920,19 @@ exports.Catalog.prototype = {
             var md = metadata[name];
             var activated = !(this.deactivatedPlugins[name]);
 
+            // Check if all plugins this one depends on are activated as well.
+            if (activated && md.depends && md.depends.length != 0) {
+                var works = md.depends.some(function(name) {
+                    return !(this.deactivatedPlugins[name]);
+                }, this);
+                // At least one depending plugin is not activated -> this plugin
+                // can't be activated. Mark this plugin as deactivated.
+                if (!works) {
+                    this.deactivatedPlugins[name] = 'somePlugin';
+                    activated = false;
+                }
+            }
+
             md.catalog = this;
             md.name = name;
             plugin = new exports.Plugin(md);
@@ -1025,23 +1041,108 @@ exports.Catalog.prototype = {
         return pr;
     },
 
-    deactivatePlugin: function(pluginName) {
+    deactivatePlugin: function(pluginName, dependPlugin) {
         var plugin = this.plugins[pluginName];
-        if (plugin && !this.deactivatedPlugins[pluginName]) {
-            plugin.unregister();
-            this.orderExtensions();
+        if (!plugin) {
+            // Deactivate the plugin only in the case when the user does this
+            // explicip (by calling the deactivatePlugin func directly and not
+            // passing in the dependPlugin argument).
+            if (!dependPlugin) {
+                this.deactivatedPlugins[pluginName] = true;
+            }
+            return 'There is no plugin named "' + pluginName + '" in this catalog.';
         }
 
-        this.deactivatedPlugins[pluginName] = true;
+        if (this.deactivatedPlugins[pluginName]) {
+            // If the plugin is already deactivated but the user explicip wants
+            // to deactivate the plugin, then store true as deactivation reason.
+            if (!dependPlugin) {
+                this.deactivatedPlugins[pluginName] = true;
+            }
+            return 'The plugin "' + pluginName + '" is already deactivated';
+        }
+
+        // Store the name of the plugin that was deactivated and caused this
+        // plugin to get activated or true if the developer deactivated the
+        // plugin itself.
+        this.deactivatedPlugins[pluginName] = dependPlugin || true;
+
+        // Get all plugins that depend on this plugin.
+        var dependents = {};
+        var deactivated = [];
+        plugin._findDependents(Object.keys(this.plugins), dependents, true);
+
+        // Deactivate all dependent plugins.
+        Object.keys(dependents).forEach(function(plugin) {
+            var ret = this.deactivatePlugin(plugin, pluginName);
+            if (Array.isArray(ret)) {
+                deactivated = deactivated.concat(ret);
+            }
+        }, this);
+
+        // Deactivate this plugin.
+        plugin.unregister();
+
+        if (dependPlugin) {
+            deactivated.push(pluginName);
+        }
+
+        return deactivated;
     },
 
-    activatePlugin: function(pluginName) {
+    activatePlugin: function(pluginName, dependPlugin) {
         var plugin = this.plugins[pluginName];
-        if (plugin && this.deactivatedPlugins[pluginName]) {
-            plugin.register();
-            this.orderExtensions();
+        if (!plugin) {
+            return 'There is no plugin named "' + pluginName + '" in this catalog.';
         }
+
+        if (!this.deactivatedPlugins[pluginName]) {
+            return 'The plugin "' + pluginName + '" is already activated';
+        }
+
+        // Don't activate this plugin if the user explicip deactivated this one
+        // and the plugin activation call is called beacuse another plugin
+        // this one depended on was activated.
+        if (dependPlugin && this.deactivatedPlugins[pluginName] === true) {
+            return;
+        }
+
+        // Check if all dependent plugins are activated.
+        if (plugin.depends && plugin.depends.length != 0) {
+            var works = plugin.depends.some(function(plugin) {
+                return !this.deactivatedPlugins[plugin];
+            }, this);
+
+            if (!works) {
+                // Update the deactivatedPlugin reason from true to some other
+                // value. When the dependet plugins are activated, this plugin
+                // will get activated then as well.
+                this.deactivatedPlugins[pluginName] = 'somePlugin';
+                return 'Can not activate plugin "' + pluginName + '" as some of its dependent plugins are not activated';
+            }
+        }
+
+        // Activate this plugin.
+        plugin.register();
+        this.orderExtensions();
         delete this.deactivatedPlugins[pluginName];
+
+        // Try to activate all the plugins that depend on this one.
+        var activated = [];
+        var dependents = {};
+        plugin._findDependents(Object.keys(this.plugins), dependents, true);
+        Object.keys(dependents).forEach(function(pluginName) {
+            var ret = this.activatePlugin(pluginName, true);
+            if (Array.isArray(ret)) {
+                activated = activated.concat(ret);
+            }
+        }, this);
+
+        if (dependPlugin) {
+            activated.push(pluginName);
+        }
+
+        return activated;
     },
 
     /**

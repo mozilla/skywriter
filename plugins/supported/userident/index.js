@@ -111,6 +111,9 @@ exports.loginController.prototype = {
 
                 for (var pluginName in deactivatePlugins) {
                     catalog.deactivatePlugin(pluginName);
+                    catalog.children.forEach(function(child) {
+                        child.deactivatePlugin(pluginName);
+                    });
                 }
 
                 catalog.registerMetadata(pluginInfo.metadata);
