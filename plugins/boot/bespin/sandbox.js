@@ -58,13 +58,8 @@ var Sandbox = function() {
     sandboxCatalog.deactivatePlugin = catalog.deactivatePlugin;
     sandboxCatalog._extensionsOrdering = catalog._extensionsOrdering;
 
-    // The sandbox catalog uses the same metadata as the master catalog. We clone
-    // it and remove the 'bespin' plugin as this is already in the sandbox catalog.
-    var pluginsMetadata = util.clone(catalog.plugins);
-    delete pluginsMetadata.bespin;
-
-    // The registration call.
-    sandboxCatalog.registerMetadata(pluginsMetadata);
+    // Register the metadata from the master catalog.
+    sandboxCatalog.registerMetadata(catalog.metadata);
 };
 
 Sandbox.prototype = new tiki.Sandbox();

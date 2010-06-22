@@ -566,6 +566,7 @@ var _setPath = function(root, path, value) {
 exports.Catalog = function() {
     this.points = {};
     this.plugins = {};
+    this.metadata = {};
     this.deactivatedPlugins = {};
     this._extensionsOrdering = [];
     this.instances = {};
@@ -876,9 +877,13 @@ exports.Catalog.prototype = {
     },
 
     registerMetadata: function(metadata) {
+        var pluginName;
         var plugins = this.plugins;
 
-        var pluginName;
+        // If we are the master catalog, then store the metadata.
+        if (!this.parent) {
+            util.mixin(this.metadata, util.clone(metadata));
+        }
 
         for (pluginName in metadata) {
             // Skip if the plugin is not activated.
@@ -1030,6 +1035,7 @@ exports.Catalog.prototype = {
 
         plugin.unregister();
         plugin._cleanup();
+        delete this.metadata[pluginName];
         delete this.plugins[pluginName];
     },
 
