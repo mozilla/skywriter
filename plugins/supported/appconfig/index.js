@@ -45,9 +45,6 @@ var util = require('bespin:util/util');
 
 var firstBespin = true;
 
-// TODO: Remove this when shipping.
-bespin.instance = [];
-
 /*
  * launch Bespin with the configuration provided. The configuration is
  * an object with the following properties:
@@ -127,13 +124,6 @@ exports.launch = function(config) {
         }
 
         catalog.publish(this, 'appLaunched');
-
-        // TODO: Remove before shipping.
-        bespin.instance.push({
-            env: env,
-            require: require,
-            catalog: catalog
-        });
 
         launchPromise.resolve(env);
     }.bind(this);
