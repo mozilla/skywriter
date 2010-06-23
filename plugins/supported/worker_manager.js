@@ -47,7 +47,6 @@ if (window == null) {
         'browser, not a web worker. Use "worker" instead.');
 }
 
-var proxy = require('bespin:proxy');
 var plugins = require('bespin:plugins');
 var console = require('bespin:console').console;
 var Event = require('events').Event;
@@ -64,7 +63,7 @@ function WorkerManager(pointer) {
     var moduleId = packageId + ":" + (m[2] != null ? m[2] : "index");
 
     var base = bespin != null && bespin.base != null ? bespin.base : "";
-    var worker = new proxy.Worker(base + "BespinEmbedded.js");
+    var worker = new Worker(base + "BespinEmbedded.js");
 
     worker.onmessage = this._onMessage.bind(this);
     worker.onerror = this._onError.bind(this);

@@ -41,7 +41,7 @@ var console = require('bespin:console').console;
 var Promise = require('bespin:promise').Promise;
 var group = require('bespin:promise').group;
 
-var proxy = require('bespin:proxy');
+var $ = require("jquery").$;
 
 var less = require('less');
 
@@ -179,7 +179,7 @@ var defaultGlobalTheme = {
 
     container: {
         background:     '#1E1916',
-        border:         '1px solid black'
+        border:         '1px solid black' 
     },
 
     // The items in the command line menu or something else,
@@ -458,20 +458,22 @@ exports.registerThemeStyles = function(extension) {
             var p = new Promise();
             loadPromises.push(p);
 
-            var url = resourceURL + styleFile + '?' + (new Date).getTime();
-            proxy.xhr('GET', url, true, function(xhr) {
-                xhr.overrideMimeType('text/plain');
-            }).then(function(response) {
-                  processStyleContent(resourceURL, pluginName, response, p);
-            }, function(err) {
-                console.error('registerLessFile: Could not load ' +
-                        resourceURL + styleFile);
+            $.ajax({
+                url: resourceURL + styleFile + '?' + (new Date).getTime(),
+                beforeSend: function(x){ x.overrideMimeType('text/plain'); },
+                success: function(response) {
+                    processStyleContent(resourceURL, pluginName, response, p);
+                },
+                error: function(err) {
+                    console.error('registerLessFile: Could not load ' +
+                            resourceURL + styleFile);
 
-                // The file couldn't get loaded but to make the group
-                // work we have to mark this loadPromise as resolved so that
-                // at least the other sucessfully loaded files can get
-                // proceeded.
-                p.resolve();
+                    // The file couldn't get loaded but to make the group
+                    // work we have to mark this loadPromise as resolved so that
+                    // at least the other sucessfully loaded files can get
+                    // proceeded.
+                    p.resolve();
+                }
             });
         }
     });
