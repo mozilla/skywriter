@@ -43,6 +43,7 @@ var builtins = require("builtins");
 var console = require("console").console;
 var util = require("util/util");
 var Trace = require("util/stacktrace").Trace;
+var proxy = require('proxy');
 
 var r = require;
 
@@ -1039,24 +1040,12 @@ exports.Catalog.prototype = {
      */
     loadMetadataFromURL: function(url, type) {
         var pr = new Promise();
-        var req = new XMLHttpRequest();
-        req.onreadystatechange = function() {
-            if (req.readyState !== 4) {
-                return;
-            }
-
-            var status = req.status;
-            if (status !== 0 && status !== 200) {
-                pr.reject("XHR error: " + req.statusText);
-                return;
-            }
-
-            this.registerMetadata(JSON.parse(req.responseText));
+        proxy.xhr('GET', url, true).then(function(response) {
+            this.registerMetadata(JSON.parse(response));
             pr.resolve();
-        }.bind(this);
-
-        req.open("GET", url, true);
-        req.send();
+        }.bind(this), function(err) {
+            pr.reject(err);
+        });
 
         return pr;
     },
