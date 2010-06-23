@@ -1,63 +1,28 @@
 {
     "description": "Handles colors in Bespin",
     "dependencies": {
-        "jquery": "0.0.0",
         "less": "0.0.0",
         "settings": "0.0.0",
-        "events": "0.0.0"
+        "events": "0.0.0",
+        "jquery": "1.4.0",
+        "theme_manager_base": "0.0.0"
     },
     "environments": { "main": true, "worker": false },
     "share": true,
     "provides": [
         {
-            "ep": "extensionpoint",
+            "ep": "extensionhandler",
             "name": "themestyles",
-            "description": "(Less)files holding the CSS style information for the UI.",
 
             "register": "themestyles#registerThemeStyles",
-            "unregister": "themestyles#unregisterThemeStyles",
-
-            "params": [
-                {
-                    "name": "url",
-                    "required": true,
-                    "description": "Name of the ThemeStylesFile - can also be an array of files."
-                }
-            ]
+            "unregister": "themestyles#unregisterThemeStyles"
         },
         {
-            "ep": "extensionpoint",
-            "name": "themeChange",
-            "description": "Event: Notify when the theme(styles) changed.",
-            "params": [
-                {
-                    "name": "pointer",
-                    "required": true,
-                    "description": "Function that is called whenever the theme is changed."
-                }
-            ]
-        },
-        {
-            "ep": "extensionpoint",
+            "ep": "extensionhandler",
             "name": "theme",
-            "indexOn": "name",
-            "description": "A theme is a way change the look of the application.",
 
             "register": "index#registerTheme",
-            "unregister": "index#unregisterTheme",
-
-            "params": [
-                {
-                    "name": "url",
-                    "required": false,
-                    "description": "Name of a ThemeStylesFile that holds theme specific CSS rules - can also be an array of files."
-                },
-                {
-                    "name": "pointer",
-                    "required": true,
-                    "description": "Function that returns the ThemeData"
-                }
-            ]
+            "unregister": "index#unregisterTheme"
         },
         {
             "ep": "setting",

@@ -8,7 +8,8 @@
         "jquery": "0.0.0",
         "overlay": "1.2.0",
         "toolbox_expose": "1.2.0",
-        "jquery_ui_checkbox": "1.4.1"
+        "jquery_ui_checkbox": "1.4.1",
+        "theme_manager_base": "0.0.0"
     },
     "objects": ["notifier"],
     "share": true,

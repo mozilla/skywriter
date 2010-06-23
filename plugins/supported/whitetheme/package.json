@@ -1,5 +1,8 @@
 {
     "description": "Provides a white theme for Bespin",
+    "dependencies": {
+        "theme_manager": "0.0.0"
+    },
     "provides": [
         {
             "ep": "theme",

@@ -106,7 +106,7 @@ var parseGlobalThemeVariables = function(globalValues) {
 };
 
 //------------------------------------------------------------------------------
-// BEGIN: THIS PART IS OVERRIDEN BY dryice
+// BEGIN: THIS PART IS OVERRIDDEN BY dryice
 
 // Stores the StyleFiles content per plugin during the build of Bespin.
 // The variable scheme looks like: { pluginName: { "fileName": data } };
@@ -238,7 +238,7 @@ var defaultGlobalTheme = {
 
 defaultGlobalTheme = parseGlobalThemeVariables(defaultGlobalTheme);
 
-// END: THIS PART IS OVERRIDEN BY dryice
+// END: THIS PART IS OVERRIDDEN BY dryice
 //------------------------------------------------------------------------------
 
 /**
