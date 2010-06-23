@@ -58,7 +58,7 @@
         },
         {
             "ep": "command",
-            "name": "openline",
+            "name": "joinline",
             "description": "Join the current line with the following",
             "key": "ctrl_shift_j",
             "predicates": { "isTextView": true },
