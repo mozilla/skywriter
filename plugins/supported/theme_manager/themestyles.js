@@ -460,6 +460,7 @@ exports.registerThemeStyles = function(extension) {
 
             $.ajax({
                 url: resourceURL + styleFile + '?' + (new Date).getTime(),
+                beforeSend: function(x){ x.overrideMimeType('text/plain'); },
                 success: function(response) {
                     processStyleContent(resourceURL, pluginName, response, p);
                 },
