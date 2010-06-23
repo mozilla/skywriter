@@ -92,9 +92,7 @@ CompletionUI.prototype = {
 
     _populate: function() {
         var html = _(this._tags).map(function(tag) {
-            var fields = tag.hasOwnProperty('fields') ? tag.fields : {};
-            var klass = fields['class'], module = fields.module;
-            var ns = fields.namespace;
+            var klass = tag['class'], module = tag.module, ns = tag.namespace;
 
             var container;
             if (klass != null) {
@@ -112,7 +110,7 @@ CompletionUI.prototype = {
             var container_html = (container == "") ? "" :
                 populate_container_template({ container: container });
 
-            var type = fields.type;
+            var type = tag.type;
             var second_row_html = (type == null) ? "" :
                 populate_second_row_template({ type: type });
 

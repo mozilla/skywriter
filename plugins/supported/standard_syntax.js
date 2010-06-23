@@ -81,6 +81,14 @@ exports.StandardSyntax.prototype = {
             token.end = col + len;
             token.tag = alt.tag;
 
+            var newSymbol = null;
+            if (alt.hasOwnProperty('symbol')) {
+                var replace = function(_, n) { return match[n]; };
+                var symspec = alt.symbol.replace(/\$([0-9]+)/g, replace);
+                var symMatch = /^([^:]+):(.*)/.exec(symspec);
+                newSymbol = [ symMatch[1], symMatch[2] ];
+            }
+
             var nextState, newContext = null;
             if (alt.hasOwnProperty('then')) {
                 var then = alt.then.split(" ");
@@ -95,7 +103,7 @@ exports.StandardSyntax.prototype = {
                 nextState = fullState;
             }
 
-            result = { state: nextState, token: token };
+            result = { state: nextState, token: token, symbol: newSymbol };
             if (newContext != null) {
                 result.newContext = newContext;
             }

@@ -57,6 +57,11 @@ var StandardSyntax = require('standard_syntax').StandardSyntax;
 var states = {
     start: [
         {
+            regex:  /^var(?=\s*([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*require\s*\(\s*['"]([^'"]*)['"]\s*\)\s*[;,])/,
+            tag:    'keyword',
+            symbol: '$1:$2'
+        },
+        {
             regex:  /^(?:break|case|catch|continue|default|delete|do|else|false|finally|for|function|if|in|instanceof|let|new|null|return|switch|this|throw|true|try|typeof|var|void|while|with)(?![a-zA-Z0-9_])/,
             tag:    'keyword'
         },

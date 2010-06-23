@@ -57,6 +57,32 @@ function replace(dest, i, src, fill) {
     return dest;
 }
 
+// A simple key-value store in which each key is paired with a corresponding
+// line. When the syntax information is updated for a line, the symbols from
+// those lines are wiped out and replaced with the new symbols.
+function Symbols() {
+    this._lines = [];
+    this._syms = {};
+}
+
+Symbols.prototype = {
+    get: function(sym) {
+        return this._syms["-" + sym];
+    },
+
+    replaceLine: function(row, newSymbols) {
+        var lines = this._lines, syms = this._syms;
+        if (row < lines.length && _(lines[row]).isArray()) {
+            _(lines[row]).each(function(ident) { delete syms["-" + ident]; });
+        }
+
+        function stripLeadingDash(s) { return s.substring(1); }
+        lines[row] = _(newSymbols).keys().map(stripLeadingDash);
+
+        _(syms).extend(newSymbols);
+    }
+};
+
 function Context(syntaxInfo, syntaxManager) {
     this._syntaxInfo = syntaxInfo;
     this._syntaxManager = syntaxManager;
@@ -64,6 +90,8 @@ function Context(syntaxInfo, syntaxManager) {
     this._invalidRow = 0;
     this._states = [];
     this._active = false;
+
+    this.symbols = new Symbols;
 }
 
 Context.prototype = {
@@ -72,7 +100,10 @@ Context.prototype = {
             return;
         }
 
-        this._syntaxManager.mergeAttrs(row, result.attrs);
+        var syntaxManager = this._syntaxManager;
+        syntaxManager.mergeAttrs(row, result.attrs);
+        syntaxManager.mergeSymbols(row, result.symbols);
+
         replace(this._states, row, result.states);
 
         if (lastRow >= this._getRowCount()) {
@@ -193,6 +224,7 @@ function SyntaxManager(layoutManager) {
     this._invalidRows = null;
     this._contextRanges = null;
     this._attrs = [];
+    this._symbols = new Symbols;
     this._syntax = 'plain';
 
     this._reset();
@@ -238,6 +270,14 @@ SyntaxManager.prototype = {
         return this._attrs.slice(startRow, endRow);
     },
 
+    /**
+     * Returns the metadata currently associated with the given symbol, or null
+     * if the symbol is unknown.
+     */
+    getSymbol: function(ident) {
+        return this._symbols.get(ident);
+    },
+
     /** Returns the current syntax. */
     getSyntax: function() {
         return this._syntax;
@@ -262,6 +302,17 @@ SyntaxManager.prototype = {
     mergeAttrs: function(startRow, newAttrs) {
         replace(this._attrs, startRow, newAttrs, []);
         this.attrsChanged(startRow, startRow + newAttrs.length);
+    },
+
+    /**
+     * Merges the supplied symbols into the symbol store, overwriting any
+     * symbols previously defined on those lines.
+     */
+    mergeSymbols: function(startRow, newSymbols) {
+        var symbols = this._symbols;
+        _(newSymbols).each(function(lineSyms, i) {
+            symbols.replaceLine(startRow + i, lineSyms);
+        });
     },
 
     /**

@@ -58,13 +58,14 @@ var syntaxWorker = {
         }
 
         var engines = this.engines;
-        var states = [], attrs = [];
+        var states = [], attrs = [], symbols = [];
         var stateStack = _(state.split(" ")).map(splitParts);
 
         _(lines).each(function(line, offset) {
             saveState();
 
-            var lineAttrs = [], col = 0;
+            var lineAttrs = [], lineSymbols = {};
+            var col = 0;
             while (col < line.length) {
                 // Check for the terminator string.
                 // FIXME: This is wrong. It should check *inside* the token
@@ -101,6 +102,11 @@ var syntaxWorker = {
                     }
 
                     token = result.token;
+
+                    var sym = result.symbol;
+                    if (sym != null) {
+                        lineSymbols["-" + sym[0]] = sym[1];
+                    }
                 }
 
                 lineAttrs.push(token);
@@ -108,11 +114,12 @@ var syntaxWorker = {
             }
 
             attrs.push(lineAttrs);
+            symbols.push(lineSymbols);
         });
 
         saveState();
 
-        return { states: states, attrs: attrs };
+        return { states: states, attrs: attrs, symbols: symbols };
     },
 
     loadSyntax: function(syntaxName) {

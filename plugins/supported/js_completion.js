@@ -58,7 +58,7 @@ function JSCompletion(tags) {
 JSCompletion.prototype = {
     tags: null,
 
-    getCompletions: function(prefix, suffix) {
+    getCompletions: function(prefix, suffix, syntaxManager) {
         if (/^[A-Za-z0-9_\$]/.test(suffix)) {
             return null;
         }
@@ -69,15 +69,37 @@ JSCompletion.prototype = {
         }
 
         var chain = m[0].split(".");
+        if (chain.length < 2) {
+            return null;
+        }
+
         var ident = chain.pop();
+        if (_(chain).any(function(s) { return s === ""; })) {
+            return null;
+        }
+
+        var module = null;
+        var sym = syntaxManager.getSymbol(chain[0]);
+        if (sym != null) {
+            chain.shift();
+            module = sym;
+        }
+
         var namespace = chain.join(".");
-        var tags = _(this.tags.stem(ident)).select(function(tag) {
-            if (namespace === "") {
+
+        var tags = [];
+        _(this.tags.stem(ident)).each(function(tag) {
+            if ((module != null && module !== tag.module) ||
+                    (namespace === "" && tag.namespace != null) ||
+                    (namespace !== "" && namespace !== tag.namespace)) {
                 return;
             }
 
-            return tag.hasOwnProperty('fields') && tag.fields.namespace ===
-                namespace;
+            tags.push(tag);
+
+            if (tags.length >= 10) {
+                _.breakLoop();
+            }
         });
 
         return (tags.length > 0) ? { tags: tags, stem: ident } : null;

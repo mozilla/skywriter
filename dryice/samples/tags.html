@@ -48,6 +48,11 @@
 </head>
 <body>
     <h1>Code Completion Example</h1>
+    <p>
+        You can drop a <tt>tags.jsonp</tt> file with a function named
+        <tt>loadTags</tt> into the <tt>samples/</tt> directory (alongside this
+        HTML file) and the tags will be automatically loaded into this editor.
+    </p>
 <div id=editor class=bespin data-bespinoptions='{ "syntax": "js" }'>// Try typing "jetpack."
 </div>
 
@@ -58,27 +63,46 @@
                 kind: "f",
                 tagfile: "jetpack.js",
                 addr: "/^foo$/",
-                fields: { namespace: "jetpack" }
+                namespace: "jetpack"
             },
             {
                 name: "bar",
                 kind: "f",
                 tagfile: "jetpack.js",
                 addr: "/^bar$/",
-                fields: { namespace: "jetpack" }
+                namespace: "jetpack"
             },
             {
                 name: "baz",
                 kind: "m",
                 tagfile: "jetpack2.js",
                 addr: "/^baz: \\/boo\\/$/",
-                fields: { namespace: "jetpack", type: "regexp" }
+                namespace: "jetpack",
+                type: "regexp"
+            },
+            {
+                name: "boo",
+                kind: "m",
+                tagfile: "jetpack3.js",
+                addr: "/^boo$/",
+                module: "jetpack"
             }
         ];
 
+        var editor;
+
         window.onBespinLoad = function() {
-            var editor = document.getElementById("editor").bespin.editor;
+            editor = document.getElementById("editor").bespin.editor;
             editor.addTags(TAGS);
+
+            var elem = document.createElement('script');
+            elem.setAttribute('type', "text/javascript");
+            elem.setAttribute('src', "tags.jsonp");
+            document.body.appendChild(elem);
+        }
+
+        window.loadTags = function(tags) {
+            editor.addTags(tags);
         }
     </script>
     <script type="text/javascript" src="../BespinEmbedded.js"></script>

@@ -68,13 +68,16 @@ CompletionController.prototype = {
             return;
         }
 
+        var layoutManager = this._buffer.layoutManager;
+        var textStorage = layoutManager.textStorage;
+        var syntaxManager = layoutManager.syntaxManager;
+
         var pos = newRange.start;
         var row = pos.row, col = pos.col;
-        var textStorage = this._buffer.layoutManager.textStorage;
         var line = textStorage.lines[row];
         var prefix = line.substring(0, col), suffix = line.substring(col);
 
-        var completions = engine.getCompletions(prefix, suffix);
+        var completions = engine.getCompletions(prefix, suffix, syntaxManager);
         if (completions == null) {
             this._hideCompletions();
             return;
