@@ -195,7 +195,9 @@ exports.CliInputView.prototype = {
      * Apply the proposed completion
      */
     complete: function() {
-        this._inputer.value = this._completion;
+        if (this._completion) {
+            this._inputer.value = this._completion;
+        }
     },
 
     /**
