@@ -40,7 +40,8 @@ var Trait = require('traits').Trait;
 
 exports.TagReader = Trait({
     readLines: function(lines) {
-        var tags = this.tags;
+        var tags = [];
+
         _(lines).each(function(line) {
             var parts = line.split("\t");
             if (parts.length < 3) {
@@ -73,7 +74,7 @@ exports.TagReader = Trait({
             tags.push(tag);
         });
 
-        tags.sort(function(a, b) { return a.name.localeCompare(b.name); });
+        this.add(tags);
     },
 
     readString: function(str) {

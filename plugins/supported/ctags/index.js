@@ -65,12 +65,39 @@ exports.Tags.prototype = Object.create(Object.prototype, Trait.compose(Trait({
     add: function(newTags) {
         var tags = this.tags;
         Array.prototype.push.apply(tags, newTags);
-        tags.sort(function(a, b) { return a.name.localeCompare(b.name); });
+
+        tags.sort(function(a, b) {
+            var nameA = a.name, nameB = b.name;
+            if (nameA < nameB) {
+                return -1;
+            }
+            if (nameA === nameB) {
+                return 0;
+            }
+            return 1;
+        });
     },
 
     /** Returns all the tags that match the given identifier. */
     get: function(id) {
         return this._search(id, function(tag) { return tag.name === id; });
+    },
+
+    /**
+     * Adds the tags from the supplied JavaScript file to the internal store of
+     * tags.
+     */
+    scan: function(src, file, opts) {
+        if (opts === null || opts === undefined) {
+            opts = {};
+        }
+
+        var lines = src.split("\n");
+        var ast = parse(src, file, 1);
+
+        var interp = new Interpreter(ast, file, lines, opts);
+        interp.interpret();
+        this.add(interp.tags);
     },
 
     /** Returns all the tags that begin with the given prefix. */
