@@ -95,6 +95,36 @@ function Context(syntaxInfo, syntaxManager) {
 }
 
 Context.prototype = {
+    _annotate: function() {
+        if (this._invalidRow == null) {
+            throw new Error("syntax_manager.Context: attempt to annotate " +
+                "without any invalid row");
+        }
+        if (!this._active) {
+            throw new Error("syntax_manager.Context: attempt to annotate " +
+                "while inactive");
+        }
+
+        if (this._worker == null) {
+            this._createWorker();
+            return;
+        }
+
+        var lines = this._syntaxManager.getTextLines();
+        var row = this._invalidRow;
+        var state = row === 0 ? this.getName() + ':start' : this._states[row];
+        var lastRow = Math.min(lines.length, row + GRANULARITY);
+        lines = lines.slice(row, lastRow);
+
+        var runRange = {
+            start: { row: row, col: 0 },
+            end: { row: lastRow - 1, col: _(lines).last().length }
+        };
+
+        var pr = this._worker.send('annotate', [ state, lines, runRange ]);
+        pr.then(_(this._annotationFinished).bind(this, row, lastRow));
+    },
+
     _annotationFinished: function(row, lastRow, result) {
         if (!this._active) {
             return;
@@ -113,7 +143,7 @@ Context.prototype = {
         }
 
         this._invalidRow = lastRow;
-        this.annotate();
+        this._annotate();
     },
 
     _createWorker: function() {
@@ -124,7 +154,9 @@ Context.prototype = {
 
         var worker = new WorkerSupervisor("syntax_worker#syntaxWorker");
         this._worker = worker;
-        worker.send('loadSyntax', [ syntaxInfo.name ]);
+
+        worker.started.add(this._workerStarted.bind(this));
+        worker.start();
 
         return true;
     },
@@ -133,32 +165,20 @@ Context.prototype = {
         return this._syntaxManager.getTextLines().length;
     },
 
-    annotate: function() {
-        if (this._invalidRow == null) {
-            throw new Error("Attempt to annotate without any invalid row");
+    _workerStarted: function() {
+        this._worker.send('loadSyntax', [ this._syntaxInfo.name ]);
+        if (this._active) {
+            this._annotate();
         }
+    },
 
-        if (this._worker == null) {
-            if (!this._createWorker()) {
-                return;
-            }
-        }
-
-        var lines = this._syntaxManager.getTextLines();
-        var row = this._invalidRow;
-        var state = row === 0 ? this.getName() + ':start' : this._states[row];
-        var lastRow = Math.min(lines.length, row + GRANULARITY);
-        lines = lines.slice(row, lastRow);
-
+    // Switches on this syntax context and begins annotation. It is the
+    // caller's responsibility to ensure that there exists an invalid row
+    // before calling this. (Typically the caller ensures this by calling cut()
+    // first.)
+    activateAndAnnotate: function() {
         this._active = true;
-
-        var runRange = {
-            start: { row: row, col: 0 },
-            end: { row: lastRow - 1, col: _(lines).last().length }
-        };
-
-        var pr = this._worker.send('annotate', [ state, lines, runRange ]);
-        pr.then(_(this._annotationFinished).bind(this, row, lastRow));
+        this._annotate();
     },
 
     contextsAtPosition: function(pos) {
@@ -250,7 +270,7 @@ SyntaxManager.prototype = {
 
         ctx = new Context(syntaxInfo, this);
         this._context = ctx;
-        ctx.annotate();
+        ctx.activateAndAnnotate();
     },
 
     attrsChanged: null,
@@ -292,7 +312,7 @@ SyntaxManager.prototype = {
     invalidateRow: function(row) {
         var ctx = this._context;
         ctx.cut(row);
-        ctx.annotate();
+        ctx.activateAndAnnotate();
     },
 
     /**

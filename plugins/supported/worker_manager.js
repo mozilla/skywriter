@@ -38,7 +38,24 @@
 "define metadata";
 ({
     "description": "Manages a web worker on the browser side",
-    "dependencies": { "events": "0.0.0", "underscore": "0.0.0" }
+    "dependencies": {
+        "canon": "0.0.0",
+        "events": "0.0.0",
+        "underscore": "0.0.0"
+    },
+    "provides": [
+        {
+            "ep": "command",
+            "name": "worker",
+            "description": "Low-level web worker control (for plugin development)"
+        },
+        {
+            "ep": "command",
+            "name": "worker restart",
+            "description": "Restarts all web workers (for plugin development)",
+            "pointer": "#workerRestartCommand"
+        }
+    ]
 });
 "end";
 
@@ -50,8 +67,27 @@ if (window == null) {
 var proxy = require('bespin:proxy');
 var plugins = require('bespin:plugins');
 var console = require('bespin:console').console;
+var _ = require('underscore')._;
 var Event = require('events').Event;
 var Promise = require('bespin:promise').Promise;
+
+var workerManager = {
+    _workers: [],
+
+    add: function(workerSupervisor) {
+        this._workers.push(workerSupervisor);
+    },
+
+    remove: function(workerSupervisor) {
+        this._workers = _(this._workers).without(workerSupervisor);
+    },
+
+    restartAll: function() {
+        var workers = this._workers;
+        _(workers).invoke('kill');
+        _(workers).invoke('start');
+    }
+};
 
 function WorkerSupervisor(pointer) {
     var m = /^([^#:]+)(?::([^#:]+))?#([^#:]+)$/.exec(pointer);
@@ -62,30 +98,27 @@ function WorkerSupervisor(pointer) {
 
     var packageId = m[1], target = m[3];
     var moduleId = packageId + ":" + (m[2] != null ? m[2] : "index");
-
     var base = bespin != null && bespin.base != null ? bespin.base : "";
-    var worker = new proxy.Worker(base + "BespinEmbedded.js");
 
-    worker.onmessage = this._onMessage.bind(this);
-    worker.onerror = this._onError.bind(this);
+    this._packageId = packageId;
+    this._moduleId = moduleId;
+    this._base = base;
+    this._target = target;
 
-    var msg = {
-        op:     'load',
-        base:   base,
-        pkg:    packageId,
-        module: moduleId,
-        target: target
-    };
-    worker.postMessage(JSON.stringify(msg));
-
-    this._worker = worker;
+    this._worker = null;
     this._currentId = 0;
+
+    this.started = new Event();
 }
 
 WorkerSupervisor.prototype = {
     _onError: function(ev) {
+        this._worker = null;
+        workerManager.remove(this);
+
         console.error("WorkerSupervisor: worker failed at file " +
-            ev.filename + ":" + ev.lineno);
+            ev.filename + ":" + ev.lineno + "; fix the worker and use " +
+            "'worker restart' to restart it");
     },
 
     _onMessage: function(ev) {
@@ -112,7 +145,13 @@ WorkerSupervisor.prototype = {
 
     _promise: null,
 
-    /** Terminates the worker. After this call, the worker manager is dead. */
+    /** An event that fires whenever the worker is started or restarted. */
+    started: null,
+
+    /**
+     * Terminates the worker. After this call, the worker can be restarted via
+     * a call to start().
+     */
     kill: function() {
         var oldPromise = this._promise;
         if (oldPromise != null) {
@@ -122,8 +161,13 @@ WorkerSupervisor.prototype = {
 
         this._worker.terminate();
         this._worker = null;
+        workerManager.remove(this);
     },
 
+    /**
+     * Invokes a method on the target running in the worker and returns a
+     * promise that will resolve to the result of that method.
+     */
     send: function(method, args) {
         var oldPromise = this._promise;
         if (oldPromise != null) {
@@ -139,8 +183,48 @@ WorkerSupervisor.prototype = {
         this._worker.postMessage(JSON.stringify(msg));
 
         return promise;
-    }
+    },
+
+    /**
+     * Starts the worker. Immediately after this method is called, the
+     * "started" event will fire.
+     */
+    start: function() {
+        if (this._worker != null) {
+            throw new Error("WorkerSupervisor: worker already started");
+        }
+
+        var base = this._base, target = this._target;
+        var packageId = this._packageId, moduleId = this._moduleId;
+
+        var worker = new proxy.Worker(base + "BespinEmbedded.js");
+
+        worker.onmessage = this._onMessage.bind(this);
+        worker.onerror = this._onError.bind(this);
+
+        var msg = {
+            op:     'load',
+            base:   base,
+            pkg:    packageId,
+            module: moduleId,
+            target: target
+        };
+        worker.postMessage(JSON.stringify(msg));
+
+        this._worker = worker;
+        this._currentId = 0;
+
+        workerManager.add(this);
+
+        this.started();
+    },
 };
 
+function workerRestartCommand(env, args, req) {
+    workerManager.restartAll();
+}
+
 exports.WorkerSupervisor = WorkerSupervisor;
+exports.workerManager = workerManager;
+exports.workerRestartCommand = workerRestartCommand;
 
