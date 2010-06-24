@@ -8,11 +8,6 @@
     },
     "environments": { "main": true, "worker": false },
     "provides": [
-        {
-            "ep": "extensionpoint",
-            "name": "fileextension",
-            "indexOn": "name"
-        }
     ]
 }
 
