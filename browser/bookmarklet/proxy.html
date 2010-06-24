@@ -77,7 +77,7 @@
                     worker.postMessage(obj.msg);
                     break;
 
-                case 'termianteWorker':
+                case 'terminateWorker':
                     var worker = getWorker(obj);
                     worker.terminate();
                     delete workerList[obj.id];
