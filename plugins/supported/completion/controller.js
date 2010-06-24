@@ -98,6 +98,11 @@ CompletionController.prototype = {
 
     _syntaxChanged: function(newSyntax) {
         var ext = catalog.getExtensionByKey('completion', newSyntax);
+        if (ext == null) {
+            this._completionEngine = null;
+            return;
+        }
+
         ext.load().then(function(engine) {
             this._completionEngine = new engine(this.tags);
         }.bind(this));
