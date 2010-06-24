@@ -53,10 +53,10 @@ var console = require('bespin:console').console;
 var Event = require('events').Event;
 var Promise = require('bespin:promise').Promise;
 
-function WorkerManager(pointer) {
+function WorkerSupervisor(pointer) {
     var m = /^([^#:]+)(?::([^#:]+))?#([^#:]+)$/.exec(pointer);
     if (m == null) {
-        throw new Error('WorkerManager: invalid pointer specification: "' +
+        throw new Error('WorkerSupervisor: invalid pointer specification: "' +
             pointer + '"');
     }
 
@@ -82,10 +82,10 @@ function WorkerManager(pointer) {
     this._currentId = 0;
 }
 
-WorkerManager.prototype = {
+WorkerSupervisor.prototype = {
     _onError: function(ev) {
-        console.error("Web worker failed at file " + ev.filename + ":" +
-            ev.lineno);
+        console.error("WorkerSupervisor: worker failed at file " +
+            ev.filename + ":" + ev.lineno);
     },
 
     _onMessage: function(ev) {
@@ -142,5 +142,5 @@ WorkerManager.prototype = {
     }
 };
 
-exports.WorkerManager = WorkerManager;
+exports.WorkerSupervisor = WorkerSupervisor;
 

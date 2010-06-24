@@ -37,7 +37,7 @@
 
 var _ = require('underscore')._;
 var Event = require('events').Event;
-var WorkerManager = require('worker_manager').WorkerManager;
+var WorkerSupervisor = require('worker_manager').WorkerSupervisor;
 var console = require('bespin:console').console;
 var rangeutils = require('rangeutils:utils/range');
 var syntaxDirectory = require('syntax_directory').syntaxDirectory;
@@ -122,7 +122,7 @@ Context.prototype = {
             return false;
         }
 
-        var worker = new WorkerManager("syntax_worker#syntaxWorker");
+        var worker = new WorkerSupervisor("syntax_worker#syntaxWorker");
         this._worker = worker;
         worker.send('loadSyntax', [ syntaxInfo.name ]);
 
