@@ -532,18 +532,32 @@ def main(args=None):
 index_html = """
 <!DOCTYPE html>
 <html><head>
+<style>
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden
+}
+</style>
 
 <link href="BespinEmbedded.css" type="text/css" rel="stylesheet">
 
 <script type="text/javascript" src="BespinEmbedded.js"></script>
 </head>
-<body style="height: 100%; width: 100%; margin: 0">
-<div id="editor" class="bespin" data-bespinoptions='{ "settings": { "tabstop": 4 }, "syntax": "js", "stealFocus": true }' style="width: 500px; height: 500px">// The text of this div shows up in the editor.
+<body class="bespin" data-bespinoptions='{ "settings": { "tabstop": 4 }, "syntax": "js", "stealFocus": true }'>
 var thisCode = "what shows up in the editor";
 function editMe() {
  alert("and have fun!");
 }
-</div>
 </body>
 </html>
 """
