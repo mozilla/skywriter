@@ -115,18 +115,20 @@ exports.Promise.prototype.isRejected = function() {
  * a different action on promise rejection.
  */
 exports.Promise.prototype.then = function(onSuccess, onError) {
-    if (onSuccess !== null && onSuccess !== undefined) {
-        this._onSuccessHandlers.push(onSuccess);
-    }
-    if (onError !== null && onError !== undefined) {
-        this._onErrorHandlers.push(onError);
+    if (typeof onSuccess === 'function') {
+        if (this._status === SUCCESS) {
+            onSuccess.call(null, this._value);
+        } else if (this._status === PENDING) {
+            this._onSuccessHandlers.push(onSuccess);
+        }
     }
 
-    if (this._status === SUCCESS) {
-        onSuccess.call(null, this._value);
-    }
-    if (this._status === ERROR) {
-        onError.call(null, this._value);
+    if (typeof onError === 'function') {
+        if (this._status === ERROR) {
+            onError.call(null, this._value);
+        } else if (this._status === PENDING) {
+            this._onErrorHandlers.push(onError);
+        }
     }
 
     return this;
