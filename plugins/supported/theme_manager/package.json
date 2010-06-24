@@ -4,7 +4,6 @@
         "less": "0.0.0",
         "settings": "0.0.0",
         "events": "0.0.0",
-        "jquery": "1.4.0",
         "theme_manager_base": "0.0.0"
     },
     "environments": { "main": true, "worker": false },
