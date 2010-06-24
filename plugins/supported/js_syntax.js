@@ -78,12 +78,12 @@ var states = {
             tag:    'plain'
         },
         {
-            regex:  /^'/,
+            regex:  /^'(?=.)/,
             tag:    'string',
             then:   'qstring'
         },
         {
-            regex:  /^"/,
+            regex:  /^"(?=.)/,
             tag:    'string',
             then:   'qqstring'
         },
@@ -104,25 +104,17 @@ var states = {
 
     qstring: [
         {
-            regex:  /^'/,
+            regex:  /^(?:\\.|[^'\\])*'?/,
             tag:    'string',
             then:   'start'
-        },
-        {
-            regex:  /^(?:\\.|[^'\\])+/,
-            tag:    'string'
         }
     ],
 
     qqstring: [
         {
-            regex:  /^"/,
+            regex:  /^(?:\\.|[^"\\])*"?/,
             tag:    'string',
             then:   'start'
-        },
-        {
-            regex:  /^(?:\\.|[^"\\])+/,
-            tag:    'string'
         }
     ],
 
