@@ -192,8 +192,8 @@ bespin.useBespin = function(element, options) {
 
             // Override the forms onsubmit function. Set the innerHTML and value
             // of the textarea before submitting.
-            while (parentNode.tagName != 'BODY') {
-                if (parentNode.tagName == 'FORM') {
+            while (parentNode !== document) {
+                if (parentNode.tagName.toUpperCase() === 'FORM') {
                     var oldSumit = parentNode.onsubmit;
                     // Override the onsubmit function of the form.
                     parentNode.onsubmit = function(evt) {
