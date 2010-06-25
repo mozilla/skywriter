@@ -41,3 +41,15 @@ Fixes
 
 Upgrade Notes
 -------------
+
+In Bespin 0.8 and earlier, command functions had the signature:
+
+    (env, args, request)
+
+Starting with Bespin 0.9, the "env" parameter is no longer passed in. The change
+is simple. At the top of your file, add:
+
+var env = require('environment').env;
+
+You can then generally just do a search and replace in your file, replacing
+`(env, ` with `(`.

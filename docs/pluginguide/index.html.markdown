@@ -57,12 +57,15 @@ highlighter looks like this:
         ]
     }
     
-The metadata is an object specified in JSON format. `provides` is a list of
-extensions that are provided by this plugin. Each one of the extensions is
-given as an object with one attribute that is always there: "ep". `ep` is the
-extension point that the extension is for. In the example above, you can see
-that the plugin is providing an extension for the "syntax" extension point. The
-other metadata for the extension is specific to the extension point.
+The metadata is an object specified in JSON format. It is an extended version
+of the [CommonJS Packages specification](http://wiki.commonjs.org/wiki/Packages/1.0)
+
+`provides` is a list of extensions that are provided by this plugin. Each one 
+of the extensions is given as an object with one attribute that is always 
+there: "ep". `ep` is the extension point that the extension is for. In the 
+example above, you can see that the plugin is providing an extension for 
+the "syntax" extension point. The other metadata for the extension is 
+specific to the extension point.
 
 `pointer` is a common piece of metadata. Since this is pure JSON, and we want
 to lazily load the code anyhow, a pointer is a string that tells Bespin where
@@ -99,6 +102,38 @@ Often, a single file is not going to be enough. When you move beyond a single
 file, a plugin is defined as a directory with a `package.json` file in it. In a
 single file plugin, the "package module" is the plugin .js file. In a plugin
 directory, the "package module" is a file called "index.js".
+
+## Dependencies ##
+
+Often, your plugin will require that other things are loaded in order for
+it to work. If your plugin will be accessing code from another plugin
+via `require`, you can add dependencies to your plugin metadata.
+For example, if there's a plugin called "textutil" and you're going
+to be doing something like `var properCase = require('textutil').properCase`,
+then you'll want to include a block like this in your metadata:
+
+    :::js
+    dependencies: {
+        "textutil": "1.0.0"
+    }
+
+where the "1.0.0" is the version of the textutil plugin that you need.
+
+Additionally, there are certain objects that are used across a Bespin
+instance. If you need the command line to be available, for example,
+you can specify that in your metadata:
+
+    :::js
+    objects: ["commandLine"]
+
+With that in your metadata, you can be assured that this:
+
+    :::js
+    var env = require('environment').env;
+
+    console.log(env.commandLine);
+
+will actually be able to get ahold of the command line.
 
 ## Plugin Reloading ##
 
