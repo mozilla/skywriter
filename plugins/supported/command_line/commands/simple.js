@@ -138,12 +138,12 @@ var _getHelp = function(prefix, options) {
 exports.helpCommand = function(args, request) {
     var output = _getHelp(args.search, {
         prefix: '<h2>Welcome to Bespin - Code in the Cloud</h2><ul>' +
-            "<li><a href='http://labs.mozilla.com/projects/bespin' target='_blank'>Home Page</a>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin' target='_blank'>Wiki</a>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/UserGuide' target='_blank'>User Guide</a>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/Tips' target='_blank'>Tips and Tricks</a>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/FAQ' target='_blank'>FAQ</a>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/DeveloperGuide' target='_blank'>Developers Guide</a>" +
+            "<li><a href='http://labs.mozilla.com/projects/bespin' target='_blank'>Home Page</a></li>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin' target='_blank'>Wiki</a></li>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/UserGuide' target='_blank'>User Guide</a></li>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/Tips' target='_blank'>Tips and Tricks</a></li>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/FAQ' target='_blank'>FAQ</a></li>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/DeveloperGuide' target='_blank'>Developers Guide</a></li>" +
             "</ul>",
          suffix: "For more information, see the <a href='https://wiki.mozilla.org/Labs/Bespin'>Bespin Wiki</a>."
     });

@@ -36,7 +36,7 @@
     <div class="cmd_kbd stack_children">
       <div class="cmd_completion" save="${cliInputView._completer}"></div>
       <div>
-        <input class="cmd_input" type="text" save="${cliInputView._inputer}">
+        <input class="cmd_input" type="text" save="${cliInputView._inputer}"/>
       </div>
     </div>
 

@@ -37,6 +37,8 @@ Features
 Fixes
 -----
 * Corrected a problem with the customKeymappings setting
+* Bespin Embedded and the command line now work with XHTML (thanks to satyr,
+  bugs 573721 and 573932)
 
 
 Upgrade Notes

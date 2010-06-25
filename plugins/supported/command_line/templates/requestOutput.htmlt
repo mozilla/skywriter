@@ -11,11 +11,11 @@
   <!-- The extra details that appear on hover -->
   <div class="cmd_duration cmd_hover" save="${actions.duration}"></div>
   <img class="cmd_hover" onclick="${actions.hideOutput}" save="${actions.hide}"
-      alt="Hide command output" src="${imagePath}/minus.png">
+      alt="Hide command output" src="${imagePath}/minus.png"/>
   <img class="cmd_hover cmd_hidden" onclick="${actions.showOutput}" save="${actions.show}"
-      alt="Show command output" src="${imagePath}/plus.png">
+      alt="Show command output" src="${imagePath}/plus.png"/>
   <img class="cmd_hover" onclick="${actions.remove}"
-      alt="Remove this command from the history" src="${imagePath}/closer.png">
+      alt="Remove this command from the history" src="${imagePath}/closer.png"/>
 
 </div>
 
