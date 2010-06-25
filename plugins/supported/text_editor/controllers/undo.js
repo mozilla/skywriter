@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var console = require('bespin:console').console;
+var env = require('environment').env;
 
 /**
  * @class
@@ -168,7 +169,7 @@ exports.EditorUndoController.prototype = {
     }
 };
 
-exports.undoManagerCommand = function(env, args, request) {
+exports.undoManagerCommand = function(args, request) {
     var editor = env.editor;
     editor.buffer.undoManager[request.commandExt.name]()
 };

@@ -39,7 +39,7 @@ var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 var Promise = require('bespin:promise').Promise;
 
-var environment = require('canon:environment');
+var env = require('environment').env;
 var keyboard = require('keyboard:keyboard');
 
 /**
@@ -54,7 +54,7 @@ exports.addSnippet = function(snippetExt) {
  *
  */
 exports.getSnippets = function() {
-    var flags = keyboard.buildFlags(environment.global, { });
+    var flags = keyboard.buildFlags({ });
     var snippetExts = catalog.getExtensions('snippet');
     var matches = [];
     snippetExts.forEach(function(snippetExt) {
@@ -68,7 +68,7 @@ exports.getSnippets = function() {
 /**
  * The 'snippet' command
  */
-exports.snippetCommand = function(env, args, request) {
+exports.snippetCommand = function(args, request) {
     var snippetExt = catalog.getExtensionByKey('snippet', args.snippet);
 
     if (!snippetExt) {

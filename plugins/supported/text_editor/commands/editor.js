@@ -37,11 +37,12 @@
 
 var catalog = require('bespin:plugins').catalog;
 var settings = require('settings').settings;
+var env = require('environment').env;
 
 /**
  * 'find' command
  */
-exports.findCommand = function(env, args, request) {
+exports.findCommand = function(args, request) {
     if (!('value' in args)) {
         env.commandLine.setInput('find ');
         return;
@@ -65,7 +66,7 @@ exports.findCommand = function(env, args, request) {
     request.done(output);
 };
 
-exports.findNextCommand = function(env, args, request) {
+exports.findNextCommand = function(args, request) {
     var view = env.view, search = view.editor.searchController;
     var sel = view.getSelectedRange();
     var match = search.findNext(sel.end, true);
@@ -75,7 +76,7 @@ exports.findNextCommand = function(env, args, request) {
     }
 };
 
-exports.findPrevCommand = function(env, args, request) {
+exports.findPrevCommand = function(args, request) {
     var view = env.view, search = view.editor.searchController;
     var sel = view.getSelectedRange();
     var match = search.findPrevious(sel.start, true);
@@ -88,7 +89,7 @@ exports.findPrevCommand = function(env, args, request) {
 /**
  * Moves the cursor to the specified line.
  */
-exports.gotoCommand = function(env, args, request) {
+exports.gotoCommand = function(args, request) {
     if (!('line' in args)) {
         env.commandLine.setInput('goto ');
         return;
@@ -103,7 +104,7 @@ exports.gotoCommand = function(env, args, request) {
  * Utility to allow us to alter the current selection
  * TODO: If the selection is empty, broaden the scope to the whole file?
  */
-var withSelection = function(env, action) {
+var withSelection = function(action) {
     var view = env.view;
     var selection = view.getSelectedCharacters();
 
@@ -117,8 +118,8 @@ var withSelection = function(env, action) {
 /**
  * 'replace' command
  */
-exports.replaceCommand = function(env, args, request) {
-    withSelection(env, function(selected) {
+exports.replaceCommand = function(args, request) {
+    withSelection(function(selected) {
         return selected.replace(args.search + '/g', args.replace);
     });
 };
@@ -126,9 +127,9 @@ exports.replaceCommand = function(env, args, request) {
 /**
  * 'entab' command
  */
-exports.entabCommand = function(env, args, request) {
+exports.entabCommand = function(args, request) {
     tabstop = settings.get('tabstop');
-    withSelection(env, function(selected) {
+    withSelection(function(selected) {
         return selected.replace(' {' + tabstop + '}', '\t');
     });
 };
@@ -136,9 +137,9 @@ exports.entabCommand = function(env, args, request) {
 /**
  * 'detab' command
  */
-exports.detabCommand = function(env, args, request) {
+exports.detabCommand = function(args, request) {
     tabstop = settings.get('tabstop');
-    withSelection(env, function(selected) {
+    withSelection(function(selected) {
         return selected.replace('\t', new Array(tabstop + 1).join(' '));
     });
 };
@@ -146,8 +147,8 @@ exports.detabCommand = function(env, args, request) {
 /**
  * 'trim' command
  */
-exports.trimCommand = function(env, args, request) {
-    withSelection(env, function(selected) {
+exports.trimCommand = function(args, request) {
+    withSelection(function(selected) {
         var lines = selected.split('\n');
         lines = lines.map(function(line) {
             if (args.side === 'left' || args.side === 'both') {
@@ -165,8 +166,8 @@ exports.trimCommand = function(env, args, request) {
 /**
  * 'uc' command
  */
-exports.ucCommand = function(env, args, request) {
-    withSelection(env, function(selected) {
+exports.ucCommand = function(args, request) {
+    withSelection(function(selected) {
         return selected.toUpperCase();
     });
 };
@@ -174,8 +175,8 @@ exports.ucCommand = function(env, args, request) {
 /**
  * 'lc' command
  */
-exports.lcCommand = function(env, args, request) {
-    withSelection(env, function(selected) {
+exports.lcCommand = function(args, request) {
+    withSelection(function(selected) {
         return selected.toLowerCase();
     });
 };

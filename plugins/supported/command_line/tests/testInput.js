@@ -37,7 +37,6 @@
 
 var Promise = require('bespin:promise').Promise;
 
-var environment = require('canon:environment');
 var keyboard = require('keyboard:keyboard');
 
 var Input = require('command_line:input').Input;

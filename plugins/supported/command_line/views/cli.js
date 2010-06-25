@@ -45,7 +45,7 @@ var keyutil = require('keyboard:keyutil');
 var keyboardManager = require('keyboard:keyboard').keyboardManager;
 
 var history = require('canon:history');
-var environment = require('canon:environment').global;
+var env = require('environment').env;
 var settings = require('settings').settings;
 
 var Level = require('command_line:hint').Level;
@@ -95,7 +95,7 @@ exports.CliInputView = function() {
     });
 
     keyutil.addKeyDownListener(this._inputer, function(ev) {
-        environment.commandLine = this;
+        env.commandLine = this;
         var handled = keyboardManager.processKeyEvent(ev, this, {
             isCommandLine: true, isKeyUp: false
         });
@@ -227,7 +227,7 @@ exports.CliInputView.prototype = {
      */
     execute: function(command) {
         // TODO: This is a hack... how to do it right?
-        environment.commandLine = this;
+        env.commandLine = this;
 
         var input = new Input(command);
         input.execute();

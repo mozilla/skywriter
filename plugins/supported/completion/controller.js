@@ -39,6 +39,7 @@ var ctags = require('ctags');
 var range = require('rangeutils:utils/range');
 var CompletionUI = require('completion:ui').CompletionUI;
 var catalog = require('bespin:plugins').catalog;
+var env = require('environment').env;
 
 function CompletionController(editorView) {
     this._editorView = editorView;
@@ -150,7 +151,7 @@ CompletionController.prototype = {
 };
 
 function makeCommand(name) {
-    return function(env, args, req) {
+    return function(args, req) {
         return env.editor.completionController[name](env);
     };
 }

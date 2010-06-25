@@ -45,7 +45,7 @@ var settings = require('settings').settings;
 var keyutil = require('keyboard:keyutil');
 var history = require('canon:history');
 var Request = require('canon:request').Request;
-var environment = require('canon:environment');
+var env = require('environment').env;
 
 /*
  * Things to do to sanitize this code:
@@ -66,10 +66,10 @@ var environment = require('canon:environment');
  * Every time we call processKeyEvent, we pass in some flags that require the
  * same processing to set them up. This function can be called to do that
  * setup.
- * @param env Probably environment.global
+ * @param env Probably environment.env
  * @param flags Probably {} (but check other places where this is called)
  */
-exports.buildFlags = function(env, flags) {
+exports.buildFlags = function(flags) {
     flags.context = env.contexts[0];
     return flags;
 };
@@ -105,7 +105,7 @@ util.mixin(KeyboardManager.prototype, {
         }
 
         // TODO: Maybe it should be the job of our caller to do this?
-        exports.buildFlags(environment.global, flags);
+        exports.buildFlags(flags);
 
         flags.isCommandKey = true;
         return this._matchCommand(symbolicName, sender, flags);
@@ -124,7 +124,7 @@ util.mixin(KeyboardManager.prototype, {
                     command: command,
                     commandExt: commandExt
                 });
-                history.execute(environment.global, match.args, request);
+                history.execute(match.args, request);
             });
             return true;
         }

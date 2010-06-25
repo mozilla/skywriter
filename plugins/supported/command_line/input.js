@@ -43,7 +43,6 @@ var Trace = require('bespin:util/stacktrace').Trace;
 var util = require('bespin:util/util');
 
 var types = require('types:types');
-var environment = require('canon:environment');
 var Request = require('canon:request').Request;
 var history = require('canon:history');
 var keyboard = require('keyboard:keyboard');
@@ -62,11 +61,8 @@ var typehint = require('command_line:typehint');
  * args object for use in executing the final command.
  * @param typed {string} The instruction as typed by the user so far
  * @param options {object} A list of optional named parameters. Can be any of:
- * <b>env</b>: The global environment (as passed to the commands) to be passed
- * to the various completion systems. Defaulted to environment.global if not
- * specified.
  * <b>flags</b>: Flags for us to check against the predicates specified with the
- * commands. Defaulted to <tt>keyboard.buildFlags(environment.global, { });</tt>
+ * commands. Defaulted to <tt>keyboard.buildFlags({ });</tt>
  * if not specified.
  */
 exports.Input = function(typed, options) {
@@ -79,10 +75,7 @@ exports.Input = function(typed, options) {
 
     options = options || {};
 
-    options.env = options.env || environment.global;
-    this.env = options.env;
-
-    options.flags = options.flags || keyboard.buildFlags(this.env, { });
+    options.flags = options.flags || keyboard.buildFlags({ });
     this.flags = options.flags;
 
     // Once tokenize() has been called, we have the #typed string cut up into
@@ -521,7 +514,7 @@ exports.Input.prototype = {
                     typed: this.typed,
                     args: args
                 });
-                history.execute(environment.global, args, request);
+                history.execute(args, request);
             }.bind(this), loadError);
         }.bind(this), loadError);
     }

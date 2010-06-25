@@ -35,6 +35,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+"define metadata";
+({
+    "dependencies": {
+        "settings": "0.0.0"
+    }
+});
+"end";
+
 var util = require('bespin:util/util');
 var console = require('bespin:console').console;
 var catalog = require("bespin:plugins").catalog;
@@ -192,7 +200,6 @@ Object.defineProperties(exports.Environment.prototype, {
 });
 
 /**
- * The global environment.
- * TODO: Check that this is the best way to do this.
+ * The global environment used throughout this Bespin instance.
  */
-exports.global = new exports.Environment();
+exports.env = new exports.Environment();

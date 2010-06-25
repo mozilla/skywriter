@@ -51,7 +51,9 @@
 });
 "end";
 
-exports.feedbackCommand = function(env, args, request) {
+var env = require('environment').env;
+
+exports.feedbackCommand = function(args, request) {
     window.open('http://feedback.mozillalabs.com/forums/49087-bespin',
         'feedback');
 };

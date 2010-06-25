@@ -213,32 +213,33 @@
 var util = require('bespin:util/util');
 var catalog = require('bespin:plugins').catalog;
 var promiseMod = require('bespin:promise');
+var env = require('environment').env;
 
 /**
  * The 'action' command
  */
-exports.actionCommand = function(env, args, request) {
+exports.actionCommand = function(args, request) {
     editor.ui.actions[args.actionname]();
 };
 
 /**
  * The 'echo' command
  */
-exports.echoCommand = function(env, args, request) {
+exports.echoCommand = function(args, request) {
     request.done(args.message);
 };
 
 /**
  * The 'insert' command
  */
-exports.insertCommand = function(env, args, request) {
+exports.insertCommand = function(args, request) {
     editor.model.insertChunk(editor.getModelPos(), args.text);
 };
 
 /**
  * The 'readonly' command
  */
-exports.readonlyCommand = function(env, args, request) {
+exports.readonlyCommand = function(args, request) {
     var msg;
     var flag = args.flag;
     if (flag === undefined || flag === '') {
@@ -260,7 +261,7 @@ var templates = { 'in': 'for (var key in object) {\n\n}' };
 /**
  * The 'template' command
  */
-exports.templateCommand = function(env, args, request) {
+exports.templateCommand = function(args, request) {
     var type = args.type;
     var value = templates[type];
     if (value) {
@@ -294,7 +295,7 @@ var uses = {
 /**
  * The 'use' command
  */
-exports.useCommand = function(env, args, request) {
+exports.useCommand = function(args, request) {
     var type = args.type;
     if (util.isFunction(this.uses[type])) {
         this.uses[type]();
@@ -314,7 +315,7 @@ exports.useCommand = function(env, args, request) {
 /**
  * The 'slow' command
  */
-exports.slowCommand = function(env, args, request) {
+exports.slowCommand = function(args, request) {
     var seconds = args.seconds || 5;
     var start = new Date().getTime();
 
@@ -349,7 +350,7 @@ exports.slowCommand = function(env, args, request) {
 /**
  * The 'promise' command
  */
-exports.promiseCommand = function(env, args, request) {
+exports.promiseCommand = function(args, request) {
     var dig = (args.which === 'outstanding') ?
         promiseMod._outstanding :
         promiseMod._recent;
@@ -365,7 +366,7 @@ exports.promiseCommand = function(env, args, request) {
 /**
  * The 'error' command
  */
-exports.errorCommand = function(env, args, request) {
+exports.errorCommand = function(args, request) {
     request.output('Some output before we die');
     var die = function() {
         if (args.type === 'throw') {

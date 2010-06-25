@@ -57,12 +57,14 @@
 });
 "end";
 
+var env = require('environment').env;
+
 var pluginCatalog = require('bespin:plugins').catalog;
 
-exports.jumpCommandLine = function(env, args, request) {
+exports.jumpCommandLine = function(args, request) {
     env.commandLine.focus();
 };
 
-exports.jumpEditor = function(env, args, request) {
+exports.jumpEditor = function(args, request) {
     env.view.focus();
 };

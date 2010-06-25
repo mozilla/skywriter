@@ -39,7 +39,7 @@ var util = require('bespin:util/util');
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
 
-var environment = require('canon:environment').global;
+var env = require('environment').env;
 
 var templates = require('command_line:templates');
 
@@ -87,7 +87,7 @@ exports.RequestOutput.prototype = {
      */
     executeRequest: function(ev) {
         // TODO: This is a hack... how to do it right?
-        environment.commandLine = this.cliInputView;
+        env.commandLine = this.cliInputView;
         this.cliInputView._input = new Input(this.request.typed);
         this.cliInputView._input.execute();
     },

@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var util = require('bespin:util/util');
+var env = require('environment').env;
 
 /**
  * This simple undo manager coordinates undo for the app that embeds Bespin.
@@ -100,6 +101,6 @@ exports.global = new exports.UndoManager();
 /**
  *
  */
-exports.undoManagerCommand = function(env, args, request) {
+exports.undoManagerCommand = function(args, request) {
     exports.global[request.commandExt.name]();
 };

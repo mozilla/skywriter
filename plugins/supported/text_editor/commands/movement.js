@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var Range = require('rangeutils:utils/range');
+var env = require('environment').env;
 
 // TODO: These should not be using private APIs of the view.
 
@@ -46,22 +47,22 @@ var Range = require('rangeutils:utils/range');
 // private virtual selection into account.
 //
 
-exports.moveDown = function(env, args, request) {
+exports.moveDown = function(args, request) {
     var view = env.view;
     view.moveDown();
 };
 
-exports.moveLeft = function(env, args, request) {
+exports.moveLeft = function(args, request) {
     var view = env.view;
     view.moveLeft();
 };
 
-exports.moveRight = function(env, args, request) {
+exports.moveRight = function(args, request) {
     var view = env.view;
     view.moveRight();
 };
 
-exports.moveUp = function(env, args, request) {
+exports.moveUp = function(args, request) {
     var view = env.view;
     view.moveUp();
 };
@@ -70,22 +71,22 @@ exports.moveUp = function(env, args, request) {
 // Simple selection.
 //
 
-exports.selectDown = function(env, args, request) {
+exports.selectDown = function(args, request) {
     var view = env.view;
     view.selectDown();
 };
 
-exports.selectLeft = function(env, args, request) {
+exports.selectLeft = function(args, request) {
     var view = env.view;
     view.selectLeft();
 };
 
-exports.selectRight = function(env, args, request) {
+exports.selectRight = function(args, request) {
     var view = env.view;
     view.selectRight();
 };
 
-exports.selectUp = function(env, args, request) {
+exports.selectUp = function(args, request) {
     var view = env.view;
     view.selectUp();
 };
@@ -94,7 +95,7 @@ exports.selectUp = function(env, args, request) {
 // Move or select to the end of the line or document.
 //
 
-var moveOrSelectEnd = function(env, shift, inLine) {
+var moveOrSelectEnd = function(shift, inLine) {
     var view = env.view, model = env.model;
     var lines = model.lines;
     var selectedRange = view.getSelectedRange(true);
@@ -102,27 +103,27 @@ var moveOrSelectEnd = function(env, shift, inLine) {
     view.moveCursorTo({ row: row, col: lines[row].length }, shift);
 };
 
-exports.moveLineEnd = function(env, args, request) {
-    moveOrSelectEnd(env, false, true);
+exports.moveLineEnd = function(args, request) {
+    moveOrSelectEnd(false, true);
 };
 
-exports.selectLineEnd = function(env, args, request) {
-    moveOrSelectEnd(env, true, true);
+exports.selectLineEnd = function(args, request) {
+    moveOrSelectEnd(true, true);
 };
 
-exports.moveDocEnd = function(env, args, request) {
-    moveOrSelectEnd(env, false, false);
+exports.moveDocEnd = function(args, request) {
+    moveOrSelectEnd(false, false);
 };
 
-exports.selectDocEnd = function(env, args, request) {
-    moveOrSelectEnd(env, true, false);
+exports.selectDocEnd = function(args, request) {
+    moveOrSelectEnd(true, false);
 };
 
 //
 // Move or select to the beginning of the line or document.
 //
 
-var moveOrSelectStart = function(env, shift, inLine) {
+var moveOrSelectStart = function(shift, inLine) {
     var view = env.view;
     var range = view.getSelectedRange(true);
     var row = inLine ? range.end.row : 0;
@@ -130,20 +131,20 @@ var moveOrSelectStart = function(env, shift, inLine) {
     view.moveCursorTo(position, shift);
 };
 
-exports.moveLineStart = function (env, args, request) {
-    moveOrSelectStart(env, false, true);
+exports.moveLineStart = function (args, request) {
+    moveOrSelectStart(false, true);
 };
 
-exports.selectLineStart = function(env, args, request) {
-    moveOrSelectStart(env, true, true);
+exports.selectLineStart = function(args, request) {
+    moveOrSelectStart(true, true);
 };
 
-exports.moveDocStart = function(env, args, request) {
-    moveOrSelectStart(env, false, false);
+exports.moveDocStart = function(args, request) {
+    moveOrSelectStart(false, false);
 };
 
-exports.selectDocStart = function(env, args, request) {
-    moveOrSelectStart(env, true, false);
+exports.selectDocStart = function(args, request) {
+    moveOrSelectStart(true, false);
 };
 
 //
@@ -182,7 +183,7 @@ var seekNextStop = function(view, text, col, dir, rowChanged) {
     return col;
 };
 
-var moveOrSelectNextWord = function(env, shiftDown) {
+var moveOrSelectNextWord = function(shiftDown) {
     var view = env.view, model = env.model;
     var lines = model.lines;
 
@@ -209,7 +210,7 @@ var moveOrSelectNextWord = function(env, shiftDown) {
     view.moveCursorTo({ row: row, col: col }, shiftDown);
 };
 
-var moveOrSelectPreviousWord = function(env, shiftDown) {
+var moveOrSelectPreviousWord = function(shiftDown) {
     var view = env.view, model = env.model;
 
     var lines = model.lines;
@@ -238,20 +239,20 @@ var moveOrSelectPreviousWord = function(env, shiftDown) {
     view.moveCursorTo({ row: row, col: col }, shiftDown);
 };
 
-exports.moveNextWord = function(env, args, request) {
-    moveOrSelectNextWord(env, false);
+exports.moveNextWord = function(args, request) {
+    moveOrSelectNextWord(false);
 };
 
-exports.selectNextWord = function(env, args, request) {
-    moveOrSelectNextWord(env, true);
+exports.selectNextWord = function(args, request) {
+    moveOrSelectNextWord(true);
 };
 
-exports.movePreviousWord = function(env, args, request) {
-    moveOrSelectPreviousWord(env, false);
+exports.movePreviousWord = function(args, request) {
+    moveOrSelectPreviousWord(false);
 };
 
-exports.selectPreviousWord = function(env, args, request) {
-    moveOrSelectPreviousWord(env, true);
+exports.selectPreviousWord = function(args, request) {
+    moveOrSelectPreviousWord(true);
 };
 
 //
@@ -261,7 +262,7 @@ exports.selectPreviousWord = function(env, args, request) {
 /**
  * Selects all characters in the buffer.
  */
-exports.selectAll = function(env, args, request) {
+exports.selectAll = function(args, request) {
     var view = env.view;
     view.selectAll();
 };

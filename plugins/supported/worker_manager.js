@@ -70,6 +70,7 @@ var console = require('bespin:console').console;
 var _ = require('underscore')._;
 var Event = require('events').Event;
 var Promise = require('bespin:promise').Promise;
+var env = require('environment').env;
 
 var workerManager = {
     _workers: [],
@@ -220,7 +221,7 @@ WorkerSupervisor.prototype = {
     },
 };
 
-function workerRestartCommand(env, args, req) {
+function workerRestartCommand(args, req) {
     workerManager.restartAll();
 }
 

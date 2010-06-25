@@ -37,6 +37,7 @@
 
 var SC = require('sproutcore/runtime').SC;
 
+var env = require('environment').env;
 var Promise = require('bespin:promise').Promise;
 var server = require('bespin_server').server;
 
@@ -164,7 +165,7 @@ exports.clearPassword = function() {
 /**
  * Retrieve an SSH public key for authentication use
  */
-exports.getkey = function(env, args, request) {
+exports.getkey = function(args, request) {
     if (args.password == '') {
         args.password = undefined;
     }
@@ -199,7 +200,7 @@ exports.getkey = function(env, args, request) {
 /*
  * Clears the stored keychain password.
  */
-exports.forget = function(env, args, request) {
+exports.forget = function(args, request) {
     exports.clearPassword();
     request.done('Password forgotten.');
 };

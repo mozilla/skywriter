@@ -37,11 +37,12 @@
 
 var bespin = require('bespin:index');
 var util = require('bespin:util/util');
+var env = require('environment').env;
 
 /**
  * 'eval' command
  */
-exports.evalCommand = function(env, args, request) {
+exports.evalCommand = function(args, request) {
     var result;
     var javascript = args.javascript;
     try {
@@ -102,7 +103,7 @@ exports.evalCommand = function(env, args, request) {
 /**
  * 'version' command
  */
-exports.versionCommand = function(env, args, request) {
+exports.versionCommand = function(args, request) {
     var version = 'Bespin ' + bespin.versionNumber + ' (' + 
             bespin.versionCodename + ')';
     request.done(version);
@@ -118,7 +119,7 @@ var messages = [
 /**
  * 'bespin' command
  */
-exports.bespinCommand = function(env, args, request) {
+exports.bespinCommand = function(args, request) {
     var index = Math.floor(Math.random() * messages.length);
     request.done('Bespin ' + messages[index]);
 };

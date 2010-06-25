@@ -37,6 +37,7 @@
 
 var catalog = require('bespin:plugins').catalog;
 var pathUtil = require('filesystem:path');
+var env = require('environment').env;
 
 var Buffer = require('text_editor:models/buffer').Buffer;
 var Promise = require('bespin:promise').Promise;
@@ -45,7 +46,7 @@ var Promise = require('bespin:promise').Promise;
  * Creates a path based on the current working directory and the passed 'path'.
  * This is also deals with '..' within the path and '/' at the beginning.
  */
-exports.getCompletePath = function(env, path) {
+exports.getCompletePath = function(path) {
     var ret;
     path = path || '';
 
@@ -82,10 +83,10 @@ exports.getCompletePath = function(env, path) {
 /**
  * 'files' command
  */
-exports.filesCommand = function(env, args, request) {
+exports.filesCommand = function(args, request) {
     var path = args.path;
 
-    path = exports.getCompletePath(env, path);
+    path = exports.getCompletePath(path);
 
     if (path && !pathUtil.isDir(path)) {
         path += '/';
@@ -107,10 +108,10 @@ exports.filesCommand = function(env, args, request) {
 /**
  * 'mkdir' command
  */
-exports.mkdirCommand = function(env, args, request) {
+exports.mkdirCommand = function(args, request) {
     var path = args.path;
 
-    path = exports.getCompletePath(env, path);
+    path = exports.getCompletePath(path);
     request.async();
 
     var files = env.files;
@@ -125,7 +126,7 @@ exports.mkdirCommand = function(env, args, request) {
 /**
  * 'save' command
  */
-exports.saveCommand = function(env, args, request) {
+exports.saveCommand = function(args, request) {
     var buffer = env.buffer;
     if (buffer.untitled()) {
         env.commandLine.setInput('saveas ');
@@ -144,9 +145,9 @@ exports.saveCommand = function(env, args, request) {
 /**
  * 'save as' command
  */
-exports.saveAsCommand = function(env, args, request) {
+exports.saveAsCommand = function(args, request) {
     var files = env.files;
-    var path = exports.getCompletePath(env, args.path);
+    var path = exports.getCompletePath(args.path);
 
     var newFile = files.getFile(path);
     env.buffer.saveAs(newFile).then(function() {
@@ -161,7 +162,7 @@ exports.saveAsCommand = function(env, args, request) {
 /**
  * 'open' command
  */
-exports.openCommand = function(env, args, request) {
+exports.openCommand = function(args, request) {
     if (!('path' in args)) {
         env.commandLine.setInput('open ');
         return;
@@ -169,7 +170,7 @@ exports.openCommand = function(env, args, request) {
 
     var files = env.files;
     var editor = env.editor;
-    var path = exports.getCompletePath(env, args.path);
+    var path = exports.getCompletePath(args.path);
 
     // TODO: handle line number in args
     request.async();
@@ -197,7 +198,7 @@ exports.openCommand = function(env, args, request) {
 /**
  * 'revert' command
  */
-exports.revertCommand = function(env, args, request) {
+exports.revertCommand = function(args, request) {
     request.async();
     var buffer = env.buffer;
     buffer.reload().then(function() {
@@ -210,19 +211,19 @@ exports.revertCommand = function(env, args, request) {
 /**
  * 'newfile' command
  */
-exports.newfileCommand = function(env, args, request) {
+exports.newfileCommand = function(args, request) {
     env.editor.buffer = new Buffer();
 };
 
 /**
  * 'rm' command
  */
-exports.rmCommand = function(env, args, request) {
+exports.rmCommand = function(args, request) {
     var files = env.files;
     var buffer = env.buffer;
 
     var path = args.path;
-    path = exports.getCompletePath(env, path);
+    path = exports.getCompletePath(path);
 
     files.remove(path).then(function() {
         request.done(path + ' deleted.');
@@ -235,18 +236,18 @@ exports.rmCommand = function(env, args, request) {
 /**
  * 'cd' command
  */
-exports.cdCommand = function(env, args, request) {
+exports.cdCommand = function(args, request) {
     var workingDir = args.workingDir || '';
     if (workingDir != '' && workingDir.substr(-1) != '/') {
         workingDir += '/';
     }
-    env.workingDir = exports.getCompletePath(env, workingDir);
+    env.workingDir = exports.getCompletePath(workingDir);
     request.done('/' + env.workingDir);
 }
 
 /**
  * 'pwd' command
  */
-exports.pwdCommand = function(env, args, request) {
+exports.pwdCommand = function(args, request) {
     request.done('/' + (env.workingDir || ''));
 }

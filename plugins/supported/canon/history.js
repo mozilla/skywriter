@@ -82,7 +82,7 @@ exports.addRequestOutput = function(request) {
  * Execute a new command.
  * This is basically an error trapping wrapper around request.command(...)
  */
-exports.execute = function(env, args, request) {
+exports.execute = function(args, request) {
     // Check the function pointed to in the meta-data exists
     if (!request.command) {
         request.doneWithError('Command not found.');
@@ -90,7 +90,7 @@ exports.execute = function(env, args, request) {
     }
 
     try {
-        request.command(env, args, request);
+        request.command(args, request);
     } catch (ex) {
         var trace = new Trace(ex, true);
         console.group('Error executing command \'' + request.typed + '\'');

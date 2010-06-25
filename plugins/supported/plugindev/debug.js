@@ -35,7 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-exports.syntaxContexts = function(env, args, request) {
+var env = require('environment').env;
+
+exports.syntaxContexts = function(args, request) {
     var contexts = env.contexts;
     request.done('Contexts = [ ' + contexts.join(', ') + ' ]');
 };

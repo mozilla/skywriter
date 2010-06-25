@@ -42,6 +42,7 @@ var Promise = require("bespin:promise").Promise;
 var group = require('bespin:promise').group;
 var test = require('core_test:test');
 var utils = require('core_test:utils');
+var env = require('environment').env;
 
 var lastTest = null;
 
@@ -455,7 +456,7 @@ TestOutputLogger.prototype = {
     }
 };
 
-exports.testrunner = function(env, args, request) {
+exports.testrunner = function(args, request) {
     var plugin;
 
     var testspec = args.testmodule;

@@ -40,6 +40,7 @@ var core_test = require('core_test');
 var assert = require('core_test:assert');
 var test = require('core_test:test');
 var DefaultLogger = require('loggers/default', 'core_test');
+var env = require('environment').env;
 
 var server = require('bespin_server').server;
 var pluginCatalog = require('bespin:plugins').catalog;
@@ -136,7 +137,7 @@ exports.getUserDeactivatedPlugins = function() {
     });
 };
 
-exports.reloadCommand = function(env, args, request) {
+exports.reloadCommand = function(args, request) {
     if (!args.plugin) {
         request.doneWithError('You must provide a plugin name');
         return;

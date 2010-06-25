@@ -37,11 +37,12 @@
 
 var catalog = require('bespin:plugins').catalog;
 var console = require('bespin:console').console;
+var env = require('environment').env;
 
 /**
  * Action to allow the command line to do completion
  */
-exports.completeCommand = function(env, args, request) {
+exports.completeCommand = function(args, request) {
     var commandLine = env.commandLine;
     commandLine.complete();
 };
@@ -134,7 +135,7 @@ var _getHelp = function(prefix, options) {
 /**
  *
  */
-exports.helpCommand = function(env, args, request) {
+exports.helpCommand = function(args, request) {
     var output = _getHelp(args.search, {
         prefix: '<h2>Welcome to Bespin - Code in the Cloud</h2><ul>' +
             "<li><a href='http://labs.mozilla.com/projects/bespin' target='_blank'>Home Page</a>" +
@@ -155,7 +156,7 @@ var rootCanon = { aliases:[], commands:[] };
 /**
  * 'alias' command
  */
-exports.aliasCommand = function(env, args, request) {
+exports.aliasCommand = function(args, request) {
     var aliases = rootCanon.aliases;
 
     if (!args.alias) {

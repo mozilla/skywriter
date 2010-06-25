@@ -36,6 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var settings = require('settings').settings;
+var env = require('environment').env;
 var m_range = require('rangeutils:utils/range');
 
 /*
@@ -46,7 +47,7 @@ var m_range = require('rangeutils:utils/range');
  * Deletes the selection or the previous character, if the selection is an
  * insertion point.
  */
-exports.backspace = function(env, args, request) {
+exports.backspace = function(args, request) {
     var view = env.view;
     view.performBackspaceOrDelete(true);
 };
@@ -55,7 +56,7 @@ exports.backspace = function(env, args, request) {
  * Deletes the selection or the next character, if the selection is an
  * insertion point.
  */
-exports.deleteCommand = function(env, args, request) {
+exports.deleteCommand = function(args, request) {
     var view = env.view;
     view.performBackspaceOrDelete(false);
 };
@@ -64,7 +65,7 @@ exports.deleteCommand = function(env, args, request) {
  * Deletes all lines that are partially or fully selected, and position the
  * insertion point at the end of the deleted range.
  */
-exports.deleteLines = function(env, args, request) {
+exports.deleteLines = function(args, request) {
     if (env.model.readOnly) {
         return;
     }
@@ -126,7 +127,7 @@ var newline = function(model, view) {
  * Replaces the selection with the given text and updates the selection
  * boundaries appropriately.
  */
-exports.insertText = function(env, args, request) {
+exports.insertText = function(args, request) {
     var view = env.view;
     var text = args.text;
     view.insertText(text);
@@ -135,7 +136,7 @@ exports.insertText = function(env, args, request) {
 /**
  * Inserts a newline at the insertion point.
  */
-exports.newline = function(env, args, request) {
+exports.newline = function(args, request) {
     var model = env.model, view = env.view;
     newline(model, view);
 };
@@ -143,7 +144,7 @@ exports.newline = function(env, args, request) {
 /**
  * Join the following line with the current one. Removes trailing whitespaces.
  */
-exports.joinLines = function(env, args, request) {
+exports.joinLines = function(args, request) {
     var model = env.model;
     if (model.readOnly) {
         return;
@@ -178,7 +179,7 @@ exports.joinLines = function(env, args, request) {
  * Creates a new, empty line below the current one, and places the insertion
  * point there.
  */
-exports.openLine = function(env, args, request) {
+exports.openLine = function(args, request) {
     if (env.model.readOnly) {
         return;
     }
@@ -198,7 +199,7 @@ exports.openLine = function(env, args, request) {
  * the current position of the cursor. If some text is selected, the selected
  * lines will be indented by tabstop spaces.
  */
-exports.tab = function(env, args, request) {
+exports.tab = function(args, request) {
     var view = env.view;
 
     view.groupChanges(function() {
@@ -258,7 +259,7 @@ exports.tab = function(env, args, request) {
  * the setting tabstop and the current cursor position. If there is a selection,
  * then the selected lines are unindented by tabstop spaces.
  */
-exports.untab = function(env, args, request) {
+exports.untab = function(args, request) {
     var view = env.view;
 
     view.groupChanges(function() {
@@ -304,7 +305,7 @@ exports.untab = function(env, args, request) {
              view.setSelection({
                  start: { row:  selection.start.row, col: selection.start.col},
                  end:   { row:  selection.end.row, col: selection.end.col - count}
-             })
+             });
        }
     }.bind(this));
 };

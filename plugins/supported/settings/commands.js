@@ -36,13 +36,14 @@
  * ***** END LICENSE BLOCK ***** */
 
 var catalog = require('bespin:plugins').catalog;
+var env = require('environment').env;
 
 var settings = require('settings').settings;
 
 /**
  * 'set' command
  */
-exports.setCommand = function(env, args, request) {
+exports.setCommand = function(args, request) {
     var html;
 
     if (!args.setting) {
@@ -85,7 +86,7 @@ exports.setCommand = function(env, args, request) {
 /**
  * 'unset' command
  */
-exports.unsetCommand = function(env, args, request) {
+exports.unsetCommand = function(args, request) {
     settings.resetValue(args.setting);
     request.done('Reset ' + args.setting + ' to default: ' + settings.get(args.setting));
 };

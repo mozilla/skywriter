@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var env = require('canon:environment').global;
+var env = require('environment').env;
 var util = require('bespin:util/util');
 var console = require('bespin:console').console;
 

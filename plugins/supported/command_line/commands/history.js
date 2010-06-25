@@ -37,6 +37,7 @@
 
 var catalog = require('bespin:plugins').catalog;
 var history = require('canon:history');
+var env = require('environment').env;
 
 /**
  * The pointer to the command that we show on up|down
@@ -47,7 +48,7 @@ var pointer = 0;
  * CLI 'up'
  * Decrement the 'current entry' pointer
  */
-exports.historyPreviousCommand = function(env, args, request) {
+exports.historyPreviousCommand = function(args, request) {
     if (pointer > 0) {
         pointer--;
     }
@@ -60,7 +61,7 @@ exports.historyPreviousCommand = function(env, args, request) {
  * CLI 'down'
  * Increment the 'current entry' pointer
  */
-exports.historyNextCommand = function(env, args, request) {
+exports.historyNextCommand = function(args, request) {
     if (pointer < history.requests.length) {
         pointer++;
     }
@@ -75,7 +76,7 @@ exports.historyNextCommand = function(env, args, request) {
 /**
  * 'history' command
  */
-exports.historyCommand = function(env, args, request) {
+exports.historyCommand = function(args, request) {
     var output = [];
     output.push('<table>');
     var count = 1;

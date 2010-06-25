@@ -38,6 +38,7 @@
 var getCompletePath = require('index').getCompletePath;
 var QuickMatcher = require('matcher:quick').QuickMatcher;
 var MatcherMenu = require('command_line:views/menu').MatcherMenu;
+var env = require('environment').env;
 
 /**
  * @see typehint#getHint()
@@ -47,14 +48,13 @@ exports.existingFileHint = {
         var matcher = new QuickMatcher(assignment.value || '');
         var menu = new MatcherMenu(input, assignment, matcher);
 
-        var env = input.env;
         var typed = assignment.value;
         typed = typed.substring(0, typed.lastIndexOf('/') + 1);
 
-        var currentDir = getCompletePath(env, typed);
+        var currentDir = getCompletePath(typed);
         currentDir = currentDir.substring(0, currentDir.lastIndexOf('/') + 1);
 
-        var files = input.env.files;
+        var files = env.files;
         files.listAll().then(function(fileList) {
             var matchRegExp = new RegExp('^' + currentDir);
 

@@ -34,34 +34,36 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+ 
+var env = require('environment').env;
 
 // Scrolling commands.
 
 /**
  * Scrolls to the start of the document.
  */
-exports.scrollDocStart = function(env, args, request) {
+exports.scrollDocStart = function(args, request) {
     env.view.scrollToPosition({ col: 0, row: 0 });
 };
 
 /**
  * Scrolls to the end of the document.
  */
-exports.scrollDocEnd = function(env, args, request) {
+exports.scrollDocEnd = function(args, request) {
     env.view.scrollToPosition(env.model.range.end);
 };
 
 /**
  * Scrolls down by one screenful of text.
  */
-exports.scrollPageDown = function(env, args, request) {
+exports.scrollPageDown = function(args, request) {
     env.view.scrollPageDown();
 };
 
 /**
  * Scrolls up by one screenful of text.
  */
-exports.scrollPageUp = function(env, args, request) {
+exports.scrollPageUp = function(args, request) {
     env.view.scrollPageUp();
 };
 

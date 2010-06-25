@@ -73,7 +73,7 @@ exports.testFilesCommand = function() {
         testpr.resolve();
     });
 
-    file_commands.filesCommand(env, {path: '/'}, request);
+    file_commands.filesCommand({path: '/'}, request);
 
     return testpr;
 };
@@ -89,7 +89,7 @@ exports.testOpenFileWithNoOpenFile = function() {
         testpr.resolve();
     });
 
-    file_commands.openCommand(env, {path: '/foo/bar/3.txt'}, request);
+    file_commands.openCommand({path: '/foo/bar/3.txt'}, request);
 };
 
 exports.testFilesCommandDefaultsToRoot = function() {
@@ -106,7 +106,7 @@ exports.testFilesCommandDefaultsToRoot = function() {
         testpr.resolve();
     });
 
-    file_commands.filesCommand(env, {path: null}, request);
+    file_commands.filesCommand({path: null}, request);
     return testpr;
 };
 
@@ -127,7 +127,7 @@ exports.testFilesAreRelativeToCurrentOpenFile = function() {
         testpr.resolve();
     });
 
-    file_commands.filesCommand(env, {path: null}, request);
+    file_commands.filesCommand({path: null}, request);
     return testpr;
 };
 
@@ -145,7 +145,7 @@ exports.testFilesListingInDirectoryRelativeToOpenFile = function() {
         testpr.resolve();
     });
 
-    file_commands.filesCommand(env, {path: 'bar/'}, request);
+    file_commands.filesCommand({path: 'bar/'}, request);
     return testpr;
 };
 
@@ -165,7 +165,7 @@ exports.testMakeDirectoryForNewDirectory = function() {
         testpr.reject(error.message);
     });
 
-    file_commands.mkdirCommand(env, {path: '/foo/one/'}, request);
+    file_commands.mkdirCommand({path: '/foo/one/'}, request);
 
     return testpr;
 };

@@ -37,6 +37,7 @@
 
 var Hint = require('command_line:hint').Hint;
 var Level = require('command_line:hint').Level;
+var env = require('environment').env;
 
 /*
  * TODO:
@@ -66,7 +67,7 @@ var latestMenu;
  * function for every numeric accelerator, we dig into the commandExt to find
  * a number for the key press and use that.
  */
-exports.activateItemAction = function(env, args, request) {
+exports.activateItemAction = function(args, request) {
     var key = request.commandExt.key;
     var index = parseInt(key.replace(/[A-Za-z_]/g, ''), 10);
     if (!latestMenu) {

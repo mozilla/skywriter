@@ -101,7 +101,7 @@ exports.launch = function(config) {
 
     // Resolve the launchPromise and pass the env variable along.
     var resolveLaunchPromise = function() {
-        var env = require("canon:environment").global;
+        var env = require("environment").env;
 
         var editor = env.editor;
         if (editor) {

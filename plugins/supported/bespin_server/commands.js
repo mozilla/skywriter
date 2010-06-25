@@ -37,6 +37,7 @@
 
 var project_m = require('project');
 var server = require('bespin_server:index').server;
+var env = require('environment').env;
 
 /**
  * Utility to convert bytes to megabytes
@@ -67,7 +68,7 @@ exports.quotaCommand = function(instruction) {
 /**
  * 'rescan' command
  */
-exports.rescanCommand = function(env, args, request) {
+exports.rescanCommand = function(args, request) {
     var project;
     if (!args.project) {
         var file = env.file;
@@ -97,7 +98,7 @@ exports.rescanCommand = function(env, args, request) {
 /**
  * 'preview' command
  */
-exports.preview = function(env, args, request) {
+exports.preview = function(args, request) {
     var buffer = env.buffer;
 
     if (buffer.untitled()) {
@@ -125,7 +126,7 @@ exports.preview = function(env, args, request) {
 /*
  * 'export' command to export a project
  */
-exports.exportCommand = function(env, args, request) {
+exports.exportCommand = function(args, request) {
     var iframe = document.createElement("iframe");
     iframe.src = server.base_url + '/project/export/' +  args.project + "." + args.archivetype;
     iframe.style.display = 'none';

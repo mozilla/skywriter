@@ -39,6 +39,7 @@ var catalog = require('bespin:plugins').catalog;
 var Promise = require('bespin:promise').Promise;
 var groupPromises = require('bespin:promise').group;
 var util = require('bespin:util/util');
+var env = require('environment').env;
 
 var server = require('bespin_server').server;
 var pathutils = require('filesystem:path');
@@ -52,7 +53,7 @@ var getPluginName = function(path) {
     return pathutils.splitext(pathutils.basename(path))[0];
 };
 
-var changePluginInfo = function(env, request) {
+var changePluginInfo = function(request) {
     var pr = new Promise();
     var prChangeDone = new Promise();
 
@@ -104,7 +105,7 @@ var changePluginInfo = function(env, request) {
 /*
  * the plugin add command to add a new plugin file or directory.
  */
-exports.add = function(env, args, request) {
+exports.add = function(args, request) {
     var path = args.path;
     var session = env.session;
     path = session.getCompletePath(path);
@@ -133,7 +134,7 @@ exports.add = function(env, args, request) {
     };
 
     // Load the pluginInfo data.
-    changePluginInfo(env, request).then(function(data) {
+    changePluginInfo(request).then(function(data) {
         var prSaveDone = new Promise();
 
         // After the pluginInfo.json is saved, load the plugin metadata.
@@ -146,7 +147,7 @@ exports.add = function(env, args, request) {
                 request.doneWithError('Couldn\'t add the plugin: ' + error.message);
 
                 // We don't handle failure as we can't do anything if it fails.
-                changePluginInfo(env, request).then(rollbackPluginAdd);
+                changePluginInfo(request).then(rollbackPluginAdd);
             });
         });
 
@@ -165,7 +166,7 @@ exports.add = function(env, args, request) {
 /*
  * the plugin list command
  */
-exports.list = function(env, args, request) {
+exports.list = function(args, request) {
     var deactivatedPlugins = catalog.deactivatedPlugins;
 
     var plugins = catalog.getPlugins({
@@ -216,7 +217,7 @@ exports.list = function(env, args, request) {
 /*
  * the plugin remove command
  */
-exports.remove = function(env, args, request) {
+exports.remove = function(args, request) {
     var pluginName = args.plugin;
     var plugin = catalog.plugins[pluginName];
     if (!plugin) {
@@ -282,7 +283,7 @@ var locationValidator = /^(http|https):\/\//;
 /*
  * the plugin install command
  */
-exports.install = function(env, args, request) {
+exports.install = function(args, request) {
     var body, url;
 
     var plugin = args.plugin;
@@ -312,7 +313,7 @@ exports.install = function(env, args, request) {
  * the plugin upload command - uploads a plugin to the
  * plugin gallery.
  */
-exports.upload = function(env, args, request) {
+exports.upload = function(args, request) {
     if (!args.pluginName) {
         request.doneWithError('You must provide the name of the plugin to install.');
     }
@@ -331,7 +332,7 @@ exports.upload = function(env, args, request) {
  * the plugin gallery command - lists the plugins in the
  * plugin gallery
  */
-exports.gallery = function(env, args, request) {
+exports.gallery = function(args, request) {
     var pr = server.request('GET', '/plugin/gallery/',
         null, {
             evalJSON: true
@@ -356,7 +357,7 @@ exports.gallery = function(env, args, request) {
  * the plugin order command - order the plugins and save the new ordering to
  * to the pluginInfo.json file.
  */
-exports.order = function(env, args, request) {
+exports.order = function(args, request) {
     if (args.order === null) {
         request.done('Current pluginorder: ' +
                                 catalog.getExtensionsOrdering().join(', '));
@@ -365,14 +366,14 @@ exports.order = function(env, args, request) {
     var newOrder = args.order.split(' ');
     catalog.orderExtensions(newOrder);
 
-    changePluginInfo(env, request).then(function(data) {
+    changePluginInfo(request).then(function(data) {
         data.pluginConfig.ordering = newOrder;
 
         data.prChangeDone.resolve("Pluginorder saved: " + newOrder.join(', '));
     });
 };
 
-exports.deactivate = function(env, args, request) {
+exports.deactivate = function(args, request) {
     var pluginNames = args.pluginNames.split(' ');
     var pluginsDeactivated = [], output = [];
 
@@ -387,7 +388,7 @@ exports.deactivate = function(env, args, request) {
         }
     });
 
-    changePluginInfo(env, request).then(function(data) {
+    changePluginInfo(request).then(function(data) {
         var deactivated = {};
         for (plugin in catalog.deactivatedPlugins) {
             if (catalog.deactivatedPlugins[plugin] === catalog.USER_DEACTIVATED) {
@@ -407,7 +408,7 @@ exports.deactivate = function(env, args, request) {
     request.async();
 };
 
-exports.activate = function(env, args, request) {
+exports.activate = function(args, request) {
     var pluginNames = args.pluginNames.split(' ');
     var pluginsActivated = [];
 
@@ -426,7 +427,7 @@ exports.activate = function(env, args, request) {
         }
     });
 
-    changePluginInfo(env, request).then(function(data) {
+    changePluginInfo(request).then(function(data) {
         var deactivated = {};
         for (plugin in catalog.deactivatedPlugins) {
         if (catalog.deactivatedPlugins[plugin] === catalog.USER_DEACTIVATED) {
@@ -447,7 +448,7 @@ exports.activate = function(env, args, request) {
 };
 
 // plugin info command
-exports.info = function(env, args, request) {
+exports.info = function(args, request) {
     if (!args.pluginName) {
         request.doneWithError('Please provide a plugin name.');
         return;
@@ -480,7 +481,7 @@ exports.info = function(env, args, request) {
 };
 
 // ep command
-exports.ep = function(env, args, request) {
+exports.ep = function(args, request) {
     var output = '';
     if (args.ep) {
         var ep = catalog.getExtensionPoint(args.ep);
@@ -497,7 +498,7 @@ exports.ep = function(env, args, request) {
             output += '<h3>Parameters:</h3>';
             output += '<table class="params"><tbody>';
             ep.params.forEach(function(param) {
-                output += '<td><th>' + param.name
+                output += '<td><th>' + param.name;
                 if (param.required) {
                     output += ' (required)';
                 }
