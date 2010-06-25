@@ -11,6 +11,13 @@ Important Changes
 There has been a major plugin API change between 0.8 and 0.9. Please
 see the "upgrade notes" later in this file.
 
+Deprecations
+------------
+
+In order to support themability across Bespin, future versions will only
+support the use of LESS files within plugins and dryice will no longer
+automatically process CSS files.
+
 Known Issues
 ------------
 
@@ -33,6 +40,11 @@ Features
   doing so, settings and themes are shared between the Bespin editors.
 * Supports ctags-based code completion. This feature will be filled out,
   documented and made easier with future releases.
+
+Changes
+-------
+* There is now only one "Bespin Embedded" package which combines the features
+  of the earlier "Drop In" and "Customizable" packages.
 
 Fixes
 -----

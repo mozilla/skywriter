@@ -85,11 +85,6 @@ options(
         dest_dir=path("external") / "compiler",
         download_url="http://closure-compiler.googlecode.com/files/compiler-latest.zip",
         download_location=path("external") / "compiler-latest.zip"
-    ),
-    fetch_css_compiler=Bunch(
-        dest_dir = path("external") / "yui_compressor",
-        download_url="http://yuilibrary.com/downloads/yuicompressor/yuicompressor-2.4.2.zip",
-        download_location=path("external") / "yui_compressor.zip"
     )
 )
 
@@ -421,13 +416,12 @@ def dist(options):
     sdist = path("dist") / ("dryice-%s.tar.gz" % (options.version.number))
     sdist.copy(output_dir / "libs")
     
-    yui_compressor = path("external/yui_compressor/build/yuicompressor-2.4.2.jar")
     closure_compiler = options.fetch_compiler.dest_dir / "compiler.jar"
     
     replaced_lines = update_javascript_version()
     try:
-        info(sh('dryice -j%s -c%s production.json' % 
-            (closure_compiler, yui_compressor), 
+        info(sh('dryice -j%s production.json' % 
+            (closure_compiler,), 
             capture=True))
     finally:
         restore_javascript_version(replaced_lines)
@@ -457,37 +451,30 @@ def build_docs(options):
     
 
 @task
-@needs(['build_docs', 'fetch_compiler', 'fetch_css_compiler'])
+@needs(['build_docs', 'fetch_compiler'])
 def release_embed(options):
     builddir = options.builddir
     if not builddir.exists():
         builddir.mkdir()
     
-    yui_compressor = path("external/yui_compressor/build/yuicompressor-2.4.2.jar")
     closure_compiler = options.fetch_compiler.dest_dir / "compiler.jar"
     
     version = options.version.number
-    outputdir = builddir / ("BespinEmbedded-DropIn-%s" 
-        % (version))
     
-    info("Building DropIn using dryice")
     replaced_lines = update_javascript_version()
     try:
-        info(sh('dryice -j%s -c%s -Doutput_dir=\\"%s\\" dropin.json' % 
-            (closure_compiler, yui_compressor, outputdir), 
-            capture=True, ignore_error=True))
-        
-        path("LICENSE.txt").copy(outputdir / "LICENSE.txt")
-        path("embedded/README-DropIn.txt").copy(outputdir / "README.txt")
-        (builddir / "docs").copytree(outputdir / "docs")
-        sh("tar czf BespinEmbedded-DropIn-%s.tar.gz BespinEmbedded-DropIn-%s" % \
-            (version, version), cwd="tmp")
-    
-        outputdir = builddir / ("BespinEmbedded-Customizable-%s" % (version))
+        outputdir = builddir / ("BespinEmbedded-%s" % (version))
         info("Building Customizable package")
         if outputdir.exists():
             outputdir.rmtree()
         outputdir.mkdir()
+        
+        builtdir = outputdir / "prebuilt"
+        info("Compiling prebuilt Bespin")
+        info(sh('dryice -j%s -Doutput_dir=\\"%s\\" dropin.json' % 
+            (closure_compiler, builtdir), 
+            capture=True, ignore_error=True))
+        
         path("LICENSE.txt").copy(outputdir / "LICENSE.txt")
         path("embedded/README-Customizable.txt").copy(outputdir / "README.txt")
         (builddir / "docs").copytree(outputdir / "docs")
@@ -518,10 +505,9 @@ def release_embed(options):
     compressors_dir = outputdir / "compressors"
     compressors_dir.mkdir()
     
-    yui_compressor.copy(compressors_dir / "yuicompressor.jar")
     closure_compiler.copy(compressors_dir / "compiler.jar")
     
-    sh("tar czf BespinEmbedded-Customizable-%s.tar.gz BespinEmbedded-Customizable-%s" % \
+    sh("tar czf BespinEmbedded-%s.tar.gz BespinEmbedded-%s" % \
         (version, version), cwd="tmp")
     
 def _fetchfile(name, dest_dir, download_location, download_url):
@@ -555,13 +541,6 @@ def _fetchfile(name, dest_dir, download_location, download_url):
                 open(dest_dir / outname, "wb").write(zf.read(name))
     
     
-@task
-def fetch_css_compiler(options):
-    """Fetches the YUI Compressor used to compress CSS files."""
-    _fetchfile("YUI Compressor", options.fetch_css_compiler.dest_dir, options.fetch_css_compiler.download_location,
-        options.fetch_css_compiler.download_url)
-
-
 @task
 def fetch_compiler(options):
     """Fetches the Closure Compiler used to compress builds."""

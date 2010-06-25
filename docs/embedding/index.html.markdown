@@ -4,35 +4,6 @@ title: Bespin Embedded Guide
 subtitle: Introduction
 ---
 
-Important Note
-==============
-
-The current Bespin Embedded release is a *preview release*, and the API has
-not yet been finalized. Changes from release-to-release are still possible
-at this stage, and will be noted in the release notes for each release.
-
-The Two Flavors of Bespin Embedded
-==================================
-
-Bespin is designed to scale up from simple text area replacement to a
-full-blown, powerful editing environment. This is accomplished through
-plugins. The Bespin Embedded package comes in two flavors:
-
-* Drop In
-* Customizable
-
-With the Drop In flavor, you get a few files that you can
-include on your server simply. You don't need anything else to use it.
-
-With the Customizable flavor, you are able to tailor which plugins are
-installed for use with your Bespin.
-
-The instructions on this page tell you how to deploy Bespin on your site, and
-apply regardless of which flavor of Bespin Embedded you're using. If you are
-using the Customizable flavor, you can take a look at the
-[building instructions](building.html) for information on how to change
-what is built into your Bespin.
-
 Compressed vs. Uncompressed
 ===========================
 
@@ -58,19 +29,19 @@ Level 1: Upgrade an element
 The easiest thing to do to get Bespin working on your website is to simply
 include the Bespin script in your page, and mark the elements that you wish to
 use with Bespin with the `class="bespin` attribute. Download the
-Bespin Embedded release and put these two files on your web server:
-
-* BespinEmbedded.js
-* BespinEmbedded.css
+Bespin Embedded release and put the files from the "prebuilt"
+directory on your web server.
 
 To use Bespin on your page, you would then add lines like the following to
 the &lt;head&gt; element on your page:
 
     :::html
-    <link href="/path/to/BespinEmbedded.css" rel="stylesheet" 
-      type="text/css">
+    <link id="bespin_base" href="/path/to"/>
     <script src="/path/to/BespinEmbedded.js"></script>
-    
+
+The bespin\_base link tag is important to tell Bespin where to find
+other resources (such as the stylesheets, plugins, etc.)
+
 Then, elsewhere on your page, you can transform an element (such as a
 &lt;div&gt; or &lt;textarea&gt;) into a Bespin editor:
 
@@ -105,6 +76,7 @@ Bespin' option. In this case just inserting `class="bespin"` after page load
 won't work, and you'll need to tell Bespin to use an element:
 
     :::html
+    <link id="bespin_base" href="/path/to"/>
     <script src="/path/to/BespinEmbedded.js"><script>
     <script>
         var node = document.getElementById("edit");
