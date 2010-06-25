@@ -19,11 +19,6 @@
                     "description": "Holds the states and all the informations about the keymapping. See docs: pluginguide/keymapping"
                 }
             ]
-        },
-        {
-            "ep": "settingChanged",
-            "key": "customKeymapping",
-            "pointer": "keyboard#keyboardManager._customKeymappingChanged"
         }
     ]
 }

@@ -390,6 +390,7 @@ util.mixin(KeyboardManager.prototype, {
         for (state in ckc.states) {
             this._buildBindingsRegex(ckc.states[state]);
         }
+        ckc._convertedRegExp = true;
     }
 });
 
@@ -418,3 +419,9 @@ exports.flagsMatch = function(predicates, flags) {
  * The global exported KeyboardManager
  */
 exports.keyboardManager = new KeyboardManager();
+
+catalog.registerExtension('settingChange', {
+    match: "customKeymapping",
+    pointer: exports.keyboardManager._customKeymappingChanged
+                                        .bind(exports.keyboardManager)
+});
