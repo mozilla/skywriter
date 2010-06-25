@@ -3,7 +3,7 @@ layout: default
 title: Bespin 0.8 ("Cheviot") Release Notes
 ---
 
-[Up](index.html) - Next Release - [Previous Release](notes073.html)
+[Up](index.html) - [Next Release](notes09.html) - [Previous Release](notes073.html)
 
 Important Changes
 -----------------

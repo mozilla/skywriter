@@ -42,7 +42,7 @@ import paver.virtual
 
 setup(
     name="dryice",
-    version="0.8.0",
+    version="0.9a1",
     packages=["dryice"],
     entry_points="""
 [console_scripts]
@@ -52,8 +52,8 @@ dryice=dryice.tool:main
 
 options(
     version=Bunch(
-        number="0.8.0",
-        name="Cheviot",
+        number="0.9a1",
+        name="Edison",
         api="4"
     ),
     virtualenv=Bunch(
