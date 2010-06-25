@@ -172,7 +172,7 @@ exports.Menu.prototype.addItems = function(items) {
 
             this._itemActions[i] = function(ev) {
                 var str = this._prefix + this._getFullName(item);
-                this.input.env.commandLine.setInput(str);
+                env.commandLine.setInput(str);
             }.bind(this);
 
             if (i < accelerators.length) {
@@ -189,7 +189,7 @@ exports.Menu.prototype.addItems = function(items) {
 
             link.addEventListener('mousedown', function(ev) {
                 var str = this._prefix + this._getFullName(item);
-                this.input.env.commandLine.setInput(str);
+                env.commandLine.setInput(str);
                 // Prevent the mousedown event. Otherwise the focused commandLine
                 // is blured.
                 ev.preventDefault();
