@@ -218,7 +218,7 @@ WorkerSupervisor.prototype = {
         workerManager.add(this);
 
         this.started();
-    },
+    }
 };
 
 function workerRestartCommand(args, req) {
