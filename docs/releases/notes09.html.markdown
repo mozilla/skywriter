@@ -51,6 +51,10 @@ Fixes
 * Corrected a problem with the customKeymappings setting
 * Bespin Embedded and the command line now work with XHTML (thanks to satyr,
   bugs 573721 and 573932)
+* cmd-L and cmd-F (ctrl- on Windows/Linux) were broken in Embedded builds
+  because they required the command line. They have been moved to a separate
+  (editing\_commands) plugin so that the keys are no longer bound at all
+  in Embedded builds. (bug 547058)
 
 
 Upgrade Notes

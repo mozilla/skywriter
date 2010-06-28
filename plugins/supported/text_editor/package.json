@@ -105,21 +105,6 @@
         },
         {
             "ep": "command",
-            "name": "find",
-            "key": "ctrl_f",
-            "params":
-            [
-                {
-                    "name": "value",
-                    "type": "text",
-                    "description": "string to search for"
-                }
-            ],
-            "description": "Search for text within this buffer",
-            "pointer": "commands/editor#findCommand"
-        },
-        {
-            "ep": "command",
             "name": "findnext",
             "key": "ctrl_g",
             "description": "Repeat the last search (forward)",
@@ -353,21 +338,6 @@
             ],
             "description": "Convert spaces to tabs.",
             "pointer": "commands/editor#entabCommand"
-        },
-        {
-            "ep": "command",
-            "name": "goto",
-            "key": "ctrl_l",
-            "params":
-            [
-                {
-                    "name": "line",
-                    "type": "text",
-                    "description": "add the line number to move to in the file"
-                }
-            ],
-            "description": "move it! make the editor head to a line number.",
-            "pointer": "commands/editor#gotoCommand"
         },
         {
             "ep": "command",

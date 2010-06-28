@@ -39,33 +39,6 @@ var catalog = require('bespin:plugins').catalog;
 var settings = require('settings').settings;
 var env = require('environment').env;
 
-/**
- * 'find' command
- */
-exports.findCommand = function(args, request) {
-    if (!('value' in args)) {
-        env.commandLine.setInput('find ');
-        return;
-    }
-
-    var view = env.view, search = view.editor.searchController;
-    var sel = view.getSelectedRange();
-    var output = '';
-
-    search.setSearchText(args.value, false);
-
-    var match = search.findNext(sel.end, true);
-    if (match) {
-        view.setSelection(match, true);
-        view.focus();
-    } else {
-        output += '<i>No matches found</i><br>';
-    }
-
-    output += 'Searching for "' + args.value + '"';
-    request.done(output);
-};
-
 exports.findNextCommand = function(args, request) {
     var view = env.view, search = view.editor.searchController;
     var sel = view.getSelectedRange();
@@ -84,20 +57,6 @@ exports.findPrevCommand = function(args, request) {
         view.setSelection(match, true);
         view.focus();
     }
-};
-
-/**
- * Moves the cursor to the specified line.
- */
-exports.gotoCommand = function(args, request) {
-    if (!('line' in args)) {
-        env.commandLine.setInput('goto ');
-        return;
-    }
-
-    var view = env.view;
-    view.moveCursorTo({ row: args.line - 1, col: 0 });
-    view.focus();
 };
 
 /**
