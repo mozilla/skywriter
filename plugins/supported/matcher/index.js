@@ -64,107 +64,123 @@ exports.Matcher = function(query) {
     this._maxScore = null;
 };
 
-/**
- * Add a single item to be considered by this matcher
- */
-exports.Matcher.prototype.addItem = function(item) {
-    this.addItems([ item ]);
-};
+Object.defineProperties(exports.Matcher.prototype, {
+    query: {
+        get: function() {
+            return this._query;
+        },
 
-/**
- * Add multiple items to be considered by this matcher.
- */
-exports.Matcher.prototype.addItems = function(items) {
-    var addedScoredItems = [];
-    var maxScoreChanged = false;
+        set: function(value) {
+            this._query = value;
+            var addedItems = [];
+            this._scoredItems.forEach(function(scoredItem) {
+                scoredItem.score = this.score(this._query, scoredItem.item);
+                if (scoredItem.score > 0) {
+                    addedItems.push(scoredItem.item);
+                }
+            }, this);
 
-    items.forEach(function(item) {
-        var scoredItem = {
-            score: this.score(this._query, item),
-            item: item
-        };
-        if (scoredItem.score > 0) {
-            addedScoredItems.push(scoredItem);
+            this._callListeners('itemsCleared');
+            this._callListeners('itemsAdded', addedItems);
         }
-        if (scoredItem.score > this._maxScore) {
-            this._maxScore = scoredItem.score;
-            maxScoreChanged = true;
-        }
-        this._scoredItems.push(scoredItem);
-    }, this);
+    },
 
-    var itemsRemoved = false;
-    if (maxScoreChanged) {
-        // The max score has changed - this could mean that existing
-        // entries are no longer relevant. Check
-        this._scoredItems.forEach(function(scoredItem) {
-            if (scoredItem.score + excludeScoreMargin < this._maxScore) {
-                itemsRemoved = true;
+    /**
+     * Add a single item to be considered by this matcher
+     */
+    addItem: {
+        value: function(item) {
+            this.addItems([ item ]);
+        }
+    },
+
+    /**
+     * Add multiple items to be considered by this matcher.
+     */
+    addItems: {
+        value: function(items) {
+            var addedScoredItems = [];
+            var maxScoreChanged = false;
+
+            items.forEach(function(item) {
+                var scoredItem = {
+                    score: this.score(this._query, item),
+                    item: item
+                };
+                if (scoredItem.score > 0) {
+                    addedScoredItems.push(scoredItem);
+                }
+                if (scoredItem.score > this._maxScore) {
+                    this._maxScore = scoredItem.score;
+                    maxScoreChanged = true;
+                }
+                this._scoredItems.push(scoredItem);
+            }, this);
+
+            var itemsRemoved = false;
+            if (maxScoreChanged) {
+                // The max score has changed - this could mean that existing
+                // entries are no longer relevant. Check
+                this._scoredItems.forEach(function(scoredItem) {
+                    if (scoredItem.score + excludeScoreMargin < this._maxScore) {
+                        itemsRemoved = true;
+                    }
+                });
             }
-        });
-    }
 
-    // TODO: There is a bug here in that listeners will not know how to
-    // slot these matches into the previously notified matches (we're not
-    // passing the score on).
-    var sorter = function(a, b) {
-        return b.score - a.score;
-    };
-    this._scoredItems.sort(sorter);
-    addedScoredItems.sort(sorter);
+            // TODO: There is a bug here in that listeners will not know how to
+            // slot these matches into the previously notified matches (we're not
+            // passing the score on).
+            var sorter = function(a, b) {
+                return b.score - a.score;
+            };
+            this._scoredItems.sort(sorter);
+            addedScoredItems.sort(sorter);
 
-    var scoredItems;
-    if (itemsRemoved) {
-        this._callListeners('itemsCleared');
-        scoredItems = this._scoredItems;
-    } else {
-        scoredItems = addedScoredItems;
-    }
+            var scoredItems;
+            if (itemsRemoved) {
+                this._callListeners('itemsCleared');
+                scoredItems = this._scoredItems;
+            } else {
+                scoredItems = addedScoredItems;
+            }
 
-    var addedItems = [];
-    scoredItems.forEach(function(scoredItem) {
-        if (scoredItem.score + excludeScoreMargin > this._maxScore) {
-            addedItems.push(scoredItem.item);
+            var addedItems = [];
+            scoredItems.forEach(function(scoredItem) {
+                if (scoredItem.score + excludeScoreMargin > this._maxScore) {
+                    addedItems.push(scoredItem.item);
+                }
+            }.bind(this));
+            this._callListeners('itemsAdded', addedItems);
         }
-    }.bind(this));
-    this._callListeners('itemsAdded', addedItems);
-};
+    },
 
-exports.Matcher.prototype.addListener = function(listener) {
-    this._listeners.push(listener);
+    addListener: {
+        value: function(listener) {
+            this._listeners.push(listener);
 
-    var items = [];
-    this._scoredItems.forEach(function(scoredItem) {
-        if (scoredItem.score > 0) {
-            items.push(scoredItem.item);
+            var items = [];
+            this._scoredItems.forEach(function(scoredItem) {
+                if (scoredItem.score > 0) {
+                    items.push(scoredItem.item);
+                }
+            }, this);
+
+            if (typeof listener.itemsAdded === 'function') {
+                listener.itemsAdded(items);
+            }
         }
-    }, this);
+    },
 
-    if (typeof listener.itemsAdded === 'function') {
-        listener.itemsAdded(items);
+    _callListeners: {
+        value: function() {
+            var args = Array.prototype.slice.call(arguments);
+            var method = args.shift();
+            this._listeners.forEach(function(listener) {
+                if (typeof listener[method] === 'function') {
+                    listener[method].apply(null, args);
+                }
+            });
+        }
     }
-};
-
-exports.Matcher.prototype.__defineSetter__('query', function(value) {
-    this._query = value;
-    var addedItems = [];
-    this._scoredItems.forEach(function(scoredItem) {
-        scoredItem.score = this.score(this._query, scoredItem.item);
-        if (scoredItem.score > 0) {
-            addedItems.push(scoredItem.item);
-        }
-    }, this);
-
-    this._callListeners('itemsCleared');
-    this._callListeners('itemsAdded', addedItems);
 });
-
-exports.Matcher.prototype._callListeners = function() {
-    var args = Array.prototype.slice.call(arguments);
-    var method = args.shift();
-    this._listeners.forEach(function(listener) {
-        if (typeof listener[method] === 'function') {
-            listener[method].apply(null, args);
-        }
-    });
-};
