@@ -379,7 +379,7 @@ exports.EditorView.prototype = {
     _fontSettingChanged: function() {
         var fontSize = settings.get('fontsize');
         var fontFace = settings.get('fontface');
-        this._font = fontsize + 'px ' + fontface;
+        this._font = fontSize + 'px ' + fontFace;
 
         // Recompute the layouts.
         this.layoutManager._recalculateMaximumWidth();
