@@ -82,7 +82,14 @@ This will start the Bespin server. You can now access the Bespin editor at http:
 
 Have fun!
 
-## Contributing to Bespin ##
+## Coding Conventions ##
 
-For details see:
-:[[Labs/Bespin/Contributing]]
+JavaScript code should follow the [Crockford Code Conventions](http://javascript.crockford.com/code.html). With a few minor modifications:
+
+* Namespaces: Crockford does not mention namespaces, probably because owning the global namespace allows you to use as much as you want. Our code is likely to be used in many different places so we should not pollute the global namespace needlessly. Our code is organized in [http://commonjs.org/specs/modules/1.0.html CommonJS] modules, so every variable should either be a "var" or attached to the "exports" object.
+
+* _private: We agree that prefixing variables with an underscore provides no actual protection, however we think of it as a warning. "Use of this member is unsupported and likely to break without warning in future revisions". In early versions of Bespin where we are experimenting a lot, allowing 3rd parties to join in the experiment is valuable. As Bespin becomes more stable and finalized, we might expect underscored members to be replaced with closure scoped variables.
+
+* Documentation: Bespin JavaScript is documented with [JSDoc](http://code.google.com/p/jsdoc-toolkit/w/list), which in practice means prefixing functions with a set of comments that use various tags.
+
+* var first: The standard recommends putting var statements as the first statements in the function body. Crockford doesn't always follow this advice and we reserve the right to follow this lead ;-)
