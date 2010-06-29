@@ -7,7 +7,7 @@ subtitle: Using and Extending Bespin
 [The Glossary](glossary.html) will clear up any questions you have about terminology used on the project.
 
 Find out what's new, in the
-[Bespin 0.8 Release Notes](releases/notes08.html).
+[Bespin 0.9 Release Notes](releases/notes09.html).
 
 User's Guide
 ------------
