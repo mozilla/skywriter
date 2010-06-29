@@ -55,7 +55,8 @@ Fixes
   because they required the command line. They have been moved to a separate
   (editing\_commands) plugin so that the keys are no longer bound at all
   in Embedded builds. (bug 547058)
-
+* fontsize setting was not working (bug 575375, thanks to Mark Spear for the 
+  patch)
 
 Upgrade Notes
 -------------
