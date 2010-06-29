@@ -1,8 +1,8 @@
 
 <div class="cmd_line" save="${cliInputView.element}"
-    onfocus="${cliInputView._focusCheck [useCapture:true]}"
-    onblur="${cliInputView._focusCheck [useCapture:true]}"
-    onclick="${cliInputView.focus [useCapture:true]}">
+    onfocus="${cliInputView._focusCheck}" capturefocus
+    onblur="${cliInputView._focusCheck}" captureblur
+    onclick="${cliInputView.focus}" captureclick>
 
   <!-- The output area that changes height -->
   <div class="cmd_tog stack_children" save="${cliInputView._tog}">
