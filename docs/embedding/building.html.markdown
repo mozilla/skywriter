@@ -159,14 +159,13 @@ Run "dryice -h" for up-to-date usage information.
 Generally speaking, using dryice is just a matter of pointing the tool at
 your manifest file, which describes what needs to be built.
 
-After the JavaScript and CSS are generated, you will likely want to compress 
+After the JavaScript files are generated, you will likely want to compress 
 those files for faster loading over the internet. dryice can do this for
-you, using the Closure Compiler for the JavaScript and YUI Compressor for
-the CSS. These are both included in the Customizable package in the
-"compressors" directory. To activate dryice compression, run a command like
-this one:
+you, using the Closure Compiler for the JavaScript. Thise is included in the
+in the "compressors" directory. To activate dryice compression, run a 
+command like this one:
 
-    dryice -j compressors/compiler.jar -c compressors/yuicompressor.jar MANIFEST.JSON
+    dryice -j compressors/compiler.jar MANIFEST.JSON
 
 If you're testing out your builds, leaving the compression step off is
 a good idea, because it takes far longer to run the compressors than it does
