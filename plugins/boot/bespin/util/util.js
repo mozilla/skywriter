@@ -574,7 +574,7 @@ exports.clone = function(object, deep) {
         return reply;
     }
 
-    if (object.clone && typeof(object.clone) === 'function') {
+    if (object && typeof(object.clone) === 'function') {
         return object.clone();
     }
 
