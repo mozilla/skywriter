@@ -9,12 +9,17 @@ subtitle: Using and Extending Bespin
 Find out what's new, in the
 [Bespin 0.9 Release Notes](releases/notes09.html).
 
-User's Guide
-------------
+Embedder's Guide
+----------------
 
-* *Important* [Bespin Server Roadmap](userguide/server_roadmap.html)
-* [Introduction](userguide/index.html)
-* [Version Control Systems](userguide/vcs.html)
+* [Introduction](embedding/index.html)
+* [Creating a custom, embedded Bespin](embedding/building.html)
+* [Application Configuration (Gluing Bespin Together)](embedding/appconfig.html)
+
+Tutorials
+---------
+
+* [Manipulating Text through Commands](tutorials/commands.html)
 
 Plugin Author Guide
 -------------------
@@ -28,13 +33,12 @@ Plugin Author Guide
 * [Syntax Highlighting](pluginguide/syntax.html)
 * [Keymapping](pluginguide/keymapping.html)
 
-Embedder's Guide
-----------------
+User's Guide
+------------
 
-* [Introduction](embedding/index.html)
-* [Creating a custom, embedded Bespin](embedding/building.html)
-* [Application Configuration (Gluing Bespin Together)](embedding/appconfig.html)
-
+* *Important* [Bespin Server Roadmap](userguide/server_roadmap.html)
+* [Introduction](userguide/index.html)
+* [Version Control Systems](userguide/vcs.html)
 
 Developer's Guide
 -----------------
