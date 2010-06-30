@@ -123,8 +123,12 @@ exports.loginController.prototype = {
                 settings.setPersister(new ServerPersister());
             }, function(error) {
                 if (!error.xhr || error.xhr.status != 404) {
-                    displayError('Register User Plugins',
-                            'Failed to load user\'s pluginInfo.json: ' + error.message);
+                    catalog.getObject('notifier').notify({
+                        plugin: 'userident',
+                        notification: 'loginerror',
+                        body: 'Failed to load your pluginInfo.json metadata ' +
+                            'file: ' + error.message
+                    });
                 }
                 settings.setPersister(new ServerPersister);
             });
@@ -458,8 +462,11 @@ exports.logout = function() {
         // TODO: Tell appconfig to destroy everything and relunch the app.
         window.location.reload();
     }, function(error) {
-        displayError('Unable to log out',
-            'There was a problem logging out: ' + error.message);
+        catalog.getObject('notifier').notify({
+            plugin: 'userident',
+            notification: 'loginerror',
+            body: 'Unable to log out: ' + error.message
+        });
     });
 };
 
