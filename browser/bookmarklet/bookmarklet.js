@@ -1,10 +1,10 @@
-a = (function() {
+(function() {
     /** --------------------------------------------------------------------
      * Load Bespin only when it's not already on the page.
      */
     if (typeof bespin == 'undefined') {
         /** Adjust the following variables as needed **/
-        var base = 'http://foo.com/bar/';
+        var base = 'http://localhost:8080/';
         var proxyFile = 'proxy.html';
         var baseConfig = {
             settings: {
@@ -170,8 +170,4 @@ a = (function() {
         };
         head.appendChild(l);
     }
-});
-
-a();
-
-eval("document.body.innerHTML += \"<a href=\\\"javascript:(" + a.toString().replace(/\n\s*/g,'') + ")()\\\">Bespin</a>\"");
+})();
