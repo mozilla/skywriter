@@ -81,7 +81,6 @@
                 url: url
             });
             workerList[this.id] = this;
-            console.log('newWorker', url, this.id);
         };
 
         WorkerProxy.prototype.postMessage = function(msg) {

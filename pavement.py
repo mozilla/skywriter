@@ -589,3 +589,30 @@ def tags(options):
         args.append(file)
     sh(" ".join(args))
 
+@task
+@needs('fetch_compiler')
+def bookmarklet(options):
+    """Generates the bookmarklet site."""
+    outputdir = options.builddir / "bookmarklet"
+    if outputdir.exists():
+        outputdir.rmtree()
+    
+    outputdir.mkdir()
+    closure_compiler = options.fetch_compiler.dest_dir / "compiler.jar"
+    
+    srcdir = path("browser/bookmarklet")
+    (srcdir / "index.html").copy(outputdir)
+    (srcdir / "bespin-logo.png").copy(outputdir)
+    (srcdir / "bookmarklet.js").copy(outputdir)
+    (srcdir / "proxy.html").copy(outputdir)
+    
+    for f in ["index.html", "bookmarklet.js"]:
+        f = outputdir / f
+        data = f.text()
+        data = data.replace("http://localhost:8080", "https://bespin.mozillalabs.com/bookmarklet")
+        f.write_text(data)
+    
+    info(sh('dryice -j%s browser/bookmarklet/manifest.json' % 
+        (closure_compiler,), 
+        capture=True))
+    

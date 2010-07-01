@@ -15,7 +15,7 @@
             "theme": "white"
         }
     },
-    "output_dir": "tmp/bookmarklet",
+    "output_dir": "tmp/bookmarklet/bespin",
     "search_path": [
         "browser/bookmarklet"
     ]
