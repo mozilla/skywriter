@@ -144,28 +144,32 @@
 
             /** Called when Bespin has finished loading. **/
             window.onBespinLoad = function() {
-                alert('Bespin is loaded! Click 4 times on an textarea to replace it with a Bespin editor.');
-                /**
-                 * Listen to the click event. If the user clicked four times
-                 * on an textarea, then replace it with a Bespin editor.
-                 */
-                document.addEventListener('click', function(evt) {
-                    if (evt.target.type == 'textarea' && evt.detail == 4) {
-                        var supports = ['plain', 'js', 'html', 'css'];
-                        var selSyntax = prompt('Choose a language (' + supports.join(', ') + '): ', 'plain');
-
-                        if (!selSyntax || supports.indexOf(selSyntax) == -1) {
-                            alert('Do not support the syntax ' + selSyntax + ' - try again!');
-                            return;
-                        }
+                var $ = bespin.tiki.require("jquery").$;
+                var currentTextArea = null;
+                var bespinButton = document.createElement("img");
+                bespinButton.setAttribute('style', 'display:none; position:absolute');
+                bespinButton.setAttribute('src', base + 'bespin-logo.png');
+                document.body.appendChild(bespinButton);
+                
+                $(bespinButton).click(function(evt) {
+                    if (currentTextArea) {
+                        $(bespinButton).hide();
                         var util = bespin.tiki.require('bespin:util/util');
-                        bespin.useBespin(evt.target, util.mixin(
+                        bespin.useBespin(currentTextArea, util.mixin(
                             util.clone(baseConfig, true), {
-                                syntax: selSyntax
+                                stealFocus: true
                             })
                         );
                     }
-                }, false);
+                });
+                
+                $('textarea').mouseenter(function(evt) {
+                    currentTextArea = evt.target;
+                    var pos = $(evt.target).offset();
+                    var width = $(evt.target).width();
+                    $(bespinButton).css({top: pos.top + 'px', 
+                                         left: pos.left + width + 'px'}).show();
+                });
             };
         };
         head.appendChild(l);
