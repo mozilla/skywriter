@@ -1,0 +1,22 @@
+{
+    "plugins": ["embedded", "js_syntax", "stylesheet", "html", "whitetheme",
+                "bookmarkletui", "templater"],
+    "config": {
+        "objects": {
+            "bookmarkletbar": {}
+        },
+        "gui": {
+            "south": {
+                "component": "bookmarkletbar"
+            }
+        },
+        "settings": {
+            "tabstop": 4,
+            "theme": "white"
+        }
+    },
+    "output_dir": "tmp/bookmarklet",
+    "search_path": [
+        "browser/bookmarklet"
+    ]
+}

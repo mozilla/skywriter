@@ -1,0 +1,16 @@
+<div class="bookmarkletbar" save="${view.element}">
+    <div>
+        <select save="${view.syntaxSelector}">
+            <option value="">None</option>
+            <option value="js">JavaScript</option>
+            <option value="html">HTML</option>
+            <option value="css">CSS</option>
+        </select>
+    </div>
+    <div>
+        <select save="${view.themeSelector}">
+            <option value="white">White Theme</option>
+            <option value="screen">Bespin Theme</option>
+        </select>
+    </div>
+</div>
