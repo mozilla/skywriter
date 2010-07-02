@@ -329,15 +329,20 @@ var generateGUI = function(catalog, config, pr) {
 
     var centerContainer = document.createElement('div');
     centerContainer.setAttribute('class', 'center-container');
-    container.appendChild(centerContainer);
+    var centerAdded = false;
 
     var element = config.element || document.body;
     // Add the 'bespin' class to the element in case it doesn't have this already.
     util.addClass(element, 'bespin');
     element.appendChild(container);
-
-    for (var place in config.gui) {
+    
+    // this shouldn't be necessary, but it looks like Firefox has an issue
+    // with the box-ordinal-group CSS property
+    ['north', 'west', 'center', 'east', 'south'].forEach(function(place) {
         var descriptor = config.gui[place];
+        if (!descriptor) {
+            return;
+        }
 
         var component = catalog.getObject(descriptor.component);
         if (!component) {
@@ -360,6 +365,10 @@ var generateGUI = function(catalog, config, pr) {
         $(element).addClass(place);
 
         if (place == 'west' || place == 'east' || place == 'center') {
+            if (!centerAdded) {
+                container.appendChild(centerContainer);
+                centerAdded = true;
+            }
             centerContainer.appendChild(element);
         } else {
             container.appendChild(element);
@@ -369,7 +378,7 @@ var generateGUI = function(catalog, config, pr) {
         if (component.elementAppended) {
             component.elementAppended();
         }
-    }
+    });
 
     pr.resolve();
 };
