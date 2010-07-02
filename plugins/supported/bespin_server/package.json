@@ -20,12 +20,6 @@
     	    "pointer": "filesource#BespinFileSource"
     	},
         {
-            "ep": "appcomponent",
-            "description": "The default server file source",
-            "name": "file_source",
-            "pointer": "filesource#BespinFileSource"
-        },
-        {
             "ep": "extensionpoint",
             "description": "Message target id to dispatch messages from the server",
             "name": "msgtargetid",

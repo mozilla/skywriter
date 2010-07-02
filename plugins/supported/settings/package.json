@@ -7,12 +7,6 @@
     "provides":
     [
         {
-            "ep": "appcomponent",
-            "name": "settings",
-            "description": "Storage for the customizable Bespin settings",
-            "pointer": "index#settings"
-        },
-        {
             "ep": "extensionpoint",
             "name": "setting",
             "description": "A setting is something that the application offers as a way to customize how it works",

@@ -145,11 +145,6 @@
             "pointer": "views/cli#CliInputView"
         },
         {
-            "ep": "appcomponent",
-            "name": "command_line",
-            "pointer": "views/cli#CliInputView"
-        },
-        {
             "ep": "setting",
             "name": "historyTimeMode",
             "description": "Display number|date|none next to each historical instruction",

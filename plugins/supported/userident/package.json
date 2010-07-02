@@ -25,12 +25,6 @@
             "url": "styles.less"
         },
         {
-            "ep": "appcomponent",
-            "description": "The login window",
-            "name": "login_controller",
-            "pointer": "#loginController"
-        },
-        {
             "ep": "command",
             "name": "logout",
             "description": "Logout of Bespin",

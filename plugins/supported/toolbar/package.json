@@ -19,11 +19,6 @@
             "url": [ "toolbar.less" ]
         },
         {
-            "ep": "appcomponent",
-            "name": "toolbar",
-            "pointer": "index#ToolbarView"
-        },
-        {
             "ep": "factory",
             "name": "toolbar",
             "action": "new",
