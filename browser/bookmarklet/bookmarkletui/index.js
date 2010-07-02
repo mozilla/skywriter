@@ -55,6 +55,11 @@ exports.BookmarkletBar = function() {
         settings.set('theme', newTheme);
         env.editor.focus = true;
     });
+    $(this.fontsizeSelector).change(function(evt) {
+        var newSize = $(evt.target).val();
+        settings.set('fontsize', parseInt(newSize, 10));
+        env.editor.focus = true;
+    });
 };
 
 Object.defineProperties(exports.BookmarkletBar.prototype, {

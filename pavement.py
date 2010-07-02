@@ -601,10 +601,14 @@ def bookmarklet(options):
     closure_compiler = options.fetch_compiler.dest_dir / "compiler.jar"
     
     srcdir = path("browser/bookmarklet")
-    (srcdir / "index.html").copy(outputdir)
-    (srcdir / "bespin-logo.png").copy(outputdir)
-    (srcdir / "bookmarklet.js").copy(outputdir)
-    (srcdir / "proxy.html").copy(outputdir)
+    
+    for f in srcdir.glob('*'):
+        if f.basename() in ["bespin", "manifest.json", "bookmarkletui"]:
+            continue
+        if f.isdir():
+            f.copytree(outputdir / f.basename())
+        else:
+            f.copy(outputdir)
     
     for f in ["index.html", "bookmarklet.js"]:
         f = outputdir / f
