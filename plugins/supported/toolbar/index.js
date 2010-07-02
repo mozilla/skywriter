@@ -41,7 +41,7 @@ var catalog = require('bespin:plugins').catalog;
 var discoveredNewToolbarItem = new Event();
 
 function ToolbarView() {
-    var elem = document.createElement("div");
+    var elem = document.createElement("menu");
     elem.setAttribute('class', "bespin-toolbar");
     elem.setAttribute('type', "toolbar");
     this.element = elem;
