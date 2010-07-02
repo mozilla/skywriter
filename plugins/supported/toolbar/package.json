@@ -1,0 +1,54 @@
+{
+    "description": "The standard Bespin toolbar",
+    "dependencies": {
+        "events": "0.0.0"
+    },
+    "provides": [
+        {
+            "ep": "extensionpoint",
+            "name": "toolbaritem",
+            "description": "Toolbar item views"
+        },
+        {
+            "ep": "extensionhandler",
+            "name": "toolbaritem",
+            "register": "index#discoveredNewToolbarItem"
+        },
+        {
+            "ep": "themestyles",
+            "url": [ "toolbar.less" ]
+        },
+        {
+            "ep": "appcomponent",
+            "name": "toolbar",
+            "pointer": "index#ToolbarView"
+        },
+        {
+            "ep": "factory",
+            "name": "toolbar",
+            "action": "new",
+            "pointer": "index#ToolbarView"
+        },
+        {
+            "ep": "toolbaritem",
+            "name": "logo",
+            "pointer": "items#Logo"
+        },
+        {
+            "ep": "toolbaritem",
+            "name": "openfileindicator",
+            "pointer": "items#OpenFileIndicator"
+        },
+        {
+            "ep": "toolbaritem",
+            "name": "save",
+            "pointer": "items#Save"
+        },
+        {
+            "ep": "toolbaritem",
+            "name": "positionindicator",
+            "pointer": "items#PositionIndicator"
+        }
+    ]
+}
+

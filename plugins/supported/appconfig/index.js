@@ -261,6 +261,9 @@ exports.normalizeConfig = function(catalog, config) {
         config.objects.commandLine = {
         };
     }
+    if (!config.objects.toolbar && catalog.plugins.toolbar) {
+        config.objects.toolbar = {};
+    }
 
     if (config.gui === undefined) {
         config.gui = {};
@@ -274,6 +277,10 @@ exports.normalizeConfig = function(catalog, config) {
         }
     }
 
+    if (!config.gui.north && config.objects.toolbar
+        && !alreadyRegistered.toolbar) {
+        config.gui.north = { component: "toolbar" };
+    }
     if (!config.gui.center && config.objects.editor
         && !alreadyRegistered.editor) {
         config.gui.center = { component: "editor" };
