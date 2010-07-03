@@ -22,9 +22,9 @@ In this tutorial, we assume that you're already familiar with using dryice and
 the basics of making plugins. We're also going to assume a directory structure
 like the one from the [commands tutorial](commands.html).
 
-By the end of this tutorial, we'll have something toolbar-like. We're not
-trying to create a fully-functional toolbar here, because the focus is
-on hooking in to Bespin's GUI.
+By the end of this tutorial, we'll have something that looks toolbar-like. 
+We're not trying to create a fully-functional toolbar here, because the 
+focus is on hooking in to Bespin's GUI.
 
 This tutorial should work with Bespin 0.9a1 or later. However, there
 is a **bug in Firefox 3.6.x that will cause the toolbar to not display
@@ -212,7 +212,7 @@ We'll change `index.js` to look like this:
 
     exports.ToolbarView = function() {
         var elem = document.createElement("menu");
-        elem.setAttribute('class', "bespin-toolbar");
+        elem.setAttribute('class', "tutorial-toolbar");
         elem.setAttribute('type', "toolbar");
         this.element = elem;
 
@@ -390,4 +390,73 @@ does it?
 
 Styling Your Plugins
 --------------------
+
+To make our toolbar look like a toolbar, we need to add some styles. In order
+to support themes properly, Bespin uses [LESS](http://lesscss.org), which is
+an extended CSS syntax.
+
+In the `tutorialtoolbar` directory, create a `resources` directory. In there,
+create a file called `toolbar.less`. We need to tell Bespin's theme manager
+about this file, so we need to add one more thing to the `provides` property
+in `package.json`:
+
+    {
+        "ep": "themestyles",
+        "url": [ "toolbar.less" ]
+    }
+
+`themestyles` extensions provide URLs (relative to the plugin's resources 
+directory) to the LESS files that this plugin needs to have loaded. The
+theme manager will automatically load these files as needed.
+
+And what's in this mysterious `toolbar.less` file?
+
+    .bespin {
+        .tutorial-toolbar {
+            display: block;
+            background-color: #000;
+            border-bottom: solid #424038 1px;
+            -moz-box-shadow: 0px 0px 3px 3px #000;
+            -webkit-box-shadow: 0px 0px 3px 3px #000;
+            color: #ffffff;
+            font-family: Helvetica, Arial;
+            width: 100%;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .tutorial-toolbar li {
+            display: inline;
+            padding: 0px 24px 0px 0px;
+        }
+    }
+
+This looks like fairly normal CSS, right? *Except* what's that `.bespin` doing
+surrounding those other rules? When LESS expands this out to standard CSS,
+the result would be something like this:
+
+    .bespin .tutorial-toolbar {
+    }
+    
+    .bespin .tutorial-toolbar li {
+    }
+
+So, the surrounding `.bespin` is a nice little shorthand, and it prevents CSS
+from leaking out onto the page. When you consider the use of Bespin Embedded
+on other sites, it's a good idea to ensure that all of our styles are scoped
+for use only within Bespin.
+
+With these styles in place, let's reload the page. Much nicer, eh?
+
+Wrapping Up
+-----------
+
+On the one hand, this tutorial didn't give us a *functioning* toolbar. It's all
+static text. On the other hand, look at everything we *did* cover:
+
+* multi-file plugin structure
+* creating a component that Bespin can display
+* the awesomeness that is CSS3's Flexible Box Model
+* configuring our component for display in Bespin
+* defining and using our own extension points
 
