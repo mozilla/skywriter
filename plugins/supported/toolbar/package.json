@@ -7,11 +7,18 @@
         {
             "ep": "extensionpoint",
             "name": "toolbaritem",
-            "description": "Toolbar item views"
-        },
-        {
-            "ep": "extensionhandler",
-            "name": "toolbaritem",
+            "description": "Toolbar item views",
+            "params": [
+                {
+                    "name": "name",
+                    "description": "name of this toolbar item",
+                    "type": "string"
+                },
+                {
+                    "name": "pointer",
+                    "description": "pointer to a component that can be instantiated with new and has an element defined on it."
+                }
+            ],
             "register": "index#discoveredNewToolbarItem"
         },
         {
