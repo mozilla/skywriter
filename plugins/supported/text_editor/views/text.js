@@ -187,10 +187,14 @@ util.mixin(exports.TextView.prototype, {
     },
 
     _drawLines: function(rect, context) {
-        var layoutManager = this.editor.layoutManager;
+        var editor = this.editor;
+        var layoutManager = editor.layoutManager;
         var textLines = layoutManager.textLines;
         var lineAscent = layoutManager.fontDimension.lineAscent;
-        var themeHighlighter = this.editor.themeData.highlighter
+
+        var themeData = editor.themeData;
+        var fgColors = themeData.highlighterFG;
+        var bgColors = themeData.highlighterBG;
 
         context.save();
         context.font = this.editor.font;
@@ -239,15 +243,24 @@ util.mixin(exports.TextView.prototype, {
                 var end = colorRange != null ? colorRange.end : endCol;
                 var tag = colorRange != null ? colorRange.tag : 'plain';
 
-                var color = themeHighlighter.hasOwnProperty(tag)
-                            ? themeHighlighter[tag]
-                            : 'red';
-                context.fillStyle = color;
-
                 var pos = { row: row, col: col };
                 var rect = layoutManager.characterRectForPosition(pos);
 
+                if (bgColors.hasOwnProperty(tag)) {
+                    var endPos = { row: row, col: end - 1 };
+                    var endRect = layoutManager.
+                        characterRectForPosition(endPos);
+
+                    var bg = bgColors[tag];
+                    context.fillStyle = bg;
+                    context.fillRect(rect.x, rect.y, endRect.x - rect.x +
+                        endRect.width, endRect.height);
+                }
+
+                var fg = fgColors.hasOwnProperty(tag) ? fgColors[tag] : 'red';
+
                 var snippet = characters.substring(col, end);
+                context.fillStyle = fg;
                 context.fillText(snippet, rect.x, rect.y + lineAscent);
 
                 if (DEBUG_TEXT_RANGES) {

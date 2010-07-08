@@ -435,7 +435,7 @@
         },
         {
             "ep": "themevariable",
-            "name": "highlighter",
+            "name": "highlighterFG",
             "defaultValue": {
                 "plain":      "#e6e6e6",
                 "comment":    "#666666",
@@ -444,7 +444,17 @@
                 "identifier": "#D841FF",
                 "keyword":    "#42A8ED",
                 "operator":   "#88BBFF",
-                "string":     "#039A0A"
+                "string":     "#039A0A",
+                "addition":   "#FFFFFF",
+                "deletion":   "#FFFFFF"
+            }
+        },
+        {
+            "ep": "themevariable",
+            "name": "highlighterBG",
+            "defaultValue": {
+                "addition": "#008000",
+                "deletion": "#800000"
             }
         },
         {

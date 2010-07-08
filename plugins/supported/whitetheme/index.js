@@ -184,7 +184,7 @@ exports.whiteTheme = function() {
             },
 
             // Variables for the syntax highlighter.
-            highlighter: {
+            highlighterFG: {
                 plain:     '#030303',
                 comment:   '#919191',
                 directive: '#999999',
@@ -192,8 +192,16 @@ exports.whiteTheme = function() {
                 identifier: '#A7379F',
                 keyword:    '#1414EF',
                 operator:   '#477ABE',
-                string:     '#017F19'
+                string:     '#017F19',
+                addition:   '#ffffff',
+                deletion:   '#ffffff'
             },
+
+            highlighterBG: {
+                plain:      'rgb(0, 0, 0, 0)",
+                addition:   '#008000',
+                deletion:   '#800000'
+            }
 
             // Variables for the scrollers.
             scroller: {

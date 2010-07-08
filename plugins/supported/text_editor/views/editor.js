@@ -86,7 +86,8 @@ function computeThemeData(themeManager) {
                 case 'gutter':
                 case 'editor':
                 case 'scroller':
-                case 'highlighter':
+                case 'highlighterFG':
+                case 'highlighterBG':
                     editorThemeData[provides[i].name] = value;
             }
         }
