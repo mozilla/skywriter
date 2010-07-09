@@ -50,6 +50,7 @@ We also need a dryice manifest so that we can see our plugin in action.
 Create a file called `toolbar.json` in the `bespintutorial` directory.
 Here's what we'll put in it to start with:
 
+    :::js
     {
         "output_dir": "../build",
         "plugins": ["embedded", "tutorialtoolbar"],
@@ -72,6 +73,7 @@ For a first step, we'll just toss a string up on the screen. In the
 `tutorialtoolbar` directory, create a new file called `index.js`.
 Here's how our toolbar component will start out:
 
+    :::js
     exports.ToolbarView = function() {
         var elem = document.createElement("div");
         elem.innerHTML = "<b>Toolbar!</b>";
@@ -87,6 +89,7 @@ that Bespin will put in place.
 The next step is telling the Bespin system about our new component.
 We do that in the `package.json` file, which will now look like this:
 
+    :::js
     {
         "provides": [
             {
@@ -111,6 +114,7 @@ one into the UI. This can be done either in the dryice manifest file or
 even at runtime when `useBespin` is called. We'll do it in the manifest
 file (`toolbar.json`). Here's the new manifest:
 
+    :::js
     {
         "output_dir": "../build",
         "plugins": ["embedded", "tutorialtoolbar"],
@@ -179,6 +183,7 @@ that is itself pluggable. Plus, that's part of the point of our tutorial.
 We'll start by defining an extension point of our own in `package.json`.
 Add this as another item in the `provides` list in `package.json`:
 
+    :::js
     {
         "ep": "extensionpoint",
         "name": "tutorialtoolbaritem",
@@ -208,6 +213,7 @@ We're going to make `tutorialtoolbaritem`s look a lot like Bespin's GUI componen
 Now, we need to make our toolbar go out and find the registered `tutorialtoolbaritem`s.
 We'll change `index.js` to look like this:
 
+    :::js
     var catalog = require("bespin:plugins").catalog;
 
     exports.ToolbarView = function() {
@@ -274,6 +280,7 @@ called `items.js`. At this stage, we're not going to make our toolbar items
 *do* anything, but we just want to have something to display. Here is
 our `items.js` file:
 
+    :::js
     exports.Logo = function() {
         var li = document.createElement('li');
         li.innerHTML = "Logo here";
@@ -307,6 +314,7 @@ the extensions for our `tutorialtoolbar` extension point. Back in
 `package.json`, we're going to add these four more items to our
 `provides` property:
 
+    :::js
     {
         "ep": "tutorialtoolbaritem",
         "name": "logo",
@@ -333,6 +341,7 @@ pointer, since that's where we put these items.
 
 For reference, here's the complete `package.json` file at this stage:
 
+    :::js
     {
         "provides": [
             {
@@ -400,6 +409,7 @@ create a file called `toolbar.less`. We need to tell Bespin's theme manager
 about this file, so we need to add one more thing to the `provides` property
 in `package.json`:
 
+    :::js
     {
         "ep": "themestyles",
         "url": [ "toolbar.less" ]
