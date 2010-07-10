@@ -10,6 +10,10 @@
 	},
     "provides": [
 		{
+			"ep": "appLaunched",
+			"pointer": "#onAppLaunched"
+		},
+		{
 			"ep": "editorChange",
             "match": "[buffer]",
 			"pointer": "#mobwriteFileChanged"

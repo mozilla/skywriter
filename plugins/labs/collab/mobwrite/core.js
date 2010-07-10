@@ -23,7 +23,6 @@
  */
 
 var server = require("bespin_server").server;
-
 var diff_match_patch = require("diff");
 
 var DIFF_EQUAL = diff_match_patch.DIFF_EQUAL;

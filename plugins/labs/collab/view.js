@@ -41,6 +41,7 @@ var env = require('environment').env;
 var project_m = require('project');
 
 var social_user = require('collab:user');
+var util = require('collab:util');
 
 /*
 var ChatLineView = SC.View.extend(SC.StaticLayout, {
@@ -241,9 +242,13 @@ exports.SocialView = SC.SplitView.design({
 */
 
 function formatUser(msg){
-    return '<img width="16" height="16" src="' +
-        social_user.getAvatarImageUrl(msg.from, 64) +
-        '">&nbsp;<strong>' + msg.from + '</strong>';
+    return util.replace(
+        '<img width="16" height="16" class="social_user_name_{name}" src="{url}">&nbsp;<strong>{name}</strong>',
+        {
+            name: msg.from,
+            url: social_user.getAvatarImageUrl(msg.from, 16)
+        }
+    );
 }
 
 exports.broadcastMsg = function (msg) {
@@ -281,7 +286,7 @@ exports.fileEventMsg = function (msg) {
     notifier.notify({
         plugin: 'collab',
         notification: 'fileEvent',
-        body: formatUser(msg) + ' works with files:<br>' + msg.event + ' /' + msg.owner + '+' + msg.project + '/' + msg.path
+        body: formatUser(msg) + util.replace(' works with files:<br>{event} /{owner}+{project}/{path}', msg)
     });
 }
 

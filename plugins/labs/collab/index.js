@@ -44,10 +44,6 @@ I took out from package.json following extension points:
             "name": "social_view",
             "pointer": "view#SocialView"
         },
-		{
-			"ep": "bufferFileChanged",
-			"pointer": "#mobwriteFileChanged"
-		},
 
 */
 
@@ -75,7 +71,8 @@ var m_view = require('collab:view');
  */
 var ShareNode = function() {
 	this.username = env.session.currentUser;
-	this.project = project.getProjectAndPath(env.file.path);
+	this.fullPath = env.file.path;
+	this.project = project.getProjectAndPath(this.fullPath);
 	var projectname = this.project[0].name;
 	if (projectname.indexOf('+') < 0) {
 		// add username
@@ -99,7 +96,8 @@ ShareNode.prototype = {
             console.trace();
             throw new Error('Attempt to getClientText() before onFirstSync() called.');
         }
-		return env.model.getValue();
+		//return env.model.getValue();
+		return env.editor.value;
     },
 
     /**
@@ -124,8 +122,8 @@ ShareNode.prototype = {
 
         if (this.errorRaised) {
             if (!this.readOnlyStateBeforeError) {
-				// TODO: how to replace it?
                 //this.editor.setReadOnly(false);
+				env.editor.readOnly = false;
             }
             this.errorRaised = false;
         }
@@ -137,7 +135,8 @@ ShareNode.prototype = {
      */
     setClientText: function(text) {
         var cursor = this.captureCursor();
-		env.model.setValue(text);
+		//env.model.setValue(text);
+		env.editor.value = text;
         this.restoreCursor(cursor);
 
         this.syncDone();
@@ -147,8 +146,8 @@ ShareNode.prototype = {
      * Set the read-only flag on the editor
      */
     setReadOnly: function(readonly) {
-		// TODO: how to replace it?
         //this.editor.setReadOnly(readonly);
+		env.editor.readOnly = readonly;
     },
 
     /**
@@ -193,9 +192,9 @@ ShareNode.prototype = {
         var suffix = '<br/><strong>Warning</strong>: Changes since the last sync could be lost';
 
         if (!this.errorRaised) {
-			// TODO: how to replace it?
-            //this.readOnlyStateBeforeError = this.editor.readonly;
+            this.readOnlyStateBeforeError = env.editor.readOnly;
             //this.editor.setReadOnly(true);
+			env.editor.readOnly = true;
             this.errorRaised = true;
         }
     },
@@ -225,7 +224,8 @@ ShareNode.prototype = {
         var newClientText = this._patchApply(patches, oldClientText, offsets);
         // Set the new text only if there is a change to be made.
         if (oldClientText != newClientText) {
-			env.model.setValue(newClientText);
+			//env.model.setValue(newClientText);
+			env.editor.value = newClientText;
             if (cursor) {
                 // Unpack the offset array.
                 cursor.startOffset = offsets[0];
@@ -346,7 +346,8 @@ ShareNode.prototype = {
      * @private
      */
     captureSimpleCursor: function() {
-		var selection = env.view.getSelectedRange();
+		//var selection = env.view.getSelectedRange();
+		var selection = env.editor.selection;
 		return this._convertRangeToOffsets(selection);
     },
 
@@ -406,7 +407,8 @@ ShareNode.prototype = {
         dmp.Match_Threshold = 0.9;
 
         var padLength = dmp.Match_MaxBits / 2; // Normally 16.
-        var newText = env.model.getValue();
+        //var newText = env.model.getValue();
+        var newText = env.editor.value;
 
         // Find the start of the selection in the new text.
         var pattern1 = cursor.startPrefix + cursor.startSuffix;
@@ -456,6 +458,9 @@ ShareNode.prototype = {
 
         // Cursor position
         var range = this._convertOffsetsToRange(cursorStartPoint, cursorEndPoint);
+		env.editor.selection = range;
+		
+		/*
 		var view = env.view;
 		view.moveCursorTo(range.start);
 
@@ -463,6 +468,7 @@ ShareNode.prototype = {
         if (cursorEndPoint != cursorStartPoint) {
 			view.moveCursorTo(range.end, true);
         }
+		*/
 
 		// TODO: what to do with scroll bars?
         // Scroll bars
@@ -473,7 +479,7 @@ ShareNode.prototype = {
 	
     /**
      * Convert range (two row-col pairs) to offsets.
-     * @param {Object} range Normalized Range object {start: {row, column}, end: {row, column}}
+     * @param {Object} range Normalized Range object {start: {row, col}, end: {row, col}}
      * @return {Object} Offsets object {startOffset, endOffset}
      * @private
      */
@@ -489,13 +495,13 @@ ShareNode.prototype = {
 			for (; i < l; ++i) {
 				offset += lines[i].length + 1; // +1 for LF
 			}
-			startOffset = offset + Math.min(range.start.column, i < lines.length ? lines[i].length : 0);
+			startOffset = offset + Math.min(range.start.col, i < lines.length ? lines[i].length : 0);
 			
 			l = Math.min(range.end.row, lines.length);
 			for (; i < l; ++i) {
 				offset += lines[i].length + 1; // +1 for LF
 			}
-			endOffset = offset + Math.min(range.end.column, i < lines.length ? lines[i].length : 0);
+			endOffset = offset + Math.min(range.end.col, i < lines.length ? lines[i].length : 0);
 		}
 		
 		return {startOffset: startOffset, endOffset: endOffset};
@@ -505,7 +511,7 @@ ShareNode.prototype = {
      * Convert offsets to a normalized range.
      * @param {Number} startOffset Start offset
      * @param {Number?} endOffset End offset
-     * @return {Object} Normalized Range object {start: {row, column}, end: {row, column}}
+     * @return {Object} Normalized Range object {start: {row, col}, end: {row, col}}
      * @private
      */
 	_convertOffsetsToRange: function(startOffset, endOffset){
@@ -541,7 +547,7 @@ ShareNode.prototype = {
 		var endRow = i;
 		var endCol = i < l ? endOffset - offset : 0;
 
-		return {start: {row: startRow, column: startCol}, end: {row: endRow, column: endCol}};
+		return {start: {row: startRow, col: startCol}, end: {row: endRow, col: endCol}};
 	}
 };
 
@@ -564,15 +570,14 @@ var shareNode = null;
 
 exports.mobwriteFileChanged = function() {
 	if (env.session && env.file) {
-		var newShareNode = new ShareNode();
 		if (shareNode) {
-			if (shareNode.project == newShareNode.project) {
+			if (shareNode.fullPath == env.file.path) {
 				return;
 			} else {
 				mobwrite.unshare([shareNode]);
 			}
 		}
-		shareNode = newShareNode;
+		shareNode = new ShareNode();
 		mobwrite.share(shareNode);
 	}else{
 		if (shareNode) {
@@ -586,4 +591,14 @@ exports.mobwriteMsg = function(msg) {
 	//console.log('TO mobwrite:\n', msg.text);
 	mobwrite.reflect(msg.text);
 	server.schedulePoll(mobwrite.syncInterval);
+};
+
+exports.onAppLaunched = function() {
+	//TODO: major hack: polling to detect when a file was set!
+	var h = setInterval(function() {
+			if (env.session && env.file) {
+				clearInterval(h);
+				exports.mobwriteFileChanged();
+			}
+		}, 100);
 };
