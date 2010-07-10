@@ -1,0 +1,10 @@
+<div>${title}</div>
+<table>
+    <tbody>
+        <tr foreach="${members}">
+            <td><img width="16" height="16" class="social_user_name_${param.name}" src="${param.url}"></td>
+            <td>${param.name}</td>
+            <td><a href="#ungroup" data-arg0="${param.name}" onclick="${onUngroup}">(ungroup)</a></td>
+        </tr>
+    </tbody>
+</table>

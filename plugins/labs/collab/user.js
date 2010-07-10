@@ -36,8 +36,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 var $ = require("jquery").$;
-
 var server = require('bespin_server').server;
+var util = require('collab:util');
 
 var userDataCache = {};
 
@@ -73,14 +73,14 @@ exports.interpolateUrl = function (username, str, extra) {
 	}
 	if (userDataCache.hasOwnProperty(username)) {
 		if (userDataCache[username]) {
-			return replace(str.url, extra ? delegate(userDataCache[username], extra) : userDataCache[username]);
+			return util.replace(str.url, extra ? util.delegate(userDataCache[username], extra) : userDataCache[username]);
 		}
 	} else {
 		// fetch user's data
 		fetchUserData(username);
 	}
 	// return the default
-	return extra ? replace(str.def, extra) : str.def;
+	return extra ? util.replace(str.def, extra) : str.def;
 };
 
 /**
@@ -156,37 +156,3 @@ function fetchUserData (username) {
 function getUserData (username, opts) {
     server.request('GET', '/register/userdata/' + username, null, opts);
 };
-
-// borrowing from Dojo Toolkit under BSD license:
-
-function getObject (/*String*/ name, /*Object*/ context) {
-	var parts = name.split('.');
-	for(var i = 0, p; context && (p = parts[i]); ++i) {
-		if (context) {
-			context = context[p];
-		} else {
-			return undefined;
-		}
-	}
-	return context; // mixed
-}
-
-var replacePattern = /\{([^\}]+)\}/g;
-function replace (/*String*/ tmpl, /*Object*/ map, /*RegularExpression?*/ pattern) {
-	return tmpl.replace(pattern || replacePattern, function(_, k){ return getObject(k, map); });
-};
-
-function T () {}
-function delegate (base, props) {
-	T.prototype = base;
-	var t = new T();
-	T.prototype = null;
-	if (props) {
-		for (var name in props) {
-			if (props.hasOwnProperty(name)) {
-				t[name] = props[name];
-			}
-		}
-	}
-	return t;
-}

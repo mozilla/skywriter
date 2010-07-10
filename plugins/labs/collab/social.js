@@ -40,6 +40,8 @@ var server = require('bespin_server').server;
 var Input = require('command_line:input').Input;
 
 var social_user = require('collab:user');
+var util = require('collab:util');
+var templates = require('collab:templates');
 
 
 /**
@@ -63,6 +65,24 @@ function toArgArray(args) {
     }
 };
 
+/**
+ * Helper to bind commands to click targets.
+ */
+function execOnClick(cmd) {
+	return function(evt) {
+		evt.preventDefault();
+		evt.stopPropagation();
+		var node = evt.currentTarget;
+		var args = [];
+		for (var i = 0; i < 5; ++i) {
+			args.push(node.getAttribute("data-arg" + i));
+		}
+		if (args.some(function(item) { return item; })){
+			new Input(util.replace(cmd, args)).execute();
+		}
+	};
+}
+
 // =============================================================================
 
 /**
@@ -74,17 +94,10 @@ exports.followCommand = function(args, request) {
         follow([], {
             evalJSON: true,
             onSuccess: function(followers) {
-                if (!followers || followers.length === 0) {
-                    request.done('You are not following anyone');
-                    return;
-                }
-
-                var parent = exports.displayFollowers(followers);
-                request.done(parent);
+                request.done(exports.displayFollowers(followers));
             },
             onFailure: function(xhr) {
-                request.doneWithError('Failed to retrieve followers: ' +
-                        xhr.responseText);
+                request.doneWithError('Failed to retrieve followers: ' + xhr.responseText);
             }
         });
     }
@@ -92,17 +105,10 @@ exports.followCommand = function(args, request) {
         follow(usernames, {
             evalJSON: true,
             onSuccess: function(followers) {
-                if (!followers || followers.length === 0) {
-                    request.done('You are not following anyone');
-                    return;
-                }
-
-                var parent = exports.displayFollowers(followers);
-                request.done(parent);
+                request.done(exports.displayFollowers(followers));
             },
             onFailure: function(xhr) {
-                request.doneWithError('Failed to add follower: ' +
-                        xhr.responseText);
+                request.doneWithError('Failed to add follower: ' + xhr.responseText);
             }
         });
     }
@@ -121,40 +127,19 @@ function follow(usernames, opts) {
  * "Following: ..." message as a command line response.
  */
 exports.displayFollowers = function(followers, title) {
-    var parent = document.createElement('div');
-	var child  = document.createElement('div');
-	child.innerHTML = title || 'You are following these users:';
-	parent.appendChild(child);
-	var table = document.createElement('table');
-	parent.appendChild(table);
-	var tbody = document.createElement('tbody');
-	table.appendChild(tbody);
-    followers.forEach(function(follower) {
-		var row = document.createElement('tr');
-		tbody.appendChild(row);
-		var cell = document.createElement('td');
-		row.appendChild(cell);
-		var img = document.createElement('img');
-		img.className = 'social_user_avatar_' + follower;
-		img.src = social_user.getAvatarImageUrl(follower, 16);
-		img.width  = '16';
-		img.height = '16';
-		cell.appendChild(img);
-		cell = document.createElement('td');
-		cell.innerHTML = follower;
-		row.appendChild(cell);
-        // TODO: Add the users status information in here
-		cell = document.createElement('td');
-		row.appendChild(cell);
-		var a = document.createElement('a');
-		a.innerHTML = '<small>(unfollow)</small>';
-		// TODO: use better way to attach an event handler
-		a.onclick = function () {
-			new Input('unfollow ' + follower).execute();
-		};
-		cell.appendChild(a);
-    });
-    return parent;
+	if (!followers || !followers.length) {
+		return 'You are not following anyone.';
+	}
+	return templates.followers({
+		title: title || 'You are following these users:',
+		followers: followers.map(function(name){
+			return {
+				name: name,
+				url: social_user.getAvatarImageUrl(name, 16)
+			};
+		}),
+		onUnfollow: execOnClick('unfollow {0}')
+	});
 };
 
 // =============================================================================
@@ -171,17 +156,10 @@ exports.unfollowCommand = function(args, request) {
         unfollow(usernames, {
             evalJSON: true,
             onSuccess: function(followers) {
-                if (!followers || followers.length === 0) {
-                    request.done('You are not following anyone');
-                    return;
-                }
-
-                var parent = exports.displayFollowers(followers);
-                request.done(parent);
+                request.done(exports.displayFollowers(followers));
             },
             onFailure: function(xhr) {
-                request.doneWithError('Failed to remove follower: ' +
-                        xhr.responseText);
+                request.doneWithError('Failed to remove follower: ' + xhr.responseText);
             }
         });
     }
@@ -203,18 +181,10 @@ exports.broadcastCommand = function(args, request) {
 	broadcast(args.message || '', {
 		evalJSON: true,
 		onSuccess: function(followers) {
-			if (!followers || followers.length === 0) {
-				request.done('You have no followers');
-				return;
-			}
-
-			var parent = exports.displayFollowers(followers,
-					'Your message was sent to your followers:');
-			request.done(parent);
+			request.done(exports.displayFollowers(followers, 'Your message was sent to your followers:'));
 		},
 		onFailure: function(xhr) {
-			request.doneWithError('Failed to broadcast to followers: ' +
-					xhr.responseText);
+			request.doneWithError('Failed to broadcast to followers: ' + xhr.responseText);
 		}
 	});
 };
@@ -236,18 +206,10 @@ exports.tellCommand = function(args, request) {
 	tell(args.username || '*****', args.message || '', {
 		evalJSON: true,
 		onSuccess: function(followers) {
-			if (!followers || followers.length === 0) {
-				request.done('You don\'t have a follower with such name.');
-				return;
-			}
-
-			var parent = exports.displayFollowers(followers,
-					'Your message was sent to your follower:');
-			request.done(parent);
+			request.done(exports.displayFollowers(followers, 'Your message was sent to your follower:'));
 		},
 		onFailure: function(xhr) {
-			request.doneWithError('Failed to broadcast to followers: ' +
-					xhr.responseText);
+			request.doneWithError('Failed to tell to a follower: ' + xhr.responseText);
 		}
 	});
 };
@@ -271,11 +233,10 @@ exports.groupListCommand = function(args, request) {
         groupListAll({
             evalJSON: true,
             onSuccess: function(groups) {
-				createGroupListDisplay(groups, args, request);
+				request.done(createGroupListDisplay(groups, args));
             },
             onFailure: function(xhr) {
-                request.doneWithError('Failed to retrieve groups: ' +
-                        xhr.responseText);
+                request.doneWithError('Failed to retrieve groups: ' + xhr.responseText);
             }
         });
     } else {
@@ -283,11 +244,10 @@ exports.groupListCommand = function(args, request) {
         groupList(args.group, {
             evalJSON: true,
             onSuccess: function(members) {
-				createMemberListDisplay(members, args, request);
+				request.done(createMemberListDisplay(members, args));
             },
             onFailure: function(xhr) {
-                request.doneWithError('Failed to retrieve group members: ' +
-                        xhr.responseText);
+                request.doneWithError('Failed to retrieve group members: ' + xhr.responseText);
             }
         });
     }
@@ -296,103 +256,35 @@ exports.groupListCommand = function(args, request) {
 /**
  * Helper to create a tabular display of groups.
  */
-function createGroupListDisplay(groups, args, request) {
-	if (!groups || groups.length === 0) {
-		request.done('You have no groups');
-		return;
+function createGroupListDisplay(groups, args) {
+	if (!groups || !groups.length) {
+		return 'You have no groups.';
 	}
-
-	var parent = document.createElement('div');
-	var div = document.createElement('div');
-	div.innerHTML = 'You have the following groups:';
-	parent.appendChild(div);
-	var table = document.createElement('table');
-	parent.appendChild(table);
-	var tbody = document.createElement('tbody');
-	table.appendChild(tbody);
-	groups.forEach(function(group) {
-		var row = document.createElement('tr');
-		tbody.appendChild(row);
-		var cell = document.createElement('td');
-		row.appendChild(cell);
-		var img = document.createElement('img');
-		img.src = '/images/collab_icn_group.png';
-		img.width = 16;
-		img.height = 16;
-		cell.appendChild(img);
-		cell = document.createElement('td');
-		cell.innerHTML = group;
-		row.appendChild(cell);
-		// TODO: Add the users status information in here
-		cell = document.createElement('td');
-		row.appendChild(cell);
-		var a = document.createElement('a');
-		a.innerHTML = '<small>(remove)</small>';
-		// TODO: use better way to attach an event handler
-		a.onclick = function () {
-			new Input('group remove ' + group).execute();
-		};
-		cell.appendChild(a);
-		var span = document.createElement('span');
-		span.innerHTML = '&nbsp;';
-		cell.appendChild(span);
-		a = document.createElement('a');
-		a.innerHTML = '<small>(list)</small>';
-		// TODO: use better way to attach an event handler
-		a.onclick = function () {
-			new Input('group list ' + group).execute();
-		};
-		cell.appendChild(a);
+	return templates.groups({
+		title: 'You have the following groups:',
+		groups: groups,
+		onRemove: execOnClick('group remove {0}'),
+		onList: execOnClick('group list {0}')
 	});
-
-	request.done(parent);
 };
 
 /**
  * Helper to create a tabular member display.
  */
-function createMemberListDisplay(members, args, request) {
-	if (!members || members.length === 0) {
-		request.done(args.group + ' has no members.');
-		return;
+function createMemberListDisplay(members, args) {
+	if (!members || !members.length) {
+		return util.replace('{group} has no members.', args);
 	}
-
-	var parent = document.createElement('div');
-	var div = document.createElement('div');
-	div.innerHTML = 'Members of ' + args.group + ':';
-	parent.appendChild(div);
-	var table = document.createElement('table');
-	parent.appendChild(table);
-	var tbody = document.createElement('tbody');
-	table.appendChild(tbody);
-
-	members.forEach(function(member) {
-		var row = document.createElement('tr');
-		tbody.appendChild(row);
-		var cell = document.createElement('td');
-		row.appendChild(cell);
-		var img = document.createElement('img');
-		img.className = 'social_user_avatar_' + member;
-		img.src = social_user.getAvatarImageUrl(member, 16);
-		img.width = 16;
-		img.height = 16;
-		cell.appendChild(img);
-		cell = document.createElement('td');
-		cell.innerHTML = member;
-		row.appendChild(cell);
-		// TODO: Add the users status information in here
-		cell = document.createElement('td');
-		row.appendChild(cell);
-		var a = document.createElement('a');
-		a.innerHTML = '<small>(ungroup)</small>';
-		// TODO: use better way to attach an event handler
-		a.onclick = function () {
-			new Input('group remove ' + args.group + ' ' + member). execute();
-		};
-		cell.appendChild(a);
+	return templates.members({
+		title: util.replace('Members of {group}:', args),
+		members: members.map(function(name){
+			return {
+				name: name,
+				url: social_user.getAvatarImageUrl(name, 16)
+			};
+		}),
+		onUngroup: execOnClick(util.replace('group remove {group} {name}', {group: args.group, name: '{0}'}))
 	});
-
-	request.done(parent);
 };
 
 /**
@@ -417,15 +309,14 @@ exports.groupAddCommand = function(args, request) {
  */
 exports.groupRemoveCommand = function(args, request) {
     var group = args.group;
-    var members = toArgArray(args.members);
+    var members = args.members ? toArgArray(args.members) : ['all'];
     if (members.length === 1 && members[0] === 'all') {
         groupRemoveAll(group, {
             onSuccess: function(data) {
                 request.done('Removed group ' + group);
             },
             onFailure: function(xhr) {
-                request.doneWithError('Failed to retrieve group members. Maybe due to: ' +
-                        xhr.responseText);
+                request.doneWithError('Failed to retrieve group members. Maybe due to: ' + xhr.responseText);
             }
         });
     } else {
@@ -435,8 +326,7 @@ exports.groupRemoveCommand = function(args, request) {
                 request.done('Removed from group "' + group + '": ' + members.join(', '));
             },
             onFailure: function(xhr) {
-                request.doneWithError('Failed to remove to group members. Maybe due to: ' +
-                        xhr.responseText);
+                request.doneWithError('Failed to remove group members. Maybe due to: ' + xhr.responseText);
             }
         });
     }
@@ -493,11 +383,17 @@ exports.shareListCommand = function(args, request) {
         onSuccess: function(shares) {
             // Filter by project name if we have one
             if (args.project && args.project != '') {
-                shares = shares.filter(function(share) {
-                    return share.project == project;
-                });
+                shares = shares.filter(function(share) { return share.project == project; });
             }
-            createShareDisplayElement(shares, args, request);
+			else {
+				shares.sort(function(a, b) {
+					if (a.project === b.project) {
+						return 0;
+					}
+					return a.project < b.project ? -1 : 1;
+				});
+			}
+            request.done(createShareDisplayElement(shares, args));
         },
         onFailure: function(xhr) {
             request.doneWithError('Failed to list project shares: ' +
@@ -510,63 +406,22 @@ exports.shareListCommand = function(args, request) {
  * Helper function to create a tabular display of shared projects
  */
 function createShareDisplayElement(shares, args, request) {
-    if (!shares || shares.length === 0) {
-		request.done('You are not sharing any projects');
-		return;
+    if (!shares || !shares.length) {
+		return 'You are not sharing any projects';
     }
-
-	var parent = document.createElement('div');
-	var div = document.createElement('div');
-	div.innerHTML = 'You have the following shared projects:';
-	parent.appendChild(div);
-	var table = document.createElement('table');
-	parent.appendChild(table);
-	var tbody = document.createElement('tbody');
-	table.appendChild(tbody);
-
-    var lastProject = '';
-    shares.forEach(function(share) {
-		var row = document.createElement('tr'), cell;
-		tbody.appendChild(row);
-
-		cell = document.createElement('td');
-		cell.innerHTML = share.project !== lastProject ? share.project : "&nbsp;";
-		row.appendChild(cell);
-
-        var withWhom;
-		switch (share.type) {
-			case 'everyone':
-				withWhom = 'everyone';
-				break;
-			case 'group':
-				withWhom = 'group ' + share.recipient;
-				break;
-			default:
-				withWhom = share.recipient;
-				break;
-		}
-		cell = document.createElement('td');
-		cell.innerHTML = 'with ' + withWhom;
-		row.appendChild(cell);
-
-		cell = document.createElement('td');
-		cell.innerHTML = share.edit ? 'Editable' : 'Read-only';
-		row.appendChild(cell);
-
-        // TODO: loadany needs adding here when we add the feature in
-
-		cell = document.createElement('td');
-		row.appendChild(cell);
-		var a = document.createElement('a');
-		a.innerHTML = '<small>(unshare)</small>';
-		// TODO: use better way to attach an event handler
-		a.onclick = function () {
-			new Input('share remove ' + share.project).execute();
-		};
-		cell.appendChild(a);
-    });
-
-    request.done(parent);
+	return templates.shares({
+		title: 'You have the following shared projects:',
+		shares: shares.map(function(share, i){
+			return {
+				name: !i || share.project !== shares[i - 1].project ? share.project : ' ',
+				share: share,
+				url: share.type !== 'everyone' && share.type !== 'group' &&
+						social_user.getAvatarImageUrl(share.recipient, 16)
+			};
+		}),
+		onList: execOnClick('group list {0}'),
+		onUnshare: execOnClick('share remove {0} {1}')
+	});
 };
 
 /**
@@ -688,8 +543,7 @@ exports.viewmeCommand = function(args, request) {
                 request.done('All view settings: ' + data);
             },
             onFailure: function(xhr) {
-                request.doneWithError('Failed to retrieve view settings. Maybe due to: ' +
-                        xhr.responseText);
+                request.doneWithError('Failed to retrieve view settings. Maybe due to: ' + xhr.responseText);
             }
         });
     }
@@ -702,8 +556,7 @@ exports.viewmeCommand = function(args, request) {
                 request.done('View settings for ' + member + ': ' + data);
             },
             onFailure: function(xhr) {
-                request.doneWithError('Failed to retrieve view settings. Maybe due to: ' +
-                        xhr.responseText);
+                request.doneWithError('Failed to retrieve view settings. Maybe due to: ' + xhr.responseText);
             }
         });
     }
@@ -720,8 +573,7 @@ exports.viewmeCommand = function(args, request) {
                     request.done('Changed view settings for ' + member);
                 },
                 onFailure: function(xhr) {
-                    request.doneWithError('Failed to change view setttings. Maybe due to: ' +
-                            xhr.responseText);
+                    request.doneWithError('Failed to change view setttings. Maybe due to: ' + xhr.responseText);
                 }
             });
         }

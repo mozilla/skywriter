@@ -1,0 +1,10 @@
+<div>${title}</div>
+<table>
+    <tbody>
+        <tr foreach="${groups}">
+            <td>${param}</td>
+            <td><a href="#remove" data-arg0="${param}" onclick="${onRemove}">(remove)</a></td>
+            <td><a href="#list" data-arg0="${param}" onclick="${onList}">(list)</a></td>
+        </tr>
+    </tbody>
+</table>
