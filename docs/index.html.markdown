@@ -15,6 +15,7 @@ Embedder's Guide
 * [Introduction](embedding/index.html)
 * [Creating a custom, embedded Bespin](embedding/building.html)
 * [Application Configuration (Gluing Bespin Together)](embedding/appconfig.html)
+* [Installing Plugins](embedding/installing.html)
 
 Tutorials
 ---------
