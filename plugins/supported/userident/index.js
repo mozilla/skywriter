@@ -260,7 +260,7 @@ exports.loginController.prototype = {
                             title: 'Reset Password',
                             body: 'The password has to be at least 6 and at most 20 characters.'
                         });
-                    } else if (this.get('password1') !== this.get('password2')) {
+                    } else if (password !== password2) {
                         notifier.notify({
                             plugin: 'userident',
                             notification: 'loginerror',
