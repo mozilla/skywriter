@@ -46,8 +46,6 @@ var Promise = bespin.tiki.require('bespin:promise').Promise;
 var group = bespin.tiki.require("bespin:promise").group;
 var $ = bespin.tiki.require("jquery").$;
 
-console.log('init!');
-
 bespin.loaded = new Promise();
 bespin.initialized = new Promise();
 
