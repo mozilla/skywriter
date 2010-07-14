@@ -109,7 +109,7 @@ exports.preview = function(env, args, request) {
     buffer.save().then(function() {
         var fileName = buffer.file.path;
         popup = window.open(
-            server.base_url + '/preview/at' + fileName,
+            server.base_url + '/preview/at/' + fileName,
             'Preview: ' + fileName, 'location=no,menubar=no'
         );
         popup.focus();
