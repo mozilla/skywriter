@@ -285,7 +285,7 @@ exports.loginController.prototype = {
                         });
                     } else {
                         var data = searchQuery.pwchange.split(';');
-                        var usename = data[0];
+                        var username = data[0];
                         var hash = data[1];
 
                         exports.changePassword(
