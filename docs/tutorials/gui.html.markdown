@@ -421,6 +421,7 @@ theme manager will automatically load these files as needed.
 
 And what's in this mysterious `toolbar.less` file?
 
+    :::css
     .bespin {
         .tutorial-toolbar {
             display: block;
@@ -445,6 +446,7 @@ This looks like fairly normal CSS, right? *Except* what's that `.bespin` doing
 surrounding those other rules? When LESS expands this out to standard CSS,
 the result would be something like this:
 
+    :::css
     .bespin .tutorial-toolbar {
     }
     

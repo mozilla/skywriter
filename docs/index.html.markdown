@@ -21,6 +21,7 @@ Tutorials
 ---------
 
 * [Manipulating Text through Commands](tutorials/commands.html)
+* [Adding to the GUI](tutorials/gui.html)
 
 Plugin Author Guide
 -------------------
