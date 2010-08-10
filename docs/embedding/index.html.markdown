@@ -170,3 +170,9 @@ You can do this by:
     env.dimensionsChanged();
 
 Where `env` is the environment variable of the Bespin that container's size changed.
+
+Embedding Bespin in XULRunner
+=============================
+
+Bespin's use of web workers and other features requires it to be loaded via
+resource:// urls if used in XULRunner iframes.
