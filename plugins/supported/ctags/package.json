@@ -1,5 +1,0 @@
-{
-    "description": "Reads and writes tag files",
-    "dependencies": { "traits": "0.0.0", "underscore": "0.0.0" }
-}
-

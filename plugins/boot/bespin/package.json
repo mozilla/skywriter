@@ -1,6 +1,0 @@
-{
-    "name": "bespin",
-    "environments": {
-        "main": true, "worker": true
-    }
-}

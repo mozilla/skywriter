@@ -1,4 +1,0 @@
-
-<div style="width:300px" save="${fileView.element}">
-  <div save="${fileView.treeElement}"></div>
-</div>
