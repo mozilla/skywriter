@@ -1,0 +1,104 @@
+.bespin .cmd_output {
+     .plugindev_module {
+        margin-left: 10px;
+    }
+
+    .plugindev_test {
+        > .header {
+            margin-left: 15px;
+            padding-left: 5px;
+        }
+
+        .header > .name {
+            width:   300px;
+            display: inline-block;
+        }
+
+        > .entryAssertions {
+            display: none;
+        }
+
+        .status span {
+            margin: 0px 5px;
+            padding: 0px 3px;
+            width: 20px;
+            display: inline-block;
+            text-align: center;
+        }
+    }
+
+    .plugindev_test:hover {
+        a {
+            color: @global_selectable_hover_color;
+        }
+        > .header {
+            background-color: @global_selectable_hover_background;
+        }
+    }
+
+    .plugindev_summary span {
+        margin: 0px 5px;
+        padding: 0px 3px;
+    }
+
+    .plugindev_assertion {
+        margin-left: 30px;
+
+        .status {
+            margin-left: 10px;
+            padding: 0px 3px;
+        }
+    }
+
+    .plugindev_assertion.passed {
+        color: #888;
+
+        .status {
+            background: #bbe9b5;
+            color: black;
+        }
+    }
+
+    .plugindev_test .header > .status .passed,
+    .plugindev_summary > .passed {
+        background: #80D175;
+        color: black;
+    }
+
+    .plugindev_test .header > .status .failed,
+    .plugindev_assertion.failed .status,
+    .plugindev_summary > .failed {
+      background: #ea4d44;
+      color: white;
+    }
+
+    .plugindev_test  .header > .status .errors,
+    .plugindev_assertion.errors .status,
+    .plugindev_summary > .errors {
+      background: red;
+      color: #fff;
+    }
+
+    .plugindev_test .header > .status .warnings,
+    .plugindev_assertion.warnings .status,
+    .plugindev_summary > .warnings {
+      background: #E49723;
+      color: black;
+    }
+}
+
+.bespin {
+    .plugin_list {
+        table {
+            margin-left: 15px;
+
+            th {
+                font-weight: bold;
+            }
+        }
+    }
+
+    .plugin_info li {
+        list-style-type: disc;
+    }
+}

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bespin</title>
+  <style>
+    html, body {
+      height: 100%;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+    }
+    .bespin { margin: 0; padding: 0; border: 0; height: 600px; width: 100%; border: 1px solid black;}
+  </style>
+</head>
+<body class="bespin">
+  <div id="_bespin_loading">Loading...</div>
+  <script type="text/javascript">
+  bespin = {};
+  </script>
+  <script type="text/javascript" src="tiki.js"></script>
+  <script type="text/javascript" src="plugin/register/boot"></script>
+  <script type="text/javascript" src="boot_multi.js"></script>
+
+  <table width="100%" height="100%">
+    <tr>
+        <td>
+            <div id="editor1" class="bespin"></div>
+        </td>
+        <td>
+            <div id="editor2" class="bespin"></div>
+        </td>
+    </tr>
+  </table>
+</body>
+</html>

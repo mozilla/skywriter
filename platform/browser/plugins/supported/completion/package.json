@@ -1,0 +1,51 @@
+{
+    "description": "Code completion support",
+    "dependencies": {
+        "canon": "0.0.0",
+        "ctags": "0.0.0",
+        "jquery": "0.0.0",
+        "rangeutils": "0.0.0",
+        "underscore": "0.0.0"
+    },
+    "provides": [
+        {
+            "ep": "extensionpoint",
+            "name": "completion",
+            "description": "Code completion support for specific languages",
+            "indexOn": "name"
+        },
+        {
+            "ep": "command",
+            "name": "complete",
+            "key": [ "return", "tab" ],
+            "predicates": { "completing": true },
+            "description": "Accept the chosen completion",
+            "pointer": "controller#completeCommand"
+        },
+        {
+            "ep": "command",
+            "name": "complete cancel",
+            "key": "escape",
+            "predicates": { "completing": true },
+            "description": "Abandon the completion",
+            "pointer": "controller#completeCancelCommand"
+        },
+        {
+            "ep": "command",
+            "name": "complete down",
+            "key": "down",
+            "predicates": { "completing": true },
+            "description": "Choose the completion below",
+            "pointer": "controller#completeDownCommand"
+        },
+        {
+            "ep": "command",
+            "name": "complete up",
+            "key": "up",
+            "predicates": { "completing": true },
+            "description": "Choose the completion above",
+            "pointer": "controller#completeUpCommand"
+        }
+    ]
+}
+

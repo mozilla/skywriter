@@ -1,0 +1,195 @@
+{
+    "description": "Bespins standard theme basePlugin",
+    "dependencies": {
+        "theme_manager": "0.0.0"
+    },
+    "provides": [
+        {
+            "ep": "themestyles",
+            "url": [
+                "theme.less"
+            ]
+        },
+        {
+            "ep": "themevariable",
+            "name": "container_font",
+            "defaultValue": "@global_font"
+        },
+        {
+            "ep": "themevariable",
+            "name": "container_font_size",
+            "defaultValue": "@global_font_size"
+        },
+        {
+            "ep": "themevariable",
+            "name": "container_bg",
+            "defaultValue": "@global_container_background"
+        },
+        {
+            "ep": "themevariable",
+            "name": "container_color",
+            "defaultValue": "@global_color"
+        },
+        {
+            "ep": "themevariable",
+            "name": "container_line_height",
+            "defaultValue": "@global_line_height"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_bg",
+            "defaultValue": "@global_pane_background"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_border_radius",
+            "defaultValue": "@global_pane_border_radius"
+        },
+        {
+            "ep": "themevariable",
+            "name": "form_font",
+            "defaultValue": "@global_form_font"
+        },
+        {
+            "ep": "themevariable",
+            "name": "form_font_size",
+            "defaultValue": "@global_form_font_size"
+        },
+        {
+            "ep": "themevariable",
+            "name": "form_line_height",
+            "defaultValue": "@global_form_line_height"
+        },
+        {
+            "ep": "themevariable",
+            "name": "form_color",
+            "defaultValue": "@global_form_color"
+        },
+        {
+            "ep": "themevariable",
+            "name": "form_text_shadow",
+            "defaultValue": "@global_form_text_shadow"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_a_color",
+            "defaultValue": "@global_pane_link_color"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_font",
+            "defaultValue": "@global_font"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_font_size",
+            "defaultValue": "@global_font_size"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_text_shadow",
+            "defaultValue": "@global_pane_text_shadow"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_h1_font",
+            "defaultValue": "@global_pane_h1_font"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_h1_font_size",
+            "defaultValue": "@global_pane_h1_font_size"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_h1_color",
+            "defaultValue": "@global_pane_h1_color"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_line_height",
+            "defaultValue": "@global_font_size * 1.8"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_color",
+            "defaultValue": "@global_pane_color"
+        },
+        {
+            "ep": "themevariable",
+            "name": "pane_text_shadow",
+            "defaultValue": "@global_text_shadow"
+        },
+        {
+            "ep": "themevariable",
+            "name": "button_font",
+            "defaultValue": "@global_font"
+        },
+        {
+            "ep": "themevariable",
+            "name": "button_font_size",
+            "defaultValue": "@global_font_size"
+        },
+        {
+            "ep": "themevariable",
+            "name": "button_color",
+            "defaultValue": "@global_button_color"
+        },
+        {
+            "ep": "themevariable",
+            "name": "button_bg",
+            "defaultValue": "@global_button_background"
+        },
+        {
+            "ep": "themevariable",
+            "name": "button_bg2",
+            "defaultValue": "@button_bg - #063A27"
+        },
+        {
+            "ep": "themevariable",
+            "name": "button_border",
+            "defaultValue": "@button_bg - #194A5E"
+        },
+        {
+            "ep": "themevariable",
+            "name": "control_bg",
+            "defaultValue": "@global_control_background"
+        },
+        {
+            "ep": "themevariable",
+            "name": "control_color",
+            "defaultValue": "@global_control_color"
+        },
+        {
+            "ep": "themevariable",
+            "name": "control_border",
+            "defaultValue": "@global_control_border"
+        },
+        {
+            "ep": "themevariable",
+            "name": "control_border_radius",
+            "defaultValue": "@global_control_border_radius"
+        },
+        {
+            "ep": "themevariable",
+            "name": "control_active_bg",
+            "defaultValue": "@global_control_active_background"
+        },
+        {
+            "ep": "themevariable",
+            "name": "control_active_border",
+            "defaultValue": "@global_control_active_border"
+        },
+        {
+            "ep": "themevariable",
+            "name": "control_active_color",
+            "defaultValue": "@global_control_active_color"
+        },
+        {
+            "ep": "themevariable",
+            "name": "control_active_inset_color",
+            "defaultValue": "@global_control_active_inset_color"
+        }
+    ]
+}
+

@@ -1,0 +1,15 @@
+{
+    "description": "Instantiates components and displays the GUI based on configuration.",
+    "dependencies": {
+        "jquery": "0.0.0",
+        "settings": "0.0.0",
+        "canon": "0.0.0"
+    },
+    "provides": [
+        {
+            "ep": "extensionpoint",
+            "name": "appLaunched",
+            "description": "Event: Fired when the app is completely launched."
+        }
+    ]
+}

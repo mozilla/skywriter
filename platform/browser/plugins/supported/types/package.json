@@ -1,0 +1,47 @@
+{
+    "description": "Defines parameter types for commands",
+    "provides":
+    [
+        {
+            "ep": "extensionpoint",
+            "name": "type",
+            "description": "Commands can accept various arguments that the user enters or that are automatically supplied by the environment. Those arguments have types that define how they are supplied or completed. The pointer points to an object with methods convert(str value) and getDefault(). Both functions have `this` set to the command's `takes` parameter. If getDefault is not defined, the default on the command's `takes` is used, if there is one. The object can have a noInput property that is set to true to reflect that this type is provided directly by the system. getDefault must be defined in that case.",
+            "indexOn": "name"
+        },
+        {
+            "ep": "type",
+            "name": "text",
+            "description": "Text that the user needs to enter.",
+            "pointer": "basic#text"
+        },
+        {
+            "ep": "type",
+            "name": "number",
+            "description": "A JavaScript number",
+            "pointer": "basic#number"
+        },
+        {
+            "ep": "type",
+            "name": "boolean",
+            "description": "A true/false value",
+            "pointer": "basic#bool"
+        },
+        {
+            "ep": "type",
+            "name": "object",
+            "description": "An object that converts via JavaScript",
+            "pointer": "basic#object"
+        },
+        {
+            "ep": "type",
+            "name": "selection",
+            "description": "A string that is constrained to be one of a number of pre-defined values",
+            "pointer": "basic#selection"
+        },
+        {
+            "ep": "type",
+            "name": "deferred",
+            "description": "A type which we don't understand from the outset, but which we hope context can help us with"
+        }
+    ]
+}

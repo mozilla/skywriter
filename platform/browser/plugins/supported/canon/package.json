@@ -1,0 +1,42 @@
+{
+    "description": "Manages commands",
+    "dependencies":
+    {
+        "settings": "0.0.0",
+        "events": "0.0.0",
+        "environment": "0.0.0"
+    },
+    "environments": { "main": true, "worker": false },
+    "provides":
+    [
+        {
+            "ep": "extensionpoint",
+            "name": "command",
+            "description": "A command is a bit of functionality with optional typed arguments which can do something small like moving the cursor around the screen, or large like cloning a project from VCS.",
+            "indexOn": "name"
+        },
+        {
+            "ep": "extensionpoint",
+            "name": "addedRequestOutput",
+            "description": "An extension point to be called whenever a new command begins output."
+        },
+        {
+            "ep": "extensionpoint",
+            "name": "dimensionsChanged",
+            "description": "A dimensionsChanged is a way to be notified of changes to the dimension of Bespin"
+        },
+        {
+            "ep": "setting",
+            "name": "historyLength",
+            "description": "How many typed commands do we recall for reference?",
+            "type": "number",
+            "defaultValue": 50
+        },
+        {
+            "ep": "factory",
+            "name": "history",
+            "action": "create",
+            "pointer": "history#InMemoryHistory"
+        }
+    ]
+}

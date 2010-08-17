@@ -1,0 +1,56 @@
+/* ***** BEGIN LICENSE BLOCK *****
+* Version: MPL 1.1/GPL 2.0/LGPL 2.1
+*
+* The contents of this file are subject to the Mozilla Public License Version
+* 1.1 (the "License"); you may not use this file except in compliance with
+* the License. You may obtain a copy of the License at
+* http: //www.mozilla.org/MPL/
+*
+* Software distributed under the License is distributed on an "AS IS" basis,
+* WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+* for the specific language governing rights and limitations under the
+* License.
+*
+* The Original Code is Bespin.
+*
+* The Initial Developer of the Original Code is
+* Mozilla.
+* Portions created by the Initial Developer are Copyright (C) 2009
+* the Initial Developer. All Rights Reserved.
+*
+* Contributor(s):
+*
+* Alternatively, the contents of this file may be used under the terms of
+* either the GNU General Public License Version 2 or later (the "GPL"), or
+* the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+* in which case the provisions of the GPL or the LGPL are applicable instead
+* of those above. If you wish to allow use of your version of this file only
+* under the terms of either the GPL or the LGPL, and not to allow others to
+* use your version of this file under the terms of the MPL, indicate your
+* decision by deleting the provisions above and replace them with the notice
+* and other provisions required by the GPL or the LGPL. If you do not delete
+* the provisions above, a recipient may use your version of this file under
+* the terms of any one of the MPL, the GPL or the LGPL.
+*
+* ***** END LICENSE BLOCK ***** */
+
+/* Global visual styles */
+.cmd_error { color: @error_text; }
+.cmd_brackets { color: @hi_text; }
+.cmd_gt { color: @theme_text; font-weight: bold; font-size: 120%; }
+.cmd_char { letter-spacing: -0.2ex; font-weight: bold; }
+
+/* Use absolute positioning to put all children 100%x100% */
+.stack_children {
+  position: relative;
+}
+.stack_children > * {
+  position: absolute;
+  top: 0; height: 100%; bottom: 0; left: 0; width: 100%; right: 0;
+}
+
+/* Check box styles - assumes 3 16x16 icons all in same png */
+.check { background-position: 0 0; overflow: hidden; }
+.check:hover { background-position: 16px 0; }
+.check.checked { background-position: 32px 0; }
+.check.checked:hover { background-position: 16px 0; }

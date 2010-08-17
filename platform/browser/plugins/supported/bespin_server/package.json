@@ -1,0 +1,76 @@
+{
+    "description": "Provides communication with the Bespin Server",
+    "dependencies":  {
+        "filesystem": "0.0",
+        "canon": "0.0",
+        "settings": "0.0",
+        "project": "0.0"
+    },
+	"provides": [
+    	{
+	        "ep": "factory",
+	        "name": "bespin_server",
+	        "action": "call",
+	        "pointer": "#createServer"
+    	},
+    	{
+    	    "ep": "factory",
+    	    "name": "bespin_filesource",
+    	    "action": "new",
+    	    "pointer": "filesource#BespinFileSource"
+    	},
+        {
+            "ep": "extensionpoint",
+            "description": "Message target id to dispatch messages from the server",
+            "name": "msgtargetid",
+            "indexOn": "name"
+        },
+        {
+            "ep": "extensionpoint",
+            "description": "Optional mobwrite instance",
+            "name": "mobwriteinstance"
+        },
+        {
+            "ep": "command",
+            "name": "rescan",
+            "params":
+            [
+                {
+                    "name": "project",
+                    "type": "text",
+                    "description": "Project (top-level directory) to scan"
+                }
+            ],
+            "description": "resynchronize the server's listing of your files. This is only in case you're having trouble. Usually you won't need this command.",
+            "pointer": "commands#rescanCommand"
+        },
+        {
+            "ep": "command",
+            "name": "preview",
+            "key": "ctrl_p",
+            "description": "Preview the current file.",
+            "pointer": "commands#preview"
+        },
+        {
+            "ep": "command",
+            "name": "export",
+            "description": "export a project (top-level directory)",
+            "pointer": "commands#exportCommand",
+            "params": [
+                {
+                    "name": "project",
+                    "type": "text",
+                    "description": "Project (top-level directory) to export"
+                },
+                {
+                    "name": "archivetype",
+                    "type": {
+                        "name": "selection",
+                        "data": ["zip", "tgz", "tar.gz"]
+                    },
+                    "description": "Type of archive to generate"
+                }
+            ]
+        }
+    ]
+}

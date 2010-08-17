@@ -1,0 +1,13 @@
+{
+    "description": "Provides syntax highlighting services for the editor",
+    "dependencies": {
+        "events": "0.0.0",
+        "syntax_directory": "0.0.0",
+        "underscore": "0.0.0",
+        "worker_manager": "0.0.0"
+    },
+    "environments": { "main": true, "worker": false },
+    "provides": [
+    ]
+}
+

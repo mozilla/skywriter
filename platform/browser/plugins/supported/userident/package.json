@@ -1,0 +1,63 @@
+{
+    "description": "Identifies the user via a Bespin server",
+    "dependencies": {
+        "bespin_server": "0.0",
+        "templater": "0.0.0",
+        "events": "0.0",
+        "settings": "0.0",
+        "jquery": "0.0.0",
+        "overlay": "1.2.0",
+        "toolbox_expose": "1.2.0",
+        "jquery_ui_checkbox": "1.4.1",
+        "theme_manager_base": "0.0.0"
+    },
+    "objects": ["notifier"],
+    "share": true,
+    "provides": [
+        {
+            "ep": "factory",
+            "name": "loginController",
+            "action": "new",
+            "pointer": "#loginController"
+        },
+        {
+            "ep": "themestyles",
+            "url": "styles.less"
+        },
+        {
+            "ep": "command",
+            "name": "logout",
+            "description": "Logout of Bespin",
+            "pointer": "#logout"
+        },
+        {
+            "ep": "command",
+            "name": "keychain",
+            "description": "Manages your Bespin keychain, which stores remote authentication information."
+        },
+        {
+            "ep": "command",
+            "name": "keychain getkey",
+            "description": "retrieve your SSH public key used for remote server auth",
+            "pointer": "kc#getkey"
+        },
+        {
+            "ep": "command",
+            "name": "keychain forget",
+            "description": "forget the keychain password that is temporarily saved in your browser",
+            "pointer": "kc#forget"
+        },
+        {
+            "ep": "notification",
+            "name": "loginerror",
+            "level": "error",
+            "description": "Problems logging in to Bespin"
+        },
+        {
+            "ep": "notification",
+            "name": "reset",
+            "level": "info",
+            "description": "Password Reset"
+        }
+    ]
+}

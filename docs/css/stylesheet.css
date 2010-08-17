@@ -1,0 +1,250 @@
+/**
+ * Stylesheet for the Typo E-mag HTML template.
+ * (c) 2009, Matìj Grabovský
+ * 
+ * Oi.
+ **/
+/**
+ * display, float, clear, width, height, margin, padding, vertical-align
+ * border, outline, background, list-style
+ * text-align, text-indent, text-transform, text-decoration, font, font-style, font-size, color
+ **/
+body {
+	background: white url(../img/pattern-bg.gif) repeat-x;
+	font: 10pt/1.8em Georgia, 'Times New Roman', Times, serif;
+	color: #444;
+}
+a {
+	padding: 1px 2px;
+	border-bottom: 1px solid #666;
+	outline: none;
+	color: #666;
+	text-decoration: none;
+}
+a:hover {
+	border: none;
+	background-color: #444;
+	color: white;
+}
+h1 a, h1 a:hover {
+	padding: inherit;
+	border: inherit;
+	background: inherit;
+	font: inherit;
+	color: inherit;
+}
+
+h2 {
+    margin-top: 1em;
+}
+
+h2.compact {
+	font: 1.5em/1.8em Georgia, 'Times New Roman', Times, serif;
+}
+ul.compact {
+	margin: 0 0 1px .5em;
+}
+ul.compact a {
+	border: none;
+}
+p {
+	margin-bottom: 1.8em;
+	text-align: justify;
+	text-indent: 1.8em;
+}
+.article .article-meta + p {
+	text-indent: 0;
+}
+img {
+	padding: 6px;
+	border: 1px solid #666;
+	background-color: white;
+}
+img.left {
+	float: left;
+	margin: 0 1.3em .5em 0;
+}
+img.right {
+	float: right;
+	margin: 0 0 .5em 1.3em;
+}
+.logotrade {
+	vertical-align: 100%;
+	font-size: .3em;
+}
+
+#main-container {
+	display: block;
+	width: 885px;
+	margin: 17px auto 50px auto;
+}
+
+#menu {
+	width: 100%;
+	height: 50px;
+	padding-top: 8px;
+	list-style: none;
+	text-align: center;
+	text-transform: uppercase;
+	font: 1.1em/1em Georgia, 'Times New Roman', Times, serif;
+}
+
+#menu ul {
+    list-style-type: none;
+}
+
+#menu li {
+	display: inline;
+	margin: 0 10px;
+	vertical-align: middle;
+}
+#menu li a {
+	padding: 8px 10px;
+	border: none;
+}
+#menu li.current a {
+	background-color: #c40000;
+	color: white;
+}
+
+ul.compact {
+    list-style-type: none;
+}
+
+ul {
+    list-style-type: square;
+    list-style-position: inside;
+}
+
+ol {
+    list-style-type: decimal;
+    list-style-position: inside;
+}
+
+#web-title {
+	margin: 15px 0 10px 0;
+	font: 2.8em Georgia, 'Times New Roman', Times, serif;
+}
+#web-title .emphasize {
+	font-style: italic;
+	color: #c40000;
+}
+#web-subtitle {
+	font: 1.6em Georgia, 'Times New Roman', Times, serif;
+}
+
+#maincol {
+	float: left;
+	width: 550px;
+	margin: 35px 35px 40px 0;
+}
+#sidebar {
+	float: left;
+	width: 300px;
+	margin-top: 35px;
+}
+#sidebar h2 {
+	color: #666;
+}
+
+.article {
+	margin-top: 80px;
+}
+.article:first-child {
+	margin-top: 0;
+}
+.article + .article {
+	margin-top: 40px;
+	padding-top: 20px;
+	border-top: 2px solid #cfcfcf;
+}
+.article-title {
+	margin: 5px 0 6px 0;
+	font: 2.6em/1.2em Georgia, 'Times New Roman', Times, serif;
+	color: #c40000;
+}
+.article-title a:hover {
+	color: #444;
+}
+.article-meta {
+	margin-bottom: 30px;
+	font: italic .8em/1.5em Georgia, 'Times New Roman', Times, serif;
+	color: #666;
+}
+.readmore {
+	margin-left: 1em;
+	border: none;
+	font: italic 1.3em Georgia, 'Times New Roman', Times, serif;
+}
+
+#pages {
+	margin: 10px 0 40px 0;
+}
+#pages a {
+	height: 14px;
+	margin: 0 1px;
+	padding: 2px 5px;
+	border: 1px solid #cfcfcf;
+}
+#pages a.current {
+	margin-left: 5px;
+	background-color: #c40000;
+	color: white;
+}
+
+#footer {
+	clear: both;
+	width: 885px;
+	height: 160px;
+	margin: 0 auto;
+	padding: 20px 0;
+	border-top: 2px solid #cfcfcf;
+	line-height: 1.6em;
+}
+#footer > div {
+	float: left;
+	width: 260px;
+	margin-right: 35px;
+}
+#footer > #fullwidth {
+	float: none;
+	width: 100%;
+	text-align: center;
+	font-size: .9em;
+	color: #666;
+}
+#footer .date {
+	vertical-align: .15em;
+	font-size: .75em;
+	color: #666;
+}
+
+dt {
+    font-weight: bold;
+}
+
+dd {
+    margin-left: 1em;
+}
+
+pre {
+    -moz-background-clip:border;
+    -moz-background-inline-policy:continuous;
+    -moz-background-origin:padding;
+    background:#F3F3F3 none repeat scroll 0 0;
+    border:1px solid #DADADA;
+    margin-bottom: 1.8em;
+}
+
+sup {
+    height: 0;
+    line-height: 1;
+    position: relative;
+    top: -0.6em;
+    vertical-align: bottom;
+}
+
+sup a {
+    text-decoration: none;
+    border-bottom: none;
+}

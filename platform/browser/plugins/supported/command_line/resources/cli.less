@@ -1,0 +1,174 @@
+/* ***** BEGIN LICENSE BLOCK *****
+* Version: MPL 1.1/GPL 2.0/LGPL 2.1
+*
+* The contents of this file are subject to the Mozilla Public License Version
+* 1.1 (the "License"); you may not use this file except in compliance with
+* the License. You may obtain a copy of the License at
+* http: //www.mozilla.org/MPL/
+*
+* Software distributed under the License is distributed on an "AS IS" basis,
+* WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+* for the specific language governing rights and limitations under the
+* License.
+*
+* The Original Code is Bespin.
+*
+* The Initial Developer of the Original Code is
+* Mozilla.
+* Portions created by the Initial Developer are Copyright (C) 2009
+* the Initial Developer. All Rights Reserved.
+*
+* Contributor(s):
+*
+* Alternatively, the contents of this file may be used under the terms of
+* either the GNU General Public License Version 2 or later (the "GPL"), or
+* the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+* in which case the provisions of the GPL or the LGPL are applicable instead
+* of those above. If you wish to allow use of your version of this file only
+* under the terms of either the GPL or the LGPL, and not to allow others to
+* use your version of this file under the terms of the MPL, indicate your
+* decision by deleting the provisions above and replace them with the notice
+* and other provisions required by the GPL or the LGPL. If you do not delete
+* the provisions above, a recipient may use your version of this file under
+* the terms of any one of the MPL, the GPL or the LGPL.
+*
+* ***** END LICENSE BLOCK ***** */
+
+/*
+We would like to be using flexbox here, however flexbox on Moz is way too buggy
+so we're stuck with absolute positioning. The flexbox layout is commented out
+for when the bugs are fixed.
+*/
+
+/* Layout */
+.cmd_line {
+  background: @bg; color: @text;
+  font-family: @fonts; font-size: 90%;
+  overflow: hidden;
+
+  /* FLEXBOX
+  display: box; display: -moz-box; display: -webkit-box;
+  box-orient: vertical; -moz-box-orient: vertical; -webkit-box-orient: vertical;
+  */
+  /* ABSOLUTE */
+  position: relative;
+}
+
+.cmd_tog {
+  /* FLEXBOX
+  box-flex: 1; -moz-box-flex: 1; -webkit-box-flex: 1;
+  */
+  /* ABSOLUTE */
+  top: 0; right: 0; bottom: 26px; left: 0;
+}
+
+.cmd_top {
+  /* FLEXBOX
+  display: box; display: -moz-box; display: -webkit-box;
+  box-orient: horizontal; -moz-box-orient: horizontal; -webkit-box-orient: horizontal;
+  */
+}
+
+/*
+Where the popup menus are displayed.
+TODO: Consider taking them out of the cmd_line and attaching to the page
+directly. This way they could vertically occupy more space than the command line
+and even bespin. Also the more complex layouts could be cached
+*/
+.cmd_line div.cmd_hints {
+  line-height: 1.2em;
+  padding-left: 30px;
+
+  /* FLEXBOX
+  display: box; display: -moz-box; display: -webkit-box;
+  box-orient: vertical; -moz-box-orient: vertical; -webkit-box-orient: vertical;
+  box-pack: end; -moz-box-pack: end; -webkit-box-pack: end;
+  box-align: start; -moz-box-align: start; -webkit-box-align: start;
+  */
+  /* ABSOLUTE */
+  position: absolute;
+  top: auto; right: auto; bottom: 0; left: 0; height: auto; width: auto;
+}
+
+.cmd_toolbar {
+  /* FLEXBOX
+  width: 30px;
+  display: box; display: -moz-box; display: -webkit-box;
+  box-orient: vertical; -moz-box-orient: vertical; -webkit-box-orient: vertical;
+  box-align: center; -moz-box-align: center; -webkit-box-align: center;
+  */
+  /* ABSOLUTE */
+  position: absolute;
+  top: 0; width: 30px; bottom: 0; left: 0;
+}
+.cmd_toolbar > * {
+  height: 16px; width: 16px; margin: 5px 7px;
+}
+
+.cmd_table {
+  overflow-y: auto; overflow-x: hidden;
+  /* FLEXBOX
+  box-flex: 1; -moz-box-flex: 1; -webkit-box-flex: 1;
+  */
+  /* ABSOLUTE */
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 30px;
+}
+
+
+/* The input area */
+.cmd_cli {
+  border-top: 1px solid @border_bg;
+  background: @input_bg;
+  background: -moz-linear-gradient(top, @input_bg, @input_bg2);
+  background: -webkit-gradient(linear, left top, left bottom, from(@input_bg), to(@input_bg2));
+
+  /* FLEXBOX
+  height: 25px;
+  display: box; display: -moz-box; display: -webkit-box;
+  box-orient: horizontal; -moz-box-orient: horizontal; -webkit-box-orient: horizontal;
+  */
+  /* ABSOLUTE */
+  position: absolute;
+  height: 25px; right: 0; bottom: 0; left: 0;
+}
+
+.cmd_prompt {
+  width: 40px; padding-left: 5px;
+  /* ABSOLUTE */
+  position: absolute;
+  top: 0; width: 40px; bottom: 0; left: 0;
+}
+
+.cmd_kbd {
+  /* FLEXBOX
+  box-flex: 1; -moz-box-flex: 1; -webkit-box-flex: 1;
+  */
+  /* ABSOLUTE */
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 40px;  
+}
+
+.cmd_line input.cmd_input {
+  color: @hi_text; font-size: 120%; font-family: @fonts; 
+  background: transparent;
+  outline: none; border: 0;
+  box-shadow: none; -moz-box-shadow: none; -webkit-box-shadow: none;
+  padding: 4px 0 0 0;
+  width: 100%;
+}
+.cmd_line input.cmd_input:focus {
+  outline: none; border: 0;
+  box-shadow: none; -moz-box-shadow: none; -webkit-box-shadow: none;
+}
+
+/* Command line completion */
+.cmd_completion {
+  color: @lo_text2; font-size: 120%; font-family: @fonts;
+  padding: 0 0 5px 2px;
+}
+.cmd_existing { color: @input_bg; text-shadow: none; }
+.cmd_extension { margin-left: 30px; }
+.cmd_extension: before { content: "\2794\00a0 "; }
+
+.cmd_pin { background-image: url(images/pins.png); }

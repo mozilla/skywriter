@@ -1,0 +1,24 @@
+{
+    "description": "Keyboard shortcuts",
+    "dependencies":
+    {
+        "settings": "0.0",
+        "canon": "0.0"
+    },
+    "provides":
+    [
+        {
+            "ep": "extensionpoint",
+            "name": "keymapping",
+            "description": "A keymapping defines how keystrokes are interpreted.",
+
+            "params": [
+                {
+                    "name": "states",
+                    "required": true,
+                    "description": "Holds the states and all the informations about the keymapping. See docs: pluginguide/keymapping"
+                }
+            ]
+        }
+    ]
+}

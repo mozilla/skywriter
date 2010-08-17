@@ -1,0 +1,19 @@
+{
+    "description": "Provides a demo file view sidebar",
+    "dependencies": {
+        "templater": "0.0.0"
+    },
+    "provides": [
+        {
+            "ep": "factory",
+            "name": "fileView",
+            "action": "new",
+            "pointer": "index#FileView"
+        },
+        {
+            "ep": "appcomponent",
+            "name": "fileview",
+            "pointer": "index#FileView"
+        }
+    ]
+}

@@ -1,0 +1,499 @@
+{
+    "description": "Canvas-based text editor component and many common editing commands",
+    "dependencies":
+    {
+        "canon": "0.0.0",
+        "keyboard": "0.0.0",
+        "rangeutils": "0.0.0",
+        "settings": "0.0.0",
+        "edit_session": "0.0.0",
+        "syntax_manager" : "0.0.0",
+        "theme_manager": "0.0.0",
+        "undomanager": "0.0.0",
+        "traits": "0.0.0",
+        "completion": "0.0.0"
+    },
+    "provides":
+    [
+        {
+            "ep": "factory",
+            "name": "text_editor",
+            "pointer": "views/editor#EditorView",
+            "action": "new"
+        },
+        {
+            "ep": "command",
+            "name": "backspace",
+            "key": "backspace",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/editing#backspace"
+        },
+        {
+            "ep": "command",
+            "name": "delete",
+            "key": "delete",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/editing#deleteCommand"
+        },
+        {
+            "ep": "command",
+            "name": "deletelines",
+            "description": "Delete all lines currently selected",
+            "key": "ctrl_d",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/editing#deleteLines"
+        },
+        {
+            "ep": "command",
+            "name": "openline",
+            "description": "Create a new, empty line below the current one",
+            "key": "ctrl_return",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/editing#openLine"
+        },
+        {
+            "ep": "command",
+            "name": "joinline",
+            "description": "Join the current line with the following",
+            "key": "ctrl_shift_j",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/editing#joinLines"
+        },
+        {
+            "ep": "command",
+            "name": "insertText",
+            "pointer": "commands/editing#insertText",
+            "params": [
+                {
+                    "name": "text",
+                    "type": "text",
+                    "description": "The text to insert",
+                    "defaultValue": ""
+                }
+            ]
+        },
+        {
+            "ep": "command",
+            "name": "newline",
+            "key": "return",
+            "predicates": { "isTextView": true, "completing": false },
+            "pointer": "commands/editing#newline"
+        },
+        {
+            "ep": "command",
+            "name": "tab",
+            "key": "tab",
+            "predicates": { "isTextView": true, "completing": false },
+            "pointer": "commands/editing#tab"
+        },
+        {
+            "ep": "command",
+            "name": "untab",
+            "key": "shift_tab",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/editing#untab"
+        },
+        {
+            "ep": "command",
+            "name": "move",
+            "predicates": {"isTextView": true}
+        },
+        {
+            "ep": "command",
+            "name": "findnext",
+            "key": "ctrl_g",
+            "description": "Repeat the last search (forward)",
+            "pointer": "commands/editor#findNextCommand"
+        },
+        {
+            "ep": "command",
+            "name": "findprev",
+            "key": "ctrl_shift_g",
+            "description": "Repeat the last search (backward)",
+            "pointer": "commands/editor#findPrevCommand"
+        },
+        {
+            "ep": "command",
+            "name": "move down",
+            "key": "down",
+            "predicates": { "isTextView": true, "completing": false },
+            "pointer": "commands/movement#moveDown"
+        },
+        {
+            "ep": "command",
+            "name": "move left",
+            "key": "left",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#moveLeft"
+        },
+        {
+            "ep": "command",
+            "name": "move right",
+            "key": "right",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#moveRight"
+        },
+        {
+            "ep": "command",
+            "name": "move up",
+            "key": "up",
+            "predicates": { "isTextView": true, "completing": false },
+            "pointer": "commands/movement#moveUp"
+        },
+        {
+            "ep": "command",
+            "name": "select",
+            "predicates": { "isTextView": true }
+        },
+        {
+            "ep": "command",
+            "name": "select down",
+            "key": "shift_down",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#selectDown"
+        },
+        {
+            "ep": "command",
+            "name": "select left",
+            "key": "shift_left",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#selectLeft"
+        },
+        {
+            "ep": "command",
+            "name": "select right",
+            "key": "shift_right",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#selectRight"
+        },
+        {
+            "ep": "command",
+            "name": "select up",
+            "key": "shift_up",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#selectUp"
+        },
+        {
+            "ep": "command",
+            "name": "move lineend",
+            "key": ["end", "ctrl_right"],
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#moveLineEnd"
+        },
+        {
+            "ep": "command",
+            "name": "select lineend",
+            "key": ["shift_end", "ctrl_shift_right"],
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#selectLineEnd"
+        },
+        {
+            "ep": "command",
+            "name": "move docend",
+            "key": "ctrl_down",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#moveDocEnd"
+        },
+        {
+            "ep": "command",
+            "name": "select docend",
+            "key": "ctrl_shift_down",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#selectDocEnd"
+        },
+        {
+            "ep": "command",
+            "name": "move linestart",
+            "key": ["home", "ctrl_left"],
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#moveLineStart"
+        },
+        {
+            "ep": "command",
+            "name": "select linestart",
+            "key": ["shift_home", "ctrl_shift_left"],
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#selectLineStart"
+        },
+        {
+            "ep": "command",
+            "name": "move docstart",
+            "key": "ctrl_up",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#moveDocStart"
+        },
+        {
+            "ep": "command",
+            "name": "select docstart",
+            "key": "ctrl_shift_up",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#selectDocStart"
+        },
+        {
+            "ep": "command",
+            "name": "move nextword",
+            "key": [ "alt_right" ],
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#moveNextWord"
+        },
+        {
+            "ep": "command",
+            "name": "select nextword",
+            "key": [ "alt_shift_right" ],
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#selectNextWord"
+        },
+        {
+            "ep": "command",
+            "name": "move prevword",
+            "key": [ "alt_left" ],
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#movePreviousWord"
+        },
+        {
+            "ep": "command",
+            "name": "select prevword",
+            "key": [ "alt_shift_left" ],
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#selectPreviousWord"
+        },
+        {
+            "ep": "command",
+            "name": "select all",
+            "key": [ "ctrl_a", "meta_a" ],
+            "predicates": { "isTextView": true },
+            "pointer": "commands/movement#selectAll"
+        },
+        {
+            "ep": "command",
+            "name": "scroll",
+            "predicates": { "isTextView": true }
+        },
+        {
+            "ep": "command",
+            "name": "scroll start",
+            "key": "ctrl_home",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/scrolling#scrollDocStart"
+        },
+        {
+            "ep": "command",
+            "name": "scroll end",
+            "key": "ctrl_end",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/scrolling#scrollDocEnd"
+        },
+        {
+            "ep": "command",
+            "name": "scroll down",
+            "key": "pagedown",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/scrolling#scrollPageDown"
+        },
+        {
+            "ep": "command",
+            "name": "scroll up",
+            "key": "pageup",
+            "predicates": { "isTextView": true },
+            "pointer": "commands/scrolling#scrollPageUp"
+        },
+        {
+            "ep": "command",
+            "name": "lc",
+            "description": "Change all selected text to lowercase",
+            "withKey": "CMD SHIFT L",
+            "pointer": "commands/editor#lcCommand"
+        },
+        {
+            "ep": "command",
+            "name": "detab",
+            "params":
+            [
+                {
+                    "name": "tabsize",
+                    "type": "text",
+                    "description": "Optionally, specify a tab size. (Defaults to setting.)",
+                    "defaultValue": null
+                }
+            ],
+            "description": "Convert tabs to spaces.",
+            "pointer": "commands/editor#detabCommand"
+        },
+        {
+            "ep": "command",
+            "name": "entab",
+            "params":
+            [
+                {
+                    "name": "tabsize",
+                    "type": "text",
+                    "description": "Optionally, specify a tab size. (Defaults to setting.)",
+                    "defaultValue": null
+                }
+            ],
+            "description": "Convert spaces to tabs.",
+            "pointer": "commands/editor#entabCommand"
+        },
+        {
+            "ep": "command",
+            "name": "trim",
+            "params":
+            [
+                {
+                    "name": "side" ,
+                    "type":
+                    {
+                        "name": "selection",
+                        "data": [ {"name": "left"}, {"name":"right"}, {"name": "both"} ]
+                    },
+                    "description": "Do we trim from the left, right or both",
+                    "defaultValue": "both"
+                }
+            ],
+            "description": "trim trailing or leading whitespace from each line in selection",
+            "pointer": "commands/editor#trimCommand"
+        },
+        {
+            "ep": "command",
+            "name": "uc",
+            "description": "Change all selected text to uppercase",
+            "withKey": "CMD SHIFT U",
+            "pointer": "commands/editor#ucCommand"
+        },
+        {
+            "ep": "command",
+            "name": "redo",
+            "key": [ "ctrl_shift_z" ],
+            "predicates": { "isTextView": true },
+            "pointer": "controllers/undo#undoManagerCommand"
+        },
+        {
+            "ep": "command",
+            "name": "undo",
+            "key": [ "ctrl_z" ],
+            "predicates": { "isTextView": true },
+            "pointer": "controllers/undo#undoManagerCommand"
+        },
+        {
+            "ep": "setting",
+            "name": "tabstop",
+            "description": "The distance in characters between each tab",
+            "type": "number",
+            "defaultValue": 8
+        },
+        {
+            "ep": "setting",
+            "name": "customKeymapping",
+            "description": "Customize the keymapping",
+            "type": "text",
+            "defaultValue": "{}"
+        },
+        {
+            "ep": "setting",
+            "name": "keymapping",
+            "description": "The keymapping to use",
+            "type": "text",
+            "defaultValue": "standard"
+        },
+        {
+            "ep": "setting",
+            "name": "fontsize",
+            "description": "The editor font size in pixels",
+            "type": "number",
+            "defaultValue": 14
+        },
+        {
+            "ep": "setting",
+            "name": "fontface",
+            "description": "The editor font face",
+            "type": "text",
+            "defaultValue": "Monaco, Lucida Console, monospace"
+        },
+        {
+            "ep": "themevariable",
+            "name": "gutter",
+            "defaultValue": {
+                "color": "#e5c138",
+                "backgroundColor": "#4c4a41",
+                "paddingLeft": 5,
+                "paddingRight": 10
+            }
+        },
+        {
+            "ep": "themevariable",
+            "name": "editor",
+            "defaultValue": {
+                "color": "#e6e6e6",
+                "backgroundColor": "#2a211c",
+
+                "cursorColor": "#879aff",
+                "selectedTextBackgroundColor": "#526da5",
+
+                "unfocusedCursorColor": "#ff0033",
+                "unfocusedCursorBackgroundColor": "#73171e"
+            }
+        },
+        {
+            "ep": "themevariable",
+            "name": "highlighterFG",
+            "defaultValue": {
+                "plain":      "#e6e6e6",
+                "comment":    "#666666",
+                "directive":  "#999999",
+                "error":      "#ff0000",
+                "identifier": "#D841FF",
+                "keyword":    "#42A8ED",
+                "operator":   "#88BBFF",
+                "string":     "#039A0A",
+                "addition":   "#FFFFFF",
+                "deletion":   "#FFFFFF"
+            }
+        },
+        {
+            "ep": "themevariable",
+            "name": "highlighterBG",
+            "defaultValue": {
+                "addition": "#008000",
+                "deletion": "#800000"
+            }
+        },
+        {
+            "ep": "themevariable",
+            "name": "scroller",
+            "defaultValue": {
+                "padding": 5,
+                "thickness": 17,
+
+                "backgroundStyle": "#2A211C",
+
+                "fullAlpha": 1.0,
+                "particalAlpha": 0.3,
+
+                "nibStyle": "rgb(100, 100, 100)",
+                "nibArrowStyle": "rgb(255, 255, 255)",
+                "nibStrokeStyle": "rgb(150, 150, 150)",
+
+                "trackFillStyle": "rgba(50, 50, 50, 0.8)",
+                "trackStrokeStyle": "rgb(150, 150, 150)",
+
+                "barFillStyle": "rgb(0, 0, 0)",
+                "barFillGradientTopStart": "rgb(90, 90, 90)",
+                "barFillGradientTopStop": "rgb(40, 40, 40)",
+                "barFillGradientBottomStart": "rgb(22, 22, 22)",
+                "barFillGradientBottomStop": "rgb(44, 44, 44)"
+            }
+        },
+        {
+            "ep": "extensionpoint",
+            "name": "editorChange",
+            "description": "Event: Notify when something within the editor changed.",
+            "params": [
+                {
+                    "name": "pointer",
+                    "required": true,
+                    "description": "Function that is called whenever a change happened."
+                }
+            ]
+        }
+    ]
+}

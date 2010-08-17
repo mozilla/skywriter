@@ -1,0 +1,6 @@
+{
+    "version": "1.6.0",
+    "dependencies": {
+        "jquery": "1.4.2"
+    }
+}

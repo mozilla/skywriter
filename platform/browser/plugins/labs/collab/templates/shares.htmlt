@@ -1,0 +1,21 @@
+<div>${title}</div>
+<table>
+    <tbody>
+        <tr foreach="${shares}">
+            <td>${param.name}</td>
+            <td if="${param.share.type === 'everyone'}" colspan="2">everyone</td>
+            <td if="${param.share.type === 'group'}" colspan="2">
+                ${param.share.recipient} <a href="#list" data-arg0="${param.share.recipient}" onclick="${onList}">(list)</a>
+            </td>
+            <td if="${param.share.type !== 'everyone' && param.share.type !== 'group'}">
+                <img width="16" height="16" class="social_user_name_${param.share.recipient}" src="${param.url}">
+            </td>
+            <td if="${param.share.type !== 'everyone' && param.share.type !== 'group'}">
+                ${param.share.recipient}
+            </td>
+            <td if="${param.share.edit}">editable</td>
+            <td if="${!param.share.edit}">read-only</td>
+            <td><a href="#unshare" data-arg0="${param.share.project}" data-arg1="${param.share.type !== 'everyone' ? param.share.recipient : ''}" onclick="${onUnshare}">(unshare)</a></td>
+        </tr>
+    </tbody>
+</table>

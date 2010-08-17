@@ -1,0 +1,90 @@
+<div id="bespinloginform" class="pane" style="display:none">
+	<div id="welcome">
+		<img class="logo" src="${resourceURL}images/bespin-s.png"><h1>Welcome to Bespin</h1>
+		<p>The <a href="http://mozillalabs.com/bespin/" target="_blank">Bespin project</a> is building a web-based code editor using the emerging HTML5 standard. The editor is easily extensible with JavaScript and can be used in your own applications. This server is for <b>demonstration purposes only</b> (read our <a href="https://bespin.mozillalabs.com/docs/userguide/server_roadmap.html" target="_blank">server roadmap</a> for details).</p>
+	</div>
+	
+	<div class="form">
+		<fieldset style="border-width: 0px">
+			<div>
+			    <input name="radio" id="useridenRadioLogin" type="radio" radioFor="loginForm"/>
+			    <label for="useridenRadioLogin">I have a Bespin account</label>
+			</div>
+			<div save="${lostForm.radio}">
+			    <input name="radio" id="useridentRadioLost" type="radio" radioFor="lostForm"/>
+			    <label for="useridentRadioLost">Password lost?</label>
+			</div>
+			<div style="display:none" save="${resetForm.radio}">
+			    <input name="radio" id="useridentRadioReset" type="radio" radioFor="resetForm" />
+			    <label for="useridentRadioReset">Reset password</label>
+			</div>
+			<div>
+			    <input name="radio" id="useridentRadioNew" type="radio" radioFor="signupForm"/>
+			    <label for="useridentRadioNew">I'm new</label>
+			</div>
+		</fieldset>
+		
+		<div id="formDiv" save="${formDiv}">
+    		<form id="loginForm" save="${loginForm.form}" onsubmit="${loginForm.submit}" style="display:block">
+    			<p>
+    			    <input type="text" name="username" save="${loginForm.username}" tabindex="1"  />
+    			    <label for="username"><small>Username or Email</small></label>
+    			</p>
+    			<p>
+    			    <input type="password" name="password" save="${loginForm.password}" tabindex="2"  />
+                    <label for="password"><small>Password</small></label>
+                </p>
+		
+    			<input class="commentButton" name="submit" type="submit" tabindex="5" value="Log in" />
+		
+    		</form>	
+
+    		<form id="lostForm" save="${lostForm.form}" onsubmit="${lostForm.submit}">
+    			<p style="font-size: 12px; padding-bottom: 6px">
+    			    Don't worry, you can get a new password. Just tell us your:
+    			</p>
+		    	<p>
+    			    <input type="input" name="input" save="${lostForm.input}" tabindex="1"  />
+                    <label for="input"><small>Username or Email</small></label>
+                </p>
+    			<input class="commentButton" name="submit" type="submit" tabindex="2" value="Reset Password" />
+    		</form>	
+
+    		<form id="resetForm" save="${resetForm.form}" onsubmit="${resetForm.submit}">
+    			<p>
+    			    <input type="password" name="password" save="${resetForm.password}" tabindex="2"  />
+                    <label for="password"><small>Password</small></label>
+			        <small class="hint" save="${signupForm.passwordHint}"></small>
+                </p>
+                <p>
+    			    <input type="password" name="password2" save="${resetForm.password2}"  tabindex="3"  />
+                    <label for="password2"><small>Password <i>(confirm)</i></small></label>
+                </p>
+    			<input class="commentButton" name="submit" type="submit" tabindex="2" value="Save New Password" />
+    		</form>	
+
+    		<form id="signupForm" save="${signupForm.form}" onsubmit="${signupForm.submit}">
+    			<p>
+    			    <input type="text" name="username" save="${signupForm.username}" tabindex="1"  />
+			        <label for="username"><small>Username</small></label>
+			        <small style="display:none" class="hint" save="${signupForm.usernameHint}">At least 4 chars</small>
+    			</p>
+    			<p>
+    			    <input type="password" name="password" save="${signupForm.password}" tabindex="2"  />
+                    <label for="password"><small>Password</small></label>
+			        <small class="hint" save="${signupForm.passwordHint}"></small>
+                </p>
+                <p>
+    			    <input type="password" name="password2" save="${signupForm.password2}"  tabindex="3"  />
+                    <label for="password2"><small>Password <i>(confirm)</i></small></label>
+                </p>
+                <p>
+    			    <input type="email" name="email" save="${signupForm.email}" tabindex="4"  />
+                    <label for="email"><small>Email</small></label>
+			        <small class="hint" save="${signupForm.emailHint}"></small>
+                </p>
+    			<input class="commentButton" name="submit" type="submit" tabindex="5" value="Sign up" />
+    		</form>	
+        </div>
+	</div>
+</div>

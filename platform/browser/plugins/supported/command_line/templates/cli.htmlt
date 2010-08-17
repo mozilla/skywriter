@@ -1,0 +1,45 @@
+
+<div class="cmd_line" save="${cliInputView.element}"
+    onfocus="${cliInputView._focusCheck}" capturefocus="capturefocus"
+    onblur="${cliInputView._focusCheck}" captureblur="captureblur"
+    onclick="${cliInputView.focus}" captureclick="captureclick">
+
+  <!-- The output area that changes height -->
+  <div class="cmd_tog stack_children" save="${cliInputView._tog}">
+
+    <div class="cmd_top">
+      <!-- Side toolbar -->
+      <div class="cmd_toolbar">
+        <img src="${imagePath}/dot_clear.gif" class="cmd_pin check"
+            alt="Pin/Unpin the console output"
+            onclick="${cliInputView._togglePin}"/>
+      </div>
+  
+      <!-- CLI output table -->
+      <div class="cmd_table" save="${cliInputView._table}"></div>
+    </div>
+
+    <!-- A div to hang hints on -->
+    <div class="cmd_hints" save="${cliInputView._hints}"></div>
+
+  </div>
+
+  <!-- The input area, with fixed height -->
+  <div class="cmd_cli">
+
+    <!-- The prompt -->
+    <div class="cmd_prompt cmd_gt">
+      <span class="cmd_brackets">{ }</span> &gt;
+    </div>
+
+    <!-- Where you type commands -->
+    <div class="cmd_kbd stack_children">
+      <div class="cmd_completion" save="${cliInputView._completer}"></div>
+      <div>
+        <input class="cmd_input" type="text" save="${cliInputView._inputer}"/>
+      </div>
+    </div>
+
+  </div>
+
+</div>

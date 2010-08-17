@@ -1,0 +1,39 @@
+{
+    "description": "Handles colors in Bespin",
+    "dependencies": {
+        "less": "0.0.0",
+        "settings": "0.0.0",
+        "events": "0.0.0",
+        "theme_manager_base": "0.0.0"
+    },
+    "environments": { "main": true, "worker": false },
+    "share": true,
+    "provides": [
+        {
+            "ep": "extensionhandler",
+            "name": "themestyles",
+
+            "register": "themestyles#registerThemeStyles",
+            "unregister": "themestyles#unregisterThemeStyles"
+        },
+        {
+            "ep": "extensionhandler",
+            "name": "theme",
+
+            "register": "index#registerTheme",
+            "unregister": "index#unregisterTheme"
+        },
+        {
+            "ep": "setting",
+            "name": "theme",
+            "type": "text",
+
+            "defaultValue": "standard",
+            "description": "The theme plugin's name to use. If set to 'standard' no theme will be used"
+        },
+        {
+            "ep": "appLaunched",
+            "pointer": "#appLaunched"
+        }
+    ]
+}

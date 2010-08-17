@@ -1,0 +1,26 @@
+
+<!-- The div for the input (i.e. what was typed) -->
+<div class="cmd_rowin" save="${actions.rowin}"
+    onclick="${actions.copyToInput}"
+    ondblclick="${actions.executeRequest}">
+
+  <!-- What the user actually typed -->
+  <div class="cmd_gt">&gt; </div>
+  <div class="cmd_typed" save="${actions.typed}"></div>
+
+  <!-- The extra details that appear on hover -->
+  <div class="cmd_duration cmd_hover" save="${actions.duration}"></div>
+  <img class="cmd_hover" onclick="${actions.hideOutput}" save="${actions.hide}"
+      alt="Hide command output" src="${imagePath}/minus.png"/>
+  <img class="cmd_hover cmd_hidden" onclick="${actions.showOutput}" save="${actions.show}"
+      alt="Show command output" src="${imagePath}/plus.png"/>
+  <img class="cmd_hover" onclick="${actions.remove}"
+      alt="Remove this command from the history" src="${imagePath}/closer.png"/>
+
+</div>
+
+<!-- The div for the command output -->
+<div class="cmd_rowout" save="${actions.rowout}">
+  <div class="cmd_output" save="${actions.output}"></div>
+  <img src="${imagePath}/throbber.gif" save="${actions.throb}"/>
+</div>

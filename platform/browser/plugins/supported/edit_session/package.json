@@ -1,0 +1,14 @@
+{
+    "description": "Ties together the files being edited with the views on screen",
+    "dependencies": {
+        "events": "0.0.0"
+    },
+    "provides": [
+        {
+            "ep": "factory",
+            "name": "session",
+            "pointer": "#createSession",
+            "action": "call"
+        }
+    ]
+}

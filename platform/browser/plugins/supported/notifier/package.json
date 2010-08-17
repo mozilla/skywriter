@@ -1,0 +1,99 @@
+{
+    "description": "Provides a way to un-obtrusively notify users of asynchronous events",
+    "dependencies": {
+        "settings": "0.0.0"
+    },
+    "provides":
+    [
+        {
+            "ep": "factory",
+            "name": "notifier",
+            "action": "new",
+            "pointer": "#Notifier"
+        },
+        {
+            "ep": "extensionpoint",
+            "name": "notification",
+            "description": "tells the notifier about a kind of notification that may be presented to the user. This will be used in a notification configuration user interface, for example.",
+            "register": "#registerNotification",
+            "unregister": "#unregisterNotification",
+            "params": [
+                {
+                    "name": "name",
+                    "description": "name of the notification type. Notifications are identified by the combination of pluginName_notificationName, so you don't need to worry about making this unique across Bespin.",
+                    "type": "string",
+                    "required": true
+                },
+                {
+                    "name": "description",
+                    "description": "The more human-readable form of the notification name that will be presented to the user.",
+                    "type": "string"
+                },
+                {
+                    "name": "level",
+                    "description": "default level for these notifications. Value should be 'error', 'info' or 'debug'.",
+                    "type": "string"
+                },
+                {
+                    "name": "onclick",
+                    "description": "function that should be called if one of these notifications is clicked on. Will be passed the message object.",
+                    "type": "pointer"
+                },
+                {
+                    "name": "iconUrl",
+                    "description": "custom icon for this notification. looked up relative to the plugins resources directory.",
+                    "type": "resourceUrl"
+                }
+            ]
+        },
+        {
+            "ep": "notification",
+            "name": "debug",
+            "description": "Debugging Messages",
+            "level": "debug"
+        },
+        {
+            "ep": "extensionpoint",
+            "name": "notificationHandler",
+            "description": "A function that is called with message objects whenever appropriate notifications are published.",
+            "indexOn": "name",
+            "params": [
+                {
+                    "name": "name",
+                    "description": "convenient name for the handler (used in configuration)",
+                    "type": "string",
+                    "required": true
+                },
+                {
+                    "name": "description",
+                    "description": "Longer, more human-readable description of the handler",
+                    "type": "string"
+                },
+                {
+                    "name": "pointer",
+                    "description": "function that will be called with the message",
+                    "required": true
+                }
+            ]
+        },
+        {
+            "ep": "notificationHandler",
+            "name": "console",
+            "description": "Logs to the browser console",
+            "pointer": "handlers#console"
+        },
+        {
+            "ep": "notificationHandler",
+            "name": "alert",
+            "description": "Displays in browser alerts",
+            "pointer": "handlers#alert"
+        },
+        {
+            "ep": "setting",
+            "name": "notifications",
+            "description": "JSON array of objects describing how notifications are configured",
+            "type": "text",
+            "defaultValue": "[]"
+        }
+    ]
+}

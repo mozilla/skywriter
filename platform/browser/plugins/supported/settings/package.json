@@ -1,0 +1,69 @@
+{
+    "description": "Infrastructure and commands for managing user preferences",
+    "dependencies": {
+        "types": "0.0"
+    },
+    "share": true,
+    "provides":
+    [
+        {
+            "ep": "extensionpoint",
+            "name": "setting",
+            "description": "A setting is something that the application offers as a way to customize how it works",
+            "register": "index#addSetting",
+            "indexOn": "name"
+        },
+        {
+            "ep": "extensionpoint",
+            "name": "settingChange",
+            "description": "A settingChange is a way to be notified of changes to a setting"
+        },
+        {
+            "ep": "command",
+            "name": "set",
+            "params":
+            [
+                {
+                    "name": "setting",
+                    "type":
+                    {
+                        "name": "selection",
+                        "pointer": "settings:index#getSettings"
+                    },
+                    "description": "The name of the setting to display or alter",
+                    "defaultValue": null
+                },
+                {
+                    "name": "value",
+                    "type":
+                    {
+                        "name": "deferred",
+                        "pointer": "settings:index#getTypeSpecFromAssignment"
+                    },
+                    "description": "The new value for the chosen setting",
+                    "defaultValue": null
+                }
+            ],
+            "description": "define and show settings",
+            "pointer": "commands#setCommand"
+        },
+        {
+            "ep": "command",
+            "name": "unset",
+            "params":
+            [
+                {
+                    "name": "setting",
+                    "type":
+                    {
+                        "name": "selection",
+                        "pointer": "settings:index#getSettings"
+                    },
+                    "description": "The name of the setting to return to defaults"
+                }
+            ],
+            "description": "unset a setting entirely",
+            "pointer": "commands#unsetCommand"
+        }
+    ]
+}

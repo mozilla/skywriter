@@ -1,0 +1,17 @@
+{
+    "description": "Manages undoable events",
+    "provides": [
+        {
+            "ep": "command",
+            "name": "redo",
+            "key": [ "ctrl_shift_z" ],
+            "pointer": "#undoManagerCommand"
+        },
+        {
+            "ep": "command",
+            "name": "undo",
+            "key": [ "ctrl_z" ],
+            "pointer": "#undoManagerCommand"
+        }
+    ]
+}

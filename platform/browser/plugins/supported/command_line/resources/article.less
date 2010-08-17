@@ -1,0 +1,71 @@
+/* ***** BEGIN LICENSE BLOCK *****
+* Version: MPL 1.1/GPL 2.0/LGPL 2.1
+*
+* The contents of this file are subject to the Mozilla Public License Version
+* 1.1 (the "License"); you may not use this file except in compliance with
+* the License. You may obtain a copy of the License at
+* http://www.mozilla.org/MPL/
+*
+* Software distributed under the License is distributed on an "AS IS" basis,
+* WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+* for the specific language governing rights and limitations under the
+* License.
+*
+* The Original Code is Bespin.
+*
+* The Initial Developer of the Original Code is
+* Mozilla.
+* Portions created by the Initial Developer are Copyright (C) 2009
+* the Initial Developer. All Rights Reserved.
+*
+* Contributor(s):
+*
+* Alternatively, the contents of this file may be used under the terms of
+* either the GNU General Public License Version 2 or later (the "GPL"), or
+* the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+* in which case the provisions of the GPL or the LGPL are applicable instead
+* of those above. If you wish to allow use of your version of this file only
+* under the terms of either the GPL or the LGPL, and not to allow others to
+* use your version of this file under the terms of the MPL, indicate your
+* decision by deleting the provisions above and replace them with the notice
+* and other provisions required by the GPL or the LGPL. If you do not delete
+* the provisions above, a recipient may use your version of this file under
+* the terms of any one of the MPL, the GPL or the LGPL.
+*
+* ***** END LICENSE BLOCK ***** */
+
+.cmd_hints article {
+  margin-left: 25px;
+  padding: 8px;
+  z-index: 1;
+  color: @text;
+  display: block;
+  border: 2px @border_bg solid;
+  border-bottom: 0;
+  font-size: 90%;
+  -moz-border-top-colors: @border_bg @border_fg;
+  -moz-border-left-colors: @border_bg @border_fg;
+  -moz-border-right-colors: @border_bg @bg;
+  -moz-border-radius-topleft: 10px;
+  -moz-border-radius-topright: 10px;
+  border-top-left-radius: 10px; border-top-right-radius: 10px;
+  background: @input_bg2;
+  background: -moz-linear-gradient(top, @input_bg_light, @input_bg);
+  background: -webkit-gradient(linear, left top, left bottom, from(@input_bg_light), to(@input_bg));
+  -webkit-box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 10px 3px;
+  -moz-box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 10px 3px;
+  max-width: 500px;
+}
+
+.cmd_hints article h1 { font-size: 110%; text-align: center; }
+.cmd_hints article h2 { font-size: 95%; }
+.cmd_hints article h3 { font-size: 90%; }
+.cmd_hints article.cmd_small { font-size: 90%; }
+.cmd_hints article table th,
+.cmd_hints article label { color: @hi_text; }
+.cmd_hints article h1,
+.cmd_hints article h2,
+.cmd_hints article h3 { margin: 2px 0 1px 0; color: @hi_text; }
+.cmd_hints article p,
+.cmd_hints article pre,
+.cmd_hints article .cmd_body { margin: 2px 0 1px 10px; }

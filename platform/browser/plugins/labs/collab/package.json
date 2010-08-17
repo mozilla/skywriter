@@ -1,0 +1,277 @@
+{
+    "description": "Provides collaboration options: social subsystem and mobwrite",
+    "dependencies": {
+		"bespin_server": "0.0.0",
+		"environment": "0.0.0",
+		"diff": "0.0.0",
+		"command_line": "0.0.0",
+		"project": "0.0.0",
+		"text_editor": "0.0.0"
+	},
+    "provides": [
+		{
+			"ep": "appLaunched",
+			"pointer": "#onAppLaunched"
+		},
+		{
+			"ep": "editorChange",
+            "match": "[buffer]",
+			"pointer": "#mobwriteFileChanged"
+		},
+		{
+			"ep": "msgtargetid",
+			"name": "mobwrite",
+			"pointer": "#mobwriteMsg"
+		},
+		{
+			"ep": "msgtargetid",
+			"name": "broadcast",
+			"pointer": "view#broadcastMsg"
+		},
+		{
+			"ep": "msgtargetid",
+			"name": "tell",
+			"pointer": "view#tellMsg"
+		},
+		{
+			"ep": "msgtargetid",
+			"name": "share_tell",
+			"pointer": "view#shareTellMsg"
+		},
+		{
+			"ep": "msgtargetid",
+			"name": "file_event",
+			"pointer": "view#fileEventMsg"
+		},
+		{
+			"ep": "mobwriteinstance",
+			"pointer": "mobwrite/core#mobwrite"
+		},
+        {
+            "ep": "notification",
+            "name": "broadcast",
+            "level": "info",
+            "description": "Broadcast message from a person you follow"
+        },
+        {
+            "ep": "notification",
+            "name": "tell",
+            "level": "info",
+            "description": "Direct message from a person you follow"
+        },
+        {
+            "ep": "notification",
+            "name": "shareTell",
+            "level": "info",
+            "description": "Direct message from a person you follow"
+        },
+        {
+            "ep": "notification",
+            "name": "fileEvent",
+            "level": "info",
+            "description": "Shared file is opened by others"
+        },
+        {
+            "ep": "command",
+            "name": "follow",
+            "params":
+            [
+                {
+                    "name": "usernames",
+                    "type": "text",
+                    "description": "username(s) of person(s) to follow",
+                    "defaultValue": null
+                }
+            ],
+            "description": "add to (or list) the users we are following",
+            "pointer": "social#followCommand"
+        },
+        {
+            "ep": "command",
+            "name": "unfollow",
+            "params":
+            [
+                {
+                    "name": "usernames",
+                    "type": "text",
+                    "description": "username(s) of person(s) to stop following"
+                }
+            ],
+            "description": "remove from the list of users we are following",
+            "pointer": "social#unfollowCommand"
+        },
+        {
+            "ep": "command",
+            "name": "broadcast",
+            "params":
+            [
+                {
+                    "name": "message",
+                    "type": "text",
+                    "description": "text message to send to your followers",
+                    "defaultValue": null
+                }
+            ],
+            "description": "send a message to all followers",
+            "pointer": "social#broadcastCommand"
+        },
+        {
+            "ep": "command",
+            "name": "tell",
+            "params":
+            [
+                {
+                    "name": "username",
+                    "type": "text",
+                    "description": "username of follower to send a message to"
+                },
+                {
+                    "name": "message",
+                    "type": "text",
+                    "description": "text message to send to your follower",
+                    "defaultValue": null
+                }
+            ],
+            "description": "send a message to all followers",
+            "pointer": "social#tellCommand"
+        },
+        {
+            "ep": "command",
+            "name": "group",
+            "description": "Collect the people you follow into groups, and display the existing groups"
+        },
+        {
+            "ep": "command",
+            "name": "group list",
+            "params":
+            [
+                {
+                    "name": "group",
+                    "type": "text",
+                    "description": "An optional group name or leave blank to list groups",
+                    "defaultValue": null
+                }
+            ],
+            "description": "List the current groups and group members",
+            "pointer": "social#groupListCommand"
+        },
+        {
+            "ep": "command",
+            "name": "group add",
+            "params":
+            [
+                {
+                    "name": "group",
+                    "type": "text",
+                    "description": "The name of the group to add to"
+                },
+                {
+                    "name": "members",
+                    "type": "text",
+                    "description": "The usernames of the followers to add"
+                }
+            ],
+            "description": "Add members to a new or existing group",
+            "pointer": "social#groupAddCommand"
+        },
+        {
+            "ep": "command",
+            "name": "group remove",
+            "params":
+            [
+                {
+                    "name": "group",
+                    "type": "text",
+                    "description": "The name of the group to remove from"
+                },
+                {
+                    "name": "members",
+                    "type": "text",
+                    "description": "The usernames of the followers to remove"
+                }
+            ],
+            "description": "Remove members from an existing group (and remove group if empty)",
+            "pointer": "social#groupRemoveCommand"
+        },
+        {
+            "ep": "command",
+            "name": "share",
+            "description": "Manage the projects that you share to other users"
+        },
+        {
+            "ep": "command",
+            "name": "share list",
+            "params":
+            [
+                {
+                    "name": "project",
+                    "type": "text",
+                    "description": "An optional project name or leave blank to list shared projects",
+                    "defaultValue": null
+                }
+            ],
+            "description": "List the current shared projects",
+            "pointer": "social#shareListCommand"
+        },
+        {
+            "ep": "command",
+            "name": "share remove",
+            "params":
+            [
+                {
+                    "name": "project",
+                    "type": "text",
+                    "description": "The name of an existing project"
+                },
+                {
+                    "name": "member",
+                    "type": "text",
+                    "description": "Optional user or group (or leave blank for all users and groups)",
+                    "defaultValue": null
+                }
+            ],
+            "description": "Remove a share from the current shared projects",
+            "pointer": "social#shareRemoveCommand"
+        },
+        {
+            "ep": "command",
+            "name": "share add",
+            "params":
+            [
+                {
+                    "name": "project",
+                    "type": "text",
+                    "description": "Project name to alter sharing on"
+                },
+                {
+                    "name": "member",
+                    "type": "text",
+                    "description": "username or group name to change"
+                },
+                {
+                    "name": "permission",
+                    "type": "text",
+                    "description": "Permission flags. edit|readonly",
+                    "defaultValue": null
+                }
+            ],
+            "description": "Add a share to the current shared projects",
+            "pointer": "social#shareAddCommand"
+        },
+        {
+            "ep": "command",
+            "name": "viewme",
+            "params":
+            [
+                {
+                    "name": "varargs",
+                    "type": "text",
+                    "description": "Arguments: ({user}|{group}|everyone) (true|false|default)",
+                    "defaultValue": null
+                }
+            ],
+            "description": "List and alter user's ability to see what I'm working on",
+            "pointer": "social#viewmeCommand"
+        }
+    ]
+}
