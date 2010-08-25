@@ -1,7 +1,8 @@
-var dryice = require('./dryice').DryIce;
+var sys    = require('sys');
+var dryice = require('./dryice');
 
 var plugin      = dryice.Plugin;
-var platform    = dryice.Platform;
+var platform    = dryice.platform;
 var test        = dryice.Test;
 var doc         = dryice.Doc;
 
@@ -52,13 +53,18 @@ namespace('dist', function () {
     task('bookmarklet', [], function () {
         platform.dist('bookmarklet');
     });
+
+    desc('Generate embedded distributable package');
+    task('embedded', [], function () {
+        platform.dist('embedded');
+    });
 });
 
 namespace('plugin', function () {
     desc('foo');
     task('foo', [], function () {
-        sys.puts('doing plugin:foo task');
-        sys.puts(sys.inspect(arguments));
+        console.log('doing plugin:foo task');
+        console.log(sys.inspect(arguments));
     });
 });
 
