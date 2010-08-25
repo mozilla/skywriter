@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,11 +35,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('bespin:util/util');
+var util = require('skywriter:util/util');
 var env = require('environment').env;
 
 /**
- * This simple undo manager coordinates undo for the app that embeds Bespin.
+ * This simple undo manager coordinates undo for the app that embeds Skywriter.
  * It's similar to SproutCore's UndoManager class, but it separates undo and
  * redo and correctly flushes the redo stack when an action is performed.
  */

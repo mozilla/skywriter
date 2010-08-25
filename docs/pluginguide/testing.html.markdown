@@ -1,13 +1,13 @@
 ---
 layout: default
-title: Bespin Plugin Guide
+title: Skywriter Plugin Guide
 subtitle: Writing and Running Tests
 ---
 
-For core Bespin code, our goal is to have "very good" code coverage. Plugins
-that are not part of the Bespin core can have whatever level of code coverage
+For core Skywriter code, our goal is to have "very good" code coverage. Plugins
+that are not part of the Skywriter core can have whatever level of code coverage
 you're comfortable with. The tools you need to do testing are included with
-Bespin in a plugin called "PluginDev".
+Skywriter in a plugin called "PluginDev".
 
 very good code coverage
 :   Everything that can be readily tested without a huge amount of work.

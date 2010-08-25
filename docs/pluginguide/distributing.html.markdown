@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Bespin Plugin Guide
+title: Skywriter Plugin Guide
 subtitle: Distributing plugins
 ---
 

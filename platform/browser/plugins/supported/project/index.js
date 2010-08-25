@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -41,7 +41,7 @@ exports.Project = function(directory, name) {
 };
 
 /*
- * Given a full path in the bespin file system, figure out which
+ * Given a full path in the skywriter file system, figure out which
  * project it belongs to and return a two element array with
  * the Project object and the remaining path within that project.
  */

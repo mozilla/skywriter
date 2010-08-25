@@ -300,16 +300,16 @@
         {
             "ep": "command",
             "name": "version",
-            "description": "show the Bespin version",
+            "description": "show the Skywriter version",
             "hidden": true,
             "pointer": "commands/basic#versionCommand"
         },
         {
             "ep": "command",
-            "name": "bespin",
+            "name": "skywriter",
             "description": "has",
             "hidden": true,
-            "pointer": "commands/basic#bespinCommand"
+            "pointer": "commands/basic#skywriterCommand"
         },
         {
             "ep": "command",

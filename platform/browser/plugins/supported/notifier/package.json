@@ -20,7 +20,7 @@
             "params": [
                 {
                     "name": "name",
-                    "description": "name of the notification type. Notifications are identified by the combination of pluginName_notificationName, so you don't need to worry about making this unique across Bespin.",
+                    "description": "name of the notification type. Notifications are identified by the combination of pluginName_notificationName, so you don't need to worry about making this unique across Skywriter.",
                     "type": "string",
                     "required": true
                 },

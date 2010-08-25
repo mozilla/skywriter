@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,13 +35,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('bespin:util/util');
+var util = require('skywriter:util/util');
 var Event = require('events').Event;
 var settings = require('settings').settings;
-var ServerPersister = require('bespin_server:settings').ServerPersister;
-var catalog = require('bespin:plugins').catalog;
-var console = require('bespin:console').console;
-var Promise = require("bespin:promise").Promise;
+var ServerPersister = require('skywriter_server:settings').ServerPersister;
+var catalog = require('skywriter:plugins').catalog;
+var console = require('skywriter:console').console;
+var Promise = require("skywriter:promise").Promise;
 var templates = require("templates");
 
 var $ = require("jquery").$;
@@ -350,7 +350,7 @@ exports.loginController.prototype = {
         var updateFromDiv = function() {
             setTimeout(function() {
                 // Find the current visible form.
-                var visibleForm = $("#bespinloginform form[style*='block']");
+                var visibleForm = $("#skywriterloginform form[style*='block']");
                 // Focus the first input field on the visible form.
                 visibleForm.find('input:eq(0)').focus();
                 // Set the height of the div based on the visibleForm height.
@@ -361,11 +361,11 @@ exports.loginController.prototype = {
         updateFromDiv();
 
         // One jQuery object that holds all the forms.
-        var radioItem = $("#bespinloginform form");
+        var radioItem = $("#skywriterloginform form");
 
         // Create the UI radioboxes and add an 'change' event listener that
         // is fired whenever the radio selection changes.
-        $('#bespinloginform input[type=radio]').checkBox({
+        $('#skywriterloginform input[type=radio]').checkBox({
             change: function(e, ui){
                 if (ui.checked) {
                     radioItem.hide();
@@ -389,11 +389,11 @@ exports.loginController.prototype = {
         }
 
         // Mark the radio item as selected.
-        $('#bespinloginform input[type=radio]:eq(' + selectedRadio + ')')
+        $('#skywriterloginform input[type=radio]:eq(' + selectedRadio + ')')
             .checkBox('changeCheckStatus', true);
 
         // Create the overlay.
-        var overlayNode = $('#bespinloginform').overlay({
+        var overlayNode = $('#skywriterloginform').overlay({
             mask: {
                 color: '#4E4D45',
                 loadSpeed: 200,

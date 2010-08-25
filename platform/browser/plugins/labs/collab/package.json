@@ -1,7 +1,7 @@
 {
     "description": "Provides collaboration options: social subsystem and mobwrite",
     "dependencies": {
-		"bespin_server": "0.0.0",
+		"skywriter_server": "0.0.0",
 		"environment": "0.0.0",
 		"diff": "0.0.0",
 		"command_line": "0.0.0",

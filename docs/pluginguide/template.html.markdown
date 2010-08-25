@@ -1,10 +1,10 @@
 ---
-title: Bespin Developer's Guide
+title: Skywriter Developer's Guide
 subtitle: Template Engine
 layout: default
 ---
 
-Using The Bespin Template Engine
+Using The Skywriter Template Engine
 ================================
 
 The template engine is designed to be all the things that everyone always claims
@@ -27,7 +27,7 @@ common way to do things.
 
 An example template could look like this:
 
-    $ cat bespin/plugins/foo/templates/bar.htmlt
+    $ cat skywriter/plugins/foo/templates/bar.htmlt
     
     <div save="${parent.element}" id="hello">${contents}</div>
 
@@ -117,7 +117,7 @@ to something that does not invade the ${...} space possibly something more like
 _***="${...}" Attributes
 ------------------------
 
-The Bespin Template engine uses the web browsers parser to interpret .htmlt
+The Skywriter Template engine uses the web browsers parser to interpret .htmlt
 file before we process the templates. This has a number of advantages in
 simplicity and the ability to work with the resulting DOM, however one drawback
 is that the browser may try to process certain elements before they are ready.
@@ -138,8 +138,8 @@ template engine will remove the underscore automatically. For example:
 Should you wish to have an attribute in the resulting document prefixed with an
 underscore, simply begin your attribute name with 2 underscores. (Is this a
 common scenario? If you know of another scenario where attribute names are
-prefixed with _, please inform the Bespin-Core mailing list using
-[bespin-core at googlegroups dot com].
+prefixed with _, please inform the Skywriter-Core mailing list using
+[skywriter-core at googlegroups dot com].
 
 if="${some_boolean}" Attributes
 -------------------------------

@@ -1,14 +1,14 @@
-<div id="bespinloginform" class="pane" style="display:none">
+<div id="skywriterloginform" class="pane" style="display:none">
 	<div id="welcome">
-		<img class="logo" src="${resourceURL}images/bespin-s.png"><h1>Welcome to Bespin</h1>
-		<p>The <a href="http://mozillalabs.com/bespin/" target="_blank">Bespin project</a> is building a web-based code editor using the emerging HTML5 standard. The editor is easily extensible with JavaScript and can be used in your own applications. This server is for <b>demonstration purposes only</b> (read our <a href="https://bespin.mozillalabs.com/docs/userguide/server_roadmap.html" target="_blank">server roadmap</a> for details).</p>
+		<img class="logo" src="${resourceURL}images/skywriter-s.png"><h1>Welcome to Skywriter</h1>
+		<p>The <a href="http://mozillalabs.com/skywriter/" target="_blank">Skywriter project</a> is building a web-based code editor using the emerging HTML5 standard. The editor is easily extensible with JavaScript and can be used in your own applications. This server is for <b>demonstration purposes only</b> (read our <a href="https://skywriter.mozillalabs.com/docs/userguide/server_roadmap.html" target="_blank">server roadmap</a> for details).</p>
 	</div>
 	
 	<div class="form">
 		<fieldset style="border-width: 0px">
 			<div>
 			    <input name="radio" id="useridenRadioLogin" type="radio" radioFor="loginForm"/>
-			    <label for="useridenRadioLogin">I have a Bespin account</label>
+			    <label for="useridenRadioLogin">I have a Skywriter account</label>
 			</div>
 			<div save="${lostForm.radio}">
 			    <input name="radio" id="useridentRadioLost" type="radio" radioFor="lostForm"/>

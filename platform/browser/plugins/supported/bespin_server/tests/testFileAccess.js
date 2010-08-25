@@ -11,20 +11,20 @@
  * See the License for the specific language governing rights and
  * limitations under the License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is Mozilla.
  * Portions created by the Initial Developer are Copyright (C) 2009
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * ***** END LICENSE BLOCK ***** */
 
 var t = require('plugindev');
 var fs = require('filesystem');
-var Promise = require('bespin:promise').Promise;
+var Promise = require('skywriter:promise').Promise;
 var filesource = require('filesource');
 
 var DummyServer = function(responseData) {
@@ -46,7 +46,7 @@ DummyServer.prototype.request = function(method, url, payload, options) {
 
 exports.testLoadDirectory = function() {
     var server = new DummyServer([ 'foo.js' ]);
-    var source = filesource.BespinFileSource.create({
+    var source = filesource.SkywriterFileSource.create({
         server: server
     });
 
@@ -64,7 +64,7 @@ exports.testLoadDirectory = function() {
 
 exports.testLoadContents = function() {
     var server = new DummyServer([ 'This is the exciting data in the file.' ]);
-    var source = filesource.BespinFileSource.create({
+    var source = filesource.SkywriterFileSource.create({
         server: server
     });
 
@@ -82,7 +82,7 @@ exports.testLoadContents = function() {
 
 exports.testSaveContents = function() {
     var server = new DummyServer();
-    var source = filesource.BespinFileSource.create({
+    var source = filesource.SkywriterFileSource.create({
         server: server
     });
 

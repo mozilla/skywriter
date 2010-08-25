@@ -10,7 +10,7 @@
     <div>
         <select save="${view.themeSelector}">
             <option value="white">White Theme</option>
-            <option value="screen">Bespin Theme</option>
+            <option value="screen">Skywriter Theme</option>
         </select>
     </div>
     <div>

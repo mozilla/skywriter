@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,8 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-//var console = require('bespin:console').console;
-var server = require('bespin_server').server;
+//var console = require('skywriter:console').console;
+var server = require('skywriter_server').server;
 var Input = require('command_line:input').Input;
 
 var social_user = require('collab:user');

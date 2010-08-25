@@ -11,14 +11,14 @@
  * See the License for the specific language governing rights and
  * limitations under the License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is Mozilla.
  * Portions created by the Initial Developer are Copyright (C) 2009
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * ***** END LICENSE BLOCK ***** */
 
@@ -30,7 +30,7 @@ var EnvironmentTrait = require('canon:tests/fixture').MockEnvironment;
 var MockRequest = require('canon:tests/fixture').MockRequest;
 var file_commands = require('file_commands');
 var edit_session = require('edit_session');
-var Promise = require('bespin:promise').Promise;
+var Promise = require('skywriter:promise').Promise;
 
 var source = new DummyFileSource([
     {name: 'atTheTop.js', contents: 'the top file'},

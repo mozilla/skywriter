@@ -22,7 +22,7 @@
  * @author fraser@google.com (Neil Fraser)
  */
 
-var server = require("bespin_server").server;
+var server = require("skywriter_server").server;
 var diff_match_patch = require("diff");
 
 var DIFF_EQUAL = diff_match_patch.DIFF_EQUAL;
@@ -985,7 +985,7 @@ mobwrite.syncLoadAjax_ = function(url, post, callback) {
     req.open('POST', url, true);
     req.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
 
-    // CSRF protection as defined by Bespin
+    // CSRF protection as defined by Skywriter
     server.protectXhrAgainstCsrf(req);
 
     req.send(post);

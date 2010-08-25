@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -381,7 +381,7 @@ exports.Plugin.prototype = {
 
     /**
      * Removes the plugin from Tiki's registries.
-     * As with the new multiple Bespins, this only clears the current sandbox.
+     * As with the new multiple Skywriters, this only clears the current sandbox.
      */
     _cleanup: function(leaveLoader) {
         // Remove the css files.
@@ -1195,7 +1195,7 @@ exports.Catalog.prototype = {
      * get at that plugin's resources (images, etc.).
      */
     getResourceURL: function(pluginName) {
-        var link = document.getElementById("bespin_base");
+        var link = document.getElementById("skywriter_base");
         var base = "";
         if (link) {
             base += link.href;
@@ -1258,7 +1258,7 @@ exports.Catalog.prototype = {
 
             // apply the filter
             if ((onlyType && plugin.type && plugin.type != onlyType)
-                || plugin.name == "bespin") {
+                || plugin.name == "skywriter") {
                 continue;
             }
 

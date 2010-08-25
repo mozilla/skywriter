@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var t = require('plugindev');
-var plugins = require('bespin:plugins');
+var plugins = require('skywriter:plugins');
 
 exports.testExtensionPointsAreCreatedAsNeeded = function() {
     var catalog = plugins.Catalog.create();
@@ -303,9 +303,9 @@ exports.testGetResourceURL = function() {
 exports.testReloadHookIsCalledWhenAPluginIsReloaded = function() {
     plugins.catalog.loadMetadataFromURL('/server/plugin/register/tests',
         t.asyncTester(function() {
-            plugins.catalog.loadPlugin('BespinTesting1').then(t.asyncTester(function() {
+            plugins.catalog.loadPlugin('SkywriterTesting1').then(t.asyncTester(function() {
                 t.ok(exports.Testing1Reloaded == undefined, 'flag should not be set now');
-                plugins.catalog.plugins.BespinTesting1.reload(
+                plugins.catalog.plugins.SkywriterTesting1.reload(
                  t.asyncTester(function() {
                     t.ok(exports.Testing1Reloaded, 'flag should be set after reload');
                     t.start();

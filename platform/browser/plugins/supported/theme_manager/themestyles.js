@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,13 +35,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('bespin:util/util');
-var catalog = require('bespin:plugins').catalog;
-var console = require('bespin:console').console;
-var Promise = require('bespin:promise').Promise;
-var group = require('bespin:promise').group;
+var util = require('skywriter:util/util');
+var catalog = require('skywriter:plugins').catalog;
+var console = require('skywriter:console').console;
+var Promise = require('skywriter:promise').Promise;
+var group = require('skywriter:promise').group;
 
-var proxy = require('bespin:proxy');
+var proxy = require('skywriter:proxy');
 
 var less = require('less');
 
@@ -108,7 +108,7 @@ var parseGlobalThemeVariables = function(globalValues) {
 //------------------------------------------------------------------------------
 // BEGIN: THIS PART IS OVERRIDDEN BY dryice
 
-// Stores the StyleFiles content per plugin during the build of Bespin.
+// Stores the StyleFiles content per plugin during the build of Skywriter.
 // The variable scheme looks like: { pluginName: { "fileName": data } };
 var extensionStyleBuildData = {};
 
@@ -304,11 +304,11 @@ exports.parseGlobalVariables();
 var parseLess = function(pr, pluginName, variableHeader) {
     // Use already existing DOM style element or create a new one on the page.
     if (extensionStyleID[pluginName]) {
-        styleElem = document.getElementById('_bespin_theme_style_' +
+        styleElem = document.getElementById('_skywriter_theme_style_' +
                                                 extensionStyleID[pluginName]);
     } else {
         styleElem = document.createElement('style');
-        styleElem.setAttribute('id', '_bespin_theme_style_' + styleID);
+        styleElem.setAttribute('id', '_skywriter_theme_style_' + styleID);
         extensionStyleID[pluginName] = styleID;
         styleID ++;
         document.body.appendChild(styleElem);
@@ -555,7 +555,7 @@ exports.unregisterThemeStyles = function(extension) {
     }
 
     // Remove the style element from the page.
-    var styleID = '_bespin_theme_style_' + extensionStyleID[pluginName];
+    var styleID = '_skywriter_theme_style_' + extensionStyleID[pluginName];
     var styleElement = document.getElementById(styleID);
     styleElement.parentNode.removeChild(styleElement);
 

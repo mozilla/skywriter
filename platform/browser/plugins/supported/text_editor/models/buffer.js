@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -37,9 +37,9 @@
 
 var env = require('environment').env;
 
-var util = require('bespin:util/util');
+var util = require('skywriter:util/util');
 
-var Promise = require('bespin:promise').Promise;
+var Promise = require('skywriter:promise').Promise;
 var TextStorage = require('models/textstorage').TextStorage;
 var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var UndoManager = require('undomanager').UndoManager;

@@ -7,7 +7,7 @@
  * All rights reserved.
  */
 
-// Imported into Bespin 2010/05/03
+// Imported into Skywriter 2010/05/03
 
 "define metadata";
 ({

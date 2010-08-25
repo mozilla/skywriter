@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -38,8 +38,8 @@
 var SC = require('sproutcore/runtime').SC;
 
 var env = require('environment').env;
-var Promise = require('bespin:promise').Promise;
-var server = require('bespin_server').server;
+var Promise = require('skywriter:promise').Promise;
+var server = require('skywriter_server').server;
 
 // these are private, because we will likely want to put a little more
 // control around the kcpass.
@@ -69,10 +69,10 @@ var kcPage = SC.Page.design({
         layout: { centerX: 0, centerY: 0, width: 300, height: 275 },
 
         contentView: SC.View.design({
-            classNames: 'bespin-color-field'.w(),
+            classNames: 'skywriter-color-field'.w(),
             childViews: 'form'.w(),
             form: SC.View.design({
-                classNames: 'bespin-form'.w(),
+                classNames: 'skywriter-form'.w(),
 
                 childViews: ('title passwordField description cancel ok').w(),
 
@@ -182,7 +182,7 @@ exports.getkey = function(args, request) {
         }
 
         pr.then(function(key) {
-            request.done('Your SSH public key that Bespin can use for remote repository authentication:<br/>' + key);
+            request.done('Your SSH public key that Skywriter can use for remote repository authentication:<br/>' + key);
         }, function(error) {
             if (error.status == '401') {
                 kc.clearPassword();

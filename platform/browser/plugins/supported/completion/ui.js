@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -41,29 +41,29 @@ var _ = require('underscore')._;
 var ANIMATION_SPEED = 100;  // in ms
 
 var populate_container_template =
-    _.template('<span class="bespin-completion-container"> &mdash; ' +
+    _.template('<span class="skywriter-completion-container"> &mdash; ' +
         '<%= container %></span>');
 var populate_second_row_template =
-    _.template('<div class="bespin-completion-second-row"><%= type %></div>');
+    _.template('<div class="skywriter-completion-second-row"><%= type %></div>');
 var populate_item_template =
-    _.template('<li><div class="bespin-completion-top-row">' +
-        '<span class="bespin-completion-kind bespin-completion-kind-' +
+    _.template('<li><div class="skywriter-completion-top-row">' +
+        '<span class="skywriter-completion-kind skywriter-completion-kind-' +
             '<%= kind %>"><%= kind %></span>' +
-        '<span class="bespin-completion-ident"><%= ident %></span>' +
+        '<span class="skywriter-completion-ident"><%= ident %></span>' +
             '<%= container %></div><%= second_row %></li>');
 
 function CompletionUI(parent) {
-    var id = _.uniqueId('bespin-completion-panel');
+    var id = _.uniqueId('skywriter-completion-panel');
 
     var panel = document.createElement("div");
     panel.id = id;
-    panel.className = "bespin-completion-panel";
+    panel.className = "skywriter-completion-panel";
     panel.style.display = 'none';
     panel.innerHTML =
-        '<div class="bespin-completion-pointer"></div>' +
-        '<div class="bespin-completion-bubble-outer">' +
-            '<div class="bespin-completion-bubble-inner">' +
-                '<div class="bespin-completion-highlight"></div>' +
+        '<div class="skywriter-completion-pointer"></div>' +
+        '<div class="skywriter-completion-bubble-outer">' +
+            '<div class="skywriter-completion-bubble-inner">' +
+                '<div class="skywriter-completion-highlight"></div>' +
                 '<ul></ul>' +
             '</div>' +
         '</div>';
@@ -154,15 +154,15 @@ CompletionUI.prototype = {
         index = (dir === 'up') ? index - 1 : index + 1;
         this._index = index;
 
-        var selFirstRow = $(sel).find('.bespin-completion-top-row');
-        var selSecondRow = $(sel).find('.bespin-completion-second-row');
-        var unselFirstRow = $(unsel).find('.bespin-completion-top-row');
-        var unselSecondRow = $(unsel).find('.bespin-completion-second-row');
+        var selFirstRow = $(sel).find('.skywriter-completion-top-row');
+        var selSecondRow = $(sel).find('.skywriter-completion-second-row');
+        var unselFirstRow = $(unsel).find('.skywriter-completion-top-row');
+        var unselSecondRow = $(unsel).find('.skywriter-completion-second-row');
 
         selSecondRow.hide();
         unselSecondRow.show();
 
-        var highlight = this.panel.find(".bespin-completion-highlight");
+        var highlight = this.panel.find(".skywriter-completion-highlight");
         highlight.stop(true, true);
         var highlightDimensions = this._getHighlightDimensions(unsel);
         highlight.animate(highlightDimensions, ANIMATION_SPEED);
@@ -210,9 +210,9 @@ CompletionUI.prototype = {
 
         var pointer;
         if (fromBottom) {
-            pointer = panel.find('.bespin-completion-pointer');
-            pointer.removeClass('bespin-completion-pointer-up');
-            pointer.addClass('bespin-completion-pointer-down');
+            pointer = panel.find('.skywriter-completion-pointer');
+            pointer.removeClass('skywriter-completion-pointer-up');
+            pointer.addClass('skywriter-completion-pointer-down');
             panel.css({ bottom: -point.y, top: "" });
 
             // Reverse the list.
@@ -223,9 +223,9 @@ CompletionUI.prototype = {
                 this._index = tags.length - 1;
             }
         } else {
-            pointer = panel.find('.bespin-completion-pointer');
-            pointer.removeClass('bespin-completion-pointer-down');
-            pointer.addClass('bespin-completion-pointer-up');
+            pointer = panel.find('.skywriter-completion-pointer');
+            pointer.removeClass('skywriter-completion-pointer-down');
+            pointer.addClass('skywriter-completion-pointer-up');
             panel.css({ top: point.y + lineHeight, bottom: "" });
 
             if (!visible) {
@@ -247,10 +247,10 @@ CompletionUI.prototype = {
             panel.hide().animate({ opacity: 'show' }, ANIMATION_SPEED);
         }
 
-        var highlight = panel.find(".bespin-completion-highlight");
+        var highlight = panel.find(".skywriter-completion-highlight");
         highlight.stop(true, true);
         var sel = this._listItemForIndex(this._index);
-        sel.find(".bespin-completion-second-row").show();
+        sel.find(".skywriter-completion-second-row").show();
 
         var highlightDimensions = this._getHighlightDimensions(sel);
         var highlightWidth = highlightDimensions.width;

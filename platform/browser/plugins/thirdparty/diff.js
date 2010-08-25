@@ -24,9 +24,9 @@
 });
 "end";
 
-// TODO: I suspect this Diff module will become important to Bespin, and likely
-// to be depended on by things in bespin-supported, so it shouldn't have a
-// lower priority. Maybe however there is a need for a bespin-3rdparty or
+// TODO: I suspect this Diff module will become important to Skywriter, and likely
+// to be depended on by things in skywriter-supported, so it shouldn't have a
+// lower priority. Maybe however there is a need for a skywriter-3rdparty or
 // similar???
 
 /**

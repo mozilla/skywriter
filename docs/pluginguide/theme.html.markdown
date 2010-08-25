@@ -1,17 +1,17 @@
 ---
 layout: default
-title: Bespin Plugin Guide
+title: Skywriter Plugin Guide
 subtitle: Themes
 ---
 
-Bespin allows users to change themes (color schemes) and to create new theme plugins
+Skywriter allows users to change themes (color schemes) and to create new theme plugins
 as well. This document describes how you can create your own themes and gives a 
-basic overview about the theming techniques used in Bespin.
+basic overview about the theming techniques used in Skywriter.
 
 The problem
 -----------
 
-Much of Bespin's UI (login form, command line) is themed using CSS.
+Much of Skywriter's UI (login form, command line) is themed using CSS.
 Imagine someone wants the whole UI background, including that of the command 
 line, to be green. If you use CSS, this means you have to replace the entire 
 CSS file only to change one variable - in this case the background color 
@@ -21,7 +21,7 @@ variable and define a color in the theme data.
 LESS extends CSS
 ----------------
 
-CSS has no way of dealing with variables, which is why Bespin uses [LESS][1] instead:
+CSS has no way of dealing with variables, which is why Skywriter uses [LESS][1] instead:
 
 > LESS extends CSS with: variables, mixins, operations and nested rules.
 > (Quoted from the LESS homepage.)
@@ -124,7 +124,7 @@ This is the basic structure of a theme definition. For a complete overview of al
 the adjustable `themeVariables` in the _global_ and _text\_editor_ section, take a
 look at the [whiteTheme][2].
 
-[2]: http://hg.mozilla.org/labs/bespinclient/file/tip/plugins/supported/whitetheme/index.js#l38 "Bespin whiteTheme definition"
+[2]: http://hg.mozilla.org/labs/skywriterclient/file/tip/plugins/supported/whitetheme/index.js#l38 "Skywriter whiteTheme definition"
 
 In the example, we define the themeVariables for the `global themeVariables`
 (stored in `global`), the  `text_editor` plugin and the `command_line` plugin.
@@ -178,4 +178,4 @@ case the _theme.less_ file. This file has to be located in the _resources_ folde
 which has to be inside of the plugin folder. You can use the [whiteTheme][3] as an
 example.
 
-[3]: http://hg.mozilla.org/labs/bespinclient/file/tip/plugins/supported/whitetheme/ "Bespin whiteTheme plugin"
+[3]: http://hg.mozilla.org/labs/skywriterclient/file/tip/plugins/supported/whitetheme/ "Skywriter whiteTheme plugin"

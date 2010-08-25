@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Bespin Plugin Guide
+title: Skywriter Plugin Guide
 subtitle: Editor API
 ---
 
 ## Introduction ##
 
-The Bespin editor provides various functions for interaction. If you have the
+The Skywriter editor provides various functions for interaction. If you have the
 environment (env) variable you can access the current editor via
 
     :::js

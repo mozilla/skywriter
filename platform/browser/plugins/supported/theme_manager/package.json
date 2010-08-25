@@ -1,5 +1,5 @@
 {
-    "description": "Handles colors in Bespin",
+    "description": "Handles colors in Skywriter",
     "dependencies": {
         "less": "0.0.0",
         "settings": "0.0.0",

@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -37,7 +37,7 @@
 
 "define metadata";
 ({
-    "description": "Commands for working with the Bespin user interface beyond the editor",
+    "description": "Commands for working with the Skywriter user interface beyond the editor",
     "provides": [
         {
             "ep": "command",
@@ -59,7 +59,7 @@
 
 var env = require('environment').env;
 
-var pluginCatalog = require('bespin:plugins').catalog;
+var pluginCatalog = require('skywriter:plugins').catalog;
 
 exports.jumpCommandLine = function(args, request) {
     env.commandLine.focus();

@@ -10,7 +10,7 @@
  * Date:    Tue Apr 20 19:26:58 2010 +0000 
  */
 
-// imported into Bespin on 2010/05/06
+// imported into Skywriter on 2010/05/06
 
 "define metadata";
 ({

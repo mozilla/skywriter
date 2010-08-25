@@ -1,15 +1,15 @@
 ---
 layout: default
-title: Bespin Tutorials
+title: Skywriter Tutorials
 subtitle: Manipulating Text Through Commands
 ---
 
 Introduction
 ============
 
-This tutorial was originally written for Bespin 0.9.
+This tutorial was originally written for Skywriter 0.9.
 
-In this tutorial, we'll be creating new commands that allow Bespin to work
+In this tutorial, we'll be creating new commands that allow Skywriter to work
 with [Markdown](http://daringfireball.net/projects/markdown/) formatted
 text.
 
@@ -20,31 +20,31 @@ Setting Up
 ----------
 
 With this tutorial, we're starting from the very basics. You'll need Python
-(preferably 2.6) to do custom Bespin plugin development. If you don't have
+(preferably 2.6) to do custom Skywriter plugin development. If you don't have
 Python already, you can get it [prebuilt for your platform](http://python.org/)
 with little fuss.
 
-You'll also need Bespin Embedded, which you can get from the
-[releases directory on ftp.mozilla.org](http://ftp.mozilla.org/pub/mozilla.org/labs/bespin/Embedded/).
+You'll also need Skywriter Embedded, which you can get from the
+[releases directory on ftp.mozilla.org](http://ftp.mozilla.org/pub/mozilla.org/labs/skywriter/Embedded/).
 
-Make a directory called `bespintutorial`. Uncompress the BespinEmbedded package
-in there and rename the directory from the tarfile `bespin` (so you'll have
-`bespintutorial/bespin/`). On a Mac, you can do these things from the Terminal
+Make a directory called `skywritertutorial`. Uncompress the SkywriterEmbedded package
+in there and rename the directory from the tarfile `skywriter` (so you'll have
+`skywritertutorial/skywriter/`). On a Mac, you can do these things from the Terminal
 command line:
 
-    mkdir bespintutorial
-    cd bespintutorial
-    cp ~/Downloads/BespinEmbedded-VERSION.tar.gz .
-    tar xzf BespinEmbedded-VERSION.tar.gz
-    mv BespinEmbedded-VERSION bespin
+    mkdir skywritertutorial
+    cd skywritertutorial
+    cp ~/Downloads/SkywriterEmbedded-VERSION.tar.gz .
+    tar xzf SkywriterEmbedded-VERSION.tar.gz
+    mv SkywriterEmbedded-VERSION skywriter
 
 
 The Manifest
 ------------
 
-Bespin's build tool, dryice, uses a "manifest" file in JSON format to describe
+Skywriter's build tool, dryice, uses a "manifest" file in JSON format to describe
 what it needs to build and where to find all of the parts. Open up your
-text editor to create a file called `manifest.json` in the `bespintutorial`
+text editor to create a file called `manifest.json` in the `skywritertutorial`
 directory. Here's what will go into the file at this step:
 
     :::js
@@ -54,27 +54,27 @@ directory. Here's what will go into the file at this step:
         "search_path": [".."]
     }
 
-We'll be running the build from the `bespin` directory, so those `..` in
-the manifest are referring to the `bespintutorial` directory.
+We'll be running the build from the `skywriter` directory, so those `..` in
+the manifest are referring to the `skywritertutorial` directory.
 
 Now, we'll fire up the dryice server. This command assumes at Python is
 on your path:
 
-    cd bespin
+    cd skywriter
     python dryice.py -s 8080 ../manifest.json
 
 After running that command, you can open up your browser to 
-http://localhost:8080/ and you should see the Bespin editor that dryice
+http://localhost:8080/ and you should see the Skywriter editor that dryice
 just built for us.
 
 Next, place the `markdown_js.js` file which you got from the Plugin Gallery
-into the `bespintutorial` directory.
+into the `skywritertutorial` directory.
 
 Getting Our Plugin Going
 ------------------------
 
-Now, we'll create a new file called `markdown.js`. This is our Bespin plugin
-file. Bespin plugins all have a metadata section, so let's put that at the
+Now, we'll create a new file called `markdown.js`. This is our Skywriter plugin
+file. Skywriter plugins all have a metadata section, so let's put that at the
 top of our file to get us going:
 
     :::js
@@ -134,7 +134,7 @@ Let's write a function that does these things.
     };
 
 The first two lines import other modules that we'll be needing. The
-`environment` plugin is always available in Bespin, and the `env`
+`environment` plugin is always available in Skywriter, and the `env`
 variable inside of there is very handy, as we'll soon see. We also
 import the `markdown_js` module that we declared in our dependencies.
 We'll call it `markdown` when we use it in this module for convenience.
@@ -145,7 +145,7 @@ import modules and you put anything you want to be available outside of the
 module on the `exports` object. We're going to make a function called `preview`
 available from this module.
 
-Bespin command functions all take two parameters: `args` and `request`.
+Skywriter command functions all take two parameters: `args` and `request`.
 `args` contains the incoming arguments to the command and `request` provides
 methods for working with this particular request from the user. Of these, the
 commands we'll be making here today only make use of `request.done()`, which
@@ -170,7 +170,7 @@ text from the editor.
 Next, we use the standard window.open call to make a new window. A call to `markdown.toHTML` will give us the HTML version of our text and we drop
 that into our new window and we're all set!
 
-We need to register our new command with Bespin.
+We need to register our new command with Skywriter.
 
 Since we're going to create more than one Markdown related command, we'll
 plan to create a top-level `markdown` command with subcommands. The
@@ -199,7 +199,7 @@ will appear in help text.
 
 The second extension is for our preview command. It has a name and description
 as well. But, since this command is not just a holder for other commands,
-it also has a `pointer`. The `pointer` tells Bespin where to find the object
+it also has a `pointer`. The `pointer` tells Skywriter where to find the object
 (in this case, a function) for the extension. `#preview` is equivalent to
 `markdown:index#preview` which means the `preview` function in the `index`
 module in the `markdown` plugin.
@@ -255,7 +255,7 @@ Reload your browser, select all of the text and paste in that text. Then,
 jump down to the command line and run the `markdown preview` command. You
 should see a new window popup with the HTML version of the text there.
 
-Congratulations! You've extended Bespin with a new command.
+Congratulations! You've extended Skywriter with a new command.
 
 Keyboard Shortcut
 -----------------
@@ -316,7 +316,7 @@ Once we've gotten our text, we can use `markdown.toHTML` to do the conversion.
 Then, we put the text back into the editor (going into either `selectedText`
 or `value`, depending on where the text came from originally).
 
-We need to tell Bespin about our new command, so we'll add another object
+We need to tell Skywriter about our new command, so we'll add another object
 to the `provides` part of our metadata.
 
     :::js
@@ -341,12 +341,12 @@ Undo
 
 Try converting the Markdown to HTML and then pressing cmd/ctrl-Z.
 
-Submitting to the Bespin Plugin Gallery
+Submitting to the Skywriter Plugin Gallery
 ---------------------------------------
 
 Once you've completed creating a plugin that you want to share with the
 rest of the world, you should add a little more to the metadata before
-uploading your plugin to the [Bespin Plugin Gallery](http://bespinplugins.mozillalabs.com/).
+uploading your plugin to the [Skywriter Plugin Gallery](http://skywriterplugins.mozillalabs.com/).
 
 We'll add version, license and maintainer information:
 
@@ -373,7 +373,7 @@ We'll add version, license and maintainer information:
         }
     ]
 
-Bespin Plugin metadata is actually a superset of the 
+Skywriter Plugin metadata is actually a superset of the 
 [CommonJS package](http://wiki.commonjs.org/wiki/Packages/1.0)
 metadata. As specified there, the version numbers should follow
 the [Semantic Versioning](http://semver.org/) numbering so that
@@ -381,7 +381,7 @@ useful information about compatibility can be picked up from the
 version number alone.
 
 I added myself as a maintainer and made this plugin available under
-the tri-license that Bespin itself is available under.
+the tri-license that Skywriter itself is available under.
 
 With all of this metadata in place, the final plugin file looks like this:
 
@@ -469,7 +469,7 @@ The End
 -------
 
 In this tutorial, we created a brand new plugin that leveraged an existing 
-JavaScript library to do useful text transformation in Bespin. Key concepts
+JavaScript library to do useful text transformation in Skywriter. Key concepts
 covered:
 
 * using dryice server mode to test new plugins

@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -37,7 +37,7 @@
 
 "define metadata";
 ({
-    "description": "Commands that may be useful in working on Bespin",
+    "description": "Commands that may be useful in working on Skywriter",
     "dependencies":
     {
         "canon": "0.0"
@@ -206,13 +206,13 @@
 
 /**
  * A set of debug commands, that is, commands that could be useful in debugging
- * bespin, as opposed to commands that are useful when using bespin to do
+ * skywriter, as opposed to commands that are useful when using skywriter to do
  * debugging.
  */
 
-var util = require('bespin:util/util');
-var catalog = require('bespin:plugins').catalog;
-var promiseMod = require('bespin:promise');
+var util = require('skywriter:util/util');
+var catalog = require('skywriter:plugins').catalog;
+var promiseMod = require('skywriter:promise');
 var env = require('environment').env;
 
 /**
@@ -328,7 +328,7 @@ exports.slowCommand = function(args, request) {
     parent.appendChild(suffix);
 
     var tick = document.createElement('img');
-    tick.setAttribute('src', 'https://bespin.mozillalabs.com/images/splash_icn_register.png');
+    tick.setAttribute('src', 'https://skywriter.mozillalabs.com/images/splash_icn_register.png');
 
     var interval = setInterval(function() {
         var actual = (new Date().getTime() - start) / 1000;

@@ -6,7 +6,7 @@
 
 
 var utils = require('utils'),
-    Promise = require('promise', 'bespin').Promise,
+    Promise = require('promise', 'skywriter').Promise,
     Ct = require('core');
     
 require('system/module'); // add Ct.Module

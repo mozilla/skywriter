@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,9 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require('bespin:plugins').catalog;
-var console = require('bespin:console').console;
-var Trace = require('bespin:util/stacktrace').Trace;
+var catalog = require('skywriter:plugins').catalog;
+var console = require('skywriter:console').console;
+var Trace = require('skywriter:util/stacktrace').Trace;
 
 /**
  * Save the settings using the server.
@@ -51,7 +51,7 @@ exports.ServerPersister.prototype = {
     _loading: false,
 
     loadInitialValues: function(settings) {
-        var promise = catalog.getObject("files").loadContents('BespinSettings/settings');
+        var promise = catalog.getObject("files").loadContents('SkywriterSettings/settings');
         promise.then(function(contents) {
             var data;
             try {
@@ -98,7 +98,7 @@ exports.ServerPersister.prototype = {
             return;
         }
         // Send it to the server
-        catalog.getObject("files").saveContents('BespinSettings/settings', settingsString);
+        catalog.getObject("files").saveContents('SkywriterSettings/settings', settingsString);
     }
 };
 

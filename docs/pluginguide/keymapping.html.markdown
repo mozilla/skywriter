@@ -1,19 +1,19 @@
 ---
 layout: default
-title: Bespin Plugin Guide
+title: Skywriter Plugin Guide
 subtitle: Keymapping
 ---
 
 ## Introduction ##
 
-The keyboard mapping mechanism built into Bespin is designed to be extensible
+The keyboard mapping mechanism built into Skywriter is designed to be extensible
 in a declarative way. This design allows a wide variety of keyboard mappings to
 be implemented without writing any code.
 
 ## Quick Start ##
 
 Whenever a key combination like Cmd+C or a new character like `c` is detected
-in the editor, Bespin's keyboard manager component searches through the
+in the editor, Skywriter's keyboard manager component searches through the
 keybinding rules, selects the first binding that matches, and executes the
 associated command. Keystrokes not handled in this way are inserted as ordinary
 text.
@@ -48,12 +48,12 @@ on.
 ## How Key Detection Works ##
 
 Before diving into more complex use cases, an understanding of the way key
-commands work in Bespin is needed.
+commands work in Skywriter is needed.
 
 Whenever a key is pressed while a modifier key (*Meta*, *Cmd*, *Ctrl*, or
-*Alt*) is held down, the Bespin framework handles the browser's key event,
+*Alt*) is held down, the Skywriter framework handles the browser's key event,
 performs translation, which most notably involves the creation of a *symbolic
-name*, and forwards the event to the Bespin keyboard manager. Some examples of
+name*, and forwards the event to the Skywriter keyboard manager. Some examples of
 symbolic names are:
 
     Ctrl+A       -> ctrl_a
@@ -273,7 +273,7 @@ to match, this binding doesn't fit.
 
 ## Further reading ##
 
-To get more familiar with keymappings in Bespin, take a look at the files
+To get more familiar with keymappings in Skywriter, take a look at the files
 `plugins/samples/vim.js` and `plugins/samples/emacs.js` for starter
 implementations of the vim and Emacs keybindings, respectively.
 

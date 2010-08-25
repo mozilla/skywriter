@@ -1,17 +1,17 @@
 ---
 layout: default
-title: Bespin Plugin Guide
+title: Skywriter Plugin Guide
 subtitle: Introduction
 ---
 
-Bespin is built around a small core with most additional functionality placed in plugins. The driving goals behind plugins are:
+Skywriter is built around a small core with most additional functionality placed in plugins. The driving goals behind plugins are:
 
 * Allow lazy loading of functionality
 * Be very easy to use
 * Make it possible to update the editor without page reloads
 
 The ability to load functionality lazily is very important, because we expect
-that Bespin will have a large number of features, only some of which any given
+that Skywriter will have a large number of features, only some of which any given
 person is likely to use at one time. The simplest example of this is syntax
 highlighters: maybe you write JavaScript most of the time, but someone else is
 developing Ruby code. If you only use JavaScript, that's the only syntax
@@ -21,7 +21,7 @@ examples possible.
 ## The Basics ##
 
 A plugin consists of *metadata* and *everything else*. When you log into
-Bespin, the metadata for all of your plugins is loaded. Everything else
+Skywriter, the metadata for all of your plugins is loaded. Everything else
 (JavaScript, CSS, images, etc.) is loaded as needed. At its simplest, a plugin
 is a single .js file that contains a special section for the metadata. Here's a
 trivial example:
@@ -36,7 +36,7 @@ trivial example:
 Clearly, this example doesn't do anything useful. The first step in making a
 plugin do something is to define the appropriate metadata.
 
-Bespin plugins feature *extensions* that plug into *extension points*. As an
+Skywriter plugins feature *extensions* that plug into *extension points*. As an
 example of this, the simple syntax highlighter defines an extension point
 called "syntax". The JavaScript highlighter is one extension
 that plugs into that extension point. The metadata for the JavaScript
@@ -68,7 +68,7 @@ the "syntax" extension point. The other metadata for the extension is
 specific to the extension point.
 
 `pointer` is a common piece of metadata. Since this is pure JSON, and we want
-to lazily load the code anyhow, a pointer is a string that tells Bespin where
+to lazily load the code anyhow, a pointer is a string that tells Skywriter where
 to find the object that the extended code is going to need to perform the
 necessary work (in this case, the JavaScript syntax highlighting). A pointer is
 given in this format: `plugin:path/to/module/in/plugin#memberInModule`. The
@@ -78,7 +78,7 @@ module below). The `name` and `extensions` metadata are specific to the
 `syntax` extension point.
 
 The `depends` list in the metadata is a list of the names of plugins upon which
-this plugin depends. Bespin will ensure that those plugins are loaded before
+this plugin depends. Skywriter will ensure that those plugins are loaded before
 this one. In the example above, the JavaScript highlighter plugin depends on
 the SyntaxManager, which is itself a plugin.
 
@@ -95,7 +95,7 @@ that are contained in strings. Here's an example:
 You must start the metadata with `"define metadata";` and end it with `"end";`.
 The metadata itself is contained in an object. JavaScript does not allow you to
 put a bare object in a program, so you can either enclose the object in
-parentheses (as above) or set it to a variable. Bespin can handle either of
+parentheses (as above) or set it to a variable. Skywriter can handle either of
 those formats.
 
 Often, a single file is not going to be enough. When you move beyond a single
@@ -119,7 +119,7 @@ then you'll want to include a block like this in your metadata:
 
 where the "1.0.0" is the version of the textutil plugin that you need.
 
-Additionally, there are certain objects that are used across a Bespin
+Additionally, there are certain objects that are used across a Skywriter
 instance. If you need the command line to be available, for example,
 you can specify that in your metadata:
 
@@ -137,11 +137,11 @@ will actually be able to get ahold of the command line.
 
 ## Plugin Reloading ##
 
-A key feature of the Bespin user experience is the ability to edit plugins
-from within Bespin and have the changes take effect immediately. Many types
-of Bespin plugins, such as syntax highlighters, don't have any UI which makes
+A key feature of the Skywriter user experience is the ability to edit plugins
+from within Skywriter and have the changes take effect immediately. Many types
+of Skywriter plugins, such as syntax highlighters, don't have any UI which makes
 them easy to reload. If you write a plugin that has UI or any other resources
-that need to be cleaned up, you can point Bespin at a function to run *before*
+that need to be cleaned up, you can point Skywriter at a function to run *before*
 the plugin is to be reloaded. Here's an example:
 
     :::js
@@ -158,12 +158,12 @@ the plugin is to be reloaded. Here's an example:
 ## Stylesheets ##
 
 If your plugin provides a user interface, you will want to use a stylesheet to
-determine how the user interface will look. Bespin uses [LESS](http://lesscss.org)
+determine how the user interface will look. Skywriter uses [LESS](http://lesscss.org)
 files with themeVariables to allow user interface components to be changed
 globally based on themes. For example, if you make a dialog box that dialog
 could have its background and foreground colors adjusted by the theme.
 
-If you have stylesheets that need to be loaded, you will tell Bespin's
+If you have stylesheets that need to be loaded, you will tell Skywriter's
 theme_manager about them through the `themestyles` extension point. Here's
 an example:
 
@@ -202,7 +202,7 @@ you can refer to bg.png from mystyles.css like so:
     background-image: url(images/bg.png)
     
 By arranging your stylesheets and images this way, your plugin will work 
-properly in both a live Bespin site context *and* an Embedded Bespin context.
+properly in both a live Skywriter site context *and* an Embedded Skywriter context.
 The dryice build tool automatically combines stylesheets from the included
 plugins and following this directory structure is important for ensuring
 that the images still work once the plugin is embedded.
@@ -212,7 +212,7 @@ If you need access to a file via JavaScript, you can get to it using the
 up the us_states.json file from the example above, you can get its URL
 like this:
 
-    var catalog = require("bespin:plugins").catalog;
+    var catalog = require("skywriter:plugins").catalog;
     
     var statesURL = catalog.getResourceURL("MyPluginName") + "data/us_states.json";
 
@@ -223,6 +223,6 @@ plugin.
 ## How To Learn More ##
 
 We will be expanding on the plugin development docs over time. In the meantime,
-it's worth noting that all of Bespin's major functionality is implemented as
-plugins. In a checkout of the [bespinclient repository](http://hg.mozilla.org/labs/bespinclient), take a look at the
-plugins/supported directory for the bulk of Bespin's code.
+it's worth noting that all of Skywriter's major functionality is implemented as
+plugins. In a checkout of the [skywriterclient repository](http://hg.mozilla.org/labs/skywriterclient), take a look at the
+plugins/supported directory for the bulk of Skywriter's code.

@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('bespin:util/util');
+var util = require('skywriter:util/util');
 
 /**
  * A invisible singleton canvas on the page, useful whenever a canvas context
@@ -44,14 +44,14 @@ var util = require('bespin:util/util');
  * @constructor
  */
 var ScratchCanvas = function() {
-    this._canvas = document.getElementById('bespin-scratch-canvas');
+    this._canvas = document.getElementById('skywriter-scratch-canvas');
 
     // It's possible that another ScratchCanvas instance in another sandbox
     // exists on the page. If so, we assume they're compatible, and use
     // that one.
     if (util.none(this._canvas)) {
         this._canvas = document.createElement('canvas');
-        this._canvas.id = 'bespin-scratch-canvas';
+        this._canvas.id = 'skywriter-scratch-canvas';
         this._canvas.width = 400;
         this._canvas.height = 300;
         this._canvas.style.position = 'absolute';

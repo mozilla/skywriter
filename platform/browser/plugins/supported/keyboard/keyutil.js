@@ -31,7 +31,7 @@ For more information about SproutCore, visit http://www.sproutcore.com
 
 // Most of the following code is taken from SproutCore with a few changes.
 
-var util = require('bespin:util/util');
+var util = require('skywriter:util/util');
 
 /**
  * Helper functions and hashes for key handling.

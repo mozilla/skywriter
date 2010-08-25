@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,8 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Trace = require('bespin:util/stacktrace').Trace;
-var catalog = require('bespin:plugins').catalog;
+var Trace = require('skywriter:util/stacktrace').Trace;
+var catalog = require('skywriter:plugins').catalog;
 
 /**
  * Current requirements are around displaying the command line, and provision

@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -44,7 +44,7 @@
         {
             "ep": "command",
             "name": "feedback",
-            "description": "Let us know how we can make Bespin better.",
+            "description": "Let us know how we can make Skywriter better.",
             "pointer": "#feedbackCommand"
         }
     ]
@@ -54,6 +54,6 @@
 var env = require('environment').env;
 
 exports.feedbackCommand = function(args, request) {
-    window.open('http://feedback.mozillalabs.com/forums/49087-bespin',
+    window.open('http://feedback.mozillalabs.com/forums/49087-skywriter',
         'feedback');
 };

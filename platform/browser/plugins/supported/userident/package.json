@@ -1,7 +1,7 @@
 {
-    "description": "Identifies the user via a Bespin server",
+    "description": "Identifies the user via a Skywriter server",
     "dependencies": {
-        "bespin_server": "0.0",
+        "skywriter_server": "0.0",
         "templater": "0.0.0",
         "events": "0.0",
         "settings": "0.0",
@@ -27,13 +27,13 @@
         {
             "ep": "command",
             "name": "logout",
-            "description": "Logout of Bespin",
+            "description": "Logout of Skywriter",
             "pointer": "#logout"
         },
         {
             "ep": "command",
             "name": "keychain",
-            "description": "Manages your Bespin keychain, which stores remote authentication information."
+            "description": "Manages your Skywriter keychain, which stores remote authentication information."
         },
         {
             "ep": "command",
@@ -51,7 +51,7 @@
             "ep": "notification",
             "name": "loginerror",
             "level": "error",
-            "description": "Problems logging in to Bespin"
+            "description": "Problems logging in to Skywriter"
         },
         {
             "ep": "notification",

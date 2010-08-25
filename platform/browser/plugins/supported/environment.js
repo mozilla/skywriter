@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -43,14 +43,14 @@
 });
 "end";
 
-var util = require('bespin:util/util');
-var console = require('bespin:console').console;
-var catalog = require("bespin:plugins").catalog;
+var util = require('skywriter:util/util');
+var console = require('skywriter:console').console;
+var catalog = require("skywriter:plugins").catalog;
 var settings = require('settings').settings;
 
 /**
  * The environment plays a similar role to the environment under unix.
- * Bespin does not currently have a concept of variables, (i.e. things the user
+ * Skywriter does not currently have a concept of variables, (i.e. things the user
  * directly changes, however it does have a number of pre-defined things that
  * are changed by the system.
  * <p>The role of the Environment is likely to be expanded over time.
@@ -200,6 +200,6 @@ Object.defineProperties(exports.Environment.prototype, {
 });
 
 /**
- * The global environment used throughout this Bespin instance.
+ * The global environment used throughout this Skywriter instance.
  */
 exports.env = new exports.Environment();

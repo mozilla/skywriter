@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -64,12 +64,12 @@ if (window == null) {
         'browser, not a web worker. Use "worker" instead.');
 }
 
-var proxy = require('bespin:proxy');
-var plugins = require('bespin:plugins');
-var console = require('bespin:console').console;
+var proxy = require('skywriter:proxy');
+var plugins = require('skywriter:plugins');
+var console = require('skywriter:console').console;
 var _ = require('underscore')._;
 var Event = require('events').Event;
-var Promise = require('bespin:promise').Promise;
+var Promise = require('skywriter:promise').Promise;
 var env = require('environment').env;
 
 var workerManager = {
@@ -99,7 +99,7 @@ function WorkerSupervisor(pointer) {
 
     var packageId = m[1], target = m[3];
     var moduleId = packageId + ":" + (m[2] != null ? m[2] : "index");
-    var base = bespin != null && bespin.base != null ? bespin.base : "";
+    var base = skywriter != null && skywriter.base != null ? skywriter.base : "";
 
     this._packageId = packageId;
     this._moduleId = moduleId;
@@ -198,7 +198,7 @@ WorkerSupervisor.prototype = {
         var base = this._base, target = this._target;
         var packageId = this._packageId, moduleId = this._moduleId;
 
-        var worker = new proxy.Worker(base + "BespinEmbedded.js");
+        var worker = new proxy.Worker(base + "SkywriterEmbedded.js");
 
         worker.onmessage = this._onMessage.bind(this);
         worker.onerror = this._onError.bind(this);

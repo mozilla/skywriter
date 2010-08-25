@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,13 +35,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require('bespin:plugins').catalog;
-var Promise = require('bespin:promise').Promise;
-var groupPromises = require('bespin:promise').group;
-var util = require('bespin:util/util');
+var catalog = require('skywriter:plugins').catalog;
+var Promise = require('skywriter:promise').Promise;
+var groupPromises = require('skywriter:promise').group;
+var util = require('skywriter:util/util');
 var env = require('environment').env;
 
-var server = require('bespin_server').server;
+var server = require('skywriter_server').server;
 var pathutils = require('filesystem:path');
 
 var getPluginName = function(path) {
@@ -78,7 +78,7 @@ var changePluginInfo = function(request) {
         );
     });
 
-    var pluginConfigPath = 'BespinSettings/pluginInfo.json';
+    var pluginConfigPath = 'SkywriterSettings/pluginInfo.json';
     var pluginConfigFile = catalog.getObject("files").getFile(pluginConfigPath);
     pluginConfigFile.loadContents().then(function(contents) {
         pluginConfig = JSON.parse(contents);
@@ -231,7 +231,7 @@ exports.remove = function(args, request) {
     }
     catalog.removePlugin(pluginName);
 
-    var pluginConfigFile = catalog.getObject("files").getFile('BespinSettings/pluginInfo.json');
+    var pluginConfigFile = catalog.getObject("files").getFile('SkywriterSettings/pluginInfo.json');
 
     pluginConfigFile.loadContents().then(function(contents) {
         var pluginConfig = JSON.parse(contents);
@@ -338,7 +338,7 @@ exports.gallery = function(args, request) {
             evalJSON: true
     });
     pr.then(function(data) {
-        output = '<h2>Bespin Plugin Gallery</h2><p>These plugins can be installed ' +
+        output = '<h2>Skywriter Plugin Gallery</h2><p>These plugins can be installed ' +
             'by typing \'plugin install NAME\'</p><table><thead><tr><th>Name</th>' +
             '<th>Description</th></tr></thead><tbody>';
         data.forEach(function(p) {

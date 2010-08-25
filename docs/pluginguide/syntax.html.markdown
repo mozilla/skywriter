@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Bespin Plugin Guide
+title: Skywriter Plugin Guide
 subtitle: Syntax highlighting
 ---
 
 ## Introduction ##
 
-Syntax highlighting in Bespin is designed from the ground up for flexibility
+Syntax highlighting in Skywriter is designed from the ground up for flexibility
 and extensibility. It's easy to design syntax highlighting engines
 for your favorite programming languages and share them with others.
 
@@ -21,14 +21,14 @@ the theme needs to do its work.
 There are two APIs for syntax developers: the simple declarative *standard
 syntax API*, which derives from `StandardSyntax`, and the low-level
 *programmatic syntax API* (which is really an informal interface) providing the
-most flexibility. The built-in Bespin highlighters use the standard syntax API,
+most flexibility. The built-in Skywriter highlighters use the standard syntax API,
 but advanced developers may prefer the programmatic API for more fine-grained
 control over the highlighting. The standard syntax engine is built on top of
 the programmatic API.
 
 ## Metadata ##
 
-Like all Bespin plugins, syntax engines are JavaScript files (or, less
+Like all Skywriter plugins, syntax engines are JavaScript files (or, less
 commonly, collections of JavaScript files). The syntax manager looks for
 plugins at the `syntax` extension point like so:
 
@@ -60,7 +60,7 @@ tutorial](http://www.regular-expressions.info/javascript.html). On the same
 site is [a handy online tool to test your
 regexes](http://www.regular-expressions.info/javascriptexample.html).
 
-Standard syntax plugins in Bespin are plugins like any other, but most of the
+Standard syntax plugins in Skywriter are plugins like any other, but most of the
 code is written for you. All you need to do is to provide a list of *regexes*,
 *tags*, and *actions*, grouped into *states*. Let's look at an excerpt from the
 JavaScript syntax highlighter for an example:
@@ -155,7 +155,7 @@ in the region delimited by the `start:` and `stop:` actions change to those
 specified by the new highlighter (overriding, in this case, the `plain` tag).
 
 That's all there is to the standard syntax API. It's powerful enough to handle
-most cases&mdash;in fact, all of Bespin's syntax highlighters are written using
+most cases&mdash;in fact, all of Skywriter's syntax highlighters are written using
 this API&mdash;but if you want more flexibility or need to run your own custom
 parsing code, read on.
 
@@ -163,7 +163,7 @@ parsing code, read on.
 
 *Note: This section is incomplete.*
 
-As far as Bespin is concerned, a syntax engine is just a SproutCore object
+As far as Skywriter is concerned, a syntax engine is just a SproutCore object
 that implements the method `syntaxInfoForLineFragment`. In JavaScript
 pseudocode, this method has the following signature:
 

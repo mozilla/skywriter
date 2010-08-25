@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -37,16 +37,16 @@
 
 var $ = require('jquery').$;
 var settings = require('settings').settings;
-var group = require("bespin:promise").group;
-var Promise = require("bespin:promise").Promise;
-var console = require("bespin:console").console;
-var Trace = require("bespin:util/stacktrace").Trace;
-var util = require('bespin:util/util');
+var group = require("skywriter:promise").group;
+var Promise = require("skywriter:promise").Promise;
+var console = require("skywriter:console").console;
+var Trace = require("skywriter:util/stacktrace").Trace;
+var util = require('skywriter:util/util');
 
-var firstBespin = true;
+var firstSkywriter = true;
 
 /*
- * launch Bespin with the configuration provided. The configuration is
+ * launch Skywriter with the configuration provided. The configuration is
  * an object with the following properties:
  * - theme: an object with the basePlugin as string and the standardTheme as
  *          string. Both are optional. If no basePlugin is given, screen_theme
@@ -54,7 +54,7 @@ var firstBespin = true;
  * - objects: an object with a collection of named objects that will be
  *            registered with the plugin catalog (see PluginCatalog.registerObject)
  *            This will automatically be augmented with sane defaults (for
- *            example, most Bespin users want a text editor!)
+ *            example, most Skywriter users want a text editor!)
  * - gui: instructions on how to build a GUI. Specifically, the current border
  *        layout positions will be filled in. Again this provides sane defaults.
  * - container: node to attach to (optional). If not provided a node will be
@@ -65,29 +65,29 @@ exports.launch = function(config) {
     var launchPromise = new Promise();
 
     // Remove the "Loading..." hint.
-    $('#_bespin_loading').remove();
+    $('#_skywriter_loading').remove();
 
     // This will hold the require function to get the catalog.
     var require;
 
-    // Is this the fist Bespin?
-    if (firstBespin) {
+    // Is this the fist Skywriter?
+    if (firstSkywriter) {
         // Use the global require.
-        require = bespin.tiki.require;
-        firstBespin = false;
+        require = skywriter.tiki.require;
+        firstSkywriter = false;
     } else {
-        // Otherwise create a new tiki-bespin sandbox and a new require function.
-        var sandbox = new (bespin.tiki.require('bespin:sandbox').Sandbox);
+        // Otherwise create a new tiki-skywriter sandbox and a new require function.
+        var sandbox = new (skywriter.tiki.require('skywriter:sandbox').Sandbox);
         require = sandbox.createRequire({
             id: 'index',
-            ownerPackage: bespin.tiki.loader.anonymousPackage
+            ownerPackage: skywriter.tiki.loader.anonymousPackage
         });
     }
 
-    // Here we go: Require the catalog that is used for this Bespin instance.
-    var catalog = require('bespin:plugins').catalog;
+    // Here we go: Require the catalog that is used for this Skywriter instance.
+    var catalog = require('skywriter:plugins').catalog;
 
-    // Launch Bespin!
+    // Launch Skywriter!
     config = config || {};
     exports.normalizeConfig(catalog, config);
     var objects = config.objects;
@@ -153,7 +153,7 @@ exports.launch = function(config) {
 
     // If the themeManager plugin is there, then check for theme configuration.
     if (catalog.plugins.theme_manager) {
-        bespin.tiki.require.ensurePackage('::theme_manager', function() {
+        skywriter.tiki.require.ensurePackage('::theme_manager', function() {
             var themeManager = require('theme_manager');
             if (config.theme.basePlugin) {
                 themeManager.setBasePlugin(config.theme.basePlugin);
@@ -214,12 +214,12 @@ exports.normalizeConfig = function(catalog, config) {
             }
         };
     }
-    if (!config.objects.server && catalog.plugins.bespin_server) {
+    if (!config.objects.server && catalog.plugins.skywriter_server) {
         config.objects.server = {
-            factory: "bespin_server"
+            factory: "skywriter_server"
         };
         config.objects.filesource = {
-            factory: "bespin_filesource",
+            factory: "skywriter_filesource",
             arguments: [
                 "server"
             ],
@@ -332,8 +332,8 @@ var generateGUI = function(catalog, config, pr) {
     var centerAdded = false;
 
     var element = config.element || document.body;
-    // Add the 'bespin' class to the element in case it doesn't have this already.
-    util.addClass(element, 'bespin');
+    // Add the 'skywriter' class to the element in case it doesn't have this already.
+    util.addClass(element, 'skywriter');
     element.appendChild(container);
     
     // this shouldn't be necessary, but it looks like Firefox has an issue
@@ -347,7 +347,7 @@ var generateGUI = function(catalog, config, pr) {
         var component = catalog.getObject(descriptor.component);
         if (!component) {
             error = 'Cannot find object ' + descriptor.component +
-                            ' to attach to the Bespin UI';
+                            ' to attach to the Skywriter UI';
             console.error(error);
             pr.reject(error);
             return;
@@ -356,7 +356,7 @@ var generateGUI = function(catalog, config, pr) {
         element = component.element;
         if (!element) {
             error = 'Component ' + descriptor.component + ' does not have' +
-                          ' an "element" attribute to attach to the Bespin UI';
+                          ' an "element" attribute to attach to the Skywriter UI';
             console.error(error);
             pr.reject(error);
             return;

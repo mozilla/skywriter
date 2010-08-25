@@ -7,7 +7,7 @@
 /*globals CoreTest exports */
 
 var utils = require('utils'), 
-    Promise = require('bespin:promise').Promise,
+    Promise = require('skywriter:promise').Promise,
     CoreTest, Ct;
 
 /** @namespace

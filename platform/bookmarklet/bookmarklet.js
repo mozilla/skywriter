@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -37,26 +37,26 @@
 
 (function() {
     /** --------------------------------------------------------------------
-     * Load Bespin only when it's not already on the page.
+     * Load Skywriter only when it's not already on the page.
      */
-    if (typeof bespin == 'undefined') {
+    if (typeof skywriter == 'undefined') {
         /** Adjust the following variables as needed **/
         var base = 'http://localhost:8080/';
         var proxyFile = 'proxy.html';
-        var bespinBase = base + "bespin/";
+        var skywriterBase = base + "skywriter/";
 
         var head = document.getElementsByTagName('head')[0];
         var iFrame;
 
-        /** Add the bespin_base link to the header **/
+        /** Add the skywriter_base link to the header **/
         var l =  document.createElement('link');
-        l.setAttribute('id', 'bespin_base');
-        l.setAttribute('href', bespinBase);
+        l.setAttribute('id', 'skywriter_base');
+        l.setAttribute('href', skywriterBase);
         head.appendChild(l);
 
-        /** Add some basic Bespin CSS **/
+        /** Add some basic Skywriter CSS **/
         l =  document.createElement('style');
-        l.innerHTML = '.bespin{border:1px solid gray;}';
+        l.innerHTML = '.skywriter{border:1px solid gray;}';
         head.appendChild(l);
 
         /** --------------------------------------------------------------------
@@ -152,9 +152,9 @@
         window.addEventListener('message', messageHandler, false);
 
         /** --------------------------------------------------------------------
-         * Put the xhr and worker proxy on the Bespin object.
+         * Put the xhr and worker proxy on the Skywriter object.
          */
-        bespin = {
+        skywriter = {
             proxy: {
                 xhr: XhrProxy,
                 worker: WorkerProxy
@@ -163,29 +163,29 @@
 
         /** --------------------------------------------------------------------
          * Create an iFrame that has the proxy file as source. After the proxy
-         * file is loaded, add a script tag with the BespinEmbedded.js file
-         * as source to the current page. This will start the Bespin boot process.
+         * file is loaded, add a script tag with the SkywriterEmbedded.js file
+         * as source to the current page. This will start the Skywriter boot process.
          */
         iFrame = l =  document.createElement('iFrame');
         l.setAttribute('src', base + proxyFile);
         l.onload = function() {
             s = document.createElement('script');
-            s.src = bespinBase + 'BespinEmbedded.js';
+            s.src = skywriterBase + 'SkywriterEmbedded.js';
             head.appendChild(s);
 
-            /** Called when Bespin has finished loading. **/
-            window.onBespinLoad = function() {
-                var $ = bespin.tiki.require("jquery").$;
+            /** Called when Skywriter has finished loading. **/
+            window.onSkywriterLoad = function() {
+                var $ = skywriter.tiki.require("jquery").$;
                 var currentTextArea = null;
-                var bespinButton = document.createElement("img");
-                bespinButton.setAttribute('style', 'display:none; position:absolute');
-                bespinButton.setAttribute('src', base + 'bespin-logo.png');
-                document.body.appendChild(bespinButton);
+                var skywriterButton = document.createElement("img");
+                skywriterButton.setAttribute('style', 'display:none; position:absolute');
+                skywriterButton.setAttribute('src', base + 'skywriter-logo.png');
+                document.body.appendChild(skywriterButton);
                 
-                $(bespinButton).click(function(evt) {
+                $(skywriterButton).click(function(evt) {
                     if (currentTextArea) {
-                        $(bespinButton).hide();
-                        bespin.useBespin(currentTextArea, {
+                        $(skywriterButton).hide();
+                        skywriter.useSkywriter(currentTextArea, {
                             stealFocus: true
                         });
                     }
@@ -195,7 +195,7 @@
                     currentTextArea = evt.target;
                     var pos = $(evt.target).offset();
                     var width = $(evt.target).width();
-                    $(bespinButton).css({top: pos.top + 'px', 
+                    $(skywriterButton).css({top: pos.top + 'px', 
                                          left: pos.left + width + 'px'}).show();
                 });
             };

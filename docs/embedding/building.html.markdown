@@ -1,15 +1,15 @@
 ---
 layout: default
-title: Bespin Embedded Guide
+title: Skywriter Embedded Guide
 subtitle: Building
 ---
 
-If you have a Bespin Embedded Customizable package, you can build your own
-custom version of Bespin Embedded, with just the plugins you want. 
+If you have a Skywriter Embedded Customizable package, you can build your own
+custom version of Skywriter Embedded, with just the plugins you want. 
 
 ## Prerequisites ##
 
-You will need Python 2.5 or 2.6 in order to build a custom Bespin. If you're using Python 2.5, you will also need to install simplejson.
+You will need Python 2.5 or 2.6 in order to build a custom Skywriter. If you're using Python 2.5, you will also need to install simplejson.
 
 ## The Manifest ##
 
@@ -33,17 +33,17 @@ incorporated into the final build.
 ## Manifest Options ##
 
 include\_tests
-:   should the output include Bespin's test suite?
-    This is useful if you're doing Bespin development in Bespin.
+:   should the output include Skywriter's test suite?
+    This is useful if you're doing Skywriter development in Skywriter.
 
 include_sample
 :   should the final output directory include a `samples` directory that
     contains HTML files that show off the editor?
 
 jquery
-:   Bespin uses jQuery for its utility functions. By default, Bespin will
+:   Skywriter uses jQuery for its utility functions. By default, Skywriter will
     use its own private copy of jQuery. The jquery build option can be
-    set to either "global" or "builtin". When jquery="global", Bespin
+    set to either "global" or "builtin". When jquery="global", Skywriter
     will use the jQuery that is on "window".
 
 output_dir
@@ -58,7 +58,7 @@ plugins
 dynamic_plugins
 :   list of plugins that should be available for dynamic loading. These will
     end up in a "plugins" directory and their metadata will be available to
-    your Embedded Bespin plugin system
+    your Embedded Skywriter plugin system
 
 search_path
 :   provide a list of relative (to the current directory) or absolute paths
@@ -69,31 +69,31 @@ search_path
 config
 :   the default [appconfig](appconfig.html) to use in the build
 
-## Using Bespin with your own jQuery ##
+## Using Skywriter with your own jQuery ##
 
-Bespin uses jQuery for utility functions. Additionally, some Bespin plugins use
+Skywriter uses jQuery for utility functions. Additionally, some Skywriter plugins use
 various jQuery plugins for higher-level user interface widgets. If you are 
 already using jQuery on your page, you can set jquery="global" in your manifest
-file, and you will end up with a smaller Bespin build that does not include
+file, and you will end up with a smaller Skywriter build that does not include
 jQuery.
 
-*Important Note*: you should ensure that the Bespin plugins that use jQuery
+*Important Note*: you should ensure that the Skywriter plugins that use jQuery
 plugins do not interfere with jQuery plugins that you are using elsewhere
 on your page.
 
 ## Writing Your Own Plugins ##
 
 One of the main reasons to use the Customizable package is that you want to,
-well, customize Bespin. Generally speaking, this means adding your own
+well, customize Skywriter. Generally speaking, this means adding your own
 collection of plugins. Let's create a "hello world" style plugin to see how
-we can build it into Bespin.
+we can build it into Skywriter.
 
-Start by creating a directory *next to* your Bespin Embedded directory.
-The reason we create this directory next to your Bespin directory is that 
-you're likely to update Bespin from time to time and you wouldn't want to
+Start by creating a directory *next to* your Skywriter Embedded directory.
+The reason we create this directory next to your Skywriter directory is that 
+you're likely to update Skywriter from time to time and you wouldn't want to
 overwrite your plugins. We'll call the directory "MyPlugins".
 
-In the same directory as the MyPlugins directory, create a "mybespin.json"
+In the same directory as the MyPlugins directory, create a "myskywriter.json"
 manifest that looks like this:
 
     {
@@ -123,31 +123,31 @@ in the MyPlugins directory that you just created.
         alert("Greetings from the Cloud!");
     };
 
-OK, now we're all set to try out our new plugin in a customized Bespin.
+OK, now we're all set to try out our new plugin in a customized Skywriter.
 We'll use the dryice tool (described in more detail in the next section)
-to create the build. Switch to the Bespin Embedded directory and then
+to create the build. Switch to the Skywriter Embedded directory and then
 run:
 
-    python dryice.py ../mybespin.json
+    python dryice.py ../myskywriter.json
     cd tmp
     
 If you look at the files in your tmp directory, you'll see a fresh
-BespinEmbedded.js. That one will actually include your plugin! Open the
+SkywriterEmbedded.js. That one will actually include your plugin! Open the
 sample.html file in your web browser, click on the editor and press
 cmd-I (ctrl-I on Windows) and you'll see your alert pop up.
 
 ## The dryice Server ##
 
-If you're hacking on plugins purely with the Bespin Embedded Customizable
+If you're hacking on plugins purely with the Skywriter Embedded Customizable
 package, it gets annoying to have to re-run dryice every time you make a
 change. For this reason, dryice has a simple server that you can run. The
 simplest way to get going is:
 
-    python dryice.py -s 8080 ../mybespin.json
+    python dryice.py -s 8080 ../myskywriter.json
 
 This will start the server on port 8080, using the manifest file that
 we created in the previous section. Just point your browser to
-[http://localhost:8080/]() and you should see your custom Bespin build!
+[http://localhost:8080/]() and you should see your custom Skywriter build!
 It will be rebuilt each time you reload the page.
 
 ## Building ##

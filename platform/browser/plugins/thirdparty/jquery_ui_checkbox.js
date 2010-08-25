@@ -3,7 +3,7 @@
  * @version 1.4.1
  */
  
-// imported into Bespin 2010/05/21
+// imported into Skywriter 2010/05/21
 
 "define metadata";
 ({

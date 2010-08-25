@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,15 +35,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('bespin:util/util');
+var util = require('skywriter:util/util');
 var t = require('plugindev');
-var m_scratchcanvas = require('bespin:util/scratchcanvas');
+var m_scratchcanvas = require('skywriter:util/scratchcanvas');
 
 exports.testScratchCanvasBehavesAsASingleton = function() {
-    t.ok(util.none(document.getElementById('bespin-scratch-canvas')),
+    t.ok(util.none(document.getElementById('skywriter-scratch-canvas')),
         'there is no scratch canvas before the singleton is requested');
     var scratchCanvasA = m_scratchcanvas.get();
-    var element = document.getElementById('bespin-scratch-canvas');
+    var element = document.getElementById('skywriter-scratch-canvas');
     t.ok(!util.none(element),
         'the element exists after the singleton is requested');
     var scratchCanvasB = m_scratchcanvas.get();

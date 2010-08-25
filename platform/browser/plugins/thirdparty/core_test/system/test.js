@@ -7,7 +7,7 @@
 
 var utils       = require('utils'),
     Ct          = require('core'),
-    Promise     = require('promise', 'bespin').Promise,
+    Promise     = require('promise', 'skywriter').Promise,
     Assertable  = require('assert').xCoreTestAssertable;
 
 require('system/dump'); // add Ct.dump

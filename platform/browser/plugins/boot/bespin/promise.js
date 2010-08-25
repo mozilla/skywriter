@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,8 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var console = require('bespin:console').console;
-var Trace = require('bespin:util/stacktrace').Trace;
+var console = require('skywriter:console').console;
+var Trace = require('skywriter:util/stacktrace').Trace;
 
 /**
  * A promise can be in one of 2 states.
@@ -260,7 +260,7 @@ exports.group = function(promiseList) {
  * return a synchronous version of the same function.
  * Clearly this is impossible without blocking or busy waiting (both evil).
  * In this case we make the assumption that the called function is only
- * theoretically asynchronous (which is actually common with Bespin, because the
+ * theoretically asynchronous (which is actually common with Skywriter, because the
  * most common cause of asynchronaity is the lazy loading module system which
  * can sometimes be proved to be synchronous in use, even though in theory
  * there is the potential for asynch behaviour)

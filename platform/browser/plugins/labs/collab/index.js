@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -52,10 +52,10 @@ I took out from package.json following extension points:
  * information and handle collaboration.
  */
 
-var console = require('bespin:console').console;
+var console = require('skywriter:console').console;
 var env = require('environment').env;
 var project = require('project');
-var server = require('bespin_server').server;
+var server = require('skywriter_server').server;
 
 var mobwrite = require('collab:mobwrite/core').mobwrite;
 var diff_match_patch = require('diff');
@@ -245,7 +245,7 @@ ShareNode.prototype = {
     /**
      * Merge a set of patches onto the text. Return a patched text.
      * This is taken from mobwrite.shareTextareaObj.prototype.patch_apply_
-     * and we should find a better way to share. Maybe shareBespinObj should
+     * and we should find a better way to share. Maybe shareSkywriterObj should
      * inherit from shareTextareaObj? In the mean time we need to take extra
      * care when doing merges
      * @param {Array.<patch_obj>} patches Array of patch objects.

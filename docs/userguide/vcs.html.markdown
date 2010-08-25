@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Bespin User's Guide
+title: Skywriter User's Guide
 subtitle: Version Control System Integration
 ---
 
@@ -8,27 +8,27 @@ subtitle: Version Control System Integration
 Version Control
 ---------------
 
-Bespin is able to use a version control system (VCS) to keep track of the history of your project's files. Using Bespin in conjunction with an external VCS is also a great way to get files in and out of a Bespin server.
+Skywriter is able to use a version control system (VCS) to keep track of the history of your project's files. Using Skywriter in conjunction with an external VCS is also a great way to get files in and out of a Skywriter server.
 
 #### The Basics ####
 
-Bespin currently supports the Mercurial distributed VCS. You can add version control to a project using the command `hg init`. If you have never used a distributed VCS before, you might consider reading the [http://en.wikipedia.org/wiki/Distributed_revision_control Wikipedia article on the subject].
+Skywriter currently supports the Mercurial distributed VCS. You can add version control to a project using the command `hg init`. If you have never used a distributed VCS before, you might consider reading the [http://en.wikipedia.org/wiki/Distributed_revision_control Wikipedia article on the subject].
 
-If you are starting to use Bespin with an existing project, you can ''clone'' a remote repository.
+If you are starting to use Skywriter with an existing project, you can ''clone'' a remote repository.
 
 ##### Securely accessing remote systems #####
 
-In order to access remote VCSes, Bespin stores your login information for those remote systems in a private '''keychain'''. Your keychain file is encrypted with a password that is distinct from your login password and that you will need to type in whenever Bespin is accessing the remote system. Using a distributed VCS, you don't need to type this password in often.
+In order to access remote VCSes, Skywriter stores your login information for those remote systems in a private '''keychain'''. Your keychain file is encrypted with a password that is distinct from your login password and that you will need to type in whenever Skywriter is accessing the remote system. Using a distributed VCS, you don't need to type this password in often.
 
-Bespin supports username and password-based access to remote systems. It can also use SSH, and Bespin will generate a public/private keypair that you can use on the remote system. The private key is stored in your keychain. You can get your public key using the command:
+Skywriter supports username and password-based access to remote systems. It can also use SSH, and Skywriter will generate a public/private keypair that you can use on the remote system. The private key is stored in your keychain. You can get your public key using the command:
 
   keychain getkey
 
-If your remote repository is at a site like [http://bitbucket.org](Bitbucket), it is easy to copy and paste this public key into the web interface of the site to get read and write access to your repositories from Bespin.
+If your remote repository is at a site like [http://bitbucket.org](Bitbucket), it is easy to copy and paste this public key into the web interface of the site to get read and write access to your repositories from Skywriter.
 
 ##### VCS Commands #####
 
-For security reasons, Bespin supports only a subset of VCS operations. We plan to expand the number of commands and VCSes supported over time.
+For security reasons, Skywriter supports only a subset of VCS operations. We plan to expand the number of commands and VCSes supported over time.
 
 ##### vcs clone #####
 
@@ -40,61 +40,61 @@ URL
 : URL of the repository (generally an http, https or ssh URL)
 
 Project name
-: name of the project to create in Bespin. You can leave this blank, and Bespin will use what comes after the last / in the URL.
+: name of the project to create in Skywriter. You can leave this blank, and Skywriter will use what comes after the last / in the URL.
 
 VCS Type
 : which version control system is used by this repository
 
 VCS User
-: For distributed VCSes (Mercurial, Git), what username should appear in your commits for this project. You can also use the global Bespin setting "vcsuser" to set this value.
+: For distributed VCSes (Mercurial, Git), what username should appear in your commits for this project. You can also use the global Skywriter setting "vcsuser" to set this value.
 
 Authentication
 : None (used for read-only access to public repositories), Only for writing (if it's a public repository that you have write access to) and For reading and writing (if it's a private repository)
 
-If you tell Bespin, via the Authentication options, that you have write access to the repository, additional fields will be displayed so that you can configure the write access.
+If you tell Skywriter, via the Authentication options, that you have write access to the repository, additional fields will be displayed so that you can configure the write access.
 
 Keychain password
-: password used to store your remote login credentials securely on the Bespin server
+: password used to store your remote login credentials securely on the Skywriter server
 
 Push to URL
 : Sometimes you will use a different URL for pushing than pulling, perhaps using http to pull and ssh to push. This allows you to set the URL for pushing.
 
 Authentication type
-: Bespin can use SSH for authentication or username/password. See the `keychain getkey` command for more information about Bespin's SSH authentication.
+: Skywriter can use SSH for authentication or username/password. See the `keychain getkey` command for more information about Skywriter's SSH authentication.
 
 Username
 : You should always fill in the username that you will be using to log into the remote system
 
 Password
-: If you are using username/password authentication rather than SSH, you will type in your password here. This password will be stored in your encrypted Bespin keychain.
+: If you are using username/password authentication rather than SSH, you will type in your password here. This password will be stored in your encrypted Skywriter keychain.
 
 ##### hg init #####
 
-If you don't need to maintain your files in a remote version control system, you can use the `hg init` command to initialize a Mercurial repository for the currently selected Bespin project.
+If you don't need to maintain your files in a remote version control system, you can use the `hg init` command to initialize a Mercurial repository for the currently selected Skywriter project.
 
 ##### vcs add #####
 
-Adds files to the version control system. This concept is familiar in most VCSes. If you create a new file, it is not automatically placed under version control. `vcs add` on its own will add the '''current''' file to the VCS. `vcs add -a` will add all files. You can also list specific files within the currently selected Bespin project.
+Adds files to the version control system. This concept is familiar in most VCSes. If you create a new file, it is not automatically placed under version control. `vcs add` on its own will add the '''current''' file to the VCS. `vcs add -a` will add all files. You can also list specific files within the currently selected Skywriter project.
 
 This does not access remote files, so you will not need your keychain password for this command.
 
 ##### vcs commit #####
 
-Commits changes '''to the local repository''' within Bespin. You need to provide a commit message, which you should put in quotes on the command line.
+Commits changes '''to the local repository''' within Skywriter. You need to provide a commit message, which you should put in quotes on the command line.
 
 This does not access remote files, so you will not need your keychain password for this command.
 
 ##### vcs diff #####
 
-Shows you the differences between your current set of files and what's checked into the local repository in Bespin. Without any options, `vcs diff` will show a diff for the current file. `vcs diff -a` shows diffs for all of the files and you can also list specific filenames within the current project for which you'd like to see diffs.
+Shows you the differences between your current set of files and what's checked into the local repository in Skywriter. Without any options, `vcs diff` will show a diff for the current file. `vcs diff -a` shows diffs for all of the files and you can also list specific filenames within the current project for which you'd like to see diffs.
 
 This does not access remote files, so you will not need your keychain password for this command.
 
 ##### keychain getkey #####
 
-As mentioned in the section ''Securely accessing remote systems'', Bespin will generate an SSH public/private keypair for you. The `keychain getkey` command will display your public key so that you can copy and paste it into the remote host. After you do that, Bespin should be able to access the remote system.
+As mentioned in the section ''Securely accessing remote systems'', Skywriter will generate an SSH public/private keypair for you. The `keychain getkey` command will display your public key so that you can copy and paste it into the remote host. After you do that, Skywriter should be able to access the remote system.
 
-When your key is first generated, you will need to enter your keychain password so that Bespin can securely store your private key in your keychain file. After this initial key generation step, you will not need to enter your keychain password for the `keychain getkey` command.
+When your key is first generated, you will need to enter your keychain password so that Skywriter can securely store your private key in your keychain file. After this initial key generation step, you will not need to enter your keychain password for the `keychain getkey` command.
 
 ##### vcs push #####
 
@@ -118,7 +118,7 @@ This does not access remote files, so you will not need your keychain password f
 
 ##### vcs revert #####
 
-If you decide that you're not happy with changes you've made, you can revert your checked out copies of the files to the last revision in the local Bespin repository. `vcs revert` will revert the current file. `vcs revert -a` will revert all files, and you can also individually list files in the current project that you'd like to revert.
+If you decide that you're not happy with changes you've made, you can revert your checked out copies of the files to the last revision in the local Skywriter repository. `vcs revert` will revert the current file. `vcs revert -a` will revert all files, and you can also individually list files in the current project that you'd like to revert.
 
 This does not access remote files, so you will not need your keychain password for this command.
 

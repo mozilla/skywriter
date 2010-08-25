@@ -1,4 +1,4 @@
-// Changed to suit the specific needs of running within Bespin
+// Changed to suit the specific needs of running within Skywriter
 
 // Domain Public by Eric Wendelin http://eriwen.com/ (2008)
 //                  Luke Smith http://lucassmith.name/ (2008)
@@ -48,8 +48,8 @@
 // IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 // OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-var util = require('bespin:util/util');
-var console = require("bespin:console").console;
+var util = require('skywriter:util/util');
+var console = require("skywriter:console").console;
 
 /**
  * Different browsers create stack traces in different ways.

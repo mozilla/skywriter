@@ -1,5 +1,5 @@
 {
-    "description": "Provides communication with the Bespin Server",
+    "description": "Provides communication with the Skywriter Server",
     "dependencies":  {
         "filesystem": "0.0",
         "canon": "0.0",
@@ -9,15 +9,15 @@
 	"provides": [
     	{
 	        "ep": "factory",
-	        "name": "bespin_server",
+	        "name": "skywriter_server",
 	        "action": "call",
 	        "pointer": "#createServer"
     	},
     	{
     	    "ep": "factory",
-    	    "name": "bespin_filesource",
+    	    "name": "skywriter_filesource",
     	    "action": "new",
-    	    "pointer": "filesource#BespinFileSource"
+    	    "pointer": "filesource#SkywriterFileSource"
     	},
         {
             "ep": "extensionpoint",

@@ -3,7 +3,7 @@
     "dependencies": {
         "types": "0.0.0",
         "core_test": "0.0.0",
-        "bespin_server": "0.0.0",
+        "skywriter_server": "0.0.0",
         "theme_manager_base": "0.0.0"
     },
     "provides": [
@@ -51,7 +51,7 @@
         {
             "ep": "command",
             "name": "plugin add",
-            "description": "Add a file or directory in your Bespin files as a plugin.",
+            "description": "Add a file or directory in your Skywriter files as a plugin.",
             "params": [
                 {
                     "name": "path",
@@ -76,7 +76,7 @@
                     "name": "plugin",
                     "type": {
                         "name": "selection",
-                        "pointer": "bespin:plugins#getUserPlugins"
+                        "pointer": "skywriter:plugins#getUserPlugins"
                     }
                 }
             ],
@@ -180,7 +180,7 @@
         {
             "ep": "command",
             "name": "ep",
-            "description": "Display information about the extension points in this Bespin",
+            "description": "Display information about the extension points in this Skywriter",
             "params": [
                 {
                     "name": "ep",

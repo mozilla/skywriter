@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,14 +35,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Load up Bespin's boot code (the plugin system, basically)
-bespin.tiki.require.ensurePackage("::bespin", function() {
-    var require = bespin.tiki.require;
-    var plugins = require("bespin:plugins");
+// Load up Skywriter's boot code (the plugin system, basically)
+skywriter.tiki.require.ensurePackage("::skywriter", function() {
+    var require = skywriter.tiki.require;
+    var plugins = require("skywriter:plugins");
     var pr = plugins.catalog.loadMetadataFromURL("plugin/register/defaults");
     pr.then(function() {
         // The "hosted" plugin sets up the environment
-        bespin.tiki.require.ensurePackage("::appconfig", function() {
+        skywriter.tiki.require.ensurePackage("::appconfig", function() {
             var appconfig = require("appconfig");
             appconfig.launch({
                 stealFocus: true

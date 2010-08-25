@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,8 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require('bespin:plugins').catalog;
-var console = require('bespin:console').console;
+var catalog = require('skywriter:plugins').catalog;
+var console = require('skywriter:console').console;
 var env = require('environment').env;
 
 /**
@@ -137,15 +137,15 @@ var _getHelp = function(prefix, options) {
  */
 exports.helpCommand = function(args, request) {
     var output = _getHelp(args.search, {
-        prefix: '<h2>Welcome to Bespin - Code in the Cloud</h2><ul>' +
-            "<li><a href='http://labs.mozilla.com/projects/bespin' target='_blank'>Home Page</a></li>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin' target='_blank'>Wiki</a></li>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/UserGuide' target='_blank'>User Guide</a></li>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/Tips' target='_blank'>Tips and Tricks</a></li>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/FAQ' target='_blank'>FAQ</a></li>" +
-            "<li><a href='https://wiki.mozilla.org/Labs/Bespin/DeveloperGuide' target='_blank'>Developers Guide</a></li>" +
+        prefix: '<h2>Welcome to Skywriter - Code in the Cloud</h2><ul>' +
+            "<li><a href='http://labs.mozilla.com/projects/skywriter' target='_blank'>Home Page</a></li>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Skywriter' target='_blank'>Wiki</a></li>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Skywriter/UserGuide' target='_blank'>User Guide</a></li>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Skywriter/Tips' target='_blank'>Tips and Tricks</a></li>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Skywriter/FAQ' target='_blank'>FAQ</a></li>" +
+            "<li><a href='https://wiki.mozilla.org/Labs/Skywriter/DeveloperGuide' target='_blank'>Developers Guide</a></li>" +
             "</ul>",
-         suffix: "For more information, see the <a href='https://wiki.mozilla.org/Labs/Bespin'>Bespin Wiki</a>."
+         suffix: "For more information, see the <a href='https://wiki.mozilla.org/Labs/Skywriter'>Skywriter Wiki</a>."
     });
     request.done(output);
 };

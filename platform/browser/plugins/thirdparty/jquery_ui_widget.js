@@ -8,7 +8,7 @@
  * http://docs.jquery.com/UI/Widget
  */
  
-// imported into Bespin 2010/05/21
+// imported into Skywriter 2010/05/21
 
 "define metadata";
 ({

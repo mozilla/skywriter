@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -94,10 +94,10 @@
  * </ul>
  */
 
-var catalog = require('bespin:plugins').catalog;
-var console = require('bespin:console').console;
-var Promise = require('bespin:promise').Promise;
-var groupPromises = require('bespin:promise').group;
+var catalog = require('skywriter:plugins').catalog;
+var console = require('skywriter:console').console;
+var Promise = require('skywriter:promise').Promise;
+var groupPromises = require('skywriter:promise').group;
 
 var types = require('types:types');
 
@@ -153,7 +153,7 @@ exports.getTypeSpecFromAssignment = function(typeSpec) {
  * <pre>
  * // Create manually, or require 'settings' from the container.
  * // This is the manual version:
- * var settings = require('bespin:plugins').catalog.getObject('settings');
+ * var settings = require('skywriter:plugins').catalog.getObject('settings');
  * // Add a new setting
  * settings.addSetting({ name:'foo', ... });
  * // Display the default value
@@ -243,7 +243,7 @@ exports.MemorySettings.prototype = {
      * Function to add to the list of available settings.
      * <p>Example usage:
      * <pre>
-     * var settings = require('bespin:plugins').catalog.getObject('settings');
+     * var settings = require('skywriter:plugins').catalog.getObject('settings');
      * settings.addSetting({
      *     name: 'tabsize', // For use in settings.get('X')
      *     type: 'number',  // To allow value checking.

@@ -1,5 +1,5 @@
 {
-    "description": "Provides a white theme for Bespin",
+    "description": "Provides a white theme for Skywriter",
     "dependencies": {
         "theme_manager": "0.0.0"
     },

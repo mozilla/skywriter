@@ -1,5 +1,5 @@
 {
-    "description": "Bespins standard theme basePlugin",
+    "description": "Skywriters standard theme basePlugin",
     "dependencies": {
         "theme_manager": "0.0.0"
     },

@@ -1,5 +1,5 @@
 {
-    "description": "The standard Bespin toolbar",
+    "description": "The standard Skywriter toolbar",
     "dependencies": {
         "events": "0.0.0"
     },

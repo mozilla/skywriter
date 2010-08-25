@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -37,7 +37,7 @@
 
 var rangeutils = require('rangeutils:utils/range');
 var scroller = require('views/scroller');
-var util = require('bespin:util/util');
+var util = require('skywriter:util/util');
 
 var Buffer = require('models/buffer').Buffer;
 var CompletionController = require('completion:controller').
@@ -52,7 +52,7 @@ var ScrollerView = scroller.ScrollerCanvasView;
 var TextView = require('views/text').TextView;
 
 var _ = require('underscore')._;
-var catalog = require('bespin:plugins').catalog;
+var catalog = require('skywriter:plugins').catalog;
 var keyboardManager = require('keyboard:keyboard').keyboardManager;
 var settings = require('settings').settings;
 
@@ -421,7 +421,7 @@ exports.EditorView.prototype = {
     /**
      * Converts a point in the coordinate system of the document being edited
      * (i.e. of the text view) to the coordinate system of the editor (i.e. of
-     * the DOM component containing Bespin).
+     * the DOM component containing Skywriter).
      */
     convertTextViewPoint: function(pt) {
         var scrollOffset = this.scrollOffset;

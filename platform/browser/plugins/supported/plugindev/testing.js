@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,11 +35,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require('bespin:plugins').catalog;
+var catalog = require('skywriter:plugins').catalog;
 var Ct = require('core_test');
 var DefaultLogger = require('loggers/default', 'core_test');
-var Promise = require("bespin:promise").Promise;
-var group = require('bespin:promise').group;
+var Promise = require("skywriter:promise").Promise;
+var group = require('skywriter:promise').group;
 var test = require('core_test:test');
 var utils = require('core_test:utils');
 var env = require('environment').env;

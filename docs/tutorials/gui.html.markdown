@@ -1,21 +1,21 @@
 ---
 layout: default
-title: Bespin Tutorials
+title: Skywriter Tutorials
 subtitle: Adding to the GUI
 ---
 
 Introduction
 ============
 
-Since Bespin is a webapp, any Bespin command could conceivably pop up some bit
+Since Skywriter is a webapp, any Skywriter command could conceivably pop up some bit
 of user interface to interact with the user. It's just a matter of creating some
 DOM nodes and placing them on the screen.
 
 But, if you want something a bit more persistent and integrated, you'll need
-to learn a bit about how Bespin's GUI is put together. That's what this tutorial
+to learn a bit about how Skywriter's GUI is put together. That's what this tutorial
 is about.
 
-At the same time, we're going to talk about how Bespin plugins can themselves
+At the same time, we're going to talk about how Skywriter plugins can themselves
 be pluggable.
 
 In this tutorial, we assume that you're already familiar with using dryice and
@@ -24,19 +24,19 @@ like the one from the [commands tutorial](commands.html).
 
 By the end of this tutorial, we'll have something that looks toolbar-like. 
 We're not trying to create a fully-functional toolbar here, because the 
-focus is on hooking in to Bespin's GUI.
+focus is on hooking in to Skywriter's GUI.
 
-This tutorial should work with Bespin 0.9a1 or later. However, there
+This tutorial should work with Skywriter 0.9a1 or later. However, there
 is a **bug in Firefox 3.6.x that will cause the toolbar to not display
-properly**. Bespin 0.9a2 has a workaround for this, and the bug itself
+properly**. Skywriter 0.9a2 has a workaround for this, and the bug itself
 is fixed in Firefox versions after 3.6.x.
 
 Creating Our Plugin
 -------------------
 
 As with the commands tutorial, we're assuming that you're working within a
-directory called `bespintutorial` that has Bespin itself in a subdirectory
-called `bespin`.
+directory called `skywritertutorial` that has Skywriter itself in a subdirectory
+called `skywriter`.
 
 In plugins that have user interface elements, you will almost always need
 to create a "multi file plugin". That just means we'll be creating a 
@@ -47,7 +47,7 @@ we need to create a file called `package.json` in the `tutorialtoolbar`
 directory.
 
 We also need a dryice manifest so that we can see our plugin in action.
-Create a file called `toolbar.json` in the `bespintutorial` directory.
+Create a file called `toolbar.json` in the `skywritertutorial` directory.
 Here's what we'll put in it to start with:
 
     :::js
@@ -57,13 +57,13 @@ Here's what we'll put in it to start with:
         "search_path": [".."]
     }
 
-Switch to the `bespin` directory and run:
+Switch to the `skywriter` directory and run:
 
     python dryice.py -s 8080 ../toolbar.json
 
 You shouldn't get any errors from dryice. That means that it was able to find
 our tutorialtoolbar plugin. If you open your browser to http://localhost:8080/,
-you'll see a normal looking Bespin. Now we just need to put something in our 
+you'll see a normal looking Skywriter. Now we just need to put something in our 
 plugin.
 
 Creating A Simple View
@@ -83,10 +83,10 @@ Here's how our toolbar component will start out:
 We're creating a `Toolbar` class. When a new `Toolbar` is created,
 it gets a new element which just has our string in it. We
 set that to `element` on the instance. This is the key to GUI components
-that are integrated into Bespin's UI: they just offer up an `element`
-that Bespin will put in place.
+that are integrated into Skywriter's UI: they just offer up an `element`
+that Skywriter will put in place.
 
-The next step is telling the Bespin system about our new component.
+The next step is telling the Skywriter system about our new component.
 We do that in the `package.json` file, which will now look like this:
 
     :::js
@@ -102,16 +102,16 @@ We do that in the `package.json` file, which will now look like this:
     }
 
 The factory extension point is used for extensions that provide components
-for Bespin to automatically instantiate. That may sound kind of vague,
+for Skywriter to automatically instantiate. That may sound kind of vague,
 but you'll see in a moment that it's actually easy to use. The `action`
-tells Bespin that it's going to be creating a new instance and the
-`pointer` is telling Bespin to look in the tutorialtoolbar plugin's
+tells Skywriter that it's going to be creating a new instance and the
+`pointer` is telling Skywriter to look in the tutorialtoolbar plugin's
 `index` module for something called `ToolbarView`.
 
 We've written code that will generate our initial toolbar and we've told
-Bespin that this is available. The next step is to tell Bespin to put
+Skywriter that this is available. The next step is to tell Skywriter to put
 one into the UI. This can be done either in the dryice manifest file or
-even at runtime when `useBespin` is called. We'll do it in the manifest
+even at runtime when `useSkywriter` is called. We'll do it in the manifest
 file (`toolbar.json`). Here's the new manifest:
 
     :::js
@@ -136,14 +136,14 @@ file (`toolbar.json`). Here's the new manifest:
 The new section is the `config` section. This provides the application
 configuration (about which you can read more in the [Embedder's Guide](../embedding/appconfig.html)).
 
-The `objects` part of the config is telling Bespin to create a "global"
-(global within Bespin) object called `toolbar`. Bespin will look for
+The `objects` part of the config is telling Skywriter to create a "global"
+(global within Skywriter) object called `toolbar`. Skywriter will look for
 a factory called `tutorialtoolbar`, which happens to be what we defined
 in the `package.json` file.
 
-The `gui` part of the config is telling Bespin to toss the component
+The `gui` part of the config is telling Skywriter to toss the component
 (object) that we created with the name `toolbar` into the "north" part
-of the interface. Bespin uses a simple "border layout" with north, south,
+of the interface. Skywriter uses a simple "border layout" with north, south,
 east, west and center locations. So, our toolbar should appear at the top
 of the page.
 
@@ -162,8 +162,8 @@ Traditionally, HTML+CSS have been quite nice for laying out documents
 but not so great for laying out user interfaces. Flexbox
 makes laying out UI a far easier process.
 
-Bespin uses flexbox to create the border layout. When you declare that a GUI
-component belongs in the "north", all Bespin has to do is add the "north" 
+Skywriter uses flexbox to create the border layout. When you declare that a GUI
+component belongs in the "north", all Skywriter has to do is add the "north" 
 class to the element, and it pops into the right place.
 
 Flexbox would also be a great way to create a toolbar, but we're not
@@ -175,7 +175,7 @@ faster and smoother than JavaScript-based layouts.
 Making Our Toolbar Pluggable
 ----------------------------
 
-One of Bespin's main features is that it is customizable and extendable.
+One of Skywriter's main features is that it is customizable and extendable.
 While it's certainly possible to make a static toolbar with a certain
 collection of functions, it's a lot more interesting to create a toolbar
 that is itself pluggable. Plus, that's part of the point of our tutorial.
@@ -203,18 +203,18 @@ Add this as another item in the `provides` list in `package.json`:
 
 Extension points themselves are defined via the `extensionpoint` extension
 point. Seems a bit circular, but it works. We're creating an extension point
-called `tutorialtoolbaritem`. Bespin is designed to be introspectable,
+called `tutorialtoolbaritem`. Skywriter is designed to be introspectable,
 so we provide some documentation about the extension point via the `description`
 and `params` properties.
 
-We're going to make `tutorialtoolbaritem`s look a lot like Bespin's GUI components
+We're going to make `tutorialtoolbaritem`s look a lot like Skywriter's GUI components
 (an object with an `element` property).
 
 Now, we need to make our toolbar go out and find the registered `tutorialtoolbaritem`s.
 We'll change `index.js` to look like this:
 
     :::js
-    var catalog = require("bespin:plugins").catalog;
+    var catalog = require("skywriter:plugins").catalog;
 
     exports.ToolbarView = function() {
         var elem = document.createElement("menu");
@@ -268,7 +268,7 @@ And, with that, we have created a dynamically extendable toolbar.
 Adding Some Items
 -----------------
 
-Of course, if we reload our Bespin, the toolbar will be rather boring. We
+Of course, if we reload our Skywriter, the toolbar will be rather boring. We
 haven't added any toolbar items!
 
 With the infrastructure that we put in place in the last section, we can
@@ -401,11 +401,11 @@ Styling Your Plugins
 --------------------
 
 To make our toolbar look like a toolbar, we need to add some styles. In order
-to support themes properly, Bespin uses [LESS](http://lesscss.org), which is
+to support themes properly, Skywriter uses [LESS](http://lesscss.org), which is
 an extended CSS syntax.
 
 In the `tutorialtoolbar` directory, create a `resources` directory. In there,
-create a file called `toolbar.less`. We need to tell Bespin's theme manager
+create a file called `toolbar.less`. We need to tell Skywriter's theme manager
 about this file, so we need to add one more thing to the `provides` property
 in `package.json`:
 
@@ -422,7 +422,7 @@ theme manager will automatically load these files as needed.
 And what's in this mysterious `toolbar.less` file?
 
     :::css
-    .bespin {
+    .skywriter {
         .tutorial-toolbar {
             display: block;
             background-color: #000;
@@ -442,21 +442,21 @@ And what's in this mysterious `toolbar.less` file?
         }
     }
 
-This looks like fairly normal CSS, right? *Except* what's that `.bespin` doing
+This looks like fairly normal CSS, right? *Except* what's that `.skywriter` doing
 surrounding those other rules? When LESS expands this out to standard CSS,
 the result would be something like this:
 
     :::css
-    .bespin .tutorial-toolbar {
+    .skywriter .tutorial-toolbar {
     }
     
-    .bespin .tutorial-toolbar li {
+    .skywriter .tutorial-toolbar li {
     }
 
-So, the surrounding `.bespin` is a nice little shorthand, and it prevents CSS
-from leaking out onto the page. When you consider the use of Bespin Embedded
+So, the surrounding `.skywriter` is a nice little shorthand, and it prevents CSS
+from leaking out onto the page. When you consider the use of Skywriter Embedded
 on other sites, it's a good idea to ensure that all of our styles are scoped
-for use only within Bespin.
+for use only within Skywriter.
 
 With these styles in place, let's reload the page. Much nicer, eh?
 
@@ -467,8 +467,8 @@ On the one hand, this tutorial didn't give us a *functioning* toolbar. It's all
 static text. On the other hand, look at everything we *did* cover:
 
 * multi-file plugin structure
-* creating a component that Bespin can display
+* creating a component that Skywriter can display
 * the awesomeness that is CSS3's Flexible Box Model
-* configuring our component for display in Bespin
+* configuring our component for display in Skywriter
 * defining and using our own extension points
 

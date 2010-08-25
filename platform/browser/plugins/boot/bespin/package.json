@@ -1,5 +1,5 @@
 {
-    "name": "bespin",
+    "name": "skywriter",
     "environments": {
         "main": true, "worker": true
     }

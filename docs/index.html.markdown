@@ -1,20 +1,20 @@
 ---
 layout: default
-title: Bespin Documentation
-subtitle: Using and Extending Bespin
+title: Skywriter Documentation
+subtitle: Using and Extending Skywriter
 ---
 
 [The Glossary](glossary.html) will clear up any questions you have about terminology used on the project.
 
 Find out what's new, in the
-[Bespin 0.9 Release Notes](releases/notes09.html).
+[Skywriter 0.9 Release Notes](releases/notes09.html).
 
 Embedder's Guide
 ----------------
 
 * [Introduction](embedding/index.html)
-* [Creating a custom, embedded Bespin](embedding/building.html)
-* [Application Configuration (Gluing Bespin Together)](embedding/appconfig.html)
+* [Creating a custom, embedded Skywriter](embedding/building.html)
+* [Application Configuration (Gluing Skywriter Together)](embedding/appconfig.html)
 * [Installing Plugins](embedding/installing.html)
 
 Tutorials
@@ -38,7 +38,7 @@ Plugin Author Guide
 User's Guide
 ------------
 
-* *Important* [Bespin Server Roadmap](userguide/server_roadmap.html)
+* *Important* [Skywriter Server Roadmap](userguide/server_roadmap.html)
 * [Introduction](userguide/index.html)
 * [Version Control Systems](userguide/vcs.html)
 
@@ -49,4 +49,4 @@ Developer's Guide
 * [A Tour of the Code](devguide/tour.html)
 * [Manual Test Plan](devguide/testplan.html)
 
-[1]: https://wiki.mozilla.org/Bespin "The Bespin Wiki"
+[1]: https://wiki.mozilla.org/Skywriter "The Skywriter Wiki"

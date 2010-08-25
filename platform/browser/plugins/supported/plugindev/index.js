@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,15 +35,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var console = require('bespin:console').console;
+var console = require('skywriter:console').console;
 var core_test = require('core_test');
 var assert = require('core_test:assert');
 var test = require('core_test:test');
 var DefaultLogger = require('loggers/default', 'core_test');
 var env = require('environment').env;
 
-var server = require('bespin_server').server;
-var pluginCatalog = require('bespin:plugins').catalog;
+var server = require('skywriter_server').server;
+var pluginCatalog = require('skywriter:plugins').catalog;
 
 // Transfer names from core_test so that this is the
 // test interface used by plugins.

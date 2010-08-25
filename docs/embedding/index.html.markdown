@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Bespin Embedded Guide
+title: Skywriter Embedded Guide
 subtitle: Introduction
 ---
 
@@ -13,55 +13,55 @@ JavaScript because it is *much* smaller than the uncompressed version.
 If you are trying to troubleshoot a problem, you should use the uncompressed
 version.
 
-`BespinEmbedded.uncompressed.js` is uncompressed. `BespinEmbedded.js` 
+`SkywriterEmbedded.uncompressed.js` is uncompressed. `SkywriterEmbedded.js` 
 is compressed.
 
-I suggest that you have your HTML refer to BespinEmbedded.js and just put
+I suggest that you have your HTML refer to SkywriterEmbedded.js and just put
 the version of the file you need in place at that URL. The examples that
 follow all make the assumption that you're doing just that.
 
-How to embed Bespin in your site
+How to embed Skywriter in your site
 ================================
 
 Level 1: Upgrade an element
 ---------------------------
 
-The easiest thing to do to get Bespin working on your website is to simply
-include the Bespin script in your page, and mark the elements that you wish to
-use with Bespin with the `class="bespin` attribute. Download the
-Bespin Embedded release and put the files from the "prebuilt"
+The easiest thing to do to get Skywriter working on your website is to simply
+include the Skywriter script in your page, and mark the elements that you wish to
+use with Skywriter with the `class="skywriter` attribute. Download the
+Skywriter Embedded release and put the files from the "prebuilt"
 directory on your web server.
 
-To use Bespin on your page, you would then add lines like the following to
+To use Skywriter on your page, you would then add lines like the following to
 the &lt;head&gt; element on your page:
 
     :::html
-    <link id="bespin_base" href="/path/to"/>
-    <script src="/path/to/BespinEmbedded.js"></script>
+    <link id="skywriter_base" href="/path/to"/>
+    <script src="/path/to/SkywriterEmbedded.js"></script>
 
-The bespin\_base link tag is important to tell Bespin where to find
+The skywriter\_base link tag is important to tell Skywriter where to find
 other resources (such as the stylesheets, plugins, etc.)
 
 Then, elsewhere on your page, you can transform an element (such as a
-&lt;div&gt; or &lt;textarea&gt;) into a Bespin editor:
+&lt;div&gt; or &lt;textarea&gt;) into a Skywriter editor:
 
     :::html
-    <div class="bespin">Initial contents</div>
+    <div class="skywriter">Initial contents</div>
 
-There are a number of options to customize how Bespin loads. You can request
-Bespin to use these as follows:
+There are a number of options to customize how Skywriter loads. You can request
+Skywriter to use these as follows:
 
     :::html
-    <div class="bespin" data-bespinoptions='{ "stealFocus":true, "syntax": "js" }'>
+    <div class="skywriter" data-skywriteroptions='{ "stealFocus":true, "syntax": "js" }'>
     </div>
 
-data-bespinoptions uses a JSON structure (so make sure you [follow the rules][1]
+data-skywriteroptions uses a JSON structure (so make sure you [follow the rules][1]
 about escaping strings).
 
 The element to be upgraded does not have to be a div, though there is a known
 issue that other element types such as textarea are not working right now.
 
-Bespin does not allow multiple elements in a page to become Bespin editors -
+Skywriter does not allow multiple elements in a page to become Skywriter editors -
 there can only be one.
 
 [1]: http://json.org/ "The JSON Spec"
@@ -71,16 +71,16 @@ Level 2: Manual Upgrade
 -----------------------
 
 Sometimes the element to upgrade might be dynamically created, or you might want
-to have Bespin as an option that is only loaded when the user selects a 'Use
-Bespin' option. In this case just inserting `class="bespin"` after page load
-won't work, and you'll need to tell Bespin to use an element:
+to have Skywriter as an option that is only loaded when the user selects a 'Use
+Skywriter' option. In this case just inserting `class="skywriter"` after page load
+won't work, and you'll need to tell Skywriter to use an element:
 
     :::html
-    <link id="bespin_base" href="/path/to"/>
-    <script src="/path/to/BespinEmbedded.js"><script>
+    <link id="skywriter_base" href="/path/to"/>
+    <script src="/path/to/SkywriterEmbedded.js"><script>
     <script>
         var node = document.getElementById("edit");
-        bespin.useBespin(node);
+        skywriter.useSkywriter(node);
     </script>
 
     <textarea id="edit">Initial contents</textarea>
@@ -89,30 +89,30 @@ Rather than passing in a node, you can also simply pass in an string identifier
 as follows:
 
     :::js
-    bespin.useBespin("edit");
+    skywriter.useSkywriter("edit");
 
 And as with level 1 above, you can also use options to customize the display:
 
     :::js
-    bespin.useBespin("edit", {
+    skywriter.useSkywriter("edit", {
         stealFocus: true
     });
 
 Because this is JavaScript, the strict demands of JSON are not applicable here,
-where they are when using data-bespinoptions.
+where they are when using data-skywriteroptions.
 
 
 Interaction
 -----------
 
-It is possible to interact with a Bespin instance on a page, to alter contents
+It is possible to interact with a Skywriter instance on a page, to alter contents
 for example.
 
-When using manual upgrade of an element, the `useBespin()` function returns a
+When using manual upgrade of an element, the `useSkywriter()` function returns a
 promise. The resolved promise has as first argument the _environment_ variable:
 
     :::js
-    bespin.useBespin("edit").then(function(env) {
+    skywriter.useSkywriter("edit").then(function(env) {
         // Get the editor.
         var editor = env.editor;
         // Change the value and move to the secound lien.
@@ -122,19 +122,19 @@ promise. The resolved promise has as first argument the _environment_ variable:
         throw new Error("Launch failed: " + error);
     });
 
-When the Bespin was created dynamically (using a div with `class="bespin"`), you
-can get the Bespin `environment` instance from the DOM node as the `bespin` 
+When the Skywriter was created dynamically (using a div with `class="skywriter"`), you
+can get the Skywriter `environment` instance from the DOM node as the `skywriter` 
 variable on the node.
 
-Creating the Bespin dynamically takes some time and the Bespin might not be ready
-when the page fires the `onLoad` event. Accessing the dynamically created Bespin
-is save after the onBespinLoad event is fired:
+Creating the Skywriter dynamically takes some time and the Skywriter might not be ready
+when the page fires the `onLoad` event. Accessing the dynamically created Skywriter
+is save after the onSkywriterLoad event is fired:
 
     ::::js
-    window.onBespinLoad = function() {
+    window.onSkywriterLoad = function() {
         var edit = document.getElementById("edit");
         // Get the environment variable.
-        var env = edit.bespin;
+        var env = edit.skywriter;
         // Get the editor.
         var editor = env.editor;
         // Change the value and move to the secound line.
@@ -154,25 +154,25 @@ To change the initial context for the syntax highlighter run:
     :::js
     env.editor.syntax = "html";
 
-The complete [Bespin editor API][3] is documented elsewhere.
+The complete [Skywriter editor API][3] is documented elsewhere.
 
 [3]: ../pluginguide/editorapi.html "Editor API"
 
 Dimensions
 ----------
 
-Bespin always has to know the absolute size of the element it's contained in.
-Because parts of Bespin depend on absolute position and size (mainly the canvas
-elements) it's necessary to tell Bespin that its container dimension changed.
+Skywriter always has to know the absolute size of the element it's contained in.
+Because parts of Skywriter depend on absolute position and size (mainly the canvas
+elements) it's necessary to tell Skywriter that its container dimension changed.
 You can do this by:
 
     :::js
     env.dimensionsChanged();
 
-Where `env` is the environment variable of the Bespin that container's size changed.
+Where `env` is the environment variable of the Skywriter that container's size changed.
 
-Embedding Bespin in XULRunner
+Embedding Skywriter in XULRunner
 =============================
 
-Bespin's use of web workers and other features requires it to be loaded via
+Skywriter's use of web workers and other features requires it to be loaded via
 resource:// urls if used in XULRunner iframes.

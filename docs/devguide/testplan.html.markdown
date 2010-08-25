@@ -1,5 +1,5 @@
 ---
-title: Bespin Developer's Guide
+title: Skywriter Developer's Guide
 subtitle: Manual Test Plan
 layout: default
 ---
@@ -14,7 +14,7 @@ reasons:
 
 ## Automated Tests ##
 
-Within Bespin, you can use the "test" command to run the tests for plugins.
+Within Skywriter, you can use the "test" command to run the tests for plugins.
 
 ## Browsers To Test In ##
 
@@ -24,7 +24,7 @@ We should test Embedded and server-based code in:
 2. Chrome
 3. Safari
 
-## Bespin Embedded ##
+## Skywriter Embedded ##
 
 Start by creating a new release:
 
@@ -38,17 +38,17 @@ compression step. You can do this by running
 This is normally run as part of release\_embed.
 
 
-You'll find the release in `tmp/BespinEmbedded-DropIn-VERSION/` and
-`tmp/BespinEmbedded-Customizable-VERSION/`. Next, you'll want 
+You'll find the release in `tmp/SkywriterEmbedded-DropIn-VERSION/` and
+`tmp/SkywriterEmbedded-Customizable-VERSION/`. Next, you'll want 
 to make sure the release works. Make sure that you're in the virtualenv (you 
-should see `(bespinclient)` at the beginning of your command prompt).
+should see `(skywriterclient)` at the beginning of your command prompt).
 If you aren't in the virtualenv, run
 
     source bin/activate
 
 Once you're set, you can take a look at the sample.html:
 
-    cd tmp/BespinEmbedded-DropIn-VERSION
+    cd tmp/SkywriterEmbedded-DropIn-VERSION
     static . localhost:8080
 
 Point your web browser at [http://localhost:8080/samples/sample.html](http://localhost:8080/samples/sample.html) [^1].
@@ -62,7 +62,7 @@ Next, get out of the virtualenv by running:
 
 Then, try to run and test a build:
 
-    cd tmp/BespinEmbedded-Customizable-VERSION
+    cd tmp/SkywriterEmbedded-Customizable-VERSION
     dryice sample.json
     cd tmp
     static . localhost:8080
@@ -73,7 +73,7 @@ This editor should work as well.
 
 ## Editor Behavior ##
 
-As we use Bespin to edit itself more, there will be less need for this test.
+As we use Skywriter to edit itself more, there will be less need for this test.
 Until that time, we should test common editor behavior:
 
 * Arrows move the insertion point around

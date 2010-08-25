@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -41,7 +41,7 @@ var Promise = require("promise").Promise;
 exports.xhr = function(method, url, async, beforeSendCallback) {
     var pr = new Promise();
 
-    if (!bespin.proxy || !bespin.proxy.xhr) {
+    if (!skywriter.proxy || !skywriter.proxy.xhr) {
         var req = new XMLHttpRequest();
         req.onreadystatechange = function() {
             if (req.readyState !== 4) {
@@ -65,16 +65,16 @@ exports.xhr = function(method, url, async, beforeSendCallback) {
         }
         req.send();
     } else {
-        bespin.proxy.xhr.call(this, method, url, async, beforeSendCallback, pr);
+        skywriter.proxy.xhr.call(this, method, url, async, beforeSendCallback, pr);
     }
 
     return pr;
 };
 
 exports.Worker = function(url) {
-    if (!bespin.proxy || !bespin.proxy.worker) {
+    if (!skywriter.proxy || !skywriter.proxy.worker) {
         return new Worker(url);
     } else {
-        return new bespin.proxy.worker(url);
+        return new skywriter.proxy.worker(url);
     }
 };

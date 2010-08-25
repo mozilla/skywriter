@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Bespin Embedded Guide
+title: Skywriter Embedded Guide
 subtitle: Installing Plugins
 ---
 
@@ -13,7 +13,7 @@ When you download a plugin, you're likely to get one of three kinds of files:
 * .zip
 * .tar.gz  (or .tgz)
 
-Bespin can directly work with the `.js` files. The other two formats are
+Skywriter can directly work with the `.js` files. The other two formats are
 archive formats that contain multiple files and directories. You will need
 to expand those archives into your plugin directory (see "Where To Put
 The Files" below).
@@ -23,17 +23,17 @@ Where To Put The Files
 
 In the [building](building.html) section of this guide, we described the
 manifest file. The manifest file allows you to set a `search_path` option
-that dryice will use when building Bespin.
+that dryice will use when building Skywriter.
 
 We recommend a directory structure that is something like this:
 
 * your\_project (top level directory with everything you need)
-    * bespin (the original Bespin Embedded files provided by the Bespin project)
+    * skywriter (the original Skywriter Embedded files provided by the Skywriter project)
     * plugins (your custom-created plugins)
     * thirdparty (plugins that you've downloaded from elsewhere)
 
-With this kind of directory structure, you can upgrade Bespin at will just by
-deleting the `bespin` directory and putting a new one in its place. In your
+With this kind of directory structure, you can upgrade Skywriter at will just by
+deleting the `skywriter` directory and putting a new one in its place. In your
 manifest file, you'll add both `plugins` and `thirdparty` to your `search_path`.
 
 So, when you download a plugin, you'll either drop the `.js` file into the
@@ -45,7 +45,7 @@ plugin is the name of the directory.
 A complete example:
 
 * your\_project
-    * bespin
+    * skywriter
     * plugins
         * mygroovyplugin.js
     * thirdparty

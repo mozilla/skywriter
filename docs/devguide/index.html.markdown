@@ -1,24 +1,24 @@
 ---
-title: Bespin Developer's Guide
+title: Skywriter Developer's Guide
 subtitle: Getting Started
 layout: default
 ---
 
-Installing the Bespin Server
+Installing the Skywriter Server
 ----------------------------
 
-Important note: The Bespin Server is going to undergo a complete rework.
-You can read more about this in the [Bespin Server Roadmap](http://groups.google.com/group/bespin/browse_thread/thread/6de8c718d64232a0)
+Important note: The Skywriter Server is going to undergo a complete rework.
+You can read more about this in the [Skywriter Server Roadmap](http://groups.google.com/group/skywriter/browse_thread/thread/6de8c718d64232a0)
 that was posted to the mailing list.
 
 
-To work on Bespin, you'll need to install the Bespin server on your local computer.
+To work on Skywriter, you'll need to install the Skywriter server on your local computer.
 
-You can easily get Bespin's Python server running on your local Mac or Linux machine (see note about Windows below).
+You can easily get Skywriter's Python server running on your local Mac or Linux machine (see note about Windows below).
 
 ## Prerequisites ##
 
-You will need the following installed on your system to get Bespin up and running: 
+You will need the following installed on your system to get Skywriter up and running: 
 
 * Mercurial 
 * Python 2.5 or 2.6 
@@ -29,19 +29,19 @@ Python 2.6 is preferred.
 
 **NOTE FOR MAC USERS:** *You will need Xcode installed.* 
 
-**NOTE FOR WINDOWS USERS:** *Most Bespin developers are using unix-like platforms. Bespin's server should be able to run on Windows, though. You'll need a C compiler, and you can use Microsoft's free [http://www.microsoft.com/Express/VC/ Visual C++] compiler. As an alternative, you can use [http://www.cygwin.com/ Cygwin] or [http://www.mingw.org/ MinGW] to have a unix-like environment on your Windows system.*
+**NOTE FOR WINDOWS USERS:** *Most Skywriter developers are using unix-like platforms. Skywriter's server should be able to run on Windows, though. You'll need a C compiler, and you can use Microsoft's free [http://www.microsoft.com/Express/VC/ Visual C++] compiler. As an alternative, you can use [http://www.cygwin.com/ Cygwin] or [http://www.mingw.org/ MinGW] to have a unix-like environment on your Windows system.*
 
 ## Getting Started ##
 
 Run:
 
-    hg clone http://hg.mozilla.org/labs/bespinclient/
-    hg clone http://hg.mozilla.org/labs/bespinserver/
-    cd bespinclient
+    hg clone http://hg.mozilla.org/labs/skywriterclient/
+    hg clone http://hg.mozilla.org/labs/skywriterserver/
+    cd skywriterclient
 
-This will get the Bespin client and Python Bespin server code checked out. The `bespinclient/` directory is the "main" directory that you'll use.
+This will get the Skywriter client and Python Skywriter server code checked out. The `skywriterclient/` directory is the "main" directory that you'll use.
 
-To set up Bespin for the first time, run:
+To set up Skywriter for the first time, run:
 
     python bootstrap.py --no-site-packages
   
@@ -64,13 +64,13 @@ And the first time around, you're also going to want to get a database set up:
 If you have some trouble on macos x like the error message: ImportError: No module named `xxx'
 It's probably cause the server side is not completely installed so try:
 
-    cd ../bespinserver
+    cd ../skywriterserver
     paver develop
     paver create_db
 
 ## Starting the development server ##
 
-If you are no longer (or not yet) in the virtualenv environment run within the bespinclient directory:
+If you are no longer (or not yet) in the virtualenv environment run within the skywriterclient directory:
 
   source bin/activate
 
@@ -78,7 +78,7 @@ To start the server execute:
 
   paver start
 
-This will start the Bespin server. You can now access the Bespin editor at http://localhost:8080/ in you browser.
+This will start the Skywriter server. You can now access the Skywriter editor at http://localhost:8080/ in you browser.
 
 Have fun!
 
@@ -88,8 +88,8 @@ JavaScript code should follow the [Crockford Code Conventions](http://javascript
 
 * Namespaces: Crockford does not mention namespaces, probably because owning the global namespace allows you to use as much as you want. Our code is likely to be used in many different places so we should not pollute the global namespace needlessly. Our code is organized in [http://commonjs.org/specs/modules/1.0.html CommonJS] modules, so every variable should either be a "var" or attached to the "exports" object.
 
-* _private: We agree that prefixing variables with an underscore provides no actual protection, however we think of it as a warning. "Use of this member is unsupported and likely to break without warning in future revisions". In early versions of Bespin where we are experimenting a lot, allowing 3rd parties to join in the experiment is valuable. As Bespin becomes more stable and finalized, we might expect underscored members to be replaced with closure scoped variables.
+* _private: We agree that prefixing variables with an underscore provides no actual protection, however we think of it as a warning. "Use of this member is unsupported and likely to break without warning in future revisions". In early versions of Skywriter where we are experimenting a lot, allowing 3rd parties to join in the experiment is valuable. As Skywriter becomes more stable and finalized, we might expect underscored members to be replaced with closure scoped variables.
 
-* Documentation: Bespin JavaScript is documented with [JSDoc](http://code.google.com/p/jsdoc-toolkit/w/list), which in practice means prefixing functions with a set of comments that use various tags.
+* Documentation: Skywriter JavaScript is documented with [JSDoc](http://code.google.com/p/jsdoc-toolkit/w/list), which in practice means prefixing functions with a set of comments that use various tags.
 
 * var first: The standard recommends putting var statements as the first statements in the function body. Crockford doesn't always follow this advice and we reserve the right to follow this lead ;-)
