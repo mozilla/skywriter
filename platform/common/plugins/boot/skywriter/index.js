@@ -35,20 +35,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/**
- * One of a known set of options
- */
-exports.existingFile = {
-    isValid: function(value, typeExt) {
-        return true;
-    },
+// BEGIN VERSION BLOCK
+/** The core version of the Skywriter system */
+exports.versionNumber = 'tip';
 
-    toString: function(value, typeExt) {
-        return value;
-    },
+/** The version number to display to users */
+exports.versionCodename = 'DEVELOPMENT MODE';
 
-    fromString: function(value, typeExt) {
-        // TODO: should we validate and return null if invalid?
-        return value;
-    }
-};
+/** The version number of the API (to ensure that the client and server are talking the same language) */
+exports.apiVersion = 'dev';
+
+// END VERSION BLOCK
+

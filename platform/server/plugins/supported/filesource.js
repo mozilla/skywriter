@@ -35,20 +35,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-/**
- * One of a known set of options
- */
-exports.existingFile = {
-    isValid: function(value, typeExt) {
-        return true;
-    },
+var fs = require('fs');
 
-    toString: function(value, typeExt) {
-        return value;
-    },
+var ServerFileSource = exports.ServerFileSource = function() {
 
-    fromString: function(value, typeExt) {
-        // TODO: should we validate and return null if invalid?
-        return value;
-    }
-};
+}
+
+ServerFileSource.prototype = {
+    copy:  function(file, path) {},
+    makeDirectory: function(path) {},
+    remove: function(path) {},
+}
+

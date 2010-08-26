@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Bespin 0.6.3 Release Notes
+title: Skywriter 0.6.3 Release Notes
 ---
 
 [Up](index.html) - [Next Release](notes07.html) - [Previous Release](notes062.html)
@@ -8,12 +8,12 @@ title: Bespin 0.6.3 Release Notes
 Known Issues
 ------------
 
-Bespin Embedded 0.6.3 is *alpha* software. It is still under active development
+Skywriter Embedded 0.6.3 is *alpha* software. It is still under active development
 and APIs are subject to change. Note also that 0.6 featured a complete retooling
 of the editor component, so it is likely that there will be some bugs
 in the editor that still need squashing.
 
-* Bespin Embedded does not attach correctly to a textarea (bug 535819;
+* Skywriter Embedded does not attach correctly to a textarea (bug 535819;
   workaround: change the textarea to a div first)
 * Options are not settable at runtime (bug 549679)
 * There is no CSS syntax highlighting yet (bug 547272)

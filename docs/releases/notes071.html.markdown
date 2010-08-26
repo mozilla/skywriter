@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Bespin 0.7.1 ("Bryce") Release Notes
+title: Skywriter 0.7.1 ("Bryce") Release Notes
 ---
 
 [Up](index.html) - [Next Release](notes072.html) - [Previous Release](notes07.html)
@@ -8,15 +8,15 @@ title: Bespin 0.7.1 ("Bryce") Release Notes
 Known Issues
 ------------
 
-Bespin 0.7.1 is *alpha* software. It is still under active development
-and APIs are subject to change. Bespin 0.7 marks the first server release
-since the Bespin project Reboot. There is still a bit of work required
-before the server reaches feature and polish parity with 0.4.4. However, Bespin
+Skywriter 0.7.1 is *alpha* software. It is still under active development
+and APIs are subject to change. Skywriter 0.7 marks the first server release
+since the Skywriter project Reboot. There is still a bit of work required
+before the server reaches feature and polish parity with 0.4.4. However, Skywriter
 0.7 also does a number of things that 0.4.4 didn't.
 
-For *Bespin Embedded*:
+For *Skywriter Embedded*:
 
-* Bespin Embedded does not attach correctly to a textarea (bug 535819;
+* Skywriter Embedded does not attach correctly to a textarea (bug 535819;
   workaround: change the textarea to a div first)
 * Options are not settable at runtime (bug 549679)
 * There is no CSS syntax highlighting yet (bug 547272)
@@ -26,7 +26,7 @@ For *Bespin Embedded*:
 * The Embedded editor remains larger than we'd like, but shrinking
   it down is low priority at the moment
 
-For *Bespin Server*:
+For *Skywriter Server*:
 
 * Collaboration is not done yet (bug 554943)
 * The File Explorer is still missing (bug 554945)
@@ -36,7 +36,7 @@ For *Bespin Server*:
   bug 554947)
 * The command line does not yet support aliases, which means that you may
   need to use different names for some of the commands you're used to
-  in earlier Bespins (bug 543968)
+  in earlier Skywriters (bug 543968)
 * Pressing enter quickly after typing the last character on the command
   line can lead to the last character of input getting chopped off
   (bug 554952)
@@ -50,7 +50,7 @@ Features
   (bug 542492)
 * Added built-in plugin gallery (plugin gallery and plugin upload commands)
   for sharing plugins.
-* New "feedback" command opens your browser to the Bespin forum at
+* New "feedback" command opens your browser to the Skywriter forum at
   feedback.mozillalabs.com, making it very easy to let us know if you
   have any suggestions. (bug 550287)
 * The "vcs clone" command is back for checking out Subversion and Mercurial

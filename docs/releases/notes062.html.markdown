@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Bespin 0.6.2 Release Notes
+title: Skywriter 0.6.2 Release Notes
 ---
 
 [Up](index.html) - [Next Release](notes063.html) - [Previous Release](notes061.html)
@@ -8,12 +8,12 @@ title: Bespin 0.6.2 Release Notes
 Known Issues
 ------------
 
-Bespin Embedded 0.6.2 is *alpha* software. It is still under active development
+Skywriter Embedded 0.6.2 is *alpha* software. It is still under active development
 and APIs are subject to change. Note also that 0.6 featured a complete retooling
 of the editor component, so it is likely that there will be some bugs
 in the editor that still need squashing.
 
-* Bespin Embedded does not attach correctly to a textarea (bug 535819;
+* Skywriter Embedded does not attach correctly to a textarea (bug 535819;
   workaround: change the textarea to a div first)
 * Options are not settable at runtime (bug 549679)
 * There is no CSS syntax highlighting yet (bug 547272)
@@ -33,7 +33,7 @@ Features
 Bug Fixes
 ---------
 
-* Settings can now be set via the "settings" property in the Bespin options
+* Settings can now be set via the "settings" property in the Skywriter options
   (bug 543969)
 * Undo/redo are working again in Firefox (bug 549986)
 * Tab width is user-customizable
@@ -45,7 +45,7 @@ Bug Fixes
 * The editor takes more delimiters into account when selecting words (bug
   509492)
 * Editors longer than the width of the page are now usable (bug 548400)
-* The insertion point now correctly changes color when Bespin loses the focus
+* The insertion point now correctly changes color when Skywriter loses the focus
 * The editor no longer moves in Safari or Chrome when copying large amounts of
   text (bug 544301)
 

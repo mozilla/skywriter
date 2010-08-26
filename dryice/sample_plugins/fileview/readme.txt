@@ -1,16 +1,16 @@
 
-How to use Closure with Bespin
+How to use Closure with Skywriter
 ------------------------------
 
-This is a quick sample of how Closure can be used with Bespin.
+This is a quick sample of how Closure can be used with Skywriter.
 
-It creates a very simple File Explorer, allowing you to look at your Bespin
+It creates a very simple File Explorer, allowing you to look at your Skywriter
 files. In addition to the files in this plugin, there are 2 other changes that
 are required:
 - Add closure to your page. The diff to static/index.html below is an example
 of how this can be done. It is likely that these changes will already be current
 in your environment, otherwise checkout closure into the static directory.
-- Tell Bespin about the new plugin. The mechanism for doing this is new and
+- Tell Skywriter about the new plugin. The mechanism for doing this is new and
 currently being fleshed out. The diff to appconfig below currently works, but
 might break in the future. Also it is likely there is likely to soon be a less
 hacky way to do this. Check the docs to see the status of customizing the editor
@@ -50,8 +50,8 @@ diff -r 3a9c1da28aab static/index.html
 +  <link rel="stylesheet" href="closure/closure/goog/demo/css/demo.css">
 +  <link rel="stylesheet" href="closure/closure/goog/css/tree.css">
  </head>
- <body class="bespin">
-   <div id="_bespin_loading">Loading...</div>
+ <body class="skywriter">
+   <div id="_skywriter_loading">Loading...</div>
    <script type="text/javascript" src="tiki.js"></script>
    <script type="text/javascript" src="plugin/register/boot"></script>
 +  <script src="closure/closure/goog/base.js"></script>

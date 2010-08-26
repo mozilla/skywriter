@@ -11,14 +11,14 @@
  * See the License for the specific language governing rights and
  * limitations under the License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is Mozilla.
  * Portions created by the Initial Developer are Copyright (C) 2009
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * ***** END LICENSE BLOCK ***** */
 

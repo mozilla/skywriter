@@ -28,7 +28,7 @@ task('jsdoc', [], function (params) {
     doc.generateAPI();
 });
 
-/*desc('Generates tags for Bespin using jsctags');
+/*desc('Generates tags for Skywriter using jsctags');
 task('tags', [], function (params) {
     platform.generateTags();
 });*/

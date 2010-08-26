@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Bespin 0.7.3 Release Notes
+title: Skywriter 0.7.3 Release Notes
 ---
 
 [Up](index.html) - [Next Release](nodes08.html) - [Previous Release](notes072.html)
@@ -8,22 +8,22 @@ title: Bespin 0.7.3 Release Notes
 Known Issues
 ------------
 
-Bespin 0.7.3 is *alpha* software. It is still under active development
-and APIs are subject to change. Bespin 0.7 marks the first server release
-since the Bespin project Reboot. There is still a bit of work required
-before the server reaches feature and polish parity with 0.4.4. However, Bespin
+Skywriter 0.7.3 is *alpha* software. It is still under active development
+and APIs are subject to change. Skywriter 0.7 marks the first server release
+since the Skywriter project Reboot. There is still a bit of work required
+before the server reaches feature and polish parity with 0.4.4. However, Skywriter
 0.7 also does a number of things that 0.4.4 didn't.
 
-For *Bespin Embedded*:
+For *Skywriter Embedded*:
 
-* Bespin Embedded does not attach correctly to a textarea (bug 535819;
+* Skywriter Embedded does not attach correctly to a textarea (bug 535819;
   workaround: change the textarea to a div first)
 * There is no CSS syntax highlighting yet (bug 547272)
 * The editor does not yet support tab characters (bug 543999)
 * The Embedded editor remains larger than we'd like, but shrinking
   it down is low priority at the moment
 
-For *Bespin Server*:
+For *Skywriter Server*:
 
 * Collaboration is not done yet (bug 554943)
 * The File Explorer is still missing (bug 554945)
@@ -32,7 +32,7 @@ For *Bespin Server*:
   bug 554947)
 * The command line does not yet support aliases, which means that you may
   need to use different names for some of the commands you're used to
-  in earlier Bespins (bug 543968)
+  in earlier Skywriters (bug 543968)
 
 Changes
 -------
@@ -51,11 +51,11 @@ Features
 * The display of a completion result when the result is not a prefix
   match has been improved. It now displays 
   what\_you\_typed -> what\_it\_completes\_to (bug 555959)
-* `ep` command will list the extension points in your Bespin or provide details
+* `ep` command will list the extension points in your Skywriter or provide details
   about a single extension point. This makes it a lot easier to write extensions.
 * `plugin info` command lists details about a given plugin and what it provides.
 * The preview command is back (bug 554958)
-* The Bespin Embedded API has been improved, with many new methods (bug 545208)
+* The Skywriter Embedded API has been improved, with many new methods (bug 545208)
 * The password recovery feature is back (bug 558323)
 * You can now log in using your email address or username. (Note that
   if your email address is associated with more than one account, you

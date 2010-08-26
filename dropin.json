@@ -1,5 +1,5 @@
 {
     "plugins": ["embedded", "html", "stylesheet", "js_syntax"],
-    "output_dir": "tmp/BespinDropIn",
+    "output_dir": "tmp/SkywriterDropIn",
     "include_sample": true
 }

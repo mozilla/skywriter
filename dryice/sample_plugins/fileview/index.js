@@ -1,5 +1,5 @@
 
-var files = require('bespin:plugins').catalog.getObject('files');
+var files = require('skywriter:plugins').catalog.getObject('files');
 var templates = require('fileview:templates');
 
 exports.FileView = function() {
