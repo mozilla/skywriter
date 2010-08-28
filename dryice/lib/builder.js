@@ -21,5 +21,4 @@ Builder.prototype.build = function() {
 	var prebuiltDir = this.config.prebuiltDir;
 	
 	util.mkpath(prebuiltDir);
-	
 }

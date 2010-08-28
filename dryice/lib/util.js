@@ -1,5 +1,6 @@
 "use strict";
 var fs = require('fs');
+var sys = require('sys');
 var path = require('path');
 
 var util = exports;
@@ -17,13 +18,14 @@ util.mkpath = function(_path) {
 	}
 }
 
-util.cp = function(src, dst, callback) {
+util.copy = function(src, dst, callback) {
 	//if src is directory throw Error
+	//if dst is inside src throw Error
 	var reader = fs.createReadStream(src);
     var writer = fs.createWriteStream(dst);
 	sys.pump(reader, writer, callback);
 }
 
-util.cp_r = function(src, dst) {
+util.copy_r = function(src, dst) {
 	
 }
