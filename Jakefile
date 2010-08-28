@@ -1,12 +1,9 @@
 var sys    = require('sys');
 var dryice = require('./dryice');
 
-var plugin      = dryice.Plugin;
 var platform    = dryice.platform;
 var test        = dryice.Test;
 var doc         = dryice.Doc;
-
-var version     = '0.9a3'
 
 desc('Launch skywriter in the default browser');
 task('default', [], function (params) {
@@ -36,35 +33,26 @@ task('tags', [], function (params) {
 namespace('dist', function () {
     desc('Generate distributable packages for all platforms');
     task('all', [], function (params) {
-        platform.dist();
+        platform.dist(arguments[0]);
     });
 
     desc('Generate browser distributable package');
     task('browser', [], function () {
-        platform.dist('browser');
+        platform.dist('browser', arguments[0]);
     });
 
     desc('Generate desktop distributable package');
     task('desktop', [], function () {
-        platform.dist('xulrunner');
+        platform.dist('xulrunner', arguments[0]);
     });
 
     desc('Generate bookmarklet distributable package');
     task('bookmarklet', [], function () {
-        platform.dist('bookmarklet');
+        platform.dist('bookmarklet', arguments[0]);
     });
 
     desc('Generate embedded distributable package');
     task('embedded', [], function () {
-        platform.dist('embedded');
+        platform.dist('embedded', arguments[0]);
     });
 });
-
-namespace('plugin', function () {
-    desc('foo');
-    task('foo', [], function () {
-        console.log('doing plugin:foo task');
-        console.log(sys.inspect(arguments));
-    });
-});
-

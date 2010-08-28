@@ -23,25 +23,31 @@
  * ***** END LICENSE BLOCK ***** */
 
 /*FIXME, put this code in the platform's boot script'*/
-var nodejs = typeof(process) !== undefined ? true: false;
+var skywriter = require('skywriter');
+//var nodejs = typeof(process) !== undefined ? true: false;
 
 var util,
     m_promise,
     catalog,
     pathUtil;
 
-if(nodejs) {
-    util = require('skywriter/util');
-    m_promise = require('skywriter/promise');
-    //catalog = require('skywriter/plugins').catalog;
-    pathUtil = require('filesystem/path');
-} else {
-    util = require('skywriter:util');
-    m_promise = require('skywriter:promise');
-    console = require('skywriter:console').console
-    //catalog = require('skywriter:plugins').catalog;
-    pathUtil = require('filesystem:path');
-}
+switch(skywriter.platform) {
+	case 'browser': 
+		util = require('skywriter:util');
+    	m_promise = require('skywriter:promise');
+    	console = require('skywriter:console').console
+    	//catalog = require('skywriter:plugins').catalog;
+    	pathUtil = require('filesystem:path');
+		break;
+	case 'nodejs':
+		util = require('skywriter/util');
+    	m_promise = require('skywriter/promise');
+    	//catalog = require('skywriter/plugins').catalog;
+    	pathUtil = require('filesystem/path');
+		break;
+	default: 
+		throw new Error('Unrecognized Skywriter platform: ' + skywriter.platform);
+};
 
 var Promise = m_promise.Promise;
 
