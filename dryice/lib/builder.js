@@ -19,6 +19,9 @@ var Builder = exports.Builder = function Builder(config, manifest) {
 
 Builder.prototype.build = function() {
 	var prebuiltDir = this.config.prebuiltDir;
+	var manifest = this.manifest;
 	
 	util.mkpath(prebuiltDir);
+	
+	
 }

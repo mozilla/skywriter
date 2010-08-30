@@ -34,7 +34,7 @@ Platform.prototype._distEmbedded = function(manifest) {
 	var outputDir = buildDir + '/SkywriterEmbedded-' + version;
 
 	if(path.existsSync(outputDir)) {
-		fs.rmdirSync(outputDir);
+		util.rmtree(outputDir);
 	}
 
 	util.mkpath(outputDir);
@@ -43,18 +43,26 @@ Platform.prototype._distEmbedded = function(manifest) {
 	builder.build();
 	
 	util.copy(cwd + '/LICENSE.txt', outputDir + '/LICENSE.txt');
+	util.copy(cwd + '/platform/embedded/README-Customizable.txt', outputDir + '/README.txt');
+
+	var genDocs = path.existsSync(buildDir + '/docs');
+	if(genDocs) {
+		util.copytree(buildDir + '/docs', outputDir + '/docs');
+		util.rmtree(buildDir + '/docs');		
+	}
+
+	var lib = outputDir + '/lib';
+	fs.mkdirSync(lib, 0755);
 	
-    //copy LICENSE.txt to outputDir/LICENSE.txt
-	//copy README-Customizable.txt to outputDir/README.txt
-	//copy buildDir/docs && rm -rf buildDir/docs
-	//mkdir outputDir/lib
-	//copy static/tiki.js to libDir
-	//copy static/SkywriterEmbedded.js to libDir/worker.js
-	//copytree plugins to outputDir/plugins
+	//util.copy(cwd + '/platform/embedded/static/tiki.js', lib + '/tiki.js');
+	util.copy(cwd + '/platform/embedded/static/SkywriterEmbedded.js', lib + '/worker.js');
+	util.copytree(cwd + '/platform/browser/plugins', outputDir + '/plugins');
+
+	util.copy(cwd + '/platform/embedded/sample.json', outputDir + '/sample.json');
+	util.copytree(cwd + '/dryice', outputDir + '/dryice');
+	util.copy(cwd + '/platform/embedded/Jakefile', outputDir + '/Jakefile');
+	
 	//replace javascript version in outputDir/plugins/boot/skywriter/index.js
-	//copy embedded/sample.json to outputDir/
-	//copy Jakefile to outputDir/
-	//copy dryice to outputDir/dryice
     //compress source code
     //make tar.gz
 }
