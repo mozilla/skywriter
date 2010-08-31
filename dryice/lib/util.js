@@ -67,7 +67,32 @@ util.copytree = function(src, dst) {
 	}
 };
 
-util.rmtree = function(path) {
+var root;
+fs.rmtree = function(_path) {
+	if(fs.statSync(_path).isFile()) {
+		throw new Error(_path + ' is a file. Use fs.unlink instead');
+	}
+	if(!root) {
+		root = _path;
+	}
+	var filenames = fs.readdirSync(_path);
+	var basedir = _path;
 
+	for(name in filenames) {
+		var file = basedir + '/' + filenames[name];
+		
+		if(fs.statSync(file).isDirectory()) {
+			fs.rmtree(file);
+			fs.rmdirSync(file);
+		} else {
+			fs.unlinkSync(file);
+		}
+	}
+	
+	try { 
+		if(path.existsSync(root)) {
+			fs.rmdirSync(root);		
+		}		
+	} catch(e) { }
 };
 
