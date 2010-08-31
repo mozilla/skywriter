@@ -68,7 +68,7 @@ util.copytree = function(src, dst) {
 };
 
 var root;
-fs.rmtree = function(_path) {
+util.rmtree = function(_path) {
 	if(fs.statSync(_path).isFile()) {
 		throw new Error(_path + ' is a file. Use fs.unlink instead');
 	}
@@ -82,7 +82,7 @@ fs.rmtree = function(_path) {
 		var file = basedir + '/' + filenames[name];
 		
 		if(fs.statSync(file).isDirectory()) {
-			fs.rmtree(file);
+			util.rmtree(file);
 			fs.rmdirSync(file);
 		} else {
 			fs.unlinkSync(file);
