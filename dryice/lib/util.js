@@ -30,10 +30,15 @@ util.copy = function(src, dst) {
 	if(src == dst) {
 		throw new Error(src + ' and ' + dst + 'are identical');
 	}
-
-	var reader = fs.createReadStream(src);
-    var writer = fs.createWriteStream(dst);
-	sys.pump(reader, writer);
+	
+	var infd = fs.openSync(src, 'r');
+	var size = fs.fstatSync(infd).size;
+	var outfd = fs.openSync(dst, 'w');
+	
+	fs.sendfileSync(outfd, infd, 0, size);
+	
+	fs.close(infd);
+	fs.close(outfd);
 };
 
 util.copytree = function(src, dst) {
@@ -57,12 +62,9 @@ util.copytree = function(src, dst) {
 		var newdst = dst + '/' + filenames[name];
 		
 		if(fs.statSync(file).isDirectory()) {
-			fs.mkdirSync(newdst, 0755);
 			util.copytree(file, newdst);
 		} else {
-			var reader = fs.createReadStream(file);
-			var writer = fs.createWriteStream(newdst);
-			sys.pump(reader, writer);	
+			util.copy(file, newdst);
 		}
 	}
 };
@@ -89,7 +91,7 @@ util.rmtree = function(_path) {
 		}
 	}
 	
-	try { 
+	try { //little hack to avoid exceptions since this code is recursive
 		if(path.existsSync(root)) {
 			fs.rmdirSync(root);		
 		}		

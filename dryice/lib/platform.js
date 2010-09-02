@@ -67,7 +67,7 @@ Platform.prototype._distEmbedded = function(manifest) {
     //make tar.gz
 }
 
-Platform.prototype._updateVersion = function(platformType) {
+Platform.prototype._updateVersion = function() {
 	var config = this.config;
 	var versionFile = config.versionFile;
 }
