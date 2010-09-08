@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('skywriter:util/util');
+var util = require('skywriter:util');
 
 /**
  * A invisible singleton canvas on the page, useful whenever a canvas context

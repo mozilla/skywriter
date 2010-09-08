@@ -29,7 +29,6 @@ Platform.prototype.dist = function(type, manifest) {
 Platform.prototype._distEmbedded = function(manifest) {
     var buildDir = this.config.buildDir;
     var version = this.config.version.number;
-	var cwd = process.cwd();
 
 	var outputDir = buildDir + '/SkywriterEmbedded-' + version;
 
@@ -42,8 +41,8 @@ Platform.prototype._distEmbedded = function(manifest) {
 	var builder = new Builder(this.config, manifest);
 	builder.build();
 	
-	util.copy(cwd + '/LICENSE.txt', outputDir + '/LICENSE.txt');
-	util.copy(cwd + '/platform/embedded/README-Customizable.txt', outputDir + '/README.txt');
+	util.copy('LICENSE.txt', outputDir + '/LICENSE.txt');
+	util.copy('platform/embedded/README-Customizable.txt', outputDir + '/README.txt');
 
 	var genDocs = path.existsSync(buildDir + '/docs');
 	if(genDocs) {
@@ -54,22 +53,31 @@ Platform.prototype._distEmbedded = function(manifest) {
 	var lib = outputDir + '/lib';
 	fs.mkdirSync(lib, 0755);
 	
-	//util.copy(cwd + '/platform/embedded/static/tiki.js', lib + '/tiki.js');
-	util.copy(cwd + '/platform/embedded/static/SkywriterEmbedded.js', lib + '/worker.js');
-	util.copytree(cwd + '/platform/browser/plugins', outputDir + '/plugins');
+	//util.copy('platform/embedded/static/tiki.js', lib + '/tiki.js');
+	util.copy('platform/embedded/static/SkywriterEmbedded.js', lib + '/worker.js');
+	util.copytree('platform/browser/plugins', outputDir + '/plugins');
+	util.copytree('platform/common/plugins', outputDir + '/plugins');
 
-	util.copy(cwd + '/platform/embedded/sample.json', outputDir + '/sample.json');
-	util.copytree(cwd + '/dryice', outputDir + '/dryice');
-	util.copy(cwd + '/platform/embedded/Jakefile', outputDir + '/Jakefile');
+	util.copy('platform/embedded/sample.json', outputDir + '/sample.json');
+	util.copytree('dryice', outputDir + '/dryice');
+	util.copy('platform/embedded/Jakefile', outputDir + '/Jakefile');
 	
+	this._updateVersion(outputDir + '/plugins/boot/skywriter/index.js');
 	//replace javascript version in outputDir/plugins/boot/skywriter/index.js
     //compress source code
     //make tar.gz
 }
 
-Platform.prototype._updateVersion = function() {
+Platform.prototype._updateVersion = function(versionFile) {
 	var config = this.config;
-	var versionFile = config.versionFile;
+	var data = fs.readFileSync(versionFile, 'utf8');
+	
+	data = data.replace('VERSION_NUMBER', config.version.number);
+	data = data.replace('VERSION_CODENAME', config.version.name);
+	data = data.replace('API_VERSION', config.version.api);
+	data = data.replace('PLATFORM', 'embedded');
+	
+	fs.writeFileSync(versionFile, data, 'utf8');
 }
 
 Platform.prototype.launch = function() {

@@ -22,6 +22,4 @@ Builder.prototype.build = function() {
 	var manifest = this.manifest;
 	
 	util.mkpath(prebuiltDir);
-	
-	
 }

@@ -2,6 +2,7 @@
 var fs = require('fs');
 var sys = require('sys');
 var path = require('path');
+var EventEmitter = require('events').EventEmitter;
 
 var util = exports;
 
@@ -69,6 +70,7 @@ util.copytree = function(src, dst) {
 	}
 };
 
+var rlevel = 0;
 var root;
 util.rmtree = function(_path) {
 	if(fs.statSync(_path).isFile()) {
@@ -84,17 +86,20 @@ util.rmtree = function(_path) {
 		var file = basedir + '/' + filenames[name];
 		
 		if(fs.statSync(file).isDirectory()) {
+			rlevel++;
 			util.rmtree(file);
+			rlevel--;
+			
 			fs.rmdirSync(file);
 		} else {
 			fs.unlinkSync(file);
 		}
 	}
 	
-	try { //little hack to avoid exceptions since this code is recursive
+	if(rlevel == 0) {
 		if(path.existsSync(root)) {
-			fs.rmdirSync(root);		
-		}		
-	} catch(e) { }
+			fs.rmdirSync(root);
+		}
+	}
 };
 

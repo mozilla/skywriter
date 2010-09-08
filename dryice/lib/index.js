@@ -9,7 +9,7 @@ var config = {
 								},
                 buildDir		: 'tmp', 
 				prebuiltDir		: 'tmp/prebuilt',
-				versionFile		: '../../platform/common/plugins/boot/skywriter/index.js'
+				versionFile		: 'platform/common/plugins/boot/skywriter/index.js'
             };
 
 var Platform = require('./platform').Platform;

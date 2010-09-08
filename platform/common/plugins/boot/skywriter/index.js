@@ -35,18 +35,19 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// BEGIN VERSION BLOCK
+//THESE PARAMETERS ARE REPLACED BY DRYICE, DON'T TOUCH PLEASE
+
 /** The core version of the Skywriter system */
-exports.versionNumber = 'tip';
+//exports.versionNumber = 'tip';
+exports.versionNumber = 'VERSION_NUMBER';
 
 /** The version number to display to users */
-exports.versionCodename = 'DEVELOPMENT MODE';
+//exports.versionCodename = 'DEVELOPMENT MODE';
+exports.versionCodename = 'VERSION_CODENAME'
 
 /** The version number of the API (to ensure that the client and server are talking the same language) */
-exports.apiVersion = 'dev';
+//exports.apiVersion = 'dev';
+exports.apiVersion = 'API_VERSION';
 
 /** skywriter platform **/
-exports.platform = 'browser';
-
-// END VERSION BLOCK
-
+exports.platform = 'PLATFORM';
