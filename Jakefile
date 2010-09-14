@@ -32,27 +32,34 @@ task('tags', [], function (params) {
 
 namespace('dist', function () {
     desc('Generate distributable packages for all platforms');
-    task('all', [], function (params) {
+    task('all', ['deps:download'], function (params) {
         platform.dist(arguments[0]);
     });
 
     desc('Generate browser distributable package');
-    task('browser', [], function () {
+    task('browser', ['deps:download'], function () {
         platform.dist('browser', arguments[0]);
     });
 
     desc('Generate desktop distributable package');
-    task('desktop', [], function () {
+    task('desktop', ['deps:download'], function () {
         platform.dist('xulrunner', arguments[0]);
     });
 
     desc('Generate bookmarklet distributable package');
-    task('bookmarklet', [], function () {
+    task('bookmarklet', ['deps:download'], function () {
         platform.dist('bookmarklet', arguments[0]);
     });
 
     desc('Generate embedded distributable package');
-    task('embedded', [], function () {
+    task('embedded', ['deps:download'], function () {
         platform.dist('embedded', arguments[0]);
     });
+});
+
+namespace('deps', function() {
+	desc('Download dependencies');
+	task('download', [], function() {
+		
+	});
 });

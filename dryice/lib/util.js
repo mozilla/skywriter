@@ -38,8 +38,8 @@ util.copy = function(src, dst) {
 	
 	fs.sendfileSync(outfd, infd, 0, size);
 	
-	fs.close(infd);
-	fs.close(outfd);
+	fs.closeSync(infd);
+	fs.closeSync(outfd);
 };
 
 util.copytree = function(src, dst) {

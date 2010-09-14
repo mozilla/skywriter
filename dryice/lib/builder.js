@@ -1,11 +1,10 @@
 "use strict";
-var path = require('path');
-var fs = require('fs');
-var util = require('./util');
+var path 	= require('path');
+var fs 		= require('fs');
+var util 	= require('./util');
+var config 	= require('./config');
 
-var Builder = exports.Builder = function Builder(config, manifest) {
-	this.config = config;
-	
+var Builder = exports.Builder = function Builder(manifest) {	
 	if(!manifest) {
 		manifest = 'manifest.json';
 	}
@@ -17,9 +16,19 @@ var Builder = exports.Builder = function Builder(config, manifest) {
 	}
 }
 
-Builder.prototype.build = function() {
-	var prebuiltDir = this.config.prebuiltDir;
+Builder.prototype.build = function(outputDir) {
 	var manifest = this.manifest;
 	
-	util.mkpath(prebuiltDir);
+	if(path.existsSync(outputDir)) {
+		util.rmtree(outputDir);
+	}
+	util.mkpath(outputDir);
+	
+	var files = config.embedded.files;
+	
+	//write preamble.js on files.js
+	//write tiki.js on files.js
+	//should go through the config.plugins
+	// and build a data structure with the plugins metadata
+	
 }
