@@ -37,6 +37,7 @@
 
 var util = require('skywriter:util/util');
 var Event = require('events').Event;
+var Range = require('rangeutils:utils/range');
 
 var KeyUtil = require('keyboard:keyutil');
 
@@ -66,14 +67,12 @@ var KeyUtil = require('keyboard:keyutil');
 exports.TextInput = function(container, delegate) {
     var domNode = this.domNode = document.createElement('textarea');
     domNode.setAttribute('style', 'position: absolute; z-index: -99999; ' +
-          'width: 0px; height: 0px; margin: 0px; outline: none; border: 0;');
+         'width: 0px; height: 0px; margin: 0px; outline: none; border: 0;');
          // 'z-index: 100; top: 20px; left: 20px; width: 50px; ' +
          // 'height: 50px');
 
     container.appendChild(domNode);
-
     this.delegate = delegate;
-
     this._attachEvents();
 };
 
@@ -198,20 +197,11 @@ exports.TextInput.prototype = {
                     getData('text/plain'));
                 evt.preventDefault();
             }, false);
+        // This is Firefox only at the moment.
         } else {
-            var textFieldChangedFn = self._textFieldChanged.bind(self);
-
-            // Same as above, but executes after all pending events. This
-            // ensures that content gets added to the text field before the
-            // value field is read.
-            var textFieldChangedLater = function() {
-                window.setTimeout(textFieldChangedFn, 0);
-            };
-
-            textField.addEventListener('keydown', textFieldChangedLater,
-                false);
-            textField.addEventListener('keypress', textFieldChangedFn, false);
-            textField.addEventListener('keyup', textFieldChangedFn, false);
+            textField.addEventListener('input', function(evt) {
+                self._textFieldChanged();
+            }, false);
 
             textField.addEventListener('compositionstart', function(evt) {
                 self._composing = true;
@@ -237,6 +227,30 @@ exports.TextInput.prototype = {
                     self._textFieldChanged();
                 }, 0);
             }, false);
+
+            // Fix for bug 583638.
+            // Copy and cut is only performed on Mozilla as of changest
+            //   http://hg.mozilla.org/mozilla-central/rev/27259a0fcbe6
+            // if some text is selected. The following code ensures that this is
+            // the case. The code hocks to the `selectionChanged` event of the
+            // `delegate` object (which is the textView) and sets and selects
+            // some text if there is a selection in the Bespin Editor. This
+            // 'enables' copy and cut.
+            var wasSelectionBefore = false;
+            this.delegate.selectionChanged.add(function(newRange) {
+                if (Range.isZeroLength(newRange)) {
+                    if (wasSelectionBefore) {
+                        textField.value = "";
+                    }
+                    wasSelection = false;
+                } else {
+                    if (!wasSelectionBefore) {
+                        textField.value = "z";
+                        textField.select();
+                    }
+                    wasSelection = true;
+                }
+            }.bind(this));
         }
 
         // Here comes the code for copy and cut...

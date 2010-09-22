@@ -56,9 +56,6 @@ exports.TextView = function(container, editor) {
     CanvasView.call(this, container, true /* preventDownsize */ );
     this.editor = editor;
 
-    // Takes the layoutManager of the editor and uses it.
-    var textInput = this.textInput = new TextInput(container, this);
-
     this.padding = {
         top: 0,
         bottom: 30,
@@ -82,6 +79,8 @@ exports.TextView = function(container, editor) {
     this.endedChangeGroup = new Event();
     this.willReplaceRange = new Event();
     this.replacedCharacters = new Event();
+
+    this.textInput = new TextInput(container, this);
 };
 
 exports.TextView.prototype = new CanvasView();
