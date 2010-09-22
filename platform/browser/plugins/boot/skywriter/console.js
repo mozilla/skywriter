@@ -82,7 +82,7 @@ if (typeof(window) === 'undefined') {
     // For each of the console functions, copy them if they exist, stub if not
     NAMES.forEach(function(name) {
         if (window.console && window.console[name]) {
-            exports.console[name] = window.console[name];
+            exports.console[name] = window.console[name].bind(window.console);
         } else {
             exports.console[name] = noop;
         }
