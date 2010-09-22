@@ -37,6 +37,7 @@
 
 var Trace = require('skywriter:util/stacktrace').Trace;
 var catalog = require('skywriter:plugins').catalog;
+var console = require('skywriter:console').console;
 
 /**
  * Current requirements are around displaying the command line, and provision
