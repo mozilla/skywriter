@@ -36,6 +36,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 var util = require('skywriter:util/util');
+var catalog = require('skywriter:plugins').catalog;
+var rect = require('utils/rect');
 
 var CanvasView = require('views/canvas').CanvasView;
 
@@ -49,11 +51,14 @@ exports.GutterView = function(container, editor) {
     CanvasView.call(this, container, true /* preventDownsize */ );
 
     this.editor = editor;
+    this.domNode.addEventListener('click', this._click.bind(this), false);
 };
 
 exports.GutterView.prototype = new CanvasView();
 
 util.mixin(exports.GutterView.prototype, {
+    _decorationSpacing: 2,
+
     drawRect: function(rect, context) {
         var theme = this.editor.themeData.gutter;
 
@@ -63,7 +68,8 @@ util.mixin(exports.GutterView.prototype, {
         context.save();
 
         var paddingLeft = theme.paddingLeft;
-        context.translate(paddingLeft, 0);
+
+        context.translate(paddingLeft - 0.5, -0.5);
 
         var layoutManager = this.editor.layoutManager;
         var range = layoutManager.characterRangeForBoundingRect(rect);
@@ -71,13 +77,23 @@ util.mixin(exports.GutterView.prototype, {
             layoutManager.textLines.length - 1);
         var lineAscent = layoutManager.fontDimension.lineAscent;
 
-        context.fillStyle = theme.color;
-        context.font = this.editor.font;
+        var decorations = this._loadedDecorations(true);
+        var decorationWidths = [];
+        for (var i = 0; i < decorations.length; i++) {
+            decorationWidths.push(decorations[i].computeWidth(this));
+        }
 
         for (var row = range.start.row; row <= endRow; row++) {
-            // TODO: breakpoints
-            context.fillText('' + (row + 1), -0.5,
-                layoutManager.lineRectForRow(row).y + lineAscent - 0.5);
+            context.save();
+
+            var rowY = layoutManager.lineRectForRow(row).y;
+            context.translate(0, rowY);
+
+            for (var i = 0; i < decorations.length; i++) {
+                decorations[i].drawDecoration(this, context, lineAscent, row);
+                context.translate(decorationWidths[i] + this._decorationSpacing, 0);
+            }
+            context.restore();
         }
 
         context.restore();
@@ -85,17 +101,77 @@ util.mixin(exports.GutterView.prototype, {
 
     computeWidth: function() {
         var theme = this.editor.themeData.gutter;
-        var paddingWidth = theme.paddingLeft + theme.paddingRight;
+        var width = theme.paddingLeft + theme.paddingRight;
 
-        var lineNumberFont = this.editor.font;
+        var decorations = this._loadedDecorations(true);
+        for (var i = 0; i < decorations.length; i++) {
+            width += decorations[i].computeWidth(this);
+        }
 
-        var layoutManager = this.editor.layoutManager;
-        var lineCount = layoutManager.textLines.length;
-        var lineCountStr = '' + lineCount;
+        width += (decorations.length - 1) * this._decorationSpacing;
+        return width;
+    },
 
-        var characterWidth = layoutManager.fontDimension.characterWidth;
-        var strWidth = characterWidth * lineCountStr.length;
+    _click: function(evt) {
+        var point = {x: evt.layerX, y: evt.layerY};
+        if (rect.pointInRect(point, this.frame)) {
+            var deco = this._decorationAtPoint(point);
+            if (deco && ('selected' in deco)) {
+                var computedPoint = this.computeWithClippingFrame(point.x, point.y);
+                var pos = this.editor.layoutManager.characterAtPoint(computedPoint);
+                deco.selected(this, pos.row);
+            }
+        }
+    },
 
-        return strWidth + paddingWidth;
+    _loadedDecorations: function(invalidateOnLoaded) {
+        var decorations = [];
+        var extensions = catalog.getExtensions('gutterDecoration');
+        for (var i = 0; i < extensions.length; i++) {
+            var promise = extensions[i].load();
+            if (promise.isResolved()) {
+                promise.then(decorations.push.bind(decorations));
+            } else if (invalidateOnLoaded) {
+                promise.then(this.invalidate.bind(this));
+            }
+        }
+        return decorations;
+    },
+
+    _decorationAtPoint: function(point) {
+        var theme = this.editor.themeData.gutter;
+        var width = theme.paddingLeft + theme.paddingRight;
+        if (point.x > theme.paddingLeft) {
+            var decorations = this._loadedDecorations(false);
+            var pos = theme.paddingLeft;
+            for (var i = 0; i < decorations.length; i++) {
+                var deco = decorations[i];
+                var w = deco.computeWidth(this);
+                if (point.x < pos + w) {
+                    return deco;
+                }
+                pos += w + this._decorationSpacing;
+            }
+        }
+        return null;
     }
 });
+
+exports.lineNumbers = {
+    drawDecoration: function(gutter, context, lineAscent, row) {
+        var editor = gutter.editor;
+        var theme = editor.themeData.gutter;
+        var layoutManager = editor.layoutManager;
+
+        context.fillStyle = theme.color;
+        context.font = editor.font;
+        context.fillText('' + (row + 1), 0, lineAscent);
+    },
+
+    computeWidth: function(gutter) {
+        var layoutManager = gutter.editor.layoutManager;
+        var lineCountStr = '' + layoutManager.textLines.length;
+        var characterWidth = layoutManager.fontDimension.characterWidth;
+        return characterWidth * lineCountStr.length;
+    }
+};

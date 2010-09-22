@@ -494,6 +494,17 @@
                     "description": "Function that is called whenever a change happened."
                 }
             ]
+        },
+        {
+            "ep": "extensionpoint",
+            "name": "gutterDecoration",
+            "description": "Decoration for the gutter"
+        },
+        {
+            "ep": "gutterDecoration",
+            "name": "lineNumbers",
+            "description": "Line number decoration for the gutter",
+            "pointer": "views/gutter#lineNumbers"
         }
     ]
 }
