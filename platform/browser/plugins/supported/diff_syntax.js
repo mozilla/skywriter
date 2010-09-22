@@ -55,8 +55,8 @@ var StandardSyntax = require('standard_syntax').StandardSyntax;
 
 var states = {
     start: [
-        { regex: /^\+.*/, tag: 'addition' },
-        { regex: /^-.*/, tag: 'deletion' },
+        { regex: /^>?\s*\+.*/, tag: 'addition' },
+        { regex: /^>?\s*-.*/, tag: 'deletion' },
         { regex: /^.*/, tag: 'plain' }
     ]
 };
