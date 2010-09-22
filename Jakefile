@@ -1,4 +1,5 @@
 var http = require('http');
+var fs = require('fs');
 
 var dryice = require('./dryice');
 var platform    = dryice.platform;
@@ -61,20 +62,21 @@ namespace('dist', function () {
 namespace('deps', function() {
 	desc('Download dependencies');
 	task('download', [], function() {
-		for(dep in config.dependencies) {
-			var file = http.createClient(dep.port, dep.host);
-			
-			var request = file.request('GET', dep.uri);
+		var deps = config.dependencies;
+		
+		for(name in deps) {
+			var file = http.createClient(deps[name].port, deps[name].host);
+			var request = file.request('GET', deps[name].uri, {'host': deps[name].host});
 			request.end();
 			
 			request.on('response', function (response) {
-			  response.setEncoding('utf8');
-			  response.on('data', function (chunk) {
-			    console.log('BODY: ' + chunk);
-			  });
+				response.setEncoding('utf8');
+
+				response.on('data', function (chunk) {
+					//chunk = '"define metadata";({});"end";' + chunk + 'exports.$ = $.noConflict(true);';
+					//config.plugins_path.thirdparty + '/' + name + '.js'
+				});
 			});
 		}
-		//donwload and install jquery in thirdparty plugins from config.deps
-		//download and install tiki
 	});
 });

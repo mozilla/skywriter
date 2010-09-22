@@ -27,7 +27,7 @@ var plugins_path = {	supported: 'platform/browser/plugins/supported',
 						boot: 'platform/browser/plugins/boot' 
 					};
 					
-var dependencies = {	jquery: {host: 'http://code.jquery.com', port: 80, uri: '/jquery-1.4.2.js'} };
+var dependencies = {	jquery: {host: 'code.jquery.com', port: 80, uri: '/jquery-1.4.2.js'} };
 
 //config.buildDir = 'tmp'; //it's already specified in the manifest
 config.version = version;
