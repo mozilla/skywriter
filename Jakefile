@@ -1,9 +1,10 @@
-var sys    = require('sys');
-var dryice = require('./dryice');
+var http = require('http');
 
+var dryice = require('./dryice');
 var platform    = dryice.platform;
 var test        = dryice.Test;
 var doc         = dryice.Doc;
+var config 		= dryice.config;
 
 desc('Launch skywriter in the default browser');
 task('default', [], function (params) {
@@ -60,6 +61,20 @@ namespace('dist', function () {
 namespace('deps', function() {
 	desc('Download dependencies');
 	task('download', [], function() {
-		
+		for(dep in config.dependencies) {
+			var file = http.createClient(dep.port, dep.host);
+			
+			var request = file.request('GET', dep.uri);
+			request.end();
+			
+			request.on('response', function (response) {
+			  response.setEncoding('utf8');
+			  response.on('data', function (chunk) {
+			    console.log('BODY: ' + chunk);
+			  });
+			});
+		}
+		//donwload and install jquery in thirdparty plugins from config.deps
+		//download and install tiki
 	});
 });

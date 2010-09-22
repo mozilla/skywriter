@@ -9,4 +9,5 @@ var Platform = require('./platform').Platform;
 //exports.doc         = require('./doc');
 //exports.test         = require('./test');
 exports.platform = new Platform();
+exports.config = require('./config');
 
