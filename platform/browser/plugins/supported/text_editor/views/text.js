@@ -67,6 +67,7 @@ exports.TextView = function(container, editor) {
 
     var dom = this.domNode;
     dom.style.cursor = "text";
+    dom.addEventListener('click', this.click.bind(this), false);
     dom.addEventListener('mousedown', this.mouseDown.bind(this), false);
     dom.addEventListener('mousemove', this.mouseMove.bind(this), false);
     window.addEventListener('mouseup', this.mouseUp.bind(this), false);
@@ -467,6 +468,14 @@ util.mixin(exports.TextView.prototype, {
     },
 
     /**
+     * Handles click events and sets the focus appropriately. This is needed
+     * now that Firefox focus is tightened down; see bugs 125282 and 588381.
+     */
+    click: function(event) {
+        this.focus();
+    },
+
+    /**
      * This is where the editor is painted from head to toe. Pitiful tricks are
      * used to draw as little as possible.
      */
@@ -626,8 +635,6 @@ util.mixin(exports.TextView.prototype, {
     },
 
     mouseDown: function(evt) {
-        util.stopEvent(evt);
-
         this.hasFocus = true;
         this._mouseIsDown = true;
 
