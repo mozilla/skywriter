@@ -142,8 +142,7 @@ exports.Buffer.prototype = {
      * Saves the contents of this buffer to a new file, and updates the file
      * field of this buffer to point to the result.
      *
-     * @param dir{Directory} The directory to save in.
-     * @param filename{string} The name of the file in the directory.
+     * @param {File} newFile The pathname to save to, as a File object.
      * @return A promise to return the newly-saved file.
      */
     saveAs: function(newFile) {
