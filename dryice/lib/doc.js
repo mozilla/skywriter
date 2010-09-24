@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-"use strict";
 doc = exports;
 
 doc.display = function() {

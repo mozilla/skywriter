@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-"use strict";
 require.paths.unshift(  '../../platform/common/plugins/boot',
                         '../../platform/common/plugins/supported');
 var exports = module.exports;

@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-"use strict";
 var fs = require('fs');
 var sys = require('sys');
 var path = require('path');
