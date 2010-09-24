@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (skywriter@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,15 +35,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-require.paths.unshift(  '../../platform/common/plugins/boot',
-                        '../../platform/common/plugins/supported');
-var exports = module.exports;
+// Responsible for loading the second script (SkywriterMain 
+// or SkywriterWorker)
 
-
-
-var Platform = require('./platform').Platform;
-//exports.doc         = require('./doc');
-//exports.test         = require('./test');
-exports.platform = new Platform();
-exports.config = require('./config');
-
+// check to see if we're in a worker
+if (typeof(window) === "undefined") {
+    importScripts("SkywriterWorker.js");
+} else {
+    (function() {
+        var mainscript = document.createElement("script");
+        mainscript.setAttribute("src", skywriter.base + "SkywriterMain.js");
+        var head = document.getElementsByTagName("head")[0];
+        head.appendChild(mainscript);
+    })();
+}

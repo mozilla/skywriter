@@ -1,9 +1,11 @@
-var sys    = require('sys');
-var dryice = require('./dryice');
+var http = require('http');
+var fs = require('fs');
 
+var dryice = require('./dryice');
 var platform    = dryice.platform;
 var test        = dryice.Test;
 var doc         = dryice.Doc;
+var config 		= dryice.config;
 
 desc('Launch skywriter in the default browser');
 task('default', [], function (params) {
@@ -60,6 +62,21 @@ namespace('dist', function () {
 namespace('deps', function() {
 	desc('Download dependencies');
 	task('download', [], function() {
+		var deps = config.dependencies;
 		
+		for(name in deps) {
+			var file = http.createClient(deps[name].port, deps[name].host);
+			var request = file.request('GET', deps[name].uri, {'host': deps[name].host});
+			request.end();
+			
+			request.on('response', function (response) {
+				response.setEncoding('utf8');
+
+				response.on('data', function (chunk) {
+					//chunk = '"define metadata";({});"end";' + chunk + 'exports.$ = $.noConflict(true);';
+					//config.plugins_path.thirdparty + '/' + name + '.js'
+				});
+			});
+		}
 	});
 });
