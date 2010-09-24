@@ -35,13 +35,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-doc = exports;
-
-doc.display = function() {
+exports.display = function() {
 
 }
 
-doc.generateAPI = function() {
+exports.generateAPI = function() {
 
 }
 
