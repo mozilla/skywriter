@@ -38,11 +38,12 @@
 var path    = require('path');
 var fs      = require('fs');
 var util    = require('./util');
+var config  = require('./config');
 
 var Builder = require('./builder').Builder;
 
 var Platform = exports.Platform = function Platform() {
-
+    // empty
 }
 
 Platform.prototype.dist = function(type, manifest) {

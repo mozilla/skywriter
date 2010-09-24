@@ -37,6 +37,7 @@
 
 var path    = require('path');
 var fs      = require('fs');
+var config  = require('./config');
 var util    = require('./util');
 
 var Builder = exports.Builder = function Builder(plugins) {
@@ -64,7 +65,7 @@ Builder.prototype.searchPlugin = function(plugin) {
     var paths = config.plugins_path;
     var location;
 
-    for(p in paths) {
+    for (var p in paths) {
         location = paths[p] + '/' + plugin;
 
         if(path.existsSync(location)) {
@@ -99,8 +100,8 @@ almost all of it happens in _set_package_lists, with the exception of identifyin
 
 var all = {};
 Builder.prototype._resolveDependencies = function(plugins) {
-    for(name in plugins) {
-        if(all[name]) {
+    for (var name in plugins) {
+        if (all[name]) {
             return;
         }
 
@@ -111,7 +112,7 @@ Builder.prototype._resolveDependencies = function(plugins) {
         metadata.location = location;
 
         var dependencies = metadata.dependencies; 
-        if(dependencies) {
+        if (dependencies) {
             this._resolveDependencies(dependencies);
         }
 
@@ -125,12 +126,6 @@ Builder.prototype.build = function(outputDir) {
     }
     util.mkpath(outputDir);
 
-    var files = config.embedded.files;
-    var loader = config.embedded.loader;
-    var preamble = config.embedded.preamble;
-    var boot = config.embedded.boot;
-    var script2loader = config.embedded.script2loader;
-
     this._resolveDependencies(this.plugins); 
     var plugins = all;
 
@@ -138,7 +133,7 @@ Builder.prototype.build = function(outputDir) {
     var shared = {};
     var main = {};  
 
-    for(name in plugins) {
+    for (var name in plugins) {
         var metadata = plugins[name];
         console.log(metadata + '\n');
 

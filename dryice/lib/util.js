@@ -46,7 +46,7 @@ util.mkpath = function(_path) {
     var dirs = _path.split('/');
     var d = './';
 
-    for(dir in dirs) {
+    for (var dir in dirs) {
         d += dirs[dir] + '/';
 
         if(!path.existsSync(d)) {
@@ -56,15 +56,15 @@ util.mkpath = function(_path) {
 };
 
 util.copy = function(src, dst) {
-    if(!path.existsSync(src)) {
+    if (!path.existsSync(src)) {
         throw new Error(src + ' does not exists. Nothing to be copied');
     }
 
-    if(fs.statSync(src).isDirectory()) {
+    if (fs.statSync(src).isDirectory()) {
         throw new Error(src + ' is a directory. It must be a file');
     }
 
-    if(src == dst) {
+    if (src == dst) {
         throw new Error(src + ' and ' + dst + 'are identical');
     }
 
@@ -79,22 +79,22 @@ util.copy = function(src, dst) {
 };
 
 util.copytree = function(src, dst) {
-    if(!path.existsSync(src)) {
+    if (!path.existsSync(src)) {
         throw new Error(src + ' does not exists. Nothing to be copied');
     }
 
-    if(!fs.statSync(src).isDirectory()) {
+    if (!fs.statSync(src).isDirectory()) {
         throw new Error(src + ' must be a directory');
     }
 
     var filenames = fs.readdirSync(src);
     var basedir = src;
 
-    if(!path.existsSync(dst)) {
+    if (!path.existsSync(dst)) {
         fs.mkdirSync(dst, 0755);
     }
 
-    for(name in filenames) {
+    for (var name in filenames) {
         var file = basedir + '/' + filenames[name];
         var newdst = dst + '/' + filenames[name];
 
@@ -109,19 +109,19 @@ util.copytree = function(src, dst) {
 var rlevel = 0;
 var root;
 util.rmtree = function(_path) {
-    if(fs.statSync(_path).isFile()) {
+    if (fs.statSync(_path).isFile()) {
         throw new Error(_path + ' is a file. Use fs.unlink instead');
     }
-    if(!root) {
+    if (!root) {
         root = _path;
     }
     var filenames = fs.readdirSync(_path);
     var basedir = _path;
 
-    for(name in filenames) {
+    for (var name in filenames) {
         var file = basedir + '/' + filenames[name];
 
-        if(fs.statSync(file).isDirectory()) {
+        if (fs.statSync(file).isDirectory()) {
             rlevel++;
             util.rmtree(file);
             rlevel--;
@@ -132,10 +132,8 @@ util.rmtree = function(_path) {
         }
     }
 
-    if(rlevel == 0) {
-        if(path.existsSync(root)) {
-            fs.rmdirSync(root);
-        }
+    if (rlevel === 0 && path.existsSync(root)) {
+        fs.rmdirSync(root);
     }
 };
 

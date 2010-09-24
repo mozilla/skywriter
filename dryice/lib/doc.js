@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-doc = exports;
+var doc = exports;
 
 doc.display = function() {
 
