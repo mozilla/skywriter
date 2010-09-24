@@ -2,7 +2,6 @@
 var path	= require('path');
 var fs 		= require('fs');
 var util 	= require('./util');
-var config 	= require('./config');
 
 var Builder = require('./builder').Builder;
 
@@ -25,9 +24,6 @@ Platform.prototype.dist = function(type, manifest) {
 }
 
 Platform.prototype._distEmbedded = function(manifest) {
-    var buildDir = config.buildDir;
-    var version = config.version.number;
-
 	var outputDir = buildDir + '/SkywriterEmbedded-' + version;
 
 	if(path.existsSync(outputDir)) {
@@ -70,9 +66,6 @@ Platform.prototype._distEmbedded = function(manifest) {
 Platform.prototype._updateVersion = function(versionFile) {
 	var data = fs.readFileSync(versionFile, 'utf8');
 	
-	data = data.replace('VERSION_NUMBER', config.version.number);
-	data = data.replace('VERSION_CODENAME', config.version.name);
-	data = data.replace('API_VERSION', config.version.api);
 	data = data.replace('PLATFORM', 'embedded');
 	
 	fs.writeFileSync(versionFile, data, 'utf8');

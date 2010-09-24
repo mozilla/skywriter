@@ -2,7 +2,6 @@
 var path 	= require('path');
 var fs 		= require('fs');
 var util 	= require('./util');
-var config 	= require('./config');
 
 var Builder = exports.Builder = function Builder(manifest) {	
 	if(!manifest) {
@@ -24,11 +23,9 @@ Builder.prototype.build = function(outputDir) {
 	}
 	util.mkpath(outputDir);
 	
-	var files = config.embedded.files;
-	
 	//write preamble.js on files.js
 	//write tiki.js on files.js
-	//should go through the config.plugins
+	//should go through the plugins in the manifest
 	// and build a data structure with the plugins metadata
 	
 }
