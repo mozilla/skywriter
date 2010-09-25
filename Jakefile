@@ -38,7 +38,7 @@
 var http = require('http');
 var fs = require('fs');
 
-var dryice = require('./dryice');
+var dryice = require('./dryice/index');
 var platform    = dryice.platform;
 var test        = dryice.Test;
 var doc         = dryice.Doc;
