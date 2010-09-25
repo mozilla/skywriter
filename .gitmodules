@@ -1,0 +1,3 @@
+[submodule "server/node-paperboy"]
+	path = server/node-paperboy
+	url = git://github.com/felixge/node-paperboy.git
