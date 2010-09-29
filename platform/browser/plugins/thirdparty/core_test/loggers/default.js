@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'utils'
+], function(require, exports, module,
+    utils
+) {
+
 // ==========================================================================
 // Project:   CoreTest Unit Testing Library
 // Copyright: ©2010 Apple Inc. All rights reserved.
@@ -6,7 +12,9 @@
 
 "use exports DefaultLogger";
 
-var utils = require('utils'),
+var utils = utils.,
+    Ct    = require('core'),
+    hasConsole = 'undefined' !== typeof console; //SYNC_REQ: var utils = require('utils'),
     Ct    = require('core'),
     hasConsole = 'undefined' !== typeof console; 
 
@@ -273,3 +281,5 @@ Ct.DefaultLogger = utils.extend(/** @scope Ct.DefaultLogger.prototype */{
 exports = module.exports = Ct.DefaultLogger;
 exports.DefaultLogger = Ct.DefaultLogger;
 
+
+});

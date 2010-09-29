@@ -1,3 +1,17 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'skywriter/console',
+    'skywriter/promise',
+    'types/types',
+    'command_line/hint'
+], function(require, exports, module,
+    plugins,
+    consoleMod,
+    promise,
+    types,
+    hint
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,13 +49,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require('skywriter:plugins').catalog;
-var console = require('skywriter:console').console;
-var Promise = require('skywriter:promise').Promise;
-var types = require('types:types');
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+//SYNC_REQ: var types = require('types:types');
 
-var Hint = require('command_line:hint').Hint;
-var Level = require('command_line:hint').Level;
+var Hint = hint.Hint; //SYNC_REQ: var Hint = require('command_line:hint').Hint;
+var Level = hint.Level; //SYNC_REQ: var Level = require('command_line:hint').Level;
 
 /**
  * If there isn't a typehint to define a hint UI component then we just use the
@@ -184,3 +198,5 @@ exports.getHint = function(input, assignment) {
 
     return promise;
 };
+
+});

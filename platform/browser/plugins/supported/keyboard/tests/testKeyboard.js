@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'keyboard/keyboard',
+    'plugindev'
+], function(require, exports, module,
+    keyboard,
+    t
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var keyboard = require('keyboard:keyboard');
-var t = require('plugindev');
+//SYNC_REQ: var keyboard = require('keyboard:keyboard');
+//SYNC_REQ: var t = require('plugindev');
 
 exports.testKeyMatching = function() {
     var km = keyboard.keyboardManager;
@@ -87,3 +95,5 @@ exports.testKeyMatching = function() {
     t.equal(km._commandMatches(command, 'meta_c', {isGreen: false}), true,
         'list: flags don\'t matter without predicates');
 };
+
+});

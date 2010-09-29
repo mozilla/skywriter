@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'environment'
+], function(require, exports, module,
+    environment
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +41,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var env = require('environment').env;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
 exports.syntaxContexts = function(args, request) {
     var contexts = env.contexts;
     request.done('Contexts = [ ' + contexts.join(', ') + ' ]');
 };
+
+});

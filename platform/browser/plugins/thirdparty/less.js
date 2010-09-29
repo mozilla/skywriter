@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'less/tree'
+], function(require, exports, module,
+    tree
+) {
+
 "define metadata";
 ({
     "description": "Leaner CSS",
@@ -148,7 +154,7 @@ if (typeof(require) !== 'undefined') {
     var less = exports;
 
     if (typeof(__LESS_DIST__) === 'undefined') {
-        var tree = require('less/tree');
+        //SYNC_REQ: var tree = require('less/tree');
     } else {
         var tree = {};
     }
@@ -1058,7 +1064,11 @@ less.Parser = function Parser(env) {
 
 less.Parser.importer = null;
 
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+tree.functions = {
+    rgb: function (r, g, b) {
+        return this.rgba(r, g, b, 1.0); //SYNC_REQ: var tree = require('less/tree') }
 
 tree.functions = {
     rgb: function (r, g, b) {
@@ -1161,7 +1171,10 @@ function number(n) {
 function clamp(val) {
     return Math.min(1, Math.max(0, val));
 }
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+tree.Alpha = function Alpha(val) {
+    this.value = val; //SYNC_REQ: var tree = require('less/tree') }
 
 tree.Alpha = function Alpha(val) {
     this.value = val;
@@ -1172,7 +1185,10 @@ tree.Alpha.prototype = {
     },
     eval: function () { return this }
 };
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+tree.Anonymous = function Anonymous(string) {
+    this.value = string.content || string; //SYNC_REQ: var tree = require('less/tree') }
 
 tree.Anonymous = function Anonymous(string) {
     this.value = string.content || string;
@@ -1183,7 +1199,13 @@ tree.Anonymous.prototype = {
     },
     eval: function () { return this }
 };
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+//
+// A function call node.
+//
+tree.Call = function Call(name, args) {
+    this.name = name; //SYNC_REQ: var tree = require('less/tree') }
 
 //
 // A function call node.
@@ -1220,7 +1242,19 @@ tree.Call.prototype = {
         return this.eval(env).toCSS();
     }
 };
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+//
+// RGB Colors - #ff0014, #eee
+//
+tree.Color = function Color(rgb, a) {
+    //
+    // The end goal here, is to parse the arguments
+    // into an integer triplet, such as `128, 255, 0`
+    //
+    // This facilitates operations and conversions.
+    //
+    if (Array.isArray(rgb)) {
+        this.rgb = rgb; //SYNC_REQ: var tree = require('less/tree') }
 //
 // RGB Colors - #ff0014, #eee
 //
@@ -1308,7 +1342,10 @@ tree.Color.prototype = {
     }
 };
 
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+tree.Comment = function Comment(value) {
+    this.value = value; //SYNC_REQ: var tree = require('less/tree') }
 
 tree.Comment = function Comment(value) {
     this.value = value;
@@ -1318,7 +1355,13 @@ tree.Comment.prototype = {
         return this.value;
     }
 };
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+//
+// A number with a unit
+//
+tree.Dimension = function Dimension(value, unit) {
+    this.value = parseFloat(value); //SYNC_REQ: var tree = require('less/tree') }
 
 //
 // A number with a unit
@@ -1351,7 +1394,10 @@ tree.Dimension.prototype = {
     }
 };
 
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+tree.Directive = function Directive(name, value) {
+    this.name = name; //SYNC_REQ: var tree = require('less/tree') }
 
 tree.Directive = function Directive(name, value) {
     this.name = name;
@@ -1381,7 +1427,11 @@ tree.Directive.prototype = {
     find: function () { return tree.Ruleset.prototype.find.apply(this.ruleset, arguments) },
     rulesets: function () { return tree.Ruleset.prototype.rulesets.apply(this.ruleset) }
 };
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+tree.Element = function Element(combinator, value) {
+    this.combinator = combinator instanceof tree.Combinator ?
+                      combinator : new(tree.Combinator)(combinator); //SYNC_REQ: var tree = require('less/tree') }
 
 tree.Element = function Element(combinator, value) {
     this.combinator = combinator instanceof tree.Combinator ?
@@ -1411,7 +1461,9 @@ tree.Combinator.prototype.toCSS = function () {
         case '>' : return ' > ';
     }
 };
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+tree.Expression = function Expression(value) { this.value = value }; //SYNC_REQ: var tree = require('less/tree') }
 
 tree.Expression = function Expression(value) { this.value = value };
 tree.Expression.prototype = {
@@ -1430,7 +1482,21 @@ tree.Expression.prototype = {
         }).join(' ');
     }
 };
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+//
+// CSS @import node
+//
+// The general strategy here is that we don't want to wait
+// for the parsing to be completed, before we start importing
+// the file. That's because in the context of a browser,
+// most of the time will be spent waiting for the server to respond.
+//
+// On creation, we push the import path to our import queue, though
+// `import,push`, we also pass it a callback, which it'll call once
+// the file has been fetched, and parsed.
+//
+tree.Import = function Import(path, imports) {
+    var that = this; //SYNC_REQ: var tree = require('less/tree') }
 //
 // CSS @import node
 //
@@ -1498,14 +1564,18 @@ tree.Import.prototype = {
         }
     }
 };
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+tree.Keyword = function Keyword(value) { this.value = value }; //SYNC_REQ: var tree = require('less/tree') }
 
 tree.Keyword = function Keyword(value) { this.value = value };
 tree.Keyword.prototype = {
     eval: function () { return this },
     toCSS: function () { return this.value }
 };
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+tree.mixin = {}; //SYNC_REQ: var tree = require('less/tree') }
 
 tree.mixin = {};
 tree.mixin.Call = function MixinCall(elements, args, index) {
@@ -1600,7 +1670,10 @@ tree.mixin.Definition.prototype = {
         return true;
     }
 };
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+tree.Operation = function Operation(op, operands) {
+    this.op = op.trim(); //SYNC_REQ: var tree = require('less/tree') }
 
 tree.Operation = function Operation(op, operands) {
     this.op = op.trim();
@@ -1630,7 +1703,10 @@ tree.operate = function (op, a, b) {
         case '/': return a / b;
     }
 };
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+tree.Quoted = function Quoted(value, content) {
+    this.value = value; //SYNC_REQ: var tree = require('less/tree') }
 
 tree.Quoted = function Quoted(value, content) {
     this.value = value;
@@ -1645,7 +1721,10 @@ tree.Quoted.prototype = {
         return this;
     }
 };
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+tree.Rule = function Rule(name, value, index) {
+    this.name = name; //SYNC_REQ: var tree = require('less/tree') }
 
 tree.Rule = function Rule(name, value, index) {
     this.name = name;
@@ -1699,7 +1778,10 @@ tree.Shorthand.prototype = {
     },
     eval: function () { return this }
 };
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+tree.Ruleset = function Ruleset(selectors, rules) {
+    this.selectors = selectors; //SYNC_REQ: var tree = require('less/tree') }
 
 tree.Ruleset = function Ruleset(selectors, rules) {
     this.selectors = selectors;
@@ -1862,7 +1944,10 @@ tree.Ruleset.prototype = {
     }
 };
 
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+tree.Selector = function Selector(elements) {
+    this.elements = elements; //SYNC_REQ: var tree = require('less/tree') }
 
 tree.Selector = function Selector(elements) {
     this.elements = elements;
@@ -1889,7 +1974,10 @@ tree.Selector.prototype.toCSS = function () {
     }).join('');
 };
 
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+tree.URL = function URL(val) {
+    this.value = val; //SYNC_REQ: var tree = require('less/tree') }
 
 tree.URL = function URL(val) {
     this.value = val;
@@ -1900,7 +1988,9 @@ tree.URL.prototype = {
     },
     eval: function () { return this }
 };
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+tree.Variable = function Variable(name, index) { this.name = name, this.index = index }; //SYNC_REQ: var tree = require('less/tree') }
 
 tree.Variable = function Variable(name, index) { this.name = name, this.index = index };
 tree.Variable.prototype = {
@@ -1919,7 +2009,10 @@ tree.Variable.prototype = {
     }
 };
 
-if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = require('less/tree') }
+if (typeof(require) !== 'undefined' && typeof(__LESS_DIST__) === 'undefined') { var tree = tree. }
+
+tree.find = function (obj, fun) {
+    for (var i = 0, r; //SYNC_REQ: var tree = require('less/tree') }
 
 tree.find = function (obj, fun) {
     for (var i = 0, r; i < obj.length; i++) {
@@ -2151,3 +2244,5 @@ less.Parser.importer = function (path, paths, callback) {
 })();
 
 // --- End less.js ---
+
+});

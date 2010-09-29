@@ -1,3 +1,15 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/util',
+    'skywriter/console',
+    'skywriter/plugins',
+    'settings'
+], function(require, exports, module,
+    util,
+    consoleMod,
+    plugins,
+    settingsMod
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -43,10 +55,10 @@
 });
 "end";
 
-var util = require('skywriter:util/util');
-var console = require('skywriter:console').console;
-var catalog = require("skywriter:plugins").catalog;
-var settings = require('settings').settings;
+//SYNC_REQ: var util = require('skywriter:util/util');
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require("skywriter:plugins").catalog;
+var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
 
 /**
  * The environment plays a similar role to the environment under unix.
@@ -203,3 +215,5 @@ Object.defineProperties(exports.Environment.prototype, {
  * The global environment used throughout this Skywriter instance.
  */
 exports.env = new exports.Environment();
+
+});

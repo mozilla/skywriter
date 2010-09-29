@@ -1,3 +1,19 @@
+require.def(['require', 'exports', 'module',
+    'promise',
+    'builtins',
+    'console',
+    'util/util',
+    'util/stacktrace',
+    'proxy'
+], function(require, exports, module,
+    promise,
+    builtins,
+    consoleMod,
+    util,
+    stacktrace,
+    proxy
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -37,13 +53,13 @@
 
 require("globals");
 
-var Promise = require("promise").Promise;
-var group = require("promise").group;
-var builtins = require("builtins");
-var console = require("console").console;
-var util = require("util/util");
-var Trace = require("util/stacktrace").Trace;
-var proxy = require('proxy');
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require("promise").Promise;
+var group = promise.group; //SYNC_REQ: var group = require("promise").group;
+//SYNC_REQ: var builtins = require("builtins");
+var console = consoleMod.console; //SYNC_REQ: var console = require("console").console;
+//SYNC_REQ: var util = require("util/util");
+var Trace = stacktrace.Trace; //SYNC_REQ: var Trace = require("util/stacktrace").Trace;
+//SYNC_REQ: var proxy = require('proxy');
 
 var r = require;
 
@@ -1559,3 +1575,5 @@ var _removeFromObject = function(regex, obj) {
 exports.getUserPlugins = function() {
     return exports.catalog.getPlugins({ onlyType: 'user' });
 };
+
+});

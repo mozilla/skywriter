@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'util/util'
+], function(require, exports, module,
+    util
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,7 +41,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require("util/util");
+//SYNC_REQ: var util = require("util/util");
 
 /**
  * This object represents a "safe console" object that forwards debugging
@@ -89,3 +95,5 @@ if (typeof(window) === 'undefined') {
     });
 }
 
+
+});

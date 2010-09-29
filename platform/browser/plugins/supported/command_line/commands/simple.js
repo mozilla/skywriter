@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'skywriter/console',
+    'environment'
+], function(require, exports, module,
+    plugins,
+    consoleMod,
+    environment
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +45,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require('skywriter:plugins').catalog;
-var console = require('skywriter:console').console;
-var env = require('environment').env;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
 /**
  * Action to allow the command line to do completion
@@ -201,3 +211,5 @@ exports.aliasCommand = function(args, request) {
     }
 };
 
+
+});

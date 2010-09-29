@@ -1,3 +1,17 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/promise',
+    'skywriter/plugins',
+    'events',
+    'themestyles',
+    'settings'
+], function(require, exports, module,
+    promise,
+    plugins,
+    events,
+    themestyles,
+    settingsMod
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,11 +49,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Promise = require('skywriter:promise').Promise;
-var catalog = require('skywriter:plugins').catalog;
-var Event = require('events').Event;
-var themestyles = require('themestyles');
-var settings = require('settings').settings;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
+//SYNC_REQ: var themestyles = require('themestyles');
+var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
 
 // The current themeExt used on the page.
 var currentThemeExt = null;
@@ -188,3 +202,5 @@ exports.appLaunched = function() {
     // during the launch of the app.
     catalog.publish(exports, 'themeChange');
 };
+
+});

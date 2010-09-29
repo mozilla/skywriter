@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'tiki',
+    'skywriter/util/util',
+    'skywriter/plugins'
+], function(require, exports, module,
+    tiki,
+    util,
+    plugins
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +45,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var tiki = require('tiki');
-var util = require('skywriter:util/util');
-var catalog = require('skywriter:plugins').catalog;
+//SYNC_REQ: var tiki = require('tiki');
+//SYNC_REQ: var util = require('skywriter:util/util');
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
 
 /**
  * A sandbox can only be used from inside of the `master` catalog.
@@ -98,3 +108,5 @@ Sandbox.prototype.require = function(moduleId, curModuleId, workingPackage) {
 
 // Expose the sandbox.
 exports.Sandbox = Sandbox;
+
+});

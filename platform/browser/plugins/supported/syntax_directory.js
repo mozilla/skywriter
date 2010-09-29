@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins'
+], function(require, exports, module,
+    plugins
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -50,7 +56,7 @@
 });
 "end";
 
-var plugins = require("skywriter:plugins");
+//SYNC_REQ: var plugins = require("skywriter:plugins");
 
 function SyntaxInfo(ext) {
     this.extension = ext;
@@ -99,3 +105,5 @@ function discoveredNewSyntax(syntaxExtension) {
 exports.syntaxDirectory = syntaxDirectory;
 exports.discoveredNewSyntax = discoveredNewSyntax;
 
+
+});

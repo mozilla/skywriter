@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'types/types',
+    'plugindev'
+], function(require, exports, module,
+    types,
+    t
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var types = require('types:types');
-var t = require('plugindev');
+//SYNC_REQ: var types = require('types:types');
+//SYNC_REQ: var t = require('plugindev');
 
 exports.testTextFromString = function() {
     types.fromString('Foo', 'text').then(function(converted) {
@@ -189,3 +197,5 @@ exports.testBooleanIsValid = function() {
         t.equal(true, valid, 'false');
     });
 };
+
+});

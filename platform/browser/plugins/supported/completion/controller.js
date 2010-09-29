@@ -1,3 +1,17 @@
+require.def(['require', 'exports', 'module',
+    'ctags',
+    'rangeutils/utils/range',
+    'completion/ui',
+    'skywriter/plugins',
+    'environment'
+], function(require, exports, module,
+    ctags,
+    range,
+    ui,
+    plugins,
+    environment
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,11 +49,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var ctags = require('ctags');
-var range = require('rangeutils:utils/range');
-var CompletionUI = require('completion:ui').CompletionUI;
-var catalog = require('skywriter:plugins').catalog;
-var env = require('environment').env;
+//SYNC_REQ: var ctags = require('ctags');
+//SYNC_REQ: var range = require('rangeutils:utils/range');
+var CompletionUI = ui.CompletionUI; //SYNC_REQ: var CompletionUI = require('completion:ui').CompletionUI;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
 function CompletionController(editorView) {
     this._editorView = editorView;
@@ -162,3 +176,5 @@ exports.completeCancelCommand = makeCommand('cancel');
 exports.completeDownCommand = makeCommand('moveDown');
 exports.completeUpCommand = makeCommand('moveUp');
 
+
+});

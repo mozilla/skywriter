@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'jquery'
+], function(require, exports, module,
+    jquery
+) {
+
 /**
  * @license 
  * jQuery Tools 1.2.0 Overlay - Overlay base. Extend it.
@@ -18,7 +24,7 @@
 });
 "end";
 
-var $ = require("jquery").$;
+var $ = jquery.$; //SYNC_REQ: var $ = require("jquery").$;
 
 // static constructs
 $.tools = $.tools || {version: '1.2.0'};
@@ -297,3 +303,5 @@ $.fn.overlay = function(conf) {
 	
 	return conf.api ? el: this;		
 }; 
+
+});

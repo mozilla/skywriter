@@ -1,3 +1,17 @@
+require.def(['require', 'exports', 'module',
+    'plugindev',
+    'filesystem',
+    'filesystem/tests/fixture',
+    'skywriter/console',
+    'skywriter/promise'
+], function(require, exports, module,
+    t,
+    fs,
+    fixture,
+    consoleMod,
+    promise
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -22,11 +36,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var t = require('plugindev');
-var fs = require('filesystem');
-var DummyFileSource = require('filesystem:tests/fixture').DummyFileSource;
-var console = require('skywriter:console').console;
-var Promise = require('skywriter:promise').Promise;
+//SYNC_REQ: var t = require('plugindev');
+//SYNC_REQ: var fs = require('filesystem');
+var DummyFileSource = fixture.DummyFileSource; //SYNC_REQ: var DummyFileSource = require('filesystem:tests/fixture').DummyFileSource;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
 
 var source = new DummyFileSource([
     { name: 'atTheTop.js', contents: 'the top file' },
@@ -161,3 +175,5 @@ exports.testFileAbstraction = function() {
     });
     return testpr;
 };
+
+});

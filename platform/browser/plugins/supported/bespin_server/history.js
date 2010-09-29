@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'canon/history'
+], function(require, exports, module,
+    history
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,7 +41,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var history = require('canon:history');
+//SYNC_REQ: var history = require('canon:history');
 
 /**
  * Store the history in SkywriterSettings/command.history.
@@ -80,4 +86,6 @@ exports.ServerHistory = history.InMemoryHistory.extend({
             timestamp: new Date().getTime()
         });
     }
+});
+
 });

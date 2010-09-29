@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/util',
+    'skywriter/plugin'
+], function(require, exports, module,
+    util,
+    plugin
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +43,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('skywriter:util/util');
+//SYNC_REQ: var util = require('skywriter:util/util');
 
-var catalog = require('skywriter:plugin').catalog;
+var catalog = plugin.catalog; //SYNC_REQ: var catalog = require('skywriter:plugin').catalog;
 
 var server = catalog.getObject('server');
 var editSession = catalog.getObject('editSession');
@@ -428,3 +436,5 @@ exports.importCommand = function(instruction, args) {
         });
     }
 };
+
+});

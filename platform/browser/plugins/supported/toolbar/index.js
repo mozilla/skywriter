@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'events',
+    'skywriter/plugins'
+], function(require, exports, module,
+    events,
+    plugins
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Event = require('events').Event;
-var catalog = require('skywriter:plugins').catalog;
+var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
 
 var discoveredNewToolbarItem = new Event();
 
@@ -68,3 +76,5 @@ ToolbarView.prototype = {
 exports.ToolbarView = ToolbarView;
 exports.discoveredNewToolbarItem = discoveredNewToolbarItem;
 
+
+});

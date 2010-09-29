@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'environment',
+    'settings'
+], function(require, exports, module,
+    plugins,
+    environment,
+    settingsMod
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,10 +45,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require('skywriter:plugins').catalog;
-var env = require('environment').env;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
-var settings = require('settings').settings;
+var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
 
 /**
  * 'set' command
@@ -90,3 +100,5 @@ exports.unsetCommand = function(args, request) {
     settings.resetValue(args.setting);
     request.done('Reset ' + args.setting + ' to default: ' + settings.get(args.setting));
 };
+
+});

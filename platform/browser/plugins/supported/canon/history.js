@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/stacktrace',
+    'skywriter/plugins',
+    'skywriter/console'
+], function(require, exports, module,
+    stacktrace,
+    plugins,
+    consoleMod
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +45,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Trace = require('skywriter:util/stacktrace').Trace;
-var catalog = require('skywriter:plugins').catalog;
-var console = require('skywriter:console').console;
+var Trace = stacktrace.Trace; //SYNC_REQ: var Trace = require('skywriter:util/stacktrace').Trace;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
 
 /**
  * Current requirements are around displaying the command line, and provision
@@ -104,3 +114,5 @@ exports.execute = function(args, request) {
         request.doneWithError(ex);
     }
 };
+
+});

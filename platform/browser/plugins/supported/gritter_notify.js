@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'jquery'
+], function(require, exports, module,
+    jquery
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -52,7 +58,7 @@
 });
 "end";
 
-var $ = require('jquery').$;
+var $ = jquery.$; //SYNC_REQ: var $ = require('jquery').$;
 require('gritter');
 
 exports.gritter = function(message) {
@@ -62,3 +68,5 @@ exports.gritter = function(message) {
         text: message.body
     });
 };
+
+});

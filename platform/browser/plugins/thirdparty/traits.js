@@ -1,3 +1,7 @@
+require.def(['require', 'exports', 'module'
+], function(require, exports, module
+) {
+
 // Copyright (C) 2010 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -693,3 +697,5 @@ if (typeof exports !== "undefined") { // CommonJS module support
 
 // --- End traits-0.3.js ---
 
+
+});

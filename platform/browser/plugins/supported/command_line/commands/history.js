@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'canon/history',
+    'environment'
+], function(require, exports, module,
+    plugins,
+    history,
+    environment
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +45,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require('skywriter:plugins').catalog;
-var history = require('canon:history');
-var env = require('environment').env;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+//SYNC_REQ: var history = require('canon:history');
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
 /**
  * The pointer to the command that we show on up|down
@@ -99,3 +109,5 @@ exports.historyCommand = function(args, request) {
 exports.addedRequestOutput = function() {
     pointer = history.requests.length;
 };
+
+});

@@ -1,3 +1,37 @@
+require.def(['require', 'exports', 'module',
+    'rangeutils/utils/range',
+    'views/scroller',
+    'skywriter/util/util',
+    'models/buffer',
+    'completion/controller',
+    'controllers/search',
+    'controllers/undo',
+    'events',
+    'views/gutter',
+    'controllers/layoutmanager',
+    'views/text',
+    'underscore',
+    'skywriter/plugins',
+    'keyboard/keyboard',
+    'settings'
+], function(require, exports, module,
+    rangeutils,
+    scroller,
+    util,
+    buffer,
+    controller,
+    search,
+    undo,
+    events,
+    gutter,
+    layoutmanager,
+    text,
+    underscore,
+    plugins,
+    keyboard,
+    settingsMod
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,26 +69,28 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var rangeutils = require('rangeutils:utils/range');
-var scroller = require('views/scroller');
-var util = require('skywriter:util/util');
+//SYNC_REQ: var rangeutils = require('rangeutils:utils/range');
+//SYNC_REQ: var scroller = require('views/scroller');
+//SYNC_REQ: var util = require('skywriter:util/util');
 
-var Buffer = require('models/buffer').Buffer;
-var CompletionController = require('completion:controller').
+var Buffer = buffer.Buffer; //SYNC_REQ: var Buffer = require('models/buffer').Buffer;
+var CompletionController = controller.
+    CompletionController; //SYNC_REQ: var CompletionController = require('completion:controller').
     CompletionController;
-var EditorSearchController = require('controllers/search').
+var EditorSearchController = search.
+    EditorSearchController; //SYNC_REQ: var EditorSearchController = require('controllers/search').
     EditorSearchController;
-var EditorUndoController = require('controllers/undo').EditorUndoController;
-var Event = require('events').Event;
-var GutterView = require('views/gutter').GutterView;
-var LayoutManager = require('controllers/layoutmanager').LayoutManager;
+var EditorUndoController = undo.EditorUndoController; //SYNC_REQ: var EditorUndoController = require('controllers/undo').EditorUndoController;
+var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
+var GutterView = gutter.GutterView; //SYNC_REQ: var GutterView = require('views/gutter').GutterView;
+var LayoutManager = layoutmanager.LayoutManager; //SYNC_REQ: var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 var ScrollerView = scroller.ScrollerCanvasView;
-var TextView = require('views/text').TextView;
+var TextView = text.TextView; //SYNC_REQ: var TextView = require('views/text').TextView;
 
-var _ = require('underscore')._;
-var catalog = require('skywriter:plugins').catalog;
-var keyboardManager = require('keyboard:keyboard').keyboardManager;
-var settings = require('settings').settings;
+var _ = underscore._; //SYNC_REQ: var _ = require('underscore')._;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var keyboardManager = keyboard.keyboardManager; //SYNC_REQ: var keyboardManager = require('keyboard:keyboard').keyboardManager;
+var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
 
 // Caches the theme data for the entire editor (editor, highlighter, and
 // gutter).
@@ -763,4 +799,6 @@ Object.defineProperties(exports.EditorView.prototype, {
             return this.layoutManager.syntaxManager.setSyntax(newSyntax);
         }
     }
+});
+
 });

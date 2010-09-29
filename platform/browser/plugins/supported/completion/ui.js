@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'jquery',
+    'underscore'
+], function(require, exports, module,
+    jquery,
+    underscore
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var $ = require('jquery').$;
-var _ = require('underscore')._;
+var $ = jquery.$; //SYNC_REQ: var $ = require('jquery').$;
+var _ = underscore._; //SYNC_REQ: var _ = require('underscore')._;
 
 var ANIMATION_SPEED = 100;  // in ms
 
@@ -263,3 +271,5 @@ CompletionUI.prototype = {
 
 exports.CompletionUI = CompletionUI;
 
+
+});

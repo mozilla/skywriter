@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'utils',
+    'loggers/default'
+], function(require, exports, module,
+    utils,
+    DefaultLogger
+) {
+
 // ==========================================================================
 // Project:   SproutCore Unit Testing Library
 // Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
@@ -6,7 +14,9 @@
 // ==========================================================================
 /*globals CoreTest exports */
 
-var utils = require('utils'), 
+var utils = utils., 
+    Promise = require('skywriter:promise').Promise,
+    CoreTest, Ct; //SYNC_REQ: var utils = require('utils'), 
     Promise = require('skywriter:promise').Promise,
     CoreTest, Ct;
 
@@ -318,7 +328,7 @@ require('system/plan');
 
 // Choose a default logger based on platform.  Used in case no override is
 // specified
-var DefaultLogger = require('loggers/default');
+//SYNC_REQ: var DefaultLogger = require('loggers/default');
 
 /**
   Default logger used by a plan if you don't override it by setting Ct.logger
@@ -331,3 +341,5 @@ Ct.defaultLogger = new DefaultLogger('default');
 
 utils.setupDisplayNames(CoreTest, 'CoreTest');
 
+
+});

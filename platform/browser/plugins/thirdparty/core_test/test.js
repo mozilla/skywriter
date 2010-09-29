@@ -1,10 +1,18 @@
+require.def(['require', 'exports', 'module',
+    'core'
+], function(require, exports, module,
+    core
+) {
+
 // ==========================================================================
 // Project:   CoreTest Unit Testing Library
 // Copyright: ©2010 Apple Inc. All rights reserved.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-var Ct    = require('core'),
+var Ct    = core.,
+    utils = require('utils'),
+    trimmer = (/^test\s*/) ; //SYNC_REQ: var Ct    = require('core'),
     utils = require('utils'),
     trimmer = (/^test\s*/) ;
 
@@ -56,3 +64,5 @@ exports.run = function(tests) {
   
   Ct.run(plan);
 };
+
+});

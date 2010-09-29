@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'events',
+    'canon/history'
+], function(require, exports, module,
+    events,
+    history
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Event = require('events').Event;
-var history = require('canon:history');
+var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
+//SYNC_REQ: var history = require('canon:history');
 
 /**
  * To create an invocation, you need to do something like this (all the ctor
@@ -137,3 +145,5 @@ exports.Request.prototype.done = function(content) {
         this.changed();
     }
 };
+
+});

@@ -1,3 +1,17 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/util',
+    'events',
+    'skywriter/console',
+    'utils/rect',
+    'views/canvas'
+], function(require, exports, module,
+    util,
+    events,
+    consoleMod,
+    Rect,
+    canvas
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,13 +49,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('skywriter:util/util');
-var Event = require('events').Event;
-var console = require('skywriter:console').console;
+//SYNC_REQ: var util = require('skywriter:util/util');
+var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
 
-var Rect = require('utils/rect');
+//SYNC_REQ: var Rect = require('utils/rect');
 
-var CanvasView = require('views/canvas').CanvasView;
+var CanvasView = canvas.CanvasView; //SYNC_REQ: var CanvasView = require('views/canvas').CanvasView;
 
 var LINE_HEIGHT                 = 15;
 var MINIMUM_HANDLE_SIZE         = 20;
@@ -744,4 +758,6 @@ Object.defineProperties(exports.ScrollerCanvasView.prototype, {
             this.invalidate();
         }
     }
+});
+
 });

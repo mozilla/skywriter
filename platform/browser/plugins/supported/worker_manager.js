@@ -1,3 +1,21 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/proxy',
+    'skywriter/plugins',
+    'skywriter/console',
+    'underscore',
+    'events',
+    'skywriter/promise',
+    'environment'
+], function(require, exports, module,
+    proxy,
+    plugins,
+    consoleMod,
+    underscore,
+    events,
+    promise,
+    environment
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -64,13 +82,13 @@ if (window == null) {
         'browser, not a web worker. Use "worker" instead.');
 }
 
-var proxy = require('skywriter:proxy');
-var plugins = require('skywriter:plugins');
-var console = require('skywriter:console').console;
-var _ = require('underscore')._;
-var Event = require('events').Event;
-var Promise = require('skywriter:promise').Promise;
-var env = require('environment').env;
+//SYNC_REQ: var proxy = require('skywriter:proxy');
+//SYNC_REQ: var plugins = require('skywriter:plugins');
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+var _ = underscore._; //SYNC_REQ: var _ = require('underscore')._;
+var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
 var workerManager = {
     _workers: [],
@@ -229,3 +247,5 @@ exports.WorkerSupervisor = WorkerSupervisor;
 exports.workerManager = workerManager;
 exports.workerRestartCommand = workerRestartCommand;
 
+
+});

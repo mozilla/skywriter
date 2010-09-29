@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'fs'
+], function(require, exports, module,
+    fs
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,7 +41,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var fs = require('fs');
+//SYNC_REQ: var fs = require('fs');
 
 var ServerFileSource = exports.ServerFileSource = function() {
 
@@ -47,3 +53,5 @@ ServerFileSource.prototype = {
     remove: function(path) {},
 }
 
+
+});

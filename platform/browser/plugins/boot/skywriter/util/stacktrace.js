@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/util',
+    'skywriter/console'
+], function(require, exports, module,
+    util,
+    consoleMod
+) {
+
 // Changed to suit the specific needs of running within Skywriter
 
 // Domain Public by Eric Wendelin http://eriwen.com/ (2008)
@@ -48,8 +56,8 @@
 // IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 // OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-var util = require('skywriter:util/util');
-var console = require("skywriter:console").console;
+//SYNC_REQ: var util = require('skywriter:util/util');
+var console = consoleMod.console; //SYNC_REQ: var console = require("skywriter:console").console;
 
 /**
  * Different browsers create stack traces in different ways.
@@ -324,3 +332,5 @@ exports.Trace.prototype.log = function(lines) {
         }
     }
 };
+
+});

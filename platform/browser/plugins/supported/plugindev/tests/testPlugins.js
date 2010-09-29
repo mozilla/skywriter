@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'plugindev',
+    'skywriter/plugins'
+], function(require, exports, module,
+    t,
+    plugins
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var t = require('plugindev');
-var plugins = require('skywriter:plugins');
+//SYNC_REQ: var t = require('plugindev');
+//SYNC_REQ: var plugins = require('skywriter:plugins');
 
 exports.testExtensionPointsAreCreatedAsNeeded = function() {
     var catalog = plugins.Catalog.create();
@@ -315,3 +323,5 @@ exports.testReloadHookIsCalledWhenAPluginIsReloaded = function() {
     );
     t.stop(1000);
 };
+
+});

@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'plugindev',
+    'file_history'
+], function(require, exports, module,
+    t,
+    file_history
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var t = require('plugindev');
-var History = require('file_history').FileHistory;
+//SYNC_REQ: var t = require('plugindev');
+var History = file_history.FileHistory; //SYNC_REQ: var History = require('file_history').FileHistory;
 
 exports.testHistory = function() {
     var mockStorage = {};
@@ -81,3 +89,5 @@ exports.testHistory = function() {
         'in it and \"bar\"');
 };
 
+
+});

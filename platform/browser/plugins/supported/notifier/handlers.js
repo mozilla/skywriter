@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/console'
+], function(require, exports, module,
+    consoleMod
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,7 +41,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var console = require('skywriter:console').console;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
 
 var getMessageText = function(message) {
     var text = '';
@@ -57,3 +63,5 @@ exports.alert = function(message) {
     var text = getMessageText(message);
     alert(text);
 };
+
+});

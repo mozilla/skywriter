@@ -1,3 +1,17 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'filesystem/path',
+    'environment',
+    'text_editor/models/buffer',
+    'skywriter/promise'
+], function(require, exports, module,
+    plugins,
+    pathUtil,
+    environment,
+    buffer,
+    promise
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,12 +49,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require('skywriter:plugins').catalog;
-var pathUtil = require('filesystem:path');
-var env = require('environment').env;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+//SYNC_REQ: var pathUtil = require('filesystem:path');
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
-var Buffer = require('text_editor:models/buffer').Buffer;
-var Promise = require('skywriter:promise').Promise;
+var Buffer = buffer.Buffer; //SYNC_REQ: var Buffer = require('text_editor:models/buffer').Buffer;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
 
 /*
  * Creates a path based on the current working directory and the passed 'path'.
@@ -251,3 +265,5 @@ exports.cdCommand = function(args, request) {
 exports.pwdCommand = function(args, request) {
     request.done('/' + (env.workingDir || ''));
 }
+
+});

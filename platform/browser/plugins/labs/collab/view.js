@@ -1,3 +1,19 @@
+require.def(['require', 'exports', 'module',
+    'skywriter_server',
+    'skywriter/plugins',
+    'environment',
+    'project',
+    'collab/user',
+    'collab/util'
+], function(require, exports, module,
+    skywriter_server,
+    plugins,
+    environment,
+    project_m,
+    social_user,
+    util
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,13 +51,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var server = require('skywriter_server').server;
-var catalog = require('skywriter:plugins').catalog;
-var env = require('environment').env;
-var project_m = require('project');
+var server = skywriter_server.server; //SYNC_REQ: var server = require('skywriter_server').server;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+//SYNC_REQ: var project_m = require('project');
 
-var social_user = require('collab:user');
-var util = require('collab:util');
+//SYNC_REQ: var social_user = require('collab:user');
+//SYNC_REQ: var util = require('collab:util');
 
 /*
 var ChatLineView = SC.View.extend(SC.StaticLayout, {
@@ -306,3 +322,5 @@ function share_tell (recipients, text, opts) {
         }
     }
 };
+
+});

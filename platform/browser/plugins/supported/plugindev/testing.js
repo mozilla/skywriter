@@ -1,3 +1,19 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'core_test',
+    'skywriter/promise',
+    'core_test/test',
+    'core_test/utils',
+    'environment'
+], function(require, exports, module,
+    plugins,
+    Ct,
+    promise,
+    test,
+    utils,
+    environment
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,14 +51,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require('skywriter:plugins').catalog;
-var Ct = require('core_test');
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+//SYNC_REQ: var Ct = require('core_test');
 var DefaultLogger = require('loggers/default', 'core_test');
-var Promise = require("skywriter:promise").Promise;
-var group = require('skywriter:promise').group;
-var test = require('core_test:test');
-var utils = require('core_test:utils');
-var env = require('environment').env;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require("skywriter:promise").Promise;
+var group = promise.group; //SYNC_REQ: var group = require('skywriter:promise').group;
+//SYNC_REQ: var test = require('core_test:test');
+//SYNC_REQ: var utils = require('core_test:utils');
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
 var lastTest = null;
 
@@ -533,3 +549,5 @@ exports.testrunner = function(args, request) {
     });
     request.async();
 };
+
+});

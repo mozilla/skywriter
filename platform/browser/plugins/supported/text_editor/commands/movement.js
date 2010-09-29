@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'rangeutils/utils/range',
+    'environment'
+], function(require, exports, module,
+    Range,
+    environment
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Range = require('rangeutils:utils/range');
-var env = require('environment').env;
+//SYNC_REQ: var Range = require('rangeutils:utils/range');
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
 // TODO: These should not be using private APIs of the view.
 
@@ -266,3 +274,5 @@ exports.selectAll = function(args, request) {
     var view = env.view;
     view.selectAll();
 };
+
+});

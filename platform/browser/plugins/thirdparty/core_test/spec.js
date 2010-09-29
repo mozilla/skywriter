@@ -1,3 +1,7 @@
+require.def(['require', 'exports', 'module'
+], function(require, exports, module
+) {
+
 // ==========================================================================
 // Project:   CoreTest Unit Testing Library
 // Copyright: ©2010 Apple Inc. All rights reserved.
@@ -261,3 +265,5 @@ valueOf.fn = {
 
 exports = module.exports = valueOf;
 exports.valueOf = valueOf;
+
+});

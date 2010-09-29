@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'events',
+    'skywriter/util/util'
+], function(require, exports, module,
+    events,
+    util
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Event = require('events').Event;
-var util = require('skywriter:util/util');
+var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
+//SYNC_REQ: var util = require('skywriter:util/util');
 
 var TextStorage;
 
@@ -264,4 +272,6 @@ Object.defineProperties(exports.TextStorage.prototype, {
             this.setValue(newValue);
         }
     }
+});
+
 });

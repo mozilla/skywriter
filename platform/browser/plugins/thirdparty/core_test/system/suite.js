@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'core'
+], function(require, exports, module,
+    core
+) {
+
 // ==========================================================================
 // Project:   SproutCore Costello - Property Observing Library
 // Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
@@ -5,7 +11,8 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-var CoreTest = require('core'),
+var CoreTest = core.,
+    utils    = require('utils'); //SYNC_REQ: var CoreTest = require('core'),
     utils    = require('utils');
 
 require('system/plan'); 
@@ -229,3 +236,5 @@ CoreTest.Suite = /** @scope CoreTest.Suite.prototype */ {
   }
   
 };
+
+});

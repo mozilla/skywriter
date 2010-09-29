@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/console',
+    'skywriter/util/stacktrace'
+], function(require, exports, module,
+    consoleMod,
+    stacktrace
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var console = require('skywriter:console').console;
-var Trace = require('skywriter:util/stacktrace').Trace;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+var Trace = stacktrace.Trace; //SYNC_REQ: var Trace = require('skywriter:util/stacktrace').Trace;
 
 /**
  * A promise can be in one of 2 states.
@@ -274,3 +282,5 @@ exports.synchronizer = function(func, scope) {
         return promise._value;
     };
 };
+
+});

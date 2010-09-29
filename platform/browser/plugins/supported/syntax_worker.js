@@ -1,3 +1,15 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/promise',
+    'underscore',
+    'skywriter/console',
+    'syntax_directory'
+], function(require, exports, module,
+    promise,
+    underscore,
+    consoleMod,
+    syntax_directory
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -43,10 +55,10 @@
 });
 "end";
 
-var promise = require('skywriter:promise');
-var _ = require('underscore')._;
-var console = require('skywriter:console').console;
-var syntaxDirectory = require('syntax_directory').syntaxDirectory;
+//SYNC_REQ: var promise = require('skywriter:promise');
+var _ = underscore._; //SYNC_REQ: var _ = require('underscore')._;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+var syntaxDirectory = syntax_directory.syntaxDirectory; //SYNC_REQ: var syntaxDirectory = require('syntax_directory').syntaxDirectory;
 
 var syntaxWorker = {
     engines: {},
@@ -156,3 +168,5 @@ var syntaxWorker = {
 
 exports.syntaxWorker = syntaxWorker;
 
+
+});

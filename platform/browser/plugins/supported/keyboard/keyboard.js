@@ -1,3 +1,25 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'skywriter/console',
+    'skywriter/util/stacktrace',
+    'skywriter/util/util',
+    'settings',
+    'keyboard/keyutil',
+    'canon/history',
+    'canon/request',
+    'environment'
+], function(require, exports, module,
+    plugins,
+    consoleMod,
+    stacktrace,
+    util,
+    settingsMod,
+    keyutil,
+    history,
+    request,
+    environment
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,17 +57,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require('skywriter:plugins').catalog;
-var console = require('skywriter:console').console;
-var Trace = require('skywriter:util/stacktrace').Trace;
-var util = require('skywriter:util/util');
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+var Trace = stacktrace.Trace; //SYNC_REQ: var Trace = require('skywriter:util/stacktrace').Trace;
+//SYNC_REQ: var util = require('skywriter:util/util');
 
-var settings = require('settings').settings;
+var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
 
-var keyutil = require('keyboard:keyutil');
-var history = require('canon:history');
-var Request = require('canon:request').Request;
-var env = require('environment').env;
+//SYNC_REQ: var keyutil = require('keyboard:keyutil');
+//SYNC_REQ: var history = require('canon:history');
+var Request = request.Request; //SYNC_REQ: var Request = require('canon:request').Request;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
 /*
  * Things to do to sanitize this code:
@@ -424,4 +446,6 @@ catalog.registerExtension('settingChange', {
     match: "customKeymapping",
     pointer: exports.keyboardManager._customKeymappingChanged
                                         .bind(exports.keyboardManager)
+});
+
 });

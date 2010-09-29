@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'skywriter_server',
+    'diff'
+], function(require, exports, module,
+    skywriter_server,
+    diff_match_patch
+) {
+
 /**
  * MobWrite - Real-time Synchronization and Collaboration Service
  *
@@ -22,8 +30,8 @@
  * @author fraser@google.com (Neil Fraser)
  */
 
-var server = require("skywriter_server").server;
-var diff_match_patch = require("diff");
+var server = skywriter_server.server; //SYNC_REQ: var server = require("skywriter_server").server;
+//SYNC_REQ: var diff_match_patch = require("diff");
 
 var DIFF_EQUAL = diff_match_patch.DIFF_EQUAL;
 var DIFF_DELETE = diff_match_patch.DIFF_DELETE;
@@ -1506,3 +1514,5 @@ mobwrite.forceSyncNow = function(data){
 
 // Module exports
 exports.mobwrite = mobwrite;
+
+});

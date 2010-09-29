@@ -1,3 +1,15 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/promise',
+    'keyboard/keyboard',
+    'command_line/input',
+    'plugindev'
+], function(require, exports, module,
+    promise,
+    keyboard,
+    input,
+    t
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,12 +47,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Promise = require('skywriter:promise').Promise;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
 
-var keyboard = require('keyboard:keyboard');
+//SYNC_REQ: var keyboard = require('keyboard:keyboard');
 
-var Input = require('command_line:input').Input;
-var t = require('plugindev');
+var Input = input.Input; //SYNC_REQ: var Input = require('command_line:input').Input;
+//SYNC_REQ: var t = require('plugindev');
 
 function parse(command) {
     var promise = new Promise();
@@ -128,4 +140,6 @@ exports.testInput = function() {
             "pointer": "test/testcommands#tstRemove"
         }
     ]
+});
+
 });

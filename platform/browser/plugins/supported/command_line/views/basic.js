@@ -1,3 +1,17 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/console',
+    'skywriter/promise',
+    'types/basic',
+    'matcher/prefix',
+    'command_line/views/menu'
+], function(require, exports, module,
+    consoleMod,
+    promise,
+    basic,
+    prefix,
+    menu
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,14 +49,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var console = require('skywriter:console').console;
-var Promise = require('skywriter:promise').Promise;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
 
-var basic = require('types:basic');
-var PrefixMatcher = require('matcher:prefix').PrefixMatcher;
+//SYNC_REQ: var basic = require('types:basic');
+var PrefixMatcher = prefix.PrefixMatcher; //SYNC_REQ: var PrefixMatcher = require('matcher:prefix').PrefixMatcher;
 
-var Menu = require('command_line:views/menu').Menu;
-var MatcherMenu = require('command_line:views/menu').MatcherMenu;
+var Menu = menu.Menu; //SYNC_REQ: var Menu = require('command_line:views/menu').Menu;
+var MatcherMenu = menu.MatcherMenu; //SYNC_REQ: var MatcherMenu = require('command_line:views/menu').MatcherMenu;
 
 /**
  * A choice between a known set of options
@@ -85,3 +99,5 @@ exports.bool = {
         return menu.hint;
     }
 };
+
+});

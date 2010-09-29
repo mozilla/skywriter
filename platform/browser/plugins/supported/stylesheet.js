@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/promise',
+    'standard_syntax'
+], function(require, exports, module,
+    promise,
+    standard_syntax
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -55,8 +63,8 @@
 });
 "end";
 
-var Promise = require('skywriter:promise').Promise;
-var StandardSyntax = require('standard_syntax').StandardSyntax;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+var StandardSyntax = standard_syntax.StandardSyntax; //SYNC_REQ: var StandardSyntax = require('standard_syntax').StandardSyntax;
 
 var COMMENT_REGEXP = {
     regex:  /^\/\/.*/,
@@ -157,3 +165,5 @@ var states = {
 };
 
 exports.CSSSyntax = new StandardSyntax(states);
+
+});

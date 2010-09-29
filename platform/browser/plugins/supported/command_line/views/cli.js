@@ -1,3 +1,33 @@
+require.def(['require', 'exports', 'module',
+    'diff',
+    'skywriter/util/util',
+    'skywriter/plugins',
+    'skywriter/console',
+    'keyboard/keyutil',
+    'keyboard/keyboard',
+    'canon/history',
+    'environment',
+    'settings',
+    'command_line/hint',
+    'command_line/input',
+    'command_line/templates',
+    'command_line/views/requestOutput'
+], function(require, exports, module,
+    diff,
+    util,
+    plugins,
+    consoleMod,
+    keyutil,
+    keyboard,
+    history,
+    environment,
+    settingsMod,
+    hint,
+    input,
+    templates,
+    requestOutput
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,23 +65,23 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var diff_match_patch = require('diff').diff_match_patch;
+var diff_match_patch = diff.diff_match_patch; //SYNC_REQ: var diff_match_patch = require('diff').diff_match_patch;
 
-var util = require('skywriter:util/util');
-var catalog = require('skywriter:plugins').catalog;
-var console = require('skywriter:console').console;
+//SYNC_REQ: var util = require('skywriter:util/util');
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
 
-var keyutil = require('keyboard:keyutil');
-var keyboardManager = require('keyboard:keyboard').keyboardManager;
+//SYNC_REQ: var keyutil = require('keyboard:keyutil');
+var keyboardManager = keyboard.keyboardManager; //SYNC_REQ: var keyboardManager = require('keyboard:keyboard').keyboardManager;
 
-var history = require('canon:history');
-var env = require('environment').env;
-var settings = require('settings').settings;
+//SYNC_REQ: var history = require('canon:history');
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
 
-var Level = require('command_line:hint').Level;
-var Input = require('command_line:input').Input;
-var templates = require('command_line:templates');
-var requestOutput = require('command_line:views/requestOutput');
+var Level = hint.Level; //SYNC_REQ: var Level = require('command_line:hint').Level;
+var Input = input.Input; //SYNC_REQ: var Input = require('command_line:input').Input;
+//SYNC_REQ: var templates = require('command_line:templates');
+//SYNC_REQ: var requestOutput = require('command_line:views/requestOutput');
 
 var imagePath = catalog.getResourceURL('command_line') + 'images';
 var diff = new diff_match_patch();
@@ -374,3 +404,5 @@ exports.CliInputView.prototype = {
         this._completer.innerHTML = val;
     }
 };
+
+});

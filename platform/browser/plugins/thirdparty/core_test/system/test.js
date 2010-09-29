@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'utils'
+], function(require, exports, module,
+    utils
+) {
+
 // ==========================================================================
 // Project:   CoreTest Unit Testing Library
 // Copyright: ©2010 Apple Inc. All rights reserved.
@@ -5,7 +11,10 @@
 // ==========================================================================
 
 
-var utils       = require('utils'),
+var utils       = utils.,
+    Ct          = require('core'),
+    Promise     = require('promise', 'skywriter').Promise,
+    Assertable  = require('assert').xCoreTestAssertable; //SYNC_REQ: var utils       = require('utils'),
     Ct          = require('core'),
     Promise     = require('promise', 'skywriter').Promise,
     Assertable  = require('assert').xCoreTestAssertable;
@@ -346,4 +355,6 @@ Ct.Test = utils.extend(Assertable, {
     }
   }
   
+});
+
 });

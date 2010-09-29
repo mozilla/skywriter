@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'utils'
+], function(require, exports, module,
+    utils
+) {
+
 // ==========================================================================
 // Project:   CoreTest Unit Testing Library
 // Copyright: ©2010 Apple Inc. All rights reserved.
@@ -5,7 +11,9 @@
 // ==========================================================================
 
 
-var utils = require('utils'),
+var utils = utils.,
+    Promise = require('promise', 'skywriter').Promise,
+    Ct = require('core'); //SYNC_REQ: var utils = require('utils'),
     Promise = require('promise', 'skywriter').Promise,
     Ct = require('core');
     
@@ -209,4 +217,6 @@ Ct.Plan = utils.extend({
     Ct.runningPlan = null;
   }
   
+});
+
 });

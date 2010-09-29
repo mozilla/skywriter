@@ -1,3 +1,15 @@
+require.def(['require', 'exports', 'module',
+    'index',
+    'matcher/quick',
+    'command_line/views/menu',
+    'environment'
+], function(require, exports, module,
+    index,
+    quick,
+    menu,
+    environment
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,10 +47,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var getCompletePath = require('index').getCompletePath;
-var QuickMatcher = require('matcher:quick').QuickMatcher;
-var MatcherMenu = require('command_line:views/menu').MatcherMenu;
-var env = require('environment').env;
+var getCompletePath = index.getCompletePath; //SYNC_REQ: var getCompletePath = require('index').getCompletePath;
+var QuickMatcher = quick.QuickMatcher; //SYNC_REQ: var QuickMatcher = require('matcher:quick').QuickMatcher;
+var MatcherMenu = menu.MatcherMenu; //SYNC_REQ: var MatcherMenu = require('command_line:views/menu').MatcherMenu;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
 /**
  * @see typehint#getHint()
@@ -79,3 +91,5 @@ exports.existingFileHint = {
         return menu.hint;
     }
 };
+
+});

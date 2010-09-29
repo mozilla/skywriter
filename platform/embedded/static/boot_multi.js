@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'appconfig'
+], function(require, exports, module,
+    plugins,
+    appconfig
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -38,12 +46,12 @@
 // Load up Skywriter's boot code (the plugin system, basically)
 skywriter.tiki.require.ensurePackage("::skywriter", function() {
     var require = skywriter.tiki.require;
-    var plugins = require("skywriter:plugins");
+    //SYNC_REQ: var plugins = require("skywriter:plugins");
     var pr = plugins.catalog.loadMetadataFromURL("plugin/register/defaults");
     pr.then(function() {
         // The "hosted" plugin sets up the environment
         skywriter.tiki.require.ensurePackage("::appconfig", function() {
-            var appconfig = require("appconfig");
+            //SYNC_REQ: var appconfig = require("appconfig");
             appconfig.launch({
                 stealFocus: true,
                 element: document.getElementById('editor1')
@@ -65,4 +73,6 @@ skywriter.tiki.require.ensurePackage("::skywriter", function() {
     }, function(error) {
         console.log("Unable to load metadata: ", error);
     });
+});
+
 });

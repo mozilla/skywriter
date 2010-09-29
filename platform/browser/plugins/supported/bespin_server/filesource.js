@@ -1,3 +1,15 @@
+require.def(['require', 'exports', 'module',
+    'traits',
+    'skywriter/promise',
+    'skywriter_server',
+    'filesystem/path'
+], function(require, exports, module,
+    traits,
+    promise,
+    skywriter_server,
+    pathUtil
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,10 +47,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Trait = require('traits').Trait;
-var Promise = require('skywriter:promise').Promise;
-var server = require('skywriter_server').server;
-var pathUtil = require('filesystem:path');
+var Trait = traits.Trait; //SYNC_REQ: var Trait = require('traits').Trait;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+var server = skywriter_server.server; //SYNC_REQ: var server = require('skywriter_server').server;
+//SYNC_REQ: var pathUtil = require('filesystem:path');
 
 exports.SkywriterFileSource = function(server) {
     this.server = server;
@@ -73,3 +85,5 @@ exports.SkywriterFileSource.prototype = {
         return this.server.request('PUT', url, null);
     }
 };
+
+});

@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'environment',
+    'jslint'
+], function(require, exports, module,
+    environment,
+    jslintMod
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -53,8 +61,8 @@
 });
 "end";
 
-var env = require('environment').env;
-var jslint = require('jslint').jslint;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var jslint = jslintMod.jslint; //SYNC_REQ: var jslint = require('jslint').jslint;
 
 function runJSLint(model) {
     var ok = jslint(model.getValue());
@@ -102,3 +110,5 @@ exports.jslintCommand = function(args, req) {
 
 exports.runJSLint = runJSLint;
 
+
+});

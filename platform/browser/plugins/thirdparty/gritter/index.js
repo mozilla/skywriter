@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'jquery'
+], function(require, exports, module,
+    jquery
+) {
+
 /*
  * Gritter for jQuery
  * http://www.boedesign.com/
@@ -9,7 +15,7 @@
  * Version: 1.6
  */
 
-var $ = require('jquery').$;
+var $ = jquery.$; //SYNC_REQ: var $ = require('jquery').$;
 
 /**
 * Set it up as an object under the jQuery namespace
@@ -397,3 +403,5 @@ var Gritter = {
 	}
     
 }
+
+});

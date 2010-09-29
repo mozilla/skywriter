@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'underscore',
+    'traits'
+], function(require, exports, module,
+    underscore,
+    traits
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var _ = require('underscore')._;
-var Trait = require('traits').Trait;
+var _ = underscore._; //SYNC_REQ: var _ = require('underscore')._;
+var Trait = traits.Trait; //SYNC_REQ: var Trait = require('traits').Trait;
 
 exports.TagReader = Trait({
     readLines: function(lines) {
@@ -82,3 +90,5 @@ exports.TagReader = Trait({
     }
 });
 
+
+});

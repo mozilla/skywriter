@@ -1,10 +1,18 @@
+require.def(['require', 'exports', 'module',
+    'core'
+], function(require, exports, module,
+    core
+) {
+
 // ==========================================================================
 // Project:   CoreTest Unit Testing Library
 // Copyright: ©2010 Apple Inc. All rights reserved.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-var Ct    = require('core'),
+var Ct    = core.,
+    utils = require('utils'),
+    assert = {}; //SYNC_REQ: var Ct    = require('core'),
     utils = require('utils'),
     assert = {};
 
@@ -303,3 +311,5 @@ for(var k in assert) {
   if (!assert.hasOwnProperty(k)) continue ;
   exports[k] = _bind(k);
 }
+
+});

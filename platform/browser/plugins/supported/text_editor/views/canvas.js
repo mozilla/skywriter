@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/util',
+    'utils/rect',
+    'events'
+], function(require, exports, module,
+    util,
+    Rect,
+    events
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +45,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('skywriter:util/util');
-var Rect = require('utils/rect');
-var Event = require('events').Event;
+//SYNC_REQ: var util = require('skywriter:util/util');
+//SYNC_REQ: var Rect = require('utils/rect');
+var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
 
 /**
  * @class
@@ -313,4 +323,6 @@ Object.defineProperties(exports.CanvasView.prototype, {
             };
         }
     }
+});
+
 });

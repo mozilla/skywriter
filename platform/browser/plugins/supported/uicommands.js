@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'environment',
+    'skywriter/plugins'
+], function(require, exports, module,
+    environment,
+    plugins
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -57,9 +65,9 @@
 });
 "end";
 
-var env = require('environment').env;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
-var pluginCatalog = require('skywriter:plugins').catalog;
+var pluginCatalog = plugins.catalog; //SYNC_REQ: var pluginCatalog = require('skywriter:plugins').catalog;
 
 exports.jumpCommandLine = function(args, request) {
     env.commandLine.focus();
@@ -68,3 +76,5 @@ exports.jumpCommandLine = function(args, request) {
 exports.jumpEditor = function(args, request) {
     env.view.focus();
 };
+
+});

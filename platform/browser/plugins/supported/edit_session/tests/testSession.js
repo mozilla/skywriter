@@ -1,3 +1,17 @@
+require.def(['require', 'exports', 'module',
+    'plugindev',
+    'filesystem/tests/fixture',
+    'filesystem',
+    'edit_session',
+    'skywriter/promise'
+], function(require, exports, module,
+    t,
+    fixture,
+    fs,
+    editsession,
+    promise
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,11 +49,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var t = require('plugindev');
-var DummyFileSource = require('filesystem:tests/fixture').DummyFileSource;
-var fs = require('filesystem');
-var editsession = require('edit_session');
-var Promise = require('skywriter:promise').Promise;
+//SYNC_REQ: var t = require('plugindev');
+var DummyFileSource = fixture.DummyFileSource; //SYNC_REQ: var DummyFileSource = require('filesystem:tests/fixture').DummyFileSource;
+//SYNC_REQ: var fs = require('filesystem');
+//SYNC_REQ: var editsession = require('edit_session');
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
 
 var source = new DummyFileSource([
     {name: 'atTheTop.js', contents: 'the top file'},
@@ -123,3 +137,5 @@ exports.testBufferSaving = function() {
 
     return testpr;
 };
+
+});

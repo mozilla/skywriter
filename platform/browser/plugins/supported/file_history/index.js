@@ -1,3 +1,15 @@
+require.def(['require', 'exports', 'module',
+    'environment',
+    'skywriter/util/util',
+    'skywriter/console',
+    'text_editor/models/buffer'
+], function(require, exports, module,
+    environment,
+    util,
+    consoleMod,
+    buffer
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,11 +47,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var env = require('environment').env;
-var util = require('skywriter:util/util');
-var console = require('skywriter:console').console;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+//SYNC_REQ: var util = require('skywriter:util/util');
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
 
-var Buffer = require('text_editor:models/buffer').Buffer;
+var Buffer = buffer.Buffer; //SYNC_REQ: var Buffer = require('text_editor:models/buffer').Buffer;
 
 var MAX_HISTORY_SIZE = 30;
 
@@ -274,3 +286,5 @@ exports.loadMostRecent = function() {
         console.error('Failed to load recentFile (', recent.path, '): ' + error);
     })
 }
+
+});

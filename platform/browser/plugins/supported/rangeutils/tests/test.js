@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'plugindev',
+    'utils/range'
+], function(require, exports, module,
+    t,
+    Range
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var t = require('plugindev');
-var Range = require('utils/range');
+//SYNC_REQ: var t = require('plugindev');
+//SYNC_REQ: var Range = require('utils/range');
 
 exports.testAddPositions = function() {
     t.deepEqual(Range.addPositions({ row: 0, col: 0 },
@@ -151,3 +159,5 @@ exports.testUnionRanges = function() {
         }, '[ 4,4 5,5 ] union [ 3,3 4,5 ] = [ 3,3 5,5 ]');
 };
 
+
+});

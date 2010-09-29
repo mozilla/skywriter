@@ -1,3 +1,7 @@
+require.def(['require', 'exports', 'module'
+], function(require, exports, module
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -51,3 +55,5 @@ exports.apiVersion = 'API_VERSION';
 
 /** skywriter platform **/
 exports.platform = 'PLATFORM';
+
+});

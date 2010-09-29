@@ -1,3 +1,19 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'skywriter/promise',
+    'skywriter/util/util',
+    'environment',
+    'skywriter_server',
+    'filesystem/path'
+], function(require, exports, module,
+    plugins,
+    promise,
+    util,
+    environment,
+    skywriter_server,
+    pathutils
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,14 +51,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require('skywriter:plugins').catalog;
-var Promise = require('skywriter:promise').Promise;
-var groupPromises = require('skywriter:promise').group;
-var util = require('skywriter:util/util');
-var env = require('environment').env;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+var groupPromises = promise.group; //SYNC_REQ: var groupPromises = require('skywriter:promise').group;
+//SYNC_REQ: var util = require('skywriter:util/util');
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
-var server = require('skywriter_server').server;
-var pathutils = require('filesystem:path');
+var server = skywriter_server.server; //SYNC_REQ: var server = require('skywriter_server').server;
+//SYNC_REQ: var pathutils = require('filesystem:path');
 
 var getPluginName = function(path) {
     if (util.endsWith(path, '/')) {
@@ -534,3 +550,5 @@ exports.ep = function(args, request) {
     }
     request.done(output);
 };
+
+});

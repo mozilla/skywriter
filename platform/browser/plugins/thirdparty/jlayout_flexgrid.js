@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'jlayout'
+], function(require, exports, module,
+    jlayout
+) {
+
 /*!
  * jLayout Flex Grid Layout - JavaScript Layout Algorithms v0.4
  * Based on: http://www.javaworld.com/javaworld/javatips/jw-javatip121.html
@@ -17,7 +23,7 @@
 });
 "end";
 
-var jLayout = exports.jLayout = require("jlayout").jLayout;
+var jLayout = exports.jLayout = jlayout.jLayout; //SYNC_REQ: var jLayout = exports.jLayout = require("jlayout").jLayout;
 
 // The flex grid has a dependency on the grid layout, so please make
 // sure you include the grid layout manager before the flex grid
@@ -115,3 +121,5 @@ if (typeof jLayout.grid !== 'undefined') {
 		return that;
 	};
 }
+
+});

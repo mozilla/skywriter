@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/promise',
+    'types/types',
+    'plugindev'
+], function(require, exports, module,
+    promise,
+    types,
+    t
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +45,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Promise = require('skywriter:promise').Promise;
-var types = require('types:types');
-var t = require('plugindev');
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+//SYNC_REQ: var types = require('types:types');
+//SYNC_REQ: var t = require('plugindev');
 
 exports.testGetSimpleName = function() {
     t.equal(types.getSimpleName('text'), 'text', 'text is simple');
@@ -214,3 +224,5 @@ exports.testDeferred = function() {
         t.deepEqual(typeData.ext.data, [ 42, 43 ], 'selection data resolved');
     });
 };
+
+});

@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'project',
+    'skywriter_server/index',
+    'environment'
+], function(require, exports, module,
+    project_m,
+    index,
+    environment
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +45,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var project_m = require('project');
-var server = require('skywriter_server:index').server;
-var env = require('environment').env;
+//SYNC_REQ: var project_m = require('project');
+var server = index.server; //SYNC_REQ: var server = require('skywriter_server:index').server;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
 /**
  * Utility to convert bytes to megabytes
@@ -134,3 +144,5 @@ exports.exportCommand = function(args, request) {
     document.getElementsByTagName("body")[0].appendChild(iframe);
     request.done("Exporting...");
 };
+
+});

@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/util',
+    'plugindev',
+    'skywriter/util/scratchcanvas'
+], function(require, exports, module,
+    util,
+    t,
+    m_scratchcanvas
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +45,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('skywriter:util/util');
-var t = require('plugindev');
-var m_scratchcanvas = require('skywriter:util/scratchcanvas');
+//SYNC_REQ: var util = require('skywriter:util/util');
+//SYNC_REQ: var t = require('plugindev');
+//SYNC_REQ: var m_scratchcanvas = require('skywriter:util/scratchcanvas');
 
 exports.testScratchCanvasBehavesAsASingleton = function() {
     t.ok(util.none(document.getElementById('skywriter-scratch-canvas')),
@@ -58,3 +68,5 @@ exports.testTheScratchCanvasYieldsAUsableCanvasContext = function() {
         'the context has a measureText method');
 };
 
+
+});

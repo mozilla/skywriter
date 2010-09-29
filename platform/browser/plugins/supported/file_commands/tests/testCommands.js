@@ -1,3 +1,23 @@
+require.def(['require', 'exports', 'module',
+    'plugindev',
+    'filesystem',
+    'filesystem/tests/fixture',
+    'canon/tests/fixture',
+    'canon/tests/fixture',
+    'file_commands',
+    'edit_session',
+    'skywriter/promise'
+], function(require, exports, module,
+    t,
+    fs,
+    fixture,
+    fixture,
+    fixture,
+    file_commands,
+    edit_session,
+    promise
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -22,15 +42,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var t = require('plugindev');
+//SYNC_REQ: var t = require('plugindev');
 
-var fs = require('filesystem');
-var DummyFileSource = require('filesystem:tests/fixture').DummyFileSource;
-var EnvironmentTrait = require('canon:tests/fixture').MockEnvironment;
-var MockRequest = require('canon:tests/fixture').MockRequest;
-var file_commands = require('file_commands');
-var edit_session = require('edit_session');
-var Promise = require('skywriter:promise').Promise;
+//SYNC_REQ: var fs = require('filesystem');
+var DummyFileSource = fixture.DummyFileSource; //SYNC_REQ: var DummyFileSource = require('filesystem:tests/fixture').DummyFileSource;
+var EnvironmentTrait = fixture.MockEnvironment; //SYNC_REQ: var EnvironmentTrait = require('canon:tests/fixture').MockEnvironment;
+var MockRequest = fixture.MockRequest; //SYNC_REQ: var MockRequest = require('canon:tests/fixture').MockRequest;
+//SYNC_REQ: var file_commands = require('file_commands');
+//SYNC_REQ: var edit_session = require('edit_session');
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
 
 var source = new DummyFileSource([
     {name: 'atTheTop.js', contents: 'the top file'},
@@ -169,3 +189,5 @@ exports.testMakeDirectoryForNewDirectory = function() {
 
     return testpr;
 };
+
+});

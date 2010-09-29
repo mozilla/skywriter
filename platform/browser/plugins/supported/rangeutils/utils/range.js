@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/util'
+], function(require, exports, module,
+    util
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,7 +41,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('skywriter:util/util');
+//SYNC_REQ: var util = require('skywriter:util/util');
 
 /**
  * Returns the result of adding the two positions.
@@ -179,3 +185,5 @@ exports.isRange = function(range) {
     return (!util.none(range) && exports.isPosition(range.start) &&
                                                 exports.isPosition(range.end));
 };
+
+});

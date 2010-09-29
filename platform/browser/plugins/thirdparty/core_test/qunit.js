@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'core'
+], function(require, exports, module,
+    core
+) {
+
 // ==========================================================================
 // Project:   CoreTest Unit Testing Library
 // Copyright: ©2010 Apple Inc. All rights reserved.
@@ -6,7 +12,8 @@
 
 "use exports module test ok equals expect start stop same run raises";
 
-var Ct = require('core'),
+var Ct = core.,
+    utils = require('utils'); //SYNC_REQ: var Ct = require('core'),
     utils = require('utils');
 
     
@@ -163,3 +170,5 @@ exports.run = function() {
 };
 
 
+
+});

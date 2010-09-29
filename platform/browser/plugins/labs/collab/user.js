@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'jquery',
+    'skywriter_server',
+    'collab/util'
+], function(require, exports, module,
+    jquery,
+    skywriter_server,
+    util
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +45,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var $ = require("jquery").$;
-var server = require('skywriter_server').server;
-var util = require('collab:util');
+var $ = jquery.$; //SYNC_REQ: var $ = require("jquery").$;
+var server = skywriter_server.server; //SYNC_REQ: var server = require('skywriter_server').server;
+//SYNC_REQ: var util = require('collab:util');
 
 var userDataCache = {};
 
@@ -156,3 +166,5 @@ function fetchUserData (username) {
 function getUserData (username, opts) {
     server.request('GET', '/register/userdata/' + username, null, opts);
 };
+
+});

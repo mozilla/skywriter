@@ -1,10 +1,17 @@
+require.def(['require', 'exports', 'module',
+    'utils'
+], function(require, exports, module,
+    utils
+) {
+
 // ==========================================================================
 // Project:   CoreTest Unit Testing Library
 // Copyright: ©2010 Apple Inc. All rights reserved.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-var utils = require('utils'),
+var utils = utils.,
+    Ct    = require('core'); //SYNC_REQ: var utils = require('utils'),
     Ct    = require('core');
     
 require('loggers/default'); // add Ct.DefaultLogger
@@ -164,3 +171,5 @@ Ct.DummyLogger = utils.extend(Ct.DefaultLogger,
 exports = module.exports = Ct.DummyLogger;
 exports.DummyLogger = Ct.DummyLogger;
 
+
+});

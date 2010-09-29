@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/promise',
+    'canon/request',
+    'canon/environment'
+], function(require, exports, module,
+    promise,
+    request,
+    environment
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +45,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Promise = require('skywriter:promise').Promise;
-var Request = require('canon:request').Request;
-var EnvironmentTrait = require('canon:environment').EnvironmentTrait;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+var Request = request.Request; //SYNC_REQ: var Request = require('canon:request').Request;
+var EnvironmentTrait = environment.EnvironmentTrait; //SYNC_REQ: var EnvironmentTrait = require('canon:environment').EnvironmentTrait;
 
 exports.MockEnvironmentTrait = EnvironmentTrait;
 
@@ -57,3 +67,5 @@ exports.MockRequest.prototype.done = function(content) {
     this.superclass(content);
     this.promise.resolve(this);
 };
+
+});

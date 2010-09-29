@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'matcher'
+], function(require, exports, module,
+    matcher
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,7 +41,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Matcher = require('matcher').Matcher;
+var Matcher = matcher.Matcher; //SYNC_REQ: var Matcher = require('matcher').Matcher;
 
 /**
  * Provides smart matching suitable for 'quick open' functionality.
@@ -94,3 +100,5 @@ exports.QuickMatcher.prototype.score = function(query, item) {
     // No match.
     return 0;
 };
+
+});

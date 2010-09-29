@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'skywriter/promise'
+], function(require, exports, module,
+    plugins,
+    promise
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -68,8 +76,8 @@ function pump() {
         var require = skywriter.tiki.require;
         require.loader.sources[0].xhr = true;
         require.ensurePackage('::skywriter', function() {
-            var catalog = require('skywriter:plugins').catalog;
-            var Promise = require('skywriter:promise').Promise;
+            var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+            var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
 
             var pr;
             if (!skywriter.hasOwnProperty('metadata')) {
@@ -121,3 +129,5 @@ onmessage = function(ev) {
     }
 };
 
+
+});

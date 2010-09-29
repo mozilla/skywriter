@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'util/util',
+    'promise'
+], function(require, exports, module,
+    util,
+    promise
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require("util/util");
-var Promise = require("promise").Promise;
+//SYNC_REQ: var util = require("util/util");
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require("promise").Promise;
 
 exports.xhr = function(method, url, async, beforeSendCallback) {
     var pr = new Promise();
@@ -78,3 +86,5 @@ exports.Worker = function(url) {
         return new skywriter.proxy.worker(url);
     }
 };
+
+});

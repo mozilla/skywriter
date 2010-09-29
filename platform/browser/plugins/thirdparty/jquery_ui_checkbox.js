@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'jquery'
+], function(require, exports, module,
+    jquery
+) {
+
 /**
  * @author alexander.farkas
  * @version 1.4.1
@@ -14,7 +20,7 @@
 });
 "end";
  
-var jQuery = require("jquery").$;
+var jQuery = jquery.$; //SYNC_REQ: var jQuery = require("jquery").$;
 var $ = jQuery;
  
 require('jquery_ui_widget');
@@ -312,3 +318,5 @@ require('jquery_ui_widget');
         }
     });
 })(jQuery);
+
+});

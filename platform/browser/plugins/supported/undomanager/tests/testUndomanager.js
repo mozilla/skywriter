@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'index',
+    'plugindev'
+], function(require, exports, module,
+    index,
+    t
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var UndoManager = require('index').UndoManager;
-var t = require('plugindev');
+var UndoManager = index.UndoManager; //SYNC_REQ: var UndoManager = require('index').UndoManager;
+//SYNC_REQ: var t = require('plugindev');
 
 exports.testUndoAndRedo = function() {
     var undoManager = new UndoManager();
@@ -99,3 +107,5 @@ exports.testUndoAndRedo = function() {
         'after undoing twice, redoing once, and performing an action; and 0');
 };
 
+
+});

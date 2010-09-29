@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'command_line/hint',
+    'environment'
+], function(require, exports, module,
+    hint,
+    environment
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +43,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Hint = require('command_line:hint').Hint;
-var Level = require('command_line:hint').Level;
-var env = require('environment').env;
+var Hint = hint.Hint; //SYNC_REQ: var Hint = require('command_line:hint').Hint;
+var Level = hint.Level; //SYNC_REQ: var Level = require('command_line:hint').Level;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
 /*
  * TODO:
@@ -301,3 +309,5 @@ exports.MatcherMenu = function(input, assignment, matcher, loaded) {
 };
 
 exports.MatcherMenu.prototype = new exports.Menu('subclassPrototype');
+
+});

@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'environment'
+], function(require, exports, module,
+    environment
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -51,9 +57,11 @@
 });
 "end";
 
-var env = require('environment').env;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
 exports.feedbackCommand = function(args, request) {
     window.open('http://feedback.mozillalabs.com/forums/49087-skywriter',
         'feedback');
 };
+
+});

@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'settings',
+    'skywriter/console'
+], function(require, exports, module,
+    plugins,
+    settingsMod,
+    consoleMod
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +45,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require('skywriter:plugins').catalog;
-var settings = require('settings').settings;
-var console = require('skywriter:console').console;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
 
 exports.Notifier = function() {};
 
@@ -222,3 +232,5 @@ exports.Notifier.prototype = {
         });
     }
 };
+
+});

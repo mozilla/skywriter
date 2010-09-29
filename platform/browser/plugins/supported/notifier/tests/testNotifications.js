@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'plugindev',
+    'notifier'
+], function(require, exports, module,
+    plugins,
+    t,
+    notifier
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +45,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require('skywriter:plugins').catalog;
-var t = require('plugindev');
-var notifier = require('notifier');
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+//SYNC_REQ: var t = require('plugindev');
+//SYNC_REQ: var notifier = require('notifier');
 
 var defaultHandlers = function() {
     return [
@@ -91,3 +101,5 @@ exports.testHandlerSelection = function() {
     result = n._chooseHandlers({plugin: 'bar'}, notification, handlers, config);
     t.deepEqual(result, [], 'expected none when plugin does not match');
 };
+
+});

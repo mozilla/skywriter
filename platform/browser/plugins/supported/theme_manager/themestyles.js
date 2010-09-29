@@ -1,3 +1,19 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/util',
+    'skywriter/plugins',
+    'skywriter/console',
+    'skywriter/promise',
+    'skywriter/proxy',
+    'less'
+], function(require, exports, module,
+    util,
+    plugins,
+    consoleMod,
+    promise,
+    proxy,
+    less
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,15 +51,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('skywriter:util/util');
-var catalog = require('skywriter:plugins').catalog;
-var console = require('skywriter:console').console;
-var Promise = require('skywriter:promise').Promise;
-var group = require('skywriter:promise').group;
+//SYNC_REQ: var util = require('skywriter:util/util');
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+var group = promise.group; //SYNC_REQ: var group = require('skywriter:promise').group;
 
-var proxy = require('skywriter:proxy');
+//SYNC_REQ: var proxy = require('skywriter:proxy');
 
-var less = require('less');
+//SYNC_REQ: var less = require('less');
 
 // The less parser to use.
 var lessParser = new less.Parser({ optimization: 3 });
@@ -564,3 +580,5 @@ exports.unregisterThemeStyles = function(extension) {
     // Remove the themeStyle cache.
     delete extensionStyleData[pluginName];
 };
+
+});

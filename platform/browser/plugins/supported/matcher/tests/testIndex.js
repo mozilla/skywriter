@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'matcher',
+    'plugindev'
+], function(require, exports, module,
+    matcher,
+    t
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Matcher = require('matcher').Matcher;
-var t = require('plugindev');
+var Matcher = matcher.Matcher; //SYNC_REQ: var Matcher = require('matcher').Matcher;
+//SYNC_REQ: var t = require('plugindev');
 
 /**
  * Performs simple prefix matching.
@@ -127,3 +135,5 @@ exports.testAddingStrings = function() {
     t.equal(items2[2], 'foo', 'the text of the matcher\'s first item ' +
         'after adding \"foo\" and \"foo\"');
 };
+
+});

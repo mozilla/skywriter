@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'matcher/quick',
+    'plugindev'
+], function(require, exports, module,
+    quick,
+    t
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var QuickMatcher = require('matcher:quick').QuickMatcher;
-var t = require('plugindev');
+var QuickMatcher = quick.QuickMatcher; //SYNC_REQ: var QuickMatcher = require('matcher:quick').QuickMatcher;
+//SYNC_REQ: var t = require('plugindev');
 
 exports.testQuickMatcher = function() {
     var matcher = new QuickMatcher('foo');
@@ -76,3 +84,5 @@ exports.testQuickMatcher = function() {
     t.equal(items[1], 'baAaz', 'the second match when searching for ' +
         '\'bZ\' and \'baAaz\'');
 };
+
+});

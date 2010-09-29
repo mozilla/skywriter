@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'path',
+    'plugindev'
+], function(require, exports, module,
+    path,
+    t
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var path = require('path');
-var t = require('plugindev');
+//SYNC_REQ: var path = require('path');
+//SYNC_REQ: var t = require('plugindev');
 
 exports.testBasename = function() {
     var basename = path.basename;
@@ -78,3 +86,5 @@ exports.testParentdir = function() {
     t.equal(parentdir('/foo/bar/'), '/foo/', 'directory gets proper parent');
     t.equal(parentdir('/foo/bar/baz.txt'), '/foo/bar/', 'file gets proper parent');
 };
+
+});

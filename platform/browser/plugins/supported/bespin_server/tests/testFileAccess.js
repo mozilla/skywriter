@@ -1,3 +1,15 @@
+require.def(['require', 'exports', 'module',
+    'plugindev',
+    'filesystem',
+    'skywriter/promise',
+    'filesource'
+], function(require, exports, module,
+    t,
+    fs,
+    promise,
+    filesource
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -22,10 +34,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var t = require('plugindev');
-var fs = require('filesystem');
-var Promise = require('skywriter:promise').Promise;
-var filesource = require('filesource');
+//SYNC_REQ: var t = require('plugindev');
+//SYNC_REQ: var fs = require('filesystem');
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+//SYNC_REQ: var filesource = require('filesource');
 
 var DummyServer = function(responseData) {
     this.responseData = responseData;
@@ -92,3 +104,5 @@ exports.testSaveContents = function() {
     t.equal(server.payload, 'new file contents here');
     t.equal(server.url, '/file/at/myfile.txt');
 };
+
+});

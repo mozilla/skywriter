@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'jquery'
+], function(require, exports, module,
+    jquery
+) {
+
 /*!
  * JSizes - JQuery plugin v0.33
  *
@@ -14,7 +20,7 @@
 });
 "end";
 
-var jQuery = require("jquery").$;
+var jQuery = jquery.$; //SYNC_REQ: var jQuery = require("jquery").$;
 var $ = jQuery;
 
 var num = function (value) {
@@ -83,4 +89,6 @@ $.each(['border', 'margin', 'padding'], function (i, name) {
 					right: num(this.css(name + '-right' + (name === 'border' ? '-width' : '')))};
 		}
 	};
+});
+
 });

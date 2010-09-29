@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'plugindev',
+    'utils/rect'
+], function(require, exports, module,
+    t,
+    Rect
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var t = require('plugindev');
-var Rect = require('utils/rect');
+//SYNC_REQ: var t = require('plugindev');
+//SYNC_REQ: var Rect = require('utils/rect');
 
 exports.testDistanceFromBounds = function() {
     t.equal(Rect._distanceFromBounds(1, 3, 5), -2,
@@ -140,3 +148,5 @@ exports.testRectsSideBySide = function() {
         '(0,0) (1,1) and (1,1) (2,2) are not side-by-side');
 };
 
+
+});

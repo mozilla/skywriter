@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'jquery'
+], function(require, exports, module,
+    jquery
+) {
+
 /*!
  * jLayout JQuery Plugin v0.17
  *
@@ -18,7 +24,7 @@
 
 require("jquery_sizes");
 
-var jQuery = require("jquery").$;
+var jQuery = jquery.$; //SYNC_REQ: var jQuery = require("jquery").$;
 var $ = jQuery;
 var jLayout = {};
 exports.jLayout = jLayout;
@@ -194,3 +200,5 @@ $.fn.layout.defaults = {
 	resize: true,
 	type: 'grid'
 };
+
+});

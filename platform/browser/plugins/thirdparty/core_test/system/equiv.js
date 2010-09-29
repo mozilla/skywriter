@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'core'
+], function(require, exports, module,
+    Ct
+) {
+
 // ==========================================================================
 // Project:   SproutCore Costello - Property Observing Library
 // Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
@@ -5,7 +11,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-var Ct = require('core');
+//SYNC_REQ: var Ct = require('core');
 
 var _equiv; // internal loop function
 
@@ -196,3 +202,5 @@ Ct.equiv.fn = {
   "object": useObjectEquiv
 };
 
+
+});

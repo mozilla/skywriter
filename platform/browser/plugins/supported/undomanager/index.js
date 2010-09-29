@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/util',
+    'environment'
+], function(require, exports, module,
+    util,
+    environment
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('skywriter:util/util');
-var env = require('environment').env;
+//SYNC_REQ: var util = require('skywriter:util/util');
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
 /**
  * This simple undo manager coordinates undo for the app that embeds Skywriter.
@@ -104,3 +112,5 @@ exports.global = new exports.UndoManager();
 exports.undoManagerCommand = function(args, request) {
     exports.global[request.commandExt.name]();
 };
+
+});

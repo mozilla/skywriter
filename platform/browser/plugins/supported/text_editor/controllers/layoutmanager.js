@@ -1,3 +1,23 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/util',
+    'events',
+    'rangeutils/utils/range',
+    'syntax_manager',
+    'models/textstorage',
+    'skywriter/plugins',
+    'settings',
+    'skywriter/util/scratchcanvas'
+], function(require, exports, module,
+    util,
+    events,
+    Range,
+    syntax_manager,
+    textstorage,
+    plugins,
+    settingsMod,
+    m_scratchcanvas
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,14 +55,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('skywriter:util/util');
-var Event = require("events").Event;
-var Range = require('rangeutils:utils/range');
-var SyntaxManager = require('syntax_manager').SyntaxManager;
-var TextStorage = require('models/textstorage').TextStorage;
-var catalog = require('skywriter:plugins').catalog;
-var settings = require('settings').settings;
-var m_scratchcanvas = require('skywriter:util/scratchcanvas');
+//SYNC_REQ: var util = require('skywriter:util/util');
+var Event = events.Event; //SYNC_REQ: var Event = require("events").Event;
+//SYNC_REQ: var Range = require('rangeutils:utils/range');
+var SyntaxManager = syntax_manager.SyntaxManager; //SYNC_REQ: var SyntaxManager = require('syntax_manager').SyntaxManager;
+var TextStorage = textstorage.TextStorage; //SYNC_REQ: var TextStorage = require('models/textstorage').TextStorage;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
+//SYNC_REQ: var m_scratchcanvas = require('skywriter:util/scratchcanvas');
 
 var fontDimension = {};
 
@@ -488,3 +508,5 @@ Object.defineProperties(exports.LayoutManager.prototype, {
         }
     }
 })
+
+});

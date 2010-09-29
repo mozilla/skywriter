@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'standard_syntax'
+], function(require, exports, module,
+    standard_syntax
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -51,7 +57,7 @@
 });
 "end";
 
-var StandardSyntax = require('standard_syntax').StandardSyntax;
+var StandardSyntax = standard_syntax.StandardSyntax; //SYNC_REQ: var StandardSyntax = require('standard_syntax').StandardSyntax;
 
 var states = {
     start: [
@@ -63,3 +69,5 @@ var states = {
 
 exports.DiffSyntax = new StandardSyntax(states);
 
+
+});

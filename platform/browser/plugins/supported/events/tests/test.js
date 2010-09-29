@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'plugindev',
+    'events'
+], function(require, exports, module,
+    t,
+    events
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var t = require('plugindev');
-var Event = require('events').Event;
+//SYNC_REQ: var t = require('plugindev');
+var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
 
 exports.testEventsAreCallable = function() {
     var evt = new Event();
@@ -100,3 +108,5 @@ exports.testRemovingEvents = function() {
         "removed");
 };
 
+
+});

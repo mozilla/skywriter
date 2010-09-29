@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'jlayout'
+], function(require, exports, module,
+    jlayout
+) {
+
 /*!
  * jLayout Grid Layout - JavaScript Layout Algorithms v0.41
  *
@@ -16,7 +22,7 @@
 });
 "end";
 
-var jLayout = exports.jLayout = require("jlayout").jLayout;
+var jLayout = exports.jLayout = jlayout.jLayout; //SYNC_REQ: var jLayout = exports.jLayout = require("jlayout").jLayout;
  
 jLayout = typeof jLayout === 'undefined' ? {} : jLayout;
 
@@ -107,3 +113,5 @@ jLayout.grid = function (spec, shared) {
 	that.maximum = typeLayout('maximum');
 	return that;
 };
+
+});

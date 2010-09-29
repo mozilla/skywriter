@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/console'
+], function(require, exports, module,
+    console
+) {
+
 // Changed to suit the specific needs of running within Skywriter
 
 // Domain Public by Eric Wendelin http://eriwen.com/ (2008)
@@ -58,7 +64,7 @@ if(nodejs) {
     util = require('skywriter:util');
 }
 
-var console = require("skywriter:console").console || console;
+var console = console.console || console; //SYNC_REQ: var console = require("skywriter:console").console || console;
 
 /**
  * Different browsers create stack traces in different ways.
@@ -334,3 +340,5 @@ exports.Trace.prototype.log = function(lines) {
     }
 };
 
+
+});

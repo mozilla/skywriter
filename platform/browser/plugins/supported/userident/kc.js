@@ -1,3 +1,15 @@
+require.def(['require', 'exports', 'module',
+    'sproutcore/runtime',
+    'environment',
+    'skywriter/promise',
+    'skywriter_server'
+], function(require, exports, module,
+    runtime,
+    environment,
+    promise,
+    skywriter_server
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,11 +47,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = require('sproutcore/runtime').SC;
+var SC = runtime.SC; //SYNC_REQ: var SC = require('sproutcore/runtime').SC;
 
-var env = require('environment').env;
-var Promise = require('skywriter:promise').Promise;
-var server = require('skywriter_server').server;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+var server = skywriter_server.server; //SYNC_REQ: var server = require('skywriter_server').server;
 
 // these are private, because we will likely want to put a little more
 // control around the kcpass.
@@ -204,3 +216,5 @@ exports.forget = function(args, request) {
     exports.clearPassword();
     request.done('Password forgotten.');
 };
+
+});

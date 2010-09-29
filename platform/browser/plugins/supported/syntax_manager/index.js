@@ -1,3 +1,19 @@
+require.def(['require', 'exports', 'module',
+    'underscore',
+    'events',
+    'worker_manager',
+    'skywriter/console',
+    'rangeutils/utils/range',
+    'syntax_directory'
+], function(require, exports, module,
+    underscore,
+    events,
+    worker_manager,
+    consoleMod,
+    rangeutils,
+    syntax_directory
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,12 +51,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var _ = require('underscore')._;
-var Event = require('events').Event;
-var WorkerSupervisor = require('worker_manager').WorkerSupervisor;
-var console = require('skywriter:console').console;
-var rangeutils = require('rangeutils:utils/range');
-var syntaxDirectory = require('syntax_directory').syntaxDirectory;
+var _ = underscore._; //SYNC_REQ: var _ = require('underscore')._;
+var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
+var WorkerSupervisor = worker_manager.WorkerSupervisor; //SYNC_REQ: var WorkerSupervisor = require('worker_manager').WorkerSupervisor;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+//SYNC_REQ: var rangeutils = require('rangeutils:utils/range');
+var syntaxDirectory = syntax_directory.syntaxDirectory; //SYNC_REQ: var syntaxDirectory = require('syntax_directory').syntaxDirectory;
 
 // The number of lines to highlight at once.
 var GRANULARITY = 100;
@@ -353,3 +369,5 @@ SyntaxManager.prototype = {
 
 exports.SyntaxManager = SyntaxManager;
 
+
+});

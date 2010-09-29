@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/console',
+    'environment'
+], function(require, exports, module,
+    consoleMod,
+    environment
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var console = require('skywriter:console').console;
-var env = require('environment').env;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
 /**
  * @class
@@ -173,3 +181,5 @@ exports.undoManagerCommand = function(args, request) {
     var editor = env.editor;
     editor.buffer.undoManager[request.commandExt.name]()
 };
+
+});

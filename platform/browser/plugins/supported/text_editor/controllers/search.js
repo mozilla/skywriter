@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/util',
+    'rangeutils/utils/range',
+    'skywriter/console'
+], function(require, exports, module,
+    util,
+    Range,
+    consoleMod
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +45,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('skywriter:util/util');
-var Range = require('rangeutils:utils/range');
-var console = require('skywriter:console').console;
+//SYNC_REQ: var util = require('skywriter:util/util');
+//SYNC_REQ: var Range = require('rangeutils:utils/range');
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
 
 /**
  * @class
@@ -231,3 +241,5 @@ exports.EditorSearchController.prototype = {
     }
 };
 
+
+});

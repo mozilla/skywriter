@@ -1,3 +1,15 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/util',
+    'events',
+    'rangeutils/utils/range',
+    'keyboard/keyutil'
+], function(require, exports, module,
+    util,
+    events,
+    Range,
+    KeyUtil
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,11 +47,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('skywriter:util/util');
-var Event = require('events').Event;
-var Range = require('rangeutils:utils/range');
+//SYNC_REQ: var util = require('skywriter:util/util');
+var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
+//SYNC_REQ: var Range = require('rangeutils:utils/range');
 
-var KeyUtil = require('keyboard:keyutil');
+//SYNC_REQ: var KeyUtil = require('keyboard:keyutil');
 
 /**
  * @namespace
@@ -321,3 +333,5 @@ exports.TextInput.prototype = {
     }
 };
 
+
+});

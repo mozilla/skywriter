@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'underscore'
+], function(require, exports, module,
+    underscore
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -49,7 +55,7 @@
 });
 "end";
 
-var _ = require('underscore')._;
+var _ = underscore._; //SYNC_REQ: var _ = require('underscore')._;
 
 function JSCompletion(tags) {
     this.tags = tags;
@@ -108,3 +114,5 @@ JSCompletion.prototype = {
 
 exports.JSCompletion = JSCompletion;
 
+
+});

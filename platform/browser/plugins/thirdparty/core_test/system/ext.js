@@ -1,3 +1,7 @@
+require.def(['require', 'exports', 'module'
+], function(require, exports, module
+) {
+
 // ==========================================================================
 // Project:   SproutCore Unit Testing Library
 // Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
@@ -60,3 +64,5 @@ if (!String.prototype.w) {
     return ary ;
   };
 }
+
+});

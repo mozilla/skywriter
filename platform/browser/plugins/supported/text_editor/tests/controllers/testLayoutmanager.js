@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'plugindev',
+    'controllers/layoutmanager'
+], function(require, exports, module,
+    t,
+    layoutmanager
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var t = require('plugindev');
-var LayoutManager = require('controllers/layoutmanager').LayoutManager;
+//SYNC_REQ: var t = require('plugindev');
+var LayoutManager = layoutmanager.LayoutManager; //SYNC_REQ: var LayoutManager = require('controllers/layoutmanager').LayoutManager;
 
 var PANGRAMS =
     'Cwm fjord bank glyphs vext quiz.\n' +
@@ -251,3 +259,5 @@ exports.testRectsForRange = function() {
         }, 'the rect returned for a single-line range and the expected rect');
 };
 
+
+});

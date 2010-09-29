@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'jlayout'
+], function(require, exports, module,
+    jlayout
+) {
+
 /*!
  * jLayout Flow Layout - JavaScript Layout Algorithms v0.12
  *
@@ -16,7 +22,7 @@
 });
 "end";
 
-var jLayout = exports.jLayout = require("jlayout").jLayout;
+var jLayout = exports.jLayout = jlayout.jLayout; //SYNC_REQ: var jLayout = exports.jLayout = require("jlayout").jLayout;
 
 jLayout.flow = function (options) {
 	var my = {},
@@ -133,3 +139,5 @@ jLayout.flow = function (options) {
 
 	return that;
 };
+
+});

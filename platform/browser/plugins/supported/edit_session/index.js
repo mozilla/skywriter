@@ -1,3 +1,15 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/promise',
+    'skywriter/plugins',
+    'skywriter/util/util',
+    'events'
+], function(require, exports, module,
+    promise,
+    plugins,
+    util,
+    events
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,11 +47,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Promise = require('skywriter:promise').Promise;
-var catalog = require('skywriter:plugins').catalog;
-var util = require('skywriter:util/util');
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+//SYNC_REQ: var util = require('skywriter:util/util');
 
-var Event = require("events").Event;
+var Event = events.Event; //SYNC_REQ: var Event = require("events").Event;
 
 exports.EditSession = function() { };
 
@@ -122,3 +134,5 @@ exports.createSession = function(view, user) {
     }
     return session;
 };
+
+});

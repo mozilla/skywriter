@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'plugindev',
+    'models/textstorage'
+], function(require, exports, module,
+    t,
+    textstorage
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var t = require('plugindev');
-var TextStorage = require('models/textstorage').TextStorage;
+//SYNC_REQ: var t = require('plugindev');
+var TextStorage = textstorage.TextStorage; //SYNC_REQ: var TextStorage = require('models/textstorage').TextStorage;
 
 exports.testCharacterMutators = function() {
     var storage = TextStorage.create({});
@@ -207,3 +215,5 @@ exports.testRange = function() {
         end:    { row: 2, col: 3 }
     }, 'the character range and [ 0,0 2,3 ]');
 };
+
+});

@@ -1,3 +1,17 @@
+require.def(['require', 'exports', 'module',
+    'jquery',
+    'canon/history',
+    'canon/request',
+    'environment',
+    'settings'
+], function(require, exports, module,
+    jquery,
+    history,
+    request,
+    environment,
+    settingsMod
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,11 +49,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var $ = require('jquery').$;
-var history = require('canon:history');
-var Request = require('canon:request').Request;
-var env = require('environment').env;
-var settings = require('settings').settings;
+var $ = jquery.$; //SYNC_REQ: var $ = require('jquery').$;
+//SYNC_REQ: var history = require('canon:history');
+var Request = request.Request; //SYNC_REQ: var Request = require('canon:request').Request;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
 
 exports.BookmarkletBar = function() {
     require('templates').bookmarkletbar({
@@ -64,4 +78,6 @@ exports.BookmarkletBar = function() {
 
 Object.defineProperties(exports.BookmarkletBar.prototype, {
     
+});
+
 });

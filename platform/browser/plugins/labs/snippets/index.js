@@ -1,3 +1,17 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'skywriter/console',
+    'skywriter/promise',
+    'environment',
+    'keyboard/keyboard'
+], function(require, exports, module,
+    plugins,
+    consoleMod,
+    promise,
+    environment,
+    keyboard
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,12 +49,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require('skywriter:plugins').catalog;
-var console = require('skywriter:console').console;
-var Promise = require('skywriter:promise').Promise;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
 
-var env = require('environment').env;
-var keyboard = require('keyboard:keyboard');
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+//SYNC_REQ: var keyboard = require('keyboard:keyboard');
 
 /**
  * Find and configure a snippet object.
@@ -79,3 +93,5 @@ exports.snippetCommand = function(args, request) {
     var range = env.view.getSelectedRange();
     env.model.replaceCharacters(range, snippetExt.contents);
 };
+
+});

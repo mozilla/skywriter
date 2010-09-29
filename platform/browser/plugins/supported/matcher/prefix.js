@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'matcher'
+], function(require, exports, module,
+    matcher
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,7 +41,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Matcher = require('matcher').Matcher;
+var Matcher = matcher.Matcher; //SYNC_REQ: var Matcher = require('matcher').Matcher;
 
 /**
  * Performs simple prefix matching.
@@ -58,3 +64,5 @@ exports.PrefixMatcher.prototype.score = function(query, item) {
 
     return 0;
 };
+
+});

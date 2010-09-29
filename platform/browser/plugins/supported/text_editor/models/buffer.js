@@ -1,3 +1,19 @@
+require.def(['require', 'exports', 'module',
+    'environment',
+    'skywriter/util/util',
+    'skywriter/promise',
+    'models/textstorage',
+    'controllers/layoutmanager',
+    'undomanager'
+], function(require, exports, module,
+    environment,
+    util,
+    promise,
+    textstorage,
+    layoutmanager,
+    undomanager
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,14 +51,14 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var env = require('environment').env;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
-var util = require('skywriter:util/util');
+//SYNC_REQ: var util = require('skywriter:util/util');
 
-var Promise = require('skywriter:promise').Promise;
-var TextStorage = require('models/textstorage').TextStorage;
-var LayoutManager = require('controllers/layoutmanager').LayoutManager;
-var UndoManager = require('undomanager').UndoManager;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+var TextStorage = textstorage.TextStorage; //SYNC_REQ: var TextStorage = require('models/textstorage').TextStorage;
+var LayoutManager = layoutmanager.LayoutManager; //SYNC_REQ: var LayoutManager = require('controllers/layoutmanager').LayoutManager;
+var UndoManager = undomanager.UndoManager; //SYNC_REQ: var UndoManager = require('undomanager').UndoManager;
 
 /**
  * A Buffer connects a model and file together. It also holds the layoutManager
@@ -213,4 +229,6 @@ Object.defineProperties(exports.Buffer.prototype, {
             return this._model;
         }
     }
+});
+
 });

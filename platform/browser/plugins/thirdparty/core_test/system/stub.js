@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'core'
+], function(require, exports, module,
+    CoreTest
+) {
+
 // ==========================================================================
 // Project:   SproutCore Unit Testing Library
 // Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
@@ -6,7 +12,7 @@
 // ==========================================================================
 /*globals CoreTest */
 
-var CoreTest = require('core');
+//SYNC_REQ: var CoreTest = require('core');
 
 
 /**
@@ -95,3 +101,5 @@ CoreTest.stub = function(name, func) {
   return ret ;
 };
 
+
+});

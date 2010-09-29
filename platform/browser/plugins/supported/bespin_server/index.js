@@ -1,3 +1,19 @@
+require.def(['require', 'exports', 'module',
+    'skywriter',
+    'skywriter/console',
+    'skywriter/promise',
+    'skywriter/plugins',
+    'skywriter/util/util',
+    'skywriter/util/cookie'
+], function(require, exports, module,
+    skywriter,
+    consoleMod,
+    promise,
+    plugins,
+    util,
+    cookie
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,13 +51,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var skywriter = require('skywriter');
-var console = require('skywriter:console').console;
-var Promise = require('skywriter:promise').Promise;
-var catalog = require('skywriter:plugins').catalog;
+//SYNC_REQ: var skywriter = require('skywriter');
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
 
-var util = require('skywriter:util/util');
-var cookie = require('skywriter:util/cookie');
+//SYNC_REQ: var util = require('skywriter:util/util');
+//SYNC_REQ: var cookie = require('skywriter:util/cookie');
 
 exports.createServer = function(base_url) {
     exports.server = new exports.SkywriterServer(base_url);
@@ -444,3 +460,5 @@ exports.SkywriterServer.prototype = {
         }
     }
 };
+
+});

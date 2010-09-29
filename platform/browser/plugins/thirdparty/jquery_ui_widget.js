@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'jquery'
+], function(require, exports, module,
+    jquery
+) {
+
 /*!
  * jQuery UI Widget 1.8
  *
@@ -18,7 +24,7 @@
 });
 "end";
 
-var jQuery = require("jquery").$;
+var jQuery = jquery.$; //SYNC_REQ: var jQuery = require("jquery").$;
 var $ = jQuery;
 
 (function( $ ) {
@@ -248,3 +254,5 @@ $.Widget.prototype = {
 };
 
 })( jQuery );
+
+});

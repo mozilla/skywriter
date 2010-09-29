@@ -1,3 +1,7 @@
+require.def(['require', 'exports', 'module'
+], function(require, exports, module
+) {
+
 // jslint.js
 // 2010-08-28
 
@@ -5673,3 +5677,5 @@ loop:   for (;;) {
 // Mozilla: export JSLINT
 exports.jslint = JSLINT;
 
+
+});

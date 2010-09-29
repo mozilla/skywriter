@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins'
+], function(require, exports, module,
+    plugins
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,7 +41,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = require('skywriter:plugins').catalog;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
 
 function Logo() {
     var li = document.createElement('li');
@@ -69,3 +75,5 @@ exports.OpenFileIndicator = OpenFileIndicator;
 exports.Save = Save;
 exports.PositionIndicator = PositionIndicator;
 
+
+});

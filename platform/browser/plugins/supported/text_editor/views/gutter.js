@@ -1,3 +1,15 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/util',
+    'skywriter/plugins',
+    'utils/rect',
+    'views/canvas'
+], function(require, exports, module,
+    util,
+    plugins,
+    rect,
+    canvas
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,11 +47,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('skywriter:util/util');
-var catalog = require('skywriter:plugins').catalog;
-var rect = require('utils/rect');
+//SYNC_REQ: var util = require('skywriter:util/util');
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+//SYNC_REQ: var rect = require('utils/rect');
 
-var CanvasView = require('views/canvas').CanvasView;
+var CanvasView = canvas.CanvasView; //SYNC_REQ: var CanvasView = require('views/canvas').CanvasView;
 
 /*
  * A view that renders the gutter for the editor.
@@ -175,3 +187,5 @@ exports.lineNumbers = {
         return characterWidth * lineCountStr.length;
     }
 };
+
+});

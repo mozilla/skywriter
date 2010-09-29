@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'underscore',
+    './reader',
+    'traits'
+], function(require, exports, module,
+    underscore,
+    reader,
+    traits
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +45,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var _ = require('underscore')._;
-var TagReader = require('./reader').TagReader;
-var Trait = require('traits').Trait;
+var _ = underscore._; //SYNC_REQ: var _ = require('underscore')._;
+var TagReader = reader.TagReader; //SYNC_REQ: var TagReader = require('./reader').TagReader;
+var Trait = traits.Trait; //SYNC_REQ: var Trait = require('traits').Trait;
 
 exports.Tags = function() {
     this.tags = [];
@@ -109,3 +119,5 @@ exports.Tags.prototype = Object.create(Object.prototype, Trait.compose(Trait({
     }
 }), TagReader));
 
+
+});

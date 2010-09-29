@@ -1,3 +1,11 @@
+require.def(['require', 'exports', 'module',
+    'matcher/prefix',
+    'plugindev'
+], function(require, exports, module,
+    prefix,
+    t
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,8 +43,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var PrefixMatcher = require('matcher:prefix').PrefixMatcher;
-var t = require('plugindev');
+var PrefixMatcher = prefix.PrefixMatcher; //SYNC_REQ: var PrefixMatcher = require('matcher:prefix').PrefixMatcher;
+//SYNC_REQ: var t = require('plugindev');
 
 exports.testPrefixMatching = function() {
     var matcher = new PrefixMatcher('b');
@@ -64,3 +72,5 @@ exports.testPrefixMatching = function() {
     t.equal(items[1].item, 'foobar', 'the text of the second matched item ' +
         'when searching for \"FOO\" and \"foobar\"');
 };
+
+});

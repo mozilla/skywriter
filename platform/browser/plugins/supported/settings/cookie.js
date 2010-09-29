@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/cookie'
+], function(require, exports, module,
+    cookie
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,7 +41,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var cookie = require('skywriter:util/cookie');
+//SYNC_REQ: var cookie = require('skywriter:util/cookie');
 
 /**
  * Save the settings in a cookie
@@ -69,3 +75,5 @@ exports.CookiePersister.prototype = {
         }
     }
 };
+
+});

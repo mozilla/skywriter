@@ -1,3 +1,15 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/promise',
+    'plugindev',
+    'skywriter/util/util',
+    'path'
+], function(require, exports, module,
+    promise,
+    t,
+    util,
+    pathUtil
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1
  *
@@ -22,10 +34,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Promise = require('skywriter:promise').Promise;
-var t = require('plugindev');
-var util = require('skywriter:util/util');
-var pathUtil = require('path');
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+//SYNC_REQ: var t = require('plugindev');
+//SYNC_REQ: var util = require('skywriter:util/util');
+//SYNC_REQ: var pathUtil = require('path');
 
 /**
  * @param files {file[]} Should be a list, each item an object with path
@@ -169,3 +181,5 @@ exports.DummyFileSource.prototype = {
         return matches;
     }
 };
+
+});

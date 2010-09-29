@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/util'
+], function(require, exports, module,
+    util
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,7 +41,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('skywriter:util/util');
+//SYNC_REQ: var util = require('skywriter:util/util');
 
 /**
  * Take the given arguments and combine them with one path separator:
@@ -183,3 +189,5 @@ exports.parentdir = function(path) {
     path = path.substring(0, slash+1);
     return path;
 };
+
+});

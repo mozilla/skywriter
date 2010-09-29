@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/util'
+], function(require, exports, module,
+    util
+) {
+
 /*! @license
 ==========================================================================
 SproutCore -- JavaScript Application Framework
@@ -31,7 +37,7 @@ For more information about SproutCore, visit http://www.sproutcore.com
 
 // Most of the following code is taken from SproutCore with a few changes.
 
-var util = require('skywriter:util/util');
+//SYNC_REQ: var util = require('skywriter:util/util');
 
 /**
  * Helper functions and hashes for key handling.
@@ -266,3 +272,5 @@ exports.addKeyDownListener = function(element, boundFunction) {
         return handleBoundFunction(ev);
     }, false);
 };
+
+});

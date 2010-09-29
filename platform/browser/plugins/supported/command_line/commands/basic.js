@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/index',
+    'skywriter/util/util',
+    'environment'
+], function(require, exports, module,
+    skywriter,
+    util,
+    environment
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +45,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var skywriter = require('skywriter:index');
-var util = require('skywriter:util/util');
-var env = require('environment').env;
+//SYNC_REQ: var skywriter = require('skywriter:index');
+//SYNC_REQ: var util = require('skywriter:util/util');
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
 
 /**
  * 'eval' command
@@ -123,3 +133,5 @@ exports.skywriterCommand = function(args, request) {
     var index = Math.floor(Math.random() * messages.length);
     request.done('Skywriter ' + messages[index]);
 };
+
+});

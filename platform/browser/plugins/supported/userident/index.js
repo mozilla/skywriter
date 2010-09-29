@@ -1,3 +1,25 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/util',
+    'events',
+    'settings',
+    'skywriter_server/settings',
+    'skywriter/plugins',
+    'skywriter/console',
+    'skywriter/promise',
+    'templates',
+    'jquery'
+], function(require, exports, module,
+    util,
+    events,
+    settingsMod,
+    settings,
+    plugins,
+    consoleMod,
+    promise,
+    templates,
+    jquery
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,16 +57,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var util = require('skywriter:util/util');
-var Event = require('events').Event;
-var settings = require('settings').settings;
-var ServerPersister = require('skywriter_server:settings').ServerPersister;
-var catalog = require('skywriter:plugins').catalog;
-var console = require('skywriter:console').console;
-var Promise = require("skywriter:promise").Promise;
-var templates = require("templates");
+//SYNC_REQ: var util = require('skywriter:util/util');
+var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
+var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
+var ServerPersister = settings.ServerPersister; //SYNC_REQ: var ServerPersister = require('skywriter_server:settings').ServerPersister;
+var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+var Promise = promise.Promise; //SYNC_REQ: var Promise = require("skywriter:promise").Promise;
+//SYNC_REQ: var templates = require("templates");
 
-var $ = require("jquery").$;
+var $ = jquery.$; //SYNC_REQ: var $ = require("jquery").$;
 require("overlay");
 require("toolbox_expose");
 require('jquery_ui_checkbox');
@@ -488,3 +510,5 @@ exports.changePassword = function(username, newPassword, verifyCode) {
     var query = { newPassword: newPassword, code: verifyCode };
     return server.request('POST', url, util.objectToQuery(query));
 };
+
+});

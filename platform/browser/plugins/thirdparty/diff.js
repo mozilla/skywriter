@@ -1,3 +1,7 @@
+require.def(['require', 'exports', 'module'
+], function(require, exports, module
+) {
+
 /**
  * Diff Match and Patch
  *
@@ -2128,3 +2132,5 @@ exports.DIFF_DELETE = DIFF_DELETE;
 exports.DIFF_INSERT = DIFF_INSERT;
 exports.DIFF_EQUAL = DIFF_EQUAL;
 
+
+});

@@ -1,3 +1,21 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/console',
+    'environment',
+    'project',
+    'skywriter_server',
+    'collab/mobwrite/core',
+    'diff',
+    'collab/view'
+], function(require, exports, module,
+    consoleMod,
+    environment,
+    project,
+    skywriter_server,
+    core,
+    diff_match_patch,
+    m_view
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -52,15 +70,15 @@ I took out from package.json following extension points:
  * information and handle collaboration.
  */
 
-var console = require('skywriter:console').console;
-var env = require('environment').env;
-var project = require('project');
-var server = require('skywriter_server').server;
+var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+//SYNC_REQ: var project = require('project');
+var server = skywriter_server.server; //SYNC_REQ: var server = require('skywriter_server').server;
 
-var mobwrite = require('collab:mobwrite/core').mobwrite;
-var diff_match_patch = require('diff');
+var mobwrite = core.mobwrite; //SYNC_REQ: var mobwrite = require('collab:mobwrite/core').mobwrite;
+//SYNC_REQ: var diff_match_patch = require('diff');
 
-var m_view = require('collab:view');
+//SYNC_REQ: var m_view = require('collab:view');
 
 /**
  * Mobwrite has a set of shareObjs which are designed to wrap DOM nodes.
@@ -602,3 +620,5 @@ exports.onAppLaunched = function() {
 			}
 		}, 100);
 };
+
+});

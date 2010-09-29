@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'settings',
+    'environment',
+    'rangeutils/utils/range'
+], function(require, exports, module,
+    settingsMod,
+    environment,
+    m_range
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,9 +45,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var settings = require('settings').settings;
-var env = require('environment').env;
-var m_range = require('rangeutils:utils/range');
+var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
+var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+//SYNC_REQ: var m_range = require('rangeutils:utils/range');
 
 /*
  * Commands that delete text.
@@ -309,3 +319,5 @@ exports.untab = function(args, request) {
        }
     }.bind(this));
 };
+
+});
