@@ -1,1 +1,10 @@
-tmp
+
+# Junk that could exist anywhere:
+.DS_Store
+*.swp
+*.tmp
+
+# Project files that should not be in the repo
+.project
+.settings/
+
