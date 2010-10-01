@@ -1,13 +1,13 @@
 require.def(['require', 'exports', 'module',
-    'jquery',
-    'settings',
+    'thirdparty/jquery',
+    'settings/index',
     'skywriter/promise',
     'skywriter/console',
     'skywriter/util/stacktrace',
     'skywriter/util/util',
     'skywriter/plugins',
     'environment',
-    'theme_manager'
+    'theme_manager/index'
 ], function(require, exports, module,
     jquery,
     settingsMod,

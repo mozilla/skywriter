@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
-    'jquery',
-    'underscore'
+    'completion/jquery',
+    'completion/underscore'
 ], function(require, exports, module,
     jquery,
     underscore

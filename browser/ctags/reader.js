@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
-    'underscore',
-    'traits'
+    'ctags/underscore',
+    'ctags/traits'
 ], function(require, exports, module,
     underscore,
     traits

@@ -1,5 +1,5 @@
 require.def(['require', 'exports', 'module',
-    'standard_syntax'
+    '/standard_syntax'
 ], function(require, exports, module,
     standard_syntax
 ) {

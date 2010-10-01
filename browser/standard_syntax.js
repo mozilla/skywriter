@@ -1,8 +1,8 @@
 require.def(['require', 'exports', 'module',
     'skywriter/promise',
-    'underscore',
+    '/underscore',
     'skywriter/console',
-    'syntax_directory'
+    '/syntax_directory'
 ], function(require, exports, module,
     promise,
     underscore,

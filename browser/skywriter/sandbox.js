@@ -1,5 +1,5 @@
 require.def(['require', 'exports', 'module',
-    'tiki',
+    'skywriter/tiki',
     'skywriter/util/util',
     'skywriter/plugins'
 ], function(require, exports, module,

@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
-    'utils',
-    'loggers/default'
+    'thirdparty/core_test/utils',
+    'thirdparty/core_test/loggers/default'
 ], function(require, exports, module,
     utils,
     DefaultLogger

@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
     'rangeutils/utils/range',
-    'environment'
+    'text_editor/commands/environment'
 ], function(require, exports, module,
     Range,
     environment

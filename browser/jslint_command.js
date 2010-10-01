@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
-    'environment',
-    'jslint'
+    '/environment',
+    '/jslint'
 ], function(require, exports, module,
     environment,
     jslintMod

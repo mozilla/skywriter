@@ -1,7 +1,7 @@
 require.def(['require', 'exports', 'module',
     'skywriter/plugins',
     'filesystem/path',
-    'environment',
+    'file_commands/environment',
     'text_editor/models/buffer',
     'skywriter/promise'
 ], function(require, exports, module,

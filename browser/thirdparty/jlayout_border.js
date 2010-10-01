@@ -1,5 +1,5 @@
 require.def(['require', 'exports', 'module',
-    'jlayout'
+    'thirdparty/jlayout'
 ], function(require, exports, module,
     jlayout
 ) {

@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
-    'settings',
-    'environment',
+    'text_editor/commands/settings',
+    'text_editor/commands/environment',
     'rangeutils/utils/range'
 ], function(require, exports, module,
     settingsMod,

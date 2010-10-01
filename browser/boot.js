@@ -36,8 +36,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 require([
-    "boot/skywriter/plugins",
-    "supported/appconfig/index"
+    "skywriter/plugins",
+    "appconfig/index"
 ], function(
     plugins,
     appconfig

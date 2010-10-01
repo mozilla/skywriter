@@ -1,5 +1,5 @@
 require.def(['require', 'exports', 'module',
-    'plugindev',
+    'plugindev/tests/plugindev',
     'skywriter/plugins'
 ], function(require, exports, module,
     t,

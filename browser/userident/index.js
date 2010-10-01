@@ -1,13 +1,13 @@
 require.def(['require', 'exports', 'module',
     'skywriter/util/util',
-    'events',
-    'settings',
+    'userident/events',
+    'userident/settings',
     'skywriter_server/settings',
     'skywriter/plugins',
     'skywriter/console',
     'skywriter/promise',
-    'templates',
-    'jquery'
+    'userident/templates',
+    'userident/jquery'
 ], function(require, exports, module,
     util,
     events,

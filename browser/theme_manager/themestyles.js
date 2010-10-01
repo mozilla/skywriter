@@ -4,7 +4,7 @@ require.def(['require', 'exports', 'module',
     'skywriter/console',
     'skywriter/promise',
     'skywriter/proxy',
-    'less'
+    'thirdparty/less'
 ], function(require, exports, module,
     util,
     plugins,

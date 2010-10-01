@@ -1,5 +1,5 @@
 require.def(['require', 'exports', 'module',
-    'events',
+    'toolbar/events',
     'skywriter/plugins'
 ], function(require, exports, module,
     events,

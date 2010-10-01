@@ -1,5 +1,5 @@
 require.def(['require', 'exports', 'module',
-    'skywriter',
+    'bespin_server/skywriter',
     'skywriter/console',
     'skywriter/promise',
     'skywriter/plugins',

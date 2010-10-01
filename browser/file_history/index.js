@@ -1,5 +1,5 @@
 require.def(['require', 'exports', 'module',
-    'environment',
+    'file_history/environment',
     'skywriter/util/util',
     'skywriter/console',
     'text_editor/models/buffer'

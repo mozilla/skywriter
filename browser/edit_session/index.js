@@ -2,7 +2,7 @@ require.def(['require', 'exports', 'module',
     'skywriter/promise',
     'skywriter/plugins',
     'skywriter/util/util',
-    'events'
+    'edit_session/events'
 ], function(require, exports, module,
     promise,
     plugins,

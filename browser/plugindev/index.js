@@ -1,10 +1,10 @@
 require.def(['require', 'exports', 'module',
     'skywriter/console',
-    'core_test',
+    'plugindev/core_test',
     'core_test/assert',
     'core_test/test',
-    'environment',
-    'skywriter_server',
+    'plugindev/environment',
+    'plugindev/skywriter_server',
     'skywriter/plugins'
 ], function(require, exports, module,
     consoleMod,

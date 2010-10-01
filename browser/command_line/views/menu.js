@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
     'command_line/hint',
-    'environment'
+    'command_line/views/environment'
 ], function(require, exports, module,
     hint,
     environment

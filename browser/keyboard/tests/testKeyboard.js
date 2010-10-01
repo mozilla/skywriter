@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
     'keyboard/keyboard',
-    'plugindev'
+    'keyboard/tests/plugindev'
 ], function(require, exports, module,
     keyboard,
     t

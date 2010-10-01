@@ -1,9 +1,9 @@
 require.def(['require', 'exports', 'module',
     'skywriter/promise',
     'skywriter/plugins',
-    'events',
-    'themestyles',
-    'settings'
+    'events/index',
+    'theme_manager/themestyles',
+    'settings/index'
 ], function(require, exports, module,
     promise,
     plugins,

@@ -1,10 +1,10 @@
 require.def(['require', 'exports', 'module',
     'skywriter/plugins',
-    'core_test',
+    'plugindev/core_test',
     'skywriter/promise',
     'core_test/test',
     'core_test/utils',
-    'environment'
+    'plugindev/environment'
 ], function(require, exports, module,
     plugins,
     Ct,

@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
     'types/types',
-    'plugindev'
+    'types/tests/plugindev'
 ], function(require, exports, module,
     types,
     t

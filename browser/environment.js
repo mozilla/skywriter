@@ -2,7 +2,7 @@ require.def(['require', 'exports', 'module',
     'skywriter/util/util',
     'skywriter/console',
     'skywriter/plugins',
-    'settings'
+    'settings/index'
 ], function(require, exports, module,
     util,
     consoleMod,

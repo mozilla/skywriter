@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
     'skywriter/console',
-    'environment'
+    'text_editor/controllers/environment'
 ], function(require, exports, module,
     consoleMod,
     environment

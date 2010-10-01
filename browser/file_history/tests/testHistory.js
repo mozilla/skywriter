@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
-    'plugindev',
-    'file_history'
+    'file_history/tests/plugindev',
+    'file_history/tests/file_history'
 ], function(require, exports, module,
     t,
     file_history

@@ -1,5 +1,5 @@
 require.def(['require', 'exports', 'module',
-    'util/util'
+    'skywriter/util/util'
 ], function(require, exports, module,
     util
 ) {

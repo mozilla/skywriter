@@ -1,10 +1,10 @@
 require.def(['require', 'exports', 'module',
-    'underscore',
-    'events',
-    'worker_manager',
+    'syntax_manager/underscore',
+    'syntax_manager/events',
+    'syntax_manager/worker_manager',
     'skywriter/console',
     'rangeutils/utils/range',
-    'syntax_directory'
+    'syntax_manager/syntax_directory'
 ], function(require, exports, module,
     underscore,
     events,

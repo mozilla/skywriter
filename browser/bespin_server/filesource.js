@@ -1,7 +1,7 @@
 require.def(['require', 'exports', 'module',
-    'traits',
+    'bespin_server/traits',
     'skywriter/promise',
-    'skywriter_server',
+    'bespin_server/skywriter_server',
     'filesystem/path'
 ], function(require, exports, module,
     traits,

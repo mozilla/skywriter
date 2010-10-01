@@ -2,7 +2,7 @@ require.def(['require', 'exports', 'module',
     'skywriter/promise',
     'keyboard/keyboard',
     'command_line/input',
-    'plugindev'
+    'command_line/tests/plugindev'
 ], function(require, exports, module,
     promise,
     keyboard,

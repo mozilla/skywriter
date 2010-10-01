@@ -1,10 +1,10 @@
 require.def(['require', 'exports', 'module',
-    'promise',
-    'builtins',
-    'console',
-    'util/util',
-    'util/stacktrace',
-    'proxy'
+    'skywriter/promise',
+    'skywriter/builtins',
+    'skywriter/console',
+    'skywriter/util/util',
+    'skywriter/util/stacktrace',
+    'skywriter/proxy'
 ], function(require, exports, module,
     promise,
     builtins,

@@ -1,5 +1,5 @@
 require.def(['require', 'exports', 'module',
-    'underscore'
+    '/underscore'
 ], function(require, exports, module,
     underscore
 ) {

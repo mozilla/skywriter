@@ -3,11 +3,11 @@ require.def(['require', 'exports', 'module',
     'skywriter/console',
     'skywriter/util/stacktrace',
     'skywriter/util/util',
-    'settings',
+    'keyboard/settings',
     'keyboard/keyutil',
     'canon/history',
     'canon/request',
-    'environment'
+    'keyboard/environment'
 ], function(require, exports, module,
     plugins,
     consoleMod,

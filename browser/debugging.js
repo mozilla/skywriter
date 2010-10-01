@@ -2,7 +2,7 @@ require.def(['require', 'exports', 'module',
     'skywriter/util/util',
     'skywriter/plugins',
     'skywriter/promise',
-    'environment'
+    '/environment'
 ], function(require, exports, module,
     util,
     plugins,

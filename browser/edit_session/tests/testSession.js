@@ -1,8 +1,8 @@
 require.def(['require', 'exports', 'module',
-    'plugindev',
+    'edit_session/tests/plugindev',
     'filesystem/tests/fixture',
-    'filesystem',
-    'edit_session',
+    'edit_session/tests/filesystem',
+    'edit_session/tests/edit_session',
     'skywriter/promise'
 ], function(require, exports, module,
     t,

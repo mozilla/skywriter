@@ -1,8 +1,8 @@
 require.def(['require', 'exports', 'module',
-    'plugindev',
-    'filesystem',
+    'bespin_server/tests/plugindev',
+    'bespin_server/tests/filesystem',
     'skywriter/promise',
-    'filesource'
+    'bespin_server/tests/filesource'
 ], function(require, exports, module,
     t,
     fs,

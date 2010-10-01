@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
-    'plugindev',
-    'utils/range'
+    'rangeutils/tests/plugindev',
+    'rangeutils/tests/utils/range'
 ], function(require, exports, module,
     t,
     Range

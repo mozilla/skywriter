@@ -1,5 +1,5 @@
 require.def(['require', 'exports', 'module',
-    'events',
+    'text_editor/models/events',
     'skywriter/util/util'
 ], function(require, exports, module,
     events,

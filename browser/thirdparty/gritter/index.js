@@ -1,5 +1,5 @@
 require.def(['require', 'exports', 'module',
-    'jquery'
+    'thirdparty/gritter/jquery'
 ], function(require, exports, module,
     jquery
 ) {

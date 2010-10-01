@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
-    'plugindev',
-    'models/textstorage'
+    'text_editor/tests/models/plugindev',
+    'text_editor/tests/models/models/textstorage'
 ], function(require, exports, module,
     t,
     textstorage

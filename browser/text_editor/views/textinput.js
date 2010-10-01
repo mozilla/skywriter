@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
     'skywriter/util/util',
-    'events',
+    'text_editor/views/events',
     'rangeutils/utils/range',
     'keyboard/keyutil'
 ], function(require, exports, module,

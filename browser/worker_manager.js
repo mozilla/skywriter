@@ -2,10 +2,10 @@ require.def(['require', 'exports', 'module',
     'skywriter/proxy',
     'skywriter/plugins',
     'skywriter/console',
-    'underscore',
-    'events',
+    '/underscore',
+    '/events',
     'skywriter/promise',
-    'environment'
+    '/environment'
 ], function(require, exports, module,
     proxy,
     plugins,

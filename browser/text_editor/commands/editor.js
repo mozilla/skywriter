@@ -1,7 +1,7 @@
 require.def(['require', 'exports', 'module',
     'skywriter/plugins',
-    'settings',
-    'environment'
+    'text_editor/commands/settings',
+    'text_editor/commands/environment'
 ], function(require, exports, module,
     plugins,
     settingsMod,

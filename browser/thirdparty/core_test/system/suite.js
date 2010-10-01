@@ -1,5 +1,5 @@
 require.def(['require', 'exports', 'module',
-    'core'
+    'thirdparty/core_test/system/core'
 ], function(require, exports, module,
     core
 ) {

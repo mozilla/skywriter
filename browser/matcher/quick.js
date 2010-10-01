@@ -1,5 +1,5 @@
 require.def(['require', 'exports', 'module',
-    'matcher'
+    'matcher/matcher'
 ], function(require, exports, module,
     matcher
 ) {

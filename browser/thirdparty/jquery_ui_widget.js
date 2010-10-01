@@ -1,5 +1,5 @@
 require.def(['require', 'exports', 'module',
-    'jquery'
+    'thirdparty/jquery'
 ], function(require, exports, module,
     jquery
 ) {

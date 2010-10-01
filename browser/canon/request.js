@@ -1,5 +1,5 @@
 require.def(['require', 'exports', 'module',
-    'events',
+    'canon/events',
     'canon/history'
 ], function(require, exports, module,
     events,

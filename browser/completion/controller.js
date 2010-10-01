@@ -1,9 +1,9 @@
 require.def(['require', 'exports', 'module',
-    'ctags',
+    'completion/ctags',
     'rangeutils/utils/range',
     'completion/ui',
     'skywriter/plugins',
-    'environment'
+    'completion/environment'
 ], function(require, exports, module,
     ctags,
     range,

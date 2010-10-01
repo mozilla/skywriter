@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
-    'plugindev',
-    'events'
+    'events/tests/plugindev',
+    'events/tests/events'
 ], function(require, exports, module,
     t,
     events

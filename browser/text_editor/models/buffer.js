@@ -1,10 +1,10 @@
 require.def(['require', 'exports', 'module',
-    'environment',
+    'text_editor/models/environment',
     'skywriter/util/util',
     'skywriter/promise',
-    'models/textstorage',
-    'controllers/layoutmanager',
-    'undomanager'
+    'text_editor/models/models/textstorage',
+    'text_editor/models/controllers/layoutmanager',
+    'text_editor/models/undomanager'
 ], function(require, exports, module,
     environment,
     util,

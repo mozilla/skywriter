@@ -1,5 +1,5 @@
 require.def(['require', 'exports', 'module',
-    'environment'
+    'text_editor/commands/environment'
 ], function(require, exports, module,
     environment
 ) {

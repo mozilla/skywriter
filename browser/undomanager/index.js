@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
     'skywriter/util/util',
-    'environment'
+    'undomanager/environment'
 ], function(require, exports, module,
     util,
     environment

@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
-    'index',
-    'plugindev'
+    'undomanager/tests/index',
+    'undomanager/tests/plugindev'
 ], function(require, exports, module,
     index,
     t

@@ -1,7 +1,7 @@
 require.def(['require', 'exports', 'module',
     'skywriter/index',
     'skywriter/util/util',
-    'environment'
+    'command_line/commands/environment'
 ], function(require, exports, module,
     skywriter,
     util,

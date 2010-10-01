@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
     'skywriter/util/util',
-    'plugindev',
+    'text_editor/tests/plugindev',
     'skywriter/util/scratchcanvas'
 ], function(require, exports, module,
     util,

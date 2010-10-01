@@ -1,8 +1,8 @@
 require.def(['require', 'exports', 'module',
-    'sproutcore/runtime',
-    'environment',
+    'userident/sproutcore/runtime',
+    'userident/environment',
     'skywriter/promise',
-    'skywriter_server'
+    'userident/skywriter_server'
 ], function(require, exports, module,
     runtime,
     environment,

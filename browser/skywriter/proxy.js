@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
-    'util/util',
-    'promise'
+    'skywriter/util/util',
+    'skywriter/promise'
 ], function(require, exports, module,
     util,
     promise

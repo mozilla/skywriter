@@ -1,5 +1,5 @@
 require.def(['require', 'exports', 'module',
-    'environment'
+    'plugindev/environment'
 ], function(require, exports, module,
     environment
 ) {

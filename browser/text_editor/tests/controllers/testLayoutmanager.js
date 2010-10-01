@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
-    'plugindev',
-    'controllers/layoutmanager'
+    'text_editor/tests/controllers/plugindev',
+    'text_editor/tests/controllers/controllers/layoutmanager'
 ], function(require, exports, module,
     t,
     layoutmanager

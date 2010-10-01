@@ -1,7 +1,7 @@
 require.def(['require', 'exports', 'module',
-    'project',
+    'bespin_server/project',
     'skywriter_server/index',
-    'environment'
+    'bespin_server/environment'
 ], function(require, exports, module,
     project_m,
     index,

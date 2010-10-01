@@ -1,8 +1,8 @@
 require.def(['require', 'exports', 'module',
-    'index',
+    'file_commands/views/index',
     'matcher/quick',
     'command_line/views/menu',
-    'environment'
+    'file_commands/views/environment'
 ], function(require, exports, module,
     index,
     quick,

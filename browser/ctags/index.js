@@ -1,7 +1,7 @@
 require.def(['require', 'exports', 'module',
-    'underscore',
-    './reader',
-    'traits'
+    'ctags/underscore',
+    'ctags/./reader',
+    'ctags/traits'
 ], function(require, exports, module,
     underscore,
     reader,

@@ -1,6 +1,6 @@
 require.def(['require', 'exports', 'module',
-    'plugindev',
-    'utils/rect'
+    'text_editor/tests/utils/plugindev',
+    'text_editor/tests/utils/utils/rect'
 ], function(require, exports, module,
     t,
     Rect
