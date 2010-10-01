@@ -12,8 +12,6 @@ require.def(['require', 'exports', 'module',
 
 var Ct    = core.,
     utils = require('utils'),
-    assert = {}; //SYNC_REQ: var Ct    = require('core'),
-    utils = require('utils'),
     assert = {};
 
 require('system/equiv'); // add Ct.equiv

@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var t = require('plugindev');
-//SYNC_REQ: var Range = require('utils/range');
+
+
 
 exports.testAddPositions = function() {
     t.deepEqual(Range.addPositions({ row: 0, col: 0 },

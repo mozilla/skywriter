@@ -14,8 +14,6 @@ require.def(['require', 'exports', 'module',
 
 var utils = utils.,
     Ct    = require('core'),
-    hasConsole = 'undefined' !== typeof console; //SYNC_REQ: var utils = require('utils'),
-    Ct    = require('core'),
     hasConsole = 'undefined' !== typeof console; 
 
 /**

@@ -49,12 +49,12 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+var catalog = plugins.catalog;
+var console = consoleMod.console;
+var Promise = promise.Promise;
 
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
-//SYNC_REQ: var keyboard = require('keyboard:keyboard');
+var env = environment.env;
+
 
 /**
  * Find and configure a snippet object.

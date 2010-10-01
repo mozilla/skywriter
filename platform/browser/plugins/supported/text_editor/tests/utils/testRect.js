@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var t = require('plugindev');
-//SYNC_REQ: var Rect = require('utils/rect');
+
+
 
 exports.testDistanceFromBounds = function() {
     t.equal(Rect._distanceFromBounds(1, 3, 5), -2,

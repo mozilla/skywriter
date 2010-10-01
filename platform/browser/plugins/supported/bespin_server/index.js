@@ -51,13 +51,13 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var skywriter = require('skywriter');
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
 
-//SYNC_REQ: var util = require('skywriter:util/util');
-//SYNC_REQ: var cookie = require('skywriter:util/cookie');
+var console = consoleMod.console;
+var Promise = promise.Promise;
+var catalog = plugins.catalog;
+
+
+
 
 exports.createServer = function(base_url) {
     exports.server = new exports.SkywriterServer(base_url);

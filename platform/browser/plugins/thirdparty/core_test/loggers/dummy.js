@@ -11,7 +11,6 @@ require.def(['require', 'exports', 'module',
 // ==========================================================================
 
 var utils = utils.,
-    Ct    = require('core'); //SYNC_REQ: var utils = require('utils'),
     Ct    = require('core');
     
 require('loggers/default'); // add Ct.DefaultLogger

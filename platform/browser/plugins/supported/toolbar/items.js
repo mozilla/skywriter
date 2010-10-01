@@ -41,7 +41,7 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var catalog = plugins.catalog;
 
 function Logo() {
     var li = document.createElement('li');

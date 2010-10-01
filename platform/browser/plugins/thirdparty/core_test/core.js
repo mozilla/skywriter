@@ -16,8 +16,6 @@ require.def(['require', 'exports', 'module',
 
 var utils = utils., 
     Promise = require('skywriter:promise').Promise,
-    CoreTest, Ct; //SYNC_REQ: var utils = require('utils'), 
-    Promise = require('skywriter:promise').Promise,
     CoreTest, Ct;
 
 /** @namespace
@@ -328,7 +326,7 @@ require('system/plan');
 
 // Choose a default logger based on platform.  Used in case no override is
 // specified
-//SYNC_REQ: var DefaultLogger = require('loggers/default');
+
 
 /**
   Default logger used by a plan if you don't override it by setting Ct.logger

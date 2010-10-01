@@ -41,7 +41,7 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var util = require('skywriter:util/util');
+
 
 /**
  * Take the given arguments and combine them with one path separator:

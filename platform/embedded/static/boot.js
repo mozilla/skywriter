@@ -46,12 +46,12 @@ require.def(['require', 'exports', 'module',
 // Load up Skywriter's boot code (the plugin system, basically)
 skywriter.tiki.require.ensurePackage("::skywriter", function() {
     var require = skywriter.tiki.require;
-    //SYNC_REQ: var plugins = require("skywriter:plugins");
+    
     var pr = plugins.catalog.loadMetadataFromURL("plugin/register/defaults");
     pr.then(function() {
         // The "hosted" plugin sets up the environment
         skywriter.tiki.require.ensurePackage("::appconfig", function() {
-            //SYNC_REQ: var appconfig = require("appconfig");
+            
             appconfig.launch({
                 stealFocus: true
             }).then(function(env) {

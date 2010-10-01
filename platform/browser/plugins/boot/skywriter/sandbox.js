@@ -45,9 +45,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var tiki = require('tiki');
-//SYNC_REQ: var util = require('skywriter:util/util');
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+
+
+var catalog = plugins.catalog;
 
 /**
  * A sandbox can only be used from inside of the `master` catalog.

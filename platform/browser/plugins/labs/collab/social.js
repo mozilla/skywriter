@@ -51,13 +51,13 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-var server = skywriter_server.server; //SYNC_REQ: var server = require('skywriter_server').server;
-var Input = input.Input; //SYNC_REQ: var Input = require('command_line:input').Input;
+//var console = consoleMod.console;
+var server = skywriter_server.server;
+var Input = input.Input;
 
-//SYNC_REQ: var social_user = require('collab:user');
-//SYNC_REQ: var util = require('collab:util');
-//SYNC_REQ: var templates = require('collab:templates');
+
+
+
 
 
 /**

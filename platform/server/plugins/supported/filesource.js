@@ -41,7 +41,7 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var fs = require('fs');
+
 
 var ServerFileSource = exports.ServerFileSource = function() {
 

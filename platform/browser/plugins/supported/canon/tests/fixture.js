@@ -45,9 +45,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
-var Request = request.Request; //SYNC_REQ: var Request = require('canon:request').Request;
-var EnvironmentTrait = environment.EnvironmentTrait; //SYNC_REQ: var EnvironmentTrait = require('canon:environment').EnvironmentTrait;
+var Promise = promise.Promise;
+var Request = request.Request;
+var EnvironmentTrait = environment.EnvironmentTrait;
 
 exports.MockEnvironmentTrait = EnvironmentTrait;
 

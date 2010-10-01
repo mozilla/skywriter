@@ -24,7 +24,7 @@ require.def(['require', 'exports', 'module',
 
 require("jquery_sizes");
 
-var jQuery = jquery.$; //SYNC_REQ: var jQuery = require("jquery").$;
+var jQuery = jquery.$;
 var $ = jQuery;
 var jLayout = {};
 exports.jLayout = jLayout;

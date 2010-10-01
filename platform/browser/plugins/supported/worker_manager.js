@@ -82,13 +82,13 @@ if (window == null) {
         'browser, not a web worker. Use "worker" instead.');
 }
 
-//SYNC_REQ: var proxy = require('skywriter:proxy');
-//SYNC_REQ: var plugins = require('skywriter:plugins');
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-var _ = underscore._; //SYNC_REQ: var _ = require('underscore')._;
-var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+
+
+var console = consoleMod.console;
+var _ = underscore._;
+var Event = events.Event;
+var Promise = promise.Promise;
+var env = environment.env;
 
 var workerManager = {
     _workers: [],

@@ -45,9 +45,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var util = require('skywriter:util/util');
-//SYNC_REQ: var Rect = require('utils/rect');
-var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
+
+
+var Event = events.Event;
 
 /**
  * @class

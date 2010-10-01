@@ -49,11 +49,11 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
-//SYNC_REQ: var themestyles = require('themestyles');
-var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
+var Promise = promise.Promise;
+var catalog = plugins.catalog;
+var Event = events.Event;
+
+var settings = settingsMod.settings;
 
 // The current themeExt used on the page.
 var currentThemeExt = null;

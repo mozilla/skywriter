@@ -45,9 +45,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var util = require('skywriter:util/util');
-//SYNC_REQ: var t = require('plugindev');
-//SYNC_REQ: var m_scratchcanvas = require('skywriter:util/scratchcanvas');
+
+
+
 
 exports.testScratchCanvasBehavesAsASingleton = function() {
     t.ok(util.none(document.getElementById('skywriter-scratch-canvas')),

@@ -45,10 +45,10 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var catalog = plugins.catalog;
+var env = environment.env;
 
-var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
+var settings = settingsMod.settings;
 
 /**
  * 'set' command

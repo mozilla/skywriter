@@ -55,14 +55,14 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var util = require('skywriter:util/util');
-var Event = events.Event; //SYNC_REQ: var Event = require("events").Event;
-//SYNC_REQ: var Range = require('rangeutils:utils/range');
-var SyntaxManager = syntax_manager.SyntaxManager; //SYNC_REQ: var SyntaxManager = require('syntax_manager').SyntaxManager;
-var TextStorage = textstorage.TextStorage; //SYNC_REQ: var TextStorage = require('models/textstorage').TextStorage;
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
-//SYNC_REQ: var m_scratchcanvas = require('skywriter:util/scratchcanvas');
+
+var Event = events.Event;
+
+var SyntaxManager = syntax_manager.SyntaxManager;
+var TextStorage = textstorage.TextStorage;
+var catalog = plugins.catalog;
+var settings = settingsMod.settings;
+
 
 var fontDimension = {};
 

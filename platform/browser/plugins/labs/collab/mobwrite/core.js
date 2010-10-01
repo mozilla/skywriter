@@ -30,8 +30,8 @@ require.def(['require', 'exports', 'module',
  * @author fraser@google.com (Neil Fraser)
  */
 
-var server = skywriter_server.server; //SYNC_REQ: var server = require("skywriter_server").server;
-//SYNC_REQ: var diff_match_patch = require("diff");
+var server = skywriter_server.server;
+
 
 var DIFF_EQUAL = diff_match_patch.DIFF_EQUAL;
 var DIFF_DELETE = diff_match_patch.DIFF_DELETE;

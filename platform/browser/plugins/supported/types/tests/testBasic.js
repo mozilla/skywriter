@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var types = require('types:types');
-//SYNC_REQ: var t = require('plugindev');
+
+
 
 exports.testTextFromString = function() {
     types.fromString('Foo', 'text').then(function(converted) {

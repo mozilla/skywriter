@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var Range = require('rangeutils:utils/range');
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+
+var env = environment.env;
 
 // TODO: These should not be using private APIs of the view.
 

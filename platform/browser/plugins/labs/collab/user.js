@@ -45,9 +45,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var $ = jquery.$; //SYNC_REQ: var $ = require("jquery").$;
-var server = skywriter_server.server; //SYNC_REQ: var server = require('skywriter_server').server;
-//SYNC_REQ: var util = require('collab:util');
+var $ = jquery.$;
+var server = skywriter_server.server;
+
 
 var userDataCache = {};
 

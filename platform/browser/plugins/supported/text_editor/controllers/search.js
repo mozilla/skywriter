@@ -45,9 +45,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var util = require('skywriter:util/util');
-//SYNC_REQ: var Range = require('rangeutils:utils/range');
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+
+
+var console = consoleMod.console;
 
 /**
  * @class

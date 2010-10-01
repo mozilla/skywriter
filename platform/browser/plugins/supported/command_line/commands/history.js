@@ -45,9 +45,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-//SYNC_REQ: var history = require('canon:history');
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var catalog = plugins.catalog;
+
+var env = environment.env;
 
 /**
  * The pointer to the command that we show on up|down

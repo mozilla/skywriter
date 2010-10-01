@@ -57,16 +57,16 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var util = require('skywriter:util/util');
-var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
-var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
-var ServerPersister = settings.ServerPersister; //SYNC_REQ: var ServerPersister = require('skywriter_server:settings').ServerPersister;
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require("skywriter:promise").Promise;
-//SYNC_REQ: var templates = require("templates");
 
-var $ = jquery.$; //SYNC_REQ: var $ = require("jquery").$;
+var Event = events.Event;
+var settings = settingsMod.settings;
+var ServerPersister = settings.ServerPersister;
+var catalog = plugins.catalog;
+var console = consoleMod.console;
+var Promise = promise.Promise;
+
+
+var $ = jquery.$;
 require("overlay");
 require("toolbox_expose");
 require('jquery_ui_checkbox');

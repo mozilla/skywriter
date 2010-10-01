@@ -34,10 +34,10 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
-//SYNC_REQ: var t = require('plugindev');
-//SYNC_REQ: var util = require('skywriter:util/util');
-//SYNC_REQ: var pathUtil = require('path');
+var Promise = promise.Promise;
+
+
+
 
 /**
  * @param files {file[]} Should be a list, each item an object with path

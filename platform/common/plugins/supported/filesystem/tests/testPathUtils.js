@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var path = require('path');
-//SYNC_REQ: var t = require('plugindev');
+
+
 
 exports.testBasename = function() {
     var basename = path.basename;

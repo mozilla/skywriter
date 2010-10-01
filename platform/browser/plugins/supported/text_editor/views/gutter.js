@@ -47,11 +47,11 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var util = require('skywriter:util/util');
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-//SYNC_REQ: var rect = require('utils/rect');
 
-var CanvasView = canvas.CanvasView; //SYNC_REQ: var CanvasView = require('views/canvas').CanvasView;
+var catalog = plugins.catalog;
+
+
+var CanvasView = canvas.CanvasView;
 
 /*
  * A view that renders the gutter for the editor.

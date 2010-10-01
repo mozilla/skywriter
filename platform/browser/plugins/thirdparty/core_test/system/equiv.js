@@ -11,7 +11,7 @@ require.def(['require', 'exports', 'module',
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-//SYNC_REQ: var Ct = require('core');
+
 
 var _equiv; // internal loop function
 

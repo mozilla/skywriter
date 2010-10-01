@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var t = require('plugindev');
-var LayoutManager = layoutmanager.LayoutManager; //SYNC_REQ: var LayoutManager = require('controllers/layoutmanager').LayoutManager;
+
+var LayoutManager = layoutmanager.LayoutManager;
 
 var PANGRAMS =
     'Cwm fjord bank glyphs vext quiz.\n' +

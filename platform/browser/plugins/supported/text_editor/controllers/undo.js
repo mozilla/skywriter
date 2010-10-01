@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var console = consoleMod.console;
+var env = environment.env;
 
 /**
  * @class

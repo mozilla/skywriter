@@ -51,14 +51,14 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-//SYNC_REQ: var Ct = require('core_test');
+var catalog = plugins.catalog;
+
 var DefaultLogger = require('loggers/default', 'core_test');
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require("skywriter:promise").Promise;
-var group = promise.group; //SYNC_REQ: var group = require('skywriter:promise').group;
-//SYNC_REQ: var test = require('core_test:test');
-//SYNC_REQ: var utils = require('core_test:utils');
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var Promise = promise.Promise;
+var group = promise.group;
+
+
+var env = environment.env;
 
 var lastTest = null;
 

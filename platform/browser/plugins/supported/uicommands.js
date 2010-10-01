@@ -65,9 +65,9 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var env = environment.env;
 
-var pluginCatalog = plugins.catalog; //SYNC_REQ: var pluginCatalog = require('skywriter:plugins').catalog;
+var pluginCatalog = plugins.catalog;
 
 exports.jumpCommandLine = function(args, request) {
     env.commandLine.focus();

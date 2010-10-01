@@ -45,9 +45,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+var catalog = plugins.catalog;
+var console = consoleMod.console;
+var Promise = promise.Promise;
 
 /**
  * Get the simple text-only, no-param version of a typeSpec.

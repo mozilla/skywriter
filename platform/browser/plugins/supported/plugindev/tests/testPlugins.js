@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var t = require('plugindev');
-//SYNC_REQ: var plugins = require('skywriter:plugins');
+
+
 
 exports.testExtensionPointsAreCreatedAsNeeded = function() {
     var catalog = plugins.Catalog.create();

@@ -41,7 +41,7 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var history = require('canon:history');
+
 
 /**
  * Store the history in SkywriterSettings/command.history.

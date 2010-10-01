@@ -53,13 +53,13 @@ require.def(['require', 'exports', 'module',
 
 require("globals");
 
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require("promise").Promise;
-var group = promise.group; //SYNC_REQ: var group = require("promise").group;
-//SYNC_REQ: var builtins = require("builtins");
-var console = consoleMod.console; //SYNC_REQ: var console = require("console").console;
-//SYNC_REQ: var util = require("util/util");
-var Trace = stacktrace.Trace; //SYNC_REQ: var Trace = require("util/stacktrace").Trace;
-//SYNC_REQ: var proxy = require('proxy');
+var Promise = promise.Promise;
+var group = promise.group;
+
+var console = consoleMod.console;
+
+var Trace = stacktrace.Trace;
+
 
 var r = require;
 

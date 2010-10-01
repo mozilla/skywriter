@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Matcher = matcher.Matcher; //SYNC_REQ: var Matcher = require('matcher').Matcher;
-//SYNC_REQ: var t = require('plugindev');
+var Matcher = matcher.Matcher;
+
 
 /**
  * Performs simple prefix matching.

@@ -64,7 +64,7 @@ if(nodejs) {
     util = require('skywriter:util');
 }
 
-var console = console.console || console; //SYNC_REQ: var console = require("skywriter:console").console || console;
+var console = console.console || console;
 
 /**
  * Different browsers create stack traces in different ways.

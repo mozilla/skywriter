@@ -57,7 +57,7 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var env = environment.env;
 
 exports.feedbackCommand = function(args, request) {
     window.open('http://feedback.mozillalabs.com/forums/49087-skywriter',

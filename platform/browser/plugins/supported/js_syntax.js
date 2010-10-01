@@ -57,7 +57,7 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-var StandardSyntax = standard_syntax.StandardSyntax; //SYNC_REQ: var StandardSyntax = require('standard_syntax').StandardSyntax;
+var StandardSyntax = standard_syntax.StandardSyntax;
 
 var states = {
     start: [

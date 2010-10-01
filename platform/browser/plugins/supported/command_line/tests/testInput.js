@@ -47,12 +47,12 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+var Promise = promise.Promise;
 
-//SYNC_REQ: var keyboard = require('keyboard:keyboard');
 
-var Input = input.Input; //SYNC_REQ: var Input = require('command_line:input').Input;
-//SYNC_REQ: var t = require('plugindev');
+
+var Input = input.Input;
+
 
 function parse(command) {
     var promise = new Promise();

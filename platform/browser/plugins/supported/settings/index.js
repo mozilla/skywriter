@@ -106,12 +106,12 @@ require.def(['require', 'exports', 'module',
  * </ul>
  */
 
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
-var groupPromises = promise.group; //SYNC_REQ: var groupPromises = require('skywriter:promise').group;
+var catalog = plugins.catalog;
+var console = consoleMod.console;
+var Promise = promise.Promise;
+var groupPromises = promise.group;
 
-//SYNC_REQ: var types = require('types:types');
+
 
 /**
  * Find and configure the settings object.
@@ -165,7 +165,7 @@ exports.getTypeSpecFromAssignment = function(typeSpec) {
  * <pre>
  * // Create manually, or require 'settings' from the container.
  * // This is the manual version:
- * var settings = plugins.catalog.getObject('settings'); //SYNC_REQ: var settings = require('skywriter:plugins').catalog.getObject('settings');
+ * var settings = plugins.catalog.getObject('settings');
  * // Add a new setting
  * settings.addSetting({ name:'foo', ... });
  * // Display the default value
@@ -255,7 +255,7 @@ exports.MemorySettings.prototype = {
      * Function to add to the list of available settings.
      * <p>Example usage:
      * <pre>
-     * var settings = plugins.catalog.getObject('settings'); //SYNC_REQ: var settings = require('skywriter:plugins').catalog.getObject('settings');
+     * var settings = plugins.catalog.getObject('settings');
      * settings.addSetting({
      *     name: 'tabsize', // For use in settings.get('X')
      *     type: 'number',  // To allow value checking.

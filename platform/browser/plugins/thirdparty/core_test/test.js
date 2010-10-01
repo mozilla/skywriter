@@ -12,8 +12,6 @@ require.def(['require', 'exports', 'module',
 
 var Ct    = core.,
     utils = require('utils'),
-    trimmer = (/^test\s*/) ; //SYNC_REQ: var Ct    = require('core'),
-    utils = require('utils'),
     trimmer = (/^test\s*/) ;
 
 require('system/plan'); // add Ct.Plan

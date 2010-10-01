@@ -45,9 +45,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-var Trace = stacktrace.Trace; //SYNC_REQ: var Trace = require('skywriter:util/stacktrace').Trace;
+var catalog = plugins.catalog;
+var console = consoleMod.console;
+var Trace = stacktrace.Trace;
 
 /**
  * Save the settings using the server.

@@ -41,7 +41,7 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var util = require('skywriter:util');
+
 
 /**
  * A invisible singleton canvas on the page, useful whenever a canvas context

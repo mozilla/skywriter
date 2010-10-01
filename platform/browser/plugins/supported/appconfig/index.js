@@ -57,13 +57,13 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var $ = jquery.$; //SYNC_REQ: var $ = require('jquery').$;
-var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
-var group = promise.group; //SYNC_REQ: var group = require("skywriter:promise").group;
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require("skywriter:promise").Promise;
-var console = consoleMod.console; //SYNC_REQ: var console = require("skywriter:console").console;
-var Trace = stacktrace.Trace; //SYNC_REQ: var Trace = require("skywriter:util/stacktrace").Trace;
-//SYNC_REQ: var util = require('skywriter:util/util');
+var $ = jquery.$;
+var settings = settingsMod.settings;
+var group = promise.group;
+var Promise = promise.Promise;
+var console = consoleMod.console;
+var Trace = stacktrace.Trace;
+
 
 var firstSkywriter = true;
 
@@ -107,7 +107,7 @@ exports.launch = function(config) {
     }
 
     // Here we go: Require the catalog that is used for this Skywriter instance.
-    var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+    var catalog = plugins.catalog;
 
     // Launch Skywriter!
     config = config || {};
@@ -123,7 +123,7 @@ exports.launch = function(config) {
 
     // Resolve the launchPromise and pass the env variable along.
     var resolveLaunchPromise = function() {
-        var env = environment.env; //SYNC_REQ: var env = require("environment").env;
+        var env = environment.env;
 
         var editor = env.editor;
         if (editor) {
@@ -176,7 +176,7 @@ exports.launch = function(config) {
     // If the themeManager plugin is there, then check for theme configuration.
     if (catalog.plugins.theme_manager) {
         skywriter.tiki.require.ensurePackage('::theme_manager', function() {
-            //SYNC_REQ: var themeManager = require('theme_manager');
+            
             if (config.theme.basePlugin) {
                 themeManager.setBasePlugin(config.theme.basePlugin);
             }

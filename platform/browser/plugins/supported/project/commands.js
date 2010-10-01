@@ -43,9 +43,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var util = require('skywriter:util/util');
 
-var catalog = plugin.catalog; //SYNC_REQ: var catalog = require('skywriter:plugin').catalog;
+
+var catalog = plugin.catalog;
 
 var server = catalog.getObject('server');
 var editSession = catalog.getObject('editSession');

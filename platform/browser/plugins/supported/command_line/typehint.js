@@ -49,13 +49,13 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
-//SYNC_REQ: var types = require('types:types');
+var catalog = plugins.catalog;
+var console = consoleMod.console;
+var Promise = promise.Promise;
 
-var Hint = hint.Hint; //SYNC_REQ: var Hint = require('command_line:hint').Hint;
-var Level = hint.Level; //SYNC_REQ: var Level = require('command_line:hint').Level;
+
+var Hint = hint.Hint;
+var Level = hint.Level;
 
 /**
  * If there isn't a typehint to define a hint UI component then we just use the

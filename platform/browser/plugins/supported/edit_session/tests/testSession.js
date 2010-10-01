@@ -49,11 +49,11 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var t = require('plugindev');
-var DummyFileSource = fixture.DummyFileSource; //SYNC_REQ: var DummyFileSource = require('filesystem:tests/fixture').DummyFileSource;
-//SYNC_REQ: var fs = require('filesystem');
-//SYNC_REQ: var editsession = require('edit_session');
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+
+var DummyFileSource = fixture.DummyFileSource;
+
+
+var Promise = promise.Promise;
 
 var source = new DummyFileSource([
     {name: 'atTheTop.js', contents: 'the top file'},

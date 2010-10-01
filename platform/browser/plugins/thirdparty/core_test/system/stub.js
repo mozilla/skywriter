@@ -12,7 +12,7 @@ require.def(['require', 'exports', 'module',
 // ==========================================================================
 /*globals CoreTest */
 
-//SYNC_REQ: var CoreTest = require('core');
+
 
 
 /**

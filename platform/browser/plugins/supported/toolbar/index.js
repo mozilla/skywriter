@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
+var Event = events.Event;
+var catalog = plugins.catalog;
 
 var discoveredNewToolbarItem = new Event();
 

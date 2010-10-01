@@ -49,11 +49,11 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var $ = jquery.$; //SYNC_REQ: var $ = require('jquery').$;
-//SYNC_REQ: var history = require('canon:history');
-var Request = request.Request; //SYNC_REQ: var Request = require('canon:request').Request;
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
-var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
+var $ = jquery.$;
+
+var Request = request.Request;
+var env = environment.env;
+var settings = settingsMod.settings;
 
 exports.BookmarkletBar = function() {
     require('templates').bookmarkletbar({

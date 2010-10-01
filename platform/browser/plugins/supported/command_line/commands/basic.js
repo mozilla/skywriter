@@ -45,9 +45,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var skywriter = require('skywriter:index');
-//SYNC_REQ: var util = require('skywriter:util/util');
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+
+
+var env = environment.env;
 
 /**
  * 'eval' command

@@ -59,10 +59,10 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-//SYNC_REQ: var promise = require('skywriter:promise');
-var _ = underscore._; //SYNC_REQ: var _ = require('underscore')._;
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-var syntaxDirectory = syntax_directory.syntaxDirectory; //SYNC_REQ: var syntaxDirectory = require('syntax_directory').syntaxDirectory;
+
+var _ = underscore._;
+var console = consoleMod.console;
+var syntaxDirectory = syntax_directory.syntaxDirectory;
 
 exports.StandardSyntax = function(states, subsyntaxes) {
     this.states = states;

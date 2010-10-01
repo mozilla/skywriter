@@ -43,9 +43,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Hint = hint.Hint; //SYNC_REQ: var Hint = require('command_line:hint').Hint;
-var Level = hint.Level; //SYNC_REQ: var Level = require('command_line:hint').Level;
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var Hint = hint.Hint;
+var Level = hint.Level;
+var env = environment.env;
 
 /*
  * TODO:

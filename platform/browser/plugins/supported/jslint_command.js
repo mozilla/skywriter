@@ -61,8 +61,8 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
-var jslint = jslintMod.jslint; //SYNC_REQ: var jslint = require('jslint').jslint;
+var env = environment.env;
+var jslint = jslintMod.jslint;
 
 function runJSLint(model) {
     var ok = jslint(model.getValue());

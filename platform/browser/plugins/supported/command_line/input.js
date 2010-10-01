@@ -61,21 +61,21 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
-var groupPromises = promise.group; //SYNC_REQ: var groupPromises = require('skywriter:promise').group;
-var Trace = stacktrace.Trace; //SYNC_REQ: var Trace = require('skywriter:util/stacktrace').Trace;
-//SYNC_REQ: var util = require('skywriter:util/util');
+var catalog = plugins.catalog;
+var console = consoleMod.console;
+var Promise = promise.Promise;
+var groupPromises = promise.group;
+var Trace = stacktrace.Trace;
 
-//SYNC_REQ: var types = require('types:types');
-var Request = request.Request; //SYNC_REQ: var Request = require('canon:request').Request;
-//SYNC_REQ: var history = require('canon:history');
-//SYNC_REQ: var keyboard = require('keyboard:keyboard');
 
-var Hint = hint.Hint; //SYNC_REQ: var Hint = require('command_line:hint').Hint;
-var Level = hint.Level; //SYNC_REQ: var Level = require('command_line:hint').Level;
-//SYNC_REQ: var typehint = require('command_line:typehint');
+
+var Request = request.Request;
+
+
+
+var Hint = hint.Hint;
+var Level = hint.Level;
+
 
 /**
  * An object used during command line parsing to hold the various intermediate

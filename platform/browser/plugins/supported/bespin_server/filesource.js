@@ -47,10 +47,10 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Trait = traits.Trait; //SYNC_REQ: var Trait = require('traits').Trait;
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
-var server = skywriter_server.server; //SYNC_REQ: var server = require('skywriter_server').server;
-//SYNC_REQ: var pathUtil = require('filesystem:path');
+var Trait = traits.Trait;
+var Promise = promise.Promise;
+var server = skywriter_server.server;
+
 
 exports.SkywriterFileSource = function(server) {
     this.server = server;

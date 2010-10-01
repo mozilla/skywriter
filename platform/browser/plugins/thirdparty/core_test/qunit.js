@@ -13,7 +13,6 @@ require.def(['require', 'exports', 'module',
 "use exports module test ok equals expect start stop same run raises";
 
 var Ct = core.,
-    utils = require('utils'); //SYNC_REQ: var Ct = require('core'),
     utils = require('utils');
 
     

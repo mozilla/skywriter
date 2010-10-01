@@ -51,13 +51,13 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var server = skywriter_server.server; //SYNC_REQ: var server = require('skywriter_server').server;
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
-//SYNC_REQ: var project_m = require('project');
+var server = skywriter_server.server;
+var catalog = plugins.catalog;
+var env = environment.env;
 
-//SYNC_REQ: var social_user = require('collab:user');
-//SYNC_REQ: var util = require('collab:util');
+
+
+
 
 /*
 var ChatLineView = SC.View.extend(SC.StaticLayout, {

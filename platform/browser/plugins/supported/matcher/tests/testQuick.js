@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var QuickMatcher = quick.QuickMatcher; //SYNC_REQ: var QuickMatcher = require('matcher:quick').QuickMatcher;
-//SYNC_REQ: var t = require('plugindev');
+var QuickMatcher = quick.QuickMatcher;
+
 
 exports.testQuickMatcher = function() {
     var matcher = new QuickMatcher('foo');

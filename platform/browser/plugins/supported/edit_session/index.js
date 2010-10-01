@@ -47,11 +47,11 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-//SYNC_REQ: var util = require('skywriter:util/util');
+var Promise = promise.Promise;
+var catalog = plugins.catalog;
 
-var Event = events.Event; //SYNC_REQ: var Event = require("events").Event;
+
+var Event = events.Event;
 
 exports.EditSession = function() { };
 

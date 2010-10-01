@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var util = require('skywriter:util/util');
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+
+var env = environment.env;
 
 /**
  * This simple undo manager coordinates undo for the app that embeds Skywriter.

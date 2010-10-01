@@ -41,7 +41,7 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Matcher = matcher.Matcher; //SYNC_REQ: var Matcher = require('matcher').Matcher;
+var Matcher = matcher.Matcher;
 
 /**
  * Provides smart matching suitable for 'quick open' functionality.

@@ -55,7 +55,7 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-var _ = underscore._; //SYNC_REQ: var _ = require('underscore')._;
+var _ = underscore._;
 
 function JSCompletion(tags) {
     this.tags = tags;

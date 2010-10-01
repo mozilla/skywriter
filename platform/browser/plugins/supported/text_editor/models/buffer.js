@@ -51,14 +51,14 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var env = environment.env;
 
-//SYNC_REQ: var util = require('skywriter:util/util');
 
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
-var TextStorage = textstorage.TextStorage; //SYNC_REQ: var TextStorage = require('models/textstorage').TextStorage;
-var LayoutManager = layoutmanager.LayoutManager; //SYNC_REQ: var LayoutManager = require('controllers/layoutmanager').LayoutManager;
-var UndoManager = undomanager.UndoManager; //SYNC_REQ: var UndoManager = require('undomanager').UndoManager;
+
+var Promise = promise.Promise;
+var TextStorage = textstorage.TextStorage;
+var LayoutManager = layoutmanager.LayoutManager;
+var UndoManager = undomanager.UndoManager;
 
 /**
  * A Buffer connects a model and file together. It also holds the layoutManager

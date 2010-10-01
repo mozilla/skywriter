@@ -41,7 +41,7 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var cookie = require('skywriter:util/cookie');
+
 
 /**
  * Save the settings in a cookie

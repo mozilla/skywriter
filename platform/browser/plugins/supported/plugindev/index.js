@@ -53,15 +53,15 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-//SYNC_REQ: var core_test = require('core_test');
-//SYNC_REQ: var assert = require('core_test:assert');
-//SYNC_REQ: var test = require('core_test:test');
-var DefaultLogger = require('loggers/default', 'core_test');
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var console = consoleMod.console;
 
-var server = skywriter_server.server; //SYNC_REQ: var server = require('skywriter_server').server;
-var pluginCatalog = plugins.catalog; //SYNC_REQ: var pluginCatalog = require('skywriter:plugins').catalog;
+
+
+var DefaultLogger = require('loggers/default', 'core_test');
+var env = environment.env;
+
+var server = skywriter_server.server;
+var pluginCatalog = plugins.catalog;
 
 // Transfer names from core_test so that this is the
 // test interface used by plugins.

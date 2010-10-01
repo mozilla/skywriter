@@ -12,7 +12,6 @@ require.def(['require', 'exports', 'module',
 // ==========================================================================
 
 var CoreTest = core.,
-    utils    = require('utils'); //SYNC_REQ: var CoreTest = require('core'),
     utils    = require('utils');
 
 require('system/plan'); 

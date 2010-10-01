@@ -59,17 +59,17 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-//SYNC_REQ: var util = require('skywriter:util/util');
+var catalog = plugins.catalog;
 
-var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
-var CanvasView = canvas.CanvasView; //SYNC_REQ: var CanvasView = require('views/canvas').CanvasView;
-var LayoutManager = layoutmanager.LayoutManager; //SYNC_REQ: var LayoutManager = require('controllers/layoutmanager').LayoutManager;
-//SYNC_REQ: var Range = require('rangeutils:utils/range');
-//SYNC_REQ: var Rect = require('utils/rect');
-var TextInput = textinput.TextInput; //SYNC_REQ: var TextInput = require('views/textinput').TextInput;
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
+
+var Event = events.Event;
+var CanvasView = canvas.CanvasView;
+var LayoutManager = layoutmanager.LayoutManager;
+
+
+var TextInput = textinput.TextInput;
+var console = consoleMod.console;
+var settings = settingsMod.settings;
 
 // Set this to true to outline all text ranges with a box. This may be useful
 // when optimizing syntax highlighting engines.

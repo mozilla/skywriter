@@ -41,7 +41,7 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
  
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var env = environment.env;
 
 // Scrolling commands.
 

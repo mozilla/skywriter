@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var $ = jquery.$; //SYNC_REQ: var $ = require('jquery').$;
-var _ = underscore._; //SYNC_REQ: var _ = require('underscore')._;
+var $ = jquery.$;
+var _ = underscore._;
 
 var ANIMATION_SPEED = 100;  // in ms
 

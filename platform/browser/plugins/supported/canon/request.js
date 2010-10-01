@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
-//SYNC_REQ: var history = require('canon:history');
+var Event = events.Event;
+
 
 /**
  * To create an invocation, you need to do something like this (all the ctor

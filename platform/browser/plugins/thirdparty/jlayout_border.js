@@ -22,7 +22,7 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-var jLayout = exports.jLayout = jlayout.jLayout; //SYNC_REQ: var jLayout = exports.jLayout = require("jlayout").jLayout;
+var jLayout = exports.jLayout = jlayout.jLayout;
 
 jLayout.border = function (spec) {
 	var my = {},

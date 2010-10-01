@@ -63,8 +63,8 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
-var StandardSyntax = standard_syntax.StandardSyntax; //SYNC_REQ: var StandardSyntax = require('standard_syntax').StandardSyntax;
+var Promise = promise.Promise;
+var StandardSyntax = standard_syntax.StandardSyntax;
 
 var COMMENT_REGEXP = {
     regex:  /^\/\/.*/,

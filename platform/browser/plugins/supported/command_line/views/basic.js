@@ -49,14 +49,14 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+var console = consoleMod.console;
+var Promise = promise.Promise;
 
-//SYNC_REQ: var basic = require('types:basic');
-var PrefixMatcher = prefix.PrefixMatcher; //SYNC_REQ: var PrefixMatcher = require('matcher:prefix').PrefixMatcher;
 
-var Menu = menu.Menu; //SYNC_REQ: var Menu = require('command_line:views/menu').Menu;
-var MatcherMenu = menu.MatcherMenu; //SYNC_REQ: var MatcherMenu = require('command_line:views/menu').MatcherMenu;
+var PrefixMatcher = prefix.PrefixMatcher;
+
+var Menu = menu.Menu;
+var MatcherMenu = menu.MatcherMenu;
 
 /**
  * A choice between a known set of options

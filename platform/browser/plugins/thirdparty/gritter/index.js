@@ -15,7 +15,7 @@ require.def(['require', 'exports', 'module',
  * Version: 1.6
  */
 
-var $ = jquery.$; //SYNC_REQ: var $ = require('jquery').$;
+var $ = jquery.$;
 
 /**
 * Set it up as an object under the jQuery namespace

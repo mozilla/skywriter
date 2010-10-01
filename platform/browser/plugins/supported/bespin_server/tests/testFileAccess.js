@@ -34,10 +34,10 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var t = require('plugindev');
-//SYNC_REQ: var fs = require('filesystem');
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
-//SYNC_REQ: var filesource = require('filesource');
+
+
+var Promise = promise.Promise;
+
 
 var DummyServer = function(responseData) {
     this.responseData = responseData;

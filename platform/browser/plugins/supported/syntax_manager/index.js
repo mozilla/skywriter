@@ -51,12 +51,12 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var _ = underscore._; //SYNC_REQ: var _ = require('underscore')._;
-var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
-var WorkerSupervisor = worker_manager.WorkerSupervisor; //SYNC_REQ: var WorkerSupervisor = require('worker_manager').WorkerSupervisor;
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-//SYNC_REQ: var rangeutils = require('rangeutils:utils/range');
-var syntaxDirectory = syntax_directory.syntaxDirectory; //SYNC_REQ: var syntaxDirectory = require('syntax_directory').syntaxDirectory;
+var _ = underscore._;
+var Event = events.Event;
+var WorkerSupervisor = worker_manager.WorkerSupervisor;
+var console = consoleMod.console;
+
+var syntaxDirectory = syntax_directory.syntaxDirectory;
 
 // The number of lines to highlight at once.
 var GRANULARITY = 100;

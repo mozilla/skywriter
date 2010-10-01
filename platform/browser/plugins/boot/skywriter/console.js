@@ -41,7 +41,7 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var util = require("util/util");
+
 
 /**
  * This object represents a "safe console" object that forwards debugging

@@ -65,23 +65,23 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var diff_match_patch = diff.diff_match_patch; //SYNC_REQ: var diff_match_patch = require('diff').diff_match_patch;
+var diff_match_patch = diff.diff_match_patch;
 
-//SYNC_REQ: var util = require('skywriter:util/util');
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
 
-//SYNC_REQ: var keyutil = require('keyboard:keyutil');
-var keyboardManager = keyboard.keyboardManager; //SYNC_REQ: var keyboardManager = require('keyboard:keyboard').keyboardManager;
+var catalog = plugins.catalog;
+var console = consoleMod.console;
 
-//SYNC_REQ: var history = require('canon:history');
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
-var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
 
-var Level = hint.Level; //SYNC_REQ: var Level = require('command_line:hint').Level;
-var Input = input.Input; //SYNC_REQ: var Input = require('command_line:input').Input;
-//SYNC_REQ: var templates = require('command_line:templates');
-//SYNC_REQ: var requestOutput = require('command_line:views/requestOutput');
+var keyboardManager = keyboard.keyboardManager;
+
+
+var env = environment.env;
+var settings = settingsMod.settings;
+
+var Level = hint.Level;
+var Input = input.Input;
+
+
 
 var imagePath = catalog.getResourceURL('command_line') + 'images';
 var diff = new diff_match_patch();

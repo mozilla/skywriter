@@ -45,9 +45,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
-//SYNC_REQ: var m_range = require('rangeutils:utils/range');
+var settings = settingsMod.settings;
+var env = environment.env;
+
 
 /*
  * Commands that delete text.

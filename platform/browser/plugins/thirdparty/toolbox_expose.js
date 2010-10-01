@@ -23,7 +23,7 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-var $ = jquery.$; //SYNC_REQ: var $ = require("jquery").$;
+var $ = jquery.$;
 
 // static constructs
 $.tools = $.tools || {version: '1.2.0'};

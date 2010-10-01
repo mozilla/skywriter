@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
-//SYNC_REQ: var util = require('skywriter:util/util');
+var Event = events.Event;
+
 
 var TextStorage;
 

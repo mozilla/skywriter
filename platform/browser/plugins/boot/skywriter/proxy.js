@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var util = require("util/util");
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require("promise").Promise;
+
+var Promise = promise.Promise;
 
 exports.xhr = function(method, url, async, beforeSendCallback) {
     var pr = new Promise();

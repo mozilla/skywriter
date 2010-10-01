@@ -14,9 +14,6 @@ require.def(['require', 'exports', 'module',
 var utils       = utils.,
     Ct          = require('core'),
     Promise     = require('promise', 'skywriter').Promise,
-    Assertable  = require('assert').xCoreTestAssertable; //SYNC_REQ: var utils       = require('utils'),
-    Ct          = require('core'),
-    Promise     = require('promise', 'skywriter').Promise,
     Assertable  = require('assert').xCoreTestAssertable;
 
 require('system/dump'); // add Ct.dump

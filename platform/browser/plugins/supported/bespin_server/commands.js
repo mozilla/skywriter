@@ -45,9 +45,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var project_m = require('project');
-var server = index.server; //SYNC_REQ: var server = require('skywriter_server:index').server;
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+
+var server = index.server;
+var env = environment.env;
 
 /**
  * Utility to convert bytes to megabytes

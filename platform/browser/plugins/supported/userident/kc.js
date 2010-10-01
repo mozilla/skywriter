@@ -47,11 +47,11 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var SC = runtime.SC; //SYNC_REQ: var SC = require('sproutcore/runtime').SC;
+var SC = runtime.SC;
 
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
-var server = skywriter_server.server; //SYNC_REQ: var server = require('skywriter_server').server;
+var env = environment.env;
+var Promise = promise.Promise;
+var server = skywriter_server.server;
 
 // these are private, because we will likely want to put a little more
 // control around the kcpass.

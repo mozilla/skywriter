@@ -49,13 +49,13 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var util = require('skywriter:util/util');
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
 
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var catalog = plugins.catalog;
+var console = consoleMod.console;
 
-//SYNC_REQ: var templates = require('command_line:templates');
+var env = environment.env;
+
+
 
 var imagePath = catalog.getResourceURL('command_line') + 'images';
 

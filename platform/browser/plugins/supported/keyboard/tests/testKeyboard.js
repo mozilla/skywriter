@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var keyboard = require('keyboard:keyboard');
-//SYNC_REQ: var t = require('plugindev');
+
+
 
 exports.testKeyMatching = function() {
     var km = keyboard.keyboardManager;

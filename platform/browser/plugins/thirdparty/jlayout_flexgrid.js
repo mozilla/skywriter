@@ -23,7 +23,7 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-var jLayout = exports.jLayout = jlayout.jLayout; //SYNC_REQ: var jLayout = exports.jLayout = require("jlayout").jLayout;
+var jLayout = exports.jLayout = jlayout.jLayout;
 
 // The flex grid has a dependency on the grid layout, so please make
 // sure you include the grid layout manager before the flex grid

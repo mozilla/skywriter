@@ -56,8 +56,8 @@ require.def(['require', 'exports', 'module',
 // IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 // OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-//SYNC_REQ: var util = require('skywriter:util/util');
-var console = consoleMod.console; //SYNC_REQ: var console = require("skywriter:console").console;
+
+var console = consoleMod.console;
 
 /**
  * Different browsers create stack traces in different ways.

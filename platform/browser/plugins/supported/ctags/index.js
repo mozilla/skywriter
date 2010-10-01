@@ -45,9 +45,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var _ = underscore._; //SYNC_REQ: var _ = require('underscore')._;
-var TagReader = reader.TagReader; //SYNC_REQ: var TagReader = require('./reader').TagReader;
-var Trait = traits.Trait; //SYNC_REQ: var Trait = require('traits').Trait;
+var _ = underscore._;
+var TagReader = reader.TagReader;
+var Trait = traits.Trait;
 
 exports.Tags = function() {
     this.tags = [];

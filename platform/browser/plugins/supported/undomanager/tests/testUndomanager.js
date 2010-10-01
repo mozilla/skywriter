@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var UndoManager = index.UndoManager; //SYNC_REQ: var UndoManager = require('index').UndoManager;
-//SYNC_REQ: var t = require('plugindev');
+var UndoManager = index.UndoManager;
+
 
 exports.testUndoAndRedo = function() {
     var undoManager = new UndoManager();

@@ -47,10 +47,10 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var getCompletePath = index.getCompletePath; //SYNC_REQ: var getCompletePath = require('index').getCompletePath;
-var QuickMatcher = quick.QuickMatcher; //SYNC_REQ: var QuickMatcher = require('matcher:quick').QuickMatcher;
-var MatcherMenu = menu.MatcherMenu; //SYNC_REQ: var MatcherMenu = require('command_line:views/menu').MatcherMenu;
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var getCompletePath = index.getCompletePath;
+var QuickMatcher = quick.QuickMatcher;
+var MatcherMenu = menu.MatcherMenu;
+var env = environment.env;
 
 /**
  * @see typehint#getHint()

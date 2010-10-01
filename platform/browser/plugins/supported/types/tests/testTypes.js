@@ -45,9 +45,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
-//SYNC_REQ: var types = require('types:types');
-//SYNC_REQ: var t = require('plugindev');
+var Promise = promise.Promise;
+
+
 
 exports.testGetSimpleName = function() {
     t.equal(types.getSimpleName('text'), 'text', 'text is simple');

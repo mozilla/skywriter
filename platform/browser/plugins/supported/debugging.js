@@ -222,10 +222,10 @@ require.def(['require', 'exports', 'module',
  * debugging.
  */
 
-//SYNC_REQ: var util = require('skywriter:util/util');
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-//SYNC_REQ: var promiseMod = require('skywriter:promise');
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+
+var catalog = plugins.catalog;
+
+var env = environment.env;
 
 /**
  * The 'action' command

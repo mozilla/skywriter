@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var t = require('plugindev');
-var History = file_history.FileHistory; //SYNC_REQ: var History = require('file_history').FileHistory;
+
+var History = file_history.FileHistory;
 
 exports.testHistory = function() {
     var mockStorage = {};

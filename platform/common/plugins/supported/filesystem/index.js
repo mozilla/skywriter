@@ -29,7 +29,7 @@ require.def(['require', 'exports', 'module',
  * ***** END LICENSE BLOCK ***** */
 
 /*FIXME, put this code in the platform's boot script'*/
-//SYNC_REQ: var skywriter = require('skywriter');
+
 //var nodejs = typeof(process) !== undefined ? true: false;
 
 var util,

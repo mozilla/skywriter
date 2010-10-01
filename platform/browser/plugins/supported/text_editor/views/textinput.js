@@ -47,11 +47,11 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var util = require('skywriter:util/util');
-var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
-//SYNC_REQ: var Range = require('rangeutils:utils/range');
 
-//SYNC_REQ: var KeyUtil = require('keyboard:keyutil');
+var Event = events.Event;
+
+
+
 
 /**
  * @namespace

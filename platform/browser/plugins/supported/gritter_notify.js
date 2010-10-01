@@ -58,7 +58,7 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-var $ = jquery.$; //SYNC_REQ: var $ = require('jquery').$;
+var $ = jquery.$;
 require('gritter');
 
 exports.gritter = function(message) {

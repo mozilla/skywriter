@@ -45,9 +45,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var catalog = plugins.catalog;
+var settings = settingsMod.settings;
+var env = environment.env;
 
 exports.findNextCommand = function(args, request) {
     var view = env.view, search = view.editor.searchController;

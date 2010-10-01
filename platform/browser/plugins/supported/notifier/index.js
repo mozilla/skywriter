@@ -45,9 +45,9 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+var catalog = plugins.catalog;
+var settings = settingsMod.settings;
+var console = consoleMod.console;
 
 exports.Notifier = function() {};
 

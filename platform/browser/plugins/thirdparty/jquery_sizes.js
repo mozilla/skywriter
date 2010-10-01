@@ -20,7 +20,7 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-var jQuery = jquery.$; //SYNC_REQ: var jQuery = require("jquery").$;
+var jQuery = jquery.$;
 var $ = jQuery;
 
 var num = function (value) {

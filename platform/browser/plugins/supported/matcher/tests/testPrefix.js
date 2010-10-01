@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var PrefixMatcher = prefix.PrefixMatcher; //SYNC_REQ: var PrefixMatcher = require('matcher:prefix').PrefixMatcher;
-//SYNC_REQ: var t = require('plugindev');
+var PrefixMatcher = prefix.PrefixMatcher;
+
 
 exports.testPrefixMatching = function() {
     var matcher = new PrefixMatcher('b');

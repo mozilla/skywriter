@@ -70,15 +70,15 @@ I took out from package.json following extension points:
  * information and handle collaboration.
  */
 
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
-//SYNC_REQ: var project = require('project');
-var server = skywriter_server.server; //SYNC_REQ: var server = require('skywriter_server').server;
+var console = consoleMod.console;
+var env = environment.env;
 
-var mobwrite = core.mobwrite; //SYNC_REQ: var mobwrite = require('collab:mobwrite/core').mobwrite;
-//SYNC_REQ: var diff_match_patch = require('diff');
+var server = skywriter_server.server;
 
-//SYNC_REQ: var m_view = require('collab:view');
+var mobwrite = core.mobwrite;
+
+
+
 
 /**
  * Mobwrite has a set of shareObjs which are designed to wrap DOM nodes.

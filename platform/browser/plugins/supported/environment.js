@@ -55,10 +55,10 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-//SYNC_REQ: var util = require('skywriter:util/util');
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require("skywriter:plugins").catalog;
-var settings = settingsMod.settings; //SYNC_REQ: var settings = require('settings').settings;
+
+var console = consoleMod.console;
+var catalog = plugins.catalog;
+var settings = settingsMod.settings;
 
 /**
  * The environment plays a similar role to the environment under unix.

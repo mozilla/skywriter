@@ -49,11 +49,11 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var ctags = require('ctags');
-//SYNC_REQ: var range = require('rangeutils:utils/range');
-var CompletionUI = ui.CompletionUI; //SYNC_REQ: var CompletionUI = require('completion:ui').CompletionUI;
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+
+
+var CompletionUI = ui.CompletionUI;
+var catalog = plugins.catalog;
+var env = environment.env;
 
 function CompletionController(editorView) {
     this._editorView = editorView;

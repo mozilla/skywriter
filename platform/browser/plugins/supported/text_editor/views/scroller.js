@@ -49,13 +49,13 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//SYNC_REQ: var util = require('skywriter:util/util');
-var Event = events.Event; //SYNC_REQ: var Event = require('events').Event;
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
 
-//SYNC_REQ: var Rect = require('utils/rect');
+var Event = events.Event;
+var console = consoleMod.console;
 
-var CanvasView = canvas.CanvasView; //SYNC_REQ: var CanvasView = require('views/canvas').CanvasView;
+
+
+var CanvasView = canvas.CanvasView;
 
 var LINE_HEIGHT                 = 15;
 var MINIMUM_HANDLE_SIZE         = 20;

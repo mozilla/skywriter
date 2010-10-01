@@ -13,8 +13,6 @@ require.def(['require', 'exports', 'module',
 
 var utils = utils.,
     Promise = require('promise', 'skywriter').Promise,
-    Ct = require('core'); //SYNC_REQ: var utils = require('utils'),
-    Promise = require('promise', 'skywriter').Promise,
     Ct = require('core');
     
 require('system/module'); // add Ct.Module

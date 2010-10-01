@@ -47,11 +47,11 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
-//SYNC_REQ: var util = require('skywriter:util/util');
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
+var env = environment.env;
 
-var Buffer = buffer.Buffer; //SYNC_REQ: var Buffer = require('text_editor:models/buffer').Buffer;
+var console = consoleMod.console;
+
+var Buffer = buffer.Buffer;
 
 var MAX_HISTORY_SIZE = 30;
 

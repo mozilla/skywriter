@@ -49,12 +49,12 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-//SYNC_REQ: var pathUtil = require('filesystem:path');
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var catalog = plugins.catalog;
 
-var Buffer = buffer.Buffer; //SYNC_REQ: var Buffer = require('text_editor:models/buffer').Buffer;
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
+var env = environment.env;
+
+var Buffer = buffer.Buffer;
+var Promise = promise.Promise;
 
 /*
  * Creates a path based on the current working directory and the passed 'path'.

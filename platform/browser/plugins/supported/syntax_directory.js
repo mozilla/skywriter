@@ -56,7 +56,7 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-//SYNC_REQ: var plugins = require("skywriter:plugins");
+
 
 function SyntaxInfo(ext) {
     this.extension = ext;

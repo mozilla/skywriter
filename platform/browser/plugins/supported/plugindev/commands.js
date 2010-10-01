@@ -51,14 +51,14 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = plugins.catalog; //SYNC_REQ: var catalog = require('skywriter:plugins').catalog;
-var Promise = promise.Promise; //SYNC_REQ: var Promise = require('skywriter:promise').Promise;
-var groupPromises = promise.group; //SYNC_REQ: var groupPromises = require('skywriter:promise').group;
-//SYNC_REQ: var util = require('skywriter:util/util');
-var env = environment.env; //SYNC_REQ: var env = require('environment').env;
+var catalog = plugins.catalog;
+var Promise = promise.Promise;
+var groupPromises = promise.group;
 
-var server = skywriter_server.server; //SYNC_REQ: var server = require('skywriter_server').server;
-//SYNC_REQ: var pathutils = require('filesystem:path');
+var env = environment.env;
+
+var server = skywriter_server.server;
+
 
 var getPluginName = function(path) {
     if (util.endsWith(path, '/')) {

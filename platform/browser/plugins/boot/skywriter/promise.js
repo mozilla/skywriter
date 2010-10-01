@@ -43,8 +43,8 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var console = consoleMod.console; //SYNC_REQ: var console = require('skywriter:console').console;
-var Trace = stacktrace.Trace; //SYNC_REQ: var Trace = require('skywriter:util/stacktrace').Trace;
+var console = consoleMod.console;
+var Trace = stacktrace.Trace;
 
 /**
  * A promise can be in one of 2 states.
