@@ -1,5 +1,7 @@
-require.def(['require', 'exports', 'module'
-], function(require, exports, module
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins'
+], function(require, exports, module,
+    plugins
 ) {
 
 /* ***** BEGIN LICENSE BLOCK *****
@@ -38,6 +40,12 @@ require.def(['require', 'exports', 'module'
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+
+exports.init = function() {
+};
+
+exports.deinit = function() {
+};
 
 /**
  * We ignore items whose score is more than <tt>excludeScoreMargin</tt> off

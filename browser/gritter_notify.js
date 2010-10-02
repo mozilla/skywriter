@@ -1,6 +1,8 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     '/jquery'
 ], function(require, exports, module,
+    plugins,
     jquery
 ) {
 
@@ -42,21 +44,23 @@ require.def(['require', 'exports', 'module',
  * ***** END LICENSE BLOCK ***** */
 
 "define metadata";
-({
-    "dependencies": {
-        "gritter": "0.0.0"
-    },
-    "provides": [
-        {
-            "ep": "notificationHandler",
-            "name": "gritter",
-            "description": "Produces Growl-like notifications using the jQuery Gritter plugin.",
-            "level": "info",
-            "pointer": "#gritter"
-        }
-    ]
-});
+({ "dependencies": { "gritter": "0.0.0" } });
 "end";
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("notificationHandler", module.id, {
+        "name": "gritter",
+        "description":
+            "Produces Growl-like notifications using the jQuery Gritter plugin.",
+        "level": "info",
+        "pointer": "#gritter"
+    });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
 
 var $ = jquery.$;
 require('gritter');

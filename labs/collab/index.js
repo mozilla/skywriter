@@ -1,4 +1,5 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     'skywriter/console',
     'environment',
     'project',
@@ -7,6 +8,7 @@ require.def(['require', 'exports', 'module',
     'diff',
     'collab/view'
 ], function(require, exports, module,
+    plugins,
     consoleMod,
     environment,
     project,
@@ -52,6 +54,225 @@ require.def(['require', 'exports', 'module',
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("appLaunched", module.id, { "pointer": "#onAppLaunched" });
+    catalog.connect("editorChange", module.id, { "match": "[buffer]", "pointer": "#mobwriteFileChanged" });
+    catalog.connect("msgtargetid", module.id, { "name": "mobwrite", "pointer": "#mobwriteMsg" });
+    catalog.connect("msgtargetid", module.id, { "name": "broadcast", "pointer": "view#broadcastMsg" });
+    catalog.connect("msgtargetid", module.id, { "name": "tell", "pointer": "view#tellMsg" });
+    catalog.connect("msgtargetid", module.id, { "name": "share_tell", "pointer": "view#shareTellMsg" });
+    catalog.connect("msgtargetid", module.id, { "name": "file_event", "pointer": "view#fileEventMsg" });
+    catalog.connect("mobwriteinstance", module.id, { "pointer": "mobwrite/core#mobwrite" });
+    catalog.connect("notification", module.id, {
+        "name": "broadcast",
+        "level": "info",
+        "description": "Broadcast message from a person you follow"
+    });
+    catalog.connect("notification", module.id, {
+        "name": "tell",
+        "level": "info",
+        "description": "Direct message from a person you follow"
+    });
+    catalog.connect("notification", module.id, {
+        "name": "shareTell",
+        "level": "info",
+        "description": "Direct message from a person you follow"
+    });
+    catalog.connect("notification", module.id, {
+        "name": "fileEvent",
+        "level": "info",
+        "description": "Shared file is opened by others"
+    });
+    catalog.connect("command", module.id, {
+        "name": "follow",
+        "params": [
+            {
+                "name": "usernames",
+                "type": "text",
+                "description": "username(s) of person(s) to follow",
+                "defaultValue": null
+            }
+        ],
+        "description": "add to (or list) the users we are following",
+        "pointer": "social#followCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "unfollow",
+        "params": [
+            {
+                "name": "usernames",
+                "type": "text",
+                "description": "username(s) of person(s) to stop following"
+            }
+        ],
+        "description": "remove from the list of users we are following",
+        "pointer": "social#unfollowCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "broadcast",
+        "params": [
+            {
+                "name": "message",
+                "type": "text",
+                "description": "text message to send to your followers",
+                "defaultValue": null
+            }
+        ],
+        "description": "send a message to all followers",
+        "pointer": "social#broadcastCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "tell",
+        "params": [
+            {
+                "name": "username",
+                "type": "text",
+                "description": "username of follower to send a message to"
+            },
+            {
+                "name": "message",
+                "type": "text",
+                "description": "text message to send to your follower",
+                "defaultValue": null
+            }
+        ],
+        "description": "send a message to all followers",
+        "pointer": "social#tellCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "group",
+        "description":
+            "Collect the people you follow into groups, and display the existing groups"
+    });
+    catalog.connect("command", module.id, {
+        "name": "group list",
+        "params": [
+            {
+                "name": "group",
+                "type": "text",
+                "description": "An optional group name or leave blank to list groups",
+                "defaultValue": null
+            }
+        ],
+        "description": "List the current groups and group members",
+        "pointer": "social#groupListCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "group add",
+        "params": [
+            {
+                "name": "group",
+                "type": "text",
+                "description": "The name of the group to add to"
+            },
+            {
+                "name": "members",
+                "type": "text",
+                "description": "The usernames of the followers to add"
+            }
+        ],
+        "description": "Add members to a new or existing group",
+        "pointer": "social#groupAddCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "group remove",
+        "params": [
+            {
+                "name": "group",
+                "type": "text",
+                "description": "The name of the group to remove from"
+            },
+            {
+                "name": "members",
+                "type": "text",
+                "description": "The usernames of the followers to remove"
+            }
+        ],
+        "description":
+            "Remove members from an existing group (and remove group if empty)",
+        "pointer": "social#groupRemoveCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "share",
+        "description": "Manage the projects that you share to other users"
+    });
+    catalog.connect("command", module.id, {
+        "name": "share list",
+        "params": [
+            {
+                "name": "project",
+                "type": "text",
+                "description":
+                    "An optional project name or leave blank to list shared projects",
+                "defaultValue": null
+            }
+        ],
+        "description": "List the current shared projects",
+        "pointer": "social#shareListCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "share remove",
+        "params": [
+            {
+                "name": "project",
+                "type": "text",
+                "description": "The name of an existing project"
+            },
+            {
+                "name": "member",
+                "type": "text",
+                "description":
+                    "Optional user or group (or leave blank for all users and groups)",
+                "defaultValue": null
+            }
+        ],
+        "description": "Remove a share from the current shared projects",
+        "pointer": "social#shareRemoveCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "share add",
+        "params": [
+            {
+                "name": "project",
+                "type": "text",
+                "description": "Project name to alter sharing on"
+            },
+            {
+                "name": "member",
+                "type": "text",
+                "description": "username or group name to change"
+            },
+            {
+                "name": "permission",
+                "type": "text",
+                "description": "Permission flags. edit|readonly",
+                "defaultValue": null
+            }
+        ],
+        "description": "Add a share to the current shared projects",
+        "pointer": "social#shareAddCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "viewme",
+        "params": [
+            {
+                "name": "varargs",
+                "type": "text",
+                "description":
+                    "Arguments: ({user}|{group}|everyone) (true|false|default)",
+                "defaultValue": null
+            }
+        ],
+        "description": "List and alter user's ability to see what I'm working on",
+        "pointer": "social#viewmeCommand"
+    });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
 
 /*
 

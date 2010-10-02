@@ -45,25 +45,30 @@ require.def(['require', 'exports', 'module',
 
 "define metadata";
 ({
-    "description": "Commands for working with the Skywriter user interface beyond the editor",
-    "provides": [
-        {
-            "ep": "command",
-            "name": "jump-commandline",
-            "key": "ctrl_j",
-            "predicates": {"isTextView": true},
-            "pointer": "#jumpCommandLine"
-        },
-        {
-            "ep": "command",
-            "name": "jump-editor",
-            "key": "ctrl_j",
-            "predicates": {"isCommandLine": true, "isKeyUp": false},
-            "pointer": "#jumpEditor"
-        }
-    ]
+    "description":
+        "Commands for working with the Skywriter user interface beyond the editor"
 });
 "end";
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("command", module.id, {
+        "name": "jump-commandline",
+        "key": "ctrl_j",
+        "predicates": { "isTextView": true },
+        "pointer": "#jumpCommandLine"
+    });
+    catalog.connect("command", module.id, {
+        "name": "jump-editor",
+        "key": "ctrl_j",
+        "predicates": { "isCommandLine": true, "isKeyUp": false },
+        "pointer": "#jumpEditor"
+    });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
 
 var env = environment.env;
 

@@ -49,6 +49,131 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("command", module.id, {
+        "name": "ls",
+        "params": [
+            {
+                "name": "path",
+                "type": "text",
+                "description":
+                    "list files relative to current file, or start with /projectname"
+            }
+        ],
+        "aliases": [ "dir", "list", "files" ],
+        "description": "show files",
+        "pointer": "#filesCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "save",
+        "params": [
+            {
+                "name": "filename",
+                "type": "text",
+                "description": "add the filename to save as, or use the current file",
+                "defaultValue": null
+            }
+        ],
+        "description": "save the current contents",
+        "key": "ctrl_s",
+        "pointer": "#saveCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "saveas",
+        "params": [
+            {
+                "name": "path",
+                "type": "text",
+                "description": "the filename to save to",
+                "defaultValue": ""
+            }
+        ],
+        "description": "save the current contents under a new name",
+        "key": "ctrl_shift_s",
+        "pointer": "#saveAsCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "open",
+        "params": [
+            {
+                "name": "path",
+                "type": "existingFile",
+                "description": "the filename to open"
+            },
+            {
+                "name": "line",
+                "type": "number",
+                "description": "optional line to jump to",
+                "defaultValue": null
+            }
+        ],
+        "aliases": [ "load" ],
+        "description": "load up the contents of the file",
+        "key": "ctrl_o",
+        "pointer": "#openCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "rm",
+        "params": [
+            {
+                "name": "path",
+                "type": "text",
+                "description":
+                    "add the filename to remove, give a full path starting with '/' to delete from a different project. To delete a directory end the path in a '/'"
+            }
+        ],
+        "aliases": [ "remove", "del" ],
+        "description": "remove the file",
+        "pointer": "#rmCommand"
+    });
+    catalog.connect("typehint", module.id, {
+        "name": "existingFile",
+        "description": "A method of selecting an existing file",
+        "pointer": "views/types#existingFileHint"
+    });
+    catalog.connect("command", module.id, {
+        "name": "newfile",
+        "description": "Creates an empty buffer for editing a new file.",
+        "pointer": "#newfileCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "mkdir",
+        "params": [
+            { "name": "path", "type": "text", "description": "Directory to create" }
+        ],
+        "description":
+            "create a new directory, use a leading / to create a directory in a different project",
+        "pointer": "#mkdirCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "cd",
+        "params": [
+            {
+                "name": "workingDir",
+                "type": "text",
+                "description": "Directory as working directory"
+            }
+        ],
+        "description": "change working directory",
+        "pointer": "#cdCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "pwd",
+        "description": "show the current working directory",
+        "pointer": "#pwdCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "revert",
+        "description": "revert the current buffer to the last saved version",
+        "pointer": "#revertCommand"
+    });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
+
 var catalog = plugins.catalog;
 
 var env = environment.env;

@@ -1,6 +1,1 @@
-{
-    "name": "skywriter",
-    "environments": {
-        "main": true, "worker": true
-    }
-}
+{ "name": "skywriter", "environments": { "main": true, "worker": true } }

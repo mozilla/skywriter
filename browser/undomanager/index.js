@@ -1,7 +1,9 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     'skywriter/util/util',
     'undomanager/environment'
 ], function(require, exports, module,
+    plugins,
     util,
     environment
 ) {
@@ -42,6 +44,20 @@ require.def(['require', 'exports', 'module',
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("command", module.id, {
+        "name": "redo",
+        "key": [ "ctrl_shift_z" ],
+        "pointer": "#undoManagerCommand"
+    });
+    catalog.connect("command", module.id, { "name": "undo", "key": [ "ctrl_z" ], "pointer": "#undoManagerCommand" });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
 
 
 var env = environment.env;

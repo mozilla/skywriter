@@ -51,6 +51,63 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("factory", module.id, { "name": "skywriter_server", "action": "call", "pointer": "#createServer" });
+    catalog.connect("factory", module.id, {
+        "name": "skywriter_filesource",
+        "action": "new",
+        "pointer": "filesource#SkywriterFileSource"
+    });
+    catalog.addExtensionPoint("msgtargetid", {
+        "description": "Message target id to dispatch messages from the server",
+        "indexOn": "name"
+    });
+    catalog.addExtensionPoint("mobwriteinstance", { "description": "Optional mobwrite instance" });
+    catalog.connect("command", module.id, {
+        "name": "rescan",
+        "params": [
+            {
+                "name": "project",
+                "type": "text",
+                "description": "Project (top-level directory) to scan"
+            }
+        ],
+        "description":
+            "resynchronize the server's listing of your files. This is only in case you're having trouble. Usually you won't need this command.",
+        "pointer": "commands#rescanCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "preview",
+        "key": "ctrl_p",
+        "description": "Preview the current file.",
+        "pointer": "commands#preview"
+    });
+    catalog.connect("command", module.id, {
+        "name": "export",
+        "description": "export a project (top-level directory)",
+        "pointer": "commands#exportCommand",
+        "params": [
+            {
+                "name": "project",
+                "type": "text",
+                "description": "Project (top-level directory) to export"
+            },
+            {
+                "name": "archivetype",
+                "type": { "name": "selection", "data": [ "zip", "tgz", "tar.gz" ] },
+                "description": "Type of archive to generate"
+            }
+        ]
+    });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+    catalog.removeExtensionPoint("msgtargetid");
+    catalog.removeExtensionPoint("mobwriteinstance");
+};
+
 
 var console = consoleMod.console;
 var Promise = promise.Promise;

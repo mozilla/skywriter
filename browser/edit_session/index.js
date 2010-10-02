@@ -47,6 +47,15 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("factory", module.id, { "name": "session", "pointer": "#createSession", "action": "call" });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
+
 var Promise = promise.Promise;
 var catalog = plugins.catalog;
 

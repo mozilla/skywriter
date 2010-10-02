@@ -1,7 +1,9 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     '/environment',
     '/jslint'
 ], function(require, exports, module,
+    plugins,
     environment,
     jslintMod
 ) {
@@ -47,19 +49,24 @@ require.def(['require', 'exports', 'module',
 ({
     "dependencies": { "jslint": "0.0.0" },
     "description": "Provides the JSLint command to check code for errors.",
-    "objects": [],
-    "provides": [
-        {
-            "ep": "command",
-            "name": "jslint",
-            "params": [],
-            "description": "Run JSLint to check the current file",
-            "pointer": "#jslintCommand",
-            "predicates": { "context": "js" }
-        }
-    ]
+    "objects": []
 });
 "end";
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("command", module.id, {
+        "name": "jslint",
+        "params": [],
+        "description": "Run JSLint to check the current file",
+        "pointer": "#jslintCommand",
+        "predicates": { "context": "js" }
+    });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
 
 var env = environment.env;
 var jslint = jslintMod.jslint;

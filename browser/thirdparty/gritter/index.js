@@ -1,6 +1,8 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     'thirdparty/gritter/jquery'
 ], function(require, exports, module,
+    plugins,
     jquery
 ) {
 
@@ -405,3 +407,9 @@ var Gritter = {
 }
 
 });
+
+exports.init = function() {
+};
+
+exports.deinit = function() {
+};

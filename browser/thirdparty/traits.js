@@ -1,5 +1,7 @@
-require.def(['require', 'exports', 'module'
-], function(require, exports, module
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins'
+], function(require, exports, module,
+    plugins
 ) {
 
 // Copyright (C) 2010 Google Inc.
@@ -20,12 +22,14 @@ require.def(['require', 'exports', 'module'
 // for background on traits and a description of this library
 
 "define metadata";
-({
-    "description": "Traits library, traitsjs.org",
-    "dependencies": {},
-    "provides": []
-});
+({ "description": "Traits library, traitsjs.org", "dependencies": {} });
 "end";
+
+exports.init = function() {
+};
+
+exports.deinit = function() {
+};
 
 // --- Begin traits-0.3.js ---
 

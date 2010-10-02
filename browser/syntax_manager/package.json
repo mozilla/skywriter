@@ -6,8 +6,5 @@
         "underscore": "0.0.0",
         "worker_manager": "0.0.0"
     },
-    "environments": { "main": true, "worker": false },
-    "provides": [
-    ]
+    "environments": { "main": true, "worker": false }
 }
-

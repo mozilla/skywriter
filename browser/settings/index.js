@@ -47,6 +47,66 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.addExtensionPoint("setting", {
+        "description":
+            "A setting is something that the application offers as a way to customize how it works",
+        "register": "index#addSetting",
+        "indexOn": "name"
+    });
+    catalog.addExtensionPoint("settingChange", {
+        "description":
+            "A settingChange is a way to be notified of changes to a setting"
+    });
+    catalog.connect("command", module.id, {
+        "name": "set",
+        "params": [
+            {
+                "name": "setting",
+                "type": {
+                    "name": "selection",
+                    "pointer": "settings:index#getSettings"
+                },
+                "description": "The name of the setting to display or alter",
+                "defaultValue": null
+            },
+            {
+                "name": "value",
+                "type": {
+                    "name": "deferred",
+                    "pointer": "settings:index#getTypeSpecFromAssignment"
+                },
+                "description": "The new value for the chosen setting",
+                "defaultValue": null
+            }
+        ],
+        "description": "define and show settings",
+        "pointer": "commands#setCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "unset",
+        "params": [
+            {
+                "name": "setting",
+                "type": {
+                    "name": "selection",
+                    "pointer": "settings:index#getSettings"
+                },
+                "description": "The name of the setting to return to defaults"
+            }
+        ],
+        "description": "unset a setting entirely",
+        "pointer": "commands#unsetCommand"
+    });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+    catalog.removeExtensionPoint("setting");
+    catalog.removeExtensionPoint("settingChange");
+};
+
 /**
  * This plug-in manages settings.
  *

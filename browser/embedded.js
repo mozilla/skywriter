@@ -1,5 +1,7 @@
-require.def(['require', 'exports', 'module'
-], function(require, exports, module
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins'
+], function(require, exports, module,
+    plugins
 ) {
 
 /* ***** BEGIN LICENSE BLOCK *****
@@ -50,6 +52,12 @@ require.def(['require', 'exports', 'module'
     }
 });
 "end";
+
+exports.init = function() {
+};
+
+exports.deinit = function() {
+};
 
 // This plugin is artificial as a convenience. It's just here to collect up
 // the common dependencies for embedded use

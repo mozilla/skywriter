@@ -50,171 +50,133 @@ require.def(['require', 'exports', 'module',
 "define metadata";
 ({
     "description": "Commands that may be useful in working on Skywriter",
-    "dependencies":
-    {
-        "canon": "0.0"
-    },
-    "provides":
-    [
-        {
-            "ep": "command",
-            "name": "action",
-            "params":
-            [
-                {
-                    "name": "actionname",
-                    "type": "text",
-                    "description": ""
-                }
-            ],
-            "hidden": true,
-            "description": "execute any editor action",
-            "pointer": "#actionCommand"
-        },
-        {
-            "ep": "command",
-            "name": "echo",
-            "params":
-            [
-                {
-                    "name": "message",
-                    "type": "text",
-                    "description": "The text to echo to the command line"
-                }
-            ],
-            "hidden": true,
-            "description": "A test echo command",
-            "pointer": "#echoCommand"
-        },
-        {
-            "ep": "command",
-            "name": "insert",
-            "params":
-            [
-                {
-                    "name": "text",
-                    "type": "text",
-                    "description": "???"
-                }
-            ],
-            "hidden": true,
-            "description": "insert the given text at this point.",
-            "pointer": "#insertCommand"
-        },
-        {
-            "ep": "command",
-            "name": "readonly",
-            "params":
-            [
-                {
-                    "name": "flag",
-                    "type": "text",
-                    "description": "???"
-                }
-            ],
-            "hidden": true,
-            "description": "Turn on and off readonly mode",
-            "pointer": "#readonlyCommand"
-        },
-        {
-            "ep": "command",
-            "name": "template",
-            "params":
-            [
-                {
-                    "name": "type",
-                    "type": "text",
-                    "description": "pass in the template name"
-                }
-            ],
-            "hidden": true,
-            "description": "insert templates",
-            "pointer": "#templateCommand"
-        },
-        {
-            "ep": "command",
-            "name": "use",
-            "params":
-            [
-                {
-                    "name": "type",
-                    "type": "text",
-                    "description": "'sound' will add sound support"
-                }
-            ],
-            "hidden": true,
-            "description": "use patterns to bring in code",
-            "pointer": "#useCommand"
-        },
-        {
-            "ep": "command",
-            "name": "slow",
-            "params":
-            [
-                {
-                    "name": "seconds",
-                    "type": "text",
-                    "description": "How long do we wait before creating output"
-                }
-            ],
-            "hidden": true,
-            "description": "create some output, slowly, after a given time (default 5s)",
-            "pointer": "#slowCommand"
-        },
-        {
-            "ep": "command",
-            "name": "promise",
-            "params":
-            [
-                {
-                    "name": "which",
-                    "type":
-                    {
-                        "name": "selection",
-                        "data": [ "outstanding", "recent" ]
-                    },
-                    "description": "Do we display <tt>outstanding</tt> or <tt>recent</tt> promises?"
-                }
-            ],
-            "hidden": true,
-            "description": "Display a list of outstanding or recently completed promises",
-            "pointer": "#promiseCommand"
-        },
-        {
-            "ep": "command",
-            "name": "error",
-            "params":
-            [
-                {
-                    "name": "type",
-                    "type":
-                    {
-                        "name": "selection",
-                        "data": [ "throw", "request" ]
-                    },
-                    "defaultValue": "throw",
-                    "description": "Do we cause the error by throwing or using request.doneWithError()?"
-                },
-                {
-                    "name": "async",
-                    "type": "boolean",
-                    "defaultValue": false,
-                    "description": "Do we become asyncronous before causing the error?"
-                },
-                {
-                    "name": "message",
-                    "type": "string",
-                    "defaultValue": "Error",
-                    "description": "What message should we report?"
-                }
-            ],
-            "hidden": true,
-            "description": "Create an error",
-            "pointer": "#errorCommand"
-        }
-    ]
+    "dependencies": { "canon": "0.0" }
 });
 "end";
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("command", module.id, {
+        "name": "action",
+        "params": [ { "name": "actionname", "type": "text", "description": "" } ],
+        "hidden": true,
+        "description": "execute any editor action",
+        "pointer": "#actionCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "echo",
+        "params": [
+            {
+                "name": "message",
+                "type": "text",
+                "description": "The text to echo to the command line"
+            }
+        ],
+        "hidden": true,
+        "description": "A test echo command",
+        "pointer": "#echoCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "insert",
+        "params": [ { "name": "text", "type": "text", "description": "???" } ],
+        "hidden": true,
+        "description": "insert the given text at this point.",
+        "pointer": "#insertCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "readonly",
+        "params": [ { "name": "flag", "type": "text", "description": "???" } ],
+        "hidden": true,
+        "description": "Turn on and off readonly mode",
+        "pointer": "#readonlyCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "template",
+        "params": [
+            {
+                "name": "type",
+                "type": "text",
+                "description": "pass in the template name"
+            }
+        ],
+        "hidden": true,
+        "description": "insert templates",
+        "pointer": "#templateCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "use",
+        "params": [
+            {
+                "name": "type",
+                "type": "text",
+                "description": "'sound' will add sound support"
+            }
+        ],
+        "hidden": true,
+        "description": "use patterns to bring in code",
+        "pointer": "#useCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "slow",
+        "params": [
+            {
+                "name": "seconds",
+                "type": "text",
+                "description": "How long do we wait before creating output"
+            }
+        ],
+        "hidden": true,
+        "description":
+            "create some output, slowly, after a given time (default 5s)",
+        "pointer": "#slowCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "promise",
+        "params": [
+            {
+                "name": "which",
+                "type": { "name": "selection", "data": [ "outstanding", "recent" ] },
+                "description":
+                    "Do we display <tt>outstanding</tt> or <tt>recent</tt> promises?"
+            }
+        ],
+        "hidden": true,
+        "description":
+            "Display a list of outstanding or recently completed promises",
+        "pointer": "#promiseCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "error",
+        "params": [
+            {
+                "name": "type",
+                "type": { "name": "selection", "data": [ "throw", "request" ] },
+                "defaultValue": "throw",
+                "description":
+                    "Do we cause the error by throwing or using request.doneWithError()?"
+            },
+            {
+                "name": "async",
+                "type": "boolean",
+                "defaultValue": false,
+                "description": "Do we become asyncronous before causing the error?"
+            },
+            {
+                "name": "message",
+                "type": "string",
+                "defaultValue": "Error",
+                "description": "What message should we report?"
+            }
+        ],
+        "hidden": true,
+        "description": "Create an error",
+        "pointer": "#errorCommand"
+    });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
 
 /**
  * A set of debug commands, that is, commands that could be useful in debugging

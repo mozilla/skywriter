@@ -49,6 +49,48 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.addExtensionPoint("snippet", {
+        "description": "Some boiler plate text for insertion into an file",
+        "register": "#addSnippet",
+        "indexOn": "name"
+    });
+    catalog.connect("snippet", module.id, {
+        "name": "lipsum",
+        "context": "text",
+        "contents":
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec adipiscing nibh. Quisque non dictum nunc. Nunc sollicitudin ornare dui, semper vehicula sapien venenatis id. Sed nec tincidunt mauris. Nunc risus est, commodo ut tempus ac, pulvinar et leo. Mauris massa risus, vestibulum sit amet viverra id, tristique sed quam. Donec sit amet lorem lacus. Aliquam eleifend odio sed enim consectetur consequat. Nullam rutrum porttitor feugiat. Nunc ultrices sapien eget velit fermentum blandit. Etiam suscipit risus vel purus tristique nec porttitor felis sollicitudin. In enim nibh, cursus ac interdum nec, adipiscing ac lorem. Vivamus sodales nunc lorem, a bibendum enim. Nullam ac erat vitae augue consectetur tincidunt. Nullam lobortis nisl nec lectus pharetra laoreet. Ut ultricies bibendum consectetur. Cras vulputate ultricies tincidunt. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Donec lectus magna, feugiat quis pretium sed, commodo ac enim. Nullam lobortis, ipsum porta dapibus rutrum, arcu purus semper dui, non suscipit nunc nulla non sapien"
+    });
+    catalog.connect("snippet", module.id, {
+        "name": "html5",
+        "context": "html",
+        "contents":
+            "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\" />\n  <link rel=\"stylesheet\" href=\"styles.css\" />\n</head>\n\n<body>\n</body>\n</html>\n"
+    });
+    catalog.connect("command", module.id, {
+        "name": "snippet",
+        "predicates": { "context": "html" },
+        "params": [
+            {
+                "name": "snippet",
+                "type": {
+                    "name": "selection",
+                    "pointer": "Snippets:index#getSnippets"
+                },
+                "description": "The name of the snippet to insert"
+            }
+        ],
+        "description": "Insert a custom snippet",
+        "pointer": "#snippetCommand"
+    });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+    catalog.removeExtensionPoint("snippet");
+};
+
 var catalog = plugins.catalog;
 var console = consoleMod.console;
 var Promise = promise.Promise;

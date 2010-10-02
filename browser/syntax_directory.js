@@ -45,16 +45,18 @@ require.def(['require', 'exports', 'module',
 ({
     "description": "Catalogs the available syntax engines",
     "dependencies": {},
-    "environments": { "main": true, "worker": true },
-    "provides": [
-        {
-            "ep": "extensionhandler",
-            "name": "syntax",
-            "register": "#discoveredNewSyntax"
-        }
-    ]
+    "environments": { "main": true, "worker": true }
 });
 "end";
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("extensionhandler", module.id, { "name": "syntax", "register": "#discoveredNewSyntax" });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
 
 
 

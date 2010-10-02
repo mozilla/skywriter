@@ -1,14 +1,1 @@
-{
-    "provides": [
-        {
-            "ep": "factory",
-            "name": "bookmarkletbar",
-            "action": "new",
-            "pointer": "#BookmarkletBar"
-        },
-        {
-            "ep": "themestyles",
-            "url": "bar.less"
-        }
-    ]
-}
+{}

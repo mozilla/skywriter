@@ -1,6 +1,8 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     'thirdparty/jlayout'
 ], function(require, exports, module,
+    plugins,
     jlayout
 ) {
 
@@ -16,12 +18,14 @@ require.def(['require', 'exports', 'module',
 // Imported into Skywriter 2010/05/03
 
 "define metadata";
-({
-    "dependencies": {
-        "jlayout": "1.0.0"
-    }
-});
+({ "dependencies": { "jlayout": "1.0.0" } });
 "end";
+
+exports.init = function() {
+};
+
+exports.deinit = function() {
+};
 
 var jLayout = exports.jLayout = jlayout.jLayout;
 

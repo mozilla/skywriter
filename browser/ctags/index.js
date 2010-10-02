@@ -1,8 +1,10 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     'ctags/underscore',
     'ctags/./reader',
     'ctags/traits'
 ], function(require, exports, module,
+    plugins,
     underscore,
     reader,
     traits
@@ -44,6 +46,12 @@ require.def(['require', 'exports', 'module',
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+
+exports.init = function() {
+};
+
+exports.deinit = function() {
+};
 
 var _ = underscore._;
 var TagReader = reader.TagReader;

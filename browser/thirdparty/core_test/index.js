@@ -1,5 +1,7 @@
-require.def(['require', 'exports', 'module'
-], function(require, exports, module
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins'
+], function(require, exports, module,
+    plugins
 ) {
 
 // ==========================================================================
@@ -30,3 +32,9 @@ require('system/suite');
 
 
 });
+
+exports.init = function() {
+};
+
+exports.deinit = function() {
+};

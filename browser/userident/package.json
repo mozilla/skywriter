@@ -11,53 +11,6 @@
         "jquery_ui_checkbox": "1.4.1",
         "theme_manager_base": "0.0.0"
     },
-    "objects": ["notifier"],
-    "share": true,
-    "provides": [
-        {
-            "ep": "factory",
-            "name": "loginController",
-            "action": "new",
-            "pointer": "#loginController"
-        },
-        {
-            "ep": "themestyles",
-            "url": "styles.less"
-        },
-        {
-            "ep": "command",
-            "name": "logout",
-            "description": "Logout of Skywriter",
-            "pointer": "#logout"
-        },
-        {
-            "ep": "command",
-            "name": "keychain",
-            "description": "Manages your Skywriter keychain, which stores remote authentication information."
-        },
-        {
-            "ep": "command",
-            "name": "keychain getkey",
-            "description": "retrieve your SSH public key used for remote server auth",
-            "pointer": "kc#getkey"
-        },
-        {
-            "ep": "command",
-            "name": "keychain forget",
-            "description": "forget the keychain password that is temporarily saved in your browser",
-            "pointer": "kc#forget"
-        },
-        {
-            "ep": "notification",
-            "name": "loginerror",
-            "level": "error",
-            "description": "Problems logging in to Skywriter"
-        },
-        {
-            "ep": "notification",
-            "name": "reset",
-            "level": "info",
-            "description": "Password Reset"
-        }
-    ]
+    "objects": [ "notifier" ],
+    "share": true
 }

@@ -1,4 +1,5 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     'syntax_manager/underscore',
     'syntax_manager/events',
     'syntax_manager/worker_manager',
@@ -6,6 +7,7 @@ require.def(['require', 'exports', 'module',
     'rangeutils/utils/range',
     'syntax_manager/syntax_directory'
 ], function(require, exports, module,
+    plugins,
     underscore,
     events,
     worker_manager,
@@ -50,6 +52,12 @@ require.def(['require', 'exports', 'module',
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+
+exports.init = function() {
+};
+
+exports.deinit = function() {
+};
 
 var _ = underscore._;
 var Event = events.Event;

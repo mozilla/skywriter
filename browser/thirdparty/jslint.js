@@ -1,5 +1,7 @@
-require.def(['require', 'exports', 'module'
-], function(require, exports, module
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins'
+], function(require, exports, module,
+    plugins
 ) {
 
 // jslint.js
@@ -7,10 +9,14 @@ require.def(['require', 'exports', 'module'
 
 // Mozilla: Plugin metadata
 "define metadata";
-({
-    "description": "JSLint support code"
-});
+({ "description": "JSLint support code" });
 "end";
+
+exports.init = function() {
+};
+
+exports.deinit = function() {
+};
 
 /*
 Copyright (c) 2002 Douglas Crockford  (www.JSLint.com)

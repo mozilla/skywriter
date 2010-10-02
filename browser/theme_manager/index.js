@@ -49,6 +49,32 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("extensionhandler", module.id, {
+        "name": "themestyles",
+        "register": "themestyles#registerThemeStyles",
+        "unregister": "themestyles#unregisterThemeStyles"
+    });
+    catalog.connect("extensionhandler", module.id, {
+        "name": "theme",
+        "register": "index#registerTheme",
+        "unregister": "index#unregisterTheme"
+    });
+    catalog.connect("setting", module.id, {
+        "name": "theme",
+        "type": "text",
+        "defaultValue": "standard",
+        "description":
+            "The theme plugin's name to use. If set to 'standard' no theme will be used"
+    });
+    catalog.connect("appLaunched", module.id, { "pointer": "#appLaunched" });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
+
 var Promise = promise.Promise;
 var catalog = plugins.catalog;
 var Event = events.Event;

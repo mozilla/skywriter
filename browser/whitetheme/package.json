@@ -1,17 +1,4 @@
 {
     "description": "Provides a white theme for Skywriter",
-    "dependencies": {
-        "theme_manager": "0.0.0"
-    },
-    "provides": [
-        {
-            "ep": "theme",
-            "name": "white",
-            "description": "A basic white theme",
-            "url": [
-                "theme.less"
-            ],
-            "pointer": "index#whiteTheme"
-       }
-    ]
+    "dependencies": { "theme_manager": "0.0.0" }
 }

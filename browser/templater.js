@@ -1,5 +1,7 @@
-require.def(['require', 'exports', 'module'
-], function(require, exports, module
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins'
+], function(require, exports, module,
+    plugins
 ) {
 
 /* ***** BEGIN LICENSE BLOCK *****
@@ -42,6 +44,12 @@ require.def(['require', 'exports', 'module'
 "define metadata";
 ({});
 "end";
+
+exports.init = function() {
+};
+
+exports.deinit = function() {
+};
 
 // WARNING: do not 'use_strict' without reading the notes in environmentEval;
 

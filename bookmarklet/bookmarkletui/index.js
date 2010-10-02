@@ -1,10 +1,12 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     'jquery',
     'canon/history',
     'canon/request',
     'environment',
     'settings'
 ], function(require, exports, module,
+    plugins,
     jquery,
     history,
     request,
@@ -48,6 +50,16 @@ require.def(['require', 'exports', 'module',
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("factory", module.id, { "name": "bookmarkletbar", "action": "new", "pointer": "#BookmarkletBar" });
+    catalog.connect("themestyles", module.id, { "url": "bar.less" });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
 
 var $ = jquery.$;
 

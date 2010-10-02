@@ -1,6 +1,8 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     '/environment'
 ], function(require, exports, module,
+    plugins,
     environment
 ) {
 
@@ -45,17 +47,21 @@ require.def(['require', 'exports', 'module',
 // to others.
 
 "define metadata";
-({
-    "provides": [
-        {
-            "ep": "command",
-            "name": "feedback",
-            "description": "Let us know how we can make Skywriter better.",
-            "pointer": "#feedbackCommand"
-        }
-    ]
-});
+({});
 "end";
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("command", module.id, {
+        "name": "feedback",
+        "description": "Let us know how we can make Skywriter better.",
+        "pointer": "#feedbackCommand"
+    });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
 
 var env = environment.env;
 

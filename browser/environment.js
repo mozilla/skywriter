@@ -48,12 +48,14 @@ require.def(['require', 'exports', 'module',
  * ***** END LICENSE BLOCK ***** */
 
 "define metadata";
-({
-    "dependencies": {
-        "settings": "0.0.0"
-    }
-});
+({ "dependencies": { "settings": "0.0.0" } });
 "end";
+
+exports.init = function() {
+};
+
+exports.deinit = function() {
+};
 
 
 var console = consoleMod.console;

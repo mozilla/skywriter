@@ -1,21 +1,5 @@
 {
-    "description": "Provides the file and directory model used within Skywriter",
-    "dependencies": {
-        "types": "0.0"
-    },
-    "provides":
-    [
-        {
-            "ep": "factory",
-            "name": "files",
-            "action": "new",
-            "pointer": "#Filesystem"
-        },
-        {
-            "ep": "type",
-            "name": "existingFile",
-            "description": "A pointer to a file which we believe to already exist",
-            "pointer": "types#existingFile"
-        }
-    ]
+    "description":
+        "Provides the file and directory model used within Skywriter",
+    "dependencies": { "types": "0.0" }
 }

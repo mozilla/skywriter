@@ -45,6 +45,98 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("factory", module.id, { "name": "notifier", "action": "new", "pointer": "#Notifier" });
+    catalog.addExtensionPoint("notification", {
+        "description":
+            "tells the notifier about a kind of notification that may be presented to the user. This will be used in a notification configuration user interface, for example.",
+        "register": "#registerNotification",
+        "unregister": "#unregisterNotification",
+        "params": [
+            {
+                "name": "name",
+                "description":
+                    "name of the notification type. Notifications are identified by the combination of pluginName_notificationName, so you don't need to worry about making this unique across Skywriter.",
+                "type": "string",
+                "required": true
+            },
+            {
+                "name": "description",
+                "description":
+                    "The more human-readable form of the notification name that will be presented to the user.",
+                "type": "string"
+            },
+            {
+                "name": "level",
+                "description":
+                    "default level for these notifications. Value should be 'error', 'info' or 'debug'.",
+                "type": "string"
+            },
+            {
+                "name": "onclick",
+                "description":
+                    "function that should be called if one of these notifications is clicked on. Will be passed the message object.",
+                "type": "pointer"
+            },
+            {
+                "name": "iconUrl",
+                "description":
+                    "custom icon for this notification. looked up relative to the plugins resources directory.",
+                "type": "resourceUrl"
+            }
+        ]
+    });
+    catalog.connect("notification", module.id, { "name": "debug", "description": "Debugging Messages", "level": "debug" });
+    catalog.addExtensionPoint("notificationHandler", {
+        "description":
+            "A function that is called with message objects whenever appropriate notifications are published.",
+        "indexOn": "name",
+        "params": [
+            {
+                "name": "name",
+                "description":
+                    "convenient name for the handler (used in configuration)",
+                "type": "string",
+                "required": true
+            },
+            {
+                "name": "description",
+                "description": "Longer, more human-readable description of the handler",
+                "type": "string"
+            },
+            {
+                "name": "pointer",
+                "description": "function that will be called with the message",
+                "required": true
+            }
+        ]
+    });
+    catalog.connect("notificationHandler", module.id, {
+        "name": "console",
+        "description": "Logs to the browser console",
+        "pointer": "handlers#console"
+    });
+    catalog.connect("notificationHandler", module.id, {
+        "name": "alert",
+        "description": "Displays in browser alerts",
+        "pointer": "handlers#alert"
+    });
+    catalog.connect("setting", module.id, {
+        "name": "notifications",
+        "description":
+            "JSON array of objects describing how notifications are configured",
+        "type": "text",
+        "defaultValue": "[]"
+    });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+    catalog.removeExtensionPoint("notification");
+    catalog.removeExtensionPoint("notificationHandler");
+};
+
 var catalog = plugins.catalog;
 var settings = settingsMod.settings;
 var console = consoleMod.console;

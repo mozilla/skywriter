@@ -1,9 +1,11 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     'skywriter/promise',
     '/underscore',
     'skywriter/console',
     '/syntax_directory'
 ], function(require, exports, module,
+    plugins,
     promise,
     underscore,
     consoleMod,
@@ -54,6 +56,12 @@ require.def(['require', 'exports', 'module',
     "dependencies": { "syntax_directory": "0.0.0", "underscore": "0.0.0" }
 });
 "end";
+
+exports.init = function() {
+};
+
+exports.deinit = function() {
+};
 
 
 var _ = underscore._;

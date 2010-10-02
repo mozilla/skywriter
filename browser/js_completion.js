@@ -1,6 +1,8 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     '/underscore'
 ], function(require, exports, module,
+    plugins,
     underscore
 ) {
 
@@ -44,16 +46,18 @@ require.def(['require', 'exports', 'module',
 "define metadata";
 ({
     "description": "JavaScript code completion",
-    "dependencies": { "completion": "0.0.0", "underscore": "0.0.0" },
-    "provides": [
-        {
-            "ep": "completion",
-            "name": "js",
-            "pointer": "#JSCompletion"
-        }
-    ]
+    "dependencies": { "completion": "0.0.0", "underscore": "0.0.0" }
 });
 "end";
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("completion", module.id, { "name": "js", "pointer": "#JSCompletion" });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
 
 var _ = underscore._;
 

@@ -1,6 +1,8 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     '/environment'
 ], function(require, exports, module,
+    plugins,
     environment
 ) {
 
@@ -44,41 +46,43 @@ require.def(['require', 'exports', 'module',
 "define metadata";
 ({
     "description": "Provides higher level commands for working with the text.",
-    "objects": ["commandLine"],
-    "provides": [
-        {
-            "ep": "command",
-            "name": "find",
-            "key": "ctrl_f",
-            "params":
-            [
-                {
-                    "name": "value",
-                    "type": "text",
-                    "description": "string to search for"
-                }
-            ],
-            "description": "Search for text within this buffer",
-            "pointer": "#findCommand"
-        },
-        {
-            "ep": "command",
-            "name": "goto",
-            "key": "ctrl_l",
-            "params":
-            [
-                {
-                    "name": "line",
-                    "type": "text",
-                    "description": "add the line number to move to in the file"
-                }
-            ],
-            "description": "move it! make the editor head to a line number.",
-            "pointer": "#gotoCommand"
-        }
-    ]
+    "objects": [ "commandLine" ]
 });
 "end";
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("command", module.id, {
+        "name": "find",
+        "key": "ctrl_f",
+        "params": [
+            {
+                "name": "value",
+                "type": "text",
+                "description": "string to search for"
+            }
+        ],
+        "description": "Search for text within this buffer",
+        "pointer": "#findCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "goto",
+        "key": "ctrl_l",
+        "params": [
+            {
+                "name": "line",
+                "type": "text",
+                "description": "add the line number to move to in the file"
+            }
+        ],
+        "description": "move it! make the editor head to a line number.",
+        "pointer": "#gotoCommand"
+    });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
 
 var env = environment.env;
 

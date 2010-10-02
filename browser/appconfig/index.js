@@ -57,6 +57,16 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.addExtensionPoint("appLaunched", { "description": "Event: Fired when the app is completely launched." });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+    catalog.removeExtensionPoint("appLaunched");
+};
+
 var $ = jquery.$;
 var settings = settingsMod.settings;
 var group = promise.group;

@@ -60,22 +60,26 @@ require.def(['require', 'exports', 'module',
         "canon": "0.0.0",
         "events": "0.0.0",
         "underscore": "0.0.0"
-    },
-    "provides": [
-        {
-            "ep": "command",
-            "name": "worker",
-            "description": "Low-level web worker control (for plugin development)"
-        },
-        {
-            "ep": "command",
-            "name": "worker restart",
-            "description": "Restarts all web workers (for plugin development)",
-            "pointer": "#workerRestartCommand"
-        }
-    ]
+    }
 });
 "end";
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("command", module.id, {
+        "name": "worker",
+        "description": "Low-level web worker control (for plugin development)"
+    });
+    catalog.connect("command", module.id, {
+        "name": "worker restart",
+        "description": "Restarts all web workers (for plugin development)",
+        "pointer": "#workerRestartCommand"
+    });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
 
 if (window == null) {
     throw new Error('The "worker_manager" plugin can only be loaded in the ' +

@@ -1,5 +1,7 @@
-require.def(['require', 'exports', 'module'
-], function(require, exports, module
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins'
+], function(require, exports, module,
+    plugins
 ) {
 
 // Underscore.js
@@ -12,9 +14,16 @@ require.def(['require', 'exports', 'module'
 
 "define metadata";
 ({
-    "description": "Functional Programming Aid for Javascript. Works well with jQuery."
+    "description":
+        "Functional Programming Aid for Javascript. Works well with jQuery."
 });
 "end";
+
+exports.init = function() {
+};
+
+exports.deinit = function() {
+};
 
 (function() {
   // ------------------------- Baseline setup ---------------------------------

@@ -53,6 +53,193 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("themestyles", module.id, { "url": "plugindev.less" });
+    catalog.connect("command", module.id, {
+        "name": "plugin reload",
+        "params": [
+            {
+                "name": "plugin",
+                "type": {
+                    "name": "selection",
+                    "pointer": "plugindev:index#getPlugins"
+                }
+            }
+        ],
+        "description": "Reload the named plugin.",
+        "pointer": "#reloadCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "test",
+        "params": [
+            {
+                "name": "testmodule",
+                "type": {
+                    "name": "selection",
+                    "pointer": "plugindev:index#getPlugins"
+                },
+                "description":
+                    "Provide a plugin name to run all tests for a plugin, 'all' to run all known tests, or plugin:module to run the tests in a specific module. If you omit this, the last tests run will be run again.",
+                "defaultValue": null
+            }
+        ],
+        "description": "Run a collection of tests.",
+        "pointer": "testing#testrunner"
+    });
+    catalog.connect("command", module.id, { "name": "plugin", "description": "Plugin management" });
+    catalog.connect("command", module.id, {
+        "name": "plugin add",
+        "description":
+            "Add a file or directory in your Skywriter files as a plugin.",
+        "params": [
+            {
+                "name": "path",
+                "type": "text",
+                "description": "Path to a file or directory."
+            }
+        ],
+        "pointer": "commands#add"
+    });
+    catalog.connect("command", module.id, {
+        "name": "plugin list",
+        "description": "List the installed plugins",
+        "pointer": "commands#list"
+    });
+    catalog.connect("command", module.id, {
+        "name": "plugin remove",
+        "description":
+            "Remove a plugin (deletes installed plugins, just removes the reference to 'add'ed plugins).",
+        "params": [
+            {
+                "name": "plugin",
+                "type": {
+                    "name": "selection",
+                    "pointer": "skywriter:plugins#getUserPlugins"
+                }
+            }
+        ],
+        "pointer": "commands#remove"
+    });
+    catalog.connect("command", module.id, {
+        "name": "plugin install",
+        "description": "Install a plugin from a given URL",
+        "params": [
+            {
+                "name": "plugin",
+                "type": "text",
+                "description":
+                    "name (if in Gallery) or URL where the plugin can be found"
+            }
+        ],
+        "pointer": "commands#install"
+    });
+    catalog.connect("command", module.id, {
+        "name": "plugin upload",
+        "description": "Upload a plugin you've created to the plugin gallery.",
+        "params": [
+            {
+                "name": "pluginName",
+                "type": "text",
+                "description": "name of the plugin to upload"
+            }
+        ],
+        "pointer": "commands#upload"
+    });
+    catalog.connect("command", module.id, {
+        "name": "plugin gallery",
+        "description": "List the plugins in the Plugin Gallery",
+        "pointer": "commands#gallery"
+    });
+    catalog.connect("command", module.id, {
+        "name": "plugin order",
+        "description": "Set the order of plugin extensions.",
+        "params": [
+            {
+                "name": "order",
+                "type": "text",
+                "description":
+                    "if given, set the plugin order, otherwise show the order",
+                "defaultValue": null
+            }
+        ],
+        "pointer": "commands#order"
+    });
+    catalog.connect("command", module.id, {
+        "name": "plugin deactivate",
+        "description": "Deactivate plugins.",
+        "params": [
+            {
+                "name": "pluginNames",
+                "type": {
+                    "name": "selection",
+                    "pointer": "plugindev:index#getUserActivePlugins"
+                },
+                "description": "Plugins to deactivate separated by a space",
+                "defaultValue": ""
+            }
+        ],
+        "pointer": "commands#deactivate"
+    });
+    catalog.connect("command", module.id, {
+        "name": "plugin activate",
+        "description": "Activate plugins.",
+        "params": [
+            {
+                "name": "pluginNames",
+                "type": {
+                    "name": "selection",
+                    "pointer": "plugindev:index#getUserDeactivatedPlugins"
+                },
+                "description": "Plugins to activate separated by a space",
+                "defaultValue": ""
+            }
+        ],
+        "pointer": "commands#activate"
+    });
+    catalog.connect("command", module.id, {
+        "name": "plugin info",
+        "description": "Display detailed information for a plugin",
+        "params": [
+            {
+                "name": "pluginName",
+                "type": "text",
+                "description": "name of the plugin for which to display info"
+            }
+        ],
+        "pointer": "commands#info"
+    });
+    catalog.connect("command", module.id, {
+        "name": "ep",
+        "description":
+            "Display information about the extension points in this Skywriter",
+        "params": [
+            {
+                "name": "ep",
+                "type": "text",
+                "description":
+                    "(optional) name of an extension point for which to display details"
+            }
+        ],
+        "pointer": "commands#ep"
+    });
+    catalog.connect("command", module.id, { "name": "debug", "description": "Commands useful for debugging" });
+    catalog.connect("command", module.id, {
+        "name": "debug syntaxcontexts",
+        "description": "Displays the active contexts at the insertion point",
+        "pointer": "debug#syntaxContexts"
+    });
+    catalog.connect("type", module.id, {
+        "name": "pluginURL",
+        "description": "a valid URL (http/https) from which to install a plugin",
+        "pointer": "commands#pluginURL"
+    });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
+
 var console = consoleMod.console;
 
 

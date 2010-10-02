@@ -35,6 +35,26 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins'
+], function(require, exports, module,
+    plugins
+) {
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("theme", module.id, {
+        "name": "white",
+        "description": "A basic white theme",
+        "url": [ "theme.less" ],
+        "pointer": "index#whiteTheme"
+    });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
+
 exports.whiteTheme = function() {
     return {
         global: {

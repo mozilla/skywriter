@@ -1,18 +1,26 @@
 
-require.def(['require', 'exports', 'module'], function(require, exports, module) {
-
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins'
+], function(require, exports, module,
+    plugins
+) {
 "define metadata";
 ({
     "description": "Leaner CSS",
     "url": "http://lesscss.org",
     "dependencies": {},
-    "provides": [],
-    "keywords": ["css", "parser", "lesscss", "browser"],
+    "keywords": [ "css", "parser", "lesscss", "browser" ],
     "author": "Alexis Sellier <self@cloudhead.net>",
     "contributors": [],
     "version": "1.0.11"
 });
 "end";
+
+exports.init = function() {
+};
+
+exports.deinit = function() {
+};
 
 // --- Begin less.js ---
 

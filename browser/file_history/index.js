@@ -1,9 +1,11 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     'file_history/environment',
     'skywriter/util/util',
     'skywriter/console',
     'text_editor/models/buffer'
 ], function(require, exports, module,
+    plugins,
     environment,
     util,
     consoleMod,
@@ -46,6 +48,20 @@ require.def(['require', 'exports', 'module',
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("factory", module.id, { "name": "file_history", "pointer": "#FileHistory", "action": "new" });
+    catalog.connect("editorChange", module.id, {
+        "match": "[buffer|scrollOffset|selection]",
+        "pointer": "#handleEditorChange"
+    });
+    catalog.connect("appLaunched", module.id, { "pointer": "#loadMostRecent" });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
 
 var env = environment.env;
 

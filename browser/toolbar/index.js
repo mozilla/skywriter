@@ -43,6 +43,37 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.addExtensionPoint("toolbaritem", {
+        "description": "Toolbar item views",
+        "params": [
+            {
+                "name": "name",
+                "description": "name of this toolbar item",
+                "type": "string"
+            },
+            {
+                "name": "pointer",
+                "description":
+                    "pointer to a component that can be instantiated with new and has an element defined on it."
+            }
+        ],
+        "register": "index#discoveredNewToolbarItem"
+    });
+    catalog.connect("themestyles", module.id, { "url": [ "toolbar.less" ] });
+    catalog.connect("factory", module.id, { "name": "toolbar", "action": "new", "pointer": "index#ToolbarView" });
+    catalog.connect("toolbaritem", module.id, { "name": "logo", "pointer": "items#Logo" });
+    catalog.connect("toolbaritem", module.id, { "name": "openfileindicator", "pointer": "items#OpenFileIndicator" });
+    catalog.connect("toolbaritem", module.id, { "name": "save", "pointer": "items#Save" });
+    catalog.connect("toolbaritem", module.id, { "name": "positionindicator", "pointer": "items#PositionIndicator" });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+    catalog.removeExtensionPoint("toolbaritem");
+};
+
 var Event = events.Event;
 var catalog = plugins.catalog;
 

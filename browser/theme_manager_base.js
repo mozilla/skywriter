@@ -1,5 +1,7 @@
-require.def(['require', 'exports', 'module'
-], function(require, exports, module
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins'
+], function(require, exports, module,
+    plugins
 ) {
 
 /* ***** BEGIN LICENSE BLOCK *****
@@ -42,58 +44,59 @@ require.def(['require', 'exports', 'module'
 "define metadata";
 ({
     "description": "Defines extension points required for theming",
-    "dependencies": { },
+    "dependencies": {},
     "environments": { "main": true },
-    "share": true,
-    "provides": [
-        {
-            "ep": "extensionpoint",
-            "name": "themestyles",
-            "description": "(Less)files holding the CSS style information for the UI.",
-
-            "params": [
-                {
-                    "name": "url",
-                    "required": true,
-                    "description": "Name of the ThemeStylesFile - can also be an array of files."
-                }
-            ]
-        },
-        {
-            "ep": "extensionpoint",
-            "name": "themeChange",
-            "description": "Event: Notify when the theme(styles) changed.",
-
-            "params": [
-                {
-                    "name": "pointer",
-                    "required": true,
-                    "description": "Function that is called whenever the theme is changed."
-                }
-            ]
-
-        },
-        {
-            "ep": "extensionpoint",
-            "name": "theme",
-            "indexOn": "name",
-            "description": "A theme is a way change the look of the application.",
-
-            "params": [
-                {
-                    "name": "url",
-                    "required": false,
-                    "description": "Name of a ThemeStylesFile that holds theme specific CSS rules - can also be an array of files."
-                },
-                {
-                    "name": "pointer",
-                    "required": true,
-                    "description": "Function that returns the ThemeData"
-                }
-            ]
-        }
-    ]
-})
+    "share": true
+});
 "end";
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.addExtensionPoint("themestyles", {
+        "description": "(Less)files holding the CSS style information for the UI.",
+        "params": [
+            {
+                "name": "url",
+                "required": true,
+                "description":
+                    "Name of the ThemeStylesFile - can also be an array of files."
+            }
+        ]
+    });
+    catalog.addExtensionPoint("themeChange", {
+        "description": "Event: Notify when the theme(styles) changed.",
+        "params": [
+            {
+                "name": "pointer",
+                "required": true,
+                "description": "Function that is called whenever the theme is changed."
+            }
+        ]
+    });
+    catalog.addExtensionPoint("theme", {
+        "indexOn": "name",
+        "description": "A theme is a way change the look of the application.",
+        "params": [
+            {
+                "name": "url",
+                "required": false,
+                "description":
+                    "Name of a ThemeStylesFile that holds theme specific CSS rules - can also be an array of files."
+            },
+            {
+                "name": "pointer",
+                "required": true,
+                "description": "Function that returns the ThemeData"
+            }
+        ]
+    });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+    catalog.removeExtensionPoint("themestyles");
+    catalog.removeExtensionPoint("themeChange");
+    catalog.removeExtensionPoint("theme");
+};
 
 });

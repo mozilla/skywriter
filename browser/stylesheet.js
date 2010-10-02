@@ -1,7 +1,9 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     'skywriter/promise',
     '/standard_syntax'
 ], function(require, exports, module,
+    plugins,
     promise,
     standard_syntax
 ) {
@@ -46,22 +48,19 @@ require.def(['require', 'exports', 'module',
 "define metadata";
 ({
     "description": "CSS syntax highlighter",
-    "dependencies": {
-        "standard_syntax": "0.0.0"
-    },
-    "environments": {
-        "worker": true
-    },
-    "provides": [
-        {
-            "ep": "syntax",
-            "name": "css",
-            "pointer": "#CSSSyntax",
-            "fileexts": [ "css", "less" ]
-        }
-    ]
+    "dependencies": { "standard_syntax": "0.0.0" },
+    "environments": { "worker": true }
 });
 "end";
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("syntax", module.id, { "name": "css", "pointer": "#CSSSyntax", "fileexts": [ "css", "less" ] });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
 
 var Promise = promise.Promise;
 var StandardSyntax = standard_syntax.StandardSyntax;

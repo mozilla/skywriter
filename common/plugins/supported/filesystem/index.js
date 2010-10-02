@@ -1,6 +1,8 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     'skywriter'
 ], function(require, exports, module,
+    plugins,
     skywriter
 ) {
 
@@ -27,6 +29,20 @@ require.def(['require', 'exports', 'module',
  *   Skywriter Team (skywriter@mozilla.com)
  *
  * ***** END LICENSE BLOCK ***** */
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("factory", module.id, { "name": "files", "action": "new", "pointer": "#Filesystem" });
+    catalog.connect("type", module.id, {
+        "name": "existingFile",
+        "description": "A pointer to a file which we believe to already exist",
+        "pointer": "types#existingFile"
+    });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
 
 /*FIXME, put this code in the platform's boot script'*/
 

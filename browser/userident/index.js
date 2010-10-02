@@ -57,6 +57,43 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("factory", module.id, { "name": "loginController", "action": "new", "pointer": "#loginController" });
+    catalog.connect("themestyles", module.id, { "url": "styles.less" });
+    catalog.connect("command", module.id, {
+        "name": "logout",
+        "description": "Logout of Skywriter",
+        "pointer": "#logout"
+    });
+    catalog.connect("command", module.id, {
+        "name": "keychain",
+        "description":
+            "Manages your Skywriter keychain, which stores remote authentication information."
+    });
+    catalog.connect("command", module.id, {
+        "name": "keychain getkey",
+        "description": "retrieve your SSH public key used for remote server auth",
+        "pointer": "kc#getkey"
+    });
+    catalog.connect("command", module.id, {
+        "name": "keychain forget",
+        "description":
+            "forget the keychain password that is temporarily saved in your browser",
+        "pointer": "kc#forget"
+    });
+    catalog.connect("notification", module.id, {
+        "name": "loginerror",
+        "level": "error",
+        "description": "Problems logging in to Skywriter"
+    });
+    catalog.connect("notification", module.id, { "name": "reset", "level": "info", "description": "Password Reset" });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
+
 
 var Event = events.Event;
 var settings = settingsMod.settings;

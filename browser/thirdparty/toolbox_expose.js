@@ -1,6 +1,8 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     'thirdparty/jquery'
 ], function(require, exports, module,
+    plugins,
     jquery
 ) {
 
@@ -19,9 +21,14 @@ require.def(['require', 'exports', 'module',
 // imported into Skywriter on 2010/05/06
 
 "define metadata";
-({
-});
+({});
 "end";
+
+exports.init = function() {
+};
+
+exports.deinit = function() {
+};
 
 var $ = jquery.$;
 

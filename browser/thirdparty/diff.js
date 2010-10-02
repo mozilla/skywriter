@@ -1,5 +1,7 @@
-require.def(['require', 'exports', 'module'
-], function(require, exports, module
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins'
+], function(require, exports, module,
+    plugins
 ) {
 
 /**
@@ -23,10 +25,14 @@ require.def(['require', 'exports', 'module'
 
 // Mozilla: Plugin-metadata
 "define metadata";
-({
-    "description": "Diff/Match/Patch module (support code, no UI)"
-});
+({ "description": "Diff/Match/Patch module (support code, no UI)" });
 "end";
+
+exports.init = function() {
+};
+
+exports.deinit = function() {
+};
 
 /**
  * @fileoverview Computes the difference between two texts to create a patch.

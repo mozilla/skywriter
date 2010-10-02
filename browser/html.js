@@ -1,6 +1,8 @@
 require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
     '/standard_syntax'
 ], function(require, exports, module,
+    plugins,
     standard_syntax
 ) {
 
@@ -45,17 +47,18 @@ require.def(['require', 'exports', 'module',
 ({
     "description": "HTML syntax highlighter",
     "dependencies": { "standard_syntax": "0.0.0" },
-    "environments": { "worker": true },
-    "provides": [
-        {
-            "ep": "syntax",
-            "name": "html",
-            "pointer": "#HTMLSyntax",
-            "fileexts": [ "htm", "html" ]
-        }
-    ]
+    "environments": { "worker": true }
 });
 "end";
+
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.connect("syntax", module.id, { "name": "html", "pointer": "#HTMLSyntax", "fileexts": [ "htm", "html" ] });
+};
+
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+};
 
 var StandardSyntax = standard_syntax.StandardSyntax;
 
