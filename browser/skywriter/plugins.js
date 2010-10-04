@@ -51,15 +51,15 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+//require("globals");
+
 var Promise = promise.Promise;
 var group = promise.group;
-
 var console = consoleMod.console;
-
 var Trace = stacktrace.Trace;
 
-
-var r = require;
+//var loader = require.loader;
+//var browser = loader.sources[0];
 
 var USER_DEACTIVATED    = 'USER';
 var DEPENDS_DEACTIVATED = 'DEPENDS';
@@ -657,9 +657,10 @@ exports.Catalog.prototype = {
         return this.instances[name] || (this.parent ? this.parent.getObject(name) : undefined);
     },
 
-    /** Retrieve an extension point object by name, optionally creating it if it
-    * does not exist.
-    */
+    /**
+     * Retrieve an extension point object by name, optionally creating it if it
+     * does not exist.
+     */
     getExtensionPoint: function(name, create) {
         if (create && this.points[name] === undefined) {
             this.points[name] = new exports.ExtensionPoint(name, this);
@@ -770,11 +771,14 @@ exports.Catalog.prototype = {
                 md.name = pluginName;
                 md.version = null;
 
+                console.log('!register', pluginName, md);
+                /* TODO:
                 var packageId = browser.canonicalPackageId(pluginName);
                 if (packageId === null) {
                     browser.register('::' + pluginName, md);
                     continue;
                 }
+                */
             }
 
             // Save the new metadata.
@@ -904,7 +908,7 @@ exports.Catalog.prototype = {
                 });
             });
         } else {
-            require.ensurePackage(pluginName, function(err) {
+            require([ pluginName ], function(err) {
                 if (err) {
                     pr.reject(err);
                 } else {
