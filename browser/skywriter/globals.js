@@ -1,7 +1,3 @@
-require.def(['require', 'exports', 'module'
-], function(require, exports, module
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -39,61 +35,11 @@ require.def(['require', 'exports', 'module'
  *
  * ***** END LICENSE BLOCK ***** */
 
-/*
-* Installs ES5 and SproutCore monkeypatches as needed.
-*/
-var installGlobals = function() {
-    /**
-     * Array detector.
-     * Firefox 3.5 and Safari 4 have this already. Chrome 4 however ...
-     * Note to Dojo - your isArray is still broken: instanceof doesn't work with
-     * Arrays taken from a different frame/window.
-     */
-    if (!Array.isArray) {
-        Array.isArray = function(data) {
-            return (data && Object.prototype.toString.call(data) == "[object Array]");
-        };
-    }
-
-    /**
-     * Retrieves the list of keys on an object.
-     */
-    if (!Object.keys) {
-        Object.keys = function(obj) {
-            var k, ret = [];
-            for (k in obj) {
-                if (obj.hasOwnProperty(k)) {
-                    ret.push(k);
-                }
-            }
-            return ret;
-        };
-    }
-
-    if (!Function.prototype.bind) {
-        // From Narwhal
-        Function.prototype.bind = function () {
-            var args = Array.prototype.slice.call(arguments);
-            var self = this;
-            var bound = function () {
-                return self.call.apply(
-                    self,
-                    args.concat(
-                        Array.prototype.slice.call(arguments)
-                    )
-                );
-            };
-            bound.name = this.name;
-            bound.displayName = this.displayName;
-            bound.length = this.length;
-            bound.unbound = self;
-            return bound;
-        };
-    }
-};
+require.def(['require', 'exports', 'module'
+], function(require, exports, module
+) {
 
 // Narwhal's shim for ES5 defineProperty
-
 // ES5 15.2.3.6
 if (!Object.defineProperty) {
     Object.defineProperty = function(object, property, descriptor) {
@@ -148,6 +94,54 @@ if (!Object.defineProperties) {
 
 
 
-installGlobals();
+/**
+ * Array detector.
+ * Firefox 3.5 and Safari 4 have this already. Chrome 4 however ...
+ * Note to Dojo - your isArray is still broken: instanceof doesn't work with
+ * Arrays taken from a different frame/window.
+ */
+if (!Array.isArray) {
+    Array.isArray = function(data) {
+        return data && Object.prototype.toString.call(data) === "[object Array]";
+    };
+}
+
+/**
+ * Retrieves the list of keys on an object.
+ */
+if (!Object.keys) {
+    Object.keys = function(obj) {
+        var k, ret = [];
+        for (k in obj) {
+            if (obj.hasOwnProperty(k)) {
+                ret.push(k);
+            }
+        }
+        return ret;
+    };
+}
+
+if (!Function.prototype.bind) {
+    // From Narwhal
+    Function.prototype.bind = function () {
+        var args = Array.prototype.slice.call(arguments);
+        var self = this;
+        var bound = function () {
+            return self.call.apply(
+                self,
+                args.concat(
+                    Array.prototype.slice.call(arguments)
+                )
+            );
+        };
+        bound.name = this.name;
+        bound.displayName = this.displayName;
+        bound.length = this.length;
+        bound.unbound = self;
+        return bound;
+    };
+}
+
+exports.globalsLoaded = true;
 
 });
