@@ -1,19 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'skywriter/plugins',
-    'plugindev/core_test',
-    'skywriter/promise',
-    'core_test/test',
-    'core_test/utils',
-    'plugindev/environment'
-], function(require, exports, module,
-    plugins,
-    Ct,
-    promise,
-    test,
-    utils,
-    environment
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -51,17 +35,28 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'plugindev/core_test',
+    'skywriter/promise',
+    'core_test/test',
+    'core_test/utils',
+    'plugindev/environment',
+    'thirdparty/core_test/loggers/default'
+], function(require, exports, module,
+    plugins,
+    Ct,
+    promise,
+    test,
+    utils,
+    environment,
+    DefaultLogger
+) {
+
 var catalog = plugins.catalog;
-
-var DefaultLogger = require('loggers/default', 'core_test');
 var Promise = promise.Promise;
-var group = promise.group;
-
-
 var env = environment.env;
-
 var lastTest = null;
-
 var textDiv, textNode;
 
 /**
@@ -530,7 +525,7 @@ exports.testrunner = function(args, request) {
         return;
     }
 
-    var pr = group(promises);
+    var pr = Promise.group(promises);
     pr.then(function() {
         testsToRun.forEach(function(testmodule) {
             var mod = require(testmodule);

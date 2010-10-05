@@ -69,7 +69,6 @@ exports.deinit = function() {
 
 var $ = jquery.$;
 var settings = settingsMod.settings;
-var group = promise.group;
 var Promise = promise.Promise;
 var console = consoleMod.console;
 var Trace = stacktrace.Trace;
@@ -350,7 +349,7 @@ var createAllObjects = function(catalog, config) {
     for (var objectName in config.objects) {
         promises.push(catalog.createObject(objectName));
     }
-    return group(promises);
+    return Promise.group(promises);
 };
 
 var generateGUI = function(catalog, config, pr) {

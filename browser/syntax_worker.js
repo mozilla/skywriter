@@ -1,17 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'skywriter/plugins',
-    'skywriter/promise',
-    '/underscore',
-    'skywriter/console',
-    '/syntax_directory'
-], function(require, exports, module,
-    plugins,
-    promise,
-    underscore,
-    consoleMod,
-    syntax_directory
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -49,6 +35,24 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'skywriter/promise',
+    '/underscore',
+    'skywriter/console',
+    '/syntax_directory'
+], function(require, exports, module,
+    plugins,
+    promise,
+    underscore,
+    consoleMod,
+    syntax_directory
+) {
+
+var _ = underscore._;
+var console = consoleMod.console;
+var syntaxDirectory = syntax_directory.syntaxDirectory;
+
 "define metadata";
 ({
     "description": "Coordinates multiple syntax engines",
@@ -62,11 +66,6 @@ exports.init = function() {
 
 exports.deinit = function() {
 };
-
-
-var _ = underscore._;
-var console = consoleMod.console;
-var syntaxDirectory = syntax_directory.syntaxDirectory;
 
 var syntaxWorker = {
     engines: {},
@@ -143,7 +142,7 @@ var syntaxWorker = {
     },
 
     loadSyntax: function(syntaxName) {
-        var pr = new promise.Promise;
+        var pr = new promise.Promise();
 
         var engines = this.engines;
         if (engines.hasOwnProperty(syntaxName)) {
@@ -166,7 +165,7 @@ var syntaxWorker = {
                 return;
             }
 
-            var pr2 = promise.group(_(subsyntaxes).map(this.loadSyntax, this));
+            var pr2 = promise.Promise.group(_(subsyntaxes).map(this.loadSyntax, this));
             pr2.then(_(pr.resolve).bind(pr));
         }.bind(this));
 
@@ -175,6 +174,5 @@ var syntaxWorker = {
 };
 
 exports.syntaxWorker = syntaxWorker;
-
 
 });

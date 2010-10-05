@@ -39,11 +39,9 @@
 // for firing up Skywriter on the page.
 // This module depends only on Tiki.
 
-
 (function() {
 
-var Promise = skywriter.tiki.require('skywriter:promise').Promise;
-var group = skywriter.tiki.require("skywriter:promise").group;
+var Promise = require('promise').Promise;
 var $ = skywriter.tiki.require("jquery").$;
 
 skywriter.loaded = new Promise();
@@ -261,7 +259,7 @@ $(document).ready(function() {
 
     // Call the window.onSkywriterLoad() function after all launched Skywriters
     // are ready or throw an error otherwise.
-    group(launchSkywriterPromises).then(function() {
+    Promise.group(launchSkywriterPromises).then(function() {
         skywriter.initialized.resolve();
         // If users want a custom startup.
         if (window.onSkywriterLoad) {

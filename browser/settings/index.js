@@ -1,15 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'skywriter/plugins',
-    'skywriter/console',
-    'skywriter/promise',
-    'types/types'
-], function(require, exports, module,
-    plugins,
-    consoleMod,
-    promise,
-    types
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -46,66 +34,6 @@ require.def(['require', 'exports', 'module',
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-
-exports.init = function() {
-    var catalog = plugins.catalog;
-    catalog.addExtensionPoint("setting", {
-        "description":
-            "A setting is something that the application offers as a way to customize how it works",
-        "register": "index#addSetting",
-        "indexOn": "name"
-    });
-    catalog.addExtensionPoint("settingChange", {
-        "description":
-            "A settingChange is a way to be notified of changes to a setting"
-    });
-    catalog.connect("command", module.id, {
-        "name": "set",
-        "params": [
-            {
-                "name": "setting",
-                "type": {
-                    "name": "selection",
-                    "pointer": "settings:index#getSettings"
-                },
-                "description": "The name of the setting to display or alter",
-                "defaultValue": null
-            },
-            {
-                "name": "value",
-                "type": {
-                    "name": "deferred",
-                    "pointer": "settings:index#getTypeSpecFromAssignment"
-                },
-                "description": "The new value for the chosen setting",
-                "defaultValue": null
-            }
-        ],
-        "description": "define and show settings",
-        "pointer": "commands#setCommand"
-    });
-    catalog.connect("command", module.id, {
-        "name": "unset",
-        "params": [
-            {
-                "name": "setting",
-                "type": {
-                    "name": "selection",
-                    "pointer": "settings:index#getSettings"
-                },
-                "description": "The name of the setting to return to defaults"
-            }
-        ],
-        "description": "unset a setting entirely",
-        "pointer": "commands#unsetCommand"
-    });
-};
-
-exports.deinit = function() {
-    catalog.disconnectAll(module.id);
-    catalog.removeExtensionPoint("setting");
-    catalog.removeExtensionPoint("settingChange");
-};
 
 /**
  * This plug-in manages settings.
@@ -166,12 +94,81 @@ exports.deinit = function() {
  * </ul>
  */
 
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'skywriter/console',
+    'skywriter/promise',
+    'types/types'
+], function(require, exports, module,
+    plugins,
+    consoleMod,
+    promise,
+    types
+) {
+
 var catalog = plugins.catalog;
 var console = consoleMod.console;
 var Promise = promise.Promise;
-var groupPromises = promise.group;
 
+exports.init = function() {
+    var catalog = plugins.catalog;
+    catalog.addExtensionPoint("setting", {
+        "description":
+            "A setting is something that the application offers as a way to customize how it works",
+        "register": "index#addSetting",
+        "indexOn": "name"
+    });
+    catalog.addExtensionPoint("settingChange", {
+        "description":
+            "A settingChange is a way to be notified of changes to a setting"
+    });
+    catalog.connect("command", module.id, {
+        "name": "set",
+        "params": [
+            {
+                "name": "setting",
+                "type": {
+                    "name": "selection",
+                    "pointer": "settings:index#getSettings"
+                },
+                "description": "The name of the setting to display or alter",
+                "defaultValue": null
+            },
+            {
+                "name": "value",
+                "type": {
+                    "name": "deferred",
+                    "pointer": "settings:index#getTypeSpecFromAssignment"
+                },
+                "description": "The new value for the chosen setting",
+                "defaultValue": null
+            }
+        ],
+        "description": "define and show settings",
+        "pointer": "commands#setCommand"
+    });
+    catalog.connect("command", module.id, {
+        "name": "unset",
+        "params": [
+            {
+                "name": "setting",
+                "type": {
+                    "name": "selection",
+                    "pointer": "settings:index#getSettings"
+                },
+                "description": "The name of the setting to return to defaults"
+            }
+        ],
+        "description": "unset a setting entirely",
+        "pointer": "commands#unsetCommand"
+    });
+};
 
+exports.deinit = function() {
+    catalog.disconnectAll(module.id);
+    catalog.removeExtensionPoint("setting");
+    catalog.removeExtensionPoint("settingChange");
+};
 
 /**
  * Find and configure the settings object.
@@ -457,7 +454,7 @@ exports.MemorySettings.prototype = {
         // this works with ignored settings (see above).
         // So we do this to hide the list of promise resolutions.
         var replyPromise = new Promise();
-        groupPromises(promises).then(function() {
+        Promise.group(promises).then(function() {
             replyPromise.resolve();
         });
         return replyPromise;
@@ -484,7 +481,7 @@ exports.MemorySettings.prototype = {
         }.bind(this));
 
         var replyPromise = new Promise();
-        groupPromises(promises).then(function() {
+        Promise.group(promises).then(function() {
             replyPromise.resolve(reply);
         });
         return replyPromise;

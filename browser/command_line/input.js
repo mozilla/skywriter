@@ -1,29 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'skywriter/plugins',
-    'skywriter/console',
-    'skywriter/promise',
-    'skywriter/util/stacktrace',
-    'skywriter/util/util',
-    'types/types',
-    'canon/request',
-    'canon/history',
-    'keyboard/keyboard',
-    'command_line/hint',
-    'command_line/typehint'
-], function(require, exports, module,
-    plugins,
-    consoleMod,
-    promise,
-    stacktrace,
-    util,
-    types,
-    request,
-    history,
-    keyboard,
-    hint,
-    typehint
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -61,21 +35,39 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'skywriter/console',
+    'skywriter/promise',
+    'skywriter/util/stacktrace',
+    'skywriter/util/util',
+    'types/types',
+    'canon/request',
+    'canon/history',
+    'keyboard/keyboard',
+    'command_line/hint',
+    'command_line/typehint'
+], function(require, exports, module,
+    plugins,
+    consoleMod,
+    promise,
+    stacktrace,
+    util,
+    types,
+    request,
+    history,
+    keyboard,
+    hint,
+    typehint
+) {
+
 var catalog = plugins.catalog;
 var console = consoleMod.console;
 var Promise = promise.Promise;
-var groupPromises = promise.group;
 var Trace = stacktrace.Trace;
-
-
-
 var Request = request.Request;
-
-
-
 var Hint = hint.Hint;
 var Level = hint.Level;
-
 
 /**
  * An object used during command line parsing to hold the various intermediate
@@ -499,7 +491,7 @@ exports.Input.prototype = {
             convertPromises.push(promise);
         }.bind(this));
 
-        groupPromises(convertPromises).then(function() {
+        Promise.group(convertPromises).then(function() {
             this.argsPromise.resolve(argOutputs);
         }.bind(this));
     },

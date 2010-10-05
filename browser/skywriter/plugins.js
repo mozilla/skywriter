@@ -1,19 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'skywriter/promise',
-    'skywriter/builtins',
-    'skywriter/console',
-    'skywriter/util/util',
-    'skywriter/util/stacktrace',
-    'skywriter/proxy'
-], function(require, exports, module,
-    promise,
-    builtins,
-    consoleMod,
-    util,
-    stacktrace,
-    proxy
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -51,10 +35,25 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+require.def(['require', 'exports', 'module',
+    'skywriter/promise',
+    'skywriter/builtins',
+    'skywriter/console',
+    'skywriter/util/util',
+    'skywriter/util/stacktrace',
+    'skywriter/proxy'
+], function(require, exports, module,
+    promise,
+    builtins,
+    consoleMod,
+    util,
+    stacktrace,
+    proxy
+) {
+
 // require("skywriter/globals");
 
 var Promise = promise.Promise;
-var group = promise.group;
 var console = consoleMod.console;
 var Trace = stacktrace.Trace;
 
@@ -619,7 +618,7 @@ exports.Catalog.prototype = {
             }
         }
 
-        group(argumentPromises).then(function() {
+        Promise.group(argumentPromises).then(function() {
             ext.load().then(function(factory) {
                 // console.log("Got factory for ", name);
                 var action = ext.action;
@@ -902,7 +901,7 @@ exports.Catalog.prototype = {
             plugin.objects.forEach(function(objectName) {
                 objectPromises.push(this.createObject(objectName));
             }.bind(this));
-            group(objectPromises).then(function() {
+            Promise.group(objectPromises).then(function() {
                 require.ensurePackage(pluginName, function() {
                     pr.resolve();
                 });

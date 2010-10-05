@@ -1,19 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'skywriter/plugins',
-    'skywriter/promise',
-    'skywriter/util/util',
-    'plugindev/environment',
-    'plugindev/skywriter_server',
-    'filesystem/path'
-], function(require, exports, module,
-    plugins,
-    promise,
-    util,
-    environment,
-    skywriter_server,
-    pathutils
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -51,14 +35,26 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+require.def(['require', 'exports', 'module',
+    'skywriter/plugins',
+    'skywriter/promise',
+    'skywriter/util/util',
+    'plugindev/environment',
+    'plugindev/skywriter_server',
+    'filesystem/path'
+], function(require, exports, module,
+    plugins,
+    promise,
+    util,
+    environment,
+    skywriter_server,
+    pathutils
+) {
+
 var catalog = plugins.catalog;
 var Promise = promise.Promise;
-var groupPromises = promise.group;
-
 var env = environment.env;
-
 var server = skywriter_server.server;
-
 
 var getPluginName = function(path) {
     if (util.endsWith(path, '/')) {

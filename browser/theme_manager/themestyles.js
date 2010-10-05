@@ -1,19 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'skywriter/util/util',
-    'skywriter/plugins',
-    'skywriter/console',
-    'skywriter/promise',
-    'skywriter/proxy',
-    'thirdparty/less'
-], function(require, exports, module,
-    util,
-    plugins,
-    consoleMod,
-    promise,
-    proxy,
-    less
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -51,15 +35,25 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+require.def(['require', 'exports', 'module',
+    'skywriter/util/util',
+    'skywriter/plugins',
+    'skywriter/console',
+    'skywriter/promise',
+    'skywriter/proxy',
+    'thirdparty/less'
+], function(require, exports, module,
+    util,
+    plugins,
+    consoleMod,
+    promise,
+    proxy,
+    less
+) {
 
 var catalog = plugins.catalog;
 var console = consoleMod.console;
 var Promise = promise.Promise;
-var group = promise.group;
-
-
-
-
 
 // The less parser to use.
 var lessParser = new less.Parser({ optimization: 3 });
@@ -498,7 +492,7 @@ exports.registerThemeStyles = function(extension) {
         // If parsing is allowed, then wait until all the styleFiles are loaded
         // and parse the plugin.
         if (!preventParsing) {
-            group(loadPromises).then(function() {
+            Promise.group(loadPromises).then(function() {
                 exports.parsePlugin(pluginName);
             });
         }
@@ -506,7 +500,7 @@ exports.registerThemeStyles = function(extension) {
         if (themeDataLoadPromise !== null) {
             loadPromises = loadPromises.concat(themeDataLoadPromise);
         }
-        themeDataLoadPromise = group(loadPromises);
+        themeDataLoadPromise = Promise.group(loadPromises);
     }
 };
 
@@ -550,7 +544,7 @@ exports.reparse = function() {
             }
 
             // After all themeStyles are parsed, resolve the returned promise.
-            group(parsePromises).then(pr.resolve.bind(pr), pr.reject.bind(pr));
+            Promise.group(parsePromises).then(pr.resolve.bind(pr), pr.reject.bind(pr));
         }, function(err) {
             pr.reject(err);
         });

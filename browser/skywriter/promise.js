@@ -1,11 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'skywriter/console',
-    'skywriter/util/stacktrace'
-], function(require, exports, module,
-    consoleMod,
-    stacktrace
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -43,6 +35,14 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+require.def(['require', 'exports', 'module',
+    'skywriter/console',
+    'skywriter/util/stacktrace'
+], function(require, exports, module,
+    consoleMod,
+    stacktrace
+) {
+
 var console = consoleMod.console;
 var Trace = stacktrace.Trace;
 
@@ -70,17 +70,17 @@ var _traceCompletion = false;
 /**
  * Outstanding promises. Handy list for debugging only.
  */
-exports._outstanding = [];
+var _outstanding = [];
 
 /**
  * Recently resolved promises. Also for debugging only.
  */
-exports._recent = [];
+var _recent = [];
 
 /**
  * Create an unfulfilled promise
  */
-exports.Promise = function () {
+Promise = function () {
     this._status = PENDING;
     this._value = undefined;
     this._onSuccessHandlers = [];
@@ -89,32 +89,32 @@ exports.Promise = function () {
     // Debugging help
     this._id = _nextId++;
     //this._createTrace = new Trace(new Error());
-    exports._outstanding[this._id] = this;
+    _outstanding[this._id] = this;
 };
 
 /**
  * Yeay for RTTI.
  */
-exports.Promise.prototype.isPromise = true;
+Promise.prototype.isPromise = true;
 
 /**
  * Have we either been resolve()ed or reject()ed?
  */
-exports.Promise.prototype.isComplete = function() {
+Promise.prototype.isComplete = function() {
     return this._status != PENDING;
 };
 
 /**
  * Have we resolve()ed?
  */
-exports.Promise.prototype.isResolved = function() {
+Promise.prototype.isResolved = function() {
     return this._status == SUCCESS;
 };
 
 /**
  * Have we reject()ed?
  */
-exports.Promise.prototype.isRejected = function() {
+Promise.prototype.isRejected = function() {
     return this._status == ERROR;
 };
 
@@ -122,7 +122,7 @@ exports.Promise.prototype.isRejected = function() {
  * Take the specified action of fulfillment of a promise, and (optionally)
  * a different action on promise rejection.
  */
-exports.Promise.prototype.then = function(onSuccess, onError) {
+Promise.prototype.then = function(onSuccess, onError) {
     if (typeof onSuccess === 'function') {
         if (this._status === SUCCESS) {
             onSuccess.call(null, this._value);
@@ -146,8 +146,8 @@ exports.Promise.prototype.then = function(onSuccess, onError) {
  * Like then() except that rather than returning <tt>this</tt> we return
  * a promise which
  */
-exports.Promise.prototype.chainPromise = function(onSuccess) {
-    var chain = new exports.Promise();
+Promise.prototype.chainPromise = function(onSuccess) {
+    var chain = new Promise();
     chain._chainedFrom = this;
     this.then(function(data) {
         try {
@@ -164,14 +164,14 @@ exports.Promise.prototype.chainPromise = function(onSuccess) {
 /**
  * Supply the fulfillment of a promise
  */
-exports.Promise.prototype.resolve = function(data) {
+Promise.prototype.resolve = function(data) {
     return this._complete(this._onSuccessHandlers, SUCCESS, data, 'resolve');
 };
 
 /**
  * Renege on a promise
  */
-exports.Promise.prototype.reject = function(data) {
+Promise.prototype.reject = function(data) {
     return this._complete(this._onErrorHandlers, ERROR, data, 'reject');
 };
 
@@ -179,7 +179,7 @@ exports.Promise.prototype.reject = function(data) {
  * Internal method to be called on resolve() or reject().
  * @private
  */
-exports.Promise.prototype._complete = function(list, status, data, name) {
+Promise.prototype._complete = function(list, status, data, name) {
     // Complain if we've already been completed
     if (this._status != PENDING) {
         console.group('Promise already closed');
@@ -212,10 +212,10 @@ exports.Promise.prototype._complete = function(list, status, data, name) {
 
     // Remove the given {promise} from the _outstanding list, and add it to the
     // _recent list, pruning more than 20 recent promises from that list.
-    delete exports._outstanding[this._id];
-    exports._recent.push(this);
-    while (exports._recent.length > 20) {
-        exports._recent.shift();
+    delete _outstanding[this._id];
+    _recent.push(this);
+    while (_recent.length > 20) {
+        _recent.shift();
     }
 
     return this;
@@ -227,17 +227,17 @@ exports.Promise.prototype._complete = function(list, status, data, name) {
  * @param group The array of promises
  * @return the promise that is fulfilled when all the array is fulfilled
  */
-exports.group = function(promiseList) {
+Promise.group = function(promiseList) {
     if (!(promiseList instanceof Array)) {
         promiseList = Array.prototype.slice.call(arguments);
     }
 
     // If the original array has nothing in it, return now to avoid waiting
     if (promiseList.length === 0) {
-        return new exports.Promise().resolve([]);
+        return new Promise().resolve([]);
     }
 
-    var groupPromise = new exports.Promise();
+    var groupPromise = new Promise();
     var results = [];
     var fulfilled = 0;
 
@@ -263,24 +263,8 @@ exports.group = function(promiseList) {
     return groupPromise;
 };
 
-/**
- * Take an asynchronous function (i.e. one that returns a promise) and
- * return a synchronous version of the same function.
- * Clearly this is impossible without blocking or busy waiting (both evil).
- * In this case we make the assumption that the called function is only
- * theoretically asynchronous (which is actually common with Skywriter, because the
- * most common cause of asynchronaity is the lazy loading module system which
- * can sometimes be proved to be synchronous in use, even though in theory
- * there is the potential for asynch behaviour)
- */
-exports.synchronizer = function(func, scope) {
-    return function() {
-        var promise = func.apply(scope, arguments);
-        if (!promise.isComplete()) {
-            throw new Error('asynchronous function can\'t be synchronized');
-        }
-        return promise._value;
-    };
-};
+exports.Promise = Promise;
+exports._outstanding = _outstanding;
+exports._recent = _recent;
 
 });
