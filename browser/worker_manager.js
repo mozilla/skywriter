@@ -9,7 +9,7 @@ require.def(['require', 'exports', 'module',
 ], function(require, exports, module,
     proxy,
     plugins,
-    consoleMod,
+    console,
     underscore,
     events,
     promise,
@@ -88,7 +88,6 @@ if (window == null) {
 
 
 
-var console = consoleMod.console;
 var _ = underscore._;
 var Event = events.Event;
 var Promise = promise.Promise;

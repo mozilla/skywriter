@@ -7,7 +7,7 @@ require.def(['require', 'exports', 'module',
     'skywriter/util/cookie'
 ], function(require, exports, module,
     skywriter,
-    consoleMod,
+    console,
     promise,
     plugins,
     util,
@@ -109,7 +109,6 @@ exports.deinit = function() {
 };
 
 
-var console = consoleMod.console;
 var Promise = promise.Promise;
 var catalog = plugins.catalog;
 

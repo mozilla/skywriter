@@ -5,7 +5,7 @@ require.def(['require', 'exports', 'module',
     'settings/index'
 ], function(require, exports, module,
     util,
-    consoleMod,
+    console,
     plugins,
     settingsMod
 ) {
@@ -58,7 +58,6 @@ exports.deinit = function() {
 };
 
 
-var console = consoleMod.console;
 var catalog = plugins.catalog;
 var settings = settingsMod.settings;
 

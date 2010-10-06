@@ -6,7 +6,7 @@ require.def(['require', 'exports', 'module',
     'keyboard/keyboard'
 ], function(require, exports, module,
     plugins,
-    consoleMod,
+    console,
     promise,
     environment,
     keyboard
@@ -92,7 +92,6 @@ exports.deinit = function() {
 };
 
 var catalog = plugins.catalog;
-var console = consoleMod.console;
 var Promise = promise.Promise;
 
 var env = environment.env;

@@ -4,7 +4,7 @@ require.def(['require', 'exports', 'module',
     'skywriter/util/stacktrace'
 ], function(require, exports, module,
     plugins,
-    consoleMod,
+    console,
     stacktrace
 ) {
 
@@ -46,7 +46,6 @@ require.def(['require', 'exports', 'module',
  * ***** END LICENSE BLOCK ***** */
 
 var catalog = plugins.catalog;
-var console = consoleMod.console;
 var Trace = stacktrace.Trace;
 
 /**

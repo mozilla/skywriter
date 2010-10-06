@@ -9,7 +9,7 @@ require.def(['require', 'exports', 'module',
     'collab/view'
 ], function(require, exports, module,
     plugins,
-    consoleMod,
+    console,
     environment,
     project,
     skywriter_server,
@@ -291,7 +291,6 @@ I took out from package.json following extension points:
  * information and handle collaboration.
  */
 
-var console = consoleMod.console;
 var env = environment.env;
 
 var server = skywriter_server.server;

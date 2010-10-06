@@ -4,7 +4,7 @@ require.def(['require', 'exports', 'module',
     'skywriter/promise'
 ], function(require, exports, module,
     plugins,
-    consoleMod,
+    console,
     promise
 ) {
 
@@ -46,7 +46,6 @@ require.def(['require', 'exports', 'module',
  * ***** END LICENSE BLOCK ***** */
 
 var catalog = plugins.catalog;
-var console = consoleMod.console;
 var Promise = promise.Promise;
 
 /**

@@ -45,7 +45,7 @@ require.def(['require', 'exports', 'module',
 ], function(require, exports, module,
     promise,
     builtins,
-    consoleMod,
+    console,
     util,
     stacktrace,
     proxy
@@ -54,7 +54,6 @@ require.def(['require', 'exports', 'module',
 // require("skywriter/globals");
 
 var Promise = promise.Promise;
-var console = consoleMod.console;
 var Trace = stacktrace.Trace;
 
 //var loader = require.loader;

@@ -39,11 +39,10 @@ require.def(['require', 'exports', 'module',
     'skywriter/console',
     'skywriter/util/stacktrace'
 ], function(require, exports, module,
-    consoleMod,
+    console,
     stacktrace
 ) {
 
-var console = consoleMod.console;
 var Trace = stacktrace.Trace;
 
 /**

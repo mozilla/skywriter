@@ -3,7 +3,7 @@ require.def(['require', 'exports', 'module',
     'skywriter/console'
 ], function(require, exports, module,
     util,
-    consoleMod
+    console
 ) {
 
 // Changed to suit the specific needs of running within Skywriter
@@ -57,7 +57,6 @@ require.def(['require', 'exports', 'module',
 // OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-var console = consoleMod.console;
 
 /**
  * Different browsers create stack traces in different ways.

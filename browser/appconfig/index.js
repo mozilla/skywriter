@@ -1,25 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'thirdparty/jquery',
-    'settings/index',
-    'skywriter/promise',
-    'skywriter/console',
-    'skywriter/util/stacktrace',
-    'skywriter/util/util',
-    'skywriter/plugins',
-    'environment',
-    'theme_manager/index'
-], function(require, exports, module,
-    jquery,
-    settingsMod,
-    promise,
-    consoleMod,
-    stacktrace,
-    util,
-    plugins,
-    environment,
-    themeManager
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -57,22 +35,44 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+require.def(['require', 'exports', 'module',
+    'thirdparty/jquery',
+    'settings/index',
+    'skywriter/promise',
+    'skywriter/console',
+    'skywriter/util/stacktrace',
+    'skywriter/util/util',
+    'skywriter/plugins',
+    'environment',
+    'theme_manager/index'
+], function(require, exports, module,
+    jquery,
+    settingsMod,
+    promise,
+    console,
+    stacktrace,
+    util,
+    plugins,
+    environment,
+    themeManager
+) {
+
+var $ = jquery.$;
+var settings = settingsMod.settings;
+var Promise = promise.Promise;
+var Trace = stacktrace.Trace;
+
 exports.init = function() {
     var catalog = plugins.catalog;
-    catalog.addExtensionPoint("appLaunched", { "description": "Event: Fired when the app is completely launched." });
+    catalog.addExtensionPoint("appLaunched", {
+        "description": "Event: Fired when the app is completely launched."
+    });
 };
 
 exports.deinit = function() {
     catalog.disconnectAll(module.id);
     catalog.removeExtensionPoint("appLaunched");
 };
-
-var $ = jquery.$;
-var settings = settingsMod.settings;
-var Promise = promise.Promise;
-var console = consoleMod.console;
-var Trace = stacktrace.Trace;
-
 
 var firstSkywriter = true;
 

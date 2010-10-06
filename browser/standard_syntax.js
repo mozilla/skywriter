@@ -8,7 +8,7 @@ require.def(['require', 'exports', 'module',
     plugins,
     promise,
     underscore,
-    consoleMod,
+    console,
     syntax_directory
 ) {
 
@@ -69,7 +69,6 @@ exports.deinit = function() {
 
 
 var _ = underscore._;
-var console = consoleMod.console;
 var syntaxDirectory = syntax_directory.syntaxDirectory;
 
 exports.StandardSyntax = function(states, subsyntaxes) {

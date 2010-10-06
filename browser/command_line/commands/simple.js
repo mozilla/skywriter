@@ -4,7 +4,7 @@ require.def(['require', 'exports', 'module',
     'command_line/commands/environment'
 ], function(require, exports, module,
     plugins,
-    consoleMod,
+    console,
     environment
 ) {
 
@@ -46,7 +46,6 @@ require.def(['require', 'exports', 'module',
  * ***** END LICENSE BLOCK ***** */
 
 var catalog = plugins.catalog;
-var console = consoleMod.console;
 var env = environment.env;
 
 /**

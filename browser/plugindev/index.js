@@ -7,7 +7,7 @@ require.def(['require', 'exports', 'module',
     'plugindev/skywriter_server',
     'skywriter/plugins'
 ], function(require, exports, module,
-    consoleMod,
+    console,
     core_test,
     assert,
     test,
@@ -240,7 +240,6 @@ exports.deinit = function() {
     catalog.disconnectAll(module.id);
 };
 
-var console = consoleMod.console;
 
 
 

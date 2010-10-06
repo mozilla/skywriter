@@ -5,7 +5,7 @@ require.def(['require', 'exports', 'module',
     'matcher/prefix',
     'command_line/views/menu'
 ], function(require, exports, module,
-    consoleMod,
+    console,
     promise,
     basic,
     prefix,
@@ -49,7 +49,6 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var console = consoleMod.console;
 var Promise = promise.Promise;
 
 

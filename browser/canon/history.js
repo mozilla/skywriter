@@ -5,7 +5,7 @@ require.def(['require', 'exports', 'module',
 ], function(require, exports, module,
     stacktrace,
     plugins,
-    consoleMod
+    console
 ) {
 
 /* ***** BEGIN LICENSE BLOCK *****
@@ -47,7 +47,6 @@ require.def(['require', 'exports', 'module',
 
 var Trace = stacktrace.Trace;
 var catalog = plugins.catalog;
-var console = consoleMod.console;
 
 /**
  * Current requirements are around displaying the command line, and provision

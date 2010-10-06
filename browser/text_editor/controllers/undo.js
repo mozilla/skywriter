@@ -2,7 +2,7 @@ require.def(['require', 'exports', 'module',
     'skywriter/console',
     'text_editor/controllers/environment'
 ], function(require, exports, module,
-    consoleMod,
+    console,
     environment
 ) {
 
@@ -43,7 +43,6 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var console = consoleMod.console;
 var env = environment.env;
 
 /**

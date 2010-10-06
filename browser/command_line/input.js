@@ -49,7 +49,7 @@ require.def(['require', 'exports', 'module',
     'command_line/typehint'
 ], function(require, exports, module,
     plugins,
-    consoleMod,
+    console,
     promise,
     stacktrace,
     util,
@@ -62,7 +62,6 @@ require.def(['require', 'exports', 'module',
 ) {
 
 var catalog = plugins.catalog;
-var console = consoleMod.console;
 var Promise = promise.Promise;
 var Trace = stacktrace.Trace;
 var Request = request.Request;

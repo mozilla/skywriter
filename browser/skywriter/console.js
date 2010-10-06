@@ -1,9 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'skywriter/util/util'
-], function(require, exports, module,
-    util
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -41,20 +35,16 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-
+require.def(['require', 'exports', 'module'
+], function(require, exports, module
+) {
 
 /**
  * This object represents a "safe console" object that forwards debugging
  * messages appropriately without creating a dependency on Firebug in Firefox.
  */
 
-// We could prefer to copy the methods on window.console to exports.console
-// one by one because then we could be sure of using the safe subset that is
-// implemented on all browsers, however this doesn't work properly everywhere
-// ...
-
-var noop = function() {
-};
+var noop = function() {};
 
 // These are the functions that are available in Chrome 4/5, Safari 4
 // and Firefox 3.6. Don't add to this list without checking browser support
@@ -66,34 +56,22 @@ var NAMES = [
 if (typeof(window) === 'undefined') {
     // We're in a web worker. Forward to the main thread so the messages
     // will show up.
-    var console = {};
     NAMES.forEach(function(name) {
-        console[name] = function() {
+        exports[name] = function() {
             var args = Array.prototype.slice.call(arguments);
             var msg = { op: 'log', method: name, args: args };
             postMessage(JSON.stringify(msg));
         };
     });
-
-    exports.console = console;
-} else if (util.isSafari || util.isChrome) {
-    // Webkit's output functions are bizarre because they get confused if 'this'
-    // is not window.console, so we just copy it all across
-    exports.console = window.console;
 } else {
-    // So we're not in Webkit, but we may still be no console object (in the
-    // case of Firefox without Firebug)
-    exports.console = { };
-
     // For each of the console functions, copy them if they exist, stub if not
     NAMES.forEach(function(name) {
         if (window.console && window.console[name]) {
-            exports.console[name] = window.console[name].bind(window.console);
+            exports[name] = window.console[name].bind(window.console);
         } else {
-            exports.console[name] = noop;
+            exports[name] = noop;
         }
     });
 }
-
 
 });

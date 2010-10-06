@@ -8,7 +8,7 @@ require.def(['require', 'exports', 'module',
     plugins,
     environment,
     util,
-    consoleMod,
+    console,
     buffer
 ) {
 
@@ -65,7 +65,6 @@ exports.deinit = function() {
 
 var env = environment.env;
 
-var console = consoleMod.console;
 
 var Buffer = buffer.Buffer;
 

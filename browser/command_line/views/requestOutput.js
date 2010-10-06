@@ -7,7 +7,7 @@ require.def(['require', 'exports', 'module',
 ], function(require, exports, module,
     util,
     plugins,
-    consoleMod,
+    console,
     environment,
     templates
 ) {
@@ -51,7 +51,6 @@ require.def(['require', 'exports', 'module',
 
 
 var catalog = plugins.catalog;
-var console = consoleMod.console;
 
 var env = environment.env;
 

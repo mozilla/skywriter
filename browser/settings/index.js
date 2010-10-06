@@ -101,13 +101,12 @@ require.def(['require', 'exports', 'module',
     'types/types'
 ], function(require, exports, module,
     plugins,
-    consoleMod,
+    console,
     promise,
     types
 ) {
 
 var catalog = plugins.catalog;
-var console = consoleMod.console;
 var Promise = promise.Promise;
 
 exports.init = function() {

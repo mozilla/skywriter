@@ -5,7 +5,7 @@ require.def(['require', 'exports', 'module',
 ], function(require, exports, module,
     util,
     Range,
-    consoleMod
+    console
 ) {
 
 /* ***** BEGIN LICENSE BLOCK *****
@@ -47,7 +47,6 @@ require.def(['require', 'exports', 'module',
 
 
 
-var console = consoleMod.console;
 
 /**
  * @class

@@ -14,7 +14,7 @@ require.def(['require', 'exports', 'module',
     settingsMod,
     settings,
     plugins,
-    consoleMod,
+    console,
     promise,
     templates,
     jquery
@@ -99,7 +99,6 @@ var Event = events.Event;
 var settings = settingsMod.settings;
 var ServerPersister = settings.ServerPersister;
 var catalog = plugins.catalog;
-var console = consoleMod.console;
 var Promise = promise.Promise;
 
 

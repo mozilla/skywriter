@@ -16,7 +16,7 @@ require.def(['require', 'exports', 'module',
     diff,
     util,
     plugins,
-    consoleMod,
+    console,
     keyutil,
     keyboard,
     history,
@@ -69,7 +69,6 @@ var diff_match_patch = diff.diff_match_patch;
 
 
 var catalog = plugins.catalog;
-var console = consoleMod.console;
 
 
 var keyboardManager = keyboard.keyboardManager;

@@ -18,7 +18,7 @@ require.def(['require', 'exports', 'module',
     Range,
     Rect,
     textinput,
-    consoleMod,
+    console,
     settingsMod
 ) {
 
@@ -68,7 +68,6 @@ var LayoutManager = layoutmanager.LayoutManager;
 
 
 var TextInput = textinput.TextInput;
-var console = consoleMod.console;
 var settings = settingsMod.settings;
 
 // Set this to true to outline all text ranges with a box. This may be useful

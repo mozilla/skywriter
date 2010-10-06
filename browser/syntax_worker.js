@@ -45,12 +45,11 @@ require.def(['require', 'exports', 'module',
     plugins,
     promise,
     underscore,
-    consoleMod,
+    console,
     syntax_directory
 ) {
 
 var _ = underscore._;
-var console = consoleMod.console;
 var syntaxDirectory = syntax_directory.syntaxDirectory;
 
 "define metadata";

@@ -6,7 +6,7 @@ require.def(['require', 'exports', 'module',
     'collab/util',
     'collab/templates'
 ], function(require, exports, module,
-    consoleMod,
+    console,
     skywriter_server,
     input,
     social_user,
@@ -51,8 +51,7 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-//var console = consoleMod.console;
-var server = skywriter_server.server;
+//var server = skywriter_server.server;
 var Input = input.Input;
 
 

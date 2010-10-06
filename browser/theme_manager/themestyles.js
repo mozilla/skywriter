@@ -45,14 +45,13 @@ require.def(['require', 'exports', 'module',
 ], function(require, exports, module,
     util,
     plugins,
-    consoleMod,
+    console,
     promise,
     proxy,
     less
 ) {
 
 var catalog = plugins.catalog;
-var console = consoleMod.console;
 var Promise = promise.Promise;
 
 // The less parser to use.

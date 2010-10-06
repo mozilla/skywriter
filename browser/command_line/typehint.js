@@ -6,7 +6,7 @@ require.def(['require', 'exports', 'module',
     'command_line/hint'
 ], function(require, exports, module,
     plugins,
-    consoleMod,
+    console,
     promise,
     types,
     hint
@@ -50,7 +50,6 @@ require.def(['require', 'exports', 'module',
  * ***** END LICENSE BLOCK ***** */
 
 var catalog = plugins.catalog;
-var console = consoleMod.console;
 var Promise = promise.Promise;
 
 

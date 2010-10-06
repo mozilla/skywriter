@@ -1,7 +1,7 @@
 require.def(['require', 'exports', 'module',
     'skywriter/console'
 ], function(require, exports, module,
-    consoleMod
+    console
 ) {
 
 /* ***** BEGIN LICENSE BLOCK *****
@@ -41,7 +41,6 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var console = consoleMod.console;
 
 var getMessageText = function(message) {
     var text = '';

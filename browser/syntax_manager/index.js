@@ -11,7 +11,7 @@ require.def(['require', 'exports', 'module',
     underscore,
     events,
     worker_manager,
-    consoleMod,
+    console,
     rangeutils,
     syntax_directory
 ) {
@@ -62,7 +62,6 @@ exports.deinit = function() {
 var _ = underscore._;
 var Event = events.Event;
 var WorkerSupervisor = worker_manager.WorkerSupervisor;
-var console = consoleMod.console;
 
 var syntaxDirectory = syntax_directory.syntaxDirectory;
 

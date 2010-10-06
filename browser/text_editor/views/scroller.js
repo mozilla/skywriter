@@ -7,7 +7,7 @@ require.def(['require', 'exports', 'module',
 ], function(require, exports, module,
     util,
     events,
-    consoleMod,
+    console,
     Rect,
     canvas
 ) {
@@ -51,7 +51,6 @@ require.def(['require', 'exports', 'module',
 
 
 var Event = events.Event;
-var console = consoleMod.console;
 
 
 

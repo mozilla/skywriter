@@ -10,7 +10,7 @@ require.def(['require', 'exports', 'module',
     'keyboard/environment'
 ], function(require, exports, module,
     plugins,
-    consoleMod,
+    console,
     stacktrace,
     util,
     settingsMod,
@@ -58,7 +58,6 @@ require.def(['require', 'exports', 'module',
  * ***** END LICENSE BLOCK ***** */
 
 var catalog = plugins.catalog;
-var console = consoleMod.console;
 var Trace = stacktrace.Trace;
 
 

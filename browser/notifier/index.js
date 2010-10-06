@@ -5,7 +5,7 @@ require.def(['require', 'exports', 'module',
 ], function(require, exports, module,
     plugins,
     settingsMod,
-    consoleMod
+    console
 ) {
 
 /* ***** BEGIN LICENSE BLOCK *****
@@ -139,7 +139,6 @@ exports.deinit = function() {
 
 var catalog = plugins.catalog;
 var settings = settingsMod.settings;
-var console = consoleMod.console;
 
 exports.Notifier = function() {};
 
