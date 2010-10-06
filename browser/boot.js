@@ -36,9 +36,11 @@
  * ***** END LICENSE BLOCK ***** */
 
 require([
+    "skywriter/globals",
     "skywriter/plugins",
     "appconfig/index"
 ], function(
+    globals,
     plugins,
     appconfig
 ) {

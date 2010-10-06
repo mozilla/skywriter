@@ -1,9 +1,6 @@
 
-require.def(['require', 'exports', 'module',
-    'skywriter/plugins'
-], function(require, exports, module,
-    plugins
-) {
+require.def(['require', 'exports', 'module'
+], function(require, exports, module) {
 "define metadata";
 ({
     "description": "Leaner CSS",

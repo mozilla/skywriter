@@ -51,8 +51,6 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-require("globals");
-
 var Promise = promise.Promise;
 var group = promise.group;
 
