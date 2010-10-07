@@ -61,9 +61,6 @@ var Trace = stacktrace.Trace;
 
 var r = require;
 
-var loader = require.loader;
-var browser = loader.sources[0];
-
 var USER_DEACTIVATED    = 'USER';
 var DEPENDS_DEACTIVATED = 'DEPENDS';
 
@@ -449,135 +446,6 @@ exports.Plugin.prototype = {
      * dependent plugins
      */
     reload: function(callback) {
-        // TODO: Broken. Needs to be updated to the latest Tiki.
-
-        // All reloadable plugins will have a reloadURL
-        if (!this.reloadURL) {
-            return;
-        }
-
-        if (this.reloadPointer) {
-            var pointer = _splitPointer(this.name, this.reloadPointer);
-            func = _retrieveObject(pointer);
-            if (func) {
-                func();
-            } else {
-                console.error("Reload function could not be loaded. Aborting reload.");
-                return;
-            }
-        }
-
-        // find all of the dependents recursively so that
-        // they can all be unregistered
-        var dependents = {};
-
-        var pluginList = Object.keys(this.catalog.plugins);
-
-        this._findDependents(pluginList, dependents);
-
-        var reloadDescription = {
-            pluginName: this.name,
-            dependents: dependents
-        };
-
-        for (var dependName in dependents) {
-            var plugin = this.catalog.plugins[dependName];
-            if (plugin.preRefresh) {
-                var parts = _splitPointer(dependName, plugin.preRefresh);
-                func = _retrieveObject(parts);
-                if (func) {
-                    // the preRefresh call can return an object
-                    // that includes attributes:
-                    // keepModule (true to keep the module object)
-                    // callPointer (pointer to call at the end of reloading)
-                    dependents[dependName] = func(reloadDescription);
-                }
-            }
-        }
-
-        // notify everyone that this plugin is going away
-        this.unregister();
-
-        for (dependName in dependents) {
-            this.catalog.plugins[dependName].unregister();
-        }
-
-        this._cleanup(this.name);
-
-        // clear the sandbox of modules from all of the dependent plugins
-        var fullModList = [];
-        var sandbox = require.sandbox;
-
-        var modulesKey = Object.keys(sandbox.modules);
-        var i = modulesKey.length;
-        var dependRegexes = [];
-        for (dependName in dependents) {
-            // check to see if the module stated that it shouldn't be
-            // refreshed
-            if (!dependents[dependName].keepModule) {
-                dependRegexes.push(new RegExp("^::" + dependName + ":"));
-            }
-        }
-
-        var nameMatch = new RegExp("^::" + this.name + ":");
-
-        while (--i >= 0) {
-            var item = modulesKey[i];
-            if (nameMatch.exec(item)) {
-                fullModList.push(item);
-            } else {
-                var j = dependRegexes.length;
-                while (--j >= 0) {
-                    if (dependRegexes[j].exec(item)) {
-                        fullModList.push(item);
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Remove the modules of the dependent plugins from the sandbox.
-        fullModList.forEach(function(item) {
-            delete sandbox.exports[item];
-            delete sandbox.modules[item];
-            delete sandbox.usedExports[item];
-        });
-
-        // reload the plugin metadata
-        var onLoad = function() {
-            // actually load the plugin, so that it's ready
-            // for any dependent plugins
-            this.catalog.loadPlugin(this.name).then(function() {
-                // re-register all of the dependent plugins
-                for (dependName in dependents) {
-                    this.catalog.plugins[dependName].register();
-                }
-
-                for (dependName in dependents) {
-                    if (dependents[dependName].callPointer) {
-                        var parts = _splitPointer(dependName,
-                            dependents[dependName].callPointer);
-                        var func = _retrieveObject(parts);
-                        if (func) {
-                            func(reloadDescription);
-                        }
-                    }
-                }
-
-                if (callback) {
-                    // at long last, reloading is done.
-                    callback();
-                }
-            }.bind(this));
-        }.bind(this);
-
-        // TODO: There should be more error handling then just logging
-        // to the command line.
-        var onError = function() {
-            console.error('Failed to load metadata from ' + this.reloadURL);
-        }.bind(this);
-
-        this.catalog.loadMetadataFromURL(this.reloadURL).then(onLoad, onError);
     }
 };
 
@@ -617,7 +485,6 @@ exports.Catalog = function() {
     // it indexes on name.
     var ep = this.getExtensionPoint("extensionpoint", true);
     ep.indexOn = "name";
-    this.registerMetadata(builtins.metadata);
 };
 
 exports.Catalog.prototype = {
@@ -1045,22 +912,6 @@ exports.Catalog.prototype = {
                 }
             });
         }
-        return pr;
-    },
-
-    /**
-     * Retrieve metadata from the server. Returns a promise that is
-     * resolved when the metadata has been loaded.
-     */
-    loadMetadataFromURL: function(url, type) {
-        var pr = new Promise();
-        proxy.xhr('GET', url, true).then(function(response) {
-            this.registerMetadata(JSON.parse(response));
-            pr.resolve();
-        }.bind(this), function(err) {
-            pr.reject(err);
-        });
-
         return pr;
     },
 

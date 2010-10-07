@@ -69,6 +69,11 @@ exports.init = function() {
             "The theme plugin's name to use. If set to 'standard' no theme will be used"
     });
     catalog.connect("appLaunched", module.id, { "pointer": "#appLaunched" });
+    catalog.connect('settingChange', module.id, {
+        match: "theme",
+        pointer: exports.themeSettingChanged.bind(exports)
+    });
+
 };
 
 exports.deinit = function() {
@@ -164,11 +169,6 @@ exports.themeSettingChanged = function(source, settingName, themeName) {
         });
     }
 };
-
-catalog.registerExtension('settingChange', {
-    match: "theme",
-    pointer: exports.themeSettingChanged.bind(exports)
-});
 
 /**
  * Sets the standard theme that is used when no other theme is specified or
