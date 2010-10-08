@@ -36,16 +36,19 @@
  * ***** END LICENSE BLOCK ***** */
 
 require([
+    "thirdparty/jquery",
     "skywriter/globals",
     "skywriter/plugins",
     "appconfig/index"
 ], function(
+    jquery,
     globals,
     plugins,
     appconfig
 ) {
-
+console.log("boot module");
 require.ready(function() {
+    console.log("Require is ready!");
     appconfig.launch({ stealFocus: true }).then(function(env) {
         // Ignore
     }, function(error) {

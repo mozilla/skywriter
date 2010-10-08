@@ -105,15 +105,15 @@ exports.launch = function(config) {
     // Is this the fist Skywriter?
     if (firstSkywriter) {
         // Use the global require.
-        require = skywriter.tiki.require;
+        // require = skywriter.tiki.require;
         firstSkywriter = false;
     } else {
         // Otherwise create a new tiki-skywriter sandbox and a new require function.
-        var sandbox = new (skywriter.tiki.require('skywriter:sandbox').Sandbox);
-        require = sandbox.createRequire({
-            id: 'index',
-            ownerPackage: skywriter.tiki.loader.anonymousPackage
-        });
+        // var sandbox = new (skywriter.tiki.require('skywriter:sandbox').Sandbox);
+        // require = sandbox.createRequire({
+        //     id: 'index',
+        //     ownerPackage: skywriter.tiki.loader.anonymousPackage
+        // });
     }
 
     // Here we go: Require the catalog that is used for this Skywriter instance.

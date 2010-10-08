@@ -13,7 +13,7 @@
  *
  * Date: Sat Feb 13 22:33:48 2010 -0500
  */
-(function( window, undefined ) {
+require.def(["exports"], function( exports ) {
 
 // Define a local copy of jQuery
 var jQuery = function( selector, context ) {
@@ -6235,6 +6235,6 @@ jQuery.each([ "Height", "Width" ], function( i, name ) {
 
 });
 // Expose jQuery to the global object
-window.jQuery = window.$ = jQuery;
+exports.jQuery = exports.$ = jQuery;
 
-})(window);
+});
