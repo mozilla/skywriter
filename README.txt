@@ -10,6 +10,6 @@ Thanks for downloading the code to the Skywriter project.
 
 You can find more documentation in the docs/ directory.
 
-The source repository is in Mercurial at:
-  http://hg.mozilla.org/labs/skywriter/
+The source repository is at:
+  http://github.com/mozilla/skywriter.git
 
