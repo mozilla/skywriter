@@ -8,3 +8,6 @@
 .project
 .settings/
 
+# A handy place to put stuff that git should ignore:
+/ignore/
+
