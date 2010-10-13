@@ -769,8 +769,8 @@ exports.Catalog.prototype = {
                 md.name = pluginName;
                 md.version = null;
 
-                console.log('!register', pluginName, md);
-                /* TODO:
+                console.log('not registering ' + pluginName + ' because we dont have browser.canonicalPackageId. See plugins.js 772');
+                /*
                 var packageId = browser.canonicalPackageId(pluginName);
                 if (packageId === null) {
                     browser.register('::' + pluginName, md);
