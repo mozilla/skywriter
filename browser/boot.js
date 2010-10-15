@@ -49,40 +49,12 @@ require([
 
     console.log("boot module");
     require.ready(function() {
-        console.log("Require is ready!");
-
-        plugins.catalog.registerMetadata({
-            "bespin": {
-                "testmodules": [],
-                "resourceURL": "resources/bespin/",
-                "name": "bespin",
-                "environments": { "main": true, "worker": true },
-                "type": "plugins/boot"
-            },
-            "syntax_directory": {
-                "resourceURL": "resources/syntax_directory/",
-                "name": "syntax_directory",
-                "environments": { "main": true, "worker": true },
-                "dependencies": {},
-                "testmodules": [],
-                "provides": [ {
-                    "register": "#discoveredNewSyntax",
-                    "ep": "extensionhandler",
-                    "name": "syntax"
-                } ],
-                "type": "plugins/supported",
-                "description": "Catalogs the available syntax engines"
-            },
-            "underscore": {
-                "testmodules": [],
-                "type": "plugins/thirdparty",
-                "resourceURL": "resources/underscore/",
-                "description": "Functional Programming Aid for Javascript. Works well with jQuery.",
-                "name": "underscore"
-            }
-        });
-
-        appconfig.launch({ stealFocus: true }).then(function(env) {
+        
+        appconfig.launch({ stealFocus: true,
+                            plugins: [
+                                      "text_editor/index"
+                                     ]
+                         }).then(function(env) {
             // Ignore
         }, function(error) {
             console.error('Error during launch: ' + error);

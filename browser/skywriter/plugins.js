@@ -319,10 +319,7 @@ exports.Plugin = function(metadata) {
     // Should be provided in the metadata
     this.catalog = null;
     this.name = null;
-    this.provides = [];
-    this.stylesheets = [];
-    this.reloadURL = null;
-    this.reloadPointer = null;
+    this.active = false;
 
     for (property in metadata) {
         if (metadata.hasOwnProperty(property)) {
@@ -335,20 +332,15 @@ exports.Plugin = function(metadata) {
  * Implementation of Plugin
  */
 exports.Plugin.prototype = {
-    register: function() {
-        this.provides.forEach(function(extension) {
-            var ep = this.catalog.getExtensionPoint(extension.ep, true);
-            ep.register(extension);
-        }, this);
+    activate: function() {
+        if (this.active) {
+            return;
+        }
+        var mod = require(this.name);
+        mod.init();
+        this.active = true;
     },
-
-    unregister: function() {
-        this.provides.forEach(function(extension) {
-            var ep = this.catalog.getExtensionPoint(extension.ep, true);
-            ep.unregister(extension);
-        }, this);
-    },
-
+    
     _getObservers: function() {
         var result = {};
         this.provides.forEach(function(extension) {
@@ -386,57 +378,6 @@ exports.Plugin.prototype = {
                 }
             }
         });
-    },
-
-    /**
-     * Removes the plugin from Tiki's registries.
-     * As with the new multiple Skywriters, this only clears the current sandbox.
-     */
-    _cleanup: function(leaveLoader) {
-        // Remove the css files.
-        this.stylesheets.forEach(function(stylesheet) {
-            var links = document.getElementsByTagName('link');
-            for (var i = 0; i < links.length; i++) {
-                if (links[i].href.indexOf(stylesheet.url) != -1) {
-                    links[i].parentNode.removeChild(links[i]);
-                    break;
-                }
-            }
-        });
-
-        // Remove all traces of the plugin.
-        var pluginName = this.name;
-
-        var nameMatch = new RegExp("^" + pluginName + '$');
-        var moduleMatch = new RegExp('^::' + pluginName + ':');
-        var packageMatch = new RegExp("^::" + pluginName + '$');
-
-        var sandbox = require.sandbox;
-        var loader = require.loader;
-        var source = browser;
-
-        if (!leaveLoader) {
-            // Clear the loader.
-            _removeFromObject(moduleMatch, loader.factories);
-            _removeFromObject(packageMatch, loader.canonicalIds);
-            _removeFromObject(packageMatch, loader.canonicalPackageIds);
-            _removeFromObject(packageMatch, loader.packageSources);
-            _removeFromObject(packageMatch, loader.packages);
-
-            // Clear the source.
-            _removeFromObject(nameMatch, source.packageInfoByName);
-            _removeFromObject(moduleMatch, source.factories);
-            _removeFromObject(moduleMatch, source.scriptActions);
-            _removeFromObject(moduleMatch, source.stylesheetActions);
-            _removeFromObject(packageMatch, source.packages);
-            _removeFromObject(packageMatch, source.ensureActions);
-            _removeFromObject(packageMatch, source.packageInfoById);
-        }
-
-        // Clear the sandbox.
-        _removeFromObject(moduleMatch, sandbox.exports);
-        _removeFromObject(moduleMatch, sandbox.modules);
-        _removeFromObject(moduleMatch, sandbox.usedExports);
     },
 
     /**
@@ -738,151 +679,27 @@ exports.Catalog.prototype = {
 
         return sorted;
     },
-
-    /**
-     * Register new metadata. If the current catalog is not the master catalog,
-     * then the master catalog registerMetadata function is called. The master
-     * catalog then makes some basic operations on the metadata and calls the
-     * _registerMetadata function on all the child catalogs and for itself as
-     * well.
-     */
-    registerMetadata: function(metadata) {
-        // If we are the master catalog, then store the metadata.
-        if (this.parent) {
-            this.parent.registerMetadata(metadata);
-        } else {
-            for (var pluginName in metadata) {
-                var md = metadata[pluginName];
-                if (md.errors) {
-                    console.error("Plugin ", pluginName, " has errors:");
-                    md.errors.forEach(function(error) {
-                        console.error(error);
-                    });
-                    delete metadata[pluginName];
-                    continue;
-                }
-
-                if (md.dependencies) {
-                    md.depends = Object.keys(md.dependencies);
-                }
-
-                md.name = pluginName;
-                md.version = null;
-
-                console.log('not registering ' + pluginName + ' because we dont have browser.canonicalPackageId. See plugins.js 772');
-                /*
-                var packageId = browser.canonicalPackageId(pluginName);
-                if (packageId === null) {
-                    browser.register('::' + pluginName, md);
-                    continue;
-                }
-                */
+    
+    loadAndActivatePlugins: function(plugins) {
+        var pr = new Promise();
+        var self = this;
+        plugins.forEach(function(p) {
+            if (self.plugins[p]) {
+                return;
             }
-
-            // Save the new metadata.
-            util.mixin(this.metadata, util.clone(metadata, true));
-
-            // Tell every child about the new metadata.
-            this.children.forEach(function(child) {
-                child._registerMetadata(util.clone(metadata, true));
+            self.plugins[p] = new exports.Plugin({
+                name: p,
+                catalog: self
             });
-            // Register the metadata in the master catalog as well.
-            this._registerMetadata(util.clone(metadata, true));
-        }
-    },
-
-    /**
-     * Registers plugin metadata. See comments inside of the function.
-     */
-    _registerMetadata: function(metadata) {
-        var pluginName, plugin;
-        var plugins = this.plugins;
-
-        this._toposort(metadata).forEach(function(name) {
-            // If the plugin is already registered.
-            if (this.plugins[name]) {
-                // Check if the plugin is loaded.
-                if (this.isPluginLoaded(name)) {
-                    // If the plugin is loaded, then the metadata/plugin/extensions
-                    // have to stay the way they are at the moment.
-                    return;
-                } else {
-                    // If the plugin is not loaded and the plugin is already
-                    // registerd, then remove the plugin.
-                    //
-                    // Reason: As new metadata arrives, this might also mean,
-                    // that the factory in the tiki.loader has changed. If the
-                    // old plugins/extensions would stay, they might not fit to
-                    // the new factory. As such, the plugin has to be updated,
-                    // which is achieved by unregister the plugin and then add it
-                    // later in this function again.
-                    var plugin = this.plugins[name];
-                    plugin.unregister();
-                }
-            }
-
-            var md = metadata[name];
-            var activated = !(this.deactivatedPlugins[name]);
-
-            // Check if all plugins this one depends on are activated as well.
-            if (activated && md.depends && md.depends.length != 0) {
-                var works = md.depends.some(function(name) {
-                    return !(this.deactivatedPlugins[name]);
-                }, this);
-                // At least one depending plugin is not activated -> this plugin
-                // can't be activated. Mark this plugin as deactivated.
-                if (!works) {
-                    this.deactivatedPlugins[name] = DEPENDS_DEACTIVATED;
-                    activated = false;
-                }
-            }
-
-            md.catalog = this;
-            md.name = name;
-            plugin = new exports.Plugin(md);
-            plugins[name] = plugin;
-
-            // Skip if the plugin is not activated.
-            if (md.provides) {
-                var provides = md.provides;
-                for (var i = 0; i < provides.length; i++) {
-                    var extension = new exports.Extension(provides[i]);
-                    extension.pluginName = name;
-                    provides[i] = extension;
-
-                    var epname = extension.ep;
-                    // This special treatment is required for the extension point
-                    // definition. TODO: Refactor the code so that this is no
-                    // longer necessary.
-                    if (epname == "extensionpoint" && extension.name == 'extensionpoint') {
-                        exports.registerExtensionPoint(extension, this, false);
-                    } else {
-                        // Only register the extension if the plugin is activated.
-                        // TODO: This should handle extension points and
-                        if (activated) {
-                            var ep = this.getExtensionPoint(extension.ep, true);
-                            ep.register(extension);
-
-                        // Even if the plugin is deactivated, the ep need to
-                        // be registered. Call the registerExtensionPoint
-                        // function manually, but pass as third argument 'true'
-                        // which indicates, that the plugin is deactivated and
-                        // prevents the handlers on the ep to get registered.
-                        } else if (epname == "extensionpoint") {
-                            exports.registerExtensionPoint(extension, this, true);
-                        }
-                    }
-                }
-            } else {
-                md.provides = [];
-            }
-        }, this);
-
-        for (pluginName in metadata) {
-            this._checkLoops(pluginName, plugins, []);
-        }
-
-        this.orderExtensions();
+            require.load(p);
+        });
+        require.ready(function() {
+            plugins.forEach(function(p) {
+                self.plugins[p].activate();
+            });
+            pr.resolve();
+        });
+        return pr;
     },
 
     /**

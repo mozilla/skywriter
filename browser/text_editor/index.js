@@ -1297,3 +1297,4 @@ exports.deinit = function() {
     catalog.removeExtensionPoint("editorChange");
     catalog.removeExtensionPoint("gutterDecoration");
 };
+});

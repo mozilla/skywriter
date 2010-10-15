@@ -117,6 +117,9 @@ exports.launch = function(config) {
 
     // Here we go: Require the catalog that is used for this Skywriter instance.
     var catalog = plugins.catalog;
+    if (config.plugins) {
+        catalog.loadAndActivatePlugins(config.plugins);
+    }
 
     // Launch Skywriter!
     config = config || {};
