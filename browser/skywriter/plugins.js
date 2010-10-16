@@ -683,6 +683,7 @@ exports.Catalog.prototype = {
     loadAndActivatePlugins: function(plugins) {
         var pr = new Promise();
         var self = this;
+        var toLoad = [];
         plugins.forEach(function(p) {
             if (self.plugins[p]) {
                 return;
@@ -691,9 +692,9 @@ exports.Catalog.prototype = {
                 name: p,
                 catalog: self
             });
-            require.load(p);
+            toLoad.push(p);
         });
-        require.ready(function() {
+        require(toLoad, function() {
             plugins.forEach(function(p) {
                 self.plugins[p].activate();
             });

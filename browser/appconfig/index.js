@@ -117,92 +117,99 @@ exports.launch = function(config) {
 
     // Here we go: Require the catalog that is used for this Skywriter instance.
     var catalog = plugins.catalog;
-    if (config.plugins) {
-        catalog.loadAndActivatePlugins(config.plugins);
-    }
 
     // Launch Skywriter!
     config = config || {};
-    exports.normalizeConfig(catalog, config);
-    var objects = config.objects;
-    for (var key in objects) {
-        catalog.registerObject(key, objects[key]);
-    }
-
-    for (var setting in config.settings) {
-        settings.set(setting, config.settings[setting]);
-    }
-
-    // Resolve the launchPromise and pass the env variable along.
-    var resolveLaunchPromise = function() {
-        var env = environment.env;
-
-        var editor = env.editor;
-        if (editor) {
-            if (config.lineNumber) {
-                editor.setLineNumber(config.lineNumber);
-            }
-            if (config.stealFocus) {
-                editor.focus = true;
-            }
-            if (config.readOnly) {
-                editor.readOnly = config.readOnly;
-            }
-            if (config.syntax) {
-                editor.syntax = config.syntax;
-            }
+    
+    var continueWithPlugins = function() {
+        exports.normalizeConfig(catalog, config);
+        var objects = config.objects;
+        for (var key in objects) {
+            catalog.registerObject(key, objects[key]);
         }
-        var commandLine = catalog.getObject('commandLine');
-        if (commandLine) {
-            env.commandLine = commandLine;
+    
+        for (var setting in config.settings) {
+            settings.set(setting, config.settings[setting]);
         }
-
-        catalog.publish(this, 'appLaunched');
-
-        launchPromise.resolve(env);
-    }.bind(this);
-
-    var themeLoadingPromise = new Promise();
-
-    themeLoadingPromise.then(function() {
-        if (objects.loginController) {
-            catalog.createObject("loginController").then(
-                function(loginController) {
-                    var pr = loginController.showLogin();
-                    pr.then(function(username) {
-                        // Add the username as constructor argument.
-                        config.objects.session.arguments.push(username);
-
-                        exports.launchEditor(catalog, config).then(resolveLaunchPromise,
-                                        launchPromise.reject.bind(launchPromise));
+    
+        // Resolve the launchPromise and pass the env variable along.
+        var resolveLaunchPromise = function() {
+            var env = environment.env;
+    
+            var editor = env.editor;
+            if (editor) {
+                if (config.lineNumber) {
+                    editor.setLineNumber(config.lineNumber);
+                }
+                if (config.stealFocus) {
+                    editor.focus = true;
+                }
+                if (config.readOnly) {
+                    editor.readOnly = config.readOnly;
+                }
+                if (config.syntax) {
+                    editor.syntax = config.syntax;
+                }
+            }
+            var commandLine = catalog.getObject('commandLine');
+            if (commandLine) {
+                env.commandLine = commandLine;
+            }
+    
+            catalog.publish(this, 'appLaunched');
+    
+            launchPromise.resolve(env);
+        }.bind(this);
+    
+        var themeLoadingPromise = new Promise();
+    
+        themeLoadingPromise.then(function() {
+            if (objects.loginController) {
+                catalog.createObject("loginController").then(
+                    function(loginController) {
+                        var pr = loginController.showLogin();
+                        pr.then(function(username) {
+                            // Add the username as constructor argument.
+                            config.objects.session.arguments.push(username);
+    
+                            exports.launchEditor(catalog, config).then(resolveLaunchPromise,
+                                            launchPromise.reject.bind(launchPromise));
+                        });
                     });
-                });
-        } else {
-            exports.launchEditor(catalog, config).then(resolveLaunchPromise,
-                                        launchPromise.reject.bind(launchPromise));
-        }
-    }, function(error) {
-        launchPromise.reject(error);
-    });
-
-    // If the themeManager plugin is there, then check for theme configuration.
-    if (catalog.plugins.theme_manager) {
-        skywriter.tiki.require.ensurePackage('::theme_manager', function() {
-            
-            if (config.theme.basePlugin) {
-                themeManager.setBasePlugin(config.theme.basePlugin);
+            } else {
+                exports.launchEditor(catalog, config).then(resolveLaunchPromise,
+                                            launchPromise.reject.bind(launchPromise));
             }
-            if (config.theme.standard) {
-                themeManager.setStandardTheme(config.theme.standard);
-            }
-            themeManager.startParsing().then(function() {
-                themeLoadingPromise.resolve();
-            }, function(error) {
-                themeLoadingPromise.reject(error);
-            });
+        }, function(error) {
+            launchPromise.reject(error);
         });
+    
+        // If the themeManager plugin is there, then check for theme configuration.
+        if (catalog.plugins.theme_manager) {
+            skywriter.tiki.require.ensurePackage('::theme_manager', function() {
+                
+                if (config.theme.basePlugin) {
+                    themeManager.setBasePlugin(config.theme.basePlugin);
+                }
+                if (config.theme.standard) {
+                    themeManager.setStandardTheme(config.theme.standard);
+                }
+                themeManager.startParsing().then(function() {
+                    themeLoadingPromise.resolve();
+                }, function(error) {
+                    themeLoadingPromise.reject(error);
+                });
+            });
+        } else {
+            themeLoadingPromise.resolve();
+        }
+        
+    }.bind(this);
+    
+    if (config.plugins) {
+        catalog.loadAndActivatePlugins(config.plugins).then(continueWithPlugins);
     } else {
-        themeLoadingPromise.resolve();
+        continueWithPlugins();
     }
 
     return launchPromise;
