@@ -1111,10 +1111,7 @@ exports.Catalog.prototype = {
     },
     
     addExtensionPoint: function(epName, metadata) {
-        var ep = this.getExtensionPoint(epName, true);
-        for (var key in metadata) {
-            ep[key] = metadata[key];
-        }
+        exports.registerExtensionPoint(metadata, this, false);
     }
 };
 
