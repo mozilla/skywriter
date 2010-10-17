@@ -175,3 +175,4 @@ exports.deinit = function() {
     catalog.disconnectAll(module.id);
     catalog.removeExtensionPoint("type");
 };
+});

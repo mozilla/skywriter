@@ -145,3 +145,4 @@ exports.deinit = function() {
     catalog.removeExtensionPoint("addedRequestOutput");
     catalog.removeExtensionPoint("dimensionsChanged");
 };
+});

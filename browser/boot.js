@@ -52,7 +52,34 @@ require([
         
         appconfig.launch({ stealFocus: true,
                             plugins: [
-                                      "text_editor/index"
+                                        {
+                                            name: "skywriter",
+                                            main: "index"
+                                        },
+                                        {
+                                            name: "settings",
+                                            main: "index"
+                                        },
+                                        {
+                                            name: "events",
+                                            main: "index"
+                                        },
+                                        {
+                                            name: "edit_session",
+                                            main: "index"
+                                        },
+                                        {
+                                            name: "types",
+                                            main: "index"
+                                        },
+                                        {
+                                            name: "canon",
+                                            main: "index"
+                                        },
+                                        {
+                                            name: "text_editor",
+                                            main: "index"
+                                        }
                                      ]
                          }).then(function(env) {
             // Ignore

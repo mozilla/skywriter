@@ -37,14 +37,12 @@
 
 require.def(['require', 'exports', 'module',
     'skywriter/promise',
-    'skywriter/builtins',
     'skywriter/console',
     'skywriter/util/util',
     'skywriter/util/stacktrace',
     'skywriter/proxy'
 ], function(require, exports, module,
     promise,
-    builtins,
     console,
     util,
     stacktrace,
@@ -336,7 +334,7 @@ exports.Plugin.prototype = {
         if (this.active) {
             return;
         }
-        var mod = require(this.name);
+        var mod = require(this.mainModuleName);
         mod.init();
         this.active = true;
     },
@@ -680,23 +678,27 @@ exports.Catalog.prototype = {
         return sorted;
     },
     
+    connect: function(epName, modName, metadata) {
+        var pluginName = modName.split('/')[0];
+        this.registerExtension(epName, metadata, pluginName);
+    },
+    
     loadAndActivatePlugins: function(plugins) {
         var pr = new Promise();
         var self = this;
         var toLoad = [];
-        plugins.forEach(function(p) {
-            if (self.plugins[p]) {
+        plugins.forEach(function(pluginData) {
+            if (self.plugins[pluginData.name]) {
                 return;
             }
-            self.plugins[p] = new exports.Plugin({
-                name: p,
-                catalog: self
-            });
-            toLoad.push(p);
+            pluginData.mainModuleName = pluginData.main ? pluginData.name + '/' + pluginData.main : pluginData.name;
+            pluginData.catalog = self;
+            self.plugins[pluginData.name] = new exports.Plugin(pluginData);
+            toLoad.push(pluginData.mainModuleName);
         });
         require(toLoad, function() {
-            plugins.forEach(function(p) {
-                self.plugins[p].activate();
+            plugins.forEach(function(pluginData) {
+                self.plugins[pluginData.name].activate();
             });
             pr.resolve();
         });
@@ -1102,10 +1104,17 @@ exports.Catalog.prototype = {
      * <li>match: A regexp to be used in place of key
      * </ul>
      */
-    registerExtension: function(ep, metadata) {
+    registerExtension: function(ep, metadata, pluginName) {
         var extension = new exports.Extension(metadata);
-        extension.pluginName = '__dynamic';
-        this.getExtensionPoint(ep).register(extension);
+        extension.pluginName = pluginName === undefined ? '__dynamic' : pluginName;
+        this.getExtensionPoint(ep, true).register(extension);
+    },
+    
+    addExtensionPoint: function(epName, metadata) {
+        var ep = this.getExtensionPoint(epName, true);
+        for (var key in metadata) {
+            ep[key] = metadata[key];
+        }
     }
 };
 
