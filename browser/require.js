@@ -1,19 +1,19 @@
 /** vim: et:ts=4:sw=4:sts=4
- * @license RequireJS Copyright (c) 2004-2010, The Dojo Foundation All Rights Reserved.
- * Available via the MIT, GPL or new BSD license.
+ * @license RequireJS Copyright (c) 2010, The Dojo Foundation All Rights Reserved.
+ * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/requirejs for details
  */
 //laxbreak is true to allow build pragmas to change some statements.
 /*jslint plusplus: false, nomen: false, laxbreak: true, regexp: false */
 /*global window: false, document: false, navigator: false,
 setTimeout: false, traceDeps: true, clearInterval: false, self: false,
-setInterval: false, importScripts: false */
-"use strict";
+setInterval: false, importScripts: false, jQuery: false */
 
-var require;
+
+var require, define;
 (function () {
     //Change this version number for each release.
-    var version = "0.14.1",
+    var version = "0.14.4",
             empty = {}, s,
             i, defContextName = "_", contextLoads = [],
             scripts, script, rePkg, src, m, dataMain, cfg = {}, setReadyState,
@@ -44,8 +44,7 @@ var require;
         }
     }
     
-    //>>excludeStart("requireExcludePlugin", pragmas.requireExcludePlugin);
-    /**
+        /**
      * Calls a method on a plugin. The obj object should have two property,
      * name: the name of the method to call on the plugin
      * args: the arguments to pass to the plugin method.
@@ -66,8 +65,7 @@ var require;
             req(["require/" + prefix], context.contextName);
         }
     }
-    //>>excludeEnd("requireExcludePlugin");
-
+    
     /**
      * Convenience method to call main for a require.def call that was put on
      * hold in the defQueue.
@@ -78,6 +76,54 @@ var require;
         //to doing it in require.def in case a script does
         //not call require.def
         context.loaded[args[0]] = true;
+    }
+
+    /**
+     * Used to set up package paths from a packagePaths or packages config object.
+     * @param {Object} packages the object to store the new package config
+     * @param {Array} currentPackages an array of packages to configure
+     * @param {String} [dir] a prefix dir to use.
+     */
+    function configurePackageDir(packages, currentPackages, dir) {
+        var i, location, pkgObj;
+        for (i = 0; (pkgObj = currentPackages[i]); i++) {
+            pkgObj = typeof pkgObj === "string" ? { name: pkgObj } : pkgObj;
+            location = pkgObj.location;
+
+            //Add dir to the path, but avoid paths that start with a slash
+            //or have a colon (indicates a protocol)
+            if (dir && (!location || (location.indexOf("/") !== 0 && location.indexOf(":") === -1))) {
+                pkgObj.location = dir + "/" + (pkgObj.location || pkgObj.name);
+            }
+
+            //Normalize package paths.
+            pkgObj.location = pkgObj.location || pkgObj.name;
+            pkgObj.lib = pkgObj.lib || "lib";
+            pkgObj.main = pkgObj.main || "main";
+
+            packages[pkgObj.name] = pkgObj;
+        }
+    }
+
+    /**
+     * Determine if priority loading is done. If so clear the priorityWait
+     */
+    function isPriorityDone(context) {
+        var priorityDone = true,
+            priorityWait = context.config.priorityWait,
+            priorityName, i;
+        if (priorityWait) {
+            for (i = 0; (priorityName = priorityWait[i]); i++) {
+                if (!context.loaded[priorityName]) {
+                    priorityDone = false;
+                    break;
+                }
+            }
+            if (priorityDone) {
+                delete context.config.priorityWait;
+            }
+        }
+        return priorityDone;
     }
 
     /**
@@ -103,7 +149,7 @@ var require;
             }
 
             //Skip the resume if current context is in priority wait.
-            if (s.contexts[s.ctxName].config.priorityWait) {
+            if (context.config.priorityWait && !isPriorityDone(context)) {
                 return;
             }
 
@@ -142,12 +188,14 @@ var require;
                 // Adjust args if there are dependencies
                 deps = callback;
                 callback = contextName;
-                contextName = arguments[3];
+                contextName = relModuleName;
+                relModuleName = arguments[4];
             } else {
                 deps = [];
             }
         }
-        main(null, deps, callback, config, contextName);
+
+        main(null, deps, callback, config, contextName, relModuleName);
 
         //If the require call does not trigger anything new to load,
         //then resume the dependency processing. Context will be undefined
@@ -185,7 +233,7 @@ var require;
      * return a value to define the module corresponding to the first argument's
      * name.
      */
-    req.def = function (name, deps, callback, contextName) {
+    define = req.def = function (name, deps, callback, contextName) {
         var i, scripts, script, node = currentlyAddingScript;
 
         //Allow for anonymous functions
@@ -242,6 +290,13 @@ var require;
             name = node.getAttribute("data-requiremodule");
         }
 
+        if (typeof name === 'string') {
+            //Do not try to auto-register a jquery later.
+            //Do this work here and in main, since for IE/useInteractive, this function
+            //is the earliest touch-point.
+            s.contexts[s.ctxName].jQueryDef = (name === "jquery");
+        }
+
         //Always save off evaluating the def call until the script onload handler.
         //This allows multiple modules to be in a file without prematurely
         //tracing dependencies, and allows for anonymous module support,
@@ -250,19 +305,18 @@ var require;
         defQueue.push([name, deps, callback, null, contextName]);
     };
 
-    main = function (name, deps, callback, config, contextName) {
+    main = function (name, deps, callback, config, contextName, relModuleName) {
         //Grab the context, or create a new one for the given context name.
         var context, newContext, loaded, pluginPrefix,
             canSetContext, prop, newLength, outDeps, mods, paths, index, i,
             deferMods, deferModArgs, lastModArg, waitingName, packages,
-            packagePaths, pkgPath, pkgNames, pkgName, pkgObj;
+            packagePaths;
 
         contextName = contextName ? contextName : (config && config.context ? config.context : s.ctxName);
         context = s.contexts[contextName];
 
         if (name) {
-            //>>excludeStart("requireExcludePlugin", pragmas.requireExcludePlugin);
-            // Pull off any plugin prefix.
+                        // Pull off any plugin prefix.
             index = name.indexOf("!");
             if (index !== -1) {
                 pluginPrefix = name.substring(0, index);
@@ -274,8 +328,7 @@ var require;
                 pluginPrefix = context.defPlugin[name];
             }
 
-            //>>excludeEnd("requireExcludePlugin");
-
+            
             //If module already defined for context, or already waiting to be
             //evaluated, leave.
             waitingName = context.waiting[name];
@@ -327,12 +380,10 @@ var require;
                 modifiers: {}
             };
 
-            //>>excludeStart("requireExcludePlugin", pragmas.requireExcludePlugin);
-            if (s.plugins.newContext) {
+                        if (s.plugins.newContext) {
                 s.plugins.newContext(newContext);
             }
-            //>>excludeEnd("requireExcludePlugin");
-
+            
             context = s.contexts[contextName] = newContext;
         }
 
@@ -371,43 +422,14 @@ var require;
                 if (packagePaths) {
                     for (prop in packagePaths) {
                         if (!(prop in empty)) {
-                            pkgPath = prop;
-                            pkgNames = packagePaths[pkgPath];
-                            for (i = 0; (pkgName = pkgNames[i]); i++) {
-                                if (typeof pkgName === "string") {
-                                    //Standard package mapping.
-                                    pkgObj = packages[pkgName] = {
-                                        name: pkgName,
-                                        location: pkgPath + "/" + pkgName
-                                    };
-                                } else {
-                                    //A custom setup.
-                                    pkgObj = context.config.packages[pkgName.name] = pkgName;
-                                    pkgObj.location = pkgPath + "/" + (pkgObj.location || pkgObj.name);
-                                }
-                            }
+                            configurePackageDir(packages, packagePaths[prop], prop);
                         }
                     }
                 }
 
                 //Adjust packages if necessary.
                 if (config.packages) {
-                    for (prop in config.packages) {
-                        if (!(prop in empty)) {
-                            pkgObj = packages[prop] = config.packages[prop];
-                            pkgObj.name = pkgObj.name || prop;
-                        }
-                    }
-                }
-
-                //Normalize package paths.
-                for (prop in packages) {
-                    if (!(prop in empty)) {
-                        pkgObj = packages[prop];
-                        pkgObj.location = pkgObj.location || pkgObj.name;
-                        pkgObj.lib = pkgObj.lib || "lib";
-                        pkgObj.main = pkgObj.main || "main";
-                    }
+                    configurePackageDir(packages, config.packages);
                 }
 
                 //Done with modifications, assing packages back to context config
@@ -431,14 +453,12 @@ var require;
                 req(config.deps || [], config.callback);
             }
 
-            //>>excludeStart("requireExcludePageLoad", pragmas.requireExcludePageLoad);
-            //Set up ready callback, if asked. Useful when require is defined as a
+                        //Set up ready callback, if asked. Useful when require is defined as a
             //config object before require.js is loaded.
             if (config.ready) {
                 req.ready(config.ready);
             }
-            //>>excludeEnd("requireExcludePageLoad");
-
+            
             //If it is just a config block, nothing else,
             //then return.
             if (!deps) {
@@ -453,7 +473,7 @@ var require;
             outDeps = deps;
             deps = [];
             for (i = 0; i < outDeps.length; i++) {
-                deps[i] = req.splitPrefix(outDeps[i], name);
+                deps[i] = req.splitPrefix(outDeps[i], (name || relModuleName), context);
             }
         }
 
@@ -473,8 +493,7 @@ var require;
             //pause/resume case where there are multiple modules in a file.
             context.specified[name] = true;
 
-            //>>excludeStart("requireExcludeModify", pragmas.requireExcludeModify);
-            //Load any modifiers for the module.
+                        //Load any modifiers for the module.
             mods = context.modifiers[name];
             if (mods) {
                 req(mods, contextName);
@@ -495,8 +514,7 @@ var require;
                     }
                 }
             }
-            //>>excludeEnd("requireExcludeModify");
-        }
+                    }
 
         //If the callback is not an actual function, it means it already
         //has the definition of the module as a literal value.
@@ -505,15 +523,13 @@ var require;
         }
 
         //If a pluginPrefix is available, call the plugin, or load it.
-        //>>excludeStart("requireExcludePlugin", pragmas.requireExcludePlugin);
-        if (pluginPrefix) {
+                if (pluginPrefix) {
             callPlugin(pluginPrefix, context, {
                 name: "require",
                 args: [name, deps, callback, context]
             });
         }
-        //>>excludeEnd("requireExcludePlugin");
-
+        
         //Hold on to the module until a script load or other adapter has finished
         //evaluating the whole file. This helps when a file has more than one
         //module in it -- dependencies are not traced and fetched until the whole
@@ -524,8 +540,10 @@ var require;
         //as part of a layer, where onScriptLoad is not fired
         //for those cases. Do this after the inline define and
         //dependency tracing is done.
+        //Also check if auto-registry of jQuery needs to be skipped.
         if (name) {
             context.loaded[name] = true;
+            context.jQueryDef = (name === "jquery");
         }
     };
 
@@ -549,14 +567,12 @@ var require;
         ctxName: defContextName,
         contexts: {},
         paused: [],
-        //>>excludeStart("requireExcludePlugin", pragmas.requireExcludePlugin);
-        plugins: {
+                plugins: {
             defined: {},
             callbacks: {},
             waiting: {}
         },
-        //>>excludeEnd("requireExcludePlugin");
-        //Stores a list of URLs that should not get async script tag treatment.
+                //Stores a list of URLs that should not get async script tag treatment.
         skipAsync: {},
         isBrowser: isBrowser,
         isPageLoaded: !isBrowser,
@@ -576,8 +592,7 @@ var require;
         }
     }
 
-    //>>excludeStart("requireExcludePlugin", pragmas.requireExcludePlugin);
-    /**
+        /**
      * Sets up a plugin callback name. Want to make it easy to test if a plugin
      * needs to be called for a certain lifecycle event by testing for
      * if (s.plugins.onLifeCyleEvent) so only define the lifecycle event
@@ -645,7 +660,36 @@ var require;
 
         return req;
     };
-    //>>excludeEnd("requireExcludePlugin");
+    
+    /**
+     * As of jQuery 1.4.3, it supports a readyWait property that will hold off
+     * calling jQuery ready callbacks until all scripts are loaded. Be sure
+     * to track it if readyWait is available. Also, since jQuery 1.4.3 does
+     * not register as a module, need to do some global inference checking.
+     * Even if it does register as a module, not guaranteed to be the precise
+     * name of the global. If a jQuery is tracked for this context, then go
+     * ahead and register it as a module too, if not already in process.
+     */
+    function jQueryCheck(context, jqCandidate) {
+        if (!context.jQuery) {
+            var $ = jqCandidate || (typeof jQuery !== "undefined" ? jQuery : null);
+            if ($ && "readyWait" in $) {
+                context.jQuery = $;
+
+                //Manually create a "jquery" module entry if not one already
+                //or in process.
+                if (!context.defined.jquery && !context.jQueryDef) {
+                    context.defined.jquery = $;
+                }
+
+                //Make sure 
+                if (context.scriptCount) {
+                    $.readyWait += 1;
+                    context.jQueryIncremented = true;
+                }
+            }
+        }
+    }
 
     /**
      * Internal method used by environment adapters to complete a load event.
@@ -679,7 +723,12 @@ var require;
         //moduleName that maps to a require.def call. This line is important
         //for traditional browser scripts.
         context.loaded[moduleName] = true;
-        
+
+        //If a global jQuery is defined, check for it. Need to do it here
+        //instead of main() since stock jQuery does not register as
+        //a module via define.
+        jQueryCheck(context);
+
         context.scriptCount -= 1;
         resume(context);
     };
@@ -709,13 +758,11 @@ var require;
         var i, dep;
 
         if (pluginPrefix) {
-            //>>excludeStart("requireExcludePlugin", pragmas.requireExcludePlugin);
-            callPlugin(pluginPrefix, context, {
+                        callPlugin(pluginPrefix, context, {
                 name: "checkDeps",
                 args: [name, deps, context]
             });
-            //>>excludeEnd("requireExcludePlugin");
-        } else {
+                    } else {
             for (i = 0; (dep = deps[i]); i++) {
                 if (!context.specified[dep.fullName]) {
                     context.specified[dep.fullName] = true;
@@ -725,13 +772,11 @@ var require;
 
                     //If a plugin, call its load method.
                     if (dep.prefix) {
-                        //>>excludeStart("requireExcludePlugin", pragmas.requireExcludePlugin);
-                        callPlugin(dep.prefix, context, {
+                                                callPlugin(dep.prefix, context, {
                             name: "load",
                             args: [dep.name, context.contextName]
                         });
-                        //>>excludeEnd("requireExcludePlugin");
-                    } else {
+                                            } else {
                         req.load(dep.name, context.contextName);
                     }
                 }
@@ -739,8 +784,7 @@ var require;
         }
     };
 
-    //>>excludeStart("requireExcludeModify", pragmas.requireExcludeModify);
-    /**
+        /**
      * Register a module that modifies another module. The modifier will
      * only be called once the target module has been loaded.
      *
@@ -809,8 +853,7 @@ var require;
             }
         }
     };
-    //>>excludeEnd("requireExcludeModify");
-
+    
     req.isArray = function (it) {
         return ostring.call(it) === "[object Array]";
     };
@@ -839,10 +882,12 @@ var require;
         }
         contextName = contextName || s.ctxName;
 
-        //Normalize module name, if it contains . or ..
-        moduleName = req.normalizeName(moduleName, relModuleName);
+        var ret, context = s.contexts[contextName];
 
-        var ret = s.contexts[contextName].defined[moduleName];
+        //Normalize module name, if it contains . or ..
+        moduleName = req.normalizeName(moduleName, relModuleName, context);
+
+        ret = context.defined[moduleName];
         if (ret === undefined) {
             req.onError(new Error("require: module name '" +
                         moduleName +
@@ -883,22 +928,30 @@ var require;
                 context.scriptCount += 1;
                 req.attach(url, contextName, moduleName);
                 urlFetched[url] = true;
+
+                //If tracking a jQuery, then make sure its readyWait
+                //is incremented to prevent its ready callbacks from
+                //triggering too soon.
+                if (context.jQuery && !context.jQueryIncremented) {
+                    context.jQuery.readyWait += 1;
+                    context.jQueryIncremented = true;
+                }
             }
         }
     };
 
     req.jsExtRegExp = /\.js$/;
 
-    
     /**
      * Given a relative module name, like ./something, normalize it to
      * a real name that can be mapped to a path.
      * @param {String} name the relative name
      * @param {String} baseName a real name that the name arg is relative
      * to.
+     * @param {Object} context
      * @returns {String} normalized name
      */
-    req.normalizeName = function (name, baseName) {
+    req.normalizeName = function (name, baseName, context) {
         //Adjust any relative paths.
         var part;
         if (name.charAt(0) === ".") {
@@ -907,13 +960,20 @@ var require;
                             name +
                             ", no relative module name available."));
             }
-            //Convert baseName to array, and lop off the last part,
-            //so that . matches that "directory" and not name of the baseName's
-            //module. For instance, baseName of "one/two/three", maps to
-            //"one/two/three.js", but we want the directory, "one/two" for
-            //this normalization.
-            baseName = baseName.split("/");
-            baseName = baseName.slice(0, baseName.length - 1);
+
+            if (context.config.packages[baseName]) {
+                //If the baseName is a package name, then just treat it as one
+                //name to concat the name with.
+                baseName = [baseName];
+            } else {
+                //Convert baseName to array, and lop off the last part,
+                //so that . matches that "directory" and not name of the baseName's
+                //module. For instance, baseName of "one/two/three", maps to
+                //"one/two/three.js", but we want the directory, "one/two" for
+                //this normalization.
+                baseName = baseName.split("/");
+                baseName = baseName.slice(0, baseName.length - 1);
+            }
 
             name = baseName.concat(name.split("/"));
             for (i = 0; (part = name[i]); i++) {
@@ -938,12 +998,13 @@ var require;
      * @param {String} name the module name
      * @param {String} [baseName] base name that name is
      * relative to.
+     * @param {Object} context
      *
      * @returns {Object} with properties, 'prefix' (which
      * may be null), 'name' and 'fullName', which is a combination
      * of the prefix (if it exists) and the name.
      */
-    req.splitPrefix = function (name, baseName) {
+    req.splitPrefix = function (name, baseName, context) {
         var index = name.indexOf("!"), prefix = null;
         if (index !== -1) {
             prefix = name.substring(0, index);
@@ -951,7 +1012,7 @@ var require;
         }
 
         //Account for relative paths if there is a base name.
-        name = req.normalizeName(name, baseName);
+        name = req.normalizeName(name, baseName, context);
 
         return {
             prefix: prefix,
@@ -965,10 +1026,11 @@ var require;
      */
     req.nameToUrl = function (moduleName, ext, contextName, relModuleName) {
         var paths, packages, pkg, pkgPath, syms, i, parentModule, url,
-            config = s.contexts[contextName].config;
+            context = s.contexts[contextName],
+            config = context.config;
 
         //Normalize module name if have a base relative module name to work from.
-        moduleName = req.normalizeName(moduleName, relModuleName);
+        moduleName = req.normalizeName(moduleName, relModuleName, context);
 
         //If a colon is in the URL, it indicates a protocol is used and it is just
         //an URL to a file, or if it starts with a slash or ends with .js, it is just a plain file.
@@ -1028,13 +1090,10 @@ var require;
                 expired = waitInterval && (context.startTime + waitInterval) < new Date().getTime(),
                 loaded, defined = context.defined,
                 modifiers = context.modifiers, waiting, noLoads = "",
-                hasLoadedProp = false, stillLoading = false, prop, priorityDone,
-                priorityName,
+                hasLoadedProp = false, stillLoading = false, prop,
 
-                //>>excludeStart("requireExcludePlugin", pragmas.requireExcludePlugin);
-                pIsWaiting = s.plugins.isWaiting, pOrderDeps = s.plugins.orderDeps,
-                //>>excludeEnd("requireExcludePlugin");
-
+                                pIsWaiting = s.plugins.isWaiting, pOrderDeps = s.plugins.orderDeps,
+                
                 i, module, allDone, loads, loadArgs, err;
 
         //If already doing a checkLoaded call,
@@ -1046,17 +1105,9 @@ var require;
         //Determine if priority loading is done. If so clear the priority. If
         //not, then do not check
         if (context.config.priorityWait) {
-            priorityDone = true;
-            for (i = 0; (priorityName = context.config.priorityWait[i]); i++) {
-                if (!context.loaded[priorityName]) {
-                    priorityDone = false;
-                    break;
-                }
-            }
-            if (priorityDone) {
-                //Clean up priority and call resume, since it could have
+            if (isPriorityDone(context)) {
+                //Call resume, since it could have
                 //some waiting dependencies to trace.
-                delete context.config.priorityWait;
                 resume(context);
             } else {
                 return;
@@ -1091,10 +1142,8 @@ var require;
 
         //Check for exit conditions.
         if (!hasLoadedProp && !waiting.length
-            //>>excludeStart("requireExcludePlugin", pragmas.requireExcludePlugin);
-            && (!pIsWaiting || !pIsWaiting(context))
-            //>>excludeEnd("requireExcludePlugin");
-           ) {
+                        && (!pIsWaiting || !pIsWaiting(context))
+                       ) {
             //If the loaded object had no items, then the rest of
             //the work below does not need to be done.
             context.isCheckLoaded = false;
@@ -1124,16 +1173,13 @@ var require;
         context.waiting = [];
         context.loaded = {};
 
-        //>>excludeStart("requireExcludePlugin", pragmas.requireExcludePlugin);
-        //Call plugins to order their dependencies, do their
+                //Call plugins to order their dependencies, do their
         //module definitions.
         if (pOrderDeps) {
             pOrderDeps(context);
         }
-        //>>excludeEnd("requireExcludePlugin");
-
-        //>>excludeStart("requireExcludeModify", pragmas.requireExcludeModify);
-        //Before defining the modules, give priority treatment to any modifiers
+        
+                //Before defining the modules, give priority treatment to any modifiers
         //for modules that are already defined.
         for (prop in modifiers) {
             if (!(prop in empty)) {
@@ -1142,8 +1188,7 @@ var require;
                 }
             }
         }
-        //>>excludeEnd("requireExcludeModify");
-
+        
         //Define the modules, doing a depth first search.
         for (i = 0; (module = waiting[i]); i++) {
             req.exec(module, {}, waiting, context);
@@ -1153,10 +1198,8 @@ var require;
         context.isCheckLoaded = false;
 
         if (context.waiting.length
-            //>>excludeStart("requireExcludePlugin", pragmas.requireExcludePlugin);
-            || (pIsWaiting && pIsWaiting(context))
-            //>>excludeEnd("requireExcludePlugin");
-           ) {
+                        || (pIsWaiting && pIsWaiting(context))
+                       ) {
             //More things in this context are waiting to load. They were probably
             //added while doing the work above in checkLoaded, calling module
             //callbacks that triggered other require calls.
@@ -1230,10 +1273,8 @@ var require;
             modRequire = makeContextModuleFunc(null, contextName, moduleName);
 
         req.mixin(modRequire, {
-            //>>excludeStart("requireExcludeModify", pragmas.requireExcludeModify);
-            modify: makeContextModuleFunc("modify", contextName, moduleName),
-            //>>excludeEnd("requireExcludeModify");
-            def: makeContextModuleFunc("def", contextName, moduleName),
+                        modify: makeContextModuleFunc("modify", contextName, moduleName),
+                        def: makeContextModuleFunc("def", contextName, moduleName),
             get: makeContextModuleFunc("get", contextName, moduleName),
             nameToUrl: makeContextModuleFunc("nameToUrl", contextName, moduleName),
             ready: req.ready,
@@ -1315,7 +1356,7 @@ var require;
                     ret = defined[name];
                 } else {
                     if (cjsModule && "exports" in cjsModule) {
-                        ret = defined[name] = depModule.exports;
+                        ret = defined[name] = cjsModule.exports;
                     } else {
                         if (name in defined && !usingExports) {
                             req.onError(new Error(name + " has already been defined"));
@@ -1326,11 +1367,9 @@ var require;
             }
         }
 
-        //>>excludeStart("requireExcludeModify", pragmas.requireExcludeModify);
-        //Execute modifiers, if they exist.
+                //Execute modifiers, if they exist.
         req.execModifiers(name, traced, waiting, context);
-        //>>excludeEnd("requireExcludeModify");
-
+        
         return ret;
     };
 
@@ -1348,8 +1387,7 @@ var require;
         return cb.apply(null, args);
     };
 
-    //>>excludeStart("requireExcludeModify", pragmas.requireExcludeModify);
-    /**
+        /**
      * Executes modifiers for the given module name.
      * @param {String} target
      * @param {Object} traced
@@ -1371,8 +1409,7 @@ var require;
             delete modifiers[target];
         }
     };
-    //>>excludeEnd("requireExcludeModify");
-
+    
     /**
      * callback for script loads, used to check status of loading.
      *
@@ -1493,22 +1530,12 @@ var require;
         if (cfg.baseUrlMatch) {
             rePkg = cfg.baseUrlMatch;
         } else {
-            //>>includeStart("jquery", pragmas.jquery);
-            rePkg = /(requireplugins-|require-)?jquery[\-\d\.]*(min)?\.js(\W|$)/i;
-            //>>includeEnd("jquery");
-
-            //>>includeStart("dojoConvert", pragmas.dojoConvert);
-            rePkg = /dojo\.js(\W|$)/i;
-            //>>includeEnd("dojoConvert");
-
-            //>>excludeStart("dojoConvert", pragmas.dojoConvert);
-
-            //>>excludeStart("jquery", pragmas.jquery);
-            rePkg = /(allplugins-|transportD-)?require\.js(\W|$)/i;
-            //>>excludeEnd("jquery");
-
-            //>>excludeEnd("dojoConvert");
-        }
+            
+            
+            
+                        rePkg = /allplugins-?require\.js(\W|$)/i;
+            
+                    }
 
         for (i = scripts.length - 1; i > -1 && (script = scripts[i]); i--) {
             //Set the "head" where we can append children by
@@ -1541,8 +1568,7 @@ var require;
         }
     }
 
-    //>>excludeStart("requireExcludePageLoad", pragmas.requireExcludePageLoad);
-    //****** START page load functionality ****************
+        //****** START page load functionality ****************
     /**
      * Sets the page as loaded and triggers check for all modules loaded.
      */
@@ -1573,12 +1599,27 @@ var require;
      * you can define this method to call your page ready code instead.
      */
     req.callReady = function () {
-        var callbacks = s.readyCalls, i, callback;
+        var callbacks = s.readyCalls, i, callback, contexts, context, prop;
 
-        if (s.isPageLoaded && s.isDone && callbacks.length) {
-            s.readyCalls = [];
-            for (i = 0; (callback = callbacks[i]); i++) {
-                callback();
+        if (s.isPageLoaded && s.isDone) {
+            if (callbacks.length) {
+                s.readyCalls = [];
+                for (i = 0; (callback = callbacks[i]); i++) {
+                    callback();
+                }
+            }
+
+            //If jQuery with readyWait is being tracked, updated its
+            //readyWait count.
+            contexts = s.contexts;
+            for (prop in contexts) {
+                if (!(prop in empty)) {
+                    context = contexts[prop];
+                    if (context.jQueryIncremented) {
+                        context.jQuery.readyWait -= 1;
+                        context.jQueryIncremented = false;
+                    }
+                }
             }
         }
     };
@@ -1639,8 +1680,7 @@ var require;
         }
     }
     //****** END page load functionality ****************
-    //>>excludeEnd("requireExcludePageLoad");
-
+    
     //Set up default context. If require was a configuration object, use that as base config.
     req(cfg);
 
@@ -1650,7 +1690,12 @@ var require;
     //which seems odd to do on the server.
     if (typeof setTimeout !== "undefined") {
         setTimeout(function () {
-            resume(s.contexts[(cfg.context || defContextName)]);
+            var ctx = s.contexts[(cfg.context || defContextName)];
+            //Allow for jQuery to be loaded/already in the page, and if jQuery 1.4.3,
+            //make sure to hold onto it for readyWait triggering.
+            jQueryCheck(ctx);
+            resume(ctx);
         }, 0);
     }
 }());
+
