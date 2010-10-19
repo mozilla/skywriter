@@ -13,7 +13,7 @@ setInterval: false, importScripts: false, jQuery: false */
 var require, define;
 (function () {
     //Change this version number for each release.
-    var version = "0.14.4",
+    var version = "0.14.5",
             empty = {}, s,
             i, defContextName = "_", contextLoads = [],
             scripts, script, rePkg, src, m, dataMain, cfg = {}, setReadyState,
@@ -1039,9 +1039,7 @@ var require, define;
             //Just a plain path, not module name lookup, so just return it.
             //Add extension if it is included. This is a bit wonky, only non-.js things pass
             //an extension, this method probably needs to be reworked.
-            return moduleName + (ext ? ext : "");
-        } else if (moduleName.charAt(0) === ".") {
-            return req.onError(new Error("require.nameToUrl does not handle relative module names (ones that start with '.' or '..')"));
+            url = moduleName + (ext ? ext : "");
         } else {
             //A module that needs to be converted to a path.
             paths = config.paths;
@@ -1073,8 +1071,11 @@ var require, define;
 
             //Join the path parts together, then figure out if baseUrl is needed.
             url = syms.join("/") + (ext || ".js");
-            return ((url.charAt(0) === '/' || url.match(/^\w+:/)) ? "" : config.baseUrl) + url;
+            url = (url.charAt(0) === '/' || url.match(/^\w+:/) ? "" : config.baseUrl) + url;
         }
+        return config.urlArgs ? url +
+                                ((url.indexOf('?') === -1 ? '?' : '&') +
+                                 config.urlArgs) : url;
     };
 
     /**
@@ -1533,7 +1534,7 @@ var require, define;
             
             
             
-                        rePkg = /allplugins-?require\.js(\W|$)/i;
+                        rePkg = /(allplugins-)?require\.js(\W|$)/i;
             
                     }
 
