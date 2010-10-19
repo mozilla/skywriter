@@ -1,7 +1,7 @@
 require.def(['require', 'exports', 'module',
     'skywriter/util/util',
     'text_editor/views/utils/rect',
-    'text_editor/views/events'
+    'events'
 ], function(require, exports, module,
     util,
     Rect,

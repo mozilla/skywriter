@@ -2,7 +2,7 @@ require.def(['require', 'exports', 'module',
     'skywriter/util/util',
     'skywriter/plugins',
     'text_editor/views/utils/rect',
-    'text_editor/views/views/canvas'
+    'text_editor/views/canvas'
 ], function(require, exports, module,
     util,
     plugins,

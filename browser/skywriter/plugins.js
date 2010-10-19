@@ -76,7 +76,7 @@ var _splitPointer = function(pluginName, pointer) {
     // this allows syntax like #foo
     // which is equivalent to PluginName:index#foo
     if (parts[0]) {
-        modName = pluginName + ":" + parts[0];
+        modName = pluginName + "/" + parts[0];
     } else {
         modName = pluginName;
     }
@@ -147,16 +147,12 @@ exports.Extension.prototype = {
         }
 
         var pluginName = this.pluginName;
-        catalog.loadPlugin(pluginName).then(function() {
-            require.ensure(pointerObj.modName, function() {
-                var func = _retrieveObject(pointerObj);
-                onComplete(func);
+        require([pointerObj.modName], function() {
+            var func = _retrieveObject(pointerObj);
+            onComplete(func);
 
-                // TODO: consider caching 'func' to save looking it up again
-                // Something like: this._setPointer(property, data);
-            });
-        }, function(err) {
-            console.error('Failed to load plugin ', pluginName, err);
+            // TODO: consider caching 'func' to save looking it up again
+            // Something like: this._setPointer(property, data);
         });
 
         return promise;
@@ -335,6 +331,7 @@ exports.Plugin.prototype = {
             return;
         }
         var mod = require(this.mainModuleName);
+        this.catalog._currentPlugin = this.name;
         mod.init();
         this.active = true;
     },
@@ -1111,7 +1108,13 @@ exports.Catalog.prototype = {
     },
     
     addExtensionPoint: function(epName, metadata) {
-        exports.registerExtensionPoint(metadata, this, false);
+        // extensionpoint is a special case, because it is set up from the get-go.
+        if (epName == "extensionpoint") {
+            return;
+        }
+        console.log("defining ep ", epName, " for ", this._currentPlugin);
+        metadata.pluginName = this._currentPlugin;
+        exports.registerExtensionPoint(new exports.Extension(metadata), this, false);
     }
 };
 

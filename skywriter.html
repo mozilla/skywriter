@@ -9,6 +9,12 @@
 </head>
 
 <body>
+  <script>
+    require = {
+      urlArgs: "bust=" +  (new Date()).getTime()
+    };
+  </script>
+
   <script src="browser/require.js" data-main="boot"></script>
   <div class="skywriter"></div>
 </body>
