@@ -1,3 +1,6 @@
 [submodule "server/node-paperboy"]
 	path = server/node-paperboy
 	url = git://github.com/felixge/node-paperboy.git
+[submodule "shared"]
+	path = shared
+	url = git://github.com/mozilla/cloud9-skywriter-shared.git
