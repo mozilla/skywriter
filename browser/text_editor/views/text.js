@@ -142,10 +142,14 @@ util.mixin(exports.TextView.prototype, {
 
         // Add the events to the new layoutManager.
         layoutManager = newBuffer.layoutManager;
-        layoutManager.invalidatedRects.add(this,
-                                this.layoutManagerInvalidatedRects.bind(this));
-        layoutManager.changedTextAtRow.add(this,
-                                this.layoutManagerChangedTextAtRow.bind(this));
+        layoutManager.invalidatedRects.add({
+            ref: this,
+            func: this.layoutManagerInvalidatedRects.bind(this)
+        });
+        layoutManager.changedTextAtRow.add({
+            ref: this,
+            func: this.layoutManagerChangedTextAtRow.bind(this)
+        });
     },
 
     /**

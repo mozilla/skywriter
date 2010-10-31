@@ -615,12 +615,20 @@ Object.defineProperties(exports.EditorView.prototype, {
             var tv = this.textView;
 
             // Watch out for changes to the layoutManager's internal size.
-            lm.sizeChanged.add(this,
-                this._layoutManagerSizeChanged.bind(this));
+            lm.sizeChanged.add({
+                ref: this,
+                func: this._layoutManagerSizeChanged.bind(this)
+            });
 
             // Map internal events so that developers can listen much easier.
-            lm.textStorage.changed.add(this, this.textChanged.bind(this));
-            tv.selectionChanged.add(this, this.selectionChanged.bind(this));
+            lm.textStorage.changed.add({
+                ref: this, 
+                func: this.textChanged.bind(this)
+            });
+            tv.selectionChanged.add({
+                ref: this, 
+                func: this.selectionChanged.bind(this)
+            });
 
             this.textView.setSelection(newBuffer._selectedRange, false);
             this.scrollOffsetChanged(newBuffer._scrollOffset);
