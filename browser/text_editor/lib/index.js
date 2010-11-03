@@ -38,8 +38,7 @@
 define(function(require, exports, module) {
     
 
-exports.init = function() {
-    var catalog = plugins.catalog;
+exports.startup = function(data, reason) {
     // catalog.connect("factory", module.id, {
     //     "name": "text_editor",
     //     "pointer": "views/editor#EditorView",
@@ -451,7 +450,7 @@ exports.init = function() {
     // });
 };
 
-exports.destroy = function() {
+exports.shutdown = function(data, reason) {
     // catalog.disconnectAll(module.id);
     // catalog.removeExtensionPoint("editorChange");
     // catalog.removeExtensionPoint("gutterDecoration");

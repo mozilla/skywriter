@@ -53,7 +53,7 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
     catalog.connect("themestyles", module.id, { "url": "plugindev.less" });
     catalog.connect("command", module.id, {
@@ -236,7 +236,7 @@ exports.init = function() {
     });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
 };
 

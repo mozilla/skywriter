@@ -51,12 +51,12 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
     catalog.connect("syntax", module.id, { "name": "html", "pointer": "#HTMLSyntax", "fileexts": [ "htm", "html" ] });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
 };
 

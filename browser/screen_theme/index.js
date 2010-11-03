@@ -41,7 +41,7 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
     catalog.connect("themestyles", module.id, { "url": [ "theme.less" ] });
     catalog.connect("themevariable", module.id, { "name": "container_font", "defaultValue": "@global_font" });
@@ -100,11 +100,11 @@ exports.init = function() {
     });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
 };
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
     catalog.connect("themestyles", module.id, { "url": [ "theme.less" ] });
     catalog.connect("themevariable", module.id, { "name": "container_font", "defaultValue": "@global_font" });
@@ -163,11 +163,11 @@ exports.init = function() {
     });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
 };
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
     catalog.connect("themestyles", module.id, { "url": [ "theme.less" ] });
     catalog.connect("themevariable", module.id, { "name": "container_font", "defaultValue": "@global_font" });
@@ -226,6 +226,6 @@ exports.init = function() {
     });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
 };

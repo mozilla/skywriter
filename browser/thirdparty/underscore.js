@@ -19,10 +19,10 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-exports.init = function() {
+exports.startup = function(data, reason) {
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
 };
 
 (function() {

@@ -20,10 +20,10 @@ require.def(['require', 'exports', 'module',
 ({ "version": "0.3.3" });
 "end";
 
-exports.init = function() {
+exports.startup = function(data, reason) {
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
 };
 
 var jQuery = jquery.$;

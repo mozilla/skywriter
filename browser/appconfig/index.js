@@ -62,14 +62,14 @@ var settings = settingsMod.settings;
 var Promise = promise.Promise;
 var Trace = stacktrace.Trace;
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
     catalog.addExtensionPoint("appLaunched", {
         "description": "Event: Fired when the app is completely launched."
     });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
     catalog.removeExtensionPoint("appLaunched");
 };

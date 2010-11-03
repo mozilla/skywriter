@@ -22,10 +22,10 @@ require.def(['require', 'exports', 'module',
 ({ "version": "1.8.0", "dependencies": {} });
 "end";
 
-exports.init = function() {
+exports.startup = function(data, reason) {
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
 };
 
 var jQuery = jquery.$;

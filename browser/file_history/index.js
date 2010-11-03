@@ -49,7 +49,7 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
     catalog.connect("factory", module.id, { "name": "file_history", "pointer": "#FileHistory", "action": "new" });
     catalog.connect("editorChange", module.id, {
@@ -59,7 +59,7 @@ exports.init = function() {
     catalog.connect("appLaunched", module.id, { "pointer": "#loadMostRecent" });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
 };
 

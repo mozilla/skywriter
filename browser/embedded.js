@@ -53,10 +53,10 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-exports.init = function() {
+exports.startup = function(data, reason) {
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
 };
 
 // This plugin is artificial as a convenience. It's just here to collect up

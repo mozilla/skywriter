@@ -43,7 +43,7 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
     catalog.addExtensionPoint("toolbaritem", {
         "description": "Toolbar item views",
@@ -69,7 +69,7 @@ exports.init = function() {
     catalog.connect("toolbaritem", module.id, { "name": "positionindicator", "pointer": "items#PositionIndicator" });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
     catalog.removeExtensionPoint("toolbaritem");
 };

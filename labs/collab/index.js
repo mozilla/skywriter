@@ -55,7 +55,7 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
     catalog.connect("appLaunched", module.id, { "pointer": "#onAppLaunched" });
     catalog.connect("editorChange", module.id, { "match": "[buffer]", "pointer": "#mobwriteFileChanged" });
@@ -270,7 +270,7 @@ exports.init = function() {
     });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
 };
 

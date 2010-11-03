@@ -47,7 +47,7 @@ require.def(['require', 'exports', 'module',
 ({ "dependencies": { "gritter": "0.0.0" } });
 "end";
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
     catalog.connect("notificationHandler", module.id, {
         "name": "gritter",
@@ -58,7 +58,7 @@ exports.init = function() {
     });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
 };
 

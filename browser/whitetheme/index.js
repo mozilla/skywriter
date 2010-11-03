@@ -41,7 +41,7 @@ require.def(['require', 'exports', 'module',
     plugins
 ) {
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
     catalog.connect("theme", module.id, {
         "name": "white",
@@ -51,7 +51,7 @@ exports.init = function() {
     });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
 };
 

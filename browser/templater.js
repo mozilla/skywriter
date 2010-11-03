@@ -45,10 +45,10 @@ require.def(['require', 'exports', 'module',
 ({});
 "end";
 
-exports.init = function() {
+exports.startup = function(data, reason) {
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
 };
 
 // WARNING: do not 'use_strict' without reading the notes in environmentEval;

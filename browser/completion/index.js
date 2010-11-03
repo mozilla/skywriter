@@ -41,7 +41,7 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
     catalog.addExtensionPoint("completion", {
         "description": "Code completion support for specific languages",
@@ -77,12 +77,12 @@ exports.init = function() {
     });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
     catalog.removeExtensionPoint("completion");
 };
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
     catalog.addExtensionPoint("completion", {
         "description": "Code completion support for specific languages",
@@ -118,12 +118,12 @@ exports.init = function() {
     });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
     catalog.removeExtensionPoint("completion");
 };
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
     catalog.addExtensionPoint("completion", {
         "description": "Code completion support for specific languages",
@@ -159,7 +159,7 @@ exports.init = function() {
     });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
     catalog.removeExtensionPoint("completion");
 };

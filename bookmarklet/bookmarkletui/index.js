@@ -51,13 +51,13 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
     catalog.connect("factory", module.id, { "name": "bookmarkletbar", "action": "new", "pointer": "#BookmarkletBar" });
     catalog.connect("themestyles", module.id, { "url": "bar.less" });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
 };
 

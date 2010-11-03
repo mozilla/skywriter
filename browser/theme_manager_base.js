@@ -50,7 +50,7 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
     catalog.addExtensionPoint("themestyles", {
         "description": "(Less)files holding the CSS style information for the UI.",
@@ -92,7 +92,7 @@ exports.init = function() {
     });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
     catalog.removeExtensionPoint("themestyles");
     catalog.removeExtensionPoint("themeChange");

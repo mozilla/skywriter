@@ -24,10 +24,10 @@ require.def(['require', 'exports', 'module',
 ({ "version": "1.2.0" });
 "end";
 
-exports.init = function() {
+exports.startup = function(data, reason) {
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
 };
 
 var $ = jquery.$;

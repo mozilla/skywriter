@@ -54,7 +54,7 @@ require.def(['require', 'exports', 'module',
 });
 "end";
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
     catalog.connect("command", module.id, {
         "name": "action",
@@ -174,7 +174,7 @@ exports.init = function() {
     });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
 };
 

@@ -33,8 +33,8 @@ require('system/suite');
 
 });
 
-exports.init = function() {
+exports.startup = function(data, reason) {
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
 };

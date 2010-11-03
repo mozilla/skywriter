@@ -25,10 +25,10 @@ require.def(['require', 'exports', 'module',
 ({ "description": "Traits library, traitsjs.org", "dependencies": {} });
 "end";
 
-exports.init = function() {
+exports.startup = function(data, reason) {
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
 };
 
 // --- Begin traits-0.3.js ---
