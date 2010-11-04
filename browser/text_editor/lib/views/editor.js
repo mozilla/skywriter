@@ -147,13 +147,14 @@ exports.EditorView = function(initialContent) {
 
     this._themeData = editorThemeData;
 
-    // Create a buffer for the editor and use initialContent as the initial
-    // content for the textStorage object.
-    this.buffer = new Buffer(null, initialContent);
-
     // Create all the necessary stuff once the container has been added.
     this.elementAppended.add(function() {
         computeThemeData();
+        
+        // Create a buffer for the editor and use initialContent as the initial
+        // content for the textStorage object.
+        this.buffer = new Buffer(null, initialContent);
+
         // Set the font property.
         var fontSize = settings.get('fontsize');
         var fontFace = settings.get('fontface');

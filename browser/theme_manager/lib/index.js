@@ -42,6 +42,7 @@ var themestyles = require('theme_manager/themestyles');
 var settingsMod = require('settings');
 
 exports.startup = function(data, reason) {
+    var env = data.env;
     // catalog.connect("extensionhandler", module.id, {
     //     "name": "themestyles",
     //     "register": "themestyles#registerThemeStyles",
@@ -52,27 +53,29 @@ exports.startup = function(data, reason) {
     //     "register": "index#registerTheme",
     //     "unregister": "index#unregisterTheme"
     // });
-    // catalog.connect("setting", module.id, {
-    //     "name": "theme",
-    //     "type": "text",
-    //     "defaultValue": "standard",
-    //     "description":
-    //         "The theme plugin's name to use. If set to 'standard' no theme will be used"
-    // });
+    
+    env.settings.addSetting({
+        "name": "theme",
+        "type": "text",
+        "defaultValue": "standard",
+        "description":
+            "The theme plugin's name to use. If set to 'standard' no theme will be used"
+    });
     // catalog.connect("appLaunched", module.id, { "pointer": "#appLaunched" });
-    // catalog.connect('settingChange', module.id, {
-    //     match: "theme",
-    //     pointer: exports.themeSettingChanged.bind(exports)
-    // });
-
+    
+    env.settings.settingChange.add({
+        match: "theme",
+        func: exports.themeSettingChanged.bind(exports),
+        ref: exports
+    });
 };
 
 exports.shutdown = function(data, reason) {
-    // catalog.disconnectAll(module.id);
+    env.settings.removeSetting("theme");
+    env.settings.settingChange.remove(exports);
 };
 
 var Promise = promise.Promise;
-var catalog = plugins.catalog;
 var Event = events.Event;
 
 var settings = settingsMod.settings;
@@ -91,9 +94,19 @@ var basePluginLoadPromise = null;
 // to access the themeStyles object when the `themeChange` event was fired.
 exports.themestyles = themestyles;
 
+var themes = {};
+
+exports.addTheme = function(themeExt) {
+    themes[themeExt.name] = themeExt;
+};
+
+exports.removeTheme = function(themeName) {
+    delete themes[themeName];
+};
+
 exports.themeSettingChanged = function(source, settingName, themeName) {
     // Get the themeExtensionPoint for 'themeName'
-    var themeExt = catalog.getExtensionByKey('theme', themeName);
+    var themeExt = themes[themeName];
 
     // 'themeName' === standard : Remove the current set theme.
     // !themeName || !themeExt  : The named theme couldn't get found
@@ -101,7 +114,7 @@ exports.themeSettingChanged = function(source, settingName, themeName) {
         themeExt = null;
         // If a standardTheme is given, try to get it.
         if (standardThemeName !== null) {
-            themeExt = catalog.getExtensionByKey('theme', standardThemeName);
+            themeExt = themes[themeName];
 
         }
     }
