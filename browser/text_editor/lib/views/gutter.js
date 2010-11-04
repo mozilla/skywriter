@@ -38,7 +38,7 @@
 define(function(require, exports, module) {
 
 var util = require('util/util');
-var rect = require('text_editor/util/rect');
+var rect = require('text_editor/utils/rect');
 var canvas = require('text_editor/views/canvas');
     
 var CanvasView = canvas.CanvasView;

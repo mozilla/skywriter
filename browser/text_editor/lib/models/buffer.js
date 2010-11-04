@@ -46,8 +46,6 @@ var undomanager = require('undomanager');
 
 var env = environment.env;
 
-
-
 var Promise = promise.Promise;
 var TextStorage = textstorage.TextStorage;
 var LayoutManager = layoutmanager.LayoutManager;
@@ -86,7 +84,7 @@ exports.Buffer = function(file, initialContent) {
 
     // Restore the state of the buffer (selection + scrollOffset).
     // TODO: Refactor this code into the ViewState.
-    var history = (env.session ? env.session.history : null);
+    var history = (env && env.session ? env.session.history : null);
     var item, selection, scrollOffset;
 
     // If

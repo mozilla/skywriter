@@ -38,11 +38,11 @@
     var config = {
         pluginDirs: {
             "../../browser": {
-                packages: ["completion", "theme_manager", "text_editor"],
+                packages: ["completion", "ctags", "theme_manager", "text_editor"],
                 singleFiles: ['theme_manager_base']
             },
             "../../browser/thirdparty": {
-                singleFiles: ["jquery", "less"]
+                singleFiles: ["traits", "jquery", "less"]
             }
         }
     };

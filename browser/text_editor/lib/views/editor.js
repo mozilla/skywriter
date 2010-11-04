@@ -38,7 +38,7 @@
 define(function(require, exports, module) {
     
 var rangeutils = require('rangeutils');
-var scroller = require('text_editor/view/scroller');
+var scroller = require('text_editor/views/scroller');
 var util = require('util/util');
 var buffer = require('text_editor/models/buffer');
 var controller = require('completion/controller');
@@ -64,7 +64,6 @@ var ScrollerView = scroller.ScrollerCanvasView;
 var TextView = text.TextView;
 
 var _ = underscore._;
-var catalog = plugins.catalog;
 var keyboardManager = keyboard.keyboardManager;
 var settings = settingsMod.settings;
 
@@ -107,11 +106,9 @@ function computeThemeData(themeManager) {
 }
 
 // Compute the themeData to make sure there is one when the editor comes up.
-computeThemeData();
-
-catalog.registerExtension('themeChange', {
-    pointer: computeThemeData
-});
+// catalog.registerExtension('themeChange', {
+//     pointer: computeThemeData
+// });
 
 /**
  * @class
@@ -156,6 +153,7 @@ exports.EditorView = function(initialContent) {
 
     // Create all the necessary stuff once the container has been added.
     this.elementAppended.add(function() {
+        computeThemeData();
         // Set the font property.
         var fontSize = settings.get('fontsize');
         var fontFace = settings.get('fontface');
@@ -586,7 +584,7 @@ Object.defineProperties(exports.EditorView.prototype, {
             }
 
             this.willChangeBuffer(newBuffer);
-            catalog.publish(this, 'editorChange', 'buffer', newBuffer);
+            // catalog.publish(this, 'editorChange', 'buffer', newBuffer);
 
             this.layoutManager = newBuffer.layoutManager;
             this._buffer = newBuffer;

@@ -42,12 +42,11 @@ var Range = require('rangeutils');
 var syntax_manager = require('syntax_manager');
 var textstorage = require('text_editor/models/textstorage');
 var settingsMod = require('settings');
-var m_scratchcanvas = require('skywriter/util/scratchcanvas');
+var m_scratchcanvas = require('text_editor/utils/scratchcanvas');
 var Event = events.Event;
 
 var SyntaxManager = syntax_manager.SyntaxManager;
 var TextStorage = textstorage.TextStorage;
-var catalog = plugins.catalog;
 var settings = settingsMod.settings;
 
 
@@ -77,10 +76,10 @@ var computeFontDimension = function() {
 
 computeFontDimension();
 
-catalog.registerExtension('settingChange', {
-    match: "font[size|face]",
-    pointer: computeFontDimension
-});
+// catalog.registerExtension('settingChange', {
+//     match: "font[size|face]",
+//     pointer: computeFontDimension
+// });
 
 exports.LayoutManager = function(opts) {
     this.changedTextAtRow = new Event();
@@ -152,14 +151,6 @@ exports.LayoutManager.prototype = {
      * reset the margin property of the layout manager instead.
      */
     margin: { left: 5, bottom: 6, top: 0, right: 12 },
-
-    /**
-     * @property
-     *
-     * The plugin catalog to use. Typically this will be plugins.catalog, but
-     * for testing this may be replaced with a mock object.
-     */
-    pluginCatalog: catalog,
 
     /** The syntax manager in use. */
     syntaxManager: null,

@@ -42,7 +42,6 @@ var ui = require('completion/ui');
 var environment = require('environment');
 
 var CompletionUI = ui.CompletionUI;
-var catalog = plugins.catalog;
 var env = environment.env;
 
 function CompletionController(editorView) {

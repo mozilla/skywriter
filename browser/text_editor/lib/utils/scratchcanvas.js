@@ -1,9 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'skywriter/util'
-], function(require, exports, module,
-    util
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -17,7 +11,7 @@ require.def(['require', 'exports', 'module',
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Skywriter.
+ * The Original Code is Mozilla Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -25,7 +19,7 @@ require.def(['require', 'exports', 'module',
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Skywriter Team (skywriter@mozilla.com)
+ *   Patrick Walton (pwalton@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -40,8 +34,9 @@ require.def(['require', 'exports', 'module',
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-
-
+define(function(require, exports, module) {
+    
+var util = require('util/util');
 
 /**
  * A invisible singleton canvas on the page, useful whenever a canvas context
