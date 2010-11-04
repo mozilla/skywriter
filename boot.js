@@ -42,5 +42,16 @@
             }
         }
     };
-    setupPlugins(config);
+    setupPlugins(config, function(catalog) {
+        require(['environment'], function(environment) {
+            var pluginModule = require('plugins');
+            environment.env.ready(function() {
+                catalog.startupPlugins({
+                    env: environment.env
+                }, pluginModule.REASONS.APP_STARTUP).then(function() {
+                    console.log("finito");
+                });
+            });
+        });
+    });
 })();
