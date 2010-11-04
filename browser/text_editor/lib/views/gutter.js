@@ -1,15 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'skywriter/util/util',
-    'skywriter/plugins',
-    'text_editor/views/utils/rect',
-    'text_editor/views/canvas'
-], function(require, exports, module,
-    util,
-    plugins,
-    rect,
-    canvas
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -47,10 +35,12 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
+define(function(require, exports, module) {
 
-var catalog = plugins.catalog;
-
-
+var util = require('util/util');
+var rect = require('text_editor/util/rect');
+var canvas = require('text_editor/views/canvas');
+    
 var CanvasView = canvas.CanvasView;
 
 /*

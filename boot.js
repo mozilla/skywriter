@@ -38,14 +38,25 @@
     var config = {
         pluginDirs: {
             "../../browser": {
-                packages: ["text_editor"]
+                packages: ["completion", "theme_manager", "text_editor"],
+                singleFiles: ['theme_manager_base']
+            },
+            "../../browser/thirdparty": {
+                singleFiles: ["jquery", "less"]
             }
         }
     };
     setupPlugins(config, function(catalog) {
-        require(['environment'], function(environment) {
-            var pluginModule = require('plugins');
-            environment.env.ready(function() {
+        require(['environment', 'text_editor/views/editor',
+                'edit_session'], function(environment, editor, edit_session) {
+            var ed = new editor.EditorView("Hi");
+            var session = edit_session.createSession(ed);
+            var env = new environment.Environment({
+                session: session
+            });
+            environment.env = env;
+            env.ready(function() {
+                var pluginModule = require('plugins');
                 catalog.startupPlugins({
                     env: environment.env
                 }, pluginModule.REASONS.APP_STARTUP).then(function() {

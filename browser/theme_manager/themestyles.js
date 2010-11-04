@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Skywriter.
+ * The Original Code is Mozilla Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Skywriter Team (skywriter@mozilla.com)
+ *   Julian Viereck (jviereck@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -34,24 +34,14 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+define(function(require, exports, module) {
+    
+var util = require('util/util');
+var console = require('util/console');
+var promise = require('util/promise');
+var proxy = require('util/proxy');
+var less = require('less');
 
-require.def(['require', 'exports', 'module',
-    'skywriter/util/util',
-    'skywriter/plugins',
-    'skywriter/console',
-    'skywriter/promise',
-    'skywriter/proxy',
-    'thirdparty/less'
-], function(require, exports, module,
-    util,
-    plugins,
-    console,
-    promise,
-    proxy,
-    less
-) {
-
-var catalog = plugins.catalog;
 var Promise = promise.Promise;
 
 // The less parser to use.

@@ -1,27 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'skywriter/plugins',
-    'skywriter/util/util',
-    'text_editor/views/events',
-    'text_editor/views/views/canvas',
-    'text_editor/views/controllers/layoutmanager',
-    'rangeutils/utils/range',
-    'text_editor/views/utils/rect',
-    'text_editor/views/views/textinput',
-    'skywriter/console',
-    'text_editor/views/settings'
-], function(require, exports, module,
-    plugins,
-    util,
-    events,
-    canvas,
-    layoutmanager,
-    Range,
-    Rect,
-    textinput,
-    console,
-    settingsMod
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -35,7 +11,7 @@ require.def(['require', 'exports', 'module',
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Skywriter.
+ * The Original Code is Mozilla Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -43,7 +19,7 @@ require.def(['require', 'exports', 'module',
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Skywriter Team (skywriter@mozilla.com)
+ *   Patrick Walton (pwalton@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -59,8 +35,18 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-var catalog = plugins.catalog;
+define(function(require, exports, module) {
 
+var util = require('util/util');
+var events = require('events');
+var canvas = require('text_editor/views/canvas');
+var layoutmanager = require('text_editor/controllers/layoutmanager');
+var Range = require('rangeutils');
+var Rect = require('text_editor/utils/rect');
+var textinput = require('text_editor/views/textinput');
+var console = require('util/console');
+var settingsMod = require('settings');
+    
 
 var Event = events.Event;
 var CanvasView = canvas.CanvasView;

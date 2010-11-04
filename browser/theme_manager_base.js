@@ -1,9 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'skywriter/plugins'
-], function(require, exports, module,
-    plugins
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -40,6 +34,7 @@ require.def(['require', 'exports', 'module',
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+define(function(require, exports, module) {
 
 "define metadata";
 ({
@@ -51,52 +46,51 @@ require.def(['require', 'exports', 'module',
 "end";
 
 exports.startup = function(data, reason) {
-    var catalog = plugins.catalog;
-    catalog.addExtensionPoint("themestyles", {
-        "description": "(Less)files holding the CSS style information for the UI.",
-        "params": [
-            {
-                "name": "url",
-                "required": true,
-                "description":
-                    "Name of the ThemeStylesFile - can also be an array of files."
-            }
-        ]
-    });
-    catalog.addExtensionPoint("themeChange", {
-        "description": "Event: Notify when the theme(styles) changed.",
-        "params": [
-            {
-                "name": "pointer",
-                "required": true,
-                "description": "Function that is called whenever the theme is changed."
-            }
-        ]
-    });
-    catalog.addExtensionPoint("theme", {
-        "indexOn": "name",
-        "description": "A theme is a way change the look of the application.",
-        "params": [
-            {
-                "name": "url",
-                "required": false,
-                "description":
-                    "Name of a ThemeStylesFile that holds theme specific CSS rules - can also be an array of files."
-            },
-            {
-                "name": "pointer",
-                "required": true,
-                "description": "Function that returns the ThemeData"
-            }
-        ]
-    });
+    // catalog.addExtensionPoint("themestyles", {
+    //     "description": "(Less)files holding the CSS style information for the UI.",
+    //     "params": [
+    //         {
+    //             "name": "url",
+    //             "required": true,
+    //             "description":
+    //                 "Name of the ThemeStylesFile - can also be an array of files."
+    //         }
+    //     ]
+    // });
+    // catalog.addExtensionPoint("themeChange", {
+    //     "description": "Event: Notify when the theme(styles) changed.",
+    //     "params": [
+    //         {
+    //             "name": "pointer",
+    //             "required": true,
+    //             "description": "Function that is called whenever the theme is changed."
+    //         }
+    //     ]
+    // });
+    // catalog.addExtensionPoint("theme", {
+    //     "indexOn": "name",
+    //     "description": "A theme is a way change the look of the application.",
+    //     "params": [
+    //         {
+    //             "name": "url",
+    //             "required": false,
+    //             "description":
+    //                 "Name of a ThemeStylesFile that holds theme specific CSS rules - can also be an array of files."
+    //         },
+    //         {
+    //             "name": "pointer",
+    //             "required": true,
+    //             "description": "Function that returns the ThemeData"
+    //         }
+    //     ]
+    // });
 };
 
 exports.shutdown = function(data, reason) {
-    catalog.disconnectAll(module.id);
-    catalog.removeExtensionPoint("themestyles");
-    catalog.removeExtensionPoint("themeChange");
-    catalog.removeExtensionPoint("theme");
+    // catalog.disconnectAll(module.id);
+    // catalog.removeExtensionPoint("themestyles");
+    // catalog.removeExtensionPoint("themeChange");
+    // catalog.removeExtensionPoint("theme");
 };
 
 });

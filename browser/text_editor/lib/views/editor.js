@@ -1,37 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'rangeutils/utils/range',
-    'text_editor/views/scroller',
-    'skywriter/util/util',
-    'text_editor/models/buffer',
-    'completion/controller',
-    'text_editor/controllers/search',
-    'text_editor/controllers/undo',
-    'events/index',
-    'text_editor/views/gutter',
-    'text_editor/controllers/layoutmanager',
-    'text_editor/views/text',
-    'thirdparty/underscore',
-    'skywriter/plugins',
-    'keyboard/keyboard',
-    'settings/index'
-], function(require, exports, module,
-    rangeutils,
-    scroller,
-    util,
-    buffer,
-    controller,
-    search,
-    undo,
-    events,
-    gutter,
-    layoutmanager,
-    text,
-    underscore,
-    plugins,
-    keyboard,
-    settingsMod
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -69,8 +35,22 @@ require.def(['require', 'exports', 'module',
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-
+define(function(require, exports, module) {
+    
+var rangeutils = require('rangeutils');
+var scroller = require('text_editor/view/scroller');
+var util = require('util/util');
+var buffer = require('text_editor/models/buffer');
+var controller = require('completion/controller');
+var search = require('text_editor/controllers/search');
+var undo = require('text_editor/controllers/undo');
+var events = require('events');
+var gutter = require('text_editor/views/gutter');
+var layoutmanager = require('text_editor/controllers/layoutmanager');
+var text = require('text_editor/views/text');
+var underscore = require('underscore');
+var keyboard = require('keyboard');
+var settingsMod = require('settings');
 
 
 var Buffer = buffer.Buffer;

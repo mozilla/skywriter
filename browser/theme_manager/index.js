@@ -1,17 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'skywriter/promise',
-    'skywriter/plugins',
-    'events/index',
-    'theme_manager/themestyles',
-    'settings/index'
-], function(require, exports, module,
-    promise,
-    plugins,
-    events,
-    themestyles,
-    settingsMod
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -25,7 +11,7 @@ require.def(['require', 'exports', 'module',
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Skywriter.
+ * The Original Code is Mozilla Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -33,7 +19,7 @@ require.def(['require', 'exports', 'module',
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Skywriter Team (skywriter@mozilla.com)
+ *   Julian Viereck (jviereck@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -48,36 +34,41 @@ require.def(['require', 'exports', 'module',
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+define(function(require, exports, module) {
+
+var promise = require('util/promise');
+var events = require('events');
+var themestyles = require('theme_manager/themestyles');
+var settingsMod = require('settings');
 
 exports.startup = function(data, reason) {
-    var catalog = plugins.catalog;
-    catalog.connect("extensionhandler", module.id, {
-        "name": "themestyles",
-        "register": "themestyles#registerThemeStyles",
-        "unregister": "themestyles#unregisterThemeStyles"
-    });
-    catalog.connect("extensionhandler", module.id, {
-        "name": "theme",
-        "register": "index#registerTheme",
-        "unregister": "index#unregisterTheme"
-    });
-    catalog.connect("setting", module.id, {
-        "name": "theme",
-        "type": "text",
-        "defaultValue": "standard",
-        "description":
-            "The theme plugin's name to use. If set to 'standard' no theme will be used"
-    });
-    catalog.connect("appLaunched", module.id, { "pointer": "#appLaunched" });
-    catalog.connect('settingChange', module.id, {
-        match: "theme",
-        pointer: exports.themeSettingChanged.bind(exports)
-    });
+    // catalog.connect("extensionhandler", module.id, {
+    //     "name": "themestyles",
+    //     "register": "themestyles#registerThemeStyles",
+    //     "unregister": "themestyles#unregisterThemeStyles"
+    // });
+    // catalog.connect("extensionhandler", module.id, {
+    //     "name": "theme",
+    //     "register": "index#registerTheme",
+    //     "unregister": "index#unregisterTheme"
+    // });
+    // catalog.connect("setting", module.id, {
+    //     "name": "theme",
+    //     "type": "text",
+    //     "defaultValue": "standard",
+    //     "description":
+    //         "The theme plugin's name to use. If set to 'standard' no theme will be used"
+    // });
+    // catalog.connect("appLaunched", module.id, { "pointer": "#appLaunched" });
+    // catalog.connect('settingChange', module.id, {
+    //     match: "theme",
+    //     pointer: exports.themeSettingChanged.bind(exports)
+    // });
 
 };
 
 exports.shutdown = function(data, reason) {
-    catalog.disconnectAll(module.id);
+    // catalog.disconnectAll(module.id);
 };
 
 var Promise = promise.Promise;

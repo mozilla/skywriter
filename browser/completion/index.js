@@ -1,9 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'skywriter/plugins'
-], function(require, exports, module,
-    plugins
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -17,7 +11,7 @@ require.def(['require', 'exports', 'module',
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Mozilla Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -25,7 +19,7 @@ require.def(['require', 'exports', 'module',
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Patrick Walton (pwalton@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -40,126 +34,47 @@ require.def(['require', 'exports', 'module',
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-
+define(function(require, exports, module) {
+    
 exports.startup = function(data, reason) {
-    var catalog = plugins.catalog;
-    catalog.addExtensionPoint("completion", {
-        "description": "Code completion support for specific languages",
-        "indexOn": "name"
-    });
-    catalog.connect("command", module.id, {
-        "name": "complete",
-        "key": [ "return", "tab" ],
-        "predicates": { "completing": true },
-        "description": "Accept the chosen completion",
-        "pointer": "controller#completeCommand"
-    });
-    catalog.connect("command", module.id, {
-        "name": "complete cancel",
-        "key": "escape",
-        "predicates": { "completing": true },
-        "description": "Abandon the completion",
-        "pointer": "controller#completeCancelCommand"
-    });
-    catalog.connect("command", module.id, {
-        "name": "complete down",
-        "key": "down",
-        "predicates": { "completing": true },
-        "description": "Choose the completion below",
-        "pointer": "controller#completeDownCommand"
-    });
-    catalog.connect("command", module.id, {
-        "name": "complete up",
-        "key": "up",
-        "predicates": { "completing": true },
-        "description": "Choose the completion above",
-        "pointer": "controller#completeUpCommand"
-    });
+    // var catalog = plugins.catalog;
+    // catalog.addExtensionPoint("completion", {
+    //     "description": "Code completion support for specific languages",
+    //     "indexOn": "name"
+    // });
+    // catalog.connect("command", module.id, {
+    //     "name": "complete",
+    //     "key": [ "return", "tab" ],
+    //     "predicates": { "completing": true },
+    //     "description": "Accept the chosen completion",
+    //     "pointer": "controller#completeCommand"
+    // });
+    // catalog.connect("command", module.id, {
+    //     "name": "complete cancel",
+    //     "key": "escape",
+    //     "predicates": { "completing": true },
+    //     "description": "Abandon the completion",
+    //     "pointer": "controller#completeCancelCommand"
+    // });
+    // catalog.connect("command", module.id, {
+    //     "name": "complete down",
+    //     "key": "down",
+    //     "predicates": { "completing": true },
+    //     "description": "Choose the completion below",
+    //     "pointer": "controller#completeDownCommand"
+    // });
+    // catalog.connect("command", module.id, {
+    //     "name": "complete up",
+    //     "key": "up",
+    //     "predicates": { "completing": true },
+    //     "description": "Choose the completion above",
+    //     "pointer": "controller#completeUpCommand"
+    // });
 };
 
 exports.shutdown = function(data, reason) {
-    catalog.disconnectAll(module.id);
-    catalog.removeExtensionPoint("completion");
+    // catalog.disconnectAll(module.id);
+    // catalog.removeExtensionPoint("completion");
 };
 
-exports.startup = function(data, reason) {
-    var catalog = plugins.catalog;
-    catalog.addExtensionPoint("completion", {
-        "description": "Code completion support for specific languages",
-        "indexOn": "name"
-    });
-    catalog.connect("command", module.id, {
-        "name": "complete",
-        "key": [ "return", "tab" ],
-        "predicates": { "completing": true },
-        "description": "Accept the chosen completion",
-        "pointer": "controller#completeCommand"
-    });
-    catalog.connect("command", module.id, {
-        "name": "complete cancel",
-        "key": "escape",
-        "predicates": { "completing": true },
-        "description": "Abandon the completion",
-        "pointer": "controller#completeCancelCommand"
-    });
-    catalog.connect("command", module.id, {
-        "name": "complete down",
-        "key": "down",
-        "predicates": { "completing": true },
-        "description": "Choose the completion below",
-        "pointer": "controller#completeDownCommand"
-    });
-    catalog.connect("command", module.id, {
-        "name": "complete up",
-        "key": "up",
-        "predicates": { "completing": true },
-        "description": "Choose the completion above",
-        "pointer": "controller#completeUpCommand"
-    });
-};
-
-exports.shutdown = function(data, reason) {
-    catalog.disconnectAll(module.id);
-    catalog.removeExtensionPoint("completion");
-};
-
-exports.startup = function(data, reason) {
-    var catalog = plugins.catalog;
-    catalog.addExtensionPoint("completion", {
-        "description": "Code completion support for specific languages",
-        "indexOn": "name"
-    });
-    catalog.connect("command", module.id, {
-        "name": "complete",
-        "key": [ "return", "tab" ],
-        "predicates": { "completing": true },
-        "description": "Accept the chosen completion",
-        "pointer": "controller#completeCommand"
-    });
-    catalog.connect("command", module.id, {
-        "name": "complete cancel",
-        "key": "escape",
-        "predicates": { "completing": true },
-        "description": "Abandon the completion",
-        "pointer": "controller#completeCancelCommand"
-    });
-    catalog.connect("command", module.id, {
-        "name": "complete down",
-        "key": "down",
-        "predicates": { "completing": true },
-        "description": "Choose the completion below",
-        "pointer": "controller#completeDownCommand"
-    });
-    catalog.connect("command", module.id, {
-        "name": "complete up",
-        "key": "up",
-        "predicates": { "completing": true },
-        "description": "Choose the completion above",
-        "pointer": "controller#completeUpCommand"
-    });
-};
-
-exports.shutdown = function(data, reason) {
-    catalog.disconnectAll(module.id);
-    catalog.removeExtensionPoint("completion");
-};
+});

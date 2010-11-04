@@ -1,11 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'completion/jquery',
-    'completion/underscore'
-], function(require, exports, module,
-    jquery,
-    underscore
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -42,9 +34,10 @@ require.def(['require', 'exports', 'module',
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+define(function(require, exports, module) {
 
-var $ = jquery.$;
-var _ = underscore._;
+var $ = require('jquery').$;
+var _ = require('underscore')._;
 
 var ANIMATION_SPEED = 100;  // in ms
 

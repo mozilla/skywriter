@@ -1,6 +1,5 @@
-
-require.def(['require', 'exports', 'module'
-], function(require, exports, module) {
+define(function(require, exports, module) {
+    
 "define metadata";
 ({
     "description": "Leaner CSS",

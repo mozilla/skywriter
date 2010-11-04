@@ -1,17 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'completion/ctags',
-    'rangeutils/utils/range',
-    'completion/ui',
-    'skywriter/plugins',
-    'completion/environment'
-], function(require, exports, module,
-    ctags,
-    range,
-    ui,
-    plugins,
-    environment
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -48,8 +34,12 @@ require.def(['require', 'exports', 'module',
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-
-
+define(function(require, exports, module) {
+    
+var ctags = require('ctags');
+var range = require('rangeutils');
+var ui = require('completion/ui');
+var environment = require('environment');
 
 var CompletionUI = ui.CompletionUI;
 var catalog = plugins.catalog;

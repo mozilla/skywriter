@@ -1,11 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'skywriter/console',
-    'text_editor/controllers/environment'
-], function(require, exports, module,
-    console,
-    environment
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -42,6 +34,11 @@ require.def(['require', 'exports', 'module',
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+
+define(function(require, exports, module) {
+
+var console = require('util/console');
+var environment = require('environment');
 
 var env = environment.env;
 
