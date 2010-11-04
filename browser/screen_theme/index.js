@@ -1,9 +1,3 @@
-require.def(['require', 'exports', 'module',
-    'skywriter/plugins'
-], function(require, exports, module,
-    plugins
-) {
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -17,7 +11,7 @@ require.def(['require', 'exports', 'module',
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Bespin.
+ * The Original Code is Mozilla Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -25,7 +19,7 @@ require.def(['require', 'exports', 'module',
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Bespin Team (bespin@mozilla.com)
+ *   Julian Viereck (jviereck@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -40,6 +34,7 @@ require.def(['require', 'exports', 'module',
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+define(function(require, exports, module) {
 
 exports.startup = function(data, reason) {
     var catalog = plugins.catalog;
@@ -104,128 +99,4 @@ exports.shutdown = function(data, reason) {
     catalog.disconnectAll(module.id);
 };
 
-exports.startup = function(data, reason) {
-    var catalog = plugins.catalog;
-    catalog.connect("themestyles", module.id, { "url": [ "theme.less" ] });
-    catalog.connect("themevariable", module.id, { "name": "container_font", "defaultValue": "@global_font" });
-    catalog.connect("themevariable", module.id, { "name": "container_font_size", "defaultValue": "@global_font_size" });
-    catalog.connect("themevariable", module.id, { "name": "container_bg", "defaultValue": "@global_container_background" });
-    catalog.connect("themevariable", module.id, { "name": "container_color", "defaultValue": "@global_color" });
-    catalog.connect("themevariable", module.id, { "name": "container_line_height", "defaultValue": "@global_line_height" });
-    catalog.connect("themevariable", module.id, { "name": "pane_bg", "defaultValue": "@global_pane_background" });
-    catalog.connect("themevariable", module.id, {
-        "name": "pane_border_radius",
-        "defaultValue": "@global_pane_border_radius"
-    });
-    catalog.connect("themevariable", module.id, { "name": "form_font", "defaultValue": "@global_form_font" });
-    catalog.connect("themevariable", module.id, { "name": "form_font_size", "defaultValue": "@global_form_font_size" });
-    catalog.connect("themevariable", module.id, { "name": "form_line_height", "defaultValue": "@global_form_line_height" });
-    catalog.connect("themevariable", module.id, { "name": "form_color", "defaultValue": "@global_form_color" });
-    catalog.connect("themevariable", module.id, { "name": "form_text_shadow", "defaultValue": "@global_form_text_shadow" });
-    catalog.connect("themevariable", module.id, { "name": "pane_a_color", "defaultValue": "@global_pane_link_color" });
-    catalog.connect("themevariable", module.id, { "name": "pane_font", "defaultValue": "@global_font" });
-    catalog.connect("themevariable", module.id, { "name": "pane_font_size", "defaultValue": "@global_font_size" });
-    catalog.connect("themevariable", module.id, { "name": "pane_text_shadow", "defaultValue": "@global_pane_text_shadow" });
-    catalog.connect("themevariable", module.id, { "name": "pane_h1_font", "defaultValue": "@global_pane_h1_font" });
-    catalog.connect("themevariable", module.id, { "name": "pane_h1_font_size", "defaultValue": "@global_pane_h1_font_size" });
-    catalog.connect("themevariable", module.id, { "name": "pane_h1_color", "defaultValue": "@global_pane_h1_color" });
-    catalog.connect("themevariable", module.id, { "name": "pane_line_height", "defaultValue": "@global_font_size * 1.8" });
-    catalog.connect("themevariable", module.id, { "name": "pane_color", "defaultValue": "@global_pane_color" });
-    catalog.connect("themevariable", module.id, { "name": "pane_text_shadow", "defaultValue": "@global_text_shadow" });
-    catalog.connect("themevariable", module.id, { "name": "button_font", "defaultValue": "@global_font" });
-    catalog.connect("themevariable", module.id, { "name": "button_font_size", "defaultValue": "@global_font_size" });
-    catalog.connect("themevariable", module.id, { "name": "button_color", "defaultValue": "@global_button_color" });
-    catalog.connect("themevariable", module.id, { "name": "button_bg", "defaultValue": "@global_button_background" });
-    catalog.connect("themevariable", module.id, { "name": "button_bg2", "defaultValue": "@button_bg - #063A27" });
-    catalog.connect("themevariable", module.id, { "name": "button_border", "defaultValue": "@button_bg - #194A5E" });
-    catalog.connect("themevariable", module.id, { "name": "control_bg", "defaultValue": "@global_control_background" });
-    catalog.connect("themevariable", module.id, { "name": "control_color", "defaultValue": "@global_control_color" });
-    catalog.connect("themevariable", module.id, { "name": "control_border", "defaultValue": "@global_control_border" });
-    catalog.connect("themevariable", module.id, {
-        "name": "control_border_radius",
-        "defaultValue": "@global_control_border_radius"
-    });
-    catalog.connect("themevariable", module.id, {
-        "name": "control_active_bg",
-        "defaultValue": "@global_control_active_background"
-    });
-    catalog.connect("themevariable", module.id, {
-        "name": "control_active_border",
-        "defaultValue": "@global_control_active_border"
-    });
-    catalog.connect("themevariable", module.id, {
-        "name": "control_active_color",
-        "defaultValue": "@global_control_active_color"
-    });
-    catalog.connect("themevariable", module.id, {
-        "name": "control_active_inset_color",
-        "defaultValue": "@global_control_active_inset_color"
-    });
-};
-
-exports.shutdown = function(data, reason) {
-    catalog.disconnectAll(module.id);
-};
-
-exports.startup = function(data, reason) {
-    var catalog = plugins.catalog;
-    catalog.connect("themestyles", module.id, { "url": [ "theme.less" ] });
-    catalog.connect("themevariable", module.id, { "name": "container_font", "defaultValue": "@global_font" });
-    catalog.connect("themevariable", module.id, { "name": "container_font_size", "defaultValue": "@global_font_size" });
-    catalog.connect("themevariable", module.id, { "name": "container_bg", "defaultValue": "@global_container_background" });
-    catalog.connect("themevariable", module.id, { "name": "container_color", "defaultValue": "@global_color" });
-    catalog.connect("themevariable", module.id, { "name": "container_line_height", "defaultValue": "@global_line_height" });
-    catalog.connect("themevariable", module.id, { "name": "pane_bg", "defaultValue": "@global_pane_background" });
-    catalog.connect("themevariable", module.id, {
-        "name": "pane_border_radius",
-        "defaultValue": "@global_pane_border_radius"
-    });
-    catalog.connect("themevariable", module.id, { "name": "form_font", "defaultValue": "@global_form_font" });
-    catalog.connect("themevariable", module.id, { "name": "form_font_size", "defaultValue": "@global_form_font_size" });
-    catalog.connect("themevariable", module.id, { "name": "form_line_height", "defaultValue": "@global_form_line_height" });
-    catalog.connect("themevariable", module.id, { "name": "form_color", "defaultValue": "@global_form_color" });
-    catalog.connect("themevariable", module.id, { "name": "form_text_shadow", "defaultValue": "@global_form_text_shadow" });
-    catalog.connect("themevariable", module.id, { "name": "pane_a_color", "defaultValue": "@global_pane_link_color" });
-    catalog.connect("themevariable", module.id, { "name": "pane_font", "defaultValue": "@global_font" });
-    catalog.connect("themevariable", module.id, { "name": "pane_font_size", "defaultValue": "@global_font_size" });
-    catalog.connect("themevariable", module.id, { "name": "pane_text_shadow", "defaultValue": "@global_pane_text_shadow" });
-    catalog.connect("themevariable", module.id, { "name": "pane_h1_font", "defaultValue": "@global_pane_h1_font" });
-    catalog.connect("themevariable", module.id, { "name": "pane_h1_font_size", "defaultValue": "@global_pane_h1_font_size" });
-    catalog.connect("themevariable", module.id, { "name": "pane_h1_color", "defaultValue": "@global_pane_h1_color" });
-    catalog.connect("themevariable", module.id, { "name": "pane_line_height", "defaultValue": "@global_font_size * 1.8" });
-    catalog.connect("themevariable", module.id, { "name": "pane_color", "defaultValue": "@global_pane_color" });
-    catalog.connect("themevariable", module.id, { "name": "pane_text_shadow", "defaultValue": "@global_text_shadow" });
-    catalog.connect("themevariable", module.id, { "name": "button_font", "defaultValue": "@global_font" });
-    catalog.connect("themevariable", module.id, { "name": "button_font_size", "defaultValue": "@global_font_size" });
-    catalog.connect("themevariable", module.id, { "name": "button_color", "defaultValue": "@global_button_color" });
-    catalog.connect("themevariable", module.id, { "name": "button_bg", "defaultValue": "@global_button_background" });
-    catalog.connect("themevariable", module.id, { "name": "button_bg2", "defaultValue": "@button_bg - #063A27" });
-    catalog.connect("themevariable", module.id, { "name": "button_border", "defaultValue": "@button_bg - #194A5E" });
-    catalog.connect("themevariable", module.id, { "name": "control_bg", "defaultValue": "@global_control_background" });
-    catalog.connect("themevariable", module.id, { "name": "control_color", "defaultValue": "@global_control_color" });
-    catalog.connect("themevariable", module.id, { "name": "control_border", "defaultValue": "@global_control_border" });
-    catalog.connect("themevariable", module.id, {
-        "name": "control_border_radius",
-        "defaultValue": "@global_control_border_radius"
-    });
-    catalog.connect("themevariable", module.id, {
-        "name": "control_active_bg",
-        "defaultValue": "@global_control_active_background"
-    });
-    catalog.connect("themevariable", module.id, {
-        "name": "control_active_border",
-        "defaultValue": "@global_control_active_border"
-    });
-    catalog.connect("themevariable", module.id, {
-        "name": "control_active_color",
-        "defaultValue": "@global_control_active_color"
-    });
-    catalog.connect("themevariable", module.id, {
-        "name": "control_active_inset_color",
-        "defaultValue": "@global_control_active_inset_color"
-    });
-};
-
-exports.shutdown = function(data, reason) {
-    catalog.disconnectAll(module.id);
-};
+});

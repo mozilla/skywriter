@@ -42,6 +42,7 @@ var themestyles = require('theme_manager/themestyles');
 var settingsMod = require('settings');
 
 exports.startup = function(data, reason) {
+    debugger;
     var env = data.env;
     // catalog.connect("extensionhandler", module.id, {
     //     "name": "themestyles",
