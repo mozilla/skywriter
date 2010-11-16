@@ -38,8 +38,8 @@
 
 require.ready(function() {
     var knownPlugins = ["util", "rangeutils", "events", "types", "settings", "canon",
-                        "edit_session"];
-    var knownSingleFilePlugins = ["worker_manager"];
+                        "edit_session", "syntax_manager"];
+    var knownSingleFilePlugins = ["worker_manager", "syntax_directory"];
     
     var pluginPackageInfo = [
         {
