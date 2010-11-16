@@ -238,5 +238,5 @@ var core = require("ace/lib/core").core;
         }
     };
 
-    return event;
+    exports.event = event;
 });

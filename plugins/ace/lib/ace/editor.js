@@ -38,7 +38,7 @@
 define(function(require, exports, module) {
 
 var oop = require("ace/lib/oop");
-var event = require("ace/lib/event");
+var event = require("ace/lib/event").event;
 var lang = require("ace/lib/lang");
 var TextInput = require("ace/textinput");
 var KeyBinding = require("ace/keybinding");
