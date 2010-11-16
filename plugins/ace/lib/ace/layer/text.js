@@ -297,5 +297,6 @@ var Text = function(parentEl) {
 
 }).call(Text.prototype);
 
-return Text;
+exports.Text = Text;
+
 });

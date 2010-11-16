@@ -145,5 +145,6 @@ var Cursor = function(parentEl) {
 
 }).call(Cursor.prototype);
 
-return Cursor;
+exports.Cursor = Cursor;
+
 });
