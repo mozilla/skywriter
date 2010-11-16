@@ -1,3 +1,9 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/util/cookie'
+], function(require, exports, module,
+    cookie
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -19,7 +25,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Kevin Dangoor (kdangoor@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,52 +41,39 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-define(function(require, exports, module) {
 
-var Promise = require("util/promise").Promise;
 
-exports.Plugin = function(name) {
-    this.name = name;
-    this.initialized = false;
+/**
+ * Save the settings in a cookie
+ * This code has not been tested since reboot
+ * @constructor
+ */
+exports.CookiePersister = function() {
 };
 
-exports.Plugin.prototype = {
-    initialize: function() {
-        var pr = new Promise();
-        if (this.initialized) {
-            pr.resolve(this);
-            return pr;
+exports.CookiePersister.prototype = {
+    loadInitialValues: function(settings) {
+        settings._loadDefaultValues().then(function() {
+            var data = cookie.get('settings');
+            settings._loadFromObject(JSON.parse(data));
+        }.bind(this));
+    },
+
+    persistValue: function(settings, key, value) {
+        try {
+            // Aggregate the settings into a file
+            var data = {};
+            settings._getSettingNames().forEach(function(key) {
+                data[key] = settings.get(key);
+            });
+
+            var stringData = JSON.stringify(data);
+            cookie.set('settings', stringData);
+        } catch (ex) {
+            console.error('Unable to JSONify the settings! ' + ex);
+            return;
         }
-        require([this.name], function(pluginModule) {
-            if (pluginModule.init) {
-                pluginModule.init();
-            }
-            this.initialized = true;
-            pr.resolve(this);
-        }.bind(this));
-        return pr;
     }
 };
-
-exports.PluginCatalog = function() {
-    this.plugins = {};
-};
-
-exports.PluginCatalog.prototype = {
-    initializePlugins: function(pluginList) {
-        var initializationPromises = [];
-        pluginList.forEach(function(pluginName) {
-            var plugin = this.plugins[pluginName];
-            if (plugin === undefined) {
-                plugin = new exports.Plugin(pluginName);
-                this.plugins[pluginName] = plugin;
-            }
-            initializationPromises.push(plugin.initialize());
-        }.bind(this));
-        return Promise.group(initializationPromises);
-    }
-};
-
-exports.catalog = new exports.PluginCatalog();
 
 });

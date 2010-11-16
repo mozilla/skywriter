@@ -50,6 +50,45 @@ exports.getType = function(name) {
     return typeRegistry[name];
 };
 
+var resolveType = function(typeSpec) {
+  if (typeof typeSpec === 'string') {
+      typeSpec = {name: typeSpec};
+  }
+  var type = exports.getType(typeSpec.name);
+  if (!type) {
+      throw new Error("Unknown type: " + typeSpec.name);
+  }
+  typeSpec.type = type;
+  return typeSpec;
+};
+
+/**
+ * Convert some data from a string to another type as specified by
+ * <tt>typeSpec</tt>.
+ */
+exports.fromString = function(stringVersion, typeSpec) {
+    var typeData = resolveType(typeSpec);
+    return typeData.type.fromString(stringVersion, typeSpec);
+};
+
+/**
+ * Convert some data from an original type to a string as specified by
+ * <tt>typeSpec</tt>.
+ */
+exports.toString = function(objectVersion, typeSpec) {
+    var typeData = resolveType(typeSpec);
+    return typeData.type.toString(objectVersion, typeSpec);
+};
+
+/**
+ * Convert some data from an original type to a string as specified by
+ * <tt>typeSpec</tt>.
+ */
+exports.isValid = function(originalVersion, typeSpec) {
+    var typeData = resolveType(typeSpec);
+    return typeData.type.isValid(originalVersion, typeSpec);
+};
+
 exports.init = function() {
     // TODO: register this extension point.
     

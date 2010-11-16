@@ -4,6 +4,11 @@
   </head>
   <body>
     <h1>Sanity test.</h1>
+    <script>
+      require = {
+        urlArgs: "bust=" +  (new Date()).getTime()
+      };
+    </script>
     <script src="scripts/require.js"></script>
     <script src="scripts/boot.js"></script>
   </body>

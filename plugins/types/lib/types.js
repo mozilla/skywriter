@@ -1,3 +1,7 @@
+// TODO this file can likely be deleted. The useful functionality has moved to
+// index.js
+
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -37,6 +41,7 @@
 define(function(require, exports, module) {
 
 var console = require("util/console");
+var types = require("types/index");
 
 // TODO: this file needs to have the lazy loading code removed
 
@@ -207,11 +212,8 @@ exports.resolveType = function(typeSpec) {
  * <tt>typeSpec</tt>.
  */
 exports.fromString = function(stringVersion, typeSpec) {
-    var promise = new Promise();
-    exports.resolveType(typeSpec).then(function(typeData) {
-        promise.resolve(typeData.type.fromString(stringVersion, typeData.ext));
-    });
-    return promise;
+    var typeData = resolveType(typeSpec);
+    return typeData.type.fromString(stringVersion, typeData.ext);
 };
 
 /**

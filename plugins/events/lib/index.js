@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Skywriter.
+ * The Original Code is Mozilla Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Kevin Dangoor (kdangoor@mozilla.com)
+ *   Patrick Walton (pwalton@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -36,51 +36,50 @@
  * ***** END LICENSE BLOCK ***** */
 
 define(function(require, exports, module) {
-
-var Promise = require("util/promise").Promise;
-
-exports.Plugin = function(name) {
-    this.name = name;
-    this.initialized = false;
+    
+exports.init = function() {
 };
 
-exports.Plugin.prototype = {
-    initialize: function() {
-        var pr = new Promise();
-        if (this.initialized) {
-            pr.resolve(this);
-            return pr;
+exports.deinit = function() {
+};
+
+exports.Event = function() {
+    var handlers = [];
+    var evt = function() {
+        var args = arguments;
+        handlers.forEach(function(handler) { handler.func.apply(null, args); });
+    };
+
+    /**
+     * Adds a new handler via
+     *  a) evt.add(handlerFunc)
+     *  b) evt.add(reference, handlerFunc)
+     */
+    evt.add = function() {
+        if (arguments.length == 1) {
+            handlers.push({
+                ref: arguments[0],
+                func: arguments[0]
+            });
+        } else {
+            handlers.push({
+                ref: arguments[0],
+                func: arguments[1]
+            });
         }
-        require([this.name], function(pluginModule) {
-            if (pluginModule.init) {
-                pluginModule.init();
-            }
-            this.initialized = true;
-            pr.resolve(this);
-        }.bind(this));
-        return pr;
-    }
+    };
+
+    evt.remove = function(ref) {
+        var notEqual = function(other) { return ref !== other.ref; };
+        handlers = handlers.filter(notEqual);
+    };
+
+    evt.removeAll = function() {
+        handlers = [];
+    };
+
+    return evt;
 };
 
-exports.PluginCatalog = function() {
-    this.plugins = {};
-};
-
-exports.PluginCatalog.prototype = {
-    initializePlugins: function(pluginList) {
-        var initializationPromises = [];
-        pluginList.forEach(function(pluginName) {
-            var plugin = this.plugins[pluginName];
-            if (plugin === undefined) {
-                plugin = new exports.Plugin(pluginName);
-                this.plugins[pluginName] = plugin;
-            }
-            initializationPromises.push(plugin.initialize());
-        }.bind(this));
-        return Promise.group(initializationPromises);
-    }
-};
-
-exports.catalog = new exports.PluginCatalog();
 
 });

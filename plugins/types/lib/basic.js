@@ -38,7 +38,7 @@
 
 define(function(require, exports, module) {
 
-var console = require("util/console");
+var console = require("util/console").console;
     
 /**
  * These are the basic types that we accept. They are vaguely based on the

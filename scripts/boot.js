@@ -35,9 +35,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+
 require.ready(function() {
-    var knownPlugins = ["util", "types"];
-    
+    var knownPlugins = ["util", "events", "types", "settings"];
+
     var pluginPackageInfo = [
         {
             name: "plugins",
@@ -60,6 +61,26 @@ require.ready(function() {
     });
     require(["plugins"], function() {
         var pluginsModule = require("plugins");
-        pluginsModule.catalog.initializePlugins(knownPlugins);
+        pluginsModule.catalog.initializePlugins(knownPlugins).then(function() {
+            var console = require('util/console');
+            console.log('initialized!');
+            
+            // try some stuff out. TODO delete this
+            var newSetting = {
+                name: "allGood",
+                defaultValue: false,
+                type: "boolean"
+            };
+            
+            var settings = require("settings");
+            settings.addSetting(newSetting);
+            settings.settings.set("allGood", true);
+            if (!settings.settings.get("allGood")) {
+                alert("it's not all good :(");
+            } else {
+                console.log("all good!");
+            }
+        });
+        
     });
 });
