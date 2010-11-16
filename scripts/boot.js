@@ -37,7 +37,8 @@
 
 
 require.ready(function() {
-    var knownPlugins = ["util", "events", "types", "settings", "canon"];
+    var knownPlugins = ["util", "rangeutils", "events", "types", "settings", "canon",
+                        "edit_session"];
     
     var pluginPackageInfo = [
         {
