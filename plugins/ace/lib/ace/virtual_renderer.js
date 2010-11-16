@@ -47,7 +47,7 @@ var TextLayer = require("ace/layer/text");
 var CursorLayer = require("ace/layer/cursor");
 var ScrollBar = require("ace/scrollbar");
 var RenderLoop = require("ace/renderloop");
-var MEventEmitter = require("ace/event_emitter");
+var MEventEmitter = require("ace/event_emitter").MEventEmitter;
 var editorCss = require("text!ace/css/editor.css");
 
 // import CSS once

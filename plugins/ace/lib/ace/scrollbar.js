@@ -41,7 +41,7 @@ var oop = require("ace/lib/oop");
 var lang = require("ace/lib/lang");
 var dom = require("ace/lib/dom");
 var event = require("ace/lib/event");
-var MEventEmitter = require("ace/event_emitter");
+var MEventEmitter = require("ace/event_emitter").MEventEmitter;
 
 var ScrollBar = function(parent) {
     this.element = document.createElement("div");

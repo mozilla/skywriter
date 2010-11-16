@@ -46,7 +46,7 @@ var Document = require("ace/document");
 var Search = require("ace/search");
 var BackgroundTokenizer = require("ace/background_tokenizer");
 var Range = require("ace/range");
-var MEventEmitter = require("ace/event_emitter");
+var MEventEmitter = require("ace/event_emitter").MEventEmitter;
 
 var Editor =function(renderer, doc) {
     var container = renderer.getContainerElement();

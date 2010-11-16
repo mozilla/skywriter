@@ -39,7 +39,7 @@ define(function(require, exports, module) {
 
 var oop = require("ace/lib/oop");
 var lang = require("ace/lib/lang");
-var MEventEmitter = require("ace/event_emitter");
+var MEventEmitter = require("ace/event_emitter").MEventEmitter;
 var Range = require("ace/range");
 
 var Selection = function(doc) {

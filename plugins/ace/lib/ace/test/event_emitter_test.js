@@ -8,12 +8,14 @@
 
 require.def([
      "ace/lib/oop",
-     "ace/MEventEmitter"
+     "ace/event_emitter"
  ], function(
      oop,
-     MEventEmitter
+     event_emitter
  ) {
 
+var MEventEmitter = event_emitter.MEventEmitter;
+  
 var EventEmitter = function() {};
 
 oop.implement(EventEmitter.prototype, MEventEmitter);

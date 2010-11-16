@@ -39,7 +39,7 @@ define(function(require, exports, module) {
 
 var oop = require("ace/lib/oop");
 var dom = require("ace/lib/dom");
-var MEventEmitter = require("ace/event_emitter");
+var MEventEmitter = require("ace/event_emitter").MEventEmitter;
 
 var Text = function(parentEl) {
     this.element = document.createElement("div");

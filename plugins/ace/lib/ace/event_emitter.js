@@ -81,5 +81,5 @@ define(function(require, exports, module) {
         }
     };
 
-    return MEventEmitter;
+    exports.MEventEmitter = MEventEmitter;
 });
