@@ -37,9 +37,8 @@
 
 define(function(require, exports, module) {
 
-var settings = require('settings');
-
 exports.startup = function(data, reason) {
+    var settings = data.env.settings;
     // TODO register these using new registration functionality
     
     // catalog.addExtensionPoint("command", {
@@ -64,20 +63,25 @@ exports.startup = function(data, reason) {
 };
 
 exports.shutdown = function(data, reason) {
+    var settings = data.env.settings;
     settings.removeSetting('historyLength');
 };
 
-exports.commands = {};
-
-exports.addCommand = function(options) {
-    if (!options.name) {
-        throw new Error("All registered commands must have a name");
-    }
-    exports.commands[name] = options;
+exports.Canon = function() {
+    this._commands = {};
 };
 
-exports.removeCommand = function(name) {
-    delete exports.commands[name];
+exports.Canon.prototype = {
+    addCommand: function(options) {
+        if (!options.name) {
+            throw new Error("All registered commands must have a name");
+        }
+        this._commands[name] = options;
+    },
+    
+    removeCommand: function(name) {
+        delete this._commands[name];
+    }
 };
 
 });

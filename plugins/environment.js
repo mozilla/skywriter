@@ -93,6 +93,14 @@ exports.Environment = function(predefined) {
             dependencyLoaded();
         });
     }
+    
+    if (!this.canon) {
+        this._waitingForDependencies++;
+        require(['canon'], function(canon) {
+            self.canon = new canon.Canon();
+            dependencyLoaded();
+        });
+    }
 };
 
 Object.defineProperties(exports.Environment.prototype, {
@@ -100,11 +108,13 @@ Object.defineProperties(exports.Environment.prototype, {
      * calls a function when the environment is ready.
      * The function is called immediately if the environment is ready.
      */
-    ready: function(callback) {
-        if (this._waitingForDependencies) {
-            this._readyCallbacks.add(callback);
-        } else {
-            callback();
+    ready: {
+        value: function(callback) {
+            if (this._waitingForDependencies) {
+                this._readyCallbacks.add(callback);
+            } else {
+                callback();
+            }
         }
     },
     
@@ -201,10 +211,5 @@ Object.defineProperties(exports.Environment.prototype, {
         }
     }
 });
-
-/**
- * The global environment used throughout this Skywriter instance.
- */
-exports.env = new exports.Environment({});
 
 });

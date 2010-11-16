@@ -39,7 +39,6 @@ define(function(request, exports, module) {
 
 var console = require('util/console');
 var Trace = require('util/stacktrace').Trace;
-var settings = require('settings');
 var keyutil = require('keyboard/keyutil');
 var history = require('canon/history');
 var Request = require('canon/request').Request;
@@ -56,6 +55,7 @@ exports.removeKeymapping = function(name) {
 };
 
 exports.startup = function(data, reason) {
+    var settings = data.env.settings;
     // TODO register this
     // catalog.addExtensionPoint("keymapping", {
     //     "description": "A keymapping defines how keystrokes are interpreted.",
@@ -77,6 +77,7 @@ exports.startup = function(data, reason) {
 };
 
 exports.shutdown = function(data, reason) {
+    var settings = data.env.settings;
     settings.settingChange.remove(exports.keyboardManager);
 };
 

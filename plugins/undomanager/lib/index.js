@@ -38,9 +38,9 @@
 define(function(require, exports, module) {
     
 var util = require("util/util");
-var canon = require('canon');
 
 exports.startup = function(data, reason) {
+    var canon = data.env.canon;
     canon.addCommand({
         "name": "redo",
         "key": [ "ctrl_shift_z" ],
@@ -54,6 +54,7 @@ exports.startup = function(data, reason) {
 };
 
 exports.shutdown = function(data, reason) {
+    var canon = data.env.canon;
     canon.removeCommand('redo');
     canon.removeCommand('undo');
 };

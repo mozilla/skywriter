@@ -49,7 +49,6 @@ define(function(require, exports, module) {
 });
 "end";
 
-var canon = require('canon');
 var _ = require('underscore')._;
 var Event = require('events').Event;
 var Promise = require('util/promise').Promise;
@@ -57,6 +56,7 @@ var proxy = require('util/proxy');
 var console = require('util/console');
 
 exports.startup = function(data, reason) {
+    var canon = data.env.canon;
     canon.addCommand({
         "name": "worker",
         "description": "Low-level web worker control (for plugin development)"
@@ -69,6 +69,7 @@ exports.startup = function(data, reason) {
 };
 
 exports.shutdown = function(data, reason) {
+    var canon = data.env.canon;
     canon.removeCommand("worker restart");
     canon.removeCommand("worker");
 };
