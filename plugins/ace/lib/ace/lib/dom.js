@@ -137,5 +137,5 @@ var lang = require("ace/lib/lang");
         return noScrollbar-withScrollbar;
     };
 
-    return dom;
+    exports.dom = dom;
 });

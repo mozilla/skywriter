@@ -39,7 +39,7 @@ define(function(require, exports, module) {
 
 var oop = require("ace/lib/oop");
 var lang = require("ace/lib/lang");
-var dom = require("ace/lib/dom");
+var dom = require("ace/lib/dom").dom;
 var event = require("ace/lib/event");
 var GutterLayer = require("ace/layer/gutter").Gutter;
 var MarkerLayer = require("ace/layer/marker").Marker;
