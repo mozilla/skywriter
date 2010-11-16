@@ -35,43 +35,65 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
-require.ready(function() {
-    var knownPlugins = ["util", "rangeutils", "events", "types", "settings", "canon",
-                        "edit_session", "syntax_manager", "undomanager", 
-                        "keyboard"];
-    var knownSingleFilePlugins = ["worker_manager", "syntax_directory", "environment"];
+// TODO: Yuck! A global function
+var setupPlugins = function(config) {
+    config = config || {};
+    if (!config.pluginDirs) {
+        config.pluginDirs = {};
+    }
+    config.pluginDirs["../plugins"] = {
+        packages: ["util", "rangeutils", "events", "types", "settings", "canon",
+                            "edit_session", "syntax_manager", "undomanager", 
+                            "keyboard"],
+        singleFiles: ["worker_manager", "syntax_directory", "environment"]
+    };
+    config.pluginDirs["../thirdparty"] = {
+        singleFiles: ["underscore"]
+    };
     
-    var pluginPackageInfo = [
-        {
-            name: "plugins",
-            main: "index"
-        }
-    ];
+    var knownPlugins = [];
     
-    var thirdpartySingleFile = ["underscore"];
-    
-    // set up RequireJS to know that our plugins all have a main module called "index"
-    knownPlugins.forEach(function(pluginName) {
-        pluginPackageInfo.push({
-            name: pluginName,
-            main: "index"
-        });
-    });
+    var pluginPackageInfo = {
+        "../plugins": [
+            {
+                name: "plugins",
+                main: "index"
+            }
+        ]
+    };
     
     var paths = {};
-    thirdpartySingleFile.forEach(function(pluginName) {
-        paths[pluginName] = "../thirdparty/" + pluginName;
-    });
-    knownSingleFilePlugins.forEach(function(pluginName) {
-        paths[pluginName] = "../plugins/" + pluginName;
-        knownPlugins.push(pluginName);
-    });
+    var i;
+    var location;
+    
+    // set up RequireJS to know that our plugins all have a main module called "index"
+    for (var pluginDir in config.pluginDirs) {
+        var dirInfo = config.pluginDirs[pluginDir];
+        if (dirInfo.packages) {
+            location = pluginPackageInfo[pluginDir];
+            if (location === undefined) {
+                pluginPackageInfo[pluginDir] = location = [];
+            }
+            var packages = dirInfo.packages;
+            for (i = 0; i < packages.length; i++) {
+                location.push({
+                    name: packages[i],
+                    main: "index"
+                });
+                knownPlugins.push(packages[i]);
+            }
+        }
+        if (dirInfo.singleFiles) {
+            for (i = 0; i < dirInfo.singleFiles.length; i++) {
+                var pluginName = dirInfo.singleFiles[i];
+                paths[pluginName] = pluginDir + "/" + pluginName;
+                knownPlugins.push(pluginName);
+            }
+        }
+    }
     
     require({
-        packagePaths: {
-            "../plugins": pluginPackageInfo
-        },
+        packagePaths: pluginPackageInfo,
         paths: paths
     });
     require(["plugins"], function() {
@@ -98,4 +120,4 @@ require.ready(function() {
         });
         
     });
-});
+};
