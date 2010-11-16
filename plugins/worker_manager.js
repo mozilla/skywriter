@@ -56,7 +56,7 @@ var Promise = require('util/promise').Promise;
 var proxy = require('util/proxy');
 var console = require('util/console');
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     canon.addCommand({
         "name": "worker",
         "description": "Low-level web worker control (for plugin development)"
@@ -68,7 +68,7 @@ exports.init = function() {
     });
 };
 
-exports.destroy = function() {
+exports.shutdown = function(data, reason) {
     canon.removeCommand("worker restart");
     canon.removeCommand("worker");
 };

@@ -102,7 +102,7 @@ var console = require("util/console");
 var types = require("types");
 var Event = require("events").Event;
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     // TODO add extension point in new style
     // catalog.addExtensionPoint("setting", {
     //     "description":
@@ -158,7 +158,7 @@ exports.init = function() {
     // });
 };
 
-exports.destroy = function() {
+exports.shutdown = function(data, reason) {
 };
 
 var settings = {};

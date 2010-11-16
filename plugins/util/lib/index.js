@@ -37,7 +37,7 @@
 
 define(function(require, exports, module) {
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     // Narwhal's shim for ES5 defineProperty
     // ES5 15.2.3.6
     if (!Object.defineProperty) {

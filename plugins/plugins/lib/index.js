@@ -39,26 +39,71 @@ define(function(require, exports, module) {
 
 var Promise = require("util/promise").Promise;
 
+exports.REASONS = {
+    APP_STARTUP: 1,
+    APP_SHUTDOWN: 2,
+    PLUGIN_ENABLE: 3,
+    PLUGIN_DISABLE: 4,
+    PLUGIN_INSTALL: 5,
+    PLUGIN_UNINSTALL: 6,
+    PLUGIN_UPGRADE: 7,
+    PLUGIN_DOWNGRADE: 8
+};
+
 exports.Plugin = function(name) {
     this.name = name;
-    this.initialized = false;
+    this.status = this.INSTALLED;
 };
 
 exports.Plugin.prototype = {
-    initialize: function() {
+    /**
+     * constants for the state
+     */
+    NEW: 0,
+    INSTALLED: 1,
+    STARTED: 2,
+    SHUTDOWN: 3,
+    
+    install: function(data, reason) {
         var pr = new Promise();
-        if (this.initialized) {
+        if (this.status > this.NEW) {
             pr.resolve(this);
             return pr;
         }
         require([this.name], function(pluginModule) {
-            if (pluginModule.init) {
-                pluginModule.init();
+            if (pluginModule.install) {
+                pluginModule.install(data, reason);
             }
-            this.initialized = true;
+            this.status = this.INSTALLED;
             pr.resolve(this);
         }.bind(this));
         return pr;
+    },
+    
+    startup: function(data, reason) {
+        var pr = new Promise();
+        if (this.status != this.INSTALLED) {
+            pr.resolve(this);
+            return pr;
+        }
+        require([this.name], function(pluginModule) {
+            if (pluginModule.startup) {
+                pluginModule.startup(data, reason);
+            }
+            this.status = this.STARTED;
+            pr.resolve(this);
+        }.bind(this));
+        return pr;
+    },
+    
+    shutdown: function(data, reason) {
+        if (this.status != this.STARTED) {
+            return;
+        }
+        pluginModule = require(this.name);
+        if (pluginModule.shutdown) {
+            pluginModule.shutdown(data, reason);
+        }
     }
 };
 
@@ -67,20 +112,24 @@ exports.PluginCatalog = function() {
 };
 
 exports.PluginCatalog.prototype = {
-    initializePlugins: function(pluginList) {
-        var initializationPromises = [];
+    registerPlugins: function(pluginList) {
         pluginList.forEach(function(pluginName) {
             var plugin = this.plugins[pluginName];
             if (plugin === undefined) {
                 plugin = new exports.Plugin(pluginName);
                 this.plugins[pluginName] = plugin;
             }
-            initializationPromises.push(plugin.initialize());
         }.bind(this));
-        return Promise.group(initializationPromises);
+    },
+    
+    startupPlugins: function(data, reason) {
+        var startupPromises = [];
+        for (var pluginName in this.plugins) {
+            var plugin = this.plugins[pluginName];
+            startupPromises.push(plugin.startup(data, reason));
+        }
+        return Promise.group(startupPromises);
     }
 };
-
-exports.catalog = new exports.PluginCatalog();
 
 });

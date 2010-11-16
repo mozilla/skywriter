@@ -42,20 +42,12 @@ define(function(require, exports, module) {
     
 var util = require("util/util");
 var console = require('util/console');
-var settingsMod = require('settings');
+var Event = require('events').Event;
+var Promise = require('util/promise').Promise;
 
 "define metadata";
-({ "dependencies": { "settings": "0.0.0" } });
+({});
 "end";
-
-exports.init = function() {
-};
-
-exports.destroy = function() {
-};
-
-
-var settings = settingsMod.settings;
 
 /**
  * The environment plays a similar role to the environment under unix.
@@ -64,56 +56,58 @@ var settings = settingsMod.settings;
  * are changed by the system.
  * <p>The role of the Environment is likely to be expanded over time.
  */
-exports.Environment = function() {
-    // The current command line pushes this value into here
-    this.commandLine = null;
-
+exports.Environment = function(predefined) {
+    this.dimensionsChanged = new Event();
+    this._readyCallbacks = new Event();
+    this._waitingForDependencies = 0;
+    
     // Fire the sizeChanged event when the window is resized.
     window.addEventListener('resize', this.dimensionsChanged.bind(this), false);
+    
+    for (var key in Object.keys(predefined)) {
+        this[key] = predefined[key];
+    }
+    
+    var self = this;
+    
+    var dependencyLoaded = function() {
+        self._waitingForDependencies--;
+        if (self._waitingForDependencies < 1) {
+            self._readyCallbacks();
+            delete self._readyCallbacks;
+        }
+    };
+    
+    if (!this.settings) {
+        this._waitingForDependencies++;
+        require(['settings'], function(settings) {
+            self.settings = settings.settings;
+            dependencyLoaded();
+        });
+    }
+    
+    if (!this.session) {
+        this._waitingForDependencies++;
+        require(['edit_session'], function(edit_session) {
+            self.session = new edit_session.EditSession();
+            dependencyLoaded();
+        });
+    }
 };
 
 Object.defineProperties(exports.Environment.prototype, {
-
     /**
-     * Provides a get() and set() function to set and get settings.
+     * calls a function when the environment is ready.
+     * The function is called immediately if the environment is ready.
      */
-    settings: {
-        value: {
-            set: function(key, value) {
-                if (util.none(key)) {
-                    throw new Error('setSetting(): key must be supplied');
-                }
-                if (util.none(value)) {
-                    throw new Error('setSetting(): value must be supplied');
-                }
-
-                settings.set(key, value);
-            },
-            
-            get: function(key) {
-                if (util.none(key)) {
-                    throw new Error('getSetting(): key must be supplied');
-                }
-                return settings.get(key);
-            }
+    ready: function(callback) {
+        if (this._waitingForDependencies) {
+            this._readyCallbacks.add(callback);
+        } else {
+            callback();
         }
     },
-
-    dimensionsChanged: {
-        value: function() {
-            catalog.publish(this, 'dimensionsChanged');
-        }
-    },
-
-    /**
-     * Retrieves the EditSession
-     */
-    session: {
-        get: function() {
-            return catalog.getObject('session');
-        }
-    },
-
+    
     /**
      * Gets the currentView from the session.
      */
@@ -211,6 +205,6 @@ Object.defineProperties(exports.Environment.prototype, {
 /**
  * The global environment used throughout this Skywriter instance.
  */
-exports.env = new exports.Environment();
+exports.env = new exports.Environment({});
 
 });

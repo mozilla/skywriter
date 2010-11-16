@@ -44,10 +44,10 @@ var syntaxDirectory = require('syntax_directory').syntaxDirectory;
 var rangeutils = require('rangeutils');
 var console = require('util/console');
 
-exports.init = function() {
+exports.startup = function(data, reason) {
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
 };
 
 // The number of lines to highlight at once.

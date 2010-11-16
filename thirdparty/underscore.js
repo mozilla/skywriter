@@ -15,7 +15,7 @@ define(function(require, exports, module) {
 });
 "end";
 
-exports.init = function() {
+exports.startup = function(data, reason) {
 };
 
 (function() {

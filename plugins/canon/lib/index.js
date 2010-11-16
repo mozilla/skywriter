@@ -39,7 +39,7 @@ define(function(require, exports, module) {
 
 var settings = require('settings');
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     // TODO register these using new registration functionality
     
     // catalog.addExtensionPoint("command", {
@@ -63,7 +63,7 @@ exports.init = function() {
     });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     settings.removeSetting('historyLength');
 };
 

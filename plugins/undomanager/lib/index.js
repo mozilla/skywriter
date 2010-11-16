@@ -40,7 +40,7 @@ define(function(require, exports, module) {
 var util = require("util/util");
 var canon = require('canon');
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     canon.addCommand({
         "name": "redo",
         "key": [ "ctrl_shift_z" ],
@@ -53,7 +53,7 @@ exports.init = function() {
     });
 };
 
-exports.deinit = function() {
+exports.shutdown = function(data, reason) {
     canon.removeCommand('redo');
     canon.removeCommand('undo');
 };

@@ -55,7 +55,7 @@ exports.removeKeymapping = function(name) {
     delete exports.keymapping[name];
 };
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     // TODO register this
     // catalog.addExtensionPoint("keymapping", {
     //     "description": "A keymapping defines how keystrokes are interpreted.",
@@ -76,7 +76,7 @@ exports.init = function() {
     });
 };
 
-exports.destroy = function() {
+exports.shutdown = function(data, reason) {
     settings.settingChange.remove(exports.keyboardManager);
 };
 

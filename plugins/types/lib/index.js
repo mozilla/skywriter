@@ -89,7 +89,7 @@ exports.isValid = function(originalVersion, typeSpec) {
     return typeData.type.isValid(originalVersion, typeSpec);
 };
 
-exports.init = function() {
+exports.startup = function(data, reason) {
     // TODO: register this extension point.
     
     // catalog.addExtensionPoint("type", {

@@ -36,7 +36,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 // TODO: Yuck! A global function
-var setupPlugins = function(config) {
+var setupPlugins = function(config, callback) {
     config = config || {};
     if (!config.pluginDirs) {
         config.pluginDirs = {};
@@ -98,26 +98,10 @@ var setupPlugins = function(config) {
     });
     require(["plugins"], function() {
         var pluginsModule = require("plugins");
-        pluginsModule.catalog.initializePlugins(knownPlugins).then(function() {
-            var console = require('util/console');
-            console.log('initialized!');
-            
-            // try some stuff out. TODO delete this
-            var newSetting = {
-                name: "allGood",
-                defaultValue: false,
-                type: "boolean"
-            };
-            
-            var settings = require("settings");
-            settings.addSetting(newSetting);
-            settings.settings.set("allGood", true);
-            if (!settings.settings.get("allGood")) {
-                alert("it's not all good :(");
-            } else {
-                console.log("all good!");
-            }
-        });
-        
+        var catalog = new pluginsModule.PluginCatalog();
+        catalog.registerPlugins(knownPlugins);
+        if (callback) {
+            callback(catalog);
+        }
     });
 };

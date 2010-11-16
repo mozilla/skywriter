@@ -12,7 +12,31 @@
     <script src="scripts/require.js"></script>
     <script src="scripts/boot.js"></script>
     <script>
-      setupPlugins();
+      require.ready(function() {
+        setupPlugins({}, function(catalog) {
+          var pluginsModule = require("plugins");
+          catalog.startupPlugins({}, pluginsModule.REASONS.APP_STARTUP).then(function() {
+              var console = require('util/console');
+              console.log('initialized!');
+
+              // try some stuff out. TODO delete this
+              var newSetting = {
+                  name: "allGood",
+                  defaultValue: false,
+                  type: "boolean"
+              };
+
+              var settings = require("settings");
+              settings.addSetting(newSetting);
+              settings.settings.set("allGood", true);
+              if (!settings.settings.get("allGood")) {
+                  alert("it's not all good :(");
+              } else {
+                  console.log("all good!");
+              }
+          });
+        });
+      });
     </script>
   </body>
 </html>
