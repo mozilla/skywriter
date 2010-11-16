@@ -47,6 +47,8 @@ require.ready(function() {
         }
     ];
     
+    var thirdpartySingleFile = ["underscore"];
+    
     // set up RequireJS to know that our plugins all have a main module called "index"
     knownPlugins.forEach(function(pluginName) {
         pluginPackageInfo.push({
@@ -55,10 +57,16 @@ require.ready(function() {
         });
     });
     
+    var paths = {};
+    thirdpartySingleFile.forEach(function(pluginName) {
+        paths[pluginName] = "../thirdparty/" + pluginName;
+    });
+    
     require({
         packagePaths: {
             "../plugins": pluginPackageInfo
-        }
+        },
+        paths: paths
     });
     require(["plugins"], function() {
         var pluginsModule = require("plugins");

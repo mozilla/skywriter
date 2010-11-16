@@ -43,7 +43,7 @@ exports.init = function() {
 exports.deinit = function() {
 };
 
-var Promise = require('promise').Promise;
+var Promise = require('util/promise').Promise;
 
 var Event = require('events').Event;
 
