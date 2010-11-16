@@ -66,8 +66,29 @@ var setupPlugins = function(config, callback) {
     var i;
     var location;
     
+    // we need to ensure that the core plugin directory is loaded first
+    var pluginDirs = [];
+    var pluginDir;
+    for (pluginDir in config.pluginDirs) {
+        pluginDirs.push(pluginDir);
+    }
+    pluginDirs.sort(function(a, b) {
+        if (a == "../plugins") {
+            return -1;
+        } else if (b == "../plugins") {
+            return 1;
+        } else if (a < b) {
+            return -1;
+        } else if (b < a) { 
+            return 1;
+        } else {
+            return 0;
+        }
+    });
+    
     // set up RequireJS to know that our plugins all have a main module called "index"
-    for (var pluginDir in config.pluginDirs) {
+    for (var dirNum = 0; dirNum < pluginDirs.length; dirNum++) {
+        pluginDir = pluginDirs[dirNum];
         var dirInfo = config.pluginDirs[pluginDir];
         if (dirInfo.packages) {
             location = pluginPackageInfo[pluginDir];
