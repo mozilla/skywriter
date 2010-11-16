@@ -39,8 +39,8 @@ define(function(require, exports, module) {
 
 var core = require("ace/lib/core");
 var event = require("ace/lib/event");
-var default_mac = require("ace/conf/keybindings/default_mac");
-var default_win = require("ace/conf/keybindings/default_win");
+var default_mac = require("ace/conf/keybindings/default_mac").bindings;
+var default_win = require("ace/conf/keybindings/default_win").bindings;
 var PluginManager = require("ace/plugin_manager");
 
 

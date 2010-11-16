@@ -37,8 +37,7 @@
 
 define(function(require, exports, module) {
 
-
-return {
+exports.bindings = {
     "selectall": "Ctrl-A",
     "removeline": "Ctrl-D",
     "gotoline": "Ctrl-L",
