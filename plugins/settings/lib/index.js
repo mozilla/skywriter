@@ -190,7 +190,9 @@ exports.getSetting = function(name) {
 /**
  * Event that tells people when a setting has changed.
  */
-exports.settingChange = new Event();
+exports.settingChange = new Event({
+    keyElement: 0
+});
 
 
 /**

@@ -1,0 +1,4 @@
+{
+    "description": "Keyboard shortcuts",
+    "dependencies": { "settings": "0.0", "canon": "0.0", "environment": "0.0" }
+}

@@ -20,6 +20,7 @@
  *
  * Contributor(s):
  *   Patrick Walton (pwalton@mozilla.com)
+ *   Kevin Dangoor (kdangoor@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -43,30 +44,45 @@ exports.init = function() {
 exports.deinit = function() {
 };
 
-exports.Event = function() {
+exports.Event = function(opts) {
+    opts = opts || {};
+    var keyElement = opts.keyElement;
+    
     var handlers = [];
     var evt = function() {
         var args = arguments;
-        handlers.forEach(function(handler) { handler.func.apply(null, args); });
+        if (keyElement) {
+            keyValue = args[keyElement];
+        }
+        handlers.forEach(function(handler) { 
+            if (keyElement && handler.match) {
+                if (handler.match != keyValue) {
+                    return;
+                }
+            }
+            handler.func.apply(null, args);
+        });
     };
 
     /**
      * Adds a new handler via
      *  a) evt.add(handlerFunc)
-     *  b) evt.add(reference, handlerFunc)
+     *  b) evt.add(handlerObj)
+     * 
+     * handlerObj should have a "func" property on it, which is the function that is called
+     * it can have a "ref" property which is the object that the handler is conceptually
+     * related to
+     * it can also have a "match" property. This is a string that is tested
+     * against the key value of the event, if there is one.
      */
-    evt.add = function() {
-        if (arguments.length == 1) {
-            handlers.push({
-                ref: arguments[0],
-                func: arguments[0]
-            });
-        } else {
-            handlers.push({
-                ref: arguments[0],
-                func: arguments[1]
-            });
+    evt.add = function(handler) {
+        if (typeof(handler) == "function") {
+            handler = {
+                ref: handler,
+                func: handler
+            };
         }
+        handlers.push(handler);
     };
 
     evt.remove = function(ref) {

@@ -38,7 +38,7 @@
 define(function(require, exports, module) {
     
 var console = require('util/console');
-var Trace = require('stacktrace').Trace;
+var Trace = require('util/stacktrace').Trace;
 var Event = require('events').Event;
 
 exports.addedRequestOutput = new Event();
