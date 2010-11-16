@@ -64,7 +64,7 @@ exports.init = function() {
     canon.addCommand({
         "name": "worker restart",
         "description": "Restarts all web workers (for plugin development)",
-        "pointer": "#workerRestartCommand"
+        "execute": exports.workerRestartCommand
     });
 };
 
