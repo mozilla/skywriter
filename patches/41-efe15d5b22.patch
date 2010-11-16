@@ -1,0 +1,46 @@
+commit efe15d5b22a221253ab767c227c55c7b6fa3183a
+Author: Joe Walker <jwalker@mozilla.com>
+Date:   Wed Nov 10 14:21:49 2010 +0000
+
+    convert core to commonjs export format
+
+diff --git a/plugins/ace/lib/ace/keybinding.js b/plugins/ace/lib/ace/keybinding.js
+index ebedb22..0ad6c79 100644
+--- a/plugins/ace/lib/ace/keybinding.js
++++ b/plugins/ace/lib/ace/keybinding.js
+@@ -37,7 +37,7 @@
+ 
+ define(function(require, exports, module) {
+ 
+-var core = require("ace/lib/core");
++var core = require("ace/lib/core").core;
+ var event = require("ace/lib/event");
+ var default_mac = require("ace/conf/keybindings/default_mac").bindings;
+ var default_win = require("ace/conf/keybindings/default_win").bindings;
+diff --git a/plugins/ace/lib/ace/lib/core.js b/plugins/ace/lib/ace/lib/core.js
+index 295be08..29aacf9 100644
+--- a/plugins/ace/lib/ace/lib/core.js
++++ b/plugins/ace/lib/ace/lib/core.js
+@@ -58,6 +58,6 @@ define(function(require, exports, module) {
+         }
+     };
+ 
+-    return core;
++    exports.core = core;
+ 
+-});
+\ No newline at end of file
++});
+diff --git a/plugins/ace/lib/ace/lib/event.js b/plugins/ace/lib/ace/lib/event.js
+index acc083c..8588ece 100644
+--- a/plugins/ace/lib/ace/lib/event.js
++++ b/plugins/ace/lib/ace/lib/event.js
+@@ -38,7 +38,7 @@
+ define(function(require, exports, module) {
+ 
+ 
+-var core = require("ace/lib/core");
++var core = require("ace/lib/core").core;
+     var event = {};
+ 
+     event.addListener = function(elem, type, callback) {

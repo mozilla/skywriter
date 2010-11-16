@@ -1,0 +1,19 @@
+commit fa52fb1be744ce3f0ee3cea5ff82cf5d89817a7c
+Author: Joe Walker <jwalker@mozilla.com>
+Date:   Tue Nov 9 13:58:03 2010 +0000
+
+    Trivial commit in an attempt to unblock a possible server error:
+    $ git clone https://github.com/mozilla/cloud9-skywriter-shared shared
+    Cloning into shared...
+    fatal: https://github.com/mozilla/cloud9-skywriter-shared/info/refs not found: did you run git update-server-info on the server?
+    Maybe the server got confused? https://git.wiki.kernel.org/index.php/GitFaq#My_HTTP_repository_has_updates.2C_which_git_clone_misses._What_happened.3F
+
+diff --git a/README.md b/README.md
+index 7b2fd84..fe5e0ad 100644
+--- a/README.md
++++ b/README.md
+@@ -15,3 +15,4 @@ Mozilla Public License (MPL), the GNU General Public License (GPL) or the
+ GNU Lesser General Public License (LGPL).
+ 
+ Please see LICENSE.txt for a copy of the MPL.
++

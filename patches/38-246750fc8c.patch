@@ -1,0 +1,25 @@
+commit 246750fc8ce17203076bcb74f11591714a56da84
+Author: Joe Walker <jwalker@mozilla.com>
+Date:   Wed Nov 10 13:42:28 2010 +0000
+
+    addition of .gitignore
+
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..6228425
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,13 @@
++
++# Junk that could exist anywhere:
++.DS_Store
++*.swp
++*.tmp
++
++# A handy place to put stuff that git should ignore:
++/ignore/
++
++# Editor junk
++/.project
++/.settings/
++

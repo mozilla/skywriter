@@ -1,0 +1,41 @@
+commit 44bdb1ad4d5a17a28076889ec10de5daf83d2a26
+Author: Kevin Dangoor <kid@blazingthings.com>
+Date:   Thu Nov 4 15:29:48 2010 -0400
+
+    ensure that base plugins are loaded first
+
+diff --git a/scripts/boot.js b/scripts/boot.js
+index 39f2956..6879036 100644
+--- a/scripts/boot.js
++++ b/scripts/boot.js
+@@ -66,8 +66,29 @@ var setupPlugins = function(config, callback) {
+     var i;
+     var location;
+     
++    // we need to ensure that the core plugin directory is loaded first
++    var pluginDirs = [];
++    var pluginDir;
++    for (pluginDir in config.pluginDirs) {
++        pluginDirs.push(pluginDir);
++    }
++    pluginDirs.sort(function(a, b) {
++        if (a == "../plugins") {
++            return -1;
++        } else if (b == "../plugins") {
++            return 1;
++        } else if (a < b) {
++            return -1;
++        } else if (b < a) { 
++            return 1;
++        } else {
++            return 0;
++        }
++    });
++    
+     // set up RequireJS to know that our plugins all have a main module called "index"
+-    for (var pluginDir in config.pluginDirs) {
++    for (var dirNum = 0; dirNum < pluginDirs.length; dirNum++) {
++        pluginDir = pluginDirs[dirNum];
+         var dirInfo = config.pluginDirs[pluginDir];
+         if (dirInfo.packages) {
+             location = pluginPackageInfo[pluginDir];

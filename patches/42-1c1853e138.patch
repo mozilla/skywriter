@@ -1,0 +1,220 @@
+commit 1c1853e1384a28421afc8d3ab1740b11ed9f7087
+Author: Joe Walker <jwalker@mozilla.com>
+Date:   Wed Nov 10 14:27:40 2010 +0000
+
+    convert dom to commonjs export format
+
+diff --git a/plugins/ace/lib/ace/layer/cursor.js b/plugins/ace/lib/ace/layer/cursor.js
+index 977ed49..63df911 100644
+--- a/plugins/ace/lib/ace/layer/cursor.js
++++ b/plugins/ace/lib/ace/layer/cursor.js
+@@ -37,7 +37,7 @@
+ 
+ define(function(require, exports, module) {
+ 
+-var dom = require("ace/lib/dom");
++var dom = require("ace/lib/dom").dom;
+ 
+ var Cursor = function(parentEl) {
+     this.element = document.createElement("div");
+diff --git a/plugins/ace/lib/ace/layer/text.js b/plugins/ace/lib/ace/layer/text.js
+index 149fac5..2c879a8 100644
+--- a/plugins/ace/lib/ace/layer/text.js
++++ b/plugins/ace/lib/ace/layer/text.js
+@@ -38,7 +38,7 @@
+ define(function(require, exports, module) {
+ 
+ var oop = require("ace/lib/oop");
+-var dom = require("ace/lib/dom");
++var dom = require("ace/lib/dom").dom;
+ var MEventEmitter = require("ace/event_emitter").MEventEmitter;
+ 
+ var Text = function(parentEl) {
+diff --git a/plugins/ace/lib/ace/lib/dom.js b/plugins/ace/lib/ace/lib/dom.js
+index bbbe5c5..08c5501 100644
+--- a/plugins/ace/lib/ace/lib/dom.js
++++ b/plugins/ace/lib/ace/lib/dom.js
+@@ -137,5 +137,5 @@ var lang = require("ace/lib/lang");
+         return noScrollbar-withScrollbar;
+     };
+ 
+-    return dom;
+-});
+\ No newline at end of file
++    exports.dom = dom;
++});
+diff --git a/plugins/ace/lib/ace/scrollbar.js b/plugins/ace/lib/ace/scrollbar.js
+index c9d2544..2df7654 100644
+--- a/plugins/ace/lib/ace/scrollbar.js
++++ b/plugins/ace/lib/ace/scrollbar.js
+@@ -39,7 +39,7 @@ define(function(require, exports, module) {
+ 
+ var oop = require("ace/lib/oop");
+ var lang = require("ace/lib/lang");
+-var dom = require("ace/lib/dom");
++var dom = require("ace/lib/dom").dom;
+ var event = require("ace/lib/event");
+ var MEventEmitter = require("ace/event_emitter").MEventEmitter;
+ 
+diff --git a/plugins/ace/lib/ace/theme/clouds.js b/plugins/ace/lib/ace/theme/clouds.js
+index 2b8436e..6e69866 100644
+--- a/plugins/ace/lib/ace/theme/clouds.js
++++ b/plugins/ace/lib/ace/theme/clouds.js
+@@ -1,6 +1,6 @@
+ define(function(require, exports, module) {
+ 
+-var dom = require("ace/lib/dom");
++var dom = require("ace/lib/dom").dom;
+ 
+     var cssText = ".ace-clouds .ace_editor {\
+   border: 2px solid rgb(159, 159, 159);\
+diff --git a/plugins/ace/lib/ace/theme/clouds_mignight.js b/plugins/ace/lib/ace/theme/clouds_mignight.js
+index b42978c..f93dd90 100644
+--- a/plugins/ace/lib/ace/theme/clouds_mignight.js
++++ b/plugins/ace/lib/ace/theme/clouds_mignight.js
+@@ -1,6 +1,6 @@
+ define(function(require, exports, module) {
+ 
+-var dom = require("ace/lib/dom");
++var dom = require("ace/lib/dom").dom;
+ 
+     var cssText = ".ace-clouds-midnight .ace_editor {\
+   border: 2px solid rgb(159, 159, 159);\
+diff --git a/plugins/ace/lib/ace/theme/cobalt.js b/plugins/ace/lib/ace/theme/cobalt.js
+index 433214b..ea19fe7 100644
+--- a/plugins/ace/lib/ace/theme/cobalt.js
++++ b/plugins/ace/lib/ace/theme/cobalt.js
+@@ -1,6 +1,6 @@
+ define(function(require, exports, module) {
+ 
+-var dom = require("ace/lib/dom");
++var dom = require("ace/lib/dom").dom;
+ 
+ 
+     var cssText = ".ace-cobalt .ace_editor {\
+diff --git a/plugins/ace/lib/ace/theme/dawn.js b/plugins/ace/lib/ace/theme/dawn.js
+index ed6d33f..11a77f0 100644
+--- a/plugins/ace/lib/ace/theme/dawn.js
++++ b/plugins/ace/lib/ace/theme/dawn.js
+@@ -1,6 +1,6 @@
+ define(function(require, exports, module) {
+ 
+-var dom = require("ace/lib/dom");
++var dom = require("ace/lib/dom").dom;
+ 
+     var cssText = ".ace-dawn .ace_editor {\
+   border: 2px solid rgb(159, 159, 159);\
+diff --git a/plugins/ace/lib/ace/theme/eclipse.js b/plugins/ace/lib/ace/theme/eclipse.js
+index 4bc7b13..1b2a401 100644
+--- a/plugins/ace/lib/ace/theme/eclipse.js
++++ b/plugins/ace/lib/ace/theme/eclipse.js
+@@ -1,6 +1,6 @@
+ define(function(require, exports, module) {
+ 
+-var dom = require("ace/lib/dom");
++var dom = require("ace/lib/dom").dom;
+ var cssText = require("text!ace/theme/eclipse.css");
+         
+     // import CSS once
+diff --git a/plugins/ace/lib/ace/theme/idle_fingers.js b/plugins/ace/lib/ace/theme/idle_fingers.js
+index f922c9f..675355e 100644
+--- a/plugins/ace/lib/ace/theme/idle_fingers.js
++++ b/plugins/ace/lib/ace/theme/idle_fingers.js
+@@ -1,6 +1,6 @@
+ define(function(require, exports, module) {
+ 
+-var dom = require("ace/lib/dom");
++var dom = require("ace/lib/dom").dom;
+ 
+ 
+     var cssText = ".ace-idle-fingers .ace_editor {\
+diff --git a/plugins/ace/lib/ace/theme/kr_theme.js b/plugins/ace/lib/ace/theme/kr_theme.js
+index 684fd02..0ad8958 100644
+--- a/plugins/ace/lib/ace/theme/kr_theme.js
++++ b/plugins/ace/lib/ace/theme/kr_theme.js
+@@ -1,6 +1,6 @@
+ define(function(require, exports, module) {
+ 
+-var dom = require("ace/lib/dom");
++var dom = require("ace/lib/dom").dom;
+ 
+ 
+     var cssText = ".ace-kr-theme .ace_editor {\
+diff --git a/plugins/ace/lib/ace/theme/mono_industrial.js b/plugins/ace/lib/ace/theme/mono_industrial.js
+index 1463ec4..7f29892 100644
+--- a/plugins/ace/lib/ace/theme/mono_industrial.js
++++ b/plugins/ace/lib/ace/theme/mono_industrial.js
+@@ -1,6 +1,6 @@
+ define(function(require, exports, module) {
+ 
+-var dom = require("ace/lib/dom");
++var dom = require("ace/lib/dom").dom;
+ 
+ 
+     var cssText = ".ace-mono-industrial .ace_editor {\
+diff --git a/plugins/ace/lib/ace/theme/monokai.js b/plugins/ace/lib/ace/theme/monokai.js
+index e712201..8a0e96d 100644
+--- a/plugins/ace/lib/ace/theme/monokai.js
++++ b/plugins/ace/lib/ace/theme/monokai.js
+@@ -1,6 +1,6 @@
+ define(function(require, exports, module) {
+ 
+-var dom = require("ace/lib/dom");
++var dom = require("ace/lib/dom").dom;
+ 
+ 
+     var cssText = ".ace-monokai .ace_editor {\
+diff --git a/plugins/ace/lib/ace/theme/textmate.js b/plugins/ace/lib/ace/theme/textmate.js
+index 80599f1..a435da1 100644
+--- a/plugins/ace/lib/ace/theme/textmate.js
++++ b/plugins/ace/lib/ace/theme/textmate.js
+@@ -1,6 +1,6 @@
+ define(function(require, exports, module) {
+ 
+-var dom = require("ace/lib/dom");
++var dom = require("ace/lib/dom").dom;
+ var cssText = require("text!ace/theme/tm.css");
+ 
+     // import CSS once
+diff --git a/plugins/ace/lib/ace/theme/twilight.js b/plugins/ace/lib/ace/theme/twilight.js
+index 42b636e..8676f82 100644
+--- a/plugins/ace/lib/ace/theme/twilight.js
++++ b/plugins/ace/lib/ace/theme/twilight.js
+@@ -1,6 +1,6 @@
+ define(function(require, exports, module) {
+ 
+-var dom = require("ace/lib/dom");
++var dom = require("ace/lib/dom").dom;
+ 
+     var cssText = ".ace-twilight .ace_editor {\
+   border: 2px solid rgb(159, 159, 159);\
+diff --git a/plugins/ace/lib/ace/virtual_renderer.js b/plugins/ace/lib/ace/virtual_renderer.js
+index e8facea..8820d1e 100644
+--- a/plugins/ace/lib/ace/virtual_renderer.js
++++ b/plugins/ace/lib/ace/virtual_renderer.js
+@@ -39,7 +39,7 @@ define(function(require, exports, module) {
+ 
+ var oop = require("ace/lib/oop");
+ var lang = require("ace/lib/lang");
+-var dom = require("ace/lib/dom");
++var dom = require("ace/lib/dom").dom;
+ var event = require("ace/lib/event");
+ var GutterLayer = require("ace/layer/gutter").Gutter;
+ var MarkerLayer = require("ace/layer/marker").Marker;
+diff --git a/plugins/ace/tool/theme.tmpl.js b/plugins/ace/tool/theme.tmpl.js
+index 90cdf6e..2dc66b8 100644
+--- a/plugins/ace/tool/theme.tmpl.js
++++ b/plugins/ace/tool/theme.tmpl.js
+@@ -1,10 +1,10 @@
+ require.def("ace/theme/%name%",
+-    ["ace/lib/dom"], function(dom) {
++    ["ace/lib/dom"], function(domMod) {
+ 
+     var cssText = %css%;
+     
+     // import CSS once
+-    dom.importCssString(cssText);
++    domMod.dom.importCssString(cssText);
+     
+     return {
+         cssClass: "%cssClass%"

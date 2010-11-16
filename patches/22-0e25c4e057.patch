@@ -1,0 +1,292 @@
+commit 0e25c4e0574ec656abc7e55c4fe5aeb04fb475e9
+Author: Kevin Dangoor <kid@blazingthings.com>
+Date:   Thu Oct 28 14:19:09 2010 -0400
+
+    adds undomanager. also fixes up commands in worker_manager.
+
+diff --git a/plugins/undomanager/lib/index.js b/plugins/undomanager/lib/index.js
+new file mode 100644
+index 0000000..ad07b71
+--- /dev/null
++++ b/plugins/undomanager/lib/index.js
+@@ -0,0 +1,129 @@
++/* ***** BEGIN LICENSE BLOCK *****
++ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
++ *
++ * The contents of this file are subject to the Mozilla Public License Version
++ * 1.1 (the "License"); you may not use this file except in compliance with
++ * the License. You may obtain a copy of the License at
++ * http://www.mozilla.org/MPL/
++ *
++ * Software distributed under the License is distributed on an "AS IS" basis,
++ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
++ * for the specific language governing rights and limitations under the
++ * License.
++ *
++ * The Original Code is Mozilla Skywriter.
++ *
++ * The Initial Developer of the Original Code is
++ * Mozilla.
++ * Portions created by the Initial Developer are Copyright (C) 2009
++ * the Initial Developer. All Rights Reserved.
++ *
++ * Contributor(s):
++ *   Patrick Walton (pwalton@mozilla.com)
++ *
++ * Alternatively, the contents of this file may be used under the terms of
++ * either the GNU General Public License Version 2 or later (the "GPL"), or
++ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
++ * in which case the provisions of the GPL or the LGPL are applicable instead
++ * of those above. If you wish to allow use of your version of this file only
++ * under the terms of either the GPL or the LGPL, and not to allow others to
++ * use your version of this file under the terms of the MPL, indicate your
++ * decision by deleting the provisions above and replace them with the notice
++ * and other provisions required by the GPL or the LGPL. If you do not delete
++ * the provisions above, a recipient may use your version of this file under
++ * the terms of any one of the MPL, the GPL or the LGPL.
++ *
++ * ***** END LICENSE BLOCK ***** */
++
++define(function(require, exports, module) {
++    
++var util = require("util/util");
++var canon = require('canon');
++
++exports.init = function() {
++    canon.addCommand({
++        "name": "redo",
++        "key": [ "ctrl_shift_z" ],
++        execute: exports.undoManagerCommand
++    });
++    canon.addCommand({ 
++        "name": "undo", 
++        "key": [ "ctrl_z" ], 
++        "execute": exports.undoManagerCommand
++    });
++};
++
++exports.deinit = function() {
++    canon.removeCommand('redo');
++    canon.removeCommand('undo');
++};
++
++
++/**
++ * This simple undo manager coordinates undo for the app that embeds Skywriter.
++ * It's similar to SproutCore's UndoManager class, but it separates undo and
++ * redo and correctly flushes the redo stack when an action is performed.
++ */
++exports.UndoManager = function() {};
++
++util.mixin(exports.UndoManager.prototype, {
++    _redoStack: [],
++    _undoStack: [],
++
++    _undoOrRedo: function(method, stack, otherStack) {
++        if (stack.length === 0) {
++            return false;
++        }
++
++        var record = stack.pop();
++        if (!record.target[method](record.context)) {
++            this._redoStack = [];
++            this._undoStack = [];
++            return false;
++        }
++
++        otherStack.push(record);
++        return true;
++    },
++
++    /**
++     * Redo the last undone action.
++     * @return{boolean} True if the action was successfully redone, false
++     *     otherwise.
++     */
++    redo: function() {
++        return this._undoOrRedo('redo', this._redoStack, this._undoStack);
++    },
++
++    /**
++     * Notifies the undo manager that an action was performed. When the action
++     * is to be undone, the 'undo' message will be sent to the target with the
++     * given context. When the action is to be redone, the 'redo' message is
++     * sent in the same way.
++     */
++    registerUndo: function(target, context) {
++        this._redoStack = [];
++        this._undoStack.push({ target: target, context: context });
++    },
++
++    /**
++     * Undoes the last action.
++     *
++     * @return{boolean} True if the action was successfully undone, false
++     *     otherwise.
++     */
++    undo: function() {
++        return this._undoOrRedo('undo', this._undoStack, this._redoStack);
++    }
++});
++
++exports.global = new exports.UndoManager();
++
++/**
++ *
++ */
++exports.undoManagerCommand = function(args, request) {
++    exports.global[request.commandExt.name]();
++};
++
++});
+diff --git a/plugins/undomanager/package.json b/plugins/undomanager/package.json
+new file mode 100644
+index 0000000..51da84f
+--- /dev/null
++++ b/plugins/undomanager/package.json
+@@ -0,0 +1 @@
++{ "description": "Manages undoable events" }
+\ No newline at end of file
+diff --git a/plugins/undomanager/tests/testUndomanager.js b/plugins/undomanager/tests/testUndomanager.js
+new file mode 100644
+index 0000000..a0e320c
+--- /dev/null
++++ b/plugins/undomanager/tests/testUndomanager.js
+@@ -0,0 +1,111 @@
++require.def(['require', 'exports', 'module',
++    'undomanager/tests/index',
++    'undomanager/tests/plugindev'
++], function(require, exports, module,
++    index,
++    t
++) {
++
++/* ***** BEGIN LICENSE BLOCK *****
++ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
++ *
++ * The contents of this file are subject to the Mozilla Public License Version
++ * 1.1 (the "License"); you may not use this file except in compliance with
++ * the License. You may obtain a copy of the License at
++ * http://www.mozilla.org/MPL/
++ *
++ * Software distributed under the License is distributed on an "AS IS" basis,
++ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
++ * for the specific language governing rights and limitations under the
++ * License.
++ *
++ * The Original Code is Skywriter.
++ *
++ * The Initial Developer of the Original Code is
++ * Mozilla.
++ * Portions created by the Initial Developer are Copyright (C) 2009
++ * the Initial Developer. All Rights Reserved.
++ *
++ * Contributor(s):
++ *   Skywriter Team (skywriter@mozilla.com)
++ *
++ * Alternatively, the contents of this file may be used under the terms of
++ * either the GNU General Public License Version 2 or later (the "GPL"), or
++ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
++ * in which case the provisions of the GPL or the LGPL are applicable instead
++ * of those above. If you wish to allow use of your version of this file only
++ * under the terms of either the GPL or the LGPL, and not to allow others to
++ * use your version of this file under the terms of the MPL, indicate your
++ * decision by deleting the provisions above and replace them with the notice
++ * and other provisions required by the GPL or the LGPL. If you do not delete
++ * the provisions above, a recipient may use your version of this file under
++ * the terms of any one of the MPL, the GPL or the LGPL.
++ *
++ * ***** END LICENSE BLOCK ***** */
++
++var UndoManager = index.UndoManager;
++
++
++exports.testUndoAndRedo = function() {
++    var undoManager = new UndoManager();
++
++    var redoReceived = null;
++    var undoReceived = null;
++
++    var receiver = {
++        redo: function(context) {
++            redoReceived = context;
++            return true;
++        },
++
++        undo: function(context) {
++            undoReceived = context;
++            return true;
++        }
++    };
++
++    undoManager.registerUndo(receiver, 'foo');
++    t.equal(undoManager._undoStack.length, 1, 'the size of the undo stack ' +
++        'after one action and 1');
++    t.equal(undoManager._redoStack.length, 0, 'the size of the redo stack ' +
++        'after one action and 0');
++
++    undoManager.registerUndo(receiver, 'bar');
++    t.equal(undoManager._undoStack.length, 2, 'the size of the undo stack ' +
++        'after two actions and 2');
++    t.equal(undoManager._redoStack.length, 0, 'the size of the redo stack ' +
++        'after two actions and 0');
++
++    undoManager.undo();
++    t.equal(undoReceived, 'bar', 'the context received after undoing \'bar\' ' +
++        'and \'bar\'');
++    t.equal(undoManager._undoStack.length, 1, 'the size of the undo stack ' +
++        'after two actions and one undo and 1');
++    t.equal(undoManager._redoStack.length, 1, 'the size of the redo stack ' +
++        'after two actions and one undo and 1');
++
++    undoManager.undo();
++    t.equal(undoReceived, 'foo', 'the context received after undoing \'foo\' ' +
++        'and \'foo\'');
++    t.equal(undoManager._undoStack.length, 0, 'the size of the undo stack ' +
++        'after undoing two actions and 0');
++    t.equal(undoManager._redoStack.length, 2, 'the size of the redo stack ' +
++        'after undoing two actions and 2');
++
++    undoManager.redo();
++    t.equal(redoReceived, 'foo', 'the context received after redoing \'foo\' ' +
++        'and \'foo\'');
++    t.equal(undoManager._undoStack.length, 1, 'the size of the undo stack ' +
++        'after redoing \'foo\' and 1');
++    t.equal(undoManager._redoStack.length, 1, 'the size of the redo stack ' +
++        'after redoing \'foo\' and 1');
++
++    undoManager.registerUndo(receiver, 'baz');
++    t.equal(undoManager._undoStack.length, 2, 'the size of the undo stack ' +
++        'after undoing twice, redoing once, and performing an action; and 2');
++    t.equal(undoManager._redoStack.length, 0, 'the size of the redo stack ' +
++        'after undoing twice, redoing once, and performing an action; and 0');
++};
++
++
++});
+diff --git a/plugins/worker_manager.js b/plugins/worker_manager.js
+index 2ce209f..b8bef70 100644
+--- a/plugins/worker_manager.js
++++ b/plugins/worker_manager.js
+@@ -64,7 +64,7 @@ exports.init = function() {
+     canon.addCommand({
+         "name": "worker restart",
+         "description": "Restarts all web workers (for plugin development)",
+-        "pointer": "#workerRestartCommand"
++        "execute": exports.workerRestartCommand
+     });
+ };
+ 
+diff --git a/scripts/boot.js b/scripts/boot.js
+index 205ea02..802782c 100644
+--- a/scripts/boot.js
++++ b/scripts/boot.js
+@@ -38,7 +38,7 @@
+ 
+ require.ready(function() {
+     var knownPlugins = ["util", "rangeutils", "events", "types", "settings", "canon",
+-                        "edit_session", "syntax_manager"];
++                        "edit_session", "syntax_manager", "undo_manager"];
+     var knownSingleFilePlugins = ["worker_manager", "syntax_directory"];
+     
+     var pluginPackageInfo = [

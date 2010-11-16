@@ -1,0 +1,129 @@
+commit a5d156cb35bfe3825e38f3eae02caaddeb8875aa
+Author: Joe Walker <jwalker@mozilla.com>
+Date:   Wed Nov 10 13:37:09 2010 +0000
+
+    convert MEventEmitter to use commonjs style
+
+diff --git a/plugins/ace/lib/ace/background_tokenizer.js b/plugins/ace/lib/ace/background_tokenizer.js
+index 35f73f9..610ac70 100644
+--- a/plugins/ace/lib/ace/background_tokenizer.js
++++ b/plugins/ace/lib/ace/background_tokenizer.js
+@@ -38,7 +38,7 @@
+ define(function(require, exports, module) {
+ 
+ var oop = require("ace/lib/oop");
+-var MEventEmitter = require("ace/event_emitter");
++var MEventEmitter = require("ace/event_emitter").MEventEmitter;
+ 
+ var BackgroundTokenizer = function(tokenizer, editor) {
+     this.running = false;
+diff --git a/plugins/ace/lib/ace/document.js b/plugins/ace/lib/ace/document.js
+index 4e6e21a..0ae2098 100644
+--- a/plugins/ace/lib/ace/document.js
++++ b/plugins/ace/lib/ace/document.js
+@@ -39,7 +39,7 @@ define(function(require, exports, module) {
+ 
+ var oop = require("ace/lib/oop");
+ var lang = require("ace/lib/lang");
+-var MEventEmitter = require("ace/event_emitter");
++var MEventEmitter = require("ace/event_emitter").MEventEmitter;
+ var Selection = require("ace/selection");
+ var TextMode = require("ace/mode/text");
+ var Range = require("ace/range");
+diff --git a/plugins/ace/lib/ace/editor.js b/plugins/ace/lib/ace/editor.js
+index fb8993c..8c3ba4e 100644
+--- a/plugins/ace/lib/ace/editor.js
++++ b/plugins/ace/lib/ace/editor.js
+@@ -46,7 +46,7 @@ var Document = require("ace/document");
+ var Search = require("ace/search");
+ var BackgroundTokenizer = require("ace/background_tokenizer");
+ var Range = require("ace/range");
+-var MEventEmitter = require("ace/event_emitter");
++var MEventEmitter = require("ace/event_emitter").MEventEmitter;
+ 
+ var Editor =function(renderer, doc) {
+     var container = renderer.getContainerElement();
+diff --git a/plugins/ace/lib/ace/event_emitter.js b/plugins/ace/lib/ace/event_emitter.js
+index 29b0b17..c08fb80 100644
+--- a/plugins/ace/lib/ace/event_emitter.js
++++ b/plugins/ace/lib/ace/event_emitter.js
+@@ -81,5 +81,5 @@ define(function(require, exports, module) {
+         }
+     };
+ 
+-    return MEventEmitter;
++    exports.MEventEmitter = MEventEmitter;
+ });
+diff --git a/plugins/ace/lib/ace/layer/text.js b/plugins/ace/lib/ace/layer/text.js
+index eb632a6..57723b5 100644
+--- a/plugins/ace/lib/ace/layer/text.js
++++ b/plugins/ace/lib/ace/layer/text.js
+@@ -39,7 +39,7 @@ define(function(require, exports, module) {
+ 
+ var oop = require("ace/lib/oop");
+ var dom = require("ace/lib/dom");
+-var MEventEmitter = require("ace/event_emitter");
++var MEventEmitter = require("ace/event_emitter").MEventEmitter;
+ 
+ var Text = function(parentEl) {
+     this.element = document.createElement("div");
+diff --git a/plugins/ace/lib/ace/scrollbar.js b/plugins/ace/lib/ace/scrollbar.js
+index ba7acd0..c9d2544 100644
+--- a/plugins/ace/lib/ace/scrollbar.js
++++ b/plugins/ace/lib/ace/scrollbar.js
+@@ -41,7 +41,7 @@ var oop = require("ace/lib/oop");
+ var lang = require("ace/lib/lang");
+ var dom = require("ace/lib/dom");
+ var event = require("ace/lib/event");
+-var MEventEmitter = require("ace/event_emitter");
++var MEventEmitter = require("ace/event_emitter").MEventEmitter;
+ 
+ var ScrollBar = function(parent) {
+     this.element = document.createElement("div");
+diff --git a/plugins/ace/lib/ace/selection.js b/plugins/ace/lib/ace/selection.js
+index 8a7f9c1..fbe57b5 100644
+--- a/plugins/ace/lib/ace/selection.js
++++ b/plugins/ace/lib/ace/selection.js
+@@ -39,7 +39,7 @@ define(function(require, exports, module) {
+ 
+ var oop = require("ace/lib/oop");
+ var lang = require("ace/lib/lang");
+-var MEventEmitter = require("ace/event_emitter");
++var MEventEmitter = require("ace/event_emitter").MEventEmitter;
+ var Range = require("ace/range");
+ 
+ var Selection = function(doc) {
+diff --git a/plugins/ace/lib/ace/test/event_emitter_test.js b/plugins/ace/lib/ace/test/event_emitter_test.js
+index 22c6e9f..80c6576 100644
+--- a/plugins/ace/lib/ace/test/event_emitter_test.js
++++ b/plugins/ace/lib/ace/test/event_emitter_test.js
+@@ -8,12 +8,14 @@
+ 
+ require.def([
+      "ace/lib/oop",
+-     "ace/MEventEmitter"
++     "ace/event_emitter"
+  ], function(
+      oop,
+-     MEventEmitter
++     event_emitter
+  ) {
+ 
++var MEventEmitter = event_emitter.MEventEmitter;
++  
+ var EventEmitter = function() {};
+ 
+ oop.implement(EventEmitter.prototype, MEventEmitter);
+diff --git a/plugins/ace/lib/ace/virtual_renderer.js b/plugins/ace/lib/ace/virtual_renderer.js
+index 8f3544a..75a7a5e 100644
+--- a/plugins/ace/lib/ace/virtual_renderer.js
++++ b/plugins/ace/lib/ace/virtual_renderer.js
+@@ -47,7 +47,7 @@ var TextLayer = require("ace/layer/text");
+ var CursorLayer = require("ace/layer/cursor");
+ var ScrollBar = require("ace/scrollbar");
+ var RenderLoop = require("ace/renderloop");
+-var MEventEmitter = require("ace/event_emitter");
++var MEventEmitter = require("ace/event_emitter").MEventEmitter;
+ var editorCss = require("text!ace/css/editor.css");
+ 
+ // import CSS once

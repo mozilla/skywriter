@@ -1,0 +1,29 @@
+commit 63434309286ecaccd6184a1af8c35f235a8bc630
+Author: Joe Walker <jwalker@mozilla.com>
+Date:   Wed Nov 10 12:57:21 2010 +0000
+
+    Undoing a s/charAt/chAt/g
+    Not sure how that happened.
+
+diff --git a/plugins/ace/lib/ace/document.js b/plugins/ace/lib/ace/document.js
+index e08b05d..4e6e21a 100644
+--- a/plugins/ace/lib/ace/document.js
++++ b/plugins/ace/lib/ace/document.js
+@@ -391,7 +391,7 @@ var Document = function(text, mode) {
+ 
+         while (true) {
+             while(column >= 0) {
+-                var ch = line.chAt(column);
++                var ch = line.charAt(column);
+                 if (ch == openBracket) {
+                     depth -= 1;
+                     if (depth == 0) {
+@@ -424,7 +424,7 @@ var Document = function(text, mode) {
+ 
+         while (true) {
+             while(column < line.length) {
+-                var ch = line.chAt(column);
++                var ch = line.charAt(column);
+                 if (ch == closingBracket) {
+                     depth -= 1;
+                     if (depth == 0) {

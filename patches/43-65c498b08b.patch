@@ -1,0 +1,83 @@
+commit 65c498b08b9df1f9d7a27409f9a672cbf805fb84
+Author: Joe Walker <jwalker@mozilla.com>
+Date:   Wed Nov 10 14:29:31 2010 +0000
+
+    convert event to commonjs export format
+
+diff --git a/plugins/ace/lib/ace/editor.js b/plugins/ace/lib/ace/editor.js
+index 8c3ba4e..2f7215a 100644
+--- a/plugins/ace/lib/ace/editor.js
++++ b/plugins/ace/lib/ace/editor.js
+@@ -38,7 +38,7 @@
+ define(function(require, exports, module) {
+ 
+ var oop = require("ace/lib/oop");
+-var event = require("ace/lib/event");
++var event = require("ace/lib/event").event;
+ var lang = require("ace/lib/lang");
+ var TextInput = require("ace/textinput");
+ var KeyBinding = require("ace/keybinding");
+diff --git a/plugins/ace/lib/ace/keybinding.js b/plugins/ace/lib/ace/keybinding.js
+index 0ad6c79..5eb2ed5 100644
+--- a/plugins/ace/lib/ace/keybinding.js
++++ b/plugins/ace/lib/ace/keybinding.js
+@@ -38,7 +38,7 @@
+ define(function(require, exports, module) {
+ 
+ var core = require("ace/lib/core").core;
+-var event = require("ace/lib/event");
++var event = require("ace/lib/event").event;
+ var default_mac = require("ace/conf/keybindings/default_mac").bindings;
+ var default_win = require("ace/conf/keybindings/default_win").bindings;
+ var PluginManager = require("ace/plugin_manager");
+diff --git a/plugins/ace/lib/ace/lib/event.js b/plugins/ace/lib/ace/lib/event.js
+index 8588ece..d0569a6 100644
+--- a/plugins/ace/lib/ace/lib/event.js
++++ b/plugins/ace/lib/ace/lib/event.js
+@@ -238,5 +238,5 @@ var core = require("ace/lib/core").core;
+         }
+     };
+ 
+-    return event;
++    exports.event = event;
+ });
+\ No newline at end of file
+diff --git a/plugins/ace/lib/ace/scrollbar.js b/plugins/ace/lib/ace/scrollbar.js
+index 2df7654..ce02993 100644
+--- a/plugins/ace/lib/ace/scrollbar.js
++++ b/plugins/ace/lib/ace/scrollbar.js
+@@ -40,7 +40,7 @@ define(function(require, exports, module) {
+ var oop = require("ace/lib/oop");
+ var lang = require("ace/lib/lang");
+ var dom = require("ace/lib/dom").dom;
+-var event = require("ace/lib/event");
++var event = require("ace/lib/event").event;
+ var MEventEmitter = require("ace/event_emitter").MEventEmitter;
+ 
+ var ScrollBar = function(parent) {
+diff --git a/plugins/ace/lib/ace/textinput.js b/plugins/ace/lib/ace/textinput.js
+index 629c0e9..94c38d5 100644
+--- a/plugins/ace/lib/ace/textinput.js
++++ b/plugins/ace/lib/ace/textinput.js
+@@ -37,7 +37,7 @@
+ 
+ define(function(require, exports, module) {
+ 
+-var event = require("ace/lib/event");
++var event = require("ace/lib/event").event;
+ 
+ var TextInput = function(parentNode, host) {
+ 
+diff --git a/plugins/ace/lib/ace/virtual_renderer.js b/plugins/ace/lib/ace/virtual_renderer.js
+index 8820d1e..a1c9cd7 100644
+--- a/plugins/ace/lib/ace/virtual_renderer.js
++++ b/plugins/ace/lib/ace/virtual_renderer.js
+@@ -40,7 +40,7 @@ define(function(require, exports, module) {
+ var oop = require("ace/lib/oop");
+ var lang = require("ace/lib/lang");
+ var dom = require("ace/lib/dom").dom;
+-var event = require("ace/lib/event");
++var event = require("ace/lib/event").event;
+ var GutterLayer = require("ace/layer/gutter").Gutter;
+ var MarkerLayer = require("ace/layer/marker").Marker;
+ var TextLayer = require("ace/layer/text").Text;

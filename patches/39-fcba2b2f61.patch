@@ -1,0 +1,49 @@
+commit fcba2b2f61082854b4c32eb77a6e13212e715c10
+Author: Joe Walker <jwalker@mozilla.com>
+Date:   Wed Nov 10 14:14:47 2010 +0000
+
+    convert key bindings to commonjs export format
+
+diff --git a/plugins/ace/lib/ace/conf/keybindings/default_mac.js b/plugins/ace/lib/ace/conf/keybindings/default_mac.js
+index 3c1a926..515a88b 100644
+--- a/plugins/ace/lib/ace/conf/keybindings/default_mac.js
++++ b/plugins/ace/lib/ace/conf/keybindings/default_mac.js
+@@ -37,8 +37,7 @@
+ 
+ define(function(require, exports, module) {
+ 
+-
+-return {
++exports.bindings = {
+     "selectall": "Command-A",
+     "removeline": "Command-D",
+     "gotoline": "Command-L",
+diff --git a/plugins/ace/lib/ace/conf/keybindings/default_win.js b/plugins/ace/lib/ace/conf/keybindings/default_win.js
+index b899965..2d94c88 100644
+--- a/plugins/ace/lib/ace/conf/keybindings/default_win.js
++++ b/plugins/ace/lib/ace/conf/keybindings/default_win.js
+@@ -37,8 +37,7 @@
+ 
+ define(function(require, exports, module) {
+ 
+-
+-return {
++exports.bindings = {
+     "selectall": "Ctrl-A",
+     "removeline": "Ctrl-D",
+     "gotoline": "Ctrl-L",
+diff --git a/plugins/ace/lib/ace/keybinding.js b/plugins/ace/lib/ace/keybinding.js
+index ab9fbbb..ebedb22 100644
+--- a/plugins/ace/lib/ace/keybinding.js
++++ b/plugins/ace/lib/ace/keybinding.js
+@@ -39,8 +39,8 @@ define(function(require, exports, module) {
+ 
+ var core = require("ace/lib/core");
+ var event = require("ace/lib/event");
+-var default_mac = require("ace/conf/keybindings/default_mac");
+-var default_win = require("ace/conf/keybindings/default_win");
++var default_mac = require("ace/conf/keybindings/default_mac").bindings;
++var default_win = require("ace/conf/keybindings/default_win").bindings;
+ var PluginManager = require("ace/plugin_manager");
+ 
+ 

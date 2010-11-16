@@ -1,0 +1,1206 @@
+commit c85eb2ae344dcb6461b1af6662df614d10bdd750
+Author: Kevin Dangoor <kid@blazingthings.com>
+Date:   Sat Oct 30 23:17:30 2010 -0400
+
+    adds the environment and keyboard plugins
+    adds support for matching in events (to avoid dealing with unwanted
+    messages)
+
+diff --git a/plugins/canon/lib/history.js b/plugins/canon/lib/history.js
+index 1fb513f..78a81bb 100644
+--- a/plugins/canon/lib/history.js
++++ b/plugins/canon/lib/history.js
+@@ -38,7 +38,7 @@
+ define(function(require, exports, module) {
+     
+ var console = require('util/console');
+-var Trace = require('stacktrace').Trace;
++var Trace = require('util/stacktrace').Trace;
+ var Event = require('events').Event;
+ 
+ exports.addedRequestOutput = new Event();
+diff --git a/plugins/environment.js b/plugins/environment.js
+new file mode 100644
+index 0000000..16dc626
+--- /dev/null
++++ b/plugins/environment.js
+@@ -0,0 +1,216 @@
++/* ***** BEGIN LICENSE BLOCK *****
++ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
++ *
++ * The contents of this file are subject to the Mozilla Public License Version
++ * 1.1 (the "License"); you may not use this file except in compliance with
++ * the License. You may obtain a copy of the License at
++ * http://www.mozilla.org/MPL/
++ *
++ * Software distributed under the License is distributed on an "AS IS" basis,
++ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
++ * for the specific language governing rights and limitations under the
++ * License.
++ *
++ * The Original Code is Mozilla Skywriter.
++ *
++ * The Initial Developer of the Original Code is
++ * Mozilla.
++ * Portions created by the Initial Developer are Copyright (C) 2009
++ * the Initial Developer. All Rights Reserved.
++ *
++ * Contributor(s):
++ *   Julian Viereck (jviereck@mozilla.com)
++ *   Kevin Dangoor (kdangoor@mozilla.com)
++ *   Patrick Walton (pwalton@mozilla.com)
++ *   Joe Walker (jwalker@mozilla.com)
++ *
++ * Alternatively, the contents of this file may be used under the terms of
++ * either the GNU General Public License Version 2 or later (the "GPL"), or
++ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
++ * in which case the provisions of the GPL or the LGPL are applicable instead
++ * of those above. If you wish to allow use of your version of this file only
++ * under the terms of either the GPL or the LGPL, and not to allow others to
++ * use your version of this file under the terms of the MPL, indicate your
++ * decision by deleting the provisions above and replace them with the notice
++ * and other provisions required by the GPL or the LGPL. If you do not delete
++ * the provisions above, a recipient may use your version of this file under
++ * the terms of any one of the MPL, the GPL or the LGPL.
++ *
++ * ***** END LICENSE BLOCK ***** */
++
++define(function(require, exports, module) {
++    
++var util = require("util/util");
++var console = require('util/console');
++var settingsMod = require('settings');
++
++"define metadata";
++({ "dependencies": { "settings": "0.0.0" } });
++"end";
++
++exports.init = function() {
++};
++
++exports.destroy = function() {
++};
++
++
++var settings = settingsMod.settings;
++
++/**
++ * The environment plays a similar role to the environment under unix.
++ * Skywriter does not currently have a concept of variables, (i.e. things the user
++ * directly changes, however it does have a number of pre-defined things that
++ * are changed by the system.
++ * <p>The role of the Environment is likely to be expanded over time.
++ */
++exports.Environment = function() {
++    // The current command line pushes this value into here
++    this.commandLine = null;
++
++    // Fire the sizeChanged event when the window is resized.
++    window.addEventListener('resize', this.dimensionsChanged.bind(this), false);
++};
++
++Object.defineProperties(exports.Environment.prototype, {
++
++    /**
++     * Provides a get() and set() function to set and get settings.
++     */
++    settings: {
++        value: {
++            set: function(key, value) {
++                if (util.none(key)) {
++                    throw new Error('setSetting(): key must be supplied');
++                }
++                if (util.none(value)) {
++                    throw new Error('setSetting(): value must be supplied');
++                }
++
++                settings.set(key, value);
++            },
++            
++            get: function(key) {
++                if (util.none(key)) {
++                    throw new Error('getSetting(): key must be supplied');
++                }
++                return settings.get(key);
++            }
++        }
++    },
++
++    dimensionsChanged: {
++        value: function() {
++            catalog.publish(this, 'dimensionsChanged');
++        }
++    },
++
++    /**
++     * Retrieves the EditSession
++     */
++    session: {
++        get: function() {
++            return catalog.getObject('session');
++        }
++    },
++
++    /**
++     * Gets the currentView from the session.
++     */
++    view: {
++        get: function() {
++            if (!this.session) {
++                // This can happen if the session is being reloaded.
++                return null;
++            }
++            return this.session.currentView;
++        }
++    },
++
++    /**
++     * Gets the currentEditor from the session.
++     */
++    editor: {
++        get: function() {
++            if (!this.session) {
++                // This can happen if the session is being reloaded.
++                return null;
++            }
++            return this.session.currentView.editor;
++        }
++    },
++
++    /**
++     * Returns the currently-active syntax contexts.
++     */
++    contexts: {
++        get: function() {
++            // when editorapp is being refreshed, the textView is not available.
++            if (!this.view) {
++                return [];
++            }
++
++            var syntaxManager = this.view.editor.layoutManager.syntaxManager;
++            var pos = this.view.getSelectedRange().start;
++            return syntaxManager.contextsAtPosition(pos);
++        }
++    },
++
++    /**
++     * The current Buffer from the session
++     */
++    buffer: {
++        get: function() {
++            if (!this.session) {
++                console.error("command attempted to get buffer but there's no session");
++                return undefined;
++            }
++            return this.view.editor.buffer;
++        }
++    },
++
++    /**
++     * The current editor model might not always be easy to find so you should
++     * use <code>instruction.model</code> to access the view where
++     * possible.
++     */
++    model: {
++        get: function() {
++            if (!this.buffer) {
++                console.error('Session has no current buffer');
++                return undefined;
++            }
++            return this.view.editor.layoutManager.textStorage;
++        }
++    },
++
++    /**
++     * gets the current file from the session
++     */
++    file: {
++        get: function() {
++            if (!this.buffer) {
++                console.error('Session has no current buffer');
++                return undefined;
++            }
++            return this.buffer.file;
++        }
++    },
++
++    /**
++     * If files are available, this will get them. Perhaps we need some other
++     * mechanism for populating these things from the catalog?
++     */
++    files: {
++        get: function() {
++            return catalog.getObject('files');
++        }
++    }
++});
++
++/**
++ * The global environment used throughout this Skywriter instance.
++ */
++exports.env = new exports.Environment();
++
++});
+diff --git a/plugins/events/lib/index.js b/plugins/events/lib/index.js
+index a9e9aec..30e5ba0 100644
+--- a/plugins/events/lib/index.js
++++ b/plugins/events/lib/index.js
+@@ -20,6 +20,7 @@
+  *
+  * Contributor(s):
+  *   Patrick Walton (pwalton@mozilla.com)
++ *   Kevin Dangoor (kdangoor@mozilla.com)
+  *
+  * Alternatively, the contents of this file may be used under the terms of
+  * either the GNU General Public License Version 2 or later (the "GPL"), or
+@@ -43,30 +44,45 @@ exports.init = function() {
+ exports.deinit = function() {
+ };
+ 
+-exports.Event = function() {
++exports.Event = function(opts) {
++    opts = opts || {};
++    var keyElement = opts.keyElement;
++    
+     var handlers = [];
+     var evt = function() {
+         var args = arguments;
+-        handlers.forEach(function(handler) { handler.func.apply(null, args); });
++        if (keyElement) {
++            keyValue = args[keyElement];
++        }
++        handlers.forEach(function(handler) { 
++            if (keyElement && handler.match) {
++                if (handler.match != keyValue) {
++                    return;
++                }
++            }
++            handler.func.apply(null, args);
++        });
+     };
+ 
+     /**
+      * Adds a new handler via
+      *  a) evt.add(handlerFunc)
+-     *  b) evt.add(reference, handlerFunc)
++     *  b) evt.add(handlerObj)
++     * 
++     * handlerObj should have a "func" property on it, which is the function that is called
++     * it can have a "ref" property which is the object that the handler is conceptually
++     * related to
++     * it can also have a "match" property. This is a string that is tested
++     * against the key value of the event, if there is one.
+      */
+-    evt.add = function() {
+-        if (arguments.length == 1) {
+-            handlers.push({
+-                ref: arguments[0],
+-                func: arguments[0]
+-            });
+-        } else {
+-            handlers.push({
+-                ref: arguments[0],
+-                func: arguments[1]
+-            });
++    evt.add = function(handler) {
++        if (typeof(handler) == "function") {
++            handler = {
++                ref: handler,
++                func: handler
++            };
+         }
++        handlers.push(handler);
+     };
+ 
+     evt.remove = function(ref) {
+diff --git a/plugins/keyboard/lib/index.js b/plugins/keyboard/lib/index.js
+new file mode 100644
+index 0000000..b520020
+--- /dev/null
++++ b/plugins/keyboard/lib/index.js
+@@ -0,0 +1,458 @@
++/* ***** BEGIN LICENSE BLOCK *****
++ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
++ *
++ * The contents of this file are subject to the Mozilla Public License Version
++ * 1.1 (the "License"); you may not use this file except in compliance with
++ * the License. You may obtain a copy of the License at
++ * http://www.mozilla.org/MPL/
++ *
++ * Software distributed under the License is distributed on an "AS IS" basis,
++ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
++ * for the specific language governing rights and limitations under the
++ * License.
++ *
++ * The Original Code is Skywriter.
++ *
++ * The Initial Developer of the Original Code is
++ * Mozilla.
++ * Portions created by the Initial Developer are Copyright (C) 2009
++ * the Initial Developer. All Rights Reserved.
++ *
++ * Contributor(s):
++ *   Skywriter Team (skywriter@mozilla.com)
++ *
++ * Alternatively, the contents of this file may be used under the terms of
++ * either the GNU General Public License Version 2 or later (the "GPL"), or
++ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
++ * in which case the provisions of the GPL or the LGPL are applicable instead
++ * of those above. If you wish to allow use of your version of this file only
++ * under the terms of either the GPL or the LGPL, and not to allow others to
++ * use your version of this file under the terms of the MPL, indicate your
++ * decision by deleting the provisions above and replace them with the notice
++ * and other provisions required by the GPL or the LGPL. If you do not delete
++ * the provisions above, a recipient may use your version of this file under
++ * the terms of any one of the MPL, the GPL or the LGPL.
++ *
++ * ***** END LICENSE BLOCK ***** */
++
++define(function(request, exports, module) {
++
++var console = require('util/console');
++var Trace = require('util/stacktrace').Trace;
++var settings = require('settings');
++var keyutil = require('keyboard/keyutil');
++var history = require('canon/history');
++var Request = require('canon/request').Request;
++var env = require('environment').env;
++
++exports.keymappings = {};
++
++exports.addKeymapping = function(mapping) {
++    exports.keymappings[mapping.name] = mapping;
++};
++
++exports.removeKeymapping = function(name) {
++    delete exports.keymapping[name];
++};
++
++exports.init = function() {
++    // TODO register this
++    // catalog.addExtensionPoint("keymapping", {
++    //     "description": "A keymapping defines how keystrokes are interpreted.",
++    //     "params": [
++    //         {
++    //             "name": "states",
++    //             "required": true,
++    //             "description":
++    //                 "Holds the states and all the informations about the keymapping. See docs: pluginguide/keymapping"
++    //         }
++    //     ]
++    // });
++    settings.settingChange.add({
++        match: "customKeymapping",
++        ref: exports.keyboardManager,
++        func: exports.keyboardManager._customKeymappingChanged
++                                            .bind(exports.keyboardManager)
++    });
++};
++
++exports.destroy = function() {
++    settings.settingChange.remove(exports.keyboardManager);
++};
++
++
++/*
++ * Things to do to sanitize this code:
++ * - 'no command' is a bizarre special value at the very least it should be a
++ *   constant to make typos more obvious, but it would be better to refactor
++ *   so that a natural value like null worked.
++ * - sender seems to be totally customized to the editor case, and the functions
++ *   that we assume that it has make no sense for the commandLine case. We
++ *   should either document and implement the same function set for both cases
++ *   or admit that the cases are different enough to have separate
++ *   implementations.
++ * - remove remaining sproutcore-isms
++ * - fold buildFlags into processKeyEvent or something better, preferably the
++ *   latter. We don't want the environment to become a singleton
++ */
++
++/**
++ * Every time we call processKeyEvent, we pass in some flags that require the
++ * same processing to set them up. This function can be called to do that
++ * setup.
++ * @param env Probably environment.env
++ * @param flags Probably {} (but check other places where this is called)
++ */
++exports.buildFlags = function(flags) {
++    flags.context = env.contexts[0];
++    return flags;
++};
++
++/**
++ * The canon, or the repository of commands, contains functions to process
++ * events and dispatch command messages to targets.
++ * @class
++ */
++var KeyboardManager = function() { };
++
++KeyboardManager.prototype = {
++    _customKeymappingCache: { states: {} },
++
++    /**
++     * Searches through the command canon for an event matching the given flags
++     * with a key equivalent matching the given SproutCore event, and, if the
++     * command is found, sends a message to the appropriate target.
++     *
++     * This will get a couple of upgrades in the not-too-distant future:
++     * 1. caching in the Canon for fast lookup based on key
++     * 2. there will be an extra layer in between to allow remapping via
++     *    user preferences and keyboard mapping plugins
++     *
++     * @return True if a matching command was found, false otherwise.
++     */
++    processKeyEvent: function(evt, sender, flags) {
++        // Use our modified commandCodes function to detect the meta key in
++        // more circumstances than SproutCore alone does.
++        var symbolicName = keyutil.commandCodes(evt, true)[0];
++        if (util.none(symbolicName)) {
++            return false;
++        }
++
++        // TODO: Maybe it should be the job of our caller to do this?
++        exports.buildFlags(flags);
++
++        flags.isCommandKey = true;
++        return this._matchCommand(symbolicName, sender, flags);
++    },
++
++    _matchCommand: function(symbolicName, sender, flags) {
++        var match = this._findCommandExtension(symbolicName, sender, flags);
++        if (match && match.commandExt !== 'no command') {
++            if (flags.isTextView) {
++                sender.resetKeyBuffers();
++            }
++
++            var commandExt = match.commandExt;
++            commandExt.load(function(command) {
++                var request = new Request({
++                    command: command,
++                    commandExt: commandExt
++                });
++                history.execute(match.args, request);
++            });
++            return true;
++        }
++
++        // 'no command' is returned if a keyevent is handled but there is no
++        // command executed (for example when switchting the keyboard state).
++        if (match && match.commandExt === 'no command') {
++            return true;
++        } else {
++            return false;
++        }
++    },
++
++    _buildBindingsRegex: function(bindings) {
++        // Escape a given Regex string.
++        bindings.forEach(function(binding) {
++            if (!util.none(binding.key)) {
++                binding.key = new RegExp('^' + binding.key + '$');
++            } else if (Array.isArray(binding.regex)) {
++                binding.key = new RegExp('^' + binding.regex[1] + '$');
++                binding.regex = new RegExp(binding.regex.join('') + '$');
++            } else {
++                binding.regex = new RegExp(binding.regex + '$');
++            }
++        });
++    },
++
++    /**
++     * Build the RegExp from the keymapping as RegExp can't stored directly
++     * in the metadata JSON and as the RegExp used to match the keys/buffer
++     * need to be adapted.
++     */
++    _buildKeymappingRegex: function(keymapping) {
++        for (state in keymapping.states) {
++            this._buildBindingsRegex(keymapping.states[state]);
++        }
++        keymapping._convertedRegExp = true;
++    },
++
++    /**
++     * Loop through the commands in the canon, looking for something that
++     * matches according to #_commandMatches, and return that.
++     */
++    _findCommandExtension: function(symbolicName, sender, flags) {
++        // If the flags indicate that we handle the textView's input then take
++        // a look at keymappings as well.
++        if (flags.isTextView) {
++            var currentState = sender._keyState;
++
++            // Don't add the symbolic name to the key buffer if the alt_ key is
++            // part of the symbolic name. If it starts with alt_, this means
++            // that the user hit an alt keycombo and there will be a single,
++            // new character detected after this event, which then will be
++            // added to the buffer (e.g. alt_j will result in ∆).
++            if (!flags.isCommandKey || symbolicName.indexOf('alt_') === -1) {
++                sender._keyBuffer +=
++                    symbolicName.replace(/ctrl_meta|meta/,'ctrl');
++                sender._keyMetaBuffer += symbolicName;
++            }
++
++            // List of all the keymappings to look at.
++            var ak = [ this._customKeymappingCache ];
++
++            // Get keymapping extension points.
++            ak = ak.concat(catalog.getExtensions('keymapping'));
++
++            for (var i = 0; i < ak.length; i++) {
++                // Check if the keymapping has the current state.
++                if (util.none(ak[i].states[currentState])) {
++                    continue;
++                }
++
++                if (util.none(ak[i]._convertedRegExp)) {
++                    this._buildKeymappingRegex(ak[i]);
++                }
++
++                // Try to match the current mapping.
++                var result = this._bindingsMatch(
++                                    symbolicName,
++                                    flags,
++                                    sender,
++                                    ak[i]);
++
++                if (!util.none(result)) {
++                    return result;
++                }
++            }
++        }
++
++        var commandExts = catalog.getExtensions('command');
++        var reply = null;
++        var args = {};
++
++        symbolicName = symbolicName.replace(/ctrl_meta|meta/,'ctrl');
++
++        commandExts.some(function(commandExt) {
++            if (this._commandMatches(commandExt, symbolicName, flags)) {
++                reply = commandExt;
++                return true;
++            }
++            return false;
++        }.bind(this));
++
++        return util.none(reply) ? null : { commandExt: reply, args: args };
++    },
++
++
++    /**
++     * Checks if the given parameters fit to one binding in the given bindings.
++     * Returns the command and arguments if a command was matched.
++     */
++    _bindingsMatch: function(symbolicName, flags, sender, keymapping) {
++        var match;
++        var commandExt = null;
++        var args = {};
++        var bufferToUse;
++
++        if (!util.none(keymapping.hasMetaKey)) {
++            bufferToUse = sender._keyBuffer;
++        } else {
++            bufferToUse = sender._keyMetaBuffer;
++        }
++
++        // Add the alt_key to the buffer as we don't want it to be in the buffer
++        // that is saved but for matching, it needs to be there.
++        if (symbolicName.indexOf('alt_') === 0 && flags.isCommandKey) {
++            bufferToUse += symbolicName;
++        }
++
++        // Loop over all the bindings of the keymapp until a match is found.
++        keymapping.states[sender._keyState].some(function(binding) {
++            // Check if the key matches.
++            if (binding.key && !binding.key.test(symbolicName)) {
++                return false;
++            }
++
++            // Check if the regex matches.
++            if (binding.regex && !(match = binding.regex.exec(bufferToUse))) {
++                return false;
++            }
++
++            // Check for disallowed matches.
++            if (binding.disallowMatches) {
++                for (var i = 0; i < binding.disallowMatches.length; i++) {
++                    if (!!match[binding.disallowMatches[i]]) {
++                        return true;
++                    }
++                }
++            }
++
++            // Check predicates.
++            if (!exports.flagsMatch(binding.predicates, flags)) {
++                return false;
++            }
++
++            // If there is a command to execute, then figure out the
++            // comand and the arguments.
++            if (binding.exec) {
++                // Get the command.
++                commandExt = catalog.getExtensionByKey('command', binding.exec);
++                if (util.none(commandExt)) {
++                    throw new Error('Can\'t find command ' + binding.exec +
++                        ' in state=' + sender._keyState +
++                        ', symbolicName=' + symbolicName);
++                }
++
++                // Bulid the arguments.
++                if (binding.params) {
++                    var value;
++                    binding.params.forEach(function(param) {
++                        if (!util.none(param.match) && !util.none(match)) {
++                            value = match[param.match] || param.defaultValue;
++                        } else {
++                            value = param.defaultValue;
++                        }
++
++                        if (param.type === 'number') {
++                            value = parseInt(value, 10);
++                        }
++
++                        args[param.name] = value;
++                    });
++                }
++                sender.resetKeyBuffers();
++            }
++
++            // Handle the 'then' property.
++            if (binding.then) {
++                sender._keyState = binding.then;
++                sender.resetKeyBuffers();
++            }
++
++            // If there is no command matched now, then return a 'false'
++            // command to stop matching.
++            if (util.none(commandExt)) {
++                commandExt = 'no command';
++            }
++
++            return true;
++        });
++
++        if (util.none(commandExt)) {
++            return null;
++        }
++
++        return { commandExt: commandExt, args: args };
++    },
++
++    /**
++     * Check that the given command fits the given key name and flags.
++     */
++    _commandMatches: function(commandExt, symbolicName, flags) {
++        var mappedKeys = commandExt.key;
++        if (!mappedKeys) {
++            return false;
++        }
++
++        // Check predicates
++        if (!exports.flagsMatch(commandExt.predicates, flags)) {
++            return false;
++        }
++
++        if (typeof(mappedKeys) === 'string') {
++            if (mappedKeys != symbolicName) {
++                return false;
++            }
++            return true;
++        }
++
++        if (!Array.isArray(mappedKeys)) {
++            mappedKeys = [mappedKeys];
++            commandExt.key = mappedKeys;
++        }
++
++        for (var i = 0; i < mappedKeys.length; i++) {
++            var keymap = mappedKeys[i];
++            if (typeof(keymap) === 'string') {
++                if (keymap == symbolicName) {
++                    return true;
++                }
++                continue;
++            }
++
++            if (keymap.key != symbolicName) {
++                continue;
++            }
++
++            return exports.flagsMatch(keymap.predicates, flags);
++        }
++        return false;
++    },
++
++    /**
++     * Build a cache of custom keymappings whenever the associated setting
++     * changes.
++     */
++    _customKeymappingChanged: function(settingName, value) {
++        var ckc = this._customKeymappingCache =
++                            JSON.parse(value);
++
++        ckc.states = ckc.states || {};
++
++        for (state in ckc.states) {
++            this._buildBindingsRegex(ckc.states[state]);
++        }
++        ckc._convertedRegExp = true;
++    }
++};
++
++/**
++ *
++ */
++exports.flagsMatch = function(predicates, flags) {
++    if (util.none(predicates)) {
++        return true;
++    }
++
++    if (!flags) {
++        return false;
++    }
++
++    for (var flagName in predicates) {
++        if (flags[flagName] !== predicates[flagName]) {
++            return false;
++        }
++    }
++
++    return true;
++};
++
++/**
++ * The global exported KeyboardManager
++ */
++exports.keyboardManager = new KeyboardManager();
++
++
++});
+diff --git a/plugins/keyboard/lib/keyutil.js b/plugins/keyboard/lib/keyutil.js
+new file mode 100644
+index 0000000..2afbd74
+--- /dev/null
++++ b/plugins/keyboard/lib/keyutil.js
+@@ -0,0 +1,274 @@
++define(function(require, exports, module) {
++
++var util = require('util/util');
++    
++/*! @license
++==========================================================================
++SproutCore -- JavaScript Application Framework
++copyright 2006-2009, Sprout Systems Inc., Apple Inc. and contributors.
++
++Permission is hereby granted, free of charge, to any person obtaining a
++copy of this software and associated documentation files (the "Software"),
++to deal in the Software without restriction, including without limitation
++the rights to use, copy, modify, merge, publish, distribute, sublicense,
++and/or sell copies of the Software, and to permit persons to whom the
++Software is furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in
++all copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
++DEALINGS IN THE SOFTWARE.
++
++SproutCore and the SproutCore logo are trademarks of Sprout Systems, Inc.
++
++For more information about SproutCore, visit http://www.sproutcore.com
++
++
++==========================================================================
++@license */
++
++// Most of the following code is taken from SproutCore with a few changes.
++
++
++
++/**
++ * Helper functions and hashes for key handling.
++ */
++exports.KeyHelper = function() {
++    var ret = {
++        MODIFIER_KEYS: {
++            16: 'shift', 17: 'ctrl', 18: 'alt', 224: 'meta'
++        },
++
++        FUNCTION_KEYS : {
++              8: 'backspace', 9: 'tab',         13: 'return',   19: 'pause',
++             27: 'escape',   33: 'pageup',      34: 'pagedown', 35: 'end',
++             36: 'home',     37: 'left',        38: 'up',       39: 'right',
++             40: 'down',     44: 'printscreen', 45: 'insert',   46: 'delete',
++            112: 'f1',      113: 'f2',         114: 'f3',      115: 'f4',
++            116: 'f5',      117: 'f7',         119: 'f8',      120: 'f9',
++            121: 'f10',     122: 'f11',        123: 'f12',     144: 'numlock',
++            145: 'scrolllock'
++        },
++
++        PRINTABLE_KEYS: {
++           32: ' ',  48: '0',  49: '1',  50: '2',  51: '3',  52: '4', 53:  '5',
++           54: '6',  55: '7',  56: '8',  57: '9',  59: ';',  61: '=', 65:  'a',
++           66: 'b',  67: 'c',  68: 'd',  69: 'e',  70: 'f',  71: 'g', 72:  'h',
++           73: 'i',  74: 'j',  75: 'k',  76: 'l',  77: 'm',  78: 'n', 79:  'o',
++           80: 'p',  81: 'q',  82: 'r',  83: 's',  84: 't',  85: 'u', 86:  'v',
++           87: 'w',  88: 'x',  89: 'y',  90: 'z', 107: '+', 109: '-', 110: '.',
++          188: ',', 190: '.', 191: '/', 192: '`', 219: '[', 220: '\',
++          221: ']', 222: '\"'
++        },
++
++        /**
++         * Create the lookup table for Firefox to convert charCodes to keyCodes
++         * in the keyPress event.
++         */
++        PRINTABLE_KEYS_CHARCODE: {},
++
++        /**
++         * Allow us to lookup keyCodes by symbolic name rather than number
++         */
++        KEY: {}
++    };
++
++    // Create the PRINTABLE_KEYS_CHARCODE hash.
++    for (var i in ret.PRINTABLE_KEYS) {
++        var k = ret.PRINTABLE_KEYS[i];
++        ret.PRINTABLE_KEYS_CHARCODE[k.charCodeAt(0)] = i;
++        if (k.toUpperCase() != k) {
++            ret.PRINTABLE_KEYS_CHARCODE[k.toUpperCase().charCodeAt(0)] = i;
++        }
++    }
++
++    // A reverse map of FUNCTION_KEYS
++    for (i in ret.FUNCTION_KEYS) {
++        var name = ret.FUNCTION_KEYS[i].toUpperCase();
++        ret.KEY[name] = parseInt(i, 10);
++    }
++
++    return ret;
++}();
++
++/**
++ * Determines if the keyDown event is a non-printable or function key.
++ * These kinds of events are processed as keyboard shortcuts.
++ * If no shortcut handles the event, then it will be sent as a regular
++ * keyDown event.
++ * @private
++ */
++var isFunctionOrNonPrintableKey = function(evt) {
++    return !!(evt.altKey || evt.ctrlKey || evt.metaKey ||
++            ((evt.charCode !== evt.which) &&
++                    exports.KeyHelper.FUNCTION_KEYS[evt.which]));
++};
++
++/**
++ * Returns character codes for the event.
++ * The first value is the normalized code string, with any Shift or Ctrl
++ * characters added to the beginning.
++ * The second value is the char string by itself.
++ * @return {Array}
++ */
++exports.commandCodes = function(evt, dontIgnoreMeta) {
++    var code = evt._keyCode || evt.keyCode;
++    var charCode = (evt._charCode === undefined ? evt.charCode : evt._charCode);
++    var ret = null;
++    var key = null;
++    var modifiers = '';
++    var lowercase;
++    var allowShift = true;
++
++    // Absent a value for 'keyCode' or 'which', we can't compute the
++    // command codes. Bail out.
++    if (code === 0 && evt.which === 0) {
++        return false;
++    }
++
++    // If the charCode is not zero, then we do not handle a command key
++    // here. Bail out.
++    if (charCode !== 0) {
++        return false;
++    }
++
++    // Check for modifier keys.
++    if (exports.KeyHelper.MODIFIER_KEYS[charCode]) {
++        return [exports.KeyHelper.MODIFIER_KEYS[charCode], null];
++    }
++
++    // handle function keys.
++    if (code) {
++        ret = exports.KeyHelper.FUNCTION_KEYS[code];
++        if (!ret && (evt.altKey || evt.ctrlKey || evt.metaKey)) {
++            ret = exports.KeyHelper.PRINTABLE_KEYS[code];
++            // Don't handle the shift key if the combo is
++            //    (meta_|ctrl_)<number>
++            // This is necessary for the French keyboard. On that keyboard,
++            // you have to hold down the shift key to access the number
++            // characters.
++            if (code > 47 && code < 58) {
++                allowShift = evt.altKey;
++            }
++        }
++
++        if (ret) {
++           if (evt.altKey) {
++               modifiers += 'alt_';
++           }
++           if (evt.ctrlKey) {
++               modifiers += 'ctrl_';
++           }
++           if (evt.metaKey) {
++               modifiers += 'meta_';
++           }
++        } else if (evt.ctrlKey || evt.metaKey) {
++            return false;
++        }
++    }
++
++    // otherwise just go get the right key.
++    if (!ret) {
++        code = evt.which;
++        key = ret = String.fromCharCode(code);
++        lowercase = ret.toLowerCase();
++
++        if (evt.metaKey) {
++           modifiers = 'meta_';
++           ret = lowercase;
++
++        } else ret = null;
++    }
++
++    if (evt.shiftKey && ret && allowShift) {
++        modifiers += 'shift_';
++    }
++
++    if (ret) {
++        ret = modifiers + ret;
++    }
++
++    if (!dontIgnoreMeta && ret) {
++        ret = ret.replace(/ctrl_meta|meta/,'ctrl');
++    }
++
++    return [ret, key];
++};
++
++// Note: Most of the following code is taken from SproutCore with a few changes.
++
++/**
++ * Firefox sends a few key events twice: the first time to the keydown event
++ * and then later again to the keypress event. To handle them correct, they
++ * should be processed only once. Due to this, we will skip these events
++ * in keydown and handle them then in keypress.
++ */
++exports.addKeyDownListener = function(element, boundFunction) {
++
++    var handleBoundFunction = function(ev) {
++        var handled = boundFunction(ev);
++        // If the boundFunction returned true, then stop the event.
++        if (handled) {
++            util.stopEvent(ev);
++        }
++        return handled;
++    };
++
++    element.addEventListener('keydown', function(ev) {
++        if (util.isMozilla) {
++            // Check for function keys (like DELETE, TAB, LEFT, RIGHT...)
++            if (exports.KeyHelper.FUNCTION_KEYS[ev.keyCode]) {
++                return true;
++                // Check for command keys (like ctrl_c, ctrl_z...)
++            } else if ((ev.ctrlKey || ev.metaKey) &&
++                    exports.KeyHelper.PRINTABLE_KEYS[ev.keyCode]) {
++                return true;
++            }
++        }
++
++        if (isFunctionOrNonPrintableKey(ev)) {
++            return handleBoundFunction(ev);
++        }
++
++        return true;
++    }, false);
++
++    element.addEventListener('keypress', function(ev) {
++        if (util.isMozilla) {
++            // If this is a function key, we have to use the keyCode.
++            if (exports.KeyHelper.FUNCTION_KEYS[ev.keyCode]) {
++                return handleBoundFunction(ev);
++            } else if ((ev.ctrlKey || ev.metaKey) &&
++                    exports.KeyHelper.PRINTABLE_KEYS_CHARCODE[ev.charCode]){
++                // Check for command keys (like ctrl_c, ctrl_z...).
++                // For command keys have to convert the charCode to a keyCode
++                // as it has been sent from the keydown event to be in line
++                // with the other browsers implementations.
++
++                // FF does not allow let you change the keyCode or charCode
++                // property. Store to a custom keyCode/charCode variable.
++                // The getCommandCodes() function takes care of these
++                // special variables.
++                ev._keyCode = exports.KeyHelper.PRINTABLE_KEYS_CHARCODE[ev.charCode];
++                ev._charCode = 0;
++                return handleBoundFunction(ev);
++            }
++        }
++
++        // normal processing: send keyDown for printable keys.
++        if (ev.charCode !== undefined && ev.charCode === 0) {
++            return true;
++        }
++
++        return handleBoundFunction(ev);
++    }, false);
++};
++
++});
+diff --git a/plugins/keyboard/package.json b/plugins/keyboard/package.json
+new file mode 100644
+index 0000000..1f8687c
+--- /dev/null
++++ b/plugins/keyboard/package.json
+@@ -0,0 +1,4 @@
++{
++    "description": "Keyboard shortcuts",
++    "dependencies": { "settings": "0.0", "canon": "0.0", "environment": "0.0" }
++}
+\ No newline at end of file
+diff --git a/plugins/keyboard/tests/testKeyboard.js b/plugins/keyboard/tests/testKeyboard.js
+new file mode 100644
+index 0000000..1791893
+--- /dev/null
++++ b/plugins/keyboard/tests/testKeyboard.js
+@@ -0,0 +1,99 @@
++require.def(['require', 'exports', 'module',
++    'keyboard/keyboard',
++    'keyboard/tests/plugindev'
++], function(require, exports, module,
++    keyboard,
++    t
++) {
++
++/* ***** BEGIN LICENSE BLOCK *****
++ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
++ *
++ * The contents of this file are subject to the Mozilla Public License Version
++ * 1.1 (the "License"); you may not use this file except in compliance with
++ * the License. You may obtain a copy of the License at
++ * http://www.mozilla.org/MPL/
++ *
++ * Software distributed under the License is distributed on an "AS IS" basis,
++ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
++ * for the specific language governing rights and limitations under the
++ * License.
++ *
++ * The Original Code is Skywriter.
++ *
++ * The Initial Developer of the Original Code is
++ * Mozilla.
++ * Portions created by the Initial Developer are Copyright (C) 2009
++ * the Initial Developer. All Rights Reserved.
++ *
++ * Contributor(s):
++ *   Skywriter Team (skywriter@mozilla.com)
++ *
++ * Alternatively, the contents of this file may be used under the terms of
++ * either the GNU General Public License Version 2 or later (the "GPL"), or
++ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
++ * in which case the provisions of the GPL or the LGPL are applicable instead
++ * of those above. If you wish to allow use of your version of this file only
++ * under the terms of either the GPL or the LGPL, and not to allow others to
++ * use your version of this file under the terms of the MPL, indicate your
++ * decision by deleting the provisions above and replace them with the notice
++ * and other provisions required by the GPL or the LGPL. If you do not delete
++ * the provisions above, a recipient may use your version of this file under
++ * the terms of any one of the MPL, the GPL or the LGPL.
++ *
++ * ***** END LICENSE BLOCK ***** */
++
++
++
++
++exports.testKeyMatching = function() {
++    var km = keyboard.keyboardManager;
++    var command = {};
++    t.equal(km._commandMatches(command, 'meta_z', {}), false,
++        'no keymapping means false');
++
++    command = {
++        key: 'meta_z'
++    };
++    t.equal(km._commandMatches(command, 'meta_z', {}), true,
++        'matching keys, simple string');
++    t.equal(km._commandMatches(command, 'meta_a', {}), false,
++        'not matching key, simple string');
++
++    command = {
++        key: {key: 'meta_z', predicates: {isGreen: true}}
++    };
++    t.equal(km._commandMatches(command, 'meta_z', {}), false,
++        'object with not matching predicate');
++    t.equal(km._commandMatches(command, 'meta_z', {isGreen: true}), true,
++        'object with matching key and predicate');
++    t.equal(km._commandMatches(command, 'meta_a', {isGreen: true}), false,
++        'object with not matching key');
++    t.equal(km._commandMatches(command, 'meta_a', {isGreen: false}), false,
++        'object with neither matching');
++    t.equal(km._commandMatches(command, 'meta_z', {isGreen: false}), false,
++        'object with matching key and but different predicate');
++
++    command = {
++        key: ['meta_b', {key: 'meta_z', predicates: {isGreen: true}},
++            {key: 'meta_c'}]
++    };
++    t.equal(km._commandMatches(command, 'meta_z', {}), false,
++        'list: object with not matching predicate');
++    t.equal(km._commandMatches(command, 'meta_z', {isGreen: true}), true,
++        'list: object with matching key and predicate');
++    t.equal(km._commandMatches(command, 'meta_a', {isGreen: true}), false,
++        'list: object with not matching key');
++    t.equal(km._commandMatches(command, 'meta_a', {isGreen: false}), false,
++        'list: object with neither matching');
++    t.equal(km._commandMatches(command, 'meta_z', {isGreen: false}), false,
++        'list: object with matching key and but different predicate');
++    t.equal(km._commandMatches(command, 'meta_b'), true,
++        'list: simple key match');
++    t.equal(km._commandMatches(command, 'meta_c'), true,
++        'list: object without predicate match');
++    t.equal(km._commandMatches(command, 'meta_c', {isGreen: false}), true,
++        'list: flags don\'t matter without predicates');
++};
++
++});
+diff --git a/plugins/settings/lib/index.js b/plugins/settings/lib/index.js
+index 681d7d6..114407a 100644
+--- a/plugins/settings/lib/index.js
++++ b/plugins/settings/lib/index.js
+@@ -190,7 +190,9 @@ exports.getSetting = function(name) {
+ /**
+  * Event that tells people when a setting has changed.
+  */
+-exports.settingChange = new Event();
++exports.settingChange = new Event({
++    keyElement: 0
++});
+ 
+ 
+ /**
+diff --git a/scripts/boot.js b/scripts/boot.js
+index 802782c..c9fafa1 100644
+--- a/scripts/boot.js
++++ b/scripts/boot.js
+@@ -38,8 +38,9 @@
+ 
+ require.ready(function() {
+     var knownPlugins = ["util", "rangeutils", "events", "types", "settings", "canon",
+-                        "edit_session", "syntax_manager", "undo_manager"];
+-    var knownSingleFilePlugins = ["worker_manager", "syntax_directory"];
++                        "edit_session", "syntax_manager", "undomanager", 
++                        "keyboard"];
++    var knownSingleFilePlugins = ["worker_manager", "syntax_directory", "environment"];
+     
+     var pluginPackageInfo = [
+         {
