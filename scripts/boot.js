@@ -39,6 +39,7 @@
 require.ready(function() {
     var knownPlugins = ["util", "rangeutils", "events", "types", "settings", "canon",
                         "edit_session"];
+    var knownSingleFilePlugins = ["worker_manager"];
     
     var pluginPackageInfo = [
         {
@@ -60,6 +61,10 @@ require.ready(function() {
     var paths = {};
     thirdpartySingleFile.forEach(function(pluginName) {
         paths[pluginName] = "../thirdparty/" + pluginName;
+    });
+    knownSingleFilePlugins.forEach(function(pluginName) {
+        paths[pluginName] = "../plugins/" + pluginName;
+        knownPlugins.push(pluginName);
     });
     
     require({

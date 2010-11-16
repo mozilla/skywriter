@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Joe Walker (jwalker@mozilla.com)
+ *   Julian Viereck (jviereck@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -34,50 +34,49 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-
 define(function(require, exports, module) {
-
-var settings = require('settings');
-
-exports.init = function() {
-    // TODO register these using new registration functionality
     
-    // catalog.addExtensionPoint("command", {
-    //     "description":
-    //         "A command is a bit of functionality with optional typed arguments which can do something small like moving the cursor around the screen, or large like cloning a project from VCS.",
-    //     "indexOn": "name"
-    // });
-    // catalog.addExtensionPoint("addedRequestOutput", {
-    //     "description":
-    //         "An extension point to be called whenever a new command begins output."
-    // });
-    // catalog.addExtensionPoint("dimensionsChanged", {
-    //     "description":
-    //         "A dimensionsChanged is a way to be notified of changes to the dimension of Skywriter"
-    // });
-    settings.addSetting({
-        "name": "historyLength",
-        "description": "How many typed commands do we recall for reference?",
-        "type": "number",
-        "defaultValue": 50
-    });
-};
+var Promise = require('util/promise').Promise;
 
-exports.deinit = function() {
-    settings.removeSetting('historyLength');
-};
+exports.xhr = function(method, url, async, beforeSendCallback) {
+    var pr = new Promise();
 
-exports.commands = {};
+    if (!skywriter.proxy || !skywriter.proxy.xhr) {
+        var req = new XMLHttpRequest();
+        req.onreadystatechange = function() {
+            if (req.readyState !== 4) {
+                return;
+            }
 
-exports.addCommand = function(options) {
-    if (!options.name) {
-        throw new Error("All registered commands must have a name");
+            var status = req.status;
+            if (status !== 0 && status !== 200) {
+                var error = new Error(req.responseText + ' (Status ' + req.status + ")");
+                error.xhr = req;
+                pr.reject(error);
+                return;
+            }
+
+            pr.resolve(req.responseText);
+        }.bind(this);
+
+        req.open("GET", url, async);
+        if (beforeSendCallback) {
+            beforeSendCallback(req);
+        }
+        req.send();
+    } else {
+        skywriter.proxy.xhr.call(this, method, url, async, beforeSendCallback, pr);
     }
-    exports.commands[name] = options;
+
+    return pr;
 };
 
-exports.removeCommand = function(name) {
-    delete exports.commands[name];
+exports.Worker = function(url) {
+    if (!skywriter.proxy || !skywriter.proxy.worker) {
+        return new Worker(url);
+    } else {
+        return new skywriter.proxy.worker(url);
+    }
 };
 
 });
