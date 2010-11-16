@@ -1,3 +1,13 @@
+require.def(['require', 'exports', 'module',
+    'skywriter/promise',
+    'canon/request',
+    'canon/environment'
+], function(require, exports, module,
+    promise,
+    request,
+    environment
+) {
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -11,7 +21,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Mozilla Skywriter.
+ * The Original Code is Skywriter.
  *
  * The Initial Developer of the Original Code is
  * Mozilla.
@@ -19,7 +29,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *      Kevin Dangoor (kdangoor@mozilla.com)
+ *   Skywriter Team (skywriter@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,52 +45,27 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var Promise = promise.Promise;
+var Request = request.Request;
+var EnvironmentTrait = environment.EnvironmentTrait;
 
-require.ready(function() {
-    var knownPlugins = ["util", "events", "types", "settings", "canon"];
-    
-    var pluginPackageInfo = [
-        {
-            name: "plugins",
-            main: "index"
-        }
-    ];
-    
-    // set up RequireJS to know that our plugins all have a main module called "index"
-    knownPlugins.forEach(function(pluginName) {
-        pluginPackageInfo.push({
-            name: pluginName,
-            main: "index"
-        });
-    });
-    
-    require({
-        packagePaths: {
-            "../plugins": pluginPackageInfo
-        }
-    });
-    require(["plugins"], function() {
-        var pluginsModule = require("plugins");
-        pluginsModule.catalog.initializePlugins(knownPlugins).then(function() {
-            var console = require('util/console');
-            console.log('initialized!');
-            
-            // try some stuff out. TODO delete this
-            var newSetting = {
-                name: "allGood",
-                defaultValue: false,
-                type: "boolean"
-            };
-            
-            var settings = require("settings");
-            settings.addSetting(newSetting);
-            settings.settings.set("allGood", true);
-            if (!settings.settings.get("allGood")) {
-                alert("it's not all good :(");
-            } else {
-                console.log("all good!");
-            }
-        });
-        
-    });
+exports.MockEnvironmentTrait = EnvironmentTrait;
+
+exports.MockRequest = function() {
+    Request.prototype.apply(this, arguments);
+    this.promise = new Promise();
+};
+
+exports.MockRequest.prototype = new Request();
+
+exports.MockRequest.prototype.doneWithError = function(errorMessage) {
+    this.superclass(errorMessage);
+    this.promise.reject(this);
+};
+
+exports.MockRequest.prototype.done = function(content) {
+    this.superclass(content);
+    this.promise.resolve(this);
+};
+
 });

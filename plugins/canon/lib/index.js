@@ -19,7 +19,7 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *      Kevin Dangoor (kdangoor@mozilla.com)
+ *   Joe Walker (jwalker@mozilla.com)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,52 +35,36 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+define(function(require, exports, module) {
 
-require.ready(function() {
-    var knownPlugins = ["util", "events", "types", "settings", "canon"];
+var settings = require('settings');
+
+exports.init = function() {
+    // TODO register these using new registration functionality
     
-    var pluginPackageInfo = [
-        {
-            name: "plugins",
-            main: "index"
-        }
-    ];
-    
-    // set up RequireJS to know that our plugins all have a main module called "index"
-    knownPlugins.forEach(function(pluginName) {
-        pluginPackageInfo.push({
-            name: pluginName,
-            main: "index"
-        });
+    // catalog.addExtensionPoint("command", {
+    //     "description":
+    //         "A command is a bit of functionality with optional typed arguments which can do something small like moving the cursor around the screen, or large like cloning a project from VCS.",
+    //     "indexOn": "name"
+    // });
+    // catalog.addExtensionPoint("addedRequestOutput", {
+    //     "description":
+    //         "An extension point to be called whenever a new command begins output."
+    // });
+    // catalog.addExtensionPoint("dimensionsChanged", {
+    //     "description":
+    //         "A dimensionsChanged is a way to be notified of changes to the dimension of Skywriter"
+    // });
+    settings.addSetting({
+        "name": "historyLength",
+        "description": "How many typed commands do we recall for reference?",
+        "type": "number",
+        "defaultValue": 50
     });
-    
-    require({
-        packagePaths: {
-            "../plugins": pluginPackageInfo
-        }
-    });
-    require(["plugins"], function() {
-        var pluginsModule = require("plugins");
-        pluginsModule.catalog.initializePlugins(knownPlugins).then(function() {
-            var console = require('util/console');
-            console.log('initialized!');
-            
-            // try some stuff out. TODO delete this
-            var newSetting = {
-                name: "allGood",
-                defaultValue: false,
-                type: "boolean"
-            };
-            
-            var settings = require("settings");
-            settings.addSetting(newSetting);
-            settings.settings.set("allGood", true);
-            if (!settings.settings.get("allGood")) {
-                alert("it's not all good :(");
-            } else {
-                console.log("all good!");
-            }
-        });
-        
-    });
+};
+
+exports.deinit = function() {
+    settings.removeSetting('historyLength');
+};
+
 });
