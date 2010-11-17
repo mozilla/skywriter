@@ -24,6 +24,15 @@ At the high level, our plan is to merge Mozilla Skywriter and ACE. Skywriter
 up notes about how this merger will work and what the end product will look
 like.
 
+## Glossary ##
+
+* **Bespin** the original Mozilla Labs experiment for coding in the cloud.
+* **Mozilla Skywriter** the more stable successor to Bespin
+* **Cloud9 IDE** an open source project from Ajax.org to build an IDE for the cloud.
+* **ACE** the text editor component used in Cloud9 that will also be used in Skywriter
+* **APF** the GUI toolkit created by Ajax.org that is used to build Cloud9's UI
+* **dryice** the CommonJS package build tool for the browser that was introduced with Bespin
+
 ## Source Repositories ##
 
 As of this writing, our source repositories are in a bit of a funny state.
@@ -94,6 +103,30 @@ Firefox's [Bootstrapped Extensions](https://developer.mozilla.org/en/Extensions/
 There is no relationship between Skywriter plugins and Firefox extensions, but
 the interface described on that page matches exactly what we need.
 
+## dryice ##
+
+dryice is the name of Bespin's build tool. The intention is to move this tool
+to a separate repository so that it can be used by APF, Cloud9 and Skywriter
+for generating ready-to-deploy JavaScript easily from a collection of
+Skywriter plugins.
+
+The new version of dryice will be written in JavaScript with an initial target
+platform of node.js.
+
+The intention is for dryice to be very simple and extensible in the right places.
+It has been my experience that declarative syntaxes often fail unless the
+problem space is extremely simple or well understood.
+
+For that reason, the new dryice will support a manifest.json file that is
+similar to that supported by the current dryice. This file will be used
+for simple builds where the user is just gathering up a bunch of plugins
+(which is a very common case).
+
+dryice will support more custom builds through the use of JavaScript
+file that uses dryice as a library.
+
+## appconfig and environment ##
+
 ## Events ##
 
 Node has a nice [Event Emitter](https://github.com/ry/node/blob/master/lib/events.js)
@@ -107,3 +140,21 @@ be:
 * (others?) TODO
 
 [Email discussion](http://groups.google.com/group/skywriter-core/browse_thread/thread/aa546535613c236)
+
+## Text Editor ##
+
+## Syntax Highlighters ##
+
+Skywriter 1.0 syntax highlighters will be very similar to those in Bespin 0.9,
+but will have some breaking changes from both Bespin 0.9 and ACE.
+
+There is a [spec](http://etherpad.mozilla.com:9000/oSW4EWUuOX) in an etherpad
+at the moment.
+
+TODO enumerate the changes for people upgrading Bespin 0.9 syntax highlighters.
+
+## Commands ##
+
+## Command Line ##
+
+## Themes ##
