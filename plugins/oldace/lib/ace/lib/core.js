@@ -43,7 +43,7 @@ define(function(require, exports, module) {
     core.isWin = (os == "win");
     core.isMac = (os == "mac");
     core.isLinux = (os == "linux");
-    core.isIE = ! + "1";
+    core.isIE = ! + "\v1";
     core.isGecko = window.controllers && window.navigator.product === "Gecko";
 
     core.provide = function(namespace) {

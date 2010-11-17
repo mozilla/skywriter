@@ -44,7 +44,7 @@ var XmlTest = new TestCase("mode.XmlTest", {
     "test: next line indent should be the same as the current line indent" : function() {
         assertEquals("     ", this.mode.getNextLineIndent("start", "     abc"));
         assertEquals("", this.mode.getNextLineIndent("start", "abc"));
-        assertEquals("	", this.mode.getNextLineIndent("start", "	abc"));
+        assertEquals("\t", this.mode.getNextLineIndent("start", "\tabc"));
     }
 });
 

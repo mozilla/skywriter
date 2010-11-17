@@ -42,7 +42,7 @@ var event = require("ace/lib/event").event;
 var default_mac = require("ace/conf/keybindings/default_mac").bindings;
 var default_win = require("ace/conf/keybindings/default_win").bindings;
 var PluginManager = require("ace/plugin_manager");
-
+require("ace/commands/default_commands");
 
 var KeyBinding = function(element, editor, config) {
     this.setConfig(config);
@@ -101,13 +101,13 @@ var KeyBinding = function(element, editor, config) {
     function splitSafe(s, separator, limit, bLowerCase) {
         return (bLowerCase && s.toLowerCase() || s)
             .replace(/(?:^\s+|\n|\s+$)/g, "")
-            .split(new RegExp("[\s ]*" + separator + "[\s ]*", "g"), limit || 999);
+            .split(new RegExp("[\\s ]*" + separator + "[\\s ]*", "g"), limit || 999);
     }
 
     function parseKeys(keys, val, ret) {
         var key,
             hashId = 0,
-            parts  = splitSafe(keys, "\-", null, true),
+            parts  = splitSafe(keys, "\\-", null, true),
             i      = 0,
             l      = parts.length;
 

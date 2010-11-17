@@ -37,7 +37,7 @@
 
 define(function(require, exports, module) {
 
-var oop = require("ace/lib/oop");
+var oop = require("ace/lib/oop").oop;
 var MEventEmitter = require("ace/event_emitter").MEventEmitter;
 
 var BackgroundTokenizer = function(tokenizer, editor) {

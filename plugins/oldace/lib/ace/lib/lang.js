@@ -86,7 +86,7 @@ define(function(require, exports, module) {
     };
 
     lang.escapeRegExp = function(str) {
-        return str.replace(/([.*+?^${}()|[\]\/\])/g, '\$1');
+        return str.replace(/([.*+?^${}()|[\]\/\\])/g, '\\$1');
     };
 
     lang.bind = function(fcn, context) {
@@ -122,5 +122,5 @@ define(function(require, exports, module) {
       };
     };
 
-    return lang;
+    exports.lang = lang;
 });

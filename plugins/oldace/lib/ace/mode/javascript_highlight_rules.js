@@ -37,8 +37,8 @@
 
 define(function(require, exports, module) {
 
-var oop = require("ace/lib/oop");
-var lang = require("ace/lib/lang");
+var oop = require("ace/lib/oop").oop;
+var lang = require("ace/lib/lang").lang;
 var DocCommentHighlightRules = require("ace/mode/doc_comment_highlight_rules");
 var TextHighlightRules = require("ace/mode/text_highlight_rules");
 
@@ -66,36 +66,36 @@ JavaScriptHighlightRules = function() {
     this.$rules = {
         "start" : [ {
             token : "comment",
-            regex : "\/\/.*$"
+            regex : "\\/\\/.*$"
         },
         docComment.getStartRule("doc-start"),
         {
             token : "comment", // multi line comment
-            regex : "\/\*",
+            regex : "\\/\\*",
             next : "comment"
         }, {
             token : "string.regexp",
-            regex : "[/](?:(?:\[(?:\\]|[^\]])+\])|(?:\\/|[^\]/]))*[/][gimy]*\s*(?=[).,;]|$)"
+            regex : "[/](?:(?:\\[(?:\\\\]|[^\\]])+\\])|(?:\\\\/|[^\\]/]))*[/][gimy]*\\s*(?=[).,;]|$)"
         }, {
             token : "string", // single line
-            regex : '["](?:(?:\\.)|(?:[^"\\]))*?["]'
+            regex : '["](?:(?:\\\\.)|(?:[^"\\\\]))*?["]'
         }, {
             token : "string", // multi line string start
-            regex : '["].*\\$',
+            regex : '["].*\\\\$',
             next : "qqstring"
         }, {
             token : "string", // single line
-            regex : "['](?:(?:\\.)|(?:[^'\\]))*?[']"
+            regex : "['](?:(?:\\\\.)|(?:[^'\\\\]))*?[']"
         }, {
             token : "string", // multi line string start
-            regex : "['].*\\$",
+            regex : "['].*\\\\$",
             next : "qstring"
         }, {
             token : "constant.numeric", // hex
-            regex : "0[xX][0-9a-fA-F]+\b"
+            regex : "0[xX][0-9a-fA-F]+\\b"
         }, {
             token : "constant.numeric", // float
-            regex : "[+-]?\d+(?:(?:\.\d*)?(?:[eE][+-]?\d+)?)?\b"
+            regex : "[+-]?\\d+(?:(?:\\.\\d*)?(?:[eE][+-]?\\d+)?)?\\b"
         }, {
             token : function(value) {
                 if (value == "this")
@@ -113,23 +113,23 @@ JavaScriptHighlightRules = function() {
             },
             // TODO: Unicode escape sequences
             // TODO: Unicode identifiers
-            regex : "[a-zA-Z_$][a-zA-Z0-9_$]*\b"
+            regex : "[a-zA-Z_$][a-zA-Z0-9_$]*\\b"
         }, {
             token : "keyword.operator",
-            regex : "!|\$|%|&|\*|\-\-|\-|\+\+|\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\|\||\?\:|\*=|%=|\+=|\-=|&=|\^=|\b(in|instanceof|new|delete|typeof|void)"
+            regex : "!|\\$|%|&|\\*|\\-\\-|\\-|\\+\\+|\\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\\|\\||\\?\\:|\\*=|%=|\\+=|\\-=|&=|\\^=|\\b(in|instanceof|new|delete|typeof|void)"
         }, {
             token : "lparen",
-            regex : "[\[\(\{]"
+            regex : "[\\[\\(\\{]"
         }, {
             token : "rparen",
-            regex : "[\]\)\}]"
+            regex : "[\\]\\)\\}]"
         }, {
             token : "text",
-            regex : "\s+"
+            regex : "\\s+"
         } ],
         "comment" : [ {
             token : "comment", // closing comment
-            regex : ".*?\*\/",
+            regex : ".*?\\*\\/",
             next : "start"
         }, {
             token : "comment", // comment spanning whole line
@@ -137,7 +137,7 @@ JavaScriptHighlightRules = function() {
         } ],
         "qqstring" : [ {
             token : "string",
-            regex : '(?:(?:\\.)|(?:[^"\\]))*?"',
+            regex : '(?:(?:\\\\.)|(?:[^"\\\\]))*?"',
             next : "start"
         }, {
             token : "string",
@@ -145,7 +145,7 @@ JavaScriptHighlightRules = function() {
         } ],
         "qstring" : [ {
             token : "string",
-            regex : "(?:(?:\\.)|(?:[^'\\]))*?'",
+            regex : "(?:(?:\\\\.)|(?:[^'\\\\]))*?'",
             next : "start"
         }, {
             token : "string",

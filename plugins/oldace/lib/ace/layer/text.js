@@ -37,7 +37,7 @@
 
 define(function(require, exports, module) {
 
-var oop = require("ace/lib/oop");
+var oop = require("ace/lib/oop").oop;
 var dom = require("ace/lib/dom").dom;
 var MEventEmitter = require("ace/event_emitter").MEventEmitter;
 
@@ -257,14 +257,14 @@ var Text = function(parentEl) {
     this.$renderLine = function(stringBuilder, row, tokens) {
 //        if (this.$showInvisibles) {
 //            var self = this;
-//            var spaceRe = /[             ​  　]+/g;
+//            var spaceRe = /[\v\f \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000]+/g;
 //            var spaceReplace = function(space) {
 //                var space = new Array(space.length+1).join(self.SPACE_CHAR);
 //                return "<span class='ace_invisible'>" + space + "</span>";
 //            };
 //        }
 //        else {
-            var spaceRe = /[             ​  　]/g;
+            var spaceRe = /[\v\f \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000]/g;
             var spaceReplace = "&nbsp;";
 //        }
 
@@ -275,7 +275,7 @@ var Text = function(parentEl) {
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(spaceRe, spaceReplace)
-                .replace(/	/g, this.$tabString);
+                .replace(/\t/g, this.$tabString);
 
             if (!this.$textToken[token.type]) {
                 var classes = "ace_" + token.type.replace(/\./g, " ace_");

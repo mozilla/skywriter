@@ -37,8 +37,8 @@
 
 define(function(require, exports, module) {
 
-var oop = require("ace/lib/oop");
-var lang = require("ace/lib/lang");
+var oop = require("ace/lib/oop").oop;
+var lang = require("ace/lib/lang").lang;
 var TextHighlightRules = require("ace/mode/text_highlight_rules");
 
 var CssHighlightRules = function() {
@@ -106,7 +106,7 @@ var CssHighlightRules = function() {
     // regexp must not have capturing parentheses. Use (?:) instead.
     // regexps are ordered -> the first match is used
 
-    var numRe = "\-?(?:(?:[0-9]+)|(?:[0-9]*\.[0-9]+))";
+    var numRe = "\\-?(?:(?:[0-9]+)|(?:[0-9]*\\.[0-9]+))";
 
     function ic(str) {
         var re = [];
@@ -125,14 +125,14 @@ var CssHighlightRules = function() {
     this.$rules = {
         "start" : [ {
             token : "comment", // multi line comment
-            regex : "\/\*",
+            regex : "\\/\\*",
             next : "comment"
         }, {
             token : "string", // single line
-            regex : '["](?:(?:\\.)|(?:[^"\\]))*?["]'
+            regex : '["](?:(?:\\\\.)|(?:[^"\\\\]))*?["]'
         }, {
             token : "string", // single line
-            regex : "['](?:(?:\\.)|(?:[^'\\]))*?[']"
+            regex : "['](?:(?:\\\\.)|(?:[^'\\\\]))*?[']"
         }, {
             token : "constant.numeric",
             regex : numRe + ic("em")
@@ -214,11 +214,11 @@ var CssHighlightRules = function() {
                     return "text";
                 }
             },
-            regex : "\-?[a-zA-Z_][a-zA-Z0-9_\-]*"
+            regex : "\\-?[a-zA-Z_][a-zA-Z0-9_\\-]*"
         }],
         "comment" : [{
             token : "comment", // closing comment
-            regex : ".*?\*\/",
+            regex : ".*?\\*\\/",
             next : "start"
         }, {
             token : "comment", // comment spanning whole line
@@ -229,5 +229,6 @@ var CssHighlightRules = function() {
 
 oop.inherits(CssHighlightRules, TextHighlightRules);
 
-return CssHighlightRules;
+exports.CssHighlightRules = CssHighlightRules;
+
 });

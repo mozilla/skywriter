@@ -37,9 +37,9 @@
 
 define(function(require, exports, module) {
 
-var oop = require("ace/lib/oop");
+var oop = require("ace/lib/oop").oop;
 var event = require("ace/lib/event").event;
-var lang = require("ace/lib/lang");
+var lang = require("ace/lib/lang").lang;
 var TextInput = require("ace/textinput");
 var KeyBinding = require("ace/keybinding");
 var Document = require("ace/document");
@@ -448,7 +448,7 @@ var Editor =function(renderer, doc) {
 
                         line = _self.doc.getLine(row);
                         for (var i = 0; i < line.length; ++i)
-                            if (line.charAt(i) == '	')
+                            if (line.charAt(i) == '\t')
                                 indent += size;
                             else if (line.charAt(i) == ' ') 
                                 indent += 1;
@@ -462,7 +462,7 @@ var Editor =function(renderer, doc) {
 
                         line = _self.doc.getLine(row);
                         for (var i = 0; i < line.length && outdent > 0; ++i)
-                            if (line.charAt(i) == '	')
+                            if (line.charAt(i) == '\t')
                                 outdent -= size;
                             else if (line.charAt(i) == ' ')
                                 outdent -= 1;
@@ -606,7 +606,7 @@ var Editor =function(renderer, doc) {
                 
         if (range.start.row < range.end.row ||
             range.start.column < range.end.column) {
-            var count = this.doc.indentRows(this.getSelectionRange(), "	");
+            var count = this.doc.indentRows(this.getSelectionRange(), "\t");
             
             this.selection.shiftSelection(count);
         } else {
@@ -618,7 +618,7 @@ var Editor =function(renderer, doc) {
                     
                 indentString = lang.stringRepeat(" ", count);
             } else
-                indentString = "	";
+                indentString = "\t";
             return this.onTextInput(indentString);
         }
     };

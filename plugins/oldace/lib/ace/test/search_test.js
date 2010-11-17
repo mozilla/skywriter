@@ -225,7 +225,7 @@ var SearchTest = new TestCase("SearchTest", {
         var doc = new Document(["abc123 123 cd", "abc"]);
 
         var search = new Search().set({
-            needle: "\d+",
+            needle: "\\d+",
             regExp: true
         });
 
@@ -238,7 +238,7 @@ var SearchTest = new TestCase("SearchTest", {
         var doc = new Document(["abc123 123 cd", "abc"]);
 
         var search = new Search().set({
-            needle: "\d+\b",
+            needle: "\\d+\\b",
             regExp: true,
             wholeWord: true
         });
@@ -252,7 +252,7 @@ var SearchTest = new TestCase("SearchTest", {
         var doc = new Document(["  ab: 12px", "  <h1 abc"]);
 
         var search = new Search().set({
-            needle: "(\d+)",
+            needle: "(\\d+)",
             regExp: true
         });
 
@@ -296,7 +296,7 @@ var SearchTest = new TestCase("SearchTest", {
 
     "test: replace with a RegExp search" : function() {
         var search = new Search().set({
-            needle: "\d+",
+            needle: "\\d+",
             regExp: true
         });
 
@@ -309,7 +309,7 @@ var SearchTest = new TestCase("SearchTest", {
 
     "test: replace with RegExp match and capture groups" : function() {
         var search = new Search().set({
-            needle: "ab(\d\d)",
+            needle: "ab(\\d\\d)",
             regExp: true
         });
 

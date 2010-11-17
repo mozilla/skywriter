@@ -37,7 +37,7 @@
 
 define(function(require, exports, module) {
 
-var oop = require("ace/lib/oop");
+var oop = require("ace/lib/oop").oop;
 var TextHighlightRules = require("ace/mode/text_highlight_rules");
 
 var XmlHighlightRules = function() {
@@ -48,22 +48,22 @@ var XmlHighlightRules = function() {
     this.$rules = {
         start : [ {
             token : "text",
-            regex : "<\!\[CDATA\[",
+            regex : "<\\!\\[CDATA\\[",
             next : "cdata"
         }, {
             token : "xml_pe",
-            regex : "<\?.*?\?>"
+            regex : "<\\?.*?\\?>"
         }, {
             token : "comment",
-            regex : "<\!--",
+            regex : "<\\!--",
             next : "comment"
         }, {
             token : "text", // opening tag
-            regex : "<\/?",
+            regex : "<\\/?",
             next : "tag"
         }, {
             token : "text",
-            regex : "\s+"
+            regex : "\\s+"
         }, {
             token : "text",
             regex : "[^<]+"
@@ -78,7 +78,7 @@ var XmlHighlightRules = function() {
             regex : "[-_a-zA-Z0-9:]+"
         }, {
             token : "text",
-            regex : "\s+"
+            regex : "\\s+"
         }, {
             token : "string",
             regex : '".*?"'
@@ -89,14 +89,14 @@ var XmlHighlightRules = function() {
 
         cdata : [ {
             token : "text",
-            regex : "\]\]>",
+            regex : "\\]\\]>",
             next : "start"
         }, {
             token : "text",
-            regex : "\s+"
+            regex : "\\s+"
         }, {
             token : "text",
-            regex : "(?:[^\]]|\](?!\]>))+"
+            regex : "(?:[^\\]]|\\](?!\\]>))+"
         } ],
 
         comment : [ {

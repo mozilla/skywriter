@@ -37,8 +37,8 @@
 
 define(function(require, exports, module) {
 
-var oop = require("ace/lib/oop");
-var lang = require("ace/lib/lang");
+var oop = require("ace/lib/oop").oop;
+var lang = require("ace/lib/lang").lang;
 var MEventEmitter = require("ace/event_emitter").MEventEmitter;
 var Selection = require("ace/selection");
 var TextMode = require("ace/mode/text");
@@ -132,7 +132,7 @@ var Document = function(text, mode) {
         if (this.getUseSoftTabs()) {
             return lang.stringRepeat(" ", this.getTabSize());
         } else {
-            return "	";
+            return "\t";
         }
     };
 
@@ -305,7 +305,7 @@ var Document = function(text, mode) {
                 var len = lines[i].length;
                 longestLine = Math.max(longestLine, len);
 
-                lines[i].replace("	", function(m) {
+                lines[i].replace("\t", function(m) {
                     len += tabSize-1;
                     return m;
                 });
@@ -328,7 +328,7 @@ var Document = function(text, mode) {
      */
     this.getDisplayLine = function(row) {
         var tab = new Array(this.getTabSize()+1).join(" ");
-        return this.lines[row].replace(/	/g, tab);
+        return this.lines[row].replace(/\t/g, tab);
     };
 
     this.getLines = function(firstRow, lastRow) {
@@ -621,7 +621,7 @@ var Document = function(text, mode) {
     };
 
     this.indentRows = function(range, indentString) {
-        indentString.replace("	", this.getTabString());
+        indentString.replace("\t", this.getTabString());
         for (var row=range.start.row; row<=range.end.row; row++) {
             this.$insert({row: row, column:0}, indentString);
         }
@@ -641,7 +641,7 @@ var Document = function(text, mode) {
             for (var j = 0; j < size; ++j)
                 if (line.charAt(j) != ' ')
                     break;            
-            if (j < size && line.charAt(j) == '	') {
+            if (j < size && line.charAt(j) == '\t') {
                 deleteRange.start.column = j;
                 deleteRange.end.column = j + 1;
             } else {
@@ -703,7 +703,7 @@ var Document = function(text, mode) {
         var screenColumn = 0;
         var remaining = docColumn;
 
-        var line = this.getLine(row).split("	");
+        var line = this.getLine(row).split("\t");
         for (var i=0; i<line.length; i++) {
             var len = line[i].length;
             if (remaining > len) {
@@ -725,7 +725,7 @@ var Document = function(text, mode) {
         var docColumn = 0;
         var remaining = screenColumn;
 
-        var line = this.getLine(row).split("	");
+        var line = this.getLine(row).split("\t");
         for (var i=0; i<line.length; i++) {
             var len = line[i].length;
             if (remaining >= len + tabSize) {

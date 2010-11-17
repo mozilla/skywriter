@@ -293,11 +293,11 @@ var TextEditTest = TestCase("TextEditTest",
         doc.setTabSize(2);
         doc.setUseSoftTabs(true);
 
-        editor.onTextInput("	");
+        editor.onTextInput("\t");
         assertEquals("  ", doc.toString());
 
         doc.setTabSize(5);
-        editor.onTextInput("	");
+        editor.onTextInput("\t");
         assertEquals("       ", doc.toString());
     },
 
@@ -307,8 +307,8 @@ var TextEditTest = TestCase("TextEditTest",
 
         doc.setUseSoftTabs(false);
 
-        editor.onTextInput("	");
-        assertEquals("	", doc.toString());
+        editor.onTextInput("\t");
+        assertEquals("\t", doc.toString());
     }
 });
 

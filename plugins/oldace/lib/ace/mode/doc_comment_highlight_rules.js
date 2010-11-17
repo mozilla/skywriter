@@ -37,7 +37,7 @@
 
 define(function(require, exports, module) {
 
-var oop = require("ace/lib/oop");
+var oop = require("ace/lib/oop").oop;
 var TextHighlightRules = require("ace/mode/text_highlight_rules");
 
 var DocCommentHighlightRules = function() {
@@ -45,17 +45,17 @@ var DocCommentHighlightRules = function() {
     this.$rules = {
         "start" : [ {
             token : "comment.doc", // closing comment
-            regex : "\*\/",
+            regex : "\\*\\/",
             next : "start"
         }, {
             token : "comment.doc.tag",
-            regex : "@[\w\d_]+"
+            regex : "@[\\w\\d_]+"
         }, {
             token : "comment.doc",
             regex : "\s+"
         }, {
             token : "comment.doc",
-            regex : "[^@\*]+"
+            regex : "[^@\\*]+"
         }, {
             token : "comment.doc",
             regex : "."
@@ -70,7 +70,7 @@ oop.inherits(DocCommentHighlightRules, TextHighlightRules);
     this.getStartRule = function(start) {
         return {
             token : "comment.doc", // doc comment
-            regex : "\/\*(?=\*)",
+            regex : "\\/\\*(?=\\*)",
             next: start
         };
     };

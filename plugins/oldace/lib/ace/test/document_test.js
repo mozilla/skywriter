@@ -185,7 +185,7 @@ var TextDocumentTest = new TestCase("TextDocumentTest", {
     },
 
     "test: convert document to screen coordinates" : function() {
-        var doc = new Document("01234	567890	1234");
+        var doc = new Document("01234\t567890\t1234");
         doc.setTabSize(4);
 
         assertEquals(0, doc.documentToScreenColumn(0, 0));
@@ -206,7 +206,7 @@ var TextDocumentTest = new TestCase("TextDocumentTest", {
     },
 
     "test: convert document to scrren coordinates with leading tabs": function() {
-        var doc = new Document("		123");
+        var doc = new Document("\t\t123");
         doc.setTabSize(4);
 
         assertEquals(0, doc.documentToScreenColumn(0, 0));
@@ -216,7 +216,7 @@ var TextDocumentTest = new TestCase("TextDocumentTest", {
     },
 
     "test: convert screen to document coordinates" : function() {
-        var doc = new Document("01234	567890	1234");
+        var doc = new Document("01234\t567890\t1234");
         doc.setTabSize(4);
 
         assertEquals(0, doc.screenToDocumentColumn(0, 0));

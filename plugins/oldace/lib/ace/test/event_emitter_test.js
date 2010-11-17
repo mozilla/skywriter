@@ -6,16 +6,11 @@
  * @author Fabian Jakobs <fabian AT ajax DOT org>
  */
 
-require.def([
-     "ace/lib/oop",
-     "ace/event_emitter"
- ], function(
-     oop,
-     event_emitter
- ) {
+define(function(require, exports, module) {
 
-var MEventEmitter = event_emitter.MEventEmitter;
-  
+var MEventEmitter = require("ace/event_emitter").MEventEmitter;
+var oop = require("ace/lib/oop").oop;
+
 var EventEmitter = function() {};
 
 oop.implement(EventEmitter.prototype, MEventEmitter);

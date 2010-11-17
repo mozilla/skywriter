@@ -37,8 +37,8 @@
 
 define(function(require, exports, module) {
 
-var oop = require("ace/lib/oop");
-var CssHighlightRules = require("ace/mode/css_highlight_rules");
+var oop = require("ace/lib/oop").oop;
+var CssHighlightRules = require("ace/mode/css_highlight_rules").CssHighlightRules;
 var JavaScriptHighlightRules = require("ace/mode/javascript_highlight_rules");
 var TextHighlightRules = require("ace/mode/text_highlight_rules");
 
@@ -50,14 +50,14 @@ var HtmlHighlightRules = function() {
     this.$rules = {
         start : [ {
             token : "text",
-            regex : "<\!\[CDATA\[",
+            regex : "<\\!\\[CDATA\\[",
             next : "cdata"
         }, {
             token : "xml_pe",
-            regex : "<\?.*?\?>"
+            regex : "<\\?.*?\\?>"
         }, {
             token : "comment",
-            regex : "<\!--",
+            regex : "<\\!--",
             next : "comment"
         }, {
             token : "text",
@@ -69,11 +69,11 @@ var HtmlHighlightRules = function() {
             next : "css"
         }, {
             token : "text", // opening tag
-            regex : "<\/?",
+            regex : "<\\/?",
             next : "tag"
         }, {
             token : "text",
-            regex : "\s+"
+            regex : "\\s+"
         }, {
             token : "text",
             regex : "[^<]+"
@@ -88,7 +88,7 @@ var HtmlHighlightRules = function() {
             regex : "[-_a-zA-Z0-9:]+"
         }, {
             token : "text",
-            regex : "\s+"
+            regex : "\\s+"
         }, {
             token : "string",
             regex : '".*?"'
@@ -106,7 +106,7 @@ var HtmlHighlightRules = function() {
             regex : "[-_a-zA-Z0-9:]+"
         }, {
             token : "text",
-            regex : "\s+"
+            regex : "\\s+"
         }, {
             token : "string",
             regex : '".*?"'
@@ -124,7 +124,7 @@ var HtmlHighlightRules = function() {
             regex : "[-_a-zA-Z0-9:]+"
         }, {
             token : "text",
-            regex : "\s+"
+            regex : "\\s+"
         }, {
             token : "string",
             regex : '".*?"'
@@ -135,11 +135,11 @@ var HtmlHighlightRules = function() {
 
         cdata : [ {
             token : "text",
-            regex : "\]\]>",
+            regex : "\\]\\]>",
             next : "start"
         }, {
             token : "text",
-            regex : "\s+"
+            regex : "\\s+"
         }, {
             token : "text",
             regex : ".+"
@@ -159,11 +159,11 @@ var HtmlHighlightRules = function() {
     this.addRules(jsRules, "js-");
     this.$rules["js-start"].unshift({
         token: "comment",
-        regex: "\/\/.*(?=<\/script>)",
+        regex: "\\/\\/.*(?=<\\/script>)",
         next: "tag"
     }, {
         token: "text",
-        regex: "<\/(?=script)",
+        regex: "<\\/(?=script)",
         next: "tag"
     });
 
@@ -171,7 +171,7 @@ var HtmlHighlightRules = function() {
     this.addRules(cssRules, "css-");
     this.$rules["css-start"].unshift({
         token: "text",
-        regex: "<\/(?=style)",
+        regex: "<\\/(?=style)",
         next: "tag"
     });
 };

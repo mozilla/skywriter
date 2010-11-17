@@ -33,12 +33,12 @@ require.def([
 
     "test: lines should keep indentation" : function() {
         assertEquals("   ", this.mode.getNextLineIndent("start", "   abc", "  "));
-        assertEquals("	", this.mode.getNextLineIndent("start", "	abc", "  "));
+        assertEquals("\t", this.mode.getNextLineIndent("start", "\tabc", "  "));
     },
 
     "test: new line after { should increase indent" : function() {
         assertEquals("     ", this.mode.getNextLineIndent("start", "   abc{", "  "));
-        assertEquals("	  ", this.mode.getNextLineIndent("start", "	abc  { ", "  "));
+        assertEquals("\t  ", this.mode.getNextLineIndent("start", "\tabc  { ", "  "));
     },
 
     "test: no indent increase after { in a comment" : function() {

@@ -37,8 +37,8 @@
 
 define(function(require, exports, module) {
 
-var lang = require("ace/lib/lang");
-var oop = require("ace/lib/oop");
+var lang = require("ace/lib/lang").lang;
+var oop = require("ace/lib/oop").oop;
 var Range = require("ace/range");
 
 var Search = function() {
@@ -196,7 +196,7 @@ Search.SELECTION = 2;
         }
 
         if (this.$options.wholeWord) {
-            needle = "\b" + needle + "\b";
+            needle = "\\b" + needle + "\\b";
         }
 
         var modifier = "g";
