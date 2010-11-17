@@ -1,5 +1,0 @@
-{
-    "output_dir": "tmp",
-    "plugins": ["embedded", "html", "js_syntax", "stylesheet"],
-    "include_sample": true
-}

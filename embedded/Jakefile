@@ -1,7 +1,0 @@
-var dryice = require('./lib/dryice');
-
-desc('Run the build according to the instructions in the manifest.');
-task('default', [], function () {
-    //builder.build(config, arguments[0]);
-});
-
