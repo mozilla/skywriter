@@ -1,0 +1,3 @@
+[submodule "plugins/ace"]
+	path = plugins/ace
+	url = git@github.com:mozilla/ace.git
