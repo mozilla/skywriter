@@ -35,33 +35,20 @@ like.
 
 ## Source Repositories ##
 
-As of this writing, our source repositories are in a bit of a funny state.
-We've done a good deal of work creating a new plugin structure and altering
-Skywriter plugins to fit this structure. That work is in a "shared"
-repository that we had created originally to hold code shared between the 
-projects. That repository is here:
-
-https://github.com/mozilla/cloud9-skywriter-shared
-
-Right now, that repository includes its own copy of ACE, right in that
-repository. This will need to change.
-
-The authoritative repository for ACE is here:
-
-https://github.com/ajaxorg/ace
-
 The authoritative repository for Skywriter is here:
 
-https://github.com/mozilla/skywriter
+<https://github.com/mozilla/skywriter>
 
-At present, the Skywriter repository doesn't have much that has migrated
-forward toward 1.0.
+This repository includes ACE as a submodule. The authoritative repository for ACE is here:
+
+<https://github.com/ajaxorg/ace>
+
+The authoritative repository for Cloud9 is here:
+
+<https://github.com/ajaxorg/cloud9>
 
 In the immediate term, Mozilla will create a fork of the ACE repository.
-The Skywriter repository will have this fork as a submodule. The code
-in the shared repository will either move into the ACE repository or the
-Skywriter repository, depending on whether it's likely to be useful
-to ACE/Cloud9.
+The Skywriter repository will have this fork as a submodule.
 
 Once Ajax.org is ready to move over to the updated-with-new-plugin-system ACE,
 the submodule in Skywriter will change to point to the authoritative ACE
@@ -154,6 +141,48 @@ at the moment.
 TODO enumerate the changes for people upgrading Bespin 0.9 syntax highlighters.
 
 ## Commands ##
+
+From Joe Walker on the skywriter-core mailing list (edited for this document):
+
+The basic command interfaces look something like this: 
+
+Ace commands are just used for keyboard shortcuts, so they are 
+synchronous, have no arguments, and do no output. 
+
+`void function(editor, selection)`
+
+Where: 
+
+* editor is an instance of Editor 
+* selection is an instance of Selection, which is synonymous with editor.getSelection() 
+
+Bespin commands encompass the Ace case, but also extend to the command line case, so they can do output, can be asynch, and can have arguments. 
+
+`void function(args, request)`
+
+Where: 
+
+* args is simple object containing command line parameters as a result of parsing the command line using the command definition
+* request is an instance of Request which allows output and control over asynchronicity 
+
+Things like editor and selection were available via require. Bespin originally had 2 separate concepts, but we merged them, and were pleased that we had. 2 obvious advantages of a merged system: 
+
+- It enables keyboard acceleration of more stuff 
+- It allows testing to happen via commands 
+
+The proposed command interface for Ace is:
+
+`void function(env, args, request)`
+
+Where: 
+
+* env is an object that will contain the Editor, Selection, and potentially other stuff 
+* args is input from the command line (and other places) and can be ignored for 0 parameter commands 
+* request is as above, and can be ignored for output-less synchronous cases 
+
+The original thread for this is here:
+
+<http://groups.google.com/group/skywriter-core/browse_thread/thread/6414cfe25e86e327>
 
 ## Command Line ##
 
