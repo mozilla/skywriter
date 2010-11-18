@@ -26,7 +26,7 @@ like.
 
 ## Glossary ##
 
-* **Bespin** the original Mozilla Labs experiment for coding in the cloud.
+* **Bespin** the original Mozilla Labs experiment for coding in the cloud. In this document, we'll use the name Bespin to refer to the 0.9x releases. Skywriter will refer to plans for 1.0.
 * **Mozilla Skywriter** the more stable successor to Bespin
 * **Cloud9 IDE** an open source project from Ajax.org to build an IDE for the cloud.
 * **ACE** the text editor component used in Cloud9 that will also be used in Skywriter
