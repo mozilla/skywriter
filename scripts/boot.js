@@ -42,7 +42,7 @@ var setupPlugins = function(config, callback) {
         config.pluginDirs = {};
     }
     config.pluginDirs["../plugins"] = {
-        packages: ["util", "rangeutils", "events", "types", "settings", "canon",
+        packages: ["util", "rangeutils", "events", "settings", "canon",
                             "edit_session", "syntax_manager", "undomanager", 
                             "keyboard"],
         singleFiles: ["worker_manager", "syntax_directory", "environment"]
