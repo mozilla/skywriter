@@ -90,6 +90,26 @@ Firefox's [Bootstrapped Extensions](https://developer.mozilla.org/en/Extensions/
 There is no relationship between Skywriter plugins and Firefox extensions, but
 the interface described on that page matches exactly what we need.
 
+## multiple editors ##
+
+Editors on a page will share:
+
+1. settings
+2. plugin catalog (ie they all have the same collection of plugins)
+3. commands (if they all have the same collection of plugins, they all have the same collection of commands)
+4. themes (this is actually required. they have to use the same theme)
+5. syntax highlighters
+
+put another way, here is what varies:
+
+1. how the plugins are glued together (is there a command line? etc.)
+2. actual DOM nodes and editing events
+3. editor content
+4. stuff like the current editing mode (JS, HTML, etc.)
+
+(For reference, I believe Bespin 0.9 shares settings and themes, and that's it! I think it makes sense to share a whole lot more.)
+
+
 ## dryice ##
 
 dryice is the name of Bespin's build tool. The intention is to move this tool
