@@ -57,7 +57,7 @@ exports.removeKeymapping = function(name) {
 exports.startup = function(data, reason) {
     var settings = data.env.settings;
     // TODO register this
-    // catalog.addExtensionPoint("keymapping", {
+    // catalog.addExtensionSpec("keymapping", {
     //     "description": "A keymapping defines how keystrokes are interpreted.",
     //     "params": [
     //         {
