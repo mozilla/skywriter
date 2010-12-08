@@ -1,9 +1,0 @@
-{
-    "description": "Manages commands",
-    "dependencies": {
-        "settings": "0.0.0",
-        "events": "0.0.0",
-        "environment": "0.0.0"
-    },
-    "environments": { "main": true, "worker": false }
-}
