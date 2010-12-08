@@ -1,9 +1,0 @@
-{
-    "description": "Provides communication with the Skywriter Server",
-    "dependencies": {
-        "filesystem": "0.0",
-        "canon": "0.0",
-        "settings": "0.0",
-        "project": "0.0"
-    }
-}
